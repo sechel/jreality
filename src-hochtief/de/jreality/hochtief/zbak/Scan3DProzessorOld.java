@@ -37,11 +37,12 @@
  *
  */
 
-package de.jreality.hochtief.bak;
+package de.jreality.hochtief.zbak;
 
 import java.awt.Color;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import de.jreality.geometry.GeometryUtility;
@@ -52,6 +53,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.AbstractReader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -67,23 +69,25 @@ import de.jreality.util.Rectangle3D;
  * @author Markus Schmies, Nils Bleicher
  * 
  */
-public class ReaderPTS extends AbstractReader {
+public class Scan3DProzessorOld extends AbstractReader {
 
 	private static final int minSegmentCount = 20000;
-
-	public ReaderPTS() {
+	private static final int minSegmentCountOtherPoints = 1;
+	private static final int maxDepth=20;
+	private static final int maxOtherPointsDepth=20;
+	
+	public Scan3DProzessorOld() {
 		root = new SceneGraphComponent();
-		Appearance app = new Appearance();
-		app.setAttribute(CommonAttributes.SPHERES_DRAW, false);
-		app.setAttribute(CommonAttributes.PICKABLE, false);
-		app.setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.PICKABLE, false);
-		app.setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.POINT_SIZE, 30.);
-		app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-		app.setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.DIFFUSE_COLOR, Color.white);
-		root.setAppearance(app);
+		root.setAppearance(new Appearance());
+		root.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
+//		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		root.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR,
+				Color.WHITE);
+		root.getAppearance().setAttribute(
+				CommonAttributes.POLYGON_SHADER + "."
+						+ CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
 	}
 
 	public void setInput(Input input) throws IOException {
@@ -105,6 +109,8 @@ public class ReaderPTS extends AbstractReader {
 
 	private void load() throws IOException {
 
+		int skip=10;
+		
 		LineNumberReader r = new LineNumberReader(input.getReader());
 
 		String l = null;
@@ -113,7 +119,7 @@ public class ReaderPTS extends AbstractReader {
 			;
 
 		int colCount = 0;
-		;
+		
 
 		double phi_ = 0;
 		double theta_ = 0;
@@ -131,13 +137,18 @@ public class ReaderPTS extends AbstractReader {
 		long last_m = 0;
 
 		int vertexCount = 0;
-
+		
+		
+		
 		while ((l = r.readLine()) != null) {
 
+
+			
 			String[] split = l.split(" ");
 			if (split.length != 7)
 				continue;
 
+			
 			colCount++;
 
 			double x = Double.parseDouble(split[0]);
@@ -158,6 +169,14 @@ public class ReaderPTS extends AbstractReader {
 				colorG[m][n] = (byte) Double.parseDouble(split[5]);
 				colorB[m][n] = (byte) Double.parseDouble(split[6]);
 			}
+//			else{
+//				otherPointsList.add(new double[] {x/1000000, y/1000000, z/1000000});
+//				otherPointsColorsList.add(new Color(
+//						Integer.parseInt(split[4]),
+//						Integer.parseInt(split[5]),
+//						Integer.parseInt(split[6])						
+//				));
+//			}
 
 			// System.out.println(x+" "+y+" "+z);
 			// System.out.println( phi + " " + (phi-phi_)+ " " + theta + " " +
@@ -178,8 +197,13 @@ public class ReaderPTS extends AbstractReader {
 
 			phi_ = phi;
 			theta_ = theta;
+			
+			
+	
 		}
 
+
+		
 		// fill single missing pixels by interpolation
 		for (int i = 0; i < M; i++) {
 			for (int j = 1; j < N - 1; j++) {
@@ -204,9 +228,12 @@ public class ReaderPTS extends AbstractReader {
 			System.out.println(stat[i]);
 
 		QuadCriteria standartDepthSegmentation = new QuadCriteria() {
-
+			
 			public boolean pass(int i, int j) {
 				if (seg[i][j] == -1)
+					return false;
+				
+				if(depth[i][j]>maxDepth)
 					return false;
 				
 				return stat[seg[i][j]] >= minSegmentCount
@@ -214,6 +241,19 @@ public class ReaderPTS extends AbstractReader {
 			}
 		};
 		
+		QuadCriteria otherPointsDepthSegmentation = new QuadCriteria() {
+			
+			public boolean pass(int i, int j) {
+				if (seg[i][j] == -1)
+					return false;
+				
+				if(depth[i][j]>maxOtherPointsDepth)
+					return false;
+				
+				return stat[seg[i][j]] >= minSegmentCountOtherPoints;
+						//&& faceSegmentCriteria(depth, seg, i, j);
+			}
+		};
 		
 		int[][] INDICES = new int[M][N];
 		
@@ -225,6 +265,7 @@ public class ReaderPTS extends AbstractReader {
 		
 		vertexCount = 0;
 		int faceCount = 0;
+		
 		for( int i = 1; i < M; i++) {
 			for( int j = 1; j < N; j++) {
 				if( standartDepthSegmentation.pass(i, j)) {
@@ -232,7 +273,7 @@ public class ReaderPTS extends AbstractReader {
 					if( INDICES[i-1][j  ] == -1 ) { INDICES[i-1][j  ] = vertexCount; vertexCount++; };
 					if( INDICES[i  ][j-1] == -1 ) { INDICES[i  ][j-1] = vertexCount; vertexCount++; };
 					if( INDICES[i  ][j  ] == -1 ) { INDICES[i  ][j  ] = vertexCount; vertexCount++; };
-					faceCount++;
+					faceCount++;	
 				}
 			}
 		}
@@ -258,12 +299,32 @@ public class ReaderPTS extends AbstractReader {
 			}
 		}
 	
+		int otherPointsCount=0;
+		for (int i = 1; i < M; i++) {
+			for (int j = 1; j < N; j++) {
+				if( INDICES[i][j]==-1) {
+					if(otherPointsDepthSegmentation.pass(i, j)){
+						INDICES[i][j] = -2 ;
+						otherPointsCount++;
+					}					
+				}
+			}
+		}
+		
+		System.out.println( "otherPointsCount="+otherPointsCount);
+		System.out.println("allPointsCount="+ (N*M));
+	
+		
 		
 		double[] points = new double[3 * vertexCount];
 
 		double[] colors = new double[3 * vertexCount];
 
 		double[][] textureCoordinates = new double[vertexCount][2];
+		
+		double[][] otherPoints=new double[otherPointsCount][3];	
+		double[][] otherPointsColors=new double[otherPointsCount][3];
+		otherPointsCount=0;
 
 		for (int i = 0; i < M; i++) {
 			for (int j = 0; j < N; j++) {
@@ -286,6 +347,14 @@ public class ReaderPTS extends AbstractReader {
 				final double z = R * Math.sin(theta);
 
 				index = INDICES[i][j];
+				
+				if( INDICES[i][j] == -2 ){
+					otherPoints[otherPointsCount]=new double[] {x,y,z};
+					otherPointsColors[otherPointsCount]=new double[] {colorR[i][j]/255.0,colorG[i][j]/255.0,colorB[i][j]/255.0};
+					otherPointsCount++;
+					continue;
+				}
+				
 				
 				points[3 * index + 0] = x;
 				points[3 * index + 1] = y;
@@ -319,6 +388,7 @@ public class ReaderPTS extends AbstractReader {
 		psf.setVertexCount(vertexCount);
 		psf.setFaceCount(faceCount);
 
+		
 		psf.setVertexCoordinates(points);
 		psf.setFaceIndices(faceIndices,4);
 
@@ -332,25 +402,36 @@ public class ReaderPTS extends AbstractReader {
 		// psf.getPointSet().setGeometryAttributes(GeometryUtility.BOUNDING_BOX,
 		// bb);
 
-		root.setGeometry(psf.getPointSet());
-		root.setAppearance(new Appearance());
-		//root.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
-		//root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		//root.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
-		//root.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
-		//root.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, false);
-		root.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR,
-				Color.WHITE);
-		root.getAppearance().setAttribute(
-				CommonAttributes.POLYGON_SHADER + "."
-						+ CommonAttributes.DIFFUSE_COLOR, Color.WHITE);
+		
+		SceneGraphComponent faceNode=new SceneGraphComponent();
+		faceNode.setAppearance(new Appearance());
+		faceNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		faceNode.setGeometry(psf.getPointSet());
+		root.addChild(faceNode);
+
 
 		ImageData img = ImageData.load(Input.getInput(texturePath));
-		Texture2D tex = TextureUtility.createTexture(root.getAppearance(),
+		Texture2D tex = TextureUtility.createTexture(faceNode.getAppearance(),
 				"polygonShader", img, false);
-
-		// root.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.005);
-		MatrixBuilder.euclidean().scale(1).assignTo(root);
+		
+//		double[][] otherPoints=new double[otherPointsList.size()][];
+//		double[][] otherPointsColors=new double[otherPointsColorsList.size()][];
+//		for(int i=otherPoints.length-1;i>=0;i--){
+//			otherPoints[i]=otherPointsList.remove(i);
+//			otherPointsColors[i]=otherPointsColorsList.remove(i);
+//		}
+		
+		SceneGraphComponent otherPointsNode=new SceneGraphComponent();
+		root.addChild(otherPointsNode);
+		PointSetFactory otherPointsSet=new PointSetFactory();
+		otherPointsSet.setVertexCount(otherPointsCount);
+		otherPointsSet.setVertexCoordinates(otherPoints);
+		otherPointsSet.setVertexColors(otherPointsColors);
+		otherPointsSet.update();
+		otherPointsNode.setGeometry(otherPointsSet.getGeometry());
+		otherPointsNode.setAppearance(new Appearance());
+//		otherPointsNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+//		otherPointsNode.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
 	}
 
 
@@ -621,7 +702,7 @@ public class ReaderPTS extends AbstractReader {
 	}
 
 	private void load_() throws IOException {
-		int skip = 10;
+		int skip = 100;
 		LineNumberReader r = new LineNumberReader(input.getReader());
 
 		String l = null;
@@ -672,20 +753,21 @@ public class ReaderPTS extends AbstractReader {
 			index++;
 		}
 
-		PointSetFactory psf = new PointSetFactory();
-		psf.setVertexCount(pointCount);
-		psf.setVertexCoordinates(points);
-		psf.setVertexColors(colors);
-
-		psf.update();
-		Rectangle3D bb = GeometryUtility
-				.calculateBoundingBox(psf.getPointSet());
-		psf.getPointSet().setGeometryAttributes(GeometryUtility.BOUNDING_BOX,
-				bb);
-		root.setGeometry(psf.getPointSet());
-		root.setAppearance(new Appearance());
-		root.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, true);
-		root.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.001);
+//		PointSetFactory psf = new PointSetFactory();
+//		psf.setVertexCount(pointCount);
+//		psf.setVertexCoordinates(points);
+//		psf.setVertexColors(colors);
+//
+//		psf.update();
+//		Rectangle3D bb = GeometryUtility
+//				.calculateBoundingBox(psf.getPointSet());
+//		psf.getPointSet().setGeometryAttributes(GeometryUtility.BOUNDING_BOX,
+//				bb);
+//		root.setGeometry(psf.getPointSet());
+//		root.setAppearance(new Appearance());
+//		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
+//		root.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
+//		root.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.001);
 		// MatrixBuilder.euclidean().scale(10).assignTo(root);
 	}
 
@@ -696,33 +778,31 @@ public class ReaderPTS extends AbstractReader {
 	}
 
 	public static void main(String[] arg) {
-		// ReaderPTS pts002 = new ReaderPTS();
-		ReaderPTS pts003 = new ReaderPTS();
-		// pts002.setTexturePath("/net/MathVis/data/testData3D/zfs/INHOUSE_II_002_color_quartersize.jpg");
-		pts003
-				.setTexturePath("/net/MathVis/data/testData3D/zfs/INHOUSE_II_003_color_quartersize2.jpg");
+		Scan3DProzessorOld pts002 = new Scan3DProzessorOld();
+		//ReaderPTS pts003 = new ReaderPTS();
+		pts002.setTexturePath("E:/prog/data/zfs/INHOUSE_II_002_color_quartersize.jpg");
+		//pts003.setTexturePath("E:/prog/data/zfs/INHOUSE_II_003_color_quartersize2.jpg");
 		try {
-			// pts002.setInput( Input.getInput(
-			// "/net/MathVis/data/testData3D/zfs/INHOUSE_II_002_ss10.pts"));
-			pts003
-					.setInput(Input
-							.getInput("/net/MathVis/data/testData3D/zfs/INHOUSE_II_003_ss10.pts"));
+			pts002.setInput(Input.getInput("E:/prog/data/zfs/INHOUSE_II_002_ss10.pts"));
+			//pts003.setInput(Input.getInput("E:/prog/data/zfs/INHOUSE_II_003_ss10.pts"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		SceneGraphComponent sceneRoot = new SceneGraphComponent();
-		// sceneRoot.addChild(pts002.root);
-		sceneRoot.addChild(pts003.root);
+		sceneRoot.setAppearance(new Appearance());
+		sceneRoot.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
+		sceneRoot.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+	    sceneRoot.addChild(pts002.getComponent());
+	    //sceneRoot.addChild(pts003.getComponent());
 
-		double[] t003 = new double[] { 0.898791, -0.438375, -0.000887, 216.043,
-				0.438376, 0.89879, 0.001709, 8029.23, 4.8e-05, -0.001925,
-				0.999998, 102.783, 0, 0, 0, 1 };
-
-		double[] t002 = new double[] { 0.994756, -0.089381, -0.049722, 203.604,
-				0.089768, 0.995947, 0.005596, 8038.29, 0.04902, -0.01003,
-				0.998747, 102.657, 0, 0, 0, 1 };
+//		double[] t003 = new double[] { 0.898791, -0.438375, -0.000887, 216.043,
+//				0.438376, 0.89879, 0.001709, 8029.23, 4.8e-05, -0.001925,
+//				0.999998, 102.783, 0, 0, 0, 1 };
+//
+//		double[] t002 = new double[] { 0.994756, -0.089381, -0.049722, 203.604,
+//				0.089768, 0.995947, 0.005596, 8038.29, 0.04902, -0.01003,
+//				0.998747, 102.657, 0, 0, 0, 1 };
 
 		// Matrix trafo=new Matrix(t003);
 		// trafo.invert();
@@ -737,6 +817,34 @@ public class ReaderPTS extends AbstractReader {
 		// MatrixBuilder.euclidean(new Matrix(t002)).assignTo(pts002.root);
 		// MatrixBuilder.euclidean(new Matrix(t003)).assignTo(pts003.root);
 
+	    double[] t002=new double[] {
+	    		0.978031,    0.208460,    0.00000,   0.00000,
+	    		-0.208460,    0.978031,    0.00000,    0.00000,
+	    		0.00000,    0.00000,    1.00000,    -0.0900000,
+	    		0.00000,    0.00000,    0.00000,    1.00000	    		
+	    };
+	    double[] t003=new double[] {
+	    		0.953117,    0.299651,    -0.0421886,    -9.09823,
+	    		-0.298821,    0.953984,    0.0249041,    12.2864,
+	    		0.0477095,    -0.0111294,    0.998799,    -0.627224,
+	    		0.00000,    0.00000,    0.00000,    1.00000   		
+	    };
+	    double[] tboth=new double[] {
+	    		0.999550,	0.00000,	0.0299955,	0.00000,
+	    		0.000599870,	0.999800,	-0.0199897,	0.00000,
+	    		-0.0299895,	0.0199987,	0.999350,	0.00000,
+	    		0.00000,	0.00000,	0.00000,	1.00000
+	    };
+	    
+	    pts002.getComponent().setTransformation(new Transformation(t002));
+	    //pts003.getComponent().setTransformation(new Transformation(t003));
+	    
+	    sceneRoot.setTransformation(new Transformation(tboth));
+	    
+	    
+//	    ViewerApp va=new ViewerApp(sceneRoot);
+//	    va.setAttachNavigator(true);
+//	    va.setAttachNavigator(true);
 		ViewerApp.display(sceneRoot);
 	}
 }
