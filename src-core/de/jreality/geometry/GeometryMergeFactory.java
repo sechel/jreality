@@ -755,18 +755,15 @@ public class GeometryMergeFactory {
 	* Attributes which are also listed here will although be used.
 	* 
 	* @param importantDefaultAttributes
-	* @deprecated use not implemented 
 	*/
 	public void setImportantFaceDefaultAttributes(
 	List<Attribute> importantFaceDefaultAttributes) {
 	this.importantFaceDefaultAttributes = importantFaceDefaultAttributes;
 	}
-	/** @deprecated use not implemented */
 	public void setImportantEdgeDefaultAttributes(
 	List<Attribute> importantEdgeDefaultAttributes) {
 	this.importantEdgeDefaultAttributes = importantEdgeDefaultAttributes;
 	}
-	/** @deprecated use not yet implemented */
 	public void setImportantVertexDefaultAttributes(
 	List<Attribute> importantVertexDefaultAttributes) {
 	this.importantVertexDefaultAttributes = importantVertexDefaultAttributes;
@@ -806,7 +803,6 @@ public class GeometryMergeFactory {
 		this.respectVerticesIntern = respectVertices;
 		}
 	// ----------- getters ------------
-	// -------- getter --------------
 	public List<Attribute> getDefaultEdgeAttributes() {
 	return defaultEdgeAttributes;
 	}
@@ -824,6 +820,15 @@ public class GeometryMergeFactory {
 	}
 	public List<List<double[]>> getDefaultVertexAttributeValues() {
 	return defaultVertexAttributeValues;
+	}
+	public List<Attribute> getImportantFaceDefaultAttributes() {
+		return importantFaceDefaultAttributes;
+	}
+	public List<Attribute> getImportantEdgeDefaultAttributes() {
+		return importantEdgeDefaultAttributes;
+	}
+	public List<Attribute> getImportantVertexDefaultAttributes() {
+		return importantVertexDefaultAttributes;
 	}
 	public boolean isGenerateFaceNormals() {
 	return generateFaceNormals;
