@@ -3,6 +3,9 @@ package de.jreality.hochtief;
 import java.awt.Color;
 import java.io.IOException;
 
+import de.jreality.hochtief.processing.EdgeDetector;
+import de.jreality.hochtief.processing.SimpleDepthFaceExtractor;
+import de.jreality.hochtief.utility.Scan3DShowUtility;
 import de.jreality.reader.AbstractReader;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
