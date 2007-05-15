@@ -679,6 +679,7 @@ public class GeometryMergeFactory {
 
 	public PointSet mergePointSets( PointSet [] ps){
 		respectFacesIntern=false;
+		respectEdgesIntern=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ps);
 		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(f);
 		return p;
@@ -690,7 +691,6 @@ public class GeometryMergeFactory {
 	 * @param RootNode 
 	 */
 	public IndexedFaceSet mergeIndexedFaceSets(SceneGraphComponent cmp){
-		respectEdgesIntern=false;
 		IndexedFaceSet f=mergeGeometrySets(cmp);
 		return f;
 	}
