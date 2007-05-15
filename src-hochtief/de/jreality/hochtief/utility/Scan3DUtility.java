@@ -75,7 +75,8 @@ public class Scan3DUtility {
 		return Rn.normalize(vNormal,vNormal);	
 	}
 	
-	public static double[] getCovarianzMatrix(double[][] data){
+	//returns only the upper part, lower part==0; since covMtx is symmetric
+	public static double[][] getCovarianzMatrix(double[][] data){
 		int count=data.length;
 		int dim=data[0].length;
 		double[] center=new double[dim];
@@ -85,14 +86,14 @@ public class Scan3DUtility {
 		double[][] centeredData=new double[data.length][data[0].length];
 		for(int i=0;i<count;i++)
 			Rn.subtract(centeredData[i], data[i], center);
-		double[] cov=new double[dim*dim];
+		double[][] cov=new double[dim][dim];
 		for(int d1=0;d1<dim;d1++){
-			for(int d2=0;d2<dim;d2++){
+			for(int d2=d1;d2<dim;d2++){
 				double entry=0;
 				for(int i=0;i<count;i++)
 					entry+=(centeredData[i][d1]*centeredData[i][d2]);
-				entry=entry/(double)count;
-				cov[d1*dim+d2]=entry;				
+				entry=entry/(double)(count-1);
+				cov[d1][d2]=entry;				
 			}
 		}
 		return cov;		

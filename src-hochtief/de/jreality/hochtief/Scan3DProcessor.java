@@ -22,7 +22,7 @@ public class Scan3DProcessor extends AbstractReader{
 	private final int minVertexCount=10000;	
 	
 	//edge detection
-	private final double normalVarianzThreshold=0.1;
+	private final double normalVarianzThreshold=0.15;//0.1;
 	private final double maxNeighborhoodDistance=0.1;
 	
 	public Scan3DProcessor(){}

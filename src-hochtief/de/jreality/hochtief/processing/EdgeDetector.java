@@ -2,6 +2,10 @@ package de.jreality.hochtief.processing;
 
 import java.awt.Color;
 
+import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.NotConvergedException;
+import no.uib.cipr.matrix.SymmPackEVD;
+
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.hochtief.utility.Scan3DUtility;
 import de.jreality.math.Rn;
@@ -59,17 +63,15 @@ public class EdgeDetector {
 						}
 						localNormals[localNormalsCount]=normals[i][j];
 
-						double[] cov=Scan3DUtility.getCovarianzMatrix(localNormals);
-
-						double max=0;
-						for(int c=0;c<cov.length;c++){
-							if(Math.abs(cov[c])>max)
-								max=Math.abs(cov[c]);
-						}
+						DenseMatrix covMtx=new DenseMatrix(Scan3DUtility.getCovarianzMatrix(localNormals));
+						SymmPackEVD evd=null;
+						try {
+							evd = SymmPackEVD.factorize(covMtx);
+						} catch (NotConvergedException e) {e.printStackTrace();}
+						double max=Rn.maxNorm(evd.getEigenvalues());
 						
 						if(max>maxCov) maxCov=max;
-						if(max<minCov) minCov=max;
-						
+						if(max<minCov) minCov=max;						
 						averageCov+=max;
 						usedPoints+=1;
 
