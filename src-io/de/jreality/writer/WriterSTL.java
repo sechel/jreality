@@ -45,6 +45,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Vector;
 
+import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Geometry;
@@ -137,8 +138,8 @@ public class WriterSTL {
 		for( int i=0; i<ifs.length; i++ ) {
 			ifs[i] = (IndexedFaceSet)ifsList.get(i);
 		}
-		
-		writeSolid( IndexedFaceSetUtility.mergeIndexedFaceSets(ifs), out);
+		GeometryMergeFactory gmf= new GeometryMergeFactory();
+		writeSolid( gmf.mergeIndexedFaceSets(ifs) , out);
 	}
 	
 	private static void write(Geometry geometry, PrintWriter out, List ifsList) {
