@@ -57,7 +57,7 @@ public class Scan3DProcessor extends AbstractReader{
 //			}
 //		}
 		
-		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, depthThreshold, maxNeighborhoodDistance , depth, faceId);		
+		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId);		
 		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.EDGE_POINTS_TYPE_BEND,Color.RED,edgeId, faceId, faceSize, minVertexCount, depth);
 		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.EDGE_POINTS_TYPE_FACEBORDER,Color.GREEN,edgeId, faceId, faceSize, minVertexCount, depth);
 		SceneGraphComponent edgePointsNode=new SceneGraphComponent();

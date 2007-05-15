@@ -26,10 +26,7 @@ public class Scan3DUtility {
 				depth * Math.sin(phi) * Math.cos(theta),
 				depth * Math.sin(theta)
 		};
-	}
-	
-	//private static double depthThreshold=0.05;
-	
+	}	
 	
 	public static double[][][] getVertexNormals(double depthThreshold, double [][] depth, int[][] faceId){
 		double[][][] normals=new double[depth.length][depth[0].length][];
@@ -170,7 +167,7 @@ public class Scan3DUtility {
 	}
 	
 //	maxDistance is the the distance from that all average-distances above will result a neighborhood=1 and all smaller average-distances will result a neighborhood>1
-	public static int getNeighborhoodSize(int i, int j, double depthThreshold, double maxDistance, double[][] depth, int[][] faceId){
+	public static int getNeighborhoodSize(int i, int j, double maxDistance, double depthThreshold, double[][] depth, int[][] faceId){
 		return (int)Math.ceil(maxDistance/averageDistance(i, j, depthThreshold, depth, faceId));
 	}
 	

@@ -15,7 +15,7 @@ public class EdgeDetector {
 	public static int EDGE_POINTS_TYPE_FACEBORDER=-1;
 	public static int EDGE_POINTS_TYPE_SINGLEPOINT=-2;
 	
-	public static int[][] detect(double varianzThreshold, double depthThreshold, double maxNbhDistance, double[][] depth, int[][] faceId){
+	public static int[][] detect(double varianzThreshold, double maxNbhDistance, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length; int N=depth[0].length;
 		int[][] edgeId=new int[M][N]; 
 		double[] nullVec=new double[]{0,0,0};
@@ -35,7 +35,7 @@ public class EdgeDetector {
 				if(adjacentPointsCount>2 && adjacentPointsCount<8)
 					edgeId[i][j]=EDGE_POINTS_TYPE_FACEBORDER;
 				else if(adjacentPointsCount>2){
-					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, depthThreshold, maxNbhDistance, depth, faceId);			
+					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, maxNbhDistance, depthThreshold, depth, faceId);			
 
 					if(neighborhoodSize>maxNB) maxNB=neighborhoodSize;
 					if(neighborhoodSize<minNB) minNB=neighborhoodSize;

@@ -8,15 +8,13 @@ import de.jreality.math.Rn;
  * @author Nils Bleicher
  */ 
 
-public class FaceSegmentator {
-	private static double depthThreshold=0.05;
+public class FaceSmoother {
 	
-	public static double[][] smoothFace(int faceNr, double[][] depth, int[][] faceId){
+	public static double[][] smoothFace(int faceNr, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length;
 		int N=depth[0].length;
 		double[][] smoothedDepth=new double[M][N];		
 			
-//		int maxNeighborhood=10;
 		double maxDist=0.5;		
 		int maxNeighborhood=1000;
 		for(int i=0;i<M;i++){
@@ -25,7 +23,7 @@ public class FaceSegmentator {
 					//smoothedDepth[i][j]=median(i,j,3,depth,faceId);
 					//smoothedDepth[i][j]=median(i,j,maxDist,maxNeighborhood,depth,faceId);
 					//smoothedDepth[i][j]=averageValue(i,j,6,depth,faceId);
-					smoothedDepth[i][j]=averageValue(i,j,maxDist,depth,faceId);
+					smoothedDepth[i][j]=averageValue(i,j,maxDist,depthThreshold,depth,faceId);
 				}else
 					smoothedDepth[i][j]=depth[i][j];
 			}
@@ -37,7 +35,7 @@ public class FaceSegmentator {
 		return smoothedDepth;		
 	}
 	
-	private static double median(int i, int j, int neighborhood, double[][] depth, int[][] faceId){
+	public static double median(int i, int j, int neighborhood, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length;
 		int N=depth[0].length;
 		ArrayList<Double> depthValues=new ArrayList<Double>();
@@ -68,13 +66,13 @@ public class FaceSegmentator {
 	
 	//median adapted to median-distance to surounding face-points 
 	//maxDistance is the the distance from that all median-distances above will result a neighborhood=1 and all smaller median-distances will result a neighborhood>1
-	public static double median(int i, int j, double maxDistance, int maxNeighborhood, double[][] depth, int[][] faceId){
-		int neighborhood=(int)Math.ceil(maxDistance/medianDistance(i, j, depth, faceId));
+	public static double median(int i, int j, double maxDistance, int maxNeighborhood, double depthThreshold, double[][] depth, int[][] faceId){
+		int neighborhood=(int)Math.ceil(maxDistance/medianDistance(i, j, depthThreshold, depth, faceId));
 		if(neighborhood>maxNeighborhood) neighborhood=maxNeighborhood;
-		return median(i, j, neighborhood, depth, faceId);
+		return median(i, j, neighborhood, depthThreshold, depth, faceId);
 	}
 	
-	public static double medianDistance(int i, int j, double[][] depth, int[][] faceId){
+	public static double medianDistance(int i, int j, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length;
 		int N=depth[0].length;
 		double[] p=Scan3DUtility.convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);
@@ -111,18 +109,18 @@ public class FaceSegmentator {
 	static double minNB=10000;
 	//averageValue adapted to average-distance to surounding face-points 
 	
-	public static double averageValue(int i, int j, double maxDistance, double[][] depth, int[][] faceId){
-		int neighborhood=Scan3DUtility.getNeighborhoodSize(i, j, depthThreshold,maxDistance, depth, faceId);
+	public static double averageValue(int i, int j, double maxDistance, double depthThreshold, double[][] depth, int[][] faceId){
+		int neighborhood=Scan3DUtility.getNeighborhoodSize(i, j, maxDistance, depthThreshold, depth, faceId);
 		
 		if(neighborhood>maxNB) maxNB=neighborhood;
 		if(neighborhood<minNB) minNB=neighborhood;
 		
-		return averageValue(i, j, neighborhood, depth, faceId);
+		return averageValue(i, j, neighborhood, depthThreshold, depth, faceId);
 	}
 	
 	private static double maxDistToAverageValue=0.01;
 	
-	public static double averageValue(int i, int j, int neighborhood, double[][] depth, int[][] faceId){		
+	public static double averageValue(int i, int j, int neighborhood, double depthThreshold, double[][] depth, int[][] faceId){		
 		int M=depth.length;
 		int N=depth[0].length;
 		double averageValue=0;
@@ -150,9 +148,5 @@ public class FaceSegmentator {
 		else
 			return depth[i][j];
 	}
-	
-
-	
-	
 	
 }
