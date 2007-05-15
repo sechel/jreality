@@ -803,7 +803,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
 			return null;
 		}
-
+		lightsChanged = true;
 		numTiles = Math.max(imageWidth/1024, imageHeight/1024);
 		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
 		tileSizeX = imageWidth/numTiles;
