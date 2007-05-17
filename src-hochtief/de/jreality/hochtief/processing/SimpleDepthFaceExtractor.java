@@ -35,7 +35,7 @@ public class SimpleDepthFaceExtractor {
 				}
 				connectJ=false;
 				if(j-1>=0 && depth[i][j]!=0 && depth[i][j-1]!=0){
-					if(Math.abs(depth[i][j]-depth[i][j-1])<depthThreshold*Math.min(depth[i][j],depth[i-1][j]))
+					if(Math.abs(depth[i][j]-depth[i][j-1])<depthThreshold*Math.min(depth[i][j],depth[i][j-1]))
 						connectJ=true;					
 				}
 				

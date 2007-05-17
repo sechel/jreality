@@ -42,15 +42,15 @@ public class Scan3DUtility {
 		int M=depth.length;
 		int N=depth[0].length;
 		
-//		8-neighborhood -> which triangulation good for v-Ns?
-		int[][] nbh=getSorted1Nbh(i, j, depthThreshold, depth, faceId);
+//		8-neighborhood -> which triangulation is good for v-Ns?
+		int[][] sorted1Nbh=getSorted1Nbh(i, j, depthThreshold, depth, faceId);
 
-		if(nbh.length<2) return new double[] {0,0,0};
+		if(sorted1Nbh.length<2) return new double[] {0,0,0};
 		
-		double[][] edges=new double[nbh.length][];
+		double[][] edges=new double[sorted1Nbh.length][];
 		double[] vCoord=convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);
 		for(int ii=0;ii<edges.length;ii++){
-			edges[ii]=Rn.subtract(null, convertDepthValueTo3DCoordinate(nbh[ii][0], nbh[ii][1], depth[nbh[ii][0]][nbh[ii][1]], M, N), vCoord);
+			edges[ii]=Rn.subtract(null, convertDepthValueTo3DCoordinate(sorted1Nbh[ii][0], sorted1Nbh[ii][1], depth[sorted1Nbh[ii][0]][sorted1Nbh[ii][1]], M, N), vCoord);
 		}
 		
 		double[][] fNormals=new double[edges.length-1][];
@@ -152,15 +152,15 @@ public class Scan3DUtility {
 		return neighborhood;		
 	}
 	
-	public static double averageDistance(int i, int j, double depthThreshold, double[][] depth, int[][] faceId){
+	public static double averageDistance(int i, int j, int[][] oneNeighborhood, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length;
 		int N=depth[0].length;
-		int[][] nbh=getNeighborhood(i, j, 1, depthThreshold, depth, faceId);	
+		//int[][] oneNeighborhood=getNeighborhood(i, j, 1, depthThreshold, depth, faceId);	
 		double averageValue=0;
 		int vertexCount=0;
 		double[] p=convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);	
-		for(int n=0;n<nbh.length;n++){
-			double[] p2=convertDepthValueTo3DCoordinate(nbh[n][0], nbh[n][1], depth[nbh[n][0]][nbh[n][1]], M, N);
+		for(int n=0;n<oneNeighborhood.length;n++){
+			double[] p2=convertDepthValueTo3DCoordinate(oneNeighborhood[n][0], oneNeighborhood[n][1], depth[oneNeighborhood[n][0]][oneNeighborhood[n][1]], M, N);
 			averageValue+=Rn.euclideanDistance(p, p2);
 			vertexCount++;
 		}
@@ -168,8 +168,8 @@ public class Scan3DUtility {
 	}
 	
 //	maxDistance is the the distance from that all average-distances above will result a neighborhood=1 and all smaller average-distances will result a neighborhood>1
-	public static int getNeighborhoodSize(int i, int j, double maxDistance, double depthThreshold, double[][] depth, int[][] faceId){
-		return (int)Math.ceil(maxDistance/averageDistance(i, j, depthThreshold, depth, faceId));
+	public static int getNeighborhoodSize(int i, int j, int[][] oneNeighborhood, double maxDistance, double depthThreshold, double[][] depth, int[][] faceId){
+		return (int)Math.ceil(maxDistance/averageDistance(i, j, oneNeighborhood, depthThreshold, depth, faceId));
 	}
 	
 }

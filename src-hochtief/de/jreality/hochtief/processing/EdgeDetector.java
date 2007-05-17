@@ -15,10 +15,10 @@ import de.jreality.shader.CommonAttributes;
 
 public class EdgeDetector {
 	
-	public static int EDGE_POINTS_TYPE_NOEDGE=0;
-	public static int EDGE_POINTS_TYPE_BEND=1;
-	public static int EDGE_POINTS_TYPE_FACEBORDER=-1;
-	public static int EDGE_POINTS_TYPE_SINGLEPOINT=-2;
+	public static int POINT_TYPE_INSIDEFACE=0;
+	public static int POINT_TYPE_BEND=-3;
+	public static int POINT_TYPE_FACEBORDER=-2;
+	public static int POINT_TYPE_SINGLEPOINT=-1;
 	
 	public static int[][] detect(double varianzThreshold, double maxNbhDistance, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length; int N=depth[0].length;
@@ -35,12 +35,12 @@ public class EdgeDetector {
 		double[][][] normals=Scan3DUtility.getVertexNormals(depthThreshold, depth, faceId);
 
 		for(int i=0;i<M;i++){
-			for(int j=0;j<N;j++){		
-				int adjacentPointsCount=Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId).length;
-				if(adjacentPointsCount>2 && adjacentPointsCount<8)
-					edgeId[i][j]=EDGE_POINTS_TYPE_FACEBORDER;
-				else if(adjacentPointsCount>2){
-					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, maxNbhDistance, depthThreshold, depth, faceId);			
+			for(int j=0;j<N;j++){
+				int[][] oneNbh=Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId);
+				if(oneNbh.length>2 && oneNbh.length<8)
+					edgeId[i][j]=POINT_TYPE_FACEBORDER;
+				else if(oneNbh.length>2){
+					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, oneNbh, maxNbhDistance, depthThreshold, depth, faceId);			
 
 					if(neighborhoodSize>maxNB) maxNB=neighborhoodSize;
 					if(neighborhoodSize<minNB) minNB=neighborhoodSize;
@@ -62,7 +62,7 @@ public class EdgeDetector {
 							}
 						}
 						localNormals[localNormalsCount]=normals[i][j];
-
+						
 						DenseMatrix covMtx=new DenseMatrix(Scan3DUtility.getCovarianzMatrix(localNormals));
 						SymmPackEVD evd=null;
 						try {
@@ -76,10 +76,10 @@ public class EdgeDetector {
 						usedPoints+=1;
 
 						if(max>varianzThreshold)
-							edgeId[i][j]=EDGE_POINTS_TYPE_BEND;
+							edgeId[i][j]=POINT_TYPE_BEND;
 					}
 				}else{
-					edgeId[i][j]=EDGE_POINTS_TYPE_SINGLEPOINT;
+					edgeId[i][j]=POINT_TYPE_SINGLEPOINT;
 				}
 
 			}
@@ -134,8 +134,8 @@ public class EdgeDetector {
 				edgeNode.addChild(cmp);	
 				
 				String type="no type";
-				if(edgeType==EDGE_POINTS_TYPE_BEND) type="bend";
-				if(edgeType==EDGE_POINTS_TYPE_FACEBORDER) type="faceBorder";
+				if(edgeType==POINT_TYPE_BEND) type="bend";
+				if(edgeType==POINT_TYPE_FACEBORDER) type="faceBorder";
 				System.out.println("edgePoints ("+type+"): "+pointCount+" in face "+f);
 			}
 		}

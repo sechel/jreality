@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.hochtief.processing.EdgeDetector;
+import de.jreality.hochtief.processing.EdgeSplitFaceExtractor;
 import de.jreality.hochtief.processing.SimpleDepthFaceExtractor;
 import de.jreality.hochtief.utility.Scan3DShowUtility;
 import de.jreality.reader.AbstractReader;
@@ -22,7 +23,7 @@ public class Scan3DProcessor extends AbstractReader{
 	private final int minVertexCount=10000;	
 	
 	//edge detection
-	private final double normalVarianzThreshold=0.15;//0.1;
+	private final double normalVarianzThreshold=0.1;//0.15;
 	private final double maxNeighborhoodDistance=0.1;
 	
 	public Scan3DProcessor(){}
@@ -60,14 +61,22 @@ public class Scan3DProcessor extends AbstractReader{
 //			}
 //		}
 		
+//		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset());
+		
 		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId);		
-		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.EDGE_POINTS_TYPE_BEND,Color.RED,edgeId, faceId, faceSize, minVertexCount, depth);
-		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.EDGE_POINTS_TYPE_FACEBORDER,Color.GREEN,edgeId, faceId, faceSize, minVertexCount, depth);
+		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_BEND,Color.RED,edgeId, faceId, faceSize, minVertexCount, depth);
+		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_FACEBORDER,Color.GREEN,edgeId, faceId, faceSize, minVertexCount, depth);
 		SceneGraphComponent edgePointsNode=new SceneGraphComponent();
 		edgePointsNode.addChild(innerEdgePointsNode);
 		edgePointsNode.addChild(borderEdgePointsNode);
+		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),edgePointsNode);
 		
-		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),edgePointsNode);		
+		EdgeSplitFaceExtractor esfe=new EdgeSplitFaceExtractor(depth);
+		esfe.splitFaces(edgeId, faceId, faceSize, 100, depthThreshold);
+		int[][] splittedFaceId=esfe.getSplittedFaceIds();
+		int[] splittedFaceSize=esfe.getSplittedFaceSizes();
+		
+		Scan3DShowUtility.showGenerateTriangulation(100, depthThreshold, splittedFaceSize, splittedFaceId, depth, null, loader.getPhiOffset(),edgePointsNode);		
 	}
 
 	public static void main(String[] args) {

@@ -128,8 +128,9 @@ public class Scan3DShowUtility {
 		for(int i=0;i<M;i++){
 			for(int j=0;j<N;j++){
 				if(faceId[i][j]==faceNr){
-					textureCoordinates[vertexCount][0] = -(double) j / N + (offset / (2 * Math.PI) + 0.5);
-					textureCoordinates[vertexCount][1] = (double) i / M;
+					//better take real point pos
+					textureCoordinates[vertexCount][0] = -(double) j / (N) + (offset / (2 * Math.PI) + 0.5);
+					textureCoordinates[vertexCount][1] = (double) i / (M);
 					vertexCount++;
 				}
 			}
@@ -261,12 +262,12 @@ public class Scan3DShowUtility {
 
 		if(child!=null) sceneRoot.addChild(child);
 		
-		//int[] faceSize=getFaceSizes();
-		
 		ImageData img=null;
-		try {
-			img = ImageData.load(Input.getInput(texturePath));
-		} catch (IOException e) {}
+		if(texturePath!=null){
+			try {
+				img = ImageData.load(Input.getInput(texturePath));
+			} catch (IOException e) {}
+		}
 		
 		for(int i=0;i<faceSize.length;i++){
 			if(faceSize[i]>minVertexCount){
@@ -278,7 +279,8 @@ public class Scan3DShowUtility {
 					ifsf.setVertexCoordinates(getFaceVertices(i, faceSize[i], depth, faceId));
 					ifsf.setFaceCount(faceInds.length);
 					ifsf.setFaceIndices(faceInds);
-					ifsf.setVertexTextureCoordinates(getTextureCoordinates(i, faceSize[i], faceId, texOffset));
+					if(texturePath!=null)
+						ifsf.setVertexTextureCoordinates(getTextureCoordinates(i, faceSize[i], faceId, texOffset));
 					ifsf.setGenerateEdgesFromFaces(true);
 					ifsf.setGenerateFaceNormals(true);
 					ifsf.setGenerateVertexNormals(true);
@@ -288,7 +290,8 @@ public class Scan3DShowUtility {
 					SceneGraphComponent sgc=new SceneGraphComponent("face "+i);
 					sgc.setGeometry(ifsf.getGeometry());
 					sgc.setAppearance(new Appearance());
-					TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", img, false);
+					if(texturePath!=null)
+						TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", img, false);
 					sceneRoot.addChild(sgc);
 
 					System.out.println("vertexCount: "+faceSize[i]);
@@ -305,7 +308,6 @@ public class Scan3DShowUtility {
 			index++;		
 		vApp.getSceneRoot().getChildComponent(index).addChild(sceneRoot);
 	
-		
 //		ViewerApp.display(sceneRoot);
 		
 	}

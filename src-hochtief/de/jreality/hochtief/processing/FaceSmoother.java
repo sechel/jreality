@@ -111,12 +111,13 @@ public class FaceSmoother {
 	//averageValue adapted to average-distance to surounding face-points 
 	
 	public static double averageValue(int i, int j, double maxDistance, double depthThreshold, double[][] depth, int[][] faceId){
-		int neighborhood=Scan3DUtility.getNeighborhoodSize(i, j, maxDistance, depthThreshold, depth, faceId);
+		int[][] oneNbh=Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId);
+		int nbhSize=Scan3DUtility.getNeighborhoodSize(i, j, oneNbh, maxDistance, depthThreshold, depth, faceId);
 		
-		if(neighborhood>maxNB) maxNB=neighborhood;
-		if(neighborhood<minNB) minNB=neighborhood;
+		if(nbhSize>maxNB) maxNB=nbhSize;
+		if(nbhSize<minNB) minNB=nbhSize;
 		
-		return averageValue(i, j, neighborhood, depthThreshold, depth, faceId);
+		return averageValue(i, j, nbhSize, depthThreshold, depth, faceId);
 	}
 	
 	private static double maxDistToAverageValue=0.01;
