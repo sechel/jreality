@@ -104,6 +104,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	
 	protected void updateRenderRunnable() {
 		setDisplayListDirty();
+		geometryDirtyBits = ALL_GEOMETRY_CHANGED;
+		System.err.println("Updating render runnable for "+goBetween.getOriginalComponent().getName());
 		if (goBetween.peerGeometry == null) renderGeometry = null;
 		else	 renderGeometry = new Runnable() {
 			public void run() {
@@ -322,7 +324,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-			updateRenderRunnable();
+			renderRunnableDirty = true;
 			break;
 
 		case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
@@ -358,7 +360,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
-			updateRenderRunnable();
+			renderRunnableDirty = true;
 			break;
 
 		case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
@@ -453,7 +455,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	protected void handleChangedGeometry() {
-		if (geometryShader != null)	{
+		if (goBetween.peerGeometry != null)	{
+			if (geometryShader == null) updateShaders();
+			if (geometryShader == null) return;
 //			theLog.fine("Handling bits: "+geometryDirtyBits+" for "+goBetween.originalComponent.getName());
 			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) 
 				geometryShader.pointShader.flushCachedState(jr);
