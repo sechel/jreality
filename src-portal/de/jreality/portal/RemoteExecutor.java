@@ -39,7 +39,8 @@ public class RemoteExecutor {
 	    fsf.validate();
 	    fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
 		
-		return (PortalToolSystem) va.getViewer().getToolSystem();
+//		return (PortalToolSystem) va.getViewer().getToolSystem();
+		return (PortalToolSystem) va.getToolSystem();
 	}
 	
 }
