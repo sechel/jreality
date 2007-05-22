@@ -58,6 +58,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -111,7 +112,7 @@ public class JRonJRTest {
         System.out.println("frame size " + f.getSize());
     }
 
-    private static ToolSystemViewer createViewer(SceneGraphComponent root) {
+    private static Viewer createViewer(SceneGraphComponent root) {
         Viewer viewer = new de.jreality.soft.DefaultViewer();
         //Viewer viewer = new de.jreality.jogl.Viewer();
 
@@ -164,12 +165,13 @@ public class JRonJRTest {
         RenderTrigger trigger = new RenderTrigger();
         trigger.addSceneGraphComponent(scene);
         trigger.addViewer(viewer);
-        ToolSystemViewer v = new ToolSystemViewer(viewer);
-        v.setSceneRoot(scene);
-        v.setCameraPath(cp);
-        v.setAvatarPath(cp);
-        v.initializeTools();
-        return v;
+ //       ToolSystemViewer v = new ToolSystemViewer(viewer);
+        viewer.setSceneRoot(scene);
+        viewer.setCameraPath(cp);
+        ToolSystem toolSystem = ToolSystem.toolSystemForViewer(viewer);
+        toolSystem.setAvatarPath(cp);
+        toolSystem.initializeSceneTools();
+        return viewer;
     }
 
 }
