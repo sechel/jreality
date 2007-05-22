@@ -59,6 +59,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.RotateTool;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 
 public class ToolsAndAppearances {
@@ -96,10 +97,13 @@ public class ToolsAndAppearances {
     camPath.push(cameraNode);
     camPath.push(camera);
     
-    ToolSystemViewer viewer = new ToolSystemViewer(new Viewer());
+ //   ToolSystemViewer viewer = new ToolSystemViewer(new Viewer());
+    Viewer viewer = new Viewer();
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(camPath);
-    viewer.initializeTools();
+//    viewer.initializeTools();
+      ToolSystem toolSystem = ToolSystem.toolSystemForViewer(viewer);
+      toolSystem.initializeSceneTools();
     
     JFrame frame = new JFrame();
     frame.setVisible(true);

@@ -60,12 +60,14 @@ import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.util.RenderTrigger;
 
@@ -111,7 +113,8 @@ public class SwtExample {
     cameraPath.push(cameraNode);
     cameraPath.push(camera);
     
-    final ToolSystemViewer viewer;
+    final Viewer viewer;
+    final ToolSystem toolSystem;
     
     // true for SWT, false for AWT
     if (true) {
@@ -139,10 +142,12 @@ public class SwtExample {
       final SwtViewer swtViewer=new SwtViewer(can[0]);
       
       // enable tools
-      viewer = new ToolSystemViewer(swtViewer);
+//      viewer = new ToolSystemViewer(swtViewer);
+      toolSystem = ToolSystem.toolSystemForViewer(swtViewer);
+      toolSystem.initializeSceneTools();
     }
     else {
-      viewer = new ToolSystemViewer(new de.jreality.jogl.Viewer());
+      viewer = new de.jreality.jogl.Viewer();
       JFrame f = new JFrame("AWT");
       f.setSize(640, 480);
       f.getContentPane().add((Component) viewer.getViewingComponent());
@@ -153,7 +158,9 @@ public class SwtExample {
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(cameraPath);
 
-    viewer.initializeTools();
+    toolSystem = ToolSystem.toolSystemForViewer(viewer);
+    toolSystem.initializeSceneTools();
+//    viewer.initializeTools();
     
     // add tools
     geometryNode.addTool(new RotateTool());
