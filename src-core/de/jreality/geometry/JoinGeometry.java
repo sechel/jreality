@@ -42,6 +42,9 @@
  */
 package de.jreality.geometry;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
@@ -59,48 +62,22 @@ public class JoinGeometry {
 				// vergleicht Punkte in R^n bis auf eps als Tolleranz
 		double delta= 0;
 		for (int i=0;i<p1.length;i++)
-			delta=(p1[i]-p2[i])*(p1[i]-p2[i]);
+			delta+=(p1[i]-p2[i])*(p1[i]-p2[i]);
 		return (delta<eps*eps);
 	}
 	private static int[][] makeNewIndicees(int [][] indicesOld,int [] refference){
 		int len=indicesOld.length;
 		int[][] indicesNew= new int[len][];
 		int k=0;
-		//System.out.println("start"+len);
 		for (int i=0;i<len;i++){
 			k=indicesOld[i].length;
-			//System.out.println("			len:"+k);
 			indicesNew[i]=new int[k];
-			
 			for (int j=0;j<k;j++){
 				indicesNew[i][j]=refference[indicesOld[i][j]];
-				//System.out.println("ind:"+refference[indicesOld[i][j]]);
 			}
 		}
 		return indicesNew;
 	}
-	
-	
-	
-	
-	
-	
-	
-	public static IndexedFaceSet removeRedundantGraphics(IndexedFaceSet ifs, Attribute ... atts){
-		// collect all double Attributes
-		// collect all int Attributes (without indices)
-		
-		
-		return null;
-		
-	}
-		
-	
-	
-	
-	
-	
-	
 	
 	/**
 	 * entfernt alle doppelt angegebenen Punkte
@@ -109,44 +86,69 @@ public class JoinGeometry {
 	 * @param ifs
 	 * @return IndexedFaceSet
 	 */
-	public static IndexedFaceSet removeDublicateVertices(IndexedFaceSet ifs, Attribute ... atts){
+	public static IndexedFaceSet removeDublicateVertices(PointSet ps, Attribute ... atts){
+		IndexedFaceSet ifs= IndexedFaceSetUtility.pointSetToIndexedFaceSet(ps);
+		List<Attribute> attrs=new LinkedList<Attribute>();
+		for (int i = 0; i < atts.length; i++) {
+			attrs.add(atts[i]);
+		}
+		if(!attrs.contains(Attribute.COORDINATES))// Koordinaten muessen dabei sein!
+			attrs.add(Attribute.COORDINATES);
+		int numOfVertices	=ifs.getNumPoints();
+		
+		// compareData [Attr][Vertex][dim]
+		List<double[][]> compareDataTemp = new LinkedList<double[][]>();
+		List<Attribute> goodAttrs = new LinkedList<Attribute>();
+		
+		//compareData auslesen und nur funktionierende Attribute merken:
+		
+		int totalDim=0;			// gesammelte dimension der zu vergl. Attribute
+		for(Attribute a:attrs){
+			try {
+				double[][] temp=ifs.getVertexAttributes (a).toDoubleArrayArray(null);
+				int dim=temp[0].length;
+				compareDataTemp.add(temp);
+				totalDim+=dim;
+				goodAttrs.add(a);
+			}catch (Exception e) {}
+		}
+		int numOfAttr=goodAttrs.size();
+		// compareData[vertex][attr][dim]
+		double[][][] compareData = new double[numOfVertices][numOfAttr][];
+		for (int i = 0; i < numOfAttr; i++) { // change sizing
+			for (int j = 0; j < numOfVertices; j++) {
+				compareData[j][i]= compareDataTemp.get(i)[j];
+			}
+		}
+		
 		// die alten Daten auslesen	
-		double [][] oldVertexCoordsArray=null;
-		double[][] oldVertexColorArray=null;
 		int[][]    oldVertexIndizeesArray=null;
 		String[]   oldVertexLabelsArray=null;
-		double[][] oldVertexNormalsArray=null;
-		double[]   oldVertexSizeArray= null;
-		double[][] oldVertexTextureCoordsArray=null;
-				
-		DataList temp= ifs.getVertexAttributes ( Attribute.COORDINATES );
-		if (temp!=null) oldVertexCoordsArray 		= temp.toDoubleArrayArray(null);
-		temp= ifs.getVertexAttributes ( Attribute.COLORS );
-		if (temp!=null)	oldVertexColorArray 		= temp.toDoubleArrayArray(null);
+		
+		DataList temp;
 		temp=ifs.getVertexAttributes ( Attribute.INDICES );
 		if (temp !=null)oldVertexIndizeesArray 		= temp.toIntArrayArray(null);
 		temp= ifs.getVertexAttributes( Attribute.LABELS );
 		if (temp!=null)	oldVertexLabelsArray 		= temp.toStringArray(null);
+		
+		// anders regeln!!! <<=>---<<<
+		double [][] oldVertexCoordsArray=null;
+		double[][] oldVertexColorArray=null;
+		double[][] oldVertexNormalsArray=null;
+		double[]   oldVertexSizeArray= null;
+		double[][] oldVertexTextureCoordsArray=null;
 		temp= ifs.getVertexAttributes( Attribute.NORMALS );
 		if (temp!=null) oldVertexNormalsArray 		= temp.toDoubleArrayArray(null);
 		temp= ifs.getVertexAttributes( Attribute.POINT_SIZE);
 		if (temp!=null) oldVertexSizeArray 			= temp.toDoubleArray(null);
 		temp= ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
 		if (temp!=null) oldVertexTextureCoordsArray = temp.toDoubleArrayArray(null);
+		temp= ifs.getVertexAttributes ( Attribute.COORDINATES );
+		if (temp!=null) oldVertexCoordsArray 		= temp.toDoubleArrayArray(null);
+		temp= ifs.getVertexAttributes ( Attribute.COLORS );
+		if (temp!=null)	oldVertexColorArray 		= temp.toDoubleArrayArray(null);
 		
-		int numOfVertices	=ifs.getNumPoints();
-		int dim3= atts.length+1;
 		
-		double[][][] data1=new double[dim3][numOfVertices][3];
-		data1[0]=oldVertexCoordsArray;
-		for (int i = 0; i < atts.length; i++)
-			data1[i+1]=ifs.getVertexAttributes ( atts[i] ).toDoubleArrayArray(null);
-		
-		double[][][] data= new double[numOfVertices][dim3][3];
-		for (int i = 0; i < numOfVertices; i++)
-			for (int j = 0; j < dim3; j++)
-				data[i][j]=data1[j][i];
-
 		// refferenceTable.[i] verweist auf den neuen i.Index (fuer umindizierung)
 		int[] refferenceTabel =new int[numOfVertices];
 		
@@ -154,14 +156,15 @@ public class JoinGeometry {
 		// neue Attribute der Punkte zwischenspeichern:
 		int curr=0; // : aktuell einzufuegender Index 
 		int index;
-		DimTreeStart dTree=new JoinGeometry().new DimTreeStart(dim3);
+ 		DimTreeStart dTree=new JoinGeometry().new DimTreeStart(totalDim);
 
 		if (numOfVertices>0){
 			for (int i=0; i<numOfVertices;i++){
-				// benutze durchgelaufenen Teil der Datenliste fuer neue Daten 
-				index=dTree.put(data[i]);
+				// Trick :benutze durchgelaufenen Teil der Datenliste fuer neue Daten
+				index=dTree.put(compareData[i]);	// pruefe ob Vertex doppelt 
 				refferenceTabel[i]=index; //Indizes vermerken 
 				if(curr==index){
+					// nur notwendige Daten uebertragen: 
 					oldVertexCoordsArray[curr]=oldVertexCoordsArray[i];
 					if (oldVertexColorArray!=null)
 						oldVertexColorArray[curr]=oldVertexColorArray[i];
@@ -182,10 +185,10 @@ public class JoinGeometry {
 		int numOfVerticesNew = curr;
 		
 		// Die VertexAttributVektoren kuerzen		
-		double[][] newVertexColorArray= 		new double[numOfVerticesNew][3];
-		double[][] newVertexCoordsArray= 		new double[numOfVerticesNew][3];
+		double[][] newVertexColorArray= 		new double[numOfVerticesNew][];
+		double[][] newVertexCoordsArray= 		new double[numOfVerticesNew][];
 		String[]   newVertexLabelsArray= 		new String[numOfVerticesNew];
-		double[][] newVertexNormalsArray= 		new double[numOfVerticesNew][3];
+		double[][] newVertexNormalsArray= 		new double[numOfVerticesNew][];
 		double[][] newVertexTextureCoordsArray= new double[numOfVerticesNew][];
 		double[]   newVertexSizeArray= 			new double[numOfVerticesNew];
 		int[][]    newVertexIndizeesArray= 		new int[numOfVerticesNew][];
@@ -245,355 +248,79 @@ public class JoinGeometry {
 		result.setEdgeAttributes(ifs.getEdgeAttributes());
 		result.setFaceAttributes(ifs.getFaceAttributes());
 		
+		// die Indices angleichen:		
 		int [][] faceIndicesOld=null;
 		int [][] edgeIndicesOld=null;
 		temp=ifs.getFaceAttributes( Attribute.INDICES );
-		if (temp !=null)	faceIndicesOld = temp.toIntArrayArray(null);
+		if (temp !=null){
+			faceIndicesOld = temp.toIntArrayArray(null);
+			int [][] faceIndicesNew= makeNewIndicees(faceIndicesOld,refferenceTabel);
+			if((numOfFaces>0)&(numOfVertices>0))
+				result.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(faceIndicesNew));
+				}
 		temp=ifs.getEdgeAttributes( Attribute.INDICES );
-		if (temp !=null)	edgeIndicesOld = temp.toIntArrayArray(null);
-
-		// die Indices angleichen		
-		int [][] faceIndicesNew= makeNewIndicees(faceIndicesOld,refferenceTabel);
-		int [][] edgesIndicesNew=makeNewIndicees(edgeIndicesOld,refferenceTabel);
-		if((numOfEdges>0)&(numOfVertices>0))
-			result.setEdgeAttributes(Attribute.INDICES, new IntArrayArray.Array(edgesIndicesNew));
-		if((numOfFaces>0)&(numOfVertices>0))
-			result.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(faceIndicesNew));
+		if (temp !=null){
+			edgeIndicesOld = temp.toIntArrayArray(null);
+			int [][] edgesIndicesNew=makeNewIndicees(edgeIndicesOld,refferenceTabel);
+			if((numOfEdges>0)&(numOfVertices>0))
+				result.setEdgeAttributes(Attribute.INDICES, new IntArrayArray.Array(edgesIndicesNew));
+			}
 		return result;		
 	}
-	public static IndexedLineSet removeDublicateVertices(IndexedLineSet ils, Attribute ... atts){
-		// die alten Daten auslesen	
-		double [][] oldVertexCoordsArray=null;
-		double[][] oldVertexColorArray=null;
-		int[][]    oldVertexIndizeesArray=null;
-		String[]   oldVertexLabelsArray=null;
-		double[][] oldVertexNormalsArray=null;
-		double[]   oldVertexSizeArray= null;
-		double[][] oldVertexTextureCoordsArray=null;
-				
-		DataList temp= ils.getVertexAttributes ( Attribute.COORDINATES );
-		if (temp!=null) oldVertexCoordsArray 		= temp.toDoubleArrayArray(null);
-		temp= ils.getVertexAttributes ( Attribute.COLORS );
-		if (temp!=null)	oldVertexColorArray 		= temp.toDoubleArrayArray(null);
-		temp=ils.getVertexAttributes ( Attribute.INDICES );
-		if (temp !=null)oldVertexIndizeesArray 		= temp.toIntArrayArray(null);
-		temp= ils.getVertexAttributes( Attribute.LABELS );
-		if (temp!=null)	oldVertexLabelsArray 		= temp.toStringArray(null);
-		temp= ils.getVertexAttributes( Attribute.NORMALS );
-		if (temp!=null) oldVertexNormalsArray 		= temp.toDoubleArrayArray(null);
-		temp= ils.getVertexAttributes( Attribute.POINT_SIZE);
-		if (temp!=null) oldVertexSizeArray 			= temp.toDoubleArray(null);
-		temp= ils.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
-		if (temp!=null) oldVertexTextureCoordsArray = temp.toDoubleArrayArray(null);
 		
-		int numOfVertices	=ils.getNumPoints();
-		
-//		 conect data:
-		int dim3= atts.length+1;
-		
-		double[][][] data1=new double[dim3][numOfVertices][3];
-		data1[0]=oldVertexCoordsArray;
-		for (int i = 0; i < atts.length; i++)
-			data1[i+1]=ils.getVertexAttributes ( atts[i] ).toDoubleArrayArray(null);
-		
-		double[][][] data= new double[numOfVertices][dim3][3];
-		for (int i = 0; i < numOfVertices; i++)
-			for (int j = 0; j < dim3; j++)
-				data[i][j]=data1[j][i];
-//		conect data end
-		
-		// refferenceTable.[i] verweist auf den neuen i.Index (fuer umindizierung)
-		int[] refferenceTabel =new int[numOfVertices];
-		
-		// hier werden die Punkte neu gelesen und die Verweise in RefferenceTable gemerkt
-		// neue Attribute der Punkte zwischenspeichern:
-		int curr=0; // : aktuell einzufuegender Index 
-		int index;
-		DimTreeStart dTree=new JoinGeometry().new DimTreeStart(dim3);
-		
-		if (numOfVertices>0){
-			for (int i=0; i<numOfVertices;i++){
-				// benutze durchgelaufenen Teil der Datenliste fuer neue Daten 
-				index=dTree.put(data[i]);
-				refferenceTabel[i]=index; //Indizes vermerken 
-				if(curr==index){
-					oldVertexCoordsArray[curr]=oldVertexCoordsArray[i];
-					if (oldVertexColorArray!=null)
-						oldVertexColorArray[curr]=oldVertexColorArray[i];
-					if (oldVertexIndizeesArray!=null)
-						oldVertexIndizeesArray[curr]=oldVertexIndizeesArray[i];
-					if (oldVertexLabelsArray!=null)
-						oldVertexLabelsArray[curr]=oldVertexLabelsArray[i];
-					if (oldVertexNormalsArray!=null)
-						oldVertexNormalsArray[curr]=oldVertexNormalsArray[i];
-					if (oldVertexSizeArray!=null)
-						oldVertexSizeArray[curr]=oldVertexSizeArray[i];
-					if (oldVertexTextureCoordsArray!=null)
-						oldVertexTextureCoordsArray[curr]=oldVertexTextureCoordsArray[i];
-					curr++;
-				}
-			}	
-		}
-		int numOfVerticesNew = curr;
-		
-		// Die VertexAttributVektoren kuerzen		
-		double[][] newVertexColorArray= 		new double[numOfVerticesNew][3];
-		double[][] newVertexCoordsArray= 		new double[numOfVerticesNew][3];
-		String[]   newVertexLabelsArray= 		new String[numOfVerticesNew];
-		double[][] newVertexNormalsArray= 		new double[numOfVerticesNew][3];
-		double[][] newVertexTextureCoordsArray= new double[numOfVerticesNew][];
-		double[]   newVertexSizeArray= 			new double[numOfVerticesNew];
-		int[][]    newVertexIndizeesArray= 		new int[numOfVerticesNew][];
-		
-		for(int i=0;i<numOfVerticesNew;i++){
-			if (oldVertexCoordsArray!=null)			newVertexCoordsArray[i]=oldVertexCoordsArray[i];
-			if (oldVertexColorArray!=null)			newVertexColorArray[i]=oldVertexColorArray[i];
-			if (oldVertexIndizeesArray!=null)		newVertexIndizeesArray[i]=oldVertexIndizeesArray[i];
-			if (oldVertexLabelsArray!=null)			newVertexLabelsArray[i]=oldVertexLabelsArray[i];
-			if (oldVertexNormalsArray!=null)		newVertexNormalsArray[i]=oldVertexNormalsArray[i];
-			if (oldVertexSizeArray!=null)			newVertexSizeArray[i]=oldVertexSizeArray[i];
-			if (oldVertexTextureCoordsArray!=null)	newVertexTextureCoordsArray[i]=oldVertexTextureCoordsArray[i];
-		}
-						
-		// Die Vertex Attribute wieder einfuegen
-		IndexedLineSet result=new IndexedLineSet();
-		result.setNumPoints(numOfVerticesNew);
-		
-		if (numOfVerticesNew>0){
-			if (oldVertexCoordsArray!=null){
-				System.out.println("coords");
-				result.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-			}
-			if (oldVertexColorArray!=null){
-				System.out.println("color");
-				result.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(newVertexColorArray));
-			}
-			if (oldVertexLabelsArray!=null){
-				System.out.println("labels");
-				result.setVertexAttributes(Attribute.LABELS, new StringArray(newVertexLabelsArray));
-			}
-			if (oldVertexNormalsArray!=null){
-				System.out.println("normals");
-				result.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(newVertexNormalsArray));
-			}
-			if (oldVertexTextureCoordsArray!=null){
-				System.out.println("texture");
-				result.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-			}
-			if (oldVertexSizeArray!=null){
-				System.out.println("size");
-				result.setVertexAttributes(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
-			}
-			if (oldVertexIndizeesArray!=null){
-				System.out.println("indicees");
-				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
-			}
-		}
-		
-		// uebernehmen der alten Attribute
-		int numOfEdges		=ils.getNumEdges();
-		result.setNumEdges(numOfEdges);
-		
-		result.setGeometryAttributes(ils.getGeometryAttributes());
-		result.setEdgeAttributes(ils.getEdgeAttributes());
-		
-		int [][] edgeIndicesOld=null;
-		temp=ils.getEdgeAttributes( Attribute.INDICES );
-		if (temp !=null)	edgeIndicesOld = temp.toIntArrayArray(null);
-
-		// die Indices angleichen		
-		int [][] edgesIndicesNew=makeNewIndicees(edgeIndicesOld,refferenceTabel);
-		if((numOfEdges>0)&(numOfVertices>0))
-			result.setEdgeAttributes(Attribute.INDICES, new IntArrayArray.Array(edgesIndicesNew));
-		return result;		
-	}
-	
-	/** removes Vertices which do not differ much in vertexCoordinates
-	 *  @param ps
-	 *  @param atts  remove no vertices which differ in this attributes
-	 *  				this attributes must be of the Type doubleArrayArray
-	 * @return
-	 */
-	public static PointSet removeDublicateVertices(PointSet ps, Attribute ... atts){
-			// die alten Daten auslesen	
-		double [][] oldVertexCoordsArray=null;
-		double[][] oldVertexColorArray=null;
-		int[][]    oldVertexIndizeesArray=null;
-		String[]   oldVertexLabelsArray=null;
-		double[][] oldVertexNormalsArray=null;
-		double[]   oldVertexSizeArray= null;
-		double[][] oldVertexTextureCoordsArray=null;
-				
-		DataList temp= ps.getVertexAttributes ( Attribute.COORDINATES );
-		if (temp!=null) oldVertexCoordsArray 		= temp.toDoubleArrayArray(null);
-		temp= ps.getVertexAttributes ( Attribute.COLORS );
-		if (temp!=null)	oldVertexColorArray 		= temp.toDoubleArrayArray(null);
-		temp=ps.getVertexAttributes ( Attribute.INDICES );
-		if (temp !=null)oldVertexIndizeesArray 		= temp.toIntArrayArray(null);
-		temp= ps.getVertexAttributes( Attribute.LABELS );
-		if (temp!=null)	oldVertexLabelsArray 		= temp.toStringArray(null);
-		temp= ps.getVertexAttributes( Attribute.NORMALS );
-		if (temp!=null) oldVertexNormalsArray 		= temp.toDoubleArrayArray(null);
-		temp= ps.getVertexAttributes( Attribute.POINT_SIZE);
-		if (temp!=null) oldVertexSizeArray 			= temp.toDoubleArray(null);
-		temp= ps.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
-		if (temp!=null) oldVertexTextureCoordsArray = temp.toDoubleArrayArray(null);
-		
-		int numOfVertices	=ps.getNumPoints();
-		
-		// conect data:
-			int dim3= atts.length+1;
-			
-			double[][][] data1=new double[dim3][numOfVertices][3];
-			data1[0]=oldVertexCoordsArray;
-			for (int i = 0; i < atts.length; i++)
-				data1[i+1]=ps.getVertexAttributes ( atts[i] ).toDoubleArrayArray(null);
-			
-			double[][][] data= new double[numOfVertices][dim3][3];
-			for (int i = 0; i < numOfVertices; i++)
-				for (int j = 0; j < dim3; j++)
-					data[i][j]=data1[j][i];
-
-		// conect data end
-		
-		// hier werden die Punkte neu gelesen und die Verweise in RefferenceTable gemerkt
-		// neue Attribute der Punkte zwischenspeichern:
-		int curr=0; // : aktuell einzufuegender Index 
-		int index;
-		DimTreeStart dTree=new JoinGeometry().new DimTreeStart(dim3);
-		if (numOfVertices>0){
-			for (int i=0; i<numOfVertices;i++){
-				// benutze durchgelaufenen Teil der Datenliste fuer neue Daten
-				index=dTree.put(data[i]);
-				if(curr==index){
-					oldVertexCoordsArray[curr]=oldVertexCoordsArray[i];
-					if (oldVertexColorArray!=null)
-						oldVertexColorArray[curr]=oldVertexColorArray[i];
-					if (oldVertexIndizeesArray!=null)
-						oldVertexIndizeesArray[curr]=oldVertexIndizeesArray[i];
-					if (oldVertexLabelsArray!=null)
-						oldVertexLabelsArray[curr]=oldVertexLabelsArray[i];
-					if (oldVertexNormalsArray!=null)
-						oldVertexNormalsArray[curr]=oldVertexNormalsArray[i];
-					if (oldVertexSizeArray!=null)
-						oldVertexSizeArray[curr]=oldVertexSizeArray[i];
-					if (oldVertexTextureCoordsArray!=null)
-						oldVertexTextureCoordsArray[curr]=oldVertexTextureCoordsArray[i];
-					curr++;
-				}
-			}	
-		}
-		int numOfVerticesNew = curr;
-		
-		// Die VertexAttributVektoren kuerzen		
-		double[][] newVertexColorArray= 		new double[numOfVerticesNew][3];
-		double[][] newVertexCoordsArray= 		new double[numOfVerticesNew][3];
-		String[]   newVertexLabelsArray= 		new String[numOfVerticesNew];
-		double[][] newVertexNormalsArray= 		new double[numOfVerticesNew][3];
-		double[][] newVertexTextureCoordsArray= new double[numOfVerticesNew][];
-		double[]   newVertexSizeArray= 			new double[numOfVerticesNew];
-		int[][]    newVertexIndizeesArray= 		new int[numOfVerticesNew][];
-		
-		for(int i=0;i<numOfVerticesNew;i++){
-			if (oldVertexCoordsArray!=null)			newVertexCoordsArray[i]=oldVertexCoordsArray[i];
-			if (oldVertexColorArray!=null)			newVertexColorArray[i]=oldVertexColorArray[i];
-			if (oldVertexIndizeesArray!=null)		newVertexIndizeesArray[i]=oldVertexIndizeesArray[i];
-			if (oldVertexLabelsArray!=null)			newVertexLabelsArray[i]=oldVertexLabelsArray[i];
-			if (oldVertexNormalsArray!=null)		newVertexNormalsArray[i]=oldVertexNormalsArray[i];
-			if (oldVertexSizeArray!=null)			newVertexSizeArray[i]=oldVertexSizeArray[i];
-			if (oldVertexTextureCoordsArray!=null)	newVertexTextureCoordsArray[i]=oldVertexTextureCoordsArray[i];
-		}
-						
-		// Die Vertex Attribute wieder einfuegen
-		PointSet result=new PointSet();
-		result.setNumPoints(numOfVerticesNew);
-		
-		if (numOfVerticesNew>0){
-			if (oldVertexCoordsArray!=null){
-				System.out.println("coords");
-				result.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-			}
-			if (oldVertexColorArray!=null){
-				System.out.println("color");
-				result.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(newVertexColorArray));
-			}
-			if (oldVertexLabelsArray!=null){
-				System.out.println("labels");
-				result.setVertexAttributes(Attribute.LABELS, new StringArray(newVertexLabelsArray));
-			}
-			if (oldVertexNormalsArray!=null){
-				System.out.println("normals");
-				result.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(newVertexNormalsArray));
-			}
-			if (oldVertexTextureCoordsArray!=null){
-				System.out.println("texture");
-				result.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-			}
-			if (oldVertexSizeArray!=null){
-				System.out.println("size");
-				result.setVertexAttributes(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
-			}
-			if (oldVertexIndizeesArray!=null){
-				System.out.println("indicees");
-				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
-			}
-		}
-		
-		// uebernehmen der alten Attribute		
-		result.setGeometryAttributes(ps.getGeometryAttributes());
-		return result;		
-	}
-	
-	
-	private static int DimTreeCurrNumToGive;
-	private static double[] DimTreeTolerance; //[dim]
-	private static int DimTreeDim;
 	private class DimTreeStart{
+		private int DimTreeCurrNumToGive;
+//      private static double[] DimTreeTolerance; //[dim]
+		private int totalDim;
 		DimTree d;
 		public DimTreeStart(int dim) {
 			double[] tol= new double[dim];
 			for (int i=0;i<dim;i++)
 				tol[i]=0.0001;
-			new DimTreeStart(dim,tol);
-		}
-		public DimTreeStart(int dim,double[] tol) {
 			DimTreeCurrNumToGive=0;
-			DimTreeDim=dim;
-			DimTreeTolerance=tol;
+			totalDim=dim;	
 		}
 		public int put(double[][] a){
+			// bei beginn initialisieren:
 			if (d==null){
-				d=new DimTree(a);
+				d=new DimTree(a,this);
 				return 0;
 			}
-		int n=d.put(a);
-		return n;
+			int n=d.put(a);
+			return n;
 		}
 	}
 	private class DimTree{
 		DimTree[] children; // [(dim-1)^2]
-		double[][] val;// [dim]
+		double[][] val;// [attr][dim of attr]
 		int number;
-
-		public DimTree(double[][] value) {
+		DimTreeStart root;
+		
+		public DimTree(double[][] value, DimTreeStart rootObject) {
+			root= rootObject;
 			val=value;
-			number=DimTreeCurrNumToGive;
-			DimTreeCurrNumToGive++;
-			children= new DimTree[(int)Math.pow(DimTreeDim*3,2)];
+			number=root.DimTreeCurrNumToGive;
+			root.DimTreeCurrNumToGive++;
+			children= new DimTree[(int)Math.pow(2,root.totalDim)];	
 		}
 		/**@param a
 		 * @return -1   : is the same element
 		 *  	   n>=0 : n is the number of the subtree
-		 *  				 in which a should be put	 */
+		 *  				 in which 'a' should be put	 
+		 *  a[j] has same size as val[j] (std is 3)*/
 		int whichChild(double[][] a){
-			int n=0; 		 // number of childtree which is to use
+			int n=0; 		// number of childtree which is to use
+			int k=0;		// how many dimensions have i handled bevore
 			boolean hit=true;// a is equal to val
-			for (int j = 0; j < DimTreeDim; j++) {
+			for (int j = 0; j < a.length; j++) {
 				if (!(compare(a[j],val[j] , eps)))hit=false;
-				for (int i = 0; i < 3; i++)
-					if(a[j][i]>val[j][i]) n+=Math.pow(2, j*3+i);
+				// calc n
+				for (int i = 0; i < a[j].length; i++) {
+					if(a[j][i]>val[j][i]) n+=Math.pow(2, k+i);
+				}
+				k+=a[j].length;
 			}
-			return (hit)? -1 : n;
+			return (hit)? -1 : n; 			
 		}
 		/**@param a
 		 * @return :  new counting number
@@ -603,8 +330,8 @@ public class JoinGeometry {
 			int n=whichChild(a);
 			if (n==-1) return number;
 			if (children[n]==null){
-				children[n]=new DimTree(a);
-				return DimTreeCurrNumToGive-1;
+				children[n]=new DimTree(a,root);
+				return root.DimTreeCurrNumToGive-1;
 			}
 			return children[n].put(a);
 		}
