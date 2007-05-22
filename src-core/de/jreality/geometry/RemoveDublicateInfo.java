@@ -46,7 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -79,12 +78,16 @@ public class RemoveDublicateInfo {
 		return indicesNew;
 	}
 	
-	/**
-	 * entfernt alle doppelt angegebenen Punkte
-	 * setzt die Indizees um
-	 * erst genannte Punktattribute gelten
-	 * @param ifs
-	 * @return IndexedFaceSet
+	
+	/** retains only vertices which differs enough in the given
+	 * attributes. 
+	 * <i>enough</i> means the euclidean distanz is smaler than <code>eps</code> 
+	 * retains only the standard Vertex Attributes.
+	 * face- and edge- attributes stay the same.
+	 * only Face and Edge Indices changes.
+	 * @param ps       can be <code>IndexedFaceSet,IndexedLineSet or PointSet</code>
+	 * @param atts	   some <code>doubleArrayArrayAttributes</code> 
+	 * @return IndexedFaceSet  
 	 */
 	public static IndexedFaceSet removeDublicateVertices(PointSet ps, Attribute ... atts){
 		IndexedFaceSet ifs= IndexedFaceSetUtility.pointSetToIndexedFaceSet(ps);
@@ -101,7 +104,6 @@ public class RemoveDublicateInfo {
 		List<Attribute> goodAttrs = new LinkedList<Attribute>();
 		
 		//compareData auslesen und nur funktionierende Attribute merken:
-		
 		int totalDim=0;			// gesammelte dimension der zu vergl. Attribute
 		for(Attribute a:attrs){
 			try {
