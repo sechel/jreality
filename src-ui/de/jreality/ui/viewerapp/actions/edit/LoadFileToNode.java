@@ -46,7 +46,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 import de.jreality.scene.Viewer;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;

@@ -82,7 +82,6 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.actions.view.SwitchBackgroundColor;
 import de.jreality.util.CameraUtility;

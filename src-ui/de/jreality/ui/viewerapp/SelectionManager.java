@@ -53,7 +53,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.Secure;
 

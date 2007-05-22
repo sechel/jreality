@@ -54,7 +54,6 @@ import javax.swing.KeyStroke;
 import de.jreality.io.JrScene;
 import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.WriterJRS;

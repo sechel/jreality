@@ -63,7 +63,6 @@ import javax.swing.KeyStroke;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
