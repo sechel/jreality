@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
@@ -55,6 +56,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.scene.tool.AxisState;
@@ -63,8 +65,10 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
+import de.jreality.util.Secure;
 
 /**
  * 
@@ -75,6 +79,41 @@ import de.jreality.util.RenderTrigger;
  */
 public class ToolSystem implements ToolEventReceiver {
 
+    static WeakHashMap<Viewer, ToolSystem> globalTable = new WeakHashMap<Viewer, ToolSystem>();
+    
+	/**
+	 * If <i>v</i> has a tool system already associated to it, return it. Otherwise allocate a default one
+	 * @param v
+	 * @return
+	 */
+    public static ToolSystem toolSystemForViewer(Viewer v)	{
+		
+		ToolSystem sm = (ToolSystem) globalTable.get(v);
+		if (sm != null) return sm;
+		LoggingSystem.getLogger(ToolSystem.class).warning("Viewer has no tool system, allocating default");
+		sm = new ToolSystem(v, null, null);
+		globalTable.put(v,sm);
+		return sm;
+	}
+	
+	/**
+	 * This method just looks up and returns the possibly null toolsystem associated to viewer
+	 * @param v
+	 * @return
+	 */
+	 public static ToolSystem getToolSystemForViewer(Viewer v)	{
+		
+		ToolSystem sm = (ToolSystem) globalTable.get(v);
+		return sm;
+	}
+	
+	public static void setToolSystemForViewer(Viewer v, ToolSystem ts)	{
+		
+		ToolSystem sm = (ToolSystem) globalTable.get(v);
+		if (sm != null) throw new IllegalStateException("Viewer already has tool system "+sm);
+		globalTable.put(v,ts);
+	}
+	
 	private RenderTrigger renderTrigger;
 
 	protected final LinkedList<ToolEvent> compQueue = new LinkedList<ToolEvent>();
@@ -93,6 +132,7 @@ public class ToolSystem implements ToolEventReceiver {
 	private PickSystem pickSystem;
 	private ToolUpdateProxy updater;
 	private ToolEventQueue eventQueue;
+	ToolSystemConfiguration config;
 
 	protected boolean executing;
 
@@ -192,6 +232,19 @@ public class ToolSystem implements ToolEventReceiver {
 		}
 	};
 
+	private static ToolSystemConfiguration loadConfiguration() {
+	    ToolSystemConfiguration config;
+	    try {
+	      String toolFile=Secure.getProperty("jreality.toolconfig");
+	      config = ToolSystemConfiguration.loadConfiguration(
+	          Input.getInput(toolFile)
+	      );
+	      LoggingSystem.getLogger(ToolSystem.class).config("Using toolconfig="+toolFile);
+	    } catch (Exception e1) {
+	      config = ToolSystemConfiguration.loadDefaultConfiguration();
+	    }
+	    return config;
+	  }
 	/**
 	 * 
 	 * @param viewer the viewer
@@ -200,14 +253,21 @@ public class ToolSystem implements ToolEventReceiver {
 	 * setting/removing the triggers viewer and scene root (on initialize/dispose)
 	 */
 	public ToolSystem(Viewer viewer, ToolSystemConfiguration config, RenderTrigger renderTrigger) {
-		this.viewer = viewer;
 		toolContext = new ToolContextImpl();
 		toolManager = new ToolManager();
 		eventQueue = new ToolEventQueue(this);
+		if (config == null) config = loadConfiguration();
+		this.config = config;
+		this.viewer = viewer;
 		deviceManager = new DeviceManager(config, eventQueue, viewer);
 		slotManager = new SlotManager(config);
 		updater = new ToolUpdateProxy(this);
 		this.renderTrigger = renderTrigger;
+		// this code moved over from the ToolSystemViewer constructor
+	    setPickSystem(new AABBPickSystem());
+	    // provide a reasonable default empty pick path
+	    emptyPickPath = new SceneGraphPath();
+	    emptyPickPath.push(viewer.getSceneRoot());
 	}
 
 	Thread getThread() {
@@ -216,7 +276,10 @@ public class ToolSystem implements ToolEventReceiver {
 
 	private boolean initialized;
 	public void initializeSceneTools() {
-		if (initialized) return; //throw new IllegalStateException("already initialized!");
+		if (initialized) {
+			LoggingSystem.getLogger(this).warning("already initialized!");
+			return;
+		}
 		initialized=true;
 		toolManager.cleanUp();
 		updater.setSceneRoot(viewer.getSceneRoot());
@@ -229,6 +292,7 @@ public class ToolSystem implements ToolEventReceiver {
 		}
 		if (pickSystem != null) pickSystem.setSceneRoot(viewer.getSceneRoot());
 		eventQueue.start();
+	    System.err.println("initializing tool system");
 	}
 
 	long renderInterval=20;
@@ -596,8 +660,11 @@ public class ToolSystem implements ToolEventReceiver {
 
 	public void setEmptyPickPath(SceneGraphPath emptyPickPath) {
 		if (emptyPickPath != null) {
-			if (emptyPickPath.getFirstElement() != viewer.getSceneRoot())
+			if (emptyPickPath.getFirstElement().getName() != viewer.getSceneRoot().getName())
 				throw new IllegalArgumentException("empty pick path must start at scene root!");
+			if (emptyPickPath.getFirstElement() != viewer.getSceneRoot()) {
+				LoggingSystem.getLogger(this).warning("Strange situation: same names but different scene roots");
+			}
 			this.emptyPickPath = emptyPickPath;
 		} else {
 			this.emptyPickPath = new SceneGraphPath();

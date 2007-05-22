@@ -128,12 +128,12 @@ public class ToolUtility {
 		tt.attach(tc);
 	}
   }
-  public static void attachTimer(javax.swing.Timer timer, ToolSystemViewer tc) {
-	  if (timer instanceof de.jreality.tools.Timer) {
-		de.jreality.tools.Timer tt = (de.jreality.tools.Timer) timer;
-		tt.attach(tc);
-	}
-  }
+//  public static void attachTimer(javax.swing.Timer timer, ToolSystemViewer tc) {
+//	  if (timer instanceof de.jreality.tools.Timer) {
+//		de.jreality.tools.Timer tt = (de.jreality.tools.Timer) timer;
+//		tt.attach(tc);
+//	}
+//  }
   public static void attachTimer(javax.swing.Timer timer, SceneGraphComponent tc) {
 	  if (timer instanceof de.jreality.tools.Timer) {
 		de.jreality.tools.Timer tt = (de.jreality.tools.Timer) timer;
