@@ -599,8 +599,13 @@ public class GeometryMergeFactory {
 	public IndexedFaceSet mergeIndexedFaceSets( PointSet[] geo) {
 		IndexedFaceSet[] ifs=new IndexedFaceSet[geo.length];
 		// convert entrys to IndexedFaceSets
-		for (int i = 0; i < geo.length; i++) 
+		for (int i = 0; i < geo.length; i++) {
 			ifs[i]=IndexedFaceSetUtility.pointSetToIndexedFaceSet(geo[i]);
+			if(generateFaceNormals && ifs[i].getNumFaces()>0 )
+				GeometryUtility.calculateAndSetFaceNormals(ifs[i]);
+			if (generateFaceNormals && ifs[i].getNumFaces()>0 )
+				GeometryUtility.calculateAndSetVertexNormals(ifs[i]);
+		}
 		//
 		indexedFaceSetTo4DColorAndCoords(ifs);
 		IndexedFaceSet result = new IndexedFaceSet();
