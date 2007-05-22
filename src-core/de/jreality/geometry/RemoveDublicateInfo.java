@@ -55,7 +55,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 
-public class JoinGeometry {
+public class RemoveDublicateInfo {
 	public static double eps= 0.000001;
 	
 	private static boolean compare(double[] p1,double[] p2,double eps){
@@ -156,7 +156,7 @@ public class JoinGeometry {
 		// neue Attribute der Punkte zwischenspeichern:
 		int curr=0; // : aktuell einzufuegender Index 
 		int index;
- 		DimTreeStart dTree=new JoinGeometry().new DimTreeStart(totalDim);
+ 		DimTreeStart dTree=new RemoveDublicateInfo().new DimTreeStart(totalDim);
 
 		if (numOfVertices>0){
 			for (int i=0; i<numOfVertices;i++){
