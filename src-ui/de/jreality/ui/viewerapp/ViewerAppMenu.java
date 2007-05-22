@@ -187,6 +187,11 @@ public class ViewerAppMenu {
   private JCheckBoxMenuItem renderSelectionCheckbox;
   private ExportImage exportImageAction;
 	private boolean showMenuBar = true;
+	
+	/** 
+	 * Keeps track of the visibility flag of the menu bar's menu entries,
+	 * because these are set to false when hiding the menu
+	 */
 	private HashMap<String, Boolean> showMenu = new HashMap<String, Boolean>();
 
 
@@ -586,12 +591,24 @@ public class ViewerAppMenu {
 
 	if (showMenuBar==show) return;
 	  
-  	for (int i = 0; i < menuBar.getComponentCount(); i++)
-      menuBar.getMenu(i).setVisible(
-      		show ? this.showMenu.get(menuBar.getMenu(i).getText()) : false 
+  	for (int i = 0; i < menuBar.getComponentCount(); i++) {
+  		menuBar.getMenu(i).setVisible(
+      		show ? getShowMenu(menuBar.getMenu(i).getText()) : false
+      		//if show==true, visibility flags of menu entries are restored from map 
       );
+  	}
 
   	showMenuBar  = show;
+  }
+  
+  
+  private boolean getShowMenu(String menu) {
+  	Boolean b = showMenu.get(menu);
+  	if (b==null) {
+  		b = true;
+  		showMenu.put(menu, b);
+  	}
+  	return b;
   }
   
   
@@ -606,9 +623,9 @@ public class ViewerAppMenu {
    * @param show true iff specified menu should be visible
    */
   public void showMenu(String menuName, boolean show) {
-	if (getMenu(menuName) == null) return;
+  	if (getMenu(menuName) == null) return;
 	
-	getMenu(menuName).setVisible(show);
+  	getMenu(menuName).setVisible(show);
   	showMenu.put(menuName, show);
   }
   

@@ -148,7 +148,14 @@ public class Navigator implements SelectionListener {
 
 	public void selectionChanged(de.jreality.ui.viewerapp.SelectionEvent e) {
 		//convert selection of manager into TreePath
-		Object[] selection = treeModel.convertSelection(e.getSelection());
+		Object[] selection = null;
+		try {
+			selection = treeModel.convertSelection(e.getSelection());			
+		} catch (NullPointerException npe) {
+			//SelectionManager's selection is not valid, 
+			//i.e. has no representation in tree view (scene graph)
+			return;
+		}
 		TreePath path = new TreePath(selection);
 
 		if (e.nodeSelected() && !path.equals(tsm.getSelectionPath()))  //compare paths only if a node is selected  
