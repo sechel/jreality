@@ -30,9 +30,9 @@ public class ShipNavigationTest {
 		snt.setCenter(bb.getCenter());
 		System.out.println(Arrays.toString(bb.getCenter()));
 		
-		va.getViewer().getAvatarPath().getLastComponent().addTool(snt);
+		va.getToolSystem().getAvatarPath().getLastComponent().addTool(snt);
 		va.getViewer().getCameraPath().getLastComponent().addTool(new HeadTransformationTool());
-		MatrixBuilder.euclidean().translate(0, 2, 0).assignTo(va.getViewer().getAvatarPath().getLastComponent());
+		MatrixBuilder.euclidean().translate(0, 2, 0).assignTo(va.getToolSystem().getAvatarPath().getLastComponent());
 		MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(va.getViewer().getCameraPath().getLastComponent());
 		Camera c = (Camera) va.getViewer().getCameraPath().getLastElement();
 		c.setNear(0.1);

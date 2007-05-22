@@ -52,6 +52,8 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import de.jreality.io.JrScene;
+import de.jreality.scene.Viewer;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
@@ -65,10 +67,10 @@ import de.jreality.writer.WriterJRS;
  */
 public class SaveScene extends AbstractJrAction {
 
-  private ToolSystemViewer viewer;
+  private Viewer viewer;
   
 
-  public SaveScene(String name, ToolSystemViewer viewer, Component parentComp) {
+  public SaveScene(String name, Viewer viewer, Component parentComp) {
     super(name, parentComp);
     
     if (viewer == null) 
@@ -94,8 +96,9 @@ public class SaveScene extends AbstractJrAction {
       WriterJRS writer = new WriterJRS();
       JrScene s = new JrScene(viewer.getSceneRoot());
       s.addPath("cameraPath", viewer.getCameraPath());
-      s.addPath("avatarPath", viewer.getAvatarPath());
-      s.addPath("emptyPickPath", viewer.getEmptyPickPath());
+      ToolSystem ts = ToolSystem.toolSystemForViewer(viewer);
+      s.addPath("avatarPath", ts.getAvatarPath());
+      s.addPath("emptyPickPath", ts.getEmptyPickPath());
       writer.writeScene(s, fw);
       fw.close();
     } catch (IOException ioe) {

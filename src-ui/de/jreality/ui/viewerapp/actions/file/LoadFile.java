@@ -55,14 +55,10 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 
-import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.RemoveDublicateInfo;
 import de.jreality.reader.Readers;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.Attribute;
-import de.jreality.toolsystem.ToolSystemViewer;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.CameraUtility;
@@ -80,17 +76,15 @@ public class LoadFile extends AbstractJrAction {
 
 
   private SceneGraphComponent parentNode;
-  private ToolSystemViewer viewer;
+  private Viewer viewer;
   
   private JComponent options; 
+  private JCheckBox mergeLineSets;
   private JCheckBox mergeFaceSets;
-  private JCheckBox mergeFaceSetsWithNormals;
-  private JCheckBox removeDublicateVertices;
-  private JCheckBox removeDublicateVerticesWithNormals;
   private JCheckBox callEncompass;
   
 
-  public LoadFile(String name, SceneGraphComponent parentNode, ToolSystemViewer viewer, Component parentComp) {
+  public LoadFile(String name, SceneGraphComponent parentNode, Viewer viewer, Component parentComp) {
     super(name, parentComp);
     this.parentNode = parentNode;
     this.viewer = viewer;
@@ -99,7 +93,7 @@ public class LoadFile extends AbstractJrAction {
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
-  public LoadFile(String name, SceneGraphComponent parentNode, ToolSystemViewer viewer) {
+  public LoadFile(String name, SceneGraphComponent parentNode, Viewer viewer) {
 	  this(name, parentNode, viewer, null);
   }
   
@@ -111,22 +105,13 @@ public class LoadFile extends AbstractJrAction {
 	  this(name, parentNode, null, null);
   }
   
-//  public LoadFile(String name, ViewerApp v) {
-//	  this(name, 
-//			  v.getSelectionManager().getDefaultSelection().getLastComponent(), 
-//			  v.getViewer(), 
-//			  v.getFrame());
-//  }
-  
   
   @Override
   public void actionPerformed(ActionEvent e) {
 
     if (options == null) options = createAccessory();
+    mergeLineSets.setSelected(false);
     mergeFaceSets.setSelected(false);
-    removeDublicateVertices.setSelected(false);
-    mergeFaceSetsWithNormals.setSelected(false);
-    removeDublicateVerticesWithNormals.setSelected(false);
     
     File[] files = FileLoaderDialog.loadFiles(parentComp, options);
     if (files == null) return;  //dialog cancelled
@@ -134,30 +119,22 @@ public class LoadFile extends AbstractJrAction {
     for (int i = 0; i < files.length; i++) {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
-        GeometryMergeFactory mFac= new GeometryMergeFactory();
-        SceneGraphComponent comp= new SceneGraphComponent();
-        if (mergeFaceSets.isSelected()){
-        	if(!mergeFaceSetsWithNormals.isSelected())
-        		mFac.setGenerateVertexNormals(false);
-        	IndexedFaceSet geo=mFac.mergeIndexedFaceSets(sgc);
-        	if(removeDublicateVertices.isSelected()){
-        		if(removeDublicateVerticesWithNormals.isSelected())
-        			geo=RemoveDublicateInfo.removeDublicateVertices(geo,Attribute.NORMALS);
-        		else geo=RemoveDublicateInfo.removeDublicateVertices(geo);
-        	}
-        	comp.setGeometry(geo);	
-        	sgc=comp;
-        } 
+        if (mergeFaceSets.isSelected()) 
+          sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
+        if (mergeLineSets.isSelected()) 
+          sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
+        sgc.setName(files[i].getName());
         System.out.println("READ finished.");
         parentNode.addChild(sgc);
+        
         PickUtility.assignFaceAABBTrees(sgc);
         
-        if (callEncompass.isSelected() && viewer != null) {
-        	CameraUtility.encompass(viewer.getAvatarPath(),
-        			viewer.getEmptyPickPath(),
-        			viewer.getCameraPath(),
-        			1.75, viewer.getSignature());
-        }
+//        if (callEncompass.isSelected() && viewer != null) {
+//        	CameraUtility.encompass(viewer.getAvatarPath(),
+//        			viewer.getEmptyPickPath(),
+//        			viewer.getCameraPath(),
+//        			1.75, viewer.getSignature());
+//        }
       } 
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(parentComp, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -171,18 +148,12 @@ public class LoadFile extends AbstractJrAction {
     TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options");
     box.setBorder(title);
 
-    mergeFaceSets = new JCheckBox("merge Geometrys");
-    mergeFaceSetsWithNormals = new JCheckBox("garantee VertexNormals (if merge is used)");
-    removeDublicateVertices = new JCheckBox("remove dublicate Vertices (if merge is used)");
-    removeDublicateVerticesWithNormals = new JCheckBox("respect VertexNormals (if remove is used)");
-    
+    mergeLineSets = new JCheckBox("merge IndexedLineSets");
+    mergeFaceSets = new JCheckBox("merge IndexedFaceSets");
     callEncompass = new JCheckBox("encompass scene");
     callEncompass.setSelected(true);
-    //box.add(mergeLineSets);
+    box.add(mergeLineSets);
     box.add(mergeFaceSets);
-    box.add(mergeFaceSetsWithNormals);
-    box.add(removeDublicateVertices);
-    box.add(removeDublicateVerticesWithNormals);
     box.add(callEncompass);
     
     return box;
