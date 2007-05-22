@@ -55,6 +55,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 
+import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
@@ -79,7 +80,6 @@ public class LoadFile extends AbstractJrAction {
   private ToolSystemViewer viewer;
   
   private JComponent options; 
-  private JCheckBox mergeLineSets;
   private JCheckBox mergeFaceSets;
   private JCheckBox callEncompass;
   
@@ -117,7 +117,6 @@ public class LoadFile extends AbstractJrAction {
   public void actionPerformed(ActionEvent e) {
 
     if (options == null) options = createAccessory();
-    mergeLineSets.setSelected(false);
     mergeFaceSets.setSelected(false);
     
     File[] files = FileLoaderDialog.loadFiles(parentComp, options);
@@ -126,11 +125,12 @@ public class LoadFile extends AbstractJrAction {
     for (int i = 0; i < files.length; i++) {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
-        if (mergeFaceSets.isSelected()) 
-          sgc = IndexedFaceSetUtility.mergeIndexedFaceSets(sgc);
-        if (mergeLineSets.isSelected()) 
-          sgc = IndexedFaceSetUtility.mergeIndexedLineSets(sgc);
-        sgc.setName(files[i].getName());
+        GeometryMergeFactory mFac= new GeometryMergeFactory();
+        SceneGraphComponent comp= new SceneGraphComponent();
+        if (mergeFaceSets.isSelected()){
+        	comp.setGeometry(mFac.mergeIndexedFaceSets(sgc));
+        	sgc=comp;
+        } 
         System.out.println("READ finished.");
         parentNode.addChild(sgc);
         
@@ -155,11 +155,10 @@ public class LoadFile extends AbstractJrAction {
     TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options");
     box.setBorder(title);
 
-    mergeLineSets = new JCheckBox("merge IndexedLineSets");
-    mergeFaceSets = new JCheckBox("merge IndexedFaceSets");
+    mergeFaceSets = new JCheckBox("merge Point-,Line- & Face-Sets");
     callEncompass = new JCheckBox("encompass scene");
     callEncompass.setSelected(true);
-    box.add(mergeLineSets);
+    //box.add(mergeLineSets);
     box.add(mergeFaceSets);
     box.add(callEncompass);
     
