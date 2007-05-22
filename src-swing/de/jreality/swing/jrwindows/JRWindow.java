@@ -233,7 +233,7 @@ public class JRWindow {
 		maxButton=new JButton("O");
 		maxButton.setEnabled(false);
 		minButton=new JButton("_");
-		maxButton.setEnabled(true);
+		minButton.setEnabled(true);
 		panel.add(minButton);
 		panel.add(maxButton);
 		panel.add(killButton);
@@ -289,11 +289,6 @@ public class JRWindow {
 		borderSgc.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,cornerRadius);
 		borderSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,borderRadius);
 		borderSgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, true);
-		
-		/*TODO:
-		 * when bug in the tubes-shader-update is fixed, erease this:
-		 */
-		borderSgc.getAppearance().setAttribute(CommonAttributes.ANY_DISPLAY_LISTS,false);
 
 		if(enableVertexPopUpTool)
 			enableVertexPopUpTool(true);
