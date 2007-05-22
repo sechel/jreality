@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import de.jreality.math.Rn;
+import de.jreality.util.CameraUtility;
 
 /**
  * A SceneGraphPath represents a directed path between two nodes in the scene graph. 
@@ -304,6 +305,9 @@ public class SceneGraphPath implements Cloneable {
 				Transformation tt = currComp.getTransformation();
 				if (tt == null) continue;
 				Rn.times(myMatrix, myMatrix, tt.getMatrix());         
+//				System.err.println("node named "+currComp.getName());
+//				System.err.println("has tform "+Rn.matrixToString(
+//						currComp.getTransformation().getMatrix()));
 			}
 		}
 		return myMatrix;
