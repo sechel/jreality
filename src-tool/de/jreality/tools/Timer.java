@@ -77,10 +77,10 @@ public class Timer extends javax.swing.Timer {
 		super(delay, listener);
 	}
 	
-	public void attach(ToolSystemViewer tsv) {
-		attach(tsv.getToolSystem());
-	}
-
+//	public void attach(ToolSystemViewer tsv) {
+//		attach(tsv.getToolSystem());
+//	}
+//
 	void attach(ToolSystem ts) {
 		attach(AnimatorTool.getInstanceImpl(ts));
 	}
