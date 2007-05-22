@@ -81,7 +81,7 @@ public class BeanShell implements SelectionListener {
 		jterm.setMaximumSize(new Dimension(10, 10));
 
 		infoStyle = new SimpleAttributeSet();
-		StyleConstants.setForeground(infoStyle, new Color(165, 204, 0));
+		StyleConstants.setForeground(infoStyle, new Color(65, 166, 48));  //from SGC icon
 		StyleConstants.setFontFamily(infoStyle, "Monospaced");
 		StyleConstants.setBold(infoStyle, true);
 		StyleConstants.setFontSize(infoStyle, 12);
