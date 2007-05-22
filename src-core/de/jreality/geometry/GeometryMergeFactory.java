@@ -601,9 +601,9 @@ public class GeometryMergeFactory {
 		// convert entrys to IndexedFaceSets
 		for (int i = 0; i < geo.length; i++) {
 			ifs[i]=IndexedFaceSetUtility.pointSetToIndexedFaceSet(geo[i]);
-			if(generateFaceNormals && ifs[i].getNumFaces()>0 )
+			if(generateFaceNormals && ifs[i].getNumFaces()>0 && ifs[i].getVertexAttributes(Attribute.NORMALS)==null)
 				GeometryUtility.calculateAndSetFaceNormals(ifs[i]);
-			if (generateFaceNormals && ifs[i].getNumFaces()>0 )
+			if (generateFaceNormals && ifs[i].getNumFaces()>0 && ifs[i].getFaceAttributes(Attribute.NORMALS)==null)
 				GeometryUtility.calculateAndSetVertexNormals(ifs[i]);
 		}
 		//
