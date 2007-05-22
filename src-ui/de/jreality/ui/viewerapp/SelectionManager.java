@@ -90,10 +90,10 @@ public class SelectionManager implements SelectionManagerInterface {
 		List<Viewer> viewers = new LinkedList<Viewer>();
 		Viewer v = viewer;
 		viewers.add(v);
-		if (v instanceof ToolSystemViewer) {
-			v = ((ToolSystemViewer)v).getDelegatedViewer();
-			viewers.add(v);
-		}
+//		if (v instanceof ToolSystemViewer) {
+//			v = ((ToolSystemViewer)v).getDelegatedViewer();
+//			viewers.add(v);
+//		}
 		if (v instanceof ViewerSwitch) {
 			Viewer[] vs = ((ViewerSwitch)v).getViewers();
 			sm = globalTable.get((ViewerSwitch)v);  //should be null

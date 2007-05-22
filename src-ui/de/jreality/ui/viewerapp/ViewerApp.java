@@ -81,6 +81,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.actions.view.SwitchBackgroundColor;
@@ -130,7 +131,8 @@ public class ViewerApp {
 
 	private Viewer[] viewers;  //containing possible viewers (jogl, soft, portal)
 	private ViewerSwitch viewerSwitch;
-	private ToolSystemViewer viewer;  //the viewer used (viewer.getDelegateViewer() = viewerSwitch)
+//	private ToolSystemViewer viewer;  //the viewer used (viewer.getDelegateViewer() = viewerSwitch)
+	private ToolSystem toolSystem;		// replace ToolSystemViewer with direct access to the ToolSystem
 	private RenderTrigger renderTrigger;
 	private boolean autoRender = true;
 	private boolean synchRender = false;
@@ -194,19 +196,15 @@ public class ViewerApp {
 		this(scene.getSceneRoot(), scene.getPath("cameraPath"), scene.getPath("emptyPickPath"), scene.getPath("avatarPath"));
 	}
 
-
-	private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
-
-		init(contentNode, root, cameraPath, emptyPick, avatar);
-	}
-
-
 	public  ViewerApp(Viewer[] vs)	{
 		viewers = vs;
 		init(null, vs[0].getSceneRoot(), vs[0].getCameraPath(), null, null);
 	}
-	
-	
+
+	private ViewerApp(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
+		init(contentNode, root, cameraPath, emptyPick, avatar);
+	}
+
 	private void init(SceneGraphNode contentNode, SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 		if (contentNode != null)  //create default scene if null
 			if (!(contentNode instanceof Geometry) && !(contentNode instanceof SceneGraphComponent))
@@ -240,24 +238,19 @@ public class ViewerApp {
 		}
 
 		//load the scene depending on environment (desktop | portal)
-		setupViewer(jrScene);
-
+		setupViewer(jrScene);	
 		selectionManager = SelectionManager.selectionManagerForViewer(getViewer());
-//		System.err.println("VApp: SelectionManager is "+selectionManager);
-		//set default selection
-		SceneGraphPath p = getViewer().getEmptyPickPath();
-//		if (p==null) {
-//			p = new SceneGraphPath();
-//			p.push(getViewer().getSceneRoot());
-//		}
-		selectionManager.setDefaultSelection(new Selection(p));
-		selectionManager.setSelection(selectionManager.getDefaultSelection());
 		
+		// have to do this here or ViewerAppMenu() hits null pointer exceptions
+		System.err.println("VA: Selection man is "+selectionManager);
+		SceneGraphPath sgp = new SceneGraphPath();
+		sgp.push(getViewer().getSceneRoot());
+		selectionManager.setDefaultSelection(new Selection(sgp));
+		selectionManager.setSelection(new Selection(sgp));
 		frame = new JFrame();
 		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
 	}
 
-	
 	public static void main(String[] args) throws IOException {
 		ViewerApp va;
 		boolean navigator = true;
@@ -313,8 +306,8 @@ public class ViewerApp {
 		va.update();
 
 		if (callEncompass) {
-			CameraUtility.encompass(va.getViewer().getAvatarPath(),
-					va.getViewer().getEmptyPickPath(),
+			CameraUtility.encompass(va.getToolSystem().getAvatarPath(),
+					va.getToolSystem().getEmptyPickPath(),
 					va.getViewer().getCameraPath(),
 					1.75, va.getViewer().getSignature());
 		}
@@ -457,48 +450,51 @@ public class ViewerApp {
 
 
 	/**
-	 * Set up the viewer.
+	 * Set up the viewer. This should only be called once in the life of a ViewerApp, so some of the code
+	 * probably can be omitted.
 	 * @param sc the scene to load
 	 */  
 	private void setupViewer(JrScene sc) {
-		if (viewer != null) {
+		if (viewerSwitch != null) {
 			if (autoRender) {
-				renderTrigger.removeViewer(viewer);
-				if (viewer.getSceneRoot() != null)
-					renderTrigger.removeSceneGraphComponent(viewer.getSceneRoot());
+				renderTrigger.removeViewer(viewerSwitch);
+				if (viewerSwitch.getSceneRoot() != null)
+					renderTrigger.removeSceneGraphComponent(viewerSwitch.getSceneRoot());
 			}
-			viewer.dispose();
+			viewerSwitch.dispose();
 		}
-
-		viewer = AccessController.doPrivileged(new PrivilegedAction<ToolSystemViewer>() {
-			public ToolSystemViewer run() {
+		if (toolSystem != null)	toolSystem.dispose();
+		toolSystem = AccessController.doPrivileged(new PrivilegedAction<ToolSystem>() {
+			public ToolSystem run() {
 				try {
-					return createToolSystemViewer();
+					return createToolSystem();
 				} catch (Exception exc) { exc.printStackTrace(); }
 				return null;
 			}
 		});
-
+		toolSystem.setPickSystem(new AABBPickSystem());
 		//set sceneRoot and paths of viewer
 		sceneRoot = sc.getSceneRoot();
-		viewer.setSceneRoot(sceneRoot);
+		System.err.println("scene root is "+sceneRoot.getName());
+		viewerSwitch.setSceneRoot(sceneRoot);
 
 		if (autoRender) {
-			renderTrigger.addViewer(viewer);
+			renderTrigger.addViewer(viewerSwitch);
 			renderTrigger.addSceneGraphComponent(sceneRoot);
 		}
 
 		SceneGraphPath path = sc.getPath("cameraPath");
-		if (path != null) viewer.setCameraPath(path);
+		if (path != null) viewerSwitch.setCameraPath(path);
 		path = sc.getPath("avatarPath");
-		if (path != null) viewer.setAvatarPath(path);
+		if (path != null) toolSystem.setAvatarPath(path);
 		path = sc.getPath("emptyPickPath");
 		if (path != null) {
 			//init scene 
 			scene = path.getLastComponent();
-			viewer.setEmptyPickPath(path);
+			toolSystem.setEmptyPickPath(path);
 		}
-		viewer.initializeTools();
+		// it's important that the viewer is a viewer switch since it has the "common" viewing component
+		toolSystem.initializeSceneTools();
 
 		//add node to this scene depending on its type
 		if (displayedNode != null) {  //show scene even if displayedNode=null
@@ -517,7 +513,7 @@ public class ViewerApp {
 
 
 	@SuppressWarnings("unchecked")
-	private ToolSystemViewer createToolSystemViewer() throws IOException {
+	private ToolSystem createToolSystem() throws IOException {
 		String config = Secure.getProperty( "de.jreality.scene.tool.Config", "default" );
 		boolean remotePortal = config.equals("portal-remote");
 		if (viewers == null) {
@@ -553,32 +549,36 @@ public class ViewerApp {
 				viewers = viewerList.toArray(new Viewer[viewerList.size()]);
 			}
 		} else {
+			// see if a tool system already exists for one of the viewers in the array of viewers
 			for (Viewer v : viewers)	
-				if ((viewer = ToolSystemViewer.toolSystemViewerForViewer(v)) != null) break;
+				if ((toolSystem = ToolSystem.getToolSystemForViewer(v)) != null) break;
 		}
-//		if (viewer != null) System.err.println("Tool system viewer is "+viewer);
+		if (toolSystem != null) System.err.println("Existing tool system is "+toolSystem);
 
 		if (viewerSwitch == null) 
 			viewerSwitch = new ViewerSwitch(viewers);
+		LoggingSystem.getLogger(this).fine("current viewer of viewer switch is "+viewerSwitch.getCurrentViewer());
 
 		//create ToolSystemViewer with configuration corresp. to environment
 		ToolSystemConfiguration cfg = loadToolSystemConfiguration();
 
 		if (!remotePortal) {
-			if (viewer == null) viewer = new ToolSystemViewer(viewerSwitch, cfg, synchRender ? renderTrigger : null);
+			if (toolSystem == null) {
+				toolSystem = new ToolSystem(viewerSwitch, cfg, synchRender ? renderTrigger : null);
+			}
 		}
 		else  {
 			try {
-				Class portalToolSystemViewer = Class.forName("de.jreality.toolsystem.PortalToolSystemViewer");
-				Constructor<? extends ToolSystemViewer> cc = portalToolSystemViewer.getConstructor(new Class[]{ViewerSwitch.class, ToolSystemConfiguration.class});
-				viewer = cc.newInstance(new Object[]{viewerSwitch, cfg});
+				Class portalToolSystem = Class.forName("de.jreality.toolsystem.PortalToolSystemImpl");
+				Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{getCurrentViewer().getClass(), ToolSystemConfiguration.class});
+				toolSystem = cc.newInstance(new Object[]{getCurrentViewer(), cfg});
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
 		}
-		viewer.setPickSystem(new AABBPickSystem());
-
-		return viewer;
+		// here we make sure that all the viewers are attached to the same tool system
+		viewerSwitch.setToolSystem(toolSystem);
+		return toolSystem;
 	}
 
 
@@ -634,7 +634,7 @@ public class ViewerApp {
 		BshEvaluator bshEval = beanShell.getBshEval();
 		try { 
 			bshEval.getInterpreter().set("_viewer", viewerSwitch);
-			bshEval.getInterpreter().set("_toolSystemViewer", viewer);      
+			bshEval.getInterpreter().set("_toolSystem", toolSystem);      
 		} 
 		catch (EvalError error) { error.printStackTrace(); }
 
@@ -846,29 +846,44 @@ public class ViewerApp {
 
 		if (navigatorTabs == null) {
 			navigatorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-			navigatorTabs.add("Navigator", getNavigator());
-			for (Component c : accessory) {  //add accessories 
-				JScrollPane scroll = new JScrollPane(c);
-				scroll.setBorder(BorderFactory.createEmptyBorder());
-				navigatorTabs.addTab(accessoryTitles.get(c), scroll);
-			}
 		}
+		navigatorTabs.removeAll();
+		navigatorTabs.add("Scene graph", getNavigator());
+		for (Component c : accessory) {  //add accessories 
+			JScrollPane scroll = new JScrollPane(c);
+			scroll.setBorder(BorderFactory.createEmptyBorder());
+			navigatorTabs.addTab(accessoryTitles.get(c), scroll);
+		}
+
 
 		return navigatorTabs;
 	}
 
 
 	/**
-	 * Get current ToolSystemViewer.
-	 * @return the viewer
+	 *
+	 * @return {@link #getViewerSwitch()}.
+	 * @deprecated Use {@link #getViewerSwitch()} {@link #getCurrentViewer()}.
 	 */
-	public ToolSystemViewer getViewer() {
-		if (viewer == null)
-			throw new UnsupportedOperationException("No viewer instantiated, call update()!");
-
-		return viewer;
+	public Viewer getViewer() {
+		return getViewerSwitch();
 	}
 
+	/**
+	 * It's useful to get a hold of the active backend.
+	 * @return
+	 */
+	public Viewer getCurrentViewer()	{
+		  return viewerSwitch.getCurrentViewer();
+	}
+	
+	public ViewerSwitch getViewerSwitch()	{
+		return viewerSwitch;
+	}
+	
+	public ToolSystem getToolSystem()	{
+		return toolSystem;
+	}
 
 	/**
 	 * Get the viewing component only.
@@ -876,9 +891,8 @@ public class ViewerApp {
 	 * @see ViewerApp#getContent()
 	 */
 	public Component getViewingComponent() {
-		return (Component) getViewer().getViewingComponent();  //returns viewerSwitch.getViewingComponent()
+		return (Component) getViewerSwitch().getViewingComponent();  
 	}
-
 
 	/**
 	 * Get the scene displayed.
@@ -960,16 +974,12 @@ public class ViewerApp {
 	public void addAccessory(Component c, String title) {
 		accessory.add(c);
 		accessoryTitles.put(c, title);
-		navigatorTabs = null;  //create new TabbedPane in getNavigatorWithAccessories()
-	}
-	
-	
-	public boolean removeAccessory(Component c) {
-		navigatorTabs = null;  //create new TabbedPane in getNavigatorWithAccessories()
-		return accessory.remove(c);
 	}
 
-
+	public void removeAccessory(Component c)	{
+		accessory.remove(c);
+	}
+	
 	public boolean isExternalNavigator() {
 		return externalNavigator;
 	}
@@ -1025,9 +1035,10 @@ public class ViewerApp {
 	public void dispose() {
 		if (autoRender) {
 			renderTrigger.removeSceneGraphComponent(sceneRoot);
-			renderTrigger.removeViewer(viewer);
+			renderTrigger.removeViewer(viewerSwitch);
 		}
-		if (viewer != null) viewer.dispose();
+//		if (viewer != null) viewer.dispose();
+		if (toolSystem != null) toolSystem.dispose();
 
 		frame.dispose();
 		if (externalNavigatorFrame!=null) externalNavigatorFrame.dispose();

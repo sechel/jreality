@@ -61,6 +61,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
 import de.jreality.scene.Geometry;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
@@ -177,7 +178,7 @@ public class ViewerAppMenu {
   private Component parentComp = null;
   private ViewerApp viewerApp = null;
   private SelectionManagerInterface sm = null;
-  private ToolSystemViewer viewer = null;
+  private Viewer viewer = null;
   private JMenuBar menuBar;
   
   private JCheckBoxMenuItem navigatorCheckBox;
@@ -187,11 +188,6 @@ public class ViewerAppMenu {
   private JCheckBoxMenuItem renderSelectionCheckbox;
   private ExportImage exportImageAction;
 	private boolean showMenuBar = true;
-	
-	/** 
-	 * Keeps track of the visibility flag of the menu bar's menu entries,
-	 * because these are set to false when hiding the menu
-	 */
 	private HashMap<String, Boolean> showMenu = new HashMap<String, Boolean>();
 
 
@@ -233,10 +229,10 @@ public class ViewerAppMenu {
     export.add(new JMenuItem(new ExportRIB("RIB", viewer, parentComp)));
     export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
     export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
-    if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
-    	exportImageAction = new ExportImage("Image", (ViewerSwitch) viewer.getDelegatedViewer(), parentComp);
+ //   if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
+    	exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
     	export.add(new JMenuItem(exportImageAction));
-    }
+//    }
     
     if (!Beans.isDesignTime()) {
     	fileMenu.addSeparator();
@@ -376,8 +372,8 @@ public class ViewerAppMenu {
     viewMenu.add(new JMenuItem(Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp)));
     viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp)));
     
-    if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
-        final ViewerSwitch viewerSwitch = (ViewerSwitch) viewer.getDelegatedViewer();
+//    if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
+        final ViewerSwitch viewerSwitch = viewerApp.getViewerSwitch();
         String[] viewerNames = viewerSwitch.getViewerNames();
         ButtonGroup bgr = new ButtonGroup();
         viewMenu.addSeparator();
@@ -397,7 +393,7 @@ public class ViewerAppMenu {
           item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
           bgr.add(item);
           viewMenu.add(item);
-        }
+//        }
            	
     }
     
@@ -591,24 +587,12 @@ public class ViewerAppMenu {
 
 	if (showMenuBar==show) return;
 	  
-  	for (int i = 0; i < menuBar.getComponentCount(); i++) {
-  		menuBar.getMenu(i).setVisible(
-      		show ? getShowMenu(menuBar.getMenu(i).getText()) : false
-      		//if show==true, visibility flags of menu entries are restored from map 
+  	for (int i = 0; i < menuBar.getComponentCount(); i++)
+      menuBar.getMenu(i).setVisible(
+      		show ? this.showMenu.get(menuBar.getMenu(i).getText()) : false 
       );
-  	}
 
   	showMenuBar  = show;
-  }
-  
-  
-  private boolean getShowMenu(String menu) {
-  	Boolean b = showMenu.get(menu);
-  	if (b==null) {
-  		b = true;
-  		showMenu.put(menu, b);
-  	}
-  	return b;
   }
   
   
@@ -623,9 +607,9 @@ public class ViewerAppMenu {
    * @param show true iff specified menu should be visible
    */
   public void showMenu(String menuName, boolean show) {
-  	if (getMenu(menuName) == null) return;
+	if (getMenu(menuName) == null) return;
 	
-  	getMenu(menuName).setVisible(show);
+	getMenu(menuName).setVisible(show);
   	showMenu.put(menuName, show);
   }
   

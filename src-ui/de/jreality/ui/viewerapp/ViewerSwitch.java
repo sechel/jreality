@@ -57,6 +57,8 @@ import javax.swing.JPanel;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.toolsystem.ToolSystem;
+import de.jreality.util.LoggingSystem;
 
 /**
  * hides several viewer implementations and provides the same
@@ -127,12 +129,15 @@ public class ViewerSwitch implements Viewer {
       newViewer.setAuxiliaryRoot(currentViewer.getAuxiliaryRoot());
       newViewer.setSignature(currentViewer.getSignature());
     } catch (Exception e) {}
-    
-    currentViewer.setCameraPath(null);
-    currentViewer.setSceneRoot(null);
-    try {
-      currentViewer.setAuxiliaryRoot(null);
-    } catch (Exception e) {}
+   
+// I would like to know why these are set to null.  Viewer instances which 
+// automatically instantiate a new camera path when null is provided cause problems here.
+//  e.g. charlesgunn.jreality.jogl.InteractiveViewer does this.
+//   currentViewer.setCameraPath(null);
+//    currentViewer.setSceneRoot(null);
+//    try {
+//      currentViewer.setAuxiliaryRoot(null);
+//    } catch (Exception e) {}
 
     if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component) unregisterComponent((Component) currentViewer.getViewingComponent());
     if (newViewer.hasViewingComponent()  && newViewer.getViewingComponent() instanceof Component) {
@@ -268,5 +273,20 @@ public class ViewerSwitch implements Viewer {
       }
     }
   }
+
+	/**
+	 * Set all the viewers and the ViewerSwitch to have the same ToolSystem
+	 * Would it be better to look up the tool system via the scene root, rather than per viewer?
+	 * @param toolSystem
+	 */
+  public void setToolSystem(ToolSystem toolSystem) {
+		if (ToolSystem.getToolSystemForViewer(this) != toolSystem)
+			ToolSystem.setToolSystemForViewer(this,toolSystem);
+		for (Viewer v : viewers)	{
+			if (ToolSystem.getToolSystemForViewer(v) != toolSystem)
+				ToolSystem.setToolSystemForViewer(v,toolSystem);
+			LoggingSystem.getLogger(this).fine("Tool system for "+v+" is "+ToolSystem.getToolSystemForViewer(v));
+		}
+	}
 
 }
