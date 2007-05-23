@@ -507,17 +507,31 @@ public class Primitives {
 		 * @param order
 		 * @return
 		 */
-		public static IndexedFaceSet regularPolygon(int order) {
-			double[][] verts = new double[order][3];
-			for (int  i =0; i<order; ++i)	{
-				double angle = 2 * (i+.5) * Math.PI/order;
-				verts[i][0] = Math.cos(angle);
-				verts[i][1] = Math.sin(angle);
-				verts[i][2] = 0.0;
-			}
-			return IndexedFaceSetUtility.constructPolygon(verts);
-		}
 		
+		 public static IndexedFaceSet regularPolygon(int order) {
+				return regularPolygon(order, 0.5);
+			}
+		 /** Construct a regular polygon lying in the (x,y) plane, lying on the unit-circle there,
+		  * and having <i>order</i> edges.
+		  * Offset rotates vertices 
+		  * Offset 0.5 : an edge touches the X-Axe
+		  * Offset 0 : a vertex touches the X-Axe
+		  * Offset 1 equals 0
+		  * @param order  number of Vertices
+		  * @param offset 
+		  * @return
+		  */
+		 public static IndexedFaceSet regularPolygon(int order, double offset) {
+				double[][] verts = new double[order][3];
+				for (int  i =0; i<order; ++i)	{
+					double angle = 2 * (i+offset) * Math.PI/order;
+					verts[i][0] = Math.cos(angle);
+					verts[i][1] = Math.sin(angle);
+					verts[i][2] = 0.0;
+				}
+				return IndexedFaceSetUtility.constructPolygon(verts);
+			}
+			
 		/**
 		 * @return {@link #arrow(double, double, double, double, double, boolean)} with final parameter false.
 		 */
