@@ -60,7 +60,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.ToolSystemViewer;
 
 public class ToolsAndAppearances {
   public static void main(String[] args) {

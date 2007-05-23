@@ -42,7 +42,6 @@ package de.jreality.swing.test;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.math.MatrixBuilder;
@@ -53,14 +52,11 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.ToolSystemViewer;
-import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
