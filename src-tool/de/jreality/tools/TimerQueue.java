@@ -136,7 +136,7 @@ package de.jreality.tools;
             timeToWait = timer.expireTime - currentTime;
 
             if (timeToWait <= 0) {
-                timer.perform();
+                timer.perform(currentTime);
                 removeTimer(timer);
                 if (timer.isRepeats()) addTimer(timer, currentTime + timer.getDelay());
             }

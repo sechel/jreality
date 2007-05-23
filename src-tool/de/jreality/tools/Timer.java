@@ -47,7 +47,6 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.ToolSystemViewer;
 
 /**
  * This is a drop-in replacement for javax.swing.Timer, when using in jreality.
@@ -146,9 +145,9 @@ public class Timer extends javax.swing.Timer {
         timerQueue().removeTimer(this);
     }
 
-    synchronized void perform() {
+    synchronized void perform(long currentTime) {
     	fireActionPerformed(new ActionEvent(this, 0, null,
-                System.currentTimeMillis(),
+                currentTime,
                 0));
     }
 
