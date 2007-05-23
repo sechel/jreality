@@ -1,4 +1,4 @@
-package mathvisss07;
+package de.jreality.tutorial;
 
 import de.jreality.shader.ImageData;
 
