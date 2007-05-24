@@ -47,12 +47,8 @@ import java.util.Vector;
 
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
-import de.jreality.geometry.QuadMeshFactory;
-import de.jreality.math.FactoredMatrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
@@ -61,7 +57,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class VRMLHelper {
 	public static boolean verbose = true;
@@ -325,66 +320,7 @@ public class VRMLHelper {
 		result.setFaceAttributes(Attribute.COLORS,null);
 		return result;
 		}
-	public static IndexedFaceSet cone2(boolean sidesdraw, boolean bottomdraw,int n) {
-				// Points
-		double[] tip= new double[]{0,1,0}; 
-		double[][] vertsBottom = new double[n][];
-		double angle = 0;
-		for (int i=0;i<n;i++){
-			angle = 2 * (i+.5) * Math.PI/n;
-			vertsBottom[i] = new double[]{
-					Math.cos(angle),0,Math.sin(angle) };
-		}
-		IndexedFaceSet sides=null;
-		IndexedFaceSet bottom=null;
-		IndexedFaceSetFactory ifsf=null;
-		if (bottomdraw){
-			int[][] indicesB = new int[1][];
-			indicesB[0] = new int[n];
-			for (int i = 0; i<n; ++i)	indicesB[0][i] = i;
-			ifsf = new IndexedFaceSetFactory();
-			ifsf.setVertexCount(n);
-			ifsf.setFaceCount(1);
-			ifsf.setVertexCoordinates(vertsBottom);
-			ifsf.setFaceIndices(indicesB);
-			ifsf.setGenerateEdgesFromFaces(true);
-			ifsf.setGenerateFaceNormals(true);
-			ifsf.setGenerateVertexNormals(true);
-			ifsf.update();
-			bottom= ifsf.getIndexedFaceSet();
-		}
-		if (sidesdraw){
-			double[][] vertsSides = new double[n+1][];
-			System.arraycopy(vertsBottom,0,vertsSides,0,n);
-			vertsSides[n]=tip;
-			int[][] indicesS = new int[n][];
-			for (int i = 0; i<n; ++i)	{
-				indicesS[i] = new int[3];
-				indicesS[i][0] = i;
-				indicesS[i][1] = (i+1)%n;
-				indicesS[i][2] = n;
-			}
-			ifsf = new IndexedFaceSetFactory();
-			ifsf.setVertexCount(n+1);
-			ifsf.setFaceCount(n);
-			ifsf.setVertexCoordinates(vertsSides);
-			ifsf.setFaceIndices(indicesS);
-			ifsf.setGenerateEdgesFromFaces(true);
-			ifsf.setGenerateVertexNormals(true);
-			ifsf.setGenerateFaceNormals(true);
-			ifsf.update();
-			sides= ifsf.getIndexedFaceSet();
-		}
-		if (sidesdraw && bottomdraw){
-			GeometryMergeFactory gmf= new GeometryMergeFactory();
-			return gmf.mergeIndexedFaceSets(new PointSet[]{bottom,sides});
-		}	
-		if (bottomdraw)
-			return bottom;
-		if (sidesdraw)
-			return sides;
-		return null;
-	}
+
 	/**
 	 * VRML kann mehrzeilige Labels.
 	 * jReality noch nicht.
