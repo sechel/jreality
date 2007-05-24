@@ -1184,7 +1184,7 @@ spotLightNode	[State state] returns[SpotLight l=null]
 			.assignTo(state.extraGeoTrans);
 		l.setConeAngle(cutA);
 		l.setDistribution(dropR);
-		l.setFalloffA0(0);
+		l.setFalloffA0(1);
 		l.setFalloffA1(0);
 		l.setFalloffA2(0);
 		if (VRMLHelper.verbose) System.err.println(")");
