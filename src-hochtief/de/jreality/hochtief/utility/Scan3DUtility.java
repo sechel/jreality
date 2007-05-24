@@ -17,10 +17,10 @@ public class Scan3DUtility {
 	}
 	
 	public static double[] convertDepthValueTo3DCoordinate(int i, int j, double depth, int M, int N){
-		double phi = j * 2 * Math.PI / (N - 1);
+		double phi = j * 2 * Math.PI / (N );
 		double theta = -i
 				* (Math.PI - (Math.PI / 2 - 1.1306075316023216))
-				/ (M - 1) + Math.PI / 2;		
+				/ (M ) + Math.PI / 2;		
 		return new double[] {
 				depth * Math.cos(phi) * Math.cos(theta),
 				depth * Math.sin(phi) * Math.cos(theta),
@@ -92,7 +92,7 @@ public class Scan3DUtility {
 				double entry=0;
 				for(int i=0;i<count;i++)
 					entry+=(centeredData[i][d1]*centeredData[i][d2]);
-				entry=entry/(double)(count-1);
+				entry=entry/(double)(count);
 				cov[d1][d2]=entry;				
 			}
 		}
@@ -127,10 +127,17 @@ public class Scan3DUtility {
 	
 
 	public static int[][] getSorted1Nbh(int i, int j, double depthThreshold, double[][] depth, int[][] faceId){
+		ArrayList<int[]> nbhList=getSorted1NbhList(i, j, depthThreshold, depth, faceId);
+		int[][] neighborhood=new int[nbhList.size()][];
+		for(int t=0;t<nbhList.size();t++)
+			neighborhood[t]=nbhList.get(t);
+		return neighborhood;		
+	}
+	
+	public static ArrayList<int[]> getSorted1NbhList(int i, int j, double depthThreshold, double[][] depth, int[][] faceId){
 		int M=depth.length;
 		int N=depth[0].length;
-		
-		int[][] nbh=new int[][] {{i,j+1},{i-1,j+1},{i-1,j},{i-1,j-1},{i,j-1},{i+1,j-1},{i+1,j},{i+1,j+1}};
+		int[][] nbh=new int[][] {{i,j+1},{i-1,j+1},{i-1,j},{i-1,j-1},{i,j-1},{i+1,j-1},{i+1,j},{i+1,j+1}};		
 		ArrayList<int[]> nbhList=new ArrayList<int[]>();
 		int addI,addJ;
 		for(int n=0;n<nbh.length;n++){
@@ -146,10 +153,7 @@ public class Scan3DUtility {
 						nbhList.add(new int[]{addI,addJ});	
 			}
 		}
-		int[][] neighborhood=new int[nbhList.size()][];
-		for(int t=0;t<nbhList.size();t++)
-			neighborhood[t]=nbhList.get(t);
-		return neighborhood;		
+		return nbhList;
 	}
 	
 	public static double averageDistance(int i, int j, int[][] oneNeighborhood, double depthThreshold, double[][] depth, int[][] faceId){

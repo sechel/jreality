@@ -55,9 +55,11 @@ public class Scan3DLoader extends AbstractReader{
 			theta = Math.atan2(z, Math.sqrt(x * x + y * y));
 
 			// should be divided by N and M (not -1) -> undersampling problems 
-			n = (int) Math.round((phi + Math.PI) / 2 / Math.PI  * (N - 1));
+			n = (int) Math.round((phi + Math.PI) / 2 / Math.PI  * (N ));
 			m = (int) Math.round((-theta + Math.PI / 2)
-					/ (Math.PI - (Math.PI / 2 - 1.1306075316023216)) * (M - 1));
+					/ (Math.PI - (Math.PI / 2 - 1.1306075316023216)) * (M ));
+			
+			if(n==N) n=0;  if(m==M) m=0;
 
 			if (depth[m][n] == 0) {
 				vertexCount++;

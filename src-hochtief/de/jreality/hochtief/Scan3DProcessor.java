@@ -17,14 +17,14 @@ import de.jreality.util.Input;
 
 public class Scan3DProcessor extends AbstractReader{
 	
-	private final int N = 1010 / 2;
-	private final int M = 431;	
+	private final int N = 1010 / 2 -1;
+	private final int M = 431 -1;	
 	private final double depthThreshold=0.05;
 	private final int minVertexCount=10000;	
 	
 	//edge detection
-	private final double normalVarianzThreshold=0.1;//0.15;
-	private final double maxNeighborhoodDistance=0.1;
+	private final double normalVarianzThreshold=2.0*Math.sin(0.2*Math.PI/2.0);
+	private final double maxNeighborhoodDistance=0.1;//0.1;
 	
 	public Scan3DProcessor(){}
 	
@@ -62,14 +62,16 @@ public class Scan3DProcessor extends AbstractReader{
 //		}
 		
 //		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset());
-		
+	
 		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId);		
 		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_BEND,Color.RED,edgeId, faceId, faceSize, minVertexCount, depth);
+		innerEdgePointsNode.setName("bendPoints");
 		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_FACEBORDER,Color.GREEN,edgeId, faceId, faceSize, minVertexCount, depth);
-		SceneGraphComponent edgePointsNode=new SceneGraphComponent();
+		borderEdgePointsNode.setName("borderPoints");
+		SceneGraphComponent edgePointsNode=new SceneGraphComponent("edgePoints");
 		edgePointsNode.addChild(innerEdgePointsNode);
 		edgePointsNode.addChild(borderEdgePointsNode);
-		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),edgePointsNode);
+//		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),edgePointsNode);
 		
 		EdgeSplitFaceExtractor esfe=new EdgeSplitFaceExtractor(depth);
 		esfe.splitFaces(edgeId, faceId, faceSize, 100, depthThreshold);

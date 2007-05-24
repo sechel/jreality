@@ -128,9 +128,8 @@ public class Scan3DShowUtility {
 		for(int i=0;i<M;i++){
 			for(int j=0;j<N;j++){
 				if(faceId[i][j]==faceNr){
-					//better take real point pos
-					textureCoordinates[vertexCount][0] = -(double) j / (N) + (offset / (2 * Math.PI) + 0.5);
-					textureCoordinates[vertexCount][1] = (double) i / (M);
+					textureCoordinates[vertexCount][0] = -(double) (j-2) / (N-1) + (offset / (2 * Math.PI) + 0.5);
+					textureCoordinates[vertexCount][1] = (double) (i-4) / (M-1) ;
 					vertexCount++;
 				}
 			}
@@ -273,7 +272,7 @@ public class Scan3DShowUtility {
 			if(faceSize[i]>minVertexCount){
 				int[][] faceInds=triangulate(i, faceId, depth, depthThreshold);
 				if(faceInds.length>0){
-					System.out.println("creating face "+i);
+					//System.out.println("creating face "+i);
 					IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
 					ifsf.setVertexCount(faceSize[i]);
 					ifsf.setVertexCoordinates(getFaceVertices(i, faceSize[i], depth, faceId));
@@ -294,8 +293,8 @@ public class Scan3DShowUtility {
 						TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", img, false);
 					sceneRoot.addChild(sgc);
 
-					System.out.println("vertexCount: "+faceSize[i]);
-					System.out.println("faceCount:   "+faceInds.length+"\n");
+					//System.out.println("vertexCount: "+faceSize[i]);
+					//System.out.println("faceCount:   "+faceInds.length+"\n");
 				}
 			}			
 		}
