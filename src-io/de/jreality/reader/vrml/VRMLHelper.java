@@ -50,14 +50,18 @@ import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
+import de.jreality.geometry.Primitives;
 import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.FactoredMatrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.ViewerApp;
 
 public class VRMLHelper {
 	public static boolean verbose = true;
@@ -276,54 +280,27 @@ public class VRMLHelper {
 	 * @return Zylinder
 	 */
 	public static IndexedFaceSet cylinder(boolean side,boolean top,boolean bottom,int n) {
-		int rn = n+1;
-		double[] verts = new double[2*3*rn];
-		double angle = 0, delta = Math.PI*2/(n);
-		for (int i = 0 ;i<rn; ++i)	{
-			angle = i*delta;
-			verts[3*(i+rn)]   = verts[3*i]   = Math.cos(angle);
-			verts[3*(i+rn)+2] = verts[3*i+2] = Math.sin(angle);
-			verts[3*i+1] = 0.5;
-			verts[3*(i+rn)+1] = -0.5;
+		SceneGraphComponent root=new SceneGraphComponent();
+		SceneGraphComponent up=new SceneGraphComponent();
+		SceneGraphComponent nappe=new SceneGraphComponent();
+		SceneGraphComponent down=new SceneGraphComponent();
+		root.addChild(up);
+		root.addChild(nappe);
+		root.addChild(down);
+		if(side)nappe.setGeometry(Primitives.cylinder(n));
+		if(top)up.setGeometry(Primitives.regularPolygon(n,0));
+		if(bottom)down.setGeometry(Primitives.regularPolygon(n,0));
+		MatrixBuilder.euclidean().scale(1,0.5,1).assignTo(root);
+		MatrixBuilder.euclidean().rotate(Math.PI/2, 1,0,0).assignTo(nappe);
+		MatrixBuilder.euclidean().translate(0,1,0).rotate(Math.PI/2, 1,0,0).assignTo(up);
+		MatrixBuilder.euclidean().translate(0,-1,0).rotate(Math.PI/2, 1,0,0).assignTo(down);
+		GeometryMergeFactory fac= new GeometryMergeFactory();
+		IndexedFaceSet result=fac.mergeGeometrySets(root);
+		result.setVertexAttributes(Attribute.COLORS,null);
+		result.setFaceAttributes(Attribute.COLORS,null);
+		return result;
 		}
-		QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, n+1, 2, true, false);
-		qmf.setULineCount(n+1);
-		qmf.setVLineCount(2);
-		qmf.setClosedInUDirection(true);
-		qmf.setVertexCoordinates(verts);
-		qmf.setGenerateEdgesFromFaces(true);
-		qmf.setGenerateFaceNormals(true);
-		qmf.setGenerateVertexNormals(true);
-		qmf.update();
-		IndexedFaceSet geo1= qmf.getIndexedFaceSet();
-		double[][] verts2 = new double[n][3];
-		double[][] verts3 = new double[n][3];
-		for (int  i =0; i<n; ++i)	{
-			angle = 2 * (i+.5) * Math.PI/n;
-			verts2[i][0] = verts3[i][0] = Math.cos(angle);
-			verts2[i][2] = verts3[i][2] = Math.sin(angle);
-			verts2[i][1] = 0.5;
-			verts3[i][1] = -0.5;
-		}
-		IndexedFaceSet geo2= IndexedFaceSetUtility.constructPolygon(verts2);
-		IndexedFaceSetUtility.assignSmoothVertexNormals(geo2,0,0);
-		IndexedFaceSet geo3= IndexedFaceSetUtility.constructPolygon(verts3);
-		IndexedFaceSetUtility.assignSmoothVertexNormals(geo3,0,0);
-		// GeometrieTeile auswaehlen
-		Vector v=new Vector();
-		if (side)  v.add(geo1);
-		if (top)   v.add(geo2);
-		if (bottom)v.add(geo3);
-		IndexedFaceSet[] geos= new IndexedFaceSet[v.size()];
-		for (int i=0;i<v.size();i++){
-			geos[i]=(IndexedFaceSet)v.get(i);
-			}
-		if(geos.length==0)
-			return null; 
-		
-		GeometryMergeFactory gmf= new GeometryMergeFactory();
-		return gmf.mergeIndexedFaceSets(geos);	
-		}
+	
 	/**
 	 * Cone mit optionalem Mantel bzw Boden
 	 * @param sidesdraw
@@ -331,8 +308,25 @@ public class VRMLHelper {
 	 * @param n		feinheit der Unterteilung
 	 * @return Kegel
 	 */
+	
 	public static IndexedFaceSet cone(boolean sidesdraw, boolean bottomdraw,int n) {
-		// Points
+		SceneGraphComponent root=new SceneGraphComponent();
+		SceneGraphComponent nappe=new SceneGraphComponent();
+		SceneGraphComponent down=new SceneGraphComponent();
+		root.addChild(nappe);
+		root.addChild(down);
+		if(sidesdraw)nappe.setGeometry(Primitives.cone(n));
+		if(bottomdraw)down.setGeometry(Primitives.regularPolygon(n,0));
+		MatrixBuilder.euclidean().rotate(Math.PI/2, -1,0,0).assignTo(nappe);
+		MatrixBuilder.euclidean().rotate(Math.PI/2, 1,0,0).assignTo(down);
+		GeometryMergeFactory fac= new GeometryMergeFactory();
+		IndexedFaceSet result=fac.mergeGeometrySets(root);
+		result.setVertexAttributes(Attribute.COLORS,null);
+		result.setFaceAttributes(Attribute.COLORS,null);
+		return result;
+		}
+	public static IndexedFaceSet cone2(boolean sidesdraw, boolean bottomdraw,int n) {
+				// Points
 		double[] tip= new double[]{0,1,0}; 
 		double[][] vertsBottom = new double[n][];
 		double angle = 0;
