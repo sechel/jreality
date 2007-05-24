@@ -416,30 +416,58 @@ public class Primitives {
 		  * @return
 		  */
 		 public static IndexedFaceSet cylinder(int n,   double r, double zmin, double zmax, double thetamax) {
-			int rn = n+1;
-			double[] verts = new double[2*3*rn];
-			double angle = 0, delta = thetamax/(n);
-			for (int i = 0 ;i<rn; ++i)	{
-				angle = i*delta;
-				verts[3*(i+rn)] = verts[3*i] = r*Math.cos(angle);
-				verts[3*(i+rn)+1] = verts[3*i+1] = r*Math.sin(angle);
-				verts[3*i+2] = zmax;
-				verts[3*(i+rn)+2] = zmin;
-			}
-			QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, n+1, 2, true, false);
-			qmf.setULineCount(n+1);
-			qmf.setVLineCount(2);
-			qmf.setClosedInUDirection(Math.abs(Math.PI*2-thetamax) < 10E-8);
-			qmf.setVertexCoordinates(verts);
-			qmf.setGenerateEdgesFromFaces(true);
-			qmf.setGenerateFaceNormals(true);
-			qmf.setGenerateVertexNormals(true);
-			qmf.update();
-			IndexedFaceSet ifs = qmf.getIndexedFaceSet();
-			ifs.setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND, "Cylinder "+r+" "+zmin+" "+zmax+" "+180.0/Math.PI * thetamax);
-			return ifs;
+				int rn = n+1;
+				double[] verts = new double[2*3*rn];
+				double angle = 0, delta = thetamax/(n);
+				for (int i = 0 ;i<rn; ++i)	{
+					angle = i*delta;
+					verts[3*(i+rn)] = verts[3*i] = r*Math.cos(angle);
+					verts[3*(i+rn)+1] = verts[3*i+1] = r*Math.sin(angle);
+					verts[3*i+2] = zmax;
+					verts[3*(i+rn)+2] = zmin;
+				}
+				QuadMeshFactory qmf = new QuadMeshFactory();//Pn.EUCLIDEAN, n+1, 2, true, false);
+				qmf.setULineCount(n+1);
+				qmf.setVLineCount(2);
+				qmf.setClosedInUDirection(Math.abs(Math.PI*2-thetamax) < 10E-8);
+				qmf.setVertexCoordinates(verts);
+				qmf.setGenerateEdgesFromFaces(true);
+				qmf.setGenerateFaceNormals(true);
+				qmf.setGenerateVertexNormals(true);
+				qmf.update();
+				IndexedFaceSet ifs = qmf.getIndexedFaceSet();
+				ifs.setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND, "Cylinder "+r+" "+zmin+" "+zmax+" "+180.0/Math.PI * thetamax);
+				return ifs;
 		}
-		
+		/** a simple cone with tip at (0,0,1) 
+		 * radius 1 on the XY axis
+		 * @param n
+		 * @return cone with no bottom
+		 */
+		public static IndexedFaceSet cone(int n){
+			double[][] verts = new double[n+1][3];
+			double angle = 0;
+			double delta = Math.PI*2/(n);
+			for (int i = 0 ;i<n; ++i)	{
+				angle = i*delta;
+				verts[i] = new double[]{Math.sin(angle),Math.cos(angle),0};
+			}
+			verts[n]= new double[]{0,0,1};
+			int[][] indices = new int[n][];
+			for (int i = 0; i<n; ++i)	{
+				indices[i] = new int[]{i,(i+1)%n,n};
+			}
+			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+			ifsf.setVertexCount(n+1);
+			ifsf.setFaceCount(n);
+			ifsf.setVertexCoordinates(verts);
+			ifsf.setFaceIndices(indices);
+			ifsf.setGenerateEdgesFromFaces(true);
+			ifsf.setGenerateFaceNormals(true);
+			ifsf.update();
+			return ifsf.getIndexedFaceSet();
+		}
+			
 		/**
 		 * A pyramid: a cone with vertex <i>tip</i> over the polygon <i>base</i>.
 		 * The polygon is assumed to be closed -- so the user need not set the last 
@@ -514,8 +542,8 @@ public class Primitives {
 		 /** Construct a regular polygon lying in the (x,y) plane, lying on the unit-circle there,
 		  * and having <i>order</i> edges.
 		  * Offset rotates vertices 
-		  * Offset 0.5 : an edge touches the X-Axe
-		  * Offset 0 : a vertex touches the X-Axe
+		  * Offset 0.5 : an edge touches the X-axis
+		  * Offset 0 : a vertex touches the X-axis
 		  * Offset 1 equals 0
 		  * @param order  number of Vertices
 		  * @param offset 
