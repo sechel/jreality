@@ -1,0 +1,159 @@
+package de.jreality.jogl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+
+import javax.media.opengl.GL;
+
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.Light;
+import de.jreality.scene.PointLight;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphPathObserver;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.SpotLight;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
+
+public class JOGLLightHelper {
+
+	private  double mat[] = new double[16];
+	private  int lightCount = GL.GL_LIGHT0;
+	private  GL lightGL = null;
+	private  int maxLights = 8;
+	protected JOGLRenderer jr;
+	
+	protected JOGLLightHelper(JOGLRenderer r)	{
+		jr = r;
+	}
+	private  SceneGraphVisitor ogllv = new SceneGraphVisitor() {
+	    public void visit(Light l) {
+	      wisit(l, lightGL, lightCount);
+	    }
+	
+	    public void visit(DirectionalLight l) {
+	      wisit(l, lightGL, lightCount);
+	    }
+	
+	    public void visit(PointLight l) {
+	      wisit(l, lightGL, lightCount);
+	    }
+	
+	    public void visit(SpotLight l) {
+	      wisit(l, lightGL, lightCount);
+	    }
+	};
+	
+  	HashMap<SceneGraphPath, SceneGraphPathObserver> lightListeners = 
+  		new HashMap<SceneGraphPath, SceneGraphPathObserver>();
+	protected  void resetLights(GL globalGL, List<SceneGraphPath> lights) {
+		for (int i = 0; i < maxLights; ++i) {
+			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_CUTOFF, 0f); 
+			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_EXPONENT, (float) 0);
+			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_CONSTANT_ATTENUATION,
+					1.0f);
+			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_LINEAR_ATTENUATION, 0.0f);
+			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_QUADRATIC_ATTENUATION,
+					0.0f);
+			globalGL.glDisable(GL.GL_LIGHT0 + i);
+		}
+		for (SceneGraphPath sgp : lights)	{
+			SceneGraphPathObserver sgpo = new SceneGraphPathObserver(sgp);
+			sgpo.addTransformationListener(new TransformationListener() {
+
+				public void transformationMatrixChanged(TransformationEvent ev) {
+					jr.lightsChanged = true;
+				}
+				
+			});
+			lightListeners.put(sgp, sgpo);
+		}
+	}
+
+	protected void disposeLights() {
+		for (SceneGraphPathObserver obs : lightListeners.values())	{
+			obs.dispose();
+		}
+		lightListeners.clear();
+	}
+
+	public  void enableLights(GL globalGL, int num) {
+		for (int i = 0; i < num; ++i)
+			globalGL.glEnable(GL.GL_LIGHT0 + i);
+	}
+	
+	public  void processLights(GL globalGL, List<SceneGraphPath> lights) {
+		lightCount = GL.GL_LIGHT0;
+		lightGL = globalGL;
+		int n = lights.size();
+		for (int i = 0; i < n; ++i) {
+			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
+			SceneGraphNode light = lp.getLastElement();
+			if (!(light instanceof Light)) {
+				JOGLConfiguration.theLog
+						.warning("Invalid light path: no light there");
+				continue;
+			}
+			lp.getMatrix(mat);
+			globalGL.glPushMatrix();
+			globalGL.glMultTransposeMatrixd(mat, 0);
+			light.accept(ogllv);
+			globalGL.glPopMatrix();
+			lightCount++;
+			if (lightCount > GL.GL_LIGHT7) {
+				JOGLConfiguration.theLog.log(Level.WARNING,
+						"Max. # lights exceeded");
+				break;
+			}
+		}
+	}
+
+	private  float[] zDirection = { 0, 0, 1, 0 }; // (float)10E-10};
+
+	private  float[] origin = { 0, 0, 0, 1 };
+
+	private  void wisit(Light dl, GL globalGL, int lightCount) {
+		globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, 180f); // use cutoff ==
+																// 0 as marker
+																// for invalid
+																// lights in
+																// glsl
+		globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl
+				.getScaledColorAsFloat(),0);
+		float f = (float) dl.getIntensity();
+		float[] specC = { f, f, f };
+		globalGL.glLightfv(lightCount, GL.GL_SPECULAR, specC,0);
+		globalGL.glLightfv(lightCount, GL.GL_AMBIENT, dl
+				.getScaledColorAsFloat(),0);
+	}
+
+  private  void wisit(DirectionalLight dl, GL globalGL, int lightCount) {
+		wisit((Light) dl, globalGL, lightCount);
+		globalGL.glLightfv(lightCount, GL.GL_POSITION, zDirection,0);
+	}
+
+  private  void wisit(PointLight dl, GL globalGL, int lightCount) {
+		// gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
+		wisit((Light) dl, globalGL, lightCount);
+		globalGL.glLightfv(lightCount, GL.GL_POSITION, origin,0);
+		globalGL.glLightf(lightCount, GL.GL_CONSTANT_ATTENUATION, (float) dl
+				.getFalloffA0());
+		globalGL.glLightf(lightCount, GL.GL_LINEAR_ATTENUATION, (float) dl
+				.getFalloffA1());
+		globalGL.glLightf(lightCount, GL.GL_QUADRATIC_ATTENUATION, (float) dl
+				.getFalloffA2());
+	}
+
+  private  void wisit(SpotLight dl, GL globalGL, int lightCount) {
+		wisit((PointLight) dl, globalGL, lightCount);
+		globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF,
+				(float) ((180.0 / Math.PI) * dl.getConeAngle()));
+		globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection, 0);
+		globalGL.glLightf(lightCount, GL.GL_SPOT_EXPONENT, (float) dl
+				.getDistribution());
+	}
+
+
+}
