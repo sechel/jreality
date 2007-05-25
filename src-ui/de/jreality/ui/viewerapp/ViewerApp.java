@@ -547,12 +547,7 @@ public class ViewerApp {
 				}
 				viewers = viewerList.toArray(new Viewer[viewerList.size()]);
 			}
-		} else {
-			// see if a tool system already exists for one of the viewers in the array of viewers
-			for (Viewer v : viewers)	
-				if ((toolSystem = ToolSystem.getToolSystemForViewer(v)) != null) break;
-		}
-		if (toolSystem != null) System.err.println("Existing tool system is "+toolSystem);
+		} 
 
 		if (viewerSwitch == null) 
 			viewerSwitch = new ViewerSwitch(viewers);
