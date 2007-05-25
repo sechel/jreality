@@ -112,6 +112,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected JOGLPeerComponent thePeerRoot = null;
 	protected JOGLPeerComponent thePeerAuxilliaryRoot = null;
 	protected JOGLRenderingState renderingState;
+	protected JOGLLightHelper lightHelper;
 
 	protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
 	protected int whichEye = CameraUtility.MIDDLE_EYE;
@@ -304,16 +305,18 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	List lights = null;
 	private void processLights( ) {
+		lightsChanged = true;
 		if (lights == null || lights.size() == 0 || lightListDirty) {
+			lightHelper.disposeLights();
 			lights = SceneGraphUtility.collectLights(theRoot);
-			JOGLRendererHelper.resetLights(globalGL, lights);
+			lightHelper.resetLights(globalGL, lights);
 			lightListDirty = false;
 			renderingState.numLights = lights.size();
 			lightsChanged = true;
 		}
-		JOGLRendererHelper.enableLights(globalGL, lights.size());
+		lightHelper.enableLights(globalGL, lights.size());
 		if (lightsChanged) {
-			JOGLRendererHelper.processLights(globalGL, lights);
+			lightHelper.processLights(globalGL, lights);
 			lightsChanged = false;
 		}
 	}
@@ -408,7 +411,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL = gl;
 		
 		renderingState = new JOGLRenderingState(this);
-
+		lightHelper = new JOGLLightHelper(this);
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.FINE,"version: "+vv);			
 		lightsChanged = true;
