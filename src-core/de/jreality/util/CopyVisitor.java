@@ -69,7 +69,7 @@ import de.jreality.scene.proxy.ProxyFactory;
  * @author Steffen Weissmann
  *
  */
-class CopyVisitor extends SceneGraphVisitor {
+public class CopyVisitor extends SceneGraphVisitor {
 
     SceneGraphNode created;
 
@@ -228,7 +228,7 @@ class CopyVisitor extends SceneGraphVisitor {
 
   public void copyAttr(IndexedFaceSet src, IndexedFaceSet dst) {
     dst.setFaceCountAndAttributes(src.getFaceAttributes());
-      copyAttr((PointSet)src, (PointSet)dst);
+      copyAttr((IndexedLineSet)src, (IndexedLineSet)dst);
   }
 
 //  public void copyAttr(QuadMeshShape src, QuadMeshShape dst) {
