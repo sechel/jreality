@@ -238,14 +238,18 @@ public class ViewerApp {
 
 		//load the scene depending on environment (desktop | portal)
 		setupViewer(jrScene);	
+
 		selectionManager = SelectionManager.selectionManagerForViewer(getViewer());
-		
-		// have to do this here or ViewerAppMenu() hits null pointer exceptions
-		System.err.println("VA: Selection man is "+selectionManager);
-		SceneGraphPath sgp = new SceneGraphPath();
-		sgp.push(getViewer().getSceneRoot());
-		selectionManager.setDefaultSelection(new Selection(sgp));
-		selectionManager.setSelection(new Selection(sgp));
+//		System.err.println("VA: Selection man is "+selectionManager);
+//		set default selection
+		SceneGraphPath p = getToolSystem().getEmptyPickPath();
+		if (p==null) {
+			p = new SceneGraphPath();
+			p.push(getViewerSwitch().getSceneRoot());
+		}
+		selectionManager.setDefaultSelection(new Selection(p));
+		selectionManager.setSelection(selectionManager.getDefaultSelection());
+
 		frame = new JFrame();
 		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
 	}
@@ -645,7 +649,7 @@ public class ViewerApp {
 	 * Set up the navigator (sceneTree and inspector).
 	 */
 	private void setupNavigator() {
-		
+
 		navigator = new Navigator(sceneRoot, selectionManager, frame);
 
 		Component navigator = this.navigator.getComponent();
@@ -799,7 +803,7 @@ public class ViewerApp {
 		return cmp;
 	}
 
-	
+
 	/**
 	 * Get the SelectionManager managing selections in the ViewerApp.
 	 * @return the SelectionManager
@@ -807,7 +811,7 @@ public class ViewerApp {
 	public SelectionManagerInterface getSelectionManager() {
 		return selectionManager;
 	}
-	
+
 
 	/**
 	 * Get the navigator. 
@@ -868,13 +872,13 @@ public class ViewerApp {
 	 * @return
 	 */
 	public Viewer getCurrentViewer()	{
-		  return viewerSwitch.getCurrentViewer();
+		return viewerSwitch.getCurrentViewer();
 	}
-	
+
 	public ViewerSwitch getViewerSwitch()	{
 		return viewerSwitch;
 	}
-	
+
 	public ToolSystem getToolSystem()	{
 		return toolSystem;
 	}
@@ -973,7 +977,7 @@ public class ViewerApp {
 	public void removeAccessory(Component c)	{
 		accessory.remove(c);
 	}
-	
+
 	public boolean isExternalNavigator() {
 		return externalNavigator;
 	}
