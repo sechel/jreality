@@ -9,6 +9,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.SystemProperties;
 
 
 public class TestLabelBug {
@@ -101,7 +102,7 @@ public class TestLabelBug {
 		part1.setName("LineSet 0");
 		geom.addChild(part1);
 		
-		System.setProperty("de.jreality.scene.Viewer", "de.jreality.softviewer.SoftViewer de.jreality.jogl.Viewer" ); // de.jreality.portal.DesktopPortalViewer");
+		System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
 
 		ViewerApp.display(root);
 

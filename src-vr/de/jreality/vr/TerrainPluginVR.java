@@ -46,6 +46,7 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 import de.jreality.vr.Terrain.GeometryType;
 import de.jtem.beans.SimpleColorChooser;
 
@@ -444,7 +445,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private void makeTerrainTextureFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
-		String dataDir = Secure.getProperty("jreality.data");
+		String dataDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
 		if (dataDir!= null) texDir = dataDir+"/textures";
 		File defaultDir = new File(texDir);
 		terrainTexFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
@@ -472,7 +473,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	private void makeTerrainFileChooser() {
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
-		String dataDir = Secure.getProperty("jreality.data");
+		String dataDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
 		if (dataDir!= null) texDir = dataDir;
 		File defaultDir = new File(texDir);
 		terrainFileChooserPanel = new JPanel(new BorderLayout());

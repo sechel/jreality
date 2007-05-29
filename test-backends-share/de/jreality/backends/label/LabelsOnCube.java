@@ -57,6 +57,7 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.SystemProperties;
 
 public class LabelsOnCube {
 
@@ -115,7 +116,7 @@ public class LabelsOnCube {
     
     dgs.setShowPoints(Boolean.TRUE);
     
-		System.setProperty("de.jreality.scene.Viewer", "de.jreality.softviewer.SoftViewer de.jreality.jogl.Viewer" ); // de.jreality.portal.DesktopPortalViewer");
+    System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
 
 		ViewerApp.display(cmp);
 	}

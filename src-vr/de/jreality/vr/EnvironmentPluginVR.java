@@ -36,6 +36,7 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.sunflow.PerezSky;
 import de.jreality.util.Input;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 import de.jtem.beans.SimpleColorChooser;
 
 public class EnvironmentPluginVR extends AbstractPluginVR {
@@ -94,7 +95,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 			}
 		};
 		String texDir = ".";
-		String dataDir = Secure.getProperty("jreality.data");
+		String dataDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
 		if (dataDir!= null) texDir = dataDir;
 		File defaultDir = new File(texDir);
 		cubeMapFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);

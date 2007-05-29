@@ -52,6 +52,7 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.SystemProperties;
 
 public class SimpleExample {
 
@@ -102,7 +103,7 @@ public class SimpleExample {
     cmp.setAppearance(app);
     cmp.setGeometry(faceSet);
     
-    System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
+    System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
     ViewerApp.display(cmp);
   }
 

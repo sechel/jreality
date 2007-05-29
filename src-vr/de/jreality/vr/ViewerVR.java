@@ -115,6 +115,7 @@ import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 
 public class ViewerVR {
@@ -207,8 +208,8 @@ public class ViewerVR {
 	public ViewerVR() {
 
 		// find out where we are running
-		boolean portalRemote = "portal-remote".equals(Secure.getProperty("de.jreality.viewerapp.env"));
-		boolean portal = "portal".equals(Secure.getProperty("de.jreality.viewerapp.env"));
+		boolean portalRemote = "portal-remote".equals(Secure.getProperty(SystemProperties.ENVIRONMENT));
+		boolean portal = "portal".equals(Secure.getProperty(SystemProperties.ENVIRONMENT));
 
 		// build basic scene graph
 		sceneRoot.setName("root");
@@ -783,7 +784,7 @@ public class ViewerVR {
 				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
 			}
 			public void actionPerformed(ActionEvent e) {
-				bakeTerrain(vapp.getViewer());
+				bakeTerrain(vapp.getCurrentViewer());
 			}
 		};
 		settings.add(bakeTerrain);

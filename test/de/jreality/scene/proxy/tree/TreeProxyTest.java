@@ -56,7 +56,6 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.proxy.ProxyFactory;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolUpdateProxy;
-import de.jreality.ui.treeview.SceneTreeModel;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 
@@ -150,7 +149,7 @@ public class TreeProxyTest extends TestCase {
     c1.addChild(c3);
     c2.addChild(c3);
     c1.addTool(new RotateTool());
-    SceneTreeModel sm = new SceneTreeModel(root);
+//    SceneTreeModel sm = new SceneTreeModel(root);
     for (int i = 0; i < 500; i++) {
       CatenoidHelicoid ch = new CatenoidHelicoid(10);
       ch.setName("ch["+i+"]");
@@ -187,7 +186,7 @@ public class TreeProxyTest extends TestCase {
       ToolUpdateProxy sm = new ToolUpdateProxy(null);
       sm.setSceneRoot(root);
     } else {
-      //System.setProperty("de.jreality.scene.Viewer", "de.jreality.soft.DefaultViewer");
+      //System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
       ViewerApp.display(root);
     }
     for (int i = 0; i < 500; i++) {

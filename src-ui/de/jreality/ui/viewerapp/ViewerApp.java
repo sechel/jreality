@@ -89,6 +89,7 @@ import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 
 /**
@@ -222,11 +223,11 @@ public class ViewerApp {
 		displayedNode = contentNode;
 
 		//update autoRender & synchRender
-		String autoRenderProp = Secure.getProperty( "de.jreality.ui.viewerapp.autoRender", "true" );
+		String autoRenderProp = Secure.getProperty(SystemProperties.AUTO_RENDER, SystemProperties.AUTO_RENDER_DEFAULT);
 		if (autoRenderProp.equalsIgnoreCase("false")) {
 			autoRender = false;
 		}
-		String synchRenderProp = Secure.getProperty( "de.jreality.ui.viewerapp.synchRender", "true" );
+		String synchRenderProp = Secure.getProperty(SystemProperties.SYNCH_RENDER, SystemProperties.SYNCH_RENDER_DEFAULT);
 		if (synchRenderProp.equalsIgnoreCase("true")) {
 			synchRender = true;
 		}
@@ -438,7 +439,7 @@ public class ViewerApp {
 	 * @return the default scene
 	 */
 	private JrScene getDefaultScene() {
-		String environment = Secure.getProperty( "de.jreality.viewerapp.env", "desktop" );
+		String environment = Secure.getProperty(SystemProperties.ENVIRONMENT, SystemProperties.ENVIRONMENT_DEFAULT);
 
 		if (environment.equals("desktop"))
 			return JrSceneFactory.getDefaultDesktopScene();
@@ -517,11 +518,11 @@ public class ViewerApp {
 
 	@SuppressWarnings("unchecked")
 	private ToolSystem createToolSystem() throws IOException {
-		String config = Secure.getProperty( "de.jreality.scene.tool.Config", "default" );
+		String config = Secure.getProperty(SystemProperties.TOOL_CONFIG, SystemProperties.TOOL_CONFIG_DEFAULT);
 		boolean remotePortal = config.equals("portal-remote");
 		if (viewers == null) {
 			if (remotePortal) {
-				String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer");
+				String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL);
 				try {
 					viewers = new Viewer[]{createViewer(viewer)};
 				} catch (InstantiationException e) {
@@ -532,7 +533,7 @@ public class ViewerApp {
 					e.printStackTrace();
 				}
 			} else {
-				String viewer = Secure.getProperty( "de.jreality.scene.Viewer", "de.jreality.jogl.Viewer de.jreality.softviewer.SoftViewer" ); // de.jreality.portal.DesktopPortalViewer");
+				String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT); // de.jreality.portal.DesktopPortalViewer");
 				String[] vrs = viewer.split(" ");
 				List<Viewer> viewerList = new LinkedList<Viewer>();
 				String viewerClassName;
@@ -583,7 +584,7 @@ public class ViewerApp {
 	private ToolSystemConfiguration loadToolSystemConfiguration() {
 		return AccessController.doPrivileged(new PrivilegedAction<ToolSystemConfiguration>() {
 			public ToolSystemConfiguration run() {
-				String config = Secure.getProperty( "de.jreality.scene.tool.Config", "default" );
+				String config = Secure.getProperty(SystemProperties.TOOL_CONFIG, SystemProperties.TOOL_CONFIG_DEFAULT);
 				ToolSystemConfiguration cfg=null;
 				// HACK: only works for "regular" URLs
 				try {

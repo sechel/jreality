@@ -36,6 +36,7 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.ActionTool;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /**
  * 
@@ -97,7 +98,7 @@ public class JRWindow {
 	private final Color inactiveColor=new Color(138,182,225);
 	private static final Font TITLE_FONT = new Font("Sans Serif", Font.BOLD, 24);
 
-	private static final boolean FORBID_EXTERNAL_FRAME = "portal-remote".equals(Secure.getProperty("de.jreality.viewerapp.env"));
+	private static final boolean FORBID_EXTERNAL_FRAME = "portal-remote".equals(Secure.getProperty(SystemProperties.ENVIRONMENT));
 
 	protected JRWindow(int windowNumber){    
 		myActionTool.addActionListener(new ActionListener() {

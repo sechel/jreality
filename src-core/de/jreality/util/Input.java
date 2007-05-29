@@ -246,7 +246,7 @@ public final class Input
    * <li> if resourceName contains :// we try to load it as a URL
    * <li> if resourceName is an absolute filename the corresponding Input is created
    * <li> resourceName is searched in the classpath
-   * <li> resourceName is searched relative to System.getProperty("jreality.data")
+   * <li> resourceName is searched relative to System.getProperty(SystemProperties.JREALITY_DATA)
    * <li> resourceName is searched relative to the current dir
    * 
    * @param resourceName the name of the resource to look for
@@ -268,7 +268,7 @@ public final class Input
     if (ret != null) return ret;
     String currentDir = null;
     try {
-      currentDir = Secure.getProperty("jreality.data");
+      currentDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
     } catch (SecurityException se) {
       // webstart
     }

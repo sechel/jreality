@@ -69,6 +69,7 @@ import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /**
  * 
@@ -235,7 +236,7 @@ public class ToolSystem implements ToolEventReceiver {
 	private static ToolSystemConfiguration loadConfiguration() {
 	    ToolSystemConfiguration config;
 	    try {
-	      String toolFile=Secure.getProperty("jreality.toolconfig");
+	      String toolFile = Secure.getProperty(SystemProperties.TOOL_CONFIG_FILE);
 	      config = ToolSystemConfiguration.loadConfiguration(
 	          Input.getInput(toolFile)
 	      );

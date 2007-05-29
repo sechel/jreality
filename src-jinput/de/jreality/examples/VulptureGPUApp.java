@@ -59,6 +59,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.SystemProperties;
 
 /*
  * Created on 11.01.2006
@@ -750,7 +751,7 @@ public class VulptureGPUApp implements Runnable {
             st.computeMesh(st.coords);
         }
 
-       System.setProperty("de.jreality.scene.Viewer", "de.jreality.jogl.GpgpuViewer"); // de.jreality.portal.DesktopPortalViewer");
+       System.setProperty(SystemProperties.VIEWER, "de.jreality.jogl.GpgpuViewer"); // de.jreality.portal.DesktopPortalViewer");
        
         ViewerApp.display(st.root) ;
         
