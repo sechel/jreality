@@ -42,7 +42,6 @@ package de.jreality.io;
 
 import java.awt.Color;
 import java.util.List;
-import java.util.logging.Level;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
@@ -57,20 +56,14 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
-import de.jreality.tools.FlyTool;
 import de.jreality.tools.PickShowTool;
 import de.jreality.tools.PointerDisplayTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
-import de.jreality.util.LoggingSystem;
 
 
 public class JrSceneFactory {
 
-
-	public static JrScene getDefaultDesktopScene() {
-		return getDefaultScene(false);
-	}
 
 	public static JrScene getDefaultDesktopSceneWithoutTools() {
 		JrScene scene = getDefaultDesktopScene();
@@ -95,14 +88,14 @@ public class JrSceneFactory {
 
 	private static JrScene getDefaultPortalScene(boolean remote) {
 		//return getDefaultScene(true);
-		SceneGraphComponent sceneRoot=new SceneGraphComponent(),
-		sceneNode=new SceneGraphComponent(),
-		avatarNode=new SceneGraphComponent(),
-		camNode=new SceneGraphComponent(),
-		lightNode=new SceneGraphComponent(),
-		lightNode2=new SceneGraphComponent(),
-		lightNode3=new SceneGraphComponent(),
-		lightNode4=new SceneGraphComponent();
+		SceneGraphComponent sceneRoot=new SceneGraphComponent("root"),
+		sceneNode=new SceneGraphComponent("scene"),
+		avatarNode=new SceneGraphComponent("avatar"),
+		camNode=new SceneGraphComponent("camNode"),
+		lightNode=new SceneGraphComponent("light 1"),
+		lightNode2=new SceneGraphComponent("light 2"),
+		lightNode3=new SceneGraphComponent("light 3"),
+		lightNode4=new SceneGraphComponent("light 4");
 
 		Appearance terrainAppearance=new Appearance(),
 		rootAppearance=new Appearance();
@@ -111,16 +104,7 @@ public class JrSceneFactory {
 
 		SceneGraphPath cameraPath, avatarPath, emptyPickPath;
 
-		sceneRoot.setName("root");
-		sceneNode.setName("scene");
-		avatarNode.setName("avatar");
-		camNode.setName("camNode");
-		lightNode.setName("light 1");
-		lightNode2.setName("light 2");
-		lightNode3.setName("light 3");
-		lightNode4.setName("light 4");
 		sceneRoot.addChild(sceneNode);
-
 		sceneRoot.setAppearance(rootAppearance);
 
 		terrainAppearance.setAttribute("showLines", false);
@@ -210,20 +194,17 @@ public class JrSceneFactory {
 	 * @return the default desktop scene
 	 */
 	//replaces de.jreality.ui.viewerapp.desktop-scene.jrs
-	private static JrScene getDefaultScene(boolean portal) {
+	public static JrScene getDefaultDesktopScene() {
 
 		//sceneRoot of the JrScene
-		SceneGraphComponent sceneRoot = new SceneGraphComponent();
-		sceneRoot.setName("root");
+		SceneGraphComponent sceneRoot = new SceneGraphComponent("root");
 		sceneRoot.setVisible(true);
-		Appearance app = new Appearance();
-		app.setName("root appearance");
+		Appearance app = new Appearance("root appearance");
 		ShaderUtility.createRootAppearance(app);
 		sceneRoot.setAppearance(app);
 		//children of sceneRoot
 		//scene
-		SceneGraphComponent scene = new SceneGraphComponent();
-		scene.setName("scene");
+		SceneGraphComponent scene = new SceneGraphComponent("scene");
 		scene.setVisible(true);
 		Transformation trafo = new Transformation(Rn.identityMatrix(4));
 		trafo.setName("scene trafo");
@@ -242,8 +223,7 @@ public class JrSceneFactory {
 		scene.addTool(draggingTool);
 		sceneRoot.addChild(scene);
 		//lightComp 1
-		SceneGraphComponent lightNode = new SceneGraphComponent();
-		lightNode.setName("lightNode");
+		SceneGraphComponent lightNode = new SceneGraphComponent("lightNode");
 		lightNode.setVisible(true);
 		double[] trafoMatrix = new double[]{
 				0.8535533905932737,  0.14644660940672619, -0.4999999999999999, 0.0,
@@ -254,65 +234,61 @@ public class JrSceneFactory {
 		trafo = new Transformation(trafoMatrix);
 		trafo.setName("lightNode trafo");
 		lightNode.setTransformation(trafo);
-		Light light = new DirectionalLight();
-		light.setName("light");
+		Light light = new DirectionalLight("light");
 		light.setColor(new Color(255,255,255,255));
 		light.setIntensity(0.75);
 		lightNode.setLight(light);
 		sceneRoot.addChild(lightNode);
 		//avatar
-		SceneGraphComponent avatar = new SceneGraphComponent();
-		avatar.setName("avatar");
+		SceneGraphComponent avatar = new SceneGraphComponent("avatar");
 		avatar.setVisible(true);
 		trafoMatrix = Rn.identityMatrix(4);
-		if (!portal) trafoMatrix[11] = 16;
+//		if (!portal) 
+		trafoMatrix[11] = 16;
 		trafo = new Transformation(trafoMatrix);
 		trafo.setName("avatar trafo");
 		avatar.setTransformation(trafo);
 		sceneRoot.addChild(avatar);
 		//children of avatar
 		//camera
-		SceneGraphComponent cameraNode = new SceneGraphComponent();
-		cameraNode.setName("cameraNode");
+		SceneGraphComponent cameraNode = new SceneGraphComponent("cameraNode");
 		cameraNode.setVisible(true);
 		trafoMatrix = Rn.identityMatrix(4);
 		trafo = new Transformation(trafoMatrix);
 		trafo.setName("camera trafo");
 		cameraNode.setTransformation(trafo);
-		Camera camera = new Camera(); 
-		camera.setName("camera");
-		if (!portal) {
-			camera.setFar(50.0);
-			camera.setFieldOfView(30.0);
-			camera.setFocus(3.0);
-			camera.setNear(3.0);
-			camera.setOnAxis(true);
-			camera.setStereo(false);
-		} else {
-			camera.setOnAxis(false);
-			camera.setStereo(true);
-		}
+		Camera camera = new Camera("camera"); 
+//		if (!portal) {
+		camera.setFar(50.0);
+		camera.setFieldOfView(30.0);
+		camera.setFocus(3.0);
+		camera.setNear(3.0);
+		camera.setOnAxis(true);
+		camera.setStereo(false);
+//		} else {
+//		camera.setOnAxis(false);
+//		camera.setStereo(true);
+//		}
 		cameraNode.setCamera(camera);
-		light = new DirectionalLight();
-		light.setName("camera light");
+		light = new DirectionalLight("camera light");
 		light.setColor(new Color(255,255,255,255));
 		light.setIntensity(0.75);
 		cameraNode.setLight(light);
 		avatar.addChild(cameraNode);
 
-		if (portal) {
-			FlyTool flyTool = new FlyTool();
-			flyTool.setGain(1.0);
-			avatar.addTool(flyTool);
-			Tool portalHeadMoveTool;
-			try {
-				portalHeadMoveTool = (Tool) Class.forName("de.jreality.tools.PortalHeadMoveTool").newInstance();
-				System.out.println("added HeadMoveTool");
-				avatar.addTool(portalHeadMoveTool);
-			} catch (Exception e) {
-				LoggingSystem.getLogger(JrSceneFactory.class).log(Level.WARNING, "failed to create PortalHeadMoveTool", e);
-			}
-		}
+//		if (portal) {
+//		FlyTool flyTool = new FlyTool();
+//		flyTool.setGain(1.0);
+//		avatar.addTool(flyTool);
+//		Tool portalHeadMoveTool;
+//		try {
+//		portalHeadMoveTool = (Tool) Class.forName("de.jreality.tools.PortalHeadMoveTool").newInstance();
+//		System.out.println("added HeadMoveTool");
+//		avatar.addTool(portalHeadMoveTool);
+//		} catch (Exception e) {
+//		LoggingSystem.getLogger(JrSceneFactory.class).log(Level.WARNING, "failed to create PortalHeadMoveTool", e);
+//		}
+//		}
 
 		//create JrScene
 		JrScene defaultScene = new JrScene(sceneRoot);
