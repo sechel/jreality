@@ -51,9 +51,12 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.RemoveDublicateInfo;
@@ -62,8 +65,10 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.PickUtility;
 
 
@@ -115,9 +120,12 @@ public class LoadFile extends AbstractJrAction {
 
     if (options == null) options = createAccessory();
     mergeFaceSets.setSelected(false);
-    removeDublicateVertices.setSelected(false);
     mergeFaceSetsWithNormals.setSelected(false);
+    mergeFaceSetsWithNormals.setEnabled(false);
+    removeDublicateVertices.setSelected(false);
+    removeDublicateVertices.setEnabled(false);
     removeDublicateVerticesWithNormals.setSelected(false);
+    removeDublicateVerticesWithNormals.setEnabled(false);
     
     File[] files = FileLoaderDialog.loadFiles(parentComp, options);
     if (files == null) return;  //dialog cancelled
@@ -125,16 +133,16 @@ public class LoadFile extends AbstractJrAction {
     for (int i = 0; i < files.length; i++) {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
-        GeometryMergeFactory mFac= new GeometryMergeFactory();
-        SceneGraphComponent comp= new SceneGraphComponent();
+        GeometryMergeFactory mFac = new GeometryMergeFactory();
+        SceneGraphComponent comp = new SceneGraphComponent();
         if (mergeFaceSets.isSelected()){
         	if(!mergeFaceSetsWithNormals.isSelected())
         		mFac.setGenerateVertexNormals(false);
-        	IndexedFaceSet geo=mFac.mergeIndexedFaceSets(sgc);
+        	IndexedFaceSet geo = mFac.mergeIndexedFaceSets(sgc);
         	if(removeDublicateVertices.isSelected()){
         		if(removeDublicateVerticesWithNormals.isSelected())
-        			geo=RemoveDublicateInfo.removeDublicateVertices(geo,Attribute.NORMALS);
-        		else geo=RemoveDublicateInfo.removeDublicateVertices(geo);
+        			geo = RemoveDublicateInfo.removeDublicateVertices(geo,Attribute.NORMALS);
+        		else geo = RemoveDublicateInfo.removeDublicateVertices(geo);
         	}
         	comp.setGeometry(geo);	
         	sgc=comp;
@@ -144,12 +152,15 @@ public class LoadFile extends AbstractJrAction {
         
         PickUtility.assignFaceAABBTrees(sgc);
         
-//        if (callEncompass.isSelected() && viewer != null) {
-//        	CameraUtility.encompass(viewer.getAvatarPath(),
-//        			viewer.getEmptyPickPath(),
-//        			viewer.getCameraPath(),
-//        			1.75, viewer.getSignature());
-//        }
+        if (callEncompass.isSelected() && viewer != null) {
+        	ToolSystem ts = ToolSystem.getToolSystemForViewer(viewer);
+        	if (ts != null) {
+        	CameraUtility.encompass(ts.getAvatarPath(),
+        			ts.getEmptyPickPath(),
+        			viewer.getCameraPath(),
+        			1.75, viewer.getSignature());
+        	}
+        }
       } 
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(parentComp, "Failed to load file: "+ioe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -163,19 +174,47 @@ public class LoadFile extends AbstractJrAction {
     TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Options");
     box.setBorder(title);
 
-    mergeFaceSets = new JCheckBox("merge Geometrys");
-    mergeFaceSetsWithNormals = new JCheckBox("garantee VertexNormals (if merge is used)");
-    removeDublicateVertices = new JCheckBox("remove dublicate Vertices (if merge is used)");
-    removeDublicateVerticesWithNormals = new JCheckBox("respect VertexNormals (if remove is used)");
+    mergeFaceSets = new JCheckBox("merge geometries");
+    mergeFaceSetsWithNormals = new JCheckBox("garantee vertex normals");
+    removeDublicateVertices = new JCheckBox("remove dublicate vertices");
+    removeDublicateVerticesWithNormals = new JCheckBox("respect vertex normals");
+    
+    mergeFaceSets.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent ev) {
+				boolean editable = mergeFaceSets.isSelected();
+				mergeFaceSetsWithNormals.setEnabled(editable);
+				removeDublicateVertices.setEnabled(editable);
+				removeDublicateVerticesWithNormals.setEnabled(editable && removeDublicateVertices.isSelected());
+			}
+		});
+    removeDublicateVertices.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent arg0) {
+				removeDublicateVerticesWithNormals.setEnabled(removeDublicateVertices.isSelected());
+			}
+		});
     
     callEncompass = new JCheckBox("encompass scene");
     callEncompass.setSelected(true);
-    //box.add(mergeLineSets);
+
     box.add(mergeFaceSets);
-    box.add(mergeFaceSetsWithNormals);
-    box.add(removeDublicateVertices);
-    box.add(removeDublicateVerticesWithNormals);
+    Box tmp = Box.createHorizontalBox();
+    tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
+    tmp.add(new JLabel("  "));
+    tmp.add(mergeFaceSetsWithNormals);
+    box.add(tmp);
+    tmp = Box.createHorizontalBox();
+    tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
+    tmp.add(new JLabel("  "));
+    tmp.add(removeDublicateVertices);    
+    box.add(tmp);
+    tmp = Box.createHorizontalBox();
+    tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
+    tmp.add(new JLabel("    "));
+    tmp.add(removeDublicateVerticesWithNormals);
+    box.add(tmp);
+    box.add(Box.createVerticalStrut(10));
     box.add(callEncompass);
+    box.validate();
     
     return box;
   }
