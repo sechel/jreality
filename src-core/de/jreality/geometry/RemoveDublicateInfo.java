@@ -56,9 +56,9 @@ import de.jreality.scene.data.StringArray;
 
 public class RemoveDublicateInfo {
 	public static double eps= 0.000001;
-	
+
 	private static boolean compare(double[] p1,double[] p2,double eps){
-				// vergleicht Punkte in R^n bis auf eps als Tolleranz
+		// vergleicht Punkte in R^n bis auf eps als Tolleranz
 		double delta= 0;
 		for (int i=0;i<p1.length;i++)
 			delta+=(p1[i]-p2[i])*(p1[i]-p2[i]);
@@ -77,14 +77,20 @@ public class RemoveDublicateInfo {
 		}
 		return indicesNew;
 	}
-	
-	
+
+
 	/** retains only vertices which differs enough in the given
 	 * attributes. 
 	 * <i>enough</i> means the euclidean distanz is smaler than <code>eps</code> 
 	 * retains only the standard Vertex Attributes.
 	 * face- and edge- attributes stay the same.
 	 * only Face and Edge Indices changes.
+	 * 
+	 * Remark: The GeonmetryAttribute 
+	 * 			<code>quadmesh</code> will be deleted
+	 * Remark: some other Attributes may collide with the new Geometry
+	 *     
+	 * 
 	 * @param ps       can be <code>IndexedFaceSet,IndexedLineSet or PointSet</code>
 	 * @param atts	   some <code>doubleArrayArrayAttributes</code> 
 	 * @return IndexedFaceSet  
@@ -98,11 +104,11 @@ public class RemoveDublicateInfo {
 		if(!attrs.contains(Attribute.COORDINATES))// Koordinaten muessen dabei sein!
 			attrs.add(Attribute.COORDINATES);
 		int numOfVertices	=ifs.getNumPoints();
-		
+
 		// compareData [Attr][Vertex][dim]
 		List<double[][]> compareDataTemp = new LinkedList<double[][]>();
 		List<Attribute> goodAttrs = new LinkedList<Attribute>();
-		
+
 		//compareData auslesen und nur funktionierende Attribute merken:
 		int totalDim=0;			// gesammelte dimension der zu vergl. Attribute
 		for(Attribute a:attrs){
@@ -122,17 +128,17 @@ public class RemoveDublicateInfo {
 				compareData[j][i]= compareDataTemp.get(i)[j];
 			}
 		}
-		
+
 		// die alten Daten auslesen	
 		int[][]    oldVertexIndizeesArray=null;
 		String[]   oldVertexLabelsArray=null;
-		
+
 		DataList temp;
 		temp=ifs.getVertexAttributes ( Attribute.INDICES );
 		if (temp !=null)oldVertexIndizeesArray 		= temp.toIntArrayArray(null);
 		temp= ifs.getVertexAttributes( Attribute.LABELS );
 		if (temp!=null)	oldVertexLabelsArray 		= temp.toStringArray(null);
-		
+
 		// anders regeln!!! <<=>---<<<
 		double [][] oldVertexCoordsArray=null;
 		double[][] oldVertexColorArray=null;
@@ -149,16 +155,16 @@ public class RemoveDublicateInfo {
 		if (temp!=null) oldVertexCoordsArray 		= temp.toDoubleArrayArray(null);
 		temp= ifs.getVertexAttributes ( Attribute.COLORS );
 		if (temp!=null)	oldVertexColorArray 		= temp.toDoubleArrayArray(null);
-		
-		
+
+
 		// refferenceTable.[i] verweist auf den neuen i.Index (fuer umindizierung)
 		int[] refferenceTabel =new int[numOfVertices];
-		
+
 		// hier werden die Punkte neu gelesen und die Verweise in RefferenceTable gemerkt
 		// neue Attribute der Punkte zwischenspeichern:
 		int curr=0; // : aktuell einzufuegender Index 
 		int index;
- 		DimTreeStart dTree=new RemoveDublicateInfo().new DimTreeStart(totalDim);
+		DimTreeStart dTree=new RemoveDublicateInfo().new DimTreeStart(totalDim);
 
 		if (numOfVertices>0){
 			for (int i=0; i<numOfVertices;i++){
@@ -185,7 +191,7 @@ public class RemoveDublicateInfo {
 			}	
 		}
 		int numOfVerticesNew = curr;
-		
+
 		// Die VertexAttributVektoren kuerzen		
 		double[][] newVertexColorArray= 		new double[numOfVerticesNew][];
 		double[][] newVertexCoordsArray= 		new double[numOfVerticesNew][];
@@ -194,7 +200,7 @@ public class RemoveDublicateInfo {
 		double[][] newVertexTextureCoordsArray= new double[numOfVerticesNew][];
 		double[]   newVertexSizeArray= 			new double[numOfVerticesNew];
 		int[][]    newVertexIndizeesArray= 		new int[numOfVerticesNew][];
-		
+
 		for(int i=0;i<numOfVerticesNew;i++){
 			if (oldVertexCoordsArray!=null)			newVertexCoordsArray[i]=oldVertexCoordsArray[i];
 			if (oldVertexColorArray!=null)			newVertexColorArray[i]=oldVertexColorArray[i];
@@ -204,11 +210,11 @@ public class RemoveDublicateInfo {
 			if (oldVertexSizeArray!=null)			newVertexSizeArray[i]=oldVertexSizeArray[i];
 			if (oldVertexTextureCoordsArray!=null)	newVertexTextureCoordsArray[i]=oldVertexTextureCoordsArray[i];
 		}
-						
+
 		// Die Vertex Attribute wieder einfuegen
 		IndexedFaceSet result=new IndexedFaceSet();
 		result.setNumPoints(numOfVerticesNew);
-		
+
 		if (numOfVerticesNew>0){
 			if (oldVertexCoordsArray!=null){
 				System.out.println("coords");
@@ -239,17 +245,17 @@ public class RemoveDublicateInfo {
 				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
 			}
 		}
-		
+
 		// uebernehmen der alten Attribute
 		int numOfEdges		=ifs.getNumEdges();
 		int numOfFaces		=ifs.getNumFaces();
 		result.setNumEdges(numOfEdges);
 		result.setNumFaces(numOfFaces);
-		
+
 		result.setGeometryAttributes(ifs.getGeometryAttributes());
 		result.setEdgeAttributes(ifs.getEdgeAttributes());
 		result.setFaceAttributes(ifs.getFaceAttributes());
-		
+
 		// die Indices angleichen:		
 		int [][] faceIndicesOld=null;
 		int [][] edgeIndicesOld=null;
@@ -259,20 +265,22 @@ public class RemoveDublicateInfo {
 			int [][] faceIndicesNew= makeNewIndicees(faceIndicesOld,refferenceTabel);
 			if((numOfFaces>0)&(numOfVertices>0))
 				result.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(faceIndicesNew));
-				}
+		}
 		temp=ifs.getEdgeAttributes( Attribute.INDICES );
 		if (temp !=null){
 			edgeIndicesOld = temp.toIntArrayArray(null);
 			int [][] edgesIndicesNew=makeNewIndicees(edgeIndicesOld,refferenceTabel);
 			if((numOfEdges>0)&(numOfVertices>0))
 				result.setEdgeAttributes(Attribute.INDICES, new IntArrayArray.Array(edgesIndicesNew));
-			}
+		}
+		result.setGeometryAttributes("quadMesh",null);
 		return result;		
+
 	}
-		
+
 	private class DimTreeStart{
 		private int DimTreeCurrNumToGive;
-//      private static double[] DimTreeTolerance; //[dim]
+//		private static double[] DimTreeTolerance; //[dim]
 		private int totalDim;
 		DimTree d;
 		public DimTreeStart(int dim) {
@@ -297,7 +305,7 @@ public class RemoveDublicateInfo {
 		double[][] val;// [attr][dim of attr]
 		int number;
 		DimTreeStart root;
-		
+
 		public DimTree(double[][] value, DimTreeStart rootObject) {
 			root= rootObject;
 			val=value;
@@ -324,19 +332,114 @@ public class RemoveDublicateInfo {
 			}
 			return (hit)? -1 : n; 			
 		}
-		/**@param a
-		 * @return :  new counting number
-		 * 		   :  number of existing doubled value
-		 */
+//		/**@param a
+//		 * @return :  new counting number
+//		 * 		   :  number of existing doubled value
+//		 */
+//		int put(double[][] a){
+//			int n=whichChild(a);
+//			if (n==-1) return number;
+//			if (children[n]==null){
+//				children[n]=new DimTree(a,root);
+//				return root.DimTreeCurrNumToGive-1;
+//			}
+//			return children[n].put(a);
+//		}
+
 		int put(double[][] a){
-			int n=whichChild(a);
-			if (n==-1) return number;
-			if (children[n]==null){
-				children[n]=new DimTree(a,root);
-				return root.DimTreeCurrNumToGive-1;
-			}
-			return children[n].put(a);
+			List<Integer> way= search(a);
+			// way to a hit?
+			DimTree target= this;
+			int last=way.get(way.size()-1);
+			way.remove(way.size()-1);
+			for (int i: way) 
+				target=target.children[i];
+			if(last==-1)
+				return target.number;
+			// no way to a hit!
+			target.children[last]=new DimTree(a,root);
+			return root.DimTreeCurrNumToGive-1;
 		}
-	}
+		/** search for way to hit(if possible)
+		 *	otherwise the best way to insert is returned
+		 * @param a
+		 * @return a way to insert 
+		 * 			 a -1 at the end means hit!
+		 */
+		List<Integer> search(double[][] a){
+			List <Integer> way= new LinkedList<Integer>();
+			List <Integer> alt=whichChild2(a);
+			if(alt.get(0)==-1)// hit value
+				return alt;
+			if(alt.size()==1){// one choise of subtree
+				if(children[alt.get(0)]!=null)
+					way=children[alt.get(0)].search(a);
+				way.add(0,alt.get(0));
+				return way;
+			}
+			// search for deeper hit
+			for (int i = alt.size()-1; i>=0 ;i--) {
+				if(children[alt.get(i)]!=null){
+					way=children[alt.get(i)].search(a);
+					way.add(0,alt.get(i));
+					if(way.get(way.size()-1)==-1)
+						return way;
+				}
+			}// remember: best choise for insert was the first in the list
+			if(way.size()==0)
+				way.add(0,alt.get(0));
+			return way;
+		}
+		/** list of posible Childtrees.
+		 * is only -1 if we hit the element.
+		 * @param a
+		 * @return
+		 */
+		List<Integer> whichChild2(double[][] a){
+			List<Integer> pos= new LinkedList<Integer>();
+			// do we hit the value?
+			boolean hit=true;
+			for (int j = 0; j < a.length; j++) {
+				if (!(compare(a[j],val[j] , eps))){
+					hit=false;
+					break;
+				}
+			}
+			if(hit){
+				pos.add(-1);// -1 means hit!
+				return pos;
+			}
+			// no hit! calc possible subtrees
+			pos.add(0);
+			int best=0;
+			for (int j = 0; j < a.length; j++) {
+				for (int i = 0; i < a[j].length; i++) {
+					// to close to border?
+					int n=pos.size();
+					if((a[j][i]-eps>val[j][i])!=(a[j][i]+eps>val[j][i])){
+						// multiply ways
+						for (int k = 0; k < n; k++) {
+							pos.add(pos.get(k)+(int)Math.pow(2, k));
+						}
+					}
+					// not to close to border!
+					else 
+						if(a[j][i]-eps>val[j][i]){ 
+							for (int k = 0; k < n; k++) {
+								pos.set(k,pos.get(k)+(int)Math.pow(2, k));
+							}
+						}
+					// anyway: calculate best choise
+					if(a[j][i]-eps>val[j][i]){
+						for (int k = 0; k < n; k++) 
+							best+=(int)Math.pow(2, k);
+					}
+				}
+			}
+			pos.remove(new Integer(best));// delete best from list
+			pos.add(0,best);// insert best at first place
+			return pos;
+		}
+	}// end DimTree
 
 }
