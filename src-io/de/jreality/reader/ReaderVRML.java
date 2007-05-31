@@ -82,5 +82,6 @@ public class ReaderVRML extends AbstractReader {
     } catch (Exception e) {
       LoggingSystem.getLogger(this).severe("parsing "+input+" failed: "+e.getMessage());
     }
+    if (root == null) throw new IOException("could not load input: "+input); 
 	}
 }
