@@ -100,6 +100,7 @@ public class SystemProperties {
 	public final static String VIEWER = de.jreality.scene.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.Viewer";  //de.jreality.jogl.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
+	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();
 	
 	/**
 	 * Specifies the path of the jReality data directory.
