@@ -40,9 +40,6 @@
 
 package de.jreality.util;
 
-import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
  * jReality system property keys and default values
@@ -57,7 +54,7 @@ public class SystemProperties {
 	
 	
 	/** 
-	 * Specifies whether {@link ViewerApp} initializes a {@link RenderTrigger}
+	 * Specifies whether {@link de.jreality.ui.viewerapp.ViewerApp} initializes a {@link RenderTrigger}
 	 * for the displayed scene.<br> 
 	 * Values: <code>true | false</code>.
 	 * @see SystemProperties#SYNCH_RENDER   
@@ -66,7 +63,7 @@ public class SystemProperties {
 	public final static String AUTO_RENDER_DEFAULT = "true";
 	
 	/** 
-	 * Specifies whether the {@link RenderTrigger} initialized by {@link ViewerApp}
+	 * Specifies whether the {@link RenderTrigger} initialized by {@link de.jreality.ui.viewerapp.ViewerApp}
 	 * dispatches synchronous render requests.<br>
 	 * Values: <code>true | false</code>.
 	 * @see SystemProperties#AUTO_RENDER
@@ -75,14 +72,14 @@ public class SystemProperties {
 	public final static String SYNCH_RENDER_DEFAULT = "true";
 
 	/** 
-	 * Specifies the default JrScene used by {@link ViewerApp}.<br>
+	 * Specifies the default JrScene used by {@link de.jreality.ui.viewerapp.ViewerApp}.<br>
 	 * Values: <code>desktop | portal | portal-remote</code>.
 	 */
 	public final static String ENVIRONMENT = "de.jreality.viewerapp.env";
 	public final static String ENVIRONMENT_DEFAULT = "desktop";
 	
 	/** 
-	 * Specifies the {@link ToolSystemConfiguration} to be used by a {@link ToolSystem}.<br>
+	 * Specifies the {@link de.jreality.toolsystem.config.ToolSystemConfiguration} to be used by a {@link de.jreality.toolsystem.ToolSystem}.<br>
 	 * Values: <code>default | portal | portal-remote | desfault+portal</code>.
 	 * @see SystemProperties#TOOL_CONFIG_FILE 
 	 */
@@ -90,19 +87,19 @@ public class SystemProperties {
 	public final static String TOOL_CONFIG_DEFAULT = "default";
 	
 	/**
-	 * Specifies the {@link ToolSystemConfiguration} to be used by a {@link ToolSystem}.<br>
+	 * Specifies the {@link de.jreality.toolsystem.config.ToolSystemConfiguration} to be used by a {@link de.jreality.toolsystem.ToolSystem}.<br>
 	 * Value: file name of a tool system cofiguration xml-file
 	 * @see SystemProperties#TOOL_CONFIG
 	 */
 	public final static String TOOL_CONFIG_FILE = "jreality.toolconfig";
 	
 	/**
-	 * Specifies the viewer(s) to be initialized by {@link ViewerApp}.<br>
+	 * Specifies the viewer(s) to be initialized by {@link de.jreality.ui.viewerapp.ViewerApp}.<br>
 	 * Values: class names of {@link de.jreality.scene.Viewer} implementations separated by space character. 
 	 */
 	public final static String VIEWER = de.jreality.scene.Viewer.class.getName();
-	public final static String VIEWER_DEFAULT_JOGL = de.jreality.jogl.Viewer.class.getName();
-	public final static String VIEWER_DEFAULT_SOFT = de.jreality.softviewer.SoftViewer.class.getName();
+	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.Viewer";  //de.jreality.jogl.Viewer.class.getName();
+	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
 	
 	/**
 	 * Specifies the path of the jReality data directory.
