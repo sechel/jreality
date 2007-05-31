@@ -44,14 +44,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
@@ -68,8 +75,8 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.swing.ScenePanel;
 import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
-import de.jreality.tools.EncompassTool;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 
@@ -77,16 +84,9 @@ import de.jreality.util.PickUtility;
 public class GFZTool  extends AbstractTool {
 	
 	private static InputSlot actSlot = InputSlot.getDevice("SystemTime");
-	private static InputSlot pause = InputSlot.getDevice("RotationToggle");
-	private static InputSlot minus = InputSlot.getDevice("pageDown");
-	private static InputSlot plus = InputSlot.getDevice("pageUp");
-	
 	
 	public GFZTool() {
 		addCurrentSlot(actSlot, "Need notification to perform once.");
-		addCurrentSlot(pause);
-		addCurrentSlot(minus);
-		addCurrentSlot(plus);
 	}
 	
 	
@@ -95,85 +95,70 @@ public class GFZTool  extends AbstractTool {
 	private double layerTimer = 1500.0;  //time in millis between layer change
 	
 	private AnimatorTask task = null;
-	private SceneGraphComponent cmp = null;
+	private SceneGraphComponent gfz = null;
 	private int layerCount, topLayer, direction;
-	
+
+	private Object toolContextKey = null;
 	
 	public void perform(ToolContext tc) {
-		
-		if (task == null) {  //first performance
-			cmp = tc.getRootToToolComponent().getLastComponent();
-			layerCount = 24;
-			topLayer = 1;  //skip first child of gfz
-			direction = -1;  //start with hiding labels
-			
-			task = new AnimatorTask() {
-				double sum = 0;
-				
-				public boolean run(double time, double dt) {
-					//rotate cmp
-					MatrixBuilder m = MatrixBuilder.euclidean(cmp.getTransformation());
-					m.rotate(0.05*dt*angle, axis);
-					m.assignTo(cmp);
-					//set visibility of layers
-					if (sum > layerTimer) {
-						if ( direction<0 && topLayer < layerCount ) {
-							cmp.getChildComponent(topLayer++).setVisible(false);
-							if (topLayer == layerCount) direction = 1;
-						}
-						else if ( direction>0 && topLayer > 1 ) {
-							cmp.getChildComponent(--topLayer).setVisible(true);
-							if (topLayer == 1) direction = -1;
-						}
-						sum = 0;
+
+		//this tool performs only once
+		gfz = tc.getRootToToolComponent().getLastComponent();
+		layerCount = 24;
+		topLayer = 1;  //skip first child of gfz
+		direction = -1;  //start with hiding labels
+		toolContextKey = tc.getKey();  //ToolSystem
+
+		task = new AnimatorTask() {
+			double sum = 0;
+
+			public boolean run(double time, double dt) {
+				//rotate cmp
+				MatrixBuilder m = MatrixBuilder.euclidean(gfz.getTransformation());
+				m.rotate(0.05*dt*angle, axis);
+				m.assignTo(gfz);
+				//set visibility of layers
+				if (sum > layerTimer) {
+					if ( direction<0 && topLayer < layerCount ) {
+						gfz.getChildComponent(topLayer++).setVisible(false);
+						if (topLayer == layerCount) direction = 1;
 					}
-					else sum += dt; 
-					
-					return true;
+					else if ( direction>0 && topLayer > 1 ) {
+						gfz.getChildComponent(--topLayer).setVisible(true);
+						if (topLayer == 1) direction = -1;
+					}
+					sum = 0;
 				}
-			};
-			removeCurrentSlot(actSlot);
-			//task is scheduled in the following
-		}
-		
-		//don't perform if minus or plus are released
-		if (tc.getSource().equals(minus) && tc.getAxisState(minus).isReleased()) 
-			return;
-		if (tc.getSource().equals(plus) && tc.getAxisState(plus).isReleased()) 
-			return;
-		
-		if (tc.getAxisState(minus).isPressed()) {
-			if (topLayer < layerCount) {
-				cmp.getChildComponent(topLayer++).setVisible(false);
-				if (topLayer == layerCount) direction = 1;
+				else sum += dt; 
+
+				return true;
 			}
-			return;
-		}
-		if (tc.getAxisState(plus).isPressed()) {
-			if (topLayer > 1) {
-				cmp.getChildComponent(--topLayer).setVisible(true);
-				if (topLayer == 1) direction = -1;
-			}
-			return;
-		}
-		
-		//pause
-		if (tc.getAxisState(pause).isReleased())
-			AnimatorTool.getInstance(tc).schedule(cmp, task);
-		if (tc.getAxisState(pause).isPressed())
-			AnimatorTool.getInstance(tc).deschedule(cmp);
+		};
+
+		//scheduled task
+		AnimatorTool.getInstanceImpl(toolContextKey).schedule(gfz, task);
+
+		removeCurrentSlot(actSlot);
 	}
 	
-	
-	
+
 	
 //	PROPERTIES
 	static final String gfzDir = "/net/MathVis/gfz";
 	static final int slideInterval = 5000;  //time after which the slide changes in millis
 	static final double scenePanelWidth = 1.0;
+	private static SceneGraphComponent sceneCmp = null;
+	private static SceneGraphComponent scenePanel = null;
+	private static SceneGraphComponent legend = null;
+	
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
+		remoteMain(args);
+	}
+	
+	public static ViewerApp remoteMain(String[] args) throws FileNotFoundException, IOException {
 		
+		GFZTool gfzTool = new GFZTool(); 
 		
 //		LOAD GFZ DATA
 		File file = new File(gfzDir + "/gfz.jrs");
@@ -182,36 +167,35 @@ public class GFZTool  extends AbstractTool {
 		JrScene scene = r.getScene();
 		
 		final SceneGraphComponent root = scene.getSceneRoot();
-		final SceneGraphComponent sceneCmp = scene.getPath("emptyPickPath").getLastComponent();
-		final SceneGraphComponent gfz = sceneCmp.getChildComponent(0);
+		sceneCmp = scene.getPath("emptyPickPath").getLastComponent();
+		SceneGraphComponent gfz = sceneCmp.getChildComponent(0);
 		
 		PickUtility.assignFaceAABBTrees(gfz);  //allows fast picking
-		gfz.addTool(new GFZTool());
+		gfz.addTool(gfzTool);
 		//gfz transformation
-		MatrixBuilder.euclidean().rotateX(-Math.PI/2.3).assignTo(sceneCmp);
+		MatrixBuilder.euclidean().rotateX(-Math.PI/2.3).assignTo(gfz);
 		
 		
 //		BOTTOM RIGHT PANEL
-		final SceneGraphComponent panCmp = new SceneGraphComponent();
-		panCmp.setName("scenePanel");
-		addSlide(gfzDir + "/sheet1.jpg", panCmp);
-		addSlide(gfzDir + "/sheet2.jpg", panCmp);
-		addSlide(gfzDir + "/sheet3.jpg", panCmp);
-		addSlide(gfzDir + "/sheet4.jpg", panCmp);
+		scenePanel = new SceneGraphComponent("scenePanel");
+		gfzTool.addSlide(gfzDir + "/sheet1.jpg", scenePanel);
+		gfzTool.addSlide(gfzDir + "/sheet2.jpg", scenePanel);
+		gfzTool.addSlide(gfzDir + "/sheet3.jpg", scenePanel);
+		gfzTool.addSlide(gfzDir + "/sheet4.jpg", scenePanel);
 		//panel transformation
-		MatrixBuilder.euclidean().translate(4500, -2800, 1000).scale(2500).rotateY(-Math.PI/5).assignTo(panCmp);
-		root.addChild(panCmp);
+		MatrixBuilder.euclidean().translate(4500, -2800, 1000).scale(2500).rotateY(-Math.PI/5).assignTo(scenePanel);
+		root.addChild(scenePanel);
 		new Thread(new Runnable(){
 			public void run() {
-				final int children = panCmp.getChildComponentCount();
+				final int children = scenePanel.getChildComponentCount();
 				int index = 0;
-				panCmp.getChildComponent(index).setVisible(true);
+				scenePanel.getChildComponent(index).setVisible(true);
 				while (true) {
 					try { Thread.sleep(slideInterval); } 
 					catch (InterruptedException e) { e.printStackTrace(); }
 					int nextIndex = (index+1) % children;
-					panCmp.getChildComponent(nextIndex).setVisible(true);
-					panCmp.getChildComponent(index).setVisible(false);
+					scenePanel.getChildComponent(nextIndex).setVisible(true);
+					scenePanel.getChildComponent(index).setVisible(false);
 					index = nextIndex;
 				}
 			}
@@ -220,7 +204,7 @@ public class GFZTool  extends AbstractTool {
 		
 		
 //		LEGEND
-		SceneGraphComponent legend = new SceneGraphComponent();
+		legend = new SceneGraphComponent();
 		legend.setName("legend");
 		root.addChild(legend);
 		legend.setGeometry(Primitives.texturedQuadrilateral(new double[]{0,1,0,1,1,0,1,0,0,0,0,0}));
@@ -241,23 +225,29 @@ public class GFZTool  extends AbstractTool {
 		//legend transformation
 		final double ratio = 1.0;  //size of billboard
 		MatrixBuilder.euclidean().translate(-6500, -2800, 0).scale(5).scale(ratio*img.getWidth(), ratio*img.getHeight(), 0).assignTo(legend);
-		legend.addTool(new EncompassTool());
+//		legend.addTool(new EncompassTool());
 		
 		
 //		START VIEWERAPP
 		ViewerApp viewerApp = new ViewerApp(scene);
-//		viewerApp.setShowMenu(true);
-//		viewerApp.setAttachNavigator(true);
-//		viewerApp.setAttachBeanShell(true);
+//		viewerApp.setShowMenu(false);
+		viewerApp.setAttachNavigator(false);
+		viewerApp.setExternalNavigator(true);
+		viewerApp.setAttachBeanShell(false);
+		viewerApp.setExternalBeanShell(true);
 		viewerApp.update();
+		
+		viewerApp.getMenu().removeMenu(ViewerAppMenu.CAMERA_MENU);
+		viewerApp.getMenu().addMenu(gfzTool.setupMenu());
+		
 		viewerApp.display();
 		
-//		root.addTool(new SelectionTool(viewerApp));
+		return viewerApp;
 	}
 	
 	
 	
-	private static ScenePanel createImagePanel(String fileName) {
+	private ScenePanel createImagePanel(String fileName) {
 		
 		ScenePanel pan = new ScenePanel();
 		pan.setShowFeet(false);
@@ -289,84 +279,100 @@ public class GFZTool  extends AbstractTool {
 	}
 	
 	
-	private static void addSlide(String filename, SceneGraphComponent parent) {
+	private void addSlide(String filename, SceneGraphComponent parent) {
 		final ScenePanel pan = createImagePanel(filename);
 		final SceneGraphComponent child = pan.getComponent();
 		child.setVisible(false);
 		parent.addChild(child);
 	}
+	
+	
+	private JMenu setupMenu() {
+		
+		final JMenu gfzMenu = new JMenu("GFZ");
+		Action action;
+		
+		//SPACE
+		final JCheckBoxMenuItem animate = new JCheckBoxMenuItem();
+		animate.setSelected(true);
+		action = new AbstractAction("animate"){
+			public void actionPerformed(ActionEvent arg0) {
+				if (animate.isSelected())
+					AnimatorTool.getInstanceImpl(toolContextKey).schedule(gfz, task);
+				else AnimatorTool.getInstanceImpl(toolContextKey).deschedule(gfz);
+			}
+		};
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+		action.putValue(Action.SHORT_DESCRIPTION, "Stop or resume animation");
+		animate.setAction(action);
+		gfzMenu.add(animate);
+		
+		//SHOW/HIDE SCENE PANEL
+		final JCheckBoxMenuItem scenepanelCheckBox = new JCheckBoxMenuItem();
+		scenepanelCheckBox.setSelected(scenePanel.isVisible());
+		action = new AbstractAction("show scene panel"){
+			public void actionPerformed(ActionEvent arg0) {
+				scenePanel.setVisible(scenepanelCheckBox.isSelected());
+			}
+		};
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+		action.putValue(Action.SHORT_DESCRIPTION, "Show or hide the panel displayed in the scene");
+		scenepanelCheckBox.setAction(action);
+		gfzMenu.add(scenepanelCheckBox);
+		
+		//SHOW/HIDE LEGEND
+		final JCheckBoxMenuItem legendCheckBox = new JCheckBoxMenuItem();
+		legendCheckBox.setSelected(legend.isVisible());
+		action = new AbstractAction("show legend"){
+			public void actionPerformed(ActionEvent arg0) {
+				legend.setVisible(legendCheckBox.isSelected());
+			}
+		};
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
+		action.putValue(Action.SHORT_DESCRIPTION, "Show or hide the legend displayed in the scene");
+		legendCheckBox.setAction(action);
+		gfzMenu.add(legendCheckBox);
+		
+		gfzMenu.addSeparator();
+		
+		//PAGE UP
+		action = new AbstractAction("Show next layer"){ //dummy
+			public void actionPerformed(ActionEvent arg0) {
+				if (topLayer > 1) {
+					gfz.getChildComponent(--topLayer).setVisible(true);
+					if (topLayer == 1) direction = -1;
+				}
+			}
+		};
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
+		action.putValue(Action.SHORT_DESCRIPTION, "Shows the next layer");
+		gfzMenu.add(new JMenuItem(action));
+		
+		//PAGE DOWN
+		action = new AbstractAction("Hide next layer"){ //dummy
+			public void actionPerformed(ActionEvent arg0) {
+				if (topLayer < layerCount) {
+					gfz.getChildComponent(topLayer++).setVisible(false);
+					if (topLayer == layerCount) direction = 1;
+				}
+			}
+		};
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
+		action.putValue(Action.SHORT_DESCRIPTION, "Hides the next layer");
+		gfzMenu.add(new JMenuItem(action));
+		gfzMenu.addSeparator();
+		
+		//RESET
+		action = new AbstractAction("Reset scene"){
+			public void actionPerformed(ActionEvent arg0) {
+				sceneCmp.setTransformation(null);
+			}
+		};
+		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0));
+		action.putValue(Action.SHORT_DESCRIPTION, "Undo all transformations caused by rotating or dragging");
+		gfzMenu.add(new JMenuItem(action));
+		
+		return gfzMenu;
+	}
+
 }
-
-
-//------ OLD STUFF ---------------------------------------------------------------------
-//COORDINATE SYSTEM (bounding box)
-//final CoordinateSystemFactory coords = new CoordinateSystemFactory(gfz, 500.0);
-//coords.showLabels(false);
-//coords.showBox(true);
-//coords.showGrid(false);
-//coords.beautify(true);
-//final Color boxColor = Color.GRAY;
-//coords.setGridColor(boxColor);
-//coords.setBoxColor(boxColor);
-
-
-//PIPE LABELS
-//final double offset = 200.0;
-//final double sqrt = Math.sqrt(0.5*Math.pow(offset, 2.0));
-//double[][] vertices = new double[][]{
-//{-1222-sqrt, -400-sqrt, 800},  //red 
-//{-1160, -347+offset, 1000},     //blue
-//{-1139+sqrt, -429-sqrt, 1200}}; //green
-//PointSetFactory fac = new PointSetFactory();
-//fac.setVertexCount(3);
-//fac.setVertexCoordinates(vertices);
-//fac.setVertexLabels(new String[]{"red", "blue", "green"});
-//fac.setVertexColors(new Color[]{Color.RED, Color.BLUE, Color.GREEN});
-//fac.update();
-//final SceneGraphComponent pipeLabels = new SceneGraphComponent();
-//pipeLabels.setName("pipe labels");
-//pipeLabels.setGeometry(fac.getPointSet());
-//Appearance app = new Appearance();
-//final double labelScale = 4.0;
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale)
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0, 100.0, 0});
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.NORTH);
-//app.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-//app.setAttribute(CommonAttributes.POINT_RADIUS, 50.0);
-//pipeLabels.setAppearance(app);
-//gfz.addChild(pipeLabels);
-
-
-//ALTERNATIVELY PIPE LABELS
-////pipe labels
-//final double offset = 200.0;
-//final double sqrt = Math.sqrt(0.5*Math.pow(offset, 2.0));
-//final double labelScale = 5.0;
-//double[][] vertices = new double[][]{
-//{-1222-sqrt, -400-sqrt, 800},  //red 
-//{-1160, -347+offset, 1000},     //blue
-//{-1139+sqrt, -429-sqrt, 1200}}; //green
-//String[] labels = new String[]{"red", "blue", "green"};
-//Color[] colors = new Color[]{Color.RED, Color.BLUE, Color.GREEN};
-//final SceneGraphComponent pipeLabels = new SceneGraphComponent();
-//pipeLabels.setName("pipe labels");
-//PointSetFactory fac;
-//for (int i = 0; i < 3; i++) {
-//fac = new PointSetFactory();
-//fac.setVertexCount(1);
-//fac.setVertexCoordinates(vertices[i]);
-//fac.setVertexLabels(new String[]{labels[i]});
-//fac.update();
-//final SceneGraphComponent cmp = new SceneGraphComponent();
-//cmp.setName(labels[i]);
-//cmp.setGeometry(fac.getPointSet());
-//Appearance app = new Appearance();
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale)
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.CENTER);
-//app.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-//app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, colors[i]);
-////app.setAttribute(CommonAttributes.POINT_RADIUS, 50.0);
-//cmp.setAppearance(app);
-//pipeLabels.addChild(cmp);
-//}
-//gfz.addChild(pipeLabels);
