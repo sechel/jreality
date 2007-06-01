@@ -82,24 +82,24 @@ import de.jreality.util.PickUtility;
 
 
 public class GFZTool  extends AbstractTool {
-	
+
 	private static InputSlot actSlot = InputSlot.getDevice("SystemTime");
-	
+
 	public GFZTool() {
 		addCurrentSlot(actSlot, "Need notification to perform once.");
 	}
-	
-	
+
+
 	private double angle = 0.001;  //angle of rotation
 	private double[] axis = new double[]{0, 0, 1};  //axis of rotation
 	private double layerTimer = 1500.0;  //time in millis between layer change
-	
+
 	private AnimatorTask task = null;
 	private SceneGraphComponent gfz = null;
 	private int layerCount, topLayer, direction;
 
 	private Object toolContextKey = null;
-	
+
 	public void perform(ToolContext tc) {
 
 		//this tool performs only once
@@ -140,9 +140,9 @@ public class GFZTool  extends AbstractTool {
 
 		removeCurrentSlot(actSlot);
 	}
-	
 
-	
+
+
 //	PROPERTIES
 	static final String gfzDir = "/net/MathVis/gfz";
 	static final int slideInterval = 5000;  //time after which the slide changes in millis
@@ -150,32 +150,32 @@ public class GFZTool  extends AbstractTool {
 	private static SceneGraphComponent sceneCmp = null;
 	private static SceneGraphComponent scenePanel = null;
 	private static SceneGraphComponent legend = null;
-	
-	
+
+
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		remoteMain(args);
 	}
-	
+
 	public static ViewerApp remoteMain(String[] args) throws FileNotFoundException, IOException {
-		
+
 		GFZTool gfzTool = new GFZTool(); 
-		
+
 //		LOAD GFZ DATA
 		File file = new File(gfzDir + "/gfz.jrs");
 		ReaderJRS r = new ReaderJRS();
 		r.setInput(new Input(file));
 		JrScene scene = r.getScene();
-		
+
 		final SceneGraphComponent root = scene.getSceneRoot();
 		sceneCmp = scene.getPath("emptyPickPath").getLastComponent();
 		SceneGraphComponent gfz = sceneCmp.getChildComponent(0);
-		
+
 		PickUtility.assignFaceAABBTrees(gfz);  //allows fast picking
 		gfz.addTool(gfzTool);
 		//gfz transformation
 		MatrixBuilder.euclidean().rotateX(-Math.PI/2.3).assignTo(gfz);
-		
-		
+
+
 //		BOTTOM RIGHT PANEL
 		scenePanel = new SceneGraphComponent("scenePanel");
 		gfzTool.addSlide(gfzDir + "/sheet1.jpg", scenePanel);
@@ -201,8 +201,8 @@ public class GFZTool  extends AbstractTool {
 			}
 		}).start();
 //		panCmp.addTool(new DraggingTool());
-		
-		
+
+
 //		LEGEND
 		legend = new SceneGraphComponent();
 		legend.setName("legend");
@@ -226,8 +226,8 @@ public class GFZTool  extends AbstractTool {
 		final double ratio = 1.0;  //size of billboard
 		MatrixBuilder.euclidean().translate(-6500, -2800, 0).scale(5).scale(ratio*img.getWidth(), ratio*img.getHeight(), 0).assignTo(legend);
 //		legend.addTool(new EncompassTool());
-		
-		
+
+
 //		START VIEWERAPP
 		ViewerApp viewerApp = new ViewerApp(scene);
 //		viewerApp.setShowMenu(false);
@@ -235,20 +235,21 @@ public class GFZTool  extends AbstractTool {
 		viewerApp.setExternalNavigator(true);
 		viewerApp.setAttachBeanShell(false);
 		viewerApp.setExternalBeanShell(true);
+
 		viewerApp.update();
-		
+
 		viewerApp.getMenu().removeMenu(ViewerAppMenu.CAMERA_MENU);
 		viewerApp.getMenu().addMenu(gfzTool.setupMenu());
-		
+
 		viewerApp.display();
-		
+
 		return viewerApp;
 	}
-	
-	
-	
+
+
+
 	private ScenePanel createImagePanel(String fileName) {
-		
+
 		ScenePanel pan = new ScenePanel();
 		pan.setShowFeet(false);
 		pan.setAngle(Math.PI/2);
@@ -268,73 +269,50 @@ public class GFZTool  extends AbstractTool {
 		imgPanel.setPreferredSize(d);
 		imgPanel.setMinimumSize(d);
 		imgPanel.setMaximumSize(d);
-		
+
 		pan.getFrame().getContentPane().add(imgPanel);
 		pan.getFrame().pack();
-		
+
 		pan.getFrame().setVisible(true);
 		pan.setPanelWidth(scenePanelWidth);
-		
+
 		return pan;
 	}
-	
-	
+
+
 	private void addSlide(String filename, SceneGraphComponent parent) {
 		final ScenePanel pan = createImagePanel(filename);
 		final SceneGraphComponent child = pan.getComponent();
 		child.setVisible(false);
 		parent.addChild(child);
 	}
-	
-	
+
+
+	private JCheckBoxMenuItem animate, scenepanelCB, legendCB, blueCB, greenCB, redCB;
+
 	private JMenu setupMenu() {
-		
-		final JMenu gfzMenu = new JMenu("GFZ");
+
+		JMenu gfzMenu = new JMenu("GFZ");
+		gfzMenu.setMnemonic(KeyEvent.VK_G);
 		Action action;
-		
+
 		//SPACE
-		final JCheckBoxMenuItem animate = new JCheckBoxMenuItem();
-		animate.setSelected(true);
-		action = new AbstractAction("animate"){
+		animate = new JCheckBoxMenuItem( new AbstractAction("animate"){
+			{
+				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+				putValue(Action.SHORT_DESCRIPTION, "Stop or resume animation");
+			}
 			public void actionPerformed(ActionEvent arg0) {
 				if (animate.isSelected())
 					AnimatorTool.getInstanceImpl(toolContextKey).schedule(gfz, task);
 				else AnimatorTool.getInstanceImpl(toolContextKey).deschedule(gfz);
 			}
-		};
-		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
-		action.putValue(Action.SHORT_DESCRIPTION, "Stop or resume animation");
-		animate.setAction(action);
+		});
+		animate.setSelected(true);
 		gfzMenu.add(animate);
-		
-		//SHOW/HIDE SCENE PANEL
-		final JCheckBoxMenuItem scenepanelCheckBox = new JCheckBoxMenuItem();
-		scenepanelCheckBox.setSelected(scenePanel.isVisible());
-		action = new AbstractAction("show scene panel"){
-			public void actionPerformed(ActionEvent arg0) {
-				scenePanel.setVisible(scenepanelCheckBox.isSelected());
-			}
-		};
-		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
-		action.putValue(Action.SHORT_DESCRIPTION, "Show or hide the panel displayed in the scene");
-		scenepanelCheckBox.setAction(action);
-		gfzMenu.add(scenepanelCheckBox);
-		
-		//SHOW/HIDE LEGEND
-		final JCheckBoxMenuItem legendCheckBox = new JCheckBoxMenuItem();
-		legendCheckBox.setSelected(legend.isVisible());
-		action = new AbstractAction("show legend"){
-			public void actionPerformed(ActionEvent arg0) {
-				legend.setVisible(legendCheckBox.isSelected());
-			}
-		};
-		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
-		action.putValue(Action.SHORT_DESCRIPTION, "Show or hide the legend displayed in the scene");
-		legendCheckBox.setAction(action);
-		gfzMenu.add(legendCheckBox);
-		
+
 		gfzMenu.addSeparator();
-		
+
 		//PAGE UP
 		action = new AbstractAction("Show next layer"){ //dummy
 			public void actionPerformed(ActionEvent arg0) {
@@ -347,7 +325,7 @@ public class GFZTool  extends AbstractTool {
 		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
 		action.putValue(Action.SHORT_DESCRIPTION, "Shows the next layer");
 		gfzMenu.add(new JMenuItem(action));
-		
+
 		//PAGE DOWN
 		action = new AbstractAction("Hide next layer"){ //dummy
 			public void actionPerformed(ActionEvent arg0) {
@@ -360,8 +338,81 @@ public class GFZTool  extends AbstractTool {
 		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
 		action.putValue(Action.SHORT_DESCRIPTION, "Hides the next layer");
 		gfzMenu.add(new JMenuItem(action));
+
 		gfzMenu.addSeparator();
-		
+
+		//SHOW/HIDE SCENE PANEL
+		scenepanelCB = new JCheckBoxMenuItem( new AbstractAction("show scene panel"){
+			{
+				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
+				putValue(Action.SHORT_DESCRIPTION, "Show or hide the panel displayed in the scene");
+			}
+			public void actionPerformed(ActionEvent arg0) {
+				scenePanel.setVisible(scenepanelCB.isSelected());
+			}
+		});
+		scenepanelCB.setSelected(scenePanel.isVisible());
+		gfzMenu.add(scenepanelCB);
+
+		//SHOW/HIDE LEGEND
+		legendCB = new JCheckBoxMenuItem( new AbstractAction("show legend"){
+			{
+				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
+				putValue(Action.SHORT_DESCRIPTION, "Show or hide the legend displayed in the scene");
+			}
+			public void actionPerformed(ActionEvent arg0) {
+				legend.setVisible(legendCB.isSelected());
+			}
+		});
+		legendCB.setSelected(legend.isVisible());
+		gfzMenu.add(legendCB);
+
+		gfzMenu.addSeparator();
+
+		//WELLS
+		SceneGraphComponent wells = gfz.getChildComponent(0);
+		final SceneGraphComponent red = wells.getChildComponent(0);
+		final SceneGraphComponent green = wells.getChildComponent(1);
+		final SceneGraphComponent blue = wells.getChildComponent(2);
+
+		blueCB = new JCheckBoxMenuItem( new AbstractAction("show blue well"){
+			{
+				//putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
+				putValue(Action.SHORT_DESCRIPTION, "Show or hide the blue well");
+			}
+			public void actionPerformed(ActionEvent arg0) {
+				blue.setVisible(blueCB.isSelected());
+			}
+		});
+		blueCB.setSelected(blue.isVisible());
+		gfzMenu.add(blueCB);
+
+		greenCB = new JCheckBoxMenuItem( new AbstractAction("show green well"){
+			{
+				//putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
+				putValue(Action.SHORT_DESCRIPTION, "Show or hide the green well");
+			}
+			public void actionPerformed(ActionEvent arg0) {
+				green.setVisible(greenCB.isSelected());
+			}
+		});
+		greenCB.setSelected(green.isVisible());
+		gfzMenu.add(greenCB);
+
+		redCB = new JCheckBoxMenuItem( new AbstractAction("show red well"){
+			{
+				//putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0));
+				putValue(Action.SHORT_DESCRIPTION, "Show or hide the red well");
+			}
+			public void actionPerformed(ActionEvent arg0) {
+				red.setVisible(redCB.isSelected());
+			}
+		});
+		redCB.setSelected(red.isVisible());
+		gfzMenu.add(redCB);
+
+		gfzMenu.addSeparator();
+
 		//RESET
 		action = new AbstractAction("Reset scene"){
 			public void actionPerformed(ActionEvent arg0) {
@@ -371,7 +422,7 @@ public class GFZTool  extends AbstractTool {
 		action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, 0));
 		action.putValue(Action.SHORT_DESCRIPTION, "Undo all transformations caused by rotating or dragging");
 		gfzMenu.add(new JMenuItem(action));
-		
+
 		return gfzMenu;
 	}
 
