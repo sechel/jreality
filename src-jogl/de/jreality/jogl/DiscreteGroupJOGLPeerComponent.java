@@ -213,7 +213,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	protected void updateShaders() {
 		super.updateShaders();
-		if (!isCopyCat) return;
+		if (!isCopyCat || eAp == null) return;
 		minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
 		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
 		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);	
