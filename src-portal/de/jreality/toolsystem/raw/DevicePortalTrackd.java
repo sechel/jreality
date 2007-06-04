@@ -15,21 +15,16 @@ import de.jreality.toolsystem.ToolEvent;
 
 public class DevicePortalTrackd extends DeviceTrackd {
 	
-//	static final Matrix OLD_HEAD_CALIB = MatrixBuilder.euclidean()
-//										.rotateY(-Math.PI/2)
-//										.rotateX(Math.PI/2)
-//										.rotateY(-Math.PI/2)
-//										.rotateX(Math.PI/2)
-//										.rotateZ(rad(-7))
-//										.rotateY(rad(12))
-//										.rotateX(rad(-5))
-//										.translate(0.08, 0., 0.)
-//										.getMatrix();
 	static final Matrix HEAD_CALIB = MatrixBuilder.euclidean()
-	.rotateX(-Math.PI/2)
-	.rotateY(Math.PI/2)
-	.translate(0.08, 0., -1.)
-	.getMatrix();
+										.rotateY(-Math.PI/2)
+										.rotateX(Math.PI/2)
+										.rotateY(-Math.PI/2)
+										.rotateX(Math.PI/2)
+										.rotateZ(rad(-7))
+										.rotateY(rad(12))
+										.rotateX(rad(-5))
+										.translate(0.08, 0., 0.)
+										.getMatrix();
 	static final Matrix WAND_CALIB = MatrixBuilder.euclidean()
 										.rotateZ(Math.PI)
 										.rotateX(rad(-5))
