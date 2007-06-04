@@ -43,8 +43,7 @@ package de.jreality.util;
 
 /**
  * jReality system property keys and default values
- * used in {@link System#getProperty(String, String)}
- * and {@link Secure#getProperty(String, String)}.
+ * used in methods of {@link Secure}.
  * 
  * @author msommer
  */
@@ -56,7 +55,7 @@ public class SystemProperties {
 	/** 
 	 * Specifies whether {@link de.jreality.ui.viewerapp.ViewerApp} initializes a {@link RenderTrigger}
 	 * for the displayed scene.<br> 
-	 * Values: <code>true | false</code>.
+	 * Values: <code>true | false</code>
 	 * @see SystemProperties#SYNCH_RENDER   
 	 */
 	public final static String AUTO_RENDER = "de.jreality.ui.viewerapp.autoRender";
@@ -65,7 +64,7 @@ public class SystemProperties {
 	/** 
 	 * Specifies whether the {@link RenderTrigger} initialized by {@link de.jreality.ui.viewerapp.ViewerApp}
 	 * dispatches synchronous render requests.<br>
-	 * Values: <code>true | false</code>.
+	 * Values: <code>true | false</code>
 	 * @see SystemProperties#AUTO_RENDER
 	 */
 	public final static String SYNCH_RENDER = "de.jreality.ui.viewerapp.synchRender";
@@ -73,14 +72,14 @@ public class SystemProperties {
 
 	/** 
 	 * Specifies the default JrScene used by {@link de.jreality.ui.viewerapp.ViewerApp}.<br>
-	 * Values: <code>desktop | portal | portal-remote</code>.
+	 * Values: <code>desktop | portal | portal-remote</code>
 	 */
 	public final static String ENVIRONMENT = "de.jreality.viewerapp.env";
 	public final static String ENVIRONMENT_DEFAULT = "desktop";
 	
 	/** 
 	 * Specifies the {@link de.jreality.toolsystem.config.ToolSystemConfiguration} to be used by a {@link de.jreality.toolsystem.ToolSystem}.<br>
-	 * Values: <code>default | portal | portal-remote | desfault+portal</code>.
+	 * Values: <code>default | portal | portal-remote | desfault+portal</code>
 	 * @see SystemProperties#TOOL_CONFIG_FILE 
 	 */
 	public final static String TOOL_CONFIG = "de.jreality.scene.tool.Config";
@@ -95,7 +94,7 @@ public class SystemProperties {
 	
 	/**
 	 * Specifies the viewer(s) to be initialized by {@link de.jreality.ui.viewerapp.ViewerApp}.<br>
-	 * Values: class names of {@link de.jreality.scene.Viewer} implementations separated by space character. 
+	 * Values: class names of {@link de.jreality.scene.Viewer} implementations separated by space character 
 	 */
 	public final static String VIEWER = de.jreality.scene.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.Viewer";  //de.jreality.jogl.Viewer.class.getName();
@@ -112,13 +111,13 @@ public class SystemProperties {
 	
 	/**
 	 * Maximal number of polygon vertices in {@link de.jreality.soft.Polygon}.<br>
-	 * Values: non-negative integer. 
+	 * Values: non-negative integer
 	 */
 	public final static String SOFT_MAX_POLYVERTEX = "jreality.soft.maxpolyvertex";
 	
 	/**
 	 * Specifies the {@link de.jreality.soft.Imager} used in {@link de.jreality.soft.NewPolygonRasterizer}.<br>
-	 * Values: <code>hatch | toon</code> (instances of {@link de.jreality.soft.Imager}).
+	 * Values: <code>hatch | toon</code> (instances of {@link de.jreality.soft.Imager})
 	 */
 	public final static String SOFT_IMAGER = "jreality.soft.imager";
 	
@@ -126,31 +125,31 @@ public class SystemProperties {
 	
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
-	 * Values: <code>true | false</code>.
+	 * Values: <code>true | false</code>
 	 */
 	public final static String JOGL_DEBUG_GL = "jreality.jogl.debugGL";
 	
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
-	 * Values: <code>true | false</code>.
+	 * Values: <code>true | false</code>
 	 */
 	public final static String JOGL_PORTAL_USAGE = "jreality.jogl.portalUsage";
 
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
-	 * Values: <code>true | false</code>.
+	 * Values: <code>true | false</code>
 	 */
 	public final static String JOGL_QUAD_BUFFERED_STEREO = "jreality.jogl.quadBufferedStereo";
 
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
-	 * Values: <code>true | false</code>.
+	 * Values: <code>true | false</code>
 	 */
 	public final static String JOGL_COPY_CAT = "discreteGroup.copycat";
 
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
-	 * Values: <code>finest | finer | fine | info</code> (static fields of {@link java.util.logging.Level}).
+	 * Values: <code>finest | finer | fine | info</code> (static fields of {@link java.util.logging.Level})
 	 */
 	public final static String JOGL_LOGGING_LEVEL = "jreality.jogl.loggingLevel";
 
@@ -172,14 +171,14 @@ public class SystemProperties {
 
 	/**
 	 * Specifies the selection manager to be used.<br>
-	 * Values: instances of {@link de.jreality.ui.viewerapp.SelectionManagerInterface}.
+	 * Values: instances of {@link de.jreality.ui.viewerapp.SelectionManagerInterface}
 	 */
 	public final static String SELECTION_MANAGER = "de.jreality.ui.viewerapp.SelectionManagerInterface";
 	public final static String SELECTION_MANAGER_DEFAULT = "de.jreality.ui.viewerapp.SelectionManager";
 	
 	/**
 	 * Specifies the viewer to be initialized by {@link de.jreality.portal.HeadTrackedViewer#HeadTrackedViewer()}.<br>
-	 * Values: class name of {@link de.jreality.scene.Viewer} implementation.
+	 * Values: class name of {@link de.jreality.scene.Viewer} implementation
 	 */
 	public final static String PORTAL_HEADTRACKED_VIEWER = "de.jreality.portal.HeadTrackedViewer";
 	public final static String PORTAL_HEADTRACKED_VIEWER_DEFAULT = "de.jreality.jogl.Viewer";
@@ -191,41 +190,4 @@ public class SystemProperties {
 	 */
 	public final static String BSH_JAR = "jreality.bsh.jar";
 
-
-	
-//	/**
-//	 * Specifies the path of the discrete group resource directory.<br>
-//	 * Values: directory path
-//	 */
-//	public final static String DISCRETEGROUP_RESOURCE_DIR = "discreteGroup.resourceDir";
-//	
-//	/**
-//	 * Specifies the maximum number of elements in a discrete group.<br>
-//	 * Values: integer
-//	 */
-//	public final static String DISCRETEGROUP_MAX_NUM_ELEMENTS = "discreteGroup.maxNumElements";
-//
-//	/**
-//	 * Specifies the path of triangle group files.<br>
-//	 * Values: directory path
-//	 */
-//	public final static String DISCRETEGROUP_TRIANGLE_GROUP_FILES = "triangleGroupFiles";
-//	
-//	/**
-//	 * Specifies the location of the <code>autgroup</code> command.
-//	 */
-//	public final static String DISCRETEGROUP_AUTGROUP_COMMAND = "discreteGroup.autgroupCommand";
-//
-//	/**
-//	 * Specifies the path of wallpaper files.<br>
-//	 * Values: directory path
-//	 */
-//	public final static String DISCRETEGROUP_WALLPAPER_FILES = "wallpaperFiles";
-//
-//	/**
-//	 * Specifies the ship scale used in discreteGroup.Maniview.<br>
-//	 * Values: directory path
-//	 */
-//	public final static String DISCRETEGROUP_MANIVIEW_SHIPSCALE = "maniview.shipScale";
-	
 }
