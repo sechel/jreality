@@ -47,6 +47,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Light;
+import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
@@ -101,8 +102,13 @@ public class SceneGraphUtility {
    * 
    * TODO: this should be called removeChildComponents!
    */
-  	public static void removeChildren(SceneGraphComponent c) {
-	  	while (c.getChildComponentCount() > 0) c.removeChild(c.getChildComponent(0));
+  	public static void removeChildren(final SceneGraphComponent c) {
+  		Scene.executeWriter(c, new Runnable()	{
+			public void run() {
+			  	while (c.getChildComponentCount() > 0) c.removeChild(c.getChildComponent(0));
+			}
+ 			
+  		});
   	}
 	
   	/**
