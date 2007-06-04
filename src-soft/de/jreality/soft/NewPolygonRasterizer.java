@@ -41,16 +41,9 @@
 package de.jreality.soft;
 
 import java.util.Arrays;
-/*
- * implementation notes: for speed reasons  we do not interpolate y coordinates 
- * and normals at all.
- * Moreover x is only interpolated as long as needed. 
- * All other quantities are interpolated when requested by the shading type.
- * 
- *
- */
 
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /**
  * @version 1.0
@@ -81,7 +74,7 @@ public class NewPolygonRasterizer implements PolygonRasterizer {
     
     {
     	try {
-    		String img = Secure.getProperty("jreality.soft.imager");
+    		String img = Secure.getProperty(SystemProperties.SOFT_IMAGER);
             if (img != null && img.equals("hatch")) imager = new HatchImager();
             if (img != null && img.equals("toon")) imager = new ToonImager();
     	} catch (SecurityException se) {

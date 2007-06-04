@@ -42,6 +42,7 @@ package de.jreality.portal;
 
 import java.util.List;
 
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 
 /**
@@ -53,7 +54,7 @@ import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 public interface RemoteViewer {
   public void setRemoteSceneRoot(RemoteSceneGraphComponent r);
   public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r);
-  public void setRemoteCameraPath(List list);
+  public void setRemoteCameraPath(List<SceneGraphNode> list);
   public void render();
   public void waitForRenderFinish();
   public void setSignature(int sig);

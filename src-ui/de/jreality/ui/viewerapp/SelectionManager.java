@@ -55,6 +55,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 
 /**
@@ -113,7 +114,7 @@ public class SelectionManager implements SelectionManagerInterface {
 		}
 		
 		if (sm == null) {  //create new SelectionManager
-			String selectionManager = Secure.getProperty("de.jreality.ui.viewerapp.SelectionManagerInterface", "de.jreality.ui.viewerapp.SelectionManager");		
+			String selectionManager = Secure.getProperty(SystemProperties.SELECTION_MANAGER, SystemProperties.SELECTION_MANAGER_DEFAULT);		
 			try { sm = (SelectionManagerInterface) Class.forName(selectionManager).newInstance();	} 
 			catch (Exception e) {	e.printStackTrace(); } 
 		}

@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import de.jreality.math.Rn;
-import de.jreality.util.CameraUtility;
 
 /**
  * A SceneGraphPath represents a directed path between two nodes in the scene graph. 

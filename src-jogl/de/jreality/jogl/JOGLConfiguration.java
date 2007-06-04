@@ -45,9 +45,9 @@ import java.util.logging.Logger;
 
 import javax.swing.JPopupMenu;
 
-import de.jreality.scene.data.Attribute;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /*
  * Author	gunn
@@ -71,10 +71,12 @@ public class JOGLConfiguration {
 	public static String resourceDir = null, saveResourceDir = null;
 	public static String localScratchDisk = null;
 	public static boolean quadBufferedStereo = false;
-	 public static String COPY_CAT = "copyCat", FORCE_RENDER = "preRender";
+	public static String COPY_CAT = "copyCat", FORCE_RENDER = "preRender";
 	static JOGLConfiguration ss = new JOGLConfiguration();
 	static Class<? extends GoBetween> goBetweenClass = null;
 	static Class<? extends JOGLPeerComponent> peerClass = null;
+	
+	@SuppressWarnings("unchecked")
 	private JOGLConfiguration() { 
 		super(); 
 		theLog	= LoggingSystem.getLogger(this);
@@ -82,12 +84,12 @@ public class JOGLConfiguration {
 		try {
 		    System.setProperty("sun.awt.noerasebackground", "true");
 			//theLog.setLevel(Level.INFO);
-			String foo = Secure.getProperty("jreality.jogl.debugGL");
+			String foo = Secure.getProperty(SystemProperties.JOGL_DEBUG_GL);
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-			foo = Secure.getProperty("jreality.jogl.portalUsage");
+			foo = Secure.getProperty(SystemProperties.JOGL_PORTAL_USAGE);
 			if (foo != null) 
 				if (foo.indexOf("true") != -1) portalUsage = true;
-			foo = Secure.getProperty("jreality.jogl.loggingLevel");
+			foo = Secure.getProperty(SystemProperties.JOGL_LOGGING_LEVEL);
 			if (foo != null)  {
 				Level level = Level.INFO;
 				if (foo.indexOf("finest") != -1) level = Level.FINEST;
@@ -99,7 +101,7 @@ public class JOGLConfiguration {
 			foo = Secure.getProperty("os.name");
 			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
-//			foo = Secure.getProperty("jreality.jogl.sharedContexts");
+//			foo = Secure.getProperty("jreality.jogl.sharedContexts");  //TODO: move to de.jreality.util.SystemProperties
 //			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
 //			if (sharedContexts)	{
 //				GLCapabilities capabilities = new GLCapabilities();
@@ -108,9 +110,9 @@ public class JOGLConfiguration {
 //				sharedContexts=false;
 //				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
 //			}
-			foo = Secure.getProperty("jreality.jogl.resourceDir");
+			foo = Secure.getProperty(SystemProperties.JOGL_RESOURCE_DIR);
 			if (foo != null) saveResourceDir = resourceDir = foo;
-			quadBufferedStereo = "true".equals(Secure.getProperty("jreality.jogl.quadBufferedStereo"));
+			quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn
 				// only for windows
@@ -118,7 +120,7 @@ public class JOGLConfiguration {
 			}
 			// this doesn't really belong here but it's important that it gets evaluated
 			// before jogl backend classes begin to be instantiated, and this is the best place to guarantee that.
-			boolean copycat = "true".equals(Secure.getProperty("discreteGroup.copycat"));
+			boolean copycat = "true".equals(Secure.getProperty(SystemProperties.JOGL_COPY_CAT));
 			if (copycat)
 				try {
 					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName("de.jreality.jogl.DiscreteGroupJOGLPeerComponent");

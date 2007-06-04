@@ -76,7 +76,6 @@ import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -303,7 +302,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		clippingPlanesDirty = false;
 	}
 
-	List lights = null;
+	List<SceneGraphPath> lights = null;
 	private void processLights( ) {
 		lightsChanged = true;
 		if (lights == null || lights.size() == 0 || lightListDirty) {
@@ -659,7 +658,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 //	static {
 //		try {
-//			String foo = Secure.getProperty("jreality.jogl.goBetweenClass");
+//			String foo = Secure.getProperty("jreality.jogl.goBetweenClass");  //TODO: move to de.jreality.util.SystemProperties
 //			if (foo != null)
 //				try {
 //					gbClass = (Class<? extends GoBetween>) Class.forName(foo);

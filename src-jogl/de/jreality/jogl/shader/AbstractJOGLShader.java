@@ -58,6 +58,7 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /**
  * A class to handle common tasks related to openGL shading language shaders.
@@ -69,7 +70,7 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 	int program = -1;
 	static String resourceDir = "./";
 	static {
-		String foo = Secure.getProperty("jreality.jogl.resourceDir");
+		String foo = Secure.getProperty(SystemProperties.JOGL_RESOURCE_DIR);
 		if (foo != null) resourceDir = foo;
 	}
 

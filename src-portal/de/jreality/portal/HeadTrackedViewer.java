@@ -58,6 +58,7 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
@@ -66,6 +67,7 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 import de.smrj.ClientFactory;
 
 /**
@@ -90,7 +92,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   Camera cam;
 
   public static HeadTrackedViewer createFullscreen(Class viewerClass) {
-    System.setProperty("de.jreality.portal.HeadTrackedViewer", viewerClass.getName());
+    System.setProperty(SystemProperties.PORTAL_HEADTRACKED_VIEWER, viewerClass.getName());
     return createFullscreen();
   }
 
@@ -120,7 +122,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
   
   public HeadTrackedViewer() {
-    String delegated = Secure.getProperty("de.jreality.portal.HeadTrackedViewer", "de.jreality.jogl.Viewer");
+    String delegated = Secure.getProperty(SystemProperties.PORTAL_HEADTRACKED_VIEWER, SystemProperties.PORTAL_HEADTRACKED_VIEWER_DEFAULT);
     try {
       viewer = (Viewer) Class.forName(delegated).newInstance();
     } catch (Exception e) {
@@ -201,7 +203,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
   }
 
   public void setCameraPath(SceneGraphPath camPath) {
-    cameraPath = (SceneGraphPath) camPath.clone();
+    cameraPath = new SceneGraphPath(camPath);
     hasCamPath = !(camPath == null || camPath.getLength() == 0);
     // empty path => reset fields
     if (camPath == null || camPath.getLength() == 0) {
@@ -223,7 +225,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     headComponent = camPath.getLastComponent();
     
     camPath.pop(); // now this should be the portal path
-    portalPath = (SceneGraphPath) camPath.clone();
+    portalPath = new SceneGraphPath(camPath);
     
     // add camera position and orientation, add camera there
     // DONT CHANGE SCENEGRAPH
@@ -313,7 +315,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     setAuxiliaryRoot((SceneGraphComponent) r);
   }
 
-  public void setRemoteCameraPath(List list) {
+  public void setRemoteCameraPath(List<SceneGraphNode> list) {
     setCameraPath(SceneGraphPath.fromList(list));
   }
 

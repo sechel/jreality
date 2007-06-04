@@ -88,7 +88,7 @@ public class SystemProperties {
 	
 	/**
 	 * Specifies the {@link de.jreality.toolsystem.config.ToolSystemConfiguration} to be used by a {@link de.jreality.toolsystem.ToolSystem}.<br>
-	 * Value: file name of a tool system cofiguration xml-file
+	 * Values: file name of a tool system cofiguration xml-file
 	 * @see SystemProperties#TOOL_CONFIG
 	 */
 	public final static String TOOL_CONFIG_FILE = "jreality.toolconfig";
@@ -100,39 +100,132 @@ public class SystemProperties {
 	public final static String VIEWER = de.jreality.scene.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.Viewer";  //de.jreality.jogl.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
-	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();
+//	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();
 	
 	/**
-	 * Specifies the path of the jReality data directory.
+	 * Specifies the path of the jReality data directory.<br>
+	 * Values: directory path
 	 */
 	public final static String JREALITY_DATA = "jreality.data";
 	
 	
 	
-//	NO DEFAULTS:
-//	
-//	de.jreality.soft.Polygon: "jreality.soft.maxpolyvertex" - int
-//	de.jreality.soft.NewPolygonRasterizer: "jreality.soft.imager" - hatch | toon
-//	
-//	CHARLES:
-//	"jreality.jogl.debugGL" - boolean
-//	"jreality.jogl.portalUsage" - boolean
-//	"jreality.jogl.loggingLevel" - public finals of java.util.logging.Level
-//	"jreality.jogl.quadBufferedStereo" - boolean
-//	"discreteGroup.copycat" - boolean
-//	"jreality.jogl.resourceDir" - directory path
-//	-------------------------------
+	/**
+	 * Maximal number of polygon vertices in {@link de.jreality.soft.Polygon}.<br>
+	 * Values: non-negative integer. 
+	 */
+	public final static String SOFT_MAX_POLYVERTEX = "jreality.soft.maxpolyvertex";
+	
+	/**
+	 * Specifies the {@link de.jreality.soft.Imager} used in {@link de.jreality.soft.NewPolygonRasterizer}.<br>
+	 * Values: <code>hatch | toon</code> (instances of {@link de.jreality.soft.Imager}).
+	 */
+	public final static String SOFT_IMAGER = "jreality.soft.imager";
 	
 	
-//	WITH DEFAULTS:
-//	
-//	"jreality.config" - ?, def: "jreality.props"
-//	"de.jreality.ui.viewerapp.SelectionManagerInterface" - class, def: "de.jreality.ui.viewerapp.SelectionManager"
-//	"de.jreality.portal.HeadTrackedViewer" - viewer interface class, def: "de.jreality.jogl.Viewer"
-//	-------------------------------
 	
-//	JAVA
-//	os.name - string
-//  user.dir - directory path, def: "/"	
+	/**
+	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
+	 * Values: <code>true | false</code>.
+	 */
+	public final static String JOGL_DEBUG_GL = "jreality.jogl.debugGL";
+	
+	/**
+	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
+	 * Values: <code>true | false</code>.
+	 */
+	public final static String JOGL_PORTAL_USAGE = "jreality.jogl.portalUsage";
+
+	/**
+	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
+	 * Values: <code>true | false</code>.
+	 */
+	public final static String JOGL_QUAD_BUFFERED_STEREO = "jreality.jogl.quadBufferedStereo";
+
+	/**
+	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
+	 * Values: <code>true | false</code>.
+	 */
+	public final static String JOGL_COPY_CAT = "discreteGroup.copycat";
+
+	/**
+	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
+	 * Values: <code>finest | finer | fine | info</code> (static fields of {@link java.util.logging.Level}).
+	 */
+	public final static String JOGL_LOGGING_LEVEL = "jreality.jogl.loggingLevel";
+
+	/**
+	 * Specifies the path of the jogl resource directory.<br>
+	 * Values: directory path
+	 */
+	public final static String JOGL_RESOURCE_DIR = "jreality.jogl.resourceDir";
+
+	
+	
+	/**
+	 * Specifies a properties file used in {@link de.jreality.util.ConfigurationAttributes} 
+	 * for managing configuration settings.<br>
+	 * Values: file path
+	 */
+	public final static String CONFIG_SETTINGS = "jreality.config";
+	public final static String CONFIG_SETTINGS_DEFAULT = "jreality.props";  //in current directory 
+
+	/**
+	 * Specifies the selection manager to be used.<br>
+	 * Values: instances of {@link de.jreality.ui.viewerapp.SelectionManagerInterface}.
+	 */
+	public final static String SELECTION_MANAGER = "de.jreality.ui.viewerapp.SelectionManagerInterface";
+	public final static String SELECTION_MANAGER_DEFAULT = "de.jreality.ui.viewerapp.SelectionManager";
+	
+	/**
+	 * Specifies the viewer to be initialized by {@link de.jreality.portal.HeadTrackedViewer#HeadTrackedViewer()}.<br>
+	 * Values: class name of {@link de.jreality.scene.Viewer} implementation.
+	 */
+	public final static String PORTAL_HEADTRACKED_VIEWER = "de.jreality.portal.HeadTrackedViewer";
+	public final static String PORTAL_HEADTRACKED_VIEWER_DEFAULT = "de.jreality.jogl.Viewer";
+
+	/**
+	 * Specifies the location of <code>bsh.jar</code> for reading bsh script files.
+	 * Values: file path
+	 * @see de.jreality.reader.ReaderBSH
+	 */
+	public final static String BSH_JAR = "jreality.bsh.jar";
+
+
+	
+//	/**
+//	 * Specifies the path of the discrete group resource directory.<br>
+//	 * Values: directory path
+//	 */
+//	public final static String DISCRETEGROUP_RESOURCE_DIR = "discreteGroup.resourceDir";
 //	
+//	/**
+//	 * Specifies the maximum number of elements in a discrete group.<br>
+//	 * Values: integer
+//	 */
+//	public final static String DISCRETEGROUP_MAX_NUM_ELEMENTS = "discreteGroup.maxNumElements";
+//
+//	/**
+//	 * Specifies the path of triangle group files.<br>
+//	 * Values: directory path
+//	 */
+//	public final static String DISCRETEGROUP_TRIANGLE_GROUP_FILES = "triangleGroupFiles";
+//	
+//	/**
+//	 * Specifies the location of the <code>autgroup</code> command.
+//	 */
+//	public final static String DISCRETEGROUP_AUTGROUP_COMMAND = "discreteGroup.autgroupCommand";
+//
+//	/**
+//	 * Specifies the path of wallpaper files.<br>
+//	 * Values: directory path
+//	 */
+//	public final static String DISCRETEGROUP_WALLPAPER_FILES = "wallpaperFiles";
+//
+//	/**
+//	 * Specifies the ship scale used in discreteGroup.Maniview.<br>
+//	 * Values: directory path
+//	 */
+//	public final static String DISCRETEGROUP_MANIVIEW_SHIPSCALE = "maniview.shipScale";
+	
 }

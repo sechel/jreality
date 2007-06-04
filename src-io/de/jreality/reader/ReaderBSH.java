@@ -47,6 +47,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AllPermission;
+import java.security.Permission;
 import java.security.Policy;
 import java.security.SecureClassLoader;
 import java.util.LinkedList;
@@ -56,6 +57,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SimpleURLPolicy;
+import de.jreality.util.SystemProperties;
 
 /**
  *
@@ -90,9 +92,9 @@ public class ReaderBSH implements SceneReader {
   
   static {
     try {
-      URL bshURL=new URL(System.getProperty("jreality.bsh.jar", "file:///net/MathVis/Oorange/oorange1.9/lib/bsh-1.3b2.jar"));
+      URL bshURL = new URL(System.getProperty(SystemProperties.BSH_JAR, "file:///net/MathVis/Oorange/oorange1.9/lib/bsh-1.3b2.jar"));
       bshLoader = new URLClassLoader(new URL[]{bshURL}, Thread.currentThread().getContextClassLoader());
-      LinkedList pc = new LinkedList();
+      LinkedList<Permission> pc = new LinkedList<Permission>();
 //      pc.add(new java.lang.RuntimePermission("getClassLoader"));
 //      pc.add(new java.lang.RuntimePermission("accessDeclaredMembers"));
 //      pc.add(new java.util.PropertyPermission("*", "read"));

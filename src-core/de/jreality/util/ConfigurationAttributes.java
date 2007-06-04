@@ -55,18 +55,18 @@ import de.jreality.math.Matrix;
  * @author weissman
  *
  * This class is for managing configuration settings based on java.lang.Properties.
- * The config file used is given as a System Property, namely jreality.config.
+ * The config file used is given as a system property, namely {@link SystemProperties#CONFIG_SETTINGS}.
  * Currently only the de.jreality.portal-Package uses this class
  * 
- * The Properties file is given via the System-property "jreality.config",
- * if not it is assumed to be "jreality.props" in the current directory 
+ * The properties file is given via the system property {@link SystemProperties#CONFIG_SETTINGS},
+ * if not it is assumed to be {@link SystemProperties#CONFIG_SETTINGS_DEFAULT} (in the current directory). 
  */
 public class ConfigurationAttributes extends Properties {
 
     public static ConfigurationAttributes getDefaultConfiguration() {
         try {
             return new ConfigurationAttributes(
-                Input.getInput(new File(Secure.getProperty("jreality.config", "jreality.props"))),
+                Input.getInput(new File(Secure.getProperty(SystemProperties.CONFIG_SETTINGS, SystemProperties.CONFIG_SETTINGS_DEFAULT))),
                 null);
         } catch (IOException e) {
             LoggingSystem.getLogger(ConfigurationAttributes.class).log(Level.WARNING, "loading default Configuration", e);
