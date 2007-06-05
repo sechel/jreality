@@ -277,7 +277,7 @@ public class EdgeDetector {
 		edgeNode.setAppearance(new Appearance());
 		edgeNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		edgeNode.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
-		edgeNode.getAppearance().setAttribute(CommonAttributes.POINT_SIZE,20.0);
+		edgeNode.getAppearance().setAttribute(CommonAttributes.POINT_SIZE,80.0);
 		edgeNode.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,edgePointColor);
 		
 		int pointCount=0;
