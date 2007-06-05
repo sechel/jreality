@@ -68,21 +68,22 @@ public class VirtualDoubleClick implements VirtualDevice {
 	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
     if (init) {
       init=false;
-      return new ToolEvent(context.getEvent().getSource(), outSlot, AxisState.ORIGIN);
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.ORIGIN);
     }
     if (releaseOnNextRelease) {
       assert (context.getAxisState(inSlot).isReleased());
       lastClickTime=-1;
       releaseOnNextRelease=false;
-      return new ToolEvent(context.getEvent().getSource(), outSlot, AxisState.ORIGIN);
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.ORIGIN);
     } else {
       if (context.getAxisState(inSlot).isReleased()) return null;
-      if (lastClickTime == -1 || System.currentTimeMillis()-lastClickTime > maxDelay) {
-        lastClickTime=System.currentTimeMillis();
+      if (lastClickTime == -1 || context.getEvent().getTimeStamp()-lastClickTime > maxDelay) {
+        lastClickTime=context.getEvent().getTimeStamp();
         return null;
       }
       releaseOnNextRelease=true;
-      return new ToolEvent(context.getEvent().getSource(), outSlot, AxisState.PRESSED);
+      System.out.println("delay="+(context.getEvent().getTimeStamp()-lastClickTime));
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.PRESSED);
     }
 	}
 

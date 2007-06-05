@@ -68,7 +68,7 @@ public class VirtualExtractPositive implements VirtualDevice {
   
   public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
     double val = context.getAxisState(inAxis).doubleValue();
-    if (updateState(val)) return new ToolEvent(context.getEvent().getSource(), outSlot, state);
+    if (updateState(val)) return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, state);
     else return null;
   }
 

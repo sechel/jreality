@@ -55,17 +55,16 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
     static class MyToolEvent extends ToolEvent {
     	private static final long serialVersionUID = -1752817756822635827L;
 		
-    	public MyToolEvent(Object source, InputSlot device, AxisState axis) {
-			super(source, device, axis);
+    	public MyToolEvent(Object source, long when, InputSlot device, AxisState axis) {
+			super(source, when, device, axis);
 		}
-			protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
-                 return true;
-             }
-             protected void replaceWith(ToolEvent replacement) {
-               this.axis = new AxisState(this.axis.intValue() + replacement.getAxisState().intValue());
-               this.trafo = replacement.getTransformation();
-               this.time = replacement.getTimeStamp();
-           }
+		protected boolean compareAxisStates(AxisState axis1, AxisState axis2) {
+             return true;
+        }
+        protected void replaceWith(ToolEvent replacement) {
+          this.axis = new AxisState((int)(getTimeStamp()-replacement.getTimeStamp()));
+          this.time = replacement.getTimeStamp();
+        }
 	}
 
 	private ToolEventQueue queue;
@@ -79,7 +78,7 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
     public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
         if (!rawDeviceName.equals(myDeviceName)) throw new IllegalArgumentException("no such raw axis");
         device = inputDevice;
-        return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+        return new MyToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
     }
 
     public synchronized void poll() {
@@ -87,7 +86,7 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
       long ct = System.currentTimeMillis();
       int delta = (int)(lastEvent == -1l ? 0 : ct - lastEvent);
       lastEvent = ct;
-      ToolEvent e = new MyToolEvent(this, device, new AxisState(delta));
+      ToolEvent e = new MyToolEvent(this, ct, device, new AxisState(delta));
       queue.addEvent(e);
     }
 

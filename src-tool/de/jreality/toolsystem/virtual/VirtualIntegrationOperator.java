@@ -72,7 +72,7 @@ public class VirtualIntegrationOperator implements VirtualDevice {
             throws MissingSlotException {
         mat.multiplyOnRight(context.getTransformationMatrix(inSlot).toDoubleArray(tmp));
         
-        return new ToolEvent(context.getEvent().getSource(), outSlot, value);
+        return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, value);
     }
 
     public void initialize(List inputSlots, InputSlot result,

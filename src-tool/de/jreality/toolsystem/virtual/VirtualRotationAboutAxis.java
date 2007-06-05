@@ -69,7 +69,7 @@ public class VirtualRotationAboutAxis implements VirtualDevice {
   
   public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
     mb.reset().rotate(gain*context.getAxisState(angle).doubleValue(), axis);
-    return new ToolEvent(this, out, da);
+    return new ToolEvent(this, context.getEvent().getTimeStamp(), out, da);
   }
 
   public void initialize(List inputSlots, InputSlot result, Map configuration) {

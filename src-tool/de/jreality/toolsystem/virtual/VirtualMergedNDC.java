@@ -77,7 +77,7 @@ public class VirtualMergedNDC implements VirtualDevice {
     try {
     mat.setEntry(0, 3, factorX*context.getAxisState(inX).doubleValue());
     mat.setEntry(1, 3, factorY*context.getAxisState(inY).doubleValue());
-    return new ToolEvent(context.getEvent().getSource(), outSlot, da);
+    return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, da);
     } catch (NullPointerException ne) {
       return null;
     }

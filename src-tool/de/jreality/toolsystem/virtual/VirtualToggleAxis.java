@@ -68,7 +68,7 @@ public class VirtualToggleAxis implements VirtualDevice {
         	pressed=!pressed;
         	return null;
         } else {
-        	return new ToolEvent(context.getEvent().getSource(), out, pressed ? AxisState.PRESSED : AxisState.ORIGIN);
+        	return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), out, pressed ? AxisState.PRESSED : AxisState.ORIGIN);
         }
     	} else { // source == out
     		if (context.getAxisState(out).isReleased() && pressed) pressed=false;

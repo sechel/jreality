@@ -68,7 +68,7 @@ public class VirtualInvertMatrix implements VirtualDevice {
     DoubleArray matrixDAA = context.getTransformationMatrix(matrixIn);
     double[] matrix = matrixDAA.toDoubleArray(null);
     double[] inverse = Rn.inverse(null, matrix);
-    return new ToolEvent(context.getEvent().getSource(), outSlot, new DoubleArray(inverse));
+    return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new DoubleArray(inverse));
   }
 
   public void initialize(List inputSlots, InputSlot result, Map configuration) {

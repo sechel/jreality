@@ -97,7 +97,7 @@ public class VirtualRawMousePointerTrafo implements VirtualDevice {
   	pointerNdc[14] = 1;
   	
   	pointerTrafo = Rn.times(pointerTrafo, ndcToWorld, pointerNdc);
-	return new ToolEvent(context.getEvent().getSource(), outSlot, outArray);
+	return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, outArray);
   }
 
   public void initialize(List inputSlots, InputSlot result, Map configuration) {

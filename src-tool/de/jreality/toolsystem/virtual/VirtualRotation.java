@@ -124,7 +124,7 @@ public class VirtualRotation implements VirtualDevice {
    }
     oldX = x;
     oldY = y;
-    return new ToolEvent(this, out, da);
+    return new ToolEvent(this, context.getEvent().getTimeStamp(), out, da);
   }
 
   public void initialize(List inputSlots, InputSlot result, Map configuration) {

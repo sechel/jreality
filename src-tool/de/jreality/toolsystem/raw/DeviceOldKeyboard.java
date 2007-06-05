@@ -107,7 +107,7 @@ public class DeviceOldKeyboard implements RawDevice, KeyListener {
                 cancelEvents.add(releaseEvent);
                 return;
             } 
-            ToolEvent ev = new ToolEvent(this, id, AxisState.PRESSED);
+            ToolEvent ev = new ToolEvent(this, System.currentTimeMillis(), id, AxisState.PRESSED);
             queue.addEvent(ev);
             LoggingSystem.getLogger(this).fine(this.hashCode()+" added key pressed ["+id+"] "+e.getWhen());
         }
@@ -135,7 +135,7 @@ public class DeviceOldKeyboard implements RawDevice, KeyListener {
                 LoggingSystem.getLogger(this).log(Level.FINEST, "release second");
                 if (cancelEvents.contains(e)) cancelEvents.remove(id);
                 else {
-                    queue.addEvent(new ToolEvent(this, id, AxisState.ORIGIN));
+                    queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), id, AxisState.ORIGIN));
                     LoggingSystem.getLogger(this).finer("added key released ["+id+"] "+e.getWhen());
                 }
                 ((HashMap)lastReleased.get(id)).remove(new Long(e.getWhen()));
@@ -147,7 +147,7 @@ public class DeviceOldKeyboard implements RawDevice, KeyListener {
         // rawDeviceName = VK_W (e.g.)
         keysToVirtual.put(resolveKeyCode(rawDeviceName), inputDevice);
         lastReleased.put(inputDevice, new HashMap());
-        return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+        return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
     }
     
     private Integer resolveKeyCode(String fieldName) {

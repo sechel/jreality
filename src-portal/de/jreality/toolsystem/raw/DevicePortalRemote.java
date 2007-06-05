@@ -22,13 +22,13 @@ public class DevicePortalRemote implements RawDevice {
 
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
 		if (rawDeviceName.equals("tick")) { // System time
-			return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+			return new ToolEvent(this, -1, inputDevice, AxisState.ORIGIN);
 		}
 		if (rawDeviceName.startsWith("button") || rawDeviceName.startsWith("valuator")) { // Wand button
-			return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+			return new ToolEvent(this, -1, inputDevice, AxisState.ORIGIN);
 		}
 		if (rawDeviceName.startsWith("sensor")) {
-			return new ToolEvent(this, inputDevice, new DoubleArray(new Matrix().getArray()));
+			return new ToolEvent(this, -1, inputDevice, new DoubleArray(new Matrix().getArray()));
 		}
 		throw new IllegalArgumentException("unhandled remote device: "+rawDeviceName+" mapped to "+inputDevice);
 	}

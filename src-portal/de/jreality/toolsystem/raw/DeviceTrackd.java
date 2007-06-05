@@ -73,7 +73,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			trackd.getMatrix(tmpMatrix, index);
 			copy(tmpMatrix, sensorMatrix);
 			calibrate(sensorMatrix, index);
-			return new ToolEvent(this, inputDevice, null, new DoubleArray(sensorMatrix));
+			return new ToolEvent(this, System.currentTimeMillis(), inputDevice, null, new DoubleArray(sensorMatrix));
 		} else if ("button".equals(split[0])) {
 			if (index >= trackd.getNumButtons()) throw new IllegalArgumentException("unknown button: "+index);
 			int buttonState = trackd.getButton(index);
@@ -81,7 +81,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			button.put(index, buttonState);
 			buttonSlot.put(index, inputDevice);
 
-			return new ToolEvent(this, inputDevice, buttonState == 0 ? AxisState.ORIGIN : AxisState.PRESSED, null);
+			return new ToolEvent(this,  System.currentTimeMillis(), inputDevice, buttonState == 0 ? AxisState.ORIGIN : AxisState.PRESSED, null);
 		} else if ("valuator".equals(split[0])) {
 			if (index >= trackd.getNumValuators()) throw new IllegalArgumentException("unknown valuator: "+index);
 			double value = trackd.getValuator(index);
@@ -89,7 +89,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			valuator.put(index, value);
 			valuatorSlot.put(index, inputDevice);
 
-			return new ToolEvent(this, inputDevice, new AxisState(value), null);
+			return new ToolEvent(this, System.currentTimeMillis(), inputDevice, new AxisState(value), null);
 		} else {
 			throw new IllegalArgumentException("unknown trackd device: "+rawDeviceName);
 		}
@@ -124,7 +124,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			int newVal = trackd.getButton(i);
 			if (newVal != val) {
 				button.put(i, newVal);
-				ToolEvent te = new ToolEvent(this, slot, newVal == 0 ? AxisState.ORIGIN : AxisState.PRESSED, null);
+				ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, newVal == 0 ? AxisState.ORIGIN : AxisState.PRESSED, null);
 				if (queue != null) queue.addEvent(te);
 				else System.out.println(te);
 			}
@@ -136,7 +136,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			double newVal = trackd.getValuator(i);
 			if (newVal != val) {
 				valuator.put(i, newVal);
-				ToolEvent te = new ToolEvent(this, slot, new AxisState(newVal), null);
+				ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, new AxisState(newVal), null);
 				if (queue != null) queue.addEvent(te);
 				else System.out.println(te);
 			}
@@ -163,7 +163,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 		private static final long serialVersionUID = -8503410127439268525L;
 
 		public MyToolEvent(Object source, InputSlot device, AxisState axis, DoubleArray trafo) {
-			super(source, device, axis, trafo);
+			super(source, System.currentTimeMillis(), device, axis, trafo);
 		}
 
 		protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {

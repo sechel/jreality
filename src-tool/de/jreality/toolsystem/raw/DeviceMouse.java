@@ -92,14 +92,13 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
   public void mousePressed(MouseEvent e) {
     InputSlot button = findButton(e);
     if (button != null)
-        queue.addEvent(new ToolEvent(DeviceMouse.this, button,
-            AxisState.PRESSED));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, System.currentTimeMillis(), button, AxisState.PRESSED));
   }
 
   public void mouseReleased(MouseEvent e) {
     InputSlot button = findButton(e);
     if (button != null)
-        queue.addEvent(new ToolEvent(DeviceMouse.this, button, AxisState.ORIGIN));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, System.currentTimeMillis(), button, AxisState.ORIGIN));
   }
 
   public void mouseDragged(MouseEvent e) {
@@ -116,16 +115,16 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
       InputSlot slot = (InputSlot) usedSources.get("wheel_up");
       if (slot == null) return;
       for (int i = 0; i < count; i++) {
-        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.PRESSED));
-        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.ORIGIN));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, System.currentTimeMillis(), slot, AxisState.PRESSED));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, System.currentTimeMillis(), slot, AxisState.ORIGIN));
       }
     }
     if (count < 0) {
       InputSlot slot = (InputSlot) usedSources.get("wheel_down");
       if (slot == null) return;
       for (int i = 0; i > count; i--) {
-        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.PRESSED));
-        queue.addEvent(new ToolEvent(DeviceMouse.this, slot, AxisState.ORIGIN));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, System.currentTimeMillis(), slot, AxisState.PRESSED));
+        queue.addEvent(new ToolEvent(DeviceMouse.this, System.currentTimeMillis(), slot, AxisState.ORIGIN));
       }
     }
   }
@@ -166,8 +165,8 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     	public void componentResized(ComponentEvent e) {
     		if (isCenter()) {
     			setCenter(false);
-          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
-          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
+          queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
+          queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
     		}
     		requestFocus();
     	}
@@ -182,8 +181,8 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
         		) {
           setCenter(!isCenter());
           // XXX: HACK
-          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
-          queue.addEvent(new ToolEvent(this, InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
+          queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
+          queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
         }
       }
       public void keyReleased(KeyEvent e) {
@@ -195,13 +194,13 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     if (!knownSources.contains(rawDeviceName))
         throw new IllegalArgumentException("no such raw device");
     usedSources.put(rawDeviceName, inputDevice);
-    if (rawDeviceName.equals("axes")) return new ToolEvent(this, inputDevice, new DoubleArray(new Matrix().getArray()));
+    if (rawDeviceName.equals("axes")) return new ToolEvent(this, System.currentTimeMillis(), inputDevice, new DoubleArray(new Matrix().getArray()));
     if (rawDeviceName.equals("axesEvolution")) {
       Matrix initM = new Matrix();
       initM.setEntry(2, 3, -1);
-      return new ToolEvent(this, inputDevice, new DoubleArray(initM.getArray()));
+      return new ToolEvent(this, System.currentTimeMillis(), inputDevice, new DoubleArray(initM.getArray()));
     }
-    return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+    return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
   }
 
   public void dispose() {

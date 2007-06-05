@@ -80,7 +80,7 @@ public class VirtualPortalRotation implements VirtualDevice {
     	try {
     	if (!context.getAxisState(inSlot).isReleased()) {
           mb.reset().rotateY(gain*context.getAxisState(inSlot).doubleValue()).assignTo(slotValue);
-          return new ToolEvent(context.getEvent().getSource(), outSlot, outTrafo);
+          return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, outTrafo);
     	}
     	} catch (Exception e) {
     		throw new MissingSlotException(inSlot);

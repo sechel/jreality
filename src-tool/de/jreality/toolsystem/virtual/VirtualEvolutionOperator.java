@@ -90,7 +90,7 @@ public class VirtualEvolutionOperator implements VirtualDevice {
       // slotValue = Rn.times(slotValue, oldTrafo, newTrafo);
       slotValue = Rn.times(slotValue, newTrafo, oldTrafo);
       oldTrafo = newTrafo;
-      return new ToolEvent(context.getEvent().getSource(), outSlot, outTrafo);
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, outTrafo);
     } else {
       double newVal;
       try {
@@ -100,7 +100,7 @@ public class VirtualEvolutionOperator implements VirtualDevice {
       }
       double dval = newVal - oldAxis;
       oldAxis = newVal;
-      return new ToolEvent(context.getEvent().getSource(), outSlot, new AxisState(dval));
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(dval));
     }
   }
 

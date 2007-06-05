@@ -149,7 +149,7 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
 		// rawDeviceName = VK_W (e.g.)
 		keysToVirtual.put(resolveKeyCode(rawDeviceName), inputDevice);
-		return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
+		return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
 	}
 
 	private int resolveKeyCode(String fieldName) {
@@ -201,7 +201,7 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 			}
 			if (keyState.get(ev.getKeyCode()) != Boolean.valueOf(pressed)) {
 				AxisState state = pressed ? AxisState.PRESSED : AxisState.ORIGIN;
-				ToolEvent event = new ToolEvent(ev, keysToVirtual.get(ev.getKeyCode()), state);
+				ToolEvent event = new ToolEvent(ev, System.currentTimeMillis(), keysToVirtual.get(ev.getKeyCode()), state);
 				//System.out.println("dt="+dt+"  ["+ev.getWhen()+"] "+event);
 				keyState.put((ev).getKeyCode(), pressed);
 				queue.addEvent(event);
@@ -281,7 +281,7 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 		InputSlot modKey = keysToVirtual.get(keyCode);
 		if (modKey != null) {
 			if (keyState.get(keyCode) == Boolean.TRUE) {
-				queue.addEvent(new ToolEvent(this, modKey, AxisState.ORIGIN));
+				queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), modKey, AxisState.ORIGIN));
 				keyState.put(keyCode, Boolean.FALSE);
 				System.out.println("added missing mod key released!");
 			}

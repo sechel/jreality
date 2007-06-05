@@ -119,7 +119,7 @@ public class JRWindow {
 		initSgc();
 		initFrame();
 		initDecoration();
-	}  
+	}
 
 	private void initSgc(){
 		positionSgc=new SceneGraphComponent("frame ["+windowNumber+"]");
@@ -128,7 +128,7 @@ public class JRWindow {
 		positionSgc.getAppearance().setAttribute("pointShader.pickable", true);
 		positionSgc.getAppearance().setAttribute("lineShader.pickable", true);
 		positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);  
-	}   
+	}
 	private void initFrame(){
 		frameSgc=new SceneGraphComponent("content");
 		positionSgc.addChild(frameSgc);    
@@ -353,6 +353,15 @@ public class JRWindow {
 		updateFrameTitle();
 	}    
 
+	public void resize(double factor) {
+		double[] c1 = cornerPos[0];
+		double[] c2 = cornerPos[2];
+		double[] diag = Rn.subtract(null, c2, c1);
+		Rn.times(diag, factor, diag);
+		Rn.add(diag, diag, c1);
+		setCorner(2, diag);
+	}
+	
 	void setCorner(int cornerIndex, double[] newPoint) {
 		int oppositeCorner = (cornerIndex+2)%4;
 		newPoint[1]-=decoHight; newPoint[2]=0;

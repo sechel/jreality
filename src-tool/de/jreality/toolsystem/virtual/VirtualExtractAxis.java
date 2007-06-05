@@ -72,7 +72,7 @@ public class VirtualExtractAxis implements VirtualDevice {
 		double newVal;
         newVal = gain * context.getTransformationMatrix(inSlot).getValueAt(index);
 		lastVal = newVal;
-		return new ToolEvent(context.getEvent().getSource(), outSlot, new AxisState(newVal));
+		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(newVal));
 	}
 
 	public void initialize(List inputSlots, InputSlot result,

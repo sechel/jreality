@@ -65,7 +65,7 @@ public class VirtualMergedAxis implements VirtualDevice {
   public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
     AxisState minus = context.getAxisState(inMinus) == null ? AxisState.ORIGIN : context.getAxisState(inMinus);
     AxisState plus = context.getAxisState(inPlus) == null ? AxisState.ORIGIN : context.getAxisState(inPlus);
-    return new ToolEvent(context.getEvent().getSource(), outSlot, new AxisState(plus.intValue()-minus.intValue()));
+    return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(plus.intValue()-minus.intValue()));
   }
 
   public void initialize(List inputSlots, InputSlot result, Map configuration) {

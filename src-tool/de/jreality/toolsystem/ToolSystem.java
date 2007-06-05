@@ -296,20 +296,9 @@ public class ToolSystem implements ToolEventReceiver {
 	    System.err.println("initializing tool system");
 	}
 
-	long renderInterval=20;
-	long lastT = System.currentTimeMillis();
-
-	List<ToolEvent> l;
-
 	public void processToolEvent(ToolEvent event) {
 		synchronized (mutex) {
 			executing=true;
-//			if (event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
-//			int dt = (int) (System.currentTimeMillis()-event.getTimeStamp());
-//			if (dt > 1) {
-//			event.axis=new AxisState(event.getAxisState().intValue()+dt);
-//			}
-//			}
 		}
 		compQueue.add(event);
 		int itarCnt=0;
@@ -317,7 +306,7 @@ public class ToolSystem implements ToolEventReceiver {
 			itarCnt++;
 			processComputationalQueue();
 			processTriggerQueue();
-			l = deviceManager.updateImplicitDevices();
+			List<ToolEvent> l = deviceManager.updateImplicitDevices();
 			if (l.isEmpty()) break;
 			compQueue.addAll(l);
 			if (itarCnt > 5000) throw new IllegalStateException("recursion in tool system!");
@@ -339,9 +328,12 @@ public class ToolSystem implements ToolEventReceiver {
 			}
 			executing=false;
 		}
-		if (renderTrigger != null && event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
-			renderTrigger.finishCollect();
-			renderTrigger.startCollect();
+		if (event.getInputSlot() == InputSlot.getDevice("SystemTime")) {
+			deviceManager.setSystemTime(event.getTimeStamp());
+			if (renderTrigger != null) {
+				renderTrigger.finishCollect();
+				renderTrigger.startCollect();
+			}
 		}
 	}
 
@@ -640,8 +632,7 @@ public class ToolSystem implements ToolEventReceiver {
 		for (Iterator i = getActivePathsForTool(tool).iterator(); i.hasNext(); ) {
 			SceneGraphPath activePath = (SceneGraphPath) i.next();
 			if (path.isEqual(activePath)) {
-				ToolEvent te = new ToolEvent(this, InputSlot.getDevice("remove"), null,
-						null);
+				ToolEvent te = new ToolEvent(this, -1, InputSlot.getDevice("remove"), null,	null);
 				toolContext.setCurrentTool(tool);
 				toolContext.setRootToLocal(path);
 				toolContext.event = te;

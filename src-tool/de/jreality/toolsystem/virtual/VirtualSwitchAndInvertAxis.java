@@ -76,7 +76,7 @@ public class VirtualSwitchAndInvertAxis implements VirtualDevice {
         value = Boolean.valueOf(context.getAxisState(switchIS).isPressed());
         lastVal = value.booleanValue();
         if (invert) lastVal = !lastVal;
-        return new ToolEvent(this, out, lastVal ? AxisState.PRESSED : AxisState.ORIGIN);
+        return new ToolEvent(this, context.getEvent().getTimeStamp(), out, lastVal ? AxisState.PRESSED : AxisState.ORIGIN);
       }
 
       if (context.getEvent().getInputSlot() == switchIS && context.getAxisState(switchIS).isPressed())
@@ -89,7 +89,7 @@ public class VirtualSwitchAndInvertAxis implements VirtualDevice {
       if (invert) newVal = !newVal;
       if (newVal != lastVal) {
         lastVal = newVal;
-        return new ToolEvent(this, out, lastVal ? AxisState.PRESSED : AxisState.ORIGIN);
+        return new ToolEvent(this, context.getEvent().getTimeStamp(), out, lastVal ? AxisState.PRESSED : AxisState.ORIGIN);
       }
       return null;
     }

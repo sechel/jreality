@@ -82,7 +82,7 @@ public class VirtualProductMatrix implements VirtualDevice {
       throw new MissingSlotException(rightSlot);
     }
       product = Rn.times(product, matrixL, matrixR);
-      return new ToolEvent(context.getEvent().getSource(), productSlot, new DoubleArray(product));
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), productSlot, new DoubleArray(product));
   }
 
   public void initialize(List inputSlots, InputSlot result, Map configuration) {

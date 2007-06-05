@@ -71,7 +71,7 @@ public class VirtualCoupledAxis implements VirtualDevice {
             throws MissingSlotException {
       if (!initialized) {
         initialized = true;
-        return new ToolEvent(context.getEvent().getSource(), out, AxisState.ORIGIN);
+        return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), out, AxisState.ORIGIN);
       }
         boolean state = true;
         for (InputSlot inSlot : inSlots) {
@@ -80,7 +80,7 @@ public class VirtualCoupledAxis implements VirtualDevice {
         }
         if (state != currentState) {
           currentState = state;
-          ToolEvent te = new ToolEvent(context.getEvent().getSource(), out, currentState ? AxisState.PRESSED : AxisState.ORIGIN);
+          ToolEvent te = new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), out, currentState ? AxisState.PRESSED : AxisState.ORIGIN);
           // ???:
           if (context.getEvent().getInputSlot() == inSlots.get(0) || context.getAxisState(inSlots.get(0)).isPressed())
             context.getEvent().consume();

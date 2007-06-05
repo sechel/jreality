@@ -66,7 +66,7 @@ public class VirtualMap implements VirtualDevice {
     public ToolEvent process(VirtualDeviceContext context)
             throws MissingSlotException {
         ToolEvent e = context.getEvent();
-        return new ToolEvent(context.getEvent().getSource(), out, e.getAxisState(), e.getTransformation());
+        return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), out, e.getAxisState(), e.getTransformation());
     }
 
     public void initialize(List inputSlots, InputSlot result,

@@ -55,7 +55,7 @@ public abstract class AbstractDeviceMouse {
         axesMatrix.setEntry(0, 3, xndc);
         axesMatrix.setEntry(1, 3, yndc);
         axesMatrix.setEntry(2, 3, -1);
-        queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, slot, da) {
+        queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, System.currentTimeMillis(), slot, da) {
           protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
             return true;
           }
@@ -64,7 +64,7 @@ public abstract class AbstractDeviceMouse {
         axesMatrix.setEntry(0, 3, 0);
         axesMatrix.setEntry(1, 3, 0);
         axesMatrix.setEntry(2, 3, -1);
-        queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, slot, da));
+        queue.addEvent(new ToolEvent(AbstractDeviceMouse.this, System.currentTimeMillis(), slot, da));
         sentCenter=true;
         // XXX HACK !!! this should be getWidth()/2 but differs by border frame
         lastX=ex;
@@ -87,7 +87,7 @@ public abstract class AbstractDeviceMouse {
       axesEvolutionMatrix.setEntry(1, 3, dyndc);
       axesEvolutionMatrix.setEntry(2, 3, -1);
   
-      ToolEvent evolutionEvent = new ToolEvent(AbstractDeviceMouse.this, slot, daEvolution){
+      ToolEvent evolutionEvent = new ToolEvent(AbstractDeviceMouse.this, System.currentTimeMillis(), slot, daEvolution){
         protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
           return true;
         }

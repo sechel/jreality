@@ -78,7 +78,7 @@ public class VirtualExtractRotationTrafo implements VirtualDevice {
             rot.assignFrom(mat.getRotation());
             rot.setRow(3, new double[4]);
             rot.setColumn(3, new double[]{0,0,0,1});
-            return new ToolEvent(context.getEvent().getSource(), outSlot, outTrafo);
+            return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, outTrafo);
         } catch (Exception e) {
             return null;
         }

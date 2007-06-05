@@ -61,7 +61,7 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	protected void fixHead() {
 		disableSensor(0);
 		if (queue != null) {
-			ToolEvent te = new ToolEvent(this, sensorSlot(0), null, new DoubleArray(FIXED_HEAD));
+			ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), sensorSlot(0), null, new DoubleArray(FIXED_HEAD));
 			queue.addEvent(te);
 		}
 	}

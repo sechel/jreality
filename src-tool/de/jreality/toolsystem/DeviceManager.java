@@ -214,7 +214,7 @@ public class DeviceManager {
         boolean firstSlot = true;
         for (Iterator in = vc.getInSlots().iterator(); in.hasNext(); ) {
           InputSlot currentSlot = (InputSlot) in.next();
-          virtualDeviceContext.setEvent(new ToolEvent(this, currentSlot, getAxisState(currentSlot), getTransformationMatrix(currentSlot)));
+          virtualDeviceContext.setEvent(new ToolEvent(this, getSystemTime(), currentSlot, getAxisState(currentSlot), getTransformationMatrix(currentSlot)));
           
           ToolEvent initialValue = null;
           try {
@@ -377,9 +377,9 @@ public List<ToolEvent> updateImplicitDevices() {
       }
 	    if (!worldToCamChanged && !camToNDCChanged && !avatarChanged) return Collections.emptyList();
 	    List<ToolEvent> ret = new LinkedList<ToolEvent>();
-	    if (worldToCamChanged) ret.add(new ToolEvent(this, worldToCamSlot, new DoubleArray(worldToCamTrafo)));
-      if (camToNDCChanged) ret.add(new ToolEvent(this, camToNDCSlot, new DoubleArray(camToNDCTrafo)));
-      if (avatarChanged) ret.add(new ToolEvent(this, avatarSlot, new DoubleArray(avatarTrafo)));
+	    if (worldToCamChanged) ret.add(new ToolEvent(this, getSystemTime(), worldToCamSlot, new DoubleArray(worldToCamTrafo)));
+      if (camToNDCChanged) ret.add(new ToolEvent(this, getSystemTime(), camToNDCSlot, new DoubleArray(camToNDCTrafo)));
+      if (avatarChanged) ret.add(new ToolEvent(this, getSystemTime(), avatarSlot, new DoubleArray(avatarTrafo)));
 	    return ret;
 	}
 
@@ -417,6 +417,8 @@ public List<ToolEvent> updateImplicitDevices() {
   
   private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappingsInv = new HashMap<InputSlot, HashSet<InputSlot>>();
 
+private long systemTime;
+
   public void dispose() {
     for (Entry<String, RawDevice> entry : rawDevices.entrySet()) {
       RawDevice rd = entry.getValue();
@@ -433,6 +435,14 @@ public List<ToolEvent> updateImplicitDevices() {
     camToNDCTrafo=new Matrix().getArray();
     worldToCamTrafo=new Matrix().getArray();
   }
+
+	public void setSystemTime(long timeStamp) {
+		this.systemTime=timeStamp;
+	}
+	
+	private long getSystemTime() {
+		return systemTime;
+	}
 
 }
 

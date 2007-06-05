@@ -73,7 +73,7 @@ public class VirtualExtractTranslationTrafo implements VirtualDevice {
             slotValue[3]  = context.getTransformationMatrix(inSlot).getValueAt(3);
             slotValue[7]  = context.getTransformationMatrix(inSlot).getValueAt(7);
             slotValue[11] = context.getTransformationMatrix(inSlot).getValueAt(11);
-            return new ToolEvent(context.getEvent().getSource(), outSlot, outTrafo);
+            return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, outTrafo);
         } catch (Exception e) {
             throw new MissingSlotException(inSlot);
         }
