@@ -21,7 +21,7 @@ public class EdgeDetector {
 	public static int POINT_TYPE_FACEBORDER=-2;
 	public static int POINT_TYPE_SINGLEPOINT=-1;
 	
-	public static int[][] detect(double varianzThreshold, double maxNbhDistance, double depthThreshold, double[][] depth, int[][] faceId){
+	public static int[][] detect(double varianzThreshold, double maxNbhDistance, double depthThreshold, double[][] depth, int[][] faceId, int[] faceSize, double minVertexCount){
 		
 		double maxEdgeAngle=3.0/4.0*Math.PI; //<=pi
 		double maxErrorAngle=1.0/15.0*Math.PI;
@@ -47,72 +47,75 @@ public class EdgeDetector {
 		
 		double[][][] normals=Scan3DUtility.getVertexNormals(depthThreshold, depth, faceId);
 		double[][] maxVar=new double[M][N];
-		
+
 		for(int i=0;i<M;i++){
 			for(int j=0;j<N;j++){
-				int[][] oneNbh=Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId);
-				if(oneNbh.length>2 && oneNbh.length<8)
-					edgeId[i][j]=POINT_TYPE_FACEBORDER;
-				else if(oneNbh.length>2){
-					int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, oneNbh, maxNbhDistance, depthThreshold, depth, faceId);			
-
-					if(neighborhoodSize>maxNB) maxNB=neighborhoodSize;
-					if(neighborhoodSize<minNB) minNB=neighborhoodSize;
-
-					int[][] nbh=Scan3DUtility.getNeighborhood(i, j, neighborhoodSize, depthThreshold, depth, faceId);
-
-					int localNormalsCount=0;
-					for(int n=0;n<nbh.length;n++){
-						if(normals[nbh[n][0]][nbh[n][1]]!=null && !Rn.equals(normals[i][j],nullVec))
-							localNormalsCount++;
-					}
-					if(localNormalsCount>0){
-						double[][] localNormals=new double[localNormalsCount+1][2];
-						localNormalsCount=0;
-						for(int n=0;n<nbh.length;n++){
-							if(normals[nbh[n][0]][nbh[n][1]]!=null && !Rn.equals(normals[i][j],nullVec)){
-								localNormals[localNormalsCount]=normals[nbh[n][0]][nbh[n][1]];
-								localNormalsCount++;
-							}
-						}
-						localNormals[localNormalsCount]=normals[i][j];
-						
-						DenseMatrix covMtx=new DenseMatrix(Scan3DUtility.getCovarianzMatrix(localNormals));
-						SymmPackEVD evd=null;
-						try {
-							evd = SymmPackEVD.factorize(covMtx);
-						} catch (NotConvergedException e) {e.printStackTrace();}
-						
-						double[] ev=evd.getEigenvalues();  //ev[0]<=ev[1]<=ev[2]
-						
-						for(int k=0;k<ev.length;k++)
-							ev[k]=2.0*Math.sqrt(ev[k]);
-						
-						maxVar[i][j]=ev[2];
-						
-						if(ev[2]>maxMaxCov) maxMaxCov=ev[2];
-						if(ev[2]<minMaxCov) minMaxCov=ev[2];
-						usedPoints++;
-						averageMaxCov+=ev[2];
-
-//						if(ev[2]>=minVarEV3forEdge){
-//							edgeId[i][j]=POINT_TYPE_BEND;
-//						}
-//						if(ev[2]>=minVarEV3forEdge && ev[1]<=maxVarEV2forEdge && ev[0]<=maxVarEV1forEdge){
-//						    edgeId[i][j]=POINT_TYPE_BEND;
-//					    }
-						if((ev[2]>=minVarEV3forEdge && ev[1]>=1.0-maxVarEV2forEdge && ev[1]<=maxVarEV2forEdge && ev[0]<=maxVarEV1forEdge)
-								|| (ev[2]>=minVarEV3forEdge && ev[1]>=minVarEV3forEdge && ev[0]>=minVarEV3forEdge)){
-							edgeId[i][j]=POINT_TYPE_BEND;
-						}
-						
-						
-						
-					}
-				}else{
+				if(faceSize[faceId[i][j]]<minVertexCount)
 					edgeId[i][j]=POINT_TYPE_SINGLEPOINT;
-				}
+				else{
+					int[][] oneNbh=Scan3DUtility.getNeighborhood(i, j, 1, depthThreshold, depth, faceId);
+					if(oneNbh.length>2 && oneNbh.length<8)
+						edgeId[i][j]=POINT_TYPE_FACEBORDER;
+					else if(oneNbh.length>2){
+						int neighborhoodSize=Scan3DUtility.getNeighborhoodSize(i, j, oneNbh, maxNbhDistance, depthThreshold, depth, faceId);			
 
+						if(neighborhoodSize>maxNB) maxNB=neighborhoodSize;
+						if(neighborhoodSize<minNB) minNB=neighborhoodSize;
+
+						int[][] nbh=Scan3DUtility.getNeighborhood(i, j, neighborhoodSize, depthThreshold, depth, faceId);
+
+						int localNormalsCount=0;
+						for(int n=0;n<nbh.length;n++){
+							if(normals[nbh[n][0]][nbh[n][1]]!=null && !Rn.equals(normals[i][j],nullVec))
+								localNormalsCount++;
+						}
+						if(localNormalsCount>0){
+							double[][] localNormals=new double[localNormalsCount+1][2];
+							localNormalsCount=0;
+							for(int n=0;n<nbh.length;n++){
+								if(normals[nbh[n][0]][nbh[n][1]]!=null && !Rn.equals(normals[i][j],nullVec)){
+									localNormals[localNormalsCount]=normals[nbh[n][0]][nbh[n][1]];
+									localNormalsCount++;
+								}
+							}
+							localNormals[localNormalsCount]=normals[i][j];
+
+							DenseMatrix covMtx=new DenseMatrix(Scan3DUtility.getCovarianzMatrix(localNormals));
+							SymmPackEVD evd=null;
+							try {
+								evd = SymmPackEVD.factorize(covMtx);
+							} catch (NotConvergedException e) {e.printStackTrace();}
+
+							double[] ev=evd.getEigenvalues();  //ev[0]<=ev[1]<=ev[2]
+
+							for(int k=0;k<ev.length;k++)
+								ev[k]=2.0*Math.sqrt(ev[k]);
+
+							maxVar[i][j]=ev[2];
+
+							if(ev[2]>maxMaxCov) maxMaxCov=ev[2];
+							if(ev[2]<minMaxCov) minMaxCov=ev[2];
+							usedPoints++;
+							averageMaxCov+=ev[2];
+
+//							if(ev[2]>=minVarEV3forEdge){
+//							edgeId[i][j]=POINT_TYPE_BEND;
+//							}
+//							if(ev[2]>=minVarEV3forEdge && ev[1]<=maxVarEV2forEdge && ev[0]<=maxVarEV1forEdge){
+//							edgeId[i][j]=POINT_TYPE_BEND;
+//							}
+							if((ev[2]>=minVarEV3forEdge && ev[1]>=1.0-maxVarEV2forEdge && ev[1]<=maxVarEV2forEdge && ev[0]<=maxVarEV1forEdge)
+									|| (ev[2]>=minVarEV3forEdge && ev[1]>=minVarEV3forEdge && ev[0]>=minVarEV3forEdge)){
+								edgeId[i][j]=POINT_TYPE_BEND;
+							}
+
+
+
+						}
+					}else{
+						edgeId[i][j]=POINT_TYPE_SINGLEPOINT;
+					}
+				}
 			}
 			//System.out.println("edge detection "+(int)(Math.ceil((double)i/(double)M*100))+"% finished");
 		}

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import de.jreality.hochtief.processing.EdgeDetector;
 import de.jreality.hochtief.processing.EdgeSplitFaceExtractor;
+import de.jreality.hochtief.processing.PointCloudSimplifier;
 import de.jreality.hochtief.processing.SimpleDepthFaceExtractor;
 import de.jreality.hochtief.utility.Scan3DShowUtility;
 import de.jreality.reader.AbstractReader;
@@ -61,24 +62,41 @@ public class Scan3DProcessor extends AbstractReader{
 //			}
 //		}
 		
+		
+		
+		
 //		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset());
 	
-		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId);		
-		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_BEND,Color.RED,edgeId, faceId, faceSize, minVertexCount, depth);
-		innerEdgePointsNode.setName("bendPoints");
-		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_FACEBORDER,Color.GREEN,edgeId, faceId, faceSize, minVertexCount, depth);
-		borderEdgePointsNode.setName("borderPoints");
-		SceneGraphComponent edgePointsNode=new SceneGraphComponent("edgePoints");
-		edgePointsNode.addChild(innerEdgePointsNode);
-		edgePointsNode.addChild(borderEdgePointsNode);
-//		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),edgePointsNode);
 		
-		EdgeSplitFaceExtractor esfe=new EdgeSplitFaceExtractor(depth);
-		esfe.splitFaces(edgeId, faceId, faceSize, 100, depthThreshold);
-		int[][] splittedFaceId=esfe.getSplittedFaceIds();
-		int[] splittedFaceSize=esfe.getSplittedFaceSizes();
 		
-		Scan3DShowUtility.showGenerateTriangulation(100, depthThreshold, splittedFaceSize, splittedFaceId, depth, null, loader.getPhiOffset(),edgePointsNode);		
+		
+//		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId, faceSize, minVertexCount);		
+//		SceneGraphComponent innerEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_BEND,Color.RED,edgeId, faceId, faceSize, minVertexCount, depth);
+//		innerEdgePointsNode.setName("bendPoints");
+//		SceneGraphComponent borderEdgePointsNode=EdgeDetector.getEdgePointsSgc(EdgeDetector.POINT_TYPE_FACEBORDER,Color.GREEN,edgeId, faceId, faceSize, minVertexCount, depth);
+//		borderEdgePointsNode.setName("borderPoints");
+//		SceneGraphComponent edgePointsNode=new SceneGraphComponent("edgePoints");
+//		edgePointsNode.addChild(innerEdgePointsNode);
+//		edgePointsNode.addChild(borderEdgePointsNode);
+////		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),edgePointsNode);
+//		
+//		EdgeSplitFaceExtractor esfe=new EdgeSplitFaceExtractor(depth);
+//		esfe.splitFaces(edgeId, faceId, faceSize, 100, depthThreshold);
+//		int[][] splittedFaceId=esfe.getSplittedFaceIds();
+//		int[] splittedFaceSize=esfe.getSplittedFaceSizes();
+//		
+//		Scan3DShowUtility.showGenerateTriangulation(100, depthThreshold, splittedFaceSize, splittedFaceId, depth, null, loader.getPhiOffset(),edgePointsNode);		
+	
+	
+	
+		
+		
+		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId, faceSize, minVertexCount);		
+		
+		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(0.1, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
+		
+		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),simplifiedPointCloud);
+	
 	}
 
 	public static void main(String[] args) {

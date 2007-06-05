@@ -16,15 +16,15 @@ public class Scan3DUtility {
 		return new double[]{n,m,d};		
 	}
 	
-	public static double[] convertDepthValueTo3DCoordinate(int i, int j, double depth, int M, int N){
+	public static double[] convertDepthValueTo3DCoordinate(int i, int j, double depthValue, int M, int N){
 		double phi = j * 2 * Math.PI / (N );
 		double theta = -i
 				* (Math.PI - (Math.PI / 2 - 1.1306075316023216))
 				/ (M ) + Math.PI / 2;		
 		return new double[] {
-				depth * Math.cos(phi) * Math.cos(theta),
-				depth * Math.sin(phi) * Math.cos(theta),
-				depth * Math.sin(theta)
+				depthValue * Math.cos(phi) * Math.cos(theta),
+				depthValue * Math.sin(phi) * Math.cos(theta),
+				depthValue * Math.sin(theta)
 		};
 	}	
 	
@@ -79,13 +79,36 @@ public class Scan3DUtility {
 	public static double[][] getCovarianzMatrix(double[][] data){
 		int count=data.length;
 		int dim=data[0].length;
-		double[] center=new double[dim];
+		double[] centeroid=new double[dim];
 		for(int i=0;i<count;i++)
-			Rn.add(center, center, data[i]);
-		Rn.times(center, 1/(double)count, center);
+			Rn.add(centeroid, centeroid, data[i]);
+		Rn.times(centeroid, 1/(double)count, centeroid);
 		double[][] centeredData=new double[data.length][data[0].length];
 		for(int i=0;i<count;i++)
-			Rn.subtract(centeredData[i], data[i], center);
+			Rn.subtract(centeredData[i], data[i], centeroid);
+		double[][] cov=new double[dim][dim];
+		for(int d1=0;d1<dim;d1++){
+			for(int d2=d1;d2<dim;d2++){
+				double entry=0;
+				for(int i=0;i<count;i++)
+					entry+=(centeredData[i][d1]*centeredData[i][d2]);
+				entry=entry/(double)(count);
+				cov[d1][d2]=entry;				
+			}
+		}
+		return cov;		
+	}
+	
+	public static double[][] getCovarianzMatrix(ArrayList<double[]> data){
+		int count=data.size();
+		int dim=data.get(0).length;
+		double[] centeroid=new double[dim];
+		for(int i=0;i<count;i++)
+			Rn.add(centeroid, centeroid, data.get(i)); 
+		Rn.times(centeroid, 1/(double)count, centeroid);
+		double[][] centeredData=new double[count][dim];
+		for(int i=0;i<count;i++)
+			Rn.subtract(centeredData[i], data.get(i), centeroid);
 		double[][] cov=new double[dim][dim];
 		for(int d1=0;d1<dim;d1++){
 			for(int d2=d1;d2<dim;d2++){
