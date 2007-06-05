@@ -72,7 +72,7 @@ public class Scan3DPointCloudUtility {
 			byte[] colorTemp=vertexColors.get(i);
 			for(int c=0;c<3;c++)
 				color[c]=colorTemp[c];
-			color[3]=1;
+			color[3]=255;
 			
 			
 			double[] point=new double[3];
@@ -93,14 +93,22 @@ public class Scan3DPointCloudUtility {
 			}
 			
 			if(i%100==0)
-				System.out.println(x+","+y);
+				System.out.println("x,y="+x+","+y+"; color="+color[0]+","+color[1]+","+color[2]+","+color[3]);
 			
 			raster.setPixel(x, y, color);	
 			matchCounter[x][y]++;
 		}
 
-//		img.setData(raster);
+
 		
+		
+//		for(int x=0;x<texWidth;x++){
+//			for(int y=0;y<texHeight;y++){
+//				raster.setPixel(x, y, new int[] {(int)((double)(256*x)/(double)texWidth),0,0,255});				
+//			}
+//		}
+		
+//		img.setData(raster);
 		
 		
 		SceneGraphComponent sgc=new SceneGraphComponent();
@@ -113,8 +121,10 @@ public class Scan3DPointCloudUtility {
 		
 		ImageData imgData=new ImageData(img);
 		
-		System.err.println("write tex");
+		
+		System.err.println("write tex..");
 		RIBHelper.writeTexture(imgData, "texTest");
+		System.err.println("..completed");
 		
 //		ImageData imgData=null;
 //		try {

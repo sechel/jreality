@@ -25,7 +25,7 @@ public class PointCloudSimplifier {
 			for(int j=0;j<N;j++){				
 				if(edgeId[i][j]==EdgeDetector.POINT_TYPE_SINGLEPOINT){
 					singlePoints.add(Scan3DUtility.convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N));
-					colors.add(new byte[]{colorR[i][j],colorG[i][j],colorB[i][j],1});					
+					colors.add(new byte[]{colorR[i][j],colorG[i][j],colorB[i][j]});					
 				}				
 			}			
 		}
