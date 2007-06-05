@@ -10,37 +10,8 @@
   </rawdevices>
 
   <rawslots>
-  <!-- map slots of raw devices to InputSlots -->
-    <mapping device="Keyboard" src="VK_W" target="forward"/>
-    <mapping device="Keyboard" src="VK_SPACE" target="JumpActivation"/>
-    <mapping device="Keyboard" src="VK_CONTROL" target="Meta"/>
-    <mapping device="Keyboard" src="VK_R" target="DrawPickActivation"/>
-    <mapping device="Keyboard" src="VK_S" target="backward"/>
-    <mapping device="Keyboard" src="VK_A" target="left"/>
-    <mapping device="Keyboard" src="VK_D" target="right"/>
-    <mapping device="Keyboard" src="VK_P" target="ShowPick"/>
-    <mapping device="Keyboard" src="VK_L" target="LookSwitch"/>
-    <mapping device="Keyboard" src="VK_E" target="EncompassActivation"/>
-    <mapping device="Keyboard" src="VK_0" target="IncreaseSpeed"/>
-    <mapping device="Keyboard" src="VK_9" target="DecreaseSpeed"/>
-    <mapping device="Mouse" src="left" target="PrimaryAction"/>
-    <mapping device="Mouse" src="left_shift" target="SecondaryAction"/>
-    <mapping device="Mouse" src="right" target="PrimarySelection"/>
-    <mapping device="Mouse" src="right_shift" target="SecondarySelection"/>
-    <mapping device="Mouse" src="center" target="PrimaryMenu"/>
-    <mapping device="Mouse" src="center_shift" target="SecondaryMenu"/>
-    <mapping device="Mouse" src="wheel_up" target="PrimaryUp"/>
-    <mapping device="Mouse" src="wheel_down" target="PrimaryDown"/>
-    <mapping device="Mouse" src="axes" target="PointerNDC"/>
-    
-    <mapping device="SystemTimer" src="tick" target="SystemTime"/>
 
-    <!--mapping device="Motionstar" src="wand_left" target="PrimaryAction"/>
-    <mapping device="Motionstar" src="wand_center" target="PrimaryMenu"/>
-    <mapping device="Motionstar" src="wand_right" target="PrimarySelection"/>
-    <mapping device="Motionstar" src="wand_axes" target="PrimaryNavigationNDC"/>
-    <mapping device="Motionstar" src="wandMatrix" target="PointerShipTransformation"/>
-    <mapping device="Motionstar" src="headMatrix" target="AvatarShipTransformation"/-->
+    <mapping device="SystemTimer" src="tick" target="SystemTime"/>
     
     <mapping device="Trackd" src="button_0" target="PrimaryAction"/>
     <mapping device="Trackd" src="button_1" target="PrimaryMenu"/>
