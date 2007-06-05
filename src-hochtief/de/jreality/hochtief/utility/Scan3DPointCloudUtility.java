@@ -98,18 +98,6 @@ public class Scan3DPointCloudUtility {
 			raster.setPixel(x, y, color);	
 			matchCounter[x][y]++;
 		}
-
-
-		
-		
-//		for(int x=0;x<texWidth;x++){
-//			for(int y=0;y<texHeight;y++){
-//				raster.setPixel(x, y, new int[] {(int)((double)(256*x)/(double)texWidth),0,0,255});				
-//			}
-//		}
-		
-//		img.setData(raster);
-		
 		
 		SceneGraphComponent sgc=new SceneGraphComponent();
 		sgc.setGeometry(ifsf.getGeometry());
@@ -117,19 +105,13 @@ public class Scan3DPointCloudUtility {
 		sgc.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
 		sgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
 		sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
-		sgc.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,true);
+		sgc.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		
 		ImageData imgData=new ImageData(img);
 		
-		
-		System.err.println("write tex..");
-		RIBHelper.writeTexture(imgData, "texTest");
-		System.err.println("..completed");
-		
-//		ImageData imgData=null;
-//		try {
-//			imgData = ImageData.load(Input.getInput("textures/outfactory3.png"));
-//		} catch (IOException e) {e.printStackTrace();}
+//		System.err.println("write tex..");
+//		RIBHelper.writeTexture(imgData, "texTest");
+//		System.err.println("..completed");
 		
 		TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", imgData, false);
 		
