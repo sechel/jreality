@@ -888,7 +888,7 @@ Color col;}
 	:"AbsolutePointSize" 								
 		// Dicke der Punkte
 		OPEN_BRACKET
-			{double d=0;} d=integerthing
+			{double d=0;} d=doublething
 			{
 			app.setAttribute(CommonAttributes.POINT_RADIUS,d/40);
 			app.setAttribute(CommonAttributes.POINT_SIZE,d);
@@ -897,7 +897,7 @@ Color col;}
 	|"AbsoluteThickness"	
 		// Dicke der Linien
 		OPEN_BRACKET  
-			{double d=0;} d=integerthing
+			{double d=0;} d=doublething
 		CLOSE_BRACKET 
 			{
 			app.setAttribute(CommonAttributes.TUBE_RADIUS,d/40);
