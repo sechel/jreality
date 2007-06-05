@@ -62,7 +62,7 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
              return true;
         }
         protected void replaceWith(ToolEvent replacement) {
-          this.axis = new AxisState((int)(getTimeStamp()-replacement.getTimeStamp()));
+          this.axis = new AxisState((int)(replacement.getTimeStamp()-getTimeStamp()));
           this.time = replacement.getTimeStamp();
         }
 	}

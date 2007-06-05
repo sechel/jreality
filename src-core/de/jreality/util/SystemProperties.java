@@ -40,6 +40,9 @@
 
 package de.jreality.util;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 
 /**
  * jReality system property keys and default values
@@ -51,6 +54,15 @@ public class SystemProperties {
 
 	private SystemProperties() {}
 	
+	public static String hostname="localhost";
+	static {
+		try {
+			hostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	/** 
 	 * Specifies whether {@link de.jreality.ui.viewerapp.ViewerApp} initializes a {@link RenderTrigger}

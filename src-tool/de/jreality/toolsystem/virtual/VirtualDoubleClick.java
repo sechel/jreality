@@ -82,7 +82,6 @@ public class VirtualDoubleClick implements VirtualDevice {
         return null;
       }
       releaseOnNextRelease=true;
-      System.out.println("delay="+(context.getEvent().getTimeStamp()-lastClickTime));
       return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.PRESSED);
     }
 	}
