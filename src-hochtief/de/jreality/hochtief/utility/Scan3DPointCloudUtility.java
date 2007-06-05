@@ -18,7 +18,7 @@ import de.jreality.util.Input;
 public class Scan3DPointCloudUtility {
 	
 	
-	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceCentroid, double[] faceDir1, double[] faceDir2, double max1, double min1, double max2, double min2, double texRes){
+	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceCenteroid, double[] faceDir1, double[] faceDir2, double max1, double min1, double max2, double min2, double texRes){
 		
 		
 		System.out.println("projecting "+points.size()+" points");
@@ -33,7 +33,7 @@ public class Scan3DPointCloudUtility {
 				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, min2, faceDir2))
 		};
 		for(int i=0; i<faceVertices.length;i++)
-			Rn.add(faceVertices[i], faceVertices[i], faceCentroid);
+			Rn.add(faceVertices[i], faceVertices[i], faceCenteroid);
 		
 		IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
 		ifsf.setVertexCount(faceVertices.length);
@@ -71,7 +71,7 @@ public class Scan3DPointCloudUtility {
 			int[] color=new int[4];
 			byte[] colorTemp=vertexColors.get(i);
 			for(int c=0;c<3;c++)
-				color[c]=colorTemp[c];
+				color[c]=colorTemp[c]+(int)((double)255/2.0);;
 			color[3]=255;
 			
 			
@@ -79,7 +79,7 @@ public class Scan3DPointCloudUtility {
 			double[] pointTemp=points.get(i);
 			for(int p=0;p<3;p++)
 				point[p]=pointTemp[p];
-			Rn.subtract(point, point, faceCentroid);
+			Rn.subtract(point, point, faceCenteroid);
 			
 			int x=(int)((Rn.innerProduct(point, faceDir1)-min1)/(max1-min1)*(double)(texWidth-1));
 			int y=(int)((Rn.innerProduct(point, faceDir2)-min2)/(max2-min2)*(double)(texHeight-1));
@@ -91,10 +91,7 @@ public class Scan3DPointCloudUtility {
 				color[1]=(int)((double)(color[1]+matchCounter[x][y]*oldColor[1])/(double)(matchCounter[x][y]+1));
 				color[2]=(int)((double)(color[2]+matchCounter[x][y]*oldColor[2])/(double)(matchCounter[x][y]+1));
 			}
-			
-			if(i%100==0)
-				System.out.println("x,y="+x+","+y+"; color="+color[0]+","+color[1]+","+color[2]+","+color[3]);
-			
+		
 			raster.setPixel(x, y, color);	
 			matchCounter[x][y]++;
 		}

@@ -40,39 +40,44 @@ public class PointCloudSimplifier {
 		//double[] ev=evd.getEigenvalues();
 		DenseMatrix eig=evd.getEigenvectors();
 		
+		//ev(faceDir1)>ev(faceDir2)>ev(faceDir3)
 		double[] faceDir1=new double[] {eig.get(0, 2),eig.get(1, 2),eig.get(2, 2)};
 		double[] faceDir2=new double[] {eig.get(0, 1),eig.get(1, 1),eig.get(2, 1)};
+		double[] faceDir3=new double[] {eig.get(0, 0),eig.get(1, 0),eig.get(2, 0)};
 		Rn.normalize(faceDir1, faceDir1);
 		Rn.normalize(faceDir2, faceDir2);
-		
+		Rn.normalize(faceDir3, faceDir3);
 		
 		double[] centeroid=new double[3];
 		for(int i=0;i<singlePoints.size();i++)
 			Rn.add(centeroid, centeroid, singlePoints.get(i)); 
 		Rn.times(centeroid, 1/(double)singlePoints.size(), centeroid);
 		
-		
-		double max1=0,min1=0,max2=0,min2=0;
-		
+		double max1=0,min1=0,max2=0,min2=0;		
 		double[] point;
-		double dist;
-		for(int i=0;i<M;i++){
-			for(int j=0;j<N;j++){				
-				if(edgeId[i][j]==EdgeDetector.POINT_TYPE_SINGLEPOINT){
-					point=Scan3DUtility.convertDepthValueTo3DCoordinate(i, j, depth[i][j], M, N);
-					Rn.subtract(point, point, centeroid);
-					dist=Rn.innerProduct(faceDir1, point);
-					if(dist>max1) max1=dist; 
-					if(dist<min1) min1=dist; 
-					dist=Rn.innerProduct(faceDir2, point);
-					if(dist>max2) max2=dist; 
-					if(dist<min2) min2=dist; 					
-				}				
-			}			
-		}
-		
-		
+		double dist;		
+		for(int i=0;i<singlePoints.size();i++){
+			point=Rn.subtract(null, singlePoints.get(i), centeroid);
+			dist=Rn.innerProduct(faceDir1, point);
+			if(dist>max1) max1=dist; 
+			if(dist<min1) min1=dist; 
+			dist=Rn.innerProduct(faceDir2, point);
+			if(dist>max2) max2=dist; 
+			if(dist<min2) min2=dist; 			
+		}			
 		sgc.addChild(Scan3DPointCloudUtility.projectPointCloud(singlePoints, colors, centeroid, faceDir1, faceDir2, max1, min1, max2, min2, texRes));
+
+//		max1=0; min1=0;	max2=0; min2=0;			
+//		for(int i=0;i<singlePoints.size();i++){
+//			point=Rn.subtract(null, singlePoints.get(i), centeroid);
+//			dist=Rn.innerProduct(faceDir3, point);
+//			if(dist>max1) max1=dist; 
+//			if(dist<min1) min1=dist; 
+//			dist=Rn.innerProduct(faceDir2, point);
+//			if(dist>max2) max2=dist; 
+//			if(dist<min2) min2=dist; 			
+//		}			
+//		sgc.addChild(Scan3DPointCloudUtility.projectPointCloud(singlePoints, colors, centeroid, faceDir3, faceDir2, max1, min1, max2, min2, texRes));
 
 		return sgc;
 	}
