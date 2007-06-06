@@ -218,7 +218,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
 		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);	
 		isTopCat = (isCopyCat && !existsHigherCat());
-//		isTopCat = eAp.getAttribute("discreteGroup.topCat", isTopCat);	
 		delay = eAp.getAttribute("discreteGroup.delay", delay);	
 	}
 
