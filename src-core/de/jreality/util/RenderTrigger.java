@@ -212,6 +212,7 @@ public class RenderTrigger implements SceneGraphComponentListener,
     static final class RenderTriggerSingleCaster extends RenderTriggerCaster
     {
         final Viewer v;
+        private boolean rendering;
         RenderTriggerSingleCaster(Viewer viewer)
         {
           v=viewer;
@@ -223,7 +224,16 @@ public class RenderTrigger implements SceneGraphComponentListener,
         void render(boolean async)
         {
             if (async) v.renderAsync();
-            else v.render();
+            else {
+                synchronized (this) {
+                    if (rendering) return;
+                    else rendering=true;
+                }
+                v.render();
+                synchronized (this) {
+                    rendering=false;
+                }
+            }
         }
     }
     static final class RenderTriggerMulticaster extends RenderTriggerCaster
