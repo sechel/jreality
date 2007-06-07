@@ -25,6 +25,9 @@ public class AppearancePluginVR extends AbstractPluginVR {
 	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
 	private static final double DEFAULT_TRANSPARENCY = .7;
 	private static final boolean DEFAULT_FACES_FLAT = false;
+	private static final boolean DEFAULT_TUBES = true;
+	private static final boolean DEFAULT_SPHERES = true;
+	
 	private AppearancePanel appearancePanel;
 
 	public AppearancePluginVR() {
@@ -86,7 +89,8 @@ public class AppearancePluginVR extends AbstractPluginVR {
 		prefs.putBoolean("transparencyEnabled", appearancePanel.isTransparencyEnabled());
 		prefs.putDouble("transparency", appearancePanel.getTransparency());
 		prefs.putBoolean("facesFlat", appearancePanel.isFacesFlat());
-	
+		prefs.putBoolean("tubes", appearancePanel.getTubes());
+		prefs.putBoolean("spheres", appearancePanel.getSpheres());
 	}
 
 	@Override
@@ -109,6 +113,8 @@ public class AppearancePluginVR extends AbstractPluginVR {
 		appearancePanel.setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
 		appearancePanel.setTransparency(DEFAULT_TRANSPARENCY);
 		appearancePanel.setFacesFlat(DEFAULT_FACES_FLAT);
+		appearancePanel.setTubes(DEFAULT_TUBES);
+		appearancePanel.setSpheres(DEFAULT_SPHERES);
 	}
 
 	
@@ -142,6 +148,8 @@ public class AppearancePluginVR extends AbstractPluginVR {
 		appearancePanel.setTransparencyEnabled(prefs.getBoolean("transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
 		appearancePanel.setTransparency(prefs.getDouble("transparency", DEFAULT_TRANSPARENCY));
 		appearancePanel.setFacesFlat(prefs.getBoolean("facesFlat", DEFAULT_FACES_FLAT));
+		appearancePanel.setTubes(prefs.getBoolean("tubes", DEFAULT_TUBES));
+		appearancePanel.setSpheres(prefs.getBoolean("spheres", DEFAULT_SPHERES));
 	}
 
 	public void setFaceColor(Color c) {

@@ -53,6 +53,7 @@ public class AppearancePanel extends JPanel {
 	private JCheckBox linesReflecting;
 	private JCheckBox facesReflecting;
 	private JCheckBox facesFlat;
+	private JCheckBox tubes, spheres;
 	
 	CubeMap cmVertices, cmEdges, cmFaces;
 	ImageData[] cubeMap;
@@ -127,9 +128,14 @@ public class AppearancePanel extends JPanel {
 			}
 		});
 		lineBox.add(lineButtonBox);
-
+		
 		Box tubeRadiusBox = new Box(BoxLayout.X_AXIS);
 		tubeRadiusBox.setBorder(sliderBoxBorder);
+
+		tubeRadiusBox.add(lineColorButton);
+		
+		tubeRadiusBox.add(Box.createHorizontalStrut(7));
+		
 		JLabel tubeRadiusLabel = new JLabel("radius");
 		tubeRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		tubeRadiusSlider.setPreferredSize(new Dimension(70,20));
@@ -140,7 +146,14 @@ public class AppearancePanel extends JPanel {
 		});
 		tubeRadiusBox.add(tubeRadiusLabel);
 		tubeRadiusBox.add(tubeRadiusSlider);
-		tubeRadiusBox.add(lineColorButton);
+		tubes = new JCheckBox("tubes");
+		tubes.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setTubes(tubes.isSelected());
+			}
+		});
+		
+		tubeRadiusBox.add(tubes);
 		lineBox.add(tubeRadiusBox);
 
 		appBox.add(lineBox);
@@ -193,6 +206,11 @@ public class AppearancePanel extends JPanel {
 
 		Box pointRadiusBox = new Box(BoxLayout.X_AXIS);
 		pointRadiusBox.setBorder(sliderBoxBorder);
+		
+		pointRadiusBox.add(pointColorButton);
+
+		pointRadiusBox.add(Box.createHorizontalStrut(7));
+
 		JLabel pointRadiusLabel = new JLabel("radius");
 		pointRadiusSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 0);
 		pointRadiusSlider.setPreferredSize(new Dimension(70,20));
@@ -203,7 +221,15 @@ public class AppearancePanel extends JPanel {
 		});
 		pointRadiusBox.add(pointRadiusLabel);
 		pointRadiusBox.add(pointRadiusSlider);
-		pointRadiusBox.add(pointColorButton);
+		spheres = new JCheckBox("spheres");
+		spheres.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setSpheres(spheres.isSelected());
+			}
+		});
+		
+		pointRadiusBox.add(spheres);
+		
 		pointBox.add(pointRadiusBox);
 
 		appBox.add(pointBox);
@@ -257,12 +283,11 @@ public class AppearancePanel extends JPanel {
 
 		Box transparencyBox = new Box(BoxLayout.X_AXIS);
 		transparencyBox.setBorder(new EmptyBorder(topSpacing,5,0,10));
-		transparency = new JCheckBox("transp");
-		transparency.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				setTransparencyEnabled(transparency.isSelected());
-			}
-		});
+
+		transparencyBox.add(faceColorButton);
+
+		transparencyBox.add(Box.createHorizontalStrut(7));
+		
 		transparencySlider = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 1);
 		transparencySlider.setPreferredSize(new Dimension(70,20));
 		transparencySlider.addChangeListener(new ChangeListener() {
@@ -270,9 +295,16 @@ public class AppearancePanel extends JPanel {
 				setTransparency(getTransparency());
 			}
 		});
-		transparencyBox.add(transparency);
 		transparencyBox.add(transparencySlider);
-		transparencyBox.add(faceColorButton);
+
+		transparency = new JCheckBox("transp");
+		transparency.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setTransparencyEnabled(transparency.isSelected());
+			}
+		});
+		transparencyBox.add(transparency);
+		
 		faceBox.add(transparencyBox);
 		JPanel flatPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		//flatPanel.setBorder(new EmptyBorder(5,5,5,5));
@@ -288,6 +320,25 @@ public class AppearancePanel extends JPanel {
 		appBox.add(faceBox);
 
 		appearancePanel.add(appBox);
+	}
+	
+	protected void setTubes(boolean b) {
+		tubes.setSelected(b);
+		getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, b);
+		tubeRadiusSlider.setEnabled(b);
+	}
+
+	boolean getTubes() {
+		return tubes.isSelected();
+	}
+	
+	protected void setSpheres(boolean b) {
+		spheres.setSelected(b);
+		getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, b);
+	}
+
+	boolean getSpheres() {
+		return spheres.isSelected();
 	}
 	
 	public void setSkyBox(ImageData[] c) {
@@ -342,9 +393,10 @@ public class AppearancePanel extends JPanel {
 	
 	public void setPointRadius(double d) {
 		pointRadiusSlider.setValue((int) (d * 100));
-		getAppearance().setAttribute(CommonAttributes.POINT_SHADER + "."
-				+ CommonAttributes.POINT_RADIUS, Math.exp(Math.log(AlignPluginVR.LOGARITHMIC_RANGE) * d)
-				/ AlignPluginVR.LOGARITHMIC_RANGE * getObjectScale() * AlignPluginVR.MAX_RADIUS);
+		double r = Math.exp(Math.log(AlignPluginVR.LOGARITHMIC_RANGE) * d)
+						/ AlignPluginVR.LOGARITHMIC_RANGE * AlignPluginVR.MAX_RADIUS;
+		getAppearance().setAttribute(CommonAttributes.POINT_SHADER + "."+ CommonAttributes.POINT_RADIUS, r * getObjectScale());
+		getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, d*64);
 	}
 	
 	public double getObjectScale() {
@@ -363,9 +415,11 @@ public class AppearancePanel extends JPanel {
 	
 	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
-		getAppearance().setAttribute(CommonAttributes.LINE_SHADER + "."
-				+ CommonAttributes.TUBE_RADIUS, Math.exp(Math.log(AlignPluginVR.LOGARITHMIC_RANGE) * d)
-				/ AlignPluginVR.LOGARITHMIC_RANGE * getObjectScale() * AlignPluginVR.MAX_RADIUS);
+		double r = Math.exp(Math.log(AlignPluginVR.LOGARITHMIC_RANGE) * d)
+						/ AlignPluginVR.LOGARITHMIC_RANGE * AlignPluginVR.MAX_RADIUS;
+		getAppearance().setAttribute(CommonAttributes.LINE_SHADER + "."	+ CommonAttributes.TUBE_RADIUS, getObjectScale() * r);
+		
+		
 	}
 	
 	public Color getPointColor() {
