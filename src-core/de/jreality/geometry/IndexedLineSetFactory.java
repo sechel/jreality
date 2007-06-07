@@ -122,6 +122,10 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 		super.setVertexLabels( data );
 	}
 
+	public void setVertexRelativeRadii( double [] data ) {
+		super.setVertexRelativeRadii( data );
+	}
+	
 	/* edge attributes */
 	
 	public void setLineCount( int count ) {

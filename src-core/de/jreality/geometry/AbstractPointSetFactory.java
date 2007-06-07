@@ -48,6 +48,7 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
@@ -166,7 +167,16 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 		setVertexAttribute( Attribute.LABELS, data == null ? null : new StringArray(data));
 	}
 	
-
+	protected void setVertexRelativeRadii( DataList data ) {
+		setVertexAttribute( Attribute.RELATIVE_RADII, data );
+	}
+	
+	protected void setVertexRelativeRadii( double [] data ) {
+		if( data != null && data.length != nov() )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setVertexAttribute( Attribute.RELATIVE_RADII, data == null ? null : new DoubleArray(data));
+	}
+	
 	String [] indexString(int nov) {
 		if( nov == 0 ) return null;
 		String [] labels = new String[nov];

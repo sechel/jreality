@@ -122,6 +122,9 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setVertexLabels( data );
 	}
 
+	public void setVertexRelativeRadii( double [] data ) {
+		super.setVertexRelativeRadii( data );
+	}
 	/* edge attributes */
 
 	public void setLineCount( int count ) {
