@@ -549,6 +549,7 @@ public class AttributeEntityUtility {
     try {
       return proxyConstructors.get(clazz).newInstance(h);
     } catch (Exception e) {
+      e.printStackTrace();
       IllegalStateException ie = new IllegalStateException(e.getMessage());
       ie.initCause(e.getCause());
       throw ie;
