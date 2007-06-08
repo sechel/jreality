@@ -164,6 +164,10 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setEdgeLabels( data );
 	}
 	
+	public void setEdgeRelativeRadii( double [] data ) {
+		super.setEdgeRelativeRadii( data );
+	}
+
 	/* face attributes */
 	
 	public void setFaceCount( int count ) {

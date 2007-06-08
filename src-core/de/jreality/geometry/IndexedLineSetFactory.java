@@ -167,5 +167,10 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 	public void setEdgeLabels( String[] data ) {
 		super.setEdgeLabels( data );
 	}
+
+	public void setEdgeRelativeRadii( double [] data ) {
+		super.setEdgeRelativeRadii( data );
+	}
 	
+
 }

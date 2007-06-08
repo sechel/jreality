@@ -54,6 +54,7 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
@@ -170,6 +171,15 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		setEdgeAttribute( Attribute.LABELS, data == null ? null : new StringArray(data));
 	}
 
+	protected void setEdgeRelativeRadii( DataList data ) {
+		setEdgeAttribute( Attribute.RELATIVE_RADII, data );
+	}
+	
+	protected void setEdgeRelativeRadii( double [] data ) {
+		if( data != null && data.length != noe() )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setEdgeAttribute( Attribute.RELATIVE_RADII, data == null ? null : new DoubleArray(data));
+	}
 
 	{
 		edgeLabels.addIngr(edgeCount);
