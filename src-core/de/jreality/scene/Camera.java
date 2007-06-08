@@ -111,7 +111,7 @@ public class Camera extends SceneGraphNode {
 			isPerspective = true,
 			isStereo = false;
 	
-	double eyeSeparation = 0.1;
+	double eyeSeparation = 0.07;
 	double[] orientationMatrix;		
 	
   private CameraListener cameraListener;
