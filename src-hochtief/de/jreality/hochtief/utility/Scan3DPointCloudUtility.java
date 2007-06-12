@@ -20,6 +20,7 @@ public class Scan3DPointCloudUtility {
 	
 	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceCenteroid, double[] faceDir1, double[] faceDir2, double max1, double min1, double max2, double min2, double texRes){
 		
+		SceneGraphComponent sgc=new SceneGraphComponent();
 		
 		System.out.println("projecting "+points.size()+" points");
 		
@@ -54,6 +55,7 @@ public class Scan3DPointCloudUtility {
 		System.out.println("texWidth="+texWidth);
 		System.out.println("texHeight="+texHeight);
 		
+		if(texWidth<=0||texHeight<=0) return sgc;
 		
 		BufferedImage img = new BufferedImage(texWidth, texHeight, BufferedImage.TYPE_INT_ARGB);
 		WritableRaster raster = img.getRaster();
@@ -96,7 +98,6 @@ public class Scan3DPointCloudUtility {
 			matchCounter[x][y]++;
 		}
 		
-		SceneGraphComponent sgc=new SceneGraphComponent();
 		sgc.setGeometry(ifsf.getGeometry());
 		sgc.setAppearance(new Appearance());
 		sgc.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
