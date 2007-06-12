@@ -144,7 +144,7 @@ public class GFZTool  extends AbstractTool {
 
 
 //	PROPERTIES
-	static final String gfzDir = "/net/MathVis/gfz";
+	static final String gfzDir = "/net/MathVis/gfz";  //GFZ: "C:\\cygwin\\home\\Administrator\\gfz"
 	static final int slideInterval = 5000;  //time after which the slide changes in millis
 	static final double scenePanelWidth = 1.0;
 	private static SceneGraphComponent sceneCmp = null;
@@ -166,6 +166,12 @@ public class GFZTool  extends AbstractTool {
 		r.setInput(new Input(file));
 		JrScene scene = r.getScene();
 
+		//adjust camara properties if displayed in 3D environment
+//		Camera camera = (Camera) scene.getPath("cameraPath").getLastElement();
+//		camera.setStereo(true);
+//		camera.setEyeSeparation(100.0);
+//		camera.setFocus(16000.0);
+		
 		final SceneGraphComponent root = scene.getSceneRoot();
 		sceneCmp = scene.getPath("emptyPickPath").getLastComponent();
 		SceneGraphComponent gfz = sceneCmp.getChildComponent(0);
@@ -314,7 +320,7 @@ public class GFZTool  extends AbstractTool {
 		gfzMenu.addSeparator();
 
 		//PAGE UP
-		action = new AbstractAction("Show next layer"){ //dummy
+		action = new AbstractAction("Show next layer"){
 			public void actionPerformed(ActionEvent arg0) {
 				if (topLayer > 1) {
 					gfz.getChildComponent(--topLayer).setVisible(true);
@@ -327,7 +333,7 @@ public class GFZTool  extends AbstractTool {
 		gfzMenu.add(new JMenuItem(action));
 
 		//PAGE DOWN
-		action = new AbstractAction("Hide next layer"){ //dummy
+		action = new AbstractAction("Hide next layer"){
 			public void actionPerformed(ActionEvent arg0) {
 				if (topLayer < layerCount) {
 					gfz.getChildComponent(topLayer++).setVisible(false);
