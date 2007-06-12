@@ -82,16 +82,16 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				displayListDirty = geometryDLDirty = true;
 			if (!jr.offscreenMode && isCopyCat)	{
 				// we only care about the time when we are clipping to the camera (and are top copycat node)
-				theLog.fine("dld\tcld:\t"+displayListDirty+"\t"+childrenDLDirty+"\t"+goBetween.originalComponent.getName());
+//				theLog.fine("dld\tcld:\t"+displayListDirty+"\t"+childrenDLDirty+"\t"+goBetween.originalComponent.getName());
 				if (isTopCat)	{
 					if (displayListDirtyUp)	{
 						propagateSGCDisplayListDirtyDown();
-						theLog.fine("Propagating display list dirty down "+goBetween.getOriginalComponent().getName());
+//						theLog.fine("Propagating display list dirty down "+goBetween.getOriginalComponent().getName());
 					}
 					if (System.currentTimeMillis() - currentTime > delay)	{
 						currentTime = System.currentTimeMillis();
 						displayListDirty = true;
-						theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
+//						theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
 					}
 				}
 				// we only use a display list if we are a copycat node
@@ -100,7 +100,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 						jr.globalGL.glCallList(displayList);
 						return;
 					}
-					theLog.fine("Going into display list: "+goBetween.getOriginalComponent().getName());
+//					theLog.fine("Going into display list: "+goBetween.getOriginalComponent().getName());
 					// TODO figure out why the following exception occurs 
 					// (currently disabled by above the enclosing if() statement)
 					if (jr.renderingState.insideDisplayList) {
@@ -111,7 +111,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 					//else jr.globalGL.glDeleteLists(displayList, 0);
 					jr.globalGL.glNewList(displayList, GL.GL_COMPILE);
 					insideDL = jr.renderingState.insideDisplayList = true;
-					theLog.fine("Turning on dlist for "+goBetween.getOriginalComponent().getName());
+//					theLog.fine("Turning on dlist for "+goBetween.getOriginalComponent().getName());
 				}	
 			}
 		}
@@ -162,7 +162,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			childrenDLDirty = child.isDisplayListDirty();
 			child.goBetween.getOriginalComponent().setVisible(vis);
-			theLog.fine("Rendered "+count);
+			theLog.info("Rendered "+count);
 			cumulativeIsReflection = isReflectionBefore;
 			jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 		} else {
