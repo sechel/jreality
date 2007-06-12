@@ -50,6 +50,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
+import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.ConfigurationAttributes;
 
 /**
@@ -86,15 +87,20 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
   
   public void perform(ToolContext tc) {
     tc.getTransformationMatrix(headSlot).toDoubleArray(headMatrix.getArray());
-    setHeadMatrix(headMatrix, tc.getViewer().getCameraPath(), tc.getAvatarPath());
+	   if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
+	        eap = EffectiveAppearance.create(tc.getRootToToolComponent());
+	      }
+	signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+	setHeadMatrix(headMatrix, tc.getViewer().getCameraPath(), tc.getAvatarPath());
   }
-  
+  EffectiveAppearance eap = null;
+  private int signature;
   private void setHeadMatrix(Matrix head, SceneGraphPath cameraPath, SceneGraphPath portalPath) {
 
 	Camera camera = (Camera) cameraPath.getLastElement();
   
 	// the transformation of the camera node is headTranslation * cameraOrientation
-	MatrixBuilder.euclidean().translate(head.getColumn(3)).times(cameraOrientation).assignTo(cameraPath.getLastComponent());
+	MatrixBuilder.init(null, signature).translate(head.getColumn(3)).times(cameraOrientation).assignTo(cameraPath.getLastComponent());
 		
 	// calculate and set camera orientation matrix:
 	head.setColumn(3, Pn.originP3);
