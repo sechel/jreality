@@ -1113,7 +1113,9 @@ public class CoordinateSystemFactory {
 				arrow.setTransformation(trans);
 				
 				ticks = nodes.get(axesNames[axis]+toBinaryString(k)+"ticks");  //e.g. x00ticks
-				m = new FactoredMatrix(ticks.getTransformation());
+				if (ticks.getTransformation()!=null)
+					m = new FactoredMatrix(ticks.getTransformation());
+				else m = new FactoredMatrix();
 				m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 				trans = new Transformation(m.getArray());
 				trans.setName("tickTransformation");
@@ -1130,7 +1132,9 @@ public class CoordinateSystemFactory {
 			arrow.setTransformation(trans);
 			
 			ticks = nodes.get(axesNames[axis]+"Ticks");  //e.g. xTicks
-			m = new FactoredMatrix(ticks.getTransformation());
+			if (ticks.getTransformation()!=null)
+				m = new FactoredMatrix(ticks.getTransformation());
+			else m = new FactoredMatrix();
 			m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
 			trans = new Transformation(m.getArray());
 			trans.setName("tickTransformation");
@@ -1348,9 +1352,8 @@ public class CoordinateSystemFactory {
 			b = (edges[axis][1] == -1)? "0":"1";
 			for (int k=0; k<=3; k++) {
 				labels = nodes.get(axesNames[axis]+toBinaryString(k)+"ticklabels");  //e.g. x00ticklabels
-				if ( toBinaryString(k).equals(a+b) )
-					labels.setVisible(true);
-				else labels.setVisible(false);
+				if (labels==null) break;
+				labels.setVisible(toBinaryString(k).equals(a+b));
 			}
 		}
 	}
