@@ -169,8 +169,6 @@ public class CoordinateSystemFactory {
    * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
 	public CoordinateSystemFactory(double extent, double axisScale) {
-		//TODO: validate extent (extent > 0)
-		
 		this(new double[]{extent, extent, extent}, axisScale);
 	}
 	
@@ -184,14 +182,16 @@ public class CoordinateSystemFactory {
   
 	
 	/**
-	 * Creates a coordinate system where min and max values of each coordinate
-	 * axis are specified by <code>extent</code>, 
+	 * Creates a coordinate system where min and max values of each of the three coordinate
+	 * axes is specified by <code>extent</code>, 
 	 * i.e. x is within [-<code>extent[0]</code>, <code>extent[0]</code>] etc.
-	 * @param extent contains the extent of each coordinate axis
+	 * @param extent the extent of each of the three coordinate axes
    * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
 	public CoordinateSystemFactory(double[] extent, double axisScale) {
-		//TODO: validate extent (extent[i] > 0, extent.length == 3)
+
+		if (extent.length!=3 || extent[X]<=0 || extent[Y]<=0 || extent[Z]<=0 || axisScale<=0)
+			throw new IllegalArgumentException("length of extent incorrect or negative values");
 		
 		boxMin = new double[]{-extent[X], -extent[Y], -extent[Z]};
 		boxMax = new double[]{ extent[X],  extent[Y],  extent[Z]};
@@ -281,26 +281,26 @@ public class CoordinateSystemFactory {
 		//set appearance of coordinate system node
 		Appearance app = new Appearance();
 		app.setName("Appearance");
-	    app.setAttribute(CommonAttributes.EDGE_DRAW, true);
-	    app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
-	    app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
-	    app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibility
+		app.setAttribute(CommonAttributes.EDGE_DRAW, true);
+		app.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+		app.setAttribute(CommonAttributes.VERTEX_DRAW, showLabels);  //label visibility
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.001);  //don't show label points
 		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, labelColor);
 		app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, coordinateSystemColor);
 		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, coordinateSystemColor);
 		//app.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.BLACK);
-	    app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"font", labelFont);  //label font
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04, 0, 0});  //label offset of ticks
-	    app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.EAST);
-	    coordinateSystem.setAppearance(app);
-		
-	    if (beautify) {
-	    	beautify = false;
-	    	beautify(true); }
-	    
+		app.setAttribute(CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"font", labelFont);  //label font
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"scale", labelScale);  //label scale
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"offset", new double[]{0.04, 0, 0});  //label offset of ticks
+		app.setAttribute(CommonAttributes.POINT_SHADER+"."+"alignment", SwingConstants.EAST);
+		coordinateSystem.setAppearance(app);
+
+		if (beautify) {
+			beautify = false;
+			beautify(true); }
+
 		return coordinateSystem;
 	}
 	
@@ -572,19 +572,16 @@ public class CoordinateSystemFactory {
 		
 		SceneGraphComponent ticks = new SceneGraphComponent();
 		ticks.setName("ticks");
-		if (minLevel>maxLevel) return ticks;
-		
-		IndexedFaceSet ticksGeom = Primitives.pyramid(octagonalCrossSection(minLevel), new double[]{0,0,minLevel});  //init
-		int numOfTicks = 1;
-		for (double level=round(minLevel+axisScale); level<=maxLevel; level=round(level+axisScale) ) {
+		if (minLevel>maxLevel)
+			return ticks;  //note that nodes.get(axesNames[axis]+"Ticks") has no geometry now
+			
+		IndexedFaceSet ticksGeom = new IndexedFaceSet();
+		int numOfTicks = 0;
+		for (double level=round(minLevel); level<=maxLevel; level=round(level+axisScale) ) {
 			if (level==0) continue;  //no tick at origin
-			// new:
-			GeometryMergeFactory gMFac= new GeometryMergeFactory();
-			ticksGeom=gMFac.mergeIndexedFaceSets(new PointSet[]{ ticksGeom, 
+			GeometryMergeFactory gMFac = new GeometryMergeFactory();
+			ticksGeom = gMFac.mergeIndexedFaceSets(new PointSet[]{ ticksGeom, 
 					Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
-			// old: 
-			// ticksGeom = IndexedFaceSetUtility.mergeIndexedFaceSets(new IndexedFaceSet[]{ ticksGeom, 
-			//	Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
 			numOfTicks++;
 		}
 		//GeometryUtility.calculateAndSetVertexNormals(ticksIFS);
@@ -645,8 +642,9 @@ public class CoordinateSystemFactory {
 		
 		SceneGraphComponent ticks = new SceneGraphComponent();
 		ticks.setName("ticks");
-		if (minLevel>maxLevel) return ticks;
-		
+		if (minLevel>maxLevel)
+			return ticks;  //note that nodes.get(axesNames[axis]+toBinaryString(k)+"ticks") has no geometry now
+			
 		IndexedLineSet ticksGeom = new IndexedLineSet();
 		IndexedLineSetFactory newTick;
 		int numOfTicks = 0;
@@ -717,9 +715,12 @@ public class CoordinateSystemFactory {
 		
 		for (int axis=X; axis<=Z; axis++) {
 			
+			SceneGraphComponent ticks = nodes.get(axesNames[axis]+"00ticklabels");
+			if (ticks == null) continue;  //no ticks on current axis
+
 			//get number of ticks on axis
-			final int n = ((PointSet)nodes.get(axesNames[axis]+"00ticklabels").getGeometry()).getNumPoints();
-			
+			final int n = ((PointSet)ticks.getGeometry()).getNumPoints();
+
 			for (int k=0; k<=3; k++) {
 				
 				double[][] vertices = new double[2*n][3];
