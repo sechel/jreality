@@ -489,8 +489,8 @@ public class Primitives {
 			for (int i = 0; i<n; ++i)	{
 				indices[i] = new int[3];
 				indices[i][0] = i;
-				indices[i][1] = (i+1)%n;
-				indices[i][2] = n;
+				indices[i][2] = (i+1)%n;
+				indices[i][1] = n;
 			}
 			indices[n] = new int[n];
 			for (int i = 0; i<n; ++i)	indices[n][i] = i;
