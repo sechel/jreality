@@ -441,5 +441,57 @@ public class RemoveDublicateInfo {
 			return pos;
 		}
 	}// end DimTree
-
+	
+	/** removes vertices which are not used by faces.
+	 * changes faceIndices.
+	 * @param vertices
+	 * @param faces
+	 * @return vertices
+	 */
+	public static double[][] removeNoFaceVertices(double[][] vertices, int[][] faces){
+		int numVOld=vertices.length;
+		int numF=faces.length;
+		boolean[] usedVertices= new boolean[numVOld];
+		for (int i = 0; i < numVOld; i++) 
+			usedVertices[i]=false;
+		// remember all vertices used in faces
+		for (int i = 0; i < numF; i++) 
+			for (int j = 0; j < faces[i].length; j++) 
+				usedVertices[faces[i][j]]=true;	
+		int count=0; 
+		int[] refferenceTabel= new int[numVOld];
+		for (int i = 0; i < numVOld; i++) {
+			if(usedVertices[i]){
+				refferenceTabel[i]=count;
+				vertices[count]=vertices[i];// vertices gleich richtig einschreiben
+				count++;
+			}
+			else{
+				refferenceTabel[i]=-1;
+			}
+		}
+		// faces umindizieren
+		for (int i = 0; i < numF; i++) 
+			for (int j = 0; j < faces[i].length; j++) 
+				faces[i][j]=refferenceTabel[faces[i][j]];
+		// VertexListe erneuern
+		double[][] newVertices= new double[count][];
+		System.arraycopy(vertices, 0, newVertices, 0, count);
+		return newVertices;
+	}
+	/** a face definition can repeat the first index at the end  
+	 * excample: {1,2,3,4,1} or {1,2,3,4}
+	 * in first case: the last index will be removed
+	 */
+	public static void removeCycleDefinition(int[][] faces){
+		for (int i = 0; i < faces.length; i++) {
+			int len=faces[i].length;
+			if(len>1)
+				if(faces[i][len-1]==faces[i][0]){
+					int[] newIndis= new int[len-1];
+					System.arraycopy(faces[i], 0, newIndis, 0, len-1);
+					faces[i]=newIndis;
+				}
+		}
+	}
 }
