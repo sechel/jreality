@@ -314,7 +314,7 @@ public class CameraUtility {
 	 */
 	public static Rectangle2D getViewport(Camera cam, double aspectRatio) {
 		Rectangle2D viewPort = null;
-		if (cam.isOnAxis())	{
+		if (cam.isOnAxis() || cam.getViewPort() == null)	{
 			viewPort = new Rectangle2D.Double();
 			double hwidth = Math.tan((Math.PI/180.0)*cam.getFieldOfView()/2.0);
 			if (!cam.isPerspective())	hwidth *= cam.getFocus();
