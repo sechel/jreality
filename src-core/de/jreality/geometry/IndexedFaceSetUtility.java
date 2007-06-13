@@ -1739,6 +1739,189 @@ public class IndexedFaceSetUtility {
 		f.setVertexAttributes(p.getVertexAttributes());
 		return f;
 	}
-	
+	/** makes a consistent orientated version of the "face Indices" if possible.
+	 * if it fails, false will be returned and nothing changes.
+	 * @param numVertices
+	 * @param faces
+	 * @throws Exception
+	 */
+	public static boolean makeConsistentOrientation(IndexedFaceSet ifs){
+		int[][] fIndis= ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		if (fIndis==null) return false;
+		int numV= ifs.getNumPoints();
+		if(_makeConsistentOrientation(numV, fIndis)){
+			ifs.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(fIndis));
+			return true;
+		}
+		return false;
+	} 
+	private static boolean _makeConsistentOrientation(int numVertices, int[][] faces){
+		// 3Listen:
+		// 1: fuer jeden Vertex eine Liste von anliegenden Facetten
+		// 2: abgehandelte Facetten 
+		// 3: fixed but unfinished Faces
+		
+		// Start:
+		// Step 1: falls [3] leer aber [2] noch nicht voll ist :
+		// 			einfach eine unbenutze Facette zu [3] hinzufuegen 
+		// Step 2: nimm eine Facette aus [3]. und tu sie in [2] 
+		//		step a:
+		//			suche NachbarFacette zu dieser (vertices: A & B):
+		//			([1].get(A) schnitt [1].get(B) ohne sie selbst)
+		//		step b:
+		//			dann ggf die orientierung der anderen anpassen(falls noch moeglich)
+		//		step c: 
+		//			die andere Facette in [2] tun falls sie noch nicht in [2] oder [3] ist
+		//		step d:
+		// 			fuer die andere(n) Seite(n) auch noch
+		
+		int numV=numVertices;
+		int numF=faces.length;
+		//Liste 1: 
+		List<List<Integer>> facesOfVertex = new LinkedList<List<Integer>>();
+		for (int i = 0; i < numV; i++) 
+			facesOfVertex.add(new LinkedList<Integer>());			
+		for (int i = 0; i < numF; i++) {
+			int[] face=	faces[i];
+			for (int j = 0; j < face.length; j++) {
+				facesOfVertex.get(face[j]).add(i);
+			}
+		}
+		int[][] facesOfVert=new int[numV][];// zum array machen (speed)
+		int k=0;
+		for(List<Integer> list : facesOfVertex){
+			int len=list.size();
+			int l=0;
+			facesOfVert[k]= new int[len];
+			for (Integer i: list) {
+				facesOfVert[k][l]=i.intValue();
+				l++;
+			}
+			k++;
+		}
+		// Liste 2:
+		boolean[] doneFace= new boolean[numF];
+		for (int i = 0; i < numF; i++) {
+			doneFace[i]=false;
+		}
+		// Liste 3:
+		boolean[] unfinishedFace= new boolean[numF];
+		for (int i = 0; i < numF; i++) {
+			unfinishedFace[i]=false;
+		}
+		// 
+		int numDone=0;
+		int numUnf=0;
+		while (numDone<numF){
+			// start again with new face:
+			unfinishedFace[getFirst(doneFace,false)]=true;
+			numUnf++;
+			// orientate unfinished Faces neighbors
+			while(numUnf>0){
+				numDone++;
+				// take out
+				int currNum=getFirst(unfinishedFace,true);
+				int[] currFace=faces[currNum];
+				int len= currFace.length;
+				unfinishedFace[currNum]=false;
+				numUnf--;
+				doneFace[currNum]=true;
+				// care about neighbors:
+				for (int i = 0; i < len; i++) {// all edges
+					// Edge Vertices:
+					int p1=currFace[i];
+					int p2=currFace[(i+1)%len];
+					List<Integer> neighbor =
+						getTouchingFaces(p1, p2, facesOfVert, currNum);
+					if (neighbor.size()<1) continue;
+					if (neighbor.size()>1) return false;
+					int neighb=neighbor.get(0);
+					// check orientation
+					boolean welloriented=haveSameOrientation(p1,p2,currFace,faces[neighb]);
+					if(!welloriented){
+						// have to switch orientation
+						if(doneFace[neighb]|unfinishedFace[neighb])
+							return false;
+						invertOrientation(faces[neighb]);
+						unfinishedFace[neighb]=true;
+						numUnf++;
+					}
+					else{
+						// everything is fine
+						if(doneFace[neighb]|unfinishedFace[neighb]){}
+						else{ 
+							unfinishedFace[neighb]=true;
+							numUnf++;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	/** returns the first Index which is "searchFor"
+	 * If it fails -1 is returned
+	 */
+	private static int getFirst(boolean[] done, boolean searchFor){
+		for (int i = 0; i < done.length; i++) {
+			if(done[i]==searchFor) return i;
+		}
+		return -1;
+	}
+	/** returnes all neighborFaces of "me" 
+	 * characterised by attaching vertices p1 and p2. 
+	 * welche Facetten beruehren beide Punkte (ohne currNum)
+	 * @param p1
+	 * @param p2
+	 * @param facesOfVerts (fuer jeden Vertex eine Liste von angrenzenden Facetten)
+	 * @return
+	 */
+	private static List<Integer> getTouchingFaces(int p1,int p2,int[][] facesOfVerts,int me){
+		int[] faces1=facesOfVerts[p1];
+		int[] faces2=facesOfVerts[p2];
+		List<Integer> facesInBoth=new LinkedList<Integer>();
+		for (int i = 0; i < faces1.length;i++) {
+			for (int j = 0; j < faces2.length; j++) {
+				if(faces1[i]==faces2[j])
+					if(faces1[i]!=me)
+						facesInBoth.add(faces1[i]);
+			}
+		}
+		return facesInBoth;
+	}
+	/** inverts the order of the vertexIndices
+	 * @param face
+	 */
+	private static void invertOrientation(int[] face){
+		int[] result= new int[face.length];
+		for (int i = 0; i < result.length; i++) {
+			result[i]=face[(face.length-i-1)];
+		}
+		System.arraycopy(result, 0, face, 0, face.length);
+	}
+	private static boolean haveSameOrientation(int p1,int p2,int[] face1,int[] face2){
+		boolean orient1=posOrientatet(p1, p2, face1);
+		boolean orient2=posOrientatet(p2, p1, face2);
+		return (orient1==orient2);
+		}
+	/** returnes true if p1 and p2 appear side by side in Face
+	 * and p1 appears leftside of p2 (in face) 
+	 */
+	private static boolean posOrientatet(int p1,int p2, int[] face){
+		for (int i = 0; i < face.length; i++) 
+			if(face[i]==p1){
+				if(i+1<face.length){
+					if(face[i+1]==p2)
+						return true;
+				}
+				else{
+					if(face[0]==p2)
+						return true;
+				}
+				return false;
+			}
+		return false;
+	}
   	
 }
