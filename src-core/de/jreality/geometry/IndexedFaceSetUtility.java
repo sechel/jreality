@@ -43,6 +43,8 @@ package de.jreality.geometry;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -1755,6 +1757,31 @@ public class IndexedFaceSetUtility {
 		}
 		return false;
 	} 
+	
+	private static int[][] collectVertxFaces(int numV,int[][] faces){
+		Object[] a= new Object[numV];
+		for (int i = 0; i < numV; i++) {
+			a[i]=new LinkedList<Integer>();
+		}
+		for (int i = 0; i < faces.length; i++) {
+			int[] face=	faces[i];
+			for (int j = 0; j < face.length; j++) {
+				((LinkedList<Integer>)a[face[j]]).add(i);
+			}
+		}
+		int[][] facesOfVert=new int[numV][];// zum array machen (speed)
+		for (int i = 0; i < numV; i++) {
+			List<Integer> list=(LinkedList<Integer>)a[i];
+			int len=list.size();
+			int l=0;
+			facesOfVert[i]= new int[len];
+			for (Integer in: list ) {
+				facesOfVert[i][l]=in.intValue();
+				l++;
+			}
+		}
+		return facesOfVert;
+	}
 	private static boolean _makeConsistentOrientation(int numVertices, int[][] faces){
 		// 3Listen:
 		// 1: fuer jeden Vertex eine Liste von anliegenden Facetten
@@ -1778,27 +1805,7 @@ public class IndexedFaceSetUtility {
 		int numV=numVertices;
 		int numF=faces.length;
 		//Liste 1: 
-		List<List<Integer>> facesOfVertex = new LinkedList<List<Integer>>();
-		for (int i = 0; i < numV; i++) 
-			facesOfVertex.add(new LinkedList<Integer>());			
-		for (int i = 0; i < numF; i++) {
-			int[] face=	faces[i];
-			for (int j = 0; j < face.length; j++) {
-				facesOfVertex.get(face[j]).add(i);
-			}
-		}
-		int[][] facesOfVert=new int[numV][];// zum array machen (speed)
-		int k=0;
-		for(List<Integer> list : facesOfVertex){
-			int len=list.size();
-			int l=0;
-			facesOfVert[k]= new int[len];
-			for (Integer i: list) {
-				facesOfVert[k][l]=i.intValue();
-				l++;
-			}
-			k++;
-		}
+		int[][] facesOfVert=collectVertxFaces(numV, faces);
 		// Liste 2:
 		boolean[] doneFace= new boolean[numF];
 		for (int i = 0; i < numF; i++) {
@@ -1923,5 +1930,5 @@ public class IndexedFaceSetUtility {
 			}
 		return false;
 	}
-  	
+
 }
