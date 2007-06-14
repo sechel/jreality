@@ -115,6 +115,7 @@ public class Scan3DPointCloudUtility {
 		sgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
 		sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
 		sgc.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
+		sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
 		
 		ImageData imgData=new ImageData(img);		
 		TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", imgData, false);
