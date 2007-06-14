@@ -22,33 +22,9 @@ public class Scan3DPointCloudUtility {
 		
 		SceneGraphComponent sgc=new SceneGraphComponent();
 		
-		System.out.println("projecting "+points.size()+" points");
-		
 		Rn.normalize(faceDir1, faceDir1);
 		Rn.normalize(faceDir2, faceDir2);
-		
-		double[][] faceVertices={
-				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, max2, faceDir2)),
-				Rn.add(null, Rn.times(null, min1, faceDir1), Rn.times(null, max2, faceDir2)),
-				Rn.add(null, Rn.times(null, min1, faceDir1), Rn.times(null, min2, faceDir2)),
-				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, min2, faceDir2))
-		};
-		for(int i=0; i<faceVertices.length;i++)
-			Rn.add(faceVertices[i], faceVertices[i], faceCenteroid);
-		
-		IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
-		ifsf.setVertexCount(faceVertices.length);
-		ifsf.setVertexCoordinates(faceVertices);
-		ifsf.setFaceCount(1);
-		ifsf.setFaceIndices(new int[][] {{0,1,2,3}});
-		ifsf.setVertexTextureCoordinates(new double[][] {{1,1},{0,1},{0,0},{1,0}});
-		ifsf.setGenerateEdgesFromFaces(true);
-		ifsf.setGenerateFaceNormals(true);
-		ifsf.setGenerateVertexNormals(true);
-		ifsf.update();
-		
 
-		
 		int texWidth=(int)((max1-min1)/texRes);
 		int texHeight=(int)((max2-min2)/texRes);		
 		
@@ -97,6 +73,26 @@ public class Scan3DPointCloudUtility {
 			raster.setPixel(x, y, color);	
 			matchCounter[x][y]++;
 		}
+	
+		double[][] faceVertices={
+				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, max2, faceDir2)),
+				Rn.add(null, Rn.times(null, min1, faceDir1), Rn.times(null, max2, faceDir2)),
+				Rn.add(null, Rn.times(null, min1, faceDir1), Rn.times(null, min2, faceDir2)),
+				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, min2, faceDir2))
+		};
+		for(int i=0; i<faceVertices.length;i++)
+			Rn.add(faceVertices[i], faceVertices[i], faceCenteroid);
+		
+		IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
+		ifsf.setVertexCount(faceVertices.length);
+		ifsf.setVertexCoordinates(faceVertices);
+		ifsf.setFaceCount(1);
+		ifsf.setFaceIndices(new int[][] {{0,1,2,3}});
+		ifsf.setVertexTextureCoordinates(new double[][] {{1,1},{0,1},{0,0},{1,0}});
+		ifsf.setGenerateEdgesFromFaces(true);
+		ifsf.setGenerateFaceNormals(true);
+		ifsf.setGenerateVertexNormals(true);
+		ifsf.update();
 		
 		sgc.setGeometry(ifsf.getGeometry());
 		sgc.setAppearance(new Appearance());
@@ -105,12 +101,7 @@ public class Scan3DPointCloudUtility {
 		sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
 		sgc.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		
-		ImageData imgData=new ImageData(img);
-		
-//		System.err.println("write tex..");
-//		RIBHelper.writeTexture(imgData, "texTest");
-//		System.err.println("..completed");
-		
+		ImageData imgData=new ImageData(img);		
 		TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", imgData, false);
 		
 		return sgc;

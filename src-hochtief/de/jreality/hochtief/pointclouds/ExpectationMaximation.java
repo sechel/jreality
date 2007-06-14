@@ -106,25 +106,25 @@ public class ExpectationMaximation {
 
 
 	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
-		//get component with biggest var
+		//get component with biggest alpha
 		int splitComponentNr=0;
-		double maxEv=0;
-		double[] maxEig=new double[3];			
-		for(int i=0;i<currentComponentCount;i++){			
-			DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[i][3],params[i][4],params[i][5]},{params[i][6],params[i][7],params[i][8]},{params[i][9],params[i][10],params[i][11]}});
-			SymmPackEVD evd=null;
-			try {
-				evd = SymmPackEVD.factorize(covMtx);
-			} catch (NotConvergedException e) {e.printStackTrace();}
-			
-			if(evd.getEigenvalues()[2]>maxEv){
-				maxEv=evd.getEigenvalues()[2];
-				splitComponentNr=i;
-				DenseMatrix eigM=evd.getEigenvectors();
-				maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
+		double maxAlpha=0;					
+		for(int c=0;c<currentComponentCount;c++){			
+			if(params[c][12]>maxAlpha){
+				maxAlpha=params[c][12];
+				splitComponentNr=c;
 			}
 		}
 		
+		DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[splitComponentNr][3],params[splitComponentNr][4],params[splitComponentNr][5]},{params[splitComponentNr][6],params[splitComponentNr][7],params[splitComponentNr][8]},{params[splitComponentNr][9],params[splitComponentNr][10],params[splitComponentNr][11]}});
+		SymmPackEVD evd=null;
+		try {
+			evd = SymmPackEVD.factorize(covMtx);
+		} catch (NotConvergedException e) {e.printStackTrace();}
+		DenseMatrix eigM=evd.getEigenvectors();
+		double[] maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
+		double maxEv=evd.getEigenvalues()[2];
+		 
 		//new component	
 		params[currentComponentCount]=new double[params[0].length];
 		double[] newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
@@ -137,17 +137,61 @@ public class ExpectationMaximation {
 		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
 		
 		//update splitted component
-		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-		params[splitComponentNr][0]=newCenteroid[0];
-		params[splitComponentNr][1]=newCenteroid[1];
-		params[splitComponentNr][2]=newCenteroid[2];		
+		double[] updatedCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
+		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+		params[splitComponentNr][0]=updatedCenteroid[0];
+		params[splitComponentNr][1]=updatedCenteroid[1];
+		params[splitComponentNr][2]=updatedCenteroid[2];		
 		for(int i=3;i<12;i++)
 			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
 		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
 		
 		return params;
 	}
+	
+//	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
+//		//get component with biggest var
+//		int splitComponentNr=0;
+//		double maxEv=0;
+//		double[] maxEig=new double[3];			
+//		for(int i=0;i<currentComponentCount;i++){			
+//			DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[i][3],params[i][4],params[i][5]},{params[i][6],params[i][7],params[i][8]},{params[i][9],params[i][10],params[i][11]}});
+//			SymmPackEVD evd=null;
+//			try {
+//				evd = SymmPackEVD.factorize(covMtx);
+//			} catch (NotConvergedException e) {e.printStackTrace();}
+//			
+//			if(evd.getEigenvalues()[2]>maxEv){
+//				maxEv=evd.getEigenvalues()[2];
+//				splitComponentNr=i;
+//				DenseMatrix eigM=evd.getEigenvectors();
+//				maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
+//			}
+//		}
+//		
+//		//new component	
+//		params[currentComponentCount]=new double[params[0].length];
+//		double[] newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
+//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
+//		params[currentComponentCount][0]=newCenteroid[0];
+//		params[currentComponentCount][1]=newCenteroid[1];
+//		params[currentComponentCount][2]=newCenteroid[2];		
+//		for(int i=3;i<12;i++)
+//			params[currentComponentCount][i]=0.25*params[splitComponentNr][i];			
+//		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
+//		
+//		//update splitted component
+//		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
+//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+//		params[splitComponentNr][0]=newCenteroid[0];
+//		params[splitComponentNr][1]=newCenteroid[1];
+//		params[splitComponentNr][2]=newCenteroid[2];		
+//		for(int i=3;i<12;i++)
+//			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
+//		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
+//		
+//		return params;
+//	}
 
 	public static DenseMatrix unitMatrix=new DenseMatrix(new double[][]{{1,0,0},{0,1,0},{0,0,1}});
 	
@@ -200,9 +244,10 @@ public class ExpectationMaximation {
 		}
 		p*=-0.5;
 		p=Math.exp(p);
-		p/=(Math.sqrt(det)*Math.pow(2*Math.PI, 3/2));
+		double factor=Math.sqrt(det*Math.pow(2*Math.PI, 3));
+		p/=factor;
 
-		//if(p<0.05) return 0;  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//if(p<factor/10.0) return 0;
 		return p;
 	}
 	
@@ -218,6 +263,7 @@ public class ExpectationMaximation {
 		DenseMatrix cov;
 		DenseMatrix[] invCov=new DenseMatrix[params.length];
 		double[] alpha=new double[params.length];
+		double[] centerP=new double[params.length];
 		for(int c=0;c<params.length;c++){
 			centeroid[c]=new double[] {params[c][0],params[c][1],params[c][2]};			
 			det[c]=det(params[c][3],params[c][4],params[c][5],params[c][6],params[c][7],params[c][8],params[c][9],params[c][10],params[c][11]);
@@ -225,6 +271,7 @@ public class ExpectationMaximation {
 			invCov[c]=new DenseMatrix(3,3);
 			unitMatrix.solve(cov, invCov[c]);
 			alpha[c]=params[c][12];
+			centerP[c]=p(centeroid[c],centeroid[c],det[c],invCov[c]);
 		}
 		
 		for(int i=0;i<points.length;i++){
@@ -237,8 +284,9 @@ public class ExpectationMaximation {
 					maxComponent=c;
 				}
 			}
-			if(maxP<0.0005) compId[i]=-1; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
-			else compId[i]=maxComponent;			
+//			if(maxP<centerP[maxComponent]/100.0) compId[i]=-1; //???????????????
+//			else compId[i]=maxComponent;
+			compId[i]=maxComponent;
 		}
 		return compId;
 	}
