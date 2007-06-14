@@ -10,6 +10,7 @@ import de.jreality.hochtief.processing.SimpleDepthFaceExtractor;
 import de.jreality.hochtief.utility.Scan3DShowUtility;
 import de.jreality.reader.AbstractReader;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 
 /**
@@ -92,9 +93,9 @@ public class Scan3DProcessor extends AbstractReader{
 		
 		
 		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId, faceSize, minVertexCount);		
-		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(30, 0.1/100.0, 1, 0.01, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
+		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(5, 0.0001, 1, 0.01, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
 		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),simplifiedPointCloud);
-	
+//		ViewerApp.display(simplifiedPointCloud);
 	}
 
 	public static void main(String[] args) {

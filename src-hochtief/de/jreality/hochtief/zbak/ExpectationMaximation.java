@@ -1,4 +1,4 @@
-package de.jreality.hochtief.pointclouds;
+package de.jreality.hochtief.zbak;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,6 @@ import de.jreality.math.Rn;
 
 public class ExpectationMaximation {
 	
-	private static final double minValue=-10000000;
 	private static DenseMatrix unitMatrix=new DenseMatrix(new double[][]{{1,0,0},{0,1,0},{0,0,1}});
 	
 	public static double[][] calculateParameters(int componentCount, double minChange, double[][] points){
@@ -26,7 +25,7 @@ public class ExpectationMaximation {
 			
 			double[][] p=new double[points.length][currentComponentCount];
 			
-			while(Math.abs(thisPX-lastPX) > minChange){
+			while(thisPX-lastPX > minChange){
 				lastPX=thisPX;
 				
 				double[][] centeroid=new double[currentComponentCount][];
@@ -59,7 +58,7 @@ public class ExpectationMaximation {
 	private static double[][] eStep(double[][] p, double[][] points,  double[][] centeroid, double[] det, DenseMatrix[] invCov, double[] alpha) {	
 		for(int i=0;i<p.length;i++){
 			double pSum=Math.log(p(points[i],centeroid,det,invCov,alpha));
-			if(pSum<minValue) pSum=minValue;	
+			if(pSum<-10000000) pSum=-10000000;			
 			for(int c=0;c<p[0].length;c++){	
 				p[i][c]=pComp(points[i],pSum,centeroid[c],det[c],invCov[c],alpha[c]); 
 			}
@@ -90,7 +89,6 @@ public class ExpectationMaximation {
 			}
 			for(int x=0;x<9;x++){
 				cov[x]/=(double)Nc;
-//				if(cov[x]<minValue) cov[x]=minValue;
 			}
 			
 			double alpha=(double)Nc/(double)points.length;
@@ -198,7 +196,7 @@ public class ExpectationMaximation {
 	
 	private static double pComp(double[] point, double pSumC, double[] centeroid, double det, DenseMatrix invCov, double alpha) {
 		double pSingle=Math.log(alpha*p(point,centeroid,det,invCov));
-		if(pSingle<minValue) pSingle=minValue;
+		if(pSingle<-100000) pSingle=-100000;
 		return Math.exp(pSingle-pSumC);
 	}
 	
@@ -244,6 +242,7 @@ public class ExpectationMaximation {
 		DenseMatrix cov;
 		DenseMatrix[] invCov=new DenseMatrix[params.length];
 		double[] alpha=new double[params.length];
+		double[] centerP=new double[params.length];
 		for(int c=0;c<params.length;c++){
 			centeroid[c]=new double[] {params[c][0],params[c][1],params[c][2]};			
 			det[c]=det(params[c][3],params[c][4],params[c][5],params[c][6],params[c][7],params[c][8],params[c][9],params[c][10],params[c][11]);
@@ -251,6 +250,7 @@ public class ExpectationMaximation {
 			invCov[c]=new DenseMatrix(3,3);
 			unitMatrix.solve(cov, invCov[c]);
 			alpha[c]=params[c][12];
+			centerP[c]=p(centeroid[c],centeroid[c],det[c],invCov[c]);
 		}
 		
 		for(int i=0;i<points.length;i++){
@@ -258,7 +258,7 @@ public class ExpectationMaximation {
 			double maxP=0;		
 			
 			double pSum=Math.log(p(points[i],centeroid,det,invCov,alpha));
-			if(pSum<minValue) pSum=minValue;	
+			if(pSum<-10000000) pSum=-10000000;	
 			
 			for(int c=0;c<params.length;c++){
 //				double p=p(points[i],centeroid[c],det[c],invCov[c]);
@@ -268,6 +268,10 @@ public class ExpectationMaximation {
 					maxComponent=c;
 				}
 			}
+//			if(maxP<centerP[maxComponent]/10000000000.0) compId[i]=-1; //???????????????
+//			else compId[i]=maxComponent;
+			
+			System.out.println(maxP);
 			compId[i]=maxComponent;
 		}
 		return compId;

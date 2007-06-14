@@ -81,7 +81,7 @@ public class Scan3DProzessorOld extends AbstractReader {
 		root.setAppearance(new Appearance());
 		root.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
 //		root.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		root.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
+		root.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
 		root.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR,
 				Color.WHITE);

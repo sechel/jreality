@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.math.Rn;
 import de.jreality.renderman.RIBHelper;
 import de.jreality.scene.Appearance;
@@ -59,12 +60,14 @@ public class Scan3DPointCloudUtility {
 				point[p]=pointTemp[p];
 			Rn.subtract(point, point, faceCenteroid);
 			
+			//calc pixel-coordinates
 			int x=(int)((Rn.innerProduct(point, faceDir1)-min1)/(max1-min1)*(double)(texWidth-1));
 			int y=(int)((Rn.innerProduct(point, faceDir2)-min2)/(max2-min2)*(double)(texHeight-1));
 
+			//average colors in one Pixel
 			if(matchCounter[x][y]>0){
 				int[] oldColor=new int[4];
-				raster.getPixel(x, y, oldColor);
+				oldColor=raster.getPixel(x, y, oldColor);
 				color[0]=(int)((double)(color[0]+matchCounter[x][y]*oldColor[0])/(double)(matchCounter[x][y]+1));
 				color[1]=(int)((double)(color[1]+matchCounter[x][y]*oldColor[1])/(double)(matchCounter[x][y]+1));
 				color[2]=(int)((double)(color[2]+matchCounter[x][y]*oldColor[2])/(double)(matchCounter[x][y]+1));
@@ -73,6 +76,18 @@ public class Scan3DPointCloudUtility {
 			raster.setPixel(x, y, color);	
 			matchCounter[x][y]++;
 		}
+		
+		//debug:
+		int pixelCount=0;
+		for(int i=0;i<matchCounter.length;i++){
+			for(int j=0;j<matchCounter[0].length;j++){
+				if(matchCounter[i][j]!=0)
+					pixelCount++;
+			}			
+		}
+		System.out.println("used Pixels: "+pixelCount+"/"+(texWidth*texHeight));
+		
+		
 	
 		double[][] faceVertices={
 				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, max2, faceDir2)),
@@ -103,6 +118,25 @@ public class Scan3DPointCloudUtility {
 		
 		ImageData imgData=new ImageData(img);		
 		TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", imgData, false);
+		
+		//debug:
+//		RIBHelper.writeTexture(imgData, "pointCloudTest"+(texWidth*texHeight));
+		
+		
+		//debug:
+//		SceneGraphComponent origPointCloudSgc=new SceneGraphComponent("origPointCloud");
+//		double[][] verts=new double[points.size()][3];
+//		for(int i=0;i<verts.length;i++)
+//			verts[i]=points.get(i);
+//		PointSetFactory origPointCloud=new PointSetFactory();
+//		origPointCloud.setVertexCount(verts.length);
+//		origPointCloud.setVertexCoordinates(verts);
+//		origPointCloud.update();
+//		origPointCloudSgc.setGeometry(origPointCloud.getPointSet());
+//		origPointCloudSgc.setAppearance(new Appearance());
+//		origPointCloudSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
+//		origPointCloudSgc.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
+//		sgc.addChild(origPointCloudSgc);
 		
 		return sgc;
 	}

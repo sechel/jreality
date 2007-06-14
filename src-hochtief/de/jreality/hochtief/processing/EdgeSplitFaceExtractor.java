@@ -117,7 +117,7 @@ public class EdgeSplitFaceExtractor {
 //		sceneRoot.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 //		sceneRoot.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
 //		sceneRoot.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
-//		sceneRoot.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
+//		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 ////		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_WIDTH,0.001);
 //		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
 //		sceneRoot.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);

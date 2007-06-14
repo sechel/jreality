@@ -17,7 +17,7 @@ public class PointCloudSimplifier {
 	public static SceneGraphComponent getSimplifiedPointCloud(int componentCount, double minProbChange, int subSample, double texRes, int[][] edgeId, double[][] depth, byte[][] colorR, byte[][] colorG, byte[][] colorB){
 		int M=depth.length;  int N=depth[0].length;
 		
-		SceneGraphComponent sgc=new SceneGraphComponent();
+		SceneGraphComponent sgc=new SceneGraphComponent("simplified point clouds");
 		ArrayList<double[]> singlePoints=new ArrayList<double[]>();
 		ArrayList<byte[]> colors=new ArrayList<byte[]>();
 		
@@ -78,9 +78,9 @@ public class PointCloudSimplifier {
 			System.out.println("max var1="+Math.sqrt(evd.getEigenvalues()[2]));
 			System.out.println("max var2="+Math.sqrt(evd.getEigenvalues()[1]));		
 			
-			double max1=0,min1=0,max2=0,min2=0;		
+			double max1=-999999999,min1=999999999,max2=-999999999,min2=999999999;		
 			double[] point;
-			double dist;		
+			double dist;			
 			for(int i=0;i<componentPoints.size();i++){
 				point=Rn.subtract(null, componentPoints.get(i), centeroid);
 				dist=Rn.innerProduct(faceDir1, point);
@@ -89,8 +89,10 @@ public class PointCloudSimplifier {
 				dist=Rn.innerProduct(faceDir2, point);
 				if(dist>max2) max2=dist; 
 				if(dist<min2) min2=dist; 			
-			}			
-			sgc.addChild(Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, centeroid, faceDir1, faceDir2, max1, min1, max2, min2, texRes));
+			}	
+			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, centeroid, faceDir1, faceDir2, max1, min1, max2, min2, texRes);
+			compSgc.setName("comp "+c);
+			sgc.addChild(compSgc);
 		}
 		return sgc;
 	}

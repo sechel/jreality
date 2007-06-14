@@ -69,7 +69,7 @@ public class Scan3DShowUtility {
 		linesSgc.getAppearance().setAttribute(CommonAttributes.POINT_SIZE, 4.0);
 		linesSgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
 //		linesSgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 4.0);	
-		linesSgc.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
+		linesSgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 		linesSgc.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS, 0.01);
 		linesSgc.setGeometry(lines.getGeometry());
 		
@@ -253,7 +253,7 @@ public class Scan3DShowUtility {
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
-		sceneRoot.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW, false);
+		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 //		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_WIDTH,0.001);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,Color.BLACK);
 		sceneRoot.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
