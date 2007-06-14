@@ -93,7 +93,7 @@ public class Scan3DProcessor extends AbstractReader{
 		
 		
 		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId, faceSize, minVertexCount);		
-		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(5, 0.0001, 1, 0.01, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
+		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(7, 0.0001, 1, 0.01, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
 		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),simplifiedPointCloud);
 //		ViewerApp.display(simplifiedPointCloud);
 	}
