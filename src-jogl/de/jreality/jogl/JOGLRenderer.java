@@ -243,6 +243,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
 			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
+			theLog.finer("Creating peer scenegraph");
 		}
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
@@ -408,16 +409,18 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	public void init(GL gl) {
 		globalGL = gl;
-		
+	
 		renderingState = new JOGLRenderingState(this);
 		lightHelper = new JOGLLightHelper(this);
 		String vv = globalGL.glGetString(GL.GL_VERSION);
+		theLog.log(Level.FINE,"new GL: "+gl);			
 		theLog.log(Level.FINE,"version: "+vv);			
 		lightsChanged = true;
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
 		// traverse tree and delete all display lists
+		if (theRoot != null) extractGlobalParameters();
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 	}

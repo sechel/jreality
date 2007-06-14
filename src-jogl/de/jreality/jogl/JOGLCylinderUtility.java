@@ -68,7 +68,7 @@ public class JOGLCylinderUtility  {
 		 return cylinderList[i];
 	}
 	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
-	static WeakHashMap cylinderDListsTable = new WeakHashMap();
+	static WeakHashMap<GL, int[]> cylinderDListsTable = new WeakHashMap<GL, int[]>();
 	static int[] globalSharedCylinderDisplayLists = null;
 	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
 	// no longer exists.  So ... these display lists have to be tied to a specific context.

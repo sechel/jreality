@@ -364,7 +364,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 
 	public void init(GLAutoDrawable arg0) {
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
-		renderer.setAuxiliaryRoot(auxiliaryRoot);
+		
+		renderer = new JOGLRenderer(this);
 		renderer.init(arg0);  
 	}
 

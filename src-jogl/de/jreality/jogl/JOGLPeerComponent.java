@@ -137,19 +137,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.getOriginalComponent());
-//		System.err.println("prerender: Matrix for "+goBetween.originalComponent.getName()+" is identity: "+isIdentity);
+		theLog.finer("prerender: "+goBetween.originalComponent.getName());
 		if (cachedTform != null && !isIdentity)  {
 			pushTransformation(cachedTform); //thisT.getMatrix());
 			mustPop = true;
 		}
-//		if (eAp != null) {
-//			jr.currentSignature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-//			jr.renderingState.setCurrentSignature(jr.currentSignature);
-//		}
-		//if (parent != null) 
-//		cumulativeIsReflection = (isReflection != .cumulativeIsReflection);
-//		else cumulativeIsReflection = (isReflection != jr.globalIsReflection);
-//		if (cumulativeIsReflection != jr.renderingState.flipped)	{
 		oldFlipped = jr.renderingState.flipped;
 		jr.renderingState.flipped = isReflection ^ jr.renderingState.flipped;
 		if (oldFlipped != jr.renderingState.flipped) {
@@ -162,8 +154,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		jr.renderingState.setCurrentSignature(signature);
 		if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
-//			if (jr.renderingState.insideDisplayList) 
-//				theLog.finer("rendering geometry: "+goBetween.peerGeometry.originalGeometry.getName());
 		}
 	}
 	protected void renderChildren() {
@@ -319,7 +309,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childAdded(SceneGraphComponentEvent ev) {
-		theLog.log(Level.FINE,"JOGLPeerComponent: Container Child added to: "+goBetween.getOriginalComponent().getName());
+		theLog.finest("JOGLPeerComponent: Container Child added to: "+goBetween.getOriginalComponent().getName());
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
@@ -356,7 +346,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
-		theLog.log(Level.FINE,"Container Child removed from: "+goBetween.getOriginalComponent().getName());
+		theLog.finest("Container Child removed from: "+goBetween.getOriginalComponent().getName());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true;
@@ -392,7 +382,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
-		theLog.log(Level.FINE,"Container Child replaced at: "+goBetween.getOriginalComponent().getName());
+		theLog.finest("Container Child replaced at: "+goBetween.getOriginalComponent().getName());
 		switch(ev.getChildType())	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true; 
