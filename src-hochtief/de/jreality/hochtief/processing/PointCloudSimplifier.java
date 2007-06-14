@@ -71,7 +71,7 @@ public class PointCloudSimplifier {
 			}
 			
 			System.out.println("\ncomponent "+c+":");
-			System.err.println("contains "+componentPoints.size()+" points");
+			System.out.println("contains "+componentPoints.size()+" points");
 			System.out.println("centeroid: "+Rn.toString(centeroid));
 			System.out.println("dir1: "+Rn.toString(faceDir1));
 			System.out.println("dir2: "+Rn.toString(faceDir2));
