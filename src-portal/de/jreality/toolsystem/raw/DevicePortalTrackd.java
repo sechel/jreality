@@ -10,11 +10,15 @@ import javax.swing.JRadioButton;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
+import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.toolsystem.ToolEvent;
+import de.jreality.util.Secure;
 
 public class DevicePortalTrackd extends DeviceTrackd {
 	
+//	public static double portalScale = 1.0;
 	static final Matrix HEAD_CALIB = MatrixBuilder.euclidean()
 										.rotateY(-Math.PI/2)
 										.rotateX(Math.PI/2)
@@ -26,12 +30,22 @@ public class DevicePortalTrackd extends DeviceTrackd {
 										.translate(0.08, 0., 0.)
 										.getMatrix();
 	static final Matrix WAND_CALIB = MatrixBuilder.euclidean()
-										.rotateZ(Math.PI)
-										.rotateX(rad(-5))
-										.getMatrix();
-	
-	static final double[] FIXED_HEAD = MatrixBuilder.euclidean().translate(0, 1.7, 0).getArray();
-	
+		.rotateZ(Math.PI)
+		.rotateX(rad(-5))
+		.getMatrix();
+
+	static final double[] FIXED_HEAD, SCALE_MATRIX;
+	static {
+//		String bar = Secure.getProperty("portalScale");
+//		if (bar != null)  {
+//			portalScale = Double.parseDouble(bar);
+//			System.err.println("DPR: Portal scale is "+portalScale);
+//		}
+//		else 
+		System.err.println("DPR: Portal scale is "+PortalCoordinateSystem.portalScale);
+		FIXED_HEAD = MatrixBuilder.euclidean().translate(0, PortalCoordinateSystem.portalScale * 1.7, 0).getArray();
+		SCALE_MATRIX = MatrixBuilder.euclidean().scale(PortalCoordinateSystem.portalScale).getArray();
+	}
 	public DevicePortalTrackd() {
 		JFrame f = new JFrame("Head tracking:");
 		ButtonGroup bg = new ButtonGroup();
@@ -85,7 +99,13 @@ public class DevicePortalTrackd extends DeviceTrackd {
 		// rotate:
 		if (index == 1) m.multiplyOnRight(WAND_CALIB); // wand
 		if (index == 0) m.multiplyOnRight(HEAD_CALIB); // head
-	}
+
+		if (index == 0 || index == 1  && PortalCoordinateSystem.portalScale != 1.0) {
+			double[] tlate = m.getColumn(3);
+			tlate = Rn.matrixTimesVector(null, SCALE_MATRIX, tlate);
+			m.setColumn(3, tlate);
+		}
+}
 	
 	@Override
 	public String getName() {
