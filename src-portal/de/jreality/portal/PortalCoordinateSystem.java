@@ -42,12 +42,10 @@ package de.jreality.portal;
 
 import java.awt.geom.Rectangle2D;
 
-import de.jreality.math.FactoredMatrix;
-import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
+import de.jreality.util.Secure;
 
 public class PortalCoordinateSystem {
 
@@ -64,12 +62,20 @@ public class PortalCoordinateSystem {
 	public static double zDimPORTAL = xDimPORTAL;
 	public static double yOffsetPORTAL = 0.4;
 
-	static double portalScale = 1.0;
+	public static double portalScale = 1.0;
 	static double[] portalCenter = {0,0,0,1};
 	static double[] metersToPortal = Rn.identityMatrix(4);
 	static double[] portalToMeters = Rn.identityMatrix(4);
 
 	private static boolean changed = true;
+	public static double eyeSeparation = .07;
+	public static double eyeLevel = 1.7;
+	
+    static {
+        String bar = Secure.getProperty("portalScale");
+        if (bar != null)  portalScale = Double.parseDouble(bar);
+        System.err.println("PCS: Portal scale is "+portalScale);         
+        }
 	public static double[] getPortalCenter() {
 		return portalCenter;
 	}
@@ -105,31 +111,22 @@ public class PortalCoordinateSystem {
 				portalScale*yDimPORTAL);
 		return wp;
 	}
-	//TODO read values and correction from ConfigurationAttributes
-		//TODO change to multiplication with correction matrix
-		//TODO think about moving this to a different class (PORTALUtilities)
 		public static void setPORTALViewport(double[] portalOriginInCamCoordinates, Camera cam) {
 	    
-			double xmin=0, xmax=0, ymin=0, ymax=0;
-	//		double x0 = -PortalCoordinateSystem.xDimPORTAL/2;
-	//		double x1 = PortalCoordinateSystem.xDimPORTAL/2;
-	//		double y0 = PortalCoordinateSystem.yOffsetPORTAL;
-	//		double y1 = PortalCoordinateSystem.yDimPORTAL+PortalCoordinateSystem.yOffsetPORTAL;
+			double xmin=0, ymin=0;
 			Rectangle2D wallport = getWallPort();
 			double x0 = wallport.getMinX();
 			double y0 = wallport.getMinY();
-			double x1 = wallport.getMaxX();
-			double y1 = wallport.getMaxY();
+			double w = wallport.getWidth();
+			double h = wallport.getHeight();
 			
 			double x = -portalOriginInCamCoordinates[0];
 			double y = -portalOriginInCamCoordinates[1];
-			double z = -portalOriginInCamCoordinates[2] + zDimPORTAL/2;  // make wall z=0
+			double z = -portalOriginInCamCoordinates[2] + portalScale*zDimPORTAL/2;  // make wall z=0
 			cam.setFocus(z);
-			xmin = (x - x0)/z;
-			xmax = ((x1 - x0) - (x - x0))/z;
-			ymin = (y - y0)/z;
-			ymax = (( y1 - y0) - (y - y0))/z;
-			cam.setViewPort(new Rectangle2D.Double(-xmin, -ymin, xmin+xmax, ymin+ymax));
+			xmin = (x0-x)/z;
+			ymin = (y0-y)/z;
+			cam.setViewPort(new Rectangle2D.Double(xmin, ymin, w/z, h/z));
 	//		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
 		}
 }
