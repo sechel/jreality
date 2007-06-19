@@ -289,7 +289,7 @@ final public class Rn {
 	public static double[] conjugateByMatrix(double[] dst, double[] m, double[] c)	{
 		int n = sqrt(c.length);
 		// assert dim checks
-		if (dst == null) dst = new double[16];
+		if (dst == null) dst = new double[c.length];
 		times(dst, c, times(null, m, inverse(null, c)));
 		return dst;
 	}
@@ -606,7 +606,7 @@ final public class Rn {
 		System.arraycopy(m,0,t,0,m.length);
 		
 		double[] minv;
-		if (minvIn == null)	minv = new double[16];
+		if (minvIn == null)	minv = new double[m.length];
 		else 				minv = minvIn;
 		setIdentityMatrix(minv);
 		

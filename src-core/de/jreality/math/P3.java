@@ -818,6 +818,11 @@ public class P3 {
 		return dst;
 	}
 	
+	 public static boolean isometryIsUnstable(double[] matrix, int signature)	{
+		 if (signature != Pn.HYPERBOLIC) return false;
+		 double max = Rn.maxNorm(matrix);
+		 return (max > 200);
+	 }
 	 private static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2)	{
 		// TODO assert dim checks
 		if (dst == null) dst = new double[4];
