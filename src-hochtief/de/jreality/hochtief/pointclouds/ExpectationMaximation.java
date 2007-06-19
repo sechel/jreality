@@ -19,8 +19,11 @@ public class ExpectationMaximation {
 		
 		
 		double thisPX,lastPX;
+		long time;
+		long overallTime=System.currentTimeMillis();
 		for(int currentComponentCount=1; currentComponentCount<=componentCount; currentComponentCount++){   //increase number of components
-			System.out.println("maximizing over "+currentComponentCount+" components");
+			System.out.print("maximizing over "+currentComponentCount+" components");
+			time=System.currentTimeMillis();
 			lastPX=-499999999;
 			thisPX=499999999;
 			
@@ -52,7 +55,20 @@ public class ExpectationMaximation {
 			if(currentComponentCount<componentCount){
 				params=initNextComponent(currentComponentCount,params);
 			}
-		}		
+			
+			double sum=0;
+			for(int i=1;i<=currentComponentCount;i++)
+				sum+=(double)i;
+			double timeStep=(System.currentTimeMillis()-overallTime)/sum;
+			sum=0;
+			for(int i=1;i<=componentCount;i++)
+				sum+=(double)i;
+			double estFinishedInTime=timeStep*sum-(System.currentTimeMillis()-overallTime);
+			System.out.append(" ..in "+Math.round((System.currentTimeMillis()-time)/1000.0)+" s, finished in ~ "+(Math.round(estFinishedInTime/100.0/60.0)/10.0)+" min\n");
+		}
+		
+		System.out.println("maximation overall time: "+Math.round((System.currentTimeMillis()-overallTime)/1000.0/60.0)+" min");
+		
 		return params;
 	}
 	
@@ -107,25 +123,81 @@ public class ExpectationMaximation {
 	}
 
 
+//	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
+//		//get component with biggest alpha
+//		int splitComponent=0;
+//		double maxAlpha=0;					
+//		for(int c=0;c<currentComponentCount;c++){			
+//			if(params[c][12]>maxAlpha){
+//				maxAlpha=params[c][12];
+//				splitComponent=c;
+//			}
+//		}
+//		
+//		System.out.println("\nsplitting component nr "+splitComponent);
+//		
+//		DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[splitComponent][3],params[splitComponent][4],params[splitComponent][5]},{params[splitComponent][6],params[splitComponent][7],params[splitComponent][8]},{params[splitComponent][9],params[splitComponent][10],params[splitComponent][11]}});
+//		SymmPackEVD evd=null;
+//		try {
+//			evd = SymmPackEVD.factorize(covMtx);
+//		} catch (NotConvergedException e) {e.printStackTrace();}
+//		DenseMatrix eigM=evd.getEigenvectors();
+//		double[] maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
+//		double maxEv=evd.getEigenvalues()[2];
+//		
+//		System.out.println("eig: "+Rn.toString(maxEig));
+//		System.out.println("sigma: "+Math.sqrt(maxEv));
+//		
+//		//new component	
+//		params[currentComponentCount]=new double[params[0].length];
+//		double[] newCenteroid=new double[] {params[splitComponent][0],params[splitComponent][1],params[splitComponent][2]};
+//		
+//		System.out.println("old centeroid: "+Rn.toString(newCenteroid));
+//		
+//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
+//		params[currentComponentCount][0]=newCenteroid[0];
+//		params[currentComponentCount][1]=newCenteroid[1];
+//		params[currentComponentCount][2]=newCenteroid[2];		
+//		for(int i=3;i<12;i++)
+//			params[currentComponentCount][i]=0.25*params[splitComponent][i];		
+//		params[currentComponentCount][12]=0.5*params[splitComponent][12];
+//		
+//		System.out.println("new centeroid: "+Rn.toString(newCenteroid));
+//		
+//		//update splitted component
+//		double[] updatedCenteroid=new double[] {params[splitComponent][0],params[splitComponent][1],params[splitComponent][2]};
+//		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+//		params[splitComponent][0]=updatedCenteroid[0];
+//		params[splitComponent][1]=updatedCenteroid[1];
+//		params[splitComponent][2]=updatedCenteroid[2];		
+//		for(int i=3;i<12;i++)
+//			params[splitComponent][i]=0.25*params[splitComponent][i];			
+//		params[splitComponent][12]=0.5*params[splitComponent][12];		
+//		
+//		System.out.println("updated centeroid: "+Rn.toString(updatedCenteroid)+"/n");
+//		
+//		return params;
+//	}
+	
 	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
-		//get component with biggest alpha
+		//get component with biggest var
 		int splitComponentNr=0;
-		double maxAlpha=0;					
-		for(int c=0;c<currentComponentCount;c++){			
-			if(params[c][12]>maxAlpha){
-				maxAlpha=params[c][12];
-				splitComponentNr=c;
+		double maxEv=0;
+		double[] maxEig=new double[3];			
+		for(int i=0;i<currentComponentCount;i++){			
+			DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[i][3],params[i][4],params[i][5]},{params[i][6],params[i][7],params[i][8]},{params[i][9],params[i][10],params[i][11]}});
+			SymmPackEVD evd=null;
+			try {
+				evd = SymmPackEVD.factorize(covMtx);
+			} catch (NotConvergedException e) {e.printStackTrace();}
+			
+			if(evd.getEigenvalues()[2]>maxEv){
+				maxEv=evd.getEigenvalues()[2];
+				splitComponentNr=i;
+				DenseMatrix eigM=evd.getEigenvectors();
+				maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
 			}
 		}
-		
-		DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[splitComponentNr][3],params[splitComponentNr][4],params[splitComponentNr][5]},{params[splitComponentNr][6],params[splitComponentNr][7],params[splitComponentNr][8]},{params[splitComponentNr][9],params[splitComponentNr][10],params[splitComponentNr][11]}});
-		SymmPackEVD evd=null;
-		try {
-			evd = SymmPackEVD.factorize(covMtx);
-		} catch (NotConvergedException e) {e.printStackTrace();}
-		DenseMatrix eigM=evd.getEigenvectors();
-		double[] maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
-		double maxEv=evd.getEigenvalues()[2];
 		
 		//new component	
 		params[currentComponentCount]=new double[params[0].length];
@@ -135,65 +207,21 @@ public class ExpectationMaximation {
 		params[currentComponentCount][1]=newCenteroid[1];
 		params[currentComponentCount][2]=newCenteroid[2];		
 		for(int i=3;i<12;i++)
-			params[currentComponentCount][i]=0.25*params[splitComponentNr][i];		
+			params[currentComponentCount][i]=0.25*params[splitComponentNr][i];			
 		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
 		
 		//update splitted component
-		double[] updatedCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-		params[splitComponentNr][0]=updatedCenteroid[0];
-		params[splitComponentNr][1]=updatedCenteroid[1];
-		params[splitComponentNr][2]=updatedCenteroid[2];		
+		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
+		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+		params[splitComponentNr][0]=newCenteroid[0];
+		params[splitComponentNr][1]=newCenteroid[1];
+		params[splitComponentNr][2]=newCenteroid[2];		
 		for(int i=3;i<12;i++)
 			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
 		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
 		
 		return params;
 	}
-	
-//	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
-//		//get component with biggest var
-//		int splitComponentNr=0;
-//		double maxEv=0;
-//		double[] maxEig=new double[3];			
-//		for(int i=0;i<currentComponentCount;i++){			
-//			DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[i][3],params[i][4],params[i][5]},{params[i][6],params[i][7],params[i][8]},{params[i][9],params[i][10],params[i][11]}});
-//			SymmPackEVD evd=null;
-//			try {
-//				evd = SymmPackEVD.factorize(covMtx);
-//			} catch (NotConvergedException e) {e.printStackTrace();}
-//			
-//			if(evd.getEigenvalues()[2]>maxEv){
-//				maxEv=evd.getEigenvalues()[2];
-//				splitComponentNr=i;
-//				DenseMatrix eigM=evd.getEigenvectors();
-//				maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
-//			}
-//		}
-//		
-//		//new component	
-//		params[currentComponentCount]=new double[params[0].length];
-//		double[] newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
-//		params[currentComponentCount][0]=newCenteroid[0];
-//		params[currentComponentCount][1]=newCenteroid[1];
-//		params[currentComponentCount][2]=newCenteroid[2];		
-//		for(int i=3;i<12;i++)
-//			params[currentComponentCount][i]=0.25*params[splitComponentNr][i];			
-//		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
-//		
-//		//update splitted component
-//		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-//		params[splitComponentNr][0]=newCenteroid[0];
-//		params[splitComponentNr][1]=newCenteroid[1];
-//		params[splitComponentNr][2]=newCenteroid[2];		
-//		for(int i=3;i<12;i++)
-//			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
-//		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
-//		
-//		return params;
-//	}
 
 	
 	
@@ -284,11 +312,11 @@ public class ExpectationMaximation {
 			}
 			compId[i]=maxComponent;
 
-			double maxFactor=1.5;
-			double[] pointCentered=Rn.subtract(null, points[i], centeroid[maxComponent]);
-			if(Rn.innerProduct(eig[maxComponent][0], pointCentered)>maxFactor*sigma[maxComponent][0]) compId[i]=-1;
-			if(Rn.innerProduct(eig[maxComponent][1], pointCentered)>maxFactor*sigma[maxComponent][1]) compId[i]=-1;
-			if(Rn.innerProduct(eig[maxComponent][2], pointCentered)>maxFactor*sigma[maxComponent][2]) compId[i]=-1;
+//			double maxFactor=1.5;
+//			double[] pointCentered=Rn.subtract(null, points[i], centeroid[maxComponent]);
+//			if(Rn.innerProduct(eig[maxComponent][0], pointCentered)>maxFactor*sigma[maxComponent][0]) compId[i]=-1;
+//			if(Rn.innerProduct(eig[maxComponent][1], pointCentered)>maxFactor*sigma[maxComponent][1]) compId[i]=-1;
+//			if(Rn.innerProduct(eig[maxComponent][2], pointCentered)>maxFactor*sigma[maxComponent][2]) compId[i]=-1;
 		}
 		return compId;
 	}

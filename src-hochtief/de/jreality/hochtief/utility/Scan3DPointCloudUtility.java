@@ -19,47 +19,92 @@ import de.jreality.util.Input;
 public class Scan3DPointCloudUtility {
 	
 	
-	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceCenteroid, double[] faceDir1, double[] faceDir2, double max1, double min1, double max2, double min2, double texRes){
-		
+	private static int minPointCount=500;
+	
+	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double[] faceDir3, double texRes){
 		SceneGraphComponent sgc=new SceneGraphComponent();
-		
+
 		Rn.normalize(faceDir1, faceDir1);
 		Rn.normalize(faceDir2, faceDir2);
+		Rn.normalize(faceDir3, faceDir3);
+
+		ArrayList<double[]> points1=new ArrayList<double[]>(); //points for face faceDir1,faceDir2 (=face1)
+		ArrayList<double[]> points2=new ArrayList<double[]>(); //points for face faceDir1,faceDir3 (=face2)
+		for(int i=0;i<points.size();i++){
+			if(Math.abs(Rn.innerProduct(points.get(i), faceDir3))<Math.abs(Rn.innerProduct(points.get(i), faceDir2))) // if point is nearer to face1 than to face2
+				points1.add(points.get(i));
+			else
+				points2.add(points.get(i));			
+		}
+
+		SceneGraphComponent face1Sgc=projectPointCloud(points1, vertexColors, faceDir1, faceDir2, texRes);
+		face1Sgc.setName("face1");
+		sgc.addChild(face1Sgc);
+		SceneGraphComponent face2Sgc=projectPointCloud(points2, vertexColors, faceDir1, faceDir3, texRes);
+		face2Sgc.setName("face2");
+		sgc.addChild(face2Sgc);
+
+		return sgc;
+	}
+
+
+	private static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double texRes){
+		SceneGraphComponent sgc=new SceneGraphComponent();
+		if(points.size()<minPointCount)
+			return sgc;
+
+//		Rn.normalize(faceDir1, faceDir1);
+//		Rn.normalize(faceDir2, faceDir2);
+
+		double[] faceCenteroid=new double[3];
+		for(int i=0;i<points.size();i++)
+			Rn.add(faceCenteroid, faceCenteroid, points.get(i));
+		Rn.times(faceCenteroid, 1/(double)points.size(), faceCenteroid);		
+
+		double max1=-999999999,min1=999999999,max2=-999999999,min2=999999999;		
+		double[] pointCentered;
+		double dist;			
+		for(int i=0;i<points.size();i++){
+			pointCentered=Rn.subtract(null, points.get(i), faceCenteroid);
+			dist=Rn.innerProduct(faceDir1, pointCentered);
+			if(dist>max1) max1=dist; 
+			if(dist<min1) min1=dist; 
+			dist=Rn.innerProduct(faceDir2, pointCentered);
+			if(dist>max2) max2=dist; 
+			if(dist<min2) min2=dist; 			
+		}	
 
 		int texWidth=(int)((max1-min1)/texRes);
 		int texHeight=(int)((max2-min2)/texRes);		
-		
+
 		System.out.println("texWidth="+texWidth);
 		System.out.println("texHeight="+texHeight);
-		
+
 		if(texWidth<=0||texHeight<=0) return sgc;
-		
+
 		BufferedImage img = new BufferedImage(texWidth, texHeight, BufferedImage.TYPE_INT_ARGB);
 		WritableRaster raster = img.getRaster();
-		
+
 		for(int x=0;x<texWidth;x++){
 			for(int y=0;y<texHeight;y++){
 				raster.setPixel(x, y, new int[] {0,0,0,0});				
 			}
 		}
-		
-		int[][] matchCounter=new int[texWidth][texHeight];
-		
-		for(int i=0;i<points.size();i++){
-			
+
+		int[][] matchCounter=new int[texWidth][texHeight];		
+		for(int i=0;i<points.size();i++){			
 			int[] color=new int[4];
 			byte[] colorTemp=vertexColors.get(i);
 			for(int c=0;c<3;c++)
-				color[c]=colorTemp[c]+(int)((double)255/2.0);;
-			color[3]=255;
-			
-			
+				color[c]=colorTemp[c];//+(int)((double)255/2.0);
+			//color[3]=255;			
+
 			double[] point=new double[3];
 			double[] pointTemp=points.get(i);
 			for(int p=0;p<3;p++)
 				point[p]=pointTemp[p];
 			Rn.subtract(point, point, faceCenteroid);
-			
+
 			//calc pixel-coordinates
 			int x=(int)((Rn.innerProduct(point, faceDir1)-min1)/(max1-min1)*(double)(texWidth-1));
 			int y=(int)((Rn.innerProduct(point, faceDir2)-min2)/(max2-min2)*(double)(texHeight-1));
@@ -72,11 +117,23 @@ public class Scan3DPointCloudUtility {
 				color[1]=(int)((double)(color[1]+matchCounter[x][y]*oldColor[1])/(double)(matchCounter[x][y]+1));
 				color[2]=(int)((double)(color[2]+matchCounter[x][y]*oldColor[2])/(double)(matchCounter[x][y]+1));
 			}
-		
+
+
+			for(int xx=x-2;xx<x+3;xx++){
+				for(int yy=y-2;yy<y+3;yy++){
+					if(xx>=0 && xx<texWidth && yy>=0 && yy<texHeight)
+						if(!(matchCounter[xx][yy]>0))
+							raster.setPixel(xx, yy, color);					
+				}				
+			}
+			color[3]=255;
 			raster.setPixel(x, y, color);	
+
+
+
 			matchCounter[x][y]++;
 		}
-		
+
 		//debug:
 		int pixelCount=0;
 		for(int i=0;i<matchCounter.length;i++){
@@ -85,10 +142,8 @@ public class Scan3DPointCloudUtility {
 					pixelCount++;
 			}			
 		}
-		System.out.println("used Pixels: "+pixelCount+"/"+(texWidth*texHeight));
-		
-		
-	
+		System.out.println("used Pixels: "+pixelCount+"/"+(texWidth*texHeight));		
+
 		double[][] faceVertices={
 				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, max2, faceDir2)),
 				Rn.add(null, Rn.times(null, min1, faceDir1), Rn.times(null, max2, faceDir2)),
@@ -97,7 +152,7 @@ public class Scan3DPointCloudUtility {
 		};
 		for(int i=0; i<faceVertices.length;i++)
 			Rn.add(faceVertices[i], faceVertices[i], faceCenteroid);
-		
+
 		IndexedFaceSetFactory ifsf=new IndexedFaceSetFactory();
 		ifsf.setVertexCount(faceVertices.length);
 		ifsf.setVertexCoordinates(faceVertices);
@@ -108,7 +163,7 @@ public class Scan3DPointCloudUtility {
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setGenerateVertexNormals(true);
 		ifsf.update();
-		
+
 		sgc.setGeometry(ifsf.getGeometry());
 		sgc.setAppearance(new Appearance());
 		sgc.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
@@ -116,19 +171,19 @@ public class Scan3DPointCloudUtility {
 		sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
 		sgc.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
-		
+
 		ImageData imgData=new ImageData(img);		
 		TextureUtility.createTexture(sgc.getAppearance(),"polygonShader", imgData, false);
-		
+
 		//debug:
 //		RIBHelper.writeTexture(imgData, "pointCloudTest"+(texWidth*texHeight));
-		
-		
+
+
 		//debug:
 //		SceneGraphComponent origPointCloudSgc=new SceneGraphComponent("origPointCloud");
 //		double[][] verts=new double[points.size()][3];
 //		for(int i=0;i<verts.length;i++)
-//			verts[i]=points.get(i);
+//		verts[i]=points.get(i);
 //		PointSetFactory origPointCloud=new PointSetFactory();
 //		origPointCloud.setVertexCount(verts.length);
 //		origPointCloud.setVertexCoordinates(verts);
@@ -136,13 +191,11 @@ public class Scan3DPointCloudUtility {
 //		origPointCloudSgc.setGeometry(origPointCloud.getPointSet());
 //		origPointCloudSgc.setAppearance(new Appearance());
 //		origPointCloudSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
-//		origPointCloudSgc.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW, false);
+//		origPointCloudSgc.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, false);
 //		sgc.addChild(origPointCloudSgc);
-		
+
 		return sgc;
 	}
-	
-	
-	
+
 
 }

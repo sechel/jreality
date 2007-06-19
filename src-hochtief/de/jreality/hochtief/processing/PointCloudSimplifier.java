@@ -47,7 +47,7 @@ public class PointCloudSimplifier {
 		int[] compId=ExpectationMaximation.evalPoints(points, params);
 		
 		for(int c=0;c<componentCount;c++){
-			double[] centeroid=new double[] {params[c][0],params[c][1],params[c][2]};
+//			double[] centeroid=new double[] {params[c][0],params[c][1],params[c][2]};
 			DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[c][3],params[c][4],params[c][5]},{params[c][6],params[c][7],params[c][8]},{params[c][9],params[c][10],params[c][11]}});
 			SymmPackEVD evd=null;
 			try {
@@ -72,25 +72,14 @@ public class PointCloudSimplifier {
 			
 			System.out.println("\ncomponent "+c+":");
 			System.out.println("contains "+componentPoints.size()+" points");
-			System.out.println("centeroid: "+Rn.toString(centeroid));
+			System.out.println("centeroid: "+Rn.toString(new double[] {params[c][0],params[c][1],params[c][2]}));
 			System.out.println("dir1: "+Rn.toString(faceDir1));
 			System.out.println("dir2: "+Rn.toString(faceDir2));
 			System.out.println("max var1="+Math.sqrt(evd.getEigenvalues()[2]));
 			System.out.println("max var2="+Math.sqrt(evd.getEigenvalues()[1]));		
 			
-			double max1=-999999999,min1=999999999,max2=-999999999,min2=999999999;		
-			double[] point;
-			double dist;			
-			for(int i=0;i<componentPoints.size();i++){
-				point=Rn.subtract(null, componentPoints.get(i), centeroid);
-				dist=Rn.innerProduct(faceDir1, point);
-				if(dist>max1) max1=dist; 
-				if(dist<min1) min1=dist; 
-				dist=Rn.innerProduct(faceDir2, point);
-				if(dist>max2) max2=dist; 
-				if(dist<min2) min2=dist; 			
-			}	
-			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, centeroid, faceDir1, faceDir2, max1, min1, max2, min2, texRes);
+
+			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, faceDir1, faceDir2, faceDir3, texRes);
 			compSgc.setName("comp "+c);
 			sgc.addChild(compSgc);
 		}
