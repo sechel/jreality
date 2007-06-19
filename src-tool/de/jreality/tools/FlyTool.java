@@ -132,8 +132,6 @@ public class FlyTool extends AbstractTool {
     //System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
     //System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
     MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
-    // demo madness: can't get render trigger to work, so do it by hand.  
-    // TODO remove when demo is over
     ship.getTransformation().setMatrix(P3.orthonormalizeMatrix(null, ship.getTransformation().getMatrix(), 10E-10, signature));    tc.getViewer().render();
     System.arraycopy(dir, 0, olddir, 0, 4);
   }
