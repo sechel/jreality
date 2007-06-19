@@ -116,9 +116,12 @@ public class MasterApplication {
 		Local.sendStart(port, cpPort, Broadcaster.RESPONSE_TYPE_EXCEPTION, ClientFactory.class);
 		js.waitForDownloads();
 		Class appClass = Class.forName(args.length == 0 ? "de.jreality.vr.ViewerVR" : args[0]);
+		String[] rest = null;
+		if (args.length > 1) rest = new String[args.length-1];
+		if (rest != null) for (int i = 0; i<args.length-1; ++i) rest[i] = args[i+1];
 		PortalToolSystem tr = bc.getRemoteFactory().createRemoteViaStaticMethod(
 				PortalToolSystem.class, RemoteExecutor.class,
-				"startRemote", new Class[]{Class.class, String[].class}, new Object[]{appClass, null});
+				"startRemote", new Class[]{Class.class, String[].class}, new Object[]{appClass, rest}); 
 		new MasterApplication(tr);
 	}
 }
