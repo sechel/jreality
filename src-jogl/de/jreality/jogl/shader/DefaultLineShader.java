@@ -289,9 +289,14 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			}
 			else {		// the assumption is that this is a genuine IndexedLineSet (not subclass with faces)
 				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, ils, i);
+				double[][] clrs = null;
+				if (vertexColors) clrs = IndexedLineSetUtility.extractCurveColors(clrs, ils, i);
 				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 				ptf.setClosed(false);
-//				ptf.setVertexColorsEnabled(true);
+				if (clrs != null) {
+					ptf.setVertexColors(clrs);
+					ptf.setVertexColorsEnabled(true);
+				}
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);
 				ptf.setSignature(sig);
