@@ -239,7 +239,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
-		LoggingSystem.getLogger(this).info("JOGLPeerComponent: appearance changed: "+goBetween.getOriginalComponent().getName());
+		LoggingSystem.getLogger(this).fine("JOGLPeerComponent: appearance changed: "+goBetween.getOriginalComponent().getName());
 		originalAppearanceDirty = true;
 	}
 
