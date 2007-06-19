@@ -67,11 +67,7 @@ public class JOGLConfiguration {
 	static boolean sharedContexts = false;
 	static boolean isLinux = false;
 	static boolean multiSample = true;
-	static boolean portalUsage = false;
-	public static String resourceDir = null, saveResourceDir = null;
-	public static String localScratchDisk = null;
 	public static boolean quadBufferedStereo = false;
-	public static String COPY_CAT = "copyCat", FORCE_RENDER = "preRender";
 	static JOGLConfiguration ss = new JOGLConfiguration();
 	static Class<? extends GoBetween> goBetweenClass = null;
 	static Class<? extends JOGLPeerComponent> peerClass = null;
@@ -86,9 +82,6 @@ public class JOGLConfiguration {
 			//theLog.setLevel(Level.INFO);
 			String foo = Secure.getProperty(SystemProperties.JOGL_DEBUG_GL);
 			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
-			foo = Secure.getProperty(SystemProperties.JOGL_PORTAL_USAGE);
-			if (foo != null) 
-				if (foo.indexOf("true") != -1) portalUsage = true;
 			foo = Secure.getProperty(SystemProperties.JOGL_LOGGING_LEVEL);
 			if (foo != null)  {
 				Level level = Level.INFO;
@@ -110,8 +103,6 @@ public class JOGLConfiguration {
 //				sharedContexts=false;
 //				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
 //			}
-			foo = Secure.getProperty(SystemProperties.JOGL_RESOURCE_DIR);
-			if (foo != null) saveResourceDir = resourceDir = foo;
 			quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn
@@ -145,15 +136,6 @@ public class JOGLConfiguration {
 
 	public static Logger getLogger()	{
 		return theLog;
-	}
-
-	public static Class<? extends JOGLPeerComponent> getPeerClass() {
-		System.err.println("JOGLConfiguation 2: peer class is "+peerClass);
-		return peerClass;
-	}
-
-	public static Class<? extends GoBetween> getGoBetweenClass() {
-		return goBetweenClass;
 	}
 
 }

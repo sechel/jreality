@@ -43,8 +43,8 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (g instanceof PointSet) ps = (PointSet) g;
 		originalGeometry.addGeometryListener(this);
 		if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
-		Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.FORCE_RENDER);
-		if (foo != null) forceRender = true;
+//		Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.FORCE_RENDER);
+//		if (foo != null) forceRender = true;
 	}
 
 	public void dispose()		{
@@ -65,10 +65,6 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (renderingHints == null) return;
 		renderingHints.render(jr.renderingState);
 		jr.renderingState.setCurrentGeometry(originalGeometry);
-		if (forceRender && geometryShader.polygonShader instanceof DefaultPolygonShader)	{
-			((DefaultPolygonShader) geometryShader.polygonShader).preRender(jr.renderingState);		
-			return;
-		}
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 		displayListsDirty = false;			// think positive!
