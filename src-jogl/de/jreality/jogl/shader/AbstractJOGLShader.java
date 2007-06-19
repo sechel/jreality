@@ -68,11 +68,7 @@ import de.jreality.util.SystemProperties;
 public abstract class AbstractJOGLShader extends AbstractPrimitiveShader implements PolygonShader {
 	String[] vertexSource, fragmentSource;
 	int program = -1;
-	static String resourceDir = "./";
-	static {
-		String foo = Secure.getProperty(SystemProperties.JOGL_RESOURCE_DIR);
-		if (foo != null) resourceDir = foo;
-	}
+	static String resourceDir = "./resources/";
 
 	public void setupShader(GL gl)	{
 		GLU glu = new GLU();
