@@ -138,6 +138,7 @@ public class GoBetween extends JOGLPeerNode implements
 
 	public void appearanceChanged(AppearanceEvent ev) {
 		String key = ev.getKey();
+		LoggingSystem.getLogger(this).finer("sgc "+originalComponent.getName()+" Appearance changed "+key);
 		LoggingSystem.getLogger(this).fine("sgc "+originalComponent.getName()+" Appearance changed "+key);
 		int changed = 0;
 		boolean propagates = true;

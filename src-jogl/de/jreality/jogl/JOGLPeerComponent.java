@@ -50,6 +50,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected GoBetween goBetween;
 	double determinant = 0.0;
 	double[] cachedTform = new double[16];
+	boolean useTformCaching = true;
 
 	RenderingHintsShader renderingHints;
 	DefaultGeometryShader geometryShader;
@@ -138,10 +139,16 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.getOriginalComponent());
 		theLog.finer("prerender: "+goBetween.originalComponent.getName());
-		if (cachedTform != null && !isIdentity)  {
-			pushTransformation(cachedTform); //thisT.getMatrix());
+		if (useTformCaching)	{
+			if (cachedTform != null && !isIdentity)  {
+				pushTransformation(cachedTform); //thisT.getMatrix());
+				mustPop = true;
+			} 
+		} else if (goBetween.getOriginalComponent().getTransformation() != null){
+			pushTransformation(goBetween.getOriginalComponent().getTransformation().getMatrix());
 			mustPop = true;
 		}
+
 		oldFlipped = jr.renderingState.flipped;
 		jr.renderingState.flipped = isReflection ^ jr.renderingState.flipped;
 		if (oldFlipped != jr.renderingState.flipped) {
@@ -239,7 +246,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
-		LoggingSystem.getLogger(this).fine("JOGLPeerComponent: appearance changed: "+goBetween.getOriginalComponent().getName());
+		//LoggingSystem.getLogger(this).finer("JOGLPeerComponent: appearance changed: "+goBetween.getOriginalComponent().getName());
 		originalAppearanceDirty = true;
 	}
 

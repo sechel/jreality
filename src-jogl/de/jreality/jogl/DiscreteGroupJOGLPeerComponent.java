@@ -6,7 +6,9 @@ import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.SceneGraphComponentEvent;
 
@@ -25,15 +27,19 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	boolean childrenDLDirty = true;
 	boolean isCopyCat = false,
 		isTopCat = false,
+		isCameraRepn = false,
 		visibilityChanged = false;
 	boolean insideDL = false;
 	double[][] matrices = null;
 	double minDistance = -1;
 	double maxDistance = -1;
 	boolean clipToCamera = true;
-	int delay = 200;
+	int delay = 50;
 	Geometry trojanHorse = null;
-	
+	SceneGraphPath w2camrepn = null;
+	double[] m2wd = new double[16], finalThing = new double[16];
+	float[] m2w = new float[16];
+	int framecount = -1;
 	protected boolean[] matrixIsReflection = null;
 	public DiscreteGroupJOGLPeerComponent()	{
 		super();
@@ -74,7 +80,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 //			System.err.println("Matrices length "+((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size());
 			if (matrices.length != ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size()) {
 				readMatrices();				
-				displayListDirty = geometryDLDirty = true;			}
+				displayListDirty = geometryDLDirty = true;			
+			}
 		}
 		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
 			// next prerequisite for using display lists at this node or above is that geometry and children are clean
@@ -162,7 +169,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			childrenDLDirty = child.isDisplayListDirty();
 			child.goBetween.getOriginalComponent().setVisible(vis);
-			theLog.info("Rendered "+count);
+			theLog.fine("Rendered "+count);
 			cumulativeIsReflection = isReflectionBefore;
 			jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 		} else {
@@ -178,6 +185,19 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		}
 	}
 		
+	@Override
+	protected void pushTransformation(double[] m) {
+		if (w2camrepn != null )	{
+			if (framecount != jr.frameCount) {
+				w2camrepn.getInverseMatrix(m2wd);
+				framecount = jr.frameCount;
+				Rn.times(finalThing,m2wd,  jr.getRenderingState().cameraToWorld);
+//				System.err.println("Setting up final thing");
+			}
+			super.pushTransformation(finalThing);
+		} else super.pushTransformation(m);
+	}
+
 	private boolean isDisplayListDirty() {
 		if (!goBetween.originalComponent.isVisible()) return false;
 		return displayListDirty;
@@ -213,10 +233,17 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	protected void updateShaders() {
 		super.updateShaders();
-		if (!isCopyCat || eAp == null) return;
+		if (eAp == null )return;
+		Object foo = eAp.getAttribute("discreteGroup.cameraRep", null, SceneGraphPath.class);
+		if (foo != null && foo instanceof SceneGraphPath) {
+			w2camrepn = (SceneGraphPath) foo;
+			System.err.println("Found path in "+w2camrepn);
+			useTformCaching = false;
+		} else w2camrepn = null;
+		if (!isCopyCat) return;
 		minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
 		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
-		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);	
+		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);
 		isTopCat = (isCopyCat && !existsHigherCat());
 		delay = eAp.getAttribute("discreteGroup.delay", delay);	
 	}

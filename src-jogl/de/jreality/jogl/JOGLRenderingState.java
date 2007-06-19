@@ -45,6 +45,7 @@ import java.util.WeakHashMap;
 import javax.media.opengl.GL;
 
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
@@ -85,6 +86,7 @@ public class JOGLRenderingState {
 	public boolean insideDisplayList = false;
 	public boolean componentDisplayLists = true;
 	public static boolean useOldTransparency = false;
+	public double[] cameraToWorld = Rn.identityMatrix(4);
 
 	public int texUnitCount = 0;
 	public int polygonCount = 0;

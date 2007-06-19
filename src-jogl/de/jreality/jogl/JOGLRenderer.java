@@ -271,7 +271,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL.glLoadIdentity();
 
 		if (backSphere) {  globalGL.glLoadTransposeMatrixd(P3.p3involution, 0);	globalGL.glPushMatrix(); }
-		double[] w2c = context.getWorldToCamera();
+		renderingState.cameraToWorld = context.getCameraToWorld();
+		double[] w2c = Rn.inverse(null, renderingState.cameraToWorld);
 		globalGL.glLoadTransposeMatrixd(w2c, 0);
 		globalIsReflection = ( isFlipped() != (Rn.determinant(w2c) < 0.0));
 
