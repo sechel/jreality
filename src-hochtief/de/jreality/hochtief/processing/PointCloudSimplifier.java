@@ -80,8 +80,10 @@ public class PointCloudSimplifier {
 			
 
 			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, faceDir1, faceDir2, faceDir3, texRes);
-			compSgc.setName("comp "+c);
-			sgc.addChild(compSgc);
+			if(compSgc!=null){
+				compSgc.setName("comp "+c);
+				sgc.addChild(compSgc);
+			}
 		}
 		return sgc;
 	}

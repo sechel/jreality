@@ -283,8 +283,8 @@ public class Scan3DShowUtility {
 					ifsf.setGenerateEdgesFromFaces(true);
 					ifsf.setGenerateFaceNormals(true);
 					ifsf.setGenerateVertexNormals(true);
-					PickUtility.setPickable(ifsf.getGeometry(), false);
 					ifsf.update();
+					PickUtility.setPickable(ifsf.getGeometry(), false);
 
 					SceneGraphComponent sgc=new SceneGraphComponent("face "+i);
 					sgc.setGeometry(ifsf.getGeometry());

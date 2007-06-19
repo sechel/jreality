@@ -15,11 +15,12 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
+import de.jreality.util.PickUtility;
 
 public class Scan3DPointCloudUtility {
 	
 	
-	private static int minPointCount=500;
+	private static int minPointCount=10;
 	
 	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double[] faceDir3, double texRes){
 		SceneGraphComponent sgc=new SceneGraphComponent();
@@ -38,12 +39,17 @@ public class Scan3DPointCloudUtility {
 		}
 
 		SceneGraphComponent face1Sgc=projectPointCloud(points1, vertexColors, faceDir1, faceDir2, texRes);
-		face1Sgc.setName("face1");
-		sgc.addChild(face1Sgc);
+		if(face1Sgc!=null){
+			face1Sgc.setName("face1");
+			sgc.addChild(face1Sgc);
+		}
 		SceneGraphComponent face2Sgc=projectPointCloud(points2, vertexColors, faceDir1, faceDir3, texRes);
-		face2Sgc.setName("face2");
-		sgc.addChild(face2Sgc);
-
+		if(face2Sgc!=null){
+			face2Sgc.setName("face2");
+			sgc.addChild(face2Sgc);
+		}		
+		if(face1Sgc==null && face2Sgc==null) return null;
+		
 		return sgc;
 	}
 
@@ -51,7 +57,7 @@ public class Scan3DPointCloudUtility {
 	private static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double texRes){
 		SceneGraphComponent sgc=new SceneGraphComponent();
 		if(points.size()<minPointCount)
-			return sgc;
+			return null;
 
 //		Rn.normalize(faceDir1, faceDir1);
 //		Rn.normalize(faceDir2, faceDir2);
@@ -80,7 +86,7 @@ public class Scan3DPointCloudUtility {
 		System.out.println("texWidth="+texWidth);
 		System.out.println("texHeight="+texHeight);
 
-		if(texWidth<=0||texHeight<=0) return sgc;
+		if(texWidth<=0||texHeight<=0) return null;
 
 		BufferedImage img = new BufferedImage(texWidth, texHeight, BufferedImage.TYPE_INT_ARGB);
 		WritableRaster raster = img.getRaster();
@@ -163,6 +169,7 @@ public class Scan3DPointCloudUtility {
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setGenerateVertexNormals(true);
 		ifsf.update();
+		PickUtility.setPickable(ifsf.getGeometry(), false);
 
 		sgc.setGeometry(ifsf.getGeometry());
 		sgc.setAppearance(new Appearance());

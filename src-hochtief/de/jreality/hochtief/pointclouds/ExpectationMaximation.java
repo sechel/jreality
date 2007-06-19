@@ -20,7 +20,7 @@ public class ExpectationMaximation {
 		
 		double thisPX,lastPX;
 		long time;
-		long overallTime=System.currentTimeMillis();
+		long startAllTime=System.currentTimeMillis();
 		for(int currentComponentCount=1; currentComponentCount<=componentCount; currentComponentCount++){   //increase number of components
 			System.out.print("maximizing over "+currentComponentCount+" components");
 			time=System.currentTimeMillis();
@@ -57,17 +57,15 @@ public class ExpectationMaximation {
 			}
 			
 			double sum=0;
-			for(int i=1;i<=currentComponentCount;i++)
-				sum+=(double)i;
-			double timeStep=(System.currentTimeMillis()-overallTime)/sum;
+			for(int i=1;i<=currentComponentCount;i++) sum+=(double)i;
+			double timeStep=(System.currentTimeMillis()-startAllTime)/sum;
 			sum=0;
-			for(int i=1;i<=componentCount;i++)
-				sum+=(double)i;
-			double estFinishedInTime=timeStep*sum-(System.currentTimeMillis()-overallTime);
+			for(int i=1;i<=componentCount;i++) sum+=(double)i;
+			double estFinishedInTime=timeStep*sum-(System.currentTimeMillis()-startAllTime);
 			System.out.append(" ..in "+Math.round((System.currentTimeMillis()-time)/1000.0)+" s, finished in ~ "+(Math.round(estFinishedInTime/100.0/60.0)/10.0)+" min\n");
 		}
 		
-		System.out.println("maximation overall time: "+Math.round((System.currentTimeMillis()-overallTime)/1000.0/60.0)+" min");
+		System.out.println("maximation overall time: "+Math.round((System.currentTimeMillis()-startAllTime)/1000.0/60.0)+" min");
 		
 		return params;
 	}
