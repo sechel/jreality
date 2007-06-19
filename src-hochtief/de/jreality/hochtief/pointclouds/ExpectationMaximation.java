@@ -65,7 +65,7 @@ public class ExpectationMaximation {
 			System.out.append(" ..in "+Math.round((System.currentTimeMillis()-time)/1000.0)+" s, finished in ~ "+(Math.round(estFinishedInTime/100.0/60.0)/10.0)+" min\n");
 		}
 		
-		System.out.println("maximation overall time: "+Math.round((System.currentTimeMillis()-startAllTime)/1000.0/60.0)+" min");
+		System.out.println("maximation overall time: "+(Math.round((System.currentTimeMillis()-startAllTime)/100.0/60.0)/10.0)+" min");
 		
 		return params;
 	}
@@ -85,36 +85,42 @@ public class ExpectationMaximation {
 		
 		for(int c=0;c<p[0].length;c++){
 			
-			int Nc=0;
-			double[] centeroid=new double[3];			
-			for(int i=0;i<points.length;i++){
+			double Nc=0;
+			for(int i=0;i<points.length;i++)
 				Nc+=p[i][c];	
-				Rn.add(centeroid, centeroid, Rn.times(null, p[i][c], points[i]));
-			}
-			Rn.times(centeroid, 1.0/(double)Nc, centeroid);
 			
-			double[] cov=new double[9];
-			for(int i=0;i<points.length;i++){
-				double[] centeredPoint=Rn.subtract(null, points[i], centeroid);				
-				for(int x=0;x<3;x++){
-					for(int y=0;y<3;y++){
-						cov[3*x+y]+=centeredPoint[x]*centeredPoint[y]*p[i][c];
-					}	
-				}
-			}
-			for(int x=0;x<9;x++){
-				cov[x]/=(double)Nc;
-//				if(cov[x]<minValue) cov[x]=minValue;
-//				if(cov[x]>-minValue) cov[x]=-minValue;
-			}
-			
-			double alpha=(double)Nc/(double)points.length;
+			if(Nc>0){			
+				double[] centeroid=new double[3];			
+				for(int i=0;i<points.length;i++)					
+					Rn.add(centeroid, centeroid, Rn.times(null, p[i][c], points[i]));			
+				Rn.times(centeroid, 1.0/Nc, centeroid);
 
-			params[c][0]=centeroid[0]; params[c][1]=centeroid[1]; params[c][2]=centeroid[2];
-			params[c][3]=cov[0]; params[c][4]=cov[1]; params[c][5]=cov[2];
-			params[c][6]=cov[3]; params[c][7]=cov[4]; params[c][8]=cov[5];
-			params[c][9]=cov[6]; params[c][10]=cov[7]; params[c][11]=cov[8];
-			params[c][12]=alpha;		
+				double[] cov=new double[9];
+				for(int i=0;i<points.length;i++){
+					double[] centeredPoint=Rn.subtract(null, points[i], centeroid);				
+					for(int x=0;x<3;x++){
+						for(int y=0;y<3;y++){
+							cov[3*x+y]+=centeredPoint[x]*centeredPoint[y]*p[i][c];
+						}	
+					}
+				}
+				for(int x=0;x<9;x++){
+					cov[x]=cov[x]/Nc;
+//					if(cov[x]<minValue) cov[x]=minValue;
+//					if(cov[x]>-minValue) cov[x]=-minValue;
+				}
+
+				double alpha=Nc/((double)points.length);
+
+				params[c][0]=centeroid[0]; params[c][1]=centeroid[1]; params[c][2]=centeroid[2];
+				params[c][3]=cov[0]; params[c][4]=cov[1]; params[c][5]=cov[2];
+				params[c][6]=cov[3]; params[c][7]=cov[4]; params[c][8]=cov[5];
+				params[c][9]=cov[6]; params[c][10]=cov[7]; params[c][11]=cov[8];
+				params[c][12]=alpha;	
+			}else{
+				for(int i=3;i<params[c].length;i++)
+					params[c][i]=0;
+			}
 		}
 		
 		return params;
@@ -255,7 +261,7 @@ public class ExpectationMaximation {
 		p*=-0.5;
 		p=Math.exp(p);
 		double factor=Math.sqrt(det*Math.pow(2*Math.PI, 3));
-		p/=factor;
+		p=p/factor;
 //		if(factor<0.01) return 0.0;
 		return p;
 	}

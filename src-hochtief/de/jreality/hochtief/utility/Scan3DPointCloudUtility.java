@@ -54,7 +54,7 @@ public class Scan3DPointCloudUtility {
 	}
 
 
-	private static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double texRes){
+	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double texRes){
 		SceneGraphComponent sgc=new SceneGraphComponent();
 		if(points.size()<minPointCount)
 			return null;
