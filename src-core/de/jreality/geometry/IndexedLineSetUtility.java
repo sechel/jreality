@@ -118,6 +118,22 @@ public class IndexedLineSetUtility {
 	}
 
 	
+	public static double[][] extractCurveColors(double[][] curve, IndexedLineSet ils, int i) {
+		DataList verts = ils.getVertexAttributes(Attribute.COLORS);
+		if (verts == null) return null;
+		DataList indices = ils.getEdgeAttributes(Attribute.INDICES);
+		IntArray thisEdge = indices.item(i).toIntArray();
+		int n = thisEdge.getLength();
+		double[][] output = null;
+		if (curve == null || curve.length != n) output = new double[n][];
+		else output = curve;
+		for (int j = 0; j<n; ++j)	{
+			int which = thisEdge.getValueAt(j);
+			output[j] = verts.item(which).toDoubleArray(null);
+		}
+		return output;
+	}
+
 	public static IndexedLineSet createCurveFromPoints(double[][] points, boolean closed)	{
 		return createCurveFromPoints(null, points,  closed);
 	}
