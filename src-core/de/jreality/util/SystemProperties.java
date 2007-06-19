@@ -145,12 +145,6 @@ public class SystemProperties {
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
 	 * Values: <code>true | false</code>
 	 */
-	public final static String JOGL_PORTAL_USAGE = "jreality.jogl.portalUsage";
-
-	/**
-	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
-	 * Values: <code>true | false</code>
-	 */
 	public final static String JOGL_QUAD_BUFFERED_STEREO = "jreality.jogl.quadBufferedStereo";
 
 	/**
@@ -165,13 +159,6 @@ public class SystemProperties {
 	 */
 	public final static String JOGL_LOGGING_LEVEL = "jreality.jogl.loggingLevel";
 
-	/**
-	 * Specifies the path of the jogl resource directory.<br>
-	 * Values: directory path
-	 */
-	public final static String JOGL_RESOURCE_DIR = "jreality.jogl.resourceDir";
-
-	
 	
 	/**
 	 * Specifies a properties file used in {@link de.jreality.util.ConfigurationAttributes} 
