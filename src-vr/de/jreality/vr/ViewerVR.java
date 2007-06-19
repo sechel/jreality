@@ -650,6 +650,15 @@ public class ViewerVR {
 		return viewerApp;
 	}
 
+	public ViewerApp initialize(ViewerApp va)	{
+		restorePreferences(getPreferences());
+		ViewerApp viewerApp = va;
+		viewerApp.setExternalBeanShell(true);
+		viewerApp.setExternalNavigator(true);
+		tweakMenu(viewerApp);
+		return viewerApp;
+		
+	}
 	/**
 	 * @deprecated use {@link ViewerVR.initialize()}
 	 */
