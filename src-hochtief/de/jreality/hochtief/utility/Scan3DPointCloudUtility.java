@@ -148,7 +148,7 @@ public class Scan3DPointCloudUtility {
 					pixelCount++;
 			}			
 		}
-		System.out.println("used Pixels: "+pixelCount+"/"+(texWidth*texHeight));		
+		System.out.println("used Pixels: "+pixelCount+"/"+(texWidth*texHeight)+" = "+(int)Math.round((double)pixelCount/(double)(texWidth*texHeight)*100.0)+"%");		
 
 		double[][] faceVertices={
 				Rn.add(null, Rn.times(null, max1, faceDir1), Rn.times(null, max2, faceDir2)),

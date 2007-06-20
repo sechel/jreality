@@ -82,7 +82,7 @@ public class Scan3DUtility {
 		double[] centeroid=new double[dim];
 		for(int i=0;i<count;i++)
 			Rn.add(centeroid, centeroid, data[i]);
-		Rn.times(centeroid, 1/(double)count, centeroid);
+		Rn.times(centeroid, 1.0/(double)count, centeroid);
 		double[][] centeredData=new double[data.length][data[0].length];
 		for(int i=0;i<count;i++)
 			Rn.subtract(centeredData[i], data[i], centeroid);
@@ -105,7 +105,13 @@ public class Scan3DUtility {
 		double[] centeroid=new double[dim];
 		for(int i=0;i<count;i++)
 			Rn.add(centeroid, centeroid, data.get(i)); 
-		Rn.times(centeroid, 1/(double)count, centeroid);
+		Rn.times(centeroid, 1.0/(double)count, centeroid);
+		return getCovarianzMatrix(data, centeroid);		
+	}
+	
+	public static double[][] getCovarianzMatrix(ArrayList<double[]> data, double[] centeroid){
+		int count=data.size();
+		int dim=data.get(0).length;
 		double[][] centeredData=new double[count][dim];
 		for(int i=0;i<count;i++)
 			Rn.subtract(centeredData[i], data.get(i), centeroid);
