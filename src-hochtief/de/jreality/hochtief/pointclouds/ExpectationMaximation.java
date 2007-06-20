@@ -10,7 +10,7 @@ import de.jreality.math.Rn;
 
 public class ExpectationMaximation {
 	
-	private static final double minValue=-10000000;
+	private static final double minValue=-999999999;
 	private static DenseMatrix unitMatrix=new DenseMatrix(new double[][]{{1,0,0},{0,1,0},{0,0,1}});
 	
 	public static double[][] calculateParameters(int componentCount, double minChange, double[][] points){
@@ -52,12 +52,12 @@ public class ExpectationMaximation {
 				params=mStep(p, points, params);
 				
 //				thisPX=Math.log(pX(points,centeroid,det,invCov,alpha));
-//				thisPX=logpX(points,centeroid,det,invCov,alpha);
+				thisPX=logpX(points,centeroid,det,invCov,alpha);
 				//??????????????????????????????????????????????
-				compId=evalPoints(points, params);
-				thisPX=1;
-				for(int i=0;i<compId.length;i++)
-					thisPX=thisPX*px(points[i],centeroid[compId[i]],det[compId[i]],invCov[compId[i]])/px(points[i],centeroid,det,invCov,alpha);
+//				compId=evalPoints(points, params);  //!is in 'while'
+//				thisPX=1;
+//				for(int i=0;i<compId.length;i++)
+//					thisPX=thisPX*px(points[i],centeroid[compId[i]],det[compId[i]],invCov[compId[i]])/px(points[i],centeroid,det,invCov,alpha);
 				
 			}
 			
@@ -72,7 +72,8 @@ public class ExpectationMaximation {
 			System.out.append(" ..in "+Math.round((System.currentTimeMillis()-time)/1000.0)+" s, finished in ~ "+(Math.round(estFinishedInTime/100.0/60.0)/10.0)+" min\n");
 		
 		
-			if(currentComponentCount<componentCount){
+			if(currentComponentCount<componentCount){	
+				compId=evalPoints(points, params);
 				params=initNextComponent(currentComponentCount,points,compId,params);
 			}
 		}
@@ -229,11 +230,11 @@ public class ExpectationMaximation {
 //		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
 //		
 //		//update splitted component
-//		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-//		params[splitComponentNr][0]=newCenteroid[0];
-//		params[splitComponentNr][1]=newCenteroid[1];
-//		params[splitComponentNr][2]=newCenteroid[2];		
+//		double[] updatedCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
+//		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+//		params[splitComponentNr][0]=updatedCenteroid[0];
+//		params[splitComponentNr][1]=updatedCenteroid[1];
+//		params[splitComponentNr][2]=updatedCenteroid[2];		
 //		for(int i=3;i<12;i++)
 //			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
 //		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
@@ -300,11 +301,11 @@ public class ExpectationMaximation {
 //		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
 //		
 //		//update splitted component
-//		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-//		params[splitComponentNr][0]=newCenteroid[0];
-//		params[splitComponentNr][1]=newCenteroid[1];
-//		params[splitComponentNr][2]=newCenteroid[2];		
+//		double[] updatedCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
+//		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+//		params[splitComponentNr][0]=updatedCenteroid[0];
+//		params[splitComponentNr][1]=updatedCenteroid[1];
+//		params[splitComponentNr][2]=updatedCenteroid[2];		
 //		for(int i=3;i<12;i++)
 //			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
 //		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
@@ -318,7 +319,9 @@ public class ExpectationMaximation {
 		
 		int splitComponentNr=0;		
 		double maxEv=0;
-		double[] maxEig=new double[3];	
+		double[] maxEig=new double[3];
+		double[] splitCenteroid=new double[3];
+		DenseMatrix splitCov=new DenseMatrix(3,3);		
 		for(int c=0;c<currentComponentCount;c++){				
 			ArrayList<double[]> compPoints=new ArrayList<double[]>();
 			for(int i=0;i<points.length;i++){
@@ -338,9 +341,11 @@ public class ExpectationMaximation {
 				} catch (NotConvergedException e) {e.printStackTrace();}
 
 				if(evd.getEigenvalues()[2]>maxEv){
+					splitComponentNr=c;
 					maxEv=evd.getEigenvalues()[2];
 					maxEig=new double[] {evd.getEigenvectors().get(0,2),evd.getEigenvectors().get(1,2),evd.getEigenvectors().get(2,2)};
-					splitComponentNr=c;
+					splitCenteroid=centeroid;
+					splitCov=cov;
 				}		
 			}
 		}
@@ -349,23 +354,22 @@ public class ExpectationMaximation {
 		
 		//new component	
 		params[currentComponentCount]=new double[params[0].length];
-		double[] newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-		Rn.add(newCenteroid, newCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
+		double[] newCenteroid=Rn.add(null, splitCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
 		params[currentComponentCount][0]=newCenteroid[0];
 		params[currentComponentCount][1]=newCenteroid[1];
 		params[currentComponentCount][2]=newCenteroid[2];		
 		for(int i=3;i<12;i++)
-			params[currentComponentCount][i]=0.25*params[splitComponentNr][i];
+			params[currentComponentCount][i]=0.25*splitCov.get(i/3-1,i%3);
+		
 		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
 		
 		//update splitted component
-		newCenteroid=new double[] {params[splitComponentNr][0],params[splitComponentNr][1],params[splitComponentNr][2]};
-		Rn.add(newCenteroid, newCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-		params[splitComponentNr][0]=newCenteroid[0];
-		params[splitComponentNr][1]=newCenteroid[1];
-		params[splitComponentNr][2]=newCenteroid[2];		
+		double[] updatedCenteroid=Rn.add(null, splitCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+		params[currentComponentCount][0]=updatedCenteroid[0];
+		params[currentComponentCount][1]=updatedCenteroid[1];
+		params[currentComponentCount][2]=updatedCenteroid[2];		
 		for(int i=3;i<12;i++)
-			params[splitComponentNr][i]=0.25*params[splitComponentNr][i];			
+			params[currentComponentCount][i]=0.25*splitCov.get(i/3-1,i%3);			
 		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
 		
 		return params;
