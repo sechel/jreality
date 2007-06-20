@@ -10,7 +10,7 @@ import de.jreality.math.Rn;
 
 public class ExpectationMaximation {
 	
-	private static final double minValue=-999999999;
+	private static final double minValue=-10000000;
 	private static DenseMatrix unitMatrix=new DenseMatrix(new double[][]{{1,0,0},{0,1,0},{0,0,1}});
 	
 	public static double[][] calculateParameters(int componentCount, double minChange, double[][] points){
@@ -72,9 +72,9 @@ public class ExpectationMaximation {
 			System.out.append(" ..in "+Math.round((System.currentTimeMillis()-time)/1000.0)+" s, finished in ~ "+(Math.round(estFinishedInTime/100.0/60.0)/10.0)+" min\n");
 		
 		
-			if(currentComponentCount<componentCount){	
-				compId=evalPoints(points, params);
-				params=initNextComponent(currentComponentCount,points,compId,params);
+			if(currentComponentCount<componentCount){
+//				params=initNextComponent(currentComponentCount,points,params);
+				params=initNextComponent(currentComponentCount,params);
 			}
 		}
 		
@@ -99,8 +99,9 @@ public class ExpectationMaximation {
 		for(int c=0;c<p[0].length;c++){
 			
 			double Nc=0;
-			for(int i=0;i<points.length;i++)
+			for(int i=0;i<points.length;i++){
 				Nc+=p[i][c];	
+			}
 			
 			if(Nc>0){			
 				double[] centeroid=new double[3];			
@@ -140,60 +141,58 @@ public class ExpectationMaximation {
 	}
 
 
-//	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
-//		//get component with biggest alpha
-//		int splitComponent=0;
-//		double maxAlpha=0;					
-//		for(int c=0;c<currentComponentCount;c++){			
-//			if(params[c][12]>maxAlpha){
-//				maxAlpha=params[c][12];
-//				splitComponent=c;
-//			}
-//		}
-//		
-//		System.out.println("\nsplitting component nr "+splitComponent);
-//		
-//		DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[splitComponent][3],params[splitComponent][4],params[splitComponent][5]},{params[splitComponent][6],params[splitComponent][7],params[splitComponent][8]},{params[splitComponent][9],params[splitComponent][10],params[splitComponent][11]}});
-//		SymmPackEVD evd=null;
-//		try {
-//			evd = SymmPackEVD.factorize(covMtx);
-//		} catch (NotConvergedException e) {e.printStackTrace();}
-//		DenseMatrix eigM=evd.getEigenvectors();
-//		double[] maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
-//		double maxEv=evd.getEigenvalues()[2];
-//		
-//	    System.out.println("splitting comp nr "+splitComponentNr+" with eigenvalue "+maxEv);
-//	
-//		//new component	
-//		params[currentComponentCount]=new double[params[0].length];
-//		double[] newCenteroid=new double[] {params[splitComponent][0],params[splitComponent][1],params[splitComponent][2]};
-//		
+	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
+		//get component with biggest alpha
+		int splitComponent=0;
+		double maxAlpha=0;					
+		for(int c=0;c<currentComponentCount;c++){			
+			if(params[c][12]>maxAlpha){
+				maxAlpha=params[c][12];
+				splitComponent=c;
+			}
+		}
+		
+		DenseMatrix covMtx=new DenseMatrix(new double[][]{{params[splitComponent][3],params[splitComponent][4],params[splitComponent][5]},{params[splitComponent][6],params[splitComponent][7],params[splitComponent][8]},{params[splitComponent][9],params[splitComponent][10],params[splitComponent][11]}});
+		SymmPackEVD evd=null;
+		try {
+			evd = SymmPackEVD.factorize(covMtx);
+		} catch (NotConvergedException e) {e.printStackTrace();}
+		DenseMatrix eigM=evd.getEigenvectors();
+		double[] maxEig=new double[] {eigM.get(0, 2),eigM.get(1, 2),eigM.get(2, 2)};
+		double maxEv=evd.getEigenvalues()[2];
+		
+	    System.out.println("splitting comp nr "+splitComponent+" with alpha "+maxAlpha);
+	
+		//new component	
+		params[currentComponentCount]=new double[params[0].length];
+		double[] newCenteroid=new double[] {params[splitComponent][0],params[splitComponent][1],params[splitComponent][2]};
+		
 //		System.out.println("old centeroid: "+Rn.toString(newCenteroid));
-//		
-//		Rn.add(newCenteroid, newCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
-//		params[currentComponentCount][0]=newCenteroid[0];
-//		params[currentComponentCount][1]=newCenteroid[1];
-//		params[currentComponentCount][2]=newCenteroid[2];		
-//		for(int i=3;i<12;i++)
-//			params[currentComponentCount][i]=0.25*params[splitComponent][i];		
-//		params[currentComponentCount][12]=0.5*params[splitComponent][12];
-//		
+		
+		Rn.add(newCenteroid, newCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
+		params[currentComponentCount][0]=newCenteroid[0];
+		params[currentComponentCount][1]=newCenteroid[1];
+		params[currentComponentCount][2]=newCenteroid[2];		
+		for(int i=3;i<12;i++)
+			params[currentComponentCount][i]=0.25*params[splitComponent][i];		
+		params[currentComponentCount][12]=0.5*params[splitComponent][12];
+		
 //		System.out.println("new centeroid: "+Rn.toString(newCenteroid));
-//		
-//		//update splitted component
-//		double[] updatedCenteroid=new double[] {params[splitComponent][0],params[splitComponent][1],params[splitComponent][2]};
-//		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-//		params[splitComponent][0]=updatedCenteroid[0];
-//		params[splitComponent][1]=updatedCenteroid[1];
-//		params[splitComponent][2]=updatedCenteroid[2];		
-//		for(int i=3;i<12;i++)
-//			params[splitComponent][i]=0.25*params[splitComponent][i];			
-//		params[splitComponent][12]=0.5*params[splitComponent][12];		
-//		
+		
+		//update splitted component
+		double[] updatedCenteroid=new double[] {params[splitComponent][0],params[splitComponent][1],params[splitComponent][2]};
+		Rn.add(updatedCenteroid, updatedCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+		params[splitComponent][0]=updatedCenteroid[0];
+		params[splitComponent][1]=updatedCenteroid[1];
+		params[splitComponent][2]=updatedCenteroid[2];		
+		for(int i=3;i<12;i++)
+			params[splitComponent][i]=0.25*params[splitComponent][i];			
+		params[splitComponent][12]=0.5*params[splitComponent][12];		
+		
 //		System.out.println("updated centeroid: "+Rn.toString(updatedCenteroid)+"/n");
-//		
-//		return params;
-//	}
+		
+		return params;
+	}
 	
 //	private static double[][] initNextComponent(int currentComponentCount, double[][] params) {
 //		//get component with biggest var
@@ -242,9 +241,9 @@ public class ExpectationMaximation {
 //		return params;
 //	}
 	
-//	private static double[][] initNextComponent(int currentComponentCount, double[][] points, int[] compId, double[][] params) {
+//	private static double[][] initNextComponent(int currentComponentCount, double[][] points, double[][] params) {
 //		//get component with biggest dist
-//		//int[] compId=evalPoints(points, params);
+//		int[] compId=evalPoints(points, params);
 //		int splitComponentNr=0;
 //		double maxDist=0;
 //		double maxEv=0;
@@ -313,67 +312,67 @@ public class ExpectationMaximation {
 //		return params;
 //	}
 	
-	private static double[][] initNextComponent(int currentComponentCount, double[][] points, int[] compId, double[][] params) {
-		//get comp with biggest var, var calculated only by points with compId==c
+//	private static double[][] initNextComponent(int currentComponentCount, double[][] points, double[][] params) {
+//		//get comp with biggest var, var calculated only by points with compId==c
 //		int[] compId=evalPoints(points, params);
-		
-		int splitComponentNr=0;		
-		double maxEv=0;
-		double[] maxEig=new double[3];
-		double[] splitCenteroid=new double[3];
-		DenseMatrix splitCov=new DenseMatrix(3,3);		
-		for(int c=0;c<currentComponentCount;c++){				
-			ArrayList<double[]> compPoints=new ArrayList<double[]>();
-			for(int i=0;i<points.length;i++){
-				if(compId[i]==c)
-					compPoints.add(points[i]);
-			}
-			if(compPoints.size()>0){
-				double[] centeroid=new double[3];
-				for(int i=0;i<compPoints.size();i++)
-					Rn.add(centeroid, centeroid, compPoints.get(i)); 
-				Rn.times(centeroid, 1.0/((double)compPoints.size()), centeroid);
-				DenseMatrix cov=new DenseMatrix(Scan3DUtility.getCovarianzMatrix(compPoints,centeroid));
-
-				SymmPackEVD evd=null;
-				try {
-					evd = SymmPackEVD.factorize(cov);
-				} catch (NotConvergedException e) {e.printStackTrace();}
-
-				if(evd.getEigenvalues()[2]>maxEv){
-					splitComponentNr=c;
-					maxEv=evd.getEigenvalues()[2];
-					maxEig=new double[] {evd.getEigenvectors().get(0,2),evd.getEigenvectors().get(1,2),evd.getEigenvectors().get(2,2)};
-					splitCenteroid=centeroid;
-					splitCov=cov;
-				}		
-			}
-		}
-		
-		System.out.println("splitting comp nr "+splitComponentNr+" with eigenvalue "+maxEv);
-		
-		//new component	
-		params[currentComponentCount]=new double[params[0].length];
-		double[] newCenteroid=Rn.add(null, splitCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
-		params[currentComponentCount][0]=newCenteroid[0];
-		params[currentComponentCount][1]=newCenteroid[1];
-		params[currentComponentCount][2]=newCenteroid[2];		
-		for(int i=3;i<12;i++)
-			params[currentComponentCount][i]=0.25*splitCov.get(i/3-1,i%3);
-		
-		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
-		
-		//update splitted component
-		double[] updatedCenteroid=Rn.add(null, splitCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
-		params[currentComponentCount][0]=updatedCenteroid[0];
-		params[currentComponentCount][1]=updatedCenteroid[1];
-		params[currentComponentCount][2]=updatedCenteroid[2];		
-		for(int i=3;i<12;i++)
-			params[currentComponentCount][i]=0.25*splitCov.get(i/3-1,i%3);			
-		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
-		
-		return params;
-	}
+//		
+//		int splitComponentNr=0;		
+//		double maxEv=0;
+//		double[] maxEig=new double[3];
+//		double[] splitCenteroid=new double[3];
+//		DenseMatrix splitCov=new DenseMatrix(3,3);		
+//		for(int c=0;c<currentComponentCount;c++){				
+//			ArrayList<double[]> compPoints=new ArrayList<double[]>();
+//			for(int i=0;i<points.length;i++){
+//				if(compId[i]==c)
+//					compPoints.add(points[i]);
+//			}
+//			if(compPoints.size()>0){
+//				double[] centeroid=new double[3];
+//				for(int i=0;i<compPoints.size();i++)
+//					Rn.add(centeroid, centeroid, compPoints.get(i)); 
+//				Rn.times(centeroid, 1.0/((double)compPoints.size()), centeroid);
+//				DenseMatrix cov=new DenseMatrix(Scan3DUtility.getCovarianzMatrix(compPoints,centeroid));
+//
+//				SymmPackEVD evd=null;
+//				try {
+//					evd = SymmPackEVD.factorize(cov);
+//				} catch (NotConvergedException e) {e.printStackTrace();}
+//
+//				if(evd.getEigenvalues()[2]>maxEv){
+//					splitComponentNr=c;
+//					maxEv=evd.getEigenvalues()[2];
+//					maxEig=new double[] {evd.getEigenvectors().get(0,2),evd.getEigenvectors().get(1,2),evd.getEigenvectors().get(2,2)};
+//					splitCenteroid=centeroid;
+//					splitCov=cov;
+//				}		
+//			}
+//		}
+//		
+//		System.out.println("splitting comp nr "+splitComponentNr+" with eigenvalue "+maxEv);
+//		
+//		//new component	
+//		params[currentComponentCount]=new double[params[0].length];
+//		double[] newCenteroid=Rn.add(null, splitCenteroid, Rn.times(null,-0.5*Math.sqrt(maxEv),maxEig));
+//		params[currentComponentCount][0]=newCenteroid[0];
+//		params[currentComponentCount][1]=newCenteroid[1];
+//		params[currentComponentCount][2]=newCenteroid[2];		
+//		for(int i=3;i<12;i++)
+//			params[currentComponentCount][i]=0.25*splitCov.get(i/3-1,i%3);
+//		
+//		params[currentComponentCount][12]=0.5*params[splitComponentNr][12];
+//		
+//		//update splitted component
+//		double[] updatedCenteroid=Rn.add(null, splitCenteroid, Rn.times(null,0.5*Math.sqrt(maxEv),maxEig));
+//		params[currentComponentCount][0]=updatedCenteroid[0];
+//		params[currentComponentCount][1]=updatedCenteroid[1];
+//		params[currentComponentCount][2]=updatedCenteroid[2];		
+//		for(int i=3;i<12;i++)
+//			params[currentComponentCount][i]=0.25*splitCov.get(i/3-1,i%3);			
+//		params[splitComponentNr][12]=0.5*params[splitComponentNr][12];		
+//		
+//		return params;
+//	}
 
 	//p(y=c|x,omega)
 	private static double pComp(double[] point, double pSumC, double[] centeroid, double det, DenseMatrix invCov, double alpha) {
