@@ -11,6 +11,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.SceneGraphComponentEvent;
+import de.jreality.util.SystemProperties;
 
 /**
  * This is an alternative class for use in conjunction with special sorts of
@@ -53,7 +54,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
 		super.init(sgp,p,jr);
 		trojanHorse = goBetween.getOriginalComponent().getGeometry();
-		isCopyCat = (trojanHorse != null &&  trojanHorse instanceof PointSet && trojanHorse.getGeometryAttributes(JOGLConfiguration.COPY_CAT) != null);
+		isCopyCat = (trojanHorse != null &&  trojanHorse instanceof PointSet && trojanHorse.getGeometryAttributes(SystemProperties.JOGL_COPY_CAT) != null);
 		if (isCopyCat)	{
 			readMatrices();
 		}
