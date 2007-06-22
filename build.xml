@@ -106,7 +106,8 @@
         <include name="jReality-ui.jar"/>
         <include name="jReality-swing.jar"/>
         <include name="jReality-sunflow.jar"/>
-    </fileset>
+      <include name="jReality-portal.jar"/>
+   </fileset>
     <fileset dir="lib">
         <include name="sunflow.jar"/>
     </fileset>
