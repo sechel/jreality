@@ -607,7 +607,7 @@ public class GeometryMergeFactory {
 				GeometryUtility.calculateAndSetVertexNormals(ifs[i]);
 		}
 		//
-		indexedFaceSetTo4DColorAndCoords(ifs);
+		indexedFaceSetTo4DColorNormalsAndCoords(ifs);
 		IndexedFaceSet result = new IndexedFaceSet();
 		DataListSet[] faceDls= new DataListSet [ifs.length];
 		DataListSet[] edgeDls= new DataListSet [ifs.length];
@@ -856,12 +856,34 @@ public class GeometryMergeFactory {
 	//---------problems with 3 and 4 dimensional Coordinates and colors-------
 	// soltion: generate the 4 netry with "1"
 	
-	private static void indexedFaceSetTo4DColorAndCoords(IndexedFaceSet[] list){
+	private static void indexedFaceSetTo4DColorNormalsAndCoords(IndexedFaceSet[] list){
 		
 		// TODO macht das probleme?
 		
 		for(IndexedFaceSet ifs: list){
-			DataList d= ifs.getFaceAttributes(Attribute.COLORS);
+			DataList d= ifs.getFaceAttributes(Attribute.NORMALS);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setFaceAttributes(Attribute.NORMALS,null);
+				ifs.setFaceAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
+			}
+			d= ifs.getEdgeAttributes(Attribute.NORMALS);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setEdgeAttributes(Attribute.NORMALS,null);
+				ifs.setEdgeAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
+			}
+			d= ifs.getVertexAttributes(Attribute.NORMALS);
+			if(d!=null){
+				double[][] ds=d.toDoubleArrayArray(null);
+				equalizeTo4D(ds);
+				ifs.setVertexAttributes(Attribute.NORMALS,null);
+				ifs.setVertexAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
+			}
+			//
+			d= ifs.getFaceAttributes(Attribute.COLORS);
 			if(d!=null){
 				double[][] ds=d.toDoubleArrayArray(null);
 				equalizeTo4D(ds);
