@@ -42,6 +42,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	float[] m2w = new float[16];
 	int framecount = -1;
 	protected boolean[] matrixIsReflection = null;
+	GL oldGL;
 	public DiscreteGroupJOGLPeerComponent()	{
 		super();
 	}
@@ -82,6 +83,10 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			if (matrices.length != ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size()) {
 				readMatrices();				
 				displayListDirty = geometryDLDirty = true;			
+			}
+			if (oldGL != jr.globalGL)	{
+				displayListDirty = geometryDLDirty = true;
+				oldGL = jr.globalGL;
 			}
 		}
 		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
@@ -149,10 +154,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			double[] o2ndc = jr.context.getObjectToNDC();
 			double[] o2c = jr.context.getObjectToCamera();
 			int count = 0;
-//			if (clipToCamera)	{
-//				System.err.println("o2c is "+Rn.matrixToString(o2c));
-//				System.err.println("o2ndc is "+Rn.matrixToString(o2ndc));				
-//			}
 			DiscreteGroupJOGLPeerComponent child = (DiscreteGroupJOGLPeerComponent) children.get(0);
 			boolean vis = child.goBetween.getOriginalComponent().isVisible();
 			child.goBetween.getOriginalComponent().setVisible(true);
@@ -170,7 +171,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			childrenDLDirty = child.isDisplayListDirty();
 			child.goBetween.getOriginalComponent().setVisible(vis);
-			theLog.fine("Rendered "+count);
+			theLog.info("Rendered "+count);
 			cumulativeIsReflection = isReflectionBefore;
 			jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 		} else {
