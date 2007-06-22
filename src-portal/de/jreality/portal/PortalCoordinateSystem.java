@@ -129,4 +129,7 @@ public class PortalCoordinateSystem {
 			cam.setViewPort(new Rectangle2D.Double(xmin, ymin, w/z, h/z));
 	//		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
 		}
+		public static double convertMeters(double d) {
+			return portalScale*d;
+		}
 }
