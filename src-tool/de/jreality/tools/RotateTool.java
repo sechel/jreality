@@ -101,8 +101,6 @@ public class RotateTool extends AbstractTool {
 	    Rectangle3D bb = GeometryUtility.calculateChildrenBoundingBox(comp);
 	    // need to respect the signature here
 	    MatrixBuilder.init(null, signature).translate(bb.getCenter()).assignTo(centerTranslation);
-	    //centerTranslation.setColumn(3, bb.getCenter());
-	    //centerTranslation.setEntry(3,3,1);
 	    return centerTranslation;
   }
   transient private int signature;
