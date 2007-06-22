@@ -384,12 +384,22 @@ public class Pn {
 	{
 		double[] np0 = new double[p0.length]; //normalize(null, p0, signature);
 		double[] np1 = new double[p1.length];
-		//System.out.println("Dragging 1"+Rn.toString(p0)+"to "+Rn.toString(p1));
+		if (signature == EUCLIDEAN)	{
+			int last = p0.length-1;
+			normalize(np0, p0, signature);
+			normalize(np1, p1, signature);
+			if (np1[last] == 1 && np0[last] == 1) Rn.subtract(np1, np1, np0);
+			double norm = Rn.euclideanNorm(np1);
+			return Rn.add(result, Rn.times(np1, length/norm, np1), np0);
+		}
+		System.out.println("Dragging 1"+Rn.toString(p0)+"to "+Rn.toString(p1));
 		normalize(np0, p0, signature);
 		projectToTangentSpace(np1, np0, p1, signature);
 		normalize(np1, np1, signature);
-		//System.out.println("Dragging 2"+Rn.toString(np0)+"to "+Rn.toString(np1));
-		return dragTangentVector(result, null, np0, np1, length, signature);
+		System.out.println("Dragging 2"+Rn.toString(np0)+"to "+Rn.toString(np1));
+		double[] res = dragTangentVector(result, null, np0, np1, length, signature);
+		System.out.println("Result is"+Rn.toString(res));
+		return res;
 	}
 
 	/**
