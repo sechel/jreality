@@ -81,6 +81,7 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
+import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -254,7 +255,7 @@ public class ViewerVR {
 		avatarPath = cameraPath.popNew();
 		cameraPath.push(cam);
 
-		MatrixBuilder.euclidean().translate(0, 1.7, 0).rotateX(5*Math.PI/180).assignTo(camNode);
+		MatrixBuilder.euclidean().translate(0, PortalCoordinateSystem.convertMeters(1.7), 0).rotateX(5*Math.PI/180).assignTo(camNode);
 
 		shipNavigationTool = new ShipNavigationTool();
 		avatarNode.addTool(shipNavigationTool);
@@ -326,7 +327,7 @@ public class ViewerVR {
 
 		if (portal || portalRemote) {
 			wm = new JRWindowManager(avatarNode);
-			wm.setPosition(new double[]{0, 1.24, -1.24});
+			wm.setPosition(new double[]{0, PortalCoordinateSystem.convertMeters(1.24), PortalCoordinateSystem.convertMeters(-1.24)});
 		} else {
 			wm = new JRWindowManager(camNode);
 			wm.setPosition(new double[]{0, 0, -2});
@@ -650,15 +651,6 @@ public class ViewerVR {
 		return viewerApp;
 	}
 
-	public ViewerApp initialize(ViewerApp va)	{
-		restorePreferences(getPreferences());
-		ViewerApp viewerApp = va;
-		viewerApp.setExternalBeanShell(true);
-		viewerApp.setExternalNavigator(true);
-		tweakMenu(viewerApp);
-		return viewerApp;
-		
-	}
 	/**
 	 * @deprecated use {@link ViewerVR.initialize()}
 	 */
