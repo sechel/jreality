@@ -101,10 +101,11 @@ public class GpgpuUtility {
   private static String checkFrameBufferStatus(GL gl) {
     int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
     switch (status) {
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENTS_EXT:
-      return "FrameBuffer incomplete attachments";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-      return "FrameBuffer incomplete missing attachment";
+    // unfortunately the name of the constant changed between the latest jogl version...
+//    case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+//      return "FrameBuffer incomplete attachments";
+//    case GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+//      return "FrameBuffer incomplete missing attachment";
     case GL.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
       return "FrameBuffer incomplete duplicate";
     case GL.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:

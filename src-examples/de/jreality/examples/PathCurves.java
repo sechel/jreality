@@ -67,7 +67,7 @@ public class PathCurves extends AbstractCalculation {
     double a=3, b=2, c=-.1;
     Matrix m = new Matrix(0,-a,-b,0, a,0,-c,0, b,c,0,0, 0,0,0,0);
     //Matrix m = MatrixBuilder.euclidean().rotate(Math.PI/2, 0,0,1).getMatrix();
-    prog.setUniform("matrix", m.getArray());
+    prog.setUniformMatrix("matrix", m.getArray());
     prog.setUniform("h", 0.005);
     prog.setUniform("r3", true);
   }

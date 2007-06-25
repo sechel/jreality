@@ -50,16 +50,26 @@ import java.util.Iterator;
  */
 public class IntegratorFactory {
 
-  private static final String EULER =
+	enum IntegrationScheme {
+	EULER(
     "void main(void) {" +
     "  vec2 pos = gl_TexCoord[0].st;\n" + 
     "  vec4 pt = textureRect(values, pos);\n" + 
     "  vec4 res = pt + h*evaluateT0(pt);\n" + 
     "  if (r3) res.w = 1.;\n" + 
     "  gl_FragColor = res;\n" +
-    "}\n";
+    "}\n"),
 
-  private static final String RK2 =
+	MIDPOINT(
+    "void main(void) {" +
+    "  vec2 pos = gl_TexCoord[0].st;\n" + 
+    "  vec4 pt = textureRect(values, pos);\n" + 
+    "  vec4 res = pt + h*evaluateT0_H2(pt);\n" + 
+    "  if (r3) res.w = 1.;\n" + 
+    "  gl_FragColor = res;\n" +
+    "}\n"),
+
+    RK2(
     "void main(void) {" +
     "  vec2 pos = gl_TexCoord[0].st;\n" + 
     "  vec4 pt = textureRect(values, pos);\n" + 
@@ -68,9 +78,9 @@ public class IntegratorFactory {
     "  vec4 res = pt + k2;\n" + 
     "  if (r3) res.w = 1.;\n" + 
     "  gl_FragColor = res;\n" +
-    "}\n";
+    "}\n"),
 
-  private static final String RK4 =
+  RK4(
     "void main(void) {" +
     "  vec2 pos = gl_TexCoord[0].st;\n" +
     "  vec4 pt = textureRect(values, pos);\n" +
@@ -81,17 +91,26 @@ public class IntegratorFactory {
     "  vec4 res = pt + (k1 + 2.*(k2 + k3) + k4)/6.;\n" +
     "  if (r3) res.w = 1.;\n" + 
     "  gl_FragColor = res;\n" +
-    "}\n";
+    "}\n");
+
+  	String src;
+	
+  	IntegrationScheme(String src) {
+		this.src=src;
+	}
+
+	}
   
-  private int order;
   private HashSet uniforms=new HashSet();
   private HashSet signatures=new HashSet();
   private HashSet methods=new HashSet();
 
   private HashSet constants=new HashSet();
+  
+  private IntegrationScheme scheme;
 
-  private IntegratorFactory(int order) {
-    this.order=order;
+  private IntegratorFactory(IntegrationScheme scheme) {
+	this.scheme=scheme;
     addUniform("h", "float");
     addUniform("r3", "bool");
     addUniform("values", "samplerRect");
@@ -103,23 +122,31 @@ public class IntegratorFactory {
    * @return the factory
    */
   public static IntegratorFactory euler() {
-    return new IntegratorFactory(1);
+    return new IntegratorFactory(IntegrationScheme.EULER);
   }
 
   /**
-   * create a factory for runge kutta integration of order 2
+   * create a factory for midpoint integration
    * @return the factory
    */
-  public static IntegratorFactory rk2() {
-    return new IntegratorFactory(2);
+  public static IntegratorFactory midpoint() {
+    return new IntegratorFactory(IntegrationScheme.MIDPOINT);
   }
   
   /**
    * create a factory for runge kutta integration of order 2
    * @return the factory
    */
+  public static IntegratorFactory rk2() {
+    return new IntegratorFactory(IntegrationScheme.RK2);
+  }
+  
+  /**
+   * create a factory for runge kutta integration of order 4
+   * @return the factory
+   */
   public static IntegratorFactory rk4() {
-    return new IntegratorFactory(4);
+    return new IntegratorFactory(IntegrationScheme.RK4);
   }
 
   /**
@@ -147,23 +174,29 @@ public class IntegratorFactory {
   }
   
   public void srcT0(String impl) {
+	if (scheme == IntegrationScheme.MIDPOINT) throw new IllegalStateException("no such method for midpoint rule");
     addMethod("evaluateT0", "vec4", "const vec4 point", impl);
   }
 
   public void srcT0_H2(String impl) {
-    if (order < 2) throw new IllegalStateException("no such method for euler"); 
+    if (scheme == IntegrationScheme.EULER) throw new IllegalStateException("no such method for euler"); 
     addMethod("evaluateT0_H2", "vec4", "const vec4 point", impl);
   }
 
   public void srcT0_H(String impl) {
-    if (order < 4) throw new IllegalStateException("no such method for order 2"); 
+    if (scheme != IntegrationScheme.RK4) throw new IllegalStateException("no such method for RK4"); 
     addMethod("evaluateT0_H", "vec4", "const vec4 point", impl);
   }
 
   public void srcAll(String impl) {
-    srcT0(impl);
-    if (order > 1) srcT0_H2(impl);
-    if (order > 2) srcT0_H(impl);
+    if (scheme != IntegrationScheme.MIDPOINT) srcT0(impl);
+    if (scheme != IntegrationScheme.EULER) srcT0_H2(impl);
+    if (scheme == IntegrationScheme.RK4) srcT0_H(impl);
+  }
+  
+  String overwrittenMain=null;
+  public void overwriteMain(String src) {
+	  overwrittenMain=src;
   }
   
   public String toString() {
@@ -176,10 +209,12 @@ public class IntegratorFactory {
     for (Iterator i = signatures.iterator(); i.hasNext(); )
       sb.append(i.next()).append(';').append('\n');
     sb.append('\n');
-    sb.append(order < 4 ? order < 2 ? EULER : RK2 : RK4).append('\n');
+    if (overwrittenMain == null) sb.append(scheme.src);
+    else sb.append("void main() {\n").append(overwrittenMain).append('\n').append('}').append('\n');
     for (Iterator i = methods.iterator(); i.hasNext(); )
       sb.append(i.next()).append('\n');
     sb.append('\n');
     return sb.toString();
   }
+
 }

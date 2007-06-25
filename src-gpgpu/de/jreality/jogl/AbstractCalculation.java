@@ -114,10 +114,10 @@ private static final double[] ID = Rn.identityMatrix(4);
       JOptionPane.showMessageDialog(null, "<html><center>Driver does not support OpenGL Shading Language!<br>Cannot execute program.</center></html>");
       System.exit(-1);
     }
-   drawable.setGL(new DebugGL(drawable.getGL()));
+   //drawable.setGL(new DebugGL(drawable.getGL()));
    String vendor = drawable.getGL().glGetString(GL.GL_VENDOR);
-   tex2D = !vendor.startsWith("NVIDIA");
-   atiHack=tex2D;
+   tex2D = false;//!vendor.startsWith("NVIDIA");
+   atiHack=false;//tex2D;
    TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
    TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
    renderer = new GlslProgram(new Appearance(), "foo", null, isTex2D() ? RENDER_PROGRAM.replaceAll("Rect", "2D") : RENDER_PROGRAM);
@@ -250,6 +250,11 @@ private static final double[] ID = Rn.identityMatrix(4);
   
   /**
    * just a callback when the calculation is done, can be used
+  public abstract long openLibrary(java.lang.String arg0);
+  
+  public abstract long lookupSymbol(long arg0, java.lang.String arg1);
+  
+  public abstract void closeLibrary(long arg0);
    * to retrigger the calculation again,...
    */
   protected void calculationFinished() {
@@ -275,7 +280,7 @@ private static final double[] ID = Rn.identityMatrix(4);
       gl.glGenBuffersARB(1, vbo, 0);
       System.out.println("created VBO=" + vbo[0]);
       gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL.GL_STREAM_COPY);
+      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL.GL_DYNAMIC_DRAW_ARB);
       gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
       hasValidVBO=true;
     }
@@ -339,14 +344,14 @@ private static final double[] ID = Rn.identityMatrix(4);
   private void transferFromTexture(GL gl, FloatBuffer data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
-    if (!isTex2D()) {
+    //if (!isTex2D()) {
       gl.glReadBuffer(attachments[writeTex]);
       gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, data);
-    } else {
-      // version b: texture is not neccessarily attached
-      gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
-      gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, data.clear());
-    }
+//    } else {
+//      // version b: texture is not neccessarily attached
+//      gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
+//      gl.glGetTexImage(TEX_TARGET, 0, TEX_FORMAT, GL.GL_FLOAT, data.clear());
+//    }
   }
 
   /**
@@ -367,8 +372,7 @@ private static final double[] ID = Rn.identityMatrix(4);
 
   private void transferFromTextureToVBO(GL gl) {
     gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-    gl.glReadBuffer(attachments[writeTex]);
-    gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
+    gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, 0l);
     gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
     hasValidVBO=true;
   }
@@ -516,7 +520,7 @@ private static final double[] ID = Rn.identityMatrix(4);
     GL gl = jr.getGL();
     
     gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
-    gl.glVertexPointer(4, GL.GL_FLOAT, 0, (Buffer) null);
+    gl.glVertexPointer(4, GL.GL_FLOAT, 0, 0l);
     gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, 0);  
     
     gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
