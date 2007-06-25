@@ -379,12 +379,19 @@ public class Matrix implements Serializable {
 
     /**
      * Form the matrix-vector product <i>M.v</i> (<i>v</i> is column vector on the right).
-     * @param vector
-     * @return
-     */public double[] multiplyVector(double[] vector) {
-        return Rn.matrixTimesVector(null, matrix, vector);
+     * @param v the vector v
+     * @return M.v
+     */public double[] multiplyVector(double[] v) {
+        return Rn.matrixTimesVector(null, matrix, v);
     }
     
+     /**
+      * Form the matrix-vector product <i>M.v</i> (<i>v</i> is column vector on the right) and assign it to v.
+      * @param vector the vector to transform
+      */public void transformVector(double[] v) {
+         Rn.matrixTimesVector(v, matrix, v);
+     }
+     
   public boolean equals(Matrix T) {
 		return Rn.equals(matrix, T.matrix);
 	}
