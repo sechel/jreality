@@ -198,4 +198,8 @@ public class JRWindowManager implements ActionListener{
   public void enableVertexPopUpTool(boolean enableVertexPopUpTool){
 	  for (JRWindow w : windowList) w.enableVertexPopUpTool(enableVertexPopUpTool);
   }
+  
+  public SceneGraphComponent getSceneGraphRepresentation() {
+  	return sgc;
+  }
 }
