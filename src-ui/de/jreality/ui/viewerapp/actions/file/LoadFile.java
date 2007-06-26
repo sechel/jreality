@@ -133,6 +133,8 @@ public class LoadFile extends AbstractJrAction {
     for (int i = 0; i < files.length; i++) {
       try {
         SceneGraphComponent sgc = Readers.read(files[i]);
+        if (sgc==null) throw new IOException("Could not read "+files[i].getPath());  //return;
+        
         GeometryMergeFactory mFac = new GeometryMergeFactory();
         SceneGraphComponent comp = new SceneGraphComponent();
         if (mergeFaceSets.isSelected()){
