@@ -261,7 +261,7 @@ options {
 * @param none sourcefile set by creating the object
 * @returns SceneGraphComponent root of generated scene
 */
-start returns [SceneGraphComponent r=null]
+start returns [SceneGraphComponent r=new SceneGraphComponent()]
 {	globalApp.setName("global");	
 	setPLColor(globalApp, plCDefault);			 	
 	globalApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
@@ -288,7 +288,9 @@ start returns [SceneGraphComponent r=null]
 		globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
 		//globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 		//globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-		r = root;}
+		r = root;
+		if(r==null)r= new SceneGraphComponent();
+		}
 	;
 
 // ---------------------------------- 3D Objects ---------------------------------------------
