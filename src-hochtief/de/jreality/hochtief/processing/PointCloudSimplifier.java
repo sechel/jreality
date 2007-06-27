@@ -30,20 +30,25 @@ public class PointCloudSimplifier {
 			}			
 		}
 		
+		
+		ArrayList<double[]> pointsForEM=new ArrayList<double[]>();
 		if(subSample>1){
-			for(int i=0;i<(int)((double)singlePoints.size()/(double)subSample);i++){
-				for(int j=i+1;j<i+subSample-1;j++){
-					singlePoints.remove(j);
-					colors.remove(j);
-				}
+			for(int i=0;i<singlePoints.size();i+=subSample){				
+				pointsForEM.add(singlePoints.get(i));				
 			}
-		}
+		}else
+			pointsForEM=singlePoints;
 		
-		double[][] points=new double[(int)((double)singlePoints.size()/(double)subSample)][];
+		double[][] points=new double[pointsForEM.size()][];
 		for(int i=0;i<points.length;i++)
-			points[i]=singlePoints.get(i*subSample);
-		
+			points[i]=pointsForEM.get(i);		
 		double[][] params=ExpectationMaximation.calculateParameters(componentCount, minProbChange, points);
+		
+		if(subSample>1){
+			points=new double[singlePoints.size()][];
+			for(int i=0;i<points.length;i++)
+				points[i]=singlePoints.get(i);
+		}
 		int[] compId=ExpectationMaximation.evalPoints(points, params);
 		
 		for(int c=0;c<componentCount;c++){
@@ -86,6 +91,9 @@ public class PointCloudSimplifier {
 				sgc.addChild(compSgc);
 			}
 		}
+		
+		System.out.println(sgc.getChildComponentCount()+" / "+componentCount+" components with more than "+Scan3DPointCloudUtility.minPointCount+" points");
+		
 		return sgc;
 	}
 	

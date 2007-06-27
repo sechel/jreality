@@ -20,7 +20,7 @@ import de.jreality.util.PickUtility;
 public class Scan3DPointCloudUtility {
 	
 	
-	private static int minPointCount=10;
+	public static int minPointCount=10;
 	
 	public static SceneGraphComponent projectPointCloud(ArrayList<double[]> points, ArrayList<byte[]> vertexColors, double[] faceDir1, double[] faceDir2, double[] faceDir3, double texRes){
 		SceneGraphComponent sgc=new SceneGraphComponent();
