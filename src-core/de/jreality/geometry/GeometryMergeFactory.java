@@ -597,6 +597,8 @@ public class GeometryMergeFactory {
 	 * @param IndexedFaceSets to merge 
 	 */
 	public IndexedFaceSet mergeIndexedFaceSets( PointSet[] geo) {
+		if(geo== null)return null;
+		if(geo.length==0)return null;
 		IndexedFaceSet[] ifs=new IndexedFaceSet[geo.length];
 		// convert entrys to IndexedFaceSets
 		for (int i = 0; i < geo.length; i++) {
