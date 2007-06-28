@@ -134,11 +134,11 @@ public class RotateTool extends AbstractTool {
   private Matrix objToAvatar(ToolContext tc) {
     Matrix object2avatar = new Matrix((moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
     // TODO: see if we can't remove head dependency from Rotate device
-    Matrix tmp = new Matrix(tc.getTransformationMatrix(camPath));
-    Matrix avatarTrans = new Matrix();
-    MatrixBuilder.init(null, signature).translate(tmp.getColumn(3)).assignTo(avatarTrans);
+//    Matrix tmp = new Matrix(tc.getTransformationMatrix(camPath));
+//    Matrix avatarTrans = new Matrix();
+//    MatrixBuilder.init(null, signature).translate(tmp.getColumn(3)).assignTo(avatarTrans);
 //    avatarTrans.setColumn(3, tmp.getColumn(3));
-    object2avatar.multiplyOnLeft(avatarTrans);
+//    object2avatar.multiplyOnLeft(avatarTrans);
     //object2avatar = object2avatar.getRotation();
     object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, signature));
     return object2avatar;
