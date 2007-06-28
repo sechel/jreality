@@ -125,16 +125,13 @@ public class DraggingTool extends AbstractTool {
       
       if (dragInViewDirection) {
         tc.getTransformationMatrix(InputSlot.getDevice("CameraToWorld")).toDoubleArray(pointer.getArray());
-        // TODO non-euclideanize this (once you understand it!)
         double dz = evolution.getEntry(0,3)+evolution.getEntry(1,3);
-        evolution.assignIdentity();
-        evolution.setColumn(3, Rn.times(null, dz, pointer.getColumn(2)));
-        evolution.setEntry(3,3,1);
-      }
-      
-      result.multiplyOnRight(local2world.getInverse());
+        double[] tlate = Rn.times(null, dz, pointer.getColumn(2));
+        if (signature==Pn.EUCLIDEAN) tlate[3] = 1.0;
+        MatrixBuilder.init(null, signature).translate(tlate).assignTo(evolution);
+      } 
+      evolution.conjugateBy(local2world.getInverse());
       result.multiplyOnRight(evolution);
-      result.multiplyOnRight(local2world);
       comp.getTransformation().setMatrix(result.getArray());
     }
 
