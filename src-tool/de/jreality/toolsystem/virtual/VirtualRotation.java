@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.jreality.math.Matrix;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.InputSlot;
@@ -94,34 +96,35 @@ public class VirtualRotation implements VirtualDevice {
     mouseCoords = Rn.normalize(mouseCoords, mouseCoords);
     mouseCoordsOld = Rn.normalize(mouseCoordsOld, mouseCoordsOld);
     
-    double[] cross = Rn.crossProduct(new double[3], mouseCoordsOld, mouseCoords);
+    double[] cross = Rn.crossProduct(null, mouseCoordsOld, mouseCoords);
     double angle = gain*Math.asin(Rn.euclideanNorm(cross));
     
-    // TODO: can't we get rid of the camera position here?
-    //Matrix camToWorldRot = new Matrix(context.getTransformationMatrix(cameraToWorld)).getRotation();
-    double[] cross4 = {cross[0], cross[1], cross[2], 0};
+     double[] cross4 = {cross[0], cross[1], cross[2], 0};
+//     double[] rotationPart = P3.extractOrientationMatrix(null, 
+//    		 context.getTransformationMatrix(cameraToWorld).toDoubleArray(null), Pn.originP3, Pn.EUCLIDEAN);
     cross = new Matrix(context.getTransformationMatrix(cameraToWorld)).multiplyVector(cross4);
-    
-   double s = Math.sin(angle);
-   double c = Math.cos(angle);
-   double t = 1 - c;
-
-   cross = Rn.normalize(cross, cross);
-
-   double xv = cross[0];
-   double yv = cross[1];
-   double zv = cross[2];
-
-   result.assignFrom(t * xv*xv+ c, t*xv*yv- s*zv, t*xv*zv + s*yv,0,
-     t*xv*yv + s*zv, t*yv*yv +c, t*yv*zv - s*xv,0,
-     t*xv*zv - s*yv, t*yv*zv + s*xv, t*zv*zv +c,0,
-     0,0,0,1);
-
-   if (false) {
-     Matrix rrt = new Matrix(result);
-     rrt.multiplyOnRight(result.getTranspose());
-     System.out.println("Rotation ["+rrt.getDeterminant()+"]:\n"+rrt);
-   }
+//     cross = Rn.matrixTimesVector(cross, rotationPart, cross4);
+     result.assignFrom(P3.makeRotationMatrix(null, cross, angle));
+//   double s = Math.sin(angle);
+//   double c = Math.cos(angle);
+//   double t = 1 - c;
+//
+//   cross = Rn.normalize(cross, cross);
+//
+//   double xv = cross[0];
+//   double yv = cross[1];
+//   double zv = cross[2];
+//
+//   result.assignFrom(t * xv*xv+ c, t*xv*yv- s*zv, t*xv*zv + s*yv,0,
+//     t*xv*yv + s*zv, t*yv*yv +c, t*yv*zv - s*xv,0,
+//     t*xv*zv - s*yv, t*yv*zv + s*xv, t*zv*zv +c,0,
+//     0,0,0,1);
+//
+//   if (false) {
+//     Matrix rrt = new Matrix(result);
+//     rrt.multiplyOnRight(result.getTranspose());
+//     System.out.println("Rotation ["+rrt.getDeterminant()+"]:\n"+rrt);
+//   }
     oldX = x;
     oldY = y;
     return new ToolEvent(this, context.getEvent().getTimeStamp(), out, da);
