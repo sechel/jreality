@@ -392,13 +392,13 @@ public class Pn {
 			double norm = Rn.euclideanNorm(np1);
 			return Rn.add(result, Rn.times(np1, length/norm, np1), np0);
 		}
-		System.out.println("Dragging 1"+Rn.toString(p0)+"to "+Rn.toString(p1));
+//		System.out.println("Dragging 1"+Rn.toString(p0)+"to "+Rn.toString(p1));
 		normalize(np0, p0, signature);
 		projectToTangentSpace(np1, np0, p1, signature);
 		normalize(np1, np1, signature);
-		System.out.println("Dragging 2"+Rn.toString(np0)+"to "+Rn.toString(np1));
+//		System.out.println("Dragging 2"+Rn.toString(np0)+"to "+Rn.toString(np1));
 		double[] res = dragTangentVector(result, null, np0, np1, length, signature);
-		System.out.println("Result is"+Rn.toString(res));
+//		System.out.println("Result is"+Rn.toString(res));
 		return res;
 	}
 
