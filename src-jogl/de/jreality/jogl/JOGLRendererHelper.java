@@ -838,6 +838,7 @@ public class JOGLRendererHelper {
 		tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 		double d = Pn.distanceBetween(tmp2, Pn.originP3, signature);
 //		System.err.println("Distance is "+d);
+		
 		if (minDistance > 0.0 &&  d < minDistance) return true;
 		if (maxDistance > 0 && d > maxDistance) return false;
 		mat = Rn.times(null, objectToNDC, m);
