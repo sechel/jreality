@@ -572,19 +572,23 @@ public class CoordinateSystemFactory {
 		
 		SceneGraphComponent ticks = new SceneGraphComponent();
 		ticks.setName("ticks");
-		if (minLevel>maxLevel)
-			return ticks;  //note that nodes.get(axesNames[axis]+"Ticks") has no geometry now
+		
+//		if (minLevel>maxLevel)
+//			return ticks;  
 			
 		IndexedFaceSet ticksGeom = new IndexedFaceSet();
 		int numOfTicks = 0;
 		for (double level=round(minLevel); level<=maxLevel; level=round(level+axisScale) ) {
-			if (level==0) continue;  //no tick at origin
+			if (level==0)	continue;  //no tick at origin
 			GeometryMergeFactory gMFac = new GeometryMergeFactory();
 			ticksGeom = gMFac.mergeIndexedFaceSets(new PointSet[]{ ticksGeom, 
 					Primitives.pyramid(octagonalCrossSection(level), new double[]{0,0,level}) });
 			numOfTicks++;
 		}
 		//GeometryUtility.calculateAndSetVertexNormals(ticksIFS);
+		
+		if (numOfTicks == 0)  //no ticks
+			return ticks;  //note that nodes.get(axesNames[axis]+"Ticks") has no geometry now
 		
 		//create labels
 		PointSetFactory labelPSF = new PointSetFactory();
@@ -642,6 +646,7 @@ public class CoordinateSystemFactory {
 		
 		SceneGraphComponent ticks = new SceneGraphComponent();
 		ticks.setName("ticks");
+		
 		if (minLevel>maxLevel)
 			return ticks;  //note that nodes.get(axesNames[axis]+toBinaryString(k)+"ticks") has no geometry now
 			
