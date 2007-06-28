@@ -57,6 +57,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
@@ -141,7 +142,10 @@ public class Navigator implements SelectionListener {
 
 		this.sceneRoot = sceneRoot;
 
-		tsm.setSelectionPath(new TreePath(treeModel.convertSelection(sm.getSelection())));  //select current selection
+		SceneGraphPath sgp = sm.getSelectionPath();
+		if (sgp != null && sgp.isValid()) 
+		    tsm.setSelectionPath(new TreePath(treeModel.convertSelection(sm.getSelection())));  //select current selection
+
 		setupContextMenu();
 	}
 
