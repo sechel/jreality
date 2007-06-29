@@ -632,15 +632,14 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 	 OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
 				{
-					polyIndices=new int[poly.size()+1];
+					polyIndices=new int[poly.size()];
 					for(int i=0;i<poly.size();i++){
 						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
-				    	polyIndices[i]=i;			   // indizirung merken
-				    }
-				    polyIndices[poly.size()]=0;
+						polyIndices[i]=i;			   // indizirung merken
+					}
 			    	count=poly.size();
 					polysIndices.add(polyIndices);
-				    colors.add(fC);
+					colors.add(fC);
 				}
 	 CLOSE_BRACKET 
 	( COLON
@@ -651,12 +650,11 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 				poly=lineset 			// das ist ein Vector von double[3]
 				{if (colorFlag) colorNeeded= true;}
 				{
-					polyIndices=new int[poly.size()+1];
+					polyIndices=new int[poly.size()];
 					for(int i=0;i<poly.size();i++){
 						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
-				    	polyIndices[i]=i+count;			   // indizirung merken
-				    }
-				    polyIndices[poly.size()]=count;
+					   	polyIndices[i]=i+count;			   // indizirung merken
+					}
 			    	count+=poly.size();
 					polysIndices.add(polyIndices);
 					colors.add(fC);
