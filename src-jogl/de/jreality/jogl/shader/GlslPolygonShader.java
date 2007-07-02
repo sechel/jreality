@@ -52,7 +52,6 @@ import javax.media.opengl.GL;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;

@@ -44,7 +44,6 @@ import java.beans.Statement;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
