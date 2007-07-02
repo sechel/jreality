@@ -41,7 +41,6 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
-import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
