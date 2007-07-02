@@ -43,24 +43,16 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.util.logging.Level;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
 
 import de.jreality.geometry.FrameFieldType;
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
-import de.jreality.geometry.QuadMeshUtility;
 import de.jreality.geometry.TubeUtility;
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
