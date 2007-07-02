@@ -163,14 +163,17 @@ public class AABBPickSystem implements PickSystem {
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
-//      System.err.println("visiting "+c.getName());
-     path.push(c);
       if (c.getAppearance()!=null) {
+          Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
+          if (foo instanceof Boolean && ((Boolean)foo).booleanValue() == false) {
+        	  return;
+          }
         EffectiveAppearance eapNew = eap.create(c.getAppearance());
         appStack.push(eap);
         eap=eapNew;
         readEApp();
       }
+//      System.err.println("visiting "+c.getName());
       if (c.getTransformation() != null)	{
     	  if (matrixStack[stackCounter+1] == null) matrixStack[stackCounter+1] = new Matrix();
     	  Rn.times(matrixStack[stackCounter+1].getArray(), matrixStack[stackCounter].getArray(), c.getTransformation().getMatrix());
@@ -178,13 +181,7 @@ public class AABBPickSystem implements PickSystem {
     	  m = matrixStack[stackCounter];
     	  mInv = m.getInverse();
        }
-//      path.getMatrix(m.getArray());
-//      path.getInverseMatrix(mInv.getArray());
-      
-//      fromLocal=mInv.multiplyVector(from);
-//      toLocal=mInv.multiplyVector(to);
-//      dirLocal=mInv.multiplyVector(dir);
-
+      path.push(c);
       c.childrenAccept(this);
       path.pop();
       if (c.getTransformation() != null) 	{
@@ -205,7 +202,7 @@ public class AABBPickSystem implements PickSystem {
 //    	pickFaces = true;
 //    	pointRadius = .02;
 //    	tubeRadius = .02;
-      pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
+     pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
         && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
       pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
         && eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, true);
