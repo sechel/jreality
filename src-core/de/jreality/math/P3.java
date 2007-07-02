@@ -252,19 +252,28 @@ public class P3 {
 	 * @return
 	 * not referenced
 	 */
-	protected static double[] makeGlideReflectionMatrix(double[] m, double[] vector, double d)	{
-		// TODO finish writing this
+	public static double[] makeGlideReflectionMatrix(double[] m, 
+			double[] p1, 
+			double[] p2, 
+			double[] plane,
+			int signature)	{
 		
-		double[] v = new double[4];
-		double[] mat = new double[16];
-		if (m == null)	m = new double[16];
-		System.arraycopy(vector, 0, v, 0, vector.length);
-		v[3] = 0.0;
-		P3.makeReflectionMatrix(mat,v, Pn.EUCLIDEAN);
-		Rn.setEuclideanNorm(v,d, v);
-		v[3] = 1.0;
-		double[] tm = P3.makeTranslationMatrix(null,v,Pn.EUCLIDEAN);
-		Rn.times(m,tm,mat);
+		double d = Rn.innerProduct(p1, plane);
+		if ( Math.abs(d) > 10E-8) 
+			throw new IllegalStateException("points must lie in plane");
+		d = Rn.innerProduct(p2, plane);
+		if ( Math.abs(d) > 10E-8) 
+			throw new IllegalStateException("points must lie in plane");
+		// TODO check that the following always leaves plane invariant
+		// i.e., all planes through the line p1-p2 are preserved by the translation (should be!)
+		double[] tlate = makeTranslationMatrix(null, p1, p2, signature);
+		double[] reflection = makeReflectionMatrix(null, plane, signature);
+		m = Rn.times(m, tlate, reflection);
+		double[] m2 = Rn.times(null, reflection, tlate);
+		double[] xx = Rn.times(null, m, Rn.inverse(null,m2));
+		if (!Rn.isIdentityMatrix(xx, 10E-8)) {
+			throw new IllegalStateException("they don't commute!");
+		}
 		return m;
 	}
 
@@ -620,6 +629,19 @@ public class P3 {
 	}
 	public static double[] makeScaleMatrix(double[] dst, double sx, double sy, double sz)	{
 		return makeStretchMatrix(dst, sx, sy, sz);
+	}
+	
+	public static double[] makeScrewMotionMatrix(double[] dst, double[] p1, double[] p2, double angle, int sig){
+		double[] tlate = makeTranslationMatrix(null, p1, p2, sig);
+		double[] rot = makeRotationMatrix(null, p1, p2, angle, sig);
+		// debug code
+		double[] m1 = Rn.times(null, tlate, rot);
+		double[] m2 = Rn.times(null, rot, tlate);
+		double[] xx = Rn.times(null, m1, Rn.inverse(null,m2));
+		if (!Rn.isIdentityMatrix(xx, 10E-8)) {
+			throw new IllegalStateException("they don't commute!");
+		}
+		return Rn.times(dst, tlate, rot);
 	}
 	/**
 	 * Calculate a translation matrix in the given metric 
