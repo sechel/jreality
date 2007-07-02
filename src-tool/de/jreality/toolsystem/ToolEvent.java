@@ -66,10 +66,22 @@ public class ToolEvent implements Serializable {
 
 	private transient Object source;
 
+	/**
+	 * @deprecated Use ToolEvent(Object source, long when, InputSlot device, AxisState axis)
+	 */
+	public ToolEvent(Object source,  InputSlot device, AxisState axis) {
+	    this(source, System.currentTimeMillis(), device, axis);
+	}
     public ToolEvent(Object source, long when, InputSlot device, AxisState axis) {
         this(source, when, device, axis, null);
     }
     
+	/**
+	 * @deprecated Use ToolEvent(Object source, long when, InputSlot device, DoubleArray trafo)
+	 */
+	public ToolEvent(Object source,  InputSlot device, DoubleArray trafo) {
+	    this(source, System.currentTimeMillis(), device, trafo);
+	}
     public ToolEvent(Object source, long when, InputSlot device, DoubleArray trafo) {
         this(source, when, device, null, trafo);
     }
