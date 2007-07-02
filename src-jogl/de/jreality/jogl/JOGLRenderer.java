@@ -420,8 +420,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
-		// traverse tree and delete all display lists
 		if (theRoot != null) extractGlobalParameters();
+		// traverse tree and delete all display lists
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 	}
