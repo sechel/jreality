@@ -110,6 +110,7 @@ private void init() {
     default:
       c.getAppearance().setAttribute("diffuseColor", Color.black);
     }
+    // TODO non-euclideanize this
     double[] worldCoordinates = pr.getWorldCoordinates();
     double[] cp = new Matrix(tc.getViewer().getCameraPath().getMatrix(null)).getColumn(3);
     double scale=Rn.euclideanDistance(cp, worldCoordinates);
