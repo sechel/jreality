@@ -407,7 +407,7 @@ public class Primitives {
 		 }
 		 
 		 /**
-		  * A renderMan-style cylinder specification
+		  * A renderMan-style cylinder specification (implicitly euclidean)
 		  * @param n
 		  * @param r
 		  * @param zmin
@@ -438,6 +438,22 @@ public class Primitives {
 				IndexedFaceSet ifs = qmf.getIndexedFaceSet();
 				ifs.setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND, "Cylinder "+r+" "+zmin+" "+zmax+" "+180.0/Math.PI * thetamax);
 				return ifs;
+		}
+		 
+		public static SceneGraphComponent closedCylinder(int n,   double r, double zmin, double zmax, double thetamax) {
+			if (Math.abs(thetamax - 2*Math.PI) > 10E-4)
+				throw new IllegalArgumentException("Can only do full cylinders");
+			SceneGraphComponent result = new SceneGraphComponent("closedCylinder");
+			SceneGraphComponent d1 = new SceneGraphComponent("disk1"), d2 = new SceneGraphComponent("disk2");
+			IndexedFaceSet cyl = cylinder(n, r, zmin, zmax, thetamax);
+			IndexedFaceSet disk = regularPolygon(n);
+			d1.setGeometry(disk);
+			d2.setGeometry(disk);
+			result.addChild(d1);
+			result.addChild(d2);
+			MatrixBuilder.euclidean().translate(0,0,zmin).scale(r,r,1).assignTo(d1);
+			MatrixBuilder.euclidean().translate(0,0,zmax).scale(r,r,1).assignTo(d2);
+			return result;
 		}
 		/** a simple cone with tip at (0,0,1) 
 		 * radius 1 on the XY axis
