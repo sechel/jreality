@@ -258,6 +258,8 @@ public class P3 {
 			double[] plane,
 			int signature)	{
 		
+		if (p1.length == 3) p1 = Pn.homogenize(null, p1);
+		if (p2.length == 3) p2 = Pn.homogenize(null, p2);
 		double d = Rn.innerProduct(p1, plane);
 		if ( Math.abs(d) > 10E-8) 
 			throw new IllegalStateException("points must lie in plane");
