@@ -112,14 +112,14 @@ public class JOGLSphereHelper extends SphereUtility {
 	 */
 	public static int[] getSphereDLists( JOGLRenderer jr) {
 		int dlists[];
-		//if (!sharedDisplayLists)	
+		if (!sharedDisplayLists)	
 			dlists =  (int[] ) sphereDListsTable.get(jr.getGL());
-		//else dlists = globalSharedSphereDisplayLists;
+		else dlists = globalSharedSphereDisplayLists;
 		if (dlists == null) 	{
 			setupSphereDLists(jr);
-			//if (!sharedDisplayLists)	
+			if (!sharedDisplayLists)	
 				dlists = (int[] ) sphereDListsTable.get(jr.getGL());
-			//else dlists = globalSharedSphereDisplayLists;
+			else dlists = globalSharedSphereDisplayLists;
 		}
 		if (dlists == null)	{
 			throw new IllegalStateException("Can't make sphere display lists successfully");

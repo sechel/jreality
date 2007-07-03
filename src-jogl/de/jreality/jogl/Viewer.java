@@ -98,8 +98,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	}
 
 	public Viewer(SceneGraphPath camPath, SceneGraphComponent root) {
-		renderer = new JOGLRenderer(this); 
-		renderer.setStereoType(stereoType);
+//		renderer = new JOGLRenderer(this); 
+//		renderer.setStereoType(stereoType);
 		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);	
 	}
@@ -226,7 +226,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 /*********** Non-standard set/get ******************/
 	
 		public void setStereoType(int type)	{
-			renderer.setStereoType(type);
+			if (renderer  != null) renderer.setStereoType(type);
 			stereoType = type;
 		}
 		
@@ -367,8 +367,8 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	public void init(GLAutoDrawable arg0) {
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
 		
-//		renderer = new JOGLRenderer(this);
-//		renderer.setStereoType(stereoType);
+		renderer = new JOGLRenderer(this);
+		renderer.setStereoType(stereoType);
 		renderer.init(arg0);  
 	}
 

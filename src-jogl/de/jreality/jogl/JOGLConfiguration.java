@@ -64,7 +64,7 @@ public class JOGLConfiguration {
 	public static Logger theLog;
 	//static boolean debugGL = true;
 	static boolean debugGL = false;
-	static boolean sharedContexts = false;
+	static boolean sharedContexts = true;
 	static boolean isLinux = false;
 	static boolean multiSample = true;
 	public static boolean quadBufferedStereo = false;
@@ -94,15 +94,15 @@ public class JOGLConfiguration {
 			foo = Secure.getProperty("os.name");
 			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
-//			foo = Secure.getProperty("jreality.jogl.sharedContexts");  //TODO: move to de.jreality.util.SystemProperties
-//			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
-//			if (sharedContexts)	{
+			foo = Secure.getProperty("jreality.jogl.sharedContexts");  //TODO: move to de.jreality.util.SystemProperties
+			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
+			if (sharedContexts)	{
 //				GLCapabilities capabilities = new GLCapabilities();
 //				firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
 //				JOGLConfiguration.theLog.log(Level.WARNING,"Not allowing shared contexts now");
 //				sharedContexts=false;
-//				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
-//			}
+				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
+			}
 			quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn

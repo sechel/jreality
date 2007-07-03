@@ -95,9 +95,6 @@ public class JOGLCylinderUtility  {
 			JOGLRendererHelper.drawFaces(jr, cyl, true, 1.0);
 			gl.glEndList();
 		}
-		//if (!sharedDisplayLists) 
-		//cylinderDListsTable.put(jr.getGL(), dlists);
-		//else globalSharedCylinderDisplayLists = dlists;
 		if (!sharedDisplayLists) cylinderDListsTable.put(jr.getGL(), dlists);
 		else globalSharedCylinderDisplayLists = dlists;
 	}
@@ -121,14 +118,14 @@ public class JOGLCylinderUtility  {
 	 */
 	public static int[] getCylinderDLists( JOGLRenderer jr) {
 		int dlists[];
-		//if (!sharedDisplayLists)	
+		if (!sharedDisplayLists)	
 		dlists =  (int[] ) cylinderDListsTable.get(jr.getGL());
-		//else dlists = globalSharedCylinderDisplayLists;
+		else dlists = globalSharedCylinderDisplayLists;
 		if (dlists == null) 	{
 			setupCylinderDLists(jr);
-			//if (!sharedDisplayLists)	
-			dlists = (int[] ) cylinderDListsTable.get(jr.getGL());
-			//else dlists = globalSharedCylinderDisplayLists;
+			if (!sharedDisplayLists)	
+				dlists = (int[] ) cylinderDListsTable.get(jr.getGL());
+			else dlists = globalSharedCylinderDisplayLists;
 		}
 		if (dlists == null)	{
 			throw new IllegalStateException("Can't make cylinder display lists successfully");
