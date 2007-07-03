@@ -1,6 +1,5 @@
 /**
  *
- * This file is part of jReality. jReality is open source software, made
  * available under a BSD license:
  *
  * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
@@ -239,7 +238,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 //		}
 		
 		if (!sphereDraw)	{
-			LoggingSystem.getLogger(JOGLRendererHelper.class).info("Rendering sprites");
+			LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
 			lighting = false;
 			gl.glPointSize((float)pointSize);
 			jrs.pointSize = pointSize;
