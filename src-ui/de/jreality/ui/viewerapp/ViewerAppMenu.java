@@ -86,6 +86,7 @@ import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
+import de.jreality.ui.viewerapp.actions.file.ExportVRML;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
 import de.jreality.ui.viewerapp.actions.file.Quit;
@@ -232,6 +233,7 @@ public class ViewerAppMenu {
 		export.add(new JMenuItem(new ExportRIB("RIB", viewer, parentComp)));
 		export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
 		export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
+		export.add(new JMenuItem(new ExportVRML("VRML", viewer, parentComp)));
 		//   if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
 		export.add(new JMenuItem(exportImageAction));
