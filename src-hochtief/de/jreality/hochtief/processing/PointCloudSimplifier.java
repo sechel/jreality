@@ -84,8 +84,8 @@ public class PointCloudSimplifier {
 			System.out.println("max var2="+Math.sqrt(evd.getEigenvalues()[1]));		
 			
 			
-			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, faceDir1, faceDir2, texRes);
-//			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, faceDir1, faceDir2, faceDir3, texRes);
+//			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, faceDir1, faceDir2, texRes);
+			SceneGraphComponent compSgc=Scan3DPointCloudUtility.projectPointCloud(componentPoints, componentColors, faceDir1, faceDir2, faceDir3, texRes);
 			if(compSgc!=null){
 				compSgc.setName("comp "+c);
 				sgc.addChild(compSgc);

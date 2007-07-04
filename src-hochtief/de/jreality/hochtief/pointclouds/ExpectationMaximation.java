@@ -1,14 +1,9 @@
 package de.jreality.hochtief.pointclouds;
 
-import java.util.ArrayList;
-
 import no.uib.cipr.matrix.DenseMatrix;
-import no.uib.cipr.matrix.MatrixSingularException;
 import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SymmPackEVD;
-import no.uib.cipr.matrix.UpperSymmDenseMatrix;
 import no.uib.cipr.matrix.UpperSymmPackMatrix;
-import de.jreality.hochtief.utility.Scan3DUtility;
 import de.jreality.math.Rn;
 
 public class ExpectationMaximation {
@@ -337,31 +332,31 @@ public class ExpectationMaximation {
 		if(!(p>=-maxValue)){
 			p=-maxValue;
 		}
-
+		
 //		if(p>1){
-//			System.out.println("\np="+p);
-//			System.out.println("point: "+Rn.toString(point));
-//			System.out.println("centeroid: "+Rn.toString(centeroid));
-//			System.out.println("det: "+det);
-//			System.out.println("invCov:");
+//			System.err.println("\np="+p);
+//			System.err.println("point: "+Rn.toString(point));
+//			System.err.println("centeroid: "+Rn.toString(centeroid));
+//			System.err.println("det: "+det);
+//			System.err.println("invCov:");
 //			for(int i=0;i<3;i++){
 //				for(int j=0;j<3;j++){
-//					System.out.println(invCov.get(i,j));
+//					System.err.println(invCov.get(i,j));
 //				}
 //			}
 //			UpperSymmPackMatrix cov=getInvSymm3(invCov);
-//			System.out.println("cov:");
+//			System.err.println("cov:");
 //			for(int i=0;i<3;i++){
 //				for(int j=0;j<3;j++){
-//					System.out.println(cov.get(i,j));
+//					System.err.println(cov.get(i,j));
 //				}
 //			}
 //			DenseMatrix test=new DenseMatrix(3,3);
 //			test=(DenseMatrix)invCov.mult(cov, test);
-//			System.out.println("invCov*cov:");
+//			System.err.println("invCov*cov:");
 //			for(int i=0;i<3;i++){
 //				for(int j=0;j<3;j++){				
-//					System.out.println(test.get(i,j));				
+//					System.err.println(test.get(i,j));				
 //				}			
 //			}			 
 //		}
@@ -370,55 +365,28 @@ public class ExpectationMaximation {
 	}
 
 //	public static double det3(double a00, double a01, double a02, double a10, double a11, double a12, double a20, double a21, double a22){
-////	double det=a00*(a11*a22-a12*a21)+a01*(a12*a20-a10*a22)+a02*(a10*a21-a11*a20);
-
-//	double det=a00*a11*a22+a01*a12*a20+a02*a10*a21-a00*a12*a21-a01*a10*a22-a02*a11*a20;
-
-//	if(!(Math.abs(det)>=1.0/maxValue))
-//	det=Math.signum(det)*1.0/maxValue;
-//	if(Math.abs(det)>maxValue)
-//	det=Math.signum(det)*maxValue;
-//	return det; 	
+//		double det=a00*a11*a22+a01*a12*a20+a02*a10*a21-a00*a12*a21-a01*a10*a22-a02*a11*a20;
+//
+//		if(!(Math.abs(det)>=1.0/maxValue))
+//			det=Math.signum(det)*1.0/maxValue;
+//		if(Math.abs(det)>maxValue)
+//			det=Math.signum(det)*maxValue;
+//	
+//		return det; 	
 //	}
 
 	public static double det3(UpperSymmPackMatrix mtx){
 		double det=mtx.get(0,0)*mtx.get(1,1)*mtx.get(2,2)+mtx.get(0,1)*mtx.get(1,2)*mtx.get(2,0)+mtx.get(0,2)*mtx.get(1,0)*mtx.get(2,1)-mtx.get(0,0)*mtx.get(1,2)*mtx.get(2,1)-mtx.get(0,1)*mtx.get(1,0)*mtx.get(2,2)-mtx.get(0,2)*mtx.get(1,1)*mtx.get(2,0);
-//		double det=mtx.get(0,0)*mtx.get(1,1)*mtx.get(2,2)+mtx.get(0,1)*mtx.get(1,2)*mtx.get(2,0)+mtx.get(0,2)*mtx.get(1,0)*mtx.get(2,1)-2*(mtx.get(0,0)*mtx.get(1,2)-mtx.get(1,0)*mtx.get(2,2)-mtx.get(0,2)*mtx.get(1,1));
 
 		if(!(Math.abs(det)>=1.0/maxValue))
 			det=Math.signum(det)*1.0/maxValue;	
 		if(Math.abs(det)>maxValue)
 			det=Math.signum(det)*maxValue;
+		
 		return det; 	
 	}
 
 	public static UpperSymmPackMatrix unitMatrix=new UpperSymmPackMatrix(new DenseMatrix(new double[][]{{1,0,0},{0,1,0},{0,0,1}}));
-
-//	public static UpperSymmPackMatrix getInvSymm3(UpperSymmPackMatrix mtx){
-//		DenseMatrix invDense=new DenseMatrix(mtx.numRows(),mtx.numColumns());
-//		invDense=(DenseMatrix)mtx.solve(unitMatrix,invDense);
-//
-//		UpperSymmPackMatrix inv=new UpperSymmPackMatrix(mtx.numRows());
-//		double value;
-//		for(int i=0;i<mtx.numRows();i++){
-//			for(int j=i;j<mtx.numColumns();j++){
-//				value=0.5*(invDense.get(i,j) + invDense.get(j,i));
-//				inv.set(i,j,value);				
-//			}			
-//		}
-//
-//		//debug:
-////	DenseMatrix test=new DenseMatrix(3,3);
-////	test=(DenseMatrix)inv.mult(mtx, test);
-////	System.out.println("\n");
-////	for(int i=0;i<mtx.numRows();i++){
-////		for(int j=0;j<mtx.numColumns();j++){				
-////			System.out.println(test.get(i,j));				
-////		}			
-////	}
-//
-//		return inv;
-//	}
 
 	public static UpperSymmPackMatrix getInvSymm3(UpperSymmPackMatrix mtx, double detMtx){
 		UpperSymmPackMatrix inv=new UpperSymmPackMatrix(mtx.numRows());
@@ -450,12 +418,35 @@ public class ExpectationMaximation {
 		return inv;
 	}
 
-	private static double minAllowedP=1.0E-50;
+//	public static UpperSymmPackMatrix getInvSymm3(UpperSymmPackMatrix mtx){
+//	DenseMatrix invDense=new DenseMatrix(mtx.numRows(),mtx.numColumns());
+//	invDense=(DenseMatrix)mtx.solve(unitMatrix,invDense);
+//
+//	UpperSymmPackMatrix inv=new UpperSymmPackMatrix(mtx.numRows());
+//	double value;
+//	for(int i=0;i<mtx.numRows();i++){
+//		for(int j=i;j<mtx.numColumns();j++){
+//			value=0.5*(invDense.get(i,j) + invDense.get(j,i));
+//			inv.set(i,j,value);				
+//		}			
+//	}
+//
+//	//debug:
+////DenseMatrix test=new DenseMatrix(3,3);
+////test=(DenseMatrix)inv.mult(mtx, test);
+////System.out.println("\n");
+////for(int i=0;i<mtx.numRows();i++){
+////	for(int j=0;j<mtx.numColumns();j++){				
+////		System.out.println(test.get(i,j));				
+////	}			
+////}
+//
+//	return inv;
+//}
+	
+	private static double minAllowedP=0.0001;
 
 	public static int[] evalPoints(double[][] points, double[][] params){
-
-		//System.out.println("\nevalPoints");
-
 		int[] compId=new int[points.length];
 
 		double[][] centeroid=new double[params.length][];
@@ -502,8 +493,11 @@ public class ExpectationMaximation {
 					maxComponent=c;
 				}
 			}
-//			if(maxP>minAllowedP)  //?????????????????????????
-			compId[i]=maxComponent;
+			
+			compId[i]=-1;
+			double thisP=Math.exp(logpx(points[i], centeroid[maxComponent], det[maxComponent], invCov[maxComponent]));
+			if(thisP>minAllowedP)
+				compId[i]=maxComponent;
 		}
 		return compId;
 	}
