@@ -53,7 +53,7 @@ public class DefaultMatrixSupport {
 	 */
 	public void restoreDefault(Transformation trafo, boolean clear) {
 		double[] defMatrix = store.get(trafo);
-		trafo.setMatrix(defMatrix != null ? defMatrix : IDENTITY);
+		if (!trafo.isReadOnly()) trafo.setMatrix(defMatrix != null ? defMatrix : IDENTITY);
 	}
 	
 	/**
