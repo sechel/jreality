@@ -416,13 +416,17 @@ public class Primitives {
 		  * @return
 		  */
 		 public static IndexedFaceSet cylinder(int n,   double r, double zmin, double zmax, double thetamax) {
+			 return cylinder(n,r,r,zmin, zmax, thetamax);
+		 }
+
+		 public static IndexedFaceSet cylinder(int n,   double r, double R, double zmin, double zmax, double thetamax) {
 				int rn = n+1;
 				double[] verts = new double[2*3*rn];
 				double angle = 0, delta = thetamax/(n);
 				for (int i = 0 ;i<rn; ++i)	{
 					angle = i*delta;
 					verts[3*(i+rn)] = verts[3*i] = r*Math.cos(angle);
-					verts[3*(i+rn)+1] = verts[3*i+1] = r*Math.sin(angle);
+					verts[3*(i+rn)+1] = verts[3*i+1] = R*Math.sin(angle);
 					verts[3*i+2] = zmax;
 					verts[3*(i+rn)+2] = zmin;
 				}
@@ -439,20 +443,24 @@ public class Primitives {
 				ifs.setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND, "Cylinder "+r+" "+zmin+" "+zmax+" "+180.0/Math.PI * thetamax);
 				return ifs;
 		}
-		 
 		public static SceneGraphComponent closedCylinder(int n,   double r, double zmin, double zmax, double thetamax) {
+			return closedCylinder(n,r,r,zmin, zmax, thetamax);
+		}
+		 
+		public static SceneGraphComponent closedCylinder(int n,   double r, double R, double zmin, double zmax, double thetamax) {
 			if (Math.abs(thetamax - 2*Math.PI) > 10E-4)
 				throw new IllegalArgumentException("Can only do full cylinders");
 			SceneGraphComponent result = new SceneGraphComponent("closedCylinder");
 			SceneGraphComponent d1 = new SceneGraphComponent("disk1"), d2 = new SceneGraphComponent("disk2");
-			IndexedFaceSet cyl = cylinder(n, r, zmin, zmax, thetamax);
+			IndexedFaceSet cyl = cylinder(n, r, R, zmin, zmax, thetamax);
+			result.setGeometry(cyl);
 			IndexedFaceSet disk = regularPolygon(n);
 			d1.setGeometry(disk);
 			d2.setGeometry(disk);
 			result.addChild(d1);
 			result.addChild(d2);
-			MatrixBuilder.euclidean().translate(0,0,zmin).scale(r,r,1).assignTo(d1);
-			MatrixBuilder.euclidean().translate(0,0,zmax).scale(r,r,1).assignTo(d2);
+			MatrixBuilder.euclidean().translate(0,0,zmin).scale(r,R,1).assignTo(d1);
+			MatrixBuilder.euclidean().translate(0,0,zmax).scale(r,R,1).assignTo(d2);
 			return result;
 		}
 		/** a simple cone with tip at (0,0,1) 
@@ -461,6 +469,10 @@ public class Primitives {
 		 * @return cone with no bottom
 		 */
 		public static IndexedFaceSet cone(int n){
+			return cone(n, 1.0);
+		}
+			
+		public static IndexedFaceSet cone(int n, double h)	{
 			double[][] verts = new double[n+1][3];
 			double angle = 0;
 			double delta = Math.PI*2/(n);
@@ -468,7 +480,7 @@ public class Primitives {
 				angle = i*delta;
 				verts[i] = new double[]{Math.sin(angle),Math.cos(angle),0};
 			}
-			verts[n]= new double[]{0,0,1};
+			verts[n]= new double[]{0,0,h};
 			int[][] indices = new int[n][];
 			for (int i = 0; i<n; ++i)	{
 				indices[i] = new int[]{i,(i+1)%n,n};
