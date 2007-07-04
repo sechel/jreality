@@ -142,6 +142,14 @@ public class SceneGraphComponent extends SceneGraphNode {
   }
 
   /**
+   * Use varargs in Java 5 to add multiple children at once
+   * @param sgcList
+   */
+  public void addChildren(SceneGraphComponent ... sgcList)	{
+	  for (SceneGraphComponent sgc : sgcList)
+		  addChild(sgc);
+  }
+  /**
   * Returns a child component node.
   * @return SceneGraphComponent
   */
