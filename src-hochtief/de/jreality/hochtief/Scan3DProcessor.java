@@ -93,17 +93,17 @@ public class Scan3DProcessor extends AbstractReader{
 		
 		
 		int[][] edgeId=EdgeDetector.detect(normalVarianzThreshold, maxNeighborhoodDistance, depthThreshold, depth, faceId, faceSize, minVertexCount);		
-		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(15, 0.0000001, 100, 0.01, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
+		SceneGraphComponent simplifiedPointCloud=PointCloudSimplifier.getSimplifiedPointCloud(40, 0.0000001, 100, 0.01, edgeId, depth, loader.getColorR(), loader.getColorG(), loader.getColorB());
 		Scan3DShowUtility.showGenerateTriangulation(minVertexCount, depthThreshold, faceSize, faceId, depth, texturePath, loader.getPhiOffset(),simplifiedPointCloud);
 //		ViewerApp.display(simplifiedPointCloud);
 	}
 
 	public static void main(String[] args) {
 		String path=args[0];
-		String filePath=path+"INHOUSE_II_002_ss10.pts";
-		String texturePath=path+"INHOUSE_II_002_color_quartersize2.jpg";
-//		String filePath=path+"INHOUSE_II_003_ss10.pts";
-//		String texturePath=path+"INHOUSE_II_003_color_quartersize2.jpg";
+//		String filePath=path+"INHOUSE_II_002_ss10.pts";
+//		String texturePath=path+"INHOUSE_II_002_color_quartersize2.jpg";
+		String filePath=path+"INHOUSE_II_003_ss10.pts";
+		String texturePath=path+"INHOUSE_II_003_color_quartersize2.jpg";
 		Scan3DProcessor pcp=new Scan3DProcessor();
 		pcp.process(filePath, texturePath);
 	}

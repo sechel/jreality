@@ -18,10 +18,10 @@ public class TestEM {
 	
 	public static void main(String[] args) {
 		
-		int componentCount=40;
-		int findComponentsCount=40;
-		int pointCount=20000;
-		double range=10.0;
+		int componentCount=30;
+		int findComponentsCount=30;
+		int pointCount=200;
+		double range=15.0;
 		double meanVar=3;
 		
 		double[][] centeroid=new double[componentCount][3];
@@ -58,7 +58,7 @@ public class TestEM {
 		pointsSgc.setAppearance(new Appearance());
 		pointsSgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
 		pointsSgc.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, false);
-		
+//		pointsSgc.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE, 200.0);
 		
 //		System.out.println("points:\n"+Rn.toString(points));
 //		System.out.println("centeroids:\n"+Rn.toString(centeroid));
