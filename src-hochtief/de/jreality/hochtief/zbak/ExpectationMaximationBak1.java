@@ -5,7 +5,7 @@ import no.uib.cipr.matrix.NotConvergedException;
 import no.uib.cipr.matrix.SymmPackEVD;
 import de.jreality.math.Rn;
 
-public class ExpectationMaximation {
+public class ExpectationMaximationBak1 {
 	
 	private static final double maxValue=1.79E308; 
 	public static DenseMatrix unitMatrix=new DenseMatrix(new double[][]{{1,0,0},{0,1,0},{0,0,1}});

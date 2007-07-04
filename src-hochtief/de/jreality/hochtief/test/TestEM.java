@@ -18,9 +18,9 @@ public class TestEM {
 	
 	public static void main(String[] args) {
 		
-		int componentCount=30;
-		int findComponentsCount=30;
-		int pointCount=200;
+		int componentCount=20;
+		int findComponentsCount=20;
+		int pointCount=2000;
 		double range=15.0;
 		double meanVar=3;
 		
