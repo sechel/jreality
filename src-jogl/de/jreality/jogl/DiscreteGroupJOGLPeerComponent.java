@@ -148,7 +148,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	protected void renderChildren() {
 		if (!jr.offscreenMode && isCopyCat)		{
 			theLog.fine("In renderChildren()"+goBetween.originalComponent.getName());
-			boolean isReflectionBefore = cumulativeIsReflection;
+			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
 			double[] o2ndc = jr.context.getObjectToNDC();
@@ -160,7 +160,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.renderingState.currentSignature)) continue;
 				count++;
-				cumulativeIsReflection = (isReflectionBefore != matrixIsReflection[j]);
+				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
 				jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 				if (cumulativeIsReflection != jr.renderingState.flipped)	{
 					jr.renderingState.flipped  = cumulativeIsReflection;
@@ -172,8 +172,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			childrenDLDirty = child.isDisplayListDirty();
 			child.goBetween.getOriginalComponent().setVisible(vis);
 //			theLog.info("Rendered "+count);
-			cumulativeIsReflection = isReflectionBefore;
-			jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
+			jr.renderingState.flipped = isReflectionBefore;
+			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 		} else {
 			childrenDLDirty = false;		// think positive!
 			int n = children.size();

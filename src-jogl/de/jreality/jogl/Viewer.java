@@ -235,12 +235,12 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 			return renderer.getStereoType();
 		}
 
-		public boolean isFlipped() {
-			return renderer.isFlipped();
-		}
-		public void setFlipped(boolean isFlipped) {
-			renderer.setFlipped(isFlipped);
-		}
+//		public boolean isFlipped() {
+//			return renderer.isFlipped();
+//		}
+//		public void setFlipped(boolean isFlipped) {
+//			renderer.setFlipped(isFlipped);
+//		}
 
 		public JOGLRenderer getRenderer() {
 			return renderer;

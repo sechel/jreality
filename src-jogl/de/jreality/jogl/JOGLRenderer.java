@@ -124,7 +124,6 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int numberTries = 0;		// how many times we have tried to make textures resident
 	protected boolean forceResidentTextures = true;
 	protected boolean oneTexture2DPerImage = false;
-	protected boolean globalIsReflection = false;
 
 	// pick-related stuff
 	public boolean pickMode = false, offscreenMode = false;
@@ -209,21 +208,21 @@ public class JOGLRenderer  implements AppearanceListener {
 	public void extractGlobalParameters()	{
 		Appearance ap = theRoot.getAppearance();
 		if (ap == null) return;
-		theLog.finer("In extractGlobalParameters");
+//		theLog.finer("In extractGlobalParameters");
 		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
-		theLog.info("one texture per image: "+oneTexture2DPerImage);
+//		theLog.fine("one texture per image: "+oneTexture2DPerImage);
 		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
 			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
-			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
+//			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
 		obj = ap.getAttribute(CommonAttributes.USE_OLD_TRANSPARENCY, Boolean.class);		
 		// a bit ugly: we make this a static variable so shaders can access it easily
 		if (obj instanceof Boolean) JOGLRenderingState.useOldTransparency = ((Boolean)obj).booleanValue();
-		theLog.info("forceResTex = "+forceResidentTextures);
+//		theLog.fine("forceResTex = "+forceResidentTextures);
 //		theLog.info("component display lists = "+renderingState.componentDisplayLists);
 	}
 
@@ -274,7 +273,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		renderingState.cameraToWorld = context.getCameraToWorld();
 		double[] w2c = Rn.inverse(null, renderingState.cameraToWorld);
 		globalGL.glLoadTransposeMatrixd(w2c, 0);
-		globalIsReflection = ( isFlipped() != (Rn.determinant(w2c) < 0.0));
+		renderingState.flipped = (Rn.determinant(w2c) < 0.0);
+		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
 		JOGLRendererHelper.handleSkyBox(this, theRoot.getAppearance(),CameraUtility.getCamera(theViewer) );
 

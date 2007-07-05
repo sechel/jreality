@@ -138,21 +138,20 @@ public class GoBetween extends JOGLPeerNode implements
 
 	public void appearanceChanged(AppearanceEvent ev) {
 		String key = ev.getKey();
-		LoggingSystem.getLogger(this).finer("sgc "+originalComponent.getName()+" Appearance changed "+key);
-		LoggingSystem.getLogger(this).fine("sgc "+originalComponent.getName()+" Appearance changed "+key);
+		LoggingSystem.getLogger(this).info("sgc "+originalComponent.getName()+" Appearance changed "+key);
 		int changed = 0;
 		boolean propagates = true;
 		// TODO shaders should register keywords somehow and which geometries might be changed
-		if (key.indexOf("implodeFactor") != -1 ) changed |= (JOGLPeerComponent.FACES_CHANGED);
-		else if (key.indexOf("transparency") != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
+		if (key.indexOf(CommonAttributes.IMPLODE_FACTOR) != -1 ) changed |= (JOGLPeerComponent.FACES_CHANGED);
+		else if (key.indexOf(CommonAttributes.TRANSPARENCY) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
 		else if (key.indexOf(CommonAttributes.SMOOTH_SHADING) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
-		else if (key.indexOf("tubeRadius") != -1) changed |= (JOGLPeerComponent.LINES_CHANGED);
-		else if (key.indexOf("pointRadius") != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED);
-		else if (key.indexOf("anyDisplayLists") != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
+		else if (key.indexOf(CommonAttributes.TUBE_RADIUS) != -1) changed |= (JOGLPeerComponent.LINES_CHANGED);
+		else if (key.indexOf(CommonAttributes.POINT_RADIUS) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED);
+		else if (key.indexOf(CommonAttributes.ANY_DISPLAY_LISTS) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
 		else if (key.endsWith("Shader")) changed |= JOGLPeerComponent.ALL_SHADERS_CHANGED;
 		else if (key.endsWith("Shadername")) changed |= JOGLPeerComponent.ALL_SHADERS_CHANGED;
 		// there are some appearances which we know aren't inherited, so don't propagate change event.
-		else if (key.indexOf("texture2d") != -1) changed |= (JOGLPeerComponent.FACES_CHANGED);
+		else if (key.indexOf(CommonAttributes.TEXTURE_2D) != -1) changed |= (JOGLPeerComponent.FACES_CHANGED);
 		else if (key.indexOf("lightMap") != -1) changed |= (JOGLPeerComponent.FACES_CHANGED);
 		if (key.indexOf("pickable") != -1 || key.indexOf(CommonAttributes.BACKGROUND_COLOR) != -1	||
 				key.indexOf("fog") != -1 
