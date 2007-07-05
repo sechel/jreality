@@ -174,7 +174,6 @@ public class Scan3DPointCloudUtility {
 		sgc.setGeometry(ifsf.getGeometry());
 		sgc.setAppearance(new Appearance());
 		sgc.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
-		sgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
 		sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,false);
 		sgc.getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
 		sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED,false);

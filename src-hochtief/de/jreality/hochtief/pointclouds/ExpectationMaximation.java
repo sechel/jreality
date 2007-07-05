@@ -137,6 +137,7 @@ public class ExpectationMaximation {
 				params[c][9]=cov[6]; params[c][10]=cov[7]; params[c][11]=cov[8];
 				params[c][12]=alpha;	
 			}else{
+				System.err.println("Nc==0");
 				for(int i=3;i<params[c].length;i++)
 					params[c][i]=0;
 				params[c][3]=1.0/maxValue; params[c][7]=1.0/maxValue; params[c][11]=1.0/maxValue;
@@ -360,6 +361,8 @@ public class ExpectationMaximation {
 //				}			
 //			}			 
 //		}
+		
+		if(p>1 || p<0) System.out.println("p="+p);
 
 		return p;
 	}

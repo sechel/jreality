@@ -93,6 +93,12 @@ public class PointCloudSimplifier {
 		}
 		
 		System.out.println(sgc.getChildComponentCount()+" / "+componentCount+" components with more than "+Scan3DPointCloudUtility.minPointCount+" points");
+		int notUsedPointsCount=0;
+		for(int i=0;i<compId.length;i++){
+			if(compId[i]==-1)
+				notUsedPointsCount++;
+		}
+		System.out.println(notUsedPointsCount+" / "+singlePoints.size()+" points not used (p too small)");
 		
 		return sgc;
 	}
