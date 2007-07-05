@@ -334,8 +334,8 @@ public class ExpectationMaximation {
 			p=-maxValue;
 		}
 		
-//		if(p>1){
-//			System.err.println("\np="+p);
+//		if(p>0){
+//			System.err.println("\nlogpx="+p);
 //			System.err.println("point: "+Rn.toString(point));
 //			System.err.println("centeroid: "+Rn.toString(centeroid));
 //			System.err.println("det: "+det);
@@ -362,7 +362,7 @@ public class ExpectationMaximation {
 //			}			 
 //		}
 		
-		if(p>1 || p<0) System.out.println("p="+p);
+		if(p>0) System.err.println("logpx="+p);
 
 		return p;
 	}
