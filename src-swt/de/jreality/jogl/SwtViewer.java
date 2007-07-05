@@ -179,13 +179,13 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
     return renderer.getStereoType();
   }
 
-  public boolean isFlipped() {
-    return renderer.isFlipped();
-  }
-  public void setFlipped(boolean isFlipped) {
-    renderer.setFlipped(isFlipped);
-  }
-
+//  public boolean isFlipped() {
+//    return renderer.isFlipped();
+//  }
+//  public void setFlipped(boolean isFlipped) {
+//    renderer.setFlipped(isFlipped);
+//  }
+//
   public JOGLRenderer getRenderer() {
     return renderer;
   }
