@@ -46,6 +46,8 @@ import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.Beans;
+import java.beans.Expression;
+import java.beans.Statement;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -57,7 +59,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -66,8 +67,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
-import jterm.BshEvaluator;
-import bsh.EvalError;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.reader.ReaderJRS;
@@ -83,7 +82,6 @@ import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
-import de.jreality.ui.viewerapp.actions.view.SwitchBackgroundColor;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
@@ -162,8 +160,13 @@ public class ViewerApp {
 	private JTabbedPane navigatorTabs;
 
 	private boolean showMenu = true;  //default
-	private boolean includeMenu = true;  //default
+	private boolean createMenu = true;  //default
 	private ViewerAppMenu menu;
+	
+	public static Color[] defaultBackgroundColor = new Color[]{
+		new Color(225, 225, 225), new Color(225, 225, 225),
+		new Color(255, 225, 180), new Color(255, 225, 180), };
+
 
 
 	/**
@@ -252,7 +255,6 @@ public class ViewerApp {
 		selectionManager.setSelection(selectionManager.getDefaultSelection());
 
 		frame = new JFrame();
-		menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -339,7 +341,7 @@ public class ViewerApp {
 		if (getSceneRoot().getAppearance() != null && 
 				(getSceneRoot().getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS) == Appearance.INHERITED 
 						&& getSceneRoot().getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLOR) == Appearance.INHERITED))
-			setBackgroundColor(SwitchBackgroundColor.defaultColor);
+			setBackgroundColor(defaultBackgroundColor);
 
 		//frame properties
 		frame.setTitle("jReality Viewer");
@@ -418,13 +420,18 @@ public class ViewerApp {
 		showExternalNavigator(attachNavigator && externalNavigator);
 
 		//update menu (e.g. visibility and checkboxes whose selection state depends on viewerApp properties)
-		if (includeMenu && frame.getJMenuBar()==null) {
-			JMenuBar menuBar = menu.getMenuBar();
-			menuBar.setBorder(BorderFactory.createEmptyBorder());  //needed for full screen mode
-			frame.setJMenuBar(menuBar);
+		if (createMenu) {
+			if (menu==null) menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
+			
+			if (frame.getJMenuBar()==null) {
+				JMenuBar menuBar = menu.getMenuBar();
+				menuBar.setBorder(BorderFactory.createEmptyBorder());  //needed for full screen mode
+				frame.setJMenuBar(menuBar);
+			}
+			menu.update();	
 		}
-		if (!includeMenu) frame.setJMenuBar(null);
-		menu.update();
+		else frame.setJMenuBar(null);
+		
 
 		//update content of frame
 		frame.getContentPane().removeAll();
@@ -631,12 +638,15 @@ public class ViewerApp {
 		beanShell.eval("import de.jreality.tools.*;");
 		beanShell.eval("import de.jreality.util.*;");
 
-		BshEvaluator bshEval = beanShell.getBshEval();
-		try { 
-			bshEval.getInterpreter().set("_viewer", viewerSwitch);
-			bshEval.getInterpreter().set("_toolSystem", toolSystem);      
+		//set some objects to be accessible from within the beanShell
+		try {
+			Object bshEval = new Expression(beanShell, "getBshEval", null).getValue();
+			Object interpreter = new Expression(bshEval, "getInterpreter", null).getValue();
+      new Statement(interpreter, "set", new Object[]{"_viewer", viewerSwitch}).execute();
+      new Statement(interpreter, "set", new Object[]{"_toolSystem", toolSystem}).execute();
+      new Statement(interpreter, "set", new Object[]{"_viewerApp", this}).execute();
 		} 
-		catch (EvalError error) { error.printStackTrace(); }
+		catch (Exception e) { e.printStackTrace(); }
 
 //		beanShell.setSelf(sceneRoot);  //already set default in constructor
 
@@ -675,15 +685,12 @@ public class ViewerApp {
 
 			externalNavigatorFrame.addComponentListener(new ComponentAdapter(){
 				public void componentHidden(ComponentEvent e) {  //externalNavigatorFrame is closed or set to invisible
-					menu.addMenu(externalNavigatorFrame.getJMenuBar().getMenu(0), 1);  //move EDIT_MENU to viewerApp.frame
-					if (externalNavigator) setAttachNavigator(false);
-					menu.update();  //update navigatorCheckBox & visibility of EDIT_MENU
-					frame.validate();  //repaint menuBar
+					if (externalNavigator) { 
+						setAttachNavigator(false);
+						if (createMenu) menu.update();
+					}
 				}
 			});
-
-			externalNavigatorFrame.setJMenuBar(new JMenuBar());
-			externalNavigatorFrame.getJMenuBar().setBorder(BorderFactory.createEmptyBorder());
 		}
 
 		if (show == externalNavigatorFrame.isVisible()) 
@@ -692,17 +699,9 @@ public class ViewerApp {
 		if (show) {
 			externalNavigatorFrame.remove(externalNavigatorFrame.getContentPane());
 			externalNavigatorFrame.getContentPane().add(getNavigatorWithAccessories());
-
-			//move EDIT_MENU to externalNavigatorFrame
-			JMenu editMenu = menu.getMenu(ViewerAppMenu.EDIT_MENU); 
-			editMenu.setVisible(true);
-			externalNavigatorFrame.getJMenuBar().add(editMenu);
-
-			externalNavigatorFrame.validate();  //repaint mb
 			externalNavigatorFrame.setVisible(true);
 		}
 		else externalNavigatorFrame.setVisible(false);
-		//EDIT_MENU is moved to viewerApp.frame by ComponentAdapter above
 	}
 
 
@@ -714,11 +713,12 @@ public class ViewerApp {
 			externalBeanShellFrame.setSize(new Dimension(800, 150));
 //			try {	externalBeanShellFrame.setAlwaysOnTop(true); }
 //			catch (SecurityException se) {}  //webstart
+			
 			externalBeanShellFrame.addComponentListener(new ComponentAdapter(){
 				public void componentHidden(ComponentEvent e) {
 					if (externalBeanShell) {
 						setAttachBeanShell(false);
-						menu.update();
+						if (createMenu) menu.update();
 					}
 				}
 			});
@@ -929,16 +929,32 @@ public class ViewerApp {
 
 
 	/**
-	 * Specify whether to include a menu bar in the ViewerApp's frame.
-	 * @param b true iff menu is to be shown
+	 * @deprecated renamed into {@link ViewerApp#setCreateMenu(boolean)}
 	 */
 	public void setIncludeMenu(boolean b) {
-		includeMenu = b;
+		setCreateMenu(b);
 	}
 
 
+	/**
+	 * @deprecated renamed into {@link ViewerApp#isCreateMenu()} 
+	 */
 	public boolean isIncludeMenu() {
-		return includeMenu;
+		return isCreateMenu();
+	}
+	
+	
+	/**
+	 * Specify whether to create a menu bar in the ViewerApp's frame.
+	 * @param b true iff menu is to be created
+	 */
+	public void setCreateMenu(boolean b) {
+		createMenu = b;
+	}
+
+
+	public boolean isCreateMenu() {
+		return createMenu;
 	}
 
 
@@ -962,6 +978,11 @@ public class ViewerApp {
 	 * @return the viewerApp's menu
 	 */
 	public ViewerAppMenu getMenu() {
+		if (createMenu) {
+			if (menu==null) menu = new ViewerAppMenu(this);  //uses frame, viewer, selectionManager and this
+		}
+		else throw new IllegalStateException("You chose to not create the menu.");
+		
 		return menu;
 	}
 
