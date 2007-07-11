@@ -59,9 +59,10 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class SwitchBackgroundColor extends AbstractJrAction {
 
-	public static Color[] defaultColor = new Color[]{
-		new Color(225, 225, 225), new Color(225, 225, 225),
-		new Color(255, 225, 180), new Color(255, 225, 180), };
+	/**
+	 * @deprecated use {@link ViewerApp#defaultBackgroundColor} instead
+	 */
+	public static Color[] defaultColor = ViewerApp.defaultBackgroundColor;
 
 	private Color[] colors;
 	private SceneGraphComponent sceneRoot;
