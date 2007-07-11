@@ -71,6 +71,7 @@ import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.CreateAppearance;
+import de.jreality.ui.viewerapp.actions.edit.CurrentSelection;
 import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
 import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
@@ -205,8 +206,14 @@ public class ViewerAppMenu {
 		menuBar = new JMenuBar();
 
 		addMenu(createFileMenu());
-		addMenu(createEditMenu(parentComp, sm));
-		addMenu(createCameraMenu());
+		
+		JMenu editMenu = createEditMenu(parentComp, sm);
+		//add dummy entry displaying the current selection's name
+		editMenu.insert(new JMenuItem(new CurrentSelection(null, sm)), 0);
+		editMenu.insertSeparator(1);
+		addMenu(editMenu);
+		
+		//addMenu(createCameraMenu());
 		addMenu(createViewMenu());
 	}
 
@@ -358,7 +365,7 @@ public class ViewerAppMenu {
 		JMenu bgColors = new JMenu(SET_BACKGROUND_COLOR);  //background color of viewerApp
 		ButtonGroup bg = new ButtonGroup();
 		List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
-		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("default", viewerApp, SwitchBackgroundColor.defaultColor)) );
+		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("default", viewerApp, ViewerApp.defaultBackgroundColor)) );
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("white", viewerApp, Color.WHITE)) );
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("gray", viewerApp, new Color(225, 225, 225))) );
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("black", viewerApp, Color.BLACK)) );
@@ -419,7 +426,7 @@ public class ViewerAppMenu {
 		beanShellCheckBox.setSelected(viewerApp.isAttachBeanShell());
 		externalBeanShellCheckBox.setSelected(viewerApp.isExternalBeanShell());
 		renderSelectionCheckbox.setSelected(sm.isRenderSelection());  //sm!=null if viewerApp!=null
-		showMenu(EDIT_MENU, viewerApp.isAttachNavigator());
+		//showMenu(EDIT_MENU, viewerApp.isAttachNavigator());
 		showMenuBar(viewerApp.isShowMenu());
 	}
 
