@@ -196,12 +196,12 @@ public class JOGLRenderer  implements AppearanceListener {
 		// some top-level appearance attributes determine how we render; 
 		// TODO set up a separate mechanism for controlling these top-level attributes
 
-		theLog.info("setSceneRoot");
+		theLog.fine("setSceneRoot");
 		extractGlobalParameters();
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
-		theLog.info("top appearance changed");
+		theLog.fine("top appearance changed");
 		extractGlobalParameters();
 	}
 

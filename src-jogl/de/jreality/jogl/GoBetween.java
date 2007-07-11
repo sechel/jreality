@@ -138,7 +138,7 @@ public class GoBetween extends JOGLPeerNode implements
 
 	public void appearanceChanged(AppearanceEvent ev) {
 		String key = ev.getKey();
-		LoggingSystem.getLogger(this).info("sgc "+originalComponent.getName()+" Appearance changed "+key);
+		LoggingSystem.getLogger(this).fine("sgc "+originalComponent.getName()+" Appearance changed "+key);
 		int changed = 0;
 		boolean propagates = true;
 		// TODO shaders should register keywords somehow and which geometries might be changed
