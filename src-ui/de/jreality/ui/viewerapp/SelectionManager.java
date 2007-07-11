@@ -53,6 +53,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
@@ -83,7 +84,7 @@ public class SelectionManager implements SelectionManagerInterface {
 			sm = globalTable.get(viewer);
 		
 		if (sm != null)	{
-			System.err.println("Selection manager is "+sm);
+			LoggingSystem.getLogger(SelectionManager.class).fine("Selection manager is "+sm);
 			return sm;
 		}
 		//get all depending viewers in hierarchy and check if SelectionManager already exists
