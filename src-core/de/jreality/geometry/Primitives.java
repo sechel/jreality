@@ -454,7 +454,7 @@ public class Primitives {
 			SceneGraphComponent d1 = new SceneGraphComponent("disk1"), d2 = new SceneGraphComponent("disk2");
 			IndexedFaceSet cyl = cylinder(n, r, R, zmin, zmax, thetamax);
 			result.setGeometry(cyl);
-			IndexedFaceSet disk = regularPolygon(n);
+			IndexedFaceSet disk = regularPolygon(n,0.0);
 			d1.setGeometry(disk);
 			d2.setGeometry(disk);
 			result.addChild(d1);
@@ -579,8 +579,9 @@ public class Primitives {
 		  */
 		 public static IndexedFaceSet regularPolygon(int order, double offset) {
 				double[][] verts = new double[order][3];
+				double start = offset*(2*Math.PI)/order;
 				for (int  i =0; i<order; ++i)	{
-					double angle = 2 * (i+offset) * Math.PI/order;
+					double angle = start+i * 2.0*Math.PI/order;
 					verts[i][0] = Math.cos(angle);
 					verts[i][1] = Math.sin(angle);
 					verts[i][2] = 0.0;
