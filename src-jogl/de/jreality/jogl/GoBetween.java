@@ -43,12 +43,12 @@ public class GoBetween extends JOGLPeerNode implements
 	public GoBetween()	{
 		super();
 	}
-	public GoBetween(SceneGraphComponent sgc, JOGLRenderer jr)	{
+	public GoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean inheritSinglePeer)	{
 		super();
-		init(sgc, jr);
+		init(sgc, jr, inheritSinglePeer);
 	}
 	
-	public void init (SceneGraphComponent sgc, JOGLRenderer jr)	{
+	public void init (SceneGraphComponent sgc, JOGLRenderer jr, boolean inheritSinglePeer)	{
 		this.jr = jr;
 		originalComponent = sgc;
 		if (originalComponent.getGeometry() != null)  {
@@ -57,14 +57,9 @@ public class GoBetween extends JOGLPeerNode implements
 			originalComponent.getGeometry().addGeometryListener(this);
 		} else peerGeometry = null;
 		originalComponent.addSceneGraphComponentListener(this);
+		singlePeer = inheritSinglePeer;
 		if (originalComponent.getAppearance() != null)  {
 			originalComponent.getAppearance().addAppearanceListener(this);
-			Object foo = originalComponent.getAppearance().getAttribute("singlePeer",Boolean.class);
-			if (foo != null && foo instanceof Boolean && ((Boolean)foo).booleanValue()) {
-				singlePeer = true;
-//				if (originalComponent.getChildComponentCount() > 1)
-//					throw new IllegalStateException("Don't allow single peer for many children");
-			}
 		}
 		if (originalComponent.getTransformation() != null)
 			originalComponent.getTransformation().addTransformationListener(this);

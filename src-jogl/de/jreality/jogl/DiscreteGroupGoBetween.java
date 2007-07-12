@@ -20,8 +20,8 @@ public class DiscreteGroupGoBetween extends GoBetween {
 		super();
 	}
 	
-	protected DiscreteGroupGoBetween(SceneGraphComponent sgc, JOGLRenderer jr) {
-		super(sgc, jr);
+	protected DiscreteGroupGoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean b) {
+		super(sgc, jr, b);
 	}
 
 	@Override

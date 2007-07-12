@@ -236,12 +236,14 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	protected void updateShaders() {
 		super.updateShaders();
 		if (eAp == null )return;
-		Object foo = eAp.getAttribute("discreteGroup.cameraRep", null, SceneGraphPath.class);
-		if (foo != null && foo instanceof SceneGraphPath) {
-			w2camrepn = (SceneGraphPath) foo;
-			System.err.println("Found path in "+w2camrepn);
-			useTformCaching = false;
-		} else w2camrepn = null;
+		if (goBetween.getOriginalComponent().getAppearance() != null)	{
+			Object foo = goBetween.getOriginalComponent().getAppearance().getAttribute("discreteGroup.cameraRep", SceneGraphPath.class);
+			if (foo != null && foo instanceof SceneGraphPath) {
+				w2camrepn = (SceneGraphPath) foo;
+				System.err.println("Found path in "+w2camrepn);
+				useTformCaching = false;
+			} else w2camrepn = null;			
+		}
 		if (!isCopyCat) return;
 		minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
 		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);

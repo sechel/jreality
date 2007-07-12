@@ -677,7 +677,7 @@ public class JOGLRenderer  implements AppearanceListener {
 //		}	
 //	}
 	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
-	public   GoBetween goBetweenFor(SceneGraphComponent sgc)	{
+	public   GoBetween goBetweenFor(SceneGraphComponent sgc, boolean singlePeer)	{
 		if (sgc == null) return null;
 		GoBetween gb = null;
 		Object foo = goBetweenTable.get(sgc);
@@ -691,13 +691,20 @@ public class JOGLRenderer  implements AppearanceListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} //new GoBetween(); //sgc, this);
-			gb.init(sgc, this);
+			gb.init(sgc, this, singlePeer);
 			goBetweenTable.put(sgc, gb);
 			return gb;
 		}
 		return ((GoBetween) foo);
 	}
 
+	public   GoBetween goBetweenFor(SceneGraphComponent sgc)	{
+		if (sgc == null) return null;
+		GoBetween gb = null;
+		Object foo = goBetweenTable.get(sgc);
+		if (foo == null) throw new IllegalStateException("No go between for "+sgc.getName());
+		return ((GoBetween) foo);
+	}
 
 	int geomDiff = 0;
 	WeakHashMap<Geometry, JOGLPeerGeometry> geometries = new WeakHashMap<Geometry, JOGLPeerGeometry>();

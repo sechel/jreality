@@ -20,6 +20,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 	SceneGraphPath sgp;
 	boolean topLevel = true;
 	JOGLRenderer jr;
+	boolean singlePeer = false;
 	static Class<? extends JOGLPeerComponent> peerClass = JOGLPeerComponent.class;
 	public static void setPeerClass(Class<? extends JOGLPeerComponent> c)	{
 		peerClass = c; 
@@ -46,7 +47,17 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 	}
 
 	public void visit(SceneGraphComponent c) {
-		GoBetween gb = jr.goBetweenFor(c);
+		// check the appearance to see if single peer is indicated
+		boolean oldSinglePeer = singlePeer;
+		if (c.getAppearance() != null)	{
+			Object foo = c.getAppearance().getAttribute("singlePeer",Boolean.class);
+			if (foo != null && foo instanceof Boolean) {
+				if (((Boolean)foo).booleanValue()) {
+					singlePeer = true;
+				} else singlePeer = false;
+			} 			
+		}
+		GoBetween gb = jr.goBetweenFor(c, singlePeer);
 		JOGLPeerComponent peer = null;
 		boolean alreadySinglePeer = false;
 		if (gb.isSinglePeer() && (gb.getSinglePeer()) != null) {
@@ -88,6 +99,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 		if (!alreadySinglePeer)	{
 			c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));
 			sgp.pop();
+			singlePeer = oldSinglePeer;
 		}
 	}
 
