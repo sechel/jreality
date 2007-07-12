@@ -103,7 +103,8 @@ import de.jreality.util.SystemProperties;
  * va.setAttachNavigator(true);
  * va.setExternalNavigator(false);
  * va.setAttachBeanShell(false);
- * va.setIncludeMenu(true);
+ * va.setCreateMenu(true);
+ * va.setShowMenu(false);
  * [setting more properties]
  * </pre></code>
  * 
@@ -662,7 +663,7 @@ public class ViewerApp {
 	 */
 	private void setupNavigator() {
 
-		navigator = new Navigator(sceneRoot, selectionManager, frame);
+		navigator = new Navigator(getViewerSwitch(), frame);
 
 		Component navigator = this.navigator.getComponent();
 		//init sizes
@@ -945,8 +946,9 @@ public class ViewerApp {
 	
 	
 	/**
-	 * Specify whether to create a menu bar in the ViewerApp's frame.
+	 * Specify whether to create a menu bar for the ViewerApp's frame.
 	 * @param b true iff menu is to be created
+	 * @see ViewerApp#setShowMenu(boolean)
 	 */
 	public void setCreateMenu(boolean b) {
 		createMenu = b;
@@ -961,6 +963,7 @@ public class ViewerApp {
 	/**
 	 * Specify whether to show or to hide the ViewerApp's menu bar.
 	 * @param b true iff menu bar is to be shown
+	 * @see ViewerApp#setCreateMenu(boolean)
 	 */
 	public void setShowMenu(boolean b) {
 		showMenu = b;

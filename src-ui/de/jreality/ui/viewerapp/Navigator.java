@@ -40,24 +40,32 @@
 
 package de.jreality.ui.viewerapp;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.ui.treeview.JTreeRenderer;
 import de.jreality.ui.treeview.SceneTreeModel;
@@ -80,19 +88,22 @@ public class Navigator implements SelectionListener {
 	private SceneTreeModel treeModel;
 	private TreeSelectionModel tsm;
 
-	private SelectionManagerInterface sm;
-	private SceneGraphComponent sceneRoot;  //the scene root
+	private SelectionManagerInterface selectionManager;
+	private SelectionManagerInterface externalSelectionManager;
+	private Viewer viewer;  //the underlying viewer
 
-	private Component navigator;
+	private Container navigator;
 	private Component parentComp;
+	
+	private boolean propagateSelections, receiveSelections;
 
 
 	/**
 	 * @param sceneRoot the scene root
 	 * @param selectionManager the underlying selection manager
 	 */
-	public Navigator(SceneGraphComponent sceneRoot, SelectionManagerInterface selectionManager) {
-		this(sceneRoot, selectionManager, null);
+	public Navigator(Viewer viewer) {
+		this(viewer, null);
 	}
 
 
@@ -101,10 +112,14 @@ public class Navigator implements SelectionListener {
 	 * @param selectionManager the underlying selection manager
 	 * @param parentComp used by dialogs from the context menu (<code>null</code> allowed)
 	 */
-	public Navigator(SceneGraphComponent sceneRoot, SelectionManagerInterface selectionManager, Component parentComp) {
+	public Navigator(Viewer viewer, Component parentComp) {
 
-		sm = selectionManager;
-		sm.addSelectionListener(this);
+		externalSelectionManager = SelectionManager.selectionManagerForViewer(viewer);
+		selectionManager = new SelectionManager(externalSelectionManager.getDefaultSelection());
+		//selectionManager.addSelectionListener(this);
+		
+		setPropagateSelections(true);
+		setReceiveSelections(true);
 
 		this.parentComp = parentComp;
 
@@ -117,11 +132,11 @@ public class Navigator implements SelectionListener {
 		//EditorManager.registerEditor(Texture2D.class, ObjectEditor.class);
 
 		sceneTree = new JTree();
-		treeModel = new SceneTreeModel(sceneRoot);
+		treeModel = new SceneTreeModel(viewer.getSceneRoot());
 
 		sceneTree.setModel(treeModel);
-		//set default selection (use the selection manager's default)
-		sceneTree.setAnchorSelectionPath(new TreePath(treeModel.convertSelection(sm.getDefaultSelection())));
+		//set default (anchor) selection (use the selection manager's default)
+		sceneTree.setAnchorSelectionPath(new TreePath(treeModel.convertSelection(selectionManager.getDefaultSelection())));
 		sceneTree.setCellRenderer(new JTreeRenderer());
 		sceneTree.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "toggle");  //collaps/expand nodes with ENTER
 
@@ -135,35 +150,40 @@ public class Navigator implements SelectionListener {
 				Selection currentSelection = e.getSelection();
 				//update inspector
 				inspector.setObject(currentSelection.getLastElement());
-				//update selection manager
-				sm.setSelection(currentSelection);  //does nothing if already selected
+				//update selection managers
+				selectionManager.setSelection(currentSelection);
+				if (propagateSelections) externalSelectionManager.setSelection(currentSelection);  //does nothing if already selected
 			}
 		});
 
-		this.sceneRoot = sceneRoot;
-
-		SceneGraphPath sgp = sm.getSelectionPath();
-		if (sgp != null && sgp.isValid()) 
-		    tsm.setSelectionPath(new TreePath(treeModel.convertSelection(sm.getSelection())));  //select current selection
-
+		try {  //set default selection
+			tsm.setSelectionPath(new TreePath(treeModel.convertSelection(selectionManager.getDefaultSelection())));  //select current selection
+		} catch (Exception e) {
+			//no valid default selection
+		}
+		
+//		SceneGraphPath sgp = sm.getSelectionPath();
+//		if (sgp != null && sgp.isValid()) 
+//		    tsm.setSelectionPath(new TreePath(treeModel.convertSelection(sm.getSelection())));  //select current selection
+		
 		setupContextMenu();
 	}
 
-
+	
 	public void selectionChanged(de.jreality.ui.viewerapp.SelectionEvent e) {
 		//convert selection of manager into TreePath
 		Object[] selection = null;
 		try {
 			selection = treeModel.convertSelection(e.getSelection());			
+			TreePath path = new TreePath(selection);
+
+			if (e.nodeSelected() && !path.equals(tsm.getSelectionPath()))  //compare paths only if a node is selected  
+				tsm.setSelectionPath(path);
+
 		} catch (NullPointerException npe) {
 			//SelectionManager's selection is not valid, 
 			//i.e. has no representation in tree view (scene graph)
-			return;
 		}
-		TreePath path = new TreePath(selection);
-
-		if (e.nodeSelected() && !path.equals(tsm.getSelectionPath()))  //compare paths only if a node is selected  
-			tsm.setSelectionPath(path);
 	}
 
 
@@ -183,12 +203,12 @@ public class Navigator implements SelectionListener {
 
 
 	public SceneGraphComponent getSceneRoot() {
-		return sceneRoot;
+		return viewer.getSceneRoot();
 	}
 
 
 	public Selection getSelection() {
-		return sm.getSelection();
+		return selectionManager.getSelection();
 	}
 
 
@@ -198,7 +218,7 @@ public class Navigator implements SelectionListener {
 		cm.setLightWeightPopupEnabled(false);
 
 		//create content of context menu
-		JMenu editMenu = ViewerAppMenu.createEditMenu(parentComp, sm);
+		JMenu editMenu = ViewerAppMenu.createEditMenu(parentComp, selectionManager);
 		for (Component c : editMenu.getMenuComponents()) cm.add(c);
 
 		//add listener to the navigator's tree
@@ -249,12 +269,69 @@ public class Navigator implements SelectionListener {
 			navigator.setBorder(BorderFactory.createEmptyBorder());
 
 //			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
-			this.navigator = navigator;
+			this.navigator = new Container();
+			this.navigator.setLayout(new BorderLayout());
+			this.navigator.add(navigator);
+			this.navigator.add(createToolBar(), BorderLayout.NORTH);
 		}
 
 		return navigator;
 	}
 
+	
+	private JToolBar createToolBar() {
+		
+		JToolBar jtb = new JToolBar(SwingConstants.HORIZONTAL);
+		
+		Action a;
+		final JToggleButton propagate = new JToggleButton();
+//		final URL propagateImg = Navigator.class.getResource("propagate.png");
+		a = new AbstractAction("Propagate"){
+			{	//putValue(Action.SMALL_ICON, new ImageIcon(propagateImg));
+				putValue(Action.SHORT_DESCRIPTION, "Propagate selections to the SelectionManager"); }
+			public void actionPerformed(ActionEvent e) {
+				setPropagateSelections(propagate.isSelected());
+			}
+		};
+		propagate.setAction(a);
+		propagate.setSelected(propagateSelections);
+		jtb.add(propagate);
+		
+		final JToggleButton receive = new JToggleButton();
+//		final URL receiveImg = Navigator.class.getResource("receive.png");
+		a = new AbstractAction("Receive"){
+			{	//putValue(Action.SMALL_ICON, new ImageIcon(receiveImg));
+				putValue(Action.SHORT_DESCRIPTION, "Receive selections from the SelectionManager"); }
+			public void actionPerformed(ActionEvent e) {
+				 setReceiveSelections(receive.isSelected());
+			}
+		};
+		receive.setAction(a);
+		receive.setSelected(receiveSelections);
+		jtb.add(receive);
+		
+		return jtb;
+	}
+	
+	
+	/**
+	 * Propagate selections to the underlying viewer's selection manager.
+	 */
+	public void setPropagateSelections(boolean propagate) {
+		propagateSelections = propagate;
+	}
+	
+
+	/**
+	 * Receive selections from the underlying viewer's selection manager.
+	 */
+	public void setReceiveSelections(boolean receive) {
+		receiveSelections = receive;
+		if (receive) 
+			externalSelectionManager.addSelectionListener(Navigator.this);
+		else externalSelectionManager.removeSelectionListener(Navigator.this);
+	}
+	
 
 //	-- INNER CLASSES -----------------------------------
 
