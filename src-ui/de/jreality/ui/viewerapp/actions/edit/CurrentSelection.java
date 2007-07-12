@@ -73,7 +73,7 @@ public class CurrentSelection extends AbstractSelectionListenerAction {
   public void selectionChanged(SelectionEvent e) {
   	super.selectionChanged(e);
   	
-  	setName("<html><body><font color=\"blue\">Selected: " +
+  	setName("<html><body><font color=\"#0b3995\">Selected: " +
   			( getSelection().isTool() ? getSelection().asTool().getClass().getSimpleName() 
 					: getSelection().getLastNode().getName() ) +
   			"</font></body></html>");
