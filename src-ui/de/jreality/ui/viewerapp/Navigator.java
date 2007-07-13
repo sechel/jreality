@@ -50,11 +50,11 @@ import java.awt.event.MouseEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
@@ -282,9 +282,10 @@ public class Navigator implements SelectionListener {
 	private JToolBar createToolBar() {
 		
 		JToolBar jtb = new JToolBar(SwingConstants.HORIZONTAL);
+		jtb.setFloatable(false);
 		
 		Action a;
-		final JToggleButton propagate = new JToggleButton();
+		final JCheckBox propagate = new JCheckBox();
 //		final URL propagateImg = Navigator.class.getResource("propagate.png");
 		a = new AbstractAction("Propagate"){
 			{	//putValue(Action.SMALL_ICON, new ImageIcon(propagateImg));
@@ -297,7 +298,7 @@ public class Navigator implements SelectionListener {
 		propagate.setSelected(propagateSelections);
 		jtb.add(propagate);
 		
-		final JToggleButton receive = new JToggleButton();
+		final JCheckBox receive = new JCheckBox();
 //		final URL receiveImg = Navigator.class.getResource("receive.png");
 		a = new AbstractAction("Receive"){
 			{	//putValue(Action.SMALL_ICON, new ImageIcon(receiveImg));
