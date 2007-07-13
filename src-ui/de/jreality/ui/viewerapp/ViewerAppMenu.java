@@ -598,7 +598,7 @@ public class ViewerAppMenu {
 	public void showMenuBar(boolean show) {
 
 		if (showMenuBar==show) return;
-
+		
 		for (int i = 0; i < menuBar.getComponentCount(); i++) {
 			menuBar.getMenu(i).setVisible(
 					show ? getShowMenu(menuBar.getMenu(i).getText()) : false
@@ -607,6 +607,7 @@ public class ViewerAppMenu {
 		}
 
 		showMenuBar  = show;
+		viewerApp.setShowMenu(show);
 	}
 
 
