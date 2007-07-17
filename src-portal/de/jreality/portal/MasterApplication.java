@@ -100,6 +100,15 @@ public class MasterApplication {
 //					receiver.swapBuffers();
 //					st+=System.currentTimeMillis();
 //					System.out.println("swapBuffers took "+st+" ms");
+					
+					// without this sleep the shared memory from trackd is blocked...
+					// (Trackd can then no longer write any updates.)
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 				}
 			}
