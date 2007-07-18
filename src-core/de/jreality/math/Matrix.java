@@ -354,11 +354,42 @@ public class Matrix implements Serializable {
 		Rn.conjugateByMatrix(matrix, matrix, T.matrix);
 	}
 
+	/**
+	 * Let M be the current Matrix.
+	 * 
+	 * assigns M + T 
+	 * 
+	 * @param T the matrix to add
+	 */
 	public void add(Matrix T) {
 		matrixChanged = true;
 		Rn.add(matrix, matrix, T.matrix);
 	}
 
+	/**
+	 * Let M be the current Matrix.
+	 * 
+	 * assigns M - T 
+	 * 
+	 * @param T the matrix to subtract
+	 */
+	public void subtract(Matrix T) {
+		matrixChanged = true;
+		Rn.subtract(matrix, matrix, T.matrix);
+	}
+
+	/**
+	 * Let M be the current Matrix.
+	 * 
+	 * assigns f * M 
+	 * 
+	 * @param f the scalar to multiply M with
+	 */
+	public void times(double f) {
+		matrixChanged = true;
+		Rn.times(matrix, f, matrix);
+	}
+	
 	public Matrix getInverse() {
 		return new Matrix(Rn.inverse(null, matrix));
 	}
