@@ -166,6 +166,7 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.CopyVisitor;
 
 public class GeometryMergeFactory {
 	private boolean respectFaces=true;// 
@@ -558,6 +559,10 @@ public class GeometryMergeFactory {
 		int i=0;
 		for (Iterator iter = geos.iterator(); iter.hasNext();i++) {
 			faces[i]= (IndexedFaceSet) iter.next();
+			CopyVisitor cv = new CopyVisitor();
+			cv.visit(faces[i]);
+			faces[i]= (IndexedFaceSet) cv.getCopy();
+
 		}
 		//  anpassen (trafo)
 		i=0;
