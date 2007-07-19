@@ -36,15 +36,9 @@ public class DevicePortalTrackd extends DeviceTrackd {
 
 	static final double[] FIXED_HEAD, SCALE_MATRIX;
 	static {
-//		String bar = Secure.getProperty("portalScale");
-//		if (bar != null)  {
-//			portalScale = Double.parseDouble(bar);
-//			System.err.println("DPR: Portal scale is "+portalScale);
-//		}
-//		else 
-		System.err.println("DPR: Portal scale is "+PortalCoordinateSystem.portalScale);
-		FIXED_HEAD = MatrixBuilder.euclidean().translate(0, PortalCoordinateSystem.portalScale * 1.7, 0).getArray();
-		SCALE_MATRIX = MatrixBuilder.euclidean().scale(PortalCoordinateSystem.portalScale).getArray();
+		System.err.println("DPR: Portal scale is "+PortalCoordinateSystem.getPortalScale());
+		FIXED_HEAD = MatrixBuilder.euclidean().translate(0, PortalCoordinateSystem.getPortalScale() * 1.7, 0).getArray();
+		SCALE_MATRIX = MatrixBuilder.euclidean().scale(PortalCoordinateSystem.getPortalScale()).getArray();
 	}
 	public DevicePortalTrackd() {
 		JFrame f = new JFrame("Head tracking:");
@@ -92,15 +86,17 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	protected void calibrate(double[] sensorMatrix, int index) {
 		Matrix m = new Matrix(sensorMatrix);
 		
-		m.setEntry(0, 3, m.getEntry(0, 3)/100-1.24);
+		// convert to coordinate system where the origin is in the middle of the bottom of the floor
+		m.setEntry(0, 3, m.getEntry(0, 3)/100-PortalCoordinateSystem.xDimPORTAL/2);
 		m.setEntry(1, 3, m.getEntry(1, 3)/100);
-		m.setEntry(2, 3, m.getEntry(2, 3)/100-1.24);
+		m.setEntry(2, 3, m.getEntry(2, 3)/100-PortalCoordinateSystem.xDimPORTAL/2);
 
 		// rotate:
 		if (index == 1) m.multiplyOnRight(WAND_CALIB); // wand
 		if (index == 0) m.multiplyOnRight(HEAD_CALIB); // head
 
-		if (index == 0 || index == 1  && PortalCoordinateSystem.portalScale != 1.0) {
+		// apply portal scale separately to the translation part of the matrices
+		if (index == 0 || index == 1  && PortalCoordinateSystem.getPortalScale() != 1.0) {
 			double[] tlate = m.getColumn(3);
 			tlate = Rn.matrixTimesVector(null, SCALE_MATRIX, tlate);
 			m.setColumn(3, tlate);

@@ -57,24 +57,24 @@ public class PortalCoordinateSystem {
 	 */
 	//  static double xDimPORTAL = 4.068;   // half PORTAL screen x-dim in feet
 	//  static double yDimPORTAL = 6.561;   // full PORTAL screen y-dim in feet
-	public static double xDimPORTAL = 2*4.068*0.3048;   // full PORTAL screen x-dim in METER
-	public static double yDimPORTAL = 6.561*0.3048;   // full PORTAL screen y-dim in METER
-	public static double zDimPORTAL = xDimPORTAL;
-	public static double yOffsetPORTAL = 0.4;
+	public static final double xDimPORTAL = 2*4.068*0.3048;   // full PORTAL screen x-dim in METER
+	public static final double yDimPORTAL = 6.561*0.3048;   // full PORTAL screen y-dim in METER
+	public static final double zDimPORTAL = xDimPORTAL;
+	public static final double yOffsetPORTAL = 0.4;		// the height (in meters) of the base of the walls
 
-	public static double portalScale = 1.0;
+	private static double portalScale = 1.0;
 	static double[] portalCenter = {0,0,0,1};
 	static double[] metersToPortal = Rn.identityMatrix(4);
 	static double[] portalToMeters = Rn.identityMatrix(4);
 
 	private static boolean changed = true;
-	public static double eyeSeparation = .07;
-	public static double eyeLevel = 1.7;
+	private static double eyeSeparationMeters = .07;
+	private static double eyeLevelMeters = 1.7;
 	
     static {
         String bar = Secure.getProperty("portalScale");
-        if (bar != null)  portalScale = Double.parseDouble(bar);
-        System.err.println("PCS: Portal scale is "+portalScale);         
+        if (bar != null)  setPortalScale(Double.parseDouble(bar));
+        System.err.println("PCS: Portal scale is "+getPortalScale());         
         }
 	public static double[] getPortalCenter() {
 		return portalCenter;
@@ -83,16 +83,9 @@ public class PortalCoordinateSystem {
 		PortalCoordinateSystem.portalCenter = portalCenter;
 		changed = true; update();
 	}
-	public static double getPortalScale() {
-		return portalScale;
-	}
-	public static void setPortalScale(double portalScale) {
-		PortalCoordinateSystem.portalScale = portalScale;
-		changed = true; update();
-	}
 	private static void update()	{
 		if (!changed) return;
-		MatrixBuilder.euclidean().scale(portalScale).translate(portalCenter).assignTo(metersToPortal);
+		MatrixBuilder.euclidean().scale(getPortalScale()).translate(portalCenter).assignTo(metersToPortal);
 		Rn.inverse(portalToMeters, metersToPortal);
 		changed = false;
 	}
@@ -105,10 +98,10 @@ public class PortalCoordinateSystem {
 	public static Rectangle2D getWallPort() {
 		Rectangle2D wp = new Rectangle2D.Double();
 		wp.setFrame(
-				portalScale*(-xDimPORTAL/2-portalCenter[0]),
-				portalScale*(yOffsetPORTAL-portalCenter[1]),
-				portalScale*xDimPORTAL,
-				portalScale*yDimPORTAL);
+				getPortalScale()*(-xDimPORTAL/2-portalCenter[0]),
+				getPortalScale()*(yOffsetPORTAL-portalCenter[1]),
+				getPortalScale()*xDimPORTAL,
+				getPortalScale()*yDimPORTAL);
 		return wp;
 	}
 		public static void setPORTALViewport(double[] portalOriginInCamCoordinates, Camera cam) {
@@ -122,7 +115,7 @@ public class PortalCoordinateSystem {
 			
 			double x = -portalOriginInCamCoordinates[0];
 			double y = -portalOriginInCamCoordinates[1];
-			double z = -portalOriginInCamCoordinates[2] + portalScale*zDimPORTAL/2;  // make wall z=0
+			double z = -portalOriginInCamCoordinates[2] + convertMeters(zDimPORTAL)/2;  // make wall z=0
 			cam.setFocus(z);
 			xmin = (x0-x)/z;
 			ymin = (y0-y)/z;
@@ -131,5 +124,23 @@ public class PortalCoordinateSystem {
 		}
 		public static double convertMeters(double d) {
 			return portalScale*d;
+		}
+		public static void setPortalScale(double portalScale) {
+			PortalCoordinateSystem.portalScale = portalScale;
+		}
+		public static double getPortalScale() {
+			return portalScale;
+		}
+		public static void setEyeSeparationMeters(double eyeSeparation) {
+			PortalCoordinateSystem.eyeSeparationMeters = eyeSeparation;
+		}
+		public static double getEyeSeparationMeters() {
+			return eyeSeparationMeters;
+		}
+		public static void setEyeLevelMeters(double eyeLevel) {
+			PortalCoordinateSystem.eyeLevelMeters = eyeLevel;
+		}
+		public static double getEyeLevelMeters() {
+			return eyeLevelMeters;
 		}
 }
