@@ -42,6 +42,7 @@
  */
 package de.jreality.geometry;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,8 +55,8 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 
-public class RemoveDublicateInfo {
-	public static double eps= 0.000001;
+public class RemoveDuplicateInfo {
+	public static double eps= 0.00000001;
 
 	private static boolean compare(double[] p1,double[] p2,double eps){
 		// vergleicht Punkte in R^n bis auf eps als Tolleranz
@@ -81,7 +82,7 @@ public class RemoveDublicateInfo {
 
 	/** retains only vertices which differs enough in the given
 	 * attributes. 
-	 * <i>enough</i> means the euclidean distanz is smaler than <code>eps</code> 
+	 * <i>enough</i> means the euclidean distance is smaler than <code>eps</code> 
 	 * retains only the standard Vertex Attributes.
 	 * face- and edge- attributes stay the same.
 	 * only Face and Edge Indices changes.
@@ -95,7 +96,7 @@ public class RemoveDublicateInfo {
 	 * @param atts	   some <code>doubleArrayArrayAttributes</code> 
 	 * @return IndexedFaceSet  
 	 */
-	public static IndexedFaceSet removeDublicateVertices(PointSet ps, Attribute ... atts){
+	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, Attribute ... atts){
 		IndexedFaceSet ifs= IndexedFaceSetUtility.pointSetToIndexedFaceSet(ps);
 		List<Attribute> attrs=new LinkedList<Attribute>();
 		for (int i = 0; i < atts.length; i++) {
@@ -164,7 +165,7 @@ public class RemoveDublicateInfo {
 		// neue Attribute der Punkte zwischenspeichern:
 		int curr=0; // : aktuell einzufuegender Index 
 		int index;
-		DimTreeStart dTree=new RemoveDublicateInfo().new DimTreeStart(totalDim);
+		DimTreeStart dTree=new RemoveDuplicateInfo().new DimTreeStart(totalDim);
 
 		if (numOfVertices>0){
 			for (int i=0; i<numOfVertices;i++){
@@ -187,6 +188,8 @@ public class RemoveDublicateInfo {
 					if (oldVertexTextureCoordsArray!=null)
 						oldVertexTextureCoordsArray[curr]=oldVertexTextureCoordsArray[i];
 					curr++;
+					System.out
+							.println("RemoveDublicateInfo.removeDublicateVertices(curr)"+curr);
 				}
 			}	
 		}
@@ -284,9 +287,6 @@ public class RemoveDublicateInfo {
 		private int totalDim;
 		DimTree d;
 		public DimTreeStart(int dim) {
-			double[] tol= new double[dim];
-			for (int i=0;i<dim;i++)
-				tol[i]=0.0001;
 			DimTreeCurrNumToGive=0;
 			totalDim=dim;	
 		}
@@ -332,28 +332,18 @@ public class RemoveDublicateInfo {
 			}
 			return (hit)? -1 : n; 			
 		}
-//		/**@param a
-//		 * @return :  new counting number
-//		 * 		   :  number of existing doubled value
-//		 */
-//		int put(double[][] a){
-//			int n=whichChild(a);
-//			if (n==-1) return number;
-//			if (children[n]==null){
-//				children[n]=new DimTree(a,root);
-//				return root.DimTreeCurrNumToGive-1;
-//			}
-//			return children[n].put(a);
-//		}
 
 		int put(double[][] a){
 			List<Integer> way= search(a);
 			// way to a hit?
 			DimTree target= this;
-			int last=way.get(way.size()-1);
-			way.remove(way.size()-1);
-			for (int i: way) 
+			Iterator iter = way.iterator();
+			for (int k = 0; k < way.size() - 1 ; k++) {
+				int i= (Integer) iter.next();
 				target=target.children[i];
+			}
+			int last=(Integer)iter.next();
+			
 			if(last==-1)
 				return target.number;
 			// no way to a hit!
@@ -368,34 +358,36 @@ public class RemoveDublicateInfo {
 		 */
 		List<Integer> search(double[][] a){
 			List <Integer> way= new LinkedList<Integer>();
-			List <Integer> alt=whichChild2(a);
-			if(alt.get(0)==-1)// hit value
-				return alt;
-			if(alt.size()==1){// one choise of subtree
-				if(children[alt.get(0)]!=null)
-					way=children[alt.get(0)].search(a);
-				way.add(0,alt.get(0));
+			int[] alt=whichChild2(a);
+			if(alt==null){// hit value
+				way.add(-1);
+				return way;
+			}
+			if(alt.length==1){// one choise of subtree
+				if(children[alt[0]]!=null)
+					way=children[alt[0]].search(a);
+				way.add(0,alt[0]);
 				return way;
 			}
 			// search for deeper hit
-			for (int i = alt.size()-1; i>=0 ;i--) {
-				if(children[alt.get(i)]!=null){
-					way=children[alt.get(i)].search(a);
-					way.add(0,alt.get(i));
+			for (int i = alt.length-1; i>=0 ;i--) {
+				if(children[alt[i]]!=null){
+					way=children[alt[i]].search(a);
+					way.add(0,alt[i]);
 					if(way.get(way.size()-1)==-1)
 						return way;
 				}
 			}// remember: best choise for insert was the first in the list
 			if(way.size()==0)
-				way.add(0,alt.get(0));
+				way.add(0,alt[0]);
 			return way;
 		}
-		/** list of posible Childtrees.
-		 * is only -1 if we hit the element.
+		/** array of posible Childtrees.
+		 * is only null if we hit the element.
 		 * @param a
 		 * @return
 		 */
-		List<Integer> whichChild2(double[][] a){
+		int[] whichChild2(double[][] a){
 			List<Integer> pos= new LinkedList<Integer>();
 			// do we hit the value?
 			boolean hit=true;
@@ -405,10 +397,8 @@ public class RemoveDublicateInfo {
 					break;
 				}
 			}
-			if(hit){
-				pos.add(-1);// -1 means hit!
-				return pos;
-			}
+			if(hit){ return null; }
+		//	hier durchgehen was nicht stimmt
 			// no hit! calc possible subtrees
 			pos.add(0);
 			int best=0;
@@ -438,7 +428,13 @@ public class RemoveDublicateInfo {
 			}
 			pos.remove(new Integer(best));// delete best from list
 			pos.add(0,best);// insert best at first place
-			return pos;
+			int[] result=new int[pos.size()];
+			int i=0;
+			for (int k: pos) {
+				result[i]=k;
+				i++;
+			}
+			return result;
 		}
 	}// end DimTree
 	
