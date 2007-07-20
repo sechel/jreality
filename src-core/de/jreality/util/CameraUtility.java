@@ -211,7 +211,7 @@ public class CameraUtility {
 	 * <p>
 	 * Define V to be the intersection of the viewing frustum with the plane <i>z = focus</i> (See {@link #setFocus(double)}).
 	 * Second, define the positions <i>Pl = (d,0,0,0)</i> and <i>Pr = (-d,0,0,0)</i> where <i>d = eyeSeparation/2.0</i>  (See
-	 * {@link #setEyeSeparation(double)}). Then the position of the left eye in
+	 * {@link #setEyeSeparationMeters(double)}). Then the position of the left eye in
 	 * camera coordinates is O.Pl (where O is the camera's orientation matrix (See {@link #setOrientationMatrix(double[])}), or the identity
 	 * matrix if none has been set) and similarly for the right eye. Then the viewing frustum for the left eye is the unique viewing frustum determined by 
 	 * the position at the left (right) eye and the rectangle V; similarly for the right eye.
