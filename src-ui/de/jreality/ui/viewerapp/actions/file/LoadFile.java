@@ -59,7 +59,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.GeometryMergeFactory;
-import de.jreality.geometry.RemoveDublicateInfo;
+import de.jreality.geometry.RemoveDuplicateInfo;
 import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -143,8 +143,8 @@ public class LoadFile extends AbstractJrAction {
         	IndexedFaceSet geo = mFac.mergeIndexedFaceSets(sgc);
         	if(removeDublicateVertices.isSelected()){
         		if(removeDublicateVerticesWithNormals.isSelected())
-        			geo = RemoveDublicateInfo.removeDublicateVertices(geo,Attribute.NORMALS);
-        		else geo = RemoveDublicateInfo.removeDublicateVertices(geo);
+        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS);
+        		else geo = RemoveDuplicateInfo.removeDuplicateVertices(geo);
         	}
         	comp.setGeometry(geo);	
         	sgc=comp;
