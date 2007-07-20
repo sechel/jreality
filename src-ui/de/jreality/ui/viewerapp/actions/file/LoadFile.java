@@ -88,8 +88,8 @@ public class LoadFile extends AbstractJrAction {
   private JComponent options; 
   private JCheckBox mergeFaceSets;
   private JCheckBox mergeFaceSetsWithNormals;
-  private JCheckBox removeDublicateVertices;
-  private JCheckBox removeDublicateVerticesWithNormals;
+  private JCheckBox removeDuplicateVertices;
+  private JCheckBox removeDuplicateVerticesWithNormals;
   private JCheckBox callEncompass;
   
 
@@ -122,10 +122,10 @@ public class LoadFile extends AbstractJrAction {
     mergeFaceSets.setSelected(false);
     mergeFaceSetsWithNormals.setSelected(false);
     mergeFaceSetsWithNormals.setEnabled(false);
-    removeDublicateVertices.setSelected(false);
-    removeDublicateVertices.setEnabled(false);
-    removeDublicateVerticesWithNormals.setSelected(false);
-    removeDublicateVerticesWithNormals.setEnabled(false);
+    removeDuplicateVertices.setSelected(false);
+    removeDuplicateVertices.setEnabled(false);
+    removeDuplicateVerticesWithNormals.setSelected(false);
+    removeDuplicateVerticesWithNormals.setEnabled(false);
     
     File[] files = FileLoaderDialog.loadFiles(parentComp, options);
     if (files == null) return;  //dialog cancelled
@@ -141,8 +141,8 @@ public class LoadFile extends AbstractJrAction {
         	if(!mergeFaceSetsWithNormals.isSelected())
         		mFac.setGenerateVertexNormals(false);
         	IndexedFaceSet geo = mFac.mergeIndexedFaceSets(sgc);
-        	if(removeDublicateVertices.isSelected()){
-        		if(removeDublicateVerticesWithNormals.isSelected())
+        	if(removeDuplicateVertices.isSelected()){
+        		if(removeDuplicateVerticesWithNormals.isSelected())
         			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS);
         		else geo = RemoveDuplicateInfo.removeDuplicateVertices(geo);
         	}
@@ -178,20 +178,20 @@ public class LoadFile extends AbstractJrAction {
 
     mergeFaceSets = new JCheckBox("merge geometries");
     mergeFaceSetsWithNormals = new JCheckBox("garantee vertex normals");
-    removeDublicateVertices = new JCheckBox("remove dublicate vertices");
-    removeDublicateVerticesWithNormals = new JCheckBox("respect vertex normals");
+    removeDuplicateVertices = new JCheckBox("remove duplicate vertices");
+    removeDuplicateVerticesWithNormals = new JCheckBox("respect vertex normals");
     
     mergeFaceSets.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ev) {
 				boolean editable = mergeFaceSets.isSelected();
 				mergeFaceSetsWithNormals.setEnabled(editable);
-				removeDublicateVertices.setEnabled(editable);
-				removeDublicateVerticesWithNormals.setEnabled(editable && removeDublicateVertices.isSelected());
+				removeDuplicateVertices.setEnabled(editable);
+				removeDuplicateVerticesWithNormals.setEnabled(editable && removeDuplicateVertices.isSelected());
 			}
 		});
-    removeDublicateVertices.addChangeListener(new ChangeListener(){
+    removeDuplicateVertices.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent arg0) {
-				removeDublicateVerticesWithNormals.setEnabled(removeDublicateVertices.isSelected());
+				removeDuplicateVerticesWithNormals.setEnabled(removeDuplicateVertices.isSelected());
 			}
 		});
     
@@ -207,12 +207,12 @@ public class LoadFile extends AbstractJrAction {
     tmp = Box.createHorizontalBox();
     tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
     tmp.add(new JLabel("  "));
-    tmp.add(removeDublicateVertices);    
+    tmp.add(removeDuplicateVertices);    
     box.add(tmp);
     tmp = Box.createHorizontalBox();
     tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
     tmp.add(new JLabel("    "));
-    tmp.add(removeDublicateVerticesWithNormals);
+    tmp.add(removeDuplicateVerticesWithNormals);
     box.add(tmp);
     box.add(Box.createVerticalStrut(10));
     box.add(callEncompass);
