@@ -673,7 +673,7 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 			indices[i]=(int[])polysIndices.get(i);
 			colorData[i]=getRGBColor((Color)colors.get(i));
 		}
-		//	melt:	  if it dos not work simply take it out
+		//	melt:	  if it dos not work just take it out
 		if(optGeo){
 			Vector temp= FaceMelt.meltCoords(data,indices);
 			data= (double[][]) temp.elementAt(0);

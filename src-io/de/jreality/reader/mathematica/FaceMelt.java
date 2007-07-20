@@ -42,6 +42,7 @@ package de.jreality.reader.mathematica;
 import java.util.Vector;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.RemoveDuplicateInfo;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
@@ -123,6 +124,7 @@ public class FaceMelt {
 	
 	
 	/**
+	 * 
 	 * reduces the points:
 	 * makes corresponding Lists to the params
 	 *  with no point twice set in the new coords-List 
@@ -130,9 +132,22 @@ public class FaceMelt {
 	 * @param indicesOld
 	 * @return a Vector of two elements:
 	 *	 double[][3]  : points
-	 *	 int[][]      : indicesVector of  
+	 *	 int[][]      : indices
+	 *
+	 *@deprecated : use RemoveDublicateInfo.remove
 	 */
 	public static Vector meltCoords( double [][] coordsOld,int [][] indicesOld){
+//		int numV=coordsOld.length;
+//		int numF=indicesOld.length;
+//		IndexedFaceSet faces=new IndexedFaceSet(numV,numF);
+//		faces.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(coordsOld));
+//		faces.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(indicesOld));
+//		RemoveDublicateInfo.removeDublicateVertices(faces);
+//		Vector res=new Vector();
+//		res.add(faces.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null));
+//		res.add(faces.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null));
+//		return res;
+
 		// returns a Vector of two elements:
 		// double[][3]  : points
 		// int[][]      : indices
@@ -178,7 +193,8 @@ public class FaceMelt {
 	 *  twice set in the CoordinateList
 	 *  this IFS has no Attributes set
 	 * @param indexedFaceSet to smaler
-	 * @return indexedFaceSet with less Points but no Attributes  
+	 * @return indexedFaceSet with less Points but no Attributes
+	 *@deprecated : use RemoveDublicateInfo.removeNoFaceVertices() 
 	 */
 	public static IndexedFaceSet meltFace (IndexedFaceSet ifs){
 		// die alten Daten auslesen
