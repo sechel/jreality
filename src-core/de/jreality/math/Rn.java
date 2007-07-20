@@ -1049,10 +1049,11 @@ final public class Rn {
 	 */
 	public static double[] projectOnto(double[] dst, double[] src, double[] fixed)	{
 		if (dst == null) dst = new double[src.length];
-		// TODO check dimensions
-		double[] nfixed = Rn.normalize(null, fixed);
-		double f = Rn.innerProduct(nfixed, src);
-		Rn.times(dst, f, fixed);
+		//double[] nfixed = Rn.normalize(null, fixed);
+		double d = Rn.innerProduct(fixed, fixed);
+		double f = Rn.innerProduct(fixed, src);
+		//System.err.println("inner product = "+f);
+		Rn.times(dst, f/d, fixed);
 		return dst;
 	}
 	
