@@ -1,12 +1,16 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
-
+import java.util.LinkedList;
+import java.util.List;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.reader.vrml.VRMLHelper;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerApp;
 
@@ -17,8 +21,8 @@ public class TestMerge {
 
 	public static void main(String[] args) {
 		IndexedFaceSet ico= Primitives.sharedIcosahedron;
-		IndexedFaceSet ico2= Primitives.sharedIcosahedron;
-		IndexedFaceSetUtility.assignSmoothVertexNormals(ico2, 20);
+		ico.setVertexAttributes(Attribute.NORMALS,null);
+		ico.setFaceAttributes(Attribute.NORMALS,null);
 		IndexedFaceSet box= Primitives.box(10, .5, .5, true);
 		IndexedFaceSet box2= Primitives.box(10, .6, 0.4, true);
 		IndexedFaceSet zyl= Primitives.cylinder(20,1,0,.5,5);
@@ -47,14 +51,14 @@ public class TestMerge {
 		B.addChild(B2);
 		root.addChild(C);
 
-		//A1.setGeometry(box);
-		//A11.setGeometry(box2);
-		//B1.setGeometry(zyl);
-		//B2.setGeometry(ico);
-		C.setGeometry(arr);
-
-		IndexedLineSet[] list= new IndexedLineSet[]{arr};
-		//PointSet[] list= new PointSet[]{zyl,box2,box,ico2};
+			root.setGeometry(new PointSet());
+			A1.setGeometry(box);
+			A11.setGeometry(box2);
+			B1.setGeometry(zyl);
+			B2.setGeometry(ico);
+			C.setGeometry(arr);
+		//IndexedLineSet[] list= new IndexedLineSet[]{			};
+		PointSet[] list= new PointSet[]{zyl,box2,box};
 		//IndexedLineSet[] list= new IndexedLineSet[]{ico,box};
 		//IndexedFaceSet i=mergeIndexedFaceSets(list,new Attribute[]{Attribute.COLORS},new double[][][]{{{0,1,1}}},null,null,null,null );
 
@@ -64,40 +68,21 @@ public class TestMerge {
 		//t.generateVertexNormals=false;
 		//t.respectEdges=false;
 		
-		//IndexedFaceSet i=t.mergeGeometrySets(root);
 		IndexedFaceSet i=t.mergeIndexedFaceSets(list);
-		//PointSet i=t.mergeIndexedFaceSets(list);
-		//System.out.println("Report:"+i);
-		vApp.display(arr);
+		//IndexedFaceSet i=t.mergeGeometrySets(root);
 		
-//		// little Scene (two colored boxes and a bangle)
-//		IndexedFaceSet box= Primitives.box(10, .5, .5, true);
-//		IndexedFaceSet box2= Primitives.box(10, .6, 0.4, true);
-//		
-//		IndexedFaceSet zyl= Primitives.cylinder(20,1,0,.5,5);
-//		SceneGraphComponent root= new SceneGraphComponent();
-//		SceneGraphComponent A= new SceneGraphComponent();
-//		SceneGraphComponent B= new SceneGraphComponent();
-//		
-//		root.addChild(A);
-//		root.addChild(B);
-//		//root.setGeometry(box);
-//		A.setGeometry(zyl);
-//		B.setGeometry(box);
-//		// the factory :
-//		
-//		GeometryMergeFactory mergeFact= new GeometryMergeFactory();		
-//		//mergeFact.setRespectEdges(false);
-//		// play with the following 3 optional settings (by default they are true)
-//		//mergeFact.setRespectFaces(true);
-//		//mergeFact.setRespectEdges(true);
-//		//mergeFact.setGenerateVertexNormals(true);				
-//		
-//		//IndexedFaceSet[] list= new IndexedFaceSet[]{box,ico};
-//		IndexedFaceSet result=mergeFact.mergeGeometrySets(root);
-//		//IndexedFaceSet result=mergeFact.mergeIndexedFaceSets(list);
-//		System.out.println(result);
-//		vApp.display(result);
+		System.out.println("Report:"+i);
+		
+		
+		
+		
+		//IndexedFaceSet i= Primitives.torus(20,10 , 20, 10);
+		//System.out.println("TestMerge.main(i)"+i);
+		IndexedFaceSet j= RemoveDuplicateInfo.removeDuplicateVertices(i,new Attribute[]{Attribute.COLORS} );
+		//System.out.println("TestMerge.main(j)"+j);
+		
+		vApp.display(j);
+		
 	}
 
 }
