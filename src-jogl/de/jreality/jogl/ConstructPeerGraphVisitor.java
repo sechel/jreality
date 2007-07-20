@@ -57,6 +57,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 				} else singlePeer = false;
 			} 			
 		}
+//		System.err.println("OSP: "+oldSinglePeer+" "+c.getName()+" NSP: "+singlePeer);
 		GoBetween gb = jr.goBetweenFor(c, singlePeer);
 		JOGLPeerComponent peer = null;
 		boolean alreadySinglePeer = false;

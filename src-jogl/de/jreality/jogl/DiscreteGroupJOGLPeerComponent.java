@@ -38,17 +38,20 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	int delay = 50;
 	Geometry trojanHorse = null;
 	SceneGraphPath w2camrepn = null;
-	double[] m2wd = new double[16], finalThing = new double[16];
+	double[] m2wd = new double[16], camera2CameraRepn = new double[16];
 	float[] m2w = new float[16];
 	int framecount = -1;
 	protected boolean[] matrixIsReflection = null;
 	GL oldGL;
+	public static int instanceCount;
 	public DiscreteGroupJOGLPeerComponent()	{
 		super();
+		instanceCount++;
 	}
 	
 	public DiscreteGroupJOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr)		{
 		super(sgp, p, jr);
+		instanceCount++;
 	}
 	
 	@Override
@@ -190,13 +193,14 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	protected void pushTransformation(double[] m) {
 		if (w2camrepn != null )	{
+			// recalculate the matrix if we haven't yet done it this frame
 			if (framecount != jr.frameCount) {
 				w2camrepn.getInverseMatrix(m2wd);
 				framecount = jr.frameCount;
-				Rn.times(finalThing,m2wd,  jr.getRenderingState().cameraToWorld);
+				Rn.times(camera2CameraRepn,m2wd,  jr.getRenderingState().cameraToWorld);
 //				System.err.println("Setting up final thing");
 			}
-			super.pushTransformation(finalThing);
+			super.pushTransformation(camera2CameraRepn);
 		} else super.pushTransformation(m);
 	}
 
