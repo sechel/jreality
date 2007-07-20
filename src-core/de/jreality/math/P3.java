@@ -1072,4 +1072,36 @@ public class P3 {
 		return sum;
 	}
 
+	/**
+	 * Project the point <i>p</i> onto the line spanned by <i>v0</i> and <i>v1</i> perpendicularly.
+	 * @param dst
+	 * @param p
+	 * @param v0
+	 * @param v1
+	 * @param signature
+	 * @return
+	 */
+	public static double[] projectPointOntoLine(double[] dst, double[] p, double[] v0, double[] v1, int signature) {
+		if (dst == null) dst = new double[4];
+		if (signature == Pn.EUCLIDEAN)	{
+			double[] dv = Rn.subtract(null, v1, v0);
+			double[] dp = Rn.subtract(null, p, v0);
+			double[] proj = Rn.projectOnto(null, dp, dv);
+			Rn.add(dst, v0, proj);
+//			System.err.println("p = "+Rn.toString(p));
+//			System.err.println("v0 = "+Rn.toString(v0));
+//			System.err.println("v1 = "+Rn.toString(v1));
+//			System.err.println("dv = "+Rn.toString(dv));
+//			System.err.println("dp = "+Rn.toString(dp));
+//			System.err.println("proj = "+Rn.toString(proj));
+			return dst;
+		}
+		double[] polar0 = Pn.polarizePoint(null, v0, signature);
+		double[] polar1 = Pn.polarizePoint(dst, v1, signature);
+		double[] line = P3.lineFromPlanes(null, polar0, polar1);
+		double[] plane = P3.lineJoinPoint(null, line, p);
+		lineIntersectPlane(dst, v0, v1, plane);
+		return dst;
+	}
+
 }
