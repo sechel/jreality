@@ -761,8 +761,8 @@ public class Pn {
 	 * @param ds
 	 * @param signature
 	 * @return
-	 */public static double[] polarizePlane(double[] dst, double[] point, int signature) {
-		return polarize(dst, point, signature);
+	 */public static double[] polarizePlane(double[] dst, double[] plane, int signature) {
+		return polarize(dst, plane, signature);
 	}
 
 	/**
@@ -773,15 +773,15 @@ public class Pn {
 	 * @param signature
 	 * @return
 	 */
-	public static double[] polarizePoint(double[] dst, double[] plane, int signature) {
+	public static double[] polarizePoint(double[] dst, double[] point, int signature) {
 		if (signature == Pn.EUCLIDEAN)	{
 			// there is only one polar plane: the plane at infinity
-			if (dst == null) dst = new double[plane.length];
+			if (dst == null) dst = new double[point.length];
 			for (int i = 0; i< (dst.length-1); ++i) dst[i] = 0.0;
 			dst[dst.length-1] = -1.0;
 			return dst;
 		}
-		return polarize(dst, plane, signature);
+		return polarize(dst, point, signature);
 	}
 	
 	/**
