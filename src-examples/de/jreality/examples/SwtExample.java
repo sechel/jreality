@@ -61,14 +61,12 @@ import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.toolsystem.ToolSystemViewer;
 import de.jreality.util.RenderTrigger;
 
 public class SwtExample {
@@ -113,8 +111,8 @@ public class SwtExample {
     cameraPath.push(cameraNode);
     cameraPath.push(camera);
     
-    final Viewer viewer;
-    final ToolSystem toolSystem;
+    Viewer viewer = null;
+    ToolSystem toolSystem;
     
     // true for SWT, false for AWT
     if (true) {
