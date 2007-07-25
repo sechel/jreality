@@ -856,6 +856,7 @@ final public class Rn {
 	    for (int i = 0; i < 4; i++) {
 	      for (int j = 0; j < 4; j++) {
 	    	  sb.append(String.format("%g", new Object[]{v[4*i+j]}));
+	    	  if (i != 3 || j != 3) sb.append(",");
 	    	  sb.append(j == 3 ? "\n":"\t");
 	      }
 	    }
