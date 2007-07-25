@@ -99,6 +99,9 @@ public class ParametricTriangularSurfaceFactory extends AbstractIndexedFaceSetFa
 		subNode.setObject(subdivision);
 	}
 	
+	public int getSubdivision()	{
+		return subdivision;
+	}
 	protected Object generateFaceIndices(int[][] is) {
 		int[][] indices = is;
 		
