@@ -1513,5 +1513,10 @@ final public class Rn {
 	}
 
 
+	public static double[] setToLength(double[] p1, double[] p12, double rad) {
+		return times(p1, rad/euclideanNorm(p12), p12);
+	}
+
+
 }
 
