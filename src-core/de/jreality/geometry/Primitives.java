@@ -578,16 +578,20 @@ public class Primitives {
 		  * @return
 		  */
 		 public static IndexedFaceSet regularPolygon(int order, double offset) {
-				double[][] verts = new double[order][3];
-				double start = offset*(2*Math.PI)/order;
-				for (int  i =0; i<order; ++i)	{
-					double angle = start+i * 2.0*Math.PI/order;
-					verts[i][0] = Math.cos(angle);
-					verts[i][1] = Math.sin(angle);
-					verts[i][2] = 0.0;
-				}
+				double[][] verts = regularPolygonVertices(order, offset);
 				return IndexedFaceSetUtility.constructPolygon(verts);
 			}
+		public static double[][] regularPolygonVertices(int order, double offset) {
+			double[][] verts = new double[order][3];
+			double start = offset*(2*Math.PI)/order;
+			for (int  i =0; i<order; ++i)	{
+				double angle = start+i * 2.0*Math.PI/order;
+				verts[i][0] = Math.cos(angle);
+				verts[i][1] = Math.sin(angle);
+				verts[i][2] = 0.0;
+			}
+			return verts;
+		}
 			
 		/**
 		 * @return {@link #arrow(double, double, double, double, double, boolean)} with final parameter false.
