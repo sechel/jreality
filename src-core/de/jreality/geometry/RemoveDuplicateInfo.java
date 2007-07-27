@@ -60,19 +60,25 @@ import de.jreality.scene.data.StringArrayArray;
 public class RemoveDuplicateInfo {
 	
 
-	/** retains only vertices which differs enough in the given
-	 * attributes. 
-	 * <i>enough</i> means the euclidean distance is smaler than <code>eps</code> 
-	 * retains only the standard Vertex Attributes.
+	/** retains only vertices which differs enough in the coordinstes. 
+	 * <i>enough</i> means the distance in the three directions is smaler than <code>eps</code> 
+	 * retains the following Vertex Attribute Datatypes in the reduced way:
+	 *  String-,Double- and Int-, -Array and -ArrayArray  
 	 * face- and edge- attributes stay the same.
 	 * only Face and Edge Indices changes.
-	 * 
-	 * Remark: The GeonmetryAttribute 
+	 * Remark:
+	 *  In some rare cases(many near Vertices) Vertices 
+	 *   within eps distance do not collapse to one.
+	 *  and in some cases Vertices with euclidean
+	 *   distance up to <i>5.2*eps</i> could be merged. 
+	 * Remark: The GeometryAttribute 
 	 * 			<code>quadmesh</code> will be deleted
 	 * Remark: some other Attributes may collide with the new Geometry
 	 * 
 	 * @param ps       can be <code>IndexedFaceSet,IndexedLineSet or PointSet</code>
-	 * @param atts	   some <code>doubleArrayArrayAttributes</code> 
+	 * @param atts	   this Attributes must be DoubleArray or DoubleArrayArray Attributes 
+	 * 					they will be respected by testing equality of Vertices.
+	 * 					This is not yet implemented. And have yet no Effect.
 	 * @return IndexedFaceSet  
 	 */
 ////---------- new start-----------------
@@ -411,11 +417,11 @@ public class RemoveDuplicateInfo {
 		geo.setGeometryAttributes("quadMesh",null);
 	}
 	// getter / setter ---------------------------------------- 
-	/** get Tolerance for merging*/
+	/** get Tolerance for equality */
 	public double getEps() {
 		return eps;
 	}
-	/** set Tolerance for merging*/
+	/** set Tolerance for equality*/
 	public void setEps(double eps) {
 		this.eps = eps;
 	}
