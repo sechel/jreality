@@ -90,6 +90,8 @@ public class LoadFile extends AbstractJrAction {
   private JCheckBox mergeFaceSetsWithNormals;
   private JCheckBox removeDuplicateVertices;
   private JCheckBox removeDuplicateVerticesWithNormals;
+  private JCheckBox removeDuplicateVerticesWithColors;
+  private JLabel remarkNormals;
   private JCheckBox callEncompass;
   
 
@@ -122,10 +124,13 @@ public class LoadFile extends AbstractJrAction {
     mergeFaceSets.setSelected(false);
     mergeFaceSetsWithNormals.setSelected(false);
     mergeFaceSetsWithNormals.setEnabled(false);
+    remarkNormals.setEnabled(false);
     removeDuplicateVertices.setSelected(false);
     removeDuplicateVertices.setEnabled(false);
     removeDuplicateVerticesWithNormals.setSelected(false);
     removeDuplicateVerticesWithNormals.setEnabled(false);
+    removeDuplicateVerticesWithColors.setSelected(false);
+    removeDuplicateVerticesWithColors.setEnabled(false);
     
     File[] files = FileLoaderDialog.loadFiles(parentComp, options);
     if (files == null) return;  //dialog cancelled
@@ -142,9 +147,15 @@ public class LoadFile extends AbstractJrAction {
         		mFac.setGenerateVertexNormals(false);
         	IndexedFaceSet geo = mFac.mergeIndexedFaceSets(sgc);
         	if(removeDuplicateVertices.isSelected()){
-        		if(removeDuplicateVerticesWithNormals.isSelected())
+        		if(removeDuplicateVerticesWithNormals.isSelected()
+        			&&removeDuplicateVerticesWithColors.isSelected())
+        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS,Attribute.COLORS);
+        		else if (removeDuplicateVerticesWithNormals.isSelected())
         			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS);
-        		else geo = RemoveDuplicateInfo.removeDuplicateVertices(geo);
+        		else if (removeDuplicateVerticesWithColors.isSelected())
+        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.COLORS);
+        		else	
+        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo);        		
         	}
         	comp.setGeometry(geo);	
         	sgc=comp;
@@ -178,20 +189,25 @@ public class LoadFile extends AbstractJrAction {
 
     mergeFaceSets = new JCheckBox("merge geometries");
     mergeFaceSetsWithNormals = new JCheckBox("garantee vertex normals");
+    remarkNormals= new JLabel("(created before points remove!)");
     removeDuplicateVertices = new JCheckBox("remove duplicate vertices");
     removeDuplicateVerticesWithNormals = new JCheckBox("respect vertex normals");
+    removeDuplicateVerticesWithColors = new JCheckBox("respect vertex colors");
     
     mergeFaceSets.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ev) {
 				boolean editable = mergeFaceSets.isSelected();
 				mergeFaceSetsWithNormals.setEnabled(editable);
+				remarkNormals.setEnabled(editable);
 				removeDuplicateVertices.setEnabled(editable);
 				removeDuplicateVerticesWithNormals.setEnabled(editable && removeDuplicateVertices.isSelected());
+				removeDuplicateVerticesWithColors.setEnabled(editable && removeDuplicateVertices.isSelected());
 			}
 		});
     removeDuplicateVertices.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent arg0) {
 				removeDuplicateVerticesWithNormals.setEnabled(removeDuplicateVertices.isSelected());
+				removeDuplicateVerticesWithColors.setEnabled(removeDuplicateVertices.isSelected());
 			}
 		});
     
@@ -207,12 +223,22 @@ public class LoadFile extends AbstractJrAction {
     tmp = Box.createHorizontalBox();
     tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
     tmp.add(new JLabel("  "));
+    tmp.add(remarkNormals);
+    box.add(tmp);
+    tmp = Box.createHorizontalBox();
+    tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
+    tmp.add(new JLabel("  "));
     tmp.add(removeDuplicateVertices);    
     box.add(tmp);
     tmp = Box.createHorizontalBox();
     tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
     tmp.add(new JLabel("    "));
     tmp.add(removeDuplicateVerticesWithNormals);
+    box.add(tmp);
+    tmp = Box.createHorizontalBox();
+    tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
+    tmp.add(new JLabel("    "));
+    tmp.add(removeDuplicateVerticesWithColors);
     box.add(tmp);
     box.add(Box.createVerticalStrut(10));
     box.add(callEncompass);
