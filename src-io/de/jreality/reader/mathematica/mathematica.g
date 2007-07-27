@@ -556,49 +556,36 @@ lineBlock [Appearance app] returns[Appearance app2]
 	  )   
 	)*
 	{
-			double [][] data= new double[coordinates.size()][];
-			double [][] colorData = new double[linesIndices.size()][];
-			for(int i=0;i<coordinates.size();i++){
-				data[i]= (double[])coordinates.get(i);
-			}
-			int[][] indices= new int[linesIndices.size()][];
-			//System.out.println("Farben der Linien:");
-			for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
-				indices[i]=(int [])linesIndices.get(i);
-				colorData[i]=getRGBColor((Color)colors.get(i));		
-			}
-			// -- verschmelzen der Punkte
-			if (optGeo){
-				Vector temp= FaceMelt.meltCoords(data,indices);
-				data= (double[][]) temp.elementAt(0);
-				indices= (int[][]) temp.elementAt(1);
-				count=data.length;
-			}
-			// -- verschmelzen der Punkte Ende
-			IndexedLineSetFactory lineset=new IndexedLineSetFactory();
-			lineset.setLineCount(linesIndices.size());
-			lineset.setVertexCount(count);
-			lineset.setEdgeIndices(indices);
-			lineset.setVertexCoordinates(data);
-			lineset.update();
-			Appearance lineApp =copyApp(app2);
-		    if (colorNeeded){
-					lineset.getIndexedLineSet().setEdgeAttributes(Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
-			}
-			else
-				lineApp= setPLColor(lineApp,plC);
-			lineset.update();
-			// for (int i=0;i<linesIndices.size();i++)
-			// System.out.println(colorData[i][0]+"|"+colorData[i][1]+"|"+colorData[i][2]);
-			SceneGraphComponent geo=new SceneGraphComponent();
-			//lineApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-			//lineApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
-			geo.setAppearance(lineApp);
-			geo.setGeometry(lineset.getIndexedLineSet());
-			geo.setName("Lines");
-			current.addChild(geo);
-			simplifyColor(app2);
+		double [][] data= new double[coordinates.size()][];
+		double [][] colorData = new double[linesIndices.size()][];
+		for(int i=0;i<coordinates.size();i++)
+			data[i]= (double[])coordinates.get(i);
+		int[][] indices= new int[linesIndices.size()][];
+		for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
+			indices[i]=(int [])linesIndices.get(i);
+			colorData[i]=getRGBColor((Color)colors.get(i));		
 		}
+		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
+		lineset.setLineCount(linesIndices.size());
+		lineset.setVertexCount(count);
+		lineset.setEdgeIndices(indices);
+		lineset.setVertexCoordinates(data);
+		lineset.update();
+		Appearance lineApp =copyApp(app2);
+		if (colorNeeded)
+			lineset.getIndexedLineSet().setEdgeAttributes(
+		Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
+		else	lineApp= setPLColor(lineApp,plC);
+		lineset.update();
+		SceneGraphComponent geo=new SceneGraphComponent();
+		geo.setAppearance(lineApp);
+		IndexedLineSet ils=lineset.getIndexedLineSet();
+		RemoveDuplicateInfo.removeDuplicateVertices(ils,Attribute.COLORS);
+		geo.setGeometry(ils);
+		geo.setName("Lines");
+		current.addChild(geo);
+		simplifyColor(app2);
+	}
 	;  
 
 
@@ -657,38 +644,24 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 		double [][] data= new double[count][];
 		double [][] colorData = new double[polysIndices.size()][];
 		for(int i=0;i<count;i++){				// Punkte zum flachen DoubleArray machen
-			data[i]=((double[]) coordinates.get(i));
+		data[i]=((double[]) coordinates.get(i));
 		}
 		int[][] indices= new int[polysIndices.size()][];
 		for(int i=0;i<polysIndices.size();i++){		// Indices als doppelListe von Doubles machen
 			indices[i]=(int[])polysIndices.get(i);
 			colorData[i]=getRGBColor((Color)colors.get(i));
 		}
-		//	melt:	  if it dos not work just take it out
-		if(optGeo){
-			Vector temp= FaceMelt.meltCoords(data,indices);
-			data= (double[][]) temp.elementAt(0);
-			indices= (int[][]) temp.elementAt(1);
-			count=data.length;
-		}
-		//  end melt
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
 		faceSet.setVertexCount(count);
 		faceSet.setFaceCount(polysIndices.size());
 		faceSet.setFaceIndices(indices);
 		faceSet.setVertexCoordinates(data);
 		Appearance faceApp =copyApp(app2);
-		//faceApp.setAttribute(CommonAttributes.SMOOTH_SHADING, true);// smoth ist eh default
-	    if (colorNeeded)
+		if (colorNeeded)
 			faceSet.setFaceColors(colorData);
-		else{
-			faceApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
+		else	faceApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
 			 	CommonAttributes.DIFFUSE_COLOR, fC);
-		}
-		
 		if (edgeF!=null){
-	 	 	//faceApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-		 	//faceApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 			faceApp.setAttribute(CommonAttributes.TUBE_RADIUS,1/150);
 			faceApp.setAttribute(CommonAttributes.LINE_WIDTH,1);	 	
 			if (edgeF instanceof Color){
@@ -700,18 +673,17 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 			}
 			faceSet.setGenerateEdgesFromFaces(true);
 		}
-		else {
-		 	faceApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-			faceSet.setGenerateEdgesFromFaces(false);
-			}
+		else faceSet.setGenerateEdgesFromFaces(false);
 		faceSet.setGenerateFaceNormals(true);
-		faceSet.setGenerateVertexNormals(true);
 		faceSet.update();
+		IndexedFaceSet ifs= faceSet.getIndexedFaceSet();
+		RemoveDuplicateInfo.removeDuplicateVertices(ifs,Attribute.COLORS);
+		IndexedFaceSetUtility.assignSmoothVertexNormals(ifs,-1);
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 		geo.setAppearance(faceApp);
 		current.addChild(geo);
 		geo.setName("Faces");
-		geo.setGeometry(faceSet.getIndexedFaceSet());
+		geo.setGeometry(ifs);
 	}
 	;
 	
