@@ -104,7 +104,7 @@ public class RemoveDuplicateInfo {
 	}
 	// methods----------------------------------------
 	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ps, Attribute ...attributes ) {
-		return removeDuplicateVertices(ps,0.00000000001,attributes);		
+		return removeDuplicateVertices(ps,0.00000001,attributes);		
 	}
 	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ps, double eps, Attribute ...attributes ) {
 		IndexedFaceSet ifs= IndexedFaceSetUtility.pointSetToIndexedFaceSet(ps);		
@@ -116,6 +116,7 @@ public class RemoveDuplicateInfo {
 			if(r.points.length==1) return null;
 		}
 		//
+		r.eps=Math.min(0, eps);
 		r.dim=r.points[0].length;
 		r.mergeRefferenceTable=new int[r.points.length];
 		for (int i = 0; i < r.points.length; i++) {
@@ -158,7 +159,7 @@ public class RemoveDuplicateInfo {
 	private void processBox(Box b){// finished
 		if(b.numOfPoints==0) return;
 		// case of to small Box:
-		if(b.getSize()<3*eps) {
+		if(b.getSize()<=(3.0*eps)) {
 			mergeAllToOne(b);
 			return;
 		}
