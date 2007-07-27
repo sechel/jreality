@@ -77,12 +77,11 @@ public class RemoveDuplicateInfo {
 	 * 
 	 * @param ps       can be <code>IndexedFaceSet,IndexedLineSet or PointSet</code>
 	 * @param atts	   this Attributes must be DoubleArray or DoubleArrayArray Attributes 
-	 * 					they will be respected by testing equality of Vertices.
-	 * 					This is not yet implemented. And have yet no Effect.
+	 * 					(others will be ignored) they will be respected by testing equality of Vertices.
 	 * @return IndexedFaceSet  
 	 */
 ////---------- new start-----------------
-	private int[] RefferenceTable;
+	private int[] refferenceTable;
 	private int[] mergeRefferenceTable;
 	private int[] removeRefferenceTable;
 	private int[] sublistTable;
@@ -90,6 +89,7 @@ public class RemoveDuplicateInfo {
 	private IndexedFaceSet source;
 	private IndexedFaceSet geo= new IndexedFaceSet();
 	private double[][] points; // the vertices
+	private double[][] attrVals; // the vertices
 	
 	private double eps; // Tolereanz for merging
 	private int dim;// =points[x].length
@@ -100,7 +100,6 @@ public class RemoveDuplicateInfo {
 	private RemoveDuplicateInfo(IndexedFaceSet ifs, Attribute ...attributes ){
 		source=ifs;
 		points=source.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		//TODO: handle  Attributes
 	}
 	// methods----------------------------------------
 	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ps, Attribute ...attributes ) {
@@ -115,7 +114,6 @@ public class RemoveDuplicateInfo {
 			if(r.points.length==0) return null;
 			if(r.points.length==1) return null;
 		}
-		//
 		r.eps=Math.min(0, eps);
 		r.dim=r.points[0].length;
 		r.mergeRefferenceTable=new int[r.points.length];
@@ -123,6 +121,7 @@ public class RemoveDuplicateInfo {
 			r.mergeRefferenceTable[i]=i;
 		}
 		r.numSubBoxes=(int)Math.pow(2, r.dim);
+		r.readOutAttributes(attributes);
 		// create first box:
 		Box b=r.fillFirstBox();
 		// start sortBox(firstBox):
@@ -131,7 +130,46 @@ public class RemoveDuplicateInfo {
 		r.postCalulation();
 		return r.geo;
 	} 
+	/** read out the attributes, which are given by the user, 
+	 * to be compared for equality.
+	 * @param attributes
+	 */
+	private void readOutAttributes(Attribute ... attributes ){
+		List<double[][]> DAAList= new LinkedList<double[][]>();
+		List<double[]> DAList= new LinkedList<double[]>();
+		int dim= 0;
+		// sort and remember meaningfull Atributes
+		for(Attribute at: attributes){
+			if(at.getName().equals(Attribute.COORDINATES.getName()))continue;
+			DataList currDL=source.getVertexAttributes(at);
+			if(currDL== null)continue;
+			if(currDL instanceof DoubleArrayArray){
+				if(currDL.item(0)== null)continue;
+				DAAList.add(currDL.toDoubleArrayArray(null));
+				dim+=currDL.item(0).size();
+			}
+			if(currDL instanceof DoubleArray){
+				DAList.add(currDL.toDoubleArray(null));
+				dim++;
+			}
+		}
+		// put the doubles into an array
+		attrVals= new double[source.getNumPoints()][dim];
+		int dimCount=0;
+		for (double[][] daa: DAAList) {
+			int currDim=daa[0].length; 
+			for (int i = 0; i < daa.length; i++) 
+				System.arraycopy(daa[i], 0, attrVals[i], dimCount, currDim);
+			dimCount+=currDim;
+		}
+		for (double[] da: DAList) {
+			for (int i = 0; i < da.length; i++)
+				attrVals[i][dimCount]=da[i];
+			dimCount++;
+		}
+	}
 	
+	/** inserts all points in the first Box	 */
 	private Box fillFirstBox(){// finished
 		double[] max= new double[dim];
 		double[] min= new double[dim];
@@ -160,7 +198,8 @@ public class RemoveDuplicateInfo {
 		if(b.numOfPoints==0) return;
 		// case of to small Box:
 		if(b.getSize()<=(3.0*eps)) {
-			mergeAllToOne(b);
+			//mergeAllToOne(b);
+			compareInBox(b);
 			return;
 		}
 		// recursion case(subdivision needed):
@@ -175,9 +214,7 @@ public class RemoveDuplicateInfo {
 		compareInBox(b);
 	}
 	/** indicates if a Point is within the box given by 
-	 *  min and max plus an eps.
-	 * 
-	 */
+	 *  min and max plus an eps. */
 	private boolean inBetwen(double[]max,double[]min,double eps, double[] val){// finished
 		for (int i = 0; i < val.length; i++) {
 			if(val[i]>max[i]+eps) return false;
@@ -185,31 +222,31 @@ public class RemoveDuplicateInfo {
 		}
 		return true;
 	}
+	/** compares the points in every important attribute.
+	 *  uses the same <code>eps</code> for every attribute.  */
+	private boolean isEqualByEps(int p1, int p2){
+		double[] c1=points[p1];// coords
+		double[] c2=points[p2];
+		double[] a1=attrVals[p1];//important double attributes (inlined)
+		double[] a2=attrVals[p2];
+		if(inBetwen(c1,c1, eps, c2)&&inBetwen(a1,a1, eps, a2))
+			return true; 
+		return false;
+	}
 	/** sets the refferences of all Vertices in the box	
 	 */ 
 	private void compareInBox(Box b) {// finished
-		for (int i: b.innerPoints){
-			if(!isLegalPoint(i)) continue;
-			for (int j: b.innerPoints){
-				if(i>=j)continue;
-				if(!isLegalPoint(j)) continue;
-				double[] p1=points[i];
-				double[] p2=points[j];
-				if (inBetwen(p1, p1, eps, p2))
-					mergeRefferenceTable[j]=i;
+		for (int p1: b.innerPoints){
+			if(!isLegalPoint(p1)) continue;
+			for (int p2: b.innerPoints){
+				if(p1>=p2)continue;
+				if(!isLegalPoint(p2)) continue;
+				if (isEqualByEps(p1, p2))
+					mergeRefferenceTable[p2]=p1;
 			}
 		}
 	}
-	private void mergeAllToOne(Box b) {// finished
-		int dest=b.innerPoints.get(0);
-		for (int p : b.innerPoints) {
-			mergeRefferenceTable[p]=dest;
-		}
-	}
-	/** indicates if a point is not refferenced to an other;
-	 * @param p
-	 * @return
-	 */
+	/** indicates if a point is not refferenced to an other; */
 	private boolean isLegalPoint(int p){// finished
 		return (mergeRefferenceTable[p]==p);
 	}
@@ -337,9 +374,9 @@ public class RemoveDuplicateInfo {
 				removeRefferenceTable[i]=-1;
 			}
 		// direct referenceTable:
-		RefferenceTable= new int[points.length];
+		refferenceTable= new int[points.length];
 		for (int i = 0; i < points.length; i++) {
-			RefferenceTable[i]=removeRefferenceTable[mergeRefferenceTable[i]];
+			refferenceTable[i]=removeRefferenceTable[mergeRefferenceTable[i]];
 		}
 		numNewVerts=numUsedVerts;
 		// sublist Table:
@@ -364,7 +401,7 @@ public class RemoveDuplicateInfo {
 			int[][] fIndis=data.toIntArrayArray(null);
 			int[][] result= new int[fIndis.length][];
 			for (int i = 0; i < result.length; i++) {
-				result[i]=newIndices(fIndis[i], RefferenceTable);
+				result[i]=newIndices(fIndis[i], refferenceTable);
 			}
 			geo.setFaceAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
 		}
@@ -374,7 +411,7 @@ public class RemoveDuplicateInfo {
 			int[][] eIndis=data.toIntArrayArray(null);
 			int[][] result= new int[eIndis.length][];
 			for (int i = 0; i < result.length; i++) {
-				result[i]=newIndices(eIndis[i], RefferenceTable);
+				result[i]=newIndices(eIndis[i], refferenceTable);
 			}
 			geo.setEdgeAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
 		}
@@ -427,197 +464,8 @@ public class RemoveDuplicateInfo {
 		this.eps = eps;
 	}
 	public int[] getRefferenceTable() {
-		return RefferenceTable;
+		return refferenceTable;
 	}
-////---------- new end ------------------
-	
-	
-//	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, Attribute ... atts){
-//		
-//		
-//		List<Attribute> attrs=new LinkedList<Attribute>();
-//		for (int i = 0; i < atts.length; i++) {
-//			attrs.add(atts[i]);
-//		}
-//		if(!attrs.contains(Attribute.COORDINATES))// Koordinaten muessen dabei sein!
-//			attrs.add(Attribute.COORDINATES);
-//		int numOfVertices	=ifs.getNumPoints();
-//
-//		// compareData [Attr][Vertex][dim]
-//		List<double[][]> compareDataTemp = new LinkedList<double[][]>();
-//		List<Attribute> goodAttrs = new LinkedList<Attribute>();
-//
-//		//compareData auslesen und nur funktionierende Attribute merken:
-//		int totalDim=0;			// gesammelte dimension der zu vergl. Attribute
-//		for(Attribute a:attrs){
-//			try {
-//				double[][] temp=ifs.getVertexAttributes (a).toDoubleArrayArray(null);
-//				int dim=temp[0].length;
-//				compareDataTemp.add(temp);
-//				totalDim+=dim;
-//				goodAttrs.add(a);
-//			}catch (Exception e) {}
-//		}
-//		int numOfAttr=goodAttrs.size();
-//		// compareData[vertex][attr][dim]
-//		double[][][] compareData = new double[numOfVertices][numOfAttr][];
-//		for (int i = 0; i < numOfAttr; i++) { // change sizing
-//			for (int j = 0; j < numOfVertices; j++) {
-//				compareData[j][i]= compareDataTemp.get(i)[j];
-//			}
-//		}
-//
-//		// die alten Daten auslesen	
-//		int[][]    oldVertexIndizeesArray=null;
-//		String[]   oldVertexLabelsArray=null;
-//
-//		DataList temp;
-//		temp=ifs.getVertexAttributes ( Attribute.INDICES );
-//		if (temp !=null)oldVertexIndizeesArray 		= temp.toIntArrayArray(null);
-//		temp= ifs.getVertexAttributes( Attribute.LABELS );
-//		if (temp!=null)	oldVertexLabelsArray 		= temp.toStringArray(null);
-//
-//		// anders regeln!!! <<=>---<<<
-//		double [][] oldVertexCoordsArray=null;
-//		double[][] oldVertexColorArray=null;
-//		double[][] oldVertexNormalsArray=null;
-//		double[]   oldVertexSizeArray= null;
-//		double[][] oldVertexTextureCoordsArray=null;
-//		temp= ifs.getVertexAttributes( Attribute.NORMALS );
-//		if (temp!=null) oldVertexNormalsArray 		= temp.toDoubleArrayArray(null);
-//		temp= ifs.getVertexAttributes( Attribute.POINT_SIZE);
-//		if (temp!=null) oldVertexSizeArray 			= temp.toDoubleArray(null);
-//		temp= ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES );
-//		if (temp!=null) oldVertexTextureCoordsArray = temp.toDoubleArrayArray(null);
-//		temp= ifs.getVertexAttributes ( Attribute.COORDINATES );
-//		if (temp!=null) oldVertexCoordsArray 		= temp.toDoubleArrayArray(null);
-//		temp= ifs.getVertexAttributes ( Attribute.COLORS );
-//		if (temp!=null)	oldVertexColorArray 		= temp.toDoubleArrayArray(null);
-//
-//
-//		// refferenceTable.[i] verweist auf den neuen i.Index (fuer umindizierung)
-//		int[] refferenceTabel =new int[numOfVertices];
-//
-//		// hier werden die Punkte neu gelesen und die Verweise in RefferenceTable gemerkt
-//		// neue Attribute der Punkte zwischenspeichern:
-//		int curr=0; // : aktuell einzufuegender Index 
-//		int index;
-//		DimTreeStart dTree=new RemoveDuplicateInfo().new DimTreeStart(totalDim);
-//
-//		if (numOfVertices>0){
-//			for (int i=0; i<numOfVertices;i++){
-//				// Trick :benutze durchgelaufenen Teil der Datenliste fuer neue Daten
-//				index=dTree.put(compareData[i]);	// pruefe ob Vertex doppelt 
-//				refferenceTabel[i]=index; //Indizes vermerken 
-//				if(curr==index){
-//					// nur notwendige Daten uebertragen: 
-//					oldVertexCoordsArray[curr]=oldVertexCoordsArray[i];
-//					if (oldVertexColorArray!=null)
-//						oldVertexColorArray[curr]=oldVertexColorArray[i];
-//					if (oldVertexIndizeesArray!=null)
-//						oldVertexIndizeesArray[curr]=oldVertexIndizeesArray[i];
-//					if (oldVertexLabelsArray!=null)
-//						oldVertexLabelsArray[curr]=oldVertexLabelsArray[i];
-//					if (oldVertexNormalsArray!=null)
-//						oldVertexNormalsArray[curr]=oldVertexNormalsArray[i];
-//					if (oldVertexSizeArray!=null)
-//						oldVertexSizeArray[curr]=oldVertexSizeArray[i];
-//					if (oldVertexTextureCoordsArray!=null)
-//						oldVertexTextureCoordsArray[curr]=oldVertexTextureCoordsArray[i];
-//					curr++;
-//					System.out
-//							.println("RemoveDublicateInfo.removeDublicateVertices(curr)"+curr);
-//				}
-//			}	
-//		}
-//		int numOfVerticesNew = curr;
-//
-//		// Die VertexAttributVektoren kuerzen		
-//		double[][] newVertexColorArray= 		new double[numOfVerticesNew][];
-//		double[][] newVertexCoordsArray= 		new double[numOfVerticesNew][];
-//		String[]   newVertexLabelsArray= 		new String[numOfVerticesNew];
-//		double[][] newVertexNormalsArray= 		new double[numOfVerticesNew][];
-//		double[][] newVertexTextureCoordsArray= new double[numOfVerticesNew][];
-//		double[]   newVertexSizeArray= 			new double[numOfVerticesNew];
-//		int[][]    newVertexIndizeesArray= 		new int[numOfVerticesNew][];
-//
-//		for(int i=0;i<numOfVerticesNew;i++){
-//			if (oldVertexCoordsArray!=null)			newVertexCoordsArray[i]=oldVertexCoordsArray[i];
-//			if (oldVertexColorArray!=null)			newVertexColorArray[i]=oldVertexColorArray[i];
-//			if (oldVertexIndizeesArray!=null)		newVertexIndizeesArray[i]=oldVertexIndizeesArray[i];
-//			if (oldVertexLabelsArray!=null)			newVertexLabelsArray[i]=oldVertexLabelsArray[i];
-//			if (oldVertexNormalsArray!=null)		newVertexNormalsArray[i]=oldVertexNormalsArray[i];
-//			if (oldVertexSizeArray!=null)			newVertexSizeArray[i]=oldVertexSizeArray[i];
-//			if (oldVertexTextureCoordsArray!=null)	newVertexTextureCoordsArray[i]=oldVertexTextureCoordsArray[i];
-//		}
-//
-//		// Die Vertex Attribute wieder einfuegen
-//		IndexedFaceSet result=new IndexedFaceSet();
-//		result.setNumPoints(numOfVerticesNew);
-//
-//		if (numOfVerticesNew>0){
-//			if (oldVertexCoordsArray!=null){
-//				System.out.println("coords");
-//				result.setVertexAttributes(Attribute.COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-//			}
-//			if (oldVertexColorArray!=null){
-//				System.out.println("color");
-//				result.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(newVertexColorArray));
-//			}
-//			if (oldVertexLabelsArray!=null){
-//				System.out.println("labels");
-//				result.setVertexAttributes(Attribute.LABELS, new StringArray(newVertexLabelsArray));
-//			}
-//			if (oldVertexNormalsArray!=null){
-//				System.out.println("normals");
-//				result.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(newVertexNormalsArray));
-//			}
-//			if (oldVertexTextureCoordsArray!=null){
-//				System.out.println("texture");
-//				result.setVertexAttributes(Attribute.TEXTURE_COORDINATES, new DoubleArrayArray.Array(newVertexCoordsArray));
-//			}
-//			if (oldVertexSizeArray!=null){
-//				System.out.println("size");
-//				result.setVertexAttributes(Attribute.POINT_SIZE, new DoubleArray(newVertexSizeArray));
-//			}
-//			if (oldVertexIndizeesArray!=null){
-//				System.out.println("indicees");
-//				result.setVertexAttributes(Attribute.INDICES, new IntArrayArray.Array(newVertexIndizeesArray));
-//			}
-//		}
-//
-//		// uebernehmen der alten Attribute
-//		int numOfEdges		=ifs.getNumEdges();
-//		int numOfFaces		=ifs.getNumFaces();
-//		result.setNumEdges(numOfEdges);
-//		result.setNumFaces(numOfFaces);
-//
-//		result.setGeometryAttributes(ifs.getGeometryAttributes());
-//		result.setEdgeAttributes(ifs.getEdgeAttributes());
-//		result.setFaceAttributes(ifs.getFaceAttributes());
-//
-//		// die Indices angleichen:		
-//		int [][] faceIndicesOld=null;
-//		int [][] edgeIndicesOld=null;
-//		temp=ifs.getFaceAttributes( Attribute.INDICES );
-//		if (temp !=null){
-//			faceIndicesOld = temp.toIntArrayArray(null);
-//			int [][] faceIndicesNew= makeNewIndicees(faceIndicesOld,refferenceTabel);
-//			if((numOfFaces>0)&(numOfVertices>0))
-//				result.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(faceIndicesNew));
-//		}
-//		temp=ifs.getEdgeAttributes( Attribute.INDICES );
-//		if (temp !=null){
-//			edgeIndicesOld = temp.toIntArrayArray(null);
-//			int [][] edgesIndicesNew=makeNewIndicees(edgeIndicesOld,refferenceTabel);
-//			if((numOfEdges>0)&(numOfVertices>0))
-//				result.setEdgeAttributes(Attribute.INDICES, new IntArrayArray.Array(edgesIndicesNew));
-//		}
-//		return result;		
-//
-//	}
-
-	
 	/** removes vertices which are not used by faces.
 	 * changes faceIndices.
 	 * @param vertices
