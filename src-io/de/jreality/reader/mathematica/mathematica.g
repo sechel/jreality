@@ -97,8 +97,7 @@ options {
 	
 	private SceneGraphComponent current = root;		// aktuell zu erweiternder Knoten 
 	private Logger log = LoggingSystem.getLogger(MathematicaParser.class);
-	private CoordinateSystemFactory box;
-	private Appearance globalApp =new Appearance();	// App. der root
+//	private CoordinateSystemFactory box;
 	private Appearance startApp =new Appearance();
 	private Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
 	private Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
@@ -262,11 +261,7 @@ options {
 * @returns SceneGraphComponent root of generated scene
 */
 start returns [SceneGraphComponent r=new SceneGraphComponent()]
-{	globalApp.setName("global");	
-	setPLColor(globalApp, plCDefault);			 	
-	globalApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, fCDefault);
-	root.setAppearance(globalApp);
+{
 	root.setName("Mathematica");
 	log.setLevel(Level.FINE);	
 }
@@ -279,15 +274,11 @@ start returns [SceneGraphComponent r=new SceneGraphComponent()]
 	  	)
 	  	{
 	  	// Box und Axen ermoeglichen:
-	  	box=new CoordinateSystemFactory(root);
+	  //	box=new CoordinateSystemFactory(root);
 		}
 	  	(optionen)? 									// Die in der 2."{}"-Klammer folgenden Optionen sind optional
 	  CLOSE_BRACKET 
 		{
-		//globalApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		globalApp.setAttribute(CommonAttributes.SPHERES_DRAW, false);
-		//globalApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
-		//globalApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
 		r = root;
 		if(r==null)r= new SceneGraphComponent();
 		}
@@ -954,17 +945,25 @@ optionPrimitive
 // Bemerkung: man kann offensichtlich auch auf Quellen verweisen (option :> $Identifier)
 //		ich habe aber keine Ahnung was das bedeutet. ignoriere es also
 // -- geht bereits:
-	:	"Boxed"			(		MINUS LARGER 
-			// eine Box um die Scene
-						 (	 "True"	{box.showBox(true);}	
-							|"False"{box.showBox(false);}
-						)| DDOT LARGER	egal {log.fine(" 'Boxed :> $<name>' not implemented");})
-	|	"Axes" 			(		MINUS LARGER
-			// Achsen an der Scene
-						 (	 "True"	{box.showAxes(true);}	
-							|"False" {box.showAxes(false);}
-							|"Automatic"{log.fine("Axes -> Automatic not implemented");}
-						)| DDOT LARGER	egal{log.fine(" 'Axes :> $<name>' not implemented");})
+	:	"Boxed"			(DDOT LARGER	egal| MINUS LARGER	egal)
+				{log.fine(" Boxed not implemented");}
+	
+	
+//						(		MINUS LARGER 
+//			// eine Box um die Scene
+//						 (	 "True"	{box.showBox(true);}	
+//							|"False"{box.showBox(false);}
+//						)| DDOT LARGER	egal {log.fine(" 'Boxed :> $<name>' not implemented");})
+
+	|	"Axes" 			(DDOT LARGER	egal| MINUS LARGER	egal)
+				{log.fine(" Axes not implemented");}
+
+//						(		MINUS LARGER
+//			// Achsen an der Scene
+//						 (	 "True"	{box.showAxes(true);}	
+//							|"False" {box.showAxes(false);}
+//							|"Automatic"{log.fine("Axes -> Automatic not implemented");}
+//						)| DDOT LARGER	egal{log.fine(" 'Axes :> $<name>' not implemented");})
 
 // -- moeglich/Sinnvoll:
 	|	"AxesLabel"				(DDOT LARGER	egal| MINUS LARGER	egal)
