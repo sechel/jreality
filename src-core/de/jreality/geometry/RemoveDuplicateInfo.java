@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
@@ -102,10 +103,10 @@ public class RemoveDuplicateInfo {
 		points=source.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	}
 	// methods----------------------------------------
-	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ps, Attribute ...attributes ) {
+	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, Attribute ...attributes ) {
 		return removeDuplicateVertices(ps,0.00000001,attributes);		
 	}
-	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ps, double eps, Attribute ...attributes ) {
+	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, double eps, Attribute ...attributes ) {
 		IndexedFaceSet ifs= IndexedFaceSetUtility.pointSetToIndexedFaceSet(ps);		
 		// inittialize some data
 		RemoveDuplicateInfo r= new RemoveDuplicateInfo(ifs);
