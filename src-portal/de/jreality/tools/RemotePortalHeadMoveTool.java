@@ -62,8 +62,8 @@ import de.jreality.util.ConfigurationAttributes;
 public class RemotePortalHeadMoveTool extends AbstractTool {
   
   static final transient InputSlot headSlot = InputSlot.getDevice("ShipHeadTransformation");
-  static final Matrix cameraOrientation;
-  static final Matrix inverseCameraOrientation;
+  public static final Matrix cameraOrientation;
+  public static final Matrix inverseCameraOrientation;
   static {
 	    ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 	    double[] rot = config.getDoubleArray("camera.orientation");
