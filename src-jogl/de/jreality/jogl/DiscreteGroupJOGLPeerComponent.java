@@ -11,6 +11,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.SceneGraphComponentEvent;
+import de.jreality.tools.RemotePortalHeadMoveTool;
 import de.jreality.util.SystemProperties;
 
 /**
@@ -38,7 +39,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	int delay = 50;
 	Geometry trojanHorse = null;
 	SceneGraphPath w2camrepn = null;
-	double[] m2wd = new double[16], camera2CameraRepn = new double[16];
+	double[] world2CameraRepn = new double[16], camera2CameraRepn = new double[16];
 	float[] m2w = new float[16];
 	int framecount = -1;
 	protected boolean[] matrixIsReflection = null;
@@ -195,9 +196,11 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		if (w2camrepn != null )	{
 			// recalculate the matrix if we haven't yet done it this frame
 			if (framecount != jr.frameCount) {
-				w2camrepn.getInverseMatrix(m2wd);
+				w2camrepn.getInverseMatrix(world2CameraRepn);
 				framecount = jr.frameCount;
-				Rn.times(camera2CameraRepn,m2wd,  jr.getRenderingState().cameraToWorld);
+				Rn.times(camera2CameraRepn,world2CameraRepn,  jr.getRenderingState().cameraToWorld);
+				Rn.times(camera2CameraRepn, camera2CameraRepn , RemotePortalHeadMoveTool.inverseCameraOrientation.getArray());
+
 //				System.err.println("Setting up final thing");
 			}
 			super.pushTransformation(camera2CameraRepn);
