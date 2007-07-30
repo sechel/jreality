@@ -106,6 +106,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 
 	public Object visit()	{
 		visit(myRoot);
+		System.err.println("Peer count is "+JOGLPeerComponent.count);
 		return thePeerRoot;
 	}
 

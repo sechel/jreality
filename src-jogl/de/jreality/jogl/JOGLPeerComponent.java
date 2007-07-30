@@ -78,7 +78,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected final static int POLYGON_SHADER_CHANGED = 32;
 	protected final static int ALL_SHADERS_CHANGED = POINT_SHADER_CHANGED | LINE_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
 	protected final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
-
+	public static int count = 0;
 	// need an empty constructor in order to allow 
 	public JOGLPeerComponent()	{
 		super();
@@ -97,10 +97,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		goBetween = jr.goBetweenFor(sgp.getLastComponent());
 		goBetween.addJOGLPeer(this);
 		name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
-		Geometry foo = goBetween.getOriginalComponent().getGeometry();
 		children = new Vector<JOGLPeerComponent>();
 		parent = p;
 		updateTransformationInfo();
+		count++;
 	}
 	
 	protected void updateRenderRunnable() {
@@ -421,7 +421,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	 */
 	protected void updateTransformationInfo() {
 		if (goBetween.getOriginalComponent().getTransformation() != null) {
-//			isReflection = goBetween.getOriginalComponent().getTransformation().getIsReflection();
 			isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
 			isIdentity = Rn.isIdentityMatrix(goBetween.getOriginalComponent().getTransformation().getMatrix(), 10E-8);
 			cachedTform = goBetween.getOriginalComponent().getTransformation().getMatrix(cachedTform);
