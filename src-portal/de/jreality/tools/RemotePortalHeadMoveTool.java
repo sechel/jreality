@@ -51,7 +51,7 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.CameraUtility;
 
 /**
  * A tool that sets the head matrix from the head tracker.
@@ -62,20 +62,6 @@ import de.jreality.util.ConfigurationAttributes;
 public class RemotePortalHeadMoveTool extends AbstractTool {
   
   static final transient InputSlot headSlot = InputSlot.getDevice("ShipHeadTransformation");
-  public static final Matrix cameraOrientation;
-  public static final Matrix inverseCameraOrientation;
-  static {
-	    ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
-	    double[] rot = config.getDoubleArray("camera.orientation");
-	    MatrixBuilder mb = MatrixBuilder.euclidean();
-	    double camRot = 0;
-	    if (rot != null) {
-	    	camRot = rot[0] * ((Math.PI * 2.0) / 360.);
-			mb.rotate(camRot, new double[] { rot[1], rot[2], rot[3] });
-		}
-	    cameraOrientation=mb.getMatrix();
-	    inverseCameraOrientation = cameraOrientation.getInverse();
-  }
 
   Matrix headMatrix = new Matrix();
   Matrix worldToCamera = new Matrix();
@@ -100,11 +86,11 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
 	Camera camera = (Camera) cameraPath.getLastElement();
   
 	// the transformation of the camera node is headTranslation * cameraOrientation
-	MatrixBuilder.init(null, signature).translate(head.getColumn(3)).times(cameraOrientation).assignTo(cameraPath.getLastComponent());
+	MatrixBuilder.init(null, signature).translate(head.getColumn(3)).times(CameraUtility.cameraOrientation).assignTo(cameraPath.getLastComponent());
 		
 	// calculate and set camera orientation matrix:
 	head.setColumn(3, Pn.originP3);
-	Matrix camOrientationMatrix = MatrixBuilder.euclidean().times(inverseCameraOrientation).times(head).getMatrix();
+	Matrix camOrientationMatrix = MatrixBuilder.euclidean().times(CameraUtility.inverseCameraOrientation).times(head).getMatrix();
 	camera.setOrientationMatrix(camOrientationMatrix.getArray());
     
     // assign camera viewport
