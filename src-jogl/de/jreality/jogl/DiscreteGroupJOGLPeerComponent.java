@@ -6,12 +6,10 @@ import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.SceneGraphComponentEvent;
-import de.jreality.tools.RemotePortalHeadMoveTool;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.SystemProperties;
 
 /**
@@ -199,7 +197,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				w2camrepn.getInverseMatrix(world2CameraRepn);
 				framecount = jr.frameCount;
 				Rn.times(camera2CameraRepn,world2CameraRepn,  jr.getRenderingState().cameraToWorld);
-				Rn.times(camera2CameraRepn, camera2CameraRepn , RemotePortalHeadMoveTool.inverseCameraOrientation.getArray());
+				Rn.times(camera2CameraRepn, camera2CameraRepn , CameraUtility.inverseCameraOrientation.getArray());
 
 //				System.err.println("Setting up final thing");
 			}
