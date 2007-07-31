@@ -115,7 +115,7 @@ public class RemoveDuplicateInfo {
 			if(r.points.length==0) return null;
 			if(r.points.length==1) return null;
 		}
-		r.eps=Math.min(0, eps);
+		r.eps=Math.max(0, eps);
 		r.dim=r.points[0].length;
 		r.mergeRefferenceTable=new int[r.points.length];
 		for (int i = 0; i < r.points.length; i++) {
