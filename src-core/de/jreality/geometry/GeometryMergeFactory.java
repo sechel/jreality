@@ -449,7 +449,7 @@ public class GeometryMergeFactory {
 							// avoid definition-holes by generating vertexnormals without faces: 
 							List<double[]> zeroNormals=new LinkedList<double[]>();
 							zeroNormals.add(new double[]{0,0,0});
-							defaultEdgeAttributeValues.add(zeroNormals);
+							defaultVertexAttributeValues.add(zeroNormals);
 						}
 					}
 				}
