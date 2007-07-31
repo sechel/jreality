@@ -69,21 +69,22 @@ public class CameraUtility {
 	  public static  Matrix cameraOrientation = new Matrix();
 	  public static  Matrix inverseCameraOrientation = new Matrix();
 	  static {
-		  if (System.getProperty(SystemProperties.ENVIRONMENT).indexOf("portal") != -1) {
-			try {
-			    ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
-			    double[] rot = config.getDoubleArray("camera.orientation");
-			    MatrixBuilder mb = MatrixBuilder.euclidean();
-			    double camRot = 0;
-			    if (rot != null) {
-			    	camRot = rot[0] * ((Math.PI * 2.0) / 360.);
-					mb.rotate(camRot, new double[] { rot[1], rot[2], rot[3] });
-				}
-			    cameraOrientation=mb.getMatrix();
-			    inverseCameraOrientation = cameraOrientation.getInverse();			  
-			} catch(SecurityException se)	{
-				LoggingSystem.getLogger(CameraUtility.class).log(Level.WARNING,"Security exception in getting configuration options",se);
-			}
+		  try {
+			  String foo = System.getProperty(SystemProperties.ENVIRONMENT);
+			  if (foo != null && foo.indexOf("portal") != -1) {
+				  ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
+				  double[] rot = config.getDoubleArray("camera.orientation");
+				  MatrixBuilder mb = MatrixBuilder.euclidean();
+				  double camRot = 0;
+				  if (rot != null) {
+					  camRot = rot[0] * ((Math.PI * 2.0) / 360.);
+					  mb.rotate(camRot, new double[] { rot[1], rot[2], rot[3] });
+				  }
+				  cameraOrientation=mb.getMatrix();
+				  inverseCameraOrientation = cameraOrientation.getInverse();	
+			  }
+		  } catch(SecurityException se)	{
+			  LoggingSystem.getLogger(CameraUtility.class).log(Level.WARNING,"Security exception in getting configuration options",se);
 		  }
 	  }
 	static boolean debug = false;
