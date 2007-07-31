@@ -64,6 +64,28 @@ import de.jreality.scene.Viewer;
  */
 public class CameraUtility {
 
+	 // this is code related to PORTAL walls; but in order to avoid dependency cycles,
+	  // between PORTAL and JOGL, put it here
+	  public static  Matrix cameraOrientation = new Matrix();
+	  public static  Matrix inverseCameraOrientation = new Matrix();
+	  static {
+		  if (System.getProperty(SystemProperties.ENVIRONMENT).indexOf("portal") != -1) {
+			try {
+			    ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
+			    double[] rot = config.getDoubleArray("camera.orientation");
+			    MatrixBuilder mb = MatrixBuilder.euclidean();
+			    double camRot = 0;
+			    if (rot != null) {
+			    	camRot = rot[0] * ((Math.PI * 2.0) / 360.);
+					mb.rotate(camRot, new double[] { rot[1], rot[2], rot[3] });
+				}
+			    cameraOrientation=mb.getMatrix();
+			    inverseCameraOrientation = cameraOrientation.getInverse();			  
+			} catch(SecurityException se)	{
+				LoggingSystem.getLogger(CameraUtility.class).log(Level.WARNING,"Security exception in getting configuration options",se);
+			}
+		  }
+	  }
 	static boolean debug = false;
 	// constants for support of stereo viewing
 	public static final int MIDDLE_EYE = 0;
