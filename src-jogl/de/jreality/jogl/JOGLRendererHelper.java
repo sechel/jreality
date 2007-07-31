@@ -574,24 +574,20 @@ public class JOGLRendererHelper {
 							if (incr == 0) {
 								da = faceColors.item(fnn).toDoubleArray();
 								if (colorLength == 3) {
-									gl.glColor4d(da.getValueAt(0), da
-											.getValueAt(1), da.getValueAt(2),
+									gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2),
 											alpha);
 								} else if (colorLength == 4) {
-									gl.glColor4d(da.getValueAt(0), da
-											.getValueAt(1), da.getValueAt(2),
+									gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2),
 											alpha * da.getValueAt(3));
 								}
 							}
 						} else if (colorBind == PER_VERTEX) {
 							da = vertexColors.item(vnn).toDoubleArray();
 							if (colorLength == 3) {
-								gl.glColor4d(da.getValueAt(0),
-										da.getValueAt(1), da.getValueAt(2),
+								gl.glColor4d(da.getValueAt(0),da.getValueAt(1), da.getValueAt(2),
 										alpha);
 							} else if (colorLength == 4) {
-								gl.glColor4d(da.getValueAt(0),
-										da.getValueAt(1), da.getValueAt(2),
+								gl.glColor4d(da.getValueAt(0),da.getValueAt(1), da.getValueAt(2),
 										alpha * da.getValueAt(3));
 							}
 						}
@@ -709,7 +705,6 @@ public class JOGLRendererHelper {
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
-		// System.err.println("Scale is "+scale);
 		double[] offset = ts.getOffset();
 		int alignment = ts.getAlignment();
 		ImageData[] img = LabelUtility.createPointImages(ps, font, c);
@@ -721,11 +716,9 @@ public class JOGLRendererHelper {
 
 	public static void drawEdgeLabels(JOGLRenderer jr, IndexedLineSet ils,
 			DefaultTextShader ts) {
-		// System.err.println("In draw edge labels 1");
 		if (!ts.getShowLabels().booleanValue())
 			return;
 
-		// System.err.println("In draw edge labels 2");
 		Font font = ts.getFont();
 		Color c = ts.getDiffuseColor();
 		double scale = ts.getScale().doubleValue();
