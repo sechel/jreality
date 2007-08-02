@@ -10,6 +10,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.SceneGraphComponentEvent;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.SystemProperties;
 
 /**
@@ -245,7 +246,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			Object foo = goBetween.getOriginalComponent().getAppearance().getAttribute("discreteGroup.cameraRep", SceneGraphPath.class);
 			if (foo != null && foo instanceof SceneGraphPath) {
 				w2camrepn = (SceneGraphPath) foo;
-				System.err.println("Found path in "+w2camrepn);
+				LoggingSystem.getLogger(this).finer("Found path in "+w2camrepn);
 				useTformCaching = false;
 			} else w2camrepn = null;			
 		}
