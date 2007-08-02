@@ -98,10 +98,10 @@ public class PortalCoordinateSystem {
 	public static Rectangle2D getWallPort() {
 		Rectangle2D wp = new Rectangle2D.Double();
 		wp.setFrame(
-				getPortalScale()*(-xDimPORTAL/2-portalCenter[0]),
-				getPortalScale()*(yOffsetPORTAL-portalCenter[1]),
-				getPortalScale()*xDimPORTAL,
-				getPortalScale()*yDimPORTAL);
+				portalScale*(-xDimPORTAL/2-portalCenter[0]),
+				portalScale*(yOffsetPORTAL-portalCenter[1]),
+				portalScale*xDimPORTAL,
+				portalScale*yDimPORTAL);
 		return wp;
 	}
 	public static void setPORTALViewport(double[] origin, Camera cam) {
