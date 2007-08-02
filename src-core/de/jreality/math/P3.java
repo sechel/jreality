@@ -637,12 +637,12 @@ public class P3 {
 		double[] tlate = makeTranslationMatrix(null, p1, p2, sig);
 		double[] rot = makeRotationMatrix(null, p1, p2, angle, sig);
 		// debug code
-		double[] m1 = Rn.times(null, tlate, rot);
-		double[] m2 = Rn.times(null, rot, tlate);
-		double[] xx = Rn.times(null, m1, Rn.inverse(null,m2));
-		if (!Rn.isIdentityMatrix(xx, 10E-8)) {
-			throw new IllegalStateException("they don't commute!");
-		}
+//		double[] m1 = Rn.times(null, tlate, rot);
+//		double[] m2 = Rn.times(null, rot, tlate);
+//		double[] xx = Rn.times(null, m1, Rn.inverse(null,m2));
+//		if (!Rn.isIdentityMatrix(xx, 10E-8)) {
+//			throw new IllegalStateException("they don't commute!");
+//		}
 		return Rn.times(dst, tlate, rot);
 	}
 	/**
