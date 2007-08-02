@@ -69,8 +69,10 @@ public class VirtualScalePortalCoordinateSystem implements VirtualDevice {
     
     double[] tlate = min.getColumn(3);
     Rn.times(tlate, PortalCoordinateSystem.getPortalScale(), tlate);
+    tlate[3] = 1.0;
     min.setColumn(3, tlate);
     DoubleArray da = new DoubleArray(min.getArray());
+//    System.err.println("In vspcs "+PortalCoordinateSystem.getPortalScale());
     return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, da);
   }
 
