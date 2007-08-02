@@ -13,8 +13,8 @@
     <mapping device="Remote" src="button_2" target="PrimarySelection"/>
     <mapping device="Remote" src="valuator_0" target="PrimaryNavigationNDC_X"/>
     <mapping device="Remote" src="valuator_1" target="PrimaryNavigationNDC_Y"/>
-    <mapping device="Remote" src="sensor_1" target="PointerShipTransformation"/>
-    <mapping device="Remote" src="sensor_0" target="ShipHeadTransformation"/>
+    <mapping device="Remote" src="sensor_1" target="RawPointerShipTransformation"/>
+    <mapping device="Remote" src="sensor_0" target="RawShipHeadTransformation"/>
     
   </rawslots>
   
@@ -31,6 +31,16 @@
     <mapping src="PrimaryMenu" target="DragActivation"/>
     <mapping src="PrimaryAction" target="PointDragActivation"/>
     
+   <virtualdevice type="de.jreality.toolsystem.virtual.VirtualScalePortalCoordinateSystem">
+      <inputslot>RawPointerShipTransformation</inputslot>
+      <outputslot>PointerShipTransformation</outputslot>
+    </virtualdevice>
+
+   <virtualdevice type="de.jreality.toolsystem.virtual.VirtualScalePortalCoordinateSystem">
+      <inputslot>RawShipHeadTransformation</inputslot>
+      <outputslot>ShipHeadTransformation</outputslot>
+    </virtualdevice>
+
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
       <inputslot>PrimaryAction</inputslot>
       <outputslot>PanelActivation</outputslot>
