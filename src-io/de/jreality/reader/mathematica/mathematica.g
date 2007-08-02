@@ -12,6 +12,7 @@ header {
 package de.jreality.reader.mathematica;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import de.jreality.geometry.*;
 import de.jreality.math.*;
 import de.jreality.scene.data.*;
@@ -445,9 +446,9 @@ pointBlock [Appearance app] returns [Appearance app2]
 // Farbliste eingelesen, oder die App. eingefaerbt
 {
  app2=copyApp(app);
- Vector points= new Vector(); 
+ List<double[]> points= new LinkedList<double[]>(); 
  double[] v;
- Vector colors= new Vector();
+ List<Color> colors= new LinkedList<Color>();
  Color plC=getPLColor(app2);
  boolean colorFlag=false;
  boolean colorNeeded =false;
@@ -480,9 +481,15 @@ pointBlock [Appearance app] returns [Appearance app2]
 		PointSetFactory psf = new PointSetFactory();
 		double [][] data = new double [points.size()][];
 		double [][] colorData = new double[points.size()][];
-		for(int i=0;i<points.size();i++){
-			data[i]=(double [])points.get(i);
-			colorData[i]=getRGBColor((Color)colors.get(i));
+		int i=0;
+		for(double[] d : points){
+			data[i]=d;
+			i++;
+		}
+		i=0;
+		for(Color d : colors){
+			colorData[i]=getRGBColor(d);
+			i++;
 		}
 		psf.setVertexCount(points.size());
 		psf.setVertexCoordinates(data);
@@ -493,8 +500,7 @@ pointBlock [Appearance app] returns [Appearance app2]
 			pointApp= setPLColor(pointApp,plC);
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
-		//pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
+//		pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 		geo.setAppearance(pointApp);
 		geo.setGeometry(psf.getPointSet());
 		geo.setName("Points");
@@ -511,12 +517,12 @@ lineBlock [Appearance app] returns[Appearance app2]
 {
  app2=copyApp(app);
  Color plC=getPLColor(app2);						// Punkt/Linienfarbe
- Vector coordinates= new Vector();			// alle Punkte in einer Liste
- Vector line=new Vector();					// alle Punkte einer Linie
- Vector colors= new Vector();				// FarbListe
+ List<double[]> coordinates= new LinkedList<double[]>();// alle Punkte in einer Liste
+ List<double[]> line=new LinkedList<double[]>();					// alle Punkte einer Linie
+ List<Color> colors= new LinkedList<Color>();// FarbListe
  int count=0;								// Anzahl aller bisher gesammelten Punkte
  int[] lineIndices;							// liste aller Indices einer Linie
- Vector linesIndices= new Vector();			// Liste aller IndiceeListen
+ List<int[]> linesIndices= new LinkedList<int[]>();			// Liste aller IndiceeListen
  boolean colorFlag=false;
  boolean colorNeeded =false;
  }
@@ -525,10 +531,12 @@ lineBlock [Appearance app] returns[Appearance app2]
 				line=lineset 			// das ist ein Vector von double[3]
 				{
 					lineIndices=new int[line.size()];
-					for(int i=0;i<line.size();i++){
-						coordinates.add(line.get(i));  // Punkte zu einer Liste machen
-				    	lineIndices[i]=i;			   // indizirung merken
-				    }
+					int i=0;
+					for(double[] d: line ){
+						coordinates.add(d);  // Punkte zu einer Liste machen
+				    	lineIndices[i]=i;			   // indizirung merken					
+						i++;
+					}
 			    	count=line.size();
 					linesIndices.add(lineIndices);
 				    colors.add(plC);
@@ -544,10 +552,12 @@ lineBlock [Appearance app] returns[Appearance app2]
 				{if (colorFlag) colorNeeded= true;}
 				{
 					lineIndices=new int[line.size()];
-					for(int i=0;i<line.size();i++){			// mithilfe von 'count' weiterzaehlen
-						coordinates.add(line.get(i));  		// Punkte zu einer Liste machen
-				    	lineIndices[i]=i+count;			    // indizirung merken
-				    }
+					i=0;
+					for(double[] d: line ){
+						coordinates.add(d);  // Punkte zu einer Liste machen
+				    	lineIndices[i]=i+count;			   // indizirung merken					
+						i++;
+					}
 			    	count+=line.size();
 					linesIndices.add(lineIndices);
 					colors.add(plC);
@@ -558,12 +568,21 @@ lineBlock [Appearance app] returns[Appearance app2]
 	{
 		double [][] data= new double[coordinates.size()][];
 		double [][] colorData = new double[linesIndices.size()][];
-		for(int i=0;i<coordinates.size();i++)
-			data[i]= (double[])coordinates.get(i);
+		i=0;
+		for(double[] d: coordinates ){
+			data[i]= d;
+			i++;
+		}
 		int[][] indices= new int[linesIndices.size()][];
-		for(int i=0;i<linesIndices.size();i++){		// Indices als doppelListe von Doubles machen
-			indices[i]=(int [])linesIndices.get(i);
-			colorData[i]=getRGBColor((Color)colors.get(i));		
+		i=0;
+		for(int[] d: linesIndices){
+			indices[i]=d;
+			i++;
+		}
+		i=0;
+		for(Color d: colors ){
+			colorData[i]=getRGBColor(d);		
+			i++;
 		}
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
 		lineset.setLineCount(linesIndices.size());
@@ -574,7 +593,7 @@ lineBlock [Appearance app] returns[Appearance app2]
 		Appearance lineApp =copyApp(app2);
 		if (colorNeeded)
 			lineset.getIndexedLineSet().setEdgeAttributes(
-		Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
+			 Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
 		else	lineApp= setPLColor(lineApp,plC);
 		lineset.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
@@ -597,11 +616,11 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 {
  app2=copyApp(app);
  Color fC=getFColor(app2);
- Vector coordinates= new Vector(); 	// alle PunktListen vereint in einer
- Vector poly=new Vector();			// alle Punkte in einem Polygon
+ List<double[]> coordinates= new LinkedList<double[]>();// alle PunktListen vereint in einer
+ List<double[]> poly=new LinkedList<double[]>();			// alle Punkte in einem Polygon
  int[] polyIndices;					// alle indices eines Polygons
- Vector colors= new Vector();		// FarbListe
- Vector polysIndices= new Vector();	// IndexListen-Liste
+ List<Color> colors= new LinkedList<Color>();		// FarbListe
+ List<int[]> polysIndices= new LinkedList<int[]>();// IndexListen-Liste
  int count=0;						// zaehlt die Punkte mit
  boolean colorFlag=false;
  boolean colorNeeded =false;
@@ -611,9 +630,11 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 				poly=lineset 			// das ist ein Vector von double[3]
 				{
 					polyIndices=new int[poly.size()];
-					for(int i=0;i<poly.size();i++){
-						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
-						polyIndices[i]=i;			   // indizirung merken
+					int i=0;
+					for(double[] d : poly){
+						coordinates.add(d);  //Punkte zu einer Liste machen
+						polyIndices[i]=i;	 // indizirung merken
+						i++;
 					}
 			    	count=poly.size();
 					polysIndices.add(polyIndices);
@@ -629,9 +650,11 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 				{if (colorFlag) colorNeeded= true;}
 				{
 					polyIndices=new int[poly.size()];
-					for(int i=0;i<poly.size();i++){
-						coordinates.add(poly.get(i));  //Punkte zu einer Liste machen
-					   	polyIndices[i]=i+count;			   // indizirung merken
+					i=0;
+					for(double[] d : poly){
+						coordinates.add(d);  //Punkte zu einer Liste machen
+						polyIndices[i]=i+count;	 // indizirung merken
+						i++;
 					}
 			    	count+=poly.size();
 					polysIndices.add(polyIndices);
@@ -642,14 +665,22 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 	)*
 	{
 		double [][] data= new double[count][];
-		double [][] colorData = new double[polysIndices.size()][];
-		for(int i=0;i<count;i++){				// Punkte zum flachen DoubleArray machen
-		data[i]=((double[]) coordinates.get(i));
+		double [][] colorData = new double[polysIndices.size()][];	
+		i=0;
+		for(double[] d : coordinates){
+			data[i]=((double[]) coordinates.get(i));
+			i++;
 		}
 		int[][] indices= new int[polysIndices.size()][];
-		for(int i=0;i<polysIndices.size();i++){		// Indices als doppelListe von Doubles machen
-			indices[i]=(int[])polysIndices.get(i);
-			colorData[i]=getRGBColor((Color)colors.get(i));
+		i=0;
+		for(int[] d : polysIndices){// Indices als doppelListe von Doubles machen
+			indices[i]=d;
+			i++;
+		}
+		i=0;
+		for(Color d : colors){
+			colorData[i]=getRGBColor(d);
+			i++;
 		}
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
 		faceSet.setVertexCount(count);
@@ -766,17 +797,17 @@ color returns[Color c]
 		;
 // -------------------------------------------- Daten ------------------------------------
 private
-lineset returns[Vector v]
+lineset returns[LinkedList<double[]> v]
 // Koordinaten in einer Liste zu Vector(double[3])
 {
 double [] point =new double[3];
 double [] point2=new double[3];
 double [] point3=new double [3];
-v=new Vector();}
+v=new LinkedList<double[]>();}
 		: OPEN_BRACE
 		  point=vektor
 		    {
-		    v.addElement(point);
+		    v.add(point);
 		    point3[0]=point[0];// have to save first point seperate and insert later again to first position (dont ask !)
 		    point3[1]=point[1];
 		    point3[2]=point[2];		    
@@ -786,12 +817,12 @@ v=new Vector();}
 			}
 			point2=vektor
 			{
-		    v.addElement(point2);
+		    v.add(point2);
 			}
 		  )*
 		 CLOSE_BRACE
 		 {
-		 v.setElementAt(point3,0);
+		 v.set(0,point3);
 		 }
 		;
 
