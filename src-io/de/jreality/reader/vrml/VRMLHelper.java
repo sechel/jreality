@@ -42,6 +42,7 @@ package de.jreality.reader.vrml;
 
 import java.awt.Color;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -119,7 +120,7 @@ public class VRMLHelper {
 	public static int[][] convertIndices(int[] input)	{
 		// count the number of negative entries
 		int count = 0;
-		List breakpoints = new Vector();
+		LinkedList<Integer> breakpoints = new LinkedList<Integer>();
 		for (int i=0; i<input.length; ++i)	{
 			if (input[i] < 0) breakpoints.add(new Integer(i));
 		}
@@ -128,10 +129,9 @@ public class VRMLHelper {
 		int oldIndex, newIndex;
 		newIndex = -1;
 		int faceCount = 0;
-		Iterator iter = breakpoints.iterator();
-		while (iter.hasNext())	{
+		for(Integer d: breakpoints){
 			oldIndex = newIndex+1;
-			newIndex = ((Integer) iter.next()).intValue();
+			newIndex = d.intValue();
 			output[faceCount] = new int[newIndex - oldIndex];
 			for (int j = oldIndex; j<newIndex; ++j)	{
 				output[faceCount][j-oldIndex] = input[j];
@@ -249,17 +249,21 @@ public class VRMLHelper {
 			return new int[][]{};
 		if (list[list.length-1]!=-1) n++;// -1 am ende ist optional
 		int[][] indices = new int[n][];
-		Vector v;
+		List<Integer> v;
 		int k=0;// current index 
 		for(int i=0;i<n;i++){// fuer alle Listen
-			v= new Vector();
+			v= new LinkedList<Integer>();
 			while ((k<list.length)&&(list[k]!=-1)){
 				v.add(new Integer(list[k]));
 				k++;
 			}
 			indices[i]= new int[v.size()];
-			for (int j=0;j<v.size();j++)
-				indices[i][j]=((Integer)v.get(j)).intValue();
+			
+			int j=0;
+			for(Integer d: v){
+				indices[i][j]=(d).intValue();
+				j++;
+			}
 			k++;// -1 ueberspringen
 		}
 		return indices;
