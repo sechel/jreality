@@ -95,9 +95,10 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
     
     // assign camera viewport
 	cameraPath.getInverseMatrix(worldToCamera.getArray());
-	portal.assignFrom(portalPath.getMatrix(portal.getArray()));
-	
-	double[] portalOriginInCamCoordinates = worldToCamera.multiplyVector(portal.getTranslation());
+	//portal.assignFrom(portalPath.getMatrix(portal.getArray()));
+	Matrix portalToWorld = new Matrix(portalPath.getMatrix(null));
+	//double[] portalOriginInCamCoordinates = worldToCamera.multiplyVector(portal.getTranslation());
+	double[] portalOriginInCamCoordinates = worldToCamera.multiplyVector(portalToWorld.getColumn(3));
 	Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
 
     PortalCoordinateSystem.setPORTALViewport(portalOriginInCamCoordinates, camera);

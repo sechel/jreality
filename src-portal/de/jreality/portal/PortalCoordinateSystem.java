@@ -104,23 +104,16 @@ public class PortalCoordinateSystem {
 				getPortalScale()*yDimPORTAL);
 		return wp;
 	}
-		public static void setPORTALViewport(double[] portalOriginInCamCoordinates, Camera cam) {
-	    
-			double xmin=0, ymin=0;
-			Rectangle2D wallport = getWallPort();
-			double x0 = wallport.getMinX();
-			double y0 = wallport.getMinY();
-			double w = wallport.getWidth();
-			double h = wallport.getHeight();
-			
-			double x = -portalOriginInCamCoordinates[0];
-			double y = -portalOriginInCamCoordinates[1];
-			double z = -portalOriginInCamCoordinates[2] + convertMeters(zDimPORTAL)/2;  // make wall z=0
-			cam.setFocus(z);
-			xmin = (x0-x)/z;
-			ymin = (y0-y)/z;
-			cam.setViewPort(new Rectangle2D.Double(xmin, ymin, w/z, h/z));
-	//		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
+	public static void setPORTALViewport(double[] origin, Camera cam) {
+    
+		double xmin=0, ymin=0;
+		Rectangle2D wallport = getWallPort();
+		double z = -origin[2] + convertMeters(zDimPORTAL)/2;  // make wall z=0
+		cam.setFocus(z);
+		xmin = (wallport.getMinX()+(origin[0]))/z;
+		ymin = (wallport.getMinY()+(origin[1]))/z;
+		cam.setViewPort(new Rectangle2D.Double(xmin, ymin, wallport.getWidth()/z, wallport.getHeight()/z));
+//		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
 		}
 		public static double convertMeters(double d) {
 			return portalScale*d;
