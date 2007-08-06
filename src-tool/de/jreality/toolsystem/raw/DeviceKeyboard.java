@@ -47,6 +47,7 @@ import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -84,7 +85,7 @@ import de.jreality.util.LoggingSystem;
  * 
  * @author Steffen Weissmann
  **/
-public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevice {
+public class DeviceKeyboard implements RawDevice, KeyListener, AWTEventListener, PollingDevice {
 
 	private HashMap<Integer, Boolean> keyState = new HashMap<Integer, Boolean>();
 
@@ -98,8 +99,12 @@ public class DeviceKeyboard implements RawDevice, AWTEventListener, PollingDevic
 	public void initialize(Viewer viewer) {
 		if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
 		this.component = (Component) viewer.getViewingComponent();
-		//this.component.addKeyListener(this);
-		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
+		try {
+			Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK | AWTEvent.MOUSE_EVENT_MASK);
+		} catch (SecurityException e) {
+			this.component.addKeyListener(this);
+			LoggingSystem.getLogger(this).info("Couldn't create AWTEventListener, using KeyListener instead");
+		}
 	}
 
 	public synchronized void keyPressed(KeyEvent e) {
