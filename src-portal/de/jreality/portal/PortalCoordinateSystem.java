@@ -40,11 +40,18 @@
 
 package de.jreality.portal;
 
+import java.awt.Event;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.util.Vector;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
+import de.jreality.ui.viewerapp.Selection;
+import de.jreality.ui.viewerapp.SelectionEvent;
+import de.jreality.ui.viewerapp.SelectionListener;
 import de.jreality.util.Secure;
 
 public class PortalCoordinateSystem {
@@ -115,25 +122,51 @@ public class PortalCoordinateSystem {
 		cam.setViewPort(new Rectangle2D.Double(xmin, ymin, wallport.getWidth()/z, wallport.getHeight()/z));
 //		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
 		}
-		public static double convertMeters(double d) {
-			return portalScale*d;
+	public static double convertMeters(double d) {
+		return portalScale*d;
+	}
+	public static void setPortalScale(double portalScale) {
+		PortalCoordinateSystem.portalScale = portalScale;
+		broadcastChange();
+	}
+	public static double getPortalScale() {
+		return portalScale;
+	}
+	public static void setEyeSeparationMeters(double eyeSeparation) {
+		PortalCoordinateSystem.eyeSeparationMeters = eyeSeparation;
+	}
+	public static double getEyeSeparationMeters() {
+		return eyeSeparationMeters;
+	}
+	public static void setEyeLevelMeters(double eyeLevel) {
+		PortalCoordinateSystem.eyeLevelMeters = eyeLevel;
+	}
+	public static double getEyeLevelMeters() {
+		return eyeLevelMeters;
+	}
+	
+	static Vector<ActionListener> listeners = new Vector<ActionListener>();
+	
+
+	public static void addChangeListener(ActionListener l)	{
+		if (listeners.contains(l)) return;
+		listeners.add(l);
+	}
+	
+	public static void removeSelectionListener(SelectionListener l)	{
+		listeners.remove(l);
+	}
+	static PortalCoordinateSystem pcs = new PortalCoordinateSystem();
+	public static void broadcastChange()	{
+		if (listeners == null) return;
+		ActionEvent e = new ActionEvent(pcs,0,null);
+		//SyJOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: broadcasting"+listeners.size()+" listeners");
+		if (!listeners.isEmpty())	{
+			//JOGLConfiguration.theLog.log(Level.INFO,"SelectionManager: broadcasting"+listeners.size()+" listeners");
+			for (ActionListener l : listeners)	{
+				l.actionPerformed(e);
+			}
 		}
-		public static void setPortalScale(double portalScale) {
-			PortalCoordinateSystem.portalScale = portalScale;
-		}
-		public static double getPortalScale() {
-			return portalScale;
-		}
-		public static void setEyeSeparationMeters(double eyeSeparation) {
-			PortalCoordinateSystem.eyeSeparationMeters = eyeSeparation;
-		}
-		public static double getEyeSeparationMeters() {
-			return eyeSeparationMeters;
-		}
-		public static void setEyeLevelMeters(double eyeLevel) {
-			PortalCoordinateSystem.eyeLevelMeters = eyeLevel;
-		}
-		public static double getEyeLevelMeters() {
-			return eyeLevelMeters;
-		}
+	}
+
 }
