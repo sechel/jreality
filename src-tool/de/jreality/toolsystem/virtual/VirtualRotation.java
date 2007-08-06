@@ -99,32 +99,9 @@ public class VirtualRotation implements VirtualDevice {
     double[] cross = Rn.crossProduct(null, mouseCoordsOld, mouseCoords);
     double angle = gain*Math.asin(Rn.euclideanNorm(cross));
     
-     double[] cross4 = {cross[0], cross[1], cross[2], 0};
-//     double[] rotationPart = P3.extractOrientationMatrix(null, 
-//    		 context.getTransformationMatrix(cameraToWorld).toDoubleArray(null), Pn.originP3, Pn.EUCLIDEAN);
+    double[] cross4 = {cross[0], cross[1], cross[2], 0};
     cross = new Matrix(context.getTransformationMatrix(cameraToWorld)).multiplyVector(cross4);
-//     cross = Rn.matrixTimesVector(cross, rotationPart, cross4);
-     result.assignFrom(P3.makeRotationMatrix(null, cross, angle));
-//   double s = Math.sin(angle);
-//   double c = Math.cos(angle);
-//   double t = 1 - c;
-//
-//   cross = Rn.normalize(cross, cross);
-//
-//   double xv = cross[0];
-//   double yv = cross[1];
-//   double zv = cross[2];
-//
-//   result.assignFrom(t * xv*xv+ c, t*xv*yv- s*zv, t*xv*zv + s*yv,0,
-//     t*xv*yv + s*zv, t*yv*yv +c, t*yv*zv - s*xv,0,
-//     t*xv*zv - s*yv, t*yv*zv + s*xv, t*zv*zv +c,0,
-//     0,0,0,1);
-//
-//   if (false) {
-//     Matrix rrt = new Matrix(result);
-//     rrt.multiplyOnRight(result.getTranspose());
-//     System.out.println("Rotation ["+rrt.getDeterminant()+"]:\n"+rrt);
-//   }
+    result.assignFrom(P3.makeRotationMatrix(null, cross, angle));
     oldX = x;
     oldY = y;
     return new ToolEvent(this, context.getEvent().getTimeStamp(), out, da);
@@ -138,7 +115,6 @@ public class VirtualRotation implements VirtualDevice {
     try {
       gain = ((Double)configuration.get("gain")).doubleValue();
     } catch (Exception e) {
-      // than we have the default value
     }
   }
 
