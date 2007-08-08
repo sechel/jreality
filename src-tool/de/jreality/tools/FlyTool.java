@@ -104,7 +104,7 @@ public class FlyTool extends AbstractTool {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
     int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
-    LoggingSystem.getLogger(this).info("signature is "+signature);
+    LoggingSystem.getLogger(this).fine("signature is "+signature);
     SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
 
     Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
