@@ -153,7 +153,7 @@ public class PortalCoordinateSystem {
 		listeners.add(l);
 	}
 	
-	public static void removeSelectionListener(SelectionListener l)	{
+	public static void removeChangeListener(SelectionListener l)	{
 		listeners.remove(l);
 	}
 	static PortalCoordinateSystem pcs = new PortalCoordinateSystem();
