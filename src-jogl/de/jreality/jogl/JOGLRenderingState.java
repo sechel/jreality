@@ -84,7 +84,7 @@ public class JOGLRenderingState {
 	public boolean ignoreAlpha0 = true;
 	public boolean renderGeometryOnly = false;
 	public boolean insideDisplayList = false;
-	public boolean componentDisplayLists = true;
+	public boolean componentDisplayLists = false;
 	public static boolean useOldTransparency = false;
 	public double[] cameraToWorld = Rn.identityMatrix(4);
 

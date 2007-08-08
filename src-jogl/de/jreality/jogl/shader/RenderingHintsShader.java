@@ -143,7 +143,7 @@ public class RenderingHintsShader  {
 		  gl.glDepthMask(true);
 		  gl.glDisable(GL.GL_BLEND);
 		}
-		jr.getRenderingState().transparencyEnabled = transparencyEnabled;
+		jr.renderingState.transparencyEnabled = transparencyEnabled;
 		if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
 		else							gl.glDisable(GL.GL_LIGHTING);
 		if (backFaceCullingEnabled)  {
@@ -151,21 +151,21 @@ public class RenderingHintsShader  {
 			gl.glCullFace(GL.GL_BACK);
 		} else
 			gl.glDisable(GL.GL_CULL_FACE);
-		jr.getRenderingState().levelOfDetail = levelOfDetail;
+		jr.renderingState.levelOfDetail = levelOfDetail;
 //		if (ignoreAlpha0 != jr.getRenderingState().ignoreAlpha0)	{
 			gl.glAlphaFunc(ignoreAlpha0 ? GL.GL_GREATER : GL.GL_ALWAYS, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
-			jr.getRenderingState().ignoreAlpha0 = ignoreAlpha0;
+			jr.renderingState.ignoreAlpha0 = ignoreAlpha0;
 //		}
-		if (localLightModel != jr.getRenderingState().localLightModel) {
+		if (localLightModel != jr.renderingState.localLightModel) {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
-			jr.getRenderingState().localLightModel = localLightModel;			
+			jr.renderingState.localLightModel = localLightModel;			
 		}
-		if (separateSpecularColor != jr.getRenderingState().separateSpecularColor) {
+		if (separateSpecularColor != jr.renderingState.separateSpecularColor) {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, separateSpecularColor ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
-			jr.getRenderingState().separateSpecularColor = separateSpecularColor;			
+			jr.renderingState.separateSpecularColor = separateSpecularColor;			
 		}
-		jr.getRenderingState().setUseDisplayLists(useDisplayLists); //(); //useDisplayLists(activeDL, jpc);
+		jr.renderingState.setUseDisplayLists(useDisplayLists); //(); //useDisplayLists(activeDL, jpc);
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{

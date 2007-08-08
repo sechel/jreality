@@ -65,7 +65,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		effectiveAppearanceDirty = true,
 		geometryIsDirty = true,
 		boundIsDirty = true,
-		renderRunnableDirty = true;
+		renderRunnableDirty = true,
+		isVisible = true;
 	int geometryDirtyBits  = 0, displayList = -1;
 	// copycat related fields
 	long currentTime = 0;
@@ -96,10 +97,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		}
 		goBetween = jr.goBetweenFor(sgp.getLastComponent());
 		goBetween.addJOGLPeer(this);
-		name = "JOGLPeer:"+goBetween.getOriginalComponent().getName();
+		name = "JOGLPeer:"+goBetween.originalComponent.getName();
 		children = new Vector<JOGLPeerComponent>();
 		parent = p;
 		updateTransformationInfo();
+	 	isVisible = goBetween.originalComponent.isVisible();
 		count++;
 	}
 	
@@ -126,7 +128,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void render()		{
-		if (!goBetween.getOriginalComponent().isVisible()) {
+		if (!isVisible) {
 			return;
 		}
 		preRender();
@@ -137,15 +139,15 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	boolean mustPop = false, oldFlipped;
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
-		jr.currentPath.push(goBetween.getOriginalComponent());
+		jr.currentPath.push(goBetween.originalComponent);
 		theLog.finer("prerender: "+goBetween.originalComponent.getName());
 		if (useTformCaching)	{
 			if (cachedTform != null && !isIdentity)  {
 				pushTransformation(cachedTform); //thisT.getMatrix());
 				mustPop = true;
 			} 
-		} else if (goBetween.getOriginalComponent().getTransformation() != null){
-			pushTransformation(goBetween.getOriginalComponent().getTransformation().getMatrix());
+		} else if (goBetween.originalComponent.getTransformation() != null){
+			pushTransformation(goBetween.originalComponent.getTransformation().getMatrix());
 			mustPop = true;
 		}
 
@@ -221,9 +223,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	protected void setIndexOfChildren()	{
 		childlock.readLock();
-		int n = goBetween.getOriginalComponent().getChildComponentCount();
+		int n = goBetween.originalComponent.getChildComponentCount();
 		for (int i = 0; i<n; ++i)	{
-			SceneGraphComponent sgc = goBetween.getOriginalComponent().getChildComponent(i);
+			SceneGraphComponent sgc = goBetween.originalComponent.getChildComponent(i);
 			JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 			if (jpc == null)	{
 				theLog.log(Level.WARNING,"No peer for sgc "+sgc.getName());
@@ -237,7 +239,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	private JOGLPeerComponent getPeerForChildComponent(SceneGraphComponent sgc) {
 //		childlock.readLock();
 		for (JOGLPeerComponent jpc : children)	{
-			if ( jpc.goBetween.getOriginalComponent() == sgc) { // found!
+			if ( jpc.goBetween.originalComponent == sgc) { // found!
 				return jpc;
 			}
 		}
@@ -251,7 +253,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	protected void propagateAppearanceChanged()	{
-		LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+goBetween.getOriginalComponent().getName());
+		LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+goBetween.originalComponent.getName());
 		appearanceDirty = true;
 		for (JOGLPeerComponent child : children) {
 			if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
@@ -261,7 +263,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void handleAppearanceChanged() {
-		Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
+		Appearance thisAp = goBetween.originalComponent.getAppearance(); 
 		if (parent == null)	{
 			if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
 				eAp = EffectiveAppearance.create();
@@ -270,10 +272,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			} 
 		} else {
 			if ( parent.eAp == null)	{
-				throw new IllegalStateException("Parent must have effective appearance"+goBetween.getOriginalComponent().getName());
+				throw new IllegalStateException("Parent must have effective appearance"+goBetween.originalComponent.getName());
 			}
 			if (effectiveAppearanceDirty || eAp == null)	{
-				theLog.finer("updating eap for "+goBetween.getOriginalComponent().getName());
+				theLog.finer("updating eap for "+goBetween.originalComponent.getName());
 				if (thisAp != null )	{
 					eAp = parent.eAp.create(thisAp);
 				} else {
@@ -293,9 +295,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
 		signature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-		if (goBetween.getOriginalComponent().getGeometry() == null) return;
-		Appearance thisAp = goBetween.getOriginalComponent().getAppearance(); 
-		if (thisAp == null && goBetween.getOriginalComponent().getGeometry() == null && parent != null)	{
+		if (goBetween.originalComponent.getGeometry() == null) return;
+		Appearance thisAp = goBetween.originalComponent.getAppearance(); 
+		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;
 			renderingHints = parent.renderingHints;
 
@@ -316,7 +318,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childAdded(SceneGraphComponentEvent ev) {
-		theLog.finest("JOGLPeerComponent: Container Child added to: "+goBetween.getOriginalComponent().getName());
+		theLog.finest("JOGLPeerComponent: Container Child added to: "+goBetween.originalComponent.getName());
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
@@ -353,7 +355,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
-		theLog.finest("Container Child removed from: "+goBetween.getOriginalComponent().getName());
+		theLog.finest("Container Child removed from: "+goBetween.originalComponent.getName());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true;
@@ -389,7 +391,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
-		theLog.finest("Container Child replaced at: "+goBetween.getOriginalComponent().getName());
+		theLog.finest("Container Child replaced at: "+goBetween.originalComponent.getName());
 		switch(ev.getChildType())	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true; 
@@ -420,10 +422,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	 * 
 	 */
 	protected void updateTransformationInfo() {
-		if (goBetween.getOriginalComponent().getTransformation() != null) {
-			isReflection = Rn.determinant(goBetween.getOriginalComponent().getTransformation().getMatrix()) < 0;
-			isIdentity = Rn.isIdentityMatrix(goBetween.getOriginalComponent().getTransformation().getMatrix(), 10E-8);
-			cachedTform = goBetween.getOriginalComponent().getTransformation().getMatrix(cachedTform);
+		if (goBetween.originalComponent.getTransformation() != null) {
+			isReflection = Rn.determinant(goBetween.originalComponent.getTransformation().getMatrix()) < 0;
+			isIdentity = Rn.isIdentityMatrix(goBetween.originalComponent.getTransformation().getMatrix(), 10E-8);
+			cachedTform = goBetween.originalComponent.getTransformation().getMatrix(cachedTform);
 		} else {
 			determinant  = 0.0;
 			isReflection = false;
@@ -473,10 +475,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
  	}
 
 	public SceneGraphComponent getOriginalComponent() {
-		return goBetween.getOriginalComponent();
+		return goBetween.originalComponent;
 	}
 
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
+		isVisible = ev.getSceneGraphComponent().isVisible();
 	}
 
 }

@@ -270,7 +270,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			jrs.setCurrentGeometry(g);
 		}
 		
-		jr.getRenderingState().lighting = lighting;
+		jr.renderingState.lighting = lighting;
 		if (lighting) gl.glEnable(GL.GL_LIGHTING);
 		else gl.glDisable(GL.GL_LIGHTING);
 		
@@ -316,7 +316,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 			int n = ps.getNumPoints();
 			int resolution = 1;
-			if (jr.getRenderingState().levelOfDetail == 0.0) resolution = 0;
+			if (jr.renderingState.levelOfDetail == 0.0) resolution = 0;
 			int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
 			polygonCount = n*24*resolution*(resolution+1)+6;
 			int nextDL = -1;
@@ -381,16 +381,16 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 					displayListsDirty = false;
 				}
 				jr.getGL().glCallList(dListProxy);
-				jr.getRenderingState().polygonCount += polygonCount;
+				jr.renderingState.polygonCount += polygonCount;
 			}
 			else {
 				if (!useDisplayLists || jr.isPickMode()) {
-					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.getRenderingState().diffuseColor[3]);
+					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
 						dList = jr.getGL().glGenLists(1);
 						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.getRenderingState().diffuseColor[3]);
+						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.renderingState.diffuseColor[3]);
 						jr.getGL().glEndList();	
 						displayListsDirty = false;
 					}

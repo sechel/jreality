@@ -137,7 +137,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		GL gl = jrs.getGL();
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
-		System.arraycopy(diffuseColorAsFloat, 0, jr.getRenderingState().diffuseColor, 0, 4);
+		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 	
 		gl.glLineWidth((float) lineWidth);
 		jrs.lineWidth = lineWidth;
@@ -154,7 +154,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			jrs.setCurrentGeometry(g);
 			lighting=true;
 		} else lighting = false;
-		jr.getRenderingState().lighting = lighting;
+		jr.renderingState.lighting = lighting;
 		if (lighting) gl.glEnable(GL.GL_LIGHTING);
 		else gl.glDisable(GL.GL_LIGHTING);
 
@@ -208,7 +208,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		p1[3] = p2[3] = 1.0;
 		double[][] oneCurve = null;
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
-		if (jr.getRenderingState().levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
+		if (jr.renderingState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		DataList radiidl = ils.getEdgeAttributes(Attribute.RELATIVE_RADII);
 		DoubleArray radii = null;
@@ -324,17 +324,17 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					displayListsDirty = false;
 				}
 				jr.getGL().glCallList(dListProxy);
-				jr.getRenderingState().polygonCount += faceCount;
+				jr.renderingState.polygonCount += faceCount;
 			}
 			else 	{
 				if (!useDisplayLists || jr.isPickMode()) {
-					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
+					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
 						dList = jr.getGL().glGenLists(1);
 						LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.getGL());
 						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.getRenderingState().diffuseColor[3]);
+						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
 						jr.getGL().glEndList();									
 						displayListsDirty = false;
 					}

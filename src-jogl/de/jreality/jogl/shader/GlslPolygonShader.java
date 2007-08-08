@@ -159,12 +159,12 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
 				int i = 3;
 				if (false) {//jr.debugGL)	{
-					double lod = jr.getRenderingState().levelOfDetail;
+					double lod = jr.renderingState.levelOfDetail;
 					i = JOGLSphereHelper.getResolutionLevel(jr.getContext().getObjectToNDC(), lod);
 				}
 				int dlist;
-				if (g instanceof Sphere) dlist = jr.getRenderingState().getSphereDisplayLists(i);
-				else 			 dlist = jr.getRenderingState().getCylinderDisplayLists(i);
+				if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
+				else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
 				if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
 				jr.getGL().glCallList(dlist);
 				if (jr.isPickMode()) jr.getGL().glPopName();
@@ -239,11 +239,11 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		// JOGLConfiguration.theLog.log(Level.INFO,"Color binding is
 		// "+colorBind);
 		if (colorBind != PER_PART) {
-			if (jr.getRenderingState().frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
+			if (jr.renderingState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glEnable(GL.GL_COLOR_MATERIAL);
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
 						GL.GL_DIFFUSE);
-				jr.getRenderingState().frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
 		if (vertexNormals != null && smooth) {

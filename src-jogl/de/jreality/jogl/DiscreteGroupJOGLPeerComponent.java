@@ -57,7 +57,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
 		super.init(sgp,p,jr);
-		trojanHorse = goBetween.getOriginalComponent().getGeometry();
+		trojanHorse = goBetween.originalComponent.getGeometry();
 		isCopyCat = (trojanHorse != null &&  trojanHorse instanceof PointSet && trojanHorse.getGeometryAttributes(SystemProperties.JOGL_COPY_CAT) != null);
 		if (isCopyCat)	{
 			readMatrices();
@@ -73,7 +73,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 
 	@Override
 	public void render() {
-		if (!goBetween.getOriginalComponent().isVisible()) {
+		if (!isVisible) {
 			return;
 		}
 		insideDL = false;
@@ -158,8 +158,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			double[] o2c = jr.context.getObjectToCamera();
 			int count = 0;
 			DiscreteGroupJOGLPeerComponent child = (DiscreteGroupJOGLPeerComponent) children.get(0);
-			boolean vis = child.goBetween.getOriginalComponent().isVisible();
-			child.goBetween.getOriginalComponent().setVisible(true);
+			boolean vis = child.isVisible;
+			child.goBetween.originalComponent.setVisible(true);
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera && !JOGLRendererHelper.accept(o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.renderingState.currentSignature)) continue;
 				count++;
@@ -173,7 +173,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				popTransformation();
 			}
 			childrenDLDirty = child.isDisplayListDirty();
-			child.goBetween.getOriginalComponent().setVisible(vis);
+			child.goBetween.originalComponent.setVisible(vis);
 			theLog.fine("Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
@@ -197,7 +197,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			if (framecount != jr.frameCount) {
 				w2camrepn.getInverseMatrix(world2CameraRepn);
 				framecount = jr.frameCount;
-				Rn.times(camera2CameraRepn,world2CameraRepn,  jr.getRenderingState().cameraToWorld);
+				Rn.times(camera2CameraRepn,world2CameraRepn,  jr.renderingState.cameraToWorld);
 				Rn.times(camera2CameraRepn, camera2CameraRepn , CameraUtility.inverseCameraOrientation.getArray());
 
 //				System.err.println("Setting up final thing");
@@ -207,28 +207,26 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	}
 
 	private boolean isDisplayListDirty() {
-		if (!goBetween.originalComponent.isVisible()) return false;
+		if (!isVisible) return false;
 		return displayListDirty;
 	}
 
 	public void propagateSGCDisplayListDirtyUp()	{
-//		displayListDirty = childrenDLDirty = true;
+		if (jr != null && jr.renderingState != null && !jr.renderingState.componentDisplayLists) return;
 		displayListDirtyUp = true;
-//		if (isTopCat)
-//				System.err.println("In propagateUp "+goBetween.originalComponent.getName());
 		if (parent != null && !isTopCat && !((DiscreteGroupJOGLPeerComponent) parent).displayListDirtyUp) { // && (!isCopyCat || !clipToCamera)) 
-//			System.err.println("In propagateUp "+goBetween.originalComponent.getName());
 			((DiscreteGroupJOGLPeerComponent) parent).propagateSGCDisplayListDirtyUp();
 		}	}
 
 	public void propagateSGCDisplayListDirtyDown()	{
+		if (jr != null && jr.renderingState != null && !jr.renderingState.componentDisplayLists) return;
 //		System.err.println("In propagateDown "+goBetween.originalComponent.getName());
 		displayListDirty = childrenDLDirty = true;
-		childlock.readLock();
+//		childlock.readLock();
 		for (JOGLPeerComponent child: children){		
 			((DiscreteGroupJOGLPeerComponent) child).propagateSGCDisplayListDirtyDown();
 		}	
-		childlock.readUnlock();
+//		childlock.readUnlock();
 		displayListDirtyUp = false;
 	}
 
@@ -242,8 +240,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	protected void updateShaders() {
 		super.updateShaders();
 		if (eAp == null )return;
-		if (goBetween.getOriginalComponent().getAppearance() != null)	{
-			Object foo = goBetween.getOriginalComponent().getAppearance().getAttribute("discreteGroup.cameraRep", SceneGraphPath.class);
+		if (goBetween.originalComponent.getAppearance() != null)	{
+			Object foo = goBetween.originalComponent.getAppearance().getAttribute("discreteGroup.cameraRep", SceneGraphPath.class);
 			if (foo != null && foo instanceof SceneGraphPath) {
 				w2camrepn = (SceneGraphPath) foo;
 				LoggingSystem.getLogger(this).finer("Found path in "+w2camrepn);

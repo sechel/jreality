@@ -110,7 +110,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected SceneGraphComponent theRoot, auxiliaryRoot;
 	protected JOGLPeerComponent thePeerRoot = null;
 	protected JOGLPeerComponent thePeerAuxilliaryRoot = null;
-	protected JOGLRenderingState renderingState;
+	public JOGLRenderingState renderingState;
 	protected JOGLLightHelper lightHelper;
 
 	protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
@@ -154,10 +154,6 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	public GL getGL() {
 		return globalGL;
-	}
-
-	public JOGLRenderingState getRenderingState() {
-		return renderingState;
 	}
 
 	public void setTextureResident(boolean b) {

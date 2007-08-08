@@ -78,9 +78,9 @@ public class SimpleVertexShader implements VertexShader {
 		GL gl = jr.getGL();
 //		JOGLConfiguration.theLog.log(Level.FINER,"Rendering simple vertex shader");
 
-		if (jr.getRenderingState().frontBack != frontBack)	{
+		if (jr.renderingState.frontBack != frontBack)	{
 			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
-			jr.getRenderingState().frontBack = frontBack;
+			jr.renderingState.frontBack = frontBack;
 		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat,0);

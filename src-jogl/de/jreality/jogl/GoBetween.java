@@ -115,20 +115,20 @@ public class GoBetween extends JOGLPeerNode implements
 	}
 
 	public void geometryChanged(GeometryEvent ev) {
-		peersLock.readLock();
+//		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
 			peer.setDisplayListDirty();
 		}
-		peersLock.readUnlock();
+//		peersLock.readUnlock();
 	}
 
 	public void transformationMatrixChanged(TransformationEvent ev) {
 //		System.err.println("TForm event for "+originalComponent.getName());
-		peersLock.readLock();
+//		peersLock.readLock();
 		for (JOGLPeerComponent peer : peers)	{
 			peer.transformationMatrixChanged(ev);				
 		}
-		peersLock.readUnlock();
+//		peersLock.readUnlock();
 	}
 
 	public void appearanceChanged(AppearanceEvent ev) {
@@ -152,14 +152,15 @@ public class GoBetween extends JOGLPeerNode implements
 				key.indexOf("fog") != -1 
 				) propagates = false;
 
-		peersLock.readLock();
+//		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
 			if (propagates) peer.appearanceChanged(ev);
 			if (changed != 0) peer.propagateGeometryChanged(changed);
 		}
-		peersLock.readUnlock();
+//		peersLock.readUnlock();
 		//theLog.log(Level.FINER,"setting display list dirty flag: "+changed);
 	}
+	
 	public void childAdded(SceneGraphComponentEvent ev) {
 		theLog.log(Level.FINE,"GoBetween: Container Child added to: "+originalComponent.getName());
 		if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
@@ -249,17 +250,13 @@ public class GoBetween extends JOGLPeerNode implements
 		peersLock.readUnlock();
 	}
 
-	public SceneGraphComponent getOriginalComponent() {
-		return originalComponent;
-	}
-
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
-		peersLock.readLock();
+//		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
 			//peer.addSceneGraphComponentEvent(ev);
 			peer.visibilityChanged(ev);
 		}				
-		peersLock.readUnlock();
+//		peersLock.readUnlock();
 	}
 	public void lightChanged(LightEvent ev) {
 		jr.lightsChanged=true;

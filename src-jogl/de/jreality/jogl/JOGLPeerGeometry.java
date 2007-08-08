@@ -68,17 +68,20 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 		displayListsDirty = false;			// think positive!
+		boolean needsNew = false;
 		if (geometryShader.isEdgeDraw() && ils != null)	{
 			geometryShader.lineShader.render(jr.renderingState);
 			geometryShader.lineShader.postRender(jr.renderingState);
 			if (geometryShader.lineShader.displayListsDirty()) displayListsDirty = true;
+			needsNew = true;
 		}
 		if (geometryShader.isVertexDraw() && ps != null)	{
 			geometryShader.pointShader.render(jr.renderingState);
 			geometryShader.pointShader.postRender(jr.renderingState);
 			if (geometryShader.pointShader.displayListsDirty()) displayListsDirty = true;
+			needsNew = true;
 		}
-		renderingHints.render(jr.renderingState);
+		if (needsNew) renderingHints.render(jr.renderingState);
 		if (geometryShader.isFaceDraw() && isSurface) {
 			geometryShader.polygonShader.render(jr.renderingState);
 			geometryShader.polygonShader.postRender(jr.renderingState);

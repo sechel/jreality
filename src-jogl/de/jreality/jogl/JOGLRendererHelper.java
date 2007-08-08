@@ -114,7 +114,7 @@ public class JOGLRendererHelper {
 	static Appearance pseudoAp = new Appearance();
 	static void handleBackground(JOGLRenderer jr, int width, int height, Appearance topAp) {
     GL gl = jr.getGL();
-    JOGLRenderingState openGLState = jr.getRenderingState();
+    JOGLRenderingState openGLState = jr.renderingState;
 		Object bgo = null;
     float[] backgroundColor;
 		if (topAp == null) topAp = pseudoAp;
@@ -243,7 +243,7 @@ public class JOGLRendererHelper {
 	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {
     GL gl = jr.getGL();
     boolean pickMode=jr.isPickMode();
-    JOGLRenderingState openGLState = jr.getRenderingState();
+    JOGLRenderingState openGLState = jr.renderingState;
 		if (sg.getNumPoints() == 0)
 			return;
 		// gl.glPointSize((float)
@@ -373,10 +373,10 @@ public class JOGLRendererHelper {
 		} else
 			colorBind = PER_PART;
 		if (colorBind != PER_PART) {
-			if (jr.getRenderingState().frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
+			if (jr.renderingState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
 						GL.GL_DIFFUSE);
-				jr.getRenderingState().frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
 		boolean pickMode = jr.isPickMode();
@@ -492,11 +492,11 @@ public class JOGLRendererHelper {
 		// JOGLConfiguration.theLog.log(Level.INFO,"Color binding is
 		// "+colorBind);
 		if (colorBind != PER_PART) {
-			if (jr.getRenderingState().frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
+			if (jr.renderingState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glEnable(GL.GL_COLOR_MATERIAL);
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
 						GL.GL_DIFFUSE);
-				jr.getRenderingState().frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
 		if (vertexNormals != null && smooth) {
@@ -591,7 +591,7 @@ public class JOGLRendererHelper {
 										alpha * da.getValueAt(3));
 							}
 						}
-						for (int nn = 0; nn<jr.getRenderingState().texUnitCount; ++nn)	{
+						for (int nn = 0; nn<jr.renderingState.texUnitCount; ++nn)	{
 							int texunit = GL.GL_TEXTURE0+nn;
 							if (nn == 0 && lightMapCoords != null) {
 								da = lightMapCoords.item(vnn).toDoubleArray();
@@ -662,7 +662,7 @@ public class JOGLRendererHelper {
 									.getValueAt(2), alpha * da.getValueAt(3));
 						}
 					}
-					for (int nn = 0; nn<jr.getRenderingState().texUnitCount; ++nn)	{
+					for (int nn = 0; nn<jr.renderingState.texUnitCount; ++nn)	{
 						int texunit = GL.GL_TEXTURE0+nn;
 						if (nn == 0 && lightMapCoords != null) {
 							da = lightMapCoords.item(k).toDoubleArray();
@@ -761,7 +761,7 @@ public class JOGLRendererHelper {
 		double[] c2o = jr.getContext().getCameraToObject();
 		gl.glActiveTexture(GL.GL_TEXTURE0);
 		gl.glEnable(GL.GL_TEXTURE_2D);
-		jr.getRenderingState().texUnitCount = 1;
+		jr.renderingState.texUnitCount = 1;
 		double[] bbm = new double[16];
 		// float[] glc2o = new float[16];
 		// double[] dglc2o = new double[16];
@@ -785,7 +785,7 @@ public class JOGLRendererHelper {
 		}
 		gl.glDisable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_TEXTURE_2D);
-		jr.getRenderingState().texUnitCount = 0;
+		jr.renderingState.texUnitCount = 0;
 	}
 	private static double[] correctionNDC = null;
 	static {

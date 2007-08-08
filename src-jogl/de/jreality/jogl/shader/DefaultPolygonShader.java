@@ -181,7 +181,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    texunitcoords++;
 	    }
 	    if (texture2D != null) {
-		    Geometry curgeom = jr.getRenderingState().currentGeometry;
+		    Geometry curgeom = jr.renderingState.currentGeometry;
 		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
 		    	if ((curgeom instanceof IndexedFaceSet) &&
 		    		((IndexedFaceSet) curgeom).getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
@@ -209,7 +209,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		} else if (useGLSL)
 			glslShader.reflectionTextureUnit = -1;    	
     
-	jr.getRenderingState().texUnitCount = texunitcoords; 
+	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
     if (useGLSL)		{
@@ -249,12 +249,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //				}
 				int dlist;
 				if (g instanceof Sphere) {
-					jr.getRenderingState().polygonCount += 24*(i*(i+1)+3);
-					dlist = jr.getRenderingState().getSphereDisplayLists(i);
+					jr.renderingState.polygonCount += 24*(i*(i+1)+3);
+					dlist = jr.renderingState.getSphereDisplayLists(i);
 				}
 				else 			{
-					jr.getRenderingState().polygonCount += 4*Math.pow(2, i);
-					dlist = jr.getRenderingState().getCylinderDisplayLists(i);
+					jr.renderingState.polygonCount += 4*Math.pow(2, i);
+					dlist = jr.renderingState.getCylinderDisplayLists(i);
 				}
 				if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
 //				if (jr.debugGL) 
@@ -264,7 +264,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				if (jr.isPickMode()) jr.getGL().glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
-				jr.getRenderingState().polygonCount += ((IndexedFaceSet) g).getNumFaces();
+				jr.renderingState.polygonCount += ((IndexedFaceSet) g).getNumFaces();
 				if (providesProxyGeometry())	{
 					if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
 						dListProxy  = proxyGeometryFor(jrs);
@@ -306,7 +306,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				gl.glDisable(GL.GL_TEXTURE_GEN_T);
 				gl.glDisable(GL.GL_TEXTURE_GEN_R);
 			}
-		jr.getRenderingState().texUnitCount=0;
+		jr.renderingState.texUnitCount=0;
 		// TODO fix this to return to previous state -- maybe textures NOT active
 	}
 
@@ -321,8 +321,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //				i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
 //			}
 			int dlist;
-			if (g instanceof Sphere) dlist = jr.getRenderingState().getSphereDisplayLists(i);
-			else 			 dlist = jr.getRenderingState().getCylinderDisplayLists(i);
+			if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
+			else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
 			if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
 //			if (jr.debugGL) 
 //				jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
