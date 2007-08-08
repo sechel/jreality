@@ -195,6 +195,9 @@ public class TubeUtility {
 		 * @return
 		 */
 		 public static SceneGraphComponent tubeOneEdge(double[] ip1, double[] ip2, double rad, double[][] crossSection, int signature)	{
+			 return tubeOneEdge(null, ip1, ip2, rad, crossSection, signature);
+		 }
+		public static SceneGraphComponent tubeOneEdge(SceneGraphComponent sgc, double[] ip1, double[] ip2, double rad, double[][] crossSection, int signature)	{
 			if (ip1.length < 3 || ip1.length > 4 || ip2.length < 3 || ip2.length > 4)	{
 				throw new IllegalArgumentException("Invalid dimension");
 			}
@@ -281,7 +284,7 @@ public class TubeUtility {
 //			double[] inp1 = Rn.matrixTimesVector(null, inet, p1);
 //			double[] inp2 = Rn.matrixTimesVector(null, inet, p2);
 //			if ((debug & 64) != 0) theLogger.log(Level.FINE,"Image of end points: "+Rn.toString(Pn.dehomogenize(null,inp1), 6)+"  "+Rn.toString(Pn.dehomogenize(null,inp2),6));
-			SceneGraphComponent sgc = new SceneGraphComponent();
+			if (sgc == null) sgc = new SceneGraphComponent();
 			sgc.setGeometry(urTube[signature+1]);
 			sgc.setTransformation(new Transformation(net)); 
 			//LoggingSystem.getLogger().log(Level.FINE,"Matrix is "+Rn.matrixToString(sgc.getTransformation().getMatrix()));

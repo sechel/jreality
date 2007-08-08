@@ -655,7 +655,7 @@ public  class TubeFactory {
 			ilsf.update();
 			IndexedLineSet ils = ilsf.getIndexedLineSet();
 			BallAndStickFactory basf = new BallAndStickFactory(ils);
-			basf.setDrawArrows(true);
+			basf.setShowArrows(true);
 			basf.setArrowPosition(1.2);
 			basf.setStickRadius(.05);
 			basf.setArrowScale(.15);

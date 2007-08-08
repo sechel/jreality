@@ -52,6 +52,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * This class constructs a ball-and-stick representation of an instance of {@link IndexedLineSet} 
@@ -113,6 +114,9 @@ import de.jreality.shader.CommonAttributes;
 			{0,-1,-1},
 			{.707, -.707, -1},
 			{1,0,-1}};
+	private SceneGraphComponent sticks;
+	private SceneGraphComponent balls;
+	private SceneGraphComponent arrow;
 	 static {
 		 urCone = Primitives.pyramid(octagonalCrossSection, new double[]{0,0,0});
 		 GeometryUtility.calculateAndSetVertexNormals(urCone);
@@ -121,23 +125,43 @@ import de.jreality.shader.CommonAttributes;
 	public BallAndStickFactory(IndexedLineSet i)	{
 		super();
 		ils = i;
+		sticks = new SceneGraphComponent("sticks");
+		balls = new SceneGraphComponent("balls");
+		topAp =  new Appearance();
+		topAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
+		theResult = new SceneGraphComponent("BAS");
+		theResult.setAppearance(topAp);
+		sticksAp =  new Appearance();
+		sticksAp.setAttribute(CommonAttributes.FACE_DRAW, true);
+		sticksAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		sticksAp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+		sticks.setAppearance(sticksAp);
+		ballsAp =  new Appearance();
+		ballsAp.setAttribute(CommonAttributes.FACE_DRAW, false);
+		ballsAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		ballsAp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, true);
+		balls.setAppearance(ballsAp);				
+		balls.setGeometry(ils);
+		arrowsAp = new Appearance();
+		theResult.addChild(sticks);
+		theResult.addChild(balls);
 	 }
 
 	 public void update()	{
+			topAp.setAttribute("signature", signature);
+			sticks.setVisible(showSticks);
+			balls.setVisible(showBalls);
+			ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, ballRadius);
+			if (ballColor != null) ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+			if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
+			if (arrowColor != null) arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
 		 	// create sticks on edges
-			SceneGraphComponent sticks = new SceneGraphComponent("sticks");
 			if (showSticks)	{
-				if (sticksAp == null) sticksAp =  new Appearance();
-				sticksAp.setAttribute(CommonAttributes.FACE_DRAW, true);
-				sticksAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-				sticksAp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
-				if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
-				sticks.setAppearance(sticksAp);
-				if (arrowsAp == null) arrowsAp = new Appearance();
-				if (arrowColor != null) arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
 				DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 				DataList edgeColors = ils.getEdgeAttributes(Attribute.COLORS);
 				int n = ils.getNumEdges();
+				SceneGraphUtility.removeChildren(sticks);
 				for (int i = 0; i<n; ++i)	{
 					int[] ed = ils.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 					int m = ed.length;
@@ -158,6 +182,7 @@ import de.jreality.shader.CommonAttributes;
 						}
 						if (cc != null) sticks.addChild(cc);
 						if (drawArrows)		{
+							arrow = new SceneGraphComponent("Arrows");
 							FactoredMatrix arrowM = new FactoredMatrix(signature);
 							double d;
 							if (p1.length == 3) d = Rn.euclideanDistance(p1, p2);
@@ -166,36 +191,18 @@ import de.jreality.shader.CommonAttributes;
 							double stretch = arrowScale/stickRadius;
 							arrowM.setStretch(stretch, stretch, arrowScale*flatten);
 							arrowM.setTranslation(0,0,arrowPosition-.5);
-							SceneGraphComponent arrow = new SceneGraphComponent("Arrows");
-							arrow.setAppearance(arrowsAp);
 							arrowM.update();
 							arrowM.assignTo(arrow);
+							arrow.setAppearance(arrowsAp);
 							arrow.setGeometry(urCone);
 							cc.addChild(arrow);
 						}
 					}
 				}				
 			}
-			SceneGraphComponent balls = new SceneGraphComponent("balls");
-			if (showBalls)	{
-				// we should allow the user to specify "real" balls, not via the appearance.
-				balls.setGeometry(ils);
-				if (ballsAp == null) ballsAp =  new Appearance();
-				ballsAp.setAttribute(CommonAttributes.FACE_DRAW, false);
-				ballsAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-				ballsAp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-				ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, true);
-				ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, ballRadius);
-				if (ballColor != null) ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
-				balls.setAppearance(ballsAp);				
-			}
-			if (topAp == null) topAp =  new Appearance();
-			topAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
-			theResult = new SceneGraphComponent("BAS");
-			theResult.setAppearance(topAp);
-			topAp.setAttribute("signature", signature);
-			if (showSticks) theResult.addChild(sticks);
-			if (showBalls) theResult.addChild(balls);
+//			if (showBalls)	{
+//				// we should allow the user to specify "real" balls, not via the appearance.
+//			}
 	 }
 	 
 	 public void setStickRadius(double r)	{
@@ -223,7 +230,10 @@ import de.jreality.shader.CommonAttributes;
 	}
 
 	protected static SceneGraphComponent sticks(IndexedLineSet ifs, double rad, int signature)	{
-		SceneGraphComponent sgc = new SceneGraphComponent();
+		return sticks(null, ifs, rad, signature);
+	}
+	public static SceneGraphComponent sticks(SceneGraphComponent sgc, IndexedLineSet ifs, double rad, int signature)	{
+		if (sgc == null) sgc = new SceneGraphComponent();
 		DataList vertices = ifs.getVertexAttributes(Attribute.COORDINATES);
 		int n = ifs.getNumEdges();
 		for (int i = 0; i<n; ++i)	{
@@ -265,11 +275,11 @@ import de.jreality.shader.CommonAttributes;
 		this.arrowSlope = arrowSlope;
 	}
 
-	public boolean isDrawArrows() {
+	public boolean isShowArrows() {
 		return drawArrows;
 	}
 
-	public void setDrawArrows(boolean drawArrows) {
+	public void setShowArrows(boolean drawArrows) {
 		this.drawArrows = drawArrows;
 	}
 
