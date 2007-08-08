@@ -44,6 +44,8 @@ import java.awt.Color;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -97,6 +99,7 @@ public class PointerDisplayTool extends AbstractTool {
 			isAssigned=true;
 		}
 		m.assignFrom(tc.getTransformationMatrix(AVATAR_POINTER));
+		MatrixBuilder.euclidean(m).scale(PortalCoordinateSystem.getPortalScale()).assignTo(m);
 		m.assignTo(cmp.getTransformation());
 	}
 
