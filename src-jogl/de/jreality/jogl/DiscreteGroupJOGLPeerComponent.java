@@ -174,7 +174,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			childrenDLDirty = child.isDisplayListDirty();
 			child.goBetween.getOriginalComponent().setVisible(vis);
-//			theLog.info("Rendered "+count);
+			theLog.fine("Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 		} else {

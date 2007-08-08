@@ -270,7 +270,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			} 
 		} else {
 			if ( parent.eAp == null)	{
-				throw new IllegalStateException("Parent must have effective appearance");
+				throw new IllegalStateException("Parent must have effective appearance"+goBetween.getOriginalComponent().getName());
 			}
 			if (effectiveAppearanceDirty || eAp == null)	{
 				theLog.finer("updating eap for "+goBetween.getOriginalComponent().getName());
