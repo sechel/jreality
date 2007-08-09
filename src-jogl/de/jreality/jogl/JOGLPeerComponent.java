@@ -140,7 +140,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.originalComponent);
-		theLog.finer("prerender: "+goBetween.originalComponent.getName());
+		theLog.finer("prerender: "+name);
 		if (useTformCaching)	{
 			if (cachedTform != null && !isIdentity)  {
 				pushTransformation(cachedTform); //thisT.getMatrix());
@@ -253,7 +253,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	protected void propagateAppearanceChanged()	{
-		LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+goBetween.originalComponent.getName());
+		LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+name);
 		appearanceDirty = true;
 		for (JOGLPeerComponent child : children) {
 			if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
@@ -272,10 +272,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			} 
 		} else {
 			if ( parent.eAp == null)	{
-				throw new IllegalStateException("Parent must have effective appearance"+goBetween.originalComponent.getName());
+				throw new IllegalStateException("Parent must have effective appearance"+name);
 			}
 			if (effectiveAppearanceDirty || eAp == null)	{
-				theLog.finer("updating eap for "+goBetween.originalComponent.getName());
+				theLog.finer("updating eap for "+name);
 				if (thisAp != null )	{
 					eAp = parent.eAp.create(thisAp);
 				} else {
@@ -302,7 +302,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			renderingHints = parent.renderingHints;
 
 		} else  {		
-			theLog.log(Level.FINER,"Updating shaders for "+goBetween.originalComponent.getName());
+			theLog.log(Level.FINER,"Updating shaders for "+name);
 			if (geometryShader == null)
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 			else 
@@ -318,7 +318,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childAdded(SceneGraphComponentEvent ev) {
-		theLog.finest("JOGLPeerComponent: Container Child added to: "+goBetween.originalComponent.getName());
+		theLog.finest("JOGLPeerComponent: Container Child added to: "+name);
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
@@ -355,7 +355,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
-		theLog.finest("Container Child removed from: "+goBetween.originalComponent.getName());
+		theLog.finest("Container Child removed from: "+name);
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true;
@@ -391,7 +391,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
-		theLog.finest("Container Child replaced at: "+goBetween.originalComponent.getName());
+		theLog.finest("Container Child replaced at: "+name);
 		switch(ev.getChildType())	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true; 
@@ -435,7 +435,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void handleNewAppearance() {
-		LoggingSystem.getLogger(this).finer("handle new appearance "+goBetween.originalComponent.getName());
+		LoggingSystem.getLogger(this).finer("handle new appearance "+name);
 		propagateGeometryChanged(ALL_CHANGED);
 		appearanceDirty = true;
 		effectiveAppearanceDirty=true;

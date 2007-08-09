@@ -276,7 +276,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 
 	@Override
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
-		theLog.fine("Visibility changed: "+goBetween.originalComponent.getName());
+		theLog.fine("Visibility changed: "+name);
 		propagateSGCDisplayListDirtyUp();
 		super.visibilityChanged(ev);
 	}
