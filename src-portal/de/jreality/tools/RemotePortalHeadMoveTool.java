@@ -66,6 +66,8 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
   Matrix headMatrix = new Matrix();
   Matrix worldToCamera = new Matrix();
   FactoredMatrix portal = new FactoredMatrix();
+  EffectiveAppearance eap = null;
+  private int signature;
     
   public RemotePortalHeadMoveTool() {
     addCurrentSlot(headSlot, "the current head matrix in PORTAL coordinates");
@@ -79,8 +81,6 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
 	signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
 	setHeadMatrix(headMatrix, tc.getViewer().getCameraPath(), tc.getAvatarPath());
   }
-  EffectiveAppearance eap = null;
-  private int signature;
   private void setHeadMatrix(Matrix head, SceneGraphPath cameraPath, SceneGraphPath portalPath) {
 
 	Camera camera = (Camera) cameraPath.getLastElement();
