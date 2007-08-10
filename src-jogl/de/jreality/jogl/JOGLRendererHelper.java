@@ -67,7 +67,6 @@ import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -822,29 +821,7 @@ public class JOGLRendererHelper {
 		}
 	}
 
-	public static boolean accept(double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
-		double fudge = 1.4;
-		boolean ret = true;
-		double[] tmp2 = new double[4];
-		// we look at the image of the origin (0,0,0,1)
-		double[] mat = Rn.times(null, o2c, m);
-		tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
-		double d = Pn.distanceBetween(tmp2, Pn.originP3, signature);
-//		System.err.println("Distance is "+d);
-		
-		if (minDistance > 0.0 &&  d < minDistance) return true;
-		if (maxDistance > 0 && d > maxDistance) return false;
-		mat = Rn.times(null, objectToNDC, m);
-		tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
-		Pn.dehomogenize(tmp2,tmp2);
-//		System.err.println("Origin goes to "+Rn.toString(tmp2));
-		if (Math.abs(tmp2[0]) > fudge) ret = false;
-		if (Math.abs(tmp2[1]) > fudge) ret = false;
-		if (Math.abs(tmp2[2]) > 1.0) ret = false;
-		return ret;
-	}
-
-//	public static void saveScreenShot(GL gl, File file) {
+	//	public static void saveScreenShot(GL gl, File file) {
 //		saveScreenShot(gl, theRenderer.getWidth(), can.getHeight(), file);
 //	}
 //

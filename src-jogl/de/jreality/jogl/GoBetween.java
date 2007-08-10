@@ -138,11 +138,12 @@ public class GoBetween extends JOGLPeerNode implements
 		boolean propagates = true;
 		// TODO shaders should register keywords somehow and which geometries might be changed
 		if (key.indexOf(CommonAttributes.IMPLODE_FACTOR) != -1 ) changed |= (JOGLPeerComponent.FACES_CHANGED);
-		else if (key.indexOf(CommonAttributes.TRANSPARENCY) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
-		else if (key.indexOf(CommonAttributes.SMOOTH_SHADING) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
+		else if (key.indexOf(CommonAttributes.TRANSPARENCY) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
+		else if (key.indexOf(CommonAttributes.SMOOTH_SHADING) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 		else if (key.indexOf(CommonAttributes.TUBE_RADIUS) != -1) changed |= (JOGLPeerComponent.LINES_CHANGED);
 		else if (key.indexOf(CommonAttributes.POINT_RADIUS) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED);
-		else if (key.indexOf(CommonAttributes.ANY_DISPLAY_LISTS) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED | JOGLPeerComponent.LINES_CHANGED | JOGLPeerComponent.FACES_CHANGED);
+		else if (key.indexOf(CommonAttributes.ANY_DISPLAY_LISTS) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
+		else if (key.indexOf(CommonAttributes.FAST_AND_DIRTY) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 		else if (key.endsWith("Shader")) changed |= JOGLPeerComponent.ALL_SHADERS_CHANGED;
 		else if (key.endsWith("Shadername")) changed |= JOGLPeerComponent.ALL_SHADERS_CHANGED;
 		// there are some appearances which we know aren't inherited, so don't propagate change event.
