@@ -230,7 +230,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		}
 	}
 	private void preRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.getGL();
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat,0);
@@ -277,7 +277,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer(); 
+		JOGLRenderer jr = jrs.renderer; 
 		if (!sphereDraw)	{
 			GL gl = jr.getGL();
 			gl.glDisable(GL.GL_POINT_SPRITE_ARB);
@@ -295,7 +295,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
 		Geometry original = jrs.getCurrentGeometry();
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		int sig = jrs.getCurrentSignature();
 		boolean useDisplayLists = jrs.isUseDisplayLists();
 		GL gl = 	jr.getGL();
@@ -368,7 +368,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 
 	public void render(JOGLRenderingState jrs)	{
 		Geometry g = jrs.getCurrentGeometry();
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		boolean useDisplayLists = jrs.isUseDisplayLists();
 		if ( !(g instanceof PointSet))	{
 			throw new IllegalArgumentException("Must be PointSet");

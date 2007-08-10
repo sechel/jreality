@@ -165,7 +165,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	}
 	
 	public void preRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else		gl.glShadeModel(GL.GL_FLAT);
@@ -237,7 +237,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	static Color[] cdbg = {Color.BLUE, Color.GREEN, Color.YELLOW,  Color.RED,Color.GRAY, Color.WHITE};
 	public void render(JOGLRenderingState jrs)	{
 		Geometry g = jrs.getCurrentGeometry();
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		boolean useDisplayLists = jrs.isUseDisplayLists();
 		preRender(jrs);
 		if (g != null)	{
@@ -291,7 +291,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.getGL();
 		if (useGLSL)
 			glslShader.postRender(jrs);
@@ -312,7 +312,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 
     public static void defaultPolygonRender(JOGLRenderingState jrs)	{
     	Geometry g = jrs.getCurrentGeometry();
-    	JOGLRenderer jr = jrs.getRenderer();
+    	JOGLRenderer jr = jrs.renderer;
     	
 		if (g instanceof Sphere || g instanceof Cylinder)	{	
 			int i = 3;

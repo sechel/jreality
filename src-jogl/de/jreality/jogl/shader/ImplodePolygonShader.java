@@ -76,7 +76,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 	}
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
 		final Geometry original = jrs.getCurrentGeometry();
-		final JOGLRenderer jr = jrs.getRenderer();
+		final JOGLRenderer jr = jrs.renderer;
 		final int sig = jrs.getCurrentSignature();
 		final boolean useDisplayLists = jrs.isUseDisplayLists();
 		if (!(original instanceof IndexedFaceSet)) return -1;

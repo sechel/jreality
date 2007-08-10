@@ -121,7 +121,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
 	public void render(JOGLRenderingState jrs) {
 		rhsShader.render(jrs);
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else gl.glShadeModel(GL.GL_FLAT);
@@ -177,7 +177,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	}
 
 	public void postRender(JOGLRenderingState jrs) {
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 		if (program != null)  GlslLoader.postRender(program, jr);
 		if (diffuseTex != null) {

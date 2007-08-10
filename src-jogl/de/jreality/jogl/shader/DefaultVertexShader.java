@@ -146,7 +146,7 @@ public class DefaultVertexShader implements VertexShader {
 	}
 	
 	public void render(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 
 //		if (jr.openGLState.frontBack != frontBack)	{

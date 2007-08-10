@@ -206,6 +206,6 @@ public class JOGLRenderingState {
 		this.clearColorBuffer = clearColorBuffer;
 	}
   public GL getGL() {
-    return getRenderer().getGL();
+    return renderer.getGL();
   }
 }

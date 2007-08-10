@@ -133,7 +133,7 @@ public class RenderingHintsShader  {
 	}
 
 	public void render(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 		if (transparencyEnabled)	{
 		  gl.glEnable (GL.GL_BLEND);
@@ -169,7 +169,7 @@ public class RenderingHintsShader  {
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 		if (transparencyEnabled)	{
 			  gl.glDepthMask(true);

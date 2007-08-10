@@ -133,7 +133,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void preRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.getGL();
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
@@ -169,7 +169,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		if (!tubeDraw) {
 			jr.getGL().glDepthRange(0.0d, 1d);
 		} else 
@@ -182,7 +182,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
 		final Geometry original = jrs.getCurrentGeometry();
-		final JOGLRenderer jr = jrs.getRenderer();
+		final JOGLRenderer jr = jrs.renderer;
 		final int sig = jrs.getCurrentSignature();
 		final boolean useDisplayLists = jrs.isUseDisplayLists();
 //		if ( !(original instanceof IndexedLineSet)) return -1;
@@ -310,7 +310,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 	public void render(JOGLRenderingState jrs)	{
 		Geometry g = jrs.getCurrentGeometry();
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		boolean useDisplayLists = jrs.isUseDisplayLists();
 		if ( !(g instanceof IndexedLineSet))	{
 			throw new IllegalArgumentException("Must be IndexedLineSet");

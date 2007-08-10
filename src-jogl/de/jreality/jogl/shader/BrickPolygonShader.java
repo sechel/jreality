@@ -90,7 +90,7 @@ public class BrickPolygonShader extends SimpleGLSLShader {
 		changed = true;
 	}
 	public void render(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.getGL();
 		super.render(jrs);
 		if (changed)	{

@@ -65,7 +65,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				trojanHorse.getGeometryAttributes(SystemProperties.JOGL_COPY_CAT) != null);
 		if (isCopyCat)	{
 			theDropBox = (Geometry) trojanHorse.getGeometryAttributes(SystemProperties.JOGL_COPY_CAT);
-			System.err.println("id is "+theDropBox);
 			readMatrices();
 		}
 	}
@@ -262,7 +261,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
 		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
 		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);
-		System.err.println("Clip to camera is "+clipToCamera);
 		isTopCat = (isCopyCat && !existsHigherCat());
 		delay = eAp.getAttribute("discreteGroup.delay", delay);	
 	}
