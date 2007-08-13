@@ -91,7 +91,7 @@ public class BrickPolygonShader extends SimpleGLSLShader {
 	}
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		super.render(jrs);
 		if (changed)	{
 		    gl.glUniform1fvARB(getUniLoc(program, "rtable",gl),100, rtable, 0);

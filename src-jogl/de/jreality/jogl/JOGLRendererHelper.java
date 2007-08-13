@@ -112,7 +112,7 @@ public class JOGLRendererHelper {
 	private JOGLRendererHelper() {}
 	static Appearance pseudoAp = new Appearance();
 	static void handleBackground(JOGLRenderer jr, int width, int height, Appearance topAp) {
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
     JOGLRenderingState openGLState = jr.renderingState;
 		Object bgo = null;
     float[] backgroundColor;
@@ -225,7 +225,7 @@ public class JOGLRendererHelper {
 
 	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp, Camera cam) {
 		if (topAp == null) return;
-	    GL gl = jr.getGL();
+	    GL gl = jr.globalGL;
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
 					CommonAttributes.SKY_BOX, topAp)) {
 			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
@@ -240,7 +240,7 @@ public class JOGLRendererHelper {
 	private static DataList vLast = null, vcLast = null, vnLast = null;
 
 	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
     boolean pickMode=jr.isPickMode();
     JOGLRenderingState openGLState = jr.renderingState;
 		if (sg.getNumPoints() == 0)
@@ -323,7 +323,7 @@ public class JOGLRendererHelper {
 		if (sg.getNumEdges() == 0)
 			return;
 
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
     
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -461,7 +461,7 @@ public class JOGLRendererHelper {
 	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha) {
 		if (sg.getNumFaces() == 0)
 			return;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		boolean pickMode = jr.isPickMode();
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -751,7 +751,7 @@ public class JOGLRendererHelper {
 	private static void renderLabels(JOGLRenderer jr, ImageData[] labels,
 			DoubleArrayArray vertices, IntArrayArray indices, double[] offset,
 			int alignment, double scale) {
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		gl.glEnable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthMask(true);

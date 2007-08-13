@@ -106,7 +106,7 @@ public class GlslDefaultPolygonShader extends SimpleGLSLShader {
 	// only the lighting/no lighting flag is required.
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		super.render(jrs);
 		if (!changed) return;
 		//System.err.println("Writing glsl values");

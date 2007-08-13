@@ -77,7 +77,7 @@ public class JOGLCylinderUtility  {
 //		if (dlists != null)	{
 //			JOGLConfiguration.theLog.log(Level.WARNING,"Already have cylinder display lists for this renderer "+jr);
 //		}
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		int n = 6;
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) cylinderDListsTable.get(gl);
@@ -95,7 +95,7 @@ public class JOGLCylinderUtility  {
 			JOGLRendererHelper.drawFaces(jr, cyl, true, 1.0);
 			gl.glEndList();
 		}
-		if (!sharedDisplayLists) cylinderDListsTable.put(jr.getGL(), dlists);
+		if (!sharedDisplayLists) cylinderDListsTable.put(jr.globalGL, dlists);
 		else globalSharedCylinderDisplayLists = dlists;
 	}
 	
@@ -119,12 +119,12 @@ public class JOGLCylinderUtility  {
 	public static int[] getCylinderDLists( JOGLRenderer jr) {
 		int dlists[];
 		if (!sharedDisplayLists)	
-		dlists =  (int[] ) cylinderDListsTable.get(jr.getGL());
+		dlists =  (int[] ) cylinderDListsTable.get(jr.globalGL);
 		else dlists = globalSharedCylinderDisplayLists;
 		if (dlists == null) 	{
 			setupCylinderDLists(jr);
 			if (!sharedDisplayLists)	
-				dlists = (int[] ) cylinderDListsTable.get(jr.getGL());
+				dlists = (int[] ) cylinderDListsTable.get(jr.globalGL);
 			else dlists = globalSharedCylinderDisplayLists;
 		}
 		if (dlists == null)	{

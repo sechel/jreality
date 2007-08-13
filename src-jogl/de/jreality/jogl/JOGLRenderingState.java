@@ -84,7 +84,7 @@ public class JOGLRenderingState {
 	public boolean ignoreAlpha0 = true;
 	public boolean renderGeometryOnly = false;
 	public boolean insideDisplayList = false;
-	public boolean componentDisplayLists = true;
+	public boolean componentDisplayLists = false;
 	public static boolean useOldTransparency = false;
 	public double[] cameraToWorld = Rn.identityMatrix(4);
 
@@ -113,7 +113,7 @@ public class JOGLRenderingState {
 			// TODO clean this up, provide an interface to set "OpenGL Preferences ..."
 			// and make sure everything is here.
 			// set drawing color and point size
-			GL gl = renderer.getGL();
+			GL gl = renderer.globalGL;
 			gl.glDepthMask(true);
 			gl.glDisable(GL.GL_BLEND);
 			gl.glColor3f( 0.0f, 0.0f, 0.0f ); 
@@ -151,61 +151,10 @@ public class JOGLRenderingState {
 		if (sphereDisplayLists == null) sphereDisplayLists = JOGLSphereHelper.getSphereDLists(renderer);
 		return sphereDisplayLists[i];
 	}
-	public double getCurrentAlpha() {
-		return currentAlpha;
-	}
-	public void setCurrentAlpha(double currentAlpha) {
-		this.currentAlpha = currentAlpha;
-	}
-	public Geometry getCurrentGeometry() {
-		return currentGeometry;
-	}
-	public void setCurrentGeometry(Geometry currentGeometry) {
-		this.currentGeometry = currentGeometry;
-	}
-	public boolean isCurrentPickMode() {
-		return currentPickMode;
-	}
-	public void setCurrentPickMode(boolean currentPickMode) {
-		this.currentPickMode = currentPickMode;
-	}
-	public int getCurrentSignature() {
-		return currentSignature;
-	}
-	public void setCurrentSignature(int currentSignature) {
-		this.currentSignature = currentSignature;
-	}
-	public float[] getDiffuseColor() {
-		return diffuseColor;
-	}
-	public void setDiffuseColor(float[] diffuseColor) {
-		this.diffuseColor = diffuseColor;
-	}
-	public JOGLRenderer getRenderer() {
-		return renderer;
-	}
-	public void setRenderer(JOGLRenderer renderer) {
-		this.renderer = renderer;
-	}
-	public boolean isSmoothShading() {
-		return smoothShading;
-	}
-	public void setSmoothShading(boolean smoothShading) {
-		this.smoothShading = smoothShading;
-	}
-	public boolean isUseDisplayLists() {
-		return useDisplayLists;
-	}
-	public void setUseDisplayLists(boolean useDisplayLists) {
-		this.useDisplayLists = useDisplayLists;
-	}
 	public boolean isClearColorBuffer() {
 		return clearColorBuffer;
 	}
 	public void setClearColorBuffer(boolean clearColorBuffer) {
 		this.clearColorBuffer = clearColorBuffer;
 	}
-  public GL getGL() {
-    return renderer.getGL();
-  }
 }

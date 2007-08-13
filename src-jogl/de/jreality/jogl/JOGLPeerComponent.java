@@ -16,7 +16,6 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.Lock;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
@@ -80,6 +79,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected final static int ALL_SHADERS_CHANGED = POINT_SHADER_CHANGED | LINE_SHADER_CHANGED | POLYGON_SHADER_CHANGED;
 	protected final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
 	public static int count = 0;
+	static boolean debug = false;
 	// need an empty constructor in order to allow 
 	public JOGLPeerComponent()	{
 		super();
@@ -140,7 +140,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.originalComponent);
-		theLog.finer("prerender: "+name);
+		if (debug) theLog.finer("prerender: "+name);
 		if (useTformCaching)	{
 			if (cachedTform != null && !isIdentity)  {
 				pushTransformation(cachedTform); //thisT.getMatrix());
@@ -160,7 +160,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
-		jr.renderingState.setCurrentSignature(signature);
+		jr.renderingState.currentSignature = signature;
 		if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
@@ -253,7 +253,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	protected void propagateAppearanceChanged()	{
-		LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+name);
+		if (debug) LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+name);
 		appearanceDirty = true;
 		for (JOGLPeerComponent child : children) {
 			if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
@@ -275,7 +275,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 				throw new IllegalStateException("Parent must have effective appearance"+name);
 			}
 			if (effectiveAppearanceDirty || eAp == null)	{
-				theLog.finer("updating eap for "+name);
+				if (debug) theLog.finer("updating eap for "+name);
 				if (thisAp != null )	{
 					eAp = parent.eAp.create(thisAp);
 				} else {
@@ -302,7 +302,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			renderingHints = parent.renderingHints;
 
 		} else  {		
-			theLog.log(Level.FINER,"Updating shaders for "+name);
+			if (debug) theLog.log(Level.FINER,"Updating shaders for "+name);
 			if (geometryShader == null)
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 			else 
@@ -318,7 +318,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childAdded(SceneGraphComponentEvent ev) {
-		theLog.finest("JOGLPeerComponent: Container Child added to: "+name);
+		if (debug) theLog.finest("JOGLPeerComponent: Container Child added to: "+name);
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
@@ -338,7 +338,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			break;
 		case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 			handleNewAppearance();
-			theLog.log(Level.FINE,"Propagating geometry change due to added appearance");
+			if (debug) theLog.log(Level.FINE,"Propagating geometry change due to added appearance");
 			break;				
 		case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 			jr.lightListDirty = true;
@@ -355,7 +355,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
-		theLog.finest("Container Child removed from: "+name);
+		if (debug) theLog.finest("Container Child removed from: "+name);
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true;
@@ -375,7 +375,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			break;
 		case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 			handleNewAppearance();
-			theLog.log(Level.FINE,"Propagating geometry change due to removed appearance");
+			if (debug) theLog.log(Level.FINE,"Propagating geometry change due to removed appearance");
 			break;				
 		case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 			jr.lightListDirty = true;
@@ -391,7 +391,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
-		theLog.finest("Container Child replaced at: "+name);
+		if (debug) theLog.finest("Container Child replaced at: "+name);
 		switch(ev.getChildType())	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true; 
@@ -399,7 +399,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 		case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
 			handleNewAppearance();
-			theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
+			if (debug) theLog.log(Level.INFO,"Propagating geometry change due to replaced appearance");
 			break;
 		case SceneGraphComponentEvent.CHILD_TYPE_LIGHT:
 			jr.lightListDirty = true;
@@ -435,7 +435,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void handleNewAppearance() {
-		LoggingSystem.getLogger(this).finer("handle new appearance "+name);
+		if (debug) LoggingSystem.getLogger(this).finer("handle new appearance "+name);
 		propagateGeometryChanged(ALL_CHANGED);
 		appearanceDirty = true;
 		effectiveAppearanceDirty=true;
@@ -455,7 +455,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (goBetween.peerGeometry != null)	{
 			if (geometryShader == null) updateShaders();
 			if (geometryShader == null) return;
-//			theLog.fine("Handling bits: "+geometryDirtyBits+" for "+goBetween.originalComponent.getName());
+			theLog.info("Handling bits: "+geometryDirtyBits+" for "+name);
 			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) 
 				geometryShader.pointShader.flushCachedState(jr);
 			if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) 

@@ -134,7 +134,7 @@ public class RenderingHintsShader  {
 
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		if (transparencyEnabled)	{
 		  gl.glEnable (GL.GL_BLEND);
 		  gl.glDepthMask(zBufferEnabled);
@@ -165,12 +165,12 @@ public class RenderingHintsShader  {
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 			jr.renderingState.separateSpecularColor = separateSpecularColor;			
 		}
-		jr.renderingState.setUseDisplayLists(useDisplayLists); //(); //useDisplayLists(activeDL, jpc);
+		jr.renderingState.useDisplayLists = useDisplayLists; //(); //useDisplayLists(activeDL, jpc);
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		if (transparencyEnabled)	{
 			  gl.glDepthMask(true);
 			  gl.glDisable(GL.GL_BLEND);

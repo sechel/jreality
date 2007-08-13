@@ -134,7 +134,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.getGL();
+		GL gl = jrs.renderer.globalGL;
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
@@ -148,10 +148,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 
 		if (tubeDraw)	{
-			Geometry g = jrs.getCurrentGeometry();
-			jrs.setCurrentGeometry(null);
+			Geometry g = jrs.currentGeometry;
+			jrs.currentGeometry = null;
 			polygonShader.render(jrs);
-			jrs.setCurrentGeometry(g);
+			jrs.currentGeometry = g;
 			lighting=true;
 		} else lighting = false;
 		jr.renderingState.lighting = lighting;
@@ -171,7 +171,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		if (!tubeDraw) {
-			jr.getGL().glDepthRange(0.0d, 1d);
+			jr.globalGL.glDepthRange(0.0d, 1d);
 		} else 
 			polygonShader.postRender(jrs);
 	}
@@ -181,10 +181,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 	
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
-		final Geometry original = jrs.getCurrentGeometry();
+		final Geometry original = jrs.currentGeometry;
 		final JOGLRenderer jr = jrs.renderer;
-		final int sig = jrs.getCurrentSignature();
-		final boolean useDisplayLists = jrs.isUseDisplayLists();
+		final int sig = jrs.currentSignature;
+		final boolean useDisplayLists = jrs.useDisplayLists;
 //		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
 	        final int[] dlist = new int[1];
@@ -202,7 +202,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	int[] tubeDL = null;
 	boolean testQMS = true;
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode, boolean useDisplayLists)	{
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		double[] p1 = new double[4],
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
@@ -220,7 +220,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		}
 		if (tubeDL[sig+1] == 0)	{
 			tubeDL[sig+1] = gl.glGenLists(1);
-			LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.getGL());
+			LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.globalGL);
 			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
 			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], smoothShading , alpha );
 			gl.glEndList();	
@@ -230,7 +230,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		int nextDL = -1;
 		if (useDisplayLists) {
 			nextDL = gl.glGenLists(1);
-			LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+nextDL+" for gl "+jr.getGL());
+			LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+nextDL+" for gl "+jr.globalGL);
 			gl.glNewList(nextDL, GL.GL_COMPILE);
 		}
 		int  k, l;
@@ -309,9 +309,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void render(JOGLRenderingState jrs)	{
-		Geometry g = jrs.getCurrentGeometry();
+		Geometry g = jrs.currentGeometry;
 		JOGLRenderer jr = jrs.renderer;
-		boolean useDisplayLists = jrs.isUseDisplayLists();
+		boolean useDisplayLists = jrs.useDisplayLists;
 		if ( !(g instanceof IndexedLineSet))	{
 			throw new IllegalArgumentException("Must be IndexedLineSet");
 		}
@@ -323,7 +323,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					dListProxy  = proxyGeometryFor(jrs);						
 					displayListsDirty = false;
 				}
-				jr.getGL().glCallList(dListProxy);
+				jr.globalGL.glCallList(dListProxy);
 				jr.renderingState.polygonCount += faceCount;
 			}
 			else 	{
@@ -331,14 +331,14 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-						dList = jr.getGL().glGenLists(1);
-						LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.getGL());
-						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						dList = jr.globalGL.glGenLists(1);
+						LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
+						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
-						jr.getGL().glEndList();									
+						jr.globalGL.glEndList();									
 						displayListsDirty = false;
 					}
-					jr.getGL().glCallList(dList);
+					jr.globalGL.glCallList(dList);
 				} 
 			}
 		}
@@ -346,15 +346,15 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 	public void flushCachedState(JOGLRenderer jr) {
 		LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+dList+" : "+dListProxy);
-		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
-		if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
+		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
+		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
 		displayListsDirty = true;
 		if (tubeDL != null) {
 			LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+tubeDL[0]+" : "+tubeDL[1]+" : "+tubeDL[2]);
 					for (int i = 0; i<3; ++i)
 				if (tubeDL[i] != 0)	{
-					jr.getGL().glDeleteLists(tubeDL[i], 1);
+					jr.globalGL.glDeleteLists(tubeDL[i], 1);
 					tubeDL[i] = 0;
 				}
 				tubeDL = null;

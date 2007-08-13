@@ -147,7 +147,7 @@ public class DefaultVertexShader implements VertexShader {
 	
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 
 //		if (jr.openGLState.frontBack != frontBack)	{
 			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);

@@ -122,7 +122,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	public void render(JOGLRenderingState jrs) {
 		rhsShader.render(jrs);
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
@@ -132,12 +132,12 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	   
 		if (diffuseTex != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE0);
-			Texture2DLoaderJOGL.render(jr.getGL(), diffuseTex);
+			Texture2DLoaderJOGL.render(jr.globalGL, diffuseTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		}
 		if (normalTex != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
-			Texture2DLoaderJOGL.render(jr.getGL(), normalTex);
+			Texture2DLoaderJOGL.render(jr.globalGL, normalTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		}
 		if (environmentMap != null) {
@@ -154,7 +154,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			}
 			GlslLoader.render(program, jr);
 		}
-		Geometry g = jrs.getCurrentGeometry();
+		Geometry g = jrs.currentGeometry;
 		if (g != null)	{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
 				int i = 3;
@@ -165,9 +165,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				int dlist;
 				if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
 				else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
-				if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
-				jr.getGL().glCallList(dlist);
-				if (jr.isPickMode()) jr.getGL().glPopName();
+				if (jr.isPickMode()) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
+				jr.globalGL.glCallList(dlist);
+				if (jr.isPickMode()) jr.globalGL.glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
 				drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
@@ -178,7 +178,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
 	public void postRender(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		if (program != null)  GlslLoader.postRender(program, jr);
 		if (diffuseTex != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -208,7 +208,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha) {
 		if (sg.getNumFaces() == 0)
 			return;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		boolean pickMode = jr.isPickMode();
 
 		int colorBind = -1, normalBind, colorLength = 3;

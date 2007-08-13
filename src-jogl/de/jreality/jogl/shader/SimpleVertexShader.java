@@ -75,7 +75,7 @@ public class SimpleVertexShader implements VertexShader {
 	}
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 //		JOGLConfiguration.theLog.log(Level.FINER,"Rendering simple vertex shader");
 
 		if (jr.renderingState.frontBack != frontBack)	{

@@ -231,7 +231,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 	private void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.getGL();
+		GL gl = jrs.renderer.globalGL;
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat,0);
 //			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
@@ -254,7 +254,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 //			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-			PointSet ps = (PointSet) jrs.getCurrentGeometry();
+			PointSet ps = (PointSet) jrs.currentGeometry;
 			if (currentTex == tex && ps.getVertexAttributes(Attribute.COLORS) != null)
 				tex.setApplyMode(Texture2D.GL_MODULATE);
 			else 
@@ -264,10 +264,10 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			Texture2DLoaderJOGL.render(gl, currentTex);
 		} else	{
 			// really need to call the preRender() method on the polygonShader, but it doesn't exist.
-			Geometry g = jrs.getCurrentGeometry();
-			jrs.setCurrentGeometry(null);
+			Geometry g = jrs.currentGeometry;
+			jrs.currentGeometry = null;
 			polygonShader.render(jrs);
-			jrs.setCurrentGeometry(g);
+			jrs.currentGeometry = g;
 		}
 		
 		jr.renderingState.lighting = lighting;
@@ -279,7 +279,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer; 
 		if (!sphereDraw)	{
-			GL gl = jr.getGL();
+			GL gl = jr.globalGL;
 			gl.glDisable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
@@ -294,11 +294,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 	
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
-		Geometry original = jrs.getCurrentGeometry();
+		Geometry original = jrs.currentGeometry;
 		JOGLRenderer jr = jrs.renderer;
-		int sig = jrs.getCurrentSignature();
-		boolean useDisplayLists = jrs.isUseDisplayLists();
-		GL gl = 	jr.getGL();
+		int sig = jrs.currentSignature;
+		boolean useDisplayLists = jrs.useDisplayLists;
+		GL gl = 	jr.globalGL;
 //		if (original instanceof PointSet)	{
 			PointSet ps = (PointSet) original;
 			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
@@ -367,9 +367,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 
 	public void render(JOGLRenderingState jrs)	{
-		Geometry g = jrs.getCurrentGeometry();
+		Geometry g = jrs.currentGeometry;
 		JOGLRenderer jr = jrs.renderer;
-		boolean useDisplayLists = jrs.isUseDisplayLists();
+		boolean useDisplayLists = jrs.useDisplayLists;
 		if ( !(g instanceof PointSet))	{
 			throw new IllegalArgumentException("Must be PointSet");
 		}
@@ -380,7 +380,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 					dListProxy  = proxyGeometryFor(jrs);						
 					displayListsDirty = false;
 				}
-				jr.getGL().glCallList(dListProxy);
+				jr.globalGL.glCallList(dListProxy);
 				jr.renderingState.polygonCount += polygonCount;
 			}
 			else {
@@ -388,13 +388,13 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
-						dList = jr.getGL().glGenLists(1);
-						jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						dList = jr.globalGL.glGenLists(1);
+						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.renderingState.diffuseColor[3]);
-						jr.getGL().glEndList();	
+						jr.globalGL.glEndList();	
 						displayListsDirty = false;
 					}
-					jr.getGL().glCallList(dList);
+					jr.globalGL.glCallList(dList);
 				} 
 			}			
 		}
@@ -402,7 +402,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 
 	public void flushCachedState(JOGLRenderer jr) {
 		LoggingSystem.getLogger(this).fine("PointShader: Flushing display lists "+dList+" : "+dListProxy);
-		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
+		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
 		//TODO !!!
     //if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;

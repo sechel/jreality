@@ -69,10 +69,10 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 
 
 	public void render(JOGLRenderingState jrs) {
-		Geometry g = jrs.getCurrentGeometry();
-		jrs.setCurrentGeometry(null);
+		Geometry g = jrs.currentGeometry;
+		jrs.currentGeometry = null;
 		if (back != null) back.render(jrs);
-		jrs.setCurrentGeometry(g);
+		jrs.currentGeometry = g;
 		if (front != null) front.render(jrs);
 	}
 	

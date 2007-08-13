@@ -166,7 +166,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
 		else		gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
@@ -218,8 +218,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     	glslShader.render(jrs);
     } //else {
    // }
-    jrs.setCurrentAlpha(vertexShader.getDiffuseColorAsFloat()[3]);
-    jrs.setSmoothShading(smoothShading);
+    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
+    jrs.smoothShading = smoothShading;
 }
 	
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
@@ -236,9 +236,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 
 	static Color[] cdbg = {Color.BLUE, Color.GREEN, Color.YELLOW,  Color.RED,Color.GRAY, Color.WHITE};
 	public void render(JOGLRenderingState jrs)	{
-		Geometry g = jrs.getCurrentGeometry();
+		Geometry g = jrs.currentGeometry;
 		JOGLRenderer jr = jrs.renderer;
-		boolean useDisplayLists = jrs.isUseDisplayLists();
+		boolean useDisplayLists = jrs.useDisplayLists;
 		preRender(jrs);
 		if (g != null)	{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
@@ -256,12 +256,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					jr.renderingState.polygonCount += 4*Math.pow(2, i);
 					dlist = jr.renderingState.getCylinderDisplayLists(i);
 				}
-				if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
+				if (jr.isPickMode()) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
 //				if (jr.debugGL) 
 //					jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
-				jr.getGL().glCallList(dlist);
+				jr.globalGL.glCallList(dlist);
 				displayListsDirty = false;
-				if (jr.isPickMode()) jr.getGL().glPopName();
+				if (jr.isPickMode()) jr.globalGL.glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
 				jr.renderingState.polygonCount += ((IndexedFaceSet) g).getNumFaces();
@@ -270,19 +270,19 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 						dListProxy  = proxyGeometryFor(jrs);
 						displayListsDirty = false;
 					}
-					jr.getGL().glCallList(dListProxy);
+					jr.globalGL.glCallList(dListProxy);
 				}
 				else 	{
 					if (!jr.isPickMode() && useDisplayLists)	{
 						if (dList == -1)	{
-							dList = jr.getGL().glGenLists(1);
-							LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+dList+" for gl "+jr.getGL());
-							jr.getGL().glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+							dList = jr.globalGL.glGenLists(1);
+							LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
+							jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
-							jr.getGL().glEndList();	
+							jr.globalGL.glEndList();	
 							displayListsDirty = false;
 						}
-						jr.getGL().glCallList(dList);
+						jr.globalGL.glCallList(dList);
 					} else
 						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
 				}	
@@ -292,7 +292,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.getGL();
+		GL gl = jrs.renderer.globalGL;
 		if (useGLSL)
 			glslShader.postRender(jrs);
 			for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
@@ -311,7 +311,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	}
 
     public static void defaultPolygonRender(JOGLRenderingState jrs)	{
-    	Geometry g = jrs.getCurrentGeometry();
+    	Geometry g = jrs.currentGeometry;
     	JOGLRenderer jr = jrs.renderer;
     	
 		if (g instanceof Sphere || g instanceof Cylinder)	{	
@@ -323,21 +323,21 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			int dlist;
 			if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
 			else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
-			if (jr.isPickMode()) jr.getGL().glPushName(JOGLPickAction.GEOMETRY_BASE);
+			if (jr.isPickMode()) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
 //			if (jr.debugGL) 
 //				jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
-			jr.getGL().glCallList(dlist);
-			if (jr.isPickMode()) jr.getGL().glPopName();
+			jr.globalGL.glCallList(dlist);
+			if (jr.isPickMode()) jr.globalGL.glPopName();
 		}
 		else if ( g instanceof IndexedFaceSet)	{
-      JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.isSmoothShading(), jrs.getDiffuseColor()[3]);			
+      JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, jrs.diffuseColor[3]);			
 		}
 
     }
 	public void flushCachedState(JOGLRenderer jr) {
 		LoggingSystem.getLogger(this).fine("PolygonShader: Flushing display lists "+dList+" : "+dListProxy);
-		if (dList != -1) jr.getGL().glDeleteLists(dList, 1);
-		if (dListProxy != -1) jr.getGL().glDeleteLists(dListProxy,1);
+		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
+		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
 		displayListsDirty = true;
 	}

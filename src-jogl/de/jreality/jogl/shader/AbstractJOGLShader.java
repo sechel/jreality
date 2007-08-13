@@ -109,8 +109,8 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 	
 	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.getGL();
-		activate(jr.getGL());
+		GL gl = jr.globalGL;
+		activate(jr.globalGL);
 	}
 	
 	public void activate(GL gl)	{
@@ -128,7 +128,7 @@ public abstract class AbstractJOGLShader extends AbstractPrimitiveShader impleme
 	
 	public void postRender(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
-		deactivate(jr.getGL());
+		deactivate(jr.globalGL);
 	}
 	
 	public void deactivate(GL gl)	{

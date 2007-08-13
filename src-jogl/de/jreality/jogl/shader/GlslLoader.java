@@ -59,7 +59,7 @@ public class GlslLoader {
   private static final WeakHashMap GL_TO_GLSL=new WeakHashMap();
   
   public static void render(GlslProgram prog, JOGLRenderer jr) {
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
     render(prog, gl);
   }
   
@@ -102,7 +102,7 @@ public class GlslLoader {
   }
 
   public static void postRender(GlslProgram prog, JOGLRenderer jr) {
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
     postRender(prog, gl);
   }
   

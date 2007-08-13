@@ -82,7 +82,7 @@ public class Texture2DLoaderJOGL {
 	}
 
 	public static void setupBoundTextureTable(GL gl, boolean activate)	{
-//		System.err.println("bound texture: "+true);
+//		System.err.println("bound texture: "+activate);
 		if (!activate) lookupBoundTextures.remove(gl);
 		else {
 			WeakHashMap<ImageData, Integer> ht = getBoundTextureTableForGL(gl);
@@ -191,7 +191,7 @@ public class Texture2DLoaderJOGL {
         Integer boundTexid = ht.get(tex.getImage());
         if (boundTexid != null)	{
         	return;
-        }    	
+        }    
         ht.put(tex.getImage(), texid);
    }
 //    System.err.println("Not yet bound ");
@@ -231,7 +231,7 @@ public class Texture2DLoaderJOGL {
 //  public static void render(GL gl, CubeMap ref, double[] c2w) {
     boolean first = true;
     boolean mipmapped = true;
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
     GLU glu = new GLU();
     WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
     

@@ -33,11 +33,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		visibilityChanged = false;
 	boolean insideDL = false;
 	double[][] matrices = null;
-	double minDistance = -1;
-	double maxDistance = -1;
-	boolean clipToCamera = true;
-	int delay = 50;
-	Geometry trojanHorse = null;
 	SceneGraphPath w2camrepn = null;
 	double[] world2CameraRepn = new double[16], camera2CameraRepn = new double[16];
 	float[] m2w = new float[16];
@@ -45,7 +40,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	protected boolean[] matrixIsReflection = null;
 	GL oldGL;
 	public static int instanceCount;
-	Geometry theDropBox;
+	DiscreteGroupData theDropBox;
 	public DiscreteGroupJOGLPeerComponent()	{
 		super();
 		instanceCount++;
@@ -59,18 +54,18 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
 		super.init(sgp,p,jr);
-		trojanHorse = goBetween.originalComponent.getGeometry();
+		Geometry trojanHorse = goBetween.originalComponent.getGeometry();
 		isCopyCat = (trojanHorse != null &&  
-				trojanHorse instanceof PointSet && 
-				trojanHorse.getGeometryAttributes(SystemProperties.JOGL_COPY_CAT) != null);
+				trojanHorse instanceof DiscreteGroupData);
 		if (isCopyCat)	{
-			theDropBox = (Geometry) trojanHorse.getGeometryAttributes(SystemProperties.JOGL_COPY_CAT);
+			theDropBox = (DiscreteGroupData) trojanHorse;
 			readMatrices();
 		}
 	}
 
 	private void readMatrices() {
-		matrices = ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
+//		matrices = ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
+		matrices = theDropBox.matrixList;
 		matrixIsReflection = new boolean[matrices.length];
 		for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
 //		System.err.println("Updating matrices length "+matrices.length);
@@ -88,7 +83,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		// first consider whether display lists are currently being used at all
 		if (isCopyCat) {
 //			System.err.println("Matrices length "+((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size());
-			if (matrices.length != ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size()) {
+			if (matrices.length != theDropBox.matrixList.length) {
 				readMatrices();				
 				displayListDirty = geometryDLDirty = true;			
 			}
@@ -109,7 +104,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 						propagateSGCDisplayListDirtyDown();
 //						theLog.fine("Propagating display list dirty down "+goBetween.getOriginalComponent().getName());
 					}
-					if (System.currentTimeMillis() - currentTime > delay)	{
+					if (System.currentTimeMillis() - currentTime > theDropBox.delay)	{
 						currentTime = System.currentTimeMillis();
 						displayListDirty = true;
 //						theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
@@ -149,7 +144,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	}
 
 	private void printUpState()	{
-		theLog.info("dld\tcld:\t"+displayListDirty+"\t"+childrenDLDirty+"\t"+name);
+		if (debug) theLog.info("dld\tcld:\t"+displayListDirty+"\t"+childrenDLDirty+"\t"+name);
 		if (parent!=null)((DiscreteGroupJOGLPeerComponent) parent).printUpState();
 	}
 	int signature;
@@ -158,7 +153,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	protected void renderChildren() {
 		if (!jr.offscreenMode && isCopyCat)		{
 			signature = jr.renderingState.currentSignature;
-			theLog.fine("In renderChildren()"+name);
+			if (debug) theLog.fine("In renderChildren()"+name);
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
@@ -166,23 +161,23 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			o2c = jr.context.getObjectToCamera();
 			int count = 0;
 			DiscreteGroupJOGLPeerComponent child = (DiscreteGroupJOGLPeerComponent) children.get(0);
-			boolean vis = child.isVisible;
-			child.goBetween.originalComponent.setVisible(true);
+			//boolean vis = child.isVisible;
+			//child.goBetween.originalComponent.setVisible(true);
 			for (int j = 0; j<nn; ++j)	{
-				if (clipToCamera && !accept(matrices[j])) continue; 
+				if (theDropBox.clipToCamera && !accept(matrices[j])) continue; 
 				count++;
 				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
-				jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 				if (cumulativeIsReflection != jr.renderingState.flipped)	{
+					jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW : GL.GL_CCW);
 					jr.renderingState.flipped  = cumulativeIsReflection;
 				}
 				pushTransformation(matrices[j]);
 				child.render();
 				popTransformation();
 			}
-			childrenDLDirty = child.isDisplayListDirty();
-			child.goBetween.originalComponent.setVisible(vis);
-			theDropBox.setName(Integer.toString(count));
+			childrenDLDirty = child.isVisible ? child.displayListDirty : false;
+			//child.goBetween.originalComponent.setVisible(vis);
+			theDropBox.count = count;
 			theLog.fine("Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
@@ -193,7 +188,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				JOGLPeerComponent child = children.get(i);					
 				if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
 				child.render();
-				if ( ((DiscreteGroupJOGLPeerComponent) child).isDisplayListDirty()) childrenDLDirty = true;
+				DiscreteGroupJOGLPeerComponent r = ((DiscreteGroupJOGLPeerComponent) child);
+				if ( r.isVisible ? r.displayListDirty : false) childrenDLDirty = true;
 				if (jr.pickMode)	jr.globalGL.glPopName();
 			}
 		}
@@ -213,11 +209,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			super.pushTransformation(camera2CameraRepn);
 		} else super.pushTransformation(m);
-	}
-
-	private boolean isDisplayListDirty() {
-		if (!isVisible) return false;
-		return displayListDirty;
 	}
 
 	public void propagateSGCDisplayListDirtyUp()	{
@@ -258,11 +249,11 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			} else w2camrepn = null;			
 		}
 		if (!isCopyCat) return;
-		minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
-		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
-		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);
+//		minDistance = eAp.getAttribute("discreteGroup.minDistance", minDistance);
+//		maxDistance = eAp.getAttribute("discreteGroup.maxDistance", maxDistance);
+//		clipToCamera = eAp.getAttribute("discreteGroup.clipToCamera", clipToCamera);
 		isTopCat = (isCopyCat && !existsHigherCat());
-		delay = eAp.getAttribute("discreteGroup.delay", delay);	
+//		delay = eAp.getAttribute("discreteGroup.delay", delay);	
 	}
 
 	private boolean existsHigherCat()	{
@@ -285,7 +276,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 
 	@Override
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
-		theLog.fine("Visibility changed: "+name);
+		if (debug) theLog.fine("Visibility changed: "+name);
 		propagateSGCDisplayListDirtyUp();
 		super.visibilityChanged(ev);
 	}
@@ -298,8 +289,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 			double d = Pn.distanceBetween(tmp2, Pn.originP3, signature);
 			
-			if (minDistance > 0.0 &&  d < minDistance) return true;
-			if (maxDistance > 0 && d > maxDistance) return false;
+			if (theDropBox.minDistance > 0.0 &&  d < theDropBox.minDistance) return true;
+			if (theDropBox.maxDistance > 0 && d > theDropBox.maxDistance) return false;
 			Rn.times(mat, o2ndc, m);
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 			Pn.dehomogenize(tmp2,tmp2);

@@ -60,7 +60,7 @@ public class SimpleLineShader extends AbstractPrimitiveShader implements LineSha
 
 
 	public void renderOld(JOGLRenderer jr) {
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		gl.glColor4fv( diffuseColorAsFloat,0);
 	}
 

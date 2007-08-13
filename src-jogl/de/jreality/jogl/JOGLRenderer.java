@@ -118,12 +118,12 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int[] currentViewport = new int[4];
 	protected Graphics3D context;
 
-	protected GL globalGL;
+	public GL globalGL;
 
 	protected boolean texResident = true;
 	protected int numberTries = 0;		// how many times we have tried to make textures resident
 	protected boolean forceResidentTextures = true;
-	protected boolean oneTexture2DPerImage = false;
+	protected boolean oneTexture2DPerImage = true;
 
 	// pick-related stuff
 	public boolean pickMode = false, offscreenMode = false;
@@ -151,10 +151,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		JOGLConfiguration.getLogger(); 
 	}
 
-
-	public GL getGL() {
-		return globalGL;
-	}
 
 	public void setTextureResident(boolean b) {
 		texResident=b;

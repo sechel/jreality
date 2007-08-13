@@ -143,7 +143,7 @@ public class GoBetween extends JOGLPeerNode implements
 		else if (key.indexOf(CommonAttributes.TUBE_RADIUS) != -1) changed |= (JOGLPeerComponent.LINES_CHANGED);
 		else if (key.indexOf(CommonAttributes.POINT_RADIUS) != -1) changed |= (JOGLPeerComponent.POINTS_CHANGED);
 		else if (key.indexOf(CommonAttributes.ANY_DISPLAY_LISTS) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
-		else if (key.indexOf(CommonAttributes.FAST_AND_DIRTY) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
+		//else if (key.indexOf(CommonAttributes.FAST_AND_DIRTY) != -1) changed |= (JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 		else if (key.endsWith("Shader")) changed |= JOGLPeerComponent.ALL_SHADERS_CHANGED;
 		else if (key.endsWith("Shadername")) changed |= JOGLPeerComponent.ALL_SHADERS_CHANGED;
 		// there are some appearances which we know aren't inherited, so don't propagate change event.

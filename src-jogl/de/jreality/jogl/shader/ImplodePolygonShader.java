@@ -75,13 +75,13 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		return true;
 	}
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
-		final Geometry original = jrs.getCurrentGeometry();
+		final Geometry original = jrs.currentGeometry;
 		final JOGLRenderer jr = jrs.renderer;
-		final int sig = jrs.getCurrentSignature();
-		final boolean useDisplayLists = jrs.isUseDisplayLists();
+		final int sig = jrs.currentSignature;
+		final boolean useDisplayLists = jrs.useDisplayLists;
 		if (!(original instanceof IndexedFaceSet)) return -1;
 		if (dListProxy != -1) return dListProxy;
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		JOGLConfiguration.theLog.log(Level.FINE,this+"Providing proxy geometry "+implodeFactor);
 		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
@@ -99,7 +99,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 	public void flushCachedState(JOGLRenderer jr) {
 		super.flushCachedState(jr);
 		LoggingSystem.getLogger(this).fine("ImplodePolygonShader: Flushing display lists "+dListProxy+" : "+dListProxy);
-		if (dListProxy != -1) { jr.getGL().glDeleteLists(dListProxy, 1);  dListProxy = -1; }
+		if (dListProxy != -1) { jr.globalGL.glDeleteLists(dListProxy, 1);  dListProxy = -1; }
 		displayListsDirty = true;
 	}
 }

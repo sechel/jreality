@@ -67,7 +67,7 @@ public class JOGLSphereHelper extends SphereUtility {
 //		if (dlists != null)	{
 //			JOGLConfiguration.theLog.log(Level.WARNING,"Already have sphere display lists for this renderer "+jr);
 //		}
-		GL gl = jr.getGL();
+		GL gl = jr.globalGL;
 		int n = SphereUtility.tessellatedIcosahedra.length;
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
@@ -89,7 +89,7 @@ public class JOGLSphereHelper extends SphereUtility {
 			}				
 			gl.glEndList();
 		}
-		if (!sharedDisplayLists) sphereDListsTable.put(jr.getGL(), dlists);
+		if (!sharedDisplayLists) sphereDListsTable.put(jr.globalGL, dlists);
 		else globalSharedSphereDisplayLists = dlists;
 	}
 	
@@ -113,12 +113,12 @@ public class JOGLSphereHelper extends SphereUtility {
 	public static int[] getSphereDLists( JOGLRenderer jr) {
 		int dlists[];
 		if (!sharedDisplayLists)	
-			dlists =  (int[] ) sphereDListsTable.get(jr.getGL());
+			dlists =  (int[] ) sphereDListsTable.get(jr.globalGL);
 		else dlists = globalSharedSphereDisplayLists;
 		if (dlists == null) 	{
 			setupSphereDLists(jr);
 			if (!sharedDisplayLists)	
-				dlists = (int[] ) sphereDListsTable.get(jr.getGL());
+				dlists = (int[] ) sphereDListsTable.get(jr.globalGL);
 			else dlists = globalSharedSphereDisplayLists;
 		}
 		if (dlists == null)	{
