@@ -286,7 +286,8 @@ public class TubeUtility {
 //			if ((debug & 64) != 0) theLogger.log(Level.FINE,"Image of end points: "+Rn.toString(Pn.dehomogenize(null,inp1), 6)+"  "+Rn.toString(Pn.dehomogenize(null,inp2),6));
 			if (sgc == null) sgc = new SceneGraphComponent();
 			sgc.setGeometry(urTube[signature+1]);
-			sgc.setTransformation(new Transformation(net)); 
+			if (sgc.getTransformation() == null) sgc.setTransformation(new Transformation());
+			sgc.getTransformation().setMatrix(net); 
 			//LoggingSystem.getLogger().log(Level.FINE,"Matrix is "+Rn.matrixToString(sgc.getTransformation().getMatrix()));
 			return sgc;
 		}
