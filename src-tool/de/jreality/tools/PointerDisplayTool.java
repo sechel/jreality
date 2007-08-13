@@ -41,11 +41,11 @@
 package de.jreality.tools;
 
 import java.awt.Color;
+import java.lang.reflect.Method;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -91,15 +91,25 @@ public class PointerDisplayTool extends AbstractTool {
 	}
 
 	boolean isAssigned;
-	Matrix m = new Matrix();
-
+	private Matrix m = new Matrix();
+	private Method getPortalScale;
+	{ 
+		try {
+			getPortalScale = Class.forName("de.jreality.portal.PortalCoordinateSystem").getMethod("getPortalScale");
+		} catch (Exception e) {	e.printStackTrace(); } 
+	}
+	
 	public void perform(ToolContext tc) {
 		if (!isAssigned) {
 			tc.getAvatarPath().getLastComponent().addChild(cmp);
 			isAssigned=true;
 		}
 		m.assignFrom(tc.getTransformationMatrix(AVATAR_POINTER));
-		MatrixBuilder.euclidean(m).scale(PortalCoordinateSystem.getPortalScale()).assignTo(m);
+		
+		try {
+			MatrixBuilder.euclidean(m).scale((Double) getPortalScale.invoke(null)).assignTo(m);
+		} catch (Exception e) {	e.printStackTrace(); }
+		
 		m.assignTo(cmp.getTransformation());
 	}
 
