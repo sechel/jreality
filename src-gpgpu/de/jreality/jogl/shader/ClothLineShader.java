@@ -311,7 +311,7 @@ public class ClothLineShader extends AbstractPrimitiveShader implements LineShad
   static WeakHashMap displayLists=new WeakHashMap();
     
   public void render(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
+		JOGLRenderer jr = jrs.renderer;
     updateData(jr);
 
     if (data == null || inited) {
@@ -319,7 +319,7 @@ public class ClothLineShader extends AbstractPrimitiveShader implements LineShad
       return;
     }
         
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
         
     gl.glPushAttrib(GL.GL_LIGHTING_BIT);
     gl.glDisable(GL.GL_LIGHTING);
@@ -332,7 +332,7 @@ public class ClothLineShader extends AbstractPrimitiveShader implements LineShad
         gl.glActiveTexture(GL.GL_TEXTURE0);
         gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
         gl.glEnable(GL.GL_TEXTURE_2D);
-        Texture2DLoaderJOGL.render(jr.getGL(), spriteTex);
+        Texture2DLoaderJOGL.render(jr.globalGL, spriteTex);
       }
       //System.out.println(data);
       //GpgpuUtility.dumpData(data);
@@ -344,7 +344,7 @@ public class ClothLineShader extends AbstractPrimitiveShader implements LineShad
       if (tex != null) {
         gl.glEnable(GL.GL_TEXTURE_2D);
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        Texture2DLoaderJOGL.render(jr.getGL(), tex);
+        Texture2DLoaderJOGL.render(jr.globalGL, tex);
       }
       
         gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
@@ -370,8 +370,8 @@ public class ClothLineShader extends AbstractPrimitiveShader implements LineShad
   }
 
   public void postRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.getRenderer();
-    GL gl = jr.getGL();
+		JOGLRenderer jr = jrs.renderer;
+    GL gl = jr.globalGL;
     if (sprites) {
       gl.glDisable(GL.GL_POINT_SPRITE_ARB);
       gl.glActiveTexture(GL.GL_TEXTURE0);
