@@ -188,5 +188,14 @@ public class SystemProperties {
 	 * @see de.jreality.reader.ReaderBSH
 	 */
 	public final static String BSH_JAR = "jreality.bsh.jar";
+	
+	
+	/**
+	 * Specifies the scale for the portal coordinate system.
+	 * Values: double
+	 * @see de.jreality.portal.PortalCoordinateSystem
+	 */
+	public final static String PORTAL_SCALE = "portalScale";
+	public final static String PORTAL_SCALE_DEFAULT = "1.0";
 
 }

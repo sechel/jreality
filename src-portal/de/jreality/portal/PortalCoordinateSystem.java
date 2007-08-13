@@ -40,7 +40,6 @@
 
 package de.jreality.portal;
 
-import java.awt.Event;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
@@ -49,10 +48,9 @@ import java.util.Vector;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
-import de.jreality.ui.viewerapp.Selection;
-import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionListener;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 public class PortalCoordinateSystem {
 
@@ -77,31 +75,37 @@ public class PortalCoordinateSystem {
 	private static boolean changed = true;
 	private static double eyeSeparationMeters = .07;
 	private static double eyeLevelMeters = 1.7;
+
+	static {
+		String bar = Secure.getProperty(SystemProperties.PORTAL_SCALE);
+		if (bar != null) setPortalScale(Double.parseDouble(bar));
+		System.err.println("PCS: Portal scale is "+getPortalScale());         
+	}
 	
-    static {
-        String bar = Secure.getProperty("portalScale");
-        if (bar != null)  setPortalScale(Double.parseDouble(bar));
-        System.err.println("PCS: Portal scale is "+getPortalScale());         
-        }
 	public static double[] getPortalCenter() {
 		return portalCenter;
 	}
+
 	public static void setPortalCenter(double[] portalCenter) {
 		PortalCoordinateSystem.portalCenter = portalCenter;
 		changed = true; update();
 	}
+
 	private static void update()	{
 		if (!changed) return;
 		MatrixBuilder.euclidean().scale(getPortalScale()).translate(portalCenter).assignTo(metersToPortal);
 		Rn.inverse(portalToMeters, metersToPortal);
 		changed = false;
 	}
+
 	public static double[] getMetersToPortal() {
 		return metersToPortal;
 	}
+
 	public static double[] getPortalToMeters() {
 		return portalToMeters;
 	}
+
 	public static Rectangle2D getWallPort() {
 		Rectangle2D wp = new Rectangle2D.Double();
 		wp.setFrame(
@@ -111,8 +115,9 @@ public class PortalCoordinateSystem {
 				portalScale*yDimPORTAL);
 		return wp;
 	}
+
 	public static void setPORTALViewport(double[] origin, Camera cam) {
-    
+
 		double xmin=0, ymin=0;
 		Rectangle2D wallport = getWallPort();
 		double z = -origin[2] + convertMeters(zDimPORTAL)/2;  // make wall z=0
@@ -121,42 +126,50 @@ public class PortalCoordinateSystem {
 		ymin = (wallport.getMinY()+(origin[1]))/z;
 		cam.setViewPort(new Rectangle2D.Double(xmin, ymin, wallport.getWidth()/z, wallport.getHeight()/z));
 //		LoggingSystem.getLogger(CameraUtility.class).info("Setting camera viewport to "+cam.getViewPort().toString());
-		}
+	}
 	public static double convertMeters(double d) {
 		return portalScale*d;
 	}
+
 	public static void setPortalScale(double portalScale) {
 		PortalCoordinateSystem.portalScale = portalScale;
 		broadcastChange();
 	}
+
 	public static double getPortalScale() {
 		return portalScale;
 	}
+
 	public static void setEyeSeparationMeters(double eyeSeparation) {
 		PortalCoordinateSystem.eyeSeparationMeters = eyeSeparation;
 	}
+
 	public static double getEyeSeparationMeters() {
 		return eyeSeparationMeters;
 	}
+
 	public static void setEyeLevelMeters(double eyeLevel) {
 		PortalCoordinateSystem.eyeLevelMeters = eyeLevel;
 	}
+
 	public static double getEyeLevelMeters() {
 		return eyeLevelMeters;
 	}
-	
+
 	static Vector<ActionListener> listeners = new Vector<ActionListener>();
-	
+
 
 	public static void addChangeListener(ActionListener l)	{
 		if (listeners.contains(l)) return;
 		listeners.add(l);
 	}
-	
+
 	public static void removeChangeListener(SelectionListener l)	{
 		listeners.remove(l);
 	}
+
 	static PortalCoordinateSystem pcs = new PortalCoordinateSystem();
+
 	public static void broadcastChange()	{
 		if (listeners == null) return;
 		ActionEvent e = new ActionEvent(pcs,0,null);
