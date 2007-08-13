@@ -517,7 +517,7 @@ private static final double[] ID = Rn.identityMatrix(4);
    */
   public void renderPoints(JOGLRenderer jr) {
     if (!hasValidVBO || readData) return;
-    GL gl = jr.getGL();
+    GL gl = jr.globalGL;
     
     gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
     gl.glVertexPointer(4, GL.GL_FLOAT, 0, 0l);
