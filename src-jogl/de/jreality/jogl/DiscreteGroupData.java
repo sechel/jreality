@@ -13,6 +13,6 @@ public class DiscreteGroupData extends Geometry {
 	public boolean clipToCamera = false;
 	public int signature;
 	public int count;
-	public int delay = 50;
+	public int delay = 150;
 	public SceneGraphComponent child;
 }

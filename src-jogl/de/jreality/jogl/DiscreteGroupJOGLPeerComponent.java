@@ -30,9 +30,11 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	boolean isCopyCat = false,
 		isTopCat = false,
 		isCameraRepn = false,
-		visibilityChanged = false;
+		visibilityChanged = false,
+		useOldMatrices = false;
 	boolean insideDL = false;
 	double[][] matrices = null;
+	boolean[] accepted;
 	SceneGraphPath w2camrepn = null;
 	double[] world2CameraRepn = new double[16], camera2CameraRepn = new double[16];
 	float[] m2w = new float[16];
@@ -67,7 +69,11 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 //		matrices = ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
 		matrices = theDropBox.matrixList;
 		matrixIsReflection = new boolean[matrices.length];
-		for (int i = 0; i<matrices.length; ++i)	matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
+		accepted = new boolean[matrices.length];
+		for (int i = 0; i<matrices.length; ++i)	{
+			matrixIsReflection[i] = Rn.determinant(matrices[i]) < 0.0;
+		}
+		
 //		System.err.println("Updating matrices length "+matrices.length);
 	}
 
@@ -92,6 +98,13 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				oldGL = jr.globalGL;
 			}
 		}
+		useOldMatrices = true;
+		if (isCopyCat && System.currentTimeMillis() - currentTime > theDropBox.delay)	{
+			currentTime = System.currentTimeMillis();
+			useOldMatrices = false;
+			displayListDirty = true;
+//			theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
+		}
 		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
 			// next prerequisite for using display lists at this node or above is that geometry and children are clean
 			if (goBetween.peerGeometry != null && goBetween.peerGeometry.displayListsDirty) 
@@ -104,11 +117,11 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 						propagateSGCDisplayListDirtyDown();
 //						theLog.fine("Propagating display list dirty down "+goBetween.getOriginalComponent().getName());
 					}
-					if (System.currentTimeMillis() - currentTime > theDropBox.delay)	{
-						currentTime = System.currentTimeMillis();
-						displayListDirty = true;
-//						theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
-					}
+//					if (System.currentTimeMillis() - currentTime > theDropBox.delay)	{
+//						currentTime = System.currentTimeMillis();
+//						displayListDirty = true;
+////						theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
+//					}
 				}
 				// we only use a display list if we are a copycat node
 				if (!childrenDLDirty && !geometryDLDirty) { // && !jr.renderingState.insideDisplayList)	{
@@ -157,14 +170,19 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
-			o2ndc = jr.context.getObjectToNDC();
-			o2c = jr.context.getObjectToCamera();
+			if (theDropBox.clipToCamera && !useOldMatrices)	{
+				o2ndc = jr.context.getObjectToNDC();
+				o2c = jr.context.getObjectToCamera();				
+			}
+
 			int count = 0;
 			DiscreteGroupJOGLPeerComponent child = (DiscreteGroupJOGLPeerComponent) children.get(0);
-			//boolean vis = child.isVisible;
-			//child.goBetween.originalComponent.setVisible(true);
 			for (int j = 0; j<nn; ++j)	{
-				if (theDropBox.clipToCamera && !accept(matrices[j])) continue; 
+				if (theDropBox.clipToCamera)	{
+					if (!useOldMatrices) 
+						accepted[j] = accept(matrices[j]);
+					if (!accepted[j]) 	continue; 
+				}
 				count++;
 				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
 				if (cumulativeIsReflection != jr.renderingState.flipped)	{
@@ -176,7 +194,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				popTransformation();
 			}
 			childrenDLDirty = child.isVisible ? child.displayListDirty : false;
-			//child.goBetween.originalComponent.setVisible(vis);
 			theDropBox.count = count;
 			theLog.fine("Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;

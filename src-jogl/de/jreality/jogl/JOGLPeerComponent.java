@@ -455,7 +455,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (goBetween.peerGeometry != null)	{
 			if (geometryShader == null) updateShaders();
 			if (geometryShader == null) return;
-			theLog.info("Handling bits: "+geometryDirtyBits+" for "+name);
+			//theLog.fine("Handling bits: "+geometryDirtyBits+" for "+name);
 			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) 
 				geometryShader.pointShader.flushCachedState(jr);
 			if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) 

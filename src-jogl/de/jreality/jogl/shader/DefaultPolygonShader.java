@@ -78,7 +78,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	boolean		smoothShading = true;		// interpolate shaded values between vertices
 	Texture2D texture2D;
+	JOGLTexture2D joglTexture2D;
 	Texture2D lightMap;
+	JOGLTexture2D joglLightMap;
 	CubeMap reflectionMap;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
@@ -107,18 +109,22 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 		fastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY), fastAndDirty);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
-	    lightMap = null;
+	    joglLightMap = null;
 	    reflectionMap = null;
-	    texture2D = null;
+	    joglTexture2D = null;
 	    if (!fastAndDirty) {
 			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
 				texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
-		    	LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
+		    	//LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
+				joglTexture2D = new JOGLTexture2D(texture2D);
 			}
-		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap))
-		    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));
-		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap))
-		    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);
+		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
+		    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
+		    }
+		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap)) {
+		    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);		    	
+		    	joglLightMap = new JOGLTexture2D(lightMap);
+		    }
 	    	
 	    }
       
@@ -137,6 +143,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    }  else useGLSL = false;
 	    
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
+		System.err.println("Found vertex shader "+vertexShader.getClass().getName());
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;
  	}
@@ -172,15 +179,15 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
 		texUnit = GL.GL_TEXTURE0; // jr.getRenderingState().texUnitCount + GL.GL_TEXTURE0; //
-	    if (lightMap != null) {
+	    if (joglLightMap != null) {
 		    gl.glActiveTexture(texUnit);
 		    gl.glEnable(GL.GL_TEXTURE_2D);
-			Texture2DLoaderJOGL.render(gl, lightMap);
+			Texture2DLoaderJOGL.render(gl, joglLightMap);
 			//testTextureResident(jr, gl);
 		    texUnit++;
 		    texunitcoords++;
 	    }
-	    if (texture2D != null) {
+	    if (joglTexture2D != null) {
 		    Geometry curgeom = jr.renderingState.currentGeometry;
 		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
 		    	if ((curgeom instanceof IndexedFaceSet) &&
@@ -191,7 +198,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    if (geometryHasTextureCoordinates) {
 		    	gl.glActiveTexture(texUnit);
 		      	gl.glEnable(GL.GL_TEXTURE_2D);
-				Texture2DLoaderJOGL.render(gl, texture2D);
+				Texture2DLoaderJOGL.render(gl, joglTexture2D);
 				//testTextureResident(jr, gl);
 			    texUnit++;
 			    texunitcoords++;		    	
