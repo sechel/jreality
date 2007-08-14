@@ -687,10 +687,10 @@ final public class Rn {
 		// assert dim check
 		int n = sqrt(mat.length);
 		double[] tmp = new double[mat.length];
-		subtract(tmp, mat, identityMatrices[n]);
-		double error = manhattanNorm(tmp);
-		if (error <= tol) return true;
-		return false;
+		double[] idd = identityMatrices[n];
+		for (int i = 0; i<tmp.length; ++i) 
+			if (Math.abs(mat[i]-idd[i]) > tol) return false;
+		return true;
 	}
 
 	/**
