@@ -1,6 +1,5 @@
 package de.jreality.jogl;
 
-import javax.media.jai.operator.MinDescriptor;
 import javax.media.opengl.GL;
 
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -173,8 +172,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			if (theDropBox.clipToCamera && !useOldMatrices)	{
 				o2ndc = jr.context.getObjectToNDC();
 				o2c = jr.context.getObjectToCamera();	
-				inverseDMin = Pn.cosh(theDropBox.minDistance);
-				inverseDMax = Pn.cosh(theDropBox.maxDistance);
+				inverseDMin = Pn.inverseDistance(theDropBox.minDistance, signature);
+				inverseDMax = Pn.inverseDistance(theDropBox.maxDistance, signature);
 //				System.err.println("min max: "+inverseDMin+" "+inverseDMax);
 			}
 
