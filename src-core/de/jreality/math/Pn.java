@@ -329,6 +329,18 @@ public class Pn {
 		return d;
 		
 	}
+	
+	public static double inverseDistance(double d, int signature)	{
+		switch (signature) {
+			case EUCLIDEAN:
+				return d;
+			case HYPERBOLIC:
+				return cosh(d);
+			case ELLIPTIC:
+				return Math.cos(d);
+		}
+		return d;
+	}
 	/**
 	 * Drag a tangent vector <i>sdir</i> based at point <i>src</i> with initial direction given by <i>sdir</i>, a distance
 	 * of <i>length</i> in the given metric.  
