@@ -428,8 +428,8 @@ public class JOGLRenderer  implements AppearanceListener {
 	public void display(GL gl) {
 		globalGL=gl;
 		renderingState.initializeGLState();
-		long beginTime = 0;
-		if (collectFrameRate) beginTime = System.currentTimeMillis();
+		beginRenderTime = 0;
+		if (collectFrameRate) beginRenderTime = System.currentTimeMillis();
 		Camera theCamera;
 		try {
 			theCamera = CameraUtility.getCamera(theViewer);
@@ -564,8 +564,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (collectFrameRate)	{
 			++frameCount;
 			int j = (frameCount % 20);
-			clockTime[j] = beginTime;
-			history[j]  =  System.currentTimeMillis() - beginTime;
+			clockTime[j] = beginRenderTime;
+			history[j]  =  System.currentTimeMillis() - beginRenderTime;
 		}
 	}
 
@@ -797,6 +797,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	private int tileSizeX=1024, tileSizeY=768,numTiles=4;
+	protected long beginRenderTime;
 	
 	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLCanvas canvas) {
 		BufferedImage img = renderOffscreen(imageWidth, imageHeight, canvas);

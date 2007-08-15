@@ -1,5 +1,6 @@
 package de.jreality.jogl;
 
+import javax.media.jai.operator.MinDescriptor;
 import javax.media.opengl.GL;
 
 import de.jreality.jogl.pick.JOGLPickAction;
@@ -79,9 +80,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 
 	@Override
 	public void render() {
-		if (!isVisible) {
-			return;
-		}
+		if (!isVisible) return;
 		insideDL = false;
 		boolean	geometryDLDirty = false;
 		if (children.size() == 0 && goBetween.peerGeometry == null) return;
@@ -99,8 +98,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 		}
 		useOldMatrices = true;
-		if (isCopyCat && System.currentTimeMillis() - currentTime > theDropBox.delay)	{
-			currentTime = System.currentTimeMillis();
+		if (isCopyCat && (jr.beginRenderTime - currentTime > theDropBox.delay))	{
+			currentTime = jr.beginRenderTime;
 			useOldMatrices = false;
 			displayListDirty = true;
 //			theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
@@ -127,6 +126,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				if (!childrenDLDirty && !geometryDLDirty) { // && !jr.renderingState.insideDisplayList)	{
 					if (!displayListDirty)	{
 						jr.globalGL.glCallList(displayList);
+//						System.err.println("dgjoglpc: Calling dlist");
 						return;
 					}
 //					theLog.fine("Going into display list: "+goBetween.getOriginalComponent().getName());
@@ -172,7 +172,10 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			int nn = matrices.length;
 			if (theDropBox.clipToCamera && !useOldMatrices)	{
 				o2ndc = jr.context.getObjectToNDC();
-				o2c = jr.context.getObjectToCamera();				
+				o2c = jr.context.getObjectToCamera();	
+				inverseDMin = Pn.cosh(theDropBox.minDistance);
+				inverseDMax = Pn.cosh(theDropBox.maxDistance);
+//				System.err.println("min max: "+inverseDMin+" "+inverseDMax);
 			}
 
 			int count = 0;
@@ -300,20 +303,20 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	//o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.renderingState.currentSignature)) continue;
 	private double[] mat = new double[16];
 	private double[] tmp2 = new double[4];
-	double fudge = 1.2;
-	protected  boolean accept(double[] m) { //double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
+	private double inverseDMin, inverseDMax;
+	protected  boolean accept(final double[] m) { //double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
 			Rn.times(mat, o2c, m);
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
-			double d = Pn.distanceBetween(tmp2, Pn.originP3, signature);
-			
-			if (theDropBox.minDistance > 0.0 &&  d < theDropBox.minDistance) return true;
-			if (theDropBox.maxDistance > 0 && d > theDropBox.maxDistance) return false;
+			double d = Pn.inverseDistanceToOrigin(tmp2,  signature);
+//			System.err.println("coshd = "+d);
+			if (theDropBox.minDistance > 0.0 &&  d < inverseDMin) return true;
+			if (theDropBox.maxDistance > 0 && d > inverseDMax) return false;
 			Rn.times(mat, o2ndc, m);
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 			Pn.dehomogenize(tmp2,tmp2);
-			if (Math.abs(tmp2[0]) > fudge) return false;
-			if (Math.abs(tmp2[1]) > fudge) return false;
-			if (Math.abs(tmp2[2]) > 1.0) return false;
+			if (tmp2[0] > theDropBox.ndcFudgeFactor || tmp2[0] < -theDropBox.ndcFudgeFactor) return false;
+			if (tmp2[1] > theDropBox.ndcFudgeFactor || tmp2[1] < -theDropBox.ndcFudgeFactor) return false;
+			if (tmp2[2] > 1.0 || tmp2[2] < -1.0) return false;
 			return true;
 		}
 

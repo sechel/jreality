@@ -10,6 +10,7 @@ public class DiscreteGroupData extends Geometry {
 	}
 	public double[][] matrixList = {Rn.identityMatrix(4)};
 	public double minDistance = -1, maxDistance = -1;
+	public double ndcFudgeFactor = 1.2;
 	public boolean clipToCamera = false;
 	public int signature;
 	public int count;
