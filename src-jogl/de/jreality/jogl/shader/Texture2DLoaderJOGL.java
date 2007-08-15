@@ -190,6 +190,9 @@ public class Texture2DLoaderJOGL {
     if (ht != null)	{
         Integer boundTexid = ht.get(tex.getImage());
         if (boundTexid != null)	{
+            gl.glMatrixMode(GL.GL_TEXTURE);
+            gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
+            gl.glMatrixMode(GL.GL_MODELVIEW);       
         	return;
         }    
         ht.put(tex.getImage(), texid);
@@ -329,7 +332,7 @@ public class Texture2DLoaderJOGL {
 
   private static FloatBuffer maxAnisotropy;
   private static boolean canFilterAnisotropic=true;
-  
+ 
   private static void handleTextureParameters(Texture2D tex, GL gl) {
 //    System.err.println("In handle text parms");
     // TODO: maybe this should move to jogl configuration?
