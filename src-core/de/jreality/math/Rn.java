@@ -434,9 +434,9 @@ final public class Rn {
 	 */
 	public static boolean equals(double[] u, double[] v, double tol)	{
 		double[] diff = new double[u.length];
-		subtract(diff, u, v);
-		double d = manhattanNorm(diff);
-		return (d <= tol);
+		for (int i = 0; i<u.length; ++i) 
+			if (Math.abs(u[i]-v[i]) > tol) return false;
+		return true;
 	}
 	
 	/**
@@ -1196,16 +1196,16 @@ final public class Rn {
      */
     public static int sqrt(int sq) {
         switch(sq) {
-            case 100: return 10;
-            case  81: return  9;
-            case  64: return  8;
-            case  49: return  7;
-            case  36: return  6;
-            case  25: return  5;
-            case  16: return  4;
-            case   9: return  3;
-            case   4: return  2;
-            case   1: return  1;
+	        case  16: return  4;
+	        case   9: return  3;
+	        case   4: return  2;
+	        case   1: return  1;
+	        case  25: return  5;
+	        case  36: return  6;
+	        case  49: return  7;
+	        case  64: return  8;
+	        case  81: return  9;
+	        case 100: return 10;
             case   0: return  0;
             default:
               if(sq<0) throw new IllegalArgumentException(String.valueOf(sq));
