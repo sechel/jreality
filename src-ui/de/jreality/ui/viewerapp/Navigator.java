@@ -243,6 +243,14 @@ public class Navigator implements SelectionListener {
 				}
 			}
 		});
+		
+		//set up input and action map to match actions of context menu instead of viewers menu bar
+		Object[] keys = editMenu.getActionMap().keys();
+		for (int i = 0; i < keys.length; i++) {
+			KeyStroke key = (KeyStroke) keys[i];
+			sceneTree.getInputMap().put(key, key);
+			sceneTree.getActionMap().put(key, editMenu.getActionMap().get(key));
+		}
 	}
 
 

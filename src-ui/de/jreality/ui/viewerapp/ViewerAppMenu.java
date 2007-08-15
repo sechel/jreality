@@ -259,19 +259,20 @@ public class ViewerAppMenu {
 	 * Creates an edit menu containing all appropriate actions.<br>
 	 * Also used for creating the navigator's context menu. 
 	 * @param parentComp use as parent component for dialogs
+	 * @param sm the selection manager to be used by contained actions
 	 */
 	protected static JMenu createEditMenu(Component parentComp, SelectionManagerInterface sm) {
 		JMenu editMenu = new JMenu(EDIT_MENU);
 		editMenu.setMnemonic(KeyEvent.VK_E);
 
-		editMenu.add(new JMenuItem(new LoadFileToNode(LOAD_FILE_TO_NODE, sm, parentComp)));
-		editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, parentComp)));
+		addActionToMenu(editMenu, new LoadFileToNode(LOAD_FILE_TO_NODE, sm, parentComp));
+		addActionToMenu(editMenu, new SaveSelected(SAVE_SELECTED, sm, parentComp));
 		editMenu.addSeparator();
-		editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
-		editMenu.add(new JMenuItem(new Rename(RENAME, sm, parentComp)));
+		addActionToMenu(editMenu, new Remove(REMOVE, sm));
+		addActionToMenu(editMenu, new Rename(RENAME, sm, parentComp));
 		editMenu.addSeparator();
-		editMenu.add(new JMenuItem(new ToggleVisibility(TOGGLE_VISIBILITY, sm)));
-		editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
+		addActionToMenu(editMenu, new ToggleVisibility(TOGGLE_VISIBILITY, sm));
+		addActionToMenu(editMenu, new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm));
 		editMenu.addSeparator();
 
 		//appearance actions
@@ -285,17 +286,17 @@ public class ViewerAppMenu {
 			}
 		});
 		editMenu.add(appearance);
-		appearance.add(new JMenuItem(new CreateAppearance(CREATE_APPEARANCE, sm)));
+		addActionToMenu(appearance, editMenu, new CreateAppearance(CREATE_APPEARANCE, sm));
 		appearance.addSeparator();
-		appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
-		appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
-		appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
+		addActionToMenu(appearance, editMenu, new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm));
+		addActionToMenu(appearance, editMenu, new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm));
+		addActionToMenu(appearance, editMenu, new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm));
 		appearance.addSeparator();
-		appearance.add(new JMenuItem(new LoadTexture(LOAD_TEXTURE, sm, parentComp)));
+		addActionToMenu(appearance, editMenu, new LoadTexture(LOAD_TEXTURE, sm, parentComp));
 		JMenu reflectionmap = new JMenu(REFLECTIONMAP);
 		appearance.add(reflectionmap);
-		reflectionmap.add(new JMenuItem(new LoadReflectionMap(LOAD_REFLECTIONMAP, sm, parentComp)));
-		reflectionmap.add(new JMenuItem(new RotateReflectionMapSides(ROTATE_REFLECTIONMAP_SIDES, sm, parentComp)));
+		addActionToMenu(reflectionmap, editMenu, new LoadReflectionMap(LOAD_REFLECTIONMAP, sm, parentComp));
+		addActionToMenu(reflectionmap, editMenu, new RotateReflectionMapSides(ROTATE_REFLECTIONMAP_SIDES, sm, parentComp));
 
 		//geometry actions
 		JMenu geometry = new JMenu(new AbstractSelectionListenerAction(GEOMETRY, sm){
@@ -312,13 +313,28 @@ public class ViewerAppMenu {
 			}
 		});
 		editMenu.add(geometry);
-		geometry.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
-		geometry.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
+		addActionToMenu(geometry, editMenu, new ExportOBJ(EXPORT_OBJ, sm, parentComp));
+		addActionToMenu(geometry, editMenu, new TogglePickable(TOGGLE_PICKABLE, sm));
 		editMenu.addSeparator();
 
-		editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
+		addActionToMenu(editMenu, new AddTool(ADD_TOOL, sm, parentComp));
 
 		return editMenu;
+	}
+	
+	
+	/** convenience method */
+	private static void addActionToMenu(JMenu menu, Action a) {
+		addActionToMenu(menu, menu, a);
+	}
+	
+	/** convenience method */
+	private static void addActionToMenu(JMenu parent, JMenu actionMapOwner, Action a) {
+		parent.add(new JMenuItem(a));
+		
+		//add action's accelerator key binding to menu's action map
+		if (a.getValue(Action.ACCELERATOR_KEY)==null) return;
+		actionMapOwner.getActionMap().put(a.getValue(Action.ACCELERATOR_KEY), a);
 	}
 
 
