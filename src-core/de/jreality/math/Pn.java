@@ -108,7 +108,7 @@ public class Pn {
 	}
 
 	public static double acosh(double x)	{
-		return Math.log(Math.abs(x)+Math.sqrt(x*x-1));
+		return Math.log((x > 0? x : -x)+Math.sqrt(x*x-1));
 	}
 
 	public static double asinh(double x)	{
@@ -285,12 +285,49 @@ public class Pn {
 				uu = innerProduct(u, u, sig);
 				vv = innerProduct(v, v, sig);
 				uv = innerProduct(u, v, sig);
-				if (uu == 0 || vv == 0) 	// error: infinite distance
-					return (Double.MAX_VALUE);
 				d = Math.acos( (uv)/Math.sqrt(Math.abs(uu*vv)));
 				break;
 			}
 		return d;
+	}
+	
+	/**
+	 * optimize calculation of the cosh of  the distance to (0,0,0,1)
+	 * @param src
+	 * @param signature
+	 * @return
+	 */
+	public static double inverseDistanceToOrigin(double[] u, int sig)	{
+		// assert dim checks
+		double d = 0;
+		int n = u.length;
+		switch(sig)	{
+			default:
+				// error: no such signature.  fall through to euclidean case
+			case EUCLIDEAN:
+				double ul,  tmp;
+				ul = u[n-1]; 
+				d = Rn.innerProduct(u,u,n-1);
+				d = Math.sqrt(d);
+				if ( !(d==0 || d == 1.0))	d /= ul;
+				break;
+			case HYPERBOLIC:
+				double uu, uv;
+				uu = innerProduct(u, u, sig);
+				uu = (uu>0? uu : -uu);
+				uv = u[n-1] > 0 ? u[n-1] : -u[n-1];
+				if (uu == 0) 	// error: infinite distance
+					return (Double.MAX_VALUE);
+				d = (uv)/Math.sqrt(uu);
+				break;
+			case ELLIPTIC:
+				uu = innerProduct(u, u, sig);
+				uv = u[n-1];
+				d = (uv)/Math.sqrt(Math.abs(uu));
+				break;
+			}
+		return d;
+		
 	}
 	/**
 	 * Drag a tangent vector <i>sdir</i> based at point <i>src</i> with initial direction given by <i>sdir</i>, a distance
@@ -601,7 +638,7 @@ public class Pn {
 	 * @return	the norm
 	 */
 	 public static double norm(double[] src, int sig)	{
-		return Math.sqrt(Math.abs(normSquared(src,sig)));
+		return Math.sqrt(Math.abs(innerProduct(src,src,sig)));
 	}
 	
 	/**
