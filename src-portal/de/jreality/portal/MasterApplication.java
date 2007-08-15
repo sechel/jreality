@@ -74,17 +74,19 @@ public class MasterApplication {
 	DeviceManager deviceManager;
 	ToolEventQueue eventQueue;
 	
-	static final boolean DUMP_RENDER=false;
+	static final boolean DUMP_RENDER=false, DUMP_SEND = false;
 	
 	public MasterApplication(final PortalToolSystem receiver) throws IOException {
 		ToolSystemConfiguration config = ToolSystemConfiguration.loadRemotePortalMasterConfiguration();
 		eventQueue = new ToolEventQueue(new ToolEventReceiver() {
 			long st;
 			public void processToolEvent(ToolEvent event) {
-				//st = -System.currentTimeMillis();
+				if (DUMP_SEND) st = -System.currentTimeMillis();
 				receiver.processToolEvent(event);
-				//st+=System.currentTimeMillis();
-				//System.out.println("send took "+st+" ms: "+event.getInputSlot());
+				if (DUMP_SEND) {
+					st+=System.currentTimeMillis();
+					System.out.println("send took "+st+" ms: "+event.getInputSlot());
+				}
 
 				if (event.getInputSlot() == SYSTEM_TIME) {
 					
