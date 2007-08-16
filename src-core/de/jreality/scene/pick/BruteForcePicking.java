@@ -85,7 +85,7 @@ class BruteForcePicking {
     for (int i = 0, n=faces.getLength(); i<n; i++) {
       IntArray face = faces.getValueAt(i);
       // simple triangulation:
-      tris: for (int j=0, c=face.getLength()-2; j<c; j++) {
+      for (int j=0, c=face.getLength()-2; j<c; j++) {
         p1=points.getValueAt(face.getValueAt(0)).toDoubleArray(p1);
         p2=points.getValueAt(face.getValueAt(1+j)).toDoubleArray(p2);
         p3=points.getValueAt(face.getValueAt(2+j)).toDoubleArray(p3);
