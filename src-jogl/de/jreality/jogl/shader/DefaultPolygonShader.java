@@ -143,7 +143,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    }  else useGLSL = false;
 	    
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
-		System.err.println("Found vertex shader "+vertexShader.getClass().getName());
+//		System.err.println("Found vertex shader "+vertexShader.getClass().getName());
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;
  	}
