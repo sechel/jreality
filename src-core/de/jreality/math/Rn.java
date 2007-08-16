@@ -370,16 +370,35 @@ final public class Rn {
 	}
 	
 	/**
-	 * Calculate the determinate of the square matrix <i>m</i>.  The dimension must be 1,2, 3, or 4.
+	 * Calculate the determinate of the square matrix <i>m</i>. 
+	 * TODO: figure out how to generate the necessary permutations without having to recursively call
+	 * submatrix()
 	 * @param m
 	 * @return
 	 */
 	public static double determinant(double[] m)	{
 		double det = 0.0;
 		int n = sqrt(m.length);
-		if (n > 4) 
-			throw new IllegalArgumentException("4x4 matrix is biggest size supported");
+		if (n > 4) {
+			double[] subm = new double[(n-1)*(n-1)];
+			for (int i = 0; i<n; ++i)	{
+				double tmp = m[i]*determinant(submatrix(subm, m, 0, i));
+				det += ( (i%2)==0) ? tmp : (-tmp);
+			}
+		} else return determinantOld(m);
+		return det;
+	}
+	
+	/**
+	 * This is optimized for low dimensional determinants.
+	 * @param m
+	 * @return
+	 */
+	private static double determinantOld(double[] m)	{
+		double det = 0.0;
+		int n = sqrt(m.length);
 		switch (n)	{
+		// optimize following by parenthesizing
 			case 4:
 				det =m[3]*m[6]*m[9]*m[12] - m[2]*m[7]*m[9]*m[12] -
 					m[3]*m[5]*m[10]*m[12] + m[1]*m[7]*m[10]*m[12] + 
@@ -405,7 +424,7 @@ final public class Rn {
 				det = m[0];
 				break;
 			default:
-				det = 0;
+				det = determinant(m);
 				// raise exception
 		}
 		return det;                                                      
@@ -1517,6 +1536,47 @@ final public class Rn {
 		return times(p1, rad/euclideanNorm(p12), p12);
 	}
 
+	/**
+	 * The array <i>partial</i> contains <i>m n-vectors</i> which are assumed to be linearly independent.
+	 * The destination array <i>dst</i> is calculated so that it extends <i>partial</i> with <i>n-m</i> n-vectors,
+	 * each of which is orthogonal to all elements of <i>partial</i> as well as to each other.  That is,
+	 * if <i>partial</i> is an orthogonal sub-basis, then <i>dst</i> will also be.
+	 * @param dst		double[n][n]
+	 * @param partial	double[m][n]
+	 * @return
+	 */
+	public static double[][] completeBasis(double[][] dst, double[][] partial)	{
+		int dim = partial[0].length;
+		int size = partial.length;
+		if (dst == null || dst.length != dim)
+			dst = new double[dim][dim];
+		double[] inline = new double[dim*dim];
+		for (int i = 0; i < size; ++i)	{
+			System.arraycopy(partial[i], 0, inline, i*dim, dim);
+		}
+		for (int i = size; i < dim; ++i)	{
+			for (int j = 0; j<dim; ++j) {
+				inline[i*dim+j] = Math.random();
+			}
+		}
+		for (int i = size; i<dim; ++i)	{
+			double[] newrow = dst[i];
+			for (int j = 0; j<dim; ++j)	{
+				newrow[j] = (((i+j)%2==0)?1:-1) * determinant(submatrix(null, inline, i, j));
+			}
+			System.arraycopy(newrow, 0, inline, i*dim, dim);
+		}
+		for (int i = 0; i<dim; ++i)	{
+			System.arraycopy(inline, i*dim, dst[i], 0, dim);
+		}
+		for (int i = size; i<dim; ++i)	{
+			for (int j = 0; j<dim; ++j)	{
+				double d = innerProduct(dst[i], dst[j]);
+				System.err.println(i+"."+j+"="+d);
+			}
+		}
+		return dst;
+	}
 
 }
 
