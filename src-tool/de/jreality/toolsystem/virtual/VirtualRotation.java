@@ -72,6 +72,7 @@ public class VirtualRotation implements VirtualDevice {
   private DoubleArray da = new DoubleArray(result.getArray());
 
   private double oldX = Integer.MAX_VALUE, oldY;
+  private double[] mouseCoords = new double[3], mouseCoordsOld = new double[3];
   
   public ToolEvent process(VirtualDeviceContext context)
       throws MissingSlotException {
@@ -87,23 +88,15 @@ public class VirtualRotation implements VirtualDevice {
     double y = pointer.getValueAt(7);
     double dist = x*x + y*y;
     double z = 2>dist?Math.sqrt(2 - dist) : 0;
-    double[] mouseCoords = new double[]{x, y, z};
-
-    double distOld = oldX*oldX + oldY*oldY;
-    double oldZ = 2>distOld?Math.sqrt(2 - distOld) : 0;
-    double[] mouseCoordsOld = new double[]{oldX, oldY, oldZ};
+    Rn.setToValue(mouseCoords, x, y, z);
     
     mouseCoords = Rn.normalize(mouseCoords, mouseCoords);
-    mouseCoordsOld = Rn.normalize(mouseCoordsOld, mouseCoordsOld);
-    
     double[] cross = Rn.crossProduct(null, mouseCoordsOld, mouseCoords);
     double angle = gain*Math.asin(Rn.euclideanNorm(cross));
-    
     double[] cross4 = {cross[0], cross[1], cross[2], 0};
     cross = new Matrix(context.getTransformationMatrix(cameraToWorld)).multiplyVector(cross4);
     result.assignFrom(P3.makeRotationMatrix(null, cross, angle));
-    oldX = x;
-    oldY = y;
+    Rn.setToValue(mouseCoordsOld, x, y, z);
     return new ToolEvent(this, context.getEvent().getTimeStamp(), out, da);
   }
 
