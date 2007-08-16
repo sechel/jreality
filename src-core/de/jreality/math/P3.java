@@ -795,14 +795,15 @@ public class P3 {
 	 * @param tolerance
 	 * @param signature
 	 * @return
-	 */public static double[] orthonormalizeMatrix(double[] dst, double[] m, double tolerance, int signature)		{
+	 */
+	 public static double[] orthonormalizeMatrix(double[] dst, double[] m, double tolerance, int signature)		{
 		if (dst == null) dst = new double[16];
 		double[] diagnosis = Rn.subtract(null, Q_LIST[signature+1], 
 				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[signature+1], m )));
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
 //			return null;
 //		}
-		boolean mydebug = true;
+		boolean mydebug = false;
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m));
@@ -847,18 +848,6 @@ public class P3 {
 		 double max = Rn.maxNorm(matrix);
 		 return (max > 200);
 	 }
-	 private static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2)	{
-		// TODO assert dim checks
-		if (dst == null) dst = new double[4];
-		double[] midpoint = new double[4];
-		Rn.add(midpoint,p1,p2);
-		Rn.times(midpoint, .5, midpoint);
-		Pn.dehomogenize(midpoint, midpoint);
-		Rn.subtract(dst, p2, p1);
-		dst[3] = -(dst[0]*midpoint[0] + dst[1] * midpoint[1] + dst[2]*midpoint[2]);
-		return dst;
-	}
-	 
 	/**
 	 * Calculate the plane coordinates for the plane which lies midway between the input
 	 * planes <i>p1</i> and <i>p2</i>. Midway in this case means the distances (with respect to
@@ -875,9 +864,16 @@ public class P3 {
 		if (p1.length != 4 || p2.length != 4)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
 		}
-		if (signature == Pn.EUCLIDEAN) return P3.perpendicularBisector(dst, p1, p2);
 		if (dst == null) dst = new double[4];
 		double[] midpoint = new double[4];
+		if (signature == Pn.EUCLIDEAN) {
+			Rn.add(midpoint,p1,p2);
+			Rn.times(midpoint, .5, midpoint);
+			Pn.dehomogenize(midpoint, midpoint);
+			Rn.subtract(dst, p2, p1);
+			dst[3] = -(Rn.innerProduct(dst, midpoint, 3));
+			return dst;			
+		}
 		Pn.linearInterpolation(midpoint,p1,p2, .5, signature);
 		double[] polarM = Pn.polarize(null, midpoint, signature);
 		double[] pb = P3.lineIntersectPlane(null, p1, p2, polarM);

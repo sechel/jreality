@@ -936,5 +936,7 @@ public class Pn {
 		for (int i = 0; i<sl; ++i)	setToLength(dst[i], src[i], d, signature);
 		return dst;
 	}
+	
+	//public static double[] barycentricCoordinates
 
 }		

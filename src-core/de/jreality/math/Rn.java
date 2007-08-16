@@ -452,8 +452,9 @@ final public class Rn {
 	 * @return
 	 */
 	public static boolean equals(double[] u, double[] v, double tol)	{
-		double[] diff = new double[u.length];
-		for (int i = 0; i<u.length; ++i) 
+		int n = u.length;
+		if (v.length < u.length) n = v.length;
+		for (int i = 0; i<n; ++i) 
 			if (Math.abs(u[i]-v[i]) > tol) return false;
 		return true;
 	}
@@ -1569,12 +1570,12 @@ final public class Rn {
 		for (int i = 0; i<dim; ++i)	{
 			System.arraycopy(inline, i*dim, dst[i], 0, dim);
 		}
-		for (int i = size; i<dim; ++i)	{
-			for (int j = 0; j<dim; ++j)	{
-				double d = innerProduct(dst[i], dst[j]);
-				System.err.println(i+"."+j+"="+d);
-			}
-		}
+//		for (int i = size; i<dim; ++i)	{
+//			for (int j = 0; j<dim; ++j)	{
+//				double d = innerProduct(dst[i], dst[j]);
+//				System.err.println(i+"."+j+"="+d);
+//			}
+//		}
 		return dst;
 	}
 
