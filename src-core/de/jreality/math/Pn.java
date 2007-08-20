@@ -215,7 +215,7 @@ public class Pn {
 		}
 		double last = src[sl-1];
 		if (last == 1.0 || last == 0.0) 	{
-			System.arraycopy(src,0,dst,0,dl);
+			if (src != dst) System.arraycopy(src,0,dst,0,dl);
 			return dst;
 		}
 		last = 1.0/last;
