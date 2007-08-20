@@ -48,6 +48,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import sun.java2d.loops.DrawPolygons;
+
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -83,6 +85,7 @@ public class AABBPickSystem implements PickSystem {
   private ArrayList<Hit> hits = new ArrayList<Hit>();
   private HashMap<IndexedFaceSet, AABBTree> aabbTreeExists = new HashMap<IndexedFaceSet, AABBTree>();
   private HashMap<Geometry, Boolean> isPickableMap = new HashMap<Geometry, Boolean>();
+  private HashMap<SceneGraphComponent, Boolean> SGCPickableMap = new HashMap<SceneGraphComponent, Boolean>();
   private Comparator<Hit> cmp = new Hit.HitComparator();
   private double[] from;
   private double[] to;
@@ -137,9 +140,13 @@ public class AABBPickSystem implements PickSystem {
    */
   private class Impl extends SceneGraphVisitor {
 
-    private Stack<EffectiveAppearance> appStack = new Stack<EffectiveAppearance>();
+    private Stack<PickInfo> appStack = new Stack<PickInfo>();
+    private PickInfo currentPI;
     
-    private EffectiveAppearance eap = EffectiveAppearance.create();
+    Impl()	{
+    	appStack.push(currentPI = new PickInfo(null, null));
+    }
+//    private EffectiveAppearance eap = EffectiveAppearance.create();
     
     private SceneGraphPath path=new SceneGraphPath();
     private ArrayList<Hit> localHits=new ArrayList<Hit>();
@@ -147,19 +154,60 @@ public class AABBPickSystem implements PickSystem {
     private Matrix m=new Matrix();
     private Matrix mInv=new Matrix();
     
-    private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
-    private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
     private int signature=Pn.EUCLIDEAN;
     private Matrix[] matrixStack = new Matrix[256];
     int stackCounter = 0;
-    private boolean pickPoints=true, drawVertices = false;
-    private boolean pickEdges=true, drawEdges = true;
-    private boolean pickFaces=true, drawFaces = true;
-
-//    /* local ray */
-//    private double[] fromLocal;
-//    private double[] dirLocal;
-//    private double[] toLocal;
+    /**
+     * This class avoids using an effective appearance by directly reading the Appearances.
+     * @author Charles Gunn
+     *
+     */
+    private class PickInfo {
+        private boolean pickPoints=true, drawVertices = false;
+        private boolean pickEdges=true, drawEdges = true;
+        private boolean pickFaces=true, drawFaces = true;
+        private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
+        private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
+        int signature = Pn.EUCLIDEAN;
+        PickInfo(PickInfo old, Appearance ap)	{
+        	if (old != null)	{
+               	drawVertices = old.drawVertices;
+            	drawEdges = old.drawEdges;
+            	drawFaces = old.drawFaces;
+            	pickPoints = old.pickPoints;
+            	pickEdges = old.pickEdges;
+            	pickFaces = old.pickFaces;
+            	tubeRadius = old.tubeRadius;
+            	pointRadius = old.pointRadius;    
+            	signature = old.signature;
+        	}
+        	if (ap == null) return;
+            Object foo = ap.getAttribute(CommonAttributes.VERTEX_DRAW, Boolean.class);
+            if (foo != Appearance.INHERITED) drawVertices = (Boolean) foo;
+            if (drawVertices)	{
+            	foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
+                if (foo != Appearance.INHERITED) pickPoints = (Boolean) foo;
+           }
+            foo = ap.getAttribute(CommonAttributes.EDGE_DRAW, Boolean.class);
+            if (foo != Appearance.INHERITED) drawEdges = (Boolean) foo;
+            if (drawEdges)	{
+            	foo = ap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
+                if (foo != Appearance.INHERITED) pickEdges = (Boolean) foo;
+           }
+            foo = ap.getAttribute(CommonAttributes.FACE_DRAW, Boolean.class);
+            if (foo != Appearance.INHERITED) drawFaces = (Boolean) foo;
+            if (drawFaces)	{
+            	foo = ap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
+                if (foo != Appearance.INHERITED) pickFaces = (Boolean) foo;
+           }
+          foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Double.class);
+          if (foo != Appearance.INHERITED) pointRadius = (Double) foo;
+          foo = ap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, Double.class);
+          if (foo != Appearance.INHERITED) tubeRadius = (Double) foo;
+          foo = ap.getAttribute(CommonAttributes.SIGNATURE, Integer.class);
+          if (foo != Appearance.INHERITED) signature = (Integer) foo;
+         }
+   }
     
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible()) return;
@@ -168,10 +216,8 @@ public class AABBPickSystem implements PickSystem {
           if (foo instanceof Boolean && ((Boolean)foo).booleanValue() == false) {
         	  return;
           }
-        EffectiveAppearance eapNew = eap.create(c.getAppearance());
-        appStack.push(eap);
-        eap=eapNew;
-        readEApp();
+         currentPI = new PickInfo(currentPI, c.getAppearance());
+        appStack.push(currentPI);
       }
 //      System.err.println("visiting "+c.getName());
       if (c.getTransformation() != null)	{
@@ -190,27 +236,27 @@ public class AABBPickSystem implements PickSystem {
     	  mInv = m.getInverse();
      }
       if (c.getAppearance()!=null) {
-        eap=(EffectiveAppearance) appStack.pop();
-        readEApp();
+         appStack.pop();
+         currentPI = appStack.elementAt(appStack.size()-1);
       }
     }
     
     // TODO simplify this to only read appearances
-    private void readEApp() {
-    	// test to see how fast picking is without having to access effective appearance
-//    	pickPoints = pickEdges = false;
-//    	pickFaces = true;
-//    	pointRadius = .02;
-//    	tubeRadius = .02;
-     pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
-        && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
-      pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
-        && eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, true);
-      pickFaces=eap.getAttribute(CommonAttributes.FACE_DRAW, true)
-      && eap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, true);
-      pointRadius=eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
-      tubeRadius=eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, CommonAttributes.TUBE_RADIUS_DEFAULT);
-    }
+//    private void readEApp() {
+//    	// test to see how fast picking is without having to access effective appearance
+////    	pickPoints = pickEdges = false;
+////    	pickFaces = true;
+////    	pointRadius = .02;
+////    	tubeRadius = .02;
+//     pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
+//        && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
+//      pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
+//        && eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, true);
+//      pickFaces=eap.getAttribute(CommonAttributes.FACE_DRAW, true)
+//      && eap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, true);
+//      pointRadius=eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
+//      tubeRadius=eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, CommonAttributes.TUBE_RADIUS_DEFAULT);
+//    }
     
     private boolean isPickable(Geometry g) {
     	Boolean boo = isPickableMap.get(g);
@@ -231,7 +277,7 @@ public class AABBPickSystem implements PickSystem {
     }
 
     public void visit(Sphere s) {
-      if (!pickFaces || !isPickable(s)) return;
+      if (!currentPI.pickFaces || !isPickable(s)) return;
       
       localHits.clear();
       
@@ -241,7 +287,7 @@ public class AABBPickSystem implements PickSystem {
     }
     
     public void visit(Cylinder c) {
-       if (!pickFaces || !isPickable(c)) return;
+       if (!currentPI.pickFaces || !isPickable(c)) return;
       
       localHits.clear();
       
@@ -254,7 +300,7 @@ public class AABBPickSystem implements PickSystem {
       if (!isPickable(ifs)) return;
       visit((IndexedLineSet)ifs);
 
-      if (!pickFaces) return;      
+      if (!currentPI.pickFaces) return;      
       
       AABBTree tree = aabbTreeExists.get(ifs);
       if (tree == null) {
@@ -277,22 +323,22 @@ public class AABBPickSystem implements PickSystem {
     public void visit(IndexedLineSet ils) {
       if (!isPickable(ils)) return;
       visit((PointSet)ils);
-      if (!pickEdges) return;
+      if (!currentPI.pickEdges) return;
 
       localHits.clear();
 
  //     System.err.println("Picking indexed line set "+ils.getName());
-       BruteForcePicking.intersectEdges(ils, signature, path, m, mInv, from, to, tubeRadius, localHits);
+       BruteForcePicking.intersectEdges(ils, signature, path, m, mInv, from, to, currentPI.tubeRadius, localHits);
        extractHits(localHits);
     }
 
     public void visit(PointSet ps) {
      
-      if (!pickPoints || !isPickable(ps)) return;
+      if (!currentPI.pickPoints || !isPickable(ps)) return;
 
       localHits.clear();
 
-      BruteForcePicking.intersectPoints(ps, signature, path, m, mInv, from, to, pointRadius, localHits);
+      BruteForcePicking.intersectPoints(ps, signature, path, m, mInv, from, to, currentPI.pointRadius, localHits);
       extractHits(localHits);        
     }
 
