@@ -127,7 +127,7 @@ class BruteForcePicking {
 
   }
 
-  public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double tubeRadius, ArrayList localHits) {
+  public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double tubeRadius, ArrayList<Hit> localHits) {
 //    path.getMatrix(m.getArray());
 //    path.getInverseMatrix(mInv.getArray()); 
     
@@ -183,15 +183,17 @@ class BruteForcePicking {
           points.getValueAt(edge.getValueAt(j)).toDoubleArray(vecRaw1);
           points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vecRaw2);
           if(vecRaw1[3]== 0) {
-              vecRaw1[0] = .99 *vecRaw1[0]+ .01*vecRaw2[0];
-              vecRaw1[1] = .99 *vecRaw1[1]+ .01*vecRaw2[1];
-              vecRaw1[2] = .99 *vecRaw1[2]+ .01*vecRaw2[2];
-              vecRaw1[3] = .99 *vecRaw1[3]+ .01*vecRaw2[3];
+        	  Rn.linearCombination(vecRaw1, .99, vecRaw1, .01, vecRaw2);
+//              vecRaw1[0] = .99 *vecRaw1[0]+ .01*vecRaw2[0];
+//              vecRaw1[1] = .99 *vecRaw1[1]+ .01*vecRaw2[1];
+//              vecRaw1[2] = .99 *vecRaw1[2]+ .01*vecRaw2[2];
+//              vecRaw1[3] = .99 *vecRaw1[3]+ .01*vecRaw2[3];
           } else if(vecRaw2[3]== 0) {
-              vecRaw2[0] = .99 *vecRaw2[0]+ .01*vecRaw1[0];
-              vecRaw2[1] = .99 *vecRaw2[1]+ .01*vecRaw1[1];
-              vecRaw2[2] = .99 *vecRaw2[2]+ .01*vecRaw1[2];
-              vecRaw2[3] = .99 *vecRaw2[3]+ .01*vecRaw1[3];
+        	  Rn.linearCombination(vecRaw2, .99, vecRaw2, .01, vecRaw1);
+//             vecRaw2[0] = .99 *vecRaw2[0]+ .01*vecRaw1[0];
+//              vecRaw2[1] = .99 *vecRaw2[1]+ .01*vecRaw1[1];
+//              vecRaw2[2] = .99 *vecRaw2[2]+ .01*vecRaw1[2];
+//              vecRaw2[3] = .99 *vecRaw2[3]+ .01*vecRaw1[3];
           }
           Pn.dehomogenize(vertex1, vecRaw1);
           Pn.dehomogenize(vertex2, vecRaw2);
