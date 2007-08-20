@@ -62,7 +62,9 @@ public class DragEventTool extends AbstractTool {
     root2cam.setColumn(3,new double[]{0,0,0,1});  
     distDir[0]=Rn.normalize(null,root2cam.multiplyVector(dir2ScaleZDrag[0]));
     distDir[1]=Rn.normalize(null,root2cam.multiplyVector(dir2ScaleZDrag[1]));
-          
+    if (tc.getCurrentPick() == null )
+    	throw new IllegalStateException("null pick");
+    
     if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
       if (pointDragListener == null) {
         active=false;
