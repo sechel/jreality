@@ -12,6 +12,7 @@ public class DiscreteGroupData extends Geometry {
 	public double minDistance = -1, maxDistance = -1;
 	public double ndcFudgeFactor = 1.2;
 	public boolean clipToCamera = false;
+	public boolean componentDisplayLists = false;
 	public int signature;
 	public int count;
 	public int delay = 150;

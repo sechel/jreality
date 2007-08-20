@@ -103,7 +103,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			displayListDirty = true;
 //			theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
 		}
-		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
+//		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
+		if (isCopyCat && theDropBox.componentDisplayLists  && jr.renderingState.useDisplayLists) {
 			// next prerequisite for using display lists at this node or above is that geometry and children are clean
 			if (goBetween.peerGeometry != null && goBetween.peerGeometry.displayListsDirty) 
 				displayListDirty = geometryDLDirty = true;
