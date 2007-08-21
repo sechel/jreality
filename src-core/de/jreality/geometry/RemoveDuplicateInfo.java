@@ -174,7 +174,7 @@ public class RemoveDuplicateInfo {
 	}
 	
 	/** inserts all points in the first Box	 */
-	private Box fillFirstBox(){// finished
+	private Box fillFirstBox(){
 		double[] max= new double[dim];
 		double[] min= new double[dim];
 		for (int i = 0; i < dim; i++) 
@@ -198,7 +198,7 @@ public class RemoveDuplicateInfo {
  * of the Vertices in the Box
  * in the refferenceTable
  */	
-	private void processBox(Box b){// finished
+	private void processBox(Box b){
 		if(b.numOfPoints<=1) return;
 		// case of to small Box:
 		if(b.getSize()<=(3.0*eps)) {
@@ -218,7 +218,7 @@ public class RemoveDuplicateInfo {
 	}
 	/** indicates if a Point is within the box given by 
 	 *  min and max plus an eps. */
-	private boolean inBetwen(double[]max,double[]min,double eps, double[] val){// finished
+	private boolean inBetween(double[]max,double[]min,double eps, double[] val){
 		for (int i = 0; i < val.length; i++) {
 			if(val[i]>max[i]+eps) return false;
 			if(val[i]<min[i]-eps) return false;
@@ -232,13 +232,13 @@ public class RemoveDuplicateInfo {
 		double[] c2=points[p2];
 		double[] a1=attrVals[p1];//important double attributes (inlined)
 		double[] a2=attrVals[p2];
-		if(inBetwen(c1,c1, eps, c2)&&inBetwen(a1,a1, eps, a2))
+		if(inBetween(c1,c1, eps, c2)&&inBetween(a1,a1, eps, a2))
 			return true; 
 		return false;
 	}
 	/** sets the refferences of all Vertices in the box	
 	 */ 
-	private void compareInBox(Box b) {// finished
+	private void compareInBox(Box b) {
 		for (int p1: b.innerPoints){
 			if(!isLegalPoint(p1)) continue;
 			for (int p2: b.innerPoints){
@@ -250,11 +250,11 @@ public class RemoveDuplicateInfo {
 		}
 	}
 	/** indicates if a point is not refferenced to an other; */
-	private boolean isLegalPoint(int p){// finished
+	private boolean isLegalPoint(int p){
 		return (mergeRefferenceTable[p]==p);
 	}
 	
-	private Box[] createSubBoxes(Box b) {// finished 
+	private Box[] createSubBoxes(Box b) { 
 		Box[] result= new Box[numSubBoxes];
 		for (int i = 0; i < result.length; i++) {
 			// calc max & min:
@@ -262,7 +262,6 @@ public class RemoveDuplicateInfo {
 			double[] max= new double[dim];
 			int k=i;
 			for (int d = 0; d < dim; d++) {
-				//new
 				if(b.realMax[d]-b.realMin[d]<=2*eps){
 					max[d]=min[d]=(b.realMax[d]+b.realMin[d])/2;
 				}
@@ -274,7 +273,6 @@ public class RemoveDuplicateInfo {
 					min[d]=(b.realMin[d]+b.realMax[d])/2;
 					max[d]=b.realMax[d]-eps;
 				}
-				// new end
 				k = k>>1;
 			}
 			// make new subBox
@@ -303,27 +301,20 @@ public class RemoveDuplicateInfo {
 		/** box with boundarys,
 		 *  can be filled with (double[dim]) Points 
 		 */
-		public Box(double[]max,double[]min,int dim) {// finished
+		private Box(double[]max,double[]min,int dim) {
 			originalMax=max;
 			originalMin=min;
 			realMax=new double[dim];
 			realMin=new double[dim];
 			empty=true;
 		}
-		/** returnes if a point can be added
-		 * (lies within the boundary)
-		 */
-		public boolean addable(int d){// finished
-			double[] p=points[d];
-			return inBetwen(originalMax, originalMin, eps, p);
-		}
 		/** adds a Point to the box if possible 
 		 *  updates the real bounding
 		 *  returns succes
 		 */
-		public boolean addPointIfPossible(int point){// finished
-			if(!addable(point))return false;
+		private boolean addPointIfPossible(int point){
 			double[] p=points[point];
+			if(!inBetween(originalMax, originalMin, eps, p))return false;
 			if (empty){
 				for (int i = 0; i < dim; i++) {
 					realMax[i]=realMin[i]=p[i];
@@ -340,7 +331,7 @@ public class RemoveDuplicateInfo {
 			numOfPoints++;
 			return true;
 		}
-		double getSize(){
+		private double getSize(){
 			double size=0;
 			for (int i = 0; i < dim; i++) 
 				if(realMax[i]-realMin[i]>size)
@@ -522,11 +513,11 @@ public class RemoveDuplicateInfo {
 		}
 	}
 	// ------------------ sublists -----------------------------
-	public static DataList getSublist(DoubleArrayArray dd, int[] referenceTable){
+	private static DataList getSublist(DoubleArrayArray dd, int[] referenceTable){
 		if(dd.getLength()==0)return dd;
 		return getSublist(dd.toDoubleArrayArray(null), referenceTable);
 	} 
-	public static DataList getSublist(double[][] dd, int[] referenceTable){
+	private static DataList getSublist(double[][] dd, int[] referenceTable){
 		if (dd.length==0)return new DoubleArrayArray.Array(new double[][]{{}});
 		int dim=dd[0].length;
 		double[][] newList=new double[referenceTable.length][dim];
@@ -535,22 +526,22 @@ public class RemoveDuplicateInfo {
 				newList[i][j]=dd[referenceTable[i]][j];
 		return new DoubleArrayArray.Array(newList);
 	} 
-	public static DataList getSublist(DoubleArray d, int[] referenceTable){
+	private static DataList getSublist(DoubleArray d, int[] referenceTable){
 		if(d.getLength()==0)return d;
 		return getSublist(d.toDoubleArray(null), referenceTable);
 	} 
-	public static DataList getSublist(double[] d, int[] referenceTable){
+	private static DataList getSublist(double[] d, int[] referenceTable){
 		if (d.length==0)return new DoubleArray(new double[]{});
 		double[] newList=new double[referenceTable.length];
 		for (int i = 0; i < newList.length; i++) 
 			newList[i]=d[referenceTable[i]];
 		return new DoubleArray(newList);
 	} 
-	public static DataList getSublist(IntArrayArray dd, int[] referenceTable){
+	private static DataList getSublist(IntArrayArray dd, int[] referenceTable){
 		if(dd.getLength()==0)return dd;
 		return getSublist(dd.toIntArrayArray(null), referenceTable);
 	} 
-	public static DataList getSublist(int[][] dd, int[] referenceTable){
+	private static DataList getSublist(int[][] dd, int[] referenceTable){
 		if (dd.length==0)return new IntArrayArray.Array(new int[][]{{}});
 		int dim=dd[0].length;
 		int[][] newList=new int[referenceTable.length][dim];
@@ -559,22 +550,22 @@ public class RemoveDuplicateInfo {
 				newList[i][j]=dd[referenceTable[i]][j];
 		return new IntArrayArray.Array(newList);
 	} 
-	public static DataList getSublist(IntArray d, int[] referenceTable){
+	private static DataList getSublist(IntArray d, int[] referenceTable){
 		if(d.getLength()==0)return d;
 		return getSublist(d.toIntArray(null), referenceTable);
 	} 
-	public static DataList getSublist(int[] d, int[] referenceTable){
+	private static DataList getSublist(int[] d, int[] referenceTable){
 		if (d.length==0)return new IntArray(new int[]{});
 		int[] newList=new int[referenceTable.length];
 		for (int i = 0; i < newList.length; i++) 
 			newList[i]=d[referenceTable[i]];
 		return new IntArray(newList);
 	} 
-	public static DataList getSublist(StringArrayArray dd, int[] referenceTable){
+	private static DataList getSublist(StringArrayArray dd, int[] referenceTable){
 		if(dd.getLength()==0)return dd;
 		return getSublist(dd.toStringArrayArray(null), referenceTable);
 	} 
-	public static DataList getSublist(String[][] dd, int[] referenceTable){
+	private static DataList getSublist(String[][] dd, int[] referenceTable){
 		if (dd.length==0)return new StringArrayArray.Array(new String[][]{{}});
 		int dim=dd[0].length;
 		String[][] newList=new String[referenceTable.length][dim];
@@ -583,310 +574,15 @@ public class RemoveDuplicateInfo {
 				newList[i][j]=dd[referenceTable[i]][j];
 		return new StringArrayArray.Array(newList);
 	} 
-	public static DataList getSublist(StringArray d, int[] referenceTable){
+	private static DataList getSublist(StringArray d, int[] referenceTable){
 		if(d.getLength()==0)return d;
 		return getSublist(d.toStringArray(null), referenceTable);
 	} 
-	public static DataList getSublist(String[] d, int[] referenceTable){
+	private static DataList getSublist(String[] d, int[] referenceTable){
 		if (d.length==0)return new StringArray(new String[]{});
 		String[] newList=new String[referenceTable.length];
 		for (int i = 0; i < newList.length; i++) 
 			newList[i]=d[referenceTable[i]];
 		return new StringArray(newList);
 	} 
-
-	public static void main(String[] args) {
-		IndexedFaceSetFactory bloed= new IndexedFaceSetFactory();
-		bloed.setVertexCount(273);
-		bloed.setLineCount(0);
-		bloed.setFaceCount(0);
-		bloed.setVertexCoordinates( new double[][]
-		 {{0.643000 ,1.36645 ,0.816000 ,1.00000  },
-				{-0.643000 ,1.36645 ,-0.816000 ,1.00000  },
-				{0.214091 ,1.56603 ,0.283867 ,1.00000 },
-				{-0.214091 ,1.56603 ,-0.283867 ,1.00000 },
-				{1.71409 ,1.43380 ,-0.690836 ,1.00000 },
-				{0.428909 ,1.53419 ,-0.423444 ,1.00000 },
-				{1.07109 ,1.49008 ,-0.559198 ,1.00000 },
-				{0.428909 ,0.876809 ,1.32825 ,1.00000 },
-				{0.857000 ,1.58511 ,0.143019 ,1.00000 },
-				{-1.71409 ,1.43380 ,0.690836 ,1.00000 },
-				{-0.428909 ,1.53419 ,0.423444 ,1.00000 },
-				{-1.07109 ,1.49008 ,0.559198 ,1.00000 },
-				{-0.428909 ,0.876809 ,-1.32825 ,1.00000 },
-				{-0.857000 ,1.58511 ,-0.143019 ,1.00000 },
-				{1.07109 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{0.643000 ,1.19832 ,-1.04741 ,1.00000 },
-				{0.857000 ,0.625845 ,-1.46333 ,1.00000 },
-				{2.14300 ,0.625845 ,1.46333 ,1.00000 },
-				{1.28591 ,1.43380 ,0.690836 ,1.00000 },
-				{1.71409 ,1.10009 ,1.15014 ,1.00000 },
-				{-0.214091 ,0.753903 ,1.40166 ,1.00000 },
-				{1.07109 ,0.992288 ,1.24435 ,1.00000 },
-				{-1.07109 ,-0.0713700 ,1.58995 ,1.00000 },
-				{-0.643000 ,1.19832 ,1.04741 ,1.00000 },
-				{-0.857000 ,0.625845 ,1.46333 ,1.00000 },
-				{-2.14300 ,0.625845 ,-1.46333 ,1.00000 },
-				{-1.28591 ,1.43380 ,-0.690836 ,1.00000 },
-				{-1.71409 ,1.10009 ,-1.15014 ,1.00000 },
-				{0.214091 ,0.753903 ,-1.40166 ,1.00000 },
-				{-1.07109 ,0.992288 ,-1.24435 ,1.00000 },
-				{2.14300 ,1.58511 ,-0.143019 ,1.00000 },
-				{1.28591 ,1.10009 ,-1.15014 ,1.00000 },
-				{1.07109 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{-0.643000 ,-0.353807 ,-1.55172 ,1.00000 },
-				{-0.214091 ,0.213956 ,-1.57710 ,1.00000 },
-				{3.21409 ,1.56603 ,0.283867 ,1.00000 },
-				{1.92891 ,1.49008 ,0.559198 ,1.00000 },
-				{2.57109 ,1.53419 ,0.423444 ,1.00000 },
-				{0.428909 ,-0.992288 ,1.24435 ,1.00000 },
-				{0.857000 ,0.353807 ,1.55172 ,1.00000 },
-				{0.643000 ,-0.353807 ,1.55172 ,1.00000 },
-				{0.214091 ,0.213956 ,1.57710 ,1.00000 },
-				{-2.14300 ,1.58511 ,0.143019 ,1.00000 },
-				{-1.28591 ,1.10009 ,1.15014 ,1.00000 },
-				{-3.21409 ,1.56603 ,-0.283867 ,1.00000 },
-				{-1.92891 ,1.49008 ,-0.559198 ,1.00000 },
-				{-2.57109 ,1.53419 ,-0.423444 ,1.00000 },
-				{-0.428909 ,-0.992288 ,-1.24435 ,1.00000 },
-				{-0.857000 ,0.353807 ,-1.55172 ,1.00000 },
-				{-0.643000 ,-0.353807 ,-1.55172 ,1.00000 },
-				{-0.643000 ,-0.353807 ,-1.55172 ,1.00000 },
-				{-0.214091 ,0.213956 ,-1.57710 ,1.00000 },
-				{3.21409 ,0.753903 ,-1.40166 ,1.00000 },
-				{1.92891 ,0.992288 ,-1.24435 ,1.00000 },
-				{2.57109 ,0.876809 ,-1.32825 ,1.00000 },
-				{2.35700 ,1.36645 ,-0.816000 ,1.00000 },
-				{1.71409 ,-0.213956 ,-1.57710 ,1.00000 },
-				{-0.214091 ,0.213956 ,-1.57710 ,1.00000 },
-				{1.07109 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{0.428909 ,0.0713700 ,-1.58995 ,1.00000 },
-				{-0.214091 ,0.213956 ,-1.57710 ,1.00000 },
-				{1.71409 ,-0.213956 ,-1.57710 ,1.00000 },
-				{0.428909 ,0.0713700 ,-1.58995 ,1.00000 },
-				{1.07109 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{1.92891 ,-0.0713700 ,1.58995 ,1.00000 },
-				{2.35700 ,1.19832 ,1.04741 ,1.00000 },
-				{2.14300 ,-1.19832 ,1.04741 ,1.00000 },
-				{1.28591 ,-0.213956 ,1.57710 ,1.00000 },
-				{1.71409 ,-0.753903 ,1.40166 ,1.00000 },
-				{-1.71409 ,-0.213956 ,1.57710 ,1.00000 },
-				{-0.428909 ,0.0713700 ,1.58995 ,1.00000 },
-				{-3.21409 ,0.753903 ,1.40166 ,1.00000 },
-				{-1.92891 ,0.992288 ,1.24435 ,1.00000 },
-				{-2.57109 ,0.876809 ,1.32825 ,1.00000 },
-				{-2.35700 ,1.36645 ,0.816000 ,1.00000 },
-				{-1.92891 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{-2.35700 ,1.19832 ,-1.04741 ,1.00000 },
-				{-1.92891 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{-0.643000 ,-0.353807 ,-1.55172 ,1.00000 },
-				{-0.857000 ,0.353807 ,-1.55172 ,1.00000 },
-				{-0.857000 ,0.353807 ,-1.55172 ,1.00000 },
-				{-2.14300 ,-1.19832 ,-1.04741 ,1.00000 },
-				{-1.28591 ,-0.213956 ,-1.57710 ,1.00000 },
-				{-1.71409 ,-0.753903 ,-1.40166 ,1.00000 },
-				{2.57109 ,-0.992288 ,-1.24435 ,1.00000 },
-				{2.14300 ,0.353807 ,-1.55172 ,1.00000 },
-				{2.35700 ,-0.353807 ,-1.55172 ,1.00000 },
-				{3.64300 ,1.36645 ,0.816000 ,1.00000 },
-				{2.78591 ,1.56603 ,-0.283867 ,1.00000 },
-				{0.428909 ,0.0713700 ,-1.58995 ,1.00000 },
-				{1.07109 ,-1.53419 ,-0.423444 ,1.00000 },
-				{0.643000 ,-0.625845 ,-1.46333 ,1.00000 },
-				{0.857000 ,-1.19832 ,-1.04741 ,1.00000 },
-				{2.14300 ,0.353807 ,-1.55172 ,1.00000 },
-				{1.71409 ,-0.213956 ,-1.57710 ,1.00000 },
-				{1.28591 ,-0.753903 ,-1.40166 ,1.00000 },
-				{2.14300 ,0.353807 ,-1.55172 ,1.00000 },
-				{1.71409 ,-0.213956 ,-1.57710 ,1.00000 },
-				{3.64300 ,-0.353807 ,1.55172 ,1.00000 },
-				{2.78591 ,0.753903 ,1.40166 ,1.00000 },
-				{3.21409 ,0.213956 ,1.57710 ,1.00000 },
-				{2.57109 ,0.0713700 ,1.58995 ,1.00000 },
-				{-0.214091 ,-1.10009 ,1.15014 ,1.00000 },
-				{1.07109 ,-0.876809 ,1.32825 ,1.00000 },
-				{-1.07109 ,-1.53419 ,0.423444 ,1.00000 },
-				{-0.643000 ,-0.625845 ,1.46333 ,1.00000 },
-				{-0.857000 ,-1.19832 ,1.04741 ,1.00000 },
-				{-2.57109 ,-0.992288 ,1.24435 ,1.00000 },
-				{-2.14300 ,0.353807 ,1.55172 ,1.00000 },
-				{-2.35700 ,-0.353807 ,1.55172 ,1.00000 },
-				{-3.64300 ,1.36645 ,-0.816000 ,1.00000 },
-				{-2.78591 ,1.56603 ,0.283867 ,1.00000 },
-				{-1.28591 ,-0.753903 ,1.40166 ,1.00000 },
-				{-3.64300 ,-0.353807 ,-1.55172 ,1.00000 },
-				{-2.78591 ,0.753903 ,-1.40166 ,1.00000 },
-				{-3.21409 ,0.213956 ,-1.57710 ,1.00000 },
-				{-1.28591 ,-0.213956 ,-1.57710 ,1.00000 },
-				{-3.21409 ,0.213956 ,-1.57710 ,1.00000 },
-				{-1.92891 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{-2.57109 ,0.0713700 ,-1.58995 ,1.00000 },
-				{-3.21409 ,0.213956 ,-1.57710 ,1.00000 },
-				{-1.28591 ,-0.213956 ,-1.57710 ,1.00000 },
-				{-2.57109 ,0.0713700 ,-1.58995 ,1.00000 },
-				{-1.92891 ,-0.0713700 ,-1.58995 ,1.00000 },
-				{-3.64300 ,1.36645 ,-0.816000 ,1.00000 },
-				{0.214091 ,-1.10009 ,-1.15014 ,1.00000 },
-				{-1.07109 ,-0.876809 ,-1.32825 ,1.00000 },
-				{-0.857000 ,0.353807 ,-1.55172 ,1.00000 },
-				{-1.28591 ,-0.213956 ,-1.57710 ,1.00000 },
-				{3.64300 ,1.19832 ,-1.04741 ,1.00000 },
-				{2.35700 ,-0.353807 ,-1.55172 ,1.00000 },
-				{2.78591 ,0.213956 ,-1.57710 ,1.00000 },
-				{2.35700 ,-0.353807 ,-1.55172 ,1.00000 },
-				{2.78591 ,0.213956 ,-1.57710 ,1.00000 },
-				{2.35700 ,-0.353807 ,-1.55172 ,1.00000 },
-				{2.14300 ,0.353807 ,-1.55172 ,1.00000 },
-				{1.07109 ,-1.53419 ,-0.423444 ,1.00000 },
-				{0.428909 ,0.0713700 ,-1.58995 ,1.00000 },
-				{-0.643000 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-0.214091 ,-1.43380 ,-0.690836 ,1.00000 },
-				{3.21409 ,-1.10009 ,-1.15014 ,1.00000 },
-				{1.92891 ,-0.876809 ,-1.32825 ,1.00000 },
-				{1.92891 ,-1.53419 ,0.423444 ,1.00000 },
-				{2.35700 ,-0.625845 ,1.46333 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{0.857000 ,-1.36645 ,0.816000 ,1.00000 },
-				{0.643000 ,-1.58511 ,0.143019 ,1.00000 },
-				{0.643000 ,-1.58511 ,0.143019 ,1.00000 },
-				{0.214091 ,-1.43380 ,0.690836 ,1.00000 },
-				{0.643000 ,-1.58511 ,0.143019 ,1.00000 },
-				{1.92891 ,-1.53419 ,0.423444 ,1.00000 },
-				{-1.07109 ,-1.53419 ,0.423444 ,1.00000 },
-				{-3.64300 ,1.19832 ,1.04741 ,1.00000 },
-				{-2.78591 ,0.213956 ,1.57710 ,1.00000 },
-				{-3.64300 ,1.19832 ,1.04741 ,1.00000 },
-				{-3.21409 ,-1.10009 ,1.15014 ,1.00000 },
-				{-1.92891 ,-0.876809 ,1.32825 ,1.00000 },
-				{-3.64300 ,-0.353807 ,-1.55172 ,1.00000 },
-				{-3.21409 ,0.213956 ,-1.57710 ,1.00000 },
-				{-2.57109 ,0.0713700 ,-1.58995 ,1.00000 },
-				{-1.92891 ,-1.53419 ,-0.423444 ,1.00000 },
-				{-2.35700 ,-0.625845 ,-1.46333 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-0.857000 ,-1.36645 ,-0.816000 ,1.00000 },
-				{-0.643000 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-0.643000 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-1.92891 ,-1.53419 ,-0.423444 ,1.00000 },
-				{-2.57109 ,0.0713700 ,-1.58995 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{1.07109 ,-1.53419 ,-0.423444 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{1.07109 ,-1.53419 ,-0.423444 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{2.14300 ,-1.36645 ,-0.816000 ,1.00000 },
-				{2.35700 ,-1.58511 ,-0.143019 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{0.643000 ,-1.58511 ,0.143019 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-1.07109 ,-1.53419 ,0.423444 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{3.21409 ,-1.43380 ,0.690836 ,1.00000 },
-				{1.92891 ,-1.53419 ,0.423444 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{1.92891 ,-1.53419 ,0.423444 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-1.07109 ,-1.53419 ,0.423444 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-2.14300 ,-1.36645 ,0.816000 ,1.00000 },
-				{-2.35700 ,-1.58511 ,0.143019 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-0.643000 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-3.21409 ,-1.43380 ,-0.690836 ,1.00000 },
-				{-1.92891 ,-1.53419 ,-0.423444 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-1.92891 ,-1.53419 ,-0.423444 ,1.00000 },
-				{3.64300 ,-0.625845 ,-1.46333 ,1.00000 },
-				{2.35700 ,-1.58511 ,-0.143019 ,1.00000 },
-				{2.78591 ,-1.43380 ,-0.690836 ,1.00000 },
-				{2.35700 ,-1.58511 ,-0.143019 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{0.643000 ,-1.58511 ,0.143019 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{2.35700 ,-1.58511 ,-0.143019 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{1.07109 ,-1.53419 ,-0.423444 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{1.07109 ,-1.53419 ,-0.423444 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{1.71409 ,-1.56603 ,-0.283867 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-0.643000 ,-1.58511 ,-0.143019 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{2.35700 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-3.64300 ,-0.625845 ,1.46333 ,1.00000 },
-				{-2.35700 ,-1.58511 ,0.143019 ,1.00000 },
-				{-2.78591 ,-1.43380 ,0.690836 ,1.00000 },
-				{-2.35700 ,-1.58511 ,0.143019 ,1.00000 },
-				{-3.64300 ,-0.625845 ,1.46333 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-2.35700 ,-1.58511 ,0.143019 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-1.07109 ,-1.53419 ,0.423444 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-1.07109 ,-1.53419 ,0.423444 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-1.71409 ,-1.56603 ,0.283867 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-2.35700 ,-1.58511 ,0.143019 ,1.00000 },
-				{0.428909 ,-1.49008 ,-0.559198 ,1.00000 },
-				{0.643000 ,-1.58511 ,0.143019 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{1.92891 ,-1.53419 ,0.423444 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{1.28591 ,-1.56603 ,0.283867 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{1.92891 ,-1.53419 ,0.423444 ,1.00000 },
-				{2.57109 ,-1.49008 ,0.559198 ,1.00000 },
-				{2.35700 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-0.428909 ,-1.49008 ,0.559198 ,1.00000 },
-				{-0.643000 ,-1.58511 ,-0.143019 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-1.92891 ,-1.53419 ,-0.423444 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-1.28591 ,-1.56603 ,-0.283867 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-1.92891 ,-1.53419 ,-0.423444 ,1.00000 },
-				{-2.57109 ,-1.49008 ,-0.559198 ,1.00000 },
-				{-2.35700 ,-1.58511 ,0.143019 ,1.00000 }});
-		bloed.update();
-		SceneGraphComponent root = new SceneGraphComponent();
-//		root.setGeometry(bloed.getIndexedFaceSet());
-//		ViewerApp.display(root);
-		
-		// 136 Punkte sind das optimale minimum
-		// (welches wir erreichen wollen)
-		
-		
-		IndexedFaceSet i= RemoveDuplicateInfo.removeDuplicateVertices(bloed.getIndexedFaceSet() );
-		root.setGeometry(i);
-		System.out.println("RemoveDuplicateInfo.main(#Points) "+i.getNumPoints());
-		ViewerApp.display(root);
-		
-		}
 }
