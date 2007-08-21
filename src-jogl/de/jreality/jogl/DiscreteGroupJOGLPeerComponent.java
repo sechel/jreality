@@ -2,6 +2,8 @@ package de.jreality.jogl;
 
 import javax.media.opengl.GL;
 
+import sun.awt.PeerEvent;
+
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -60,6 +62,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		isCopyCat = (trojanHorse != null &&  
 				trojanHorse instanceof DiscreteGroupData);
 		if (isCopyCat)	{
+			goBetween.peerGeometry = null;		// this isn't really a geometry
 			theDropBox = (DiscreteGroupData) trojanHorse;
 			readMatrices();
 		}
@@ -80,11 +83,9 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	public void render() {
 		if (!isVisible) return;
+		if (children.size() == 0 && goBetween.peerGeometry == null) return;
 		insideDL = false;
 		boolean	geometryDLDirty = false;
-		if (children.size() == 0 && goBetween.peerGeometry == null) return;
-		// evaluate display list situation
-		// first consider whether display lists are currently being used at all
 		if (isCopyCat) {
 //			System.err.println("Matrices length "+((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size());
 			if (matrices.length != theDropBox.matrixList.length) {
@@ -95,6 +96,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 				displayListDirty = geometryDLDirty = true;
 				oldGL = jr.globalGL;
 			}
+			jr.renderingState.componentDisplayLists = theDropBox.componentDisplayLists;
 		}
 		useOldMatrices = true;
 		if (isCopyCat && (jr.beginRenderTime - currentTime > theDropBox.delay))	{
@@ -103,11 +105,15 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			displayListDirty = true;
 //			theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
 		}
-//		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
-		if (isCopyCat && theDropBox.componentDisplayLists  && jr.renderingState.useDisplayLists) {
+		// evaluate display list situation
+		// first consider whether display lists are currently being used at all
+		// The following code is fairly inscrutable.  The point is to decide whether we can safely
+		// generate a display list for this scene graph component
+		if (jr.renderingState.componentDisplayLists  && jr.renderingState.useDisplayLists) {
 			// next prerequisite for using display lists at this node or above is that geometry and children are clean
 			if (goBetween.peerGeometry != null && goBetween.peerGeometry.displayListsDirty) 
 				displayListDirty = geometryDLDirty = true;
+			if (displayListDirty) setDisplayListDirty();
 			if (!jr.offscreenMode && isCopyCat)	{
 				// we only care about the time when we are clipping to the camera (and are top copycat node)
 //				theLog.fine("dld\tcld:\t"+displayListDirty+"\t"+childrenDLDirty+"\t"+goBetween.originalComponent.getName());
@@ -152,7 +158,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		} else if (!isCopyCat) {
 			if (goBetween.peerGeometry != null && !goBetween.peerGeometry.displayListsDirty) 
 				geometryDLDirty = false;
-			displayListDirty = childrenDLDirty || geometryDLDirty;			
+			displayListDirty = childrenDLDirty || geometryDLDirty;	
+			if (displayListDirty) setDisplayListDirty();
 		}
 	}
 
@@ -201,6 +208,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			theLog.fine("Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
+			jr.renderingState.componentDisplayLists = false;
+
 		} else {
 			childrenDLDirty = false;		// think positive!
 			int n = children.size();
@@ -214,7 +223,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 		}
 	}
-		
 	@Override
 	protected void pushTransformation(double[] m) {
 		if (w2camrepn != null )	{
@@ -232,21 +240,17 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	}
 
 	public void propagateSGCDisplayListDirtyUp()	{
-		if (jr != null && jr.renderingState != null && !jr.renderingState.componentDisplayLists) return;
 		displayListDirtyUp = true;
 		if (parent != null && !isTopCat && !((DiscreteGroupJOGLPeerComponent) parent).displayListDirtyUp) { // && (!isCopyCat || !clipToCamera)) 
 			((DiscreteGroupJOGLPeerComponent) parent).propagateSGCDisplayListDirtyUp();
 		}	}
 
 	public void propagateSGCDisplayListDirtyDown()	{
-		if (jr != null && jr.renderingState != null && !jr.renderingState.componentDisplayLists) return;
-//		System.err.println("In propagateDown "+goBetween.originalComponent.getName());
 		displayListDirty = childrenDLDirty = true;
-//		childlock.readLock();
-		for (JOGLPeerComponent child: children){		
+		if (isCopyCat) ((DiscreteGroupJOGLPeerComponent) children.get(0)).propagateSGCDisplayListDirtyDown();
+		else for (JOGLPeerComponent child: children){		
 			((DiscreteGroupJOGLPeerComponent) child).propagateSGCDisplayListDirtyDown();
 		}	
-//		childlock.readUnlock();
 		displayListDirtyUp = false;
 	}
 
