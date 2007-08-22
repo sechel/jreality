@@ -570,7 +570,8 @@ final public class Rn {
 	}
 	
 	/**
-	 * Calculate and return the euclidean inner product of the  two vectors.
+	 * Calculate and return the euclidean inner product of the  two vectors. If they are of different lengths
+	 * only evaluates the inner product on the lesser of the two lengths.
 	 * @param u
 	 * @param v
 	 * @return
@@ -582,7 +583,7 @@ final public class Rn {
       if (Math.abs(u.length-v.length) != 1) throw new IllegalArgumentException("Vectors must have same length");
 		}
 		double norm = 0.0;
-		int n = Math.min(u.length, v.length);
+		int n = u.length < v.length? u.length : v.length;
 		for (int i = 0; i<n; ++i)	{
 			norm += u[i] * v[i];
 		}
@@ -602,7 +603,8 @@ final public class Rn {
 			throw new IllegalArgumentException("Vectors not long enough");
 		}
 		double norm = 0.0;
-		for (int i = 0; i<Math.min(u.length,n); ++i)	{
+		int m = u.length < n ? u.length : n;
+		for (int i = 0; i<m; ++i)	{
 			norm += u[i] * v[i];
 		}
 		return norm;
