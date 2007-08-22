@@ -161,7 +161,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
 		jr.renderingState.currentSignature = signature;
-		if (goBetween != null && goBetween.peerGeometry != null && goBetween.peerGeometry.originalGeometry != null )	{
+		if (renderGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
 	}

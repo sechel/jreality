@@ -31,6 +31,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	int refCount = 0;
 	int signature = Pn.EUCLIDEAN;
 	boolean isSurface = false;
+	boolean hasPointLabels = false, hasEdgeLabels = false, hasFaceLabels = false;
 	boolean forceRender = false;
 	boolean displayListsDirty =  true;
 	public JOGLPeerGeometry(Geometry g, JOGLRenderer jr)	{
@@ -38,9 +39,16 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		originalGeometry = g;
 		name = "JOGLPeer:"+g.getName();
 		ifs = null; ils = null; ps = null;
-		if (g instanceof IndexedFaceSet) ifs = (IndexedFaceSet) g;
-		if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
-		if (g instanceof PointSet) ps = (PointSet) g;
+		if (g instanceof IndexedFaceSet) {
+			ifs = (IndexedFaceSet) g;
+		}
+		if (g instanceof IndexedLineSet) {
+			ils = (IndexedLineSet) g;
+		}
+		if (g instanceof PointSet) {
+			ps = (PointSet) g;
+		}
+		updateLabelState();
 		originalGeometry.addGeometryListener(this);
 		if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
 //		Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.FORCE_RENDER);
@@ -72,28 +80,28 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (geometryShader.isEdgeDraw() && ils != null)	{
 			geometryShader.lineShader.render(jr.renderingState);
 			geometryShader.lineShader.postRender(jr.renderingState);
-			//if (geometryShader.lineShader.displayListsDirty()) displayListsDirty = true;
+			if (geometryShader.lineShader.displayListsDirty()) displayListsDirty = true;
 			needsNew = true;
 		}
 		if (geometryShader.isVertexDraw() && ps != null)	{
 			geometryShader.pointShader.render(jr.renderingState);
 			geometryShader.pointShader.postRender(jr.renderingState);
-			//if (geometryShader.pointShader.displayListsDirty()) displayListsDirty = true;
+			if (geometryShader.pointShader.displayListsDirty()) displayListsDirty = true;
 			needsNew = true;
 		}
 		if (needsNew) renderingHints.render(jr.renderingState);
 		if (geometryShader.isFaceDraw() && isSurface) {
 			geometryShader.polygonShader.render(jr.renderingState);
 			geometryShader.polygonShader.postRender(jr.renderingState);
-			//if (geometryShader.polygonShader.displayListsDirty()) displayListsDirty = true;
+			if (geometryShader.polygonShader.displayListsDirty()) displayListsDirty = true;
 		}	
-		if (geometryShader.isVertexDraw() && ps!=null && ps.getVertexAttributes(Attribute.LABELS) != null) {
+		if (geometryShader.isVertexDraw() && hasPointLabels) {
 			JOGLRendererHelper.drawPointLabels(jr, ps,  jpc.geometryShader.pointShader.getTextShader());
 		}
-		if (geometryShader.isEdgeDraw() &&ils != null && ils.getEdgeAttributes(Attribute.LABELS) != null) {
+		if (geometryShader.isEdgeDraw() && hasEdgeLabels) {
 			JOGLRendererHelper.drawEdgeLabels(jr, ils, jpc.geometryShader.lineShader.getTextShader());
 		}
-		if (geometryShader.isFaceDraw() &&ifs != null && ifs.getFaceAttributes(Attribute.LABELS) != null) {
+		if (geometryShader.isFaceDraw() && hasFaceLabels) {
 			JOGLRendererHelper.drawFaceLabels(jr, ifs,  jpc.geometryShader.polygonShader.getTextShader());
 		}
 		renderingHints.postRender(jr.renderingState);
@@ -109,6 +117,13 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 				signature = foo2.intValue();
 			}				
 		}
+		updateLabelState();
+	}
+	
+	private void updateLabelState()	{
+		if (ps != null) hasPointLabels = ps.getVertexAttributes(Attribute.LABELS) != null;
+		if (ils != null) hasEdgeLabels = ils.getEdgeAttributes(Attribute.LABELS) != null;
+		if (ifs != null) hasFaceLabels = ifs.getFaceAttributes(Attribute.LABELS) != null;
 
 	}
 }

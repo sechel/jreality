@@ -39,7 +39,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	boolean[] accepted;
 	SceneGraphPath w2camrepn = null;
 	double[] world2CameraRepn = new double[16], camera2CameraRepn = new double[16];
-	float[] m2w = new float[16];
 	int framecount = -1;
 	protected boolean[] matrixIsReflection = null;
 	GL oldGL;
@@ -69,7 +68,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	}
 
 	private void readMatrices() {
-//		matrices = ((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);
 		matrices = theDropBox.matrixList;
 		matrixIsReflection = new boolean[matrices.length];
 		accepted = new boolean[matrices.length];
@@ -114,21 +112,9 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			if (goBetween.peerGeometry != null && goBetween.peerGeometry.displayListsDirty) 
 				displayListDirty = geometryDLDirty = true;
 			if (displayListDirty) setDisplayListDirty();
+			// we only use a display list if we are a copycat node
 			if (!jr.offscreenMode && isCopyCat)	{
-				// we only care about the time when we are clipping to the camera (and are top copycat node)
 //				theLog.fine("dld\tcld:\t"+displayListDirty+"\t"+childrenDLDirty+"\t"+goBetween.originalComponent.getName());
-				if (isTopCat)	{
-					if (displayListDirtyUp)	{
-						propagateSGCDisplayListDirtyDown();
-//						theLog.fine("Propagating display list dirty down "+goBetween.getOriginalComponent().getName());
-					}
-//					if (System.currentTimeMillis() - currentTime > theDropBox.delay)	{
-//						currentTime = System.currentTimeMillis();
-//						displayListDirty = true;
-////						theLog.fine("Delay exceeded"+goBetween.getOriginalComponent().getName());
-//					}
-				}
-				// we only use a display list if we are a copycat node
 				if (!childrenDLDirty && !geometryDLDirty) { // && !jr.renderingState.insideDisplayList)	{
 					if (!displayListDirty)	{
 						jr.globalGL.glCallList(displayList);
@@ -205,7 +191,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			childrenDLDirty = child.isVisible ? child.displayListDirty : false;
 			theDropBox.count = count;
-			theLog.fine("Rendered "+count);
+//			theLog.fine("Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;
@@ -305,17 +291,18 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		super.visibilityChanged(ev);
 	}
 	//o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.renderingState.currentSignature)) continue;
-	private double[] mat = new double[16];
+	private double[] mat = new double[16], mat2, mat3;
 	private double[] tmp2 = new double[4];
 	private double inverseDMin, inverseDMax;
 	protected  boolean accept(final double[] m) { //double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
-			Rn.times(mat, o2c, m);
+			mat3 = m;
+			mat2 = o2c; fastTimes();
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 			double d = Pn.inverseDistanceToOrigin(tmp2,  signature);
 //			System.err.println("coshd = "+d);
 			if (theDropBox.minDistance > 0.0 &&  d < inverseDMin) return true;
 			if (theDropBox.maxDistance > 0 && d > inverseDMax) return false;
-			Rn.times(mat, o2ndc, m);
+			mat2 = o2ndc; fastTimes();
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 			Pn.dehomogenize(tmp2,tmp2);
 			if (tmp2[0] > theDropBox.ndcFudgeFactor || tmp2[0] < -theDropBox.ndcFudgeFactor) return false;
@@ -324,7 +311,19 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			return true;
 		}
 
+	private void fastTimes()	{
+		for (int i=0; i<4; ++i)	{	
+			for (int j=0; j<4; ++j)	{
+				mat[i*4+j] = 0.0;
+				for (int k=0; k<4; ++k)		{
+					// the (i,j)th position is the inner product of the ith row and 
+					// the jth column of the two factors
+					mat[i*4+j] += mat2[i*4+k]*mat3[k*4+j];
+				}
+			}
+		}
 
+	}
 
 
 }
