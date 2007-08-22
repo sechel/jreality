@@ -228,8 +228,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
 		}
 	}
-    protected Runnable testClean = null;
-	public Object render() {
+	public void render() {
 		Texture2DLoaderJOGL.setupBoundTextureTable(globalGL, oneTexture2DPerImage);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
@@ -284,7 +283,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (forceResidentTextures) forceResidentTextures();
 
 		lightListDirty = false;
-		return null;
 	}
 
 	List clipPlanes = null;

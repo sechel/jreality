@@ -67,7 +67,7 @@ public class DiscreteGroupGoBetween extends GoBetween {
 	}
 	
 	protected void setPeerDisplayListDirty() {
-		((DiscreteGroupJOGLPeerComponent) peers.get(0)).propagateSGCDisplayListDirtyUp();
+		((DiscreteGroupJOGLPeerComponent) peers.get(0)).setDisplayListDirty();
 	}
 
 }

@@ -66,7 +66,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		boundIsDirty = true,
 		renderRunnableDirty = true,
 		isVisible = true;
-	int geometryDirtyBits  = 0, displayList = -1;
+	int geometryDirtyBits  = ALL_GEOMETRY_CHANGED, displayList = -1;
 	// copycat related fields
 	long currentTime = 0;
 	protected final static int POINTS_CHANGED = 1;
@@ -317,6 +317,27 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		System.err.println("Clip to camera is "+clipToCamera);
 	}
 
+	protected boolean someSubNodeIsDirty()	{
+		if (isVisible && goBetween.peerGeometry != null && geometryDirtyBits != 0) return true;
+		for (JOGLPeerComponent child : children) {
+			if (child.someSubNodeIsDirty()) return true;
+		}
+		return false;
+	}
+	
+//	protected boolean shadersAreDirty()	{
+//		if (geometryShader == null) return false;
+//		boolean ret = false;
+//		if (geometryDirtyBits != 0) ret = true;
+//		else if (geometryShader.isFaceDraw() && geometryShader.polygonShader != null &&
+//			geometryShader.polygonShader.displayListsDirty()) ret = true;
+//		else if (geometryShader.isEdgeDraw() && geometryShader.lineShader != null &&
+//			geometryShader.lineShader.displayListsDirty()) ret = true;
+//		else if (geometryShader.isVertexDraw() && geometryShader.pointShader != null &&
+//			geometryShader.pointShader.displayListsDirty()) ret = true;
+//		if (ret) System.err.println(name+" shaders are dirty");
+//		return ret;
+//	}
 	public void childAdded(SceneGraphComponentEvent ev) {
 		if (debug) theLog.finest("JOGLPeerComponent: Container Child added to: "+name);
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
