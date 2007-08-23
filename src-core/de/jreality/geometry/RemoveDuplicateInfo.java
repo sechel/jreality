@@ -57,8 +57,6 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 import de.jreality.scene.data.StringArrayArray;
-import de.jreality.scene.proxy.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class RemoveDuplicateInfo {
 	
