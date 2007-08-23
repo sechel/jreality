@@ -48,8 +48,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import sun.java2d.loops.DrawPolygons;
-
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -64,8 +62,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.soft.PickVisitor;
 import de.jreality.util.PickUtility;
 
 /**
