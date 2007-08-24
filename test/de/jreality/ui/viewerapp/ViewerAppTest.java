@@ -41,8 +41,7 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Component;
-
-import javax.swing.JPanel;
+import java.awt.Dimension;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.FactoredMatrix;
@@ -72,7 +71,8 @@ public class ViewerAppTest {
 //    JPanel p = new JPanel();
 //    p.add( new JCheckBox("test component", true) );
 //    viewerApp.addAccessory(p, "test tab");
-    viewerApp.addAccessory(getSecondViewer());
+    
+    viewerApp.addAccessory(getSecondViewer(), "viewer");
     viewerApp.update();
     viewerApp.display();
     
@@ -100,10 +100,15 @@ public class ViewerAppTest {
     return cmp;
   }
   
+  
   private static Component getSecondViewer()	{
-	  	SceneGraphComponent cmp = getSGC();
-	    ViewerApp viewerApp = new ViewerApp(cmp);
-	    return ((Component) viewerApp.getComponent());
-
+	  	SceneGraphComponent sgc = getSGC();
+	  	//Secure.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
+	    ViewerApp viewerApp = new ViewerApp(sgc);
+	    Component cmp = ((Component) viewerApp.getContent()); 
+	    cmp.setPreferredSize(new Dimension(0,0));
+	    viewerApp.setBackgroundColor(ViewerApp.defaultBackgroundColor);
+	    
+	    return cmp;
   }
 }
