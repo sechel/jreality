@@ -51,9 +51,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -64,10 +66,6 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
-import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
-import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
-import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
-import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.CreateAppearance;
@@ -215,6 +213,22 @@ public class ViewerAppMenu {
 		
 		//addMenu(createCameraMenu());
 		addMenu(createViewMenu());
+		
+		//set up input and action map of viewing component to match 
+		//actions of menu bar (needed when menu bar or menus are hidden)
+		JComponent viewingComp = (JComponent) viewerApp.getViewingComponent();
+		for (int i = 0; i < menuBar.getComponentCount(); i++) {
+			JMenu menu = (JMenu)menuBar.getComponent(i);
+			Object[] keys = menu.getActionMap().keys();
+			if (keys == null) continue;
+			for (int j = 0; j < keys.length; j++) {
+				KeyStroke key = (KeyStroke) keys[j];
+				viewingComp.getInputMap().put(key, key);
+				viewingComp.getActionMap().put(key, menu.getActionMap().get(key));
+			}			
+		}
+		
+    
 	}
 
 
@@ -222,33 +236,40 @@ public class ViewerAppMenu {
 		JMenu fileMenu = new JMenu(FILE_MENU);
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
-		fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, 
-				sm.getDefaultSelection().getLastComponent(), viewer, parentComp)));
-		fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp)));
+		addActionToMenu(fileMenu, new LoadFile(LOAD_FILE, 
+				sm.getDefaultSelection().getLastComponent(), viewer, parentComp));
+				addActionToMenu(fileMenu, new LoadScene(LOAD_SCENE, viewerApp));
 		fileMenu.addSeparator();
-		fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewer, parentComp)));
+		addActionToMenu(fileMenu, new SaveScene(SAVE_SCENE, viewer, parentComp));
 		fileMenu.addSeparator();
 
 		JMenu export = new JMenu(EXPORT);
 		fileMenu.add(export);
 		try {
-			export.add(new SunflowMenu(viewerApp));
+			JMenu sunflow = new SunflowMenu(viewerApp);
+			export.add(sunflow);
+			for (int i = 0; i < sunflow.getMenuComponentCount(); i++) {
+				Action a = ((JMenuItem)sunflow.getMenuComponent(i)).getAction();
+				if (a.getValue(Action.ACCELERATOR_KEY)==null) continue;
+				fileMenu.getActionMap().put(a.getValue(Action.ACCELERATOR_KEY), a);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			LoggingSystem.getLogger(this).log(Level.CONFIG, "no sunflow", e);
 		}
-		export.add(new JMenuItem(new ExportRIB("RIB", viewer, parentComp)));
-		export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
-		export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
-		export.add(new JMenuItem(new ExportVRML("VRML", viewer, parentComp)));
+		addActionToMenu(export, fileMenu, new ExportRIB("RIB", viewer, parentComp));
+		addActionToMenu(export, fileMenu, new ExportSVG("SVG", viewer, parentComp));
+		addActionToMenu(export, fileMenu, new ExportPS("PS", viewer, parentComp));
+		addActionToMenu(export, fileMenu, new ExportVRML("VRML", viewer, parentComp));
 		//   if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
-		export.add(new JMenuItem(exportImageAction));
+		addActionToMenu(export, fileMenu, exportImageAction);
 //		}
 
 		if (!Beans.isDesignTime()) {
 			fileMenu.addSeparator();
-			fileMenu.add(new JMenuItem(new Quit(QUIT)));    
+			addActionToMenu(fileMenu, new Quit(QUIT));    
 		}
 
 		return fileMenu;
@@ -323,39 +344,25 @@ public class ViewerAppMenu {
 	}
 	
 	
-	/** convenience method */
-	private static void addActionToMenu(JMenu menu, Action a) {
-		addActionToMenu(menu, menu, a);
-	}
-	
-	/** convenience method */
-	private static void addActionToMenu(JMenu parent, JMenu actionMapOwner, Action a) {
-		parent.add(new JMenuItem(a));
-		
-		//add action's accelerator key binding to menu's action map
-		if (a.getValue(Action.ACCELERATOR_KEY)==null) return;
-		actionMapOwner.getActionMap().put(a.getValue(Action.ACCELERATOR_KEY), a);
-	}
-
-
-	private JMenu createCameraMenu() {
-		JMenu cameraMenu = new JMenu(CAMERA_MENU);
-		cameraMenu.setMnemonic(KeyEvent.VK_C);
-
-		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewer, true)));
-		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewer, false)));
-		cameraMenu.addSeparator();
-		cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewer, true)));
-		cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewer, false)));
-		cameraMenu.addSeparator();
-		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewer, true)));
-		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewer, false)));
-		cameraMenu.addSeparator();
-//		cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
-		cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
-
-		return cameraMenu;
-	}
+//	private JMenu createCameraMenu() {
+//		TODO: replace add() by addActionToMenu()
+//		JMenu cameraMenu = new JMenu(CAMERA_MENU);
+//		cameraMenu.setMnemonic(KeyEvent.VK_C);
+//
+//		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewer, true)));
+//		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewer, false)));
+//		cameraMenu.addSeparator();
+//		cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewer, true)));
+//		cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewer, false)));
+//		cameraMenu.addSeparator();
+//		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewer, true)));
+//		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewer, false)));
+//		cameraMenu.addSeparator();
+////		cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
+//		cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
+//
+//		return cameraMenu;
+//	}
 
 
 	private JMenu createViewMenu() {
@@ -366,15 +373,15 @@ public class ViewerAppMenu {
 		externalNavigatorCheckBox = new JCheckBoxMenuItem(new ToggleExternalNavigator(TOGGLE_EXTERNAL_NAVIGATOR, viewerApp));
 		beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
 		externalBeanShellCheckBox = new JCheckBoxMenuItem(new ToggleExternalBeanShell(TOGGLE_EXTERNAL_BEANSHELL, viewerApp));
-		viewMenu.add(navigatorCheckBox);
-		viewMenu.add(externalNavigatorCheckBox);
-		viewMenu.add(beanShellCheckBox);
-		viewMenu.add(externalBeanShellCheckBox);
+		addItemToMenu(viewMenu, navigatorCheckBox);
+		addItemToMenu(viewMenu, externalNavigatorCheckBox);
+		addItemToMenu(viewMenu, beanShellCheckBox);
+		addItemToMenu(viewMenu, externalBeanShellCheckBox);
 		viewMenu.addSeparator();
 
 		renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
-		viewMenu.add(renderSelectionCheckbox);
-		viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, this)));
+		addItemToMenu(viewMenu, renderSelectionCheckbox);
+		addActionToMenu(viewMenu, new ToggleMenu(TOGGLE_MENU, this));
 		viewMenu.addSeparator();
 
 		//create background color list
@@ -387,18 +394,18 @@ public class ViewerAppMenu {
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("black", viewerApp, Color.BLACK)) );
 		for (JRadioButtonMenuItem item : items) {
 			bg.add(item);
-			bgColors.add(item);
+			addItemToMenu(bgColors, viewMenu, item);
 		}
 		viewMenu.add(bgColors);
 		JMenu skybox = new JMenu(SKYBOX);
 		viewMenu.add(skybox);
-		skybox.add(new JMenuItem(new LoadSkyBox(LOAD_SKYBOX, viewer.getSceneRoot(), parentComp)));
-		skybox.add(new JMenuItem(new RotateSkyboxSides(ROTATE_SKYBOX_SIDES, viewer.getSceneRoot(), parentComp)));
+		addActionToMenu(skybox, viewMenu, new LoadSkyBox(LOAD_SKYBOX, viewer.getSceneRoot(), parentComp));
+		addActionToMenu(skybox, viewMenu, new RotateSkyboxSides(ROTATE_SKYBOX_SIDES, viewer.getSceneRoot(), parentComp));
 		viewMenu.addSeparator();
 
-		viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp)));
-		viewMenu.add(new JMenuItem(Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp)));
-		viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp)));
+		addActionToMenu(viewMenu, ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp));
+		addActionToMenu(viewMenu, Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp));
+		addActionToMenu(viewMenu, new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp));
 
 //		if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		final ViewerSwitch viewerSwitch = viewerApp.getViewerSwitch();
@@ -420,18 +427,44 @@ public class ViewerAppMenu {
 			item.setSelected(index==0);
 			item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
 			bgr.add(item);
-			viewMenu.add(item);
+			addItemToMenu(viewMenu, item);
 //			}
 
-	}
+		}
 
 //		viewMenu.addSeparator();
-//		viewMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
+//		addActionToMenu(viewMenu, new Render(RENDER, viewerSwitch));
 
 		return viewMenu;
 	}
 
+	
+	/** convenience method */
+	private static void addActionToMenu(JMenu menu, Action a) {
+		addActionToMenu(menu, menu, a);
+	}
+	
+	/** convenience method */
+	private static void addActionToMenu(JMenu parent, JMenu actionMapOwner, Action a) {
+		addItemToMenu(parent, actionMapOwner, new JMenuItem(a));
+	}
+	
+	/** convenience method */
+	private static void addItemToMenu(JMenu menu, AbstractButton item) {
+		addItemToMenu(menu, menu, item);
+	}
+	
+	/** convenience method */
+	private static void addItemToMenu(JMenu parent, JMenu actionMapOwner, AbstractButton item) {
+		parent.add(item);
+		
+		//add action's accelerator key binding to menu's action map
+		Action a = item.getAction();
+		if (a.getValue(Action.ACCELERATOR_KEY)==null) return;
+		actionMapOwner.getActionMap().put(a.getValue(Action.ACCELERATOR_KEY), a);
+	}
 
+	
 	//update menu items which depend on viewerApp properties
 	//setupMenuBar() has to be called before
 	public void update() {
