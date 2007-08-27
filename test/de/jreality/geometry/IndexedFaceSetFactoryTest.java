@@ -421,8 +421,9 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setGenerateVertexNormals( true );
 		factory.setGenerateEdgesFromFaces( true );
 		factory.setGenerateVertexLabels(true);
-		factory.setLineCount( 1 );
-		factory.setEdgeIndices( new int[][] {{0,1}} );
+		//factory.setEdgeIndices( new int[][] {{0,1}} );
+		factory.setVertexRelativeRadii( new double [] { 1, 2, 3, 4, 1, 2, 3, 4 } );
+		
 		factory.setFaceColors( new Color[] {Color.RED, Color.GREEN, Color.RED, Color.GREEN, Color.RED, Color.GREEN })  ;
 		factory.update();
 		ViewerApp.display(factory.getIndexedFaceSet());

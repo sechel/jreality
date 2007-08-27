@@ -169,6 +169,24 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		factory.setGenerateEdgeLabels( true );
 	}
 	
+	
+	public void testIndexedLineSet(){
+
+		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+		int[][] ind1 = {{0,1}};
+		double[][] pts = new double[10][3];
+		ilsf.setVertexCount(pts.length);
+		ilsf.setVertexCoordinates(pts);
+		ilsf.setLineCount(ind1.length);
+		ilsf.setEdgeIndices(ind1);
+		ilsf.update();
+
+		int[][] ind2 = new int[][]{{0,1,2}};
+		ilsf.setEdgeIndices(ind2);
+		ilsf.update();
+
+	}
+
 	public static void main( String [] arg ) {
 
 		IndexedLineSetFactory factory = new IndexedLineSetFactory();
