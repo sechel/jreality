@@ -49,6 +49,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JMenu;
@@ -219,6 +220,7 @@ public class Navigator implements SelectionListener {
 
 		//create content of context menu
 		JMenu editMenu = ViewerAppMenu.createEditMenu(parentComp, selectionManager);
+		ActionMap editActions = ViewerAppMenu.updateActionMap(editMenu.getActionMap(), editMenu);
 		for (Component c : editMenu.getMenuComponents()) cm.add(c);
 
 		//add listener to the navigator's tree
@@ -245,11 +247,15 @@ public class Navigator implements SelectionListener {
 		});
 		
 		//set up input and action map to match actions of context menu instead of viewers menu bar
-		Object[] keys = editMenu.getActionMap().keys();
-		for (int i = 0; i < keys.length; i++) {
-			KeyStroke key = (KeyStroke) keys[i];
-			sceneTree.getInputMap().put(key, key);
-			sceneTree.getActionMap().put(key, editMenu.getActionMap().get(key));
+		try {
+			Object[] keys = editActions.keys();
+			for (int i = 0; i < keys.length; i++) {
+				KeyStroke key = (KeyStroke) keys[i];
+				sceneTree.getInputMap().put(key, key);
+				sceneTree.getActionMap().put(key, editActions.get(key));
+			}
+		} catch (Exception e) {
+			//e.printStackTrace();
 		}
 	}
 

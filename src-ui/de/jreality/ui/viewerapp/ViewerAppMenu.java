@@ -51,8 +51,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.swing.AbstractButton;
 import javax.swing.Action;
+import javax.swing.ActionMap;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
@@ -116,6 +116,7 @@ public class ViewerAppMenu {
 	//menu names
 	public static String FILE_MENU = "File";
 	public static String EDIT_MENU = "Edit";
+	/** @deprecated removed from menu */
 	public static String CAMERA_MENU = "Camera";
 	public static String VIEW_MENU = "View";
 
@@ -149,14 +150,14 @@ public class ViewerAppMenu {
 	public static String ADD_TOOL = "Add Tools";
 
 	//CAMERA MENU
-	public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
-	public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
-	public static String DECREASE_FOCUS = "Decrease focus";
-	public static String INCREASE_FOCUS = "Increase focus";
-	public static String DECREASE_EYE_SEPARATION = "Decrease eyeSeparation";
-	public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
-	public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
-	public static String TOGGLE_STEREO = "Toggle stereo";
+//	public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
+//	public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
+//	public static String DECREASE_FOCUS = "Decrease focus";
+//	public static String INCREASE_FOCUS = "Increase focus";
+//	public static String DECREASE_EYE_SEPARATION = "Decrease eyeSeparation";
+//	public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
+//	public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
+//	public static String TOGGLE_STEREO = "Toggle stereo";
 
 	//VIEW MENU
 	public static String TOGGLE_NAVIGATOR = "Show navigator";
@@ -178,6 +179,7 @@ public class ViewerAppMenu {
 	private ViewerApp viewerApp = null;
 	private SelectionManagerInterface sm = null;
 	private Viewer viewer = null;
+	private JComponent viewingComp = null;
 	private JMenuBar menuBar;
 
 	private JCheckBoxMenuItem navigatorCheckBox;
@@ -200,6 +202,7 @@ public class ViewerAppMenu {
 		parentComp = v.getFrame();
 		sm = v.getSelectionManager();
 		viewer = v.getViewerSwitch();
+		viewingComp = (JComponent) viewerApp.getViewingComponent();
 
 		menuBar = new JMenuBar();
 
@@ -213,63 +216,40 @@ public class ViewerAppMenu {
 		
 		//addMenu(createCameraMenu());
 		addMenu(createViewMenu());
-		
-		//set up input and action map of viewing component to match 
-		//actions of menu bar (needed when menu bar or menus are hidden)
-		JComponent viewingComp = (JComponent) viewerApp.getViewingComponent();
-		for (int i = 0; i < menuBar.getComponentCount(); i++) {
-			JMenu menu = (JMenu)menuBar.getComponent(i);
-			Object[] keys = menu.getActionMap().keys();
-			if (keys == null) continue;
-			for (int j = 0; j < keys.length; j++) {
-				KeyStroke key = (KeyStroke) keys[j];
-				viewingComp.getInputMap().put(key, key);
-				viewingComp.getActionMap().put(key, menu.getActionMap().get(key));
-			}			
-		}
-		
-    
 	}
 
 
-	private JMenu createFileMenu() {
+private JMenu createFileMenu() {
 		JMenu fileMenu = new JMenu(FILE_MENU);
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 
-		addActionToMenu(fileMenu, new LoadFile(LOAD_FILE, 
-				sm.getDefaultSelection().getLastComponent(), viewer, parentComp));
-				addActionToMenu(fileMenu, new LoadScene(LOAD_SCENE, viewerApp));
+		fileMenu.add(new JMenuItem(new LoadFile(LOAD_FILE, 
+				sm.getDefaultSelection().getLastComponent(), viewer, parentComp)));
+		fileMenu.add(new JMenuItem(new LoadScene(LOAD_SCENE, viewerApp)));
 		fileMenu.addSeparator();
-		addActionToMenu(fileMenu, new SaveScene(SAVE_SCENE, viewer, parentComp));
+		fileMenu.add(new JMenuItem(new SaveScene(SAVE_SCENE, viewer, parentComp)));
 		fileMenu.addSeparator();
 
 		JMenu export = new JMenu(EXPORT);
 		fileMenu.add(export);
 		try {
-			JMenu sunflow = new SunflowMenu(viewerApp);
-			export.add(sunflow);
-			for (int i = 0; i < sunflow.getMenuComponentCount(); i++) {
-				Action a = ((JMenuItem)sunflow.getMenuComponent(i)).getAction();
-				if (a.getValue(Action.ACCELERATOR_KEY)==null) continue;
-				fileMenu.getActionMap().put(a.getValue(Action.ACCELERATOR_KEY), a);
-			}
-			
+			export.add(new SunflowMenu(viewerApp));
 		} catch (Exception e) {
 			e.printStackTrace();
 			LoggingSystem.getLogger(this).log(Level.CONFIG, "no sunflow", e);
 		}
-		addActionToMenu(export, fileMenu, new ExportRIB("RIB", viewer, parentComp));
-		addActionToMenu(export, fileMenu, new ExportSVG("SVG", viewer, parentComp));
-		addActionToMenu(export, fileMenu, new ExportPS("PS", viewer, parentComp));
-		addActionToMenu(export, fileMenu, new ExportVRML("VRML", viewer, parentComp));
+		export.add(new JMenuItem(new ExportRIB("RIB", viewer, parentComp)));
+		export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
+		export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
+		export.add(new JMenuItem(new ExportVRML("VRML", viewer, parentComp)));
 		//   if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
-		addActionToMenu(export, fileMenu, exportImageAction);
+		export.add(new JMenuItem(exportImageAction));
 //		}
 
 		if (!Beans.isDesignTime()) {
 			fileMenu.addSeparator();
-			addActionToMenu(fileMenu, new Quit(QUIT));    
+			fileMenu.add(new JMenuItem(new Quit(QUIT)));    
 		}
 
 		return fileMenu;
@@ -286,14 +266,14 @@ public class ViewerAppMenu {
 		JMenu editMenu = new JMenu(EDIT_MENU);
 		editMenu.setMnemonic(KeyEvent.VK_E);
 
-		addActionToMenu(editMenu, new LoadFileToNode(LOAD_FILE_TO_NODE, sm, parentComp));
-		addActionToMenu(editMenu, new SaveSelected(SAVE_SELECTED, sm, parentComp));
+		editMenu.add(new JMenuItem(new LoadFileToNode(LOAD_FILE_TO_NODE, sm, parentComp)));
+		editMenu.add(new JMenuItem(new SaveSelected(SAVE_SELECTED, sm, parentComp)));
 		editMenu.addSeparator();
-		addActionToMenu(editMenu, new Remove(REMOVE, sm));
-		addActionToMenu(editMenu, new Rename(RENAME, sm, parentComp));
+		editMenu.add(new JMenuItem(new Remove(REMOVE, sm)));
+		editMenu.add(new JMenuItem(new Rename(RENAME, sm, parentComp)));
 		editMenu.addSeparator();
-		addActionToMenu(editMenu, new ToggleVisibility(TOGGLE_VISIBILITY, sm));
-		addActionToMenu(editMenu, new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm));
+		editMenu.add(new JMenuItem(new ToggleVisibility(TOGGLE_VISIBILITY, sm)));
+		editMenu.add(new JMenuItem(new AssignFaceAABBTree(ASSIGN_FACE_AABBTREE, sm)));
 		editMenu.addSeparator();
 
 		//appearance actions
@@ -307,17 +287,17 @@ public class ViewerAppMenu {
 			}
 		});
 		editMenu.add(appearance);
-		addActionToMenu(appearance, editMenu, new CreateAppearance(CREATE_APPEARANCE, sm));
+		appearance.add(new JMenuItem(new CreateAppearance(CREATE_APPEARANCE, sm)));
 		appearance.addSeparator();
-		addActionToMenu(appearance, editMenu, new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm));
-		addActionToMenu(appearance, editMenu, new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm));
-		addActionToMenu(appearance, editMenu, new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm));
+		appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_VERTEX_DRAWING, CommonAttributes.VERTEX_DRAW, sm)));
+		appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_EDGE_DRAWING, CommonAttributes.EDGE_DRAW, sm)));
+		appearance.add(new JMenuItem(new ToggleAppearance(TOGGLE_FACE_DRAWING, CommonAttributes.FACE_DRAW, sm)));
 		appearance.addSeparator();
-		addActionToMenu(appearance, editMenu, new LoadTexture(LOAD_TEXTURE, sm, parentComp));
+		appearance.add(new JMenuItem(new LoadTexture(LOAD_TEXTURE, sm, parentComp)));
 		JMenu reflectionmap = new JMenu(REFLECTIONMAP);
 		appearance.add(reflectionmap);
-		addActionToMenu(reflectionmap, editMenu, new LoadReflectionMap(LOAD_REFLECTIONMAP, sm, parentComp));
-		addActionToMenu(reflectionmap, editMenu, new RotateReflectionMapSides(ROTATE_REFLECTIONMAP_SIDES, sm, parentComp));
+		reflectionmap.add(new JMenuItem(new LoadReflectionMap(LOAD_REFLECTIONMAP, sm, parentComp)));
+		reflectionmap.add(new JMenuItem(new RotateReflectionMapSides(ROTATE_REFLECTIONMAP_SIDES, sm, parentComp)));
 
 		//geometry actions
 		JMenu geometry = new JMenu(new AbstractSelectionListenerAction(GEOMETRY, sm){
@@ -334,18 +314,17 @@ public class ViewerAppMenu {
 			}
 		});
 		editMenu.add(geometry);
-		addActionToMenu(geometry, editMenu, new ExportOBJ(EXPORT_OBJ, sm, parentComp));
-		addActionToMenu(geometry, editMenu, new TogglePickable(TOGGLE_PICKABLE, sm));
+		geometry.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
+		geometry.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
 		editMenu.addSeparator();
 
-		addActionToMenu(editMenu, new AddTool(ADD_TOOL, sm, parentComp));
+		editMenu.add(new JMenuItem(new AddTool(ADD_TOOL, sm, parentComp)));
 
 		return editMenu;
 	}
 	
 	
 //	private JMenu createCameraMenu() {
-//		TODO: replace add() by addActionToMenu()
 //		JMenu cameraMenu = new JMenu(CAMERA_MENU);
 //		cameraMenu.setMnemonic(KeyEvent.VK_C);
 //
@@ -373,15 +352,15 @@ public class ViewerAppMenu {
 		externalNavigatorCheckBox = new JCheckBoxMenuItem(new ToggleExternalNavigator(TOGGLE_EXTERNAL_NAVIGATOR, viewerApp));
 		beanShellCheckBox = new JCheckBoxMenuItem(new ToggleBeanShell(TOGGLE_BEANSHELL, viewerApp));
 		externalBeanShellCheckBox = new JCheckBoxMenuItem(new ToggleExternalBeanShell(TOGGLE_EXTERNAL_BEANSHELL, viewerApp));
-		addItemToMenu(viewMenu, navigatorCheckBox);
-		addItemToMenu(viewMenu, externalNavigatorCheckBox);
-		addItemToMenu(viewMenu, beanShellCheckBox);
-		addItemToMenu(viewMenu, externalBeanShellCheckBox);
+		viewMenu.add(navigatorCheckBox);
+		viewMenu.add(externalNavigatorCheckBox);
+		viewMenu.add(beanShellCheckBox);
+		viewMenu.add(externalBeanShellCheckBox);
 		viewMenu.addSeparator();
 
 		renderSelectionCheckbox = new JCheckBoxMenuItem(new ToggleRenderSelection(TOGGLE_RENDER_SELECTION, sm));
-		addItemToMenu(viewMenu, renderSelectionCheckbox);
-		addActionToMenu(viewMenu, new ToggleMenu(TOGGLE_MENU, this));
+		viewMenu.add(renderSelectionCheckbox);
+		viewMenu.add(new JMenuItem(new ToggleMenu(TOGGLE_MENU, this)));
 		viewMenu.addSeparator();
 
 		//create background color list
@@ -394,18 +373,18 @@ public class ViewerAppMenu {
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("black", viewerApp, Color.BLACK)) );
 		for (JRadioButtonMenuItem item : items) {
 			bg.add(item);
-			addItemToMenu(bgColors, viewMenu, item);
+			bgColors.add(item);
 		}
 		viewMenu.add(bgColors);
 		JMenu skybox = new JMenu(SKYBOX);
 		viewMenu.add(skybox);
-		addActionToMenu(skybox, viewMenu, new LoadSkyBox(LOAD_SKYBOX, viewer.getSceneRoot(), parentComp));
-		addActionToMenu(skybox, viewMenu, new RotateSkyboxSides(ROTATE_SKYBOX_SIDES, viewer.getSceneRoot(), parentComp));
+		skybox.add(new JMenuItem(new LoadSkyBox(LOAD_SKYBOX, viewer.getSceneRoot(), parentComp)));
+		skybox.add(new JMenuItem(new RotateSkyboxSides(ROTATE_SKYBOX_SIDES, viewer.getSceneRoot(), parentComp)));
 		viewMenu.addSeparator();
 
-		addActionToMenu(viewMenu, ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp));
-		addActionToMenu(viewMenu, Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp));
-		addActionToMenu(viewMenu, new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp));
+		viewMenu.add(new JMenuItem(ToggleViewerFullScreen.sharedInstance(TOGGLE_VIEWER_FULL_SCREEN, viewerApp)));
+		viewMenu.add(new JMenuItem(Maximize.sharedInstance(MAXIMIZE, (Frame)parentComp)));
+		viewMenu.add(new JMenuItem(new SetViewerSize(SET_VIEWER_SIZE, viewerApp.getViewingComponent(), (Frame)parentComp)));
 
 //		if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		final ViewerSwitch viewerSwitch = viewerApp.getViewerSwitch();
@@ -427,43 +406,66 @@ public class ViewerAppMenu {
 			item.setSelected(index==0);
 			item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
 			bgr.add(item);
-			addItemToMenu(viewMenu, item);
+			viewMenu.add(item);
 //			}
 
-		}
+	}
 
 //		viewMenu.addSeparator();
-//		addActionToMenu(viewMenu, new Render(RENDER, viewerSwitch));
+//		viewMenu.add(new JMenuItem(new Render(RENDER, viewerSwitch)));
 
 		return viewMenu;
 	}
 
 	
-	/** convenience method */
-	private static void addActionToMenu(JMenu menu, Action a) {
-		addActionToMenu(menu, menu, a);
-	}
-	
-	/** convenience method */
-	private static void addActionToMenu(JMenu parent, JMenu actionMapOwner, Action a) {
-		addItemToMenu(parent, actionMapOwner, new JMenuItem(a));
-	}
-	
-	/** convenience method */
-	private static void addItemToMenu(JMenu menu, AbstractButton item) {
-		addItemToMenu(menu, menu, item);
-	}
-	
-	/** convenience method */
-	private static void addItemToMenu(JMenu parent, JMenu actionMapOwner, AbstractButton item) {
-		parent.add(item);
-		
-		//add action's accelerator key binding to menu's action map
-		Action a = item.getAction();
-		if (a.getValue(Action.ACCELERATOR_KEY)==null) return;
-		actionMapOwner.getActionMap().put(a.getValue(Action.ACCELERATOR_KEY), a);
-	}
+	/**
+	 * Updates a given ActionMap by recursively adding all actions with accelerator key 
+	 * from the specified menu using the accelerator keystroke as key. 
+	 * @param actionMap the action map where to add the actions with corresponding keystroke
+	 * @param menu the menu containing the actions
+	 * @return the modified action map
+	 */
+	protected static ActionMap updateActionMap(ActionMap actionMap, JMenu menu) {
+		Object[] elements = menu.getMenuComponents();
 
+		for (int i = 0; i < elements.length; i++) {
+			try { 
+				JMenuItem element = (JMenuItem) elements[i];  //throws ClassCastExc when Separator
+				if (element instanceof JMenu)
+					updateActionMap(actionMap, (JMenu)element);
+				else {
+					//add action's accelerator key binding to the action map
+					Action a = element.getAction();
+					if (a!=null && a.getValue(Action.ACCELERATOR_KEY)!=null)
+						actionMap.put(a.getValue(Action.ACCELERATOR_KEY), a);
+				}
+			} 
+			catch (Exception e) { 
+				//e.printStackTrace();
+			}
+		}
+		
+		return actionMap;
+	}
+	
+	
+	private void registerAcceleratorKey(KeyStroke key, Action a) {
+		viewingComp.getInputMap().put(key, key);
+		viewingComp.getActionMap().put(key, a);
+	}
+	
+	private void degisterAcceleratorKey(KeyStroke key) {
+		viewingComp.getInputMap().remove(key);
+	}
+	
+	private void registerAcceleratorKeys(ActionMap actionMap) {
+		Object[] keys = actionMap.keys();
+		if (keys != null) {
+			for (int j = 0; j < keys.length; j++)
+				registerAcceleratorKey((KeyStroke) keys[j], actionMap.get(keys[j]));
+		}
+	}
+	
 	
 	//update menu items which depend on viewerApp properties
 	//setupMenuBar() has to be called before
@@ -508,6 +510,10 @@ public class ViewerAppMenu {
 	public void addMenu(JMenu menu, int index) {
 		menuBar.add(menu, index);
 		showMenu.put(menu.getText(), menu.isVisible());
+		
+		//set up input and action map of viewing component to match 
+		//actions of menu bar (needed when menu bar or menus are hidden)
+		registerAcceleratorKeys( updateActionMap(menu.getActionMap(), menu) );
 	}
 
 
@@ -518,7 +524,16 @@ public class ViewerAppMenu {
 	 */
 	public boolean removeMenu(String menuName) {
 		JMenu menu = getMenu(menuName);
-		if (menu != null) menuBar.remove(menu);
+		if (menu != null) {
+			menuBar.remove(menu);
+			
+			//remove accelerator keystroke from viewing component's input map
+			Object[] keys = menu.getActionMap().keys();
+			if (keys != null) {
+				for (int j = 0; j < keys.length; j++)
+					degisterAcceleratorKey((KeyStroke) keys[j]);
+			}
+		}
 		return (menu != null);
 	}
 
@@ -560,7 +575,14 @@ public class ViewerAppMenu {
 	 */
 	public boolean addMenuItem(JMenuItem item, String menuName, int index) {
 		JMenu menu = getMenu(menuName);
-		if (menu != null) menu.insert(item, index);
+		if (menu != null) {
+			menu.insert(item, index);
+
+			//set up input and action map of viewing component to match 
+			//actions of menu bar (needed when menu bar or menus are hidden)
+			registerAcceleratorKeys( updateActionMap(menu.getActionMap(), menu) );  //update since item could be a JMenu
+		}
+			
 		return (menu != null);
 	}
 
@@ -574,7 +596,16 @@ public class ViewerAppMenu {
 	 */
 	public boolean removeMenuItem(String menuName, int index) {
 		JMenu menu = getMenu(menuName);
-		if (menu != null) menu.remove(index);
+		if (menu != null) {
+			try {	//remove accelerator keystroke from viewing component's input map
+				JMenuItem item = (JMenuItem) menu.getMenuComponent(index);
+				Action a = item.getAction();
+				if (a!=null && a.getValue(Action.ACCELERATOR_KEY)!=null) 
+					degisterAcceleratorKey((KeyStroke) a.getValue(Action.ACCELERATOR_KEY));
+			} catch (Exception e) {}
+
+			menu.remove(index);
+		}
 		return (menu != null);
 	}
 
