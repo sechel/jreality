@@ -540,7 +540,8 @@ public class Pn {
 	 * @param src
 	 * @param sig
 	 * @return
-	 */public static double innerProductPoints(double[] dst, double[] src, int sig)	{
+	 */
+	public static double innerProductPoints(double[] dst, double[] src, int sig)	{
 		return innerProduct(dst, src, sig);
 	}
 	 
@@ -625,6 +626,53 @@ public class Pn {
 		return Rn.linearCombination(dst, s0, uu, s1, vv);
 	}
 	 
+	/**
+	 * Construct a central projectivity with fixed point center and fixed plane axis.
+	 * @param dst
+	 * @param center
+	 * @param axis
+	 * @param signature
+	 * @return
+	 */
+	public static double[] makeHarmonicHarmology(double[] dst, double[] center, double[] axis){ 
+		return makeGeneralizedProjection(dst, center, axis, -2);
+	}
+	
+	/**
+	 * Similar to {@link P3#makeHarmonicHarmology(double[], double[], double[])} but maps all points
+	 * onto the <i>axis</i> plane.
+	 * @param dst
+	 * @param center
+	 * @param axis
+	 * @return
+	 */
+	public static double[] makeFlattenProjection(double[] dst, double[] center, double[] axis)	{
+		return makeGeneralizedProjection(dst, center, axis, -1 );
+	}
+	
+	/**
+	 * Create a projectivity that leaves center invariant (planewise), axis invariant (point-wise) and
+	 * otherwise moves a general point P along the line through P and the center depending on  
+	 * <i>val</i>.
+	 * @param dst
+	 * @param center
+	 * @param axis
+	 * @param val
+	 * @return
+	 */
+	public static double[] makeGeneralizedProjection(double[] dst, double[] center, double[] axis, double val) {
+		if (center.length != axis.length)
+			throw new IllegalArgumentException("center and axis must have same length");
+		int n = center.length;
+		if (dst == null) dst = new double[n*n];
+	     double f = 1.0/Rn.innerProduct(center, axis); 
+	     for (int i = 0; i<n; ++i)  {    
+	         for (int j = 0; j<n; ++j) {
+	              dst[n*i+j] = (i==j? 1 : 0) + val * f * center[i] * axis[j];
+	         }
+	     }
+	     return dst; 		
+	}
 	 /**
 	  * Find the plane which lies, metrically, half-way between the two given planes.
 	  * @param midp
@@ -768,7 +816,8 @@ public class Pn {
 	 * @param p
 	 * @param signature
 	 * @return
-	 */public static double[] polarize(double[] polar, double[] p, int signature)	{
+	 */
+	public static double[] polarize(double[] polar, double[] p, int signature)	{
 		if (polar == null)	polar = (double[]) p.clone();
 		else System.arraycopy(p,0,polar, 0, p.length);
 		// last element is multiplied by the signature!
