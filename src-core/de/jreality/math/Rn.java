@@ -454,8 +454,10 @@ final public class Rn {
 	public static boolean equals(double[] u, double[] v, double tol)	{
 		int n = u.length;
 		if (v.length < u.length) n = v.length;
-		for (int i = 0; i<n; ++i) 
-			if (Math.abs(u[i]-v[i]) > tol) return false;
+		for (int i = 0; i<n; ++i) {
+			double d = u[i] - v[i];
+			if (d > tol || d < -tol ) return false;			
+		}
 		return true;
 	}
 	
