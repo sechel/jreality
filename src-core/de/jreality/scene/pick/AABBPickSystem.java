@@ -82,7 +82,6 @@ public class AABBPickSystem implements PickSystem {
   private ArrayList<Hit> hits = new ArrayList<Hit>();
   private HashMap<IndexedFaceSet, AABBTree> aabbTreeExists = new HashMap<IndexedFaceSet, AABBTree>();
   private HashMap<Geometry, Boolean> isPickableMap = new HashMap<Geometry, Boolean>();
-  private HashMap<Appearance, Impl.PickInfo> pickInfoMap = new HashMap<Appearance, Impl.PickInfo>();
   private Comparator<Hit> cmp = new Hit.HitComparator();
   private double[] from;
   private double[] to;
@@ -131,16 +130,6 @@ public class AABBPickSystem implements PickSystem {
     }
   }
 
-	public static final int DV = 0,
-		DE = 1,
-		DF = 2,
-		PV = 3,
-		PE = 4,
-		PF = 5,
-		SR = 6,
-		TR = 7,
-		SI = 8,
-		GP = 9;
   /**
    * TODO: optimize access to appearances to avoid use of effective appearance objects.
    *
@@ -151,7 +140,7 @@ public class AABBPickSystem implements PickSystem {
     private PickInfo currentPI;
     
     Impl()	{
-    	appStack.push(currentPI = new PickInfo((Appearance) null));
+    	appStack.push(currentPI = new PickInfo(null, null));
     }
 //    private EffectiveAppearance eap = EffectiveAppearance.create();
     
@@ -170,110 +159,64 @@ public class AABBPickSystem implements PickSystem {
      *
      */
     private class PickInfo {
-        private boolean[] drawPick = {false, true, true, true, true, true};
-        private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT,
-        		pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
+        private boolean pickPoints=true, drawVertices = false;
+        private boolean pickEdges=true, drawEdges = true;
+        private boolean pickFaces=true, drawFaces = true;
+        private boolean hasNewPickInfo = false;
+        private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
+        private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
         int signature = Pn.EUCLIDEAN;
-        private boolean globalPickable = true;
-        boolean[] active = new boolean[10];
-        boolean hasNewPickInfo = false;
-        PickInfo(PickInfo copy)	{
-        	System.arraycopy(copy.drawPick, 0, drawPick, 0, drawPick.length);
-        	tubeRadius = copy.tubeRadius;
-        	pointRadius = copy.pointRadius;
-        	signature = copy.signature;
-        	System.arraycopy(copy.active, 0, active, 0, active.length);
-        }
-        PickInfo(Appearance ap)	{
-        	if (ap == null) return;
-        	// first check for global pickable
-        	Object foo = ap.getAttribute(CommonAttributes.PICKABLE,Boolean.class);
-        	if (foo != Appearance.INHERITED) {
-        		globalPickable = (Boolean) foo;
-        		drawPick[PV] = drawPick[PE] = drawPick[PF] = globalPickable;
-        		active[GP] = true;
+        PickInfo(PickInfo old, Appearance ap)	{
+        	if (old != null)	{
+               	drawVertices = old.drawVertices;
+            	drawEdges = old.drawEdges;
+            	drawFaces = old.drawFaces;
+            	pickPoints = old.pickPoints;
+            	pickEdges = old.pickEdges;
+            	pickFaces = old.pickFaces;
+            	tubeRadius = old.tubeRadius;
+            	pointRadius = old.pointRadius;    
+            	signature = old.signature;
         	}
-           foo = ap.getAttribute(CommonAttributes.VERTEX_DRAW, Boolean.class);
-           if (foo != Appearance.INHERITED) {
-            	drawPick[DV] = (Boolean) foo;
-            	active[DV] = true;
-            }
-            if (drawPick[DV])	{
+        	if (ap == null) return;
+            Object foo = ap.getAttribute(CommonAttributes.VERTEX_DRAW, Boolean.class);
+            if (foo != Appearance.INHERITED) pickPoints = drawVertices = (Boolean) foo;
+            if (drawVertices)	{
             	foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
-                if (foo != Appearance.INHERITED) { 
-                 	drawPick[PV] = (Boolean) foo;             	
-                	active[PV] = true;
-                }
+                if (foo != Appearance.INHERITED) { hasNewPickInfo = true; pickPoints = (Boolean) foo; }
              }
             foo = ap.getAttribute(CommonAttributes.EDGE_DRAW, Boolean.class);
-            if (foo != Appearance.INHERITED)  { 
-             	drawPick[DE] = (Boolean) foo;
-               	active[DE] = true;
-           }
-            if (drawPick[DE])	{
+            if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pickEdges = drawEdges = (Boolean) foo;}
+            if (drawEdges)	{
             	foo = ap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
-                if (foo != Appearance.INHERITED)  { 
-                	drawPick[PE] = (Boolean) foo;
-                	active[PE] = true;
+                if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pickEdges = (Boolean) foo;}
            }
             foo = ap.getAttribute(CommonAttributes.FACE_DRAW, Boolean.class);
-            if (foo != Appearance.INHERITED)  { 
-            	active[DF] = true; 
-            	drawPick[DF] = (Boolean) foo;
-            }
-            if (drawPick[DF])	{
+            if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pickFaces = drawFaces = (Boolean) foo;}
+            if (drawFaces)	{
             	foo = ap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
-                if (foo != Appearance.INHERITED)  { 
-                	active[PF] = true; 
-                	drawPick[PF] = (Boolean) foo; }
-                }
+                if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pickFaces = (Boolean) foo; }
            }
           foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Double.class);
-          if (foo != Appearance.INHERITED)  { 
-        	  active[SR] = true; 
-        	  pointRadius = (Double) foo;}
+          if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pointRadius = (Double) foo;}
           else {
               foo = ap.getAttribute(CommonAttributes.POINT_RADIUS, Double.class);
-              if (foo != Appearance.INHERITED)  { active[SR] = true; pointRadius = (Double) foo;}
+              if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pointRadius = (Double) foo;}
           }
           foo = ap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, Double.class);
-          if (foo != Appearance.INHERITED)  { active[TR] = true; tubeRadius = (Double) foo; }
+          if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; tubeRadius = (Double) foo; }
           else {
               foo = ap.getAttribute(CommonAttributes.TUBE_RADIUS, Double.class);
-              if (foo != Appearance.INHERITED)  { active[TR] = true; tubeRadius = (Double) foo;}
+              if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; tubeRadius = (Double) foo;}
           }
           foo = ap.getAttribute(CommonAttributes.SIGNATURE, Integer.class);
-          if (foo != Appearance.INHERITED)  { active[SI] = true; signature = (Integer) foo; }
-          
-          for (int i = 0; i<active.length; ++i)	{
-        	  if (active[i]) { hasNewPickInfo = true; break;}
-          }
+          if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; signature = (Integer) foo; }
          }
-        
+        public String toString()	{
+        	return "Pick vef = "+pickPoints+" "+pickEdges+" "+pickFaces+" "+pointRadius+" "+tubeRadius;
+        }
         public boolean hasNewPickInfo()	{
         	return hasNewPickInfo;
-        }
-        public String toString()	{
-        	return "Pick vef = "+drawPick[PV]+" "+drawPick[PE]+" "+drawPick[PF]+" "+pointRadius+" "+tubeRadius;
-        }
-         
-        public void mergeInto(PickInfo base)	{
-        	int n = active.length;
-        	for (int i = 0; i<n; ++i)	{
-        		if (!active[i]) continue;
-        		if (i < 6) {	// draw/pick options
-        			base.drawPick[i] = drawPick[i];
-        			base.active[i] = true;
-        		}
-        		else if (i==TR)	base.tubeRadius = tubeRadius;
-        		else if (i==SR) base.pointRadius = pointRadius;
-        		else if (i==SI)	base.signature = signature;
-        		else if (i==GP)	{
-        			if (!base.active[PV]) base.drawPick[PV] = globalPickable;
-        			if (!base.active[PE]) base.drawPick[PE] = globalPickable;
-        			if (!base.active[PF]) base.drawPick[PF] = globalPickable;
-       		}
-        	}
         }
    }
     
@@ -281,22 +224,12 @@ public class AABBPickSystem implements PickSystem {
       if (!c.isVisible()) return;
       PickInfo pickInfo = null;
       if (c.getAppearance()!=null) {
-    	  pickInfo = pickInfoMap.get(c.getAppearance());
-    	  if (pickInfo == null)	{
-    	         pickInfo = new PickInfo(c.getAppearance());   
-    	         pickInfoMap.put(c.getAppearance(), pickInfo);
-    	  } 
-    	  // we can quickly return if the global flag is turned off
-    	  if (!pickInfo.globalPickable) return;
-//          Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
-//          if (foo instanceof Boolean && ((Boolean)foo).booleanValue() == false) {
-//        	  return;
-//          }
-         if (pickInfo.hasNewPickInfo()) {
-        	 currentPI = new PickInfo(currentPI);
-        	 appStack.push(currentPI);
-             pickInfo.mergeInto(currentPI);
-         }
+          Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
+          if (foo instanceof Boolean && ((Boolean)foo).booleanValue() == false) {
+        	  return;
+          }
+         pickInfo = new PickInfo(currentPI, c.getAppearance());
+         if (pickInfo.hasNewPickInfo) appStack.push(currentPI = pickInfo);
        }
 //      System.err.println("visiting "+c.getName());
       if (c.getTransformation() != null)	{
@@ -352,12 +285,11 @@ public class AABBPickSystem implements PickSystem {
     	matrixStack[0] = new Matrix();
     	aabbTreeExists.clear();
     	isPickableMap.clear();
-    	pickInfoMap.clear();
     	visit(root);
     }
 
     public void visit(Sphere s) {
-      if (!currentPI.drawPick[PF] || !isPickable(s)) return;
+      if (!currentPI.pickFaces || !isPickable(s)) return;
       
       localHits.clear();
       
@@ -367,7 +299,7 @@ public class AABBPickSystem implements PickSystem {
     }
     
     public void visit(Cylinder c) {
-       if (!currentPI.drawPick[PF] || !isPickable(c)) return;
+       if (!currentPI.pickFaces || !isPickable(c)) return;
       
       localHits.clear();
       
@@ -380,7 +312,7 @@ public class AABBPickSystem implements PickSystem {
       if (!isPickable(ifs)) return;
       visit((IndexedLineSet)ifs);
 
-      if (!currentPI.drawPick[PF]) return;      
+      if (!currentPI.pickFaces) return;      
       
       AABBTree tree = aabbTreeExists.get(ifs);
       if (tree == null) {
@@ -403,7 +335,7 @@ public class AABBPickSystem implements PickSystem {
     public void visit(IndexedLineSet ils) {
       if (!isPickable(ils)) return;
       visit((PointSet)ils);
-      if (!currentPI.drawPick[PE]) return;
+      if (!currentPI.pickEdges) return;
 
       localHits.clear();
 
@@ -414,7 +346,7 @@ public class AABBPickSystem implements PickSystem {
 
     public void visit(PointSet ps) {
      
-      if (!currentPI.drawPick[PV] || !isPickable(ps)) return;
+      if (!currentPI.pickPoints || !isPickable(ps)) return;
 
       localHits.clear();
 
