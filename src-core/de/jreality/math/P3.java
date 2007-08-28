@@ -279,43 +279,6 @@ public class P3 {
 		return m;
 	}
 
-	/**
-	 * Construct a central projectivity with fixed point center and fixed plane axis.
-	 * @param dst
-	 * @param center
-	 * @param axis
-	 * @param signature
-	 * @return
-	 */
-	public static double[] makeHarmonicHarmology(double[] dst, double[] center, double[] axis){ 
-		if (dst == null) dst = new double[center.length*center.length];
-	     double f = 1.0/Rn.innerProduct(center, axis); 
-	     for (int i = 0; i<3; ++i)  {    
-	         for (int j = 0; j<3; ++j) {
-	              dst[3*i+j] = (i==j? 1 : 0) - 2 * f * center[i] * axis[j];
-	         }
-	     }
-	     return dst; 
-	}
-	
-	/**
-	 * Similar to {@link P3#makeHarmonicHarmology(double[], double[], double[])} but maps all points
-	 * onto the <i>axis</i> plane.
-	 * @param dst
-	 * @param center
-	 * @param axis
-	 * @return
-	 */public static double[] makeFlattenProjection(double[] dst, double[] center, double[] axis)	{
-		if (dst == null) dst = new double[center.length*center.length];
-	     double f = 1.0/Rn.innerProduct(center, axis); 
-	     for (int i = 0; i<3; ++i)  {    
-	         for (int j = 0; j<3; ++j) {
-	              dst[3*i+j] = (i==j? 1 : 0) - f * center[i] * axis[j];
-	         }
-	     }
-	     return dst; 
-		
-	}
 
 	/**
 	 * Creates an isometry that carries the <i>from</i> vector to the origin; and takes the 
@@ -342,8 +305,6 @@ public class P3 {
 		//ystem.out.println(Rn.matrixToString(tm1));
 		Rn.matrixTimesVector(newto, tm1, to);
 //		LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.toString(newto));
-//		P3.makeNewZMatrix(tm3, newto);
-//		System.out.println("newZMatrix: "+Rn.toString(Rn.matrixTimesVector(null, tm3, newto)));
 		P3.makeRotationMatrix(tm2, newto, P3.zaxis);
 //		System.out.println("rotationMatrix: "+Rn.toString(Rn.matrixTimesVector(null, tm3, newto)));
 		// the matrix m takes to -> newto -> zaxis
@@ -449,7 +410,6 @@ public class P3 {
 				reflectionMatrix[i*4 + j] = reflectionMatrix[i*4+j] - 2 * fixedPlane[j]*polarPoint[i];
 			}
 		}
-//		makeHarmonicHarmology(reflectionMatrix, polarPoint, fixedPlane);
 		return reflectionMatrix;
 	}
 
@@ -490,69 +450,69 @@ public class P3 {
 		return m;
 	}
 
-		/**
-		 * Generate a rotation matrix which fixes the origin (0,0,0,1) and carries the vector <i>from</i> to the vector <i>to</i>.
-		 * The output matrix is 4x4.  <i>from</i> and <i>to</i> are 3-vectors.
-		 * 
-		 * @param m		double[16]
-		 * @param from	double[3]
-		 * @param to	double[3]
-		 * @return
-		 */
-		public static double[] makeRotationMatrix(double[] m, double[] from, double[] to)	{
-			// assert dim checks; only valid for P3
-			if (from.length < 3 || to.length < 3)	{
-				throw new IllegalArgumentException("Input vectors too short");
-			}
-			double[][] vecs = new double[3][3];
-			System.arraycopy(from,0,vecs[0],0,3);
-			System.arraycopy(to,0,vecs[1],0,3);
-			Rn.normalize(vecs[0], vecs[0]);
-			Rn.normalize(vecs[1], vecs[1]);
-			double cosAngle = Rn.innerProduct(vecs[0], vecs[1]);
-			double angle = Math.acos(cosAngle);
-			if (Double.isNaN(angle)) {
-				// inner product is out of [-1,1] for numerical reasons
-				angle=cosAngle>0?0:Math.PI;
-			}
-			Rn.crossProduct(vecs[2], vecs[0], vecs[1]);
-			Rn.normalize(vecs[2], vecs[2]);
-			return P3.makeRotationMatrix(m, vecs[2], angle);
+	/**
+	 * Generate a rotation matrix which fixes the origin (0,0,0,1) and carries the vector <i>from</i> to the vector <i>to</i>.
+	 * The output matrix is 4x4.  <i>from</i> and <i>to</i> are 3-vectors.
+	 * 
+	 * @param m		double[16]
+	 * @param from	double[3]
+	 * @param to	double[3]
+	 * @return
+	 */
+	public static double[] makeRotationMatrix(double[] m, double[] from, double[] to)	{
+		// assert dim checks; only valid for P3
+		if (from.length < 3 || to.length < 3)	{
+			throw new IllegalArgumentException("Input vectors too short");
 		}
-		
-		/**
-		  * Calculate a rotation matrix in the given metric which rotates a given <i>angle</i> about the axis
-		  * determined by <i>p1</i> and <i>p2</i>.
-		  * @param m
-		  * @param p1
-		  * @param p2
-		  * @param angle
-		  * @param sig
-		  * @return
-		  */public static double[] makeRotationMatrix(double[] m, double[] p1, double[] p2, double angle, int sig)	{
-			// assert dim checks; only valid for P3
-			if (p1.length < 3 || p2.length < 3)	{
-				throw new IllegalArgumentException("Points too short");
-			}
-		 	if (m == null) m = new double[16];
-			double[] tmat = P3.makeTranslationMatrix(null, p1, sig);
-			double[] invtmat = Rn.inverse(null, tmat);
-			double[] ip2 = new double[4];
-			Rn.matrixTimesVector(ip2, invtmat, p2);
-			double[] foo = P3.makeRotationMatrix(null, ip2, angle);
-			Rn.conjugateByMatrix(m,foo,tmat);
-			return m;
+		double[][] vecs = new double[3][3];
+		System.arraycopy(from,0,vecs[0],0,3);
+		System.arraycopy(to,0,vecs[1],0,3);
+		Rn.normalize(vecs[0], vecs[0]);
+		Rn.normalize(vecs[1], vecs[1]);
+		double cosAngle = Rn.innerProduct(vecs[0], vecs[1]);
+		double angle = Math.acos(cosAngle);
+		if (Double.isNaN(angle)) {
+			// inner product is out of [-1,1] for numerical reasons
+			angle=cosAngle>0?0:Math.PI;
 		}
+		Rn.crossProduct(vecs[2], vecs[0], vecs[1]);
+		Rn.normalize(vecs[2], vecs[2]);
+		return P3.makeRotationMatrix(m, vecs[2], angle);
+	}
+	
+	/**
+	  * Calculate a rotation matrix in the given metric which rotates a given <i>angle</i> about the axis
+	  * determined by <i>p1</i> and <i>p2</i>.
+	  * @param m
+	  * @param p1
+	  * @param p2
+	  * @param angle
+	  * @param sig
+	  * @return
+	  */public static double[] makeRotationMatrix(double[] m, double[] p1, double[] p2, double angle, int sig)	{
+		// assert dim checks; only valid for P3
+		if (p1.length < 3 || p2.length < 3)	{
+			throw new IllegalArgumentException("Points too short");
+		}
+	 	if (m == null) m = new double[16];
+		double[] tmat = P3.makeTranslationMatrix(null, p1, sig);
+		double[] invtmat = Rn.inverse(null, tmat);
+		double[] ip2 = new double[4];
+		Rn.matrixTimesVector(ip2, invtmat, p2);
+		double[] foo = P3.makeRotationMatrix(null, ip2, angle);
+		Rn.conjugateByMatrix(m,foo,tmat);
+		return m;
+	}
 
-		/**
-		 * @param object
-		 * @param earthPhi
-		 * @return
-		 */
-		public static double[] makeRotationMatrixX(double[] mat, double angle) {
-			double[] axis = {1.0, 0.0, 0.0};
-			return makeRotationMatrix(mat, axis, angle);
-		}
+	/**
+	 * @param object
+	 * @param earthPhi
+	 * @return
+	 */
+	public static double[] makeRotationMatrixX(double[] mat, double angle) {
+		double[] axis = {1.0, 0.0, 0.0};
+		return makeRotationMatrix(mat, axis, angle);
+	}
 
 	public static double[] makeRotationMatrixY(double[] mat, double angle) {
 		double[] axis = {0.0, 1.0, 0.0};
@@ -778,7 +738,8 @@ public class P3 {
 	 * @param up
 	 * @param upNoRoll
 	 * @return
-	 */public static double orientation(double[] to, double[] up, double[] upNoRoll) {
+	 */
+	 public static double orientation(double[] to, double[] up, double[] upNoRoll) {
 		double[] mat = new double[16];
 		System.arraycopy(to, 0, mat,0,4);
 		System.arraycopy(up, 0, mat, 4, 4);
@@ -951,86 +912,7 @@ public class P3 {
 		}
 
 
-	 public static double[] lineIntersectPlane(double[] point,double[] pluckerLine, double[] plane )	{
-		return Rn.matrixTimesVector(point, 
-				lineToSkewMatrix(null, dualizeLine(null, pluckerLine)), 
-				plane); 
-	 }
-
-	public static double[] lineJoinPoint (double[] plane, double[] p1, double[] p2, double[] point)	{
-			return lineIntersectPlane(plane, p1, p2, point);
-		}
-
-	 public static double[] lineJoinPoint(double[] dst, double[] pluckerLine, double[] point)	{
-			return Rn.matrixTimesVector(dst, lineToSkewMatrix(null, pluckerLine), point); 
-		 }
-/**
-	  * Calculate Pluecker coordinates for the line spanned by <i>p0</i> and <i>p1</i>.
-	  * These are basically the six 2x2 minors of the 2x4 matrix formed by the two points.
-	  * @param dst
-	  * @param p0
-	  * @param p1
-	  * @return
-	  */
-	 public static double[] lineFromPoints(double[] dst, double[] p0, double[] p1)	{
-		if (p0.length != 4 || p1.length != 4) {
-			throw new IllegalArgumentException("Input points must be homogeneous vectors");
-		}
-		double[] coords;
-		if (dst == null)	coords = new double[6];
-		else 				coords = dst;
-		coords[0] = p0[0]*p1[1] - p0[1]*p1[0];
-		coords[1] = p0[0]*p1[2] - p0[2]*p1[0];
-		coords[2] = p0[0]*p1[3] - p0[3]*p1[0];
-		coords[3] = p0[1]*p1[2] - p0[2]*p1[1];
-		coords[4] = p0[3]*p1[1] - p0[1]*p1[3];
-		coords[5] = p0[2]*p1[3] - p0[3]*p1[2];
-		return coords;
-	}
-
-	 public static double[] lineFromPlanes(double[] dst, double[] plane0, double[] plane1)	{
-		 dst = lineFromPoints(dst, plane0, plane1);
-		 return dualizeLine(dst, dst);
-	 }
-	 public static double[] lineIntersectLine(double[] dst, double[] line0, double[] line1) {
-		 if (dst == null) dst = new double[4];
-		 if (Math.abs(pluckerInnerProduct(line0, line1)) > 10E-8) 
-			 throw new IllegalArgumentException("These two lines do not intersect");
-		 double[] mm = Rn.times(null,
-				 lineToSkewMatrix(null, dualizeLine(null, line0)),
-				 lineToSkewMatrix(null, line1));
-		 // every column of mm should be the same point, the intersection point of the two lines
-		 //TODO reject columns which are the null vector (occurs when line lies in that coordinate plane)
-		 dst[0] = mm[0];
-		 dst[1] = mm[4];
-		 dst[2] = mm[8];
-		 dst[3] = mm[12];
-		 return dst;
-	 }
-	/**
-	 * Plucker line coordinates can be arranged in a 4x4 skew symmetric matrix <i>M</i> such
-	 * that <i>M</i> is the polarizing operator: if the original line was produced by two points,
-	 * then it acts on points to give the plane spanned
-	 * by the point and the line; if it was generated by two planes, then it acts on planes to give
-	 * the intersection point of the line and the plane.
-	 * @param m
-	 * @param pl
-	 * @return
-	 */
-	 public static double[] lineToSkewMatrix(double[] m, double[] pl) {
-		if (m == null) m = new double[16];
-		m[0] = m[5] = m[10] = m[15] = 0.0;
-		m[4] = -(m[1] = pl[5]);
-		m[8] = -(m[2] = pl[4]);
-		m[12] = -(m[3] = pl[3]);
-		m[9] = -(m[6] = pl[2]);
-		m[13] = -(m[7] = -pl[1]);		// here's the strange minus sign! (p42 instead of p24 in formulas)
-		m[14] = -(m[11] = pl[0]);
-		return m;
-		
-	}
-
-	/**
+	 /**
 	 * Via duality, an alias for {@link #planeFromPoints(double[], double[], double[], double[])}.
 	 * @param point
 	 * @param p1
@@ -1042,62 +924,8 @@ public class P3 {
 		return planeFromPoints(point, p1, p2, p3);
 	}
 
-	/**
-	 * Plucker coordinates for the same line are different depending on
-	 * whether the line is considered as the join of two points or the cut of two planes.
-	 * This method converts between the two coordinate systems.
-	 * @param dst
-	 * @param src
-	 * @return
-	 */
-	 public static double[] dualizeLine(double[] dst, double[] src) {
-		if (dst == null) dst = new double[6];
-		double[] tmp = null;
-		if (dst == src)  tmp = new double[6];
-		else tmp = dst;
-		for (int i = 0; i<6; ++i) tmp[5-i] = src[i];
-		if (src == dst) System.arraycopy(tmp, 0, dst, 0,  6);
-		return dst;
-	}
-
-	public static double pluckerInnerProduct(double[] l0, double[] l1) {
-		double sum = 0;
-		for (int i = 0; i<6; ++i)	{
-			sum += l0[i] * l1[5-i];
-		}
-		return sum;
-	}
-
-	/**
-	 * Project the point <i>p</i> onto the line spanned by <i>v0</i> and <i>v1</i> perpendicularly.
-	 * @param dst
-	 * @param p
-	 * @param v0
-	 * @param v1
-	 * @param signature
-	 * @return
-	 */
-	public static double[] projectPointOntoLine(double[] dst, double[] p, double[] v0, double[] v1, int signature) {
-		if (dst == null) dst = new double[4];
-		if (signature == Pn.EUCLIDEAN)	{
-			double[] dv = Rn.subtract(null, v1, v0);
-			double[] dp = Rn.subtract(null, p, v0);
-			double[] proj = Rn.projectOnto(null, dp, dv);
-			Rn.add(dst, v0, proj);
-//			System.err.println("p = "+Rn.toString(p));
-//			System.err.println("v0 = "+Rn.toString(v0));
-//			System.err.println("v1 = "+Rn.toString(v1));
-//			System.err.println("dv = "+Rn.toString(dv));
-//			System.err.println("dp = "+Rn.toString(dp));
-//			System.err.println("proj = "+Rn.toString(proj));
-			return dst;
-		}
-		double[] polar0 = Pn.polarizePoint(null, v0, signature);
-		double[] polar1 = Pn.polarizePoint(dst, v1, signature);
-		double[] line = P3.lineFromPlanes(null, polar0, polar1);
-		double[] plane = P3.lineJoinPoint(null, line, p);
-		lineIntersectPlane(dst, v0, v1, plane);
-		return dst;
+	public static double[] lineJoinPoint (double[] plane, double[] p1, double[] p2, double[] point)	{
+		return lineIntersectPlane(plane, p1, p2, point);
 	}
 
 }
