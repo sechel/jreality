@@ -1224,20 +1224,20 @@ public class IndexedFaceSetUtility {
              double[] e2 = Rn.subtract(null,p3,p2);
              double[] e3 = Rn.subtract(null,p1,p3);
 
-             double[] cnormal = Rn.crossProduct(null,e2,e1);
-             double d = Rn.innerProduct(normal, cnormal);
-             if(Math.abs(d) < EPS) {
-                 System.out.println("Warning degenerate triangle in triangulate... dropping "+second);
-                 System.out.println(" ->"+first+" "+second+" "+third);
-                 pts[second] = null;
-                 remainingPts--;
-                 first = second;
-                 continue;
-             }
-             if(d < 0) {
-               first++;
-               continue;
-             }
+//             double[] cnormal = Rn.crossProduct(null,e2,e1);
+//             double d = Rn.innerProduct(normal, cnormal);
+//             if(Math.abs(d) < EPS) {
+//                 System.out.println("Warning degenerate triangle in triangulate... dropping "+second);
+//                 System.out.println(" ->"+first+" "+second+" "+third);
+//                 pts[second] = null;
+//                 remainingPts--;
+//                 first = second;
+//                 continue;
+//             }
+//             if(d < 0) {
+//               first++;
+//               continue;
+//             }
              boolean allOutside = true;
              for(int k = 0;k<numPts;k++) {
                  if(pts[k] ==null||k == first|| k == second|| k == third) continue;
