@@ -150,7 +150,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		if (!isVisible) return false;
 		if (!isCopyCat) 	{
 			if (displayListDirty) {
-				System.err.println(name+" is dldirty");
+				//System.err.println(name+" is dldirty");
 				return true;
 			}
 			if (goBetween.peerGeometry != null && geometryDirtyBits != 0) {
