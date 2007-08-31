@@ -125,7 +125,7 @@ public class RenderingHintsInfo  {
 	        	values[i][VALUE] = (Boolean) foo; 
 		        	values[i][ACTIVE] = true;
 		        	hasSomeActiveField = true;	    
-		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
+	//	        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
 			}	else {
 				values[i][ACTIVE] = false;
 			}
