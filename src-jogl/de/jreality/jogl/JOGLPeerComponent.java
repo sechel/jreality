@@ -9,8 +9,6 @@ import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 
-import sun.font.EAttribute;
-
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsInfo;
