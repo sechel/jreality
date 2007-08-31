@@ -301,15 +301,19 @@ public class ToolSystem implements ToolEventReceiver {
 			executing=true;
 		}
 		compQueue.add(event);
-		int itarCnt=0;
+		int iterCnt=0;
 		do {
-			itarCnt++;
+			iterCnt++;
 			processComputationalQueue();
 			processTriggerQueue();
 			List<ToolEvent> l = deviceManager.updateImplicitDevices();
 			if (l.isEmpty()) break;
 			compQueue.addAll(l);
-			if (itarCnt > 5000) throw new IllegalStateException("recursion in tool system!");
+			if (iterCnt > 5000) {
+				//throw new IllegalStateException("recursion in tool system!");
+				LoggingSystem.getLogger(this).warning("may be stuck in endless loop");
+				iterCnt = 0;
+			}
 		} while (true);
 		// handle newly added/removed tools
 		synchronized (mutex) {
