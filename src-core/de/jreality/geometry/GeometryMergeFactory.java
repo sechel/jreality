@@ -494,10 +494,21 @@ public class GeometryMergeFactory {
 			Mycol=dps.getDiffuseColor();
 			fCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
 			Mycol=dls.getDiffuseColor();
+			if (dls.getTubeDraw()){
+				try {
+					Color c=((DefaultPolygonShader)(dls.getPolygonShader())).getDiffuseColor();
+					if(c!=null) Mycol=c;
+				} catch (Exception e) {}
+			}
 			eCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
 			Mycol=dvs.getDiffuseColor();
+			if (dvs.getSpheresDraw()){
+				try {
+					Color c=((DefaultPolygonShader)(dvs.getPolygonShader())).getDiffuseColor();
+					if(c!=null) Mycol=c;
+				} catch (Exception e) {}
+			}
 			vCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
-
 			// transformation
 			double[] mat=p.getMatrix(new Matrix().getArray());
 			tra.add(mat);
