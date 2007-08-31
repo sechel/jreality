@@ -67,8 +67,13 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JPanel;
 
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 /**
  * @author Charles Gunn
@@ -354,6 +359,34 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 	  }
 
+	  static Matrix[] cubeMapMatrices = new Matrix[6];
+	  static {
+		  for (int i = 0; i<6; i++) cubeMapMatrices[i] = new Matrix();
+		  MatrixBuilder.euclidean().rotateY(Math.PI/2).assignTo(cubeMapMatrices[0]);	// right
+		  MatrixBuilder.euclidean().rotateY(-Math.PI/2).assignTo(cubeMapMatrices[1]);	// left
+		  MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(cubeMapMatrices[2]);	// up
+		  MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(cubeMapMatrices[3]);	// down
+		  MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(cubeMapMatrices[4]);		// back ... front (Id)
+	  }
+	  public BufferedImage[] renderCubeMap(int size)	{
+		  BufferedImage[] cmp = new BufferedImage[6];
+		  Camera cam = CameraUtility.getCamera(this);
+		  double oldFOV = cam.getFieldOfView();
+		  SceneGraphComponent camNode = CameraUtility.getCameraNode(this);
+		  if (camNode.getTransformation() == null) camNode.setTransformation(new Transformation());
+		  Matrix oldCamMat = new Matrix(camNode.getTransformation().getMatrix());
+		  for (int i = 0; i<6; ++i)	{
+			  Matrix newCamMat = new Matrix(oldCamMat);
+			  newCamMat.multiplyOnRight(cubeMapMatrices[i]);
+			  newCamMat.assignTo(camNode);
+			  cmp[i] = renderOffscreen(size, size);
+		  }
+		  cam.setFieldOfView(oldFOV);
+		  camNode.getTransformation().setMatrix(oldCamMat.getArray());
+		  
+		  return cmp;
+		  
+	  }
 	private boolean pendingUpdate;
 	
 	public void display(GLAutoDrawable arg0) {
