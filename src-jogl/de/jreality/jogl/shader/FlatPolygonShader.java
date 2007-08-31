@@ -58,7 +58,7 @@ public class FlatPolygonShader extends DefaultPolygonShader {
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
-		smoothShading = false;
+//		smoothShading = false;
 	}
 
 }

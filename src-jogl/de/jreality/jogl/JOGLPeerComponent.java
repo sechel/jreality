@@ -72,6 +72,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		renderRunnableDirty = true,
 		isVisible = true;
 	int geometryDirtyBits  = ALL_GEOMETRY_CHANGED, displayList = -1;
+	protected int childCount = 0;
 	// copycat related fields
 	long currentTime = 0;
 	protected final static int POINTS_CHANGED = 1;
@@ -124,7 +125,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	public void dispose()	{
 
-		int n = children.size();
+		int n = childCount; //children.size();
 		for (int i = n-1; i>=0; --i)	{
 			JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 			child.dispose();
@@ -166,7 +167,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
 		jr.renderingState.currentSignature = signature;
-		if (rhInfo != null)	{
+		if (rhInfo != null && rhInfo.hasSomeActiveField())	{
 			rhInfo.render(jr.renderingState, jr.rhStack.lastElement());
 			jr.rhStack.push(rhInfo);
 		}
@@ -176,7 +177,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 	protected void renderChildren() {
 //		theLog.finest("Processing sgc, clipToCamera is "+goBetween.originalComponent.getName()+" "+clipToCamera);
-		int n = children.size();
+		int n = childCount; //children.size();
 
 		for (int i = 0; i<n; ++i)	{	
 			JOGLPeerComponent child = children.get(i);					
@@ -187,7 +188,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void postRender() {
-		if (rhInfo != null)	{
+		if (rhInfo != null && rhInfo.hasSomeActiveField())	{
 			jr.rhStack.pop();
 			rhInfo.postRender(jr.renderingState, jr.rhStack.lastElement());
 		}
@@ -236,6 +237,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	protected void setIndexOfChildren()	{
 		childlock.readLock();
+		childCount = children.size();
 		int n = goBetween.originalComponent.getChildComponentCount();
 		for (int i = 0; i<n; ++i)	{
 			SceneGraphComponent sgc = goBetween.originalComponent.getChildComponent(i);

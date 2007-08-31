@@ -96,6 +96,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 			//String space = (new char[2*sgp.getLength()]).toString();
 			myParent.children.add(peer);
 			peer.childIndex = n;
+			myParent.childCount = n+1;
 		}
 		if (!alreadySinglePeer)	{
 			c.childrenAccept(new ConstructPeerGraphVisitor(this, peer));

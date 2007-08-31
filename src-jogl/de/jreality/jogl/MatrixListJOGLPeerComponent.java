@@ -25,7 +25,7 @@ import de.jreality.util.SystemProperties;
  * @author Charles Gunn
  *
  */
-public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
+public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 
 	boolean displayListDirty = true;
 //    boolean displayListDirtyUp = false;
@@ -44,13 +44,13 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	protected boolean[] matrixIsReflection = null;
 	GL oldGL;
 	public static int instanceCount;
-	DiscreteGroupData theDropBox;
-	public DiscreteGroupJOGLPeerComponent()	{
+	MatrixListData theDropBox;
+	public MatrixListJOGLPeerComponent()	{
 		super();
 		instanceCount++;
 	}
 	
-	public DiscreteGroupJOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr)		{
+	public MatrixListJOGLPeerComponent(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr)		{
 		super(sgp, p, jr);
 		instanceCount++;
 	}
@@ -60,10 +60,10 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		super.init(sgp,p,jr);
 		Geometry trojanHorse = goBetween.originalComponent.getGeometry();
 		isCopyCat = (trojanHorse != null &&  
-				trojanHorse instanceof DiscreteGroupData);
+				trojanHorse instanceof MatrixListData);
 		if (isCopyCat)	{
 			goBetween.peerGeometry = null;		// this isn't really a geometry
-			theDropBox = (DiscreteGroupData) trojanHorse;
+			theDropBox = (MatrixListData) trojanHorse;
 			readMatrices();
 		}
 	}
@@ -82,7 +82,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	@Override
 	public void render() throws GLException {
 		if (!isVisible) return;
-		if (children.size() == 0 && goBetween.peerGeometry == null) return;
+		if (childCount == 0 && goBetween.peerGeometry == null) return;
 		insideDL = false;
 		useOldMatrices = true;
 		if (isCopyCat) {
@@ -166,7 +166,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 	}
 	private void printUpState()	{
 		if (debug) theLog.info("dld\tcld:\t"+displayListDirty+"\t"+"\t"+name);
-		if (parent!=null)((DiscreteGroupJOGLPeerComponent) parent).printUpState();
+		if (parent!=null)((MatrixListJOGLPeerComponent) parent).printUpState();
 	}
 	int signature;
 	double[] o2c, o2ndc;
@@ -187,7 +187,7 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 			}
 
 			int count = 0;
-			DiscreteGroupJOGLPeerComponent child = (DiscreteGroupJOGLPeerComponent) children.get(0);
+			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
 			for (int j = 0; j<nn; ++j)	{
 				if (theDropBox.clipToCamera)	{
 					if (!useOldMatrices) 
@@ -213,12 +213,12 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 
 		} else {
 //	childrenDLDirty = false;		// think positive!
-			int n = children.size();
+			int n = childCount; //children.size();
 			for (int i = 0; i<n; ++i)	{	
 				JOGLPeerComponent child = children.get(i);					
 				if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
 				child.render();
-				DiscreteGroupJOGLPeerComponent r = ((DiscreteGroupJOGLPeerComponent) child);
+				MatrixListJOGLPeerComponent r = ((MatrixListJOGLPeerComponent) child);
 //		if ( r.isVisible ? r.displayListDirty : false) childrenDLDirty = true;
 				if (jr.pickMode)	jr.globalGL.glPopName();
 			}
@@ -240,14 +240,6 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 		} else super.pushTransformation(m);
 	}
 
-//	public void propagateSGCDisplayListDirtyUp()	{
-//		displayListDirty = true;
-//		System.err.println(name+" in PSGCDLDUp");
-//		if (parent != null && !isTopCat && !((DiscreteGroupJOGLPeerComponent) parent).displayListDirty) { // && (!isCopyCat || !clipToCamera)) 
-//			((DiscreteGroupJOGLPeerComponent) parent).propagateSGCDisplayListDirtyUp();
-//		}	
-//		}
-//
 	@Override
 	protected void propagateAppearanceChanged() {
 		displayListDirty = true;
@@ -272,8 +264,8 @@ public class DiscreteGroupJOGLPeerComponent extends JOGLPeerComponent {
 
 	private boolean existsHigherCat()	{
 		if (parent != null) 
-			if (((DiscreteGroupJOGLPeerComponent) parent).isCopyCat) return true;
-			else return ((DiscreteGroupJOGLPeerComponent)parent).existsHigherCat();
+			if (((MatrixListJOGLPeerComponent) parent).isCopyCat) return true;
+			else return ((MatrixListJOGLPeerComponent)parent).existsHigherCat();
 		else return false;
 	}
 	@Override

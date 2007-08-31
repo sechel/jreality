@@ -14,13 +14,13 @@ import de.jreality.scene.event.TransformationEvent;
  * @author Charles Gunn
  *
  */
-public class DiscreteGroupGoBetween extends GoBetween {
+public class MatrixListGoBetween extends GoBetween {
 
-	public DiscreteGroupGoBetween()	{
+	public MatrixListGoBetween()	{
 		super();
 	}
 	
-	protected DiscreteGroupGoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean b) {
+	protected MatrixListGoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean b) {
 		super(sgc, jr, b);
 	}
 
@@ -67,7 +67,7 @@ public class DiscreteGroupGoBetween extends GoBetween {
 	}
 	
 	protected void setPeerDisplayListDirty() {
-		((DiscreteGroupJOGLPeerComponent) peers.get(0)).setDisplayListDirty();
+		((MatrixListJOGLPeerComponent) peers.get(0)).setDisplayListDirty();
 	}
 
 }

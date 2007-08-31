@@ -90,7 +90,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 			gl.glNewList(dListProxy, GL.GL_COMPILE);
 		}
 		//if (jr.isPickMode())	gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
-    JOGLRendererHelper.drawFaces(jr, ifs,  isSmoothShading(), alpha);
+    JOGLRendererHelper.drawFaces(jr, ifs,  jrs.smoothShading, alpha);
 		//if (jr.isPickMode())	gl.glPopName();
 		if (useDisplayLists) gl.glEndList();
 		return dListProxy;

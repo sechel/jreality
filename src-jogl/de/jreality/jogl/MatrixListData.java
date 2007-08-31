@@ -4,8 +4,8 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 
-public class DiscreteGroupData extends Geometry {
-	public DiscreteGroupData(String name) {
+public class MatrixListData extends Geometry {
+	public MatrixListData(String name) {
 		super(name);
 	}
 	public double[][] matrixList = {Rn.identityMatrix(4)};

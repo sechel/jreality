@@ -76,7 +76,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public static final int FRONT = GL.GL_FRONT;
 	public static final int BACK = GL.GL_BACK;
 	
-	boolean		smoothShading = true;		// interpolate shaded values between vertices
+//	boolean		smoothShading = true;		// interpolate shaded values between vertices
 	Texture2D texture2D;
 	JOGLTexture2D joglTexture2D;
 	Texture2D lightMap;
@@ -106,7 +106,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap,name);
-		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
+//		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
 		fastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY), fastAndDirty);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
 	    joglLightMap = null;
@@ -148,10 +148,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		needsChecked = true;
  	}
 
-	public boolean isSmoothShading() {
-		return smoothShading;
-	}
-
 	public Color getDiffuseColor() {
 		return vertexShader.getDiffuseColor(); //diffuseColor;
 	}
@@ -160,9 +156,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		return vertexShader.getDiffuseColorAsFloat();
 	}
 
-	public void setSmoothShading(boolean b) {
-		smoothShading = b;
-	}
 	
 	public int getFrontBack() {
 		return frontBack;
@@ -174,9 +167,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
-		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-		else		gl.glShadeModel(GL.GL_FLAT);
-		jrs.smoothShading = smoothShading;
+//		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
+//		else		gl.glShadeModel(GL.GL_FLAT);
+//		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
 		texUnit = GL.GL_TEXTURE0; // jr.getRenderingState().texUnitCount + GL.GL_TEXTURE0; //
 	    if (joglLightMap != null) {
@@ -226,7 +219,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     } //else {
    // }
     jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
-    jrs.smoothShading = smoothShading;
+//    jrs.smoothShading = smoothShading;
 }
 	
 	private void testTextureResident(JOGLRenderer jr, GL gl) {
@@ -285,13 +278,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 							dList = jr.globalGL.glGenLists(1);
 							LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
 							jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
+							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
 							jr.globalGL.glEndList();	
 							displayListsDirty = false;
 						}
 						jr.globalGL.glCallList(dList);
 					} else
-						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
+						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
 				}	
 			}
 		}

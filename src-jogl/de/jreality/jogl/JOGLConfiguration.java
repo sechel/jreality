@@ -114,10 +114,10 @@ public class JOGLConfiguration {
 			boolean copycat = "true".equals(Secure.getProperty(SystemProperties.JOGL_COPY_CAT));
 			if (copycat)
 				try {
-					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName("de.jreality.jogl.DiscreteGroupJOGLPeerComponent");
+					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName("de.jreality.jogl.MatrixListJOGLPeerComponent");
 					ConstructPeerGraphVisitor.setPeerClass(peerClass);
 					System.err.println("Got peer class "+peerClass);
-					goBetweenClass = (Class<? extends GoBetween>) Class.forName("de.jreality.jogl.DiscreteGroupGoBetween");
+					goBetweenClass = (Class<? extends GoBetween>) Class.forName("de.jreality.jogl.MatrixListGoBetween");
 					JOGLRenderer.setGoBetweenClass(goBetweenClass);
 					System.err.println("Got go betwen class "+goBetweenClass);
 				} catch (ClassNotFoundException e) {

@@ -46,6 +46,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
@@ -71,9 +72,10 @@ public class RenderingHintsInfo  {
 	 final static int LL = 5;
 	 final static int SS = 6;
 	 final static int IA = 7;
-	 final static int FF = 8;
-	 final static int LD = 9;
-	 final static int numBooleans = LD-1;
+	 final static int SM = 8;
+	 final static int FF = 9;
+	 final static int LD = 10;
+	 final static int numBooleans = SM+1;
 	 boolean[][] values = new boolean[LD+1][3];		// 0: active, 1: current value, 2: old value
 	boolean hasSomeActiveField = false, merged = false;
 	static boolean[] defaultValues = {
@@ -84,7 +86,8 @@ public class RenderingHintsInfo  {
 		RenderingHintsShader.ANY_DISPLAY_LISTS_DEFAULT,
 		RenderingHintsShader.LOCAL_LIGHT_MODEL_DEFAULT,
 		RenderingHintsShader.SEPARATE_SPECULAR_DEFAULT,
-		RenderingHintsShader.IGNORE_ALPHA0_DEFAULT};
+		RenderingHintsShader.IGNORE_ALPHA0_DEFAULT,
+		DefaultPolygonShader.SMOOTH_SHADING_DEFAULT};
 	String[] attributes = {
 			CommonAttributes.TRANSPARENCY_ENABLED,
 			CommonAttributes.Z_BUFFER_ENABLED,
@@ -94,6 +97,7 @@ public class RenderingHintsInfo  {
 			CommonAttributes.LOCAL_LIGHT_MODEL,
 			CommonAttributes.SEPARATE_SPECULAR_COLOR,
 			CommonAttributes.IGNORE_ALPHA0,
+			"polygonShader."+CommonAttributes.SMOOTH_SHADING,
 			CommonAttributes.DEPTH_FUDGE_FACTOR,
 			CommonAttributes.LEVEL_OF_DETAIL
 			};
@@ -118,7 +122,7 @@ public class RenderingHintsInfo  {
 	        	values[i][VALUE] = (Boolean) foo; 
 		        	values[i][ACTIVE] = true;
 		        	hasSomeActiveField = true;	    
-//		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
+		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
 			}	else {
 				values[i][ACTIVE] = false;
 			}
@@ -199,12 +203,19 @@ public class RenderingHintsInfo  {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 		}
+		if (values[SM][ACTIVE])	{
+			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
+			else		gl.glShadeModel(GL.GL_FLAT);
+		}
 		if (values[DL][ACTIVE])
 			jr.renderingState.useDisplayLists = values[DL][which]; 
 		if (values[LD][ACTIVE])
 			jr.renderingState.levelOfDetail = which == VALUE ? levelOfDetail : oldLevelOfDetail;
 		if (values[FF][ACTIVE])
 			jr.renderingState.depthFudgeFactor = which == VALUE ? depthFudgeFactor : oldDepthFudgeFactor;
+	}
+	public boolean hasSomeActiveField() {
+		return hasSomeActiveField;
 	}
 
 }
