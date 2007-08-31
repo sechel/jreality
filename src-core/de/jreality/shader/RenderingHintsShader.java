@@ -50,17 +50,14 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean LIGHTING_ENABLED_DEFAULT = true;			// do lighting or not
 	  final static boolean TRANSPARENCY_ENABLED_DEFAULT = false;		// do transparency or not
 	  final static boolean Z_BUFFER_ENABLED_DEFAULT = false;			// can help to switch this in transparency mode
-	  final static boolean DIFFUSE_COLOR_ONLY_DEFAULT = false;		// optimize appearance rendering 
 	  final static boolean IGNORE_ALPHA0_DEFAULT = true;				// pseudo-transparency available in OpenGL
 	  final static boolean ANY_DISPLAY_LISTS_DEFAULT = true;			// use display lists at all?
-	  final static boolean MANY_DISPLAY_LISTS_DEFAULT = true;			// if so, one display list per instance?
 	  final static boolean BACK_FACE_CULLING_DEFAULT = false;	
-	  final static boolean CLEAR_COLOR_BUFFER_DEFAULT = true;
-	  final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
-	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
-	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
+	  final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = true;
 	  final static boolean LOCAL_LIGHT_MODEL_DEFAULT = false;		
 	  final static boolean SEPARATE_SPECULAR_DEFAULT = false;
+	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
+	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
 	  
 	  Boolean getLightingEnabled();
 	  void setLightingEnabled(Boolean b);
@@ -70,9 +67,6 @@ public interface RenderingHintsShader extends AttributeEntity {
 
 	  Boolean getZBufferEnabled();
 	  void setZBufferEnabled(Boolean d);
-
-	  Boolean getDiffuseColorOnly();
-	  void setDiffuseColorOnly(Boolean d);
 
 	  Boolean getIgnoreAlpha0();
 	  void setIgnoreAlpha0(Boolean d);
@@ -86,14 +80,8 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  Boolean getAnyDisplayLists();
 	  void setAnyDisplayLists(Boolean d);
 
-	  Boolean getManyDisplayLists();
-	  void setManyDisplayLists(Boolean d);
-
 	  Boolean getBackFaceCulling();
 	  void setBackFaceCulling(Boolean d);
-
-	  Boolean getClearColorBuffer();
-	  void setClearColorBuffer(Boolean d);
 
 	  Boolean getOpaqueTubesAndSpheres();
 	  void setOpaqueTubesAndSpheres(Boolean d);
