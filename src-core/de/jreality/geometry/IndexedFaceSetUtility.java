@@ -1226,21 +1226,21 @@ public class IndexedFaceSetUtility {
              double[] e1 = Rn.subtract(null,p2,p1);
              double[] e2 = Rn.subtract(null,p3,p2);
              double[] e3 = Rn.subtract(null,p1,p3);
-
-//             double[] cnormal = Rn.crossProduct(null,e2,e1);
-//             double d = Rn.innerProduct(normal, cnormal);
-//             if(Math.abs(d) < EPS) {
-//                 System.out.println("Warning degenerate triangle in triangulate... dropping "+second);
-//                 System.out.println(" ->"+first+" "+second+" "+third);
-//                 pts[second] = null;
-//                 remainingPts--;
-//                 first = second;
-//                 continue;
-//             }
-//             if(d < 0) {
-//               first++;
-//               continue;
-//             }
+             // TODO  fix! following code can lead to infinite loop -gunn 30.08.07
+             double[] cnormal = Rn.crossProduct(null,e2,e1);
+             double d = Rn.innerProduct(normal, cnormal);
+             if(Math.abs(d) < EPS) {
+                 System.out.println("Warning degenerate triangle in triangulate... dropping "+second);
+                 System.out.println(" ->"+first+" "+second+" "+third);
+                 pts[second] = null;
+                 remainingPts--;
+                 first = second;
+                 continue;
+             }
+             if(d < 0) {
+               first++;
+               continue;
+             }
              boolean allOutside = true;
              for(int k = 0;k<numPts;k++) {
                  if(pts[k] ==null||k == first|| k == second|| k == third) continue;
@@ -1292,6 +1292,40 @@ public class IndexedFaceSetUtility {
      return ts;
     }
        
+    /**
+     * Do a simple (dumb) triangulation of the indexed face set
+     * Edit the input IFS; if you want a copy, make it before calling this method.
+     * @param ifs
+     */
+    public static void simpleTriangulate(IndexedFaceSet ifs)	{
+    	int triCount = 0;
+    	int n = ifs.getNumFaces();
+    	int[][] oldIndices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+    	for (int i = 0; i<n; ++i)	{
+    		if (oldIndices[i].length < 3) continue;
+    		triCount += oldIndices[i].length -2;
+    	}
+    	int[][] newIndices = new int[triCount][3];
+    	triCount = 0;
+    	for (int i = 0; i<n; ++i)	{
+    		int[] oldFace = oldIndices[i];
+    		if (oldFace.length < 3) continue;
+    		for (int j = 0; j<oldFace.length - 2; ++j) {
+    			newIndices[triCount][0] = oldFace[0];
+    			newIndices[triCount][1] = oldFace[j+1];
+    			newIndices[triCount][2] = oldFace[j+2];
+    			triCount++;
+    		}
+    	}
+    	boolean hasFaceNormals = ifs.getFaceAttributes(Attribute.NORMALS) != null;
+    	ifs.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.array(3).createReadOnly(newIndices));
+    	if (ifs.getEdgeAttributes(Attribute.INDICES) != null)	{
+    		calculateAndSetEdgesFromFaces(ifs);
+    	}
+    	if (hasFaceNormals)	{
+    		GeometryUtility.calculateAndSetFaceNormals(ifs);
+    	}
+    }
     /**
 	 * Truncate the corners of each face of <i>ifs</i>.
 	 * @param ifs
