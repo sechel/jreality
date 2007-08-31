@@ -1165,8 +1165,11 @@ public class IndexedFaceSetUtility {
      * This mehtod assumes that the faces in the given IndexedFaceSet are
      * planar embedded polygons. They need not be convex. 
      * Moreover it assumes that the facenormals are set.
-     * This method is not R4 safe at the moment. 
-     * @param fs
+     * This method is not R4 safe at the moment.
+     * 
+ 	 * @author Tim Hoffmann
+	 * 
+	 * @param fs  
      * @return
      */
     public static IndexedFaceSet triangulate(IndexedFaceSet fs) {
