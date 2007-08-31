@@ -72,9 +72,10 @@ public class RenderingHintsInfo  {
 	 final static int LL = 5;
 	 final static int SS = 6;
 	 final static int IA = 7;
-	 final static int SM = 8;
-	 final static int FF = 9;
-	 final static int LD = 10;
+	 final static int SMPG = 8;
+	 final static int SM = 9;
+	 final static int FF = 10;
+	 final static int LD = 11;
 	 final static int numBooleans = SM+1;
 	 boolean[][] values = new boolean[LD+1][3];		// 0: active, 1: current value, 2: old value
 	boolean hasSomeActiveField = false, merged = false;
@@ -87,6 +88,7 @@ public class RenderingHintsInfo  {
 		RenderingHintsShader.LOCAL_LIGHT_MODEL_DEFAULT,
 		RenderingHintsShader.SEPARATE_SPECULAR_DEFAULT,
 		RenderingHintsShader.IGNORE_ALPHA0_DEFAULT,
+		DefaultPolygonShader.SMOOTH_SHADING_DEFAULT,
 		DefaultPolygonShader.SMOOTH_SHADING_DEFAULT};
 	String[] attributes = {
 			CommonAttributes.TRANSPARENCY_ENABLED,
@@ -97,7 +99,8 @@ public class RenderingHintsInfo  {
 			CommonAttributes.LOCAL_LIGHT_MODEL,
 			CommonAttributes.SEPARATE_SPECULAR_COLOR,
 			CommonAttributes.IGNORE_ALPHA0,
-			"polygonShader."+CommonAttributes.SMOOTH_SHADING,
+			"polygonShader."+CommonAttributes.SMOOTH_SHADING,		// Experiment w/ handling "polygonShader.smoothShading"
+			CommonAttributes.SMOOTH_SHADING,						// or just "smoothShading"
 			CommonAttributes.DEPTH_FUDGE_FACTOR,
 			CommonAttributes.LEVEL_OF_DETAIL
 			};
@@ -205,6 +208,10 @@ public class RenderingHintsInfo  {
 		}
 		if (values[SM][ACTIVE])	{
 			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
+			else		gl.glShadeModel(GL.GL_FLAT);
+		}
+		if (values[SMPG][ACTIVE])	{
+			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
 			else		gl.glShadeModel(GL.GL_FLAT);
 		}
 		if (values[DL][ACTIVE])
