@@ -60,12 +60,14 @@ public class JOGLRenderingState {
 	public boolean smoothShading = true;
 	public boolean lighting = true;
 	public boolean backFaceCullingEnabled = false;
+	public boolean zbufferEnabled = true;
 	public boolean flipped = false;
 	public boolean transparencyEnabled = false;
 	public float[] diffuseColor = new float[4];
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
 	public double levelOfDetail;
+	public double depthFudgeFactor;
 	public int numLights = 0;
 	protected int[] sphereDisplayLists = null;
 	protected int[] cylinderDisplayLists = null;

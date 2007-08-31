@@ -13,6 +13,7 @@ import sun.font.EAttribute;
 
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
+import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
@@ -53,7 +54,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	double[] cachedTform = new double[16];
 	boolean useTformCaching = true;
 
+	Appearance thisAp;
 	RenderingHintsShader renderingHints;
+	RenderingHintsInfo rhInfo;
 	DefaultGeometryShader geometryShader;
 
 	Lock childlock = new Lock();
@@ -163,6 +166,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
 		jr.renderingState.currentSignature = signature;
+		if (rhInfo != null)	{
+			rhInfo.render(jr.renderingState, jr.rhStack.lastElement());
+			jr.rhStack.push(rhInfo);
+		}
 		if (renderGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
@@ -180,6 +187,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void postRender() {
+		if (rhInfo != null)	{
+			jr.rhStack.pop();
+			rhInfo.postRender(jr.renderingState, jr.rhStack.lastElement());
+		}
 		if (mustPop) {
 			popTransformation();			
 			mustPop = false;
@@ -265,7 +276,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void handleAppearanceChanged() {
-		Appearance thisAp = goBetween.originalComponent.getAppearance(); 
+		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (parent == null)	{
 			if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
 				eAp = EffectiveAppearance.create();
@@ -301,13 +312,13 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
 		signature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-		if (goBetween.originalComponent.getGeometry() == null) return;
-		Appearance thisAp = goBetween.originalComponent.getAppearance(); 
+//		if (goBetween.originalComponent.getGeometry() == null) return;
+		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;
 			renderingHints = parent.renderingHints;
 
-		} else  {		
+		} else  if (goBetween.originalComponent.getGeometry() != null ){		
 			if (debug) theLog.log(Level.FINER,"Updating shaders for "+name);
 			if (geometryShader == null)
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
@@ -317,8 +328,13 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			if (renderingHints == null)
 				renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
 			else
-				renderingHints.setFromEffectiveAppearance(eAp, "");								
+				renderingHints.setFromEffectiveAppearance(eAp, "");		
 		}
+		if (thisAp != null) {
+			if (rhInfo == null) 	rhInfo =  new RenderingHintsInfo();
+			rhInfo.setFromAppearance(thisAp);			
+		}
+
 //		System.err.println(goBetween.getOriginalComponent().getName()+" signature is "+signature);
 //		System.err.println("Clip to camera is "+clipToCamera);
 	}

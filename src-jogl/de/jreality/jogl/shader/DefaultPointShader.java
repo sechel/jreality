@@ -80,7 +80,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
 	float[] specularColorAsFloat = {0f,1f,1f,1f};		// for texturing point sprite to simulate sphere
-	boolean sphereDraw = false, lighting = true;
+	boolean sphereDraw = false, lighting = true, opaqueSpheres = true;
 	boolean attenuatePointSize = true;
 	PolygonShader polygonShader = null;
 	Appearance a=new Appearance();
@@ -88,16 +88,12 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	Texture2D currentTex;
 	double specularExponent = 60.0;
 	int polygonCount = 0;
-	/**
-	 * 
-	 */
-	public DefaultPointShader() {
-		super();
-	}
+	boolean changedTransp, changedLighting;
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
+		opaqueSpheres = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
 		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_DIRECTION),lightDirection);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
 		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
@@ -123,6 +119,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	  }
 	}
 
+	public Color getDiffuseColor() {
+		return diffuseColor;
+	}
 
 	byte[] sphereTex;
 	double[] lightDirection = {1,-1,2};
@@ -178,34 +177,6 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 
 	/**
-	 * @return
-	 */
-	public boolean isSphereDraw() {
-		return sphereDraw;
-	}
-
-	/**
-	 * @return
-	 */
-	public double getPointSize() {
-		return pointSize;
-	}
-
-	/**
-	 * @return
-	 */
-	public double getPointRadius() {
-		return pointRadius;
-	}
-
-	public float[] getDiffuseColorAsFloat() {
-		return diffuseColorAsFloat;
-	}
-
-	public Color getDiffuseColor() {
-		return diffuseColor;
-	}
-	/**
 	 * @param globalHandle
 	 * @param jpc
 	 */
@@ -232,10 +203,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	private void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.renderer.globalGL;
-//		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
 			gl.glColor4fv( diffuseColorAsFloat,0);
-//			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
-//		}
 		
 		if (!sphereDraw)	{
 			LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
@@ -270,22 +238,55 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			jrs.currentGeometry = g;
 		}
 		
-		jr.renderingState.lighting = lighting;
-		if (lighting) gl.glEnable(GL.GL_LIGHTING);
-		else gl.glDisable(GL.GL_LIGHTING);
+//		jr.renderingState.lighting = lighting;
+		changedLighting = false;
+		if (lighting != jrs.lighting)	{
+			if (lighting) gl.glEnable(GL.GL_LIGHTING);
+			else gl.glDisable(GL.GL_LIGHTING);	
+			changedLighting = true;
+		}
+		// TODO build in support for OPAQUE_TUBES_AND_SPHERES
+		changedTransp = false;
+		if (sphereDraw) {
+			if (opaqueSpheres == jrs.transparencyEnabled)	{	// change of state!
+				if (opaqueSpheres)	{
+					gl.glDepthMask(true);
+					gl.glDisable(GL.GL_BLEND);	
+				} else {
+					gl.glEnable (GL.GL_BLEND);
+					gl.glDepthMask(jrs.zbufferEnabled);
+					gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);								
+				}
+				changedTransp = true;					
+			}
+		}
 		
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer; 
+		GL gl = jr.globalGL;
 		if (!sphereDraw)	{
-			GL gl = jr.globalGL;
 			gl.glDisable(GL.GL_POINT_SPRITE_ARB);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		} else {
 			polygonShader.postRender(jrs);
+		}
+		if (changedTransp) {
+			if (jrs.transparencyEnabled) {
+				gl.glEnable (GL.GL_BLEND);
+				gl.glDepthMask(jrs.zbufferEnabled);
+				gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);			
+			} else {
+				gl.glDepthMask(true);
+				gl.glDisable(GL.GL_BLEND);						
+			}
+		}
+		if (changedLighting)	{
+			if (jrs.lighting)  gl.glEnable(GL.GL_LIGHTING);
+			else gl.glDisable(GL.GL_LIGHTING);			
 		}
 	}
 

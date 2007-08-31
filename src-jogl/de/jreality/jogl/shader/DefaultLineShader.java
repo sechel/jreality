@@ -74,8 +74,7 @@ import de.jreality.util.LoggingSystem;
 public class DefaultLineShader extends AbstractPrimitiveShader implements LineShader  {
 	FrameFieldType 	tubeStyle = FrameFieldType.PARALLEL;
 	double	tubeRadius = 0.05,
-		 	lineWidth = 1.0,
-			depthFudgeFactor = 0.99999d;
+		 	lineWidth = 1.0;
 	boolean smoothLineShading = false, lighting, vertexColors;
 	boolean smoothShading = true;		// this applies to the tubes, not the edges
 	int	lineFactor = 1;
@@ -87,6 +86,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	int faceCount = 0;		
 	Color diffuseColor = java.awt.Color.BLACK;
 	private PolygonShader polygonShader;
+	boolean changedTransp, changedLighting;
 	 
 		/**
 		 * 
@@ -101,7 +101,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		tubeRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
 		tubeStyle = (FrameFieldType) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
-		depthFudgeFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DEPTH_FUDGE_FACTOR), depthFudgeFactor);
 		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), false);
 		vertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.VERTEX_COLORS_ENABLED), false);
@@ -154,26 +153,57 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			jrs.currentGeometry = g;
 			lighting=true;
 		} else lighting = false;
-		jr.renderingState.lighting = lighting;
-		if (lighting) gl.glEnable(GL.GL_LIGHTING);
-		else gl.glDisable(GL.GL_LIGHTING);
+//		jr.renderingState.lighting = lighting;
+		changedLighting = false;
+		if (lighting != jrs.lighting)	{
+			if (lighting) gl.glEnable(GL.GL_LIGHTING);
+			else gl.glDisable(GL.GL_LIGHTING);
+			changedLighting = true;
+		}
 
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled
-		if (opaqueTubes)	{
-			gl.glDepthMask(true);
-			gl.glDisable(GL.GL_BLEND);			
+		changedTransp = false;
+		if (tubeDraw) {
+			if (opaqueTubes == jrs.transparencyEnabled)	{	// change of state!
+				if (opaqueTubes)	{
+					gl.glDepthMask(true);
+					gl.glDisable(GL.GL_BLEND);	
+				} else {
+					gl.glEnable (GL.GL_BLEND);
+					gl.glDepthMask(jrs.zbufferEnabled);
+					gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);								
+				}
+				changedTransp = true;					
+			}
 		}
 
-		if (!tubeDraw) gl.glDepthRange(0.0d, depthFudgeFactor);
+		if (!tubeDraw) gl.glDepthRange(0.0d, jrs.depthFudgeFactor);
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
+		GL gl = jr.globalGL;
 		if (!tubeDraw) {
 			jr.globalGL.glDepthRange(0.0d, 1d);
 		} else 
 			polygonShader.postRender(jrs);
+		if (changedTransp) {
+			if (jrs.transparencyEnabled) {
+				gl.glEnable (GL.GL_BLEND);
+				gl.glDepthMask(jrs.zbufferEnabled);
+				gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);			
+			} else {
+				gl.glDepthMask(true);
+				gl.glDisable(GL.GL_BLEND);						
+			}
+		}
+		if (changedLighting)	{
+			if (jrs.lighting)  gl.glEnable(GL.GL_LIGHTING);
+			else gl.glDisable(GL.GL_LIGHTING);			
+		}
+
+
 	}
 
 	public boolean providesProxyGeometry() {		

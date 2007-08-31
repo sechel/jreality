@@ -52,6 +52,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.List;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.WeakHashMap;
@@ -72,6 +73,8 @@ import com.sun.opengl.util.ImageUtil;
 
 import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.PickPoint;
+import de.jreality.jogl.shader.RenderingHintsInfo;
+import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -104,6 +107,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int stackDepth;
     protected Matrix[] matrixStack = new Matrix[128];
     protected int stackCounter = 0;
+    public Stack<RenderingHintsInfo> rhStack = new Stack<RenderingHintsInfo>();
 
 	SceneGraphPath currentPath = new SceneGraphPath();
 
@@ -233,7 +237,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
 			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
-			theLog.finer("Creating peer scenegraph");
+			//theLog.finer("Creating peer scenegraph");
 		}
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
@@ -273,6 +277,9 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		processClippingPlanes();
 
+		rhStack.clear();
+		rhStack.push(RenderingHintsInfo.defaultRHInfo);
+		RenderingHintsInfo.defaultRHInfo.render(renderingState, null);
 		nodeCount = renderingState.polygonCount = 0;			// for profiling info
 		texResident=true;
 		currentPath.clear();
@@ -296,7 +303,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	List<SceneGraphPath> lights = null;
 	private void processLights( ) {
-		lightsChanged = true;
+//		lightsChanged = false;
 		if (lights == null || lights.size() == 0 || lightListDirty) {
 			lightHelper.disposeLights();
 			lights = SceneGraphUtility.collectLights(theRoot);

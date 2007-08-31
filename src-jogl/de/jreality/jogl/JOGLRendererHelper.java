@@ -196,7 +196,9 @@ public class JOGLRendererHelper {
 					gl.glVertex2fv(unitsquare[q],0);
 				}
 				gl.glEnd();
+				// TODO push/pop this correctly (now may overwrite previous values)
 				gl.glEnable(GL.GL_DEPTH_TEST);
+				gl.glEnable(GL.GL_LIGHTING);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 			}			
 		}
@@ -223,6 +225,8 @@ public class JOGLRendererHelper {
 			gl.glDisable(GL.GL_FOG);
 	}
 
+	// TODO don't do this every render, attach an Appearance listener and cache the value
+	// between changes
 	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp, Camera cam) {
 		if (topAp == null) return;
 	    GL gl = jr.globalGL;

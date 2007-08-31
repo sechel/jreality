@@ -71,7 +71,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		RenderingHintsShader renderingHints = jpc.renderingHints;
 		DefaultGeometryShader geometryShader = jpc.geometryShader;
 		if (renderingHints == null) return;
-		renderingHints.render(jr.renderingState);
+//		renderingHints.render(jr.renderingState);
 		jr.renderingState.currentGeometry = originalGeometry;
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
@@ -89,7 +89,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		}
 		// the following call shouldn't be required.  make sure the line shader cleans up
 		// after itself (i.e., pushes and pops state like "lighting"
-		if (needsNew) renderingHints.render(jr.renderingState);
+//		if (needsNew) renderingHints.render(jr.renderingState);
 		if (geometryShader.isFaceDraw() && isSurface) {
 			geometryShader.polygonShader.render(jr.renderingState);
 			geometryShader.polygonShader.postRender(jr.renderingState);
