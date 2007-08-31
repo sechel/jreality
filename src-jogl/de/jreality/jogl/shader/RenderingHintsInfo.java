@@ -110,7 +110,7 @@ public class RenderingHintsInfo  {
 	}
 	// TODO make sure that levelOfDetail is handled consistently 
 	public void setFromAppearance(Appearance ap)	{
-    	System.err.println("in set from appearance");
+//    	System.err.println("in set from appearance");
 		hasSomeActiveField = false;
 		for (int i=0; i<numBooleans; ++i)	{
 	        Object foo = ap.getAttribute(attributes[i], Boolean.class);
@@ -118,7 +118,7 @@ public class RenderingHintsInfo  {
 	        	values[i][VALUE] = (Boolean) foo; 
 		        	values[i][ACTIVE] = true;
 		        	hasSomeActiveField = true;	    
-		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
+//		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
 			}	else {
 				values[i][ACTIVE] = false;
 			}
