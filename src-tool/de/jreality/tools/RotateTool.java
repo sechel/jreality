@@ -46,7 +46,9 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
@@ -68,6 +70,7 @@ public class RotateTool extends AbstractTool {
   static InputSlot camPath = InputSlot.getDevice("WorldToCamera");
 
   boolean fixOrigin=false;
+  private boolean rotateOnPick=false;
   
   public RotateTool() {
     super(activationSlot);
@@ -88,7 +91,12 @@ public class RotateTool extends AbstractTool {
     // TODO is this legitimate?  perhaps we should introduce a boolean "forceNewTransformation"
     if (comp.getTransformation() == null)
       comp.setTransformation(new Transformation());
-    if (!fixOrigin)	center = getCenter(comp);
+    if (!fixOrigin){
+    	if(rotateOnPick && tc.getCurrentPick()!=null)
+    		center=getRotationPoint(tc);
+    	else
+    		center = getCenter(comp);
+    }
     if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
@@ -103,6 +111,22 @@ public class RotateTool extends AbstractTool {
 	    MatrixBuilder.init(null, signature).translate(bb.getCenter()).assignTo(centerTranslation);
 	    return centerTranslation;
   }
+  private Matrix getRotationPoint(ToolContext tc){
+	  double[] obj=tc.getCurrentPick().getObjectCoordinates();
+	  double[] pickMatr = tc.getCurrentPick().getPickPath().getMatrix(null);
+	  SceneGraphPath compPath=(moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent());
+	  double[] compMatrInv=compPath.getInverseMatrix(null);
+	  double[] matr=Rn.times(null, compMatrInv,pickMatr);
+	  double[] rotationPoint =Rn.matrixTimesVector(null, matr, obj);
+	  
+	  Matrix centerTranslation = new Matrix();
+	    MatrixBuilder
+	     .init(null, signature)
+	     .translate(rotationPoint)
+	     .assignTo(centerTranslation);
+	    return centerTranslation;
+  }
+  
   transient private int signature;
 
   transient Matrix result = new Matrix();
@@ -119,7 +143,12 @@ public class RotateTool extends AbstractTool {
     Matrix object2avatar = objToAvatar(tc);
     evolution.assignFrom(tc.getTransformationMatrix(evolutionSlot));
     evolution.conjugateBy(object2avatar);
-    if (!fixOrigin && updateCenter) center = getCenter(comp);
+    if (!fixOrigin && updateCenter){ 
+    	if(rotateOnPick && tc.getCurrentPick()!=null)
+    		center=getRotationPoint(tc);
+    	else
+    	center = getCenter(comp);
+    }
     
 	result.assignFrom(comp.getTransformation());
     if (!fixOrigin) result.multiplyOnRight(center);
@@ -211,5 +240,10 @@ public class RotateTool extends AbstractTool {
   public void setFixOrigin(boolean fixOrigin) {
   	this.fixOrigin = fixOrigin;
   }
-
+  public boolean isRotateOnPick() {
+	  return rotateOnPick;
+  }
+  public void setRotateOnPick(boolean rotateOnPick) {
+	  this.rotateOnPick = rotateOnPick;
+  }
 }
