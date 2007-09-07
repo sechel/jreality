@@ -68,28 +68,19 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	}
 
 	public void render(JOGLPeerComponent jpc) {
-		RenderingHintsShader renderingHints = jpc.renderingHints;
 		DefaultGeometryShader geometryShader = jpc.geometryShader;
-		if (renderingHints == null) return;
-//		renderingHints.render(jr.renderingState);
 		jr.renderingState.currentGeometry = originalGeometry;
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 		displayListsDirty = false;			// think positive!
-		boolean needsNew = false;
 		if (geometryShader.isEdgeDraw() && ils != null)	{
 			geometryShader.lineShader.render(jr.renderingState);
 			geometryShader.lineShader.postRender(jr.renderingState);
-			needsNew = true;
 		}
 		if (geometryShader.isVertexDraw() && ps != null)	{
 			geometryShader.pointShader.render(jr.renderingState);
 			geometryShader.pointShader.postRender(jr.renderingState);
-			needsNew = true;
 		}
-		// the following call shouldn't be required.  make sure the line shader cleans up
-		// after itself (i.e., pushes and pops state like "lighting"
-//		if (needsNew) renderingHints.render(jr.renderingState);
 		if (geometryShader.isFaceDraw() && isSurface) {
 			geometryShader.polygonShader.render(jr.renderingState);
 			geometryShader.polygonShader.postRender(jr.renderingState);
@@ -103,7 +94,6 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (geometryShader.isFaceDraw() && hasFaceLabels) {
 			JOGLRendererHelper.drawFaceLabels(jr, ifs,  jpc.geometryShader.polygonShader.getTextShader());
 		}
-		renderingHints.postRender(jr.renderingState);
 	}
 
 	public void geometryChanged(GeometryEvent ev) {

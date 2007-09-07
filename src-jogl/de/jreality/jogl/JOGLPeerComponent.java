@@ -12,7 +12,6 @@ import javax.media.opengl.GL;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsInfo;
-import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -53,7 +52,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	boolean useTformCaching = true;
 
 	Appearance thisAp;
-	RenderingHintsShader renderingHints;
 	RenderingHintsInfo rhInfo;
 	DefaultGeometryShader geometryShader;
 
@@ -316,7 +314,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;
-			renderingHints = parent.renderingHints;
 
 		} else  if (goBetween.originalComponent.getGeometry() != null ){		
 			if (debug) theLog.log(Level.FINER,"Updating shaders for "+name);
@@ -325,10 +322,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			else 
 				geometryShader.setFromEffectiveAppearance(eAp, "");
 
-			if (renderingHints == null)
-				renderingHints = RenderingHintsShader.createFromEffectiveAppearance(eAp, "");
-			else
-				renderingHints.setFromEffectiveAppearance(eAp, "");		
 		}
 		if (thisAp != null) {
 			if (rhInfo == null) 	rhInfo =  new RenderingHintsInfo();

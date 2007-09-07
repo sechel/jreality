@@ -362,16 +362,17 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	  static Matrix[] cubeMapMatrices = new Matrix[6];
 	  static {
 		  for (int i = 0; i<6; i++) cubeMapMatrices[i] = new Matrix();
-		  MatrixBuilder.euclidean().rotateY(Math.PI/2).assignTo(cubeMapMatrices[0]);	// right
-		  MatrixBuilder.euclidean().rotateY(-Math.PI/2).assignTo(cubeMapMatrices[1]);	// left
+		  MatrixBuilder.euclidean().rotateY(-Math.PI/2).assignTo(cubeMapMatrices[0]);	// right
+		  MatrixBuilder.euclidean().rotateY(Math.PI/2).assignTo(cubeMapMatrices[1]);	// left
 		  MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(cubeMapMatrices[2]);	// up
 		  MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(cubeMapMatrices[3]);	// down
-		  MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(cubeMapMatrices[4]);		// back ... front (Id)
+		  MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(cubeMapMatrices[5]);		// back ... front (Id)
 	  }
 	  public BufferedImage[] renderCubeMap(int size)	{
 		  BufferedImage[] cmp = new BufferedImage[6];
 		  Camera cam = CameraUtility.getCamera(this);
 		  double oldFOV = cam.getFieldOfView();
+		  cam.setFieldOfView(90.0);
 		  SceneGraphComponent camNode = CameraUtility.getCameraNode(this);
 		  if (camNode.getTransformation() == null) camNode.setTransformation(new Transformation());
 		  Matrix oldCamMat = new Matrix(camNode.getTransformation().getMatrix());

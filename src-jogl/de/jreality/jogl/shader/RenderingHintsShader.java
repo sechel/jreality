@@ -171,9 +171,9 @@ public class RenderingHintsShader  {
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
-		if (transparencyEnabled)	{
-			  gl.glDepthMask(true);
-			  gl.glDisable(GL.GL_BLEND);
-			}
+//		if (transparencyEnabled)	{
+//			  gl.glDepthMask(true);
+//			  gl.glDisable(GL.GL_BLEND);
+//			}
 	}
 }
