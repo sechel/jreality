@@ -362,10 +362,15 @@ final public class Rn {
 		if (u.length < 3 || v.length < 3)	{
 			throw new IllegalArgumentException("Vectors too short");
 		}
-		if (dst == null) dst = new double[u.length];
-		dst[0] = u[1]*v[2] - u[2]*v[1];
-		dst[1] = u[2]*v[0] - u[0]*v[2];
-		dst[2] = u[0]*v[1] - u[1]*v[0];
+		if (dst == null) dst = new double[3];
+		double[] tmp = dst;
+		if (dst == u || dst == v) {
+			tmp = new double[3];
+		}
+		tmp[0] = u[1]*v[2] - u[2]*v[1];
+		tmp[1] = u[2]*v[0] - u[0]*v[2];
+		tmp[2] = u[0]*v[1] - u[1]*v[0];
+		if (tmp != dst) System.arraycopy(tmp, 0, dst, 0, 3);
 		return dst;
 	}
 	
