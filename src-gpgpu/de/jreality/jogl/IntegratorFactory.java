@@ -40,8 +40,12 @@
 
 package de.jreality.jogl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+
+import de.jreality.util.LoggingSystem;
 
 /**
  * factory for easy creation of glsl code for runge kutta integration on the gpu
@@ -103,7 +107,7 @@ public class IntegratorFactory {
   
   private HashSet uniforms=new HashSet();
   private HashSet signatures=new HashSet();
-  private HashSet methods=new HashSet();
+  private HashMap<String, String> methods=new HashMap<String, String>();
 
   private HashSet constants=new HashSet();
   
@@ -168,9 +172,12 @@ public class IntegratorFactory {
   
   public void addMethod(String name, String retType, String params, String implementation) {
     String signature = retType+" "+name+"("+params+")";
-    String impl = signature+"{\n"+implementation+"}\n";
+    String impl = "{\n"+implementation+"}\n";
     signatures.add(signature);
-    methods.add(impl);
+    String prevImpl = methods.put(signature, impl);
+    if (prevImpl != null) {
+    	LoggingSystem.getLogger(IntegratorFactory.class).info("Overwriting glsl method: "+signature);
+    }
   }
   
   public void srcT0(String impl) {
@@ -211,8 +218,8 @@ public class IntegratorFactory {
     sb.append('\n');
     if (overwrittenMain == null) sb.append(scheme.src);
     else sb.append("void main() {\n").append(overwrittenMain).append('\n').append('}').append('\n');
-    for (Iterator i = methods.iterator(); i.hasNext(); )
-      sb.append(i.next()).append('\n');
+    for (Map.Entry<String, String> m : methods.entrySet() )
+      sb.append(m.getKey() + m.getValue()).append('\n');
     sb.append('\n');
     return sb.toString();
   }
