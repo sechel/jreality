@@ -57,6 +57,8 @@ import javax.swing.ListSelectionModel;
 import de.jreality.scene.tool.Tool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
+import de.jreality.tools.FeatheredDraggingTool;
+import de.jreality.tools.FlyToPickTool;
 import de.jreality.tools.FlyTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.LookAtTool;
@@ -142,6 +144,8 @@ public class AddTool extends AbstractSelectionListenerAction {
     tools.add(ShipScaleTool.class.getName());
     tools.add(ShowPropertiesTool.class.getName());
     tools.add(TranslateTool.class.getName());
+    tools.add(FlyToPickTool.class.getName());
+    tools.add(FeatheredDraggingTool.class.getName());
 
     try {  //different source folder
       tools.add(Class.forName("de.jreality.tools.PortalHeadMoveTool").getName());
