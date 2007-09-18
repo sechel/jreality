@@ -69,7 +69,7 @@ public class FeatheredDraggingTool extends AbstractTool {
 
 	// public
 	private boolean moveChildren;
-	private boolean feathered;
+	private boolean feathered=true;
 	private double linearScaleFactor=500;
 	private double featherPow=2;
 	// private
