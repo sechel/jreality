@@ -70,6 +70,7 @@ import de.jreality.tools.ShipRotateTool;
 import de.jreality.tools.ShipScaleTool;
 import de.jreality.tools.ShowPropertiesTool;
 import de.jreality.tools.TranslateTool;
+import de.jreality.tools.AirplaneTool;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
@@ -146,6 +147,7 @@ public class AddTool extends AbstractSelectionListenerAction {
     tools.add(TranslateTool.class.getName());
     tools.add(FlyToPickTool.class.getName());
     tools.add(FeatheredDraggingTool.class.getName());
+    tools.add(AirplaneTool.class.getName());
 
     try {  //different source folder
       tools.add(Class.forName("de.jreality.tools.PortalHeadMoveTool").getName());
