@@ -174,13 +174,14 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected void renderChildren() {
 //		theLog.finest("Processing sgc, clipToCamera is "+goBetween.originalComponent.getName()+" "+clipToCamera);
 		int n = childCount; //children.size();
-
+		childlock.readLock();
 		for (int i = 0; i<n; ++i)	{	
 			JOGLPeerComponent child = children.get(i);					
 			if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
 			child.render();
 			if (jr.pickMode)	jr.globalGL.glPopName();
 		}
+		childlock.readUnlock();
 	}
 
 	private void postRender() {
@@ -364,10 +365,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
 			SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
 			JOGLPeerComponent pc = jr.constructPeerForSceneGraphComponent(sgc, this);
-			//childlock.writeLock();
+			childlock.writeLock();
 			//theLog.log(Level.FINE,"Before adding child count is "+children.size());
 			children.add(pc);						
-			//childlock.writeUnlock();
+			childlock.writeUnlock();
 			//theLog.log(Level.FINE,"After adding child count is "+children.size());
 			setIndexOfChildren();
 			jr.lightListDirty = true;
@@ -401,9 +402,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			SceneGraphComponent sgc = (SceneGraphComponent) ev.getOldChildElement();
 			JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 			if (jpc == null) return;
-			//childlock.writeLock();
+			childlock.writeLock();
 			children.remove(jpc);						
-			//childlock.writeUnlock();
+			childlock.writeUnlock();
 			//theLog.log(Level.FINE,"After removal child count is "+children.size());
 			//jpc.dispose();		// there are no other references to this child
 			setIndexOfChildren();
