@@ -177,12 +177,14 @@ public class RenderingHintsInfo  {
 				  if (values[ZB][ACTIVE]) gl.glDepthMask(values[ZB][which]);
 				  else gl.glDepthMask(false);
 				  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+					jrs.transparencyEnabled = true;
+					if (values[ZB][ACTIVE]) 	jrs.zbufferEnabled = values[ZB][which];
 				} else	{
 				  gl.glDepthMask(true);
 				  gl.glDisable(GL.GL_BLEND);
+				  jrs.transparencyEnabled = false;
+				  jrs.zbufferEnabled = true;
 				}
-			jrs.transparencyEnabled = values[TE][which];
-			jrs.zbufferEnabled = values[ZB][which];
 		}
 		if (values[LE][ACTIVE]) {
 			if (values[LE][which])			gl.glEnable(GL.GL_LIGHTING);
