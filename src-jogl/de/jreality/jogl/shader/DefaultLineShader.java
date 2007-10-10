@@ -165,6 +165,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		// transparency-enable flag to the line shader to allow this to be controlled
 		changedTransp = false;
 		if (tubeDraw) {
+			// check to see if we're different from most recent rendering hints
 			if (opaqueTubes == jrs.transparencyEnabled)	{	// change of state!
 				if (opaqueTubes)	{
 					gl.glDepthMask(true);
@@ -172,6 +173,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				} else {
 					gl.glEnable (GL.GL_BLEND);
 					gl.glDepthMask(jrs.zbufferEnabled);
+//					System.err.println("enabled = "+jrs.zbufferEnabled);
 					gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);								
 				}
 				changedTransp = true;					

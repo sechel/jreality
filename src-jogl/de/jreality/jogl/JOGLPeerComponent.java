@@ -108,7 +108,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 	
 	protected void updateRenderRunnable() {
+		if (debug) theLog.finer("updateRenderRunnable: "+name);
 		setDisplayListDirty();
+		updateShaders();
 		geometryDirtyBits = ALL_GEOMETRY_CHANGED;
 		if (goBetween.peerGeometry == null) renderGeometry = null;
 		else	 renderGeometry = new Runnable() {
@@ -142,7 +144,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
 		jr.currentPath.push(goBetween.originalComponent);
-		if (debug) theLog.finer("prerender: "+name);
+		if (debug) theLog.finest("prerender: "+name);
 		if (useTformCaching)	{
 			if (cachedTform != null && !isIdentity)  {
 				pushTransformation(cachedTform); //thisT.getMatrix());
@@ -318,7 +320,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 		} else  if (goBetween.originalComponent.getGeometry() != null ){		
 			if (debug) theLog.log(Level.FINER,"Updating shaders for "+name);
-			if (geometryShader == null)
+			if (geometryShader == null || geometryShader == parent.geometryShader)
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 			else 
 				geometryShader.setFromEffectiveAppearance(eAp, "");
@@ -355,7 +357,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		return ret;
 //	}
 	public void childAdded(SceneGraphComponentEvent ev) {
-		if (debug) theLog.finest("JOGLPeerComponent: Container Child added to: "+name);
+		if (debug) theLog.finer("JOGLPeerComponent: Container Child added to: "+name);
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
@@ -392,7 +394,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
-		if (debug) theLog.finest("Container Child removed from: "+name);
+		if (debug) theLog.finer("Container Child removed from: "+name);
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true;
@@ -428,7 +430,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
-		if (debug) theLog.finest("Container Child replaced at: "+name);
+		if (debug) theLog.finer("Container Child replaced at: "+name);
 		switch(ev.getChildType())	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true; 

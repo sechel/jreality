@@ -276,7 +276,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					if (!jr.isPickMode() && useDisplayLists)	{
 						if (dList == -1)	{
 							dList = jr.globalGL.glGenLists(1);
-							LoggingSystem.getLogger(this).fine("PolygonShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
+							LoggingSystem.getLogger(this).fine(" PolygonShader: is "+this+" Allocating new dlist "+dList+" for gl "+jr.globalGL);
 							jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
 							jr.globalGL.glEndList();	
