@@ -208,14 +208,14 @@ public class RenderingHintsInfo  {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 		}
-		if (values[SM][ACTIVE])	{
-			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
-			else		gl.glShadeModel(GL.GL_FLAT);
-		}
-		if (values[SMPG][ACTIVE])	{
-			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
-			else		gl.glShadeModel(GL.GL_FLAT);
-		}
+//		if (values[SM][ACTIVE])	{
+//			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
+//			else		gl.glShadeModel(GL.GL_FLAT);
+//		}
+//		if (values[SMPG][ACTIVE])	{
+//			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
+//			else		gl.glShadeModel(GL.GL_FLAT);
+//		}
 		if (values[DL][ACTIVE])
 			jr.renderingState.useDisplayLists = values[DL][which]; 
 		if (values[LD][ACTIVE])
