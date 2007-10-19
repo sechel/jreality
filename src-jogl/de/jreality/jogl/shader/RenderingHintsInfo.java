@@ -125,7 +125,7 @@ public class RenderingHintsInfo  {
 	        	values[i][VALUE] = (Boolean) foo; 
 		        	values[i][ACTIVE] = true;
 		        	hasSomeActiveField = true;	    
-	//	        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
+		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
 			}	else {
 				values[i][ACTIVE] = false;
 			}
@@ -177,8 +177,8 @@ public class RenderingHintsInfo  {
 				  if (values[ZB][ACTIVE]) gl.glDepthMask(values[ZB][which]);
 				  else gl.glDepthMask(false);
 				  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-					jrs.transparencyEnabled = true;
-					if (values[ZB][ACTIVE]) 	jrs.zbufferEnabled = values[ZB][which];
+				  jrs.transparencyEnabled = true;
+				  if (values[ZB][ACTIVE]) 	jrs.zbufferEnabled = values[ZB][which];
 				} else	{
 				  gl.glDepthMask(true);
 				  gl.glDisable(GL.GL_BLEND);
@@ -208,14 +208,18 @@ public class RenderingHintsInfo  {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 		}
-//		if (values[SM][ACTIVE])	{
-//			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
-//			else		gl.glShadeModel(GL.GL_FLAT);
-//		}
-//		if (values[SMPG][ACTIVE])	{
-//			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
-//			else		gl.glShadeModel(GL.GL_FLAT);
-//		}
+		if (values[SM][ACTIVE])	{
+			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
+			else		gl.glShadeModel(GL.GL_FLAT);
+			jr.renderingState.smoothShading = values[SM][which];
+//			System.err.println("SM: Setting ss to "+values[SM][which]);
+		}
+		if (values[SMPG][ACTIVE])	{
+			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
+			else		gl.glShadeModel(GL.GL_FLAT);
+			jr.renderingState.smoothShading = values[SMPG][which];
+//			System.err.println("SMPG: Setting ss to "+values[SMPG][which]);
+		}
 		if (values[DL][ACTIVE])
 			jr.renderingState.useDisplayLists = values[DL][which]; 
 		if (values[LD][ACTIVE])
