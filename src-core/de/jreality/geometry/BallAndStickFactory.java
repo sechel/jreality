@@ -105,20 +105,20 @@ import de.jreality.util.SceneGraphUtility;
 	 double arrowSlope = 1.0;			// bigger scale: more pointy arrow profile
 	 Appearance ballsAp, sticksAp, arrowsAp, topAp;
 	 private static IndexedFaceSet urCone = null;
-	 static double[][] octagonalCrossSection = {{1,0,-1}, 
-			{.707, .707, -1}, 
-			{0,1,-1},
-			{-.707, .707, -1},
-			{-1,0,-1},
-			{-.707, -.707, -1},
-			{0,-1,-1},
-			{.707, -.707, -1},
-			{1,0,-1}};
+	 static double[][] octagonalCrossSection = {{1,0,0}, 
+			{.707, .707, 0}, 
+			{0,1,0},
+			{-.707, .707, 0},
+			{-1,0,0},
+			{-.707, -.707, 0},
+			{0,-1,0},
+			{.707, -.707, 0},
+			{1,0,0}};
 	private SceneGraphComponent sticks;
 	private SceneGraphComponent balls;
 	private SceneGraphComponent arrow;
 	 static {
-		 urCone = Primitives.pyramid(octagonalCrossSection, new double[]{0,0,0});
+		 urCone = Primitives.pyramid(octagonalCrossSection, new double[]{0,0,1});
 		 GeometryUtility.calculateAndSetVertexNormals(urCone);
 	 }
 
