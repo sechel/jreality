@@ -90,6 +90,8 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
+import de.jreality.scene.event.CameraEvent;
+import de.jreality.scene.event.CameraListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ImageUtility;
@@ -99,7 +101,7 @@ import de.jreality.util.SceneGraphUtility;
  * @author gunn
  *
  */
-public class JOGLRenderer  implements AppearanceListener {
+public class JOGLRenderer  implements AppearanceListener, CameraListener {
 
 	private final  Logger theLog = LoggingSystem.getLogger(this);
 	private static boolean collectFrameRate = true;
@@ -121,6 +123,8 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int whichEye = CameraUtility.MIDDLE_EYE;
 	protected int[] currentViewport = new int[4];
 	protected Graphics3D context;
+	private double[] world2camera;
+	private double[][] camera2NDC = new double[3][];
 
 	public GL globalGL;
 
@@ -153,9 +157,26 @@ public class JOGLRenderer  implements AppearanceListener {
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
 		// have to make sure JOGLConfiguration is initialized before we do anything else
 		JOGLConfiguration.getLogger(); 
+		((Camera) viewer.getCameraPath().getLastElement()).addCameraListener(this);
 	}
 
 
+	public void cameraChanged(CameraEvent ev) {
+		updateCamera();
+	}
+	
+	private void updateCamera() {
+		context  = new Graphics3D(theViewer.getCameraPath(), currentPath, CameraUtility.getAspectRatio(theViewer));
+		renderingState.cameraToWorld = context.getCameraToWorld();
+		world2camera = Rn.inverse(null, renderingState.cameraToWorld);
+		renderingState.flipped = (Rn.determinant(world2camera) < 0.0);
+		double aspectRatio = getAspectRatio();
+		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
+		camera2NDC[whichEye] = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
+				aspectRatio,
+				whichEye);
+		
+	}
 	public void setTextureResident(boolean b) {
 		texResident=b;
 	}
@@ -242,8 +263,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
 
-		context  = new Graphics3D(theViewer.getCameraPath(), currentPath, CameraUtility.getAspectRatio(theViewer));
-		//context.setCurrentPath(currentPath);
+		if (context == null) updateCamera();
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
@@ -252,23 +272,15 @@ public class JOGLRenderer  implements AppearanceListener {
 		else
 			JOGLRendererHelper.handleBackground(this, width, height, theRoot.getAppearance());
 
-		double aspectRatio = getAspectRatio();
 		// for pick mode the aspect ratio has to be set to that of the viewer component
-		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
-		double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
-				aspectRatio,
-				whichEye);
-		globalGL.glMultTransposeMatrixd(c2ndc, 0);
+		globalGL.glMultTransposeMatrixd(camera2NDC[whichEye], 0);
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
 
 		if (backSphere) {  globalGL.glLoadTransposeMatrixd(P3.p3involution, 0);	globalGL.glPushMatrix(); }
-		renderingState.cameraToWorld = context.getCameraToWorld();
-		double[] w2c = Rn.inverse(null, renderingState.cameraToWorld);
-		globalGL.glLoadTransposeMatrixd(w2c, 0);
-		renderingState.flipped = (Rn.determinant(w2c) < 0.0);
+		globalGL.glLoadTransposeMatrixd(world2camera, 0);
 		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
 		JOGLRendererHelper.handleSkyBox(this, theRoot.getAppearance(),CameraUtility.getCamera(theViewer) );
@@ -407,8 +419,8 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	public void init(GL gl) {
 		globalGL = gl;
-	
 		renderingState = new JOGLRenderingState(this);
+		updateCamera();
 		lightHelper = new JOGLLightHelper(this);
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.FINE,"new GL: "+gl);			
@@ -649,6 +661,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		width = arg3-arg1;
 		height = arg4-arg2;
 		myglViewport(0,0, width, height);
+		updateCamera();
 	}
 
 
