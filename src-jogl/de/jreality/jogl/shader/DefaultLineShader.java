@@ -164,7 +164,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be controlled
 		changedTransp = false;
-		if (tubeDraw) {
+//		if (tubeDraw) {
 			// check to see if we're different from most recent rendering hints
 			if (opaqueTubes == jrs.transparencyEnabled)	{	// change of state!
 				if (opaqueTubes)	{
@@ -178,7 +178,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				}
 				changedTransp = true;					
 			}
-		}
+//		}
 
 		if (!tubeDraw) gl.glDepthRange(0.0d, jrs.depthFudgeFactor);
 	}

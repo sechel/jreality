@@ -756,6 +756,7 @@ public class JOGLRendererHelper {
 			DoubleArrayArray vertices, IntArrayArray indices, double[] offset,
 			int alignment, double scale) {
 		GL gl = jr.globalGL;
+		gl.glPushAttrib(GL.GL_ENABLE_BIT);
 		gl.glEnable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthMask(true);
@@ -786,8 +787,7 @@ public class JOGLRendererHelper {
 			drawFaces(jr, bb, true, 1.0);
 			gl.glPopMatrix();
 		}
-		gl.glDisable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_TEXTURE_2D);
+		gl.glPopAttrib();
 		jr.renderingState.texUnitCount = 0;
 	}
 	private static double[] correctionNDC = null;
