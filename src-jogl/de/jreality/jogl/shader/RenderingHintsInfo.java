@@ -125,7 +125,7 @@ public class RenderingHintsInfo  {
 	        	values[i][VALUE] = (Boolean) foo; 
 		        	values[i][ACTIVE] = true;
 		        	hasSomeActiveField = true;	    
-		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
+//		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
 			}	else {
 				values[i][ACTIVE] = false;
 			}
@@ -179,6 +179,7 @@ public class RenderingHintsInfo  {
 				  gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 				  jrs.transparencyEnabled = true;
 				  if (values[ZB][ACTIVE]) 	jrs.zbufferEnabled = values[ZB][which];
+				  else jrs.zbufferEnabled = false;
 				} else	{
 				  gl.glDepthMask(true);
 				  gl.glDisable(GL.GL_BLEND);
