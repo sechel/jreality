@@ -269,13 +269,18 @@ public class IndexedFaceSetUtility {
 		// TODO replace this code when it's fixed to initialize the factory with the existing ifs.
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();// Pn.EUCLIDEAN, true, false, true);
 		ifsf.setSignature(sig);
-		ifsf.setGenerateEdgesFromFaces(true);
+//		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setVertexCount(points.length);
 		ifsf.setFaceCount(1);
 		ifsf.setVertexCoordinates(points);
 		ifsf.setFaceIndices(ind);
+		ifsf.setLineCount(1);
+		ind = new int[1][points.length+1];
+		for (int i = 0; i<=points.length; ++i)	ind[0][i] = (i%points.length);
+		ifsf.setEdgeIndices(ind);
 		ifsf.update();
+		
 		return ifsf.getIndexedFaceSet();
 	}
 
