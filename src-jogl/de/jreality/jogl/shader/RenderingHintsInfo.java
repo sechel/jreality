@@ -109,6 +109,7 @@ public class RenderingHintsInfo  {
 		for (int i = 0; i<numBooleans; ++i)	{
 			defaultRHInfo.values[i][ACTIVE] = true;
 			defaultRHInfo.values[i][VALUE] = defaultValues[i];
+			defaultRHInfo.values[i][OLD] = defaultValues[i];
 		}
 		defaultRHInfo.values[LD][ACTIVE] = true;
 		defaultRHInfo.values[FF][ACTIVE] = true;
@@ -169,6 +170,8 @@ public class RenderingHintsInfo  {
 		if (!hasSomeActiveField) return;
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
+		if (this == defaultRHInfo) 
+//			System.err.println("rendering default rhinfo");
 		// TODO handle zbuffer enabled correctly; it's a bit tricky 
 		// since it depends on transparency enabled value
 		if (values[TE][ACTIVE])	{

@@ -203,7 +203,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	private void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.renderer.globalGL;
-			gl.glColor4fv( diffuseColorAsFloat,0);
+		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
+		gl.glColor4fv( diffuseColorAsFloat,0);
+		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 		
 		if (!sphereDraw)	{
 			LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
@@ -247,7 +249,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		}
 		// TODO build in support for OPAQUE_TUBES_AND_SPHERES
 		changedTransp = false;
-		if (sphereDraw) {
+//		if (sphereDraw) {
 			if (opaqueSpheres == jrs.transparencyEnabled)	{	// change of state!
 				if (opaqueSpheres)	{
 					gl.glDepthMask(true);
@@ -259,7 +261,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				}
 				changedTransp = true;					
 			}
-		}
+//		}
 		
 	}
 
@@ -386,7 +388,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			}
 			else {
 				if (!useDisplayLists || jr.isPickMode()) {
-					JOGLRendererHelper.drawVertices(jr, (PointSet) g,   jr.renderingState.diffuseColor[3]);
+					JOGLRendererHelper.drawVertices(jr, (PointSet) g, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{
 						dList = jr.globalGL.glGenLists(1);

@@ -94,6 +94,14 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	boolean fastAndDirty = false;
 	boolean geometryHasTextureCoordinates = false;
 	private transient boolean needsChecked = true;
+	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
+	static {
+		Appearance ap = new Appearance();
+		EffectiveAppearance eap = EffectiveAppearance.create();
+		eap.create(ap);
+		defaultShader.setFromEffectiveAppearance(eap, "");
+	}
+	
 	/**
 		 * 
 		 */
@@ -171,6 +179,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //		else		gl.glShadeModel(GL.GL_FLAT);
 //		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
+		gl.glPushAttrib(GL.GL_TEXTURE_BIT);
 		texUnit = GL.GL_TEXTURE0; // jr.getRenderingState().texUnitCount + GL.GL_TEXTURE0; //
 	    if (joglLightMap != null) {
 		    gl.glActiveTexture(texUnit);
@@ -295,19 +304,20 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		GL gl = jrs.renderer.globalGL;
 		if (useGLSL)
 			glslShader.postRender(jrs);
-			for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
-				gl.glActiveTexture(i);
-				gl.glDisable(GL.GL_TEXTURE_2D);
-			}
-			if (reflectionMap != null) {
-				gl.glActiveTexture(refMapUnit);
-				gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-				gl.glDisable(GL.GL_TEXTURE_GEN_S);
-				gl.glDisable(GL.GL_TEXTURE_GEN_T);
-				gl.glDisable(GL.GL_TEXTURE_GEN_R);
-			}
+		for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
+			gl.glActiveTexture(i);
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		}
+		if (reflectionMap != null) {
+			gl.glActiveTexture(refMapUnit);
+			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+			gl.glDisable(GL.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL.GL_TEXTURE_GEN_R);
+		}
 		jr.renderingState.texUnitCount=0;
 		// TODO fix this to return to previous state -- maybe textures NOT active
+		gl.glPopAttrib();
 	}
 
     public static void defaultPolygonRender(JOGLRenderingState jrs)	{

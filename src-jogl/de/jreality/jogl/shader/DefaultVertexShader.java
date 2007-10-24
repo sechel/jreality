@@ -48,6 +48,7 @@ import javax.media.opengl.GL;
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
@@ -67,6 +68,13 @@ public class DefaultVertexShader implements VertexShader {
 	public double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
 	public float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
 	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+	public static DefaultVertexShader defaultShader = new DefaultVertexShader();
+	static {
+		Appearance ap = new Appearance();
+		EffectiveAppearance eap = EffectiveAppearance.create();
+		eap.create(ap);
+		defaultShader.setFromEffectiveAppearance(eap, "");
+	}
 	
 	/**
 	 * 
