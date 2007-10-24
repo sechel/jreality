@@ -294,7 +294,8 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	private double inverseDMin, inverseDMax;
 	protected  boolean accept(final double[] m) { //double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
 			mat3 = m;
-			mat2 = o2c; fastTimes();
+			mat2 = o2c; if (mat2 == null) return false; 
+			fastTimes();
 			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
 			double d = Pn.inverseDistanceToOrigin(tmp2,  signature);
 //			System.err.println("coshd = "+d);

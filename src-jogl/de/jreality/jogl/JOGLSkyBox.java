@@ -111,9 +111,9 @@ class JOGLSkyBox {
 		gl.glEnd();
 	}
     gl.glPopMatrix();
-	gl.glDepthFunc(GL.GL_LESS);
 	gl.glPopAttrib();
 	gl.glDepthMask(true);
+	gl.glDepthFunc(GL.GL_LESS);	
 }
 	
 }
