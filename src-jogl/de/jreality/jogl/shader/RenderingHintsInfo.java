@@ -189,7 +189,7 @@ public class RenderingHintsInfo  {
 				  jrs.transparencyEnabled = false;
 				  jrs.zbufferEnabled = true;
 				}
-			System.err.println("Setting transp to "+values[TE][which]);
+//			System.err.println("Setting transp to "+values[TE][which]);
 		}
 		if (values[LE][ACTIVE]) {
 			if (values[LE][which])			gl.glEnable(GL.GL_LIGHTING);
