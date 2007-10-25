@@ -213,12 +213,12 @@ public class RenderingHintsInfo  {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 		}
-		if (values[SM][ACTIVE])	{
-			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
-			else		gl.glShadeModel(GL.GL_FLAT);
-			jr.renderingState.smoothShading = values[SM][which];
-//			System.err.println("SM: Setting ss to "+values[SM][which]);
-		}
+//		if (values[SM][ACTIVE])	{
+//			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
+//			else		gl.glShadeModel(GL.GL_FLAT);
+//			jr.renderingState.smoothShading = values[SM][which];
+////			System.err.println("SM: Setting ss to "+values[SM][which]);
+//		}
 		if (values[SMPG][ACTIVE])	{
 			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
 			else		gl.glShadeModel(GL.GL_FLAT);
