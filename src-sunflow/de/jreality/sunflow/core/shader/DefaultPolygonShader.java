@@ -79,15 +79,13 @@ public class DefaultPolygonShader implements Shader {
         	Color ref = state.traceReflection(refRay, 0);
         	float l = cm.getBlendColor().getAlpha()/255f;
         	ret.mul(1-l).madd(l, ref);
-        	
-            
-            if (diff[3] != 1) {
-            	float t=(float) diff[3];
-            	Color refl = state.traceRefraction(new Ray(state.getPoint(), state.getRay().getDirection()), 0); 
-            	//Color refl = state.traceTransparency();
-            	ret.mul(t).madd(1-t, refl);
-            }
         }             
+        if (diff[3] != 1) {
+        	float t=(float) diff[3];
+        	Color refl = state.traceRefraction(new Ray(state.getPoint(), state.getRay().getDirection()), 0); 
+        	//Color refl = state.traceTransparency();
+        	ret.mul(t).madd(1-t, refl);
+        }
         return ret;
 	}
 
