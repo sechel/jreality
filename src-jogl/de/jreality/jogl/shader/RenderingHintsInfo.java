@@ -124,8 +124,8 @@ public class RenderingHintsInfo  {
 	        Object foo = ap.getAttribute(attributes[i], Boolean.class);
 	        if (foo != Appearance.INHERITED) { 
 	        	values[i][VALUE] = (Boolean) foo; 
-		        	values[i][ACTIVE] = true;
-		        	hasSomeActiveField = true;	    
+		        values[i][ACTIVE] = true;
+		        hasSomeActiveField = true;	    
 //		        	System.err.println("Got field "+attributes[i]+" = "+values[i][VALUE]);
 			}	else {
 				values[i][ACTIVE] = false;
@@ -170,7 +170,7 @@ public class RenderingHintsInfo  {
 		if (!hasSomeActiveField) return;
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
-		if (this == defaultRHInfo) 
+//		if (this == defaultRHInfo) 
 //			System.err.println("rendering default rhinfo");
 		// TODO handle zbuffer enabled correctly; it's a bit tricky 
 		// since it depends on transparency enabled value
@@ -189,6 +189,7 @@ public class RenderingHintsInfo  {
 				  jrs.transparencyEnabled = false;
 				  jrs.zbufferEnabled = true;
 				}
+			System.err.println("Setting transp to "+values[TE][which]);
 		}
 		if (values[LE][ACTIVE]) {
 			if (values[LE][which])			gl.glEnable(GL.GL_LIGHTING);
