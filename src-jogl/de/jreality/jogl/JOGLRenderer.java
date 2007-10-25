@@ -429,7 +429,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		display(drawable.getGL());
 	}
-
+	protected int[] whichTile = new int[2];
 	public void display(GL gl) {
 		globalGL=gl;
 		renderingState.initializeGLState();
@@ -493,6 +493,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				else whichEye = CameraUtility.MIDDLE_EYE;
 				for (int i = 0; i<numTiles; ++i)	{
 					for (int j = 0; j<numTiles; ++j)	{
+						whichTile[0] = j; whichTile[1] = i;
 						renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
 						System.err.println("Setting vp to "+lr.toString());
@@ -801,7 +802,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		return ((double) currentViewport[2])/currentViewport[3];
 	}
 
-	private int tileSizeX=1024, tileSizeY=768,numTiles=4;
+	protected int tileSizeX=1024, tileSizeY=768,numTiles=4;
 	protected long beginRenderTime;
 	
 	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLCanvas canvas) {

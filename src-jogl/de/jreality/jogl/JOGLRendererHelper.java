@@ -47,6 +47,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.logging.Level;
@@ -93,6 +94,7 @@ import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -148,15 +150,11 @@ public class JOGLRendererHelper {
 			boolean hasTexture = false, hasColors = false;
 			double textureAR = 1.0;
 			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
-			if (bgo != null && bgo instanceof Texture2D) {
-				Texture2D tex = ((Texture2D) bgo);
-				// Texture2DLoaderJOGL tl = Texture2DLoaderJOGL.FactoryLoader;
-				// JOGLConfiguration.theLog.log(Level.INFO,"Texture:
-				// "+tex.getWidth()+" "+tex.getHeight());
+			Texture2D tex = null;
+			if (bgo != null && bgo instanceof List) {
+				tex = (Texture2D) ((List)bgo).get(0);
 				textureAR = tex.getImage().getWidth()
 						/ ((double) tex.getImage().getHeight());
-				Texture2DLoaderJOGL.render(gl, tex);
-				gl.glEnable(GL.GL_TEXTURE_2D);
 				hasTexture = true;
 			}
 			double ar = width / ((double) height) / textureAR;
@@ -172,14 +170,35 @@ public class JOGLRendererHelper {
 				xl = .5 * (1 - ar);
 				xr = 1.0 - xl;
 			}
+			if (jr.offscreenMode)	{
+				double xmin = ((double)jr.whichTile[0])/jr.numTiles;
+				double xmax = ((double)jr.whichTile[0]+1)/jr.numTiles;
+				double ymin = ((double)jr.whichTile[1])/jr.numTiles;
+				double ymax = ((double)jr.whichTile[1]+1)/jr.numTiles;
+				double nxl, nxr, nyb, nyt;
+				nxr = xr + xmin*(xl-xr);
+				nxl = xr + xmax*(xl-xr);
+				nyt = yt + ymin*(yb-yt);
+				nyb = yt + ymax*(yb-yt);
+				xl = nxl; xr = nxr; yb = nyb; yt = nyt;
+			}
 			double[][] texcoords = { { xl, yb }, { xr, yb }, { xr, yt }, { xl, yt } };
-			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
-			if (bgo != null && bgo instanceof Color[]) {
-				hasColors = true;
+			if (!hasTexture)	{
+				bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
+				if (bgo != null && bgo instanceof Color[]) {
+					hasColors = true;
+				}				
 			}
 			if (hasTexture || hasColors) {
 				// bgo = (Object) corners;
 				float[][] cornersf = new float[4][];
+				if (hasTexture)	{
+					gl.glPushAttrib(GL.GL_TEXTURE_BIT);
+					gl.glActiveTexture(GL.GL_TEXTURE0);
+					gl.glEnable(GL.GL_TEXTURE_2D);
+					Texture2DLoaderJOGL.render(gl, tex);
+				}
+//				gl.glPushAttrib(GL.GL_ENABLE_BIT);
 				gl.glDisable(GL.GL_DEPTH_TEST);
 				gl.glDisable(GL.GL_LIGHTING);
 				gl.glShadeModel(GL.GL_SMOOTH);
@@ -197,9 +216,14 @@ public class JOGLRendererHelper {
 				}
 				gl.glEnd();
 				// TODO push/pop this correctly (now may overwrite previous values)
+//				gl.glPopAttrib();
 				gl.glEnable(GL.GL_DEPTH_TEST);
 				gl.glEnable(GL.GL_LIGHTING);
-				gl.glDisable(GL.GL_TEXTURE_2D);
+				if  (hasTexture) {
+					gl.glActiveTexture(GL.GL_TEXTURE0);
+					gl.glDisable(GL.GL_TEXTURE_2D);
+					gl.glPopAttrib();
+				}
 			}			
 		}
 		bgo = topAp.getAttribute(CommonAttributes.FOG_ENABLED);
