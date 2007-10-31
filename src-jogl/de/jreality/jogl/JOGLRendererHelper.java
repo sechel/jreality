@@ -220,8 +220,8 @@ public class JOGLRendererHelper {
 				gl.glEnable(GL.GL_DEPTH_TEST);
 				gl.glEnable(GL.GL_LIGHTING);
 				if  (hasTexture) {
-					gl.glActiveTexture(GL.GL_TEXTURE0);
 					gl.glDisable(GL.GL_TEXTURE_2D);
+					gl.glMatrixMode(GL.GL_PROJECTION);
 					gl.glPopAttrib();
 				}
 			}			
