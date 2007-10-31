@@ -199,7 +199,7 @@ public class Texture2DLoaderJOGL {
    }
 //    System.err.println("Not yet bound ");
     int srcPixelFormat = GL.GL_RGBA;
-    handleTextureParameters(tex, gl);
+   handleTextureParameters(tex, gl);
 
     // create either a series of mipmaps of a single texture image based on
     // what's loaded
