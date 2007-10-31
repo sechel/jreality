@@ -161,9 +161,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 		}
 
-		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		if (originalAppearanceDirty) propagateAppearanceChanged();
-		if (appearanceDirty || effectiveAppearanceDirty)  	handleAppearanceChanged();
+		if (effectiveAppearanceDirty)  	propagateEffectiveAppearanceChanged();
+		if (appearanceDirty )  	handleAppearanceChanged();
+		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		jr.renderingState.currentSignature = signature;
 		if (rhInfo != null && rhInfo.hasSomeActiveField())	{
 			rhInfo.render(jr.renderingState, jr.rhStack.lastElement());
@@ -270,10 +271,18 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (debug) LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+name);
 		appearanceDirty = true;
 		for (JOGLPeerComponent child : children) {
-			if (effectiveAppearanceDirty) child.effectiveAppearanceDirty=true;
 			child.propagateAppearanceChanged();
 		}	
 		originalAppearanceDirty = false;
+	}
+
+	protected void propagateEffectiveAppearanceChanged()	{
+		if (debug) LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagateeap: "+name);
+		appearanceDirty =  true;
+		effectiveAppearanceDirty = true;
+		for (JOGLPeerComponent child : children) {
+			child.propagateEffectiveAppearanceChanged();
+		}	
 	}
 
 	private void handleAppearanceChanged() {
@@ -313,7 +322,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
 		signature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-//		if (goBetween.originalComponent.getGeometry() == null) return;
 		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;
@@ -324,15 +332,12 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 			else 
 				geometryShader.setFromEffectiveAppearance(eAp, "");
-
-		}
+		} 	
 		if (thisAp != null) {
 			if (rhInfo == null) 	rhInfo =  new RenderingHintsInfo();
 			rhInfo.setFromAppearance(thisAp);			
 		}
 
-//		System.err.println(goBetween.getOriginalComponent().getName()+" signature is "+signature);
-//		System.err.println("Clip to camera is "+clipToCamera);
 	}
 
 	protected boolean someSubNodeIsDirty()	{
@@ -343,19 +348,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		return false;
 	}
 	
-//	protected boolean shadersAreDirty()	{
-//		if (geometryShader == null) return false;
-//		boolean ret = false;
-//		if (geometryDirtyBits != 0) ret = true;
-//		else if (geometryShader.isFaceDraw() && geometryShader.polygonShader != null &&
-//			geometryShader.polygonShader.displayListsDirty()) ret = true;
-//		else if (geometryShader.isEdgeDraw() && geometryShader.lineShader != null &&
-//			geometryShader.lineShader.displayListsDirty()) ret = true;
-//		else if (geometryShader.isVertexDraw() && geometryShader.pointShader != null &&
-//			geometryShader.pointShader.displayListsDirty()) ret = true;
-//		if (ret) System.err.println(name+" shaders are dirty");
-//		return ret;
-//	}
 	public void childAdded(SceneGraphComponentEvent ev) {
 		if (debug) theLog.finer("JOGLPeerComponent: Container Child added to: "+name);
 		//theLog.log(Level.FINE,"Event is: "+ev.toString());
@@ -474,10 +466,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void handleNewAppearance() {
-		if (debug) LoggingSystem.getLogger(this).finer("handle new appearance "+name);
-		propagateGeometryChanged(ALL_CHANGED);
-		appearanceDirty = true;
+		if (debug) 
+			LoggingSystem.getLogger(this).info("handle new appearance "+name);
 		effectiveAppearanceDirty=true;
+		propagateGeometryChanged(ALL_CHANGED);
 	}
 
 	public void propagateGeometryChanged(int changed) {
