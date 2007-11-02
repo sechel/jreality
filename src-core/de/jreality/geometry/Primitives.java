@@ -798,7 +798,8 @@ public class Primitives {
 	    
 	    factory.setVertexCount( 4 );
 	    factory.setFaceCount(1);
-	    factory.setVertexCoordinates(points);
+	    factory.setVertexCoordinates(points == null ? 
+	    		new double[]{0,0,0, 1,0,0,  1,1,0,  0,1,0} : points);
 	    factory.setFaceIndices(new int[][] {{ 0,1,2,3}});
 	    factory.setVertexTextureCoordinates(new double[] { 0,0,1,0,1,1,0,1});
 	    factory.setGenerateVertexNormals(true);
