@@ -194,15 +194,19 @@ public class IndexedLineSetUtility {
 		return createCurveFromPoints(g, points, fiber, ind);
 	}
 
-	public static IndexedLineSet circle(int n) {
+	public static IndexedLineSet circle(int n, double cx, double cy, double r) {
 		double[][] verts = new double[n][3];
 		double angle = 0, delta = Math.PI * 2 / (n);
 		for (int i = 0; i<n; ++i) {
 			angle = i * delta;
-			verts[i][0] = Math.cos(angle);
-			verts[i][1] = Math.sin(angle);
+			verts[i][0] = cx+r*Math.cos(angle);
+			verts[i][1] = cy+r*Math.sin(angle);
 		}
 		return createCurveFromPoints(verts, true);
+	}
+
+	public static IndexedLineSet circle(int n) {
+		return circle(n, 0, 0, 1);
 	}
 	public static PointSet indexedLineSetToPointSet(IndexedLineSet l){
 		PointSet p= new PointSet(l.getNumPoints());
