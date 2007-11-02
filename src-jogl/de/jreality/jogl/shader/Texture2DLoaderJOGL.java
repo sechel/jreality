@@ -355,12 +355,13 @@ public class Texture2DLoaderJOGL {
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
 
-    float[] texcolor = tex.getBlendColor().getRGBComponents(null);
+    float[] texcolor = tex.getBlendColor().getComponents(null);
     gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
     gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
     
     if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
     {
+//    	System.err.println("Combining with alpha "+texcolor[3]);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineModeColor());
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, tex.getSource0Color()); //GL.GL_TEXTURE);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, tex.getOperand0Color()); // GL.GL_SRC_COLOR);
@@ -368,6 +369,13 @@ public class Texture2DLoaderJOGL {
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_RGB, tex.getOperand1Color()); //GL.GL_SRC_COLOR);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_RGB, tex.getSource2Color()); // GL.GL_CONSTANT);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB,tex.getOperand2Color()); // GL.GL_SRC_ALPHA);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, tex.getCombineModeAlpha());
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_ALPHA, tex.getSource0Alpha()); //GL.GL_TEXTURE);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_ALPHA, tex.getOperand0Alpha()); // GL.GL_SRC_COLOR);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_ALPHA, tex.getSource1Alpha()); //GL.GL_PREVIOUS);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_ALPHA, tex.getOperand1Alpha()); //GL.GL_SRC_COLOR);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_ALPHA, tex.getSource2Alpha()); // GL.GL_CONSTANT);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_ALPHA,tex.getOperand2Alpha()); // GL.GL_SRC_ALPHA);
       
     }    
     gl.glMatrixMode(GL.GL_TEXTURE);

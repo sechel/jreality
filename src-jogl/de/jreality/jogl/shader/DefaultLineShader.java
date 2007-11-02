@@ -377,7 +377,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
-		//LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+dList+" : "+dListProxy);
+		LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+dList+" : "+dListProxy);
 		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
 		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
