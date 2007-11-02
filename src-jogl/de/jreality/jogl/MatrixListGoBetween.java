@@ -56,7 +56,7 @@ public class MatrixListGoBetween extends GoBetween {
 
 	@Override
 	public void transformationMatrixChanged(TransformationEvent ev) {
-		setPeerDisplayListDirty();
+//		setPeerDisplayListDirty();
 		super.transformationMatrixChanged(ev);
 	}
 
