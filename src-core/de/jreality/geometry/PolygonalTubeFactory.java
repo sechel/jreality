@@ -210,14 +210,14 @@ import de.jreality.util.LoggingSystem;
 		qmf.setGenerateVertexNormals(true);
 		qmf.setEdgeFromQuadMesh(true);
 		qmf.setGenerateEdgesFromFaces(generateEdges);
+		qmf.update();
+		theTube = qmf.getIndexedFaceSet();
 		if (generateTextureCoordinates)	{
 			if (!arcLengthTextureCoordinates) qmf.setGenerateTextureCoordinates(true);
 			else {
 				qmf.setVertexTextureCoordinates(arcLengthTextureCoordinates(theCurve, crossSection, signature));
 			}
 		}
-		qmf.update();
-		theTube = qmf.getIndexedFaceSet();
 		if (vertexColors != null || edgeColors != null)	{
 		 	int numVerts = theTube.getNumPoints();
 		 	int numFaces = theTube.getNumFaces();
@@ -234,7 +234,8 @@ import de.jreality.util.LoggingSystem;
 		 			}
 		 		}
 		 		theLogger.log(Level.FINER,"Setting Face colors");
-		 		theTube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(colorLength).createReadOnly(faceColors));
+//		 		theTube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(colorLength).createReadOnly(faceColors));
+		 		qmf.setFaceColors(faceColors);
 		 	}
 		 	if (vertexColorsEnabled && vertexColors != null)	{
 		 		int colorLength = vertexColors[0].length;
@@ -248,9 +249,12 @@ import de.jreality.util.LoggingSystem;
 		 			}
 		 		}
 		 		theLogger.log(Level.FINER,"Setting vertex colors");
-		 		theTube.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(colorLength).createReadOnly(vertColors));
+//		 		theTube.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(colorLength).createReadOnly(vertColors));
+		 		qmf.setVertexColors(vertColors);
 		 	}
 		}
+		qmf.update();
+		theTube = qmf.getIndexedFaceSet();
 	}
 	
 	private double[][] arcLengthTextureCoordinates(double[][] theCurve, double[][] crossSection, int signature) {
