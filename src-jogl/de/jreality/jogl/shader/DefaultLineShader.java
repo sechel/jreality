@@ -87,14 +87,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	Color diffuseColor = java.awt.Color.BLACK;
 	private PolygonShader polygonShader;
 	boolean changedTransp, changedLighting;
+	float[] diffuseColorAsFloat;
 	 
-		/**
-		 * 
-		 */
-	public DefaultLineShader() {
-			super();
-		}
-
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		tubeDraw = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
@@ -110,25 +104,11 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		lineStipplePattern = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE_PATTERN),lineStipplePattern);
 		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.LINE_DIFFUSE_COLOR_DEFAULT);
 		double transp = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		setDiffuseColor( ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp, JOGLRenderingState.useOldTransparency));
-		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
-		//smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
-		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader is smooth: "+smoothShading);
-		//JOGLConfiguration.theLog.log(Level.FINE,"Line shader's polygon shader is smooth: "+(polygonShader.isSmoothShading() ? "true" : "false"));
-		//polygonShader.setDiffuseColor(diffuseColor);
-	}
-
-	public Color getDiffuseColor() {
-		return diffuseColor;
-	}
-	float[] diffuseColorAsFloat;
-	public float[] getDiffuseColorAsFloat() {
-		return diffuseColorAsFloat;
-	}
-
-	public void setDiffuseColor(Color diffuseColor2) {
-		diffuseColor = diffuseColor2;
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
+		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
+		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
+		//LoggingSystem.getLogger(this).info("Line shader is smooth: "+smoothShading);
 	}
 
 	public void preRender(JOGLRenderingState jrs)	{
@@ -137,7 +117,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
-	
+
+		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
+		else		gl.glShadeModel(GL.GL_FLAT);
+		jrs.smoothShading = smoothShading;
 		gl.glLineWidth((float) lineWidth);
 		jrs.lineWidth = lineWidth;
 		if (lineStipple) {
@@ -152,7 +135,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			polygonShader.render(jrs);
 			jrs.currentGeometry = g;
 			lighting=true;
-		} else lighting = false;
+		} else lighting = smoothShading;
 //		jr.renderingState.lighting = lighting;
 		changedLighting = false;
 		if (lighting != jrs.lighting)	{
