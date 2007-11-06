@@ -296,7 +296,7 @@ final public class Quaternion implements Cloneable, Serializable {
 	 */
 	public static Quaternion rotationMatrixToQuaternion(Quaternion q, double[] mat)		{
 		// assert dim checks
-		int n = Rn.sqrt(mat.length);
+		int n = Rn.mysqrt(mat.length);
 		double d = Rn.determinant(mat);
 		double[] m = null;
 		if (d < 0)	{

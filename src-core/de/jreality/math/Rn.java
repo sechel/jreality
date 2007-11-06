@@ -168,7 +168,7 @@ final public class Rn {
 	 * @return	dst
 	 */
 	public static double[] adjoint(double[] dst, double[] src)	{
-		int n = sqrt(src.length);
+		int n = mysqrt(src.length);
 		int sgn = 1;
 		//assert dim checks
 		if (dst == null)	dst = (double[]) src.clone();
@@ -273,7 +273,7 @@ final public class Rn {
 	 * @return		m
 	 */
 	public static double cofactor(double[] m, int row, int column)	{
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		// assert dim check
 		return determinant(submatrix((double[]) null, m, row, column));		
 	}
@@ -287,7 +287,7 @@ final public class Rn {
 	 * @return	dst
 	 */
 	public static double[] conjugateByMatrix(double[] dst, double[] m, double[] c)	{
-		int n = sqrt(c.length);
+		int n = mysqrt(c.length);
 		// assert dim checks
 		if (dst == null) dst = new double[c.length];
 		times(dst, c, times(null, m, inverse(null, c)));
@@ -383,7 +383,7 @@ final public class Rn {
 	 */
 	public static double determinant(double[] m)	{
 		double det = 0.0;
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		if (n > 4) {
 			double[] subm = new double[(n-1)*(n-1)];
 			for (int i = 0; i<n; ++i)	{
@@ -401,7 +401,7 @@ final public class Rn {
 	 */
 	private static double determinantOld(double[] m)	{
 		double det = 0.0;
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		switch (n)	{
 		// optimize following by parenthesizing
 			case 4:
@@ -545,7 +545,7 @@ final public class Rn {
 		if (r-l != b-t )	{
 			throw new IllegalArgumentException("(b-t) must equal (r-l)");
 		}
-		int n = sqrt(src.length);
+		int n = mysqrt(src.length);
 		int submsize = (b-t+1)*(r-l+1);
 		int count = 0;
 		if (subm.length != submsize)	subm = new double[submsize];
@@ -625,7 +625,7 @@ final public class Rn {
 	 * @return		minv
 	 */
 	public static double[] inverse(double[] minvIn, double[] m)	{
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		int i, j, k;
 		double x, f;
 		double[] t;
@@ -714,7 +714,7 @@ final public class Rn {
 	 */
 	public static boolean isIdentityMatrix(double[] mat, double tol)	{
 		// assert dim check
-		int n = sqrt(mat.length);
+		int n = mysqrt(mat.length);
 		double[] tmp = new double[mat.length];
 		double[] idd = identityMatrices[n];
 		for (int i = 0; i<tmp.length; ++i) 
@@ -820,7 +820,7 @@ final public class Rn {
 	 */
 	private static void _matrixTimesVectorSafe(double[] dst, double[] m, double[] src)	{
 		int sl = src.length;
-		int ml = sqrt(m.length);
+		int ml = mysqrt(m.length);
 		boolean dehomog = false;
 		if (ml == sl + 1)	dehomog = true;
 		if (sl + 1 < ml || sl > ml)	{
@@ -850,7 +850,7 @@ final public class Rn {
 	 * @return	dst
 	 */
 	public static double[][] matrixTimesVector(double[][] dst, double[] m, double[][] src) {
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		double[][] out;
 		boolean rewrite = false;
 		if (dst == null || dst == src)	{
@@ -913,7 +913,7 @@ final public class Rn {
 	 */
 	public static String matrixToString(double[] m, String formatString) {
 		StringBuffer sb = new StringBuffer();
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 //        sb.append(df.format(v[4*i+j])).append(j == 3 ? "\n":"\t");
@@ -1109,7 +1109,7 @@ final public class Rn {
 	public static double[] setDiagonalMatrix(double[] dst, double[] diag)	{
 		int n2 = diag.length;
 		if (dst == null) dst = new double[n2*n2];
-		int n1 = sqrt(dst.length);
+		int n1 = mysqrt(dst.length);
 		if (n1 < n2)	{
 			throw new IllegalArgumentException("Incompatible lengths");
 		}
@@ -1146,7 +1146,7 @@ final public class Rn {
 	 * @return
 	 */
   public static double[] setIdentityMatrix(double[] mat)	{
-		int n = sqrt(mat.length), noffs=n+1;
+		int n = mysqrt(mat.length), noffs=n+1;
 		Arrays.fill(mat, 0);
 		for(int i=0, k=0; i<n; i++, k+=noffs) mat[k] = 1.0;
 		return mat;		
@@ -1223,7 +1223,7 @@ final public class Rn {
      * @param sq
      * @return
      */
-    public static int sqrt(int sq) {
+    public static int mysqrt(int sq) {
         switch(sq) {
 	        case  16: return  4;
 	        case   9: return  3;
@@ -1251,7 +1251,7 @@ final public class Rn {
 	 * @return
 	 */
 	 public static double[] submatrix(double[] subm, double[] m, int row, int column)	{
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		if (subm == null) subm = new double[(n-1)*(n-1)];
 		if (subm.length != (n-1)*(n-1)) {
 			throw new IllegalArgumentException("Invalid dimension for submatrix");
@@ -1324,11 +1324,12 @@ final public class Rn {
 	 * @param src1		double[n*n]
 	 * @param src2		double[n*n]
 	 * @return
-	 */public static double[] times(double[] dst, double[] src1, double[] src2)	{
+	 */
+	public static double[] times(double[] dst, double[] src1, double[] src2)	{
 		if (src1.length != src2.length) {
 			throw new IllegalArgumentException("Matrices must be same size");
 		}
-		int n = sqrt(src1.length);
+		int n = mysqrt(src1.length);
 		double[] out;
 		boolean rewrite = false;
 		if (dst == src1 || dst == src2 || dst == null )	{
@@ -1429,7 +1430,7 @@ final public class Rn {
 	 * @return
 	 */
 	public static double trace(double[] m) {
-		int n = sqrt(m.length);
+		int n = mysqrt(m.length);
 		double t = 0;
 		for (int i = 0; i < n; ++i)
 			t += m[i * n + i];
@@ -1443,7 +1444,7 @@ final public class Rn {
 	 * @return
 	 */
 	 public static double[] transpose(double[] dst, double[] src)	{
-		int n = sqrt(src.length);
+		int n = mysqrt(src.length);
 		// assert dim checks
 		double[] out;
 		boolean rewrite = false;

@@ -533,7 +533,7 @@ public class P3 {
 	public static double[] makeStretchMatrix(double[] dst, double stretch)	{
 		// assert dim checks
 		if (dst == null) dst = new double[16];
-		int n = Rn.sqrt(dst.length);
+		int n = Rn.mysqrt(dst.length);
 		double[] stretchV = new double[n];
 		Rn.setToValue(stretchV, stretch, stretch, stretch, 1.0);
 		return makeStretchMatrix(dst, stretchV);
@@ -567,7 +567,7 @@ public class P3 {
 	public static double[] makeStretchMatrix(double[] dst, double[] v)	{
 		// assert dim checks
 		if (dst == null) dst = new double[16];
-		int n = Rn.sqrt(dst.length);
+		int n = Rn.mysqrt(dst.length);
 		int ll = Math.min(n, v.length);
 		Rn.setIdentityMatrix(dst);
 		for (int i = 0; i<ll; ++i)	{
