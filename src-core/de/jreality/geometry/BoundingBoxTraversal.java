@@ -164,8 +164,10 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
     if (initialTrafo == currentTrafo)
       currentTrafo= new double[16];
     Rn.copy(currentTrafo, initialTrafo);
+    if (Rn.isNan(t.getMatrix()))	{
+    	throw new IllegalStateException("bad matrix");
+    }
     Rn.times(currentTrafo, currentTrafo, t.getMatrix());
-    //pipeline.setMatrix(currentTrafo);
   }
 
 
@@ -239,10 +241,14 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 	int vectorLength = data[0].length;
 	if (vectorLength<3 || vectorLength > 4) return;
 	Rn.matrixTimesVector(data, currentTrafo, data);
-	if (vectorLength == 4)	{
-		Pn.calculateBounds(tmpVec, data);
-	} else if (vectorLength == 3){
-		Rn.calculateBounds(tmpVec, data);
+	try {
+		if (vectorLength == 4)	{
+			Pn.calculateBounds(tmpVec, data);
+		} else if (vectorLength == 3){
+			Rn.calculateBounds(tmpVec, data);
+		}		
+	} catch (IllegalStateException e){
+		e.printStackTrace();
 	}
 	bound.xmin = Math.min(bound.xmin,tmpVec[0][0]);
 	bound.xmax = Math.max(bound.xmax,tmpVec[1][0]);
