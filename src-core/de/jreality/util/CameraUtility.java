@@ -201,7 +201,7 @@ public class CameraUtility {
 	public static double getAspectRatio(Viewer v)		{
 		if (!v.hasViewingComponent()) return 1.0;
 		Dimension d = v.getViewingComponentSize();
-		return ((double) d.getWidth())/ d.getHeight();
+		return d.getHeight() > 0 ? (double) d.getWidth()/ d.getHeight() : 1.0;
 	}
 	
 	/**
