@@ -963,7 +963,6 @@ public class IndexedFaceSetUtility {
 			if (textureJumps[i][0] || textureJumps[i][1]) newVerts += indices[i].length;
 		}
 		LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINE, "Adding "+newVerts+" vertices");
-		IndexedFaceSet dst = new IndexedFaceSet(newVerts+np, nf);
 		double[][] oldVerts = src.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		double[][] on =null, nn = null;
 		int nl = 0;
@@ -1005,13 +1004,15 @@ public class IndexedFaceSetUtility {
 		ifsf.setVertexCount(nverts.length);
 		ifsf.setVertexCoordinates(nverts);
 		ifsf.setFaceCount(indices.length);
-		ifsf.setVertexNormals(nn);
+		if (nn != null) ifsf.setVertexNormals(nn);
 		ifsf.setVertexTextureCoordinates(ntex);
+		ifsf.setFaceIndices(indices);
 		if( src.getFaceAttributes(Attribute.NORMALS) != null)
 			ifsf.setFaceNormals( src.getFaceAttributes(Attribute.NORMALS));
 		if( src.getFaceAttributes(Attribute.COLORS) != null) 
 			ifsf.setFaceColors( src.getFaceAttributes(Attribute.COLORS));
-		return dst;
+		ifsf.update();
+		return ifsf.getIndexedFaceSet();
 	}
 
         
