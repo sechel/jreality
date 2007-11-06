@@ -314,7 +314,7 @@ public class ReaderOOGL extends AbstractReader {
             else if ( st.sval.indexOf("VECT") != -1) {
               current =SceneGraphUtility.createFullSceneGraphComponent("VECT-node");
               int vLength = (st.sval.indexOf("4") != -1) ?  4 : 3;
-               //LoggingSystem.getLogger().log(Level.FINER,"found object!");
+               LoggingSystem.getLogger(this).log(Level.FINER,"found object!");
               st.nextToken();
               int numCurves = Integer.parseInt(st.sval);
               st.nextToken();
@@ -329,7 +329,7 @@ public class ReaderOOGL extends AbstractReader {
               for (int i = 0; i<numCurves; ++i) {
                 st.nextToken();
                 int realCount = 0;
-                //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
+                LoggingSystem.getLogger(this).log(Level.FINER,"Token is "+st.sval);
                 int val = Integer.parseInt(st.sval);  
                 if (val < 0) {
 	                val = sizes[i] = -val;
@@ -350,7 +350,7 @@ public class ReaderOOGL extends AbstractReader {
               int totalColors = 0;
               for (int i = 0; i<numCurves; ++i) {
             	  st.nextToken();
-            	  //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
+            	  LoggingSystem.getLogger(this).log(Level.FINER,"Token is "+st.sval);
             	  colors[i] = Integer.parseInt(st.sval);  
             	  totalColors += colors[i];
               }
@@ -358,31 +358,33 @@ public class ReaderOOGL extends AbstractReader {
               vc = new double[totalVerts][4];
               for (int i = 0; i<totalVerts; ++i)  {
                 for (int j = 0; j<vLength; ++j) {
-              st.nextToken();
-              //LoggingSystem.getLogger().log(Level.FINER,"Token is "+st.sval);
-              verts[i][j] = Double.parseDouble(st.sval);                        
-            }
-          }
+                	st.nextToken();
+                	LoggingSystem.getLogger(this).log(Level.FINER,"Token is "+st.sval);
+                	verts[i][j] = Double.parseDouble(st.sval);                        
+                }
+              }
               // parse the colors now
               int vertC = 0;
-              for (int i = 0; i<numCurves; ++i) {
-                int j;
-                for (j = 0; j<colors[i]; ++j) {
-                    for (int k = 0; k<4; ++k) {
-                      st.nextToken();
-                      vc[vertC][k] = Double.parseDouble(st.sval);      
-                  }
-                  vertC++;
-                }
-                // fill in the remaining entries in the colors
-                for ( ; j< sizes[i]; ++j) {
-                  for (int k = 0; k<4; ++k) {
-                      vc[vertC][k] = vc[vertC-1][k];                    
-                  }
-                  vertC++;
-                }
-                }
-              LoggingSystem.getLogger(ReaderOOGL.class).log(Level.INFO,"Read "+numCurves+" curves and "+totalVerts+ " vertices");
+              if (totalColors > 0)	{
+                  for (int i = 0; i<numCurves; ++i) {
+                      int j;
+                      for (j = 0; j<colors[i]; ++j) {
+                          for (int k = 0; k<4; ++k) {
+                            st.nextToken();
+                            vc[vertC][k] = Double.parseDouble(st.sval);      
+                        }
+                        vertC++;
+                      }
+                      // fill in the remaining entries in the colors
+                      for ( ; j< sizes[i]; ++j) {
+                        for (int k = 0; k<4; ++k) {
+                            vc[vertC][k] = vc[vertC-1][k];                    
+                        }
+                        vertC++;
+                      }
+                      }           	  
+              }
+               LoggingSystem.getLogger(ReaderOOGL.class).log(Level.INFO,"Read "+numCurves+" curves and "+totalVerts+ " vertices");
               IndexedLineSet ils = new IndexedLineSet(totalVerts);
               ils.setName("VECT Geometry");
                   ils.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vLength).createReadOnly(verts));
