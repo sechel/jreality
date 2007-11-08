@@ -657,6 +657,7 @@ public class SunflowRenderer extends SunflowAPI {
 			fov = Math.atan(((double)width)/((double)height)*Math.tan(fov/360*Math.PI))/Math.PI*360;
 		}
 		parameter("fov", fov);
+		parameter("focus", camera.getFocus());  //for orthographic projection
 		String name = getUniqueName("camera");
 		camera(name, camera.isPerspective() ? new PinholeLens() : new OrthogonalLens());
 		parameter("camera", name);

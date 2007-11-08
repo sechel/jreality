@@ -7,11 +7,13 @@ import org.sunflow.core.Ray;
 
 public class OrthogonalLens implements CameraLens {
 
-	private float aspect, fov;
+	private float au, av;
+	private float aspect, fov, focus;
 
 	public OrthogonalLens() {
-		fov = 90;
-		aspect = 1;
+		fov = 90.0f;
+		aspect = 1.0f;
+		focus = 3.0f;  //default of camera
 		update();
 	}
 
@@ -19,18 +21,19 @@ public class OrthogonalLens implements CameraLens {
 		// get parameters
 		fov = pl.getFloat("fov", fov);
 		aspect = pl.getFloat("aspect", aspect);
+		focus = pl.getFloat("focus", focus);
 		update();
 		return true;
 	}
 
 	private void update() {
-		fov = (float) Math.tan(Math.toRadians(fov * 0.5f));
+		au = (float) Math.tan(Math.toRadians(fov * 0.5f));
+		av = au / aspect;
 	}
 
 	public Ray getRay(float x, float y, int imageWidth, int imageHeight, double lensX, double lensY, double time) {
-//		System.out.println("x="+x+" y="+y);
-		x= (x-imageWidth/2) / (imageWidth*fov);
-		y= (y-imageHeight/2) / (imageHeight*fov*aspect);
-		return new Ray(x, y, 0, 0, 0, -1);
+		x = -au + ((2.0f * au * x) / (imageWidth - 1.0f));
+		y = -av + ((2.0f * av * y) / (imageHeight - 1.0f));
+		return new Ray(x*focus, y*focus, 0, 0, 0, -1);
 	}
 }
