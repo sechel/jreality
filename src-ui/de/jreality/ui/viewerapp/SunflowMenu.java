@@ -180,6 +180,8 @@ public class SunflowMenu extends JMenu {
 			dimPanel.setBorder(title);
 		}
 		File file = FileLoaderDialog.selectTargetFile(null, dimPanel, false, fileFilters);
+		if (file==null) return;  //dialog cancelled
+		
 		final Dimension dim = dimPanel.getDimension();
 		try {
 			new Statement(Class.forName("de.jreality.sunflow.Sunflow"), "renderAndSave", new Object[]{viewer, opts, dim, file}).execute();
