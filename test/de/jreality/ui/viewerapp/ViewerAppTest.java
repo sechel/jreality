@@ -40,12 +40,12 @@
 
 package de.jreality.ui.viewerapp;
 
-import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 
@@ -60,23 +60,21 @@ public class ViewerAppTest {
   
   public static void main(String[] args) {
     
-  	SceneGraphComponent cmp = getSGC();
-    ViewerApp viewerApp = new ViewerApp(cmp);
+//  	SceneGraphComponent cmp = getSGC();
+    ViewerApp viewerApp = new ViewerApp(Primitives.icosahedron());//cmp);
     viewerApp.setAttachNavigator(true);
     viewerApp.setExternalNavigator(false);
     viewerApp.setAttachBeanShell(true);
     viewerApp.setExternalBeanShell(false);
     
     
-//    JPanel p = new JPanel();
-//    p.add( new JCheckBox("test component", true) );
-//    viewerApp.addAccessory(p, "test tab");
+    ((Camera)viewerApp.getViewerSwitch().getCameraPath().getLastElement()).setPerspective(false);
+    viewerApp.setBackgroundColor(Color.WHITE);
     
-    viewerApp.addAccessory(getSecondViewer(), "viewer");
     viewerApp.update();
     viewerApp.display();
     
-    cmp.addTool(new SelectionTool(viewerApp));
+//    cmp.addTool(new SelectionTool(viewerApp));
 
   }
   
@@ -100,15 +98,4 @@ public class ViewerAppTest {
     return cmp;
   }
   
-  
-  private static Component getSecondViewer()	{
-	  	SceneGraphComponent sgc = getSGC();
-	  	//Secure.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
-	    ViewerApp viewerApp = new ViewerApp(sgc);
-	    Component cmp = ((Component) viewerApp.getContent()); 
-	    cmp.setPreferredSize(new Dimension(0,0));
-	    viewerApp.setBackgroundColor(ViewerApp.defaultBackgroundColor);
-	    
-	    return cmp;
-  }
 }
