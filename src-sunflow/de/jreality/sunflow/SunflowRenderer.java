@@ -110,6 +110,7 @@ import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.sunflow.core.camera.OrthogonalLens;
 import de.jreality.sunflow.core.light.GlPointLight;
 import de.jreality.sunflow.core.primitive.SkyBox;
 import de.jreality.util.Rectangle3D;
@@ -657,7 +658,7 @@ public class SunflowRenderer extends SunflowAPI {
 		}
 		parameter("fov", fov);
 		String name = getUniqueName("camera");
-		camera(name, new PinholeLens());
+		camera(name, camera.isPerspective() ? new PinholeLens() : new OrthogonalLens());
 		parameter("camera", name);
 
 		// sunflow rendering
