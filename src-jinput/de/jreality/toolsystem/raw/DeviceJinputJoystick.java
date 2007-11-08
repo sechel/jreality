@@ -68,6 +68,7 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
     
 	private HashMap<Component,InputSlot> componentMap = new HashMap<Component,InputSlot>();
 	private HashMap<Component,AxisState> lastValues = new HashMap<Component,AxisState>();
+	private HashMap<Component,Float> maxValues = new HashMap<Component,Float>();
     
     private Controller controllers[];
 	private net.java.games.input.Component[][] components;
@@ -76,24 +77,31 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
 	public DeviceJinputJoystick() {
 		ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
 		controllers = env.getControllers();
+		for (Controller ctrl : controllers) {
+			System.out.println(ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
+		}
 		components = new net.java.games.input.Component[controllers.length][];
 		for (int i = 0; i < controllers.length; i++) {
 			components[i] = controllers[i].getComponents();
 		}
-		 
-		System.out.println(Arrays.deepToString(components));
-		
 	}
 	
     public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
 		String[] nums = rawDeviceName.split("_");
-		if(nums.length != 3) throw new IllegalArgumentException("no such raw axis");
+		if(nums.length < 3) throw new IllegalArgumentException("no such raw axis");
 		try {
 			int i = Integer.parseInt(nums[1]);
 			int j = Integer.parseInt(nums[2]);
             net.java.games.input.Component c = components[i][j];
 			componentMap.put(c,inputDevice);
             lastValues.put(c,AxisState.ORIGIN);
+            float maxVal = 1;
+            if (nums.length==4) try {
+            	maxVal = Float.parseFloat(nums[3]);
+            } catch (NumberFormatException nbfe) {
+            	System.err.println("invalid max value: "+nums[3]);
+            }
+            maxValues.put(c, maxVal);
 			return new ToolEvent(this, inputDevice, AxisState.ORIGIN);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("no such raw axis");
@@ -126,10 +134,11 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
             
             Component c = element.getKey();
 			//InputSlot inputDevice = (InputSlot) element.getValue();
-            AxisState newState = new AxisState(c.getPollData());
+            float val = c.getPollData()/maxValues.get(c);
+            AxisState newState = new AxisState(val);
 			AxisState oldState = lastValues.get(c);
 			if(newState.intValue() != oldState.intValue()) {
-				System.out.println("new event");
+				//System.out.println("new event");
 				queue.addEvent(
 						new ToolEvent(this, element.getValue(), newState)
 						);
