@@ -48,7 +48,6 @@ import java.awt.event.KeyEvent;
 import java.beans.Beans;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 
 import javax.swing.Action;
@@ -366,7 +365,7 @@ private JMenu createFileMenu() {
 		//create background color list
 		JMenu bgColors = new JMenu(SET_BACKGROUND_COLOR);  //background color of viewerApp
 		ButtonGroup bg = new ButtonGroup();
-		List<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
+		LinkedList<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("default", viewerApp, ViewerApp.defaultBackgroundColor)) );
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("white", viewerApp, Color.WHITE)) );
 		items.add( new JRadioButtonMenuItem(new SwitchBackgroundColor("gray", viewerApp, new Color(225, 225, 225))) );
@@ -375,6 +374,7 @@ private JMenu createFileMenu() {
 			bg.add(item);
 			bgColors.add(item);
 		}
+		//items.getFirst().setSelected(true);  //user may have set own color
 		viewMenu.add(bgColors);
 		JMenu skybox = new JMenu(SKYBOX);
 		viewMenu.add(skybox);
