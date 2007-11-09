@@ -177,8 +177,8 @@ public final class Readers {
 			format = "MATHEMATICA";
 		} else if (lcName.endsWith(".msms")) {
 			format = "MSMS";
-		} else  {//if (lcName.endsWith(".off") || lcName.endsWith(".quad") || lcName.endsWith(".mesh") || lcName.endsWith(".vect") || lcName.endsWith(".bez") 
-				//|| lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith(".inst")){
+		} else  if (lcName.endsWith(".off") || lcName.endsWith(".quad") || lcName.endsWith(".mesh") || lcName.endsWith(".vect") || lcName.endsWith(".bez") 
+				|| lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith(".inst")){
 			format = "OOGL";
 
 			// currently removed (licensing unclear)
@@ -189,7 +189,7 @@ public final class Readers {
 //			format = "ASE";
 		}
 
-		return format;
+		return format;  //NULL if unknown format (needed for <jReality 3D data files> FileFilter)
 	}
 
 }
