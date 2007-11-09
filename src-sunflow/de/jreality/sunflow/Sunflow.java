@@ -41,21 +41,28 @@
 package de.jreality.sunflow;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.Expression;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.Statement;
 import java.io.File;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.basic.BasicFileChooserUI;
@@ -139,6 +146,10 @@ public class Sunflow {
 		JMenuBar bar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(new AbstractAction("Save") {
+			{
+				putValue(Action.SHORT_DESCRIPTION, "Save image as a file");
+			    putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+			}
 			public void actionPerformed(ActionEvent e) {
 				save(viewer, frame);
 			}
@@ -158,6 +169,20 @@ public class Sunflow {
 
 
 	private static void save(SunflowViewer v, JFrame frame) {
+		try {  //test if jReality ui stuff is available
+			Class<?> ffClass = Class.forName("de.jreality.ui.viewerapp.FileFilter");
+			Class<?> fldClass = Class.forName("de.jreality.ui.viewerapp.FileLoaderDialog");
+			FileFilter[] ff = new FileFilter[filters.length];
+			for (int i = 0; i < filters.length; i++) {
+				ff[i] = (FileFilter) ffClass.newInstance();
+				new Statement(ff[i], "setDescription", new Object[]{filters[i].toUpperCase()+" Image"}).execute();
+				new Statement(ff[i], "addExtension", new Object[]{filters[i]}).execute();
+			}
+			File file = (File) new Expression(fldClass, "selectTargetFile", new Object[]{(Component)null, false, ff}).getValue();
+			if (file!=null) v.getViewingComponent().save(file.getAbsolutePath());
+			return;
+		} catch (Exception e) {}  // use java stuff:
+		
 		FileSystemView view = FileSystemView.getFileSystemView();
 		final JFileChooser chooser = new JFileChooser(view.getHomeDirectory(), view);
 		chooser.setMultiSelectionEnabled(false);
