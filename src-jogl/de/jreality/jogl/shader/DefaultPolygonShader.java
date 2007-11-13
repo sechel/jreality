@@ -180,12 +180,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
 		gl.glPushAttrib(GL.GL_TEXTURE_BIT);
-		texUnit = GL.GL_TEXTURE0; // jr.getRenderingState().texUnitCount + GL.GL_TEXTURE0; //
+		texUnit = GL.GL_TEXTURE0; 
 	    if (joglLightMap != null) {
 		    gl.glActiveTexture(texUnit);
 		    gl.glEnable(GL.GL_TEXTURE_2D);
 			Texture2DLoaderJOGL.render(gl, joglLightMap);
-			//testTextureResident(jr, gl);
 		    texUnit++;
 		    texunitcoords++;
 	    }
@@ -201,7 +200,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    	gl.glActiveTexture(texUnit);
 		      	gl.glEnable(GL.GL_TEXTURE_2D);
 				Texture2DLoaderJOGL.render(gl, joglTexture2D);
-				//testTextureResident(jr, gl);
 			    texUnit++;
 			    texunitcoords++;		    	
 		    }
@@ -213,7 +211,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			refMapUnit = texUnit;
 			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, reflectionMap);
-			//testTextureResident(jr, gl);
 			texUnit++;
 		} else if (useGLSL)
 			glslShader.reflectionTextureUnit = -1;    	
@@ -222,23 +219,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
     if (useGLSL)		{
-    	//if (frontBack == FRONT_AND_BACK)	gl.glDisable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-    	//else gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
     	glslShader.render(jrs);
-    } //else {
-   // }
+    }
     jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
-//    jrs.smoothShading = smoothShading;
 }
 	
-	private void testTextureResident(JOGLRenderer jr, GL gl) {
-		int[] res = new int[1];
-		gl.glGetTexParameteriv(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_RESIDENT, res,0);
-		JOGLConfiguration.theLog.log(Level.FINEST,"Texture is resident"+res[0]);
-		if (res[0] == 0) { jr.setTextureResident(false); }
-	}
-
-
 	public boolean providesProxyGeometry() {		
 		return false;
 	}
@@ -304,7 +289,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		GL gl = jrs.renderer.globalGL;
 		if (useGLSL)
 			glslShader.postRender(jrs);
-		for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
+		for (int i = GL.GL_TEXTURE0; i < GL.GL_TEXTURE7; ++i) {
 			gl.glActiveTexture(i);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}

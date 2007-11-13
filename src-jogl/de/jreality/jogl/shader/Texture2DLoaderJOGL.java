@@ -187,16 +187,16 @@ public class Texture2DLoaderJOGL {
     
     // see if this texture has already been handled in this render cycle
     ht = getBoundTextureTableForGL(gl);
-    if (ht != null)	{
-        Integer boundTexid = ht.get(tex.getImage());
-        if (boundTexid != null)	{
-            gl.glMatrixMode(GL.GL_TEXTURE);
-            gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
-            gl.glMatrixMode(GL.GL_MODELVIEW);       
-        	return;
-        }    
-        ht.put(tex.getImage(), texid);
-   }
+//    if (ht != null)	{
+//        Integer boundTexid = ht.get(tex.getImage());
+//        if (boundTexid != null)	{
+//            gl.glMatrixMode(GL.GL_TEXTURE);
+//            gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
+//            gl.glMatrixMode(GL.GL_MODELVIEW);       
+//        	return;
+//        }    
+//        ht.put(tex.getImage(), texid);
+//   }
 //    System.err.println("Not yet bound ");
     int srcPixelFormat = GL.GL_RGBA;
    handleTextureParameters(tex, gl);
@@ -358,11 +358,10 @@ public class Texture2DLoaderJOGL {
     float[] texcolor = tex.getBlendColor().getComponents(null);
     gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
     gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
-    
     if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
     {
 //    	System.err.println("Combining with alpha "+texcolor[3]);
-      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineModeColor());
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineMode());
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, tex.getSource0Color()); //GL.GL_TEXTURE);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, tex.getOperand0Color()); // GL.GL_SRC_COLOR);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, tex.getSource1Color()); //GL.GL_PREVIOUS);

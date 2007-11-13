@@ -14,7 +14,6 @@ import de.jreality.shader.Texture2D;
 public class JOGLTexture2D implements Texture2D {
 	Texture2D proxy;
 	protected int applyMode,
-		combineMode,
 		combineModeAlpha,
 		combineModeColor;
 	protected Color blendColor;
@@ -34,7 +33,7 @@ public class JOGLTexture2D implements Texture2D {
 	public void update()	{
 		applyMode = proxy.getApplyMode();
 		blendColor = proxy.getBlendColor();
-		combineMode = proxy.getCombineModeColor();
+		combineModeColor = proxy.getCombineModeColor();
 		combineModeAlpha = proxy.getCombineModeAlpha();
 		image = proxy.getImage();
 		textureMatrix = proxy.getTextureMatrix();
@@ -54,7 +53,7 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public Integer getCombineMode() {
-		return combineMode;
+		return combineModeColor;
 	}
 
 	public Integer getCombineModeAlpha() {

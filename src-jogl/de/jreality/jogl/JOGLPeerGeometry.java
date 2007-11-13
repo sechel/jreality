@@ -73,10 +73,6 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
 		displayListsDirty = false;			// think positive!
-		if (geometryShader.isFaceDraw() && isSurface) {
-			geometryShader.polygonShader.render(jr.renderingState);
-			geometryShader.polygonShader.postRender(jr.renderingState);
-		}	
 		if (geometryShader.isVertexDraw() && ps != null)	{
 			geometryShader.pointShader.render(jr.renderingState);
 			geometryShader.pointShader.postRender(jr.renderingState);
@@ -85,6 +81,10 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 			geometryShader.lineShader.render(jr.renderingState);
 			geometryShader.lineShader.postRender(jr.renderingState);
 		}
+		if (geometryShader.isFaceDraw() && isSurface) {
+			geometryShader.polygonShader.render(jr.renderingState);
+			geometryShader.polygonShader.postRender(jr.renderingState);
+		}	
 		if (geometryShader.isVertexDraw() && hasPointLabels) {
 			JOGLRendererHelper.drawPointLabels(jr, ps,  jpc.geometryShader.pointShader.getTextShader());
 		}

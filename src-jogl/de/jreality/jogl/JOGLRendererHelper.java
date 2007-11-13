@@ -43,12 +43,14 @@ package de.jreality.jogl;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.font.NumericShaper;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -365,29 +367,29 @@ public class JOGLRendererHelper {
 		boolean hasNormals = vertexNormals == null ? false : true;
 		DoubleArray da;
 		// SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
-
-		// if (testArrays) {
-		// double[] varray = vertices.toDoubleArray(null);
-		// ByteBuffer bb =
-		// ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
-		// bb.asDoubleBuffer().put(varray);
-		// bb.flip();
-		// gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);
-		// 
-		// gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-		// gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-		// gl.glDrawArrays(GL.GL_POINTS, 0, sg.getNumPoints());
-		// 
-		// for (int i = 0; i sg.getNumEdges(); ++i) {
-		// gl.glBegin(GL.GL_LINE_STRIP);
-		// IntArray ed =
-		// sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
-		// int m = ed.getLength();
-		// for (int j = 0; jm; ++j) {
-		// gl.glArrayElement(ed.getValueAt(j));
-		// }
-		// gl.glEnd();
-		// }
+//		boolean testArrays =false;
+//		 if (testArrays) {
+//		 double[] varray = vertices.toDoubleArray(null);
+//		 ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
+//		 bb.asDoubleBuffer().put(varray);
+//		 bb.flip();
+//		 gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);
+//		 
+//		 gl.glDisableClientState(GL.GL_COLOR_ARRAY);
+//		 gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+//		 gl.glDrawArrays(GL.GL_POINTS, 0, sg.getNumPoints());
+//		 
+//		 for (int i = 0; i < sg.getNumEdges(); ++i) {
+//			 gl.glBegin(GL.GL_LINE_STRIP);
+//			 IntArray ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
+//			 int m = ed.getLength();
+//			 for (int j = 0; j < m; ++j) {
+//				 gl.glArrayElement(ed.getValueAt(j));
+//			 }
+//			 gl.glEnd();
+//		 }
+//		 return;
+//		 }
 		if (sg.getEdgeAttributes(Attribute.INDICES) == null)
 			return;
 		int colorBind = 0, colorLength = 0;
