@@ -1,14 +1,14 @@
 package de.jreality.scene;
 
 import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.text.NumberFormat;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -46,44 +46,59 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 
 	public TransformationCustomizer(Transformation t) {
 		
-		//set up layout
-//		Box tBox = Box.createHorizontalBox();
-		JPanel tBox = new JPanel(new GridLayout(1,5));
-		JPanel rBox = new JPanel(new GridLayout(1,5));
-		JPanel sBox = new JPanel(new GridLayout(1,5));
-//		tBox.setAlignmentY(JComponent.LEFT_ALIGNMENT);
-//		tBox.setBorder(BorderFactory.createTitledBorder("translation"));
-//		Box rBox = Box.createHorizontalBox();
-//		rBox.setBorder(BorderFactory.createTitledBorder("rotation"));
-//		Box sBox = Box.createHorizontalBox();
-//		sBox.setBorder(BorderFactory.createTitledBorder("scale"));
-		Font f = new Font("Helvetica", Font.PLAIN, 12);
-		JLabel label = new JLabel("translate", JLabel.LEFT);
-//		label.setFont(f);
-		tBox.add(label);
-		label = new JLabel("rotate", JLabel.LEFT);
-		label.setFont(f);
-		rBox.add(label);
-		label = new JLabel("scale", JLabel.LEFT);
-		label.setFont(f);
-		sBox.add(label);
+		GridBagLayout gbl = new GridBagLayout();
+		GridBagConstraints c = new GridBagConstraints();
+		setLayout(gbl);
+		
+		//init
 		tEntries = new Entry[3];
 		rEntries = new Entry[4];
 		sEntries = new Entry[3];
+
+		c.weightx = 1.0;  //cell width
+		c.anchor = GridBagConstraints.WEST;  //horizontal alignment
+
+		//TRANSLATE
+		Font f = new Font("Helvetica", Font.BOLD, 12);
+		JLabel label = new JLabel(" translate ", JLabel.LEFT);
+		label.setFont(f);
+		gbl.setConstraints(label, c);
+		add(label);
 		for (int i=X; i<=Z; i++) {
-			tBox.add(tEntries[i] = new Entry(labels[i], 0, TRANSLATION));
-			rBox.add(rEntries[i] = new Entry(labels[i], 0, ROTATION));
-			sBox.add(sEntries[i] = new Entry(labels[i], 0, SCALE));
+			tEntries[i] = new Entry(labels[i], 0, TRANSLATION);
+			if (i==Z) c.gridwidth = GridBagConstraints.REMAINDER;
+			gbl.setConstraints(tEntries[i], c);
+			add(tEntries[i]);
 		}
-		tBox.add(Box.createHorizontalGlue());
-		rBox.add(rEntries[ANGLE] = new Entry(labels[ANGLE], angle, ROTATION));
-//		rBox.add(Box.createVerticalGlue());
-		sBox.add(Box.createHorizontalGlue());
-		Box vbox = Box.createVerticalBox();
-		vbox.add(tBox);
-		vbox.add(rBox);
-		vbox.add(sBox);
-		add(vbox);
+		
+		//ROTATE
+		label = new JLabel(" rotate ", JLabel.LEFT);
+		label.setFont(f);
+		c.gridwidth = 1;
+		gbl.setConstraints(label, c);
+		add(label);
+		for (int i=X; i<=Z; i++) {
+			rEntries[i] = new Entry(labels[i], 0, ROTATION);
+			gbl.setConstraints(rEntries[i], c);
+			add(rEntries[i]);
+		}
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		rEntries[ANGLE] = new Entry(labels[ANGLE], angle, ROTATION);
+		gbl.setConstraints(rEntries[ANGLE], c);
+		add(rEntries[ANGLE]);
+		
+		//SCALE
+		label = new JLabel(" scale ", JLabel.LEFT);
+		label.setFont(f);
+		c.gridwidth = 1;
+		gbl.setConstraints(label, c);
+		add(label);
+		for (int i=X; i<=Z; i++) {
+			sEntries[i] = new Entry(labels[i], 0, SCALE);
+			if (i==Z) c.gridwidth = GridBagConstraints.REMAINDER;
+			gbl.setConstraints(sEntries[i], c);
+			add(sEntries[i]);
+		}
 		
 //		addComponentListener(new ComponentAdapter() {
 //			public void componentShown(ComponentEvent e) {
@@ -146,14 +161,14 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 	
 	public void transformationMatrixChanged(TransformationEvent ev) {
 //		if (isShowing()) 
-		update();
+		update();  //TODO: even updates if JPanel is "not shown" (object other than transformation selected)
 	}
 	
 
 //----------------------------------------------------------------------
 	//testing layout
 	public static void main(String[] args) {
-		JFrame frame = new JFrame();
+		JFrame frame = new JFrame("TransformationCustomizer");
 		frame.getContentPane().add(new TransformationCustomizer(new Transformation("transformation")));
 		
 		frame.pack();
@@ -184,12 +199,12 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 			textField = new JFormattedTextField(formatter);
 			textField.setFont(new Font("Courier", Font.PLAIN, 12));
 			textField.setValue(new Double(d));
-			textField.setColumns(8); // get some space
+			textField.setColumns(6); // get some space
 			textField.addActionListener(this);
 			Box box = Box.createHorizontalBox();
-			box.setBorder(BorderFactory.createEtchedBorder());
+//			box.setBorder(BorderFactory.createEtchedBorder());
 			box.add(this.label);
-			box.add(Box.createHorizontalStrut(4));
+			box.add(Box.createHorizontalStrut(2));
 			box.add(textField);
 			add(box);
 		}
