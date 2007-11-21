@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Component;
@@ -118,8 +117,9 @@ public class ExportImage extends AbstractJrAction {
 		}
 		//render offscreen
 		BufferedImage img = null;
+		int antialiasing = 2;
 		try {
-			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{4*dim.width, 4*dim.height});
+			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height});
 			expr.execute();
 			img = (BufferedImage) expr.getValue();
 		} catch (Exception e1) {
@@ -147,6 +147,7 @@ public class ExportImage extends AbstractJrAction {
 		//JOGLRenderer.writeBufferedImage(file,img2); :
 		try {
 			new Statement(Class.forName("de.jreality.util.ImageUtility"), "writeBufferedImage", new Object[]{file, img2}).execute();
+			System.out.println("Wrote file "+file.getPath());
 		} catch (Exception ex) {
 			// and now?
 			throw new RuntimeException("writing image failed", ex);
