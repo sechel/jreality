@@ -10,10 +10,13 @@ import java.beans.Customizer;
 import java.text.NumberFormat;
 
 import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.text.NumberFormatter;
 
 import de.jreality.math.FactoredMatrix;
@@ -36,8 +39,11 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 	
 	private double[] translation, rotation, scale;
 	private double angle;
-	private Entry[] tEntries, rEntries, sEntries;
+	private Entry[] tEntries=new Entry[3], rEntries=new Entry[4], sEntries=new Entry[3];
 	private String[] labels = {"X", "Y", "Z", "angle"};
+	private JTextField name;
+	private JButton chain;
+	private boolean chained;
 	
 
 	public TransformationCustomizer() {
@@ -47,58 +53,98 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 	public TransformationCustomizer(Transformation t) {
 		
 		GridBagLayout gbl = new GridBagLayout();
-		GridBagConstraints c = new GridBagConstraints();
 		setLayout(gbl);
+		//setBorder(new EmptyBorder(10,10,10,0));
 		
-		//init
-		tEntries = new Entry[3];
-		rEntries = new Entry[4];
-		sEntries = new Entry[3];
+		GridBagConstraints labelConstraint = new GridBagConstraints();
+		labelConstraint.weightx = 1.0;  //cell width
+		labelConstraint.anchor = GridBagConstraints.EAST;  //horizontal alignment
+		labelConstraint.ipadx = 5;
+		GridBagConstraints editorConstraint = new GridBagConstraints();
+		editorConstraint.weightx = 1.0;  //cell width
+		editorConstraint.anchor = GridBagConstraints.WEST;  //horizontal alignment
+//		editorConstraint.fill = GridBagConstraints.BOTH;
 
-		c.weightx = 1.0;  //cell width
-		c.anchor = GridBagConstraints.WEST;  //horizontal alignment
-
+		//NAME
+//		Font f = new Font("Helvetica", Font.BOLD, 12);
+		JLabel label = new JLabel("Name", JLabel.LEFT);
+//		label.setFont(f);
+		//label.setToolTipText("Name of the Transformation");
+		gbl.setConstraints(label, labelConstraint);
+		add(label);
+		name = new JTextField(17);
+		//name.setFont(new Font("Courier", Font.PLAIN, 12));
+		name.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				transformation.setName(name.getText());
+			}
+		});
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.ipadx = 10;
+		c.anchor = GridBagConstraints.WEST;
+		Box box = Box.createHorizontalBox();
+//		box.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
+		box.add(name);
+		gbl.setConstraints(box, c);
+		add(box);
+		
 		//TRANSLATE
-		Font f = new Font("Helvetica", Font.BOLD, 12);
-		JLabel label = new JLabel(" translate ", JLabel.LEFT);
-		label.setFont(f);
-		gbl.setConstraints(label, c);
+		label = new JLabel("Translation", JLabel.LEFT);
+//		label.setFont(f);
+		gbl.setConstraints(label, labelConstraint);
 		add(label);
 		for (int i=X; i<=Z; i++) {
 			tEntries[i] = new Entry(labels[i], 0, TRANSLATION);
-			if (i==Z) c.gridwidth = GridBagConstraints.REMAINDER;
-			gbl.setConstraints(tEntries[i], c);
+			if (i==Z) editorConstraint.gridwidth = GridBagConstraints.REMAINDER;
+			gbl.setConstraints(tEntries[i], editorConstraint);
 			add(tEntries[i]);
 		}
 		
 		//ROTATE
-		label = new JLabel(" rotate ", JLabel.LEFT);
-		label.setFont(f);
-		c.gridwidth = 1;
-		gbl.setConstraints(label, c);
+		label = new JLabel("Rotation", JLabel.LEFT);
+//		label.setFont(f);
+		gbl.setConstraints(label, labelConstraint);
+		editorConstraint.gridwidth = 1;
 		add(label);
 		for (int i=X; i<=Z; i++) {
 			rEntries[i] = new Entry(labels[i], 0, ROTATION);
-			gbl.setConstraints(rEntries[i], c);
+			gbl.setConstraints(rEntries[i], editorConstraint);
 			add(rEntries[i]);
 		}
-		c.gridwidth = GridBagConstraints.REMAINDER;
+		editorConstraint.gridwidth = GridBagConstraints.REMAINDER;
 		rEntries[ANGLE] = new Entry(labels[ANGLE], angle, ROTATION);
-		gbl.setConstraints(rEntries[ANGLE], c);
+		gbl.setConstraints(rEntries[ANGLE], editorConstraint);
 		add(rEntries[ANGLE]);
 		
 		//SCALE
-		label = new JLabel(" scale ", JLabel.LEFT);
-		label.setFont(f);
-		c.gridwidth = 1;
-		gbl.setConstraints(label, c);
+		label = new JLabel("Scale", JLabel.LEFT);
+//		label.setFont(f);
+		gbl.setConstraints(label, labelConstraint);
+		editorConstraint.gridwidth = 1;
 		add(label);
 		for (int i=X; i<=Z; i++) {
 			sEntries[i] = new Entry(labels[i], 0, SCALE);
-			if (i==Z) c.gridwidth = GridBagConstraints.REMAINDER;
-			gbl.setConstraints(sEntries[i], c);
+			gbl.setConstraints(sEntries[i], editorConstraint);
 			add(sEntries[i]);
 		}
+		chain = new JButton();
+		chain.setToolTipText("Toggle scalar scale");
+		chained = false;
+		final ImageIcon openChain = new ImageIcon(TransformationCustomizer.class.getResource("openChain.gif"));
+		final ImageIcon closedChain = new ImageIcon(TransformationCustomizer.class.getResource("closedChain.gif"));
+		chain.setIcon(chained ? closedChain : openChain);
+		chain.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				chained = !chained;
+				chain.setIcon(chained ? closedChain : openChain);
+			}
+		});
+		
+		editorConstraint.gridwidth = GridBagConstraints.REMAINDER;
+		editorConstraint.anchor = GridBagConstraints.CENTER;
+		gbl.setConstraints(chain, editorConstraint);
+		add(chain);
 		
 //		addComponentListener(new ComponentAdapter() {
 //			public void componentShown(ComponentEvent e) {
@@ -121,6 +167,7 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 	
 	private void update() {
 		
+		name.setText(transformation.getName());
 		matrix = new FactoredMatrix(transformation.getMatrix());
 		
 		translation = matrix.getTranslation();
@@ -135,7 +182,7 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 		}
 		rEntries[ANGLE].setValue(angle);
 		
-		repaint();
+		//repaint();
 	}
 	
 	
@@ -209,8 +256,14 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 			add(box);
 		}
 
-		public void actionPerformed(ActionEvent arg0) {
+		public void actionPerformed(ActionEvent ev) {
 			updateValue();
+			
+			if (type==SCALE && chained) {  //update scale values
+				for (int i=X; i<=Z; i++) sEntries[i].setValue(getValue());
+				//repaint();
+			}
+			
 			updateTransformation(type);
 		}
 
@@ -220,7 +273,7 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 				textField.selectAll();
 			} else
 				try { //text is valid
-					textField.commitEdit();  //so use test
+					textField.commitEdit();  //so use text
 					java.lang.Double dd = (java.lang.Double) textField.getValue();
 					value = dd.doubleValue();
 				} catch (java.text.ParseException exc) {

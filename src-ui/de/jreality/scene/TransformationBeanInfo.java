@@ -54,7 +54,7 @@ public class TransformationBeanInfo extends SimpleBeanInfo {
 
   
   public TransformationBeanInfo() throws IntrospectionException {
-    bd = new BeanDescriptor(Transformation.class);
+    bd = new BeanDescriptor(Transformation.class, TransformationCustomizer.class);
     bd.setShortDescription("Holds a 4x4 transformation matrix "
         +"affecting all child nodes");
   }
