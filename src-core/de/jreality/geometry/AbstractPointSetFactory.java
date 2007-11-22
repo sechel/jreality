@@ -106,7 +106,6 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexCoordinates( double [][] data ) {
-		//setVertexAttribute( Attribute.COORDINATES, new DoubleArrayArray.Array( data, data[0].length ) );
 		setVertexAttribute( Attribute.COORDINATES,
 				StorageModel.DOUBLE_ARRAY.array(data[0].length).createReadOnly(data));
 	}
@@ -140,7 +139,7 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexColors( double [][] data ) {
-		setVertexAttribute( Attribute.COLORS, new DoubleArrayArray.Array( data, data[0].length ) );
+		setVertexAttribute( Attribute.COLORS, data == null ? null : new DoubleArrayArray.Array( data, data[0].length ) );
 	}
 	
 	protected void setVertexTextureCoordinates( DataList data ) {
