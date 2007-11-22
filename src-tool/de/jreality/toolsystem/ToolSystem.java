@@ -383,7 +383,8 @@ public class ToolSystem implements ToolEventReceiver {
 				// TODO: see if activating more than one Tool for an axis
 				// makes sense...
 				for (Tool candidate : candidatesForPick) {
-					if (!toolManager.needsPick(candidate)) throw new Error();
+					if (!toolManager.needsPick(candidate)) //throw new Error();
+						LoggingSystem.getLogger(this).warning("Something wrong with pick candidates\n");
 				}
 				if (!candidatesForPick.isEmpty()) {
 					// now we need a pick path
