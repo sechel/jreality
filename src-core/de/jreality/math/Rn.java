@@ -1417,6 +1417,19 @@ final public class Rn {
 		return (new String(strb));
 	}
 
+	 public static String toString(double[][][] v) {
+			int n = v.length, m = v[0].length;
+			StringBuffer strb = new StringBuffer();
+			for (int i =0 ; i<n;++i)	{
+				for (int j=0 ; j<m;++j)	{
+					strb.append(toString(v[i][j])+"\t");
+					strb.append("\n");
+				}
+				strb.append("\n");
+			}
+			return (new String(strb));
+		}
+
 	public static String toString(float[] v)	{
 	 	double[] cp = new double[v.length];
 	 	for (int i = 0; i<v.length; ++i)	cp[i] =  v[i];
