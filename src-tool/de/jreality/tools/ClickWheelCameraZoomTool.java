@@ -38,7 +38,6 @@ public class ClickWheelCameraZoomTool extends AbstractTool  {
 		else if (tc.getSource()== InputSlot.getDevice("PrimaryDown")) {
 			wheel = -1;
 		}
-		System.err.println("In cwct");
 		Camera cam = (Camera) tc.getViewer().getCameraPath().getLastElement();
 		double fov = cam.getFieldOfView();
 		cam.setFieldOfView(fov * ((wheel > 0) ? speed : 1.0/speed));
