@@ -115,7 +115,7 @@ import de.jreality.util.LoggingSystem;
 	 * @return
 	 */
 	private double[][] polygon2, vals;
-	protected  double[][] makeTube(double[][] curve, double radius, double[][] xsec, FrameFieldType type, boolean closed, int signature, int twists)	{
+	protected  double[][] makeTube(double[][] curve, double[] radii, double[][] xsec, FrameFieldType type, boolean closed, int signature, int twists)	{
 
 		int n = curve.length;
 		int vl = xsec[0].length;
@@ -136,19 +136,33 @@ import de.jreality.util.LoggingSystem;
 		if (n <= 1) {
 			throw new IllegalArgumentException("Can't tube a vertex list of length less than 2");
 		}
-		
+		double[] radii2 = null;
+		boolean hasRadii = radii.length > 1;
 		int usedVerts = closed ? n+3 : n+2;
-		if (polygon2 == null || polygon2.length != usedVerts)  
+		if (polygon2 == null || polygon2.length != usedVerts)  {
 			polygon2 = new double[usedVerts][];
-		for (int i = 0; i<n; ++i)	polygon2[i+1] = curve[i];
+			if (hasRadii) radii2 = new double[usedVerts];
+		}
+		for (int i = 0; i<n; ++i)	{ 
+			polygon2[i+1] = curve[i]; 
+			if (hasRadii) radii2[i+1] = radii[i]; 
+			}
 		if (closed)	{
 			polygon2[0] = curve[n-1];
-			polygon2[n+1] = curve[0];
-			polygon2[n+2] = curve[1];				
+			polygon2[n+1] = curve[0];	
+			polygon2[n+2] = curve[1];
+			if (hasRadii) {
+				radii2[0] = radii[n-1];
+				radii2[n+1] = radii[0];
+				radii2[n+2] = radii[1];				
+			}
 		} else {
 			polygon2[0] = Rn.add(null, curve[0],  Rn.subtract(null, curve[0], curve[1]));
 			polygon2[n+1] = Rn.add(null, curve[n-1], Rn.subtract(null, curve[n-1], curve[n-2]));
-			
+			if (hasRadii)	{
+				radii2[0] = radii2[1];
+				radii2[n+1] = radii2[n];				
+			}
 		}
 //		FrameInfo[] 
 		          frames = makeFrameField(polygon2, type, signature);
@@ -157,7 +171,6 @@ import de.jreality.util.LoggingSystem;
 			throw new NullPointerException("No frames!");
 //		System.err.println("makeTube: sig = "+signature);
 		double[] rad = Rn.identityMatrix(4);
-		rad[0] = rad[5] = radius;
 		int nn = frames.length;
 		double lastphi = frames[frames.length-1].phi;
 		double correction = (closed && matchClosedTwist) ? ( lastphi > Math.PI ? (2*Math.PI-lastphi) : -lastphi) / nn : 0.0;
@@ -166,7 +179,9 @@ import de.jreality.util.LoggingSystem;
 			double sangle = Math.sin( frames[i].theta/2.0);
 			double factor = 1.0;
 			if (sangle != 0) factor = 1.0/sangle;
-			rad[0] = radius *factor;
+			double r = hasRadii ? radii2[i] : radii[0];
+			rad[0] = r *factor;
+			rad[5] = r;
 			//System.err.println("frame is "+Rn.matrixToString(frames[i].frame));
 			double[] zrot = P3.makeRotationMatrixZ(null,frames[i].phi + i*correction+ twists*2*Math.PI*frames[i].length);
 			double[] scaledFrame = Rn.times(null, frames[i].frame, Rn.times(null, rad, zrot));
@@ -194,7 +209,13 @@ import de.jreality.util.LoggingSystem;
 	  */
 	public void update() {
 		super.update();
-		theTubeVertices = makeTube(theCurve, radius, crossSection, frameFieldType, closedCurve, signature, twists);
+		if (radii == null) {
+			radii = new double[1];
+		}
+		if (radii.length == 1) {
+			radii[0] = radius;
+		}
+		theTubeVertices = makeTube(theCurve, radii, crossSection, frameFieldType, closedCurve, signature, twists);
 //		System.err.println("PTF: frame type is "+frameFieldType);
 //		System.err.println("PTF: signature is "+signature);
 		qmf = new QuadMeshFactory();
@@ -203,7 +224,8 @@ import de.jreality.util.LoggingSystem;
 		qmf.setGenerateTextureCoordinates(generateTextureCoordinates && !arcLengthTextureCoordinates);
 		qmf.setULineCount(crossSection.length);
 		qmf.setVLineCount(theTubeVertices.length/crossSection.length);
-		qmf.setClosedInUDirection(true);
+		boolean closedInU = Rn.euclideanDistance(crossSection[0], crossSection[crossSection.length-1]) < 10E-8;
+		qmf.setClosedInUDirection(closedInU);
 		qmf.setClosedInVDirection(closedCurve);
 		qmf.setVertexCoordinates(theTubeVertices);
 		qmf.setGenerateFaceNormals(true);
