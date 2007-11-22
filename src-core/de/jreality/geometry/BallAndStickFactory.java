@@ -153,7 +153,11 @@ import de.jreality.util.SceneGraphUtility;
 			sticks.setVisible(showSticks);
 			balls.setVisible(showBalls);
 			ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, ballRadius);
-			if (ballColor != null) ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+			if (ballColor != null) {
+				ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+				ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+
+						CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+			}
 			if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
 			if (arrowColor != null) arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
 		 	// create sticks on edges
