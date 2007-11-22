@@ -51,9 +51,14 @@ import java.beans.Expression;
 import java.beans.Statement;
 import java.io.File;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.KeyStroke;
-import javax.swing.border.TitledBorder;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileFilter;
@@ -72,8 +77,10 @@ public class ExportImage extends AbstractJrAction {
 
 	private ViewerSwitch viewer;
 	private DimensionPanel dimPanel;
+	private JComponent options;
+	private int antialiasing;
 
-
+	
 	public ExportImage(String name, ViewerSwitch viewer, Component parentComp) {
 		super(name, parentComp);
 
@@ -85,19 +92,11 @@ public class ExportImage extends AbstractJrAction {
 		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK));
 	}
 
-//	public ExportImage(String name, ViewerApp v) {
-//		this(name, v.getViewerSwitch(), v.getFrame());
-//	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if (dimPanel == null) {
-			dimPanel = new DimensionPanel();
-			TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Dimension");
-			dimPanel.setBorder(title);
-		}
+		if (options == null) options = createAccessory();
 
 		// Hack
 		Viewer realViewer = viewer.getCurrentViewer();
@@ -105,7 +104,7 @@ public class ExportImage extends AbstractJrAction {
 		Dimension d = realViewer.getViewingComponentSize();
 		dimPanel.setDimension(d);
 
-		File file = FileLoaderDialog.selectTargetFile(parentComp, dimPanel, false, FileFilter.createImageWriterFilters());
+		File file = FileLoaderDialog.selectTargetFile(parentComp, options, false, FileFilter.createImageWriterFilters());
 		Dimension dim = dimPanel.getDimension();
 //		Dimension dim = DimensionDialog.selectDimension(d,frame);
 		if (file == null || dim == null) return;
@@ -115,9 +114,9 @@ public class ExportImage extends AbstractJrAction {
 			"Export aborted.");
 			return;
 		}
+		
 		//render offscreen
 		BufferedImage img = null;
-		int antialiasing = 2;
 		try {
 			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height});
 			expr.execute();
@@ -171,4 +170,47 @@ public class ExportImage extends AbstractJrAction {
 		return false;
 	}
 
+	
+	private JComponent createAccessory() {
+		
+		if (dimPanel == null) {
+			dimPanel = new DimensionPanel();
+			dimPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Dimension"));
+		}
+		
+		Box accessory = Box.createVerticalBox();
+		accessory.add(dimPanel);
+		accessory.add(Box.createVerticalGlue());
+		
+		JPanel p = new JPanel();
+		ButtonGroup bg = new ButtonGroup();
+		JRadioButton button = new JRadioButton(new AbstractAction("none") {
+			public void actionPerformed(ActionEvent e) {
+				antialiasing = 1;
+			}
+		});
+		bg.add(button);
+		p.add(button);
+		button = new JRadioButton(new AbstractAction("2x2") {
+			public void actionPerformed(ActionEvent e) {
+				antialiasing = 2;
+			}
+		});
+		bg.add(button);
+		p.add(button);
+		button = new JRadioButton(new AbstractAction("4x4") {
+			public void actionPerformed(ActionEvent e) {
+				antialiasing = 4;
+			}
+		});
+		button.setSelected(true);
+		antialiasing = 4;
+		bg.add(button);
+		p.add(button);
+		
+		p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Antialiasing factor"));
+		accessory.add(p);
+		
+		return accessory;
+	}
 }
