@@ -111,6 +111,7 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.sunflow.core.camera.OrthogonalLens;
+import de.jreality.sunflow.core.camera.TiledPinholeLens;
 import de.jreality.sunflow.core.light.GlPointLight;
 import de.jreality.sunflow.core.primitive.SkyBox;
 import de.jreality.util.Rectangle3D;
@@ -540,12 +541,21 @@ public class SunflowRenderer extends SunflowAPI {
 		bakingPath = null;
 	}
 
+	/**
+	 * 
+	 * @param sceneRoot
+	 * @param cameraPath
+	 * @param display
+	 * @param width
+	 * @param height
+	 * @param tiling optional array containing [tilesX, tilesY, tileX, tileY]
+	 */
 	public void render(
 			SceneGraphComponent sceneRoot,
 			SceneGraphPath cameraPath,
 			Display display,
 			int width,
-			int height
+			int height, int... tiling
 	) {
 		shader("constantWhite", new ConstantShader());
 		shader("ambientOcclusion", new DiffuseShader());
@@ -657,9 +667,16 @@ public class SunflowRenderer extends SunflowAPI {
 			fov = Math.atan(((double)width)/((double)height)*Math.tan(fov/360*Math.PI))/Math.PI*360;
 		}
 		parameter("fov", fov);
-		parameter("focus", camera.getFocus());  //for orthographic projection
+		
+		if (tiling.length > 0) {
+			parameter("tilesX", tiling[0]);
+			parameter("tilesY", tiling[1]);
+			parameter("tileX", tiling[2]);
+			parameter("tileY", tiling[3]);
+		}
+		
 		String name = getUniqueName("camera");
-		camera(name, camera.isPerspective() ? new PinholeLens() : new OrthogonalLens());
+		camera(name, tiling.length == 0 ? (camera.isPerspective() ? new PinholeLens() : new OrthogonalLens()) : new TiledPinholeLens());
 		parameter("camera", name);
 
 		// sunflow rendering
@@ -668,8 +685,8 @@ public class SunflowRenderer extends SunflowAPI {
 		if (bakingInstance != null) {
 			parameter("baking.instance", bakingInstance);
 		}
-		parameter("resolutionX", width);
-		parameter("resolutionY", height);
+		parameter("resolutionX", tiling.length == 0 ? width : width/tiling[0]);
+		parameter("resolutionY", tiling.length == 0 ? height : height/tiling[1]);
 		parameter("threads.lowPriority", options.isThreadsLowPriority());
 		parameter("aa.min", options.getAaMin());
 		parameter("aa.max", options.getAaMax());

@@ -34,9 +34,11 @@ public class TiledPinholeLens implements CameraLens {
         av = au / aspect;
     }
 
-    public Ray getRay(float x, float y, int imageWidth, int imageHeight, double lensX, double lensY, double time) {
-        float du = -au + ((2.0f * au * x) / (imageWidth - 1.0f));
-        float dv = -av + ((2.0f * av * y) / (imageHeight - 1.0f));
+    public Ray getRay(float x, float y, int imageX, int imageY, double lensX, double lensY, double time) {
+    	int imageWidth = imageX*tilesX;
+    	int imageHeight = imageY*tilesY;
+        float du = -au + ((2.0f * au * (x+tileX*imageX) ) / (imageWidth - 1.0f));
+        float dv = -av + ((2.0f * av * (y+tileY*imageY) ) / (imageHeight - 1.0f));
         return new Ray(0, 0, 0, du, dv, -1);
     }
 }
