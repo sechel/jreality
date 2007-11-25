@@ -118,7 +118,7 @@ public class SystemProperties {
 	 * Values: directory path
 	 */
 	public final static String JREALITY_DATA = "jreality.data";
-	
+	public final static String JREALITY_DATA_DEFAULT="/net/MathVis/data/testData3D";
 	
 	
 	/**

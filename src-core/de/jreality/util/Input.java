@@ -268,7 +268,7 @@ public final class Input
     if (ret != null) return ret;
     String currentDir = null;
     try {
-      currentDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
+      currentDir = Secure.getProperty(SystemProperties.JREALITY_DATA, SystemProperties.JREALITY_DATA_DEFAULT);
     } catch (SecurityException se) {
       // webstart
     }
