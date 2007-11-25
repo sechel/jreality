@@ -79,6 +79,12 @@ public class JrScene {
   }
 
   
+  /**
+   * currently used:
+   *  scene.getPath("cameraPath"), scene.getPath("emptyPickPath"), scene.getPath("avatarPath")
+   * @param name
+   * @return
+   */
   public SceneGraphPath getPath(String name) {
     return (SceneGraphPath) scenePaths.get(name);
   }
