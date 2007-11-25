@@ -40,36 +40,46 @@
 
 package de.jreality.toolsystem.virtual;
 
-import de.jreality.scene.tool.AxisState;
+import java.util.List;
+import java.util.Map;
 
+import de.jreality.scene.tool.AxisState;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.toolsystem.MissingSlotException;
+import de.jreality.toolsystem.ToolEvent;
+import de.jreality.toolsystem.VirtualDevice;
+import de.jreality.toolsystem.VirtualDeviceContext;
 
 /**
- *
- * TODO: comment this
- *
- * @author weissman
+ * 
+ * Transforms an Axis.
  *
  */
-public class VirtualExtractNegative extends VirtualExtractPositive {
+public class VirtualBumpAxis implements VirtualDevice {
 
-  /**
-   * @param val
-   * @return true if the state has changed
-   */
-  protected boolean updateState(double val) {
-    if (state == AxisState.ORIGIN && val < min) {
-      state = AxisState.PRESSED;
-      return true;
-    }
-    if (state == AxisState.PRESSED && val >= min) {
-      state = AxisState.ORIGIN;
-      return true;
-    }
-    return false;
-  }
+	InputSlot inSlot, outSlot;
+	
+	AxisState state;
+	
+	double eps=0.1;
+	
+	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+		double val = context.getAxisState(inSlot).doubleValue();
+		double ret = Math.pow(val+eps, 2)*Math.pow(val-eps, 2)*Math.signum(val);
+		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(ret));
+	}
 
-  public String getName() {
-    return "ExtractNegative";
-  }
-  
+	public void initialize(List inputSlots, InputSlot result,
+			Map configuration) {
+		inSlot = (InputSlot) inputSlots.get(0);
+		outSlot = result;
+	}
+
+	public void dispose() {
+	}
+
+	public String getName() {
+		return "BumpAxis";
+	}
+
 }

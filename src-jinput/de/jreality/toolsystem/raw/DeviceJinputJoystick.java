@@ -137,7 +137,7 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
             float val = c.getPollData()/maxValues.get(c);
             AxisState newState = new AxisState(val);
 			AxisState oldState = lastValues.get(c);
-			if(newState.intValue() != oldState.intValue()) {
+			if(!newState.isReleased() || newState.intValue() != oldState.intValue()) {
 				//System.out.println("new event");
 				queue.addEvent(
 						new ToolEvent(this, element.getValue(), newState)

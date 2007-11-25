@@ -129,8 +129,9 @@ public class ShipNavigationTool extends AbstractTool {
 		SceneGraphComponent myComponent = path.getLastComponent();
 		Matrix myMatrix = myComponent.getTransformation() != null ? new Matrix(myComponent.getTransformation()) : new Matrix();	
 		
+		double rot = tc.getAxisState(horizontalRotation).doubleValue();
 		if (pollingDevice && tc.getSource() == horizontalRotation) {
-			MatrixBuilder.euclidean(myMatrix).rotateY(-tc.getAxisState(horizontalRotation).doubleValue());
+			MatrixBuilder.euclidean(myMatrix).rotateY(-rot);
 			myMatrix.assignTo(myComponent);
 			return;
 		}
@@ -157,7 +158,7 @@ public class ShipNavigationTool extends AbstractTool {
 
 			double sec = 0.001* tc.getAxisState(timer).intValue(); // time since
 			if (!pollingDevice) {
-				MatrixBuilder.euclidean(myMatrix).rotateY(-tc.getAxisState(horizontalRotation).doubleValue()*sec).assignTo(myComponent);
+				MatrixBuilder.euclidean(myMatrix).rotateY(-rot*sec).assignTo(myComponent);
 			}
 			double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
 			double[] dest = myMatrix.multiplyVector(trans);

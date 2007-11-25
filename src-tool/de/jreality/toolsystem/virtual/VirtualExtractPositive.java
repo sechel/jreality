@@ -62,11 +62,15 @@ public class VirtualExtractPositive implements VirtualDevice {
 
   InputSlot inAxis, outSlot;
   
-  AxisState state = AxisState.ORIGIN;
+  AxisState state = null;
   
-  double min;
+  double min=0.1;
   
   public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+	if (state == null) {
+		state = AxisState.ORIGIN;
+		return new ToolEvent(this, outSlot, state);
+	}
     double val = context.getAxisState(inAxis).doubleValue();
     if (updateState(val)) return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, state);
     else return null;
@@ -91,7 +95,10 @@ public class VirtualExtractPositive implements VirtualDevice {
   public void initialize(List inputSlots, InputSlot result, Map configuration) {
     inAxis = (InputSlot) inputSlots.get(0);
     outSlot = result;
-    min = ((Double)configuration.get("threshold")).doubleValue();
+    try {
+    	min = ((Double)configuration.get("threshold")).doubleValue();
+    } catch (NullPointerException npe) {}
+    catch (NumberFormatException e) {}
   }
 
   public void dispose() {
