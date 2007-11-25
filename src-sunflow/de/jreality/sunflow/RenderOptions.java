@@ -1,8 +1,9 @@
 package de.jreality.sunflow;
 
+import java.io.Serializable;
 import java.util.prefs.Preferences;
 
-public class RenderOptions {
+public class RenderOptions implements Serializable {
 	private boolean progressiveRender = true;
 	private boolean threadsLowPriority = false;
 	private double ambientOcclusionBright = .2f;
