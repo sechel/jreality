@@ -22,6 +22,11 @@
     <mapping device="Keyboard" src="VK_CONTROL" target="Meta"/>
     <mapping device="KeyboardSWT" src="262144" target="Meta"/>
 
+    <mapping device="Keyboard" src="VK_1" target="key1"/>
+    <mapping device="Keyboard" src="VK_2" target="key2"/>
+    <mapping device="Keyboard" src="VK_3" target="key3"/>
+    <mapping device="Keyboard" src="VK_4" target="key4"/>
+    <mapping device="Keyboard" src="VK_5" target="key5"/>
     <mapping device="Keyboard" src="VK_W" target="forward"/>
     <mapping device="Keyboard" src="VK_A" target="left"/>
     <mapping device="Keyboard" src="VK_S" target="backward"/>
