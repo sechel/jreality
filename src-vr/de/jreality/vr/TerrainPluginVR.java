@@ -642,10 +642,10 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		}
 		terrain.setTextureByName(texName);
 
-		String terrainName = prefs.get("terrain.geometry", DEFAULT_TERRAIN);
+		String terrainName = prefs.get("geometry", DEFAULT_TERRAIN);
 		if ("custom".equals(terrainName)) {
-			String fileName = prefs.get("terrain.customTerrain", null);
-			boolean center = prefs.getBoolean("terrain.customTerrainCenter", false);
+			String fileName = prefs.get("customTerrain", null);
+			boolean center = prefs.getBoolean("customTerrainCenter", false);
 			System.out.println("terrainFile="+fileName);
 			if (fileName != null) {
 				terrainFile = new File(fileName);
@@ -661,7 +661,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		}
 		terrain.setGeometryByName(terrainName);
 		
-		setSphericalTerrain(prefs.getBoolean("terrain.sphericalTerrain", DEFAULT_SPHERICAL_TERRAIN));
+		setSphericalTerrain(prefs.getBoolean("sphericalTerrain", DEFAULT_SPHERICAL_TERRAIN));
 		
 		int r = prefs.getInt("colorRed", DEFAULT_FACE_COLOR.getRed());
 		int g = prefs.getInt("colorGreen", DEFAULT_FACE_COLOR.getGreen());
