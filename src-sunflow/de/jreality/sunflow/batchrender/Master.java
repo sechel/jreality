@@ -3,10 +3,8 @@ package de.jreality.sunflow.batchrender;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -14,8 +12,6 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 
 import de.jreality.sunflow.RenderOptions;
-import de.jreality.util.ImageUtility;
-import de.smrj.Broadcaster;
 import de.smrj.executor.DistributedExecutorService;
 import de.smrj.executor.RemoteCallable;
 
@@ -76,18 +72,16 @@ public class Master {
 		renderOptions.setDepthsRefraction(8);
 		renderOptions.setDepthsReflection(4);
 		
-		renderOptions.setFilter("gaussian");
-		
 		String[] hosts = new String[100]; //parseHosts("/net/MathVis/Projects/Exhibition/good_guys");
 		//System.out.println(System.getProperty("java.class.path"));
 		//System.out.println(Arrays.toString(hosts));
 		//if (true) return;
 		final DistributedExecutorService des = new DistributedExecutorService(hosts);
-		broadcastStaticMethodCall(des, "setJrsFile", new Class<?>[]{String.class}, new Object[]{base+".jrs"});
-		broadcastStaticMethodCall(des, "setRenderOptions", new Class<?>[]{RenderOptions.class}, new Object[]{renderOptions});
-		broadcastStaticMethodCall(des, "setExtension", new Class<?>[]{String.class}, new Object[]{"png"});
-		broadcastStaticMethodCall(des, "setImageSize", new Class<?>[]{Integer.class, Integer.class}, new Object[]{width, height});
-		broadcastStaticMethodCall(des, "setTiling", new Class<?>[]{Integer.class, Integer.class}, new Object[]{tilesX, tilesY});
+		des.broadcastStaticMethodCall(Client.class, "setJrsFile", new Class<?>[]{String.class}, new Object[]{base+".jrs"});
+		des.broadcastStaticMethodCall(Client.class, "setRenderOptions", new Class<?>[]{RenderOptions.class}, new Object[]{renderOptions});
+		des.broadcastStaticMethodCall(Client.class, "setExtension", new Class<?>[]{String.class}, new Object[]{"png"});
+		des.broadcastStaticMethodCall(Client.class, "setImageSize", new Class<?>[]{Integer.class, Integer.class}, new Object[]{width, height});
+		des.broadcastStaticMethodCall(Client.class, "setTiling", new Class<?>[]{Integer.class, Integer.class}, new Object[]{tilesX, tilesY});
 		
 		final Master master = new Master(base+".png", width, height, tilesX, tilesY);
 		
@@ -138,18 +132,4 @@ public class Master {
 		return hosts.toArray(new String[0]);
 	}
 
-	private static void broadcastStaticMethodCall(DistributedExecutorService des, 
-			String methodName, Class<?>[] sig, Object[] params) {
-		System.out.println("broadcast call: "+methodName);
-		for (Broadcaster bc : des.broadcasters()) {
-			System.out.print('.');
-			try {
-				bc.getRemoteFactory().createRemoteViaStaticMethod(Object.class, Client.class, methodName, sig, params);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		System.out.println("\ndone.");
-	}
 }

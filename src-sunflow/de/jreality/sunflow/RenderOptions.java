@@ -15,7 +15,7 @@ public class RenderOptions implements Serializable {
 	private int depthsReflection = 2;
 	private int depthsRefraction = 2;
 	private String giEngine = "ambocc";
-	private String filter = "box";
+	private String filter = "gaussian";
 	private int causticsEmit = 0;
 	private int causticsGather = 50;
 	private double causticsRadius = 0.5;
