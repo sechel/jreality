@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src-backends-share"/>
-	<classpathentry kind="src" path="src-core"/>
+	<classpathentry kind="src" path="src-core">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jreality/jni"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry excluding="de/jreality/examples/SwtExample.java" kind="src" path="src-examples"/>
 	<classpathentry kind="src" path="src-gpgpu"/>
 	<classpathentry kind="src" path="src-io"/>
