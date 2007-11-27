@@ -269,9 +269,10 @@ public class SceneGraphUtility {
     
     
     /**
-     * Return a copy of the scene graph rooted at <i>template</i>. 
+     * Return a copy of the scene graph node <i>template</i>.
+     * For a SceneGraphComponent, it does not include copies of the children.  
      * @param template
-     * @return
+     * @return the copy
      * @see CopyVisitor
      */
     public static <T extends SceneGraphNode> T copy(T template) {
