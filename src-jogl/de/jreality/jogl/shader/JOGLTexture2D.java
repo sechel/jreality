@@ -15,7 +15,19 @@ public class JOGLTexture2D implements Texture2D {
 	Texture2D proxy;
 	protected int applyMode,
 		combineModeAlpha,
-		combineModeColor;
+		combineModeColor,
+		source0Color,
+		source0Alpha,
+		source1Color,
+		source1Alpha,
+		source2Color,
+		source2Alpha,
+		operand0Color,
+		operand0Alpha,
+		operand1Color,
+		operand1Alpha,
+		operand2Color,
+		operand2Alpha;
 	protected Color blendColor;
 	protected String externalSource;
 	protected ImageData image;
@@ -35,6 +47,18 @@ public class JOGLTexture2D implements Texture2D {
 		blendColor = proxy.getBlendColor();
 		combineModeColor = proxy.getCombineModeColor();
 		combineModeAlpha = proxy.getCombineModeAlpha();
+		operand0Color = proxy.getOperand0Color();
+		operand1Color = proxy.getOperand1Color();
+		operand2Color = proxy.getOperand2Color();
+		operand0Alpha = proxy.getOperand0Alpha();
+		operand1Alpha = proxy.getOperand1Alpha();
+		operand2Alpha = proxy.getOperand2Alpha();
+		source0Color = proxy.getSource0Color();
+		source1Color = proxy.getSource1Color();
+		source2Color = proxy.getSource2Color();
+		source0Alpha = proxy.getSource0Alpha();
+		source1Alpha = proxy.getSource1Alpha();
+		source2Alpha = proxy.getSource2Alpha();
 		image = proxy.getImage();
 		textureMatrix = proxy.getTextureMatrix();
 		minFilter = proxy.getMinFilter();
@@ -81,27 +105,27 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public Integer getOperand0Alpha() {
-		return proxy.getOperand0Alpha();
+		return operand0Alpha;
 	}
 
 	public Integer getOperand0Color() {
-		return proxy.getOperand0Color();
+		return operand0Color;
 	}
 
 	public Integer getOperand1Alpha() {
-		return proxy.getOperand1Alpha();
+		return operand1Alpha;
 	}
 
 	public Integer getOperand1Color() {
-		return proxy.getOperand1Color();
+		return operand1Color;
 	}
 
 	public Integer getOperand2Alpha() {
-		return proxy.getOperand2Alpha();
+		return operand2Alpha;
 	}
 
 	public Integer getOperand2Color() {
-		return proxy.getOperand2Color();
+		return operand2Color;
 	}
 
 	public Integer getRepeatS() {
@@ -113,27 +137,27 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public Integer getSource0Alpha() {
-		return proxy.getSource0Alpha();
+		return source0Alpha;
 	}
 
 	public Integer getSource0Color() {
-		return proxy.getSource0Color();
+		return source0Color;
 	}
 
 	public Integer getSource1Alpha() {
-		return proxy.getSource1Alpha();
+		return source1Alpha;
 	}
 
 	public Integer getSource1Color() {
-		return proxy.getSource1Color();
+		return source1Color;
 	}
 
 	public Integer getSource2Alpha() {
-		return proxy.getSource2Alpha();
+		return source2Alpha;
 	}
 
 	public Integer getSource2Color() {
-		return proxy.getSource2Color();
+		return source2Color;
 	}
 
 	public Matrix getTextureMatrix() {

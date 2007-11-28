@@ -134,8 +134,10 @@ public class Texture2DLoaderJOGL {
     public static void render(GL gl, Texture2D tex) {
       render(gl, tex, true);
     }
+    static Texture2D lastRendered = null;
     public static void render(GL gl, Texture2D tex, boolean mipmapped) {
-      if (tex.getImage() == null) return;
+    	ImageData image = tex.getImage();
+      if (image == null) return;
         //  render(drawable, tex, 0);
     //}
     //public static void render(GLCanvas drawable, Texture2D tex, int level) {
@@ -143,15 +145,14 @@ public class Texture2DLoaderJOGL {
 
     boolean replace = false;
     
-    GLU glu = new GLU(); //drawable.getGLU();
     
     WeakHashMap<ImageData, Integer> ht = getTextureTableForGL(gl);
 
-    Integer texid = ht.get(tex.getImage());
+    Integer texid = ht.get(image);
     if (texid != null) {
       first = false;
     } else {
-      Dimension dim = new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight());
+      Dimension dim = new Dimension(image.getWidth(), image.getHeight());
       { // delete garbage collected textures or reuse if possible
         for (Object ref=refQueue.poll(); ref != null; ref=refQueue.poll()) {
           Integer id = (Integer) refToID.remove(ref);
@@ -174,42 +175,46 @@ public class Texture2DLoaderJOGL {
       // create the texture ID for this texture
       if (texid == null) {
     	  texid = createTextureID(gl);
-          ht.put(tex.getImage(), texid);
+          ht.put(image, texid);
       }
       // register reference for refQueue
-      WeakReference<ImageData> ref = new WeakReference<ImageData>(tex.getImage(), refQueue);
+      WeakReference<ImageData> ref = new WeakReference<ImageData>(image, refQueue);
       refToID.put(ref, texid);
       refToGL.put(ref, gl);
-      refToDim.put(ref, new Dimension(tex.getImage().getWidth(), tex.getImage().getHeight()));
+      refToDim.put(ref, new Dimension(image.getWidth(), image.getHeight()));
     }
 
     gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
     
+    gl.glMatrixMode(GL.GL_TEXTURE);
+    gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
+    gl.glMatrixMode(GL.GL_MODELVIEW);  
     // see if this texture has already been handled in this render cycle
-    ht = getBoundTextureTableForGL(gl);
+//    ht = getBoundTextureTableForGL(gl);
 //    if (ht != null)	{
-//        Integer boundTexid = ht.get(tex.getImage());
+//        Integer boundTexid = ht.get(image);
 //        if (boundTexid != null)	{
-//            gl.glMatrixMode(GL.GL_TEXTURE);
-//            gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
-//            gl.glMatrixMode(GL.GL_MODELVIEW);       
-//        	return;
+//         	return;
 //        }    
-//        ht.put(tex.getImage(), texid);
+//        ht.put(image, texid);
 //   }
-//    System.err.println("Not yet bound ");
     int srcPixelFormat = GL.GL_RGBA;
-   handleTextureParameters(tex, gl);
+    if (lastRendered  == null  || image != lastRendered.getImage()) {
+    	handleTextureParameters(tex, gl);
+    	lastRendered = tex;
+//       System.err.println("Not yet handled "+image);
+    }
 
     // create either a series of mipmaps of a single texture image based on
     // what's loaded
     if (first || replace) {
-    	byte[] data = tex.getImage().getByteArray();
+    	byte[] data = image.getByteArray();
         if (mipmapped) {
+          GLU glu = new GLU(); //drawable.getGLU();
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
         		  GL.GL_RGBA, 
-        		  tex.getImage().getWidth(),
-              tex.getImage().getHeight(), 
+        		  image.getWidth(),
+              image.getHeight(), 
               srcPixelFormat, 
               GL.GL_UNSIGNED_BYTE, 
               ByteBuffer.wrap(data));
@@ -217,16 +222,11 @@ public class Texture2DLoaderJOGL {
         } else {
           gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, //GL.GL_RGBA,
                                                                           // //tex.getPixelFormat(),
-              tex.getImage().getWidth(), tex.getImage().getHeight(), 0, srcPixelFormat,
+              image.getWidth(), image.getHeight(), 0, srcPixelFormat,
               GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
         }
     }
     
-/*    if (replace) {
-      // write data into the tex with id = textureID
-      // what aboud mipmapped textures?
-      throw new Error("not implemented");
-    }*/
     
   } 
 
@@ -377,9 +377,7 @@ public class Texture2DLoaderJOGL {
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_ALPHA,tex.getOperand2Alpha()); // GL.GL_SRC_ALPHA);
       
     }    
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
-    gl.glMatrixMode(GL.GL_MODELVIEW);       
+    lastRendered = tex;
   }
 
 	/**

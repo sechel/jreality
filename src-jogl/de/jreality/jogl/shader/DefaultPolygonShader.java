@@ -82,6 +82,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	Texture2D lightMap;
 	JOGLTexture2D joglLightMap;
 	CubeMap reflectionMap;
+	JOGLCubeMap joglCubeMap;
 	int frontBack = FRONT_AND_BACK;
 	public VertexShader vertexShader = null;
 	boolean useGLSL = false;
@@ -92,7 +93,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	EffectiveAppearance myEap = null;
 	boolean inheritGLSL = false;
 	boolean fastAndDirty = false;
-	boolean geometryHasTextureCoordinates = false;
+	boolean geometryHasTextureCoordinates = false, hasTextures = false;
 	private transient boolean needsChecked = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
 	static {
@@ -120,20 +121,23 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    joglLightMap = null;
 	    reflectionMap = null;
 	    joglTexture2D = null;
+	    hasTextures = false;
 	    if (!fastAndDirty) {
 			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
 				texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
 		    	//LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
 				joglTexture2D = new JOGLTexture2D(texture2D);
+				hasTextures = true;
 			}
 		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
 		    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
+		    	joglCubeMap = new JOGLCubeMap(reflectionMap);
 		    }
 		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap)) {
 		    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);		    	
 		    	joglLightMap = new JOGLTexture2D(lightMap);
+		    	hasTextures = true;
 		    }
-	    	
 	    }
       
 		inheritGLSL= eap.getAttribute(ShaderUtility.nameSpace(name,"inheritGLSL"), false);	
@@ -179,7 +183,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		else		gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
-		gl.glPushAttrib(GL.GL_TEXTURE_BIT);
+    	hasTextures = false;
+		if (hasTextures) gl.glPushAttrib(GL.GL_TEXTURE_BIT);
 		texUnit = GL.GL_TEXTURE0; 
 	    if (joglLightMap != null) {
 		    gl.glActiveTexture(texUnit);
@@ -205,12 +210,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    }
 	    }
 
-	    if (reflectionMap != null)  {
+	    if (joglCubeMap != null)  {
 	      	gl.glActiveTexture(texUnit);
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 			refMapUnit = texUnit;
 			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
-			Texture2DLoaderJOGL.render(jr, reflectionMap);
+			Texture2DLoaderJOGL.render(jr, joglCubeMap);
 			texUnit++;
 		} else if (useGLSL)
 			glslShader.reflectionTextureUnit = -1;    	
@@ -224,6 +229,27 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
 }
 	
+	public void postRender(JOGLRenderingState jrs)	{
+		JOGLRenderer jr = jrs.renderer;
+		GL gl = jrs.renderer.globalGL;
+		if (useGLSL)
+			glslShader.postRender(jrs);
+		for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
+			gl.glActiveTexture(i);
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		}
+		if (joglCubeMap != null) {
+			gl.glActiveTexture(refMapUnit);
+			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
+			gl.glDisable(GL.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL.GL_TEXTURE_GEN_R);
+		}
+		jr.renderingState.texUnitCount=0;
+		// TODO fix this to return to previous state -- maybe textures NOT active
+		if (hasTextures) gl.glPopAttrib();
+	}
+
 	public boolean providesProxyGeometry() {		
 		return false;
 	}
@@ -282,27 +308,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				}	
 			}
 		}
-	}
-
-	public void postRender(JOGLRenderingState jrs)	{
-		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.renderer.globalGL;
-		if (useGLSL)
-			glslShader.postRender(jrs);
-		for (int i = GL.GL_TEXTURE0; i < GL.GL_TEXTURE7; ++i) {
-			gl.glActiveTexture(i);
-			gl.glDisable(GL.GL_TEXTURE_2D);
-		}
-		if (reflectionMap != null) {
-			gl.glActiveTexture(refMapUnit);
-			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-			gl.glDisable(GL.GL_TEXTURE_GEN_S);
-			gl.glDisable(GL.GL_TEXTURE_GEN_T);
-			gl.glDisable(GL.GL_TEXTURE_GEN_R);
-		}
-		jr.renderingState.texUnitCount=0;
-		// TODO fix this to return to previous state -- maybe textures NOT active
-		gl.glPopAttrib();
 	}
 
     public static void defaultPolygonRender(JOGLRenderingState jrs)	{
