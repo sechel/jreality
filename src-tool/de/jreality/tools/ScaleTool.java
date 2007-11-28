@@ -18,6 +18,15 @@ public class ScaleTool extends DragEventTool {
 	double[] translation;
 	public ScaleTool(String activationSlotName){
 		super(activationSlotName);
+		addPrimitiveDragListener(new PrimitiveDragListener() {
+			public void primitiveDragEnd(PrimitiveDragEvent e) {
+			}
+			public void primitiveDragStart(PrimitiveDragEvent e) {
+			}
+			public void primitiveDragged(PrimitiveDragEvent e) {
+				translation=Rn.subtract(null,e.getPosition(),pickPoint);
+			}
+		});
 		addPointDragListener(new PointDragListener(){
 			public void pointDragStart(PointDragEvent e) {	
 			}

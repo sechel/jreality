@@ -4,6 +4,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
@@ -20,6 +21,7 @@ public class DragEventTool extends AbstractTool {
 	protected PointDragListener pointDragListener;
 	protected LineDragListener lineDragListener;
 	protected FaceDragListener faceDragListener;
+	protected PrimitiveDragListener primitiveDragListener;
 	
   private static final InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
   private static InputSlot alongZPointerSlot = InputSlot.getDevice("DragAlongViewDirection");
@@ -36,6 +38,7 @@ public class DragEventTool extends AbstractTool {
 	
   protected boolean active;
   private boolean dragInViewDirection;
+  protected Geometry geom;
   protected PointSet pointSet;
   protected IndexedLineSet lineSet;
   protected IndexedFaceSet faceSet;
@@ -68,8 +71,21 @@ public class DragEventTool extends AbstractTool {
 		active=false;
 		return;
 	}
-    
-    if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
+    if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_OBJECT) {
+        if (primitiveDragListener == null) {
+          active=false;
+          tc.reject();
+          return;
+        }
+  	    pickType=PickResult.PICK_TYPE_OBJECT;
+  	    geom = (Geometry) tc.getCurrentPick().getPickPath().getLastElement();
+  	  double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
+      if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
+      else Pn.dehomogenize(pickPoint,pickPointTemp);
+      MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint); 	            
+	  firePrimitiveDragStart(new double[]{0,0,0,1});        
+
+    } else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
       if (pointDragListener == null) {
         active=false;
         tc.reject();
@@ -146,18 +162,21 @@ public class DragEventTool extends AbstractTool {
     }   
     double[] translation={translation3[0],translation3[1],translation3[2],0};
     double[] position = new double[4];
-	  if (pickType == PickResult.PICK_TYPE_POINT) {      
+	  if (pickType == PickResult.PICK_TYPE_OBJECT) {
+		    firePrimitiveDragged(Rn.add(translation,translation,pickPoint));
+	  }else if (pickType == PickResult.PICK_TYPE_POINT) {
 	    firePointDragged(Rn.add(translation,translation,pickPoint));
 	  }else if (pickType == PickResult.PICK_TYPE_LINE) {
 	    fireLineDragged(translation,Rn.add(position,translation,pickPoint));    	
 	  }else if (pickType == PickResult.PICK_TYPE_FACE) {
-      fireFaceDragged(translation);	    	
+      fireFaceDragged(translation);
 	  }
 	}
 
 	public void deactivate(ToolContext tc) {
 		  if (!active) return;   
-	      if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(new double[]{0,0,0,1});
+	      if (pickType == PickResult.PICK_TYPE_OBJECT) firePrimitiveDragEnd(new double[]{0,0,0,1});
+	      else if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(new double[]{0,0,0,1});
 	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1},new double[]{0,0,0,1});
 	      else if (pickType == PickResult.PICK_TYPE_FACE) fireFaceDragEnd(new double[]{0,0,0,1});
 	      index=-1;
@@ -169,6 +188,12 @@ public class DragEventTool extends AbstractTool {
 	      pickType=PickResult.PICK_TYPE_OBJECT;
 	}	
 	
+    public void addPrimitiveDragListener(PrimitiveDragListener listener) {
+        primitiveDragListener = PrimitiveDragEventMulticaster.add(primitiveDragListener, listener);
+    }
+    public void removePrimitiveDragListener(PrimitiveDragListener listener) {
+    	primitiveDragListener = PrimitiveDragEventMulticaster.remove(primitiveDragListener, listener);
+    }    
     public void addPointDragListener(PointDragListener listener) {
         pointDragListener = PointDragEventMulticaster.add(pointDragListener, listener);
     }
@@ -188,6 +213,19 @@ public class DragEventTool extends AbstractTool {
     	faceDragListener = FaceDragEventMulticaster.remove(faceDragListener, listener);
     }
 	
+	protected void firePrimitiveDragStart(double[] position) {
+	    final PrimitiveDragListener l=primitiveDragListener;
+		if (l != null) l.primitiveDragStart(new PrimitiveDragEvent(geom, position));
+	}
+    protected void firePrimitiveDragged(double[] position) {
+		final PrimitiveDragListener l=primitiveDragListener;
+		if (l != null) l.primitiveDragged(new PrimitiveDragEvent(geom, position));
+	}
+	protected void firePrimitiveDragEnd(double[] position) {
+		final PrimitiveDragListener l=primitiveDragListener;
+		if (l != null) l.primitiveDragEnd(new PrimitiveDragEvent(geom, position));
+	}
+		   
     protected void firePointDragStart(double[] location) {
         final PointDragListener l=pointDragListener;
         if (l != null) l.pointDragStart(new PointDragEvent(pointSet, index, location));
