@@ -113,13 +113,13 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
   @Override
   public void actionPerformed(ActionEvent e) {
 
-  	if (menu == null) menu = viewerApp.getMenu();  //init menu
+  	if (menu == null && viewerApp.isCreateMenu()) menu = viewerApp.getMenu();  //init menu
   	
     if (isFullscreen) {  //exit full screen
       
       //restore menu state
       if (showMenu) menu.showMenuBar(true);
-      frame.setJMenuBar(menu.getMenuBar());
+      if (menu != null) frame.setJMenuBar(menu.getMenuBar());
 
       viewerApp.update();  //restores the frame's content
 //      frame.pack();
@@ -136,10 +136,12 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
       fsf.getContentPane().add(viewer);
       
       //remember menu state and hide
-      ViewerAppMenu menu = viewerApp.getMenu();
-      showMenu = menu.isShowMenuBar();
-      if (showMenu) menu.showMenuBar(false);
-      fsf.setJMenuBar(menu.getMenuBar());
+      if (viewerApp.isCreateMenu())	{
+          ViewerAppMenu menu = viewerApp.getMenu();
+          showMenu = menu.isShowMenuBar();
+          if (showMenu) menu.showMenuBar(false);
+          fsf.setJMenuBar(menu.getMenuBar());   	  
+      }
       
       fsf.validate();
       fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
