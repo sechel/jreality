@@ -253,16 +253,9 @@ public class JOGLRendererHelper {
 
 	// TODO don't do this every render, attach an Appearance listener and cache the value
 	// between changes
-	public static void handleSkyBox(JOGLRenderer jr, Appearance topAp, Camera cam) {
-		if (topAp == null) return;
+	public static void handleSkyBox(JOGLRenderer jr, CubeMap cm, Camera cam) {
 	    GL gl = jr.globalGL;
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
-					CommonAttributes.SKY_BOX, topAp)) {
-			CubeMap cm = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
-					CommonAttributes.SKY_BOX, topAp, true);
-			double[] w2c = jr.getContext().getWorldToCamera();
-			JOGLSkyBox.render(gl, w2c, cm, cam);
-		}
+			JOGLSkyBox.render(gl, jr.renderingState.worldToCamera, cm, cam);
 	}
 
 	private static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;

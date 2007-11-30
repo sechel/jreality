@@ -88,9 +88,11 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
@@ -121,6 +123,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int whichEye = CameraUtility.MIDDLE_EYE;
 	protected int[] currentViewport = new int[4];
 	protected Graphics3D context;
+	protected CubeMap skyboxCubemap;
 
 	public GL globalGL;
 
@@ -220,6 +223,11 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (obj instanceof Boolean) JOGLRenderingState.useOldTransparency = ((Boolean)obj).booleanValue();
 //		theLog.fine("forceResTex = "+forceResidentTextures);
 //		theLog.info("component display lists = "+renderingState.componentDisplayLists);
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+				CommonAttributes.SKY_BOX, ap)) {
+			skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
+				CommonAttributes.SKY_BOX, ap, true);
+		} else skyboxCubemap = null;
 	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {
@@ -233,17 +241,16 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 	}
 	public void render() {
-		Texture2DLoaderJOGL.setupBoundTextureTable(globalGL, oneTexture2DPerImage);
+// 		following optimization has been abandoned for now
+//		Texture2DLoaderJOGL.setupBoundTextureTable(globalGL, oneTexture2DPerImage);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
 			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
-			//theLog.finer("Creating peer scenegraph");
 		}
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
 
 		context  = new Graphics3D(theViewer.getCameraPath(), currentPath, CameraUtility.getAspectRatio(theViewer));
-		//context.setCurrentPath(currentPath);
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
@@ -266,12 +273,13 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		if (backSphere) {  globalGL.glLoadTransposeMatrixd(P3.p3involution, 0);	globalGL.glPushMatrix(); }
 		renderingState.cameraToWorld = context.getCameraToWorld();
-		double[] w2c = Rn.inverse(null, renderingState.cameraToWorld);
-		globalGL.glLoadTransposeMatrixd(w2c, 0);
-		renderingState.flipped = (Rn.determinant(w2c) < 0.0);
+		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
+		globalGL.glLoadTransposeMatrixd(renderingState.worldToCamera, 0);
+		renderingState.flipped = (Rn.determinant(renderingState.worldToCamera) < 0.0);
 		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
-		JOGLRendererHelper.handleSkyBox(this, theRoot.getAppearance(),CameraUtility.getCamera(theViewer) );
+		if (skyboxCubemap != null) 
+			JOGLSkyBox.render(globalGL, renderingState.worldToCamera, skyboxCubemap, CameraUtility.getCamera(theViewer));
 
 		if (!pickMode) processLights();
 

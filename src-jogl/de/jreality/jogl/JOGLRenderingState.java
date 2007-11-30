@@ -89,6 +89,7 @@ public class JOGLRenderingState {
 	public boolean componentDisplayLists = false;
 	public static boolean useOldTransparency = false;
 	public double[] cameraToWorld = Rn.identityMatrix(4);
+	public double[] worldToCamera = Rn.identityMatrix(4);
 
 	public int texUnitCount = 0;
 	public int polygonCount = 0;

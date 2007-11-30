@@ -54,6 +54,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.math.Rn;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -68,7 +69,7 @@ import de.jreality.util.LoggingSystem;
  */
 public class Texture2DLoaderJOGL {
 	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupTextures = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
-	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupBoundTextures = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
+	private static WeakHashMap<GL, WeakHashMap<ImageData, double[]>> lookupBoundTextures = new WeakHashMap<GL, WeakHashMap<ImageData,double[]>>();
 	private static WeakHashMap<GL, WeakHashMap<ImageData, Integer>> lookupCubemaps = new WeakHashMap<GL, WeakHashMap<ImageData,Integer>>();
 
   private static ReferenceQueue<ImageData> refQueue = new ReferenceQueue<ImageData>();
@@ -85,9 +86,9 @@ public class Texture2DLoaderJOGL {
 //		System.err.println("bound texture: "+activate);
 		if (!activate) lookupBoundTextures.remove(gl);
 		else {
-			WeakHashMap<ImageData, Integer> ht = getBoundTextureTableForGL(gl);
+			WeakHashMap<ImageData, double[]> ht = getBoundTextureTableForGL(gl);
 		  	if (ht == null)	{
-	    		ht = new WeakHashMap<ImageData, Integer>();
+	    		ht = new WeakHashMap<ImageData, double[]>();
 	    		lookupBoundTextures.put(gl, ht);
 		  	} 
 		ht.clear();			
@@ -103,8 +104,8 @@ public class Texture2DLoaderJOGL {
        
 //	public  WeakHashMap<ImageData, Integer> boundToTextureUnit = new WeakHashMap<ImageData, Integer>();
  
-	private static WeakHashMap<ImageData, Integer> getBoundTextureTableForGL(GL gl)	{
-	      WeakHashMap<ImageData, Integer> ht = lookupBoundTextures.get(gl);
+	private static WeakHashMap<ImageData, double[]> getBoundTextureTableForGL(GL gl)	{
+	      WeakHashMap<ImageData, double[]> ht = lookupBoundTextures.get(gl);
 //	  		if (ht == null)	{
 //	    			ht = new WeakHashMap<ImageData, Integer>();
 //	    			lookupBoundTextures.put(gl, ht);
@@ -229,7 +230,6 @@ public class Texture2DLoaderJOGL {
     
     
   } 
-
   public static void render(JOGLRenderer jr, CubeMap ref) {
 //  public static void render(GL gl, CubeMap ref, double[] c2w) {
     boolean first = true;
@@ -251,14 +251,10 @@ public class Texture2DLoaderJOGL {
     }
     gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, textureID); 
     
-
+    double[] c2w = Rn.copy(null, jr.renderingState.cameraToWorld);
+    c2w[3] = c2w[7] = c2w[11] = 0.0;    	 
     int srcPixelFormat =  GL.GL_RGBA;
-    double[] c2w = jr.getContext().getCameraToWorld();
-    c2w[3] = c2w[7] = c2w[11] = 0.0;
     
-//    ref.setTextureMatrix(c2w);
-//    handleTextureParameters(ref, gl);
-
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, Texture2D.GL_CLAMP_TO_EDGE); 
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, Texture2D.GL_CLAMP_TO_EDGE); 
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, Texture2D.GL_LINEAR_MIPMAP_LINEAR); 
