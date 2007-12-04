@@ -397,7 +397,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 			if (jpc == null) return;
 			childlock.writeLock();
-			children.remove(jpc);						
+			children.remove(jpc);	
+			jpc.dispose();
 			childlock.writeUnlock();
 			//theLog.log(Level.FINE,"After removal child count is "+children.size());
 			//jpc.dispose();		// there are no other references to this child
