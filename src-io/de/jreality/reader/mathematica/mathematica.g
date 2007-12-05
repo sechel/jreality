@@ -75,8 +75,8 @@ options {
 * Internes:
 * ueberall die aktuelle Appearance, FlaechenFarbe(fC), und Punkt/LinienFarbe(plC) durchreichen
 *
-* TO DO:
-* viele Optionen sind noch unbehandelt (siehe dort: "optionPrimitives")
+* TODO:
+* alle Optionen sind noch unbehandelt (siehe dort: "optionPrimitives")
 * Standard Lichter und Camera werden nicht uebernommen 
 * 		(der Scenegraph hat keine Lichter oder Camera)
 * ein paar Directiven werden auch ignoriert (siehe dort: "directive")
@@ -89,8 +89,8 @@ options {
 *	Loesung :ein + ...*I ignorieren!
 *			   Doubles werden ja immer durch "," getrennt! Also geht das!
 *			   sollte jemand komplexe Zahlen lesen wollen
-*				oder doubles ohne Komma parsenwollen 
-*				so erstellt man dann noch eine eine extra RegelMethode
+*				oder doubles ohne Komma parsen wollen 
+*				so erstellt man dann noch eine extra RegelMethode
 */
 
 	// this is what is returned from the parsing process
@@ -100,8 +100,8 @@ options {
 	private Logger log = LoggingSystem.getLogger(MathematicaParser.class);
 //	private CoordinateSystemFactory box;
 	private Appearance startApp =new Appearance();
-	private Color plCDefault= new Color(255,0,0);	// default- Punkt und Linienfarbe
-	private Color fCDefault = new Color(0,255,0);	// default- Flaechenfarbe
+	private Color plCDefault= new Color(127,127,127);	// default- Punkt und Linienfarbe
+	private Color fCDefault = new Color(255,255,255);	// default- Flaechenfarbe
 	
 	private boolean optGeo=false;
 	public void setOptimizeGeometry(boolean flag){optGeo=flag;}
@@ -127,121 +127,13 @@ options {
 			gotFirstPoint=true;		
 		}
 	}
-	
+
 // -------------------------------- default Lights ----------------------------
 	public static SceneGraphComponent getDefaultLightNode (){
-		SceneGraphComponent lightNode= new SceneGraphComponent();
-		SceneGraphComponent light1Node= new SceneGraphComponent();
-		SceneGraphComponent light2Node= new SceneGraphComponent();
-		SceneGraphComponent light3Node= new SceneGraphComponent();
-		SceneGraphComponent light4Node= new SceneGraphComponent();
-		SceneGraphComponent light5Node= new SceneGraphComponent();
-		SceneGraphComponent light6Node= new SceneGraphComponent();
-		Light light1 = new PointLight();
-		Light light2 = new PointLight();
-		Light light3 = new PointLight();
-		Light light4 = new PointLight();
-		Light light5 = new PointLight();
-		Light light6 = new PointLight();
-		lightNode.addChild(light1Node);
-		lightNode.addChild(light2Node);
-		lightNode.addChild(light3Node);
-		lightNode.addChild(light4Node);
-		lightNode.addChild(light5Node);
-		lightNode.addChild(light6Node);
-		light1.setColor(new Color(255,0,0));
-		light2.setColor(new Color(0,255,0));
-		light3.setColor(new Color(0,0,255));
-		light4.setColor(new Color(255,0,0));
-		light5.setColor(new Color(0,255,0));
-		light6.setColor(new Color(0,0,255));
-		light1.setIntensity(1);
-		light2.setIntensity(1);
-		light3.setIntensity(1);
-		light4.setIntensity(1);
-		light5.setIntensity(1);
-		light6.setIntensity(1);
-		light1Node.setLight(light1);
-		light2Node.setLight(light2);
-		light3Node.setLight(light3);
-		light4Node.setLight(light4);
-		light5Node.setLight(light5);
-		light6Node.setLight(light6);
-		MatrixBuilder.euclidean().translate(1,0,1).assignTo(light1Node);
-		MatrixBuilder.euclidean().translate(1,1,1).assignTo(light2Node);
-		MatrixBuilder.euclidean().translate(0,1,1).assignTo(light3Node);
-		MatrixBuilder.euclidean().translate(-1,0,-1).assignTo(light4Node);
-		MatrixBuilder.euclidean().translate(-1,-1,-1).assignTo(light5Node);
-		MatrixBuilder.euclidean().translate(0,-1,-1).assignTo(light6Node);
-		return lightNode; 
+		return	MathematicaHelper.getDefaultLightNode();
 	} 
 
 
-// ------------------------------------------------------------------------------
-	private static Appearance copyApp(Appearance appOld){
-		// kopiert eine Appearance um doppelt-Verzeigerung zu vermeiden
-		Appearance appNew= new Appearance();
-		Set s=appOld.getStoredAttributes();
-		Iterator ite= s.iterator();
-		while (ite.hasNext()){
-			String key=(String)ite.next();
-			appNew.setAttribute(key,appOld.getAttribute(key));
-		}
-	 	return appNew;
-	}
-	private static Appearance setPLColor(Appearance app,Object c){
-		Appearance app2= copyApp(app);
-		app2.setAttribute(CommonAttributes.POINT_SHADER+"."+
-			 	CommonAttributes.POLYGON_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, c);
-	 	app2.setAttribute(CommonAttributes.POINT_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, c);			 	
-		app2.setAttribute(CommonAttributes.LINE_SHADER+"."+
-			 	CommonAttributes.POLYGON_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, c);
-	 	app2.setAttribute(CommonAttributes.LINE_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR, c);
-		return app2;
-	}
-	private Color getPLColor(Appearance app){
-		Color c= null;
-		try{
-			c=(Color)app.getAttribute(CommonAttributes.POINT_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR);
-			}
-		catch(Exception e){
-			c=plCDefault;
-		}
-		return c;
-	}
-	private Color getFColor(Appearance app){
-		Color c= null;
-		try{
-			c=(Color)app.getAttribute(CommonAttributes.POLYGON_SHADER+"."+
-			 	CommonAttributes.DIFFUSE_COLOR);
-			}
-		catch(Exception e){
-			c=fCDefault;
-		}
-		return c;
-	}
-	private static Color copyColor(Color c){
-		// kopiert eine Farbe um doppelt-Verzeigerung zu vermeiden
-		return new Color(c.getRed(),c.getGreen(),c.getBlue()) ;
-	}
-	private static void simplifyColor(Appearance app){
-		//takes out the point-, polygon and line- colors if they are at defaultColors
-		// kommt spaeter ist nicht so wichtig
-	}	
-	private double[] getRGBColor(Color c){
-	// retuns a array that represents a color (needed for color-Arrays as double[][])
-		double[] fl= new double[3];
-		fl[0]=c.getRed()/255.0;
-		fl[1]=c.getGreen()/255.0;
-		fl[2]=c.getBlue()/255.0;
-		return fl ;
-	}
-	
 /**
 * konstructs a parser who can translate a
 * mathematica-file to the corresponding SceneGraph
@@ -266,38 +158,62 @@ start returns [SceneGraphComponent r=new SceneGraphComponent()]
 	root.setName("Mathematica");
 	log.setLevel(Level.FINE);	
 }
-	:"Graphics3D"
-	  OPEN_BRACKET  
-	  	( 	  firstList[startApp,defaultEdgeForm]			// bei nur einem Objekt sind Klammern optional
-	  		| startApp=faceThing[startApp,defaultEdgeForm]	// ein Flaechen-beeinflussendes Object
-	  		| startApp=plThing[startApp]  					// ein Punkt/Linien-beeinflussendes Object
-	  		| startApp=appThing[startApp]					// ein App.-beeinflussendes Object
-	  	)
-	  	{
-	  	// Box und Axen ermoeglichen:
-	  //	box=new CoordinateSystemFactory(root);
-		}
-	  	(optionen)? 									// Die in der 2."{}"-Klammer folgenden Optionen sind optional
-	  CLOSE_BRACKET 
+	:(  graphics3D
+	  | OPEN_BRACE listOfGraphics CLOSE_BRACE)
 		{
 		r = root;
 		if(r==null)r= new SceneGraphComponent();
 		}
 	;
 
-// ---------------------------------- 3D Objects ---------------------------------------------
 private
-firstList[Appearance app, Object edgeF]
-// firstList ist wie list, nur das hier kein neuer Sc.Gr.Co. erstellt wird da wir ja schon die Root haben
-// (wird nur am Anfang benutzt!)
-	:	OPEN_BRACE
-			(objectList[app,edgeF])?	// eine Abfolge graphischer Objecte
-	    CLOSE_BRACE
+listOfGraphics
+	:(	( graphics3D
+		 |OPEN_BRACE
+			{						
+			// neuen Knoten erstellen der die Listenelemente enthaelt, 
+			SceneGraphComponent newPart = new SceneGraphComponent();
+			newPart.setName("Graphic");
+			SceneGraphComponent oldPart = current;
+			current.addChild(newPart);
+			current=newPart;
+			}		 
+		 	listOfGraphics 
+		 	CLOSE_BRACE
+			{current=oldPart;}		 
+		 )
+	 	(COLON listOfGraphics)*
+	 )?
 	;
 
 private
+graphics3D
+	:"Graphics3D"
+	  OPEN_BRACKET  
+	  	( 	  
+		  	(OPEN_BRACE
+				(objectList[startApp,defaultEdgeForm])?	// eine Abfolge graphischer Objecte
+		    CLOSE_BRACE)		    	
+	  		| faceThing[startApp,defaultEdgeForm]	// ein Flaechen-beeinflussendes Object
+	  		| plThing[startApp]  					// ein Punkt/Linien-beeinflussendes Object
+	  		| appThing[startApp]					// ein App.-beeinflussendes Object
+	  	)
+
+//	  	(COLON optionen)? // Optionen werden komplett ignoriert
+	  	(
+	  		COLON egal
+	  		{log.fine("options are not supported");}
+	  	)?     // Optionen werden komplett ignoriert
+	  CLOSE_BRACKET 
+	; 
+		
+	  
+
+// ---------------------------------- 3D Objects ---------------------------------------------
+
+private
 list[Appearance app, Object edgeF]
-{Appearance app2=copyApp(app);}
+{Appearance app2=MathematicaHelper.copyApp(app);}
 	// eine Klammer mit mglw. einer Abfolge von 3d-Objekten
 	:	OPEN_BRACE						
 			{						
@@ -317,7 +233,7 @@ list[Appearance app, Object edgeF]
 private
 objectList [Appearance app, Object edgeF]
 // abarbeiten einer Abfolge von 3d-Objecten(und Directiven)
-{Appearance app2=copyApp(app);}
+{Appearance app2=MathematicaHelper.copyApp(app);}
 	:(
 		  list[app2 ,edgeF]		// Listen koennen Listen enthalten
 		| edgeF=edgeFormThing
@@ -338,7 +254,7 @@ objectList [Appearance app, Object edgeF]
 	
 private
 faceThing [Appearance app, Object edgeF] returns[Appearance app2]
-{app2=copyApp(app);}
+{app2=MathematicaHelper.copyApp(app);}
 	:	cuboid[app2,edgeF]					// Wuerfel 
 	|	app2=polygonBlock[app2,edgeF]		// Abfolge von Polygonen (IndexedFaceSet)
 	|	app2=faceColor[app2]				// Farbe die Flaechen beeinflusst
@@ -348,10 +264,10 @@ faceThing [Appearance app, Object edgeF] returns[Appearance app2]
 private
 plThing [Appearance app] returns[Appearance app2]
 {
- app2=copyApp(app);
+ app2=MathematicaHelper.copyApp(app);
  Color c= null;
 }
-	:	c= color	{app2=setPLColor(app2,c);}	// Farbe fuer folgende Punkte, Linien und Texte
+	:	c= color	{app2=MathematicaHelper.setPLColor(app2,c);}	// Farbe fuer folgende Punkte, Linien und Texte
 	|	app2= lineBlock [app2]			// Abfolge von Linien (IndexedLineSet)
 	|	app2= pointBlock [app2]			// Abfolge von Punkten (PointSet)
 	|	text [app2]					// Text an einem Punkt im Raum (einelementiges labeld PointSet)
@@ -359,7 +275,7 @@ plThing [Appearance app] returns[Appearance app2]
 	
 private
 appThing [Appearance appOld] returns [ Appearance app]
-{app=copyApp(appOld);}
+{app=MathematicaHelper.copyApp(appOld);}
 	:	app=directiveBlock[app]			// Abfolge von graphischen Direktiven (aendert eine Appearance)
 	;
 	
@@ -381,7 +297,7 @@ cuboid [Appearance app,Object edgeF]
 			 current.addChild(geo);
 			 geo.setGeometry(Primitives.cube());
 	 		 geo.setName("Cuboid");
-	 		 Appearance cubicApp =copyApp(app);
+	 		 Appearance cubicApp =MathematicaHelper.copyApp(app);
 	 		 if (edgeF!=null){
 	 		 	//cubicApp.setAttribute(CommonAttributes.EDGE_DRAW, true);
 			 	//cubicApp.setAttribute(CommonAttributes.TUBES_DRAW, true);
@@ -427,7 +343,7 @@ text [Appearance app]
 					 psf.update();
 		
 					 SceneGraphComponent geo=new SceneGraphComponent();
-					 Appearance pointApp =copyApp(app);
+					 Appearance pointApp =MathematicaHelper.copyApp(app);
 					 pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
 					 //pointApp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
 					 pointApp.setAttribute(CommonAttributes.POINT_RADIUS, 0.0001);
@@ -445,11 +361,11 @@ pointBlock [Appearance app] returns [Appearance app2]
 // je nach dem ob Farben ZWISCHEN den Punkten stehen wird eine 
 // Farbliste eingelesen, oder die App. eingefaerbt
 {
- app2=copyApp(app);
+ app2=MathematicaHelper.copyApp(app);
  List<double[]> points= new LinkedList<double[]>(); 
  double[] v;
  List<Color> colors= new LinkedList<Color>();
- Color plC=getPLColor(app2);
+ Color plC=MathematicaHelper.getPLColor(app2,plCDefault);
  boolean colorFlag=false;
  boolean colorNeeded =false;
  }
@@ -466,7 +382,7 @@ pointBlock [Appearance app] returns [Appearance app2]
 	COLON
 	(
 	
-	   plC=color {colorFlag=true; app2=setPLColor(app2,plC);}
+	   plC=color {colorFlag=true; app2=MathematicaHelper.setPLColor(app2,plC);}
 	 |( "Point"  {if (colorFlag) colorNeeded= true;}
 	   OPEN_BRACKET
 				{v=new double [3];}
@@ -488,16 +404,16 @@ pointBlock [Appearance app] returns [Appearance app2]
 		}
 		i=0;
 		for(Color d : colors){
-			colorData[i]=getRGBColor(d);
+			colorData[i]=MathematicaHelper.getRGBColor(d);
 			i++;
 		}
 		psf.setVertexCount(points.size());
 		psf.setVertexCoordinates(data);
-		Appearance pointApp =copyApp(app2);
+		Appearance pointApp =MathematicaHelper.copyApp(app2);
 	    if (colorNeeded) 			// brauchen wir eine Farbliste?
 			psf.setVertexColors(colorData);
 		else
-			pointApp= setPLColor(pointApp,plC);
+			pointApp= MathematicaHelper.setPLColor(pointApp,plC);
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
 //		pointApp.setAttribute(CommonAttributes.SPHERES_DRAW, true);
@@ -505,7 +421,7 @@ pointBlock [Appearance app] returns [Appearance app2]
 		geo.setGeometry(psf.getPointSet());
 		geo.setName("Points");
 		current.addChild(geo);
-		simplifyColor(app2);
+		MathematicaHelper.simplifyColor(app2);
 	}
 	;  
 
@@ -515,8 +431,8 @@ lineBlock [Appearance app] returns[Appearance app2]
 // schmeist doppelte Punkte durch umindizierung raus.
 // Farben wie bei pointBlock.
 {
- app2=copyApp(app);
- Color plC=getPLColor(app2);						// Punkt/Linienfarbe
+ app2=MathematicaHelper.copyApp(app);
+ Color plC=MathematicaHelper.getPLColor(app2,plCDefault);						// Punkt/Linienfarbe
  List<double[]> coordinates= new LinkedList<double[]>();// alle Punkte in einer Liste
  List<double[]> line=new LinkedList<double[]>();					// alle Punkte einer Linie
  List<Color> colors= new LinkedList<Color>();// FarbListe
@@ -545,7 +461,7 @@ lineBlock [Appearance app] returns[Appearance app2]
 	(
 	  COLON
 	  (
-	    (plC=color {colorFlag=true; app2=setPLColor(app2,plC);})
+	    (plC=color {colorFlag=true; app2=MathematicaHelper.setPLColor(app2,plC);})
 	   |( "Line"
 	     OPEN_BRACKET
 				line=lineset 			// das ist ein Vector von double[3]
@@ -581,7 +497,7 @@ lineBlock [Appearance app] returns[Appearance app2]
 		}
 		i=0;
 		for(Color d: colors ){
-			colorData[i]=getRGBColor(d);		
+			colorData[i]=MathematicaHelper.getRGBColor(d);		
 			i++;
 		}
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
@@ -590,11 +506,11 @@ lineBlock [Appearance app] returns[Appearance app2]
 		lineset.setEdgeIndices(indices);
 		lineset.setVertexCoordinates(data);
 		lineset.update();
-		Appearance lineApp =copyApp(app2);
+		Appearance lineApp =MathematicaHelper.copyApp(app2);
 		if (colorNeeded)
 			lineset.getIndexedLineSet().setEdgeAttributes(
 			 Attribute.COLORS,new DoubleArrayArray.Array( colorData ));
-		else	lineApp= setPLColor(lineApp,plC);
+		else	lineApp= MathematicaHelper.setPLColor(lineApp,plC);
 		lineset.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
 		geo.setAppearance(lineApp);
@@ -603,7 +519,7 @@ lineBlock [Appearance app] returns[Appearance app2]
 		geo.setGeometry(ils);
 		geo.setName("Lines");
 		current.addChild(geo);
-		simplifyColor(app2);
+		MathematicaHelper.simplifyColor(app2);
 	}
 	;  
 
@@ -614,8 +530,8 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 // schmeist doppelte Punkte durch umindizierung raus
 // Farben wie pointBlock und lineBlock
 {
- app2=copyApp(app);
- Color fC=getFColor(app2);
+ app2=MathematicaHelper.copyApp(app);
+ Color fC=MathematicaHelper.getFColor(app2,fCDefault);
  List<double[]> coordinates= new LinkedList<double[]>();// alle PunktListen vereint in einer
  List<double[]> poly=new LinkedList<double[]>();			// alle Punkte in einem Polygon
  int[] polyIndices;					// alle indices eines Polygons
@@ -643,7 +559,7 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 	 CLOSE_BRACKET 
 	( COLON
 	 (
-	   (   app2=faceColor[app2] {colorFlag=true; fC=getFColor(app2);} )
+	   (   app2=faceColor[app2] {colorFlag=true; fC=MathematicaHelper.getFColor(app2,fCDefault);} )
 	  |("Polygon"
 	    OPEN_BRACKET
 				poly=lineset 			// das ist ein Vector von double[3]
@@ -679,7 +595,7 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 		}
 		i=0;
 		for(Color d : colors){
-			colorData[i]=getRGBColor(d);
+			colorData[i]=MathematicaHelper.getRGBColor(d);
 			i++;
 		}
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
@@ -687,9 +603,10 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 		faceSet.setFaceCount(polysIndices.size());
 		faceSet.setFaceIndices(indices);
 		faceSet.setVertexCoordinates(data);
-		Appearance faceApp =copyApp(app2);
+		Appearance faceApp =MathematicaHelper.copyApp(app2);
 		if (colorNeeded)
 			faceSet.setFaceColors(colorData);
+	//TODO do not colorice if color == inherit
 		else	faceApp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+
 			 	CommonAttributes.DIFFUSE_COLOR, fC);
 		if (edgeF!=null){
@@ -733,7 +650,7 @@ private
 faceColor [Appearance app] returns[Appearance app2]
 // Farben fuer Flaechen sind in 'SurfaceColor[]' gekapselt
 {
- app2=copyApp(app);
+ app2=MathematicaHelper.copyApp(app);
  Color specular; double d; Color fC= new Color(255,0,0);
 }
 	: "SurfaceColor" OPEN_BRACKET
@@ -862,7 +779,7 @@ double res1,res2,res3;}
 private 
 directiveBlock[Appearance appOld] returns [ Appearance app]
 // eine Abfolge von Direktiven die die Appearance beeinflussen(keine Farben, keine EdgeForm)
-{app =copyApp(appOld);}
+{app =MathematicaHelper.copyApp(appOld);}
 	: app=directive[app]
 	  (
 	  	COLON
@@ -877,7 +794,7 @@ private
 directive[Appearance appGiven] returns [Appearance app]
 // Direktiven die die Appearance beeinflussen(keine Farben)
 // Bemerkung: Der Aufruf 'dumb' ignoriert alles in der Klammer.
-{app = copyApp(appGiven); 
+{app = MathematicaHelper.copyApp(appGiven); 
 Color col;}
 	:"AbsolutePointSize" 								
 		// Dicke der Punkte
@@ -921,18 +838,9 @@ Color col;}
 
 private
 optionen
-// liest einen Block bestehend aus einer Abfolge von Optionen
-	: COLON 
-	  OPEN_BRACE 
-	  		( option (COLON option)* )? 
-	  CLOSE_BRACE
-	;
-
-private
-option
 // Optionen beeinflussen die gesammte Scene
 	: OPEN_BRACE 			// Block von Optionen
-	  		( Option (COLON Option)* )? 
+	  		( optionen (COLON optionen)* )? 
 	  CLOSE_BRACE
 	| optionPrimitive		// eine einfache Option
 	;
@@ -942,45 +850,29 @@ option
 */
 private
 optionPrimitive
+// im Momment werden alle Optionen ueberlesen!
+
 // einfache Optionen
 // die meisten werden schlicht ignoriert
 // Bemerkung: egal ueberspring alles bis zur naechsten Option bzw dem Ende des Blocks
 // Bemerkung: man kann offensichtlich auch auf Quellen verweisen (option :> $Identifier)
 //		ich habe aber keine Ahnung was das bedeutet. ignoriere es also
-// -- geht bereits:
-	:	"Boxed"			(DDOT LARGER	egal| MINUS LARGER	egal)
-				{log.fine(" Boxed not implemented");}
-	
-	
-//						(		MINUS LARGER 
-//			// eine Box um die Scene
-//						 (	 "True"	{box.showBox(true);}	
-//							|"False"{box.showBox(false);}
-//						)| DDOT LARGER	egal {log.fine(" 'Boxed :> $<name>' not implemented");})
-
-	|	"Axes" 			(DDOT LARGER	egal| MINUS LARGER	egal)
-				{log.fine(" Axes not implemented");}
-
-//						(		MINUS LARGER
-//			// Achsen an der Scene
-//						 (	 "True"	{box.showAxes(true);}	
-//							|"False" {box.showAxes(false);}
-//							|"Automatic"{log.fine("Axes -> Automatic not implemented");}
-//						)| DDOT LARGER	egal{log.fine(" 'Axes :> $<name>' not implemented");})
 
 // -- moeglich/Sinnvoll:
+	:	"Boxed"			(DDOT LARGER	egal| MINUS LARGER	egal)
+				{log.fine(" Boxed not implemented");}
+	|	"Axes" 			(DDOT LARGER	egal| MINUS LARGER	egal)
+				{log.fine(" Axes not implemented");}
 	|	"AxesLabel"				(DDOT LARGER	egal| MINUS LARGER	egal)
 				{log.fine(" AxesLabel not implemented");}
-			// 3D: Label an den Achsen (waere moeglich)
 	|	"Prolog"				(DDOT LARGER	egal| MINUS LARGER	egal)
 				{log.fine(" Prolog not implemented");}
 			// irgendwelche graphischen objekte die zuerst berechnet werden
-			// (gut koennte ich auch noch Parsen und extra an die Root haengen)
+			// ( koennte man auch noch Parsen und extra an die Root haengen)
 	|	"Epilog"				(DDOT LARGER	egal| MINUS LARGER	egal)
 				{log.fine(" Epilog not implemented");}
 			// irgendwelche graphischen objekte die zuletzt berechnet werden
-			// (gut koennte ich auch noch Parsen und extra an die Root haengen)
-			
+			// ( koennte man auch noch Parsen und extra an die Root haengen)
 	|	"ViewPoint"				(DDOT LARGER	egal| MINUS LARGER	egal)
 				{log.fine(" ViewPoint not implemented");}
 			// CameraFokus (sollen wir das ueberhaupt uebernehmen)
@@ -1001,7 +893,6 @@ optionPrimitive
 	|	"BoxRatios"				(DDOT LARGER	egal| MINUS LARGER	egal)
 				{log.fine(" BoxRatios not implemented");}
 			//3D: Laengenverzerrung der Achsen in der Darstellung(linear)
-
  	|	"Lighting"				(DDOT LARGER	egal| MINUS LARGER	egal)
 				{log.fine(" Lighting not implemented");}
  			// soll es Lichtquellen geben (ja/nein), oder gar eine Farbfunktionen
