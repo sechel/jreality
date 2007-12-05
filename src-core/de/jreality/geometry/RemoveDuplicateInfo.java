@@ -48,6 +48,8 @@ import java.util.Set;
 
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
@@ -582,5 +584,101 @@ public class RemoveDuplicateInfo {
 		for (int i = 0; i < newList.length; i++) 
 			newList[i]=d[referenceTable[i]];
 		return new StringArray(newList);
-	} 
+	}
+	
+	/** simplifys the SceneGraphComponent tree recursivly
+	 * 
+	 *  Nodes with cameras, geometrys and lights will not be changed
+	 *  Nodes with transformations and  Appearances will only be deleted if no
+	 *   geometry, camera or light will be effected.
+	 *  Nodes which have only one Child(which has a Geometry, camera or Light in subtree)
+	 *   and no geometry, Camera or light 
+	 *   will be deleted if it has 
+	 *    no Appearence or Transformation
+	 *    or if the Tranformation / Appearance can be shifted into the child node 
+	 */
+	public static void simplifySceneTree(SceneGraphComponent g){
+		// author bernd
+		simplifyLeafs(null,g);
+		simplifyBridges(null,g);
+	}
+	private static void simplifyBridges(SceneGraphComponent parent,SceneGraphComponent g){
+		// author bernd
+		//TODO: delete bridgeNodes if they have Appearance or Transformation
+		// and merge these into childNode Trafo / App ??
+		if(g==null) return;
+		// check and simplify Children first
+		SceneGraphComponent[] children=getComponents(g);
+		for (int i = 0; i < children.length; i++) {// array because of deletion
+						simplifyBridges(g, children[i]);
+		}
+		// is removeable?
+		if(parent==null) return;
+		boolean possible=true;
+		boolean shiftApp=false;
+		boolean shiftTrafo=false;
+		if(isBridgeComponent(g)){
+			// collect infos:
+			if(g.getAppearance()!=null)
+				if(g.getChildComponent(0).getAppearance()!=null) possible=false;
+				else shiftApp=true;
+			if(g.getTransformation()!=null)
+				if(g.getChildComponent(0).getTransformation()!=null) possible=false;
+				else shiftTrafo=true;
+			// remove:
+			System.out.println("RemoveDuplicateInfo.simplifyBridges()"+g.getName()+possible);
+			if (possible) {
+				SceneGraphComponent child=g.getChildComponent(0);//ist ja nur eine!
+				parent.removeChild(g);
+				parent.addChild(child);
+				if (shiftApp) child.setAppearance(g.getAppearance());
+				if (shiftTrafo) child.setTransformation(g.getTransformation());
+			}
+		}	
+	}
+	private static void simplifyLeafs(SceneGraphComponent parent,SceneGraphComponent g){
+		// author bernd
+		if(g==null) return;
+		// check and simplify Children first
+		SceneGraphComponent[] children=getComponents(g);
+		for (int i = 0; i < children.length; i++) {// array because of deletion
+						simplifyLeafs(g, children[i]);
+		}
+		// is removeable?
+		if(parent==null) return;
+		if(isEmptyComponent(g))		parent.removeChild(g);
+	}	
+	private static SceneGraphComponent[] getComponents(SceneGraphComponent g){
+		// author bernd
+		List<SceneGraphComponent> list= new LinkedList<SceneGraphComponent>();
+		for (Object o:g.getChildNodes()){
+			if(o instanceof SceneGraphComponent)
+				list.add((SceneGraphComponent)o);
+		}
+		SceneGraphComponent[] result=new  SceneGraphComponent[list.size()];
+		int i=0;
+		for (SceneGraphComponent c:list) {
+			result[i]=c;
+			i++;
+		}
+		return result;
+	}
+	private static boolean isEmptyComponent(SceneGraphComponent g){
+		// author bernd
+		if(	g.getGeometry()!=null 
+				||g.getChildComponentCount()>0
+				||g.getCamera()!=null
+				||g.getLight()!=null) return false;
+		if(g.getTools()!=null && g.getTools().size()>0) return false;
+		return true;	
+	}
+	private static boolean isBridgeComponent(SceneGraphComponent g){
+		// author bernd
+		if(	g.getGeometry()!=null
+				||g.getChildComponentCount()!=1
+				||g.getCamera()!=null
+				||g.getLight()!=null) return false;
+		if(g.getTools()!=null && g.getTools().size()>0) return false;
+		return true;	
+	}
 }
