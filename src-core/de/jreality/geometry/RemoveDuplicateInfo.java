@@ -608,10 +608,8 @@ public class RemoveDuplicateInfo {
 		// and merge these into childNode Trafo / App ??
 		if(g==null) return;
 		// check and simplify Children first
-		SceneGraphComponent[] children=getComponents(g);
-		for (int i = 0; i < children.length; i++) {// array because of deletion
-						simplifyBridges(g, children[i]);
-		}
+		List<SceneGraphComponent> children=getComponents(g);
+		for (SceneGraphComponent c: children)		simplifyBridges(g,c);
 		// is removeable?
 		if(parent==null) return;
 		boolean possible=true;
@@ -626,7 +624,6 @@ public class RemoveDuplicateInfo {
 				if(g.getChildComponent(0).getTransformation()!=null) possible=false;
 				else shiftTrafo=true;
 			// remove:
-			System.out.println("RemoveDuplicateInfo.simplifyBridges()"+g.getName()+possible);
 			if (possible) {
 				SceneGraphComponent child=g.getChildComponent(0);//ist ja nur eine!
 				parent.removeChild(g);
@@ -640,15 +637,13 @@ public class RemoveDuplicateInfo {
 		// author bernd
 		if(g==null) return;
 		// check and simplify Children first
-		SceneGraphComponent[] children=getComponents(g);
-		for (int i = 0; i < children.length; i++) {// array because of deletion
-						simplifyLeafs(g, children[i]);
-		}
+		List<SceneGraphComponent> children=getComponents(g);
+		for (SceneGraphComponent c: children)		simplifyLeafs(g,c);
 		// is removeable?
 		if(parent==null) return;
 		if(isEmptyComponent(g))		parent.removeChild(g);
 	}	
-	private static SceneGraphComponent[] getComponents(SceneGraphComponent g){
+	private static List<SceneGraphComponent> getComponents(SceneGraphComponent g){
 		// author bernd
 		List<SceneGraphComponent> list= new LinkedList<SceneGraphComponent>();
 		for (Object o:g.getChildNodes()){
@@ -661,7 +656,7 @@ public class RemoveDuplicateInfo {
 			result[i]=c;
 			i++;
 		}
-		return result;
+		return list;
 	}
 	private static boolean isEmptyComponent(SceneGraphComponent g){
 		// author bernd
