@@ -87,6 +87,7 @@ public class LoadFile extends AbstractJrAction {
   
   private JComponent options; 
   private JCheckBox mergeFaceSets;
+  private JCheckBox simplifyTree;
   private JCheckBox mergeFaceSetsWithNormals;
   private JCheckBox removeDuplicateVertices;
   private JCheckBox removeDuplicateVerticesWithNormals;
@@ -121,7 +122,9 @@ public class LoadFile extends AbstractJrAction {
   public void actionPerformed(ActionEvent e) {
 
     if (options == null) options = createAccessory();
+    
     mergeFaceSets.setSelected(false);
+    simplifyTree.setSelected(false);
     mergeFaceSetsWithNormals.setSelected(false);
     mergeFaceSetsWithNormals.setEnabled(false);
     remarkNormals.setEnabled(false);
@@ -142,6 +145,9 @@ public class LoadFile extends AbstractJrAction {
         
         GeometryMergeFactory mFac = new GeometryMergeFactory();
         SceneGraphComponent comp = new SceneGraphComponent();
+        if (simplifyTree.isSelected()){
+        	RemoveDuplicateInfo.simplifySceneTree(sgc);
+        }
         if (mergeFaceSets.isSelected()){
         	if(!mergeFaceSetsWithNormals.isSelected())
         		mFac.setGenerateVertexNormals(false);
@@ -188,22 +194,33 @@ public class LoadFile extends AbstractJrAction {
     box.setBorder(title);
 
     mergeFaceSets = new JCheckBox("merge geometries");
+    simplifyTree= new JCheckBox("simplify tree");
     mergeFaceSetsWithNormals = new JCheckBox("garantee vertex normals");
     remarkNormals= new JLabel("(created before points remove!)");
     removeDuplicateVertices = new JCheckBox("remove duplicate vertices");
     removeDuplicateVerticesWithNormals = new JCheckBox("respect vertex normals");
     removeDuplicateVerticesWithColors = new JCheckBox("respect vertex colors");
     
-    mergeFaceSets.addChangeListener(new ChangeListener(){
-			public void stateChanged(ChangeEvent ev) {
-				boolean editable = mergeFaceSets.isSelected();
-				mergeFaceSetsWithNormals.setEnabled(editable);
-				remarkNormals.setEnabled(editable);
-				removeDuplicateVertices.setEnabled(editable);
-				removeDuplicateVerticesWithNormals.setEnabled(editable && removeDuplicateVertices.isSelected());
-				removeDuplicateVerticesWithColors.setEnabled(editable && removeDuplicateVertices.isSelected());
+    simplifyTree.addChangeListener(new ChangeListener(){
+		public void stateChanged(ChangeEvent ev) {
+			if (simplifyTree.isSelected()){
+				mergeFaceSets.setSelected(false);
 			}
-		});
+		}
+	});
+    mergeFaceSets.addChangeListener(new ChangeListener(){
+		public void stateChanged(ChangeEvent ev) {
+			if (mergeFaceSets.isSelected()){
+				simplifyTree.setSelected(false);
+			}
+			boolean editable = mergeFaceSets.isSelected();
+			mergeFaceSetsWithNormals.setEnabled(editable);
+			remarkNormals.setEnabled(editable);
+			removeDuplicateVertices.setEnabled(editable);
+			removeDuplicateVerticesWithNormals.setEnabled(editable && removeDuplicateVertices.isSelected());
+			removeDuplicateVerticesWithColors.setEnabled(editable && removeDuplicateVertices.isSelected());
+		}
+	});
     removeDuplicateVertices.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent arg0) {
 				removeDuplicateVerticesWithNormals.setEnabled(removeDuplicateVertices.isSelected());
@@ -214,6 +231,7 @@ public class LoadFile extends AbstractJrAction {
     callEncompass = new JCheckBox("encompass scene");
     callEncompass.setSelected(true);
 
+    box.add(simplifyTree);
     box.add(mergeFaceSets);
     Box tmp = Box.createHorizontalBox();
     tmp.setAlignmentX(Component.LEFT_ALIGNMENT);
