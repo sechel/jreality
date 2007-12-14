@@ -465,7 +465,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				return;
 			}
 			globalGL = offscreenPBuffer.getGL();
-			forceNewDisplayLists();
+			if (!JOGLConfiguration.sharedContexts)  forceNewDisplayLists();
 			renderingState.initializeGLState();
 
 			Color[] bg=null;
@@ -818,6 +818,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		ImageUtility.writeBufferedImage(file, img);
 	}
 
+	BufferedImage img;
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLCanvas canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
@@ -832,12 +833,11 @@ public class JOGLRenderer  implements AppearanceListener {
 		imageHeight = (tileSizeY) * numTiles;
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
-		offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
+		if (offscreenPBuffer == null) offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
 				canvas.getContext());
-		BufferedImage img = null;
-		offscreenBuffer = null;
+//		offscreenBuffer = null;
 //		imageWidth = numTiles*tileSizeX;
 //		imageHeight = numTiles*tileSizeY;
 		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);

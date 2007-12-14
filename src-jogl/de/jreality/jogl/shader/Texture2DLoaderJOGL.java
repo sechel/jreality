@@ -230,12 +230,12 @@ public class Texture2DLoaderJOGL {
     
     
   } 
+	 	static GLU glu = null;
   public static void render(JOGLRenderer jr, CubeMap ref) {
 //  public static void render(GL gl, CubeMap ref, double[] c2w) {
     boolean first = true;
     boolean mipmapped = true;
     GL gl = jr.globalGL;
-    GLU glu = new GLU();
     WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
     
     //hash one side of the cube map and do only render sides when hashed image data changed
@@ -302,6 +302,7 @@ public class Texture2DLoaderJOGL {
         byte[] data = faces[i].getByteArray();
         int width = faces[i].getWidth();
         int height = faces[i].getHeight();
+   	 	if (glu == null) glu = new GLU();
          if (mipmapped) 
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
                       GL.GL_RGBA, 
