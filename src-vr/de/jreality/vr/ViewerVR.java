@@ -190,7 +190,8 @@ public class ViewerVR {
 	// flag indicating wether aabb-trees will be generated
 	// when content is set
 	private boolean generatePickTrees;
-
+	// whether to perform alignment
+	boolean doAlign = true;
 	private JCheckBoxMenuItem panelInSceneCheckBox;
 
 	// navigation tools
@@ -604,7 +605,7 @@ public class ViewerVR {
 	}
 
 	public void alignContent() {
-		if (alignmentComponent == null) return;
+		if (alignmentComponent == null || !doAlign) return;
 		final double diam=getContentSize();
 		final double offset=getContentOffset();
 		final Matrix rotation=getContentMatrix();
@@ -1179,5 +1180,13 @@ public class ViewerVR {
 	
 	public JRWindowManager getWindowManager() {
 		return wm;
+	}
+
+	public boolean isDoAlign() {
+		return doAlign;
+	}
+
+	public void setDoAlign(boolean doAlign) {
+		this.doAlign = doAlign;
 	}
 }
