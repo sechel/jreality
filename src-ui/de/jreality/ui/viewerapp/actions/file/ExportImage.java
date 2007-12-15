@@ -116,11 +116,11 @@ public class ExportImage extends AbstractJrAction {
 		}
 		
 		//render offscreen
-		BufferedImage img = null;
+		BufferedImage scaledImg = null;
 		try {
 			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height});
 			expr.execute();
-			img = (BufferedImage) expr.getValue();
+			scaledImg = (BufferedImage) expr.getValue();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -128,11 +128,11 @@ public class ExportImage extends AbstractJrAction {
 //		img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
 //		if(realViewer instanceof SoftViewer)
 //		img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-		BufferedImage img2 = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
-		Graphics2D g = (Graphics2D) img2.getGraphics();
+		BufferedImage img = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = (Graphics2D) img.getGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		img2.getGraphics().drawImage(
-				img.getScaledInstance(
+		img.getGraphics().drawImage(
+				scaledImg.getScaledInstance(
 						dim.width,
 						dim.height,
 						BufferedImage.SCALE_SMOOTH
@@ -145,7 +145,7 @@ public class ExportImage extends AbstractJrAction {
 
 		//JOGLRenderer.writeBufferedImage(file,img2); :
 		try {
-			new Statement(Class.forName("de.jreality.util.ImageUtility"), "writeBufferedImage", new Object[]{file, img2}).execute();
+			new Statement(Class.forName("de.jreality.util.ImageUtility"), "writeBufferedImage", new Object[]{file, img}).execute();
 			System.out.println("Wrote file "+file.getPath());
 		} catch (Exception ex) {
 			// and now?
@@ -176,6 +176,7 @@ public class ExportImage extends AbstractJrAction {
 		if (dimPanel == null) {
 			dimPanel = new DimensionPanel();
 			dimPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Dimension"));
+			dimPanel.setToolTipText("Set image dimensions");
 		}
 		
 		Box accessory = Box.createVerticalBox();
@@ -209,6 +210,8 @@ public class ExportImage extends AbstractJrAction {
 		p.add(button);
 		
 		p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Antialiasing factor"));
+		p.setToolTipText("<html><body>Choose the factor of dimension scaling<br>" +
+				"for \"antialiased\" offscreen rendering</body></html>");
 		accessory.add(p);
 		
 		return accessory;
