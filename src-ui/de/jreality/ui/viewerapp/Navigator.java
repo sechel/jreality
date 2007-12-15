@@ -219,8 +219,14 @@ public class Navigator implements SelectionListener {
 		cm.setLightWeightPopupEnabled(false);
 
 		//create content of context menu
-		JMenu editMenu = ViewerAppMenu.createEditMenu(parentComp, selectionManager);
-		ActionMap editActions = ViewerAppMenu.updateActionMap(editMenu.getActionMap(), editMenu);
+		JMenu editMenu = null;
+		ActionMap editActions = null;
+		try {
+			editMenu = ViewerAppMenu.createEditMenu(parentComp, selectionManager);
+			editActions = ViewerAppMenu.updateActionMap(editMenu.getActionMap(), editMenu);
+		} catch (Exception e) {
+			return;  //menu or actions not in classpath
+		}
 		for (Component c : editMenu.getMenuComponents()) cm.add(c);
 
 		//add listener to the navigator's tree
