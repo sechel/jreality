@@ -28,8 +28,6 @@ import de.jreality.util.SystemProperties;
 public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 
 	boolean displayListDirty = true;
-//    boolean displayListDirtyUp = false;
-//    boolean childrenDLDirty = true;
 	boolean isCopyCat = false,
 		isTopCat = false,
 		isCameraRepn = false,

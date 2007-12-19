@@ -110,7 +110,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected void updateRenderRunnable() {
 		if (debug) theLog.finer("updateRenderRunnable: "+name);
 		setDisplayListDirty();
-//		updateShaders();
 		geometryDirtyBits = ALL_GEOMETRY_CHANGED;
 		if (goBetween.peerGeometry == null) renderGeometry = null;
 		else	 renderGeometry = new Runnable() {

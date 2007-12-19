@@ -51,10 +51,12 @@ public class GoBetween extends JOGLPeerNode implements
 	public void init (SceneGraphComponent sgc, JOGLRenderer jr, boolean inheritSinglePeer)	{
 		this.jr = jr;
 		originalComponent = sgc;
+//		System.err.println("Initializing peer for "+originalComponent.getName());
 		if (originalComponent.getGeometry() != null)  {
 			peerGeometry = jr.getJOGLPeerGeometryFor(originalComponent.getGeometry());
 			peerGeometry.refCount++;
 			originalComponent.getGeometry().addGeometryListener(this);
+//			System.err.println("Adding geom listener for "+originalComponent.getGeometry().getName());
 		} else peerGeometry = null;
 		originalComponent.addSceneGraphComponentListener(this);
 		singlePeer = inheritSinglePeer;
@@ -74,6 +76,7 @@ public class GoBetween extends JOGLPeerNode implements
 			originalComponent.getAppearance().removeAppearanceListener(this);
 		if (peerGeometry != null)		{
 			originalComponent.getGeometry().removeGeometryListener(this);
+//			System.err.println("Removing geom listener for "+originalComponent.getGeometry().getName());
 			peerGeometry.dispose();
 		}
 		if (originalComponent.getTransformation() != null)
