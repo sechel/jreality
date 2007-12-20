@@ -47,6 +47,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
+import java.beans.Expression;
 import java.beans.Statement;
 import java.io.File;
 import java.io.FileInputStream;
@@ -854,19 +855,14 @@ public class ViewerVR {
 				} catch (MalformedURLException e1) { e1.printStackTrace(); }
 
 				try {
-					new Statement(Class.forName("java.awt.Desktop"), "browse",
+					new Statement(
+							new Expression(Class.forName("java.awt.Desktop"), "getDesktop", null).getValue(),
+							"browse",
 							new Object[]{
 						helpURL.toURI()
 					}).execute();
 				} catch(Exception e2) {
-					try {
-						new Statement(Class.forName("org.jdesktop.jdic.desktop.Desktop"), "browse",
-								new Object[]{
-							helpURL
-						}).execute();
-					} catch (Exception e3) {
-						JOptionPane.showMessageDialog(null, "Please visit "+helpURL);
-					}
+					JOptionPane.showMessageDialog(null, "Please visit "+helpURL);
 				}
 			}
 

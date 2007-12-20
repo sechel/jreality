@@ -256,7 +256,7 @@ public class AppearancePanel extends JPanel {
 			}
 		});
 		faceButtonBox.add(showFaces);
-		facesReflecting = new JCheckBox("reflecting");
+		facesReflecting = new JCheckBox("reflection");
 		facesReflecting.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setFacesReflecting(isFacesReflecting());
