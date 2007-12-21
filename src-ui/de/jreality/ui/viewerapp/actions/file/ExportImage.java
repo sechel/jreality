@@ -49,12 +49,14 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.beans.Expression;
 import java.beans.Statement;
+import java.io.BufferedInputStream;
 import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -79,6 +81,8 @@ public class ExportImage extends AbstractJrAction {
 	private DimensionPanel dimPanel;
 	private JComponent options;
 	private int antialiasing;
+	private boolean saveAlpha = false;
+	private JCheckBox checkbox;
 
 	
 	public ExportImage(String name, ViewerSwitch viewer, Component parentComp) {
@@ -100,13 +104,11 @@ public class ExportImage extends AbstractJrAction {
 
 		// Hack
 		Viewer realViewer = viewer.getCurrentViewer();
-//		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
 		Dimension d = realViewer.getViewingComponentSize();
 		dimPanel.setDimension(d);
 
 		File file = FileLoaderDialog.selectTargetFile(parentComp, options, false, FileFilter.createImageWriterFilters());
 		Dimension dim = dimPanel.getDimension();
-//		Dimension dim = DimensionDialog.selectDimension(d,frame);
 		if (file == null || dim == null) return;
 
 		if (FileFilter.getFileExtension(file) == null) {  //no extension specified
@@ -124,11 +126,8 @@ public class ExportImage extends AbstractJrAction {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-//		if(realViewer instanceof de.jreality.jogl.Viewer)   
-//		img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-//		if(realViewer instanceof SoftViewer)
-//		img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-		BufferedImage img = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
+		int type = saveAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+		BufferedImage img = new BufferedImage(dim.width, dim.height, type);
 		Graphics2D g = (Graphics2D) img.getGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		img.getGraphics().drawImage(
@@ -141,7 +140,7 @@ public class ExportImage extends AbstractJrAction {
 				0,
 				null
 		);
-//		System.out.println("\nWriting to file "+file.getPath());
+		if (saveAlpha) img.coerceData(true);
 
 		//JOGLRenderer.writeBufferedImage(file,img2); :
 		try {
@@ -207,8 +206,15 @@ public class ExportImage extends AbstractJrAction {
 		button.setSelected(true);
 		antialiasing = 4;
 		bg.add(button);
+		bg.setSelected(button.getModel(), true);
 		p.add(button);
 		
+		checkbox = new JCheckBox(new AbstractAction("save alpha") {
+			public void actionPerformed(ActionEvent e) {
+				saveAlpha = checkbox.isSelected();
+			}
+		});
+		p.add(checkbox);
 		p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Antialiasing factor"));
 		p.setToolTipText("<html><body>Choose the factor of dimension scaling<br>" +
 				"for \"antialiased\" offscreen rendering</body></html>");
