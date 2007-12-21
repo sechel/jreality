@@ -104,8 +104,8 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     map.put("float transparencyenabled"+side,new Float(transp ? 1 : 0));    
     
     if (signature != Pn.EUCLIDEAN) {
-      map.put("signature", signature);
-      map.put("objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
+      map.put("float signature", signature);
+      map.put("float[16] objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
       shaderName = "noneuclideanpolygonshader";
     }
     else shaderName ="defaultpolygonshader" ;
