@@ -416,16 +416,16 @@ public class GeometryUtility {
 	    	    
             public void visit(PointSet oldi) {
             	// have to copy the geometry in case it is reused!
-            	PointSet i = (PointSet) SceneGraphUtility.copy(oldi);
+            	PointSet geometry = (PointSet) SceneGraphUtility.copy(oldi);
             	//System.err.println("point set is "+i);
-            	if (i.getVertexAttributes(Attribute.COORDINATES) == null) return;
-           	    double[][] v = i.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+            	if (geometry.getVertexAttributes(Attribute.COORDINATES) == null) return;
+           	    double[][] v = geometry.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
             	double[] currentMatrix = thePath.getMatrix(null);
             	double[][] nv = Rn.matrixTimesVector(null, currentMatrix, v);
-            	i.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+            	geometry.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
                 double[] cmp = null;
-         	    if (i instanceof IndexedFaceSet)	{
-            	    IndexedFaceSet ifs = (IndexedFaceSet) i; //(IndexedFaceSet) SceneGraphUtility.copy(i); //
+         	    if (geometry instanceof IndexedFaceSet)	{
+            	    IndexedFaceSet ifs = (IndexedFaceSet) geometry; //(IndexedFaceSet) SceneGraphUtility.copy(i); //
                     double[] mat = Rn.transpose(null, currentMatrix);          	
                     mat[12] = mat[13] = mat[14] = 0.0;
                     Rn.inverse(mat, mat);
@@ -457,7 +457,7 @@ public class GeometryUtility {
          	   //System.out.println("det is "+Rn.determinant(currentMatrix));
 //	          if (Rn.determinant(currentMatrix) < 0.0)	{
 	                SceneGraphComponent foo = new SceneGraphComponent();
-	                foo.setGeometry(i);
+	                foo.setGeometry(geometry);
 	                if (thePath.getLastComponent().getAppearance() != null)	{
 	                	foo.setAppearance(thePath.getLastComponent().getAppearance());
 	                }
@@ -483,10 +483,7 @@ public class GeometryUtility {
              SceneGraphComponent foo = (SceneGraphComponent)iter.next(); ;
              flat.addChild(foo);
        }
-        // TODO do this correclty: transform existing normals if there are any.
-        //GeometryUtility.calculateFaceNormals(flat);
-        //GeometryUtility.calculateVertexNormals(flat);
-       return flat;
+        return flat;
 	}
 
 	public static int getSignature(Geometry g ) {
