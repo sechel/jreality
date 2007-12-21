@@ -76,6 +76,7 @@ import de.jreality.scene.data.StringArray;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * Static methods for editing and processing instances of {@link de.jreality.scene.IndexedFaceSet}.
@@ -349,6 +350,7 @@ public class IndexedFaceSetUtility {
 	 * @param ifs
 	 * @param which
 	 * @return
+	 * @deprecated  Use {@link IndexedLineSetUtility#extractCurve(double[][], IndexedLineSet, int)}.
 	 */
 	public static double[][] extractEdge(double[][] curve, IndexedFaceSet ifs, int which)	{
 		DataList verts = ifs.getVertexAttributes(Attribute.COORDINATES);
@@ -365,6 +367,22 @@ public class IndexedFaceSetUtility {
 		return curve;
 	}
 
+	public static IndexedFaceSet extractFace(IndexedFaceSet ifs, int which)	{
+		IndexedFaceSet ifs2 = SceneGraphUtility.copy(ifs);
+		int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		int[][] newIndices = new int[1][];
+		newIndices[0] = indices[which];
+		ifs2.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.array().createReadOnly(newIndices));
+		DataList colors = ifs.getFaceAttributes(Attribute.COLORS);
+		if (colors != null)	{
+			double[][] cc = colors.toDoubleArrayArray(null);
+			double[][] newc = new double[1][];
+			newc[0] = cc[which];
+			ifs2.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array().createReadOnly(newc));
+		}
+		GeometryUtility.calculateAndSetFaceNormals(ifs2);
+		return ifs2;
+	}
 	private static double[][] getMinMax(int[] indices, double[][] array2d)	{
 		int f = array2d[0].length;
 		double[][] minmax = new double[2][f];
