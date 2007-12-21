@@ -169,7 +169,7 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
   	//get existing writer formats
 		String writerFormats[] = ImageIO.getWriterFormatNames();
 		//usually [bmp, jpg, jpeg, png, wbmp]
-		String[] known = new String[]{"bmp","jpg","jpeg","png", "wbmp"};
+		String[] known = new String[]{"bmp","jpg","jpeg","png", "wbmp","tiff","tif"};
 		//get remaining formats ignoring case
 		Set<String> special = new HashSet<String>();
 		outer: for (int i = 0; i < writerFormats.length; i++) {
