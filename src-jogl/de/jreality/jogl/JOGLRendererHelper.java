@@ -119,7 +119,7 @@ public class JOGLRendererHelper {
     GL gl = jr.globalGL;
     JOGLRenderingState openGLState = jr.renderingState;
 		Object bgo = null;
-    float[] backgroundColor;
+    float[] backgroundColor = new float[4];
 		if (topAp == null) topAp = pseudoAp;
 //			return;
 		for (int i = 0; i < 6; ++i) {
@@ -128,10 +128,10 @@ public class JOGLRendererHelper {
 		if (topAp != null)
 			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
 		if (bgo != null && bgo instanceof java.awt.Color)
-			backgroundColor = ((java.awt.Color) bgo).getComponents(null);
+			((java.awt.Color) bgo).getRGBComponents(backgroundColor);
 		else
 			backgroundColor = CommonAttributes.BACKGROUND_COLOR_DEFAULT.getRGBComponents(null);
-		gl.glClearColor(backgroundColor[0], backgroundColor[1],backgroundColor[2], 0.0f); // bg[3] ); //white
+		gl.glClearColor(backgroundColor[0], backgroundColor[1],backgroundColor[2],backgroundColor[3]); 
 		// Here is where we clear the screen and set the color mask
 		// It's a bit complicated by the various color masking required by
 		// color-channel stereo (see JOGLRenderer#display() ).
@@ -139,9 +139,11 @@ public class JOGLRendererHelper {
 		//System.err.println("colormask = "+jr.openGLState.colorMask);
 		// first set the color mask for the clear
 		LoggingSystem.getLogger(JOGLRendererHelper.class).finest("JOGLRRH cbb = "+ openGLState.clearBufferBits);
-		if ((openGLState.clearBufferBits & GL.GL_COLOR_BUFFER_BIT) != 0) gl.glColorMask(true, true, true, true);
-		//if (openGLState.clearBufferBits != 0) 
-				gl.glClear (openGLState.clearBufferBits);
+		// set color mask for the clear
+		if ((openGLState.clearBufferBits & GL.GL_COLOR_BUFFER_BIT) != 0) {
+			gl.glColorMask(true, true, true, true);
+		}
+		gl.glClear (openGLState.clearBufferBits);
 		// now set the color mask for pixel writing
 		int cm = openGLState.colorMask;
 		gl.glColorMask((cm&1) !=0, (cm&2) != 0, (cm&4) != 0, (cm&8) != 0);

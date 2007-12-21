@@ -47,6 +47,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -474,10 +475,10 @@ public class JOGLRenderer  implements AppearanceListener {
 				if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
 					bg = (Color[]) theRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS, Color[].class);
 					bgColors=new float[4][];
-					bgColors[0]=bg[0].getColorComponents(null);
-					bgColors[1]=bg[1].getColorComponents(null);
-					bgColors[2]=bg[2].getColorComponents(null);
-					bgColors[3]=bg[3].getColorComponents(null);
+					bgColors[0]=bg[0].getRGBComponents(null);
+					bgColors[1]=bg[1].getRGBComponents(null);
+					bgColors[2]=bg[2].getRGBComponents(null);
+					bgColors[3]=bg[3].getRGBComponents(null);
 				}
 			}
 			double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
@@ -490,7 +491,6 @@ public class JOGLRenderer  implements AppearanceListener {
 			Rectangle2D vp = CameraUtility.getViewport(theCamera, getAspectRatio()); //CameraUtility.getAspectRatio(theViewer));
 			double dx = vp.getWidth()/numTiles;
 			double dy = vp.getHeight()/numTiles;
-			boolean perspective = theCamera.isPerspective();
 			boolean isOnAxis = theCamera.isOnAxis();
 			theCamera.setOnAxis(false);
 			for (int st = 0; st < numImages; ++st)	{
@@ -527,7 +527,7 @@ public class JOGLRenderer  implements AppearanceListener {
 						globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
 
 						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
-								GL.GL_BGR, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
 					}
 				}
 				
@@ -540,7 +540,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			Dimension d = theViewer.getViewingComponentSize();
 			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
 			offscreenMode = false;
-		} else 		if (theCamera.isStereo())		{
+		} else if (theCamera.isStereo())		{
 			setupRightEye(width, height);
 			render();
 			setupLeftEye(width, height);
@@ -833,6 +833,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		imageHeight = (tileSizeY) * numTiles;
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
+		caps.setAlphaBits(8);
 		if (offscreenPBuffer == null) offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
@@ -840,13 +841,22 @@ public class JOGLRenderer  implements AppearanceListener {
 //		offscreenBuffer = null;
 //		imageWidth = numTiles*tileSizeX;
 //		imageHeight = numTiles*tileSizeY;
-		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
+		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR);
 		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
-
 		offscreenMode = true;
 		canvas.display();
-		//display(offscreenPBuffer);
-
+		WritableRaster raster = img.getRaster();
+		byte[] byteArray = ((DataBufferByte) raster.getDataBuffer()).getData();
+		int[] dst = new int[4];
+        for (int y = 0, ptr = 0; y < imageHeight; y++)
+	          for (int x = 0; x < imageWidth; x++, ptr += 4) {
+	            dst[0] = byteArray[ptr];
+	            dst[1] = byteArray[ptr+1];
+	            dst[2] = byteArray[ptr+2];
+	            dst[3] = (byteArray[ptr+3]);
+//	            System.err.println("Alpha channel is "+byteArray[ptr+3]);
+	            raster.setPixel(x, y, dst);
+          }
 		ImageUtil.flipImageVertically(img);
 	
 		// force alpha channel to be "pre-multiplied"
