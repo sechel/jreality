@@ -176,6 +176,7 @@ public class TubeUtility {
 				qmf.setClosedInUDirection(true);
 				qmf.setVertexCoordinates(verts);
 				qmf.setGenerateEdgesFromFaces(true);
+				qmf.setEdgeFromQuadMesh(true);
 				qmf.setGenerateFaceNormals(true);
 				qmf.setGenerateVertexNormals(true);
 				qmf.setGenerateTextureCoordinates(true);
@@ -250,16 +251,15 @@ public class TubeUtility {
 			if ((debug & 16) != 0)  {
 				theLogger.log(Level.FINE,"Frame is "+Rn.matrixToString(frame));
 				theLogger.log(Level.FINE,"Det is "+Rn.determinant(frame));
-//				double[] QQ = Rn.identityMatrix(4);
-//				QQ[15] = signature;
-//				double[] result = Rn.times(null, Rn.transpose(null, frame), Rn.times(null, QQ, frame));
-//				LoggingSystem.getLogger().log(Level.FINE,"Transformed Q is "+Rn.matrixToString(result));
 			}
 			Rn.transpose(frame, frame);
 			
 			double[] scaler = Rn.identityMatrix(4);
 			double dist = Pn.distanceBetween(p1, p2, signature);
 			double coord = dist/2;
+			if (Double.isNaN(coord)){
+				throw new IllegalStateException("bad coord");
+			}
 			if (signature == Pn.HYPERBOLIC)	coord = Pn.tanh(dist/2.0);
 			else if (signature == Pn.ELLIPTIC)	coord = Math.tan(dist/2.0);
 			scaler[10] = 2*coord;
