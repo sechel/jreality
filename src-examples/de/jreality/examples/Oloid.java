@@ -51,8 +51,8 @@ public class Oloid {
 			coords[4][2*N-2-i] = coords[0][2*N-2-i];
 		}
 		
-		factory.setULineCount(5);
-		factory.setVLineCount(2*N-1);
+		factory.setVLineCount(5);
+		factory.setULineCount(2*N-1);
 		
 		
 		factory.setVertexCoordinates(coords);
