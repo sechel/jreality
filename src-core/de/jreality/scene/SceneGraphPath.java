@@ -88,6 +88,11 @@ public class SceneGraphPath implements Cloneable {
 		this.path.addAll(path.path);
 	}
 
+	public SceneGraphPath(SceneGraphComponent ... nodes) {
+		super();
+		for (int i=0; i<nodes.length; ++i)	this.push(nodes[i]);
+	}
+
 	public static SceneGraphPath fromList(List<SceneGraphNode> list) {
 		SceneGraphPath path = new SceneGraphPath();
 		path.path.addAll(list);
