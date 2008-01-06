@@ -43,12 +43,16 @@ package de.jreality.geometry;
 import java.awt.Color;
 
 import de.jreality.math.FactoredMatrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.shader.CommonAttributes;
@@ -97,14 +101,15 @@ import de.jreality.util.SceneGraphUtility;
 	 double stickRadius=.025, ballRadius=.05;
 	 Color stickColor = Color.YELLOW, ballColor=Color.GREEN, arrowColor = Color.RED;
 	 int signature = Pn.EUCLIDEAN;
-	 boolean showBalls = true, showSticks = true;
+	 boolean showBalls = true, showSticks = true, realSpheres = true, drawArrows = false;
 	 SceneGraphComponent theResult;
-	 boolean drawArrows = false;
 	 double arrowPosition = .5;		// where is tip of arrow placed?
 	 double arrowScale = .1;			// scale=1:  height of cone is length of edge
 	 double arrowSlope = 1.0;			// bigger scale: more pointy arrow profile
 	 Appearance ballsAp, sticksAp, arrowsAp, topAp;
+	 Geometry stickGeometry = null, ballGeometry = null;
 	 private static IndexedFaceSet urCone = null;
+	 double[][] crossSection = null;
 	 static double[][] octagonalCrossSection = {{1,0,0}, 
 			{.707, .707, 0}, 
 			{0,1,0},
@@ -112,8 +117,7 @@ import de.jreality.util.SceneGraphUtility;
 			{-1,0,0},
 			{-.707, -.707, 0},
 			{0,-1,0},
-			{.707, -.707, 0},
-			{1,0,0}};
+			{.707, -.707, 0}}; //,{1,0,0}};
 	private SceneGraphComponent sticks;
 	private SceneGraphComponent balls;
 	private SceneGraphComponent arrow;
@@ -128,7 +132,7 @@ import de.jreality.util.SceneGraphUtility;
 		sticks = new SceneGraphComponent("sticks");
 		balls = new SceneGraphComponent("balls");
 		topAp =  new Appearance();
-		topAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
+//		topAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, true);
 		theResult = new SceneGraphComponent("BAS");
 		theResult.setAppearance(topAp);
 		sticksAp =  new Appearance();
@@ -137,12 +141,7 @@ import de.jreality.util.SceneGraphUtility;
 		sticksAp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		sticks.setAppearance(sticksAp);
 		ballsAp =  new Appearance();
-		ballsAp.setAttribute(CommonAttributes.FACE_DRAW, false);
-		ballsAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
-		ballsAp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
-		ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, true);
 		balls.setAppearance(ballsAp);				
-		balls.setGeometry(ils);
 		arrowsAp = new Appearance();
 		theResult.addChild(sticks);
 		theResult.addChild(balls);
@@ -152,15 +151,55 @@ import de.jreality.util.SceneGraphUtility;
 			topAp.setAttribute("signature", signature);
 			sticks.setVisible(showSticks);
 			balls.setVisible(showBalls);
-			ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, ballRadius);
-			if (ballColor != null) {
-				ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
-				ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+
-						CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
-			}
 			if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
 			if (arrowColor != null) arrowsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, arrowColor);
 		 	// create sticks on edges
+			if (showBalls)	{
+				if (!realSpheres)	{
+					balls.setGeometry(ils);
+					ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, ballRadius);
+					ballsAp.setAttribute(CommonAttributes.FACE_DRAW, false);
+					ballsAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+					ballsAp.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+					ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, true);
+					if (ballColor != null) {
+						ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+						ballsAp.setAttribute(CommonAttributes.POINT_SHADER+"."+
+								CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+					}					
+				} else {
+					balls.setGeometry(null);
+					ballsAp.setAttribute(CommonAttributes.FACE_DRAW, true);
+					ballsAp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+					ballsAp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+					if (ballColor != null) {
+						ballsAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ballColor);
+					}					
+					DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
+					DataList vertexColors = ils.getVertexAttributes(Attribute.COLORS);
+					int n = ils.getNumPoints();
+					SceneGraphUtility.removeChildren(balls);
+					for (int i = 0; i<n; ++i)	{
+							double[] p1 = vertices.item(i).toDoubleArray(null);	
+							SceneGraphComponent cc = new SceneGraphComponent("ball"+i);
+							MatrixBuilder.init(null, signature).translate(p1).scale(ballRadius).assignTo(cc);
+							if (ballGeometry != null) cc.setGeometry(ballGeometry);
+							else cc.setGeometry(new Sphere());
+							if (vertexColors != null) {
+								Color ccc = null;
+								double[] dcc = vertexColors.item(i).toDoubleArray(null);
+								if (dcc.length == 4) ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2], (float) dcc[3]);
+								else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
+								Appearance ap = new Appearance();
+								ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
+								cc.setAppearance(ap);
+							}
+							balls.addChild(cc);
+						}
+					}				
+					
+				}
+
 			if (showSticks)	{
 				DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 				DataList edgeColors = ils.getEdgeAttributes(Attribute.COLORS);
@@ -174,7 +213,8 @@ import de.jreality.util.SceneGraphUtility;
 						double[] p1 = vertices.item(k).toDoubleArray(null);	
 						k = ed[j+1];
 						double[] p2 = vertices.item(k).toDoubleArray(null);	
-						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, stickRadius, null, signature);
+						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, stickRadius, crossSection, signature);
+						if (stickGeometry != null) cc.setGeometry(stickGeometry);
 						if (edgeColors != null) {
 							Color ccc = null;
 							double[] dcc = edgeColors.item(i).toDoubleArray(null);
@@ -301,6 +341,30 @@ import de.jreality.util.SceneGraphUtility;
 
 	public void setShowSticks(boolean showSticks) {
 		this.showSticks = showSticks;
+	}
+
+	public double[][] getCrossSection() {
+		return crossSection;
+	}
+
+	public void setCrossSection(double[][] crossSection) {
+		this.crossSection = crossSection;
+	}
+
+	public Geometry getBallGeometry() {
+		return ballGeometry;
+	}
+
+	public void setBallGeometry(Geometry ballGeometry) {
+		this.ballGeometry = ballGeometry;
+	}
+
+	public Geometry getStickGeometry() {
+		return stickGeometry;
+	}
+
+	public void setStickGeometry(Geometry stickGeometry) {
+		this.stickGeometry = stickGeometry;
 	}
 
 
