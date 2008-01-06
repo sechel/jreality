@@ -24,16 +24,16 @@ public class QuadMeshTest extends TestCase {
 		qmf.setGenerateVertexNormals(true);
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateEdgesFromFaces(true);
-		qmf.setULineCount(2);
-		qmf.setVLineCount(3);
+		qmf.setVLineCount(2);
+		qmf.setULineCount(3);
 		qmf.setVertexCoordinates(grid1);
 		qmf.update();
-		qmf.setULineCount(3);
 		qmf.setVLineCount(3);
+		qmf.setULineCount(3);
 		qmf.setVertexCoordinates(grid2);
 		qmf.update();
-		qmf.setULineCount(3);
-		qmf.setVLineCount(2);
+		qmf.setVLineCount(3);
+		qmf.setULineCount(2);
 		qmf.setVertexCoordinates(grid3);
 		qmf.update();
 	}
