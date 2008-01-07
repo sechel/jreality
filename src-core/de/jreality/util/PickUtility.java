@@ -84,6 +84,12 @@ public class PickUtility {
     });
   }
 
+  /**
+   * Setting this will abort all picking for this scene graph. 
+   * If this isn't desired, use {@link #setPickable(SceneGraphComponent, boolean, boolean, boolean)}.
+   * @param cmp
+   * @param pickable
+   */
   public static void setPickable(SceneGraphComponent cmp, final boolean pickable) {
 	  if (cmp.getAppearance() ==null) cmp.setAppearance(new Appearance());
       cmp.getAppearance().setAttribute(CommonAttributes.PICKABLE, pickable);
