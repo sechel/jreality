@@ -325,8 +325,7 @@ public class RIBHelper {
 	   byte[] byteArray = data.getByteArray();
 	   int dataHeight = data.getHeight();
 	   int dataWidth = data.getWidth();
-	   img = new BufferedImage(dataWidth, dataHeight,
-	   BufferedImage.TYPE_INT_ARGB);
+	   img = new BufferedImage(dataWidth, dataHeight, BufferedImage.TYPE_INT_ARGB);
 	   WritableRaster raster = img.getRaster();
 	   int[] pix = new int[4];
          for (int y = 0, ptr = 0; y < dataHeight; y++) {
@@ -348,33 +347,33 @@ public class RIBHelper {
 		try {
 		  Class encParamClass = Class.forName("com.sun.media.jai.codec.TIFFEncodeParam");
 		  
-      Object encodeParam = encParamClass.newInstance();
-      Object compField = encParamClass.getField("COMPRESSION_DEFLATE").get(null);
-      
-      new Statement(encodeParam, "setCompression", new Object[]{compField}).execute();
-      new Statement(encodeParam, "setDeflateLevel", new Object[]{9}).execute();
-      
-      ParameterBlock pb = new ParameterBlock();
-      pb.addSource(img);
-      pb.add(new FileOutputStream(noSuffix+".tiff"));
-      pb.add("tiff");
-      pb.add(encodeParam);
-      
-	  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"encode", pb}).execute();
-
+	      Object encodeParam = encParamClass.newInstance();
+	      Object compField = encParamClass.getField("COMPRESSION_DEFLATE").get(null);
+	      
+	      new Statement(encodeParam, "setCompression", new Object[]{compField}).execute();
+	      new Statement(encodeParam, "setDeflateLevel", new Object[]{9}).execute();
+	      
+	      ParameterBlock pb = new ParameterBlock();
+	      pb.addSource(img);
+	      pb.add(new FileOutputStream(noSuffix+".tiff"));
+	      pb.add("tiff");
+	      pb.add(encodeParam);
+	      
+		  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"encode", pb}).execute();
+	
 		} catch(Throwable e) {
-		  worked=false;
-		  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
+			  worked=false;
+			  LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write TIFF: "+noSuffix+".tiff", e);
 		}
-	  if (!worked) {
-	    try {
-			 worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
-	    } catch (IOException e) {
-	      e.printStackTrace();
+		if (!worked) {
+		    try {
+				 worked =ImageIO.write(img, "PNG", new File(noSuffix+".png"));
+		    } catch (IOException e) {
+		      e.printStackTrace();
 			}
-	    if (!worked) 
-	     LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
-	  }
+		    if (!worked) 
+		     LoggingSystem.getLogger(RIBVisitor.class).log(Level.CONFIG, "could not write PNG: {0}.png", noSuffix);
+		  }
 	}
   
   
