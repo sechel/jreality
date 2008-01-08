@@ -151,7 +151,9 @@ public final class Readers {
 	public static String findFormat(String resourceName) {
 		String format=null;
 		String lcName = resourceName.toLowerCase();
-		if (lcName.endsWith(".top")) {
+		if (lcName.endsWith(".fe")) {
+			format = "FE";
+		} else if (lcName.endsWith(".top")) {
 			format = "POLY";
 		} else if (lcName.endsWith(".pov")) {
 			format = "POV";
