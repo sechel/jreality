@@ -42,6 +42,7 @@ package de.jreality.io.jrs;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import com.thoughtworks.xstream.XStream;
@@ -122,6 +123,8 @@ public class XStreamFactory {
     knownClasses.add(HeadTransformationTool.class);
     knownClasses.add(PickShowTool.class);
     knownClasses.add(FlyTool.class);
+    
+    knownClasses.add(HashMap.class);
     
     try {
 		knownClasses.add(Class.forName("de.jreality.tools.PortalHeadMoveTool"));
@@ -218,9 +221,7 @@ public class XStreamFactory {
   static boolean canWrite(Object val) {
     Class clazz = val.getClass();
     if (clazz.isArray()) return canWrite(clazz.getComponentType());
-    if (clazz.isPrimitive() || knownClasses.contains(clazz))
-      return true;
-    return false;
+    return clazz.isPrimitive() || knownClasses.contains(clazz);
   }
   
 }
