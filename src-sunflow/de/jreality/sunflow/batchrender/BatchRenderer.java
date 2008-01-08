@@ -3,15 +3,13 @@ package de.jreality.sunflow.batchrender;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import de.jreality.io.JrScene;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.sunflow.RenderOptions;
 import de.jreality.sunflow.SunflowRenderer;
 import de.jreality.util.Input;
 
-public class Client {
+public class BatchRenderer {
 	
 	private static String sceneFile;
 	private static JrScene scene;
@@ -21,7 +19,7 @@ public class Client {
 	private static int tilesX, tilesY;
 	private static String extension;
 	
-	public Client() {}
+	public BatchRenderer() {}
 	
 	public static void setJrsFile(String fileName) {
 		if (sceneFile == fileName) return;
@@ -39,7 +37,7 @@ public class Client {
 	}
 	
 	public static void setRenderOptions(RenderOptions opts) {
-		Client.opts = opts;
+		BatchRenderer.opts = opts;
 	}
 	
 	public static void setExtension(String ext) {
@@ -50,13 +48,13 @@ public class Client {
 	public static void setImageSize(Integer w, Integer h) {
 		width=w;
 		height=h;
-		System.out.println("w="+w+"h="+h);
+		System.out.println("w="+w+" h="+h);
 	}
 	
 	public static void setTiling(Integer tX, Integer tY) {
 		tilesX=tX;
 		tilesY=tY;
-		System.out.println("tX="+tX+"tY="+tY);
+		System.out.println("tX="+tX+" tY="+tY);
 	}
 	
 	public static String renderTile(int tileX, int tileY) {
@@ -76,6 +74,41 @@ public class Client {
 			e.printStackTrace(System.err);
 		}
 		return null;
+	}
+
+	public static void render(String fileName) {
+		try {
+			load();
+			FileDisplay fd = new FileDisplay(fileName);
+			SunflowRenderer renderer = new SunflowRenderer();
+			renderer.setOptions(opts);
+			renderer.render(
+					scene.getSceneRoot(),
+					scene.getPath("cameraPath"),
+					fd,
+					width, height);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(System.getProperty("java.class.path"));
+		if (args.length<2) {
+			System.out.println("usage: java Client in.jrs out.png imgWidth imgHeight");
+			System.exit(0);
+		}
+		RenderOptions ro = new RenderOptions();
+		ro.setAaMax(4);
+		
+		setRenderOptions(ro);
+		String filename=args[0];
+		String outfile=args[1];
+		String w=args[2];
+		String h=args[3];
+		setImageSize(Integer.parseInt(w), Integer.parseInt(h));
+		setJrsFile(filename);
+		render(outfile);
 	}
 
 }

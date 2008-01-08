@@ -77,11 +77,11 @@ public class Master {
 		//System.out.println(Arrays.toString(hosts));
 		//if (true) return;
 		final DistributedExecutorService des = new DistributedExecutorService(hosts);
-		des.broadcastStaticMethodCall(Client.class, "setJrsFile", new Class<?>[]{String.class}, new Object[]{base+".jrs"});
-		des.broadcastStaticMethodCall(Client.class, "setRenderOptions", new Class<?>[]{RenderOptions.class}, new Object[]{renderOptions});
-		des.broadcastStaticMethodCall(Client.class, "setExtension", new Class<?>[]{String.class}, new Object[]{"png"});
-		des.broadcastStaticMethodCall(Client.class, "setImageSize", new Class<?>[]{Integer.class, Integer.class}, new Object[]{width, height});
-		des.broadcastStaticMethodCall(Client.class, "setTiling", new Class<?>[]{Integer.class, Integer.class}, new Object[]{tilesX, tilesY});
+		des.broadcastStaticMethodCall(BatchRenderer.class, "setJrsFile", new Class<?>[]{String.class}, new Object[]{base+".jrs"});
+		des.broadcastStaticMethodCall(BatchRenderer.class, "setRenderOptions", new Class<?>[]{RenderOptions.class}, new Object[]{renderOptions});
+		des.broadcastStaticMethodCall(BatchRenderer.class, "setExtension", new Class<?>[]{String.class}, new Object[]{"png"});
+		des.broadcastStaticMethodCall(BatchRenderer.class, "setImageSize", new Class<?>[]{Integer.class, Integer.class}, new Object[]{width, height});
+		des.broadcastStaticMethodCall(BatchRenderer.class, "setTiling", new Class<?>[]{Integer.class, Integer.class}, new Object[]{tilesX, tilesY});
 		
 		final Master master = new Master(base+".png", width, height, tilesX, tilesY);
 		
@@ -93,7 +93,7 @@ public class Master {
 				final Future<String> f = des.submit(new RemoteCallable<String>() {
 						private static final long serialVersionUID = 3713825184723907804L;
 						public String call() throws Exception {
-							return Client.renderTile(tX, tY);
+							return BatchRenderer.renderTile(tX, tY);
 						}						
 					});
 				new Thread() {
