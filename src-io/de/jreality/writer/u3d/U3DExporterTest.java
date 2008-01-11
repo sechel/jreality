@@ -53,7 +53,7 @@ public class U3DExporterTest {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		U3DWriter writer = new U3DWriter();
+		WriterU3D writer = new WriterU3D();
 		try {
 			writer.writeScene(scene, fout);
 			fout.close();

@@ -104,7 +104,7 @@ import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
 import de.jreality.writer.u3d.u3dencoding.DataBlock;
 
 
-public class U3DWriter implements SceneWriter {
+public class WriterU3D implements SceneWriter {
 
 	private SceneGraphComponent
 		rootNode = null;
