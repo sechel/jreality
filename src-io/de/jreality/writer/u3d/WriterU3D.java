@@ -1088,6 +1088,16 @@ public class WriterU3D implements SceneWriter {
 		
 	}
 	
+	public void write(SceneGraphComponent c, OutputStream out) throws IOException {
+		JrScene scene = new JrScene(c);
+		writeScene(scene, out);
+	}
+	
+	public static void write(JrScene scene, OutputStream out) throws IOException {
+		WriterU3D writer = new WriterU3D();
+		writer.writeScene(scene, out);
+	}
+	
 	private Geometry getPreparedGeometry(SceneGraphComponent c) {
 		Geometry g = c.getGeometry();
 		if (g == null) return null;
