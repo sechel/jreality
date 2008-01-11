@@ -84,6 +84,7 @@ import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
+import de.jreality.ui.viewerapp.actions.file.ExportU3D;
 import de.jreality.ui.viewerapp.actions.file.ExportVRML;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
 import de.jreality.ui.viewerapp.actions.file.LoadScene;
@@ -244,6 +245,7 @@ private JMenu createFileMenu() {
 		//   if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
 		export.add(new JMenuItem(exportImageAction));
+		export.add(new JMenuItem(new ExportU3D("U3D", viewer, parentComp)));
 //		}
 
 		if (!Beans.isDesignTime()) {

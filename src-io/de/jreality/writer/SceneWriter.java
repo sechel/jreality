@@ -45,10 +45,13 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 import de.jreality.io.JrScene;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 
 public interface SceneWriter {
 
   void writeScene(JrScene scene, OutputStream out) throws IOException;
-  void writeScene(JrScene scene, Writer out) throws IOException;
+  void writeScene(JrScene scene, Writer out) throws IOException, UnsupportedOperationException;
+  void write(SceneGraphNode cmp, OutputStream out) throws IOException;
   
 }

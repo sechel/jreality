@@ -38,72 +38,67 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.edit;
+package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 
-import de.jreality.ui.viewerapp.FileFilter;
+import de.jreality.io.JrScene;
+import de.jreality.scene.Viewer;
+import de.jreality.toolsystem.ToolSystem;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
-import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
-import de.jreality.writer.SceneWriter;
-import de.jreality.writer.WriterJRS;
+import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.u3d.WriterU3D;
 
 
 /**
- * Saves the selected SceneGraphComponent into a file 
- * (if no SceneGraphComponent is selected, this action is disabled).
+ * Saves the current scene.
  * 
  * @author msommer
  */
-public class SaveSelected extends AbstractSelectionListenerAction {
+public class ExportU3D extends AbstractJrAction {
 
-	FileFilter ffJRS = new FileFilter("JRS file format", "jrs");
-	FileFilter ffU3D = new FileFilter("U3D file format", "u3d");
-	
-  public SaveSelected(String name, SelectionManagerInterface sm, Component parentComp) {
-    super(name, sm, parentComp);
+  private Viewer viewer;
+  
+
+  public ExportU3D(String name, Viewer viewer, Component parentComp) {
+    super(name, parentComp);
     
-    setShortDescription("Save selected SceneGraphComponent as a file");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    if (viewer == null) 
+      throw new IllegalArgumentException("Viewer is null!");
+    this.viewer = viewer;
+    
+    setShortDescription("Save scene as a U3D file");
   }
 
+//  public SaveScene(String name, ViewerApp v) {
+//    this(name, v.getViewer(), v.getFrame());
+//  }
+  
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(parentComp, false, ffJRS, ffU3D);
-    if (file == null) return;
-//    if (!file.getName().endsWith(".jrs")) {
-//    	JOptionPane.showMessageDialog(parentComp, "can only safe .jrs files", "unsupported format", JOptionPane.ERROR_MESSAGE);
-//    	return;
-//    }
+    File file = FileLoaderDialog.selectTargetFile(parentComp, "u3d", "Adobe u3d files");
+    if (file == null) return;  //dialog cancelled
+   
     try {
-      FileOutputStream fos = new FileOutputStream(file);
-      String lc = file.getName().toLowerCase();
-      SceneWriter writer = lc.endsWith(".jrs") ? new WriterJRS() : new WriterU3D();
-      writer.write(getSelection().getLastComponent(), fos);
-      fos.close();
+      WriterU3D writer = new WriterU3D();
+      JrScene s = new JrScene(viewer.getSceneRoot());
+      s.addPath("cameraPath", viewer.getCameraPath());
+      ToolSystem ts = ToolSystem.toolSystemForViewer(viewer);
+      s.addPath("avatarPath", ts.getAvatarPath());
+      s.addPath("emptyPickPath", ts.getEmptyPickPath());
+      FileOutputStream fileOutputStream = new FileOutputStream(file);
+	writer.writeScene(s, fileOutputStream);
+	fileOutputStream.close();
     } catch (IOException ioe) {
-      JOptionPane.showMessageDialog(parentComp, "Save failed: "+ioe.getMessage(), "IO Error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(parentComp, "Save failed: "+ioe.getMessage());
     }
   }
 
-  
-  @Override
-  public boolean isEnabled(SelectionEvent e) {
-    return e.componentSelected();
-  }
-  
 }

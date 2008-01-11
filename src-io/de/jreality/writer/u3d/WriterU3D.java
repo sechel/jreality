@@ -93,12 +93,14 @@ import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
 import de.jreality.writer.u3d.u3dencoding.DataBlock;
@@ -1088,8 +1090,14 @@ public class WriterU3D implements SceneWriter {
 		throw new UnsupportedOperationException("U3D is a binary file format");
 	}
 	
-	public void write(SceneGraphComponent c, OutputStream out) throws IOException {
-		JrScene scene = new JrScene(c);
+	public void write(SceneGraphNode c, OutputStream out) throws IOException {
+		SceneGraphComponent root = null;
+		if (c instanceof SceneGraphComponent) root = (SceneGraphComponent) c;
+		else {
+			root = new SceneGraphComponent();
+			SceneGraphUtility.addChildNode(root, c);
+		}
+		JrScene scene = new JrScene(root);
 		writeScene(scene, out);
 	}
 	
