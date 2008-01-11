@@ -1,7 +1,5 @@
 package de.jreality.writer.u3d;
 
-import static com.objectplanet.image.PngEncoder.BEST_COMPRESSION;
-import static com.objectplanet.image.PngEncoder.COLOR_TRUECOLOR_ALPHA;
 import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
@@ -22,7 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.objectplanet.image.PngEncoder;
+import javax.imageio.ImageIO;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
@@ -425,10 +423,9 @@ public class U3DSceneUtility {
 	
 	public static byte[] preparePNGImageData(ImageData img) {
 		BufferedImage bi = getBufferedImage(img);
-		PngEncoder encoder = new PngEncoder(COLOR_TRUECOLOR_ALPHA, BEST_COMPRESSION);
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		try {
-			encoder.encode(bi, buffer);
+			ImageIO.write(bi, "PNG", buffer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
