@@ -85,6 +85,7 @@ public class U3DSceneUtility {
 			nameMap = new HashMap<String, List<T>>();
 		HashMap<T, String> r = new HashMap<T, String>();
 		for (T c : l) {
+			if (c == null) continue;
 			String name = c.getName();
 			List<T> cList = nameMap.get(c.getName());
 			if (cList == null) {
@@ -94,6 +95,7 @@ public class U3DSceneUtility {
 			cList.add(c);
 		}
 		for (T c : l) {
+			if (c == null) continue;
 			String name = c.getName();
 			List<T> cList = nameMap.get(c.getName());
 			if (cList.size() > 1) {
