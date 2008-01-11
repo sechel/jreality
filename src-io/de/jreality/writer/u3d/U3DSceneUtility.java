@@ -1,7 +1,6 @@
 package de.jreality.writer.u3d;
 
 import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
-import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SKY_BOX;
@@ -22,6 +21,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.scene.Appearance;
@@ -35,7 +35,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
@@ -267,44 +266,44 @@ public class U3DSceneUtility {
 	
 	public static IndexedFaceSet prepareFaceSet(IndexedFaceSet ifs) {
 		// TODO: prepare texture coordinates too 
-		IntArrayArray fData = (IntArrayArray)ifs.getFaceAttributes(INDICES);
-		int[][] faces = fData.toIntArrayArray(null);
-		boolean needsTreatment = false;
-		int numFaces = 0; // count faces
-		for (int i = 0; i < faces.length; i++) {
-			if (faces[i].length != 3) {
-				int v = faces[i].length;
-				int numNewfaces = v - 2 + v % 2; 
-				needsTreatment = true;
-				numFaces += numNewfaces;
-			} else {
-				numFaces++;
-			}
-		}
-		if (!needsTreatment)
-			return ifs;
-		IndexedFaceSet rifs = new IndexedFaceSet();
-		int[][] newFaceData = new int[numFaces][];
-		int j = 0;
-		for (int[]f : faces) {
-			if (f.length != 3){
-				int v = f.length;
-				int numNewfaces = v - 2 + v % 2;
-				for (int k = 0; k < numNewfaces / 2; k++){
-					newFaceData[j++] = new int[]{ f[k], f[k+1], f[v - 1 - k]};
-					newFaceData[j++] = new int[]{ f[k+1], f[v - 2 - k], f[v - 1 - k]};
-				}
-				if (v % 2 != 0) {
-					int k = v / 2;
-					newFaceData[j++] = new int[]{ f[k-1], f[k], f[k+1]};
-				}
-			} else {
-				newFaceData[j++] = f;
-			}
-		}
-		rifs.setVertexCountAndAttributes(ifs.getVertexAttributes());
-		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData));
-		return rifs;
+//		IntArrayArray fData = (IntArrayArray)ifs.getFaceAttributes(INDICES);
+//		int[][] faces = fData.toIntArrayArray(null);
+//		boolean needsTreatment = false;
+//		int numFaces = 0; // count faces
+//		for (int i = 0; i < faces.length; i++) {
+//			if (faces[i].length != 3) {
+//				int v = faces[i].length;
+//				int numNewfaces = v - 1;// - 2 + v % 2; 
+//				needsTreatment = true;
+//				numFaces += numNewfaces;
+//			} else {
+//				numFaces++;
+//			}
+//		}
+//		if (!needsTreatment)
+//			return ifs;
+//		IndexedFaceSet rifs = new IndexedFaceSet();
+//		int[][] newFaceData = new int[numFaces][];
+//		int j = 0;
+//		for (int[]f : faces) {
+//			if (f.length != 3){
+//				int v = f.length;
+////				int numNewfaces = v - 1;// - 2 + v % 2;
+//				for (int k = 0; k < v / 2 - 1; k++){
+//					newFaceData[j++] = new int[]{ f[k], f[k+1], f[v - 1 - k]};
+//					newFaceData[j++] = new int[]{ f[k+1], f[v - 2 - k], f[v - 1 - k]};
+//				}
+//				if (v % 2 != 0) {
+//					int k = v / 2 - 1;
+//					newFaceData[j++] = new int[]{ f[k-1], f[k], f[k+1]};
+//				}
+//			} else {
+//				newFaceData[j++] = f;
+//			}
+//		}
+//		rifs.setVertexCountAndAttributes(ifs.getVertexAttributes());
+//		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData));
+		return IndexedFaceSetUtility.triangulate(ifs);
 	}
 	
 	
