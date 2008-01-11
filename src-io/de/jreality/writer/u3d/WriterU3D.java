@@ -1085,7 +1085,7 @@ public class WriterU3D implements SceneWriter {
 	}
 
 	public void writeScene(JrScene scene, Writer out) throws IOException {
-		
+		throw new UnsupportedOperationException("U3D is a binary file format");
 	}
 	
 	public void write(SceneGraphComponent c, OutputStream out) throws IOException {
