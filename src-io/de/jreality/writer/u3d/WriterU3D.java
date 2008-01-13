@@ -769,6 +769,9 @@ public class WriterU3D implements SceneWriter {
 		// diffuse
 		Color diffuse = (Color)a.getAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, DIFFUSE_COLOR_DEFAULT);
 		float diffCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + DIFFUSE_COEFFICIENT, DIFFUSE_COEFFICIENT_DEFAULT);
+		U3DTexture envMap = sphereMapsMap.get(a);
+		if (envMap != null)
+			diffCoeff *= (1 - envMap.getIntesity());
 		float[] dif = diffuse.getColorComponents(null);
 		diffuse = new Color(dif[0] * diffCoeff, dif[1] * diffCoeff, dif[2] * diffCoeff);
 		w.WriteColor(diffuse);
@@ -850,7 +853,7 @@ public class WriterU3D implements SceneWriter {
 		if (tex != null) {
 			Texture2D texInfo = (Texture2D) createAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a);
 			w.WriteString(textureNameMap.get(tex));
-			w.WriteF32(1.0f); // intensity
+			w.WriteF32(tex.getIntesity()); // intensity
 			// blend function
 			switch (texInfo.getApplyMode()) {
 			case Texture2D.GL_MODULATE:
@@ -885,7 +888,7 @@ public class WriterU3D implements SceneWriter {
 		// env texture
 		if (envMap != null) {
 			w.WriteString(textureNameMap.get(envMap));
-			w.WriteF32(1.0f); // intensity
+			w.WriteF32(envMap.getIntesity()); // intensity
 			// blend function
 //			switch (texInfo.getApplyMode()) {
 //			case Texture2D.GL_MODULATE:

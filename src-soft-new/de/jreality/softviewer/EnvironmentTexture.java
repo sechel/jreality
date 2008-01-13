@@ -36,7 +36,7 @@ public class EnvironmentTexture implements Texture {
     private final SimpleTexture left;
     private final SimpleTexture right;
     
-    private final int br, bg,bb,ba;
+    private int br, bg,bb,ba;
     
     public EnvironmentTexture(CubeMap cm, Texture texture2) {
         texture = texture2;
@@ -51,9 +51,17 @@ public class EnvironmentTexture implements Texture {
         bg = blend.getGreen();
         bb = blend.getBlue();
         ba = blend.getAlpha();
-        
     }
 
+    public EnvironmentTexture(CubeMap cm, Texture texture2, Color blend) {
+        this(cm, texture2);
+        br = blend.getRed();
+        bg = blend.getGreen();
+        bb = blend.getBlue();
+        ba = blend.getAlpha();
+    }
+    
+    
     public void getColor(double u, double v, double nx, double ny, double nz,
             int x, int y, double[] color) {
         

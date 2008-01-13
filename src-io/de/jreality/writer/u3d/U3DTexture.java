@@ -7,6 +7,8 @@ public class U3DTexture {
 
 	private ImageData
 		image = null;
+	private float 
+		intesity = 1.0f;
 	
 	public U3DTexture(Texture2D tex) {
 		this.image = tex.getImage();
@@ -29,6 +31,14 @@ public class U3DTexture {
 	
 	public ImageData getImage() {
 		return image;
+	}
+	
+	public float getIntesity() {
+		return intesity;
+	}
+
+	public void setIntesity(float intesity) {
+		this.intesity = intesity;
 	}
 	
 }

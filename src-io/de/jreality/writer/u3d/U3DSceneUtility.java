@@ -384,6 +384,7 @@ public class U3DSceneUtility {
 		    	BufferedImage img = SphereMapGenerator.create(tex, 768, 768);
 		    	ImageData data = new ImageData(img);
 		    	U3DTexture u3dTex = new U3DTexture(data);
+		    	u3dTex.setIntesity(tex.getBlendColor().getAlpha() / 255.0f);
 		    	r.put(a, u3dTex);
 		    }
 		}
