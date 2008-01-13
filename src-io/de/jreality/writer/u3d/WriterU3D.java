@@ -113,6 +113,8 @@ public class WriterU3D implements SceneWriter {
 		rootNode = null;
 	private Collection<SceneGraphComponent>
 		nodes = null;
+	private HashMap<SceneGraphComponent, Boolean>
+		visibilityMap = null;
 	private Collection<Geometry>
 		geometries = null;
 	private Collection<SceneGraphComponent>
@@ -703,8 +705,7 @@ public class WriterU3D implements SceneWriter {
 
 		Geometry g = getPreparedGeometry(c);
 		w.WriteString(geometryNameMap.get(g));
-		boolean visible = c.isVisible();
-		if (!visible)
+		if (!visibilityMap.get(c))
 			w.WriteU32(0x00000000); // invisible
 		else
 			w.WriteU32(0x00000003); // front and back
@@ -759,19 +760,19 @@ public class WriterU3D implements SceneWriter {
 		long attribs = 0x00000001 | 0x00000002 | 0x00000004 | 0x00000020;
 		w.WriteU32(attribs);
 		
+		U3DTexture envMap = sphereMapsMap.get(a);
 		// ambient
 		Color ambient = (Color)a.getAttribute(POLYGON_SHADER + "." + AMBIENT_COLOR, AMBIENT_COLOR_DEFAULT);
 		float ambiCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + AMBIENT_COEFFICIENT, AMBIENT_COEFFICIENT_DEFAULT);
 		float[] amb = ambient.getColorComponents(null);
+		if (envMap != null) ambiCoeff *= (1 - envMap.getIntesity());
 		ambient = new Color(amb[0] * ambiCoeff, amb[1] * ambiCoeff, amb[2] * ambiCoeff);
 		w.WriteColor(ambient);
 		
 		// diffuse
 		Color diffuse = (Color)a.getAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, DIFFUSE_COLOR_DEFAULT);
 		float diffCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + DIFFUSE_COEFFICIENT, DIFFUSE_COEFFICIENT_DEFAULT);
-		U3DTexture envMap = sphereMapsMap.get(a);
-		if (envMap != null)
-			diffCoeff *= (1 - envMap.getIntesity());
+		if (envMap != null) diffCoeff *= (1 - envMap.getIntesity());
 		float[] dif = diffuse.getColorComponents(null);
 		diffuse = new Color(dif[0] * diffCoeff, dif[1] * diffCoeff, dif[2] * diffCoeff);
 		w.WriteColor(diffuse);
@@ -779,6 +780,7 @@ public class WriterU3D implements SceneWriter {
 		// specular
 		Color specular = (Color)a.getAttribute(POLYGON_SHADER + "." + SPECULAR_COLOR, SPECULAR_COLOR_DEFAULT);
 		float specCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + SPECULAR_COEFFICIENT, SPECULAR_COEFFICIENT_DEFAULT);
+		if (envMap != null) specCoeff *= (1 - envMap.getIntesity());
 		float[] s = specular.getColorComponents(null);
 		specular = new Color(s[0] * specCoeff, s[1] * specCoeff, s[2] * specCoeff);
 		w.WriteColor(specular);
@@ -835,13 +837,18 @@ public class WriterU3D implements SceneWriter {
 		U3DTexture envMap = sphereMapsMap.get(a);
 		long shaderChannels = 0;
 		long alphatexChannels = 0;
+		float texIntensity = 1.0f;
+		float envIntensity = 1.0f;
 		if (tex != null) {
 			shaderChannels |= 0x00000001;
 			alphatexChannels |= 0x00000001;
+			texIntensity *= tex.getIntesity();
 		}
 		if (envMap != null) {
 			shaderChannels |= 0x00000002;
 			alphatexChannels |= 0x00000001;
+			envIntensity *= envMap.getIntesity();
+			texIntensity *= (1 - envIntensity);
 		}
 		w.WriteU32(shaderChannels);
 		w.WriteU32(alphatexChannels);
@@ -853,7 +860,7 @@ public class WriterU3D implements SceneWriter {
 		if (tex != null) {
 			Texture2D texInfo = (Texture2D) createAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a);
 			w.WriteString(textureNameMap.get(tex));
-			w.WriteF32(tex.getIntesity()); // intensity
+			w.WriteF32(texIntensity); // intensity
 			// blend function
 			switch (texInfo.getApplyMode()) {
 			case Texture2D.GL_MODULATE:
@@ -885,10 +892,10 @@ public class WriterU3D implements SceneWriter {
 				repeat |= 0x02;
 			w.WriteU8(repeat);
 		}
-		// env texture
+		// environment texture
 		if (envMap != null) {
 			w.WriteString(textureNameMap.get(envMap));
-			w.WriteF32(envMap.getIntesity()); // intensity
+			w.WriteF32(envIntensity); // intensity
 			// blend function
 //			switch (texInfo.getApplyMode()) {
 //			case Texture2D.GL_MODULATE:
@@ -1163,6 +1170,7 @@ public class WriterU3D implements SceneWriter {
 		rootNode = scene.getSceneRoot();
 		
 		nodes = U3DSceneUtility.getSceneGraphComponents(scene);
+		visibilityMap = U3DSceneUtility.getVisibility(scene);
 		parentMap = U3DSceneUtility.getParentsMap(nodes);
 		nodeNameMap = U3DSceneUtility.getUniqueNames(nodes);
 		

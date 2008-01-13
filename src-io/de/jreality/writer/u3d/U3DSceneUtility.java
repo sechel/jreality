@@ -4,11 +4,14 @@ import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
 import static de.jreality.math.MatrixBuilder.euclidean;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
+import static de.jreality.shader.CommonAttributes.AMBIENT_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.AMBIENT_COLOR;
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.LIGHTING_ENABLED;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.SKY_BOX;
+import static de.jreality.shader.CommonAttributes.SPECULAR_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.TextureUtility.createTexture;
 import static java.awt.Color.WHITE;
@@ -432,7 +435,8 @@ public class U3DSceneUtility {
 		for (EffectiveAppearance a : apps) {
 		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a)) {
 		    	Texture2D tex = (Texture2D) createAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a);
-		    	r.put(a, new U3DTexture(tex));
+		    	if (tex != null && tex.getImage() != null)
+		    		r.put(a, new U3DTexture(tex));
 		    }
 		}
 		return r;
@@ -502,20 +506,30 @@ public class U3DSceneUtility {
 		if (rootApp == null) return null;
 		CubeMap skyBox = (CubeMap)createAttributeEntity(CubeMap.class, SKY_BOX, rootApp, false);
 		if (skyBox == null) return null;
+		if (skyBox.getFront() 	== null
+		||	skyBox.getBack() 	== null
+		|| 	skyBox.getLeft() 	== null
+		||	skyBox.getRight() 	== null
+		|| 	skyBox.getTop() 	== null
+		|| 	skyBox.getBottom() 	== null)
+			return null;
 		SceneGraphComponent r = new SceneGraphComponent();
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 		ifsf.setVertexCount(4);
 		ifsf.setFaceCount(1);
 		ifsf.setVertexCoordinates(new double[][]{{1,1,0},{1,-1,0},{-1,-1,0},{-1,1,0}});
 		ifsf.setFaceIndices(new int[][]{{0,1,2,3}});
-		ifsf.setVertexTextureCoordinates(new double[][]{{1,1},{1,0},{0,0},{0,1}});
+		double o = 0.005;
+		ifsf.setVertexTextureCoordinates(new double[][]{{1-o,1-o},{1-o,o},{o,o},{o,1-o}});
 		ifsf.update();
 		
 		SceneGraphComponent front = new SceneGraphComponent();
 		Appearance frontApp = new Appearance();
 		createTexture(frontApp, POLYGON_SHADER, skyBox.getFront());
+		System.err.println(skyBox.getFront());
 		front.setAppearance(frontApp);
 		front.setGeometry(ifsf.getGeometry());
+		front.setName("front");
 		euclidean().translate(0, 0, 1.0).rotate(PI, 0, 1, 0).assignTo(front);
 
 		SceneGraphComponent back = new SceneGraphComponent();
@@ -523,6 +537,7 @@ public class U3DSceneUtility {
 		createTexture(backApp, POLYGON_SHADER, skyBox.getBack());
 		back.setAppearance(backApp);
 		back.setGeometry(ifsf.getGeometry());
+		back.setName("back");
 		euclidean().translate(0, 0, -1.0).assignTo(back);
 
 		SceneGraphComponent top = new SceneGraphComponent();
@@ -530,6 +545,7 @@ public class U3DSceneUtility {
 		createTexture(topApp, POLYGON_SHADER, skyBox.getTop());
 		top.setAppearance(topApp);
 		top.setGeometry(ifsf.getGeometry());
+		top.setName("bottom");
 		euclidean().translate(0, 1.0, 0).rotate(PI / 2, 1, 0, 0).rotate(-PI / 2, 0, 0, 1).assignTo(top);
 
 		SceneGraphComponent bottom = new SceneGraphComponent();
@@ -537,6 +553,7 @@ public class U3DSceneUtility {
 		createTexture(bottomApp, POLYGON_SHADER, skyBox.getBottom());
 		bottom.setAppearance(bottomApp);
 		bottom.setGeometry(ifsf.getGeometry());
+		bottom.setName("top");
 		euclidean().translate(0, -1.0, 0).rotate(-PI / 2, 1, 0, 0).rotate(PI / 2, 0, 0, 1).assignTo(bottom);
 
 		SceneGraphComponent left = new SceneGraphComponent();
@@ -544,6 +561,7 @@ public class U3DSceneUtility {
 		createTexture(leftApp, POLYGON_SHADER, skyBox.getLeft());
 		left.setAppearance(leftApp);
 		left.setGeometry(ifsf.getGeometry());
+		left.setName("left");
 		euclidean().translate(-1.0, 0, 0).rotate(PI / 2, 0, 1, 0).assignTo(left);
 
 		SceneGraphComponent right = new SceneGraphComponent();
@@ -551,19 +569,40 @@ public class U3DSceneUtility {
 		createTexture(rightApp, POLYGON_SHADER, skyBox.getRight());
 		right.setAppearance(rightApp);
 		right.setGeometry(ifsf.getGeometry());
+		right.setName("right");
 		euclidean().translate(1.0, 0, 0).rotate(-PI / 2, 0, 1, 0).assignTo(right);
 		  
 		r.addChildren(front, back, top, bottom, left, right);
-		euclidean().rotate(PI, 1, 0, 0).scale(1000.0).assignTo(r);
+		r.setName("skybox");
+		euclidean().rotate(PI / 2, 0, 1, 0).rotate(PI, 1, 0, 0).scale(1000.0).assignTo(r);
 		
 		Appearance skyBoxApp = new Appearance();
 		skyBoxApp.setAttribute(POLYGON_SHADER + "." + LIGHTING_ENABLED, false);
 		skyBoxApp.setAttribute(POLYGON_SHADER + "." + AMBIENT_COLOR, WHITE);
+		skyBoxApp.setAttribute(POLYGON_SHADER + "." + AMBIENT_COEFFICIENT, 1.0);
+		skyBoxApp.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COEFFICIENT, 0.0);
+		skyBoxApp.setAttribute(POLYGON_SHADER + "." + SPECULAR_COEFFICIENT, 0.0);
 		r.setAppearance(skyBoxApp);
-		
 		return r;
 	}
 	
+	
+	private static void getVisibility_R(
+		SceneGraphComponent root, 
+		HashMap<SceneGraphComponent, Boolean> map, 
+		boolean subTreeV
+	) {
+		boolean visible = root.isVisible() & subTreeV;
+		map.put(root, visible);
+		for (int i = 0; i < root.getChildComponentCount(); i++)
+			getVisibility_R(root.getChildComponent(i), map, visible);
+	}
+	
+	public static HashMap<SceneGraphComponent, Boolean> getVisibility(JrScene scene) {
+		HashMap<SceneGraphComponent, Boolean> r = new HashMap<SceneGraphComponent, Boolean>();
+		getVisibility_R(scene.getSceneRoot(), r, true);
+		return r;
+	}
 	
 	
 }
