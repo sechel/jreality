@@ -1078,7 +1078,10 @@ public class WriterU3D implements SceneWriter {
 	
 	public void writeScene(JrScene scene, OutputStream out) throws IOException {
 		System.out.print("U3D Export: prepare data...");
+		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
+		if (skyBox != null) scene.getSceneRoot().addChild(skyBox);
 		prepareSceneData(scene);
+		if (skyBox != null) scene.getSceneRoot().removeChild(skyBox);
 		System.out.print("writing...");
 		WritableByteChannel o = Channels.newChannel(out);
 		writeDataBlock(getHeaderBlock(0, 0), o);
