@@ -20,12 +20,13 @@ public class SphereMapGenerator {
 		EnvironmentTexture tex = new EnvironmentTexture(map, null);
 		WritableRaster raster = r.getRaster();
 		for (double y = 0; y < height; y++) {
+			double v = PI * y / height;
+			double ry = cos(v);
+			double sinV = sin(v);
 			for (double x = 0; x < width; x++) {
 				double u = PI * x / width;
-				double v = PI * y / height;
-				double rx = cos(2*u) * sin(v);
-				double ry = cos(v);
-				double rz = sin(2*u) * sin(v);
+				double rx = cos(2*u) * sinV;
+				double rz = sin(2*u) * sinV;
 				double[] ray = new double[]{rx, ry, rz};
 				double[] color = new double[4];
 				tex.getColor(0, 0, ray[0], ray[1], ray[2], 0, 0, color);
