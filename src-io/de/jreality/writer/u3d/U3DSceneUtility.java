@@ -4,6 +4,7 @@ import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.SKY_BOX;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -41,6 +42,7 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.Rectangle3D;
+import de.jreality.writer.u3d.texture.SphereMapGenerator;
 
 public class U3DSceneUtility {
 
@@ -373,12 +375,44 @@ public class U3DSceneUtility {
 	}
 	
 	
-	public static HashMap<U3DTexture, String> getTextureNames(Collection<U3DTexture> l) {
+	
+	public static HashMap<EffectiveAppearance, U3DTexture> getSphereMapsMap(Collection<EffectiveAppearance> apps) {
+		HashMap<EffectiveAppearance, U3DTexture> r = new HashMap<EffectiveAppearance, U3DTexture>();
+		for (EffectiveAppearance a : apps) {
+		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, POLYGON_SHADER + "." + REFLECTION_MAP, a)) {
+		    	CubeMap tex = (CubeMap) createAttributeEntity(CubeMap.class, POLYGON_SHADER + "." + REFLECTION_MAP, a);
+		    	BufferedImage img = SphereMapGenerator.create(tex, 768, 768);
+		    	ImageData data = new ImageData(img);
+		    	U3DTexture u3dTex = new U3DTexture(data);
+		    	r.put(a, u3dTex);
+		    }
+		}
+		return r;
+	}
+	
+	
+	public static HashMap<CubeMap, byte[]> prepareSphereMap(Collection<CubeMap> maps) {
+		HashMap<CubeMap, byte[]> r = new HashMap<CubeMap, byte[]>();
+		for (CubeMap cm : maps) {
+			BufferedImage bi = SphereMapGenerator.create(cm, 768, 768);
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			try {
+				ImageIO.write(bi, "PNG", buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			r.put(cm, buffer.toByteArray());
+		}
+		return r;
+	}
+	
+	
+	public static HashMap<U3DTexture, String> getTextureNames(String prefix, Collection<U3DTexture> l) {
 		HashMap<U3DTexture, String> map = new HashMap<U3DTexture, String>();
 		int number = 1;
 		DecimalFormat df = new DecimalFormat("000");
 		for (U3DTexture ae : l) {
-			map.put(ae, "Texture " + df.format(number));
+			map.put(ae, prefix + " " + df.format(number));
 			number++;
 		}
 		return map;

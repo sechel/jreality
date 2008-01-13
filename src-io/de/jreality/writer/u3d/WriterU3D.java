@@ -61,6 +61,7 @@ import static de.jreality.writer.u3d.U3DConstants.uACContextPositionDiffMagZ;
 import static de.jreality.writer.u3d.U3DConstants.uACContextPositionDiffSigns;
 import static de.jreality.writer.u3d.U3DConstants.uACStaticFull;
 import static java.awt.Color.GRAY;
+import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 import static java.lang.Math.pow;
@@ -150,9 +151,9 @@ public class WriterU3D implements SceneWriter {
 		textureNameMap = null;
 	private HashMap<U3DTexture, byte[]>
 		texturePNGData = null;
-//	private CubeMap
-//		skybox = null;
-	
+	private HashMap<EffectiveAppearance, U3DTexture>
+		sphereMapsMap = null;	
+
 		
 	protected DataBlock getLightResource(Light l) {
 		BitStreamWrite w = new BitStreamWrite();
@@ -659,8 +660,9 @@ public class WriterU3D implements SceneWriter {
 	
 	protected void WriteTransform(SceneGraphComponent c, BitStreamWrite w) {
 		double[] T = Rn.setIdentityMatrix(new double[16]);
-		if (c.getTransformation() != null)
+		if (c.getTransformation() != null) {
 			c.getTransformation().getMatrix(T);
+		}
 		WriteMatrix(T, w);
 	}
 	
@@ -670,7 +672,7 @@ public class WriterU3D implements SceneWriter {
 		if (parents.size() == 0) { // root has default node as parent
 			w.WriteU32(1);
 			w.WriteString("");
-			WriteTransform(c, w);
+			WriteMatrix(euclidean(c).rotate(PI, 0, 0, 1).rotate(PI / 2, 1, 0, 0).getArray(), w);
 		} else {
 			w.WriteU32(parents.size());
 			for (SceneGraphComponent p : parents) {
@@ -827,13 +829,20 @@ public class WriterU3D implements SceneWriter {
 		
 		// shader channels and alpha texture channels
 		U3DTexture tex = textureMap.get(a);
+		U3DTexture envMap = sphereMapsMap.get(a);
+		long shaderChannels = 0;
+		long alphatexChannels = 0;
 		if (tex != null) {
-			w.WriteU32(0x00000001);
-			w.WriteU32(0x00000001);
-		} else {
-			w.WriteU32(0x00000000);
-			w.WriteU32(0x00000000);
+			shaderChannels |= 0x00000001;
+			alphatexChannels |= 0x00000001;
 		}
+		if (envMap != null) {
+			shaderChannels |= 0x00000002;
+			alphatexChannels |= 0x00000001;
+		}
+		w.WriteU32(shaderChannels);
+		w.WriteU32(alphatexChannels);
+		
 		// material name (same name as lit texture shader)
 		w.WriteString(appearanceNameMap.get(a));
 		
@@ -872,6 +881,36 @@ public class WriterU3D implements SceneWriter {
 			if (texInfo.getRepeatT() == GL_REPEAT)
 				repeat |= 0x02;
 			w.WriteU8(repeat);
+		}
+		// env texture
+		if (envMap != null) {
+			w.WriteString(textureNameMap.get(envMap));
+			w.WriteF32(1.0f); // intensity
+			// blend function
+//			switch (texInfo.getApplyMode()) {
+//			case Texture2D.GL_MODULATE:
+//				w.WriteU8((short)0); break;
+//			case Texture2D.GL_ADD:
+//				w.WriteU8((short)1);// break;
+//			case Texture2D.GL_REPLACE:
+				w.WriteU8((short)2);// break;
+//			case Texture2D.GL_BLEND:
+//				w.WriteU8((short)3); //break;
+//			default:
+//				w.WriteU8((short)2); break;
+//			}
+			// blend source
+			w.WriteU8((short)0); // alpha combine
+			// blend constant dummy
+			w.WriteF32(1.0f);
+			// texture mode
+			w.WriteU8((short)0x04); // spherical reflection
+			// texture transform matrix
+			WriteMatrix(euclidean().getArray(), w); // identity
+			// texture wrap transform matrix element
+			WriteMatrix(euclidean().getArray(), w); // identity
+			short repeat = 0x01 | 0x02;
+			w.WriteU8(repeat);	
 		}
 		
 		DataBlock b = w.GetDataBlock();
@@ -1140,9 +1179,10 @@ public class WriterU3D implements SceneWriter {
 		
 		textureMap = U3DSceneUtility.getTextureMap(appearances);
 		textures = new HashSet<U3DTexture>(textureMap.values());
-		textureNameMap = U3DSceneUtility.getTextureNames(textures);
+		sphereMapsMap = U3DSceneUtility.getSphereMapsMap(appearances);
+		textures.addAll(sphereMapsMap.values());
+		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
-		
 		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
