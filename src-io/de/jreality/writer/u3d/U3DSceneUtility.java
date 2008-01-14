@@ -526,7 +526,6 @@ public class U3DSceneUtility {
 		SceneGraphComponent front = new SceneGraphComponent();
 		Appearance frontApp = new Appearance();
 		createTexture(frontApp, POLYGON_SHADER, skyBox.getFront());
-		System.err.println(skyBox.getFront());
 		front.setAppearance(frontApp);
 		front.setGeometry(ifsf.getGeometry());
 		front.setName("front");
