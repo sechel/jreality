@@ -84,13 +84,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
 	int frontBack = FRONT_AND_BACK;
-	public VertexShader vertexShader = null;
+	public VertexShader vertexShader = new DefaultVertexShader();
 	boolean useGLSL = false;
-	static double[] idmat = Rn.identityMatrix(4);
 	int texUnit = 0, refMapUnit = 0;
-	Appearance ap = new Appearance();
 	GlslDefaultPolygonShader glslShader;
-	EffectiveAppearance myEap = null;
 	boolean inheritGLSL = false;
 	boolean fastAndDirty = false;
 	boolean geometryHasTextureCoordinates = false, hasTextures = false;
@@ -103,14 +100,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		defaultShader.setFromEffectiveAppearance(eap, "");
 	}
 	
-	/**
-		 * 
-		 */
-		public DefaultPolygonShader() {
-			super();
-			vertexShader = new DefaultVertexShader();
-		}
-
 		
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
@@ -155,7 +144,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    }  else useGLSL = false;
 	    
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
-//		System.err.println("Found vertex shader "+vertexShader.getClass().getName());
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;
  	}
