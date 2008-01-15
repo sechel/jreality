@@ -215,14 +215,13 @@ public class Texture2DLoaderJOGL {
           glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
         		  GL.GL_RGBA, 
         		  image.getWidth(),
-              image.getHeight(), 
-              srcPixelFormat, 
-              GL.GL_UNSIGNED_BYTE, 
-              ByteBuffer.wrap(data));
+        		  image.getHeight(), 
+        		  srcPixelFormat, 
+        		  GL.GL_UNSIGNED_BYTE, 
+        		  ByteBuffer.wrap(data));
  //         System.err.println("Creating mipmaps");
         } else {
-          gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, //GL.GL_RGBA,
-                                                                          // //tex.getPixelFormat(),
+          gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
               image.getWidth(), image.getHeight(), 0, srcPixelFormat,
               GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
         }
@@ -352,7 +351,7 @@ public class Texture2DLoaderJOGL {
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
 
-    float[] texcolor = tex.getBlendColor().getComponents(null);
+    float[] texcolor = tex.getBlendColor().getRGBComponents(null);
     gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
     gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
     if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
