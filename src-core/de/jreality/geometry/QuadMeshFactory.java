@@ -99,7 +99,6 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	private double[][] convertDDDtoDD(double[][][] points) {
 		int lengthv = points.length;
 		int lengthu = points[0].length;
-		//setMeshSize(lengthu, lengthv);
 		int lengthf = points[0][0].length;
 		if (lengthv != getVLineCount() || lengthu != getULineCount() ) {
 			throw new IllegalArgumentException("Bad dimension for 3D array");
