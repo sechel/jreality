@@ -42,6 +42,8 @@ package de.jreality.softviewer;
 import java.awt.Color;
 import java.util.Arrays;
 
+import de.jreality.backends.texture.Texture;
+
 /*
  * implementation notes: for speed reasons we do not interpolate y coordinates
  * and normals at all. Moreover x is only interpolated as long as needed. All

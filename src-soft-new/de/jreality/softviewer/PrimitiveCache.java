@@ -40,6 +40,7 @@
 
 package de.jreality.softviewer;
 
+import de.jreality.backends.texture.SimpleTexture;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;

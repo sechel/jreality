@@ -10,10 +10,10 @@ import org.sunflow.math.OrthoNormalBasis;
 import org.sunflow.math.Point2;
 import org.sunflow.math.Vector3;
 
+import de.jreality.backends.texture.SimpleTexture;
+import de.jreality.backends.texture.Texture;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.RenderingHintsShader;
-import de.jreality.softviewer.SimpleTexture;
-import de.jreality.softviewer.Texture;
 
 public class DefaultPolygonShader implements Shader {
 

@@ -40,7 +40,7 @@
 
 package de.jreality.softviewer.shader;
 
-import de.jreality.softviewer.Texture;
+import de.jreality.backends.texture.Texture;
 
 /**
  * 

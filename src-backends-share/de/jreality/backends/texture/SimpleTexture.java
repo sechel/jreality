@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.softviewer;
+package de.jreality.backends.texture;
 
 import de.jreality.math.Matrix;
 import de.jreality.shader.ImageData;

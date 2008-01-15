@@ -9,8 +9,8 @@ import static java.lang.Math.sin;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 
+import de.jreality.backends.texture.EnvironmentTexture;
 import de.jreality.shader.CubeMap;
-import de.jreality.softviewer.EnvironmentTexture;
 
 public class SphereMapGenerator {
 

@@ -13,8 +13,8 @@ import org.sunflow.math.Matrix4;
 import org.sunflow.math.OrthoNormalBasis;
 import org.sunflow.math.Vector3;
 
+import de.jreality.backends.texture.EnvironmentTexture;
 import de.jreality.shader.CubeMap;
-import de.jreality.softviewer.EnvironmentTexture;
 
 public class SkyBox implements PrimitiveList, Shader {
 	

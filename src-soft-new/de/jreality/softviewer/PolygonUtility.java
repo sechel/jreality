@@ -39,15 +39,7 @@
 
 package de.jreality.softviewer;
 
-import java.util.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Vector;
-
-import com.sun.org.apache.bcel.internal.generic.NEWARRAY;
-
-import de.jreality.math.Rn;
 
 /**
  * This class capsules utility methods for intersecting polygons. It is

@@ -39,6 +39,8 @@
 
 package de.jreality.softviewer;
 
+import de.jreality.backends.texture.Texture;
+
 public abstract class AbstractPolygon {
 
     public static final int WX = 0;

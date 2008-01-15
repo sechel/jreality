@@ -20,7 +20,7 @@
  * Boston, MA 02111-1307
  * USA 
  */
-package de.jreality.softviewer;
+package de.jreality.backends.texture;
 
 import java.awt.Color;
 

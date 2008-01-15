@@ -40,10 +40,10 @@
 
 package de.jreality.softviewer.shader;
 
+import de.jreality.backends.texture.Texture;
 import de.jreality.scene.Geometry;
 import de.jreality.softviewer.Environment;
 import de.jreality.softviewer.Polygon;
-import de.jreality.softviewer.Texture;
 
 /**
  * This is what the PolygonPipeline uses to shade a polygon.

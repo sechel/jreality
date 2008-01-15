@@ -41,6 +41,9 @@
 package de.jreality.softviewer.shader;
 
 
+import de.jreality.backends.texture.EnvironmentTexture;
+import de.jreality.backends.texture.SimpleTexture;
+import de.jreality.backends.texture.Texture;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;

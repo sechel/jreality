@@ -249,7 +249,7 @@
     <jar jarfile="${dist}/jReality-swing.jar" basedir="${build}/swing" />
   </target>
 
-  <target name="io" depends="core, tools" description="build readers and writers">
+  <target name="io" depends="core, tools, backends-share" description="build readers and writers">
     <mkdir dir="${build}/io" />
 	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v1.0.g">
 	  	  <classpath refid="io.classpath"/>

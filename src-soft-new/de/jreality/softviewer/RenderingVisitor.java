@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 import de.jreality.backends.label.LabelUtility;
+import de.jreality.backends.texture.SimpleTexture;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
