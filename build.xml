@@ -525,19 +525,6 @@
 	  	<delete dir="release/tmp"/>
 	  </target>
 
-	<target name="check_cvs" description="check the current cvs state">
-	<mkdir dir="check_cvs_tmp"/>
-  	<cvs cvsroot="${env.CVSROOT}" package="jReality" dest="check_cvs_tmp"/>
-    <ant dir="check_cvs_tmp/jReality" inheritall="false">
-    	  <property name="env.NO_FETCH_DEPS" value="1"/>
-    </ant>
-    <delete dir="check_cvs_tmp"/>
-  </target>
-
-  <target name="viewer-deps" unless="env.NO_FETCH_DEPS">
-    <get dest="lib/kunststoff.jar" src="http://www.math.tu-berlin.de/~weissman/jreality-lib/kunststoff.jar" usetimestamp="true" verbose="true"/>
-  </target>
-
   <target name="tutorial-src" description="create a zip file containing tutorial src">
 	<zip destfile="${dist}/tutorial.zip" basedir="." includes="src-tutorial/**/*" defaultexcludes="yes"/>
   </target>
