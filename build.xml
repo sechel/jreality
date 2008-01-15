@@ -77,7 +77,6 @@
   <path id="sunflow.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="dist">
-        <include name="jReality-soft.jar"/>
         <include name="jReality-io.jar"/>
     </fileset>
     <fileset dir="lib">
@@ -366,7 +365,7 @@
     <jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
   </target>
 
-  <target name="sunflow" depends="core,soft" description="build sunflow backend">
+  <target name="sunflow" depends="core,backends-share" description="build sunflow backend">
     <mkdir dir="${build}/sunflow" />
   	<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${sunflow}" destdir="${build}/sunflow" debug="true">
       <classpath refid="sunflow.classpath"/>

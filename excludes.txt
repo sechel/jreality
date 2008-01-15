@@ -1,22 +1,17 @@
 # this file contains the filenames that should not be compiled.
-# see README.ant for description
 
-**/jsyzygy/**/*.java
-**/AlexDemo.java
-de/jreality/remote/util/*.java
-de/jreality/remote/portal/smrj/*.java
-de/jreality/portal/tools/*.java
-
-de/jreality/examples/GameTrak.java
-de/jreality/examples/MouseButtonTrak.java
-de/jreality/examples/VulptureGPUApp.java
-
-**/SwtExample.java
-**/PathLineShader.java
-
-**/TestSoft.java
+#
+# To build jars that work with both Java 1.5 and Java 6 do the following:
+# 1. set JAVA_HOME to point to a Java 1.5 installation
+# 2. exclude **/Fake*6.java (and do not exclude **/Fake*5.java)
+# 3. call 'ant'
+# 4. set JAVA_HOME to point to a Java 6 installation
+# 5. exclude **/Fake*5.java (and do not exclude **/Fake*6.java)
+# 6. call 'ant' again
+#
 
 **/Fake*6.java
+# **/Fake*5.java
 
-**/RenderOptionsBeanInfo.java
+**/SwtExample.java
 
