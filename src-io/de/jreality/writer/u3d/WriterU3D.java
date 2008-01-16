@@ -109,10 +109,18 @@ import de.jreality.writer.u3d.u3dencoding.DataBlock;
 
 /**
  * Exports a {@link JrScene} into u3d compliant binary data. The exported 
- * data is written as specified in the 4th edition of ECMA standard 363.
+ * data is written as specified in the 4th edition of ECMA standard 363.<br>
+ * Here is a list of open tasks, any volunteer?
+ * <ul>
+ * 	<li>Line Sets</li>
+ * 	<li>Vertex Colors</li>
+ * 	<li>Emulate face normals with per face vertex normals</li>
+ * 	<li>Translate Attributes like FACE DRAW, VERTEX DRAW to node visibility</li>
+ * 	<li>Export Attributes SPHERES DRAW, TUBES DRAW as geometry</li>
+ * 	<li>Labels</li>
+ * </ul>
  * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-363.htm">
  * Standard ECMA-363 Universal 3D File Format</a>
- * 
  * @author Stefan Sechelmann
  */
 public class WriterU3D implements SceneWriter { 
@@ -1146,8 +1154,8 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	/**
-	 * Exports a given {@link JrScene} into U3D binary data. 
-	 * @param c the root of the exported scene graph 
+	 * Exports a given {@link SceneGraphNode} into U3D binary data. 
+	 * @param c the scene graph node to export
 	 * @param out the output stream to export the data to
 	 */
 	public void write(SceneGraphNode c, OutputStream out) throws IOException {
