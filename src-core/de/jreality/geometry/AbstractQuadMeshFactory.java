@@ -148,19 +148,17 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		int uLineCount = getULineCount();
 		int vLineCount = getVLineCount();
 		
-		int sizeUCurve = vLineCount; //isClosedInVDirection() ? vLineCount+1 : vLineCount;		// a "u-curve" has a fixed u-value
-		int sizeVCurve = uLineCount; //isClosedInUDirection() ? uLineCount+1 : uLineCount;
-		int numVCurves = sizeUCurve;
-		int numUCurves = sizeVCurve;
+		int sizeUCurve = vLineCount;
+		int sizeVCurve = uLineCount;
 		int numVerts = getULineCount()*getVLineCount();
-		int[][] indices = new int[numUCurves +numVCurves][];
-		for (int i = 0; i<numUCurves; ++i)	{
+		int[][] indices = new int[uLineCount +vLineCount][];
+		for (int i = 0; i<uLineCount; ++i)	{
 			indices[i] = new int[sizeUCurve];
 			for (int j = 0; j< sizeUCurve; ++j)	  indices[i][j] = ((j)*uLineCount + (i%uLineCount))%numVerts;
 		}
-		for (int i = 0; i<numVCurves; ++i)	{
-			indices[i+numUCurves] = new int[sizeVCurve];
-			for (int j = 0; j< sizeVCurve; ++j)	  indices[i+numUCurves][j] = (i*uLineCount + (j%uLineCount))%numVerts;
+		for (int i = 0; i<vLineCount; ++i)	{
+			indices[i+uLineCount] = new int[sizeVCurve];
+			for (int j = 0; j< sizeVCurve; ++j)	  indices[i+uLineCount][j] = (i*uLineCount + (j%uLineCount))%numVerts;
 		}	
 		return indices;
 	}
