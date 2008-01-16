@@ -37,8 +37,6 @@ public class ImageUtility {
 			      pb.add(encodeParam);
 			      
 				  new Statement(Class.forName("javax.media.jai.JAI"), "create", new Object[]{"encode", pb}).execute();
-//			Method cm = Class.forName("javax.media.jai.JAI").getMethod("create", new Class[]{String.class, RenderedImage.class, Object.class, Object.class});
-//				cm.invoke(null, new Object[]{"filestore", img, file.getPath(), "tiff"});
 			} catch(Throwable e) {
 				throw new RuntimeException("need JAI for tiff writing", e);
 			}
