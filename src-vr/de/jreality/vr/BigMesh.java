@@ -7,7 +7,7 @@ import de.jreality.scene.IndexedFaceSet;
 
 public class BigMesh {
 	
-	static IndexedFaceSet bigMesh(int discretization, double cameraHeight, double size) {
+	public static IndexedFaceSet bigMesh(int discretization, double cameraHeight, double size) {
 		int n = discretization;
 		QuadMeshFactory factory = new QuadMeshFactory();
 		factory.setULineCount(n);
@@ -23,10 +23,10 @@ public class BigMesh {
 		double[][][] coords = new double[n][n][3];
 
 		for (int i=0; i<n; i++) {
-			double x = -cameraHeight * Math.tan(-totalAngle + i * dt);
+			double y = cameraHeight * Math.tan(-totalAngle + i * dt);
 			for (int j=0; j<n; j++) {
-				coords[i][j][0] = x;
-				coords[i][j][1] = cameraHeight * Math.tan(-totalAngle + j * dt);
+				coords[i][j][0] = cameraHeight * Math.tan(-totalAngle + j * dt);
+				coords[i][j][1] = y;
 			}
 		}
 		
