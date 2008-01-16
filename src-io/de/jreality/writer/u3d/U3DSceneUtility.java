@@ -1,6 +1,7 @@
 package de.jreality.writer.u3d;
 
 import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
+import static de.jreality.geometry.Primitives.sphere;
 import static de.jreality.math.MatrixBuilder.euclidean;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
@@ -33,7 +34,6 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -328,7 +328,7 @@ public class U3DSceneUtility {
 			else if (g instanceof PointSet)
 				r.put(g, g);
 			else if (g instanceof Sphere) {
-				r.put(g, prepareFaceSet(Primitives.sphere(30)));
+				r.put(g, prepareFaceSet(sphere(30)));
 			}
 		}
 		return r;
