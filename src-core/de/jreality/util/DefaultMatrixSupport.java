@@ -53,6 +53,8 @@ public class DefaultMatrixSupport {
 	 */
 	public void restoreDefault(Transformation trafo, boolean clear) {
 		double[] defMatrix = store.get(trafo);
+		if (defMatrix != null && Rn.equals(defMatrix, trafo.getMatrix())) return;
+		if (defMatrix == null && !clear) return;
 		if (!trafo.isReadOnly()) trafo.setMatrix(defMatrix != null ? defMatrix : IDENTITY);
 	}
 	
@@ -64,10 +66,12 @@ public class DefaultMatrixSupport {
 	 * without a default matrix: if true, set to the indentity - if
 	 * false, do nothing. 
 	 */
+	SceneGraphComponent cc;
   	public void restoreDefaultMatrices(SceneGraphComponent root, final boolean clear) {
 	  	root.accept(new SceneGraphVisitor() {
 	  		@Override
 	  		public void visit(SceneGraphComponent c)	{
+	  			cc = c;
 			  	c.childrenWriteAccept(this, true, false, false, false, false, false);
 		  	}
 		  	@Override
