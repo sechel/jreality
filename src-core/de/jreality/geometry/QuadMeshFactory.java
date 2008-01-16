@@ -103,10 +103,11 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 		if (lengthv != getVLineCount() || lengthu != getULineCount() ) {
 			throw new IllegalArgumentException("Bad dimension for 3D array");
 		}
-		double[][] npoints = new double[lengthv * lengthu][points[0][0].length];
+		double[][] npoints = new double[lengthv * lengthu][];
 		for (int i = 0; i<lengthv; ++i)	{
 			for (int j = 0; j<lengthu; ++j)	{
-				System.arraycopy(points[i][j], 0, npoints[i*lengthu+j],0,lengthf);
+				//System.arraycopy(points[i][j], 0, npoints[i*lengthu+j],0,lengthf);
+				npoints[i*lengthu+j] = points[i][j];
 			}
 		}
 		return npoints;
