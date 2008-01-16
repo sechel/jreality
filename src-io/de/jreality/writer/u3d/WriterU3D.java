@@ -107,53 +107,59 @@ import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
 import de.jreality.writer.u3d.u3dencoding.DataBlock;
 
 
+/**
+ * Exports a {@link JrScene} into u3d compliant binary data. The exported 
+ * data is written as specified in the 4th edition of ECMA standard 363.
+ * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-363.htm">
+ * Standard ECMA-363 Universal 3D File Format</a>
+ * 
+ * @author Stefan Sechelmann
+ */
 public class WriterU3D implements SceneWriter { 
 
-	private SceneGraphComponent
+	protected SceneGraphComponent
 		rootNode = null;
-	private Collection<SceneGraphComponent>
+	protected Collection<SceneGraphComponent>
 		nodes = null;
-	private HashMap<SceneGraphComponent, Boolean>
+	protected HashMap<SceneGraphComponent, Boolean>
 		visibilityMap = null;
-	private Collection<Geometry>
+	protected Collection<Geometry>
 		geometries = null;
-	private Collection<SceneGraphComponent>
+	protected Collection<SceneGraphComponent>
 		viewNodes = null;
-	private Collection<Camera>
+	protected Collection<Camera>
 		cameras = null;
-	private HashMap<Camera, String>
+	protected HashMap<Camera, String>
 		cameraNameMap = null;
-	private Collection<SceneGraphComponent>
+	protected Collection<SceneGraphComponent>
 		lightNodes = null;
-	private Collection<Light>
+	protected Collection<Light>
 		lights = null;
-	private HashMap<Light, String>
+	protected HashMap<Light, String>
 		lightNameMap = new HashMap<Light, String>();
-	private HashMap<SceneGraphComponent, Collection<SceneGraphComponent>>
+	protected HashMap<SceneGraphComponent, Collection<SceneGraphComponent>>
 		parentMap = null;
-	private HashMap<SceneGraphComponent, String>
+	protected HashMap<SceneGraphComponent, String>
 		nodeNameMap = null;
-	private HashMap<Geometry, String>
+	protected HashMap<Geometry, String>
 		geometryNameMap = null;
-//	private HashMap<Geometry, Rectangle3D>
-//		geometryBoundingBox = null;
-	private HashMap<Geometry, Geometry>
+	protected HashMap<Geometry, Geometry>
 		preparedGeometryMap = null;
-	private Collection<EffectiveAppearance>
+	protected Collection<EffectiveAppearance>
 		appearances = null;
-	private HashMap<SceneGraphComponent, EffectiveAppearance>
+	protected HashMap<SceneGraphComponent, EffectiveAppearance>
 		appearanceMap = null;
-	private HashMap<EffectiveAppearance, String>
+	protected HashMap<EffectiveAppearance, String>
 		appearanceNameMap = null;
-	private Collection<U3DTexture>
+	protected Collection<U3DTexture>
 		textures = null;
-	private HashMap<EffectiveAppearance, U3DTexture>
+	protected HashMap<EffectiveAppearance, U3DTexture>
 		textureMap = null;
-	private HashMap<U3DTexture, String>
+	protected HashMap<U3DTexture, String>
 		textureNameMap = null;
-	private HashMap<U3DTexture, byte[]>
+	protected HashMap<U3DTexture, byte[]>
 		texturePNGData = null;
-	private HashMap<EffectiveAppearance, U3DTexture>
+	protected HashMap<EffectiveAppearance, U3DTexture>
 		sphereMapsMap = null;	
 
 		
@@ -204,8 +210,8 @@ public class WriterU3D implements SceneWriter {
 	protected DataBlock getLightNodeDeclaration(SceneGraphComponent c) {
 		Light light = c.getLight();
 		BitStreamWrite w = new BitStreamWrite();
+		// lights are extra nodes under their component
 		w.WriteString(nodeNameMap.get(c) + ".light");
-//		WriteParentNodeData(c, w); 
 		w.WriteU32(1);
 		w.WriteString(nodeNameMap.get(c));
 		WriteMatrix(euclidean().getArray(), w);
@@ -244,8 +250,8 @@ public class WriterU3D implements SceneWriter {
 	protected DataBlock getViewNodeDeclaration(SceneGraphComponent c) {
 		Camera cam = c.getCamera();
 		BitStreamWrite w = new BitStreamWrite();
+		// cameras are extra nodes under their component
 		w.WriteString(nodeNameMap.get(c) + ".camera");
-//		WriteParentNodeData(c, w);
 		w.WriteU32(1);
 		w.WriteString(nodeNameMap.get(c));
 		WriteMatrix(euclidean().getArray(), w);
@@ -328,8 +334,6 @@ public class WriterU3D implements SceneWriter {
 			long udX = (long)(0.5 + m_fQuantPosition * abs(v[0]));
 			long udY = (long)(0.5 + m_fQuantPosition * abs(v[1]));
 			long udZ = (long)(0.5 + m_fQuantPosition * abs(v[2]));
-//			System.out.println(Arrays.toString(vPosition));
-//			System.out.println(u8Signs + " - " + udX + " - " + udY + " - " + udZ);
 			w.WriteCompressedU8(uACContextPositionDiffSigns, u8Signs);
 			w.WriteCompressedU32(uACContextPositionDiffMagX, udX);
 			w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
@@ -517,7 +521,7 @@ public class WriterU3D implements SceneWriter {
 		// reserved
 		w.WriteU32(0);
 		// number of points
-		w.WriteU32(0);//g.getNumPoints());
+		w.WriteU32(0);
 		w.WriteU32(g.getNumPoints());
 		
 		// vertex normals
@@ -595,11 +599,9 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(1000);
 		w.WriteU32(1000);
 		w.WriteU32(1000);
-		
 		// Resource Inverse Quantization
 		for (int i = 0; i < 5; i++)
 			w.WriteF32(1.0f);
-	
 		// Resource parameters
 		for (int i = 0; i < 3; i++)
 			w.WriteF32(1.0f);
@@ -897,18 +899,7 @@ public class WriterU3D implements SceneWriter {
 			w.WriteString(textureNameMap.get(envMap));
 			w.WriteF32(envIntensity); // intensity
 			// blend function
-//			switch (texInfo.getApplyMode()) {
-//			case Texture2D.GL_MODULATE:
-//				w.WriteU8((short)0); break;
-//			case Texture2D.GL_ADD:
-//				w.WriteU8((short)1);// break;
-//			case Texture2D.GL_REPLACE:
-				w.WriteU8((short)2);// break;
-//			case Texture2D.GL_BLEND:
-//				w.WriteU8((short)3); //break;
-//			default:
-//				w.WriteU8((short)2); break;
-//			}
+			w.WriteU8((short)2); // REPLACE;
 			// blend source
 			w.WriteU8((short)0); // alpha combine
 			// blend constant dummy
@@ -1065,7 +1056,7 @@ public class WriterU3D implements SceneWriter {
 		return b;
 	}
 	
-	public void writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
+	protected void writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
 		int dataSize = (int)Math.ceil(b.getDataSize() / 4.0); // include padding
 		int metaDataSize = (int)Math.ceil(b.getMetaDataSize() / 4.0); // include padding
 		ByteBuffer buffer = ByteBuffer.allocate((int)(12 + 4 * (dataSize + metaDataSize)));
@@ -1083,14 +1074,18 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	
+	/**
+	 * Exports a given {@link JrScene} into U3D binary data. 
+	 * @param scene the jReality scene to export
+	 * @param out the output stream to export the data to
+	 */
 	public void writeScene(JrScene scene, OutputStream out) throws IOException {
 		System.out.print("U3D Export: prepare data...");
-		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
-		if (skyBox != null) scene.getSceneRoot().addChild(skyBox);
 		prepareSceneData(scene);
-		if (skyBox != null) scene.getSceneRoot().removeChild(skyBox);
 		System.out.print("writing...");
+		
 		WritableByteChannel o = Channels.newChannel(out);
+		// this is wrong, the real sizes should be computed
 		writeDataBlock(getHeaderBlock(0, 0), o);
 		
 		// declarations
@@ -1138,10 +1133,23 @@ public class WriterU3D implements SceneWriter {
 		System.out.println("done.");
 	}
 
+	
+	/**
+	 * This method cannot be used for U3D exporting. 
+	 * It always throws an {@link UnsupportedOperationException}.
+	 * @param scene unused
+	 * @param out unused
+	 */
+	@Deprecated
 	public void writeScene(JrScene scene, Writer out) throws IOException {
 		throw new UnsupportedOperationException("U3D is a binary file format");
 	}
 	
+	/**
+	 * Exports a given {@link JrScene} into U3D binary data. 
+	 * @param c the root of the exported scene graph 
+	 * @param out the output stream to export the data to
+	 */
 	public void write(SceneGraphNode c, OutputStream out) throws IOException {
 		SceneGraphComponent root = null;
 		if (c instanceof SceneGraphComponent) root = (SceneGraphComponent) c;
@@ -1153,12 +1161,17 @@ public class WriterU3D implements SceneWriter {
 		writeScene(scene, out);
 	}
 	
+	/**
+	 * Exports a given {@link JrScene} into U3D binary data. 
+	 * @param c the root of the exported scene graph 
+	 * @param out the output stream to export the data to
+	 */
 	public static void write(JrScene scene, OutputStream out) throws IOException {
 		WriterU3D writer = new WriterU3D();
 		writer.writeScene(scene, out);
 	}
 	
-	private Geometry getPreparedGeometry(SceneGraphComponent c) {
+	protected Geometry getPreparedGeometry(SceneGraphComponent c) {
 		Geometry g = c.getGeometry();
 		if (g == null) return null;
 		Geometry p = preparedGeometryMap.get(g);
@@ -1166,8 +1179,12 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	
-	private void prepareSceneData(JrScene scene) {
+	protected void prepareSceneData(JrScene scene) {
 		rootNode = scene.getSceneRoot();
+
+		// add skybox helper component
+		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
+		if (skyBox != null) rootNode.addChild(skyBox);
 		
 		nodes = U3DSceneUtility.getSceneGraphComponents(scene);
 		visibilityMap = U3DSceneUtility.getVisibility(scene);
@@ -1185,7 +1202,6 @@ public class WriterU3D implements SceneWriter {
 		geometries = U3DSceneUtility.getGeometries(scene);
 		preparedGeometryMap = U3DSceneUtility.prepareGeometry(geometries);
 		geometryNameMap = U3DSceneUtility.getUniqueNames(preparedGeometryMap.values());
-//		geometryBoundingBox = U3DSceneUtility.getBoundingBoxes(geometries);
 		
 		appearanceMap = U3DSceneUtility.getAppearanceMap(scene);
 		appearances = new HashSet<EffectiveAppearance>(appearanceMap.values());
@@ -1197,6 +1213,10 @@ public class WriterU3D implements SceneWriter {
 		textures.addAll(sphereMapsMap.values());
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
+		
+		// remove the skybox helper
+		if (skyBox != null) scene.getSceneRoot().removeChild(skyBox);
+		
 		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);

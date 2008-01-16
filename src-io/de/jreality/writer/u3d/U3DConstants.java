@@ -1,7 +1,7 @@
 package de.jreality.writer.u3d;
 
 
-public class U3DConstants {
+public final class U3DConstants {
 
 	public final static short
 		EXPORTER_VERSION_MINOR = 0,
