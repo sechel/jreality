@@ -138,7 +138,7 @@ public class TextureUtility {
 	 * @param imgs
 	 * @return a proxy implementation of ReflectionMap
 	 */
-	public static CubeMap createReflectionMap(Appearance app, String shader, ImageData[] imgs) {
+	public static CubeMap createReflectionMap(Appearance app, String shader, ImageData... imgs) {
 		String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
 		if (imgs != null) {  
 			if (imgs.length != 6) throw new IllegalArgumentException("need 6 images for reflection map");
@@ -452,5 +452,15 @@ public class TextureUtility {
 
 	public static void main(String[] args) throws IOException {
 		createCubeMapData(Input.getInput("/home/weissman/Desktop/test_cubemap.zip"));
+	}
+
+	public static boolean hasReflectionMap(EffectiveAppearance ea, String shader) {
+		String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
+		return AttributeEntityUtility.hasAttributeEntity(CubeMap.class, key, ea);
+	}
+
+	public static boolean hasReflectionMap(Appearance app, String shader) {
+		String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
+		return AttributeEntityUtility.hasAttributeEntity(CubeMap.class, key, app);
 	}
 }

@@ -8,6 +8,8 @@ import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntit
 import static de.jreality.shader.CommonAttributes.AMBIENT_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.AMBIENT_COLOR;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COEFFICIENT;
+import static de.jreality.shader.CommonAttributes.FACE_DRAW;
+import static de.jreality.shader.CommonAttributes.FACE_DRAW_DEFAULT;
 import static de.jreality.shader.CommonAttributes.LIGHTING_ENABLED;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
@@ -25,6 +27,7 @@ import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,10 +36,14 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.Primitives;
+import de.jreality.geometry.SphereUtility;
 import de.jreality.io.JrScene;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -44,13 +51,23 @@ import de.jreality.scene.Light;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultLineShader;
+import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.Rectangle3D;
 import de.jreality.writer.u3d.texture.SphereMapGenerator;
 
@@ -58,6 +75,8 @@ public class U3DSceneUtility {
 
 
 	
+	private static final IndexedFaceSet SPHERE = SphereUtility.tessellatedIcosahedronSphere(4, true);
+	private static final IndexedFaceSet CYLINDER = Primitives.cylinder(60);
 	public static HashMap<SceneGraphComponent, Collection<SceneGraphComponent>> getParentsMap(Collection<SceneGraphComponent> l) {
 		HashMap<SceneGraphComponent, Collection<SceneGraphComponent>> r = new HashMap<SceneGraphComponent, Collection<SceneGraphComponent>>();
 		for (SceneGraphComponent c : l)
@@ -315,6 +334,94 @@ public class U3DSceneUtility {
 		return rifs;
 	}
 	
+	static final Geometry POINT_SPHERE = SphereUtility.tessellatedIcosahedronSphere(1);
+	static final Geometry LINE_CYLINDER = Primitives.cylinder(8, 1, -0.5, 0.5, 2 * PI);
+	static void prepareTubesAndSpheres(SceneGraphComponent root) {
+		SceneGraphComponent dummy = new SceneGraphComponent();
+		dummy.addChild(root);
+		dummy.childrenWriteAccept(new SceneGraphVisitor() {
+			SceneGraphPath p = new SceneGraphPath();
+			@Override
+			public void visit(SceneGraphComponent c) {
+				p.push(c);
+				SceneGraphComponent basPoints=null;
+				SceneGraphComponent basLines=null;
+				Geometry g = c.getGeometry();
+				if (g != null && g instanceof PointSet){
+					EffectiveAppearance ea = EffectiveAppearance.create(p);
+					DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ea);
+					DefaultPointShader dps = (DefaultPointShader) dgs.getPointShader();
+					DefaultPolygonShader dpos = (DefaultPolygonShader)dps.getPolygonShader();
+					if (dgs.getShowPoints()) {
+						BallAndStickFactory bsf = new BallAndStickFactory((IndexedLineSet) g);
+						bsf.setBallGeometry(POINT_SPHERE);
+						bsf.setBallColor(dpos.getDiffuseColor());
+						bsf.setBallRadius(dps.getPointRadius());
+						bsf.setShowBalls(true);
+						bsf.setShowSticks(false);
+						bsf.update();
+						basPoints = bsf.getSceneGraphComponent();
+						basPoints.setOwner("foo");
+						basPoints.setName("spheres");
+						Appearance app = basPoints.getAppearance();
+						if (app == null) {
+							app = new Appearance();
+							basPoints.setAppearance(app);
+						}
+						app.setAttribute(FACE_DRAW, true);
+						if (TextureUtility.hasReflectionMap(ea, "pointShader.polygonShader")) {
+							CubeMap cm = TextureUtility.readReflectionMap(ea, "pointShader.polygonShader.reflectionMap");
+							CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
+									cm.getBack(),
+									cm.getFront(),
+									cm.getBottom(),
+									cm.getTop(),
+									cm.getLeft(),
+									cm.getRight()
+									);
+							cmDest.setBlendColor(cm.getBlendColor());
+						} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+					}
+					if (g instanceof IndexedLineSet && dgs.getShowLines()) {
+						DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
+						BallAndStickFactory bsf = new BallAndStickFactory((IndexedLineSet) g);
+						bsf.setStickGeometry(LINE_CYLINDER);
+						bsf.setStickColor(((DefaultPolygonShader) dls.getPolygonShader()).getDiffuseColor());
+						bsf.setStickRadius(dls.getTubeRadius());
+						bsf.setShowBalls(false);
+						bsf.setShowSticks(true);
+						bsf.update();
+						basLines = bsf.getSceneGraphComponent();
+						basLines.setOwner("foo");
+						basLines.setName("tubes");
+						Appearance app = basPoints.getAppearance();
+						if (app == null) {
+							app = new Appearance();
+							basPoints.setAppearance(app);
+						}
+						app.setAttribute(FACE_DRAW, true);
+						if (TextureUtility.hasReflectionMap(ea, "lineShader.polygonShader")) {
+							CubeMap cm = TextureUtility.readReflectionMap(ea, "lineShader.polygonShader.reflectionMap");
+							CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
+									cm.getBack(),
+									cm.getFront(),
+									cm.getBottom(),
+									cm.getTop(),
+									cm.getLeft(),
+									cm.getRight()
+									);
+							cmDest.setBlendColor(cm.getBlendColor());
+						} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+					}
+					
+				}
+				c.childrenWriteAccept(this, false, false, false, false, false, true);
+				if (basPoints != null) c.addChild(basPoints);
+				if (basLines != null) c.addChild(basLines);
+				p.pop();
+			}
+		}, false, false, false, false, false, true);
+	}
 	
 	public static HashMap<Geometry, Geometry> prepareGeometry(Collection<Geometry> geometry) {
 		HashMap<Geometry, Geometry> r = new HashMap<Geometry, Geometry>();
@@ -326,9 +433,12 @@ public class U3DSceneUtility {
 			else if (g instanceof IndexedLineSet)
 				r.put(g, null);
 			else if (g instanceof PointSet)
-				r.put(g, g);
-			else if (g instanceof Sphere) {
-				r.put(g, prepareFaceSet(sphere(30)));
+				r.put(g, null);
+			else if (g instanceof Sphere)
+				r.put(g, SPHERE);
+			else if (g instanceof Cylinder) {
+				r.put(g, CYLINDER);
+				
 			}
 		}
 		return r;
@@ -363,12 +473,6 @@ public class U3DSceneUtility {
 			map.put(root, ea);
 		}
 		fillAppearanceMap_R(root, map);
-		// remove non-geometry materials
-		LinkedList<SceneGraphComponent> keys = new LinkedList<SceneGraphComponent>(map.keySet());
-		for (SceneGraphComponent c : keys) {
-			if (c.getGeometry() == null)
-				map.remove(c);
-		}
 		return map;
 	}
 	
@@ -389,8 +493,8 @@ public class U3DSceneUtility {
 	public static HashMap<EffectiveAppearance, U3DTexture> getSphereMapsMap(Collection<EffectiveAppearance> apps) {
 		HashMap<EffectiveAppearance, U3DTexture> r = new HashMap<EffectiveAppearance, U3DTexture>();
 		for (EffectiveAppearance a : apps) {
-		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, POLYGON_SHADER + "." + REFLECTION_MAP, a)) {
-		    	CubeMap tex = (CubeMap) createAttributeEntity(CubeMap.class, POLYGON_SHADER + "." + REFLECTION_MAP, a);
+		    if (TextureUtility.hasReflectionMap(a, "polygonShader")) {
+		    	CubeMap tex = TextureUtility.readReflectionMap(a, "polygonShader.reflectionMap");
 		    	BufferedImage img = SphereMapGenerator.create(tex, 768, 768);
 		    	ImageData data = new ImageData(img);
 		    	U3DTexture u3dTex = new U3DTexture(data);
@@ -504,7 +608,7 @@ public class U3DSceneUtility {
 	public static SceneGraphComponent getSkyBox(JrScene scene) {
 		Appearance rootApp = scene.getSceneRoot().getAppearance();
 		if (rootApp == null) return null;
-		CubeMap skyBox = (CubeMap)createAttributeEntity(CubeMap.class, SKY_BOX, rootApp, false);
+		CubeMap skyBox = (CubeMap)createAttributeEntity(CubeMap.class, SKY_BOX, rootApp, true);
 		if (skyBox == null) return null;
 		if (skyBox.getFront() 	== null
 		||	skyBox.getBack() 	== null
@@ -589,17 +693,20 @@ public class U3DSceneUtility {
 	private static void getVisibility_R(
 		SceneGraphComponent root, 
 		HashMap<SceneGraphComponent, Boolean> map, 
-		boolean subTreeV
+		boolean subTreeV,
+		HashMap<SceneGraphComponent, EffectiveAppearance> appMap
 	) {
 		boolean visible = root.isVisible() & subTreeV;
+		EffectiveAppearance ea = appMap.get(root);
+		if (ea != null) visible &= ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT);
 		map.put(root, visible);
 		for (int i = 0; i < root.getChildComponentCount(); i++)
-			getVisibility_R(root.getChildComponent(i), map, visible);
+			getVisibility_R(root.getChildComponent(i), map, visible, appMap);
 	}
 	
-	public static HashMap<SceneGraphComponent, Boolean> getVisibility(JrScene scene) {
+	public static HashMap<SceneGraphComponent, Boolean> getVisibility(JrScene scene, HashMap<SceneGraphComponent, EffectiveAppearance> appMap) {
 		HashMap<SceneGraphComponent, Boolean> r = new HashMap<SceneGraphComponent, Boolean>();
-		getVisibility_R(scene.getSceneRoot(), r, true);
+		getVisibility_R(scene.getSceneRoot(), r, true, appMap);
 		return r;
 	}
 	

@@ -95,12 +95,17 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.CopyVisitor;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
@@ -1187,15 +1192,21 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	
-	protected void prepareSceneData(JrScene scene) {
+	protected void prepareSceneData(JrScene originalScene) {
+		SceneGraphComponent copy = copy(originalScene.getSceneRoot());
+		
+		ViewerApp.display(copy);
+		
+		JrScene scene = new JrScene(copy);
 		rootNode = scene.getSceneRoot();
-
+		
+		U3DSceneUtility.prepareTubesAndSpheres(rootNode);
+		
 		// add skybox helper component
 		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
 		if (skyBox != null) rootNode.addChild(skyBox);
 		
 		nodes = U3DSceneUtility.getSceneGraphComponents(scene);
-		visibilityMap = U3DSceneUtility.getVisibility(scene);
 		parentMap = U3DSceneUtility.getParentsMap(nodes);
 		nodeNameMap = U3DSceneUtility.getUniqueNames(nodes);
 		
@@ -1214,6 +1225,14 @@ public class WriterU3D implements SceneWriter {
 		appearanceMap = U3DSceneUtility.getAppearanceMap(scene);
 		appearances = new HashSet<EffectiveAppearance>(appearanceMap.values());
 		appearanceNameMap = U3DSceneUtility.getAppearanceNames(appearances);
+		visibilityMap = U3DSceneUtility.getVisibility(scene, appearanceMap);
+		
+		// remove non-geometry materials
+		LinkedList<SceneGraphComponent> keys = new LinkedList<SceneGraphComponent>(appearanceMap.keySet());
+		for (SceneGraphComponent c : keys) {
+			if (c.getGeometry() == null)
+				appearanceMap.remove(c);
+		}
 		
 		textureMap = U3DSceneUtility.getTextureMap(appearances);
 		textures = new HashSet<U3DTexture>(textureMap.values());
@@ -1222,10 +1241,7 @@ public class WriterU3D implements SceneWriter {
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
 		
-		// remove the skybox helper
-		if (skyBox != null) scene.getSceneRoot().removeChild(skyBox);
-		
-		/*		
+//		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
 		U3DSceneUtility.printNodes("View Nodes", viewNodes);
@@ -1241,7 +1257,29 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
-		*/
+//		*/
+	}
+
+
+	private SceneGraphComponent copy(final SceneGraphComponent node) {
+		final SceneGraphPath path = new SceneGraphPath();
+		node.accept(new SceneGraphVisitor() {
+			@Override
+			public void visit(SceneGraphComponent c) {
+				SceneGraphComponent copy = SceneGraphUtility.copy(c);
+				if (c != node) path.getLastComponent().addChild(copy);
+				path.push(copy);
+				c.childrenAccept(this);
+				if (c != node) path.pop();
+			}
+			@Override
+			public void visit(SceneGraphNode m) {
+				SceneGraphUtility.addChildNode(path.getLastComponent(), m);
+			}
+		});
+		SceneGraphComponent copy = path.getLastComponent();
+		System.out.println("copy="+copy.getName());
+		return copy;
 	}
 	
 

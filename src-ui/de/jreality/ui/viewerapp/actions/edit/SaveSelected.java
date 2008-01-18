@@ -70,8 +70,7 @@ import de.jreality.writer.u3d.WriterU3D;
  */
 public class SaveSelected extends AbstractSelectionListenerAction {
 
-	FileFilter ffJRS = new FileFilter("JRS file format", "jrs");
-	FileFilter ffU3D = new FileFilter("U3D file format", "u3d");
+	FileFilter ff = new FileFilter("Supported file formats", "jrs", "u3d");
 	
   public SaveSelected(String name, SelectionManagerInterface sm, Component parentComp) {
     super(name, sm, parentComp);
@@ -83,7 +82,7 @@ public class SaveSelected extends AbstractSelectionListenerAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(parentComp, false, ffJRS, ffU3D);
+    File file = FileLoaderDialog.selectTargetFile(parentComp, false, ff);
     if (file == null) return;
 //    if (!file.getName().endsWith(".jrs")) {
 //    	JOptionPane.showMessageDialog(parentComp, "can only safe .jrs files", "unsupported format", JOptionPane.ERROR_MESSAGE);

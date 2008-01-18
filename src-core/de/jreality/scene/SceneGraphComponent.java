@@ -163,6 +163,17 @@ public class SceneGraphComponent extends SceneGraphNode {
   }
 
   /**
+   * returns a read-only list of the child component nodes.
+   * @return a List containing the child component nodes
+  public List<SceneGraphComponent> getChildComponents() {
+	  startReader();
+	  try {
+		  return Collections.unmodifiableList(children);
+	  } finally {
+		  finishReader();
+	  }
+  }
+  /**
    * Returns the number of child component nodes.
    * @return int 
    */
