@@ -103,9 +103,6 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
-import de.jreality.util.CopyVisitor;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
@@ -1194,8 +1191,6 @@ public class WriterU3D implements SceneWriter {
 	
 	protected void prepareSceneData(JrScene originalScene) {
 		SceneGraphComponent copy = copy(originalScene.getSceneRoot());
-		
-		ViewerApp.display(copy);
 		
 		JrScene scene = new JrScene(copy);
 		rootNode = scene.getSceneRoot();
