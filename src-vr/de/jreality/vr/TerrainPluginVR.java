@@ -125,15 +125,20 @@ public class TerrainPluginVR extends AbstractPluginVR {
 		// terrain
 		terrain = new Terrain();
 
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		Secure.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				makeTerrainTextureFileChooser();
+				return null;
+			}
+		});
+		Secure.doPrivileged(new PrivilegedAction<Object>() {
+			public Object run() {
 				makeTerrainFileChooser();
 				return null;
 			}
 		});
 		
-		nonflatTerrain = AccessController.doPrivileged(new PrivilegedAction<SceneGraphComponent>() {
+		nonflatTerrain = Secure.doPrivileged(new PrivilegedAction<SceneGraphComponent>() {
 			public SceneGraphComponent run() {
 				try {
 					return Readers.read(Input.getInput(ViewerVR.class.getResource("terrain.3ds")));
@@ -471,13 +476,13 @@ public class TerrainPluginVR extends AbstractPluginVR {
 	}
 
 	private void makeTerrainFileChooser() {
+		terrainFileChooserPanel = new JPanel(new BorderLayout());
+		sphericalTerrainBox = new JCheckBox("spherical");
 		FileSystemView view = FileSystemView.getFileSystemView();
 		String texDir = ".";
 		String dataDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
 		if (dataDir!= null) texDir = dataDir;
 		File defaultDir = new File(texDir);
-		terrainFileChooserPanel = new JPanel(new BorderLayout());
-		sphericalTerrainBox = new JCheckBox("spherical");
 		final JFileChooser terrainFileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
 		terrainFileChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {

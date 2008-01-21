@@ -63,7 +63,7 @@ public class TexturePluginVR extends AbstractPluginVR {
 
 	public TexturePluginVR() {
 		super("tex");
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		Secure.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				makeTextureFileChooser();
 				return null;

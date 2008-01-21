@@ -476,7 +476,7 @@ public class ViewerApp {
 			viewerSwitch.dispose();
 		}
 		if (toolSystem != null)	toolSystem.dispose();
-		toolSystem = AccessController.doPrivileged(new PrivilegedAction<ToolSystem>() {
+		toolSystem = Secure.doPrivileged(new PrivilegedAction<ToolSystem>() {
 			public ToolSystem run() {
 				try {
 					return createToolSystem();
@@ -591,7 +591,7 @@ public class ViewerApp {
 
 
 	private ToolSystemConfiguration loadToolSystemConfiguration() {
-		return AccessController.doPrivileged(new PrivilegedAction<ToolSystemConfiguration>() {
+		return Secure.doPrivileged(new PrivilegedAction<ToolSystemConfiguration>() {
 			public ToolSystemConfiguration run() {
 				String config = Secure.getProperty(SystemProperties.TOOL_CONFIG, SystemProperties.TOOL_CONFIG_DEFAULT);
 				ToolSystemConfiguration cfg=null;

@@ -29,6 +29,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.data.Attribute;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.util.Input;
+import de.jreality.util.Secure;
 
 public class LoadPluginVR extends AbstractPluginVR {
 
@@ -40,7 +41,7 @@ public class LoadPluginVR extends AbstractPluginVR {
 
 	public LoadPluginVR(final String[][] examples) {
 		super("load");
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		Secure.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				makeContentFileChooser();
 				return null;

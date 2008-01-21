@@ -74,7 +74,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 		landscape = new Landscape();
 		perezBox = new PerezSky();
 		makeEnvTab();
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		Secure.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				makeCubeMapFileChooser();
 				return null;

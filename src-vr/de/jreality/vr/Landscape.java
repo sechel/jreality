@@ -22,6 +22,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
+import de.jreality.util.Secure;
 
 public class Landscape {
 
@@ -115,7 +116,7 @@ public class Landscape {
 	}
 
 	private void load(final String env) {
-		AccessController.doPrivileged(new PrivilegedAction<Object>() {
+		Secure.doPrivileged(new PrivilegedAction<Object>() {
 			public Object run() {
 				selectionIndex = ((Integer)boxes.get(env)).intValue();
 				try {

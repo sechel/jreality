@@ -2,6 +2,7 @@ package de.jreality.util;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.logging.Level;
 
 public class Secure {
 	
@@ -20,25 +21,29 @@ public class Secure {
     }
 
     public static String getProperty(final String name) {
-        String result = null;
-        try {
-    	result =  AccessController.doPrivileged(new PrivilegedAction<String>() {
+        return  doPrivileged(new PrivilegedAction<String>() {
     		public String run() {
     			return System.getProperty(name);
     		}
     	});
-        } catch (Throwable t) {
-            
-        }
-        return result;
     }
 
 	public static String setProperty(final String name, final String value) {
-    	return AccessController.doPrivileged(new PrivilegedAction<String>() {
+    	return doPrivileged(new PrivilegedAction<String>() {
     		public String run() {
     			return System.setProperty(name, value);
     		}
     	});
+	}
+	
+	public static <T> T doPrivileged(PrivilegedAction<T> action) {
+		T ret=null;
+		try {
+			ret = AccessController.doPrivileged(action);
+		} catch (Throwable e) {
+			LoggingSystem.getLogger(Secure.class).log(Level.INFO, "security problem:", e);
+		}
+		return ret;
 	}
 
 }

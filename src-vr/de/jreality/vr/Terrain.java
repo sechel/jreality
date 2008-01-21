@@ -20,6 +20,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.shader.ImageData;
 import de.jreality.util.Input;
+import de.jreality.util.Secure;
 
 public class Terrain {
 
@@ -157,7 +158,7 @@ public class Terrain {
 	}
 
 	private ImageData loadTexture(final String resourceName) {
-		return AccessController.doPrivileged(new PrivilegedAction<ImageData>() {
+		return Secure.doPrivileged(new PrivilegedAction<ImageData>() {
 			public ImageData run() {
 				try {
 					return ImageData.load(Input.getInput(resourceName));

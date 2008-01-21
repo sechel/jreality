@@ -22,6 +22,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.util.Secure;
 
 @SuppressWarnings("serial")
 public class RotateBox extends JPanel {
@@ -34,14 +35,14 @@ public class RotateBox extends JPanel {
 	public RotateBox() {
 		super(new GridLayout(3, 3));
 		
-		ImageIcon rotateLeft = AccessController.doPrivileged(new PrivilegedAction<ImageIcon>() {
+		ImageIcon rotateLeft = Secure.doPrivileged(new PrivilegedAction<ImageIcon>() {
 			public ImageIcon run() {
 				URL imgURL = ViewerVR.class.getResource("rotleft.gif");
 				return new ImageIcon(imgURL);
 			}
 		});
 
-		ImageIcon rotateRight = AccessController.doPrivileged(new PrivilegedAction<ImageIcon>() {
+		ImageIcon rotateRight = Secure.doPrivileged(new PrivilegedAction<ImageIcon>() {
 			public ImageIcon run() {
 				URL imgURL = ViewerVR.class.getResource("rotright.gif");
 				return new ImageIcon(imgURL);

@@ -692,7 +692,7 @@ public class ViewerVR {
 	}
 
 	private Preferences getPreferences() {
-		return AccessController.doPrivileged(new PrivilegedAction<Preferences>() {
+		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
 			public Preferences run() {
 				return Preferences.userNodeForPackage(ViewerVR.class);
 			}
@@ -700,6 +700,10 @@ public class ViewerVR {
 	}
 
 	public void restorePreferences(Preferences prefs) {
+		if (prefs == null) {
+			restoreDefaults();
+			return;
+		}
 		setPanelInScene(prefs.getBoolean("panelInScene", DEFAULT_PANEL_IN_SCENE));
 		for (PluginVR plugin : plugins) {
 			Preferences p = prefs.node(plugin.getName());

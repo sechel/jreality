@@ -63,6 +63,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import de.jreality.scene.Viewer;
+import de.jreality.util.Secure;
 import de.jtem.beans.DimensionPanel;
 import de.jtem.beans.InspectorPanel;
 
@@ -118,7 +119,7 @@ public class SunflowMenu extends JMenu {
 
 		Action previewAction = new AbstractAction("preview") {
 			public void actionPerformed(ActionEvent arg0) {
-				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				Secure.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
 						render(va.getCurrentViewer(), va.getCurrentViewer().getViewingComponentSize(), getPreviewOptions());
 						return null;
@@ -134,7 +135,7 @@ public class SunflowMenu extends JMenu {
 
 		add(new AbstractAction("render") {
 			public void actionPerformed(ActionEvent arg0) {
-				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				Secure.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
 						renderAndSave(va.getCurrentViewer(), getRenderOptions());
 						return null;
