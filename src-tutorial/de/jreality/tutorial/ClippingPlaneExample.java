@@ -41,40 +41,38 @@ import de.jreality.util.Secure;
 
 
 public class ClippingPlaneExample{
-	static double[][] square = {{0,-1,0},{1,-1,0},{1,1,0},{0,1,0}};
-	static double[][] texc = {{0,0},{1,0},{1,1},{0,1}};
+		static double[][] square = {{0,-1,0},{1,-1,0},{1,1,0},{0,1,0}};
 	
 	  public static void main(String[] args) throws IOException {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("world");
-		Appearance withTex = new Appearance();
 		
-			SceneGraphComponent theComponent = SceneGraphUtility.createFullSceneGraphComponent("theClipIcon");
-			theComponent.setAppearance(withTex);
-			double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
-			double[][] texc = {{0,0},{1,0},{1,1} ,{0,1}};
-			IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
-			square.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(2).createReadOnly(texc));
-			theComponent.setGeometry(square);
-			theComponent.getTransformation().setMatrix(P3.makeTranslationMatrix(null, new double[]{0d,0d,.5d}, Pn.EUCLIDEAN));
-			
-			SceneGraphComponent cp2 =  SceneGraphUtility.createFullSceneGraphComponent("theClipPlane");
-			cp2.getTransformation().setMatrix(P3.makeTranslationMatrix(null, new double[]{0d,0d,.01d}, Pn.EUCLIDEAN));
-			cp2.setGeometry(new ClippingPlane());
-			theComponent.addTool(new RotateTool());
-			theComponent.addChild(cp2);
-			
-			SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
-			PickUtility.setPickable(sgc, false);
-			sgc.addChild(SphereUtility.tessellatedCubeSphere(SphereUtility.SPHERE_SUPERFINE));
-			sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"name","twoSide");
-			sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER,TwoSidePolygonShader.class);
-			sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
-			sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
-			sgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-			root.addChild(sgc);
-			root.addChild(theComponent);
-			root.addTool(new ClickWheelCameraZoomTool());
-		    ViewerApp.display(root);
+		SceneGraphComponent clipIcon = SceneGraphUtility.createFullSceneGraphComponent("theClipIcon");
+		double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
+		IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
+		clipIcon.setGeometry(square);
+		clipIcon.getTransformation().setMatrix(P3.makeTranslationMatrix(null, new double[]{0d,0d,.5d}, Pn.EUCLIDEAN));
+		
+		// The clip plane itself is a child of the clip icon, so when I move the icon the plane moves
+		SceneGraphComponent clipPlane =  SceneGraphUtility.createFullSceneGraphComponent("theClipPlane");
+		// the icon for the clipping plane shouldn't get clipped away; move it slightly 
+		clipPlane.getTransformation().setMatrix(P3.makeTranslationMatrix(null, new double[]{0d,0d,.01d}, Pn.EUCLIDEAN));
+		clipPlane.setGeometry(new ClippingPlane());
+		// add a rotate tool to the clip icon
+		clipIcon.addTool(new RotateTool());
+		clipIcon.addChild(clipPlane);
+		
+		SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
+		PickUtility.setPickable(sgc, false);
+		sgc.addChild(SphereUtility.tessellatedCubeSphere(SphereUtility.SPHERE_SUPERFINE));
+		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"name","twoSide");
+		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER,TwoSidePolygonShader.class);
+		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
+		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
+		sgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+		root.addChild(sgc);
+		root.addChild(clipIcon);
+		root.addTool(new ClickWheelCameraZoomTool());
+	    ViewerApp.display(root);
 	}
  }
