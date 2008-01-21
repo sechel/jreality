@@ -326,25 +326,24 @@ public class Texture2DLoaderJOGL {
         }
   }
 
-  private static FloatBuffer maxAnisotropy;
-  private static boolean canFilterAnisotropic=true;
+  private static FloatBuffer maxAnisotropy = FloatBuffer.allocate(1);
+  private static boolean canFilterAnisotropic=false, haveCheckedForAnisotropy = false;
  
   private static void handleTextureParameters(Texture2D tex, GL gl) {
 //    System.err.println("In handle text parms");
     // TODO: maybe this should move to jogl configuration?
+	  if (!haveCheckedForAnisotropy)	{
+	       if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_filter_anisotropic")) 
+	    	   canFilterAnisotropic = true;
+	       else canFilterAnisotropic = false;
+		   haveCheckedForAnisotropy = true;
+	  }
     if (canFilterAnisotropic)  {
-      if (maxAnisotropy == null) {
-        if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_filter_anisotropic")) {
-          maxAnisotropy = FloatBuffer.allocate(1);
           gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
           gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
-        } else {
-          canFilterAnisotropic = false;
-        }
-      } else {
+       } else {
         gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
       }
-    }
     
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, tex.getRepeatS()); 
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, tex.getRepeatT()); 
