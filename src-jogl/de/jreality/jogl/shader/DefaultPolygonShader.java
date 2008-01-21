@@ -110,6 +110,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    joglLightMap = null;
 	    reflectionMap = null;
 	    joglTexture2D = null;
+	    joglCubeMap = null;
 	    hasTextures = false;
 	    if (!fastAndDirty) {
 			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
