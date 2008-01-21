@@ -696,10 +696,10 @@ public class U3DSceneUtility {
 		boolean subTreeV,
 		HashMap<SceneGraphComponent, EffectiveAppearance> appMap
 	) {
-		boolean visible = root.isVisible() & subTreeV;
+		boolean visible = root.isVisible() && subTreeV;
 		EffectiveAppearance ea = appMap.get(root);
-		if (ea != null) visible &= ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT);
-		map.put(root, visible);
+		boolean showFaces = visible && ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT); 
+		map.put(root, showFaces);
 		for (int i = 0; i < root.getChildComponentCount(); i++)
 			getVisibility_R(root.getChildComponent(i), map, visible, appMap);
 	}
