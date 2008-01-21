@@ -73,7 +73,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
@@ -101,9 +100,11 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
@@ -118,8 +119,6 @@ import de.jreality.writer.u3d.u3dencoding.DataBlock;
  * 	<li>Line Sets</li>
  * 	<li>Vertex Colors</li>
  * 	<li>Emulate face normals with per face vertex normals</li>
- * 	<li>Translate Attributes like FACE DRAW, VERTEX DRAW to node visibility</li>
- * 	<li>Export Attributes SPHERES DRAW, TUBES DRAW as geometry</li>
  * 	<li>Labels</li>
  * </ul>
  * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-363.htm">
@@ -776,18 +775,23 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(attribs);
 		
 		U3DTexture envMap = sphereMapsMap.get(a);
+		float envIntensity = 0.0f;
+		if (envMap != null) {
+			CubeMap tex = TextureUtility.readReflectionMap(a, "polygonShader.reflectionMap");
+			envIntensity = tex.getBlendColor().getAlpha() / 255.0f;
+		}
 		// ambient
 		Color ambient = (Color)a.getAttribute(POLYGON_SHADER + "." + AMBIENT_COLOR, AMBIENT_COLOR_DEFAULT);
 		float ambiCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + AMBIENT_COEFFICIENT, AMBIENT_COEFFICIENT_DEFAULT);
 		float[] amb = ambient.getColorComponents(null);
-		if (envMap != null) ambiCoeff *= (1 - envMap.getIntesity());
+		if (envMap != null) ambiCoeff *= (1 - envIntensity);
 		ambient = new Color(amb[0] * ambiCoeff, amb[1] * ambiCoeff, amb[2] * ambiCoeff);
 		w.WriteColor(ambient);
 		
 		// diffuse
 		Color diffuse = (Color)a.getAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, DIFFUSE_COLOR_DEFAULT);
 		float diffCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + DIFFUSE_COEFFICIENT, DIFFUSE_COEFFICIENT_DEFAULT);
-		if (envMap != null) diffCoeff *= (1 - envMap.getIntesity());
+		if (envMap != null) diffCoeff *= (1 - envIntensity);
 		float[] dif = diffuse.getColorComponents(null);
 		diffuse = new Color(dif[0] * diffCoeff, dif[1] * diffCoeff, dif[2] * diffCoeff);
 		w.WriteColor(diffuse);
@@ -795,7 +799,7 @@ public class WriterU3D implements SceneWriter {
 		// specular
 		Color specular = (Color)a.getAttribute(POLYGON_SHADER + "." + SPECULAR_COLOR, SPECULAR_COLOR_DEFAULT);
 		float specCoeff = (float)a.getAttribute(POLYGON_SHADER + "." + SPECULAR_COEFFICIENT, SPECULAR_COEFFICIENT_DEFAULT);
-		if (envMap != null) specCoeff *= (1 - envMap.getIntesity());
+		if (envMap != null) specCoeff *= (1 - envIntensity);
 		float[] s = specular.getColorComponents(null);
 		specular = new Color(s[0] * specCoeff, s[1] * specCoeff, s[2] * specCoeff);
 		w.WriteColor(specular);
@@ -855,14 +859,16 @@ public class WriterU3D implements SceneWriter {
 		float texIntensity = 1.0f;
 		float envIntensity = 1.0f;
 		if (tex != null) {
+			Texture2D tex2d = (Texture2D) createAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a);
 			shaderChannels |= 0x00000001;
 			alphatexChannels |= 0x00000001;
-			texIntensity *= tex.getIntesity();
+			texIntensity *= tex2d.getBlendColor().getAlpha() / 255.0f;
 		}
 		if (envMap != null) {
+			CubeMap envTex = TextureUtility.readReflectionMap(a, "polygonShader.reflectionMap");
 			shaderChannels |= 0x00000002;
 			alphatexChannels |= 0x00000001;
-			envIntensity *= envMap.getIntesity();
+			envIntensity *= envTex.getBlendColor().getAlpha() / 255.0f;
 			texIntensity *= (1 - envIntensity);
 		}
 		w.WriteU32(shaderChannels);
@@ -1241,11 +1247,11 @@ public class WriterU3D implements SceneWriter {
 		textureMap = U3DSceneUtility.getTextureMap(appearances);
 		textures = new HashSet<U3DTexture>(textureMap.values());
 		sphereMapsMap = U3DSceneUtility.getSphereMapsMap(appearances);
-		textures.addAll(sphereMapsMap.values());
+		textures.addAll(new HashSet<U3DTexture>(sphereMapsMap.values()));
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
 		
-//		/*		
+		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
 		U3DSceneUtility.printNodes("View Nodes", viewNodes);
@@ -1261,7 +1267,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
-//		*/
+		*/
 	}
 
 

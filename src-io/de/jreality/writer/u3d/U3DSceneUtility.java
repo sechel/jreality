@@ -1,7 +1,6 @@
 package de.jreality.writer.u3d;
 
 import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
-import static de.jreality.geometry.Primitives.sphere;
 import static de.jreality.math.MatrixBuilder.euclidean;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
@@ -12,7 +11,6 @@ import static de.jreality.shader.CommonAttributes.FACE_DRAW;
 import static de.jreality.shader.CommonAttributes.FACE_DRAW_DEFAULT;
 import static de.jreality.shader.CommonAttributes.LIGHTING_ENABLED;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
-import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.SKY_BOX;
 import static de.jreality.shader.CommonAttributes.SPECULAR_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
@@ -27,7 +25,6 @@ import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,10 +51,8 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
@@ -501,11 +496,7 @@ public class U3DSceneUtility {
 		for (EffectiveAppearance a : apps) {
 		    if (TextureUtility.hasReflectionMap(a, "polygonShader")) {
 		    	CubeMap tex = TextureUtility.readReflectionMap(a, "polygonShader.reflectionMap");
-		    	BufferedImage img = SphereMapGenerator.create(tex, 768, 768);
-		    	ImageData data = new ImageData(img);
-		    	U3DTexture u3dTex = new U3DTexture(data);
-		    	u3dTex.setIntesity(tex.getBlendColor().getAlpha() / 255.0f);
-		    	r.put(a, u3dTex);
+		    	r.put(a, new U3DTexture(tex));
 		    }
 		}
 		return r;
@@ -545,8 +536,9 @@ public class U3DSceneUtility {
 		for (EffectiveAppearance a : apps) {
 		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a)) {
 		    	Texture2D tex = (Texture2D) createAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, a);
-		    	if (tex != null && tex.getImage() != null)
+		    	if (tex != null && tex.getImage() != null) {
 		    		r.put(a, new U3DTexture(tex));
+		    	}
 		    }
 		}
 		return r;
