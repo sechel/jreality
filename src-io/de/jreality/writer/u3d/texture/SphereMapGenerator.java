@@ -11,6 +11,7 @@ import java.awt.image.WritableRaster;
 
 import de.jreality.backends.texture.EnvironmentTexture;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.ImageData;
 
 public class SphereMapGenerator {
 
@@ -42,5 +43,37 @@ public class SphereMapGenerator {
 //		}
 		return r;
 	}
+	
+//	
+//	public static ImageData createImage(CubeMap map, int w, int h) {
+//		byte[] data = new byte[w * h * 4];
+//		EnvironmentTexture tex = new EnvironmentTexture(map, null, WHITE);
+//		for (double y = 0; y < h; y++) {
+//			double v = PI * y / h;
+//			double ry = cos(v);
+//			double sinV = sin(v);
+//			for (double x = 0; x < w; x++) {
+//				double u = 2 * PI * x / w - PI / 2;
+//				double rx = cos(u) * sinV;
+//				double rz = sin(u) * sinV;
+//				double[] ray = new double[]{rx, ry, rz};
+//				double[] color = new double[4];
+//				tex.getColor(0, 0, ray[0], ray[1], ray[2], 0, 0, color);
+//				double[] iColor = new double[]{color[0], color[1], color[2], 255.0};
+//				data[(y * w + x) * 4 + 0] = (byte)(color[0] - 127);
+//				data[(y * w + x) * 4 + 0] = color[0];
+//				data[(y * w + x) * 4 + 0] = color[0];
+//				data[(y * w + x) * 4 + 0] = color[0];
+//				raster.setPixel((int)x, (int)y, iColor);
+//			}
+//		}
+////		try {
+////			ImageIO.write(r, "PNG", new File("spheremap" + i++ + ".png"));
+////		} catch (IOException e) {
+////			e.printStackTrace();
+////		}
+//		return r;
+//	}
+	
 	
 }

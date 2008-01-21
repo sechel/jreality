@@ -352,8 +352,14 @@ public class U3DSceneUtility {
 					DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ea);
 					DefaultPointShader dps = (DefaultPointShader) dgs.getPointShader();
 					DefaultPolygonShader dpos = (DefaultPolygonShader)dps.getPolygonShader();
+					IndexedLineSet ils;
+					if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
+					else {
+						ils = new IndexedLineSet();
+						ils.setVertexCountAndAttributes(((PointSet)g).getVertexAttributes());
+					}
 					if (dgs.getShowPoints()) {
-						BallAndStickFactory bsf = new BallAndStickFactory((IndexedLineSet) g);
+						BallAndStickFactory bsf = new BallAndStickFactory(ils);
 						bsf.setBallGeometry(POINT_SPHERE);
 						bsf.setBallColor(dpos.getDiffuseColor());
 						bsf.setBallRadius(dps.getPointRadius());
@@ -384,7 +390,7 @@ public class U3DSceneUtility {
 					}
 					if (g instanceof IndexedLineSet && dgs.getShowLines()) {
 						DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-						BallAndStickFactory bsf = new BallAndStickFactory((IndexedLineSet) g);
+						BallAndStickFactory bsf = new BallAndStickFactory(ils);
 						bsf.setStickGeometry(LINE_CYLINDER);
 						bsf.setStickColor(((DefaultPolygonShader) dls.getPolygonShader()).getDiffuseColor());
 						bsf.setStickRadius(dls.getTubeRadius());
@@ -394,7 +400,7 @@ public class U3DSceneUtility {
 						basLines = bsf.getSceneGraphComponent();
 						basLines.setOwner("foo");
 						basLines.setName("tubes");
-						Appearance app = basPoints.getAppearance();
+						Appearance app = basLines.getAppearance();
 						if (app == null) {
 							app = new Appearance();
 							basPoints.setAppearance(app);

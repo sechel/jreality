@@ -73,6 +73,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
@@ -170,7 +171,9 @@ public class WriterU3D implements SceneWriter {
 	protected HashMap<U3DTexture, byte[]>
 		texturePNGData = null;
 	protected HashMap<EffectiveAppearance, U3DTexture>
-		sphereMapsMap = null;	
+		sphereMapsMap = null;
+	private ByteBuffer 
+		buffer = ByteBuffer.allocate(1024 * 1024).order(LITTLE_ENDIAN);	
 
 		
 	protected DataBlock getLightResource(Light l) {
@@ -1069,8 +1072,14 @@ public class WriterU3D implements SceneWriter {
 	protected void writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
 		int dataSize = (int)Math.ceil(b.getDataSize() / 4.0); // include padding
 		int metaDataSize = (int)Math.ceil(b.getMetaDataSize() / 4.0); // include padding
-		ByteBuffer buffer = ByteBuffer.allocate((int)(12 + 4 * (dataSize + metaDataSize)));
-		buffer.order(LITTLE_ENDIAN);
+		int blockLength = (int)(12 + 4 * (dataSize + metaDataSize));
+		if (buffer.capacity() < blockLength) {
+			buffer = ByteBuffer.allocate(blockLength);
+			buffer.order(LITTLE_ENDIAN);
+		}
+		buffer.position(0);
+		buffer.limit(blockLength);
+		
 		buffer.putInt((int)b.getBlockType());
 		buffer.putInt((int)b.getDataSize());
 		buffer.putInt((int)b.getMetaDataSize());
@@ -1273,7 +1282,6 @@ public class WriterU3D implements SceneWriter {
 			}
 		});
 		SceneGraphComponent copy = path.getLastComponent();
-		System.out.println("copy="+copy.getName());
 		return copy;
 	}
 	

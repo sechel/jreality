@@ -91,7 +91,6 @@ class ImageDataConverter implements Converter {
 		  
 	  } else {
 		  // read old format (from default XStream serialization)
-		  System.out.println("old ID format");
 		  reader.moveDown();
 		  data = (byte[]) context.convertAnother(null, byte[].class);
 		  reader.moveUp();
