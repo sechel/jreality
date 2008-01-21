@@ -196,6 +196,7 @@ public class XStreamFactory {
     ret.registerConverter(new InputSlotConverter());
     ret.registerConverter(new MatrixConverter(ret.getMapper()));
     ret.registerConverter(new FontConverter(ret.getMapper()));
+    ret.registerConverter(new ImageDataConverter(ret.getMapper()));
     
     return ret;
   }
