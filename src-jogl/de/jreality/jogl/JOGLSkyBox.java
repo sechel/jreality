@@ -103,7 +103,7 @@ class JOGLSkyBox {
 	for (int i = 0; i<6; ++i)	{
 		tex.setImage(imgs[i]);
 	    Texture2DLoaderJOGL.render(gl, tex);
-
+	    // for reasons unknown, this has to be repeated here
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, Texture2D.GL_CLAMP_TO_EDGE); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, Texture2D.GL_CLAMP_TO_EDGE); 
 		gl.glBegin(GL.GL_POLYGON);
