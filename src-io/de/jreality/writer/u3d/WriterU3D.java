@@ -424,9 +424,17 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvertCount == 0 ? 1 : tvertCount); // no texture coordinates
 		DoubleArrayArray vData = (DoubleArrayArray)g.getVertexAttributes(COORDINATES);
-		double[][] vertices = vData.toDoubleArrayArray(null); 
+		double[][] vertices = null;
+		if (vData == null)
+			vertices = new double[0][0];
+		else
+			vertices = vData.toDoubleArrayArray(null); 
 		IntArrayArray fData = (IntArrayArray)g.getFaceAttributes(INDICES);
-		int[][] faces = fData.toIntArrayArray(null);
+		int[][] faces = null;
+		if (fData == null)
+			faces = new int[0][0];
+		else
+			faces = fData.toIntArrayArray(null);
 		
 		// vertices
 		for (int i = 0; i < vertCount; i++) {

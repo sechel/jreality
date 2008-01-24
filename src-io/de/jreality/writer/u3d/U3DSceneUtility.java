@@ -293,6 +293,7 @@ public class U3DSceneUtility {
 	
 	public static IndexedFaceSet prepareFaceSet(IndexedFaceSet ifs) {
 		IntArrayArray fData = (IntArrayArray)ifs.getFaceAttributes(INDICES);
+		if (fData == null) return ifs;
 		int[][] faces = fData.toIntArrayArray(null);
 		boolean needsTreatment = false;
 		int numFaces = 0; // count faces
@@ -328,6 +329,7 @@ public class U3DSceneUtility {
 		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData));
 		return rifs;
 	}
+	
 	
 	static final Geometry POINT_SPHERE = SphereUtility.tessellatedIcosahedronSphere(1);
 	static final Geometry LINE_CYLINDER = Primitives.cylinder(8, 1, -0.5, 0.5, 2 * PI);
