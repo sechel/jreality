@@ -71,26 +71,28 @@ public class HeadTransformationTool extends AbstractTool {
   
   private final transient Matrix m=new Matrix();
   
+  static final boolean SPACE_NAVIGATOR_USAGE=false;
+  
   public HeadTransformationTool() {
 	addCurrentSlot(verticalRotation);
-    //addCurrentSlot(rotateActivation);
+    if (!SPACE_NAVIGATOR_USAGE) addCurrentSlot(rotateActivation);
   }
 
   public void perform(ToolContext tc) {
-    /*
-	if (rotate) {
-      if (!tc.getAxisState(rotateActivation).isPressed()) {
-        removeCurrentSlot(verticalRotation);
-        rotate = false;
-      }
-    } else {
-      if (tc.getAxisState(rotateActivation).isPressed()) {
-        addCurrentSlot(verticalRotation);
-        rotate = true;
-      }
+    if (!SPACE_NAVIGATOR_USAGE) {
+		if (rotate) {
+	      if (!tc.getAxisState(rotateActivation).isPressed()) {
+	        removeCurrentSlot(verticalRotation);
+	        rotate = false;
+	      }
+	    } else {
+	      if (tc.getAxisState(rotateActivation).isPressed()) {
+	        addCurrentSlot(verticalRotation);
+	        rotate = true;
+	      }
+	    }
+		if (tc.getSource() == rotateActivation || !rotate) return;
     }
-    if (tc.getSource() == rotateActivation || !rotate) return;
-    */
     double deltaAngle = tc.getAxisState(verticalRotation).doubleValue();
     if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
       tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
