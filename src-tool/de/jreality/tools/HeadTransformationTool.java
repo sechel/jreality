@@ -40,6 +40,8 @@
 
 package de.jreality.tools;
 
+import java.text.NumberFormat;
+
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -71,11 +73,12 @@ public class HeadTransformationTool extends AbstractTool {
   
   public HeadTransformationTool() {
 	addCurrentSlot(verticalRotation);
-    addCurrentSlot(rotateActivation);
+    //addCurrentSlot(rotateActivation);
   }
 
   public void perform(ToolContext tc) {
-    if (rotate) {
+    /*
+	if (rotate) {
       if (!tc.getAxisState(rotateActivation).isPressed()) {
         removeCurrentSlot(verticalRotation);
         rotate = false;
@@ -87,6 +90,7 @@ public class HeadTransformationTool extends AbstractTool {
       }
     }
     if (tc.getSource() == rotateActivation || !rotate) return;
+    */
     double deltaAngle = tc.getAxisState(verticalRotation).doubleValue();
     if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
       tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
@@ -100,12 +104,13 @@ public class HeadTransformationTool extends AbstractTool {
       headTranslation=new double[]{0,1.7,0};
     }
 	double dAngle = (invert ? -1 : 1) * deltaAngle;
-    if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) {
+	//System.out.println(NumberFormat.getNumberInstance().format(dAngle));
+	if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) {
     	return;
     }
+    currentAngle+=dAngle;
     SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
     MatrixBuilder.euclidean().translate(headTranslation).rotateX(currentAngle).assignTo(myComponent);
-    currentAngle+=dAngle;
   }
 
   public double getMaxAngle() {
@@ -121,15 +126,17 @@ public class HeadTransformationTool extends AbstractTool {
   }
 
   public void setMinAngle(double minAngle) {
-    this.minAngle = minAngle;
+	  this.minAngle = minAngle;
   }
 
-public boolean isInvert() {
-	return invert;
-}
+  public boolean isInvert() {
+	  return invert;
+  }
 
-public void setInvert(boolean invert) {
-	this.invert = invert;
-}
-
+  public void setInvert(boolean invert) {
+	  this.invert = invert;
+  }
+  public void currentAngle(double ang){
+	  currentAngle=ang;
+  }
 }

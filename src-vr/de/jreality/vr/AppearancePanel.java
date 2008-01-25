@@ -345,7 +345,9 @@ public class AppearancePanel extends JPanel {
 		cubeMap = c;
 		
 		setPointsReflecting(isPointsReflecting());
+		setPointReflection(getPointReflection());
 		setLinesReflecting(isLinesReflecting());
+		setLineReflection(getLineReflection());
 		setFacesReflecting(isFacesReflecting());
 		setFaceReflection(getFaceReflection());
 	}
@@ -370,7 +372,9 @@ public class AppearancePanel extends JPanel {
 	
 	public void setLineReflection(double d) {
 		lineReflectionSlider.setValue((int)(100*d));
-		if (cmEdges != null) cmEdges.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+		if (cmEdges != null) {
+			cmEdges.setBlendColor(new Color(1f, 1f, 1f, (float) d));
+		}
 	}
 	
 	public void setPointReflection(double d) {

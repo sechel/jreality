@@ -308,7 +308,7 @@ public class ViewerVR {
 				t.printStackTrace();
 			}
 		}
-		sceneRoot.addTool(new PickShowTool());
+		//sceneRoot.addTool(new PickShowTool());
 
 		terrainAppearance.setAttribute("showLines", false);
 		terrainAppearance.setAttribute("showPoints", false);
@@ -428,20 +428,24 @@ public class ViewerVR {
 			}
 		});
 		if (getShipNavigationTool().getGravity() != 0) {
-			// move the avatar onto the next floor
-			Matrix m = new Matrix(avatarNode.getTransformation());
-			AABBPickSystem ps = new AABBPickSystem();
-			ps.setSceneRoot(terrainNode);
-			double[] pos = m.getColumn(3);
-			List<PickResult> picks = ps.computePick(pos, new double[]{0,-1,0,0});
-			if (picks.isEmpty()) {
-				picks = ps.computePick(pos, new double[]{0,1,0,0});
-			}
-			if (!picks.isEmpty()) {
-				setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
-			}
+			avatarToGround();
 		}
 		for (PluginVR plugin : plugins) plugin.terrainChanged();
+	}
+
+	public void avatarToGround() {
+		// move the avatar onto the next floor
+		Matrix m = new Matrix(avatarNode.getTransformation());
+		AABBPickSystem ps = new AABBPickSystem();
+		ps.setSceneRoot(terrainNode);
+		double[] pos = m.getColumn(3);
+		List<PickResult> picks = ps.computePick(pos, new double[]{0,-1,0,0});
+		if (picks.isEmpty()) {
+			picks = ps.computePick(pos, new double[]{0,1,0,0});
+		}
+		if (!picks.isEmpty()) {
+			setAvatarHeight(picks.get(0).getWorldCoordinates()[1]);
+		}
 	}
 	
 	public void setTerrainWithCenter(final SceneGraphComponent c) {
