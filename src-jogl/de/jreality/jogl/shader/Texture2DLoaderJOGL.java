@@ -200,11 +200,11 @@ public class Texture2DLoaderJOGL {
 //        ht.put(image, texid);
 //   }
     int srcPixelFormat = GL.GL_RGBA;
-    if (lastRendered  == null  || image != lastRendered.getImage()) {
+//    if (lastRendered  == null  || image != lastRendered.getImage()) {
     	handleTextureParameters(tex, gl);
     	lastRendered = tex;
 //       System.err.println("Not yet handled "+image);
-    }
+//    }
 
     // create either a series of mipmaps of a single texture image based on
     // what's loaded
