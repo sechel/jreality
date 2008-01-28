@@ -650,16 +650,18 @@ public class Pn {
 		return makeGeneralizedProjection(dst, center, axis, -1 );
 	}
 	
-	/**
-	 * Create a projectivity that leaves center invariant (planewise), axis invariant (point-wise) and
-	 * otherwise moves a general point P along the line through P and the center depending on  
-	 * <i>val</i>.
-	 * @param dst
-	 * @param center
-	 * @param axis
-	 * @param val
-	 * @return
-	 */
+/**
+ * Create a projectivity that leaves center <i>C</i> invariant (planewise), axis <i>A</i> invariant (point-wise) and
+ * otherwise moves a general point P along the line <i>l</i> through P and the center depending on  
+ * <i>val</i>. To be exact, let Q be the intersection of <i>l</i> with the axis.  Define projective
+ * coordinates on <i>l</i> by setting <i>C,P,Q</i> to 0,1,infinity  respectively. Then the projective coordinate
+ * of <i>f(P)</i> is <i>val</i>.
+ * @param dst
+ * @param center
+ * @param axis
+ * @param val
+ * @return
+ */
 	public static double[] makeGeneralizedProjection(double[] dst, double[] center, double[] axis, double val) {
 		if (center.length != axis.length)
 			throw new IllegalArgumentException("center and axis must have same length");
