@@ -125,20 +125,18 @@ public class U3DSceneUtility {
 			}
 			cList.add(c);
 		}
-		for (T c : l) {
-			if (c == null) continue;
-			String name = c.getName();
-			List<T> cList = nameMap.get(c.getName());
-			if (cList.size() > 1) {
-				DecimalFormat df = new DecimalFormat("000");
+		for (String name : nameMap.keySet()) {
+			List<T> nodes = nameMap.get(name);
+			if (nodes.size() > 1) {
 				int index = 1;
-				for (T notUniqueC : cList) {
+				DecimalFormat df = new DecimalFormat("000");
+				for (T c : nodes) {
 					String newName = name + df.format(index);
-					r.put(notUniqueC, newName);
+					r.put(c, newName);
 					index++;
 				}
 			} else {
-				r.put(c, name);
+				r.put(nodes.get(0), name);
 			}
 		}
 		return r;
