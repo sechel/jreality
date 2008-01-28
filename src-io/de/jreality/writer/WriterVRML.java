@@ -10,6 +10,8 @@ package de.jreality.writer;
  * Labels
  */
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.WeakHashMap;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
@@ -48,6 +51,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.ImageUtility;
 
 
 
@@ -61,7 +65,7 @@ public class WriterVRML
 	 geoPointMap = new HashMap<Integer, Geometry>();
 
 	
-	
+	boolean useDefs = false;
 	private DefaultGeometryShader dgs;
 	private RenderingHintsShader rhs;
 	private DefaultPolygonShader dps;
@@ -70,7 +74,7 @@ public class WriterVRML
 	private DefaultTextShader dpts;
 	private DefaultTextShader dlts;
 	private DefaultTextShader dvts;
-
+	private String fileStem = String.format("texture-%10d-", System.currentTimeMillis());
 	private static final int PER_VERTEX=0,PER_PART=1,PER_FACE=2,OVERALL=3;
 
 	private PrintWriter out=null;
@@ -90,7 +94,18 @@ public class WriterVRML
 		WriterVRML writer = new WriterVRML(stream);
 		writer.write(sceneRoot);
 	}
-	// ---------------------------------------
+	
+	String writePath = "";
+	WeakHashMap<ImageData, String> textureMaps = new WeakHashMap<ImageData, String>();
+	public void setWritePath(String path)	{
+		writePath = path;
+		if (!writePath.endsWith("/")) writePath = writePath + "/";
+	}
+
+	public void setWriteTextureFiles(boolean writeTextureFiles2) {
+		writeTextureFiles = writeTextureFiles2;
+	}
+// ---------------------------------------
 
 	public void write( SceneGraphComponent sgc)throws IOException {
 		if (sgc==null) throw new IOException("component is null");
@@ -213,31 +228,36 @@ public class WriterVRML
 		// write content
 		out.println(""+hist+"Separator { # "+c.getName());
 		if (t!=null)		writeTrafo(t,hist2);
-		for (int i=0;i<c.getChildComponentCount();i++)
-			writeComp(c.getChildComponent(i),hist2,eApp);
 		if (g!=null)		writeGeo(g,hist2);// use Appearance
 		if (li!=null)		writeLight(li,hist2);// use Appearance
 		if (cam!=null)		writeCam(cam,hist2);
+		for (int i=0;i<c.getChildComponentCount();i++)
+			writeComp(c.getChildComponent(i),hist2,eApp);
 		out.println(""+hist+"}");
 	}
 	private void writeGeo(Geometry g,String hist)throws IOException{
 		String hist2= hist+spacing;
 // Geom Primitives
-		if (g instanceof Sphere){
-			if (dgs.getShowFaces())	writeSphere((Sphere)g,hist);return;}
-		if (g instanceof Cylinder ){
-			if (dgs.getShowFaces())	writeCylinder((Cylinder)g,hist);return;}
-// Define & write Geo
-		if (g instanceof IndexedFaceSet)
-			if (dgs.getShowFaces())	{
-				// first write the appearance colors and texture outside the DEF/USE
-				writeMaterialBinding(OVERALL,hist);
-				Color amb = dps.getAmbientColor();
-				Color spec= dps.getSpecularColor();
-				Color diff= dps.getDiffuseColor();
-				double tra= dps.getTransparency();
-				if (tra!=0|diff!=null|spec!=null|amb!=null){
-					writeMaterial(amb,diff,spec,tra,hist);
+		if (dgs.getShowFaces())	{
+			// first write the appearance colors and texture outside the DEF/USE
+			writeMaterialBinding(OVERALL,hist);
+			Color amb = dps.getAmbientColor();
+			Color spec= dps.getSpecularColor();
+			Color diff= dps.getDiffuseColor();
+			double tra= dps.getTransparency();
+			if (tra!=0|diff!=null|spec!=null|amb!=null){
+				writeMaterial(amb,diff,spec,tra,hist);
+			}
+			if (g instanceof Sphere){
+				writeSphere((Sphere)g,hist);return;}
+			if (g instanceof Cylinder ){
+				writeCylinder((Cylinder)g,hist);return;}
+	// Define & write Geo
+			if (g instanceof IndexedFaceSet) {
+	//			 check if allready defined
+				if (useDefs && geoPolygonMap.containsKey(g.hashCode())){
+					out.println(""+hist+"USE"+ str(g.hashCode()+"POLYGON"));
+					return;
 				}
 				try {
 					IndexedFaceSet f = (IndexedFaceSet) g;
@@ -261,17 +281,13 @@ public class WriterVRML
 					if (!e.getMessage().equals("missing texture component"))
 					throw e;
 				}
-//				 check if allready defined
-				if (geoPolygonMap.containsKey(g.hashCode())){
-					out.println(""+hist+"USE"+ str(g.hashCode()+"POLYGON"));
-					return;
-				}
 				out.print(""+hist+"DEF "+str(g.hashCode()+"POLYGON"));
 				out.println(" Separator { ");
 				writeGeoFaces((IndexedFaceSet) g,hist2);
 				out.println(""+hist+"} ");
-				geoPolygonMap.put(g.hashCode(), g);
+				if (useDefs) geoPolygonMap.put(g.hashCode(), g);
 			}
+		}
 		if (g instanceof IndexedLineSet)
 			if(dls.getTubeDraw()&& dgs.getShowLines()) {
 				// first write the appearance colors and texture outside the DEF/USE
@@ -281,7 +297,7 @@ public class WriterVRML
 					writeMaterial(null,diff,null,0,hist);
 				}
 //				 check if allready defined
-				if (geoLineMap.containsKey(g.hashCode())){
+				if (useDefs && geoLineMap.containsKey(g.hashCode())){
 					out.println(""+hist+"USE"+ str(g.hashCode()+"LINE"));
 					return;
 				}
@@ -289,7 +305,7 @@ public class WriterVRML
 				out.println(" Separator { ");
 				writeGeoLines((IndexedLineSet) g,hist2);
 				out.println(""+hist+"} ");
-				geoLineMap.put(g.hashCode(), g);
+				if (useDefs) geoLineMap.put(g.hashCode(), g);
 			}
 		if (g instanceof PointSet){
 			if(dvs.getSpheresDraw()&& dgs.getShowPoints()) {
@@ -300,7 +316,7 @@ public class WriterVRML
 					writeMaterial(null,diff,null,0,hist);
 				}
 //				 check if allready defined
-				if (geoPointMap.containsKey(g.hashCode())){
+				if (useDefs && geoPointMap.containsKey(g.hashCode())){
 					out.println(""+hist+"USE"+ str(g.hashCode()+"POINT"));
 					return;
 				}
@@ -308,7 +324,7 @@ public class WriterVRML
 				out.println(" Separator { ");
 			    writeGeoPoints((PointSet) g,hist2);
 				out.println(""+hist+"} ");
-				geoPointMap.put(g.hashCode(), g);
+				if (useDefs) geoPointMap.put(g.hashCode(), g);
 			}
 			return;
 		}
@@ -622,7 +638,18 @@ public class WriterVRML
 		 *		}		*/
 		String hist2=hist+spacing;
 		out.println(hist+"Texture2 {");
-		writeImage(tex,hist2);
+		if (writeTextureFiles)	{
+			String fileName = textureMaps.get(tex.getImage());
+			if (fileName == null)	{
+				fileName = fileStem+String.format("%04d", textureCount)+".png";
+				String fullName = writePath+fileName;
+				textureCount++;
+				ImageUtility.writeBufferedImage( new File(fullName),(BufferedImage) tex.getImage().getImage());				
+				textureMaps.put(tex.getImage(), fileName);
+			}
+			out.println(hist+"filename "+"\""+fileName+"\" ");
+		} else 
+			writeImage(tex,hist2);
 		out.print(hist+"wrapS ");
 		writeTexWrap(tex.getRepeatS());
 		out.print(hist+"wrapT ");
@@ -702,6 +729,8 @@ public class WriterVRML
 		double[] d=new double[]{(double)c.getRed()/255,(double)c.getGreen()/255,(double)c.getBlue()/255};
 		return d;
 	}
+	static boolean writeTextureFiles = true;
+	int textureCount = 0;
 	private  void writeImage(Texture2D tex,String hist)throws IOException{
 		String hist2=hist+spacing;
 		ImageData id=tex.getImage();
