@@ -114,12 +114,13 @@ public class JOGLRendererHelper {
 			{ val, -val } };
 
 	private JOGLRendererHelper() {}
+
 	static Appearance pseudoAp = new Appearance();
 	static void handleBackground(JOGLRenderer jr, int width, int height, Appearance topAp) {
-    GL gl = jr.globalGL;
-    JOGLRenderingState openGLState = jr.renderingState;
+		GL gl = jr.globalGL;
+		JOGLRenderingState openGLState = jr.renderingState;
 		Object bgo = null;
-    float[] backgroundColor = new float[4];
+		float[] backgroundColor = new float[4];
 		if (topAp == null) topAp = pseudoAp;
 //			return;
 		for (int i = 0; i < 6; ++i) {
@@ -822,10 +823,10 @@ public class JOGLRendererHelper {
 	/**
 	 * 
 	 */
-	public static void processClippingPlanes(GL globalGL, List clipPlanes) {
-
-		int clipBase = GL.GL_CLIP_PLANE0;
+	final static int clipBase = GL.GL_CLIP_PLANE0;
+	public static void processClippingPlanes(JOGLRenderer jr, List<SceneGraphPath> clipPlanes) {
 		int n = clipPlanes.size();
+		jr.renderingState.currentClippingPlane = clipBase;
 		// globalGL.glDisable(GL.GL_CLIP_PLANE0);
 		for (int i = 0; i < n; ++i) {
 			SceneGraphPath lp = (SceneGraphPath) clipPlanes.get(i);
@@ -836,14 +837,27 @@ public class JOGLRendererHelper {
 				JOGLConfiguration.theLog.log(Level.WARNING,
 						"Invalid clipplane class " + cp.getClass().toString());
 			else {
+				if ( ((ClippingPlane) cp).isLocal()) continue;
 				double[] mat = lp.getMatrix(null);
-				globalGL.glPushMatrix();
-				globalGL.glMultTransposeMatrixd(mat,0);
-				globalGL.glClipPlane(clipBase + i, clipPlane,0);
-				globalGL.glEnable(clipBase + i);
-				globalGL.glPopMatrix();
+				jr.globalGL.glPushMatrix();
+				jr.globalGL.glMultTransposeMatrixd(mat,0);
+				pushClippingPlane(jr, clipPlane);
+				jr.globalGL.glPopMatrix();
 			}
 		}
+	}
+
+	public static void  pushClippingPlane(JOGLRenderer jr, double[] plane) {
+		GL gl = jr.globalGL;
+		gl.glClipPlane(jr.renderingState.currentClippingPlane, plane == null ? clipPlane : plane,0);
+		gl.glEnable(jr.renderingState.currentClippingPlane);
+		jr.renderingState.currentClippingPlane++;
+	}
+	
+	// calls to clipping plane have to be properly nested
+	public static void popClippingPlane(JOGLRenderer jr) {
+		jr.renderingState.currentClippingPlane--;
+		jr.globalGL.glDisable(jr.renderingState.currentClippingPlane);
 	}
 
 	//	public static void saveScreenShot(GL gl, File file) {

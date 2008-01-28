@@ -76,6 +76,7 @@ public class JOGLRenderingState {
 	public boolean currentPickMode = false;
 	public Geometry currentGeometry = null;
 	public double currentAlpha = 1.0;
+	public int currentClippingPlane = 0;
 	public boolean useDisplayLists=true;
 	public boolean clearColorBuffer=true;
 	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT;
@@ -108,10 +109,6 @@ public class JOGLRenderingState {
 		return true;
 	}
 
-	/**
-		 * @param sg
-		 */
-		// ultimately all this should happen in various visit() methods
 		public  void initializeGLState()	{
 			// TODO clean this up, provide an interface to set "OpenGL Preferences ..."
 			// and make sure everything is here.

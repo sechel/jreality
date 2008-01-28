@@ -169,7 +169,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			rhInfo.render(jr.renderingState, jr.rhStack.lastElement());
 			jr.rhStack.push(rhInfo);
 		}
-		if (renderGeometry != null )	{
+		if (goBetween.peerGeometry != null && goBetween.peerGeometry.localClippingPlane)	{
+			JOGLRendererHelper.pushClippingPlane(jr, null);
+		}
+		else if (renderGeometry != null )	{
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
 	}
@@ -187,6 +190,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void postRender() {
+		if (goBetween.peerGeometry != null && goBetween.peerGeometry.localClippingPlane)	{
+			JOGLRendererHelper.popClippingPlane(jr);
+		}
 		if (rhInfo != null && rhInfo.hasSomeActiveField())	{
 			jr.rhStack.pop();
 			rhInfo.postRender(jr.renderingState, jr.rhStack.lastElement());

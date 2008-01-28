@@ -12,6 +12,7 @@ import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.math.Pn;
+import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -33,7 +34,8 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	boolean isSurface = false;
 	boolean hasPointLabels = false, hasEdgeLabels = false, hasFaceLabels = false;
 	boolean forceRender = false;
-	boolean displayListsDirty =  true;
+	boolean displayListsDirty =  true,
+		localClippingPlane = false;
 	public JOGLPeerGeometry(Geometry g, JOGLRenderer jr)	{
 		super(jr);
 		originalGeometry = g;
@@ -50,9 +52,13 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		}
 		updateLabelState();
 		originalGeometry.addGeometryListener(this);
+		if (originalGeometry instanceof ClippingPlane)	{
+			if (((ClippingPlane) originalGeometry).isLocal()) {
+				localClippingPlane = true;
+				System.err.println("Found local clipping plane");
+			}
+		}
 		if (ifs != null || g instanceof Sphere || g instanceof Cylinder) isSurface = true;
-//		Object foo = originalGeometry.getGeometryAttributes(JOGLConfiguration.FORCE_RENDER);
-//		if (foo != null) forceRender = true;
 	}
 
 	public void dispose()		{

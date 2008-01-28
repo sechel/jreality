@@ -306,7 +306,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (clipPlanes == null  || clippingPlanesDirty) {
 			clipPlanes = SceneGraphUtility.collectClippingPlanes(theRoot);
 		}
-		JOGLRendererHelper.processClippingPlanes(globalGL, clipPlanes);
+		JOGLRendererHelper.processClippingPlanes(this, clipPlanes);
 		clippingPlanesDirty = false;
 	}
 
