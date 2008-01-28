@@ -55,25 +55,25 @@ class ClippingPlaneCollector extends SceneGraphVisitor {
 
 	SceneGraphComponent sgc;
 	SceneGraphPath currentPath;
-	Vector lightList;
+	Vector clippingPlaneList;
 	public ClippingPlaneCollector(SceneGraphComponent b)	{
 	  	sgc = b;
-	  	lightList = new Vector();
+	  	clippingPlaneList = new Vector();
 	}
 
 	 public Object visit()	{
 	   	currentPath = new SceneGraphPath();
-	   	lightList.clear();
-	   	if (sgc == null) return lightList;
+	   	clippingPlaneList.clear();
+	   	if (sgc == null) return clippingPlaneList;
 	   	visit(sgc);
-	   	return lightList;
+	   	return clippingPlaneList;
 	 }
 
 	public void visit(ClippingPlane l) {
 		SceneGraphPath foundOne ;
 		foundOne = (SceneGraphPath) currentPath.clone();
 		foundOne.push(l);
-		lightList.add(foundOne);
+		clippingPlaneList.add(foundOne);
 	}
 	
 	public void visit(SceneGraphComponent c) {
