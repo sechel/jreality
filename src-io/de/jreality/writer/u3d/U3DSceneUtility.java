@@ -68,10 +68,15 @@ import de.jreality.writer.u3d.texture.SphereMapGenerator;
 
 public class U3DSceneUtility {
 
-
+	static final Geometry 
+		POINT_SPHERE = SphereUtility.tessellatedIcosahedronSphere(1),
+		LINE_CYLINDER = Primitives.cylinder(8, 1, -0.5, 0.5, 2 * PI);
 	
-	private static final IndexedFaceSet SPHERE = SphereUtility.tessellatedIcosahedronSphere(4, true);
-	private static final IndexedFaceSet CYLINDER = Primitives.cylinder(60);
+	private static final IndexedFaceSet 
+		SPHERE = SphereUtility.tessellatedIcosahedronSphere(4, true),
+		CYLINDER = Primitives.cylinder(60);
+	
+	
 	public static HashMap<SceneGraphComponent, Collection<SceneGraphComponent>> getParentsMap(Collection<SceneGraphComponent> l) {
 		HashMap<SceneGraphComponent, Collection<SceneGraphComponent>> r = new HashMap<SceneGraphComponent, Collection<SceneGraphComponent>>();
 		for (SceneGraphComponent c : l)
@@ -331,8 +336,6 @@ public class U3DSceneUtility {
 	}
 	
 	
-	static final Geometry POINT_SPHERE = SphereUtility.tessellatedIcosahedronSphere(1);
-	static final Geometry LINE_CYLINDER = Primitives.cylinder(8, 1, -0.5, 0.5, 2 * PI);
 	static void prepareTubesAndSpheres(SceneGraphComponent root) {
 		SceneGraphComponent dummy = new SceneGraphComponent();
 		dummy.addChild(root);
