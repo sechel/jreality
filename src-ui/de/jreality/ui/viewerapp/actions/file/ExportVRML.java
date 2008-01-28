@@ -8,16 +8,25 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.PSRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.WriterVRML;
+import de.jtem.beans.DimensionPanel;
 
 public class ExportVRML extends AbstractJrAction {
 
 	private Viewer viewer;
 
+	private boolean writeTextureFiles = false;
+	private JComponent options;
 
 	public ExportVRML(String name, Viewer viewer, Component parentComp) {
 		super(name, parentComp);
@@ -33,17 +42,23 @@ public class ExportVRML extends AbstractJrAction {
 //	this(name, v.getViewerSwitch(), v.getFrame());
 //	}
 
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		File file = FileLoaderDialog.selectTargetFile(parentComp, "wrl", "VRML Files");
+		if (options == null) options = createAccessory();
+		
+		File file = FileLoaderDialog.selectTargetFile(parentComp, options, "wrl", "VRML Files");
 		if (file == null) return;  //dialog cancelled
 
+		if (options == null) options = createAccessory();
 		// try {
 		Dimension d = viewer.getViewingComponentSize();
 		PSRenderer rv;
 		try {
-			WriterVRML.write(viewer.getSceneRoot(), new FileOutputStream(file));
+//			WriterVRML.write(viewer.getSceneRoot(), new FileOutputStream(file));
+			WriterVRML writer = new WriterVRML(new FileOutputStream(file));
+			writer.setWritePath(file.getParent()+"/");
+			writer.setWriteTextureFiles(writeTextureFiles);
+			writer.write(viewer.getSceneRoot());
 		} catch (FileNotFoundException exc) {
 			exc.printStackTrace();
 		} catch (IOException ev) {
@@ -51,6 +66,18 @@ public class ExportVRML extends AbstractJrAction {
 			ev.printStackTrace();
 		}			
 	}
-
-
+	JCheckBox checkbox;
+	private JComponent createAccessory() {
+		
+		Box accessory = Box.createVerticalBox();
+		accessory.add(Box.createVerticalGlue());
+		checkbox = new JCheckBox(new AbstractAction("write texture files") {
+			public void actionPerformed(ActionEvent e) {
+				writeTextureFiles = checkbox.isSelected();
+			}
+		});
+		accessory.add(checkbox);
+		
+		return accessory;
+	}
 }
