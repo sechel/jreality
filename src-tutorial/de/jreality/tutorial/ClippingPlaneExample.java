@@ -57,7 +57,9 @@ public class ClippingPlaneExample{
 		SceneGraphComponent clipPlane =  SceneGraphUtility.createFullSceneGraphComponent("theClipPlane");
 		// the icon for the clipping plane shouldn't get clipped away; move it slightly 
 		clipPlane.getTransformation().setMatrix(P3.makeTranslationMatrix(null, new double[]{0d,0d,.01d}, Pn.EUCLIDEAN));
-		clipPlane.setGeometry(new ClippingPlane());
+		ClippingPlane cp =  new ClippingPlane();
+		cp.setLocal(true);
+		clipPlane.setGeometry(cp);
 		// add a rotate tool to the clip icon
 		clipIcon.addTool(new RotateTool());
 		clipIcon.addChild(clipPlane);
