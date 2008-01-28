@@ -1214,7 +1214,6 @@ public class WriterU3D implements SceneWriter {
 	
 	protected void prepareSceneData(JrScene originalScene) {
 		SceneGraphComponent copy = copy(originalScene.getSceneRoot());
-		
 		JrScene scene = new JrScene(copy);
 		rootNode = scene.getSceneRoot();
 		
