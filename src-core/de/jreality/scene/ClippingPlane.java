@@ -54,22 +54,34 @@ package de.jreality.scene;
 public class ClippingPlane extends Geometry {
 
 	  private static int UNNAMED_ID;
+	boolean local = false; // apply only to this sub-graph?
 
-	  public ClippingPlane(String name) {
-	    super(name);
-	  }
-	  
-	  public ClippingPlane() {
-		  this("clippingPlane "+(UNNAMED_ID++));
-	  }
+	public ClippingPlane(String name) {
+		super(name);
+	}
 
-    public void accept(SceneGraphVisitor v) {
-        v.visit(this);
-    }
-    static void superAccept(ClippingPlane c, SceneGraphVisitor v) {
-        c.superAccept(v);
-    }
-    private void superAccept(SceneGraphVisitor v) {
-        super.accept(v);
-    }
+	public ClippingPlane() {
+		this("clippingPlane " + (UNNAMED_ID++));
+	}
+
+	public boolean isLocal() {
+		return local;
+	}
+
+	public void setLocal(boolean local) {
+		this.local = local;
+	}
+
+	public void accept(SceneGraphVisitor v) {
+		v.visit(this);
+	}
+
+	static void superAccept(ClippingPlane c, SceneGraphVisitor v) {
+		c.superAccept(v);
+	}
+
+	private void superAccept(SceneGraphVisitor v) {
+		super.accept(v);
+	}
+
 }
