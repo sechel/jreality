@@ -42,6 +42,7 @@ package de.jreality.jogl;
 
 import javax.media.opengl.GL;
 
+import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
@@ -76,9 +77,11 @@ class JOGLSkyBox {
 	
 	static Appearance a=new Appearance();
 	static Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
-  static {
+	static JOGLTexture2D jogltex;
+	static {
     tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
     tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+    jogltex = new JOGLTexture2D(tex);
   }
 
   static void render(GL gl, double[] w2c, CubeMap cm, Camera cam)	{
@@ -103,9 +106,6 @@ class JOGLSkyBox {
 	for (int i = 0; i<6; ++i)	{
 		tex.setImage(imgs[i]);
 	    Texture2DLoaderJOGL.render(gl, tex);
-	    // for reasons unknown, this has to be repeated here
-	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, Texture2D.GL_CLAMP_TO_EDGE); 
-	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, Texture2D.GL_CLAMP_TO_EDGE); 
 		gl.glBegin(GL.GL_POLYGON);
 		for (int j = 0; j<4; ++j)	{
 			gl.glTexCoord2dv(texCoords[j],0);
