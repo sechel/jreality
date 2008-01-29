@@ -527,7 +527,7 @@ public class JOGLRenderer  implements AppearanceListener {
 						globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
 
 						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
-								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+								GL.GL_BGR, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
 					}
 				}
 				
@@ -833,7 +833,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		imageHeight = (tileSizeY) * numTiles;
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
-		caps.setAlphaBits(8);
 		if (offscreenPBuffer == null) offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
@@ -841,22 +840,13 @@ public class JOGLRenderer  implements AppearanceListener {
 //		offscreenBuffer = null;
 //		imageWidth = numTiles*tileSizeX;
 //		imageHeight = numTiles*tileSizeY;
-		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR);
+		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
 		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
 		offscreenMode = true;
+		lightListDirty = true;
 		canvas.display();
-		WritableRaster raster = img.getRaster();
-		byte[] byteArray = ((DataBufferByte) raster.getDataBuffer()).getData();
-		int[] dst = new int[4];
-        for (int y = 0, ptr = 0; y < imageHeight; y++)
-	          for (int x = 0; x < imageWidth; x++, ptr += 4) {
-	            dst[0] = byteArray[ptr];
-	            dst[1] = byteArray[ptr+1];
-	            dst[2] = byteArray[ptr+2];
-	            dst[3] = (byteArray[ptr+3]);
-//	            System.err.println("Alpha channel is "+byteArray[ptr+3]);
-	            raster.setPixel(x, y, dst);
-          }
+		//display(offscreenPBuffer);
+
 		ImageUtil.flipImageVertically(img);
 	
 		// force alpha channel to be "pre-multiplied"
