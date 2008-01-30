@@ -35,6 +35,8 @@ public class FlyToPickTool  extends AbstractTool {
 	private SceneGraphComponent arrowNode;
 	private boolean attached=false;
 	private boolean reverse=false;
+	private boolean holdYAxis=true;
+	
 
 	
 	// a "P" means "Point" 
@@ -75,6 +77,7 @@ public class FlyToPickTool  extends AbstractTool {
 		    arrowNode.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 			}
 
+	@Override
 	public void perform(ToolContext tc) {
 		if (task==null) init(tc); // only ones
 		if (tc.getSource()==zoomActivateSlot
@@ -106,8 +109,10 @@ public class FlyToPickTool  extends AbstractTool {
 			axisW3V=Rn.matrixTimesVector(null, avaPath.getMatrix(null), axisW3V);// "W" 
 			axisW3V= new double[]{axisW3V[0],axisW3V[1],axisW3V[2]};// "3"
 			Rn.normalize(axisW3V,axisW3V);
+			if(holdYAxis) axisW3V=new double[]{0,Math.signum(axisW3V[1]),0};
 			///angle:
 			angleW=Rn.euclideanNorm(relMousePos)*4;
+			if(holdYAxis) angleW= Math.abs(relMousePos[0])*4;
 			while(angleW>Math.PI) angleW-=Math.PI*2;
 			while(angleW<-Math.PI) angleW+=Math.PI*2;
 			/// show DestPoint with arrow:
@@ -194,5 +199,11 @@ public class FlyToPickTool  extends AbstractTool {
 	}
 	public void setGoFactor(double goFactor) {
 		this.goFactor = goFactor;
+	}
+	public boolean isHoldYAxis() {
+		return holdYAxis;
+	}
+	public void setHoldYAxis(boolean holdYAxis) {
+		this.holdYAxis = holdYAxis;
 	}
 }
