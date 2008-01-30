@@ -5,8 +5,6 @@ package de.jreality.reader.vrml;
 
 import java.awt.Color;
 
-//import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
@@ -26,11 +24,19 @@ import de.jreality.util.Input;
 
 public class State {
 	// konstanten
-	public static final String[] BINDING= new String[]{	
-		"DEFAULT","OVERALL",
-		"PER_PART","PER_PART_INDEXED",
-		"PER_FACE","PER_FACE_INDEXED",
-		"PER_VERTEX","PER_VERTEX_INDEXED"};
+	public static enum Binding {
+		DEFAULT,OVERALL,
+		PER_PART,PER_PART_INDEXED,
+		PER_FACE,PER_FACE_INDEXED,
+		PER_VERTEX,PER_VERTEX_INDEXED,
+		NONE
+	}
+//	public static final String[] BINDING= new String[]{	
+//		"DEFAULT","OVERALL",
+//		"PER_PART","PER_PART_INDEXED",
+//		"PER_FACE","PER_FACE_INDEXED",
+//		"PER_VERTEX","PER_VERTEX_INDEXED","NONE"};// none means it is allready set in App
+	//TODO none benutzen und overall color auslagern in App mitten im baum
 	public static final String[] VERTORDER= new String[]{
 		"UNKNOWN_ORDERING","CLOCKWISE","COUNTERCLOCKWISE"};
 	public static final String[] SHAPETYPE= new String[]{
@@ -45,16 +51,16 @@ public class State {
 	public Color[] emissive= new Color[]{}; 
 	public double[] shininess= new double[]{};
 	public double[] transparency= new double[]{};
-	public int materialBinding=1;// Bindings
-	public int normalBinding=0;
+	public Binding materialBinding=Binding.NONE;//TODO Bindings 
+	public Binding normalBinding=Binding.DEFAULT;
 	public SceneGraphPath camPath=new SceneGraphPath();// Graph
 	public SceneGraphComponent currNode=null;
 	public double [][] coords= new double[0][3];	// 3d Daten
 	public double [][] normals= new double[0][3];
-	public Transformation trafo=null;
+	public Transformation trafo=null;// TODO auslagern in den Baum
 	public Transformation extraGeoTrans=null;// fuer die Abmessungen der Geometrie
-	public String textureFile="";				// TexturDaten
-	public int[][][] textureData= new int[][][]{{{}}};
+	public String textureFile="";				// TexturDaten TODO auslagern in den Baum
+	public int[][][] textureData= new int[][][]{{{}}};// TODO auslagern in den Baum
 	public int wrapS=0; // 0=Repeat 1=clamp
 	public int wrapT=0; 
 	public Matrix textureTrafo = MatrixBuilder.euclidean().getMatrix(); 
@@ -157,12 +163,24 @@ public class State {
 		return Math.max(n,m);
 	}
 
-	public static int getBinding(String bind){
-		int b=0;
-		for(int i=0;i<8;i++){
-			if (BINDING[i].equals(bind)) b=i;
-		}
-		return b;}
+	public static Binding getBinding(String bind){
+		if(bind.equals("DEFAULT"))
+			return Binding.DEFAULT;
+		if(bind.equals("OVERALL"))
+			return Binding.OVERALL;
+		if(bind.equals("PER_PART"))
+			return Binding.PER_PART;
+		if(bind.equals("PER_PART_INDEXED"))
+			return Binding.PER_PART_INDEXED;
+		if(bind.equals("PER_FACE"))
+			return Binding.PER_FACE;
+		if(bind.equals("PER_FACE_INDEXED"))
+			return Binding.PER_FACE_INDEXED;
+		if(bind.equals("PER_VERTEX"))
+			return Binding.PER_VERTEX;
+		if(bind.equals("PER_VERTEX_INDEXED"))
+			return Binding.PER_VERTEX_INDEXED;
+		return Binding.NONE;}
 	
 //   -------------- set ----------------------
 	/**
@@ -243,12 +261,12 @@ public class State {
 	 * sets the texture
 	 * @param app
 	 */ 
-	public void assignTexture(Appearance app, IndexedFaceSet f){
+	public Appearance assignTexture(Appearance app, IndexedFaceSet f){
+		// read Data:
 		ImageData id;
 		if (textureFile.equals("")){
 			if (textureData.length==0||textureData[0].length==0||
-					textureData[0][0].length==0)	return;
-			
+					textureData[0][0].length==0)	return app;
 			// uebersetze die Int[][][] nach byte[][]
 			int w= textureData.length;
 			int h= textureData[0].length;
@@ -288,6 +306,8 @@ public class State {
 			try {id = ImageData.load(Input.getInput(textureFile));}
 			catch (Exception e) {}
 	    }
+		// fill in Data:
+		if(app==null)app= new Appearance();
 		double[][] texCoord = new double [f.getNumPoints()][];
 		if (textureCoords.length<f.getNumPoints()) System.out.println("State.assignTexture() not enough Texturecoords");
 		System.arraycopy(textureCoords,0,texCoord,0,f.getNumPoints());
@@ -304,5 +324,6 @@ public class State {
 	    	tex.setRepeatT(Texture2D.GL_REPEAT);
 	    else tex.setRepeatT(Texture2D.GL_CLAMP);
 	    tex.setApplyMode(Texture2D.GL_MODULATE);
+		return app;
 	}
 }

@@ -44,8 +44,6 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
-
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedLineSetFactory;
@@ -61,15 +59,15 @@ import de.jreality.shader.CommonAttributes;
 
 public class VRMLHelper {
 	public static boolean verbose = true;
-	
-	public static final int DEFAULT = 0;
-	public static final int OVERALL = 1;
-	public static final int PER_PART = 2;
-	public static final int PER_PART_INDEXED = 3;
-	public static final int PER_FACE = 4;
-	public static final int PER_FACE_INDEXED = 5;
-	public static final int PER_VERTEX = 6;
-	public static final int PER_VERTEX_INDEXED = 7;
+//	
+//	public static final int DEFAULT = 0;
+//	public static final int OVERALL = 1;
+//	public static final int PER_PART = 2;
+//	public static final int PER_PART_INDEXED = 3;
+//	public static final int PER_FACE = 4;
+//	public static final int PER_FACE_INDEXED = 5;
+//	public static final int PER_VERTEX = 6;
+//	public static final int PER_VERTEX_INDEXED = 7;
 
 	public VRMLHelper() {
 		super();
@@ -359,9 +357,10 @@ public class VRMLHelper {
 	int VertexCount= state.coords.length;
 	double[][] fNormals=new double[faceCount][3];
 	double[][] vNormals=new double[VertexCount][3];
-	switch (state.normalBinding) {
-	case 1:// overall
-	{	for (int i=0;i<faceCount;i++){
+	
+	State.Binding bind=state.normalBinding;
+	if(bind==State.Binding.OVERALL){
+		for (int i=0;i<faceCount;i++){
 			fNormals[i][0]=state.normals[0][0];
 			fNormals[i][1]=state.normals[0][1];
 			fNormals[i][2]=state.normals[0][2];
@@ -369,17 +368,13 @@ public class VRMLHelper {
 		ifsf.setFaceNormals(fNormals);
 		//ifsf.setGenerateVertexNormals(true);
 	}
-	break;
-	case 2:// per part
-	case 4:// per face
-	{	System.arraycopy(state.normals,0,fNormals,0,faceCount);
+	if(bind==State.Binding.PER_PART|bind==State.Binding.PER_FACE){
+		System.arraycopy(state.normals,0,fNormals,0,faceCount);
 		ifsf.setFaceNormals(fNormals);
 		//ifsf.setGenerateVertexNormals(true);
 	}
-	break;
-	case 3:// per part indexed
-	case 5:// per face indexed
-	{	for (int i=0;i<faceCount;i++){
+	if(bind==State.Binding.PER_PART_INDEXED|bind==State.Binding.PER_FACE_INDEXED){
+		for (int i=0;i<faceCount;i++){
 			fNormals[i][0]=state.normals[(nIndex[0][i])][0];
 			fNormals[i][1]=state.normals[(nIndex[0][i])][1];
 			fNormals[i][2]=state.normals[(nIndex[0][i])][2];
@@ -387,9 +382,7 @@ public class VRMLHelper {
 		ifsf.setFaceNormals(fNormals);
 		//ifsf.setGenerateVertexNormals(true);
 	}
-	break;
-	case 6:// per Vertex
-	{
+	if(bind==State.Binding.PER_VERTEX){
 		int m=0;
 		for (int i=0;i<faceCount;i++){
 			int faceLength=cIndex[i].length;
@@ -404,33 +397,101 @@ public class VRMLHelper {
 		ifsf.setVertexNormals(vNormals);
 		ifsf.setGenerateFaceNormals(true);
 	}
-		break;
-	case 0:// default
-	case 7:// per Vertex indexed 
-	{
+	if(bind==State.Binding.DEFAULT|bind==State.Binding.PER_VERTEX_INDEXED){
 		if (nIndex == null || nIndex.length != faceCount){
 			//ifsf.setGenerateVertexNormals(true);
 			ifsf.setGenerateFaceNormals(true); 
-			break;
 		}
-		for (int i=0;i<faceCount;i++){
-//			int k=faceCount-i-1;
-			int faceLength=cIndex[i].length;
-			for (int j=0;j<faceLength;j++){
-//				int l=faceLength-1-j;
-				double [] n=state.normals[nIndex[i][j]];
-				vNormals[cIndex[i][j]][0]=n[0];
-				vNormals[cIndex[i][j]][1]=n[1];
-				vNormals[cIndex[i][j]][2]=n[2];
+		else{
+			for (int i=0;i<faceCount;i++){
+//				int k=faceCount-i-1;
+				int faceLength=cIndex[i].length;
+				for (int j=0;j<faceLength;j++){
+//					int l=faceLength-1-j;
+					double [] n=state.normals[nIndex[i][j]];
+					vNormals[cIndex[i][j]][0]=n[0];
+					vNormals[cIndex[i][j]][1]=n[1];
+					vNormals[cIndex[i][j]][2]=n[2];
+				}
 			}
+			ifsf.setVertexNormals(vNormals);
+			ifsf.setGenerateFaceNormals(true);
 		}
-		ifsf.setVertexNormals(vNormals);
-		ifsf.setGenerateFaceNormals(true);
 	}
-		break;
-		default:
-		break;
-	}
+			
+		
+//	switch (state.normalBinding) {
+//	case 1:// overall
+//	{	for (int i=0;i<faceCount;i++){
+//			fNormals[i][0]=state.normals[0][0];
+//			fNormals[i][1]=state.normals[0][1];
+//			fNormals[i][2]=state.normals[0][2];
+//		}
+//		ifsf.setFaceNormals(fNormals);
+//		//ifsf.setGenerateVertexNormals(true);
+//	}
+//	break;
+//	case 2:// per part
+//	case 4:// per face
+//	{	System.arraycopy(state.normals,0,fNormals,0,faceCount);
+//		ifsf.setFaceNormals(fNormals);
+//		//ifsf.setGenerateVertexNormals(true);
+//	}
+//	break;
+//	case 3:// per part indexed
+//	case 5:// per face indexed
+//	{	for (int i=0;i<faceCount;i++){
+//			fNormals[i][0]=state.normals[(nIndex[0][i])][0];
+//			fNormals[i][1]=state.normals[(nIndex[0][i])][1];
+//			fNormals[i][2]=state.normals[(nIndex[0][i])][2];
+//		}
+//		ifsf.setFaceNormals(fNormals);
+//		//ifsf.setGenerateVertexNormals(true);
+//	}
+//	break;
+//	case 6:// per Vertex
+//	{
+//		int m=0;
+//		for (int i=0;i<faceCount;i++){
+//			int faceLength=cIndex[i].length;
+//			for (int j=0;j<faceLength;j++){
+//				double [] n=state.normals[m];
+//				vNormals[cIndex[i][j]][0]=n[0];
+//				vNormals[cIndex[i][j]][1]=n[1];
+//				vNormals[cIndex[i][j]][2]=n[2];
+//				m++;
+//			}
+//		}
+//		ifsf.setVertexNormals(vNormals);
+//		ifsf.setGenerateFaceNormals(true);
+//	}
+//		break;
+//	case 0:// default
+//	case 7:// per Vertex indexed 
+//	{
+//		if (nIndex == null || nIndex.length != faceCount){
+//			//ifsf.setGenerateVertexNormals(true);
+//			ifsf.setGenerateFaceNormals(true); 
+//			break;
+//		}
+//		for (int i=0;i<faceCount;i++){
+////			int k=faceCount-i-1;
+//			int faceLength=cIndex[i].length;
+//			for (int j=0;j<faceLength;j++){
+////				int l=faceLength-1-j;
+//				double [] n=state.normals[nIndex[i][j]];
+//				vNormals[cIndex[i][j]][0]=n[0];
+//				vNormals[cIndex[i][j]][1]=n[1];
+//				vNormals[cIndex[i][j]][2]=n[2];
+//			}
+//		}
+//		ifsf.setVertexNormals(vNormals);
+//		ifsf.setGenerateFaceNormals(true);
+//	}
+//		break;
+//		default:
+//		break;
+//	}
 }
 	/**
 	 * Setzt FarbListe in die gegebene Factory
@@ -443,63 +504,108 @@ public class VRMLHelper {
 	 */
 	public static void setColors(IndexedFaceSetFactory ifsf,
 			int [][] coordIndex,int[][] colorIndex,State state){
-	int faceCount=coordIndex.length;
-	int VertexCount= state.coords.length;
-	Color[] fColors=new Color[faceCount];
-	Color[] vColors=new Color[VertexCount];
-	switch (state.materialBinding) {
-	case 0:// default
-	case 1:// overall
-	break;
-	case 2:// per part
-	case 4:// per face
-	{   if (state.diffuse.length>=faceCount){
-			System.arraycopy(state.diffuse,0,fColors,0,faceCount);
-			ifsf.setFaceColors(fColors);
-	}	else System.err.println("wrong material Binding"); 
-	}
-	break;
-	case 3:// per part indexed
-	case 5:// per face indexed
-	{		for (int i=0;i<faceCount;i++){
-				fColors[i]=state.diffuse[(colorIndex[0][i])];
-				}
-			ifsf.setFaceColors(fColors);
-			break;
-	}
-	case 6:// per Vertex
-	{
-		if (state.diffuse.length>=faceCount){
-		int m=0;
-		for (int i=0;i<faceCount;i++){
-//			int k=faceCount-i-1;
-			int faceLength=coordIndex[i].length;
-			for (int j=0;j<faceLength;j++){
-//				int l=faceLength-1-j;
-				vColors[coordIndex[i][j]]=state.diffuse[m];
-				m++;
-			}
+		int faceCount=coordIndex.length;
+		int VertexCount= state.coords.length;
+		Color[] fColors=new Color[faceCount];
+		Color[] vColors=new Color[VertexCount];
+		State.Binding bind= state.materialBinding;
+		if(bind==State.Binding.DEFAULT|
+				bind==State.Binding.OVERALL|
+				bind==State.Binding.NONE){}
+
+		if(bind==State.Binding.PER_PART
+				|bind==State.Binding.PER_FACE){
+			if (state.diffuse.length>=faceCount){
+				System.arraycopy(state.diffuse,0,fColors,0,faceCount);
+				ifsf.setFaceColors(fColors);
+			}	else System.err.println("wrong material Binding");
 		}
-		ifsf.setVertexColors(vColors);
-		break;}
-	}
-		break;
-	case 7:// per Vertex indexed 
-	{
+		if(bind==State.Binding.PER_PART_INDEXED
+				|bind==State.Binding.PER_FACE_INDEXED){
 			for (int i=0;i<faceCount;i++){
-//			int k=faceCount-i-1;
-			int faceLength=coordIndex[i].length;
-			for (int j=0;j<faceLength;j++){
-//				int l=faceLength-1-j;
-				vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
+				fColors[i]=state.diffuse[(colorIndex[0][i])];
+			}
+			ifsf.setFaceColors(fColors);
+		}
+		if(bind==State.Binding.PER_VERTEX){
+			if (state.diffuse.length>=faceCount){
+				int m=0;
+				for (int i=0;i<faceCount;i++){
+//					int k=faceCount-i-1;
+					int faceLength=coordIndex[i].length;
+					for (int j=0;j<faceLength;j++){
+//						int l=faceLength-1-j;
+						vColors[coordIndex[i][j]]=state.diffuse[m];
+						m++;
+					}
+				}
+				ifsf.setVertexColors(vColors);
 			}
 		}
+		if(bind==State.Binding.PER_VERTEX_INDEXED){
+			for (int i=0;i<faceCount;i++){
+//				int k=faceCount-i-1;
+				int faceLength=coordIndex[i].length;
+				for (int j=0;j<faceLength;j++){
+//					int l=faceLength-1-j;
+					vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
+				}
+			}	
+		}
+
+//		switch (state.materialBinding) {
+//		case 0:// default
+//		case 1:// overall
+//		break;
+//		case 2:// per part
+//		case 4:// per face
+//		{   if (state.diffuse.length>=faceCount){
+//		System.arraycopy(state.diffuse,0,fColors,0,faceCount);
+//		ifsf.setFaceColors(fColors);
+//		}	else System.err.println("wrong material Binding"); 
+//		}
+//		break;
+//		case 3:// per part indexed
+//		case 5:// per face indexed
+//		{		for (int i=0;i<faceCount;i++){
+//		fColors[i]=state.diffuse[(colorIndex[0][i])];
+//		}
+//		ifsf.setFaceColors(fColors);
+//		break;
+//		}
+//		case 6:// per Vertex
+//		{
+//		if (state.diffuse.length>=faceCount){
+//		int m=0;
+//		for (int i=0;i<faceCount;i++){
+////		int k=faceCount-i-1;
+//		int faceLength=coordIndex[i].length;
+//		for (int j=0;j<faceLength;j++){
+////		int l=faceLength-1-j;
+//		vColors[coordIndex[i][j]]=state.diffuse[m];
+//		m++;
+//		}
+//		}
+//		ifsf.setVertexColors(vColors);
+//		break;}
+//		}
+//		break;
+//		case 7:// per Vertex indexed 
+//		{
+//		for (int i=0;i<faceCount;i++){
+////		int k=faceCount-i-1;
+//		int faceLength=coordIndex[i].length;
+//		for (int j=0;j<faceLength;j++){
+////		int l=faceLength-1-j;
+//		vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
+//		}
+//		}
+//		}
+//		break;
+//		default:
+//		break;
+//		}
 	}
-		break;
-		default:
-		break;
-	}
-}
 	/**
 	 * Setzt FarbListe in das gegebene PointSet
 	 * @param psf
@@ -509,39 +615,66 @@ public class VRMLHelper {
 	 */
 	public static void setColors(PointSet ps,State state,int start,int numP){
 	double[][] vColors=new double[numP][3];
-	switch (state.materialBinding) {
-	case 0:// default
-	case 1:// overall
-	break;
-	case 2:// per part
-	case 4:// per face 
-	case 6:// per Vertex 
-	{
+	State.Binding bind=state.materialBinding;
+	if(bind==State.Binding.DEFAULT|
+			bind==State.Binding.OVERALL|
+			bind==State.Binding.NONE){}
+	if(bind==State.Binding.PER_PART|
+			bind==State.Binding.PER_FACE|
+			bind==State.Binding.PER_VERTEX){
 		for (int i=0;i<numP;i++){
 			Color c=state.diffuse[i];
 			vColors[i][0]=((double)c.getRed())/256;
 			vColors[i][1]=((double)c.getGreen())/256;
 			vColors[i][2]=((double)c.getBlue())/256;
 		}	
-	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
+	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));	
 	}
-	break;
-	case 3:// per part indexed
-	case 5:// per face indexed
-	case 7:// per Vertex indexed 
-	{	
+	if(bind==State.Binding.PER_PART_INDEXED|
+			bind==State.Binding.PER_FACE_INDEXED|
+			bind==State.Binding.PER_VERTEX_INDEXED){
 		for (int i=start;i<start+numP;i++){
 			Color c=state.diffuse[i];
 			vColors[i-start][0]=((double)c.getRed())/256;
 			vColors[i-start][1]=((double)c.getGreen())/256;
 			vColors[i-start][2]=((double)c.getBlue())/256;
 		}	
-	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
+	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));	
 	}
-	break;
-		default:
-		break;
-	}
+	
+//	switch (state.materialBinding) {
+//	case 0:// default
+//	case 1:// overall
+//	break;
+//	case 2:// per part
+//	case 4:// per face 
+//	case 6:// per Vertex 
+//	{
+//		for (int i=0;i<numP;i++){
+//			Color c=state.diffuse[i];
+//			vColors[i][0]=((double)c.getRed())/256;
+//			vColors[i][1]=((double)c.getGreen())/256;
+//			vColors[i][2]=((double)c.getBlue())/256;
+//		}	
+//	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
+//	}
+//	break;
+//	case 3:// per part indexed
+//	case 5:// per face indexed
+//	case 7:// per Vertex indexed 
+//	{	
+//		for (int i=start;i<start+numP;i++){
+//			Color c=state.diffuse[i];
+//			vColors[i-start][0]=((double)c.getRed())/256;
+//			vColors[i-start][1]=((double)c.getGreen())/256;
+//			vColors[i-start][2]=((double)c.getBlue())/256;
+//		}	
+//	ps.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(vColors));
+//	}
+//	break;
+//		default:
+//		break;
+//	}
 }
 	/**
 	 * Setzt FarbListe in die gegebene Factory
@@ -562,18 +695,16 @@ public class VRMLHelper {
 		vColors[i]=Color.BLACK;
 	for(int i=0;i<edgeCount;i++)
 		eColors[i]=Color.BLACK;
-	switch (state.materialBinding) {
-	case 0:// default
-	case 1:// overall
-	break;
-	case 2:// per part
-	{	System.arraycopy(state.diffuse,0,eColors,0,edgeCount);
+	State.Binding bind=state.materialBinding;
+	if(bind==State.Binding.DEFAULT|
+			bind==State.Binding.OVERALL|
+			bind==State.Binding.NONE){}
+	if(bind==State.Binding.PER_PART){
+		System.arraycopy(state.diffuse,0,eColors,0,edgeCount);
 		ilsf.setEdgeColors(eColors);
 	}
-	break;
-	case 4:// per face 
-		//TODO: get nicht, mache angepasstes "per Vertex"
-	{	int m=0;
+	if(bind==State.Binding.PER_FACE){
+		int m=0;
 		for (int i=0;i<edgeCount;i++){
 			int edgeLength=coordIndex[i].length;
 			for (int j=0;j<edgeLength;j++){
@@ -586,18 +717,13 @@ public class VRMLHelper {
 		}
 		ilsf.setVertexColors(vColors);
 	}
-	break;
-	case 3:// per part indexed
-	{
+	if(bind==State.Binding.PER_PART_INDEXED){
 		for (int i=0;i<edgeCount;i++){
-		eColors[i]=state.diffuse[(colorIndex[0][i])];
-		}
-	ilsf.setEdgeColors(eColors);
+			eColors[i]=state.diffuse[(colorIndex[0][i])];
+			}
+		ilsf.setEdgeColors(eColors);	
 	}
-	break;
-	case 5:// per face indexed
-	//TODO: get nicht mache angepasstes "per vertex indexed"
-		{
+	if(bind==State.Binding.PER_FACE_INDEXED){
 		for (int i=0;i<edgeCount;i++){
 			int edgeLength=coordIndex[i].length;
 			for (int j=0;j<edgeLength;j++){
@@ -607,12 +733,9 @@ public class VRMLHelper {
 					vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
 			}
 		}
-		ilsf.setVertexColors(vColors);
+		ilsf.setVertexColors(vColors);	
 	}
-	break;
-	case 6:// per Vertex 
-		//TODO: eine Farbe pro Punkt! weitere Farben gehen verloren
-	{
+	if(bind==State.Binding.PER_VERTEX){
 		int m=0;
 		for (int i=0;i<edgeCount;i++){
 			int edgeLength=coordIndex[i].length;
@@ -623,9 +746,7 @@ public class VRMLHelper {
 		}
 		ilsf.setVertexColors(vColors);
 	}
-		break;
-	case 7:// per Vertex indexed 
-	{
+	if(bind==State.Binding.PER_VERTEX_INDEXED){
 		for (int i=0;i<edgeCount;i++){
 			int edgeLength=coordIndex[i].length;
 			for (int j=0;j<edgeLength;j++){
@@ -634,10 +755,83 @@ public class VRMLHelper {
 		}
 		ilsf.setVertexColors(vColors);
 	}
-		break;
-		default:
-		break;
-	}
+
+//	switch (state.materialBinding) {
+//	case 0:// default
+//	case 1:// overall
+//	break;
+//	case 2:// per part
+//	{	System.arraycopy(state.diffuse,0,eColors,0,edgeCount);
+//		ilsf.setEdgeColors(eColors);
+//	}
+//	break;
+//	case 4:// per face 
+//		//TODO: get nicht, mache angepasstes "per Vertex"
+//	{	int m=0;
+//		for (int i=0;i<edgeCount;i++){
+//			int edgeLength=coordIndex[i].length;
+//			for (int j=0;j<edgeLength;j++){
+//				if (j==edgeLength-1)
+//					vColors[coordIndex[i][j]]=state.diffuse[m-1];
+//				else
+//					vColors[coordIndex[i][j]]=state.diffuse[m];
+//				m++;
+//			}
+//		}
+//		ilsf.setVertexColors(vColors);
+//	}
+//	break;
+//	case 3:// per part indexed
+//	{
+//		for (int i=0;i<edgeCount;i++){
+//		eColors[i]=state.diffuse[(colorIndex[0][i])];
+//		}
+//	ilsf.setEdgeColors(eColors);
+//	}
+//	break;
+//	case 5:// per face indexed
+//	//TODO: get nicht mache angepasstes "per vertex indexed"
+//		{
+//		for (int i=0;i<edgeCount;i++){
+//			int edgeLength=coordIndex[i].length;
+//			for (int j=0;j<edgeLength;j++){
+//				if (j==edgeLength-1)
+//					vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j-1]];
+//				else
+//					vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
+//			}
+//		}
+//		ilsf.setVertexColors(vColors);
+//	}
+//	break;
+//	case 6:// per Vertex 
+//		//TODO: eine Farbe pro Punkt! weitere Farben gehen verloren
+//	{
+//		int m=0;
+//		for (int i=0;i<edgeCount;i++){
+//			int edgeLength=coordIndex[i].length;
+//			for (int j=0;j<edgeLength;j++){
+//				vColors[coordIndex[i][j]]=state.diffuse[m];
+//				m++;
+//			}
+//		}
+//		ilsf.setVertexColors(vColors);
+//	}
+//		break;
+//	case 7:// per Vertex indexed 
+//	{
+//		for (int i=0;i<edgeCount;i++){
+//			int edgeLength=coordIndex[i].length;
+//			for (int j=0;j<edgeLength;j++){
+//				vColors[coordIndex[i][j]]=state.diffuse[colorIndex[i][j]];
+//			}
+//		}
+//		ilsf.setVertexColors(vColors);
+//	}
+//		break;
+//		default:
+//		break;
+//	}
 }
 	/**
 	 * wandelt eine Int- oder HexZahl 
@@ -705,7 +899,7 @@ public class VRMLHelper {
 		int[] refferenceTable= new int[totalVC];
 		for(int f=0;f<faceC;f++){
 			for(int v=0;v<faces[f].length;v++){
-				if(state.normalBinding==PER_VERTEX){
+				if(state.normalBinding==State.Binding.PER_VERTEX){
 					newVNormals[count]=new double []{
 							state.normals[faces[f][v]][0],
 							state.normals[faces[f][v]][1],
@@ -729,7 +923,7 @@ public class VRMLHelper {
 				state.textureCoords.length==state.coords.length)
 			state.textureCoords=newTexCoords;
 		state.coords=newCoords;
-		if(state.normalBinding==PER_VERTEX){
+		if(state.normalBinding==State.Binding.PER_VERTEX){
 			state.normals=newVNormals;
 		}
 		return refferenceTable;

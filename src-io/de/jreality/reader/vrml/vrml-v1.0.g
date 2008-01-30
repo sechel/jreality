@@ -60,7 +60,7 @@ options {
 	// 		Desshalb gibt es im State eine Matrix extraGeoTrans die dufuer ungleich 
 	//		der Identitaet gesetzt wird. Sie wird im ShapeNode behandelt.
 	// - sfbitmaskValue werden eine Liste mit zulaessigen Namen uebergeben
-	//		zurueckgegebewn wird ein neuer BooleanArray der fuer die  
+	//		zurueckgegeben wird ein neuer BooleanArray der fuer die  
 	//		geparsten Namen den entsprechenden Flag auf true gesetzt hat
 	// - Erkennungs-Problem zwischen double(float) und int(long):
 	//		betrachte filefragment: " 2   .5    1.5 "
@@ -131,7 +131,7 @@ vrmlFile returns [SceneGraphComponent r=null]
 			state.currNode=root;
 			state.camPath=p;
 			state.transparency= new double[]{1};
-			root.setAppearance(VRMLHelper.defaultApp());
+			//root.setAppearance(VRMLHelper.defaultApp());
 			}
 		(statement[state] {state.history = state.history+"*";}
 		(statement[state] {state.history = state.history+"*";
@@ -232,6 +232,12 @@ separatorNode[State state]
  if (VRMLHelper.verbose) System.err.println("Separator"); 
  State state2= new State(state);
  Transformation t= state2.trafo;
+ Appearance app=null;
+ if(state2.materialBinding==State.Binding.OVERALL){
+ 	app= new Appearance();
+	state2.setColorApp(app,false);
+ 	state2.materialBinding=State.Binding.NONE;
+ }
  state2.trafo=null;
  state2.history=state.history+"|";
  { if (VRMLHelper.verbose) System.err.println(state.history+"\\"); }
@@ -242,6 +248,8 @@ separatorNode[State state]
 				SceneGraphComponent sgc = new SceneGraphComponent();
 				if (t!=null)
 					sgc.setTransformation(t);
+				if (app!=null)
+					sgc.setAppearance(app);
 				sgc.setName("Knot LineNo "+g.getLine()); // for looking up later
 				state2.currNode.addChild(sgc);
 				state2.currNode=sgc;
@@ -502,7 +510,15 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	ifsf.setFaceCount(coordIndex2.length);
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
 	ifsf.setFaceIndices(coordIndex2);
-	if (state.normalBinding >=6 | state.materialBinding>=6 
+	if (state.normalBinding 
+	    ==State.Binding.PER_VERTEX
+	    |state.normalBinding ==State.Binding.PER_VERTEX_INDEXED
+	// >=6 ohne NONE
+	| state.materialBinding
+		==State.Binding.PER_VERTEX
+	    |state.materialBinding ==State.Binding.PER_VERTEX_INDEXED
+	// >=6 ohne NONE
+	
 		| state.textureFile.equals("")	|state.textureData.length!=0 )
 		{
 		// have to separate the vertices!
