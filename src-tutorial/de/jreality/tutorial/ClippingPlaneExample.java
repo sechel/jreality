@@ -16,6 +16,7 @@ import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.IndexedFaceSet;
@@ -26,6 +27,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -47,9 +49,13 @@ public class ClippingPlaneExample{
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("world");
 		
-		SceneGraphComponent clipIcon = SceneGraphUtility.createFullSceneGraphComponent("theClipIcon");
-		double[][] vv = {{0,-1,0},{0,1,0},{1,1,0},{1,-1,0}};
+		final SceneGraphComponent clipIcon = SceneGraphUtility.createFullSceneGraphComponent("theClipIcon");
+		double[][] vv = {{-1,-1,0},{-1,1,0},{1,1,0},{1,-1,0}};
 		IndexedFaceSet square = IndexedFaceSetUtility.constructPolygon(vv);
+		// set color to be completely transparent
+		square.setFaceAttributes(Attribute.COLORS, 
+				StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(new double[][]{{0,0,1,0}}));
+	
 		clipIcon.setGeometry(square);
 		clipIcon.getTransformation().setMatrix(P3.makeTranslationMatrix(null, new double[]{0d,0d,.5d}, Pn.EUCLIDEAN));
 		
@@ -61,10 +67,19 @@ public class ClippingPlaneExample{
 		cp.setLocal(true);
 		clipPlane.setGeometry(cp);
 		// add a rotate tool to the clip icon
-		clipIcon.addTool(new RotateTool());
+		final SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
+		clipIcon.addTool(new RotateTool() {
+
+			@Override
+			public void perform(ToolContext tc) {
+				super.perform(tc);
+				sgc.getTransformation().setMatrix(
+						Rn.inverse(null, clipIcon.getTransformation().getMatrix()));
+			}
+			
+		});
 		clipIcon.addChild(clipPlane);
 		
-		SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
 		PickUtility.setPickable(sgc, false);
 		sgc.addChild(SphereUtility.tessellatedCubeSphere(SphereUtility.SPHERE_SUPERFINE));
 		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"name","twoSide");
@@ -72,7 +87,7 @@ public class ClippingPlaneExample{
 		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
 		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
 		sgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-		root.addChild(sgc);
+		clipPlane.addChild(sgc);
 		root.addChild(clipIcon);
 		root.addTool(new ClickWheelCameraZoomTool());
 	    ViewerApp.display(root);

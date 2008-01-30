@@ -46,7 +46,11 @@ public class LocalClippingPlaneExample{
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER,TwoSidePolygonShader.class);
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
-			world.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+			world.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+
+					CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+			world.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.RED);
+			world.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+
+					CommonAttributes.POINT_RADIUS, 2*CommonAttributes.POINT_RADIUS_DEFAULT);
 			return world;
 	  }
 	  
