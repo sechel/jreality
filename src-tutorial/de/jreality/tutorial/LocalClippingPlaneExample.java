@@ -37,13 +37,16 @@ public class LocalClippingPlaneExample{
 			return foo;
 	  }
 	  
+	  /**
+	   * This is just a sphere -- for real applications, replace this sgc with your own.
+	   * @return	the scene graph component to be sliced.
+	   */
 	  protected SceneGraphComponent makeWorld()	{	
 			SceneGraphComponent world;
 			world = SceneGraphUtility.createFullSceneGraphComponent("container");
 			PickUtility.setPickable(world, false);
 			world.addChild(SphereUtility.tessellatedCubeSphere(SphereUtility.SPHERE_SUPERFINE));
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"name","twoSide");
-			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER,TwoSidePolygonShader.class);
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
 			world.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+
