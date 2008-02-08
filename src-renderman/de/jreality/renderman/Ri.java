@@ -102,6 +102,9 @@ public class Ri {
         }
     }
     
+    public String quote(String s)	{
+    	return("\""+s+"\"");
+    }
     public  void declare(String name, String type)	{
         w.println("Declare "+RIBHelper.str(name)+" "+RIBHelper.str(type));    	
     }
@@ -303,6 +306,12 @@ public class Ri {
         w.print(" ");
         RIBHelper.writeObject(w,vertices);
         w.print(" ");
+        RIBHelper.writeMap(w,map);
+    }
+   
+    public  void patchMesh(String type, int nu,  boolean uwrap, int nv, boolean vwrap, Map map) {
+        w.print("PatchMesh "+quote(type)+" "+nu+" "+quote(uwrap ? "periodic" : "nonperiodic")+" "+nv+" "+
+        		quote(uwrap ? "periodic" : "nonperiodic"));
         RIBHelper.writeMap(w,map);
     }
     

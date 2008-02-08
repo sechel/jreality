@@ -61,6 +61,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.shader.SLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
@@ -92,6 +93,9 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.LineShader;
+import de.jreality.shader.PointShader;
+import de.jreality.shader.PolygonShader;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -398,8 +402,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if(shadowEnabled){
 			if(rendererType==RIBViewer.TYPE_3DELIGHT)
 				ri.verbatim("Attribute \"visibility\"  \"string transmission\" \"shader\"");            
-			else 
+			else {
 				ri.verbatim("Attribute \"visibility\"  \"int transmission\" [1]");
+				ri.verbatim("Option \"trace\"  \"int maxdepth\" [2]");
+			}
 		}
 
 		if(raytracedReflectionsEnabled||raytracedVolumesEnabled){
@@ -411,6 +417,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			}else {      
 				ri.verbatim("Attribute \"visibility\"  \"int diffuse\" [1]");
 				ri.verbatim("Attribute \"visibility\"  \"int specular\" [1]");
+				ri.verbatim("Option \"trace\"  \"int maxdepth\" [2]");
 			}
 		}
 
@@ -688,6 +695,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			double d = eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
 			currentOpacity = 1f - (float) d;
 		}
+		//System.err.println("Current opacity is "+currentOpacity);
 	}
 
 	/**
@@ -813,11 +821,22 @@ public class RIBVisitor extends SceneGraphVisitor {
 			DataList ind = p.getVertexAttributes(Attribute.INDICES);
 			int[] vind = null;
 			if (ind != null) vind = ind.toIntArray(null);
+			Color pointColor;
+			
 			if (drawSpheres) {
 				// process the polygon shader associated to this point shader
 				// This is something of a hack since we don't really know what the associated string is
-				handlingProxyGeometry = true;  
-				
+				handlingProxyGeometry = true; 
+				PointShader ls = dgs.getPointShader();
+				if (ls instanceof DefaultPointShader)	{
+					PolygonShader ps = ((DefaultPointShader)ls).getPolygonShader();
+					if (ps instanceof DefaultPolygonShader)	{
+						pointColor = ((DefaultPolygonShader)ps).getDiffuseColor();
+						float[] cc = new float[3];
+						cc = pointColor.getRGBColorComponents(cc);
+						ri.color(cc);
+					}
+				}
 				double[][] vColData=null;
 				if( p.getVertexAttributes(Attribute.COLORS)!=null)
 					vColData= p.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null);          
@@ -845,6 +864,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 			} else {
 				// use the RenderMan "points" command to draw the points				
+				PointShader ls = dgs.getPointShader();
+				if (ls instanceof DefaultPointShader)	{
+						pointColor = ((DefaultPointShader)ls).getDiffuseColor();
+						ri.color(pointColor);
+				}
 				HashMap<String, Object> map = new HashMap<String, Object>();
 				int fiber = GeometryUtility.getVectorLength(coord);
 				double[][] pc = new double[n][fiber];
@@ -1119,11 +1143,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 			boolean opaqueColors = true;
 			if (colors != null && GeometryUtility.getVectorLength(colors) >= 3) {
 				double[][] colorArray = colors.toDoubleArrayArray(null);
-//				for (double[] cc : colorArray) {
-//				if (cc[3] != 1.0)
-//				opaqueColors = false;
-//				}
-				opaqueColors = false;
+				for (double[] cc : colorArray) {
+					if (cc[3] != 1.0)
+					opaqueColors = false;
+				}
 				if (!opaqueColors) {
 					int nn = GeometryUtility.getVectorLength(colors);
 					int numFaces = i.getNumFaces();
@@ -1164,15 +1187,15 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 * problem in Renderman prman renderer related to non-opaque per-face
 	 * colors.
 	 * 
-	 * @param i
+	 * @param ifs
 	 * @param color
 	 */
-	protected void pointPolygon(IndexedFaceSet i, float[] color) {
-		int npolys = i.getNumFaces();
+	protected void pointPolygon(IndexedFaceSet ifs, float[] color) {
+		int npolys = ifs.getNumFaces();
 		if (color != null && color.length == 4 && color[3] == 0.0 && ignoreAlpha0) return;
 		if (npolys != 0) {
 			HashMap<String, Object> map = new HashMap<String, Object>();
-			DataList coords = i.getVertexAttributes(Attribute.COORDINATES);
+			DataList coords = ifs.getVertexAttributes(Attribute.COORDINATES);
 			DoubleArrayArray da = coords.toDoubleArrayArray();
 			int pointlength = GeometryUtility.getVectorLength(coords);
 			// We'd like to be able to use the "Pw" attribute which accepts
@@ -1219,17 +1242,17 @@ public class RIBVisitor extends SceneGraphVisitor {
 			}
 			DataList normals = null;
 			boolean vertexNormals = true;
-			if (smooth && i.getVertexAttributes(Attribute.NORMALS) != null)
-				normals = i.getVertexAttributes(Attribute.NORMALS);
-			else if (i.getFaceAttributes(Attribute.NORMALS) != null)
-			{vertexNormals = false; normals = i.getFaceAttributes(Attribute.NORMALS);}
+			if (smooth && ifs.getVertexAttributes(Attribute.NORMALS) != null)
+				normals = ifs.getVertexAttributes(Attribute.NORMALS);
+			else if (ifs.getFaceAttributes(Attribute.NORMALS) != null)
+			{vertexNormals = false; normals = ifs.getFaceAttributes(Attribute.NORMALS);}
 			int n;
 			if (normals != null) {
 				da = normals.toDoubleArrayArray();
 				n = da.getLengthAt(0);
 				if (n == 4 && currentSignature == Pn.EUCLIDEAN) {
-					throw new IllegalStateException(
-							"4D normals only valid with non-euclidean signature");
+//					throw new IllegalStateException(
+//							"4D normals only valid with non-euclidean signature");
 				}
 				if (currentSignature == Pn.EUCLIDEAN) {
 					float[] fnormals = new float[3 * da.getLength()];
@@ -1256,7 +1279,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				}
 			}
 			// texture coords:
-			DataList texCoords = i.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+			DataList texCoords = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 			if (texCoords != null) {
 				float[] ftex = new float[2 * texCoords.size()];
 				for (int j = 0; j < texCoords.size(); j++) {
@@ -1271,8 +1294,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 				map.put("st", ftex);
 			}
 
-			DataList vertexColors = i.getVertexAttributes(Attribute.COLORS);
-			DataList faceColors = i.getFaceAttributes(Attribute.COLORS);
+			DataList vertexColors = ifs.getVertexAttributes(Attribute.COLORS);
+			DataList faceColors = ifs.getFaceAttributes(Attribute.COLORS);
 			if ((smooth || (color == null && faceColors == null)) && vertexColors != null) {
 				int vertexColorLength = GeometryUtility
 				.getVectorLength(vertexColors);
@@ -1312,10 +1335,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 					vCol[3 * j] = (float) rgba.getValueAt(0);
 					vCol[3 * j + 1] = (float) rgba.getValueAt(1);
 					vCol[3 * j + 2] = (float) rgba.getValueAt(2);
+					float alpha = (float) rgba.getValueAt(3) * currentOpacity;
 					if (faceColorLength == 4) {
-						vOp[3 * j] = (float) rgba.getValueAt(3);
-						vOp[3 * j + 1] = (float) rgba.getValueAt(3);
-						vOp[3 * j + 2] = (float) rgba.getValueAt(3);
+						vOp[3 * j] = vOp[3 * j + 1] = vOp[3 * j + 2] = alpha;
 					}
 				}
 				map.put("uniform color Cs", vCol);
@@ -1331,7 +1353,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			int[] nvertices = new int[npolys];
 			int verticesLength = 0;
 			for (int k = 0; k < npolys; k++) {
-				IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
+				IntArray fi = ifs.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
 				nvertices[k] = fi.getLength();
 				verticesLength += nvertices[k];
 			}
@@ -1339,7 +1361,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			int l = 0;
 			for (int k = 0; k < npolys; k++) {
 				for (int m = 0; m < nvertices[k]; m++, l++) {
-					IntArray fi = i.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
+					IntArray fi = ifs.getFaceAttributes(Attribute.INDICES).item(k).toIntArray();
 					vertices[l] = fi.getValueAt(m);
 				}
 			}
@@ -1360,7 +1382,12 @@ public class RIBVisitor extends SceneGraphVisitor {
 					ri.opacity(f);
 				}
 			}
-			ri.pointsPolygons(npolys, nvertices, vertices, map);
+			Object foo = ifs.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+			if (foo != null && foo instanceof Dimension)	{
+				Dimension d = (Dimension) foo;
+				ri.patchMesh("bilinear", d.width, false, d.height, false, map);
+			}
+			else ri.pointsPolygons(npolys, nvertices, vertices, map);
 		}
 	}
 

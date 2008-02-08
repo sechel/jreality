@@ -30,6 +30,7 @@ import de.jreality.math.Rn;
 import de.jreality.renderman.shader.DefaultPolygonShader;
 import de.jreality.renderman.shader.CustomPolygonShader;
 import de.jreality.renderman.shader.RendermanShader;
+import de.jreality.renderman.shader.SLShader;
 import de.jreality.renderman.shader.TwoSidePolygonShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;

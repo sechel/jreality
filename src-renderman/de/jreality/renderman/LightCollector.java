@@ -68,7 +68,7 @@ import de.jreality.shader.EffectiveAppearance;
  * <p>
  * Todo: look at the {@link de.jreality.scene.Appearance} attached to the SceneGraphComponent 
  * containing the light for the key {@link de.jreality.shader.CommonAttributes#RMAN_LIGHT_SHADER}. If 
- * found, its value should be an instance of {@link de.jreality.renderman.SLShader}, and this 
+ * found, its value should be an instance of {@link de.jreality.renderman.shader.SLShader}, and this 
  * should be substituted for the standard light as generated now by this visitor.
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
  *
