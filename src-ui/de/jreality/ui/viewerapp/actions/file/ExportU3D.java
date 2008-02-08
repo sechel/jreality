@@ -91,8 +91,8 @@ public class ExportU3D extends AbstractJrAction {
       JrScene s = new JrScene(viewer.getSceneRoot());
       s.addPath("cameraPath", viewer.getCameraPath());
       ToolSystem ts = ToolSystem.toolSystemForViewer(viewer);
-      s.addPath("avatarPath", ts.getAvatarPath());
-      s.addPath("emptyPickPath", ts.getEmptyPickPath());
+      if (ts.getAvatarPath() != null)  s.addPath("avatarPath", ts.getAvatarPath());
+      if (ts.getEmptyPickPath() != null) s.addPath("emptyPickPath", ts.getEmptyPickPath());
       FileOutputStream fileOutputStream = new FileOutputStream(file);
 	writer.writeScene(s, fileOutputStream);
 	fileOutputStream.close();
