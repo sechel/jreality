@@ -65,7 +65,7 @@ public class WriterVRML
 	 geoPointMap = new HashMap<Integer, Geometry>();
 
 	
-	boolean useDefs = false;
+	boolean useDefs = true;
 	private DefaultGeometryShader dgs;
 	private RenderingHintsShader rhs;
 	private DefaultPolygonShader dps;
