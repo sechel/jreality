@@ -157,7 +157,9 @@ public class ViewerApp {
 	private JFrame externalNavigatorFrame;
 
 	private LinkedList<Component> accessory = new LinkedList<Component>();
+	private Component showFirstAccessory;
 	private HashMap<Component, String> accessoryTitles = new HashMap<Component, String>();
+	private HashMap<Component, JScrollPane> accessoryScrolls = new HashMap<Component, JScrollPane>();
 	private JTabbedPane navigatorTabs;
 
 	private boolean showMenu = true;  //default
@@ -843,17 +845,21 @@ public class ViewerApp {
 	 */
 	public Component getNavigatorWithAccessories() {
 
-//		if (accessory.isEmpty()) return getNavigator();
-
 		if (navigatorTabs == null) {
 			navigatorTabs = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
 		}
 		navigatorTabs.removeAll();
 		navigatorTabs.add("Scene graph", getNavigator());
 		for (Component c : accessory) {  //add accessories 
-			JScrollPane scroll = new JScrollPane(c);
-			scroll.setBorder(BorderFactory.createEmptyBorder());
-			navigatorTabs.addTab(accessoryTitles.get(c), scroll);
+			if (accessoryScrolls.get(c) != null)	{
+				navigatorTabs.addTab(accessoryTitles.get(c), accessoryScrolls.get(c));				
+			} else
+				navigatorTabs.addTab(accessoryTitles.get(c), c);				
+		}
+		if (showFirstAccessory != null) 	{
+			JScrollPane jsp = accessoryScrolls.get(showFirstAccessory);
+			if (jsp != null) navigatorTabs.setSelectedComponent(jsp);
+			else navigatorTabs.setSelectedComponent(showFirstAccessory); //scroll);
 		}
 
 
@@ -991,15 +997,28 @@ public class ViewerApp {
 
 
 	public void addAccessory(Component c) {
-		addAccessory(c, null);
+		addAccessory(c, c.getName());
 	}
 
 
 	public void addAccessory(Component c, String title) {
-		accessory.add(c);
-		accessoryTitles.put(c, title);
+		addAccessory(c, c.getName(), true);
 	}
 
+	public void addAccessory(Component c, String title, boolean scrolling) {
+		accessory.add(c);
+		accessoryTitles.put(c, title);
+		if (scrolling)	{
+			JScrollPane scroll = new JScrollPane(c);
+			scroll.setBorder(BorderFactory.createEmptyBorder());
+			accessoryScrolls.put(c, scroll);			
+		}
+	}
+
+	public void setFirstAccessory(Component c)	{
+		showFirstAccessory = c;
+	}
+	
 	public void removeAccessory(Component c)	{
 		accessory.remove(c);
 	}
