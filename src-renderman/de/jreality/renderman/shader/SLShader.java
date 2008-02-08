@@ -40,59 +40,37 @@
 
 package de.jreality.renderman.shader;
 
-import java.awt.Color;
-import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 
-import de.jreality.math.Matrix;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
-import de.jreality.renderman.RIBHelper;
-import de.jreality.renderman.RIBVisitor;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.CubeMap;
-import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
-
 /**
- * @author bleicher
+ * 
+ * @version 1.0
+ * @author timh
  *
  */
-public class TwoSidePolygonShader extends AbstractRendermanShader {
-  
-  CubeMap reflectionMap;  
-  
-  static int count = 0;
-  de.jreality.shader.TwoSidePolygonShader tsps;
-  DefaultPolygonShader front, back;
-  de.jreality.renderman.shader.DefaultPolygonShader rfront, rback;
-  
-  public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader xxx)	{
-	  super();	  
-	  shaderName="twosidepolygonshader";
-	  tsps = xxx;
-	  front = (DefaultPolygonShader) tsps.getFront();
-	  back = (DefaultPolygonShader) tsps.getBack();
-	  rfront = new de.jreality.renderman.shader.DefaultPolygonShader(front);
-	  rback = new de.jreality.renderman.shader.DefaultPolygonShader(back);
-  }  
-
-  public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name) {    
-    map.clear();
-    rfront.setFromEffectiveAppearance(ribv, eap, name, "front");
-    rback.setFromEffectiveAppearance(ribv, eap, name, "back");
-    map.putAll(rfront.getAttributes());
-    map.putAll(rback.getAttributes());
-    map.put("color diffusecolorfront", front.getDiffuseColor());
-    map.put("color diffusecolorback", back.getDiffuseColor());
-  }
-  
-  public String getType() {
-    return "Surface";
-  }
+public class SLShader {
+final String name;
+HashMap<String, Object> parameters = new HashMap<String, Object>();
+public SLShader(String name) {
+    this.name  = name;
+}
+/**
+ * @return Returns the name.
+ */
+public String getName() {
+    return name;
+}
+/**
+ * @return Returns the parameters.
+ */
+public Map getParameters() {
+    return parameters;
+}
+public void addParameter(String name, Object value) {
+    parameters.put(name, value);
+}
+public String toString() {
+    return name;
+}
 }

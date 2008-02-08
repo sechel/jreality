@@ -48,7 +48,6 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.RIBHelper;
 import de.jreality.renderman.RIBVisitor;
-import de.jreality.renderman.SLShader;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
