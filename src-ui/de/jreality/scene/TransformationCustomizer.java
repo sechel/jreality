@@ -257,16 +257,28 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 		}
 
 		public void actionPerformed(ActionEvent ev) {
-			updateValue();
-			
-			if (type==SCALE && chained) {  //update scale values
-				for (int i=X; i<=Z; i++) sEntries[i].setValue(getValue());
-				//repaint();
-			}
-			
+			updateValues();
 			updateTransformation(type);
 		}
 
+		private void updateValues() {
+			switch (type) {
+			case SCALE:
+				if (chained) {
+					updateValue();
+					for (int i=X; i<=Z; i++) sEntries[i].setValue(getValue());
+				}
+				else for (int i=X; i<=Z; i++) sEntries[i].updateValue();  //update scale values
+				break;
+			case ROTATION:
+				for (int i=X; i<=Z; i++) rEntries[i].updateValue();
+				rEntries[ANGLE].updateValue();
+				break;
+			case TRANSLATION:
+				for (int i=X; i<=Z; i++) tEntries[i].updateValue();
+			}
+		}
+		
 		public void updateValue() {
 			if (!textField.isEditValid()) {  //text is invalid.
 				Toolkit.getDefaultToolkit().beep();
