@@ -349,12 +349,12 @@ public class TextureUtility {
 	private static int findIndex(String name) {
 		//createCubeMap method requires order "bk","ft","up","dn","lf","rt"
 
-		if (name.contains("posx")) return 0;
-		if (name.contains("negx")) return 1;
-		if (name.contains("posy")) return 2;
-		if (name.contains("negy")) return 3;
-		if (name.contains("posz")) return 4;
-		if (name.contains("negz")) return 5;
+		if (name.contains("posx") || name.contains("positive_x")) return 0;
+		if (name.contains("negx") || name.contains("negative_x")) return 1;
+		if (name.contains("posy") || name.contains("positive_y")) return 2;
+		if (name.contains("negy") || name.contains("negative_y")) return 3;
+		if (name.contains("posz") || name.contains("positive_z")) return 4;
+		if (name.contains("negz") || name.contains("negative_z")) return 5;
 
 		// Quake order => ft,bk,up,dn,rt,lf => working with nebula.zip and other zip-files in testData3D
 		// ViewerVR environments => "rt,lf,up,dn,bk,ft" => working with jpg files (snow, desert)
