@@ -371,7 +371,8 @@ public class CameraUtility {
 	 * @param cameraPath
 	 * @param margin
 	 * @param signature
-	 */public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
+	 */
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
 	    Rectangle3D bounds = GeometryUtility.calculateBoundingBox(scene.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
