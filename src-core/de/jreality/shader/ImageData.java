@@ -222,7 +222,6 @@ public class ImageData implements Serializable {
     return img == null ? img = createImage() : img;
   }
   /**
-   * TODO: change this to ByteArray ?
    * @return a copy of the byte data
    */
   public byte[] getByteArray() {
