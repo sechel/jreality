@@ -729,7 +729,7 @@ public class WriterVRML
 		double[] d=new double[]{(double)c.getRed()/255,(double)c.getGreen()/255,(double)c.getBlue()/255};
 		return d;
 	}
-	static boolean writeTextureFiles = true;
+	static boolean writeTextureFiles = false;
 	int textureCount = 0;
 	private  void writeImage(Texture2D tex,String hist)throws IOException{
 		String hist2=hist+spacing;
