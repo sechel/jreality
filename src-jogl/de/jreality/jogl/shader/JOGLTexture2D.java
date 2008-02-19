@@ -2,6 +2,8 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
+import com.sun.opengl.util.texture.Texture;
+
 import de.jreality.math.Matrix;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -36,6 +38,7 @@ public class JOGLTexture2D implements Texture2D {
 	protected Matrix textureMatrix;
 	protected Integer repeatS;
 	protected Integer repeatT;
+	protected Boolean animated;
 	public JOGLTexture2D(Texture2D t)	{
 		super();
 		proxy = t;
@@ -66,6 +69,7 @@ public class JOGLTexture2D implements Texture2D {
 		repeatS = proxy.getRepeatS();
 		repeatT = proxy.getRepeatT();
 		externalSource = proxy.getExternalSource();
+		animated = proxy.getAnimated();
 	}
 	
 	public Integer getApplyMode() {
@@ -162,6 +166,10 @@ public class JOGLTexture2D implements Texture2D {
 
 	public Matrix getTextureMatrix() {
 		return textureMatrix;
+	}
+	
+	public Boolean getAnimated() {
+		return animated;
 	}
 
 	public void setApplyMode(Integer applyMode) {
@@ -283,5 +291,11 @@ public class JOGLTexture2D implements Texture2D {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void setAnimated(Boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
