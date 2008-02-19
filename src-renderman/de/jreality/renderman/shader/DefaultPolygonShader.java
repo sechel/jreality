@@ -91,13 +91,14 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     String realName =  (side != "") ? name+"."+side : name;
     
     int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
-    boolean lighting = (boolean) eap.getAttribute(realName+CommonAttributes.LIGHTING_ENABLED, true);
+    boolean lighting = (boolean) eap.getAttribute(CommonAttributes.LIGHTING_ENABLED, true);
     map.put("float roughness"+side,new Float(1/attent.getSpecularExponent().floatValue()));
     map.put("float Ks"+side,new Float(attent.getSpecularCoefficient()));
     map.put("float Kd"+side,new Float(attent.getDiffuseCoefficient()));
     map.put("float Ka"+side,new Float(attent.getAmbientCoefficient()));
     map.put("color specularcolor"+side,attent.getSpecularColor());
     map.put("float lighting"+side, new Float( lighting ? 1 : 0));
+//    System.err.println("name = "+name+" lighting = "+lighting);
     
     boolean transp = (boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
     map.put("float transparencyenabled"+side,new Float(transp ? 1 : 0));    
