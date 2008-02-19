@@ -312,6 +312,8 @@ public class Ri {
     public  void patchMesh(String type, int nu,  boolean uwrap, int nv, boolean vwrap, Map map) {
         w.print("PatchMesh "+quote(type)+" "+nu+" "+quote(uwrap ? "periodic" : "nonperiodic")+" "+nv+" "+
         		quote(uwrap ? "periodic" : "nonperiodic"));
+//        map.remove("N");
+        map.remove("uniform normal N");
         RIBHelper.writeMap(w,map);
     }
     

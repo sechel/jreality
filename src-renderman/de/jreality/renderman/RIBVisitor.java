@@ -827,6 +827,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				// process the polygon shader associated to this point shader
 				// This is something of a hack since we don't really know what the associated string is
 				handlingProxyGeometry = true; 
+				if (opaqueTubes)	ri.opacity(1.0f);
 				PointShader ls = dgs.getPointShader();
 				if (ls instanceof DefaultPointShader)	{
 					PolygonShader ps = ((DefaultPointShader)ls).getPolygonShader();
@@ -1143,10 +1144,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 			boolean opaqueColors = true;
 			if (colors != null && GeometryUtility.getVectorLength(colors) >= 3) {
 				double[][] colorArray = colors.toDoubleArrayArray(null);
-				for (double[] cc : colorArray) {
-					if (cc[3] != 1.0)
-					opaqueColors = false;
-				}
+				if (colorArray[0].length > 3)
+//					for (double[] cc : colorArray) {
+//						if (cc[3] != 1.0)
+							opaqueColors = false;
+//					}
 				if (!opaqueColors) {
 					int nn = GeometryUtility.getVectorLength(colors);
 					int numFaces = i.getNumFaces();
@@ -1194,6 +1196,13 @@ public class RIBVisitor extends SceneGraphVisitor {
 		int npolys = ifs.getNumFaces();
 		if (color != null && color.length == 4 && color[3] == 0.0 && ignoreAlpha0) return;
 		if (npolys != 0) {
+			boolean isQuadMesh = false;
+			Dimension qmDim = null;
+			Object foo = ifs.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
+			if (foo != null && foo instanceof Dimension)	{
+				qmDim = (Dimension) foo;
+				isQuadMesh = true;
+			}
 			HashMap<String, Object> map = new HashMap<String, Object>();
 			DataList coords = ifs.getVertexAttributes(Attribute.COORDINATES);
 			DoubleArrayArray da = coords.toDoubleArrayArray();
@@ -1247,7 +1256,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			else if (ifs.getFaceAttributes(Attribute.NORMALS) != null)
 			{vertexNormals = false; normals = ifs.getFaceAttributes(Attribute.NORMALS);}
 			int n;
-			if (normals != null) {
+			if ( normals != null) {
 				da = normals.toDoubleArrayArray();
 				n = da.getLengthAt(0);
 				if (n == 4 && currentSignature == Pn.EUCLIDEAN) {
@@ -1335,8 +1344,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 					vCol[3 * j] = (float) rgba.getValueAt(0);
 					vCol[3 * j + 1] = (float) rgba.getValueAt(1);
 					vCol[3 * j + 2] = (float) rgba.getValueAt(2);
-					float alpha = (float) rgba.getValueAt(3) * currentOpacity;
 					if (faceColorLength == 4) {
+						float alpha = (float) rgba.getValueAt(3) * currentOpacity;
 						vOp[3 * j] = vOp[3 * j + 1] = vOp[3 * j + 2] = alpha;
 					}
 				}
@@ -1382,12 +1391,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 					ri.opacity(f);
 				}
 			}
-			Object foo = ifs.getGeometryAttributes(GeometryUtility.QUAD_MESH_SHAPE);
-			if (foo != null && foo instanceof Dimension)	{
-				Dimension d = (Dimension) foo;
-				ri.patchMesh("bilinear", d.width, false, d.height, false, map);
-			}
-			else ri.pointsPolygons(npolys, nvertices, vertices, map);
+			if (isQuadMesh)
+				ri.patchMesh("bilinear", qmDim.width, false,qmDim.height, false, map);
+			else 
+				ri.pointsPolygons(npolys, nvertices, vertices, map);
 		}
 	}
 
