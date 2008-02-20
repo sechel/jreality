@@ -125,6 +125,7 @@ public interface Texture2D extends AttributeEntity {
   public static final int REPEAT_T_DEFAULT=GL_REPEAT;
 
   public static final int APPLY_MODE_DEFAULT = GL_MODULATE;
+  public static final Boolean MIPMAP_MODE_DEFAULT = true;
   //public static final int APPLY_MODE_DEFAULT = GL_COMBINE;
   
   public static final int MAG_FILTER_DEFAULT = GL_LINEAR;
@@ -212,6 +213,10 @@ public interface Texture2D extends AttributeEntity {
    *          The applyMode to set.
    */
   public abstract void setApplyMode(Integer applyMode);
+  
+  public abstract Boolean getMipmapMode();
+  
+  public abstract void setMipmapMode( Boolean b);
 
   public abstract Color getBlendColor();
 
