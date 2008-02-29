@@ -4,6 +4,8 @@ package de.jreality.reader.vrml;
  */
 
 import java.util.LinkedList;
+
+import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 
@@ -50,6 +52,8 @@ public class DefUseData {
 		State s=new State(givenState);
 		// Aufstazpunkt isoloieren:
 		s.trafo=null;		
+		// entferne Appearance color, sie wird erst bei use eingetragen
+		s.materialBinding=State.Binding.NONE;
 		s.currNode=new SceneGraphComponent();
 		s.history="DEF:";
 		return s;
@@ -106,6 +110,12 @@ public class DefUseData {
 		givenState.currNode.addChild(defUseNode);
 		if (givenState.trafo==null) return;
 		defUseNode.setTransformation(new Transformation(givenState.trafo.getMatrix()));
+		// set Appearance color
+		 if(givenState.materialBinding==State.Binding.OVERALL){
+		 		Appearance app= new Appearance();
+				givenState.setColorApp(app,false);
+				defUseNode.setAppearance(app);
+			 }
 	}
 	private static void useMaterial(State givenState,State defState){
 		State s=new State(defState);
