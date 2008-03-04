@@ -233,7 +233,8 @@ separatorNode[State state]
  State state2= new State(state);
  Transformation t= state2.trafo;
  Appearance app=null;
- if(state2.materialBinding==State.Binding.OVERALL){
+ if(state2.materialBinding==State.Binding.OVERALL||
+ 	state2.materialBinding==State.Binding.DEFAULT){
  	app= new Appearance();
 	state2.setColorApp(app,false);
  	state2.materialBinding=State.Binding.NONE;
@@ -540,8 +541,8 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	state.assignTexture(app, ifs);
 	ifs.setName("Face Set");
 	state.extraGeoTrans = new Transformation();
-	state.edgeDraw=2;
-	state.vertexDraw=2;
+//	state.edgeDraw=2;
+//	state.vertexDraw=2;
 	state.faceDraw=0;
 	if (VRMLHelper.verbose) System.err.println(")");
 	}
@@ -589,7 +590,7 @@ indexedLineSetNode[State state, Appearance app] returns [IndexedLineSet ils=null
 	ils = ilsf.getIndexedLineSet();
 	ils.setName("Line Set");
 	state.extraGeoTrans = new Transformation();
-	state.vertexDraw=2;
+//	state.vertexDraw=2;
 	state.edgeDraw=0;
 	state.faceDraw=0;
 	if (VRMLHelper.verbose) System.err.println(")");
@@ -660,8 +661,18 @@ propertyGeoNAppNode [State state]
 	:(	coordinate3Node 		[state]{state.defTyp=DefUseData.COORDS;}
 	  |	"FontStyle"				egal 		// TODO2
 	  |	infoNode				[state]
-	  |	materialNode			[state]{state.defTyp=DefUseData.MATERIAL;}
-	  |	baseColorNode			[state]{state.defTyp=DefUseData.MATERIAL;}
+	  |	materialNode			[state]
+	  		{
+	  			state.defTyp=DefUseData.MATERIAL;
+				if(state.materialBinding==State.Binding.NONE)
+					state.materialBinding=State.Binding.OVERALL;
+			}
+	  |	baseColorNode			[state]
+	  	  		{
+	  			state.defTyp=DefUseData.MATERIAL;
+				if(state.materialBinding==State.Binding.NONE)
+					state.materialBinding=State.Binding.OVERALL;
+				}
 	  |	materialBindingNode		[state]{state.defTyp=DefUseData.BIND_M;}
 	  								// nur fuer IFS & ILS implementiert TODO3: rest
 	  |	normalNode				[state]{state.defTyp=DefUseData.NORMALS;}

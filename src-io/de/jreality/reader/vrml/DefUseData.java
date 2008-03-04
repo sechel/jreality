@@ -5,6 +5,7 @@ package de.jreality.reader.vrml;
 
 import java.util.LinkedList;
 
+import de.jreality.reader.vrml.State.Binding;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
@@ -53,7 +54,8 @@ public class DefUseData {
 		// Aufstazpunkt isoloieren:
 		s.trafo=null;		
 		// entferne Appearance color, sie wird erst bei use eingetragen
-		s.materialBinding=State.Binding.NONE;
+		if(s.materialBinding==Binding.OVERALL||s.materialBinding==Binding.DEFAULT)
+			s.materialBinding=State.Binding.NONE;
 		s.currNode=new SceneGraphComponent();
 		s.history="DEF:";
 		return s;
@@ -108,10 +110,12 @@ public class DefUseData {
 		defUseNode.setName("defined:"+name);
 		defUseNode.addChild(c);
 		givenState.currNode.addChild(defUseNode);
-		if (givenState.trafo==null) return;
-		defUseNode.setTransformation(new Transformation(givenState.trafo.getMatrix()));
+		if (givenState.trafo!=null)
+			defUseNode.setTransformation(new Transformation(givenState.trafo.getMatrix()));
 		// set Appearance color
-		 if(givenState.materialBinding==State.Binding.OVERALL){
+		if(givenState.materialBinding==State.Binding.OVERALL||
+				 givenState.materialBinding==State.Binding.DEFAULT){
+			 	System.out.println("DefUseData.useKnot(2)");
 		 		Appearance app= new Appearance();
 				givenState.setColorApp(app,false);
 				defUseNode.setAppearance(app);
@@ -125,6 +129,8 @@ public class DefUseData {
 		givenState.ambient=s.ambient;
 		givenState.shininess=s.shininess;
 		givenState.transparency=s.transparency;
+		if(givenState.materialBinding==Binding.NONE)
+			givenState.materialBinding=Binding.OVERALL;
 	}	
 	private static void useTexture(State givenState,State defState){
 		State s=new State(defState);

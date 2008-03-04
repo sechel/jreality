@@ -504,6 +504,7 @@ public class VRMLHelper {
 	 */
 	public static void setColors(IndexedFaceSetFactory ifsf,
 			int [][] coordIndex,int[][] colorIndex,State state){
+		if (state.diffuse.length==0)return;
 		int faceCount=coordIndex.length;
 		int VertexCount= state.coords.length;
 		Color[] fColors=new Color[faceCount];
@@ -614,6 +615,7 @@ public class VRMLHelper {
 	 * @param state
 	 */
 	public static void setColors(PointSet ps,State state,int start,int numP){
+		if (state.diffuse.length==0)return;
 	double[][] vColors=new double[numP][3];
 	State.Binding bind=state.materialBinding;
 	if(bind==State.Binding.DEFAULT|
@@ -687,6 +689,7 @@ public class VRMLHelper {
 	 */
 	public static void setColors(IndexedLineSetFactory ilsf,
 			int [][] coordIndex,int[][] colorIndex,State state){
+		if (state.diffuse.length==0)return;
 	int edgeCount=coordIndex.length;
 	int VertexCount= state.coords.length; 
 	Color[] eColors=new Color[edgeCount];

@@ -28,8 +28,8 @@ public class State {
 		DEFAULT,OVERALL,
 		PER_PART,PER_PART_INDEXED,
 		PER_FACE,PER_FACE_INDEXED,
-		PER_VERTEX,PER_VERTEX_INDEXED,
-		NONE
+		PER_VERTEX,PER_VERTEX_INDEXED
+		,NONE // by Color:means default/overall with allready drawn color 
 	}
 //	public static final String[] BINDING= new String[]{	
 //		"DEFAULT","OVERALL",
@@ -51,7 +51,7 @@ public class State {
 	public Color[] emissive= new Color[]{}; 
 	public double[] shininess= new double[]{};
 	public double[] transparency= new double[]{};
-	public Binding materialBinding=Binding.NONE;//TODO Bindings 
+	public Binding materialBinding=Binding.DEFAULT; 
 	public Binding normalBinding=Binding.DEFAULT;
 	public SceneGraphPath camPath=new SceneGraphPath();// Graph
 	public SceneGraphComponent currNode=null;
@@ -195,38 +195,6 @@ public class State {
 	 */
 
 	public void setColorApp(Appearance a,boolean useEmissive){
-		//TODO: calculate shininess
-		if (ambient.length>0){
-			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
-			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
-			a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
-			}
-		if (specular.length>0){
-			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
-			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
-			a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
-		}
-		// VRML diffuse & emissive definition, if emissive is not supported:
-		// take diffuse as base Color, take emissive if all others colors are empty
-		if (diffuse.length>0){
-			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
-			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
-			a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
-		}
-		else
-			if (emissive.length>0){
-				a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
-				a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
-				a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
-			}
-		// 
-		if (transparency.length>0)
-			if (transparency[0]!=1){
-				a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
-				a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
-				a.setAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
-			}
-
 		if (vertexDraw==1)
 			a.setAttribute(CommonAttributes.VERTEX_DRAW,true);
 		if (vertexDraw==2)
@@ -239,6 +207,59 @@ public class State {
 			a.setAttribute(CommonAttributes.FACE_DRAW,true);
 		if (faceDraw==2)
 			a.setAttribute(CommonAttributes.FACE_DRAW,false);
+
+		if(materialBinding!=Binding.OVERALL && materialBinding!=Binding.DEFAULT) return;
+		//TODO: calculate shininess
+		if (ambient.length>0){
+			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+
+				 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+		 	a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.AMBIENT_COLOR, ambient[0]);			 	
+			a.setAttribute(CommonAttributes.POINT_SHADER+"."+
+				 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.AMBIENT_COLOR,ambient[0]);
+			}
+		if (specular.length>0){
+			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+
+				 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+		 	a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPECULAR_COLOR, specular[0]);			 	
+			a.setAttribute(CommonAttributes.POINT_SHADER+"."+
+				 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR,specular[0]);
+		}
+		// VRML diffuse & emissive definition, if emissive is not supported:
+		// take diffuse as base Color, take emissive if all others colors are empty
+		if (diffuse.length>0){
+			a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+			a.setAttribute(CommonAttributes.LINE_SHADER+"."+
+				 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+		 	a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, diffuse[0]);			 	
+			a.setAttribute(CommonAttributes.POINT_SHADER+"."+
+				 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,diffuse[0]);
+		}
+		else
+			if (emissive.length>0){
+				a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+				a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+				a.setAttribute(CommonAttributes.LINE_SHADER+"."+
+					 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+			 	a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, emissive[0]);			 	
+				a.setAttribute(CommonAttributes.POINT_SHADER+"."+
+					 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR,emissive[0]);
+			}
+		// 
+		if (transparency.length>0)
+			if (transparency[0]!=1){
+				a.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+				a.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+				a.setAttribute(CommonAttributes.LINE_SHADER+"."+
+					 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+			 	a.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.TRANSPARENCY, transparency[0]);			 	
+				a.setAttribute(CommonAttributes.POINT_SHADER+"."+
+					 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
+			}
 	}
 	
 	/** sets the transformation resulting of trafo and 
