@@ -1,11 +1,8 @@
 package de.jreality.sunflow.batchrender;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -15,6 +12,34 @@ import de.jreality.sunflow.RenderOptions;
 import de.smrj.executor.DistributedExecutorService;
 import de.smrj.executor.RemoteCallable;
 
+/*
+ * 
+ * 
+ * Rendering a tiled image on remote cluster nodes. To use do the following:
+ * 
+ * 1. start this class with parameters on the main cluster node.
+ * 
+ * save the example script to start a single client:
+ * 
+
+#!/bin/bash
+# use as many CPU cores as possible (2-4):
+#$ -pe mp 2-4
+
+# compute the next free port to connect to the Master
+port=$(expr $SGE_TASK_ID + 8843)
+
+# set the classpath to contain jreality and smrj:
+export CLASSPATH=...
+
+java -Xms1024M -Xmx3072M de.smrj.tcp.management.ClientEnvironment node01 $port &> nodeLogs/$HOSTNAME.$SGE_TASK_ID.log
+
+$> qsub -t 1-25 w                   
+
+ * start-client
+ * @author weissman
+ *
+ */
 public class Master {
 	
 	int tilesX, tilesY;
@@ -94,7 +119,7 @@ public class Master {
 						private static final long serialVersionUID = 3713825184723907804L;
 						public String call() throws Exception {
 							return BatchRenderer.renderTile(tX, tY);
-						}						
+						}
 					});
 				new Thread() {
 					@Override
@@ -117,19 +142,6 @@ public class Master {
 		}
 		
 		
-	}
-
-	private static String[] parseHosts(String string) {
-		LinkedList<String> hosts = new LinkedList<String>();
-		try {
-			BufferedReader br = new BufferedReader(new FileReader(string));
-			String line=null;
-			while ((line=br.readLine())!=null) hosts.add(line);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return hosts.toArray(new String[0]);
 	}
 
 }
