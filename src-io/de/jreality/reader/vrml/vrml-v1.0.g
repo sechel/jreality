@@ -162,7 +162,7 @@ defNode [State state]
 	{
 		defs.addDef(fake,name);
 		if (VRMLHelper.verbose) System.err.print("DEF End(");
-		defs.use(state,name); 
+		defs.use(state,name,true); 
 		if (VRMLHelper.verbose) System.err.println("DEF used)");
 	}
 	;
@@ -175,7 +175,7 @@ useNode [State state]
 		name = sfstringValue
 		{if (VRMLHelper.verbose) System.err.print(name);}
 	{
-		defs.use(state,name);
+		defs.use(state,name,false);
 		if (VRMLHelper.verbose) System.err.println(")");
 		System.out.println("Attention: The USE-Statement is not completely supported and may be read incorrect!");
 	}

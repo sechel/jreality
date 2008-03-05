@@ -66,7 +66,7 @@ public class DefUseData {
 	 * @param current state
 	 * @param name  	the key
 	 */
-	public void use(State givenState,String name){
+	public void use(State givenState,String name,boolean definition){
 		int n=-1;
 		for (int i=0;i<names.size();i++)
 			if (name.equalsIgnoreCase((String)names.get(i)))
@@ -75,7 +75,7 @@ public class DefUseData {
 		State defState=(State)states.get(n);
 		givenState.defTyp=defState.defTyp;
 		switch (defState.defTyp) {
-		case KNOT:useKnot(givenState,defState,name);
+		case KNOT:useKnot(givenState,defState,name,definition);
 			break;
 		case MATERIAL:useMaterial(givenState,defState); 
 			break;
@@ -104,10 +104,13 @@ public class DefUseData {
 		}		
 	}	
 // privates
-	private static void useKnot(State givenState,State defState,String name){
+	private static void useKnot(State givenState,State defState,String name,boolean definition){
 		SceneGraphComponent c=defState.currNode.getChildComponent(0);
 		SceneGraphComponent defUseNode =new SceneGraphComponent();
-		defUseNode.setName("defined:"+name);
+		if(definition)
+			defUseNode.setName("defined:"+name);
+		else
+			defUseNode.setName("used:"+name);
 		defUseNode.addChild(c);
 		givenState.currNode.addChild(defUseNode);
 		if (givenState.trafo!=null)
