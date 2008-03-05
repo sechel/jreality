@@ -1802,6 +1802,14 @@ public class IndexedFaceSetUtility {
 		f.setVertexAttributes(p.getVertexAttributes());
 		return f;
 	}
+	public static IndexedFaceSet IndexedFaceSetToPureIndexedFaceSet(IndexedFaceSet i){
+		// has no Edge attributes
+		IndexedFaceSet f= new IndexedFaceSet(i.getNumPoints(),0);
+		f.setGeometryAttributes(i.getGeometryAttributes());
+		f.setVertexAttributes(i.getVertexAttributes());
+		f.setFaceAttributes(i.getFaceAttributes());
+		return f;
+	}
 	/** makes a consistent orientated version of the "face Indices" if possible.
 	 * if it fails, false will be returned and nothing changes.
 	 * @param numVertices
