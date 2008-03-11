@@ -917,8 +917,8 @@ final public class Rn {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 //        sb.append(df.format(v[4*i+j])).append(j == 3 ? "\n":"\t");
-				sb.append(String.format(formatString, new Object[]{m[4*i+j]}));
-				sb.append(j == 3 ? "\n":"\t");
+				sb.append(String.format(formatString, new Object[]{m[n*i+j]}));
+				sb.append(j == (n-1) ? "\n":"\t");
 			}
 		} 
 		return sb.toString();
