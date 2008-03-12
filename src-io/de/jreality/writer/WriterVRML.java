@@ -17,7 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.WeakHashMap;
 
@@ -36,6 +35,8 @@ import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
@@ -48,26 +49,15 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
 
-
-
 public class WriterVRML 
-//extends SceneGraphVisitor 
 {
-	// for  DEF & USE
-	//private HashMap<Integer, SceneGraphComponent> cmpMap = new HashMap<Integer, SceneGraphComponent>();
-	private  HashMap<Integer, Geometry> geoPolygonMap = new HashMap<Integer, Geometry>(),
-	 geoLineMap = new HashMap<Integer, Geometry>(),
-	 geoPointMap = new HashMap<Integer, Geometry>();
-
-	
 	boolean useDefs = true;
+	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
-	private RenderingHintsShader rhs;
 	private DefaultPolygonShader dps;
 	private DefaultLineShader dls;
 	private DefaultPointShader dvs;
@@ -76,10 +66,10 @@ public class WriterVRML
 	private DefaultTextShader dvts;
 	private String fileStem = String.format("texture-%10d-", System.currentTimeMillis());
 	private static final int PER_VERTEX=0,PER_PART=1,PER_FACE=2,OVERALL=3;
-
 	private PrintWriter out=null;
 	private static final String spacing="  ";// for outlay
-	
+	private static String hist="";// for outlay
+
 	// -----------------constructor----------------------
 	public WriterVRML(OutputStream outS) {	
 		out=new PrintWriter( outS );
@@ -90,11 +80,11 @@ public class WriterVRML
 	public WriterVRML(PrintWriter outS) {
 		out=outS;
 	}
-	public static void write(SceneGraphComponent sceneRoot, FileOutputStream stream) throws IOException {
+	public static void write(SceneGraphComponent sceneRoot, FileOutputStream stream)   {
 		WriterVRML writer = new WriterVRML(stream);
 		writer.write(sceneRoot);
 	}
-	
+
 	String writePath = "";
 	WeakHashMap<ImageData, String> textureMaps = new WeakHashMap<ImageData, String>();
 	public void setWritePath(String path)	{
@@ -105,29 +95,21 @@ public class WriterVRML
 	public void setWriteTextureFiles(boolean writeTextureFiles2) {
 		writeTextureFiles = writeTextureFiles2;
 	}
-// ---------------------------------------
+//	---------------------------------------
 
-	public void write( SceneGraphComponent sgc)throws IOException {
-		if (sgc==null) throw new IOException("component is null");
-		geoPointMap = new HashMap<Integer, Geometry>();
-		geoLineMap = new HashMap<Integer, Geometry>();
-		geoPolygonMap = new HashMap<Integer, Geometry>();
+	public void write( SceneGraphNode sgn ){
+//		if (sgn==null) throw new IOException("component is null");
 		out.println("#VRML V1.0 ascii");
-		// init EffectiveAppearance
-		Appearance app = sgc.getAppearance();
-		if (app == null) app = new Appearance();
-		EffectiveAppearance eApp= EffectiveAppearance.create();
-		eApp= eApp.create(app);
-		// init shaders
-		updateShaders(eApp);
-		// start writing scene
-		writeFirstComp(sgc,"",eApp);
+		// what should be defined
+		if(useDefs){
+			wHelp.inspect(sgn);
+		}
+		sgn.accept(new MyVisitor());
 		out.flush();
 	}
 //	------------------ 
 	private void updateShaders(EffectiveAppearance eap) {
 		dgs = ShaderUtility.createDefaultGeometryShader(eap);
-		rhs = ShaderUtility.createRenderingHintsShader(eap);
 
 		if (dgs.getPointShader() instanceof DefaultPointShader){	
 			dvs = (DefaultPointShader) dgs.getPointShader();
@@ -152,231 +134,18 @@ public class WriterVRML
 			else dpts=null;
 		}
 		else dps = null;
-		
-		
+
+
 	}
-// ---------------------
+//	---------------------
 //	---------------------------- start writing --------------------
-
-	private   void writeFirstComp(SceneGraphComponent c,String hist,
-			EffectiveAppearance parentEA)throws IOException{
-		if (c==null)throw new IOException("A SceneGraphComponent is null");
-		if (!c.isVisible()) return;
-		// write 
-		String hist2= hist+spacing;
-
-		Geometry g = c.getGeometry();
-		Camera cam = c.getCamera();
-		Light li = c.getLight();
-		Appearance app =c.getAppearance();
-		EffectiveAppearance	eApp=parentEA;
-		if (app!=null) eApp=parentEA.create(app);
-		updateShaders(eApp);
-		Transformation t= c.getTransformation();
-
-		// write content
-		out.print(""+hist+"Separator { ");
-		out.println("# "+c.getName());
-		
-		// write INFO STRING
-		if (c.getAppearance()!=null){
-			Object obj = c.getAppearance().getAttribute(
-					CommonAttributes.INFO_STRING, String.class);
-			if (obj instanceof String && obj!=null){
-				String info= (String)obj;
-				writeInfoString(info, hist+spacing);
-			}
-		}
-		// defaults:
-		/*		ShapeHints {
-	          vertexOrdering  UNKNOWN_ORDERING      # SFEnum
-	          shapeType       UNKNOWN_SHAPE_TYPE    # SFEnum
-	          faceType        CONVEX                # SFEnum
-	          creaseAngle     0.5                   # SFFloat
-	     }*/
-		out.println(""+hist+"ShapeHints { # some default Parameters ");
-		out.println(""+hist2+"vertexOrdering  UNKNOWN_ORDERING");
-		out.println(""+hist2+"shapeType       UNKNOWN_SHAPE_TYPE");
-		out.println(""+hist2+"faceType        CONVEX");
-		out.println(""+hist+"}");
-		//
-		if (t!=null)		writeTrafo(t,hist2);
-		for (int i=0;i<c.getChildComponentCount();i++)
-			writeComp(c.getChildComponent(i),hist2,eApp);
-		if (g!=null)		writeGeo(g,hist2);// use Appearance
-		if (li!=null)		writeLight(li,hist2);// use Appearance
-		if (cam!=null)		writeCam(cam,hist2);
-		out.println(""+hist+"}");
-	}
-
-	private   void writeComp(SceneGraphComponent c,String hist,
-			EffectiveAppearance parentEA)throws IOException{
-		if (c==null)throw new IOException("A SceneGraphComponent is null");
-		if (!c.isVisible()) return;
-		// write 
-		String hist2= hist+spacing;
-
-		Geometry g = c.getGeometry();
-		Camera cam = c.getCamera();
-		Light li = c.getLight();
-		Appearance app =c.getAppearance();
-		EffectiveAppearance	eApp=parentEA;
-		if (app!=null) eApp=parentEA.create(app);
-		updateShaders(eApp);
-		Transformation t= c.getTransformation();
-
-		// write content
-		out.println(""+hist+"Separator { # "+c.getName());
-		if (t!=null)		writeTrafo(t,hist2);
-		if (g!=null)		writeGeo(g,hist2);// use Appearance
-		if (li!=null)		writeLight(li,hist2);// use Appearance
-		if (cam!=null)		writeCam(cam,hist2);
-		for (int i=0;i<c.getChildComponentCount();i++)
-			writeComp(c.getChildComponent(i),hist2,eApp);
-		out.println(""+hist+"}");
-	}
-	private void writeGeo(Geometry g,String hist)throws IOException{
-		String hist2= hist+spacing;
-// Geom Primitives
-		if (dgs.getShowFaces())	{
-			// first write the appearance colors and texture outside the DEF/USE
-			writeMaterialBinding(OVERALL,hist);
-			Color amb = dps.getAmbientColor();
-			Color spec= dps.getSpecularColor();
-			Color diff= dps.getDiffuseColor();
-			double tra= dps.getTransparency();
-			if (tra!=0|diff!=null|spec!=null|amb!=null){
-				writeMaterial(amb,diff,spec,tra,hist);
-			}
-			if (g instanceof Sphere){
-				writeSphere((Sphere)g,hist);return;}
-			if (g instanceof Cylinder ){
-				writeCylinder((Cylinder)g,hist);return;}
-	// Define & write Geo
-			if (g instanceof IndexedFaceSet) {
-	//			 check if allready defined
-				if (useDefs && geoPolygonMap.containsKey(g.hashCode())){
-					out.println(""+hist+"USE"+ str(g.hashCode()+"POLYGON"));
-					return;
-				}
-				try {
-					IndexedFaceSet f = (IndexedFaceSet) g;
-					// check texture
-					if (f.getVertexAttributes(Attribute.TEXTURE_COORDINATES)==null)
-						throw new IOException("missing texture component");			
-					double[][]texcords=f.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
-					Texture2D tex=dps.getTexture2d();
-					if (tex==null) throw new IOException("missing texture component");
-					Matrix mat= tex.getTextureMatrix();
-					if (mat==null) throw new IOException("missing texture component");
-					ImageData id=tex.getImage();
-					if (id==null) throw new IOException("missing texture component");
-					
-					// write texture
-					writeTexCoords(texcords,hist);	
-					writeTexture(tex,hist);
-				} catch (IOException e) {
-					// falls es nur nicht genug componenten fuer die Textur gibt 
-					// werfe keinen Fehler
-					if (!e.getMessage().equals("missing texture component"))
-					throw e;
-				}
-				out.print(""+hist+"DEF "+str(g.hashCode()+"POLYGON"));
-				out.println(" Separator { ");
-				writeGeoFaces((IndexedFaceSet) g,hist2);
-				out.println(""+hist+"} ");
-				if (useDefs) geoPolygonMap.put(g.hashCode(), g);
-			}
-		}
-		if (g instanceof IndexedLineSet)
-			if(dls.getTubeDraw()&& dgs.getShowLines()) {
-				// first write the appearance colors and texture outside the DEF/USE
-				writeMaterialBinding(OVERALL,hist);
-				Color diff=dls.getDiffuseColor();
-				if (diff!=null){
-					writeMaterial(null,diff,null,0,hist);
-				}
-//				 check if allready defined
-				if (useDefs && geoLineMap.containsKey(g.hashCode())){
-					out.println(""+hist+"USE"+ str(g.hashCode()+"LINE"));
-					return;
-				}
-				out.print(""+hist+"DEF "+str(g.hashCode()+"LINE"));
-				out.println(" Separator { ");
-				writeGeoLines((IndexedLineSet) g,hist2);
-				out.println(""+hist+"} ");
-				if (useDefs) geoLineMap.put(g.hashCode(), g);
-			}
-		if (g instanceof PointSet){
-			if(dvs.getSpheresDraw()&& dgs.getShowPoints()) {
-				// first write the appearance colors and texture outside the DEF/USE
-				writeMaterialBinding(OVERALL,hist);
-				Color diff=dvs.getDiffuseColor();
-				if (diff!=null){
-					writeMaterial(null,diff,null,0,hist);
-				}
-//				 check if allready defined
-				if (useDefs && geoPointMap.containsKey(g.hashCode())){
-					out.println(""+hist+"USE"+ str(g.hashCode()+"POINT"));
-					return;
-				}
-				out.print(""+hist+"DEF "+str(g.hashCode()+"POINT"));
-				out.println(" Separator { ");
-			    writeGeoPoints((PointSet) g,hist2);
-				out.println(""+hist+"} ");
-				if (useDefs) geoPointMap.put(g.hashCode(), g);
-			}
-			return;
-		}
-		out.println(""+hist+"# unknown Geometry ");
-		out.println(""+hist+"} ");
-		System.err.println("WriterVRML.writeComp() unknown geometrytype");
-	}
-
-	private static String str(String name) {
-	    return "\""+name+"\"";
-	}
-
-	private   void writeSphere(Sphere s,String hist){
-		/**	Sphere {
-		 *    radius  1     # SFFloat
-		 *	}		*/
-		out.println(hist+"Sphere { radius  1}");
-	}
-	private   void writeCylinder(Cylinder c,String hist)throws IOException{
-		String hist2= hist+spacing;
-	/**	PARTS
-	*     SIDES   The cylindrical part
-	*     TOP     The top circular face
-	*     BOTTOM  The bottom circular face
-	*     ALL     All parts
-	*FILE FORMAT/DEFAULTS
-	*     Cylinder {
-	*          parts   ALL   # SFBitMask
-	*          radius  1     # SFFloat
-	*          height  2     # SFFloat
-	*     }		*/
-		double[] r=MatrixBuilder.euclidean().rotateFromTo(new double[]{0,1,0}, new double[]{1,0,0}).getArray();
-		
-		out.println(" Separator { # Cylinder");
-		out.println(hist2+"MatrixTransform { matrix");
-		writeDoubleMatrix(r,4,4,hist+spacing);
-		out.println(hist+"}");
-		out.print(hist2+"Cylinder { ");
-		out.print("parts SIDES ");
-		out.print("radius  1 ");
-		out.print("height  1 ");
-		out.println("}");
-		out.println(""+hist+"} ");
-		
-	}
-	private   void writeGeoFaces(IndexedFaceSet f,String hist)throws IOException{
+	private void writeGeoFaces(IndexedFaceSet f,String hist) {
 		// write the coordinates:
-		if (f.getVertexAttributes(Attribute.COORDINATES)==null)throw new IOException("no Coordinates");
+//		if (f.getVertexAttributes(Attribute.COORDINATES)==null)throw new IOException("no Coordinates");
 		double[][] coords=f.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		writeCoordinates(coords,hist);
 		// writes the Normals depending on smooth or flat shading:
-		
+
 		if(dps.getSmoothShading()){
 			if(f.getVertexAttributes(Attribute.NORMALS)!=null){
 				writeNormalBinding(PER_VERTEX,hist);
@@ -398,37 +167,35 @@ public class WriterVRML
 			writeMaterialBinding(PER_VERTEX,hist);
 			writeColors(f.getVertexAttributes(Attribute.COLORS).toDoubleArrayArray(null),hist);
 		}
-			
+
 		/**	IndexedFaceSet {
 		 * 	coordIndex         0  # MFLong indies
 		 * 	materialIndex      -1 # MFLong egal
 		 * 	normalIndex        -1 # MFLong egal
 		 * 	textureCoordIndex  -1 # MFLong spaeter
 		 * 	} */	
-		
+
 		out.println(hist+"IndexedFaceSet { # "+ f.getName());
-		// writes the FaceIndices
-		if (f.getFaceAttributes(Attribute.INDICES)==null) throw new IOException("no FaceIndices");
+		// writes the FaceIndices:
+//		if (f.getFaceAttributes(Attribute.INDICES)==null) throw new IOException("no FaceIndices");
 		int[][] indices=f.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		writeIndices(indices, hist+spacing);
 		out.println(hist+"}");
-		
-		// write Labels
+		// write Labels:
 		if(dpts.getShowLabels())
 			if (f.getFaceAttributes(Attribute.LABELS)!=null){
 				String[] labels=f.getFaceAttributes(Attribute.LABELS).toStringArray(null);
 				writeFaceLabels(coords,indices,labels,hist);	
 			}
-			
 	}
-	private   void writeGeoLines(IndexedLineSet l,String hist)throws IOException{
-		if (l.getVertexAttributes(Attribute.COORDINATES)==null)
-			throw new IOException("missing coordinates");
+	private void writeGeoLines(IndexedLineSet l,String hist) {
+//		if (l.getVertexAttributes(Attribute.COORDINATES)==null)
+//			throw new IOException("missing coordinates");
 		if (l.getEdgeAttributes(Attribute.INDICES)==null) 
 			return;
 		double[][] lcoords=l.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		int[][] lindices=l.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-		
+
 		// write coords
 		writeCoordinates(lcoords,hist);
 		// writes Edge Colors if given:
@@ -462,9 +229,9 @@ public class WriterVRML
 				writeEdgeLabels(lcoords,lindices,labels,hist);	
 			}
 	}
-	private   void writeGeoPoints(PointSet p,String hist)throws IOException{
+	private   void writeGeoPoints(PointSet p,String hist) {
 		// write coords
-		if(p.getVertexAttributes(Attribute.COORDINATES)==null)throw new IOException("missing coordinates");
+//		if(p.getVertexAttributes(Attribute.COORDINATES)==null)throw new IOException("missing coordinates");
 		double[][] coords=p.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		writeCoordinates(coords,hist);
 		// writes Vertex Colors
@@ -487,118 +254,32 @@ public class WriterVRML
 				writeLabelsAtPoints(coords, labels, hist);
 			}
 	}
-	private   void writeLight(Light li,String hist)throws IOException{
-		
-		if (li instanceof SpotLight)
-			writeSpotLight((SpotLight) li,hist);
-		else if (li instanceof PointLight)
-			writePointLight((PointLight) li,hist);				
-		else if (li instanceof DirectionalLight)
-			writeDirLight((DirectionalLight) li,hist);
-		else System.err.println("WriterVRML.writeLight() unknown Lighttype");
-	}
-	private   void writePointLight(PointLight li,String hist)throws IOException{
-		String hist2= hist+spacing;
-		/* PointLight {
-	          on         TRUE       # SFBool
-	          intensity  1          # SFFloat
-	          color      1 1 1      # SFColor
-	          location   0 0 1      # SFVec3f
-	     }  */
-		double di=li.getIntensity();
-		double[] dc=colorToDoubleArray(li.getColor());
-		out.println(hist+"PointLight { # "+ li.getName());
-		out.println(hist2 + "intensity " +di);
-		out.print(hist2 + "color " );
-		writeDoubleArray(dc, "", "", 3);
-		out.println(hist2 + "location   0 0 0");
-		out.println(hist+"}");
-	}
-	private   void writeDirLight(DirectionalLight li,String hist)throws IOException{
-		String hist2= hist+spacing;
-		/*	DirectionalLight {
-	          on         TRUE       # SFBool
-	          intensity  1          # SFFloat
-	          color      1 1 1      # SFColor
-	          direction  0 0 -1     # SFVec3f
-	     } */
-		double di=li.getIntensity();
-		double[] dc=colorToDoubleArray(li.getColor());
-		out.println(hist+"DirectionalLight { # "+ li.getName());
-		out.println(hist2 + "intensity " +di);
-		out.print(hist2 + "color " );
-		writeDoubleArray(dc, "", "", 3);
-		out.println(hist2 + "direction  0 0 1");
-		out.println(hist+"}");
-	}
-	private   void writeSpotLight(SpotLight li,String hist)throws IOException{
-		String hist2= hist+spacing;
-		/*  SpotLight {
-	          on           TRUE     # SFBool
-	          intensity    1        # SFFloat
-	          color        1 1 1    # SFVec3f
-	          location     0 0 1    # SFVec3f
-	          direction    0 0 -1   # SFVec3f
-	          dropOffRate  0        # SFFloat
-	          cutOffAngle  0.785398 # SFFloat
-	     }  */
-		double di=li.getIntensity();
-		double[] dc=colorToDoubleArray(li.getColor());
-		
-		out.println(hist+"SpotLight { # "+ li.getName());
-		out.println(hist2 + "intensity " +di);
-		out.print(hist2 + "color " );
-		writeDoubleArray(dc, "", "", 3);
-		out.println(hist2 + "location 0 0 0 ");
-		out.println(hist2 + "dropOffRate 0" );
-		out.println(hist2 + "direction  0 0 1");
-		out.println(hist2 + "cutOffAngle "+li.getConeAngle() );
-		out.println(hist+"}");
-	}
-	private   void writeCam(Camera c,String hist){
-		if (c.isPerspective()){
-			String hist2=hist+spacing;
-			//TODO: orientation
-			out.println(hist+"PerspectiveCamera { ");
-			out.println(hist2+"focalDistance "+c.getFocalLength());
-			double hAngle=c.getFieldOfView()*Math.PI /180;
-			out.println(hist2+"heightAngle "+hAngle);			
-			out.println(hist+"}");
-		}
-		else {System.out.println("WriterVRML.writeCam(not completely implemented)");}
-	}
-
-	private   void writeTrafo(Transformation t,String hist)throws IOException{
-		out.println(hist+"MatrixTransform { matrix");
-		writeDoubleMatrix(t.getMatrix(),4,4,hist+spacing);
-		out.println(hist+"}");
-	}
-	private   void writeCoordinates(double[][] points,String hist)throws IOException{
+	private   void writeCoordinates(double[][] points,String hist) {
 		out.println(hist+"Coordinate3 { point [");
 		String hist2=hist+spacing;
 		if (points[0].length == 4) points = Pn.dehomogenize(points, points);
 		for(int i=0;i<points.length;i++){
-			if (points[i].length<3)throw new IOException("invalid Coordinates");
+//			if (points[i].length<3)throw new IOException("invalid Coordinates");
 			writeDoubleArray(points[i],hist2,",",3);
-			}
+		}
 		out.println(hist+"]}");
 	}	
-	private   void writeNormals(double[][] normals,String hist)throws IOException{
+	private   void writeNormals(double[][] normals,String hist) {
 		out.println(hist+"Normal { vector  [");
 		String hist2=hist+spacing;
 		if (normals[0].length == 4) normals = Pn.dehomogenize(normals, normals);
 		for(int i=0;i<normals.length;i++){
-			if (normals[i].length<3)throw new IOException("invalid Normals");
+//			if (normals[i].length<3)throw new IOException("invalid Normals");
 			writeDoubleArray(normals[i],hist2,",",3);
 		}
 		out.println(hist+"]}");	
 	}
-	private   void writeColors(double[][] Colors,String hist)throws IOException{
+	private   void writeColors(double[][] Colors,String hist) {
 		out.println(hist+"Material { ");
 		out.println(hist+spacing+"diffuseColor  [");
 		String hist2=hist+spacing+spacing;
 		for(int i=0;i<Colors.length;i++){
-			if (Colors[i].length<3)throw new IOException("invalid Colors");
+//			if (Colors[i].length<3)throw new IOException("invalid Colors");
 			writeDoubleArray(Colors[i],hist2,",",3);
 		}
 		out.println(hist+"]}");
@@ -625,7 +306,7 @@ public class WriterVRML
 			out.println("PER_FACE }");
 		else out.println("DEFAULT }");
 	} 
-	private   void writeTexture(Texture2D tex,String hist)throws IOException{
+	private   void writeTexture(Texture2D tex,String hist) {
 		/**		WRAP ENUM
 		 *		REPEAT  Repeats texture outside 0-1 texture coordinate range
 		 *		CLAMP   Clamps texture coordinates to lie within 0-1 range
@@ -658,7 +339,7 @@ public class WriterVRML
 		writeTexTrans(hist2,tex);
 
 	}
-	private   void writeTexWrap(int wrap)throws IOException{
+	private   void writeTexWrap(int wrap) {
 		switch (wrap) {
 		case Texture2D.GL_CLAMP_TO_EDGE:
 			System.out.println("texture wrap:only clamp & repeat are supported");
@@ -671,12 +352,12 @@ public class WriterVRML
 			out.println("REPEAT");				
 			break;
 		default:
-			throw new IOException("unknown Texture wrapping");
+//			throw new IOException("unknown Texture wrapping");
 		}
 	}
-	
-	private   void writeFaceLabels(double[][]coords,int[][]indis,String[]labs,String hist)throws IOException{
-		if (labs==null||indis==null||coords==null)throw new IOException("Labels impossible");
+
+	private   void writeFaceLabels(double[][]coords,int[][]indis,String[]labs,String hist) {
+//		if (labs==null||indis==null||coords==null)throw new IOException("Labels impossible");
 		double[][] centers= new double[indis.length][3];// coords for the labels
 		double[] midpoint;
 		int[] face;
@@ -692,21 +373,21 @@ public class WriterVRML
 		}
 		writeLabelsAtPoints(centers,labs,hist);
 	}
-	
-	private   void writeEdgeLabels(double[][]coords,int[][]indis,String[]labs,String hist)throws IOException{
-		if (labs==null||indis==null||coords==null)throw new IOException("Labels impossible");
+
+	private   void writeEdgeLabels(double[][]coords,int[][]indis,String[]labs,String hist) {
+//		if (labs==null||indis==null||coords==null)throw new IOException("Labels impossible");
 		double[][] centers= new double[indis.length][3];// coords for the labels
 		int[] firstEdge;
 		for (int i = 0; i < indis.length; i++) {// all line-Objects
 			firstEdge=indis[i];
-			if (firstEdge.length<2)throw new IOException("bad Lines");
+//			if (firstEdge.length<2)throw new IOException("bad Lines");
 			for (int k = 0; k < 3; k++) // calc the mean of the first segment
 				centers[i][k]=coords[indis[i][0]][k]/2+coords[indis[i][1]][k]/2;
 		}
 		writeLabelsAtPoints(centers,labs,hist);
 	}
-	private   void writeLabelsAtPoints(double[][]centers,String[] labs,String hist)throws IOException{
-		 /*AsciiText {
+	private   void writeLabelsAtPoints(double[][]centers,String[] labs,String hist) {
+		/*AsciiText {
         	string         ""    # MFString
         	spacing        1     # SFFloat
         	justification  LEFT  # SFEnum
@@ -722,24 +403,29 @@ public class WriterVRML
 			out.println(hist+"Translation { translation ");
 			writeDoubleArray(new double[]{-centers[i][0],-centers[i][1],-centers[i][2]}, "", " }", 3);
 		}
-		
+
 	}
-	//	-----------------------------	
+	// --------------- helper Classes ---------------------
+	
+	private static String str(String name) {
+		return "\""+name+"\"";
+	}
+	
 	private static double[] colorToDoubleArray(Color c){
 		double[] d=new double[]{(double)c.getRed()/255,(double)c.getGreen()/255,(double)c.getBlue()/255};
 		return d;
 	}
 	static boolean writeTextureFiles = false;
 	int textureCount = 0;
-	private  void writeImage(Texture2D tex,String hist)throws IOException{
+	private  void writeImage(Texture2D tex,String hist) {
 		String hist2=hist+spacing;
 		ImageData id=tex.getImage();
 		byte[] data= id.getByteArray();
 		int w=id.getWidth();
 		int h=id.getHeight();
 		int dim= data.length/(w*h);
-		if (data.length!=dim*h*w) throw new IOException("invalid image");
-		if (dim <0|dim>4) throw new IOException("invalid image Color-Dimension");
+//		if (data.length!=dim*h*w) throw new IOException("invalid image");
+//		if (dim <0|dim>4) throw new IOException("invalid image Color-Dimension");
 		// write image
 		out.print(hist+"image ");
 		out.println(""+w+" "+h+" "+dim);
@@ -751,39 +437,39 @@ public class WriterVRML
 				if (val<0)val=val+256;
 				mergeVal*=256;
 				mergeVal+=val;
-				}
+			}
 			out.println(hist2+"0x"+ Integer.toHexString(mergeVal).toUpperCase());
 		}
 	}
 	private static String ColorToString(Color c){
 		return ""+((double)c.getRed())/255+" "+((double)c.getGreen())/255+" "+((double)c.getBlue())/255;
 	}
-	private  void writeDoubleArray(double[] d, String hist, String append,int size)throws IOException{
+	private  void writeDoubleArray(double[] d, String hist, String append,int size) {
 		out.print(""+hist);
-		if (d.length<size)throw new IOException("Invalid Data");
+//		if (d.length<size)throw new IOException("Invalid Data");
 		for (int i=0;i<size;i++)
 			out.print(String.format(" %13.7g",d[i]));
 		out.println(append);
 	}
-	private  void writeDoubleMatrix(double[] d,int width, int depth, String hist)throws IOException{
-		if (d.length<width*depth)throw new IOException("Matrix is to short");
+	private  void writeDoubleMatrix(double[] d,int width, int depth, String hist) {
+//		if (d.length<width*depth)throw new IOException("Matrix is to short");
 		double[] n=new double[width];
 		for (int i=0;i<depth;i++){
 			System.arraycopy(d,i*width,n,0,4);
 			writeDoubleArray(n,hist,"",n.length);
 		}
 	}
-	private  void writeInfoString(String info,String hist)throws IOException{
-		 /*Info {
+	private  void writeInfoString(String info,String hist) {
+		/*Info {
 	          string  "<Undefined info>"      # SFString
 	     }	*/
 		out.println(hist+"Info { string \"" +info+ "\" }");	
 	}
-	private  void writeIndices(int[][] in,String hist)throws IOException{
-		if (in==null)throw new IOException("no coordinate Indices");
+	private  void writeIndices(int[][] in,String hist) {
+//		if (in==null)throw new IOException("no coordinate Indices");
 		out.println(hist+"coordIndex ["); 		
 		for (int i=0;i<in.length;i++){
-			if (in==null)throw new IOException("missing coordinate Indice");
+//			if (in==null)throw new IOException("missing coordinate Indice");
 			int le=in[i].length;
 			out.print(hist+spacing);
 			for(int j=0;j<le;j++){
@@ -825,7 +511,7 @@ public class WriterVRML
 		out.println(hist2+"center 0 0");
 		out.println(hist+"}");
 	}
-	private  void writeTexCoords(double[][] texCoords,String hist)throws IOException{
+	private  void writeTexCoords(double[][] texCoords,String hist) {
 		/**		TextureCoordinate2 {
 		 *		point  0 0    # MFVec2f
 		 *		} */
@@ -845,4 +531,295 @@ public class WriterVRML
 			newCol[i]=(double[])list.get(i);
 		return newCol;
 	}
+	
+	// -------------- Visitor -------------------
+	private class MyVisitor extends SceneGraphVisitor{
+		private EffectiveAppearance effApp= EffectiveAppearance.create();
+		private boolean firstTime=true;
+		
+		public MyVisitor() {}
+		public MyVisitor(MyVisitor mv) {
+			effApp=mv.effApp;
+		}		
+		public void visit(SceneGraphComponent c) {
+			if(!c.isVisible())return;
+			out.println(""+hist+"Separator { # "+c.getName());
+			String oldhist= hist;
+			hist=hist+spacing;
+			if(firstTime){
+//				 write INFO STRING
+				if (c.getAppearance()!=null){
+					Object obj = c.getAppearance().getAttribute(
+							CommonAttributes.INFO_STRING, String.class);
+					if (obj instanceof String && obj!=null){
+						String info= (String)obj;
+						writeInfoString(info, hist+spacing);
+					}
+				}
+				// defaults:
+				/*		ShapeHints {
+			          vertexOrdering  UNKNOWN_ORDERING      # SFEnum
+			          shapeType       UNKNOWN_SHAPE_TYPE    # SFEnum
+			          faceType        CONVEX                # SFEnum
+			          creaseAngle     0.5                   # SFFloat
+			     }*/
+				out.println(""+hist+"ShapeHints { # some default Parameters ");
+				out.println(""+hist+spacing+"vertexOrdering  UNKNOWN_ORDERING");
+				out.println(""+hist+spacing+"shapeType       UNKNOWN_SHAPE_TYPE");
+				out.println(""+hist+spacing+"faceType        CONVEX");
+				out.println(""+hist+"}");
+				
+				firstTime=false;
+			}
+			c.childrenAccept(new MyVisitor(this));			
+			super.visit(c);
+			hist=oldhist;
+			out.println(""+hist+"}");
+		}
+		public void visit(Appearance a) {
+			effApp=effApp.create(a);
+			super.visit(a);
+		}
+		// ----- geometrys -----
+		public void visit(Sphere s) {// finished
+			super.visit(s);
+			if ( !dgs.getShowFaces())	return;
+			// first write the appearance colors and texture outside the DEF/USE
+			writeMaterialBinding(OVERALL,hist);
+			Color amb = dps.getAmbientColor();
+			Color spec= dps.getSpecularColor();
+			Color diff= dps.getDiffuseColor();
+			double tra= dps.getTransparency();
+			if (tra!=0|diff!=null|spec!=null|amb!=null){
+				writeMaterial(amb,diff,spec,tra,hist);
+			}
+			/**	Sphere {
+			 *    radius  1     # SFFloat
+			 *	}		*/
+			out.println(hist+"Sphere { radius  1}");
+		}
+		public void visit(Cylinder c) {//finished
+			super.visit(c);			
+			if ( !dgs.getShowFaces())	return;
+			// first write the appearance colors and texture outside the DEF/USE
+			writeMaterialBinding(OVERALL,hist);
+			Color amb = dps.getAmbientColor();
+			Color spec= dps.getSpecularColor();
+			Color diff= dps.getDiffuseColor();
+			double tra= dps.getTransparency();
+			if (tra!=0|diff!=null|spec!=null|amb!=null){
+				writeMaterial(amb,diff,spec,tra,hist);
+			}
+			/**	PARTS
+			 *     SIDES   The cylindrical part
+			 *     TOP     The top circular face
+			 *     BOTTOM  The bottom circular face
+			 *     ALL     All parts
+			 *FILE FORMAT/DEFAULTS
+			 *     Cylinder {
+			 *          parts   ALL   # SFBitMask
+			 *          radius  1     # SFFloat
+			 *          height  2     # SFFloat
+			 *     }		*/
+			double[] r=MatrixBuilder.euclidean().rotateFromTo(new double[]{0,1,0}, new double[]{1,0,0}).getArray();
+			out.println(hist+" Separator { # Cylinder");
+			String oldHist= hist;		hist=hist+spacing;
+			out.println(hist+"MatrixTransform { matrix");
+			writeDoubleMatrix(r,4,4,hist+spacing);
+			out.println(hist+"}");
+			out.print(hist+"Cylinder { ");
+			out.print("parts SIDES ");
+			out.print("radius  1 ");
+			out.print("height  1 ");
+			out.println("}");
+			hist=oldHist;
+			out.println(""+hist+"} ");
+		}
+		public void visit(Geometry g) {//finished
+			updateShaders(effApp);
+			super.visit(g);
+		}
+		public void visit(PointSet p) {
+			super.visit(p);
+			if ( !dvs.getSpheresDraw() || !dgs.getShowPoints()|| p.getNumPoints()==0) return;
+			// first write the appearance colors and texture outside the DEF/USE
+			writeMaterialBinding(OVERALL,hist);
+			Color diff=dvs.getDiffuseColor();
+			if (diff!=null){	writeMaterial(null,diff,null,0,hist);	}
+			//	check if allready defined
+			if(useDefs){
+				if (wHelp.isDefinedPointSet(p)){
+					out.println(""+hist+"USE"+ str( p.hashCode()+"POINT"));
+					return;
+				}
+			}
+			if (useDefs && wHelp.isMultipleUsedPointSet(p)){
+				out.print(""+hist+"DEF "+str(p.hashCode()+"POINT"));
+				wHelp.setDefinedPointSet(p);
+				}
+			else out.print(""+hist);
+			out.println(" Separator { ");
+			writeGeoPoints( p,hist+spacing);
+			out.println(""+hist+"} ");					
+		}
+		public void visit(IndexedLineSet g) {
+			super.visit(g);
+			if ( !dls.getTubeDraw() || !dgs.getShowLines() || g.getNumEdges()==0) return;
+			// first write the appearance colors and texture outside the DEF/USE
+			writeMaterialBinding(OVERALL,hist);
+			Color diff=dls.getDiffuseColor();
+			if (diff!=null){	writeMaterial(null,diff,null,0,hist);	}
+			//	check if allready defined
+			if(useDefs){
+				if (wHelp.isDefinedLineSet(g)){
+					out.println(""+hist+"USE"+ str( g.hashCode()+"LINE"));
+					return;
+				}
+			}
+			if (useDefs && wHelp.isMultipleUsedLineSet(g)){
+				out.print(""+hist+"DEF "+str(g.hashCode()+"LINE"));
+				wHelp.setDefinedLineSet(g);
+				}
+			else out.print(""+hist);
+			out.println(" Separator { ");
+				writeGeoLines( g,hist+spacing);
+			out.println(""+hist+"} ");		
+		}
+		public void visit(IndexedFaceSet g) {
+			super.visit(g);
+			if ( !dgs.getShowFaces()|| g.getNumFaces()==0)	return;
+			// first write the appearance colors and texture outside the DEF/USE
+			writeMaterialBinding(OVERALL,hist);
+			Color amb = dps.getAmbientColor();
+			Color spec= dps.getSpecularColor();
+			Color diff= dps.getDiffuseColor();
+			double tra= dps.getTransparency();
+			if (tra!=0|diff!=null|spec!=null|amb!=null){
+				writeMaterial(amb,diff,spec,tra,hist);
+			}
+			try {
+				// check texture
+				if (g.getVertexAttributes(Attribute.TEXTURE_COORDINATES)==null)
+					throw new IOException("missing texture component");			
+				double[][]texcords=g.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
+				Texture2D tex=dps.getTexture2d();
+				if (tex==null) throw new IOException("missing texture component");
+				Matrix mat= tex.getTextureMatrix();
+				if (mat==null) throw new IOException("missing texture component");
+				ImageData id=tex.getImage();
+				if (id==null) throw new IOException("missing texture component");
+				// write texture:
+				writeTexCoords(texcords,hist);	
+				writeTexture(tex,hist);
+			} catch (IOException e) {
+				// falls es nur nicht genug componenten fuer die Textur gibt 
+				// werfe keinen Fehler
+//				if (!e.getMessage().equals("missing texture component"))	throw e;
+			}
+			//			check if allready defined
+			if(useDefs){
+				if (wHelp.isDefinedFaceSet(g)){
+					out.println(""+hist+"USE"+ str( g.hashCode()+"POLYGON"));
+					return;
+				}
+			}
+			if (useDefs && wHelp.isMultipleUsedFaceSet(g)){
+				out.print(""+hist+"DEF "+str(g.hashCode()+"POLYGON"));
+				wHelp.setDefinedFaceSet(g);
+				}
+			else out.print(""+hist);
+			out.println(" Separator { ");
+			writeGeoFaces( g,hist+spacing);
+			out.println(""+hist+"} ");
+		}
+		// ---- Lights ----
+		public void visit(Light l) {//finished
+			super.visit(l);
+		}
+		public void visit(DirectionalLight l) {
+			/*	DirectionalLight {
+		          on         TRUE       # SFBool
+		          intensity  1          # SFFloat
+		          color      1 1 1      # SFColor
+		          direction  0 0 -1     # SFVec3f
+		     } */
+			double di=l.getIntensity();
+			double[] dc=colorToDoubleArray(l.getColor());
+			out.println(hist+"DirectionalLight { # "+ l.getName());
+			String oldHist= hist;		hist=hist+spacing;
+			out.println(hist + "intensity " +di);
+			out.print(hist + "color " );
+			writeDoubleArray(dc, "", "", 3);
+			out.println(hist + "direction  0 0 1");
+			hist=oldHist;
+			out.println(hist+"}");
+			super.visit(l);
+		}
+		public void visit(PointLight l) {
+			/* PointLight {
+		          on         TRUE       # SFBool
+		          intensity  1          # SFFloat
+		          color      1 1 1      # SFColor
+		          location   0 0 1      # SFVec3f
+		     }  */
+			double di=l.getIntensity();
+			double[] dc=colorToDoubleArray(l.getColor());
+			out.println(hist+"PointLight { # "+ l.getName());
+			String oldHist= hist;		hist=hist+spacing;
+			out.println(hist + "intensity " +di);
+			out.print(hist + "color " );
+			writeDoubleArray(dc, "", "", 3);
+			out.println(hist + "location   0 0 0");
+			hist=oldHist;
+			out.println(hist+"}");			
+			super.visit(l);
+		}
+		public void visit(SpotLight li) {
+			/*  SpotLight {
+	          on           TRUE     # SFBool
+	          intensity    1        # SFFloat
+	          color        1 1 1    # SFVec3f
+	          location     0 0 1    # SFVec3f
+	          direction    0 0 -1   # SFVec3f
+	          dropOffRate  0        # SFFloat
+	          cutOffAngle  0.785398 # SFFloat
+	     }  */
+			double di=li.getIntensity();
+			double[] dc=colorToDoubleArray(li.getColor());
+			out.println(hist+"SpotLight { # "+ li.getName());
+			String oldHist= hist;		hist=hist+spacing;
+			out.println(hist + "intensity " +di);
+			out.print(hist + "color " );
+			writeDoubleArray(dc, "", "", 3);
+			out.println(hist + "location 0 0 0 ");
+			out.println(hist + "dropOffRate 0" );
+			out.println(hist + "direction  0 0 1");
+			out.println(hist + "cutOffAngle "+li.getConeAngle() );
+			hist=oldHist;
+			out.println(hist+"}");
+			super.visit(li);
+		}
+		// ----------- cam ------------
+		public void visit(Camera c) {
+			if (c.isPerspective()){
+				//TODO: orientation
+				out.println(hist+"PerspectiveCamera { ");
+				String oldHist= hist;		hist=hist+spacing;
+				out.println(hist+"focalDistance "+c.getFocalLength());
+				double hAngle=c.getFieldOfView()*Math.PI /180;
+				out.println(hist+"heightAngle "+hAngle);
+				hist=oldHist;
+				out.println(hist+"}");
+			}
+			else {System.out.println("WriterVRML.writeCam(not completely implemented)");}
+			super.visit(c);
+		}
+		// ---------- trafo ---------
+		public void visit(Transformation t) {
+			out.println(hist+"MatrixTransform { matrix");
+			writeDoubleMatrix(t.getMatrix(),4,4,hist+spacing);
+			out.println(hist+"}");
+			super.visit(t);
+		}
+	}		
 }
