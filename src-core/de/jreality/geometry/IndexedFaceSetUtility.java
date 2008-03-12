@@ -1770,46 +1770,6 @@ public class IndexedFaceSetUtility {
 		}
 		return tris;
 	}
-	public static PointSet indexedFaceSetToPointSet(IndexedFaceSet f){
-		PointSet p= new PointSet(f.getNumPoints());
-		p.setGeometryAttributes(f.getGeometryAttributes());
-		p.setVertexAttributes(f.getVertexAttributes());
-		return p;
-	}
-	public static IndexedLineSet indexedFaceSetToIndexedLineSet(IndexedFaceSet f){
-		IndexedLineSet l= new IndexedLineSet(f.getNumPoints(),f.getNumEdges());
-		l.setGeometryAttributes(f.getGeometryAttributes());
-		l.setVertexAttributes(f.getVertexAttributes());
-		l.setEdgeAttributes(f.getEdgeAttributes());
-		return l;
-	}
-	public static IndexedFaceSet indexedLineSetToIndexedFaceSet(IndexedLineSet l){
-		if (l instanceof IndexedFaceSet)
-			return (IndexedFaceSet) l;
-		IndexedFaceSet f= new IndexedFaceSet(l.getNumPoints(),0);
-		f.setGeometryAttributes(l.getGeometryAttributes());
-		f.setVertexAttributes(l.getVertexAttributes());
-		f.setEdgeCountAndAttributes(l.getEdgeAttributes());
-		return f;
-	}
-	public static IndexedFaceSet pointSetToIndexedFaceSet(PointSet p){
-		if (p instanceof IndexedFaceSet)
-			return (IndexedFaceSet) p;
-		if (p instanceof IndexedLineSet)
-			return indexedLineSetToIndexedFaceSet((IndexedLineSet)p);
-		IndexedFaceSet f= new IndexedFaceSet(p.getNumPoints(),0);
-		f.setGeometryAttributes(p.getGeometryAttributes());
-		f.setVertexAttributes(p.getVertexAttributes());
-		return f;
-	}
-	public static IndexedFaceSet IndexedFaceSetToPureIndexedFaceSet(IndexedFaceSet i){
-		// has no Edge attributes
-		IndexedFaceSet f= new IndexedFaceSet(i.getNumPoints(),0);
-		f.setGeometryAttributes(i.getGeometryAttributes());
-		f.setVertexAttributes(i.getVertexAttributes());
-		f.setFaceAttributes(i.getFaceAttributes());
-		return f;
-	}
 	/** makes a consistent orientated version of the "face Indices" if possible.
 	 * if it fails, false will be returned and nothing changes.
 	 * @param numVertices
