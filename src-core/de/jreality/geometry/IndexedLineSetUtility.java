@@ -208,20 +208,5 @@ public class IndexedLineSetUtility {
 	public static IndexedLineSet circle(int n) {
 		return circle(n, 0, 0, 1);
 	}
-	public static PointSet indexedLineSetToPointSet(IndexedLineSet l){
-		PointSet p= new PointSet(l.getNumPoints());
-		p.setGeometryAttributes(l.getGeometryAttributes());
-		p.setVertexAttributes(l.getVertexAttributes());
-		return p;
-	}
-	
-	public static IndexedLineSet pointSetToIndexedLineSet(PointSet p){
-		if (p instanceof IndexedLineSet)
-			return (IndexedLineSet) p;
-		IndexedLineSet l= new IndexedLineSet(p.getNumPoints(),0);
-		l.setGeometryAttributes(p.getGeometryAttributes());
-		l.setVertexAttributes(p.getVertexAttributes());
-		return l;
-	}
 
 }
