@@ -118,7 +118,6 @@ public class DefUseData {
 		// set Appearance color
 		if(givenState.materialBinding==State.Binding.OVERALL||
 				 givenState.materialBinding==State.Binding.DEFAULT){
-			 	System.out.println("DefUseData.useKnot(2)");
 		 		Appearance app= new Appearance();
 				givenState.setColorApp(app,false);
 				defUseNode.setAppearance(app);
