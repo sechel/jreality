@@ -486,8 +486,8 @@ public class GeometryMergeFactory {
 				IndexedLineSet myLSet = (IndexedLineSet) myPs;	
 				if (myPs instanceof IndexedFaceSet) {
 					myface = (IndexedFaceSet) myPs;
-				}else myface=IndexedFaceSetUtility.indexedLineSetToIndexedFaceSet(myLSet);
-			}else myface=IndexedFaceSetUtility.pointSetToIndexedFaceSet(myPs); 
+				}else myface=indexedLineSetToIndexedFaceSet(myLSet);
+			}else myface=pointSetToIndexedFaceSet(myPs); 
 			g.add(myface);
 			// color
 			Color Mycol;
@@ -618,7 +618,7 @@ public class GeometryMergeFactory {
 		IndexedFaceSet[] ifs=new IndexedFaceSet[geo.length];
 		// convert entrys to IndexedFaceSets
 		for (int i = 0; i < geo.length; i++) {
-			ifs[i]=IndexedFaceSetUtility.pointSetToIndexedFaceSet(geo[i]);
+			ifs[i]=pointSetToIndexedFaceSet(geo[i]);
 			if(generateFaceNormals && ifs[i].getNumFaces()>0 && ifs[i].getVertexAttributes(Attribute.NORMALS)==null)
 				GeometryUtility.calculateAndSetFaceNormals(ifs[i]);
 			if (generateFaceNormals && ifs[i].getNumFaces()>0 && ifs[i].getFaceAttributes(Attribute.NORMALS)==null)
@@ -693,7 +693,7 @@ public class GeometryMergeFactory {
 	public IndexedLineSet mergeIndexedLineSets( IndexedLineSet [] ils){
 		respectFacesIntern=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ils);
-		IndexedLineSet l=IndexedFaceSetUtility.indexedFaceSetToIndexedLineSet(f);
+		IndexedLineSet l=indexedFaceSetToIndexedLineSet(f);
 		return l;
 	}
 	/** merges all PointSets to one PointSet
@@ -705,7 +705,7 @@ public class GeometryMergeFactory {
 		respectFacesIntern=false;
 		respectEdgesIntern=false;
 		IndexedFaceSet f=mergeIndexedFaceSets(ps);
-		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(f);
+		PointSet p=indexedFaceSetToPointSet(f);
 		return p;
 	}
 	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
@@ -726,7 +726,7 @@ public class GeometryMergeFactory {
 	 */
 	public IndexedLineSet mergeIndexedLineSets(SceneGraphComponent cmp){
 		respectFacesIntern= false;
-		IndexedLineSet l=IndexedFaceSetUtility.indexedFaceSetToIndexedLineSet(mergeGeometrySets(cmp));
+		IndexedLineSet l=indexedFaceSetToIndexedLineSet(mergeGeometrySets(cmp));
 		return l;
 	}
 	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
@@ -737,7 +737,7 @@ public class GeometryMergeFactory {
 	 */
 	public PointSet mergePointSets(SceneGraphComponent cmp){
 		respectFacesIntern= false;		respectEdgesIntern= false;
-		PointSet p=IndexedFaceSetUtility.indexedFaceSetToPointSet(mergeGeometrySets(cmp));
+		PointSet p=indexedFaceSetToPointSet(mergeGeometrySets(cmp));
 		return p;
 	}
 	// ------------- setters ----------
@@ -937,4 +937,53 @@ public class GeometryMergeFactory {
 					d[i]=new double[]{d[i][0],d[i][1],d[i][2],1};
 	}
 	
+	// --- converter 
+	// TODO make without converter, use Visitor
+	private static PointSet indexedLineSetToPointSet(IndexedLineSet l){
+		PointSet p= new PointSet(l.getNumPoints());
+		p.setGeometryAttributes(l.getGeometryAttributes());
+		p.setVertexAttributes(l.getVertexAttributes());
+		return p;
+	}
+	
+	private static IndexedLineSet pointSetToIndexedLineSet(PointSet p){
+		if (p instanceof IndexedLineSet)
+			return (IndexedLineSet) p;
+		IndexedLineSet l= new IndexedLineSet(p.getNumPoints(),0);
+		l.setGeometryAttributes(p.getGeometryAttributes());
+		l.setVertexAttributes(p.getVertexAttributes());
+		return l;
+	}
+	private static PointSet indexedFaceSetToPointSet(IndexedFaceSet f){
+		PointSet p= new PointSet(f.getNumPoints());
+		p.setGeometryAttributes(f.getGeometryAttributes());
+		p.setVertexAttributes(f.getVertexAttributes());
+		return p;
+	}
+	private static IndexedLineSet indexedFaceSetToIndexedLineSet(IndexedFaceSet f){
+		IndexedLineSet l= new IndexedLineSet(f.getNumPoints(),f.getNumEdges());
+		l.setGeometryAttributes(f.getGeometryAttributes());
+		l.setVertexAttributes(f.getVertexAttributes());
+		l.setEdgeAttributes(f.getEdgeAttributes());
+		return l;
+	}
+	private static IndexedFaceSet indexedLineSetToIndexedFaceSet(IndexedLineSet l){
+		if (l instanceof IndexedFaceSet)
+			return (IndexedFaceSet) l;
+		IndexedFaceSet f= new IndexedFaceSet(l.getNumPoints(),0);
+		f.setGeometryAttributes(l.getGeometryAttributes());
+		f.setVertexAttributes(l.getVertexAttributes());
+		f.setEdgeCountAndAttributes(l.getEdgeAttributes());
+		return f;
+	}
+	private static IndexedFaceSet pointSetToIndexedFaceSet(PointSet p){
+		if (p instanceof IndexedFaceSet)
+			return (IndexedFaceSet) p;
+		if (p instanceof IndexedLineSet)
+			return indexedLineSetToIndexedFaceSet((IndexedLineSet)p);
+		IndexedFaceSet f= new IndexedFaceSet(p.getNumPoints(),0);
+		f.setGeometryAttributes(p.getGeometryAttributes());
+		f.setVertexAttributes(p.getVertexAttributes());
+		return f;
+	}
 }

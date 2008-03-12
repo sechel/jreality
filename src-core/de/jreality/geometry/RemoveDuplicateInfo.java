@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -110,7 +111,7 @@ public class RemoveDuplicateInfo {
 		return removeDuplicateVertices(ps,0.00000001,attributes);		
 	}
 	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, double eps, Attribute ...attributes ) {
-		IndexedFaceSet ifs= IndexedFaceSetUtility.pointSetToIndexedFaceSet(ps);		
+		IndexedFaceSet ifs= pointSetToIndexedFaceSet(ps);		
 		// inittialize some data
 		RemoveDuplicateInfo r= new RemoveDuplicateInfo(ifs);
 		{
@@ -676,4 +677,25 @@ public class RemoveDuplicateInfo {
 		if(g.getTools()!=null && g.getTools().size()>0) return false;
 		return true;	
 	}
+	// TODO dont use this method, use "instanceof" instead
+	private static IndexedFaceSet pointSetToIndexedFaceSet(PointSet p){
+		if (p instanceof IndexedFaceSet)
+			return (IndexedFaceSet) p;
+		if (p instanceof IndexedLineSet)
+			return indexedLineSetToIndexedFaceSet((IndexedLineSet)p);
+		IndexedFaceSet f= new IndexedFaceSet(p.getNumPoints(),0);
+		f.setGeometryAttributes(p.getGeometryAttributes());
+		f.setVertexAttributes(p.getVertexAttributes());
+		return f;
+	}
+	private static IndexedFaceSet indexedLineSetToIndexedFaceSet(IndexedLineSet l){
+		if (l instanceof IndexedFaceSet)
+			return (IndexedFaceSet) l;
+		IndexedFaceSet f= new IndexedFaceSet(l.getNumPoints(),0);
+		f.setGeometryAttributes(l.getGeometryAttributes());
+		f.setVertexAttributes(l.getVertexAttributes());
+		f.setEdgeCountAndAttributes(l.getEdgeAttributes());
+		return f;
+	}
+	
 }
