@@ -123,8 +123,9 @@ public class SunflowRenderer extends SunflowAPI {
 	IdentityHashMap<Object, String> geom2name = new IdentityHashMap<Object, String>();
 	HashMap<String, Object> name2geom = new HashMap<String, Object>();
 
-	private String POINT_SPHERE="point";
-	private String LINE_CYLINDER="line";
+	private static final String POINT_SPHERE="point";
+	private static final String LINE_CYLINDER="line";
+	private static final String PARTICLE_SURFACE = "particleSurface";
 	private SceneGraphPath bakingPath;
 	private String bakingInstance;
 	private RenderOptions options = new RenderOptions();
@@ -250,6 +251,7 @@ public class SunflowRenderer extends SunflowAPI {
 			
 		}
 
+		int particleSurfaceCnt=0;
 		@Override
 		public void visit(IndexedLineSet indexedLineSet) {
 			HashMap<String, ?> particleSurface = (HashMap<String, ?>) indexedLineSet.getGeometryAttributes("particleSurface");
@@ -273,7 +275,7 @@ public class SunflowRenderer extends SunflowAPI {
 				parameter("particles", "point", "vertex", particles);
 				parameter("num", n);
 				parameter("radius", radius);
-				String name = "particeSurface";
+				String name = "particeSurface"+particleSurfaceCnt;
 				geometry(name, new ParticleSurface());
 				//parameter("shaders", "glass");
 				
@@ -281,7 +283,8 @@ public class SunflowRenderer extends SunflowAPI {
 				
 				parameter("shaders", "default-shader" + appCount);
 				System.out.println("["+name+"] particle surface with n="+n+", r="+radius);
-				instance("particeSurface.instance", "particeSurface"); 
+				instance("particeSurface.instance"+particleSurfaceCnt, name); 
+				particleSurfaceCnt++;
 				return;
 			}
 			visit((PointSet)indexedLineSet);
@@ -676,7 +679,7 @@ public class SunflowRenderer extends SunflowAPI {
 		// init default primitives
 		geometry(POINT_SPHERE, new org.sunflow.core.primitive.Sphere());
 		geometry(LINE_CYLINDER, new de.jreality.sunflow.core.primitive.Cylinder());
-
+		
 		Rectangle3D sceneBounds = GeometryUtility.calculateBoundingBox(sceneRoot);
 		double[] c = sceneBounds.getCenter();
 		Point3 sceneCenter = new Point3((float)c[0], (float)c[1], (float)c[2]);
