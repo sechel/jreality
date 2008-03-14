@@ -65,13 +65,11 @@ import de.jreality.scene.event.AppearanceListener;
  */
 public class Appearance extends SceneGraphNode
 {
-  // it would be convenient if these were no inner classes but just objects....
-  public static final Object DEFAULT = new Object() {
-    public String toString() { return "default"; }
-  };
-  public static final Object INHERITED = new Object() {
-    public String toString() { return "inherited"; }
-  };
+  // steffen: i changed these to objects otherwise an effective appearance can never return them...
+  // obsolete now: it would be convenient if these were no inner classes but just objects....
+  public static final Object DEFAULT = new Object();
+  public static final Object INHERITED = new Object();
+
   private transient AppearanceListener appearanceListener;
   private HashMap<String, Object> attributes=new HashMap<String, Object>();
   private Set<String> storedAttributes = Collections.unmodifiableSet(attributes.keySet());
