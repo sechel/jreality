@@ -54,6 +54,7 @@ import org.sunflow.core.camera.PinholeLens;
 import org.sunflow.core.light.DirectionalSpotlight;
 import org.sunflow.core.light.SunSkyLight;
 import org.sunflow.core.primitive.Background;
+import org.sunflow.core.primitive.ParticleSurface;
 import org.sunflow.core.primitive.Plane;
 import org.sunflow.core.primitive.TriangleMesh;
 import org.sunflow.core.shader.ConstantShader;
@@ -167,7 +168,7 @@ public class SunflowRenderer extends SunflowAPI {
 
 			dgs = ShaderUtility.createDefaultGeometryShader(eapp);
 			rhs = ShaderUtility.createRenderingHintsShader(eapp);
-			c.childrenAccept(this);			
+			c.childrenAccept(this);
 		    path.pop();
 		}
 
@@ -251,6 +252,38 @@ public class SunflowRenderer extends SunflowAPI {
 
 		@Override
 		public void visit(IndexedLineSet indexedLineSet) {
+			HashMap<String, ?> particleSurface = (HashMap<String, ?>) indexedLineSet.getGeometryAttributes("particleSurface");
+			if (particleSurface!= null) {
+				DefaultPointShader pointShader = (DefaultPointShader) dgs.getPointShader();
+				dps = (DefaultPolygonShader) pointShader.getPolygonShader();
+				applyShader(dps);
+				float[] particles = (float[]) particleSurface.get("particles");
+				int n = (Integer) particleSurface.get("n");
+				double radius = pointShader.getPointRadius();
+				double[] tmp = new double[4];
+				for (int i=0; i<n; i++) {
+					tmp[0]=particles[3*i];
+					tmp[1]=particles[3*i+1];
+					tmp[2]=particles[3*i+2];
+					tmp[3]=1;
+					particles[3*i]=(float) tmp[0];
+					particles[3*i+1]=(float) tmp[1];
+					particles[3*i+2]=(float) tmp[2];
+				}
+				parameter("particles", "point", "vertex", particles);
+				parameter("num", n);
+				parameter("radius", radius);
+				String name = "particeSurface";
+				geometry(name, new ParticleSurface());
+				//parameter("shaders", "glass");
+				
+				parameter("transform", currentMatrix);
+				
+				parameter("shaders", "default-shader" + appCount);
+				System.out.println("["+name+"] particle surface with n="+n+", r="+radius);
+				instance("particeSurface.instance", "particeSurface"); 
+				return;
+			}
 			visit((PointSet)indexedLineSet);
 			DefaultLineShader ls = (DefaultLineShader) dgs.getLineShader();
 			Matrix m=null;
