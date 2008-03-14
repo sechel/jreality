@@ -314,7 +314,7 @@ public class ViewerVR {
 		terrainAppearance.setAttribute("showPoints", false);
 		terrainAppearance.setAttribute("diffuseColor", Color.white);
 		terrainAppearance.setAttribute(CommonAttributes.BACK_FACE_CULLING_ENABLED, true);
-		terrainAppearance.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0);
+		terrainAppearance.setAttribute(CommonAttributes.SPECULAR_COEFFICIENT, 0.0);
 		terrainAppearance.setAttribute(CommonAttributes.SPECULAR_COLOR, Color.black);
 		terrainNode.setAppearance(terrainAppearance);
 		sceneRoot.addChild(terrainNode);
