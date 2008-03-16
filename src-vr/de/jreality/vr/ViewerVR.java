@@ -785,8 +785,7 @@ public class ViewerVR {
 				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
 			}
 			public void actionPerformed(ActionEvent e) {
-				//sp.toggle(sceneRoot, new Matrix(avatarPath.getMatrix(null)));
-				sp.getFrame().setVisible(sp.getFrame().isVisible());
+				sp.getFrame().setVisible(!sp.getFrame().isVisible());
 			}
 		};
 		settings.add(panelPopup);
