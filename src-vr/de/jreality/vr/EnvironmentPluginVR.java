@@ -325,7 +325,7 @@ public class EnvironmentPluginVR extends AbstractPluginVR {
 				File f = new File(customFile);
 				if (f.exists()) customCubeMapFile = f;
 				try {
-					customCubeMap = TextureUtility.createCubeMapData(Input.getInput(f));
+					customCubeMap = TextureUtility.createCubeMapData(Input.getInput(customFile));
 				} catch (IOException e) {
 					e.printStackTrace();
 					customCubeMapFile = null;
