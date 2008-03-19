@@ -42,22 +42,17 @@ package de.jreality.reader;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.Arrays;
 import java.util.LinkedList;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
-import de.jreality.util.Rectangle3D;
 
 /**
  *
- * simple reader for the TXT file format (3d scan data) 
- * 
+ * simple reader for the TXT file format (3d scan data)
+ *
  * @author Philipp Beckmann
  *
  */
@@ -78,9 +73,9 @@ public class ReaderSTL extends AbstractReader {
   }
 
   private void load() throws Exception {
-    
+
     LineNumberReader r  = new LineNumberReader(input.getReader());
-    
+
     PointOctree po = new PointOctree();
     LinkedList<double[]> pts = new LinkedList<double[]>();
     LinkedList<int[]> face_indices = new LinkedList<int[]>();
@@ -88,18 +83,20 @@ public class ReaderSTL extends AbstractReader {
     String line;
 
     // read until "solid"
-    while (( !"solid".equals(r.readLine().trim())));
-    
+    //while (( !"solid".equals(r.readLine().trim())));
+    while ((!r.readLine().trim().startsWith("solid")));
+
     int faceCount = 0;
-    
+
     while (true) {
 	    line = r.readLine().trim();
-	    
-	    if ("endsolid".equals(line)) {
+
+	    //if ("endsolid".equals(line)) {
+	    if ((line.startsWith("end solid")) || (line.startsWith("endsolid"))) {
 	    	System.out.println("solid end: "+faceCount+" facets read.");
 	    	break; // file finished
 	    }
-	    
+
 	    assert (line.startsWith("facet normal"));
 	    faceCount++;
 		String[] split = line.trim().split("\\s+");
@@ -108,41 +105,41 @@ public class ReaderSTL extends AbstractReader {
 		normal[0] = Double.parseDouble(split[2]);
 		normal[1] = Double.parseDouble(split[3]);
 		normal[2] = Double.parseDouble(split[4]);
-	    
-	    line = r.readLine().trim();  
+
+	    line = r.readLine().trim();
 	    assert (line.startsWith("outer loop"));
-	    
+
 	    LinkedList<Integer> face_idx = new LinkedList<Integer>();
-	
+
 	    // read n consecutive lines of vertices: collect each face:
 	    while ((line = r.readLine().trim()).startsWith("vertex")) {
 	    	String[] numbers = line.trim().split("\\s+");
-	
+
 	        // note that "vertex" is stored at pos 0!
 	    	double coord[]  = new double[3];
 	    	coord[0] = Double.parseDouble(numbers[1]);
 	    	coord[1] = Double.parseDouble(numbers[2]);
 	    	coord[2] = Double.parseDouble(numbers[3]);
-	
+
 	        if ( po.insert(coord[0], coord[1], coord[2]) != null ) {
 	          pts.add( coord );
 	        }
 	        PointOctree.Node n;
-	        if ( (n = po.find(coord[0], coord[1], coord[2])) == null) 
+	        if ( (n = po.find(coord[0], coord[1], coord[2])) == null)
 	          throw new RuntimeException();
 	        face_idx.add(n.index());
 	      } // face finished
-	      
+
 	    assert (line.equals("endloop"));
-	  
-	    line = r.readLine().trim();  
+
+	    line = r.readLine().trim();
 	    assert (line.equals("endfacet"));
 
 	    int[] face = new int[face_idx.size()];
 	    for (int i=0; i<face.length;i++) face[i]=face_idx.get(i);
 	    face_indices.add(face);
     }
-    
+
     double vertices[][] = pts.toArray(new double[0][0]);
     int faces[][]       = face_indices.toArray(new int[0][0]);
 
