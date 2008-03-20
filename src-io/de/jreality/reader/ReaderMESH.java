@@ -11,6 +11,12 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
 
+/**
+ * simple reader for mathematica tables with entries{x,y,z,tx,ty} where the texture coordinates (tx,ty) are optional
+ * 
+ * @author weissman
+ *
+ */
 public class ReaderMESH extends AbstractReader {
 
 
