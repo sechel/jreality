@@ -153,6 +153,8 @@ public final class Readers {
 		String lcName = resourceName.toLowerCase();
 		if (lcName.endsWith(".fe")) {
 			format = "FE";
+		} else if (lcName.endsWith(".mesh")) {
+			format = "MESH";
 		} else if (lcName.endsWith(".top")) {
 			format = "POLY";
 		} else if (lcName.endsWith(".pov")) {
