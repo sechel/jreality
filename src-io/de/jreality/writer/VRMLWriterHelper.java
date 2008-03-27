@@ -1,7 +1,14 @@
 package de.jreality.writer;
 
+import java.awt.Color;
+import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
 
+import de.jreality.math.FactoredMatrix;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -10,9 +17,14 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DataListSet;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 public class VRMLWriterHelper {
 
@@ -144,5 +156,112 @@ public class VRMLWriterHelper {
 			gp.pointsDefined=true;
 		}
 	}
-	
+	static int[][] getIntIntFaceAttr(IndexedFaceSet ifs,Attribute a){
+		DataList d=null;
+		d=ifs.getFaceAttributes(a);
+		if(d==null)return null;
+		try {			return d.toIntArrayArray(null);	
+		} catch (Exception e) {return null;		}		
+	}
+	static double[][] getDoubleDoubleFaceAttr(IndexedFaceSet ifs,Attribute a){
+		DataList d=null;
+		d=ifs.getFaceAttributes(a);
+		if(d==null)return null;
+		try {	return d.toDoubleArrayArray(null);
+		} catch (Exception e) {	return null;	}		
+	}
+	static int[][] getIntIntEdgeAttr(IndexedLineSet ils,Attribute a){
+		DataList d=null;
+		d=ils.getEdgeAttributes(a);
+		if(d==null)return null;
+		try {			return d.toIntArrayArray(null);	
+		} catch (Exception e) {return null;		}		
+	}
+	static double[][] getDoubleDoubleEdgeAttr(IndexedLineSet ils,Attribute a){
+		DataList d=null;
+		d=ils.getEdgeAttributes(a);
+		if(d==null)return null;
+		try {	return d.toDoubleArrayArray(null);
+		} catch (Exception e) {	return null;	}		
+	}
+	static double[][] getDoubleDoubleVertexAttr(PointSet p,Attribute a){
+		DataList d=null;
+		d=p.getVertexAttributes(a);
+		if(d==null)return null;
+		try {	return d.toDoubleArrayArray(null);
+		} catch (Exception e) {	return null;	}		
+	}
+	static String[] getLabelFaceAttr(IndexedFaceSet ifs){
+		DataList d=null;
+		d=ifs.getFaceAttributes(Attribute.LABELS);
+		if(d==null)return null;
+		try {			return d.toStringArray(null);	
+		} catch (Exception e) {return null;		}		
+	}
+	static String[] getLabelEdgeAttr(IndexedLineSet ils){
+		DataList d=null;
+		d=ils.getEdgeAttributes(Attribute.LABELS);
+		if(d==null)return null;
+		try {			return d.toStringArray(null);	
+		} catch (Exception e) {return null;		}		
+	}
+	static String[] getLabelPointAttr(PointSet p){
+		DataList d=null;
+		d=p.getVertexAttributes(Attribute.LABELS);
+		if(d==null)return null;
+		try {			return d.toStringArray(null);	
+		} catch (Exception e) {return null;		}		
+	}
+	//-------------------------------------------------------------
+	 static String str(String name) {
+		 return "\""+name+"\"";
+	 }
+	 static void writeDoubleArray(double[] d, String hist, String append,int size,PrintWriter out) {
+		 out.print(""+hist);
+		 for (int i=0;i<size;i++)
+			 out.print(String.format(" %13.7g",d[i]));
+		 out.println(append);
+	 }
+
+	 static double[] colorToDoubleArray(Color c){
+		 double[] d=new double[]{(double)c.getRed()/255,(double)c.getGreen()/255,(double)c.getBlue()/255};
+		 return d;
+	 }
+	 static String ColorToString(Color c){
+		 return ""+((double)c.getRed())/255+" "+((double)c.getGreen())/255+" "+((double)c.getBlue())/255;
+	 }
+	 static Color DoublesToColor(double[] c){
+		 return new Color((float)c[0],(float)c[1],(float)c[2]);
+	 }
+	 static double[][] convertLineVertexColors(double[][] colors,int[][] lindis){
+		 LinkedList list= new LinkedList<double[]>();
+		 for (int i = 0; i < lindis.length; i++) 
+			 for (int j = 0; j < lindis[i].length; j++) 
+				 list.add(colors[lindis[i][j]]);
+		 double[][] newCol=new double[list.size()][];
+		 for (int i = 0; i < newCol.length; i++) 
+			 newCol[i]=(double[])list.get(i);
+		 return newCol;
+	 }
+	 /** returnes a Matrix which transforms a Cylinder(vrml !!!)
+	  * to a Tube surrounding the line betwen v and w
+	  * @param v
+	  * @param w
+	  * @param radius
+	  * @return
+	  */
+	 static double[] calcCylinderMatrix(double[] v,double[] w, double radius){
+		 v= new double[]{v[0],v[1],v[2]};
+		 w= new double[]{w[0],w[1],w[2]};
+		 double[] midpoint=Rn.linearCombination(null, .5, v, .5, w);
+		 double[] direction=Rn.subtract(null, v, w);
+		 double length=Rn.euclideanNorm(direction);
+		 double[] martix=
+			 MatrixBuilder.euclidean()
+			 .translate(midpoint)
+			 .rotateFromTo(new double[]{0,1,0}, direction)
+			 .scale(new double[]{radius,length/2,radius})
+			 .getArray();
+		 return martix;
+	 }
 }
