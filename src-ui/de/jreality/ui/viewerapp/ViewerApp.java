@@ -334,7 +334,11 @@ public class ViewerApp {
 		//set general properties of UI
 		try {
 			//use CrossPlatformLookAndFeel (SystemLookAndFeel looks ugly on windows & linux)
-			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			String os = Secure.getProperty("os.name");
+			boolean macOS = os.equalsIgnoreCase("Mac OS X");
+			if (!macOS) {
+				UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+			}
 		} catch (Exception e) {}
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
