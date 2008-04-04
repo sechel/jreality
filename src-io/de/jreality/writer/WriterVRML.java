@@ -17,7 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.LinkedList;
 import java.util.WeakHashMap;
 
 import de.jreality.math.FactoredMatrix;
@@ -25,7 +24,6 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.reader.vrml.VRMLHelper;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -38,6 +36,7 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
@@ -55,12 +54,11 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
 
-// TODO: handle Tubes To Cylinders,Sheres To Spheres
-// TODO Probleme beim rausschreiben mit kamera:
-//  Scene bis zur unkenntlichkeit verzerrt bei Transformationen am KameraPfad
+// TODO: moeglw. Camera falsch positioniert
 public class WriterVRML 
 {
 	boolean useDefs = true;
+	private boolean moveLightsToSceneRoot=true;
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
 	private DefaultPolygonShader dps;
@@ -108,7 +106,18 @@ public class WriterVRML
 		if(useDefs){
 			wHelp.inspect(sgn);
 		}
-		sgn.accept(new MyVisitor());
+		if(moveLightsToSceneRoot){
+			// collect Lights
+			out.println(""+hist+"Separator { # collected lights and sceneRoot" );
+			String oldhist= hist;
+			hist=hist+spacing;
+			sgn.accept(new MyLightVisitor());
+			sgn.accept(new MyVisitor());
+			hist=oldhist;
+			out.println(""+hist+"}");
+		}
+		else
+			sgn.accept(new MyVisitor());
 		out.flush();
 	}
 //	------------------ 
@@ -432,6 +441,7 @@ public class WriterVRML
 		}
 	}
 	private  void writeDoubleMatrix(double[] d,int width, int depth, String hist) {
+		d= Rn.transpose(null,d);
 		double[] n=new double[width];
 		for (int i=0;i<depth;i++){
 			System.arraycopy(d,i*width,n,0,4);
@@ -498,6 +508,81 @@ public class WriterVRML
 			VRMLWriterHelper.writeDoubleArray(texCoords[i],hist2,",",2,out);
 		out.println(hist+"]}");
 	}	
+	private void writeDirLight(DirectionalLight l,String hist,PrintWriter out, double[] dir){
+		/*	DirectionalLight {
+        on         TRUE       # SFBool
+        intensity  1          # SFFloat
+        color      1 1 1      # SFColor
+        direction  0 0 -1     # SFVec3f
+   } */
+	double di=l.getIntensity();
+	double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
+	out.println(hist+"DirectionalLight { # "+ l.getName());
+	String oldHist= hist;		hist=hist+spacing;
+	out.println(hist + "intensity " +di);
+	out.print(hist + "color " );
+	VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
+	if(dir==null)
+		out.println(hist + "direction  0 0 1");
+	else{
+		out.print(hist + "direction ");
+		VRMLWriterHelper.writeDoubleArray(dir, "", "", 3,out);
+	}
+	hist=oldHist;
+	out.println(hist+"}");
+	}
+	private void writePointLight(PointLight l,String hist,PrintWriter out,double[] location){
+		/* PointLight {
+        on         TRUE       # SFBool
+        intensity  1          # SFFloat
+        color      1 1 1      # SFColor
+        location   0 0 1      # SFVec3f
+   }  */
+	double di=l.getIntensity();
+	double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
+	out.println(hist+"PointLight { # "+ l.getName());
+	String oldHist= hist;		hist=hist+spacing;
+	out.println(hist + "intensity " +di);
+	if(location!=null){
+		out.print(hist + "location ");
+		VRMLWriterHelper.writeDoubleArray(location, "", "", 3,out);
+	}
+	out.print(hist + "color " );
+	VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
+	hist=oldHist;
+	out.println(hist+"}");			
+	}
+	private void writeSpotLight(SpotLight li,String hist,PrintWriter out,double[] location, double[] dir){
+		/*  SpotLight {
+        on           TRUE     # SFBool
+        intensity    1        # SFFloat
+        color        1 1 1    # SFVec3f
+        location     0 0 1    # SFVec3f
+        direction    0 0 -1   # SFVec3f
+        dropOffRate  0        # SFFloat
+        cutOffAngle  0.785398 # SFFloat
+   }  */
+		double di=li.getIntensity();
+		double[] dc=VRMLWriterHelper.colorToDoubleArray(li.getColor());
+		out.println(hist+"SpotLight { # "+ li.getName());
+		String oldHist= hist;		hist=hist+spacing;
+		out.println(hist + "intensity " +di);
+		out.print(hist + "color " );
+		VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
+		if(location!=null){
+			out.print(hist + "location ");
+			VRMLWriterHelper.writeDoubleArray(location, "", "", 3,out);
+		}
+		out.println(hist + "dropOffRate 0" );
+		if(dir!=null){
+			out.print(hist + "direction ");
+			VRMLWriterHelper.writeDoubleArray(dir, "", "", 3,out);
+		}
+		out.println(hist + "cutOffAngle "+li.getConeAngle() );
+		hist=oldHist;
+		out.println(hist+"}");
+	}
+
 	
 	// -------------- Visitor -------------------
 	private class MyVisitor extends SceneGraphVisitor{
@@ -703,67 +788,21 @@ public class WriterVRML
 			super.visit(l);
 		}
 		public void visit(DirectionalLight l) {
-			/*	DirectionalLight {
-		          on         TRUE       # SFBool
-		          intensity  1          # SFFloat
-		          color      1 1 1      # SFColor
-		          direction  0 0 -1     # SFVec3f
-		     } */
-			double di=l.getIntensity();
-			double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
-			out.println(hist+"DirectionalLight { # "+ l.getName());
-			String oldHist= hist;		hist=hist+spacing;
-			out.println(hist + "intensity " +di);
-			out.print(hist + "color " );
-			VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
-			out.println(hist + "direction  0 0 1");
-			hist=oldHist;
-			out.println(hist+"}");
+			if(moveLightsToSceneRoot)return;
+			writeDirLight(l,hist,out,null);
 			super.visit(l);
 		}
 		public void visit(PointLight l) {
-			/* PointLight {
-		          on         TRUE       # SFBool
-		          intensity  1          # SFFloat
-		          color      1 1 1      # SFColor
-		          location   0 0 1      # SFVec3f
-		     }  */
-			double di=l.getIntensity();
-			double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
-			out.println(hist+"PointLight { # "+ l.getName());
-			String oldHist= hist;		hist=hist+spacing;
-			out.println(hist + "intensity " +di);
-			out.print(hist + "color " );
-			VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
-			out.println(hist + "location   0 0 0");
-			hist=oldHist;
-			out.println(hist+"}");			
+			if(moveLightsToSceneRoot)return;
+			if(!(l instanceof SpotLight)){
+				writePointLight(l, hist, out, null);
+			}
 			super.visit(l);
 		}
-		public void visit(SpotLight li) {
-			/*  SpotLight {
-	          on           TRUE     # SFBool
-	          intensity    1        # SFFloat
-	          color        1 1 1    # SFVec3f
-	          location     0 0 1    # SFVec3f
-	          direction    0 0 -1   # SFVec3f
-	          dropOffRate  0        # SFFloat
-	          cutOffAngle  0.785398 # SFFloat
-	     }  */
-			double di=li.getIntensity();
-			double[] dc=VRMLWriterHelper.colorToDoubleArray(li.getColor());
-			out.println(hist+"SpotLight { # "+ li.getName());
-			String oldHist= hist;		hist=hist+spacing;
-			out.println(hist + "intensity " +di);
-			out.print(hist + "color " );
-			VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
-			out.println(hist + "location 0 0 0 ");
-			out.println(hist + "dropOffRate 0" );
-			out.println(hist + "direction  0 0 1");
-			out.println(hist + "cutOffAngle "+li.getConeAngle() );
-			hist=oldHist;
-			out.println(hist+"}");
-			super.visit(li);
+		public void visit(SpotLight l) {
+			if(moveLightsToSceneRoot)return;
+			writeSpotLight(l, hist, out, null,null);
+			super.visit(l);
 		}
 		// ----------- cam ------------
 		public void visit(Camera c) {
@@ -782,11 +821,50 @@ public class WriterVRML
 		}
 		// ---------- trafo ---------
 		public void visit(Transformation t) {
-			t= new Transformation(Rn.transpose(null, t.getMatrix()));
 			out.println(hist+"MatrixTransform { matrix");
 			writeDoubleMatrix(t.getMatrix(),4,4,hist+spacing);
 			out.println(hist+"}");
 			super.visit(t);
 		}
-	}		
+	}	
+	private class MyLightVisitor extends SceneGraphVisitor{
+		SceneGraphPath p= new SceneGraphPath();
+		public MyLightVisitor() {}
+		public void visit(SceneGraphComponent c) {// fin
+			if(!c.isVisible())return;
+			p.push(c);
+			c.childrenAccept(this);
+			super.visit(c);
+			p.pop();
+		}
+		public void visit(DirectionalLight l) {
+			FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
+			fm.update();
+			double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,-1,0});
+			writeDirLight(l,hist,out,dir);
+			super.visit(l);
+		}
+		public void visit(PointLight l) {
+			if(!(l instanceof SpotLight)){
+				FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
+				fm.update();
+				double[] c=fm.getTranslation();
+				if(c!=null)
+					c=new double[]{c[0],c[1],c[2]};
+				writePointLight(l, hist, out, c);
+			}
+			super.visit(l);
+		}
+		public void visit(SpotLight l) {
+			if(moveLightsToSceneRoot){
+				FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
+				fm.update();
+				double[] c=fm.getTranslation();
+				double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,-1,0});
+				writeSpotLight(l, hist, out, c,dir);
+			}
+			super.visit(l);
+		}
+	}
+	
 }

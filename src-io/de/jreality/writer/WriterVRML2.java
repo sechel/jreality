@@ -18,7 +18,6 @@ import java.util.WeakHashMap;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -47,14 +46,13 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 
+//TODO: moeglw. Camera falsch positioniert
+
 public class WriterVRML2{
 	private boolean useDefs = true;
 	private boolean drawTubes = false;
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
-//	 moveCamToSceneRoot has to be true if scale is used in 
-//	  Transformations which effect the camera
-	private Matrix camMatrix;
 	
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
@@ -419,7 +417,7 @@ public class WriterVRML2{
 		out.println(hist+spacing+"translation ");
 		VRMLWriterHelper.writeDoubleArray(fm.getTranslation(), hist, "", 3, out);
 	}
-	private void writeDirLight(DirectionalLight l,String hist,PrintWriter out){
+	private void writeDirLight(DirectionalLight l,String hist,PrintWriter out, double[] dir){
 		/*DirectionalLight {
 //		exposedField SFFloat ambientIntensity  0 
 		exposedField SFColor color             1 1 1
@@ -436,7 +434,12 @@ public class WriterVRML2{
 	out.println(hist + "intensity " +di);
 	out.print(hist + "color " );
 	VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
-	out.println(hist + "direction  0 0 1");
+	if(dir==null)
+		out.println(hist + "direction  0 0 1");
+	else{
+		out.print(hist + "direction ");
+		VRMLWriterHelper.writeDoubleArray(dir, "", "", 3,out);
+	}
 	hist=oldHist;
 	out.println(hist+"}");
 	}
@@ -499,8 +502,6 @@ public class WriterVRML2{
 		hist=oldHist;
 		out.println(hist+"}");
 
-	}
-	private void writeCamera(Camera c,String hist,PrintWriter out,double[] location, double[] rotAx,double ang){
 	}
 	
 	// -------------- Visitor -------------------
@@ -827,7 +828,7 @@ public class WriterVRML2{
 		}
 		public void visit(DirectionalLight l) {
 			if(moveLightsToSceneRoot)return;
-			writeDirLight(l,hist,out);
+			writeDirLight(l,hist,out,null);
 			super.visit(l);
 		}
 		public void visit(PointLight l) {
@@ -889,7 +890,10 @@ public class WriterVRML2{
 			p.pop();
 		}
 		public void visit(DirectionalLight l) {
-			writeDirLight(l,hist,out);
+			FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
+			fm.update();
+			double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,-1,0});
+			writeDirLight(l,hist,out,dir);
 			super.visit(l);
 		}
 		public void visit(PointLight l) {
@@ -908,7 +912,7 @@ public class WriterVRML2{
 				FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
 				fm.update();
 				double[] c=fm.getTranslation();
-				double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,1,0});
+				double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,-1,0});
 				writeSpotLight(l, hist, out, c,dir);
 			}
 			super.visit(l);
