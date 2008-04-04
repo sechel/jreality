@@ -943,7 +943,7 @@ double[] mat = null;}
 	   ( "matrix"	mat = sfmatrixValue
 	   | wrongAttribute )?
 	  CLOSE_BRACE
-	{t= new Transformation(mat);}
+	{t= new Transformation(Rn.transpose(null, mat));}
 	;
 
 private

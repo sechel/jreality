@@ -24,6 +24,7 @@ import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.reader.vrml.VRMLHelper;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -55,6 +56,8 @@ import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
 
 // TODO: handle Tubes To Cylinders,Sheres To Spheres
+// TODO Probleme beim rausschreiben mit kamera:
+//  Scene bis zur unkenntlichkeit verzerrt bei Transformationen am KameraPfad
 public class WriterVRML 
 {
 	boolean useDefs = true;
@@ -779,6 +782,7 @@ public class WriterVRML
 		}
 		// ---------- trafo ---------
 		public void visit(Transformation t) {
+			t= new Transformation(Rn.transpose(null, t.getMatrix()));
 			out.println(hist+"MatrixTransform { matrix");
 			writeDoubleMatrix(t.getMatrix(),4,4,hist+spacing);
 			out.println(hist+"}");

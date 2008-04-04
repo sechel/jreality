@@ -18,6 +18,7 @@ import java.util.WeakHashMap;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -51,6 +52,10 @@ public class WriterVRML2{
 	private boolean drawTubes = false;
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
+//	 moveCamToSceneRoot has to be true if scale is used in 
+//	  Transformations which effect the camera
+	private boolean moveCamToSceneRoot=false;
+	private Matrix camMatrix;
 	
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
@@ -105,18 +110,27 @@ public class WriterVRML2{
 		if(useDefs){
 			wHelp.inspect(sgn);
 		}
-		if(moveLightsToSceneRoot){
-			// collect Lights
+		if(moveLightsToSceneRoot||moveCamToSceneRoot){
+			// collect Lights & cam
+			// cam ignores scaling in its TRansformation(VRML)
 			// wrap in extra SGC
-			out.println(""+hist+"Group { # collected lights" );
+			out.println(""+hist+"Group { # collected lights and/or Camera" );
 			String oldhist= hist;
 			hist=hist+spacing;
 			out.println(hist+"children [");
 			hist=hist+spacing;
 			
-			sgn.accept(new MyLightVisitor());
+			sgn.accept(new MyLightAndCamVisitor());
+//			 TODO:needExtraCamTrafoNode
+			boolean needExtraCamTrafoNode=(moveCamToSceneRoot&&camMatrix!=null);
+			if(needExtraCamTrafoNode){
+				out.println(""+hist+"Transform { # the Root" );
+				writeTrafo(new Transformation(camMatrix.getInverse().getArray()));
+				out.println(hist+"children [");
+			}	
 			sgn.accept(new MyVisitor());
-			
+			if(needExtraCamTrafoNode)
+				out.println(""+hist+"] }");
 			hist=oldhist;
 			out.println(""+hist+spacing+"]");			
 			out.println(""+hist+"}");
@@ -498,6 +512,35 @@ public class WriterVRML2{
 		out.println(hist+"}");
 
 	}
+	private void writeCamera(Camera c,String hist,PrintWriter out,double[] location, double[] rotAx,double ang){
+		/*Viewpoint {
+//		  eventIn      SFBool     set_bind
+		  exposedField SFFloat    fieldOfView    0.785398
+//		  exposedField SFBool     jump           TRUE
+		  exposedField SFRotation orientation    0 0 1  0
+		  exposedField SFVec3f    position       0 0 10
+//		  field        SFString   description    ""
+//		  eventOut     SFTime     bindTime
+//		  eventOut     SFBool     isBound
+		}*/
+		out.println(hist+"Viewpoint { ");
+		String oldHist= hist;		hist=hist+spacing;
+		out.println(hist+"fieldOfView "+c.getFieldOfView());
+
+		// ---------------------
+		if(location!=null){
+			out.print(hist + "position ");
+		VRMLWriterHelper.writeDoubleArray(location, "", "", 3,out);
+		}
+		if(rotAx!=null){
+			out.print(hist + "orientation ");
+			VRMLWriterHelper.writeDoubleArray(rotAx, "", " "+ang, 3,out);
+		}
+		// ---------------------
+		hist=oldHist;
+		out.println(hist+"}");
+
+	}
 	
 	// -------------- Visitor -------------------
 	private class MyVisitor extends SceneGraphVisitor{
@@ -840,21 +883,8 @@ public class WriterVRML2{
 		}
 		// ----------- cam ------------
 		public void visit(Camera c) {
-			/*Viewpoint {
-//				  eventIn      SFBool     set_bind
-				  exposedField SFFloat    fieldOfView    0.785398
-//				  exposedField SFBool     jump           TRUE
-//				  exposedField SFRotation orientation    0 0 1  0
-//				  exposedField SFVec3f    position       0 0 10
-//				  field        SFString   description    ""
-//				  eventOut     SFTime     bindTime
-//				  eventOut     SFBool     isBound
-				}*/
-			out.println(hist+"Viewpoint { ");
-			String oldHist= hist;		hist=hist+spacing;
-			out.println(hist+"fieldOfView "+c.getFieldOfView());
-			hist=oldHist;
-			out.println(hist+"}");
+			if(moveCamToSceneRoot) return;
+			writeCamera(c, hist, out, null, null,0);
 			super.visit(c);
 		}
 		// ---------- trafo ---------
@@ -863,9 +893,9 @@ public class WriterVRML2{
 			super.visit(t);
 		}
 	}
-	private class MyLightVisitor extends SceneGraphVisitor{
+	private class MyLightAndCamVisitor extends SceneGraphVisitor{
 		SceneGraphPath p= new SceneGraphPath();
-		public MyLightVisitor() {}
+		public MyLightAndCamVisitor() {}
 		public void visit(SceneGraphComponent c) {// fin
 			if(!c.isVisible())return;
 			p.push(c);
@@ -874,26 +904,45 @@ public class WriterVRML2{
 			p.pop();
 		}
 		public void visit(DirectionalLight l) {
-			writeDirLight(l,hist,out);
+			if(moveLightsToSceneRoot)
+				writeDirLight(l,hist,out);
 			super.visit(l);
 		}
-		public void visit(PointLight l) {
-			if(!(l instanceof SpotLight)){
+		@Override
+		public void visit(Camera c) {
+			if(moveCamToSceneRoot){
 				FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
 				fm.update();
-				double[] c=fm.getTranslation();
-				if(c!=null)
-					c=new double[]{c[0],c[1],c[2]};
-				writePointLight(l, hist, out, c);
+				double[] pos=fm.getTranslation();
+				double[] rotAx=fm.getRotationAxis();
+				double ang= fm.getRotationAngle();
+				//writeCamera(c, hist, out, pos,rotAx,ang);
+				writeCamera(c, hist, out, null,null,0);
+				camMatrix= new Matrix(p.getMatrix(null));
+			}
+			super.visit(c);
+		}
+		public void visit(PointLight l) {
+			if(moveLightsToSceneRoot){
+				if(!(l instanceof SpotLight)){
+					FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
+					fm.update();
+					double[] c=fm.getTranslation();
+					if(c!=null)
+						c=new double[]{c[0],c[1],c[2]};
+					writePointLight(l, hist, out, c);
+				}
 			}
 			super.visit(l);
 		}
 		public void visit(SpotLight l) {
-			FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
-			fm.update();
-			double[] c=fm.getTranslation();
-			double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,1,0});
-			writeSpotLight(l, hist, out, c,dir);
+			if(moveLightsToSceneRoot){
+				FactoredMatrix fm= new FactoredMatrix(p.getMatrix(null));
+				fm.update();
+				double[] c=fm.getTranslation();
+				double[] dir=fm.getRotation().multiplyVector(new double[]{0,0,1,0});
+				writeSpotLight(l, hist, out, c,dir);
+			}
 			super.visit(l);
 		}
 	}

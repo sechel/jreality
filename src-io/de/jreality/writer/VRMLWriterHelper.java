@@ -46,7 +46,7 @@ public class VRMLWriterHelper {
 	 */
 	private class MyVisitor extends SceneGraphVisitor{
 		private EffectiveAppearance effApp= EffectiveAppearance.create();
-		private DefaultGeometryShader dgs;
+		private DefaultGeometryShader dgs=ShaderUtility.createDefaultGeometryShader(effApp);
 		private boolean faces=false;
 		private boolean lines=false;
 		private boolean points=false;
