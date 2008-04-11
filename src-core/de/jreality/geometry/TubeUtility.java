@@ -258,7 +258,9 @@ public class TubeUtility {
 			double dist = Pn.distanceBetween(p1, p2, signature);
 			double coord = dist/2;
 			if (Double.isNaN(coord)){
-				throw new IllegalStateException("bad coord");
+				LoggingSystem.getLogger(TubeUtility.class).warning("bad coord");
+				return new SceneGraphComponent();
+				//throw new IllegalStateException("bad coord");
 			}
 			if (signature == Pn.HYPERBOLIC)	coord = Pn.tanh(dist/2.0);
 			else if (signature == Pn.ELLIPTIC)	coord = Math.tan(dist/2.0);
