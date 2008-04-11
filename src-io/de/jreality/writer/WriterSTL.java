@@ -48,6 +48,7 @@ import java.util.Vector;
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -70,10 +71,10 @@ public class WriterSTL {
 	
 	static void write( PrintWriter out, double [] array, String seperator ) {
 		if( array==null || array.length==0) return;
-		out.print(array[0]);
-		for( int i=1; i<array.length; i++ ) {
-			out.print(seperator);
-			out.print(array[i]);
+		for( int i=0; i<array.length; i++ ) {
+			if (i>0) out.print(seperator);
+			String formatted = String.format("%6.4g", array[i]);
+			out.print(formatted); //array[i]);
 		}
 	}
 	
@@ -150,6 +151,6 @@ public class WriterSTL {
 	}
 
 	static public void main( String [] arg ) {
-		writeSolid( new IndexedFaceSet(), System.out );
+		writeSolid( Primitives.coloredCube(), System.out );
 	}
 }
