@@ -83,6 +83,7 @@ import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
+import de.jreality.ui.viewerapp.actions.file.ExportSTL;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
 import de.jreality.ui.viewerapp.actions.file.ExportU3D;
 import de.jreality.ui.viewerapp.actions.file.ExportVRML;
@@ -242,6 +243,7 @@ private JMenu createFileMenu() {
 		export.add(new JMenuItem(new ExportSVG("SVG", viewer, parentComp)));
 		export.add(new JMenuItem(new ExportPS("PS", viewer, parentComp)));
 		export.add(new JMenuItem(new ExportVRML("VRML", viewer, parentComp)));
+		export.add(new JMenuItem(new ExportSTL("STL", viewer, parentComp)));
 		//   if (viewer.getDelegatedViewer() instanceof ViewerSwitch) {
 		exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
 		export.add(new JMenuItem(exportImageAction));
