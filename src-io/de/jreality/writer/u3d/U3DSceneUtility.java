@@ -3,6 +3,7 @@ package de.jreality.writer.u3d;
 import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
 import static de.jreality.math.MatrixBuilder.euclidean;
 import static de.jreality.scene.data.Attribute.INDICES;
+import static de.jreality.scene.data.Attribute.NORMALS;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
 import static de.jreality.shader.CommonAttributes.AMBIENT_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.AMBIENT_COLOR;
@@ -34,6 +35,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import de.jreality.geometry.BallAndStickFactory;
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
@@ -329,7 +331,9 @@ public class U3DSceneUtility {
 			}
 		}
 		rifs.setVertexCountAndAttributes(ifs.getVertexAttributes());
-		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData));
+		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData).readOnlyList());
+		if (ifs.getFaceAttributes(NORMALS) != null)
+			GeometryUtility.calculateAndSetFaceNormals(rifs);
 		return rifs;
 	}
 	
@@ -401,7 +405,7 @@ public class U3DSceneUtility {
 						Appearance app = basLines.getAppearance();
 						if (app == null) {
 							app = new Appearance();
-							basPoints.setAppearance(app);
+							basLines.setAppearance(app);
 						}
 						app.setAttribute(FACE_DRAW, true);
 						if (TextureUtility.hasReflectionMap(ea, "lineShader.polygonShader")) {

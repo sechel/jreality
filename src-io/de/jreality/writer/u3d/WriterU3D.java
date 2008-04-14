@@ -81,6 +81,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.jreality.geometry.GeometryUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
@@ -118,12 +119,11 @@ import de.jreality.writer.u3d.u3dencoding.DataBlock;
  * <ul>
  * 	<li>Line Sets</li>
  * 	<li>Vertex Colors</li>
- * 	<li>Emulate face normals with per face vertex normals</li>
  * 	<li>Labels</li>
  * </ul>
  * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-363.htm">
  * Standard ECMA-363 Universal 3D File Format</a>
- * @author Stefan Sechelmann
+ * @author (c)Stefan Sechelmann
  */
 public class WriterU3D implements SceneWriter { 
 
@@ -395,7 +395,7 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 
-	protected DataBlock getCLODMeshContinuation(IndexedFaceSet g){
+	protected DataBlock getCLODBaseMeshContinuation(IndexedFaceSet g){
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		int vertCount = g.getNumPoints();
@@ -408,18 +408,40 @@ public class WriterU3D implements SceneWriter {
 			tvertCount = tvData.size();
 			tVerts = tvData.toDoubleArrayArray(null);
 		}
-		DoubleArrayArray nData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
-		double[][] normals = null;
-		int nCount = 0;
-		if (nData != null) {
-			nCount = nData.size();
-			normals = nData.toDoubleArrayArray(null);
+		/*
+		 * u3d does not know smooth shading as an appearance
+		 * this is a property of the geometry
+		 * if there are vertex normals they will be written regardless of the 
+		 * SMOOTHSHADING appearance
+		 */
+		DoubleArrayArray vnData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
+		double[][] vNormals = null;
+		int vnCount = 0;
+		if (vnData != null) {
+			try {
+				vNormals = vnData.toDoubleArrayArray(null);
+			} catch (Exception e) {
+				vNormals = GeometryUtility.calculateVertexNormals(g);
+			}
+			vnCount = vNormals.length;
 		}
+		DoubleArrayArray fnData = (DoubleArrayArray)g.getFaceAttributes(NORMALS);
+		double[][] fNormals = null;
+		int fnCount = 0;
+		if (fnData != null && vnData == null) {
+			try {
+				fNormals = fnData.toDoubleArrayArray(null);
+			} catch (Exception e) {
+				fNormals = GeometryUtility.calculateFaceNormals(g);
+			}
+			fnCount = fNormals.length;
+		}
+
 		// base mesh description
 		w.WriteU32(0); // chain index 
 		w.WriteU32(faceCount);
 		w.WriteU32(vertCount);
-		w.WriteU32(nCount); // no normals
+		w.WriteU32(vnCount != 0 ? vnCount : fnCount);
 		w.WriteU32(0); // no per vertex diffuse colors
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvertCount == 0 ? 1 : tvertCount); // no texture coordinates
@@ -446,9 +468,16 @@ public class WriterU3D implements SceneWriter {
 			w.WriteF32((float) v[2]);
 		}
 		// normals
-		if (nCount != 0) {
-			for (int i = 0; i < normals.length; i++) {
-				double[] n = normals[i];
+		if (vnCount != 0) { // vertex normals
+			for (int i = 0; i < vNormals.length; i++) {
+				double[] n = vNormals[i];
+				w.WriteF32((float) n[0]);
+				w.WriteF32((float) n[1]);
+				w.WriteF32((float) n[2]);
+			}
+		} else if (fnCount != 0){ // face normals
+			for (int i = 0; i < fNormals.length; i++) {
+				double[] n = fNormals[i];
 				w.WriteF32((float) n[0]);
 				w.WriteF32((float) n[1]);
 				w.WriteF32((float) n[2]);
@@ -475,8 +504,10 @@ public class WriterU3D implements SceneWriter {
 			w.WriteCompressedU32(uACContextBaseShadingID, 0);
 			for (int j = 0; j < 3; j++) {
 				w.WriteCompressedU32(uACStaticFull + vertCount, f[j]);
-				if (nData != null)
-					w.WriteCompressedU32(uACStaticFull + nCount, f[j]);
+				if (vnData != null)
+					w.WriteCompressedU32(uACStaticFull + vnCount, f[j]);
+				else if (fnData != null)
+					w.WriteCompressedU32(uACStaticFull + fnCount, i);
 				w.WriteCompressedU32(uACStaticFull + (tvertCount == 0 ? 1 : tvertCount), tvertCount == 0 ? 0 : f[j]);
 			}
 		}
@@ -491,7 +522,7 @@ public class WriterU3D implements SceneWriter {
 		LinkedList<DataBlock> r = new LinkedList<DataBlock>();
 		DataBlock geomCont = null;
 		if (g instanceof IndexedFaceSet)
-			geomCont = getCLODMeshContinuation((IndexedFaceSet)g);
+			geomCont = getCLODBaseMeshContinuation((IndexedFaceSet)g);
 		else if (g instanceof IndexedLineSet)
 			geomCont = getLineSetContinuation((IndexedLineSet)g);
 		else if (g instanceof PointSet)
@@ -634,16 +665,17 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(0); // chain index 
 		
 		DoubleArrayArray tvData = (DoubleArrayArray)g.getVertexAttributes(TEXTURE_COORDINATES);
-		DoubleArrayArray nData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
+		DoubleArrayArray vnData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
+		DoubleArrayArray fnData = (DoubleArrayArray)g.getFaceAttributes(NORMALS);
 		// Max Mesh Description
-		if (nData != null) {
-			w.WriteU32(0x00000000); // vertex normals
-		} else {
+		if (vnData == null && fnData == null) {
 			w.WriteU32(0x00000001); // no vertex normals
+		} else {
+			w.WriteU32(0x00000000); // normals per face or vertex
 		}
 		w.WriteU32(g.getNumFaces());
 		w.WriteU32(g.getNumPoints());
-		w.WriteU32(nData == null ? 0 : nData.size()); // no normals
+		w.WriteU32(vnData != null ? vnData.size() : (fnData != null ? fnData.size() : 0)); // normals
 		w.WriteU32(0); // no per vertex diffuse colors
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvData == null ? 1 : tvData.size()); // one default coordinate
@@ -1258,7 +1290,7 @@ public class WriterU3D implements SceneWriter {
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
 		
-		/*		
+//		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
 		U3DSceneUtility.printNodes("View Nodes", viewNodes);
@@ -1274,7 +1306,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
-		*/
+//		*/
 	}
 
 
