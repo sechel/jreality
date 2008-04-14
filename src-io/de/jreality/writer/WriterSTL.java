@@ -66,12 +66,12 @@ public class WriterSTL {
 	final static String t2 = t1+t1;
 	
 	public static void write( IndexedFaceSet ifs, OutputStream out ) {
-		writeSolid( ifs, new PrintWriter( out ));
+		writeGeometry( ifs, new PrintWriter( out ));
 	}
 	
 	static void write( PrintWriter out, double [] array, String seperator ) {
 		if( array==null || array.length==0) return;
-		for( int i=0; i<array.length; i++ ) {
+		for( int i=0; i<3; i++ ) {
 			if (i>0) out.print(seperator);
 			String formatted = String.format("%6.4g", array[i]);
 			out.print(formatted); //array[i]);
@@ -79,13 +79,18 @@ public class WriterSTL {
 	}
 	
 	public static void writeSolid(  IndexedFaceSet ifs, OutputStream out ) {
-		writeSolid( ifs,  new PrintWriter( out ));
+		PrintWriter pw = new PrintWriter(out);
+		beginFile(pw);
+		writeGeometry( ifs,  pw);
+		endFile(pw);
 	}
 	
-	static void writeSolid( IndexedFaceSet ifs, PrintWriter out ) {
+	static void writeGeometry( Geometry g, PrintWriter out ) {
 		
-		out.println( "solid" );
-		
+		if(g == null || !(g instanceof IndexedFaceSet) )
+			return;
+		IndexedFaceSet ifs = (IndexedFaceSet) g;
+	
 		double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
 		
 		double [][] normals;
@@ -98,21 +103,22 @@ public class WriterSTL {
 		DataList indices = ifs.getFaceAttributes(Attribute.INDICES  );
 		
 		for (int i= 0; i < ifs.getNumFaces(); i++) {
-			out.print( "facet normal ");
-			write( out, normals[i], " " ); out.println();
-			out.println( t1+"outer loop");
 			IntArray faceIndices=indices.item(i).toIntArray();
-			for (int j= 0; j < faceIndices.size(); j++) {
-				out.print( t2+"vertex " );
-				write( out, points[faceIndices.getValueAt(j)], " " );
-				out.println();			
+			for (int j= 0; j < faceIndices.size()-2; j++) {
+				out.print( "facet normal ");
+				write( out, normals[i], " " ); out.println();
+				out.println( t1+"outer loop");
+				int[] inds = {0,j+1,j+2};
+				for (int k= 0; k < 3; k++) {
+					out.print( t2+"vertex " );
+					write( out, points[faceIndices.getValueAt(inds[k])], " " );
+					out.println();
+				}
+				out.println( t1+"endloop");
+				out.println( t1+"endfacet" );
 			}
-			out.println( t1+"endloop");
-			out.println( t1+"endfacet" );
 		}
 		
-		out.println( "endsolid" );
-		out.flush();
 	}
 	
 	public static void write( SceneGraphComponent sgc, OutputStream out ) {
@@ -121,36 +127,31 @@ public class WriterSTL {
 	
 	public static void write( SceneGraphComponent sgc, PrintWriter out ) {
 		
-		List ifsList = new Vector(0);
-		
-		SceneGraphComponent flat = GeometryUtility.flatten(sgc);
-		
-		write( flat.getGeometry(), out, ifsList );
+		SceneGraphComponent flat = GeometryUtility.flatten(sgc, true);
+		beginFile(out);
+		writeGeometry( flat.getGeometry(), out); //, ifsList );
 		
 		final int noc = flat.getChildComponentCount();
 			
 		for( int i=0; i<noc; i++ ) {
 			SceneGraphComponent child=flat.getChildComponent(i);
-			write( child.getGeometry(), out, ifsList );
+			writeGeometry( child.getGeometry(), out); //, ifsList );
 		}
-		
-		IndexedFaceSet [] ifs = new IndexedFaceSet[ifsList.size()];
-		
-		for( int i=0; i<ifs.length; i++ ) {
-			ifs[i] = (IndexedFaceSet)ifsList.get(i);
-		}
-		GeometryMergeFactory gmf= new GeometryMergeFactory();
-		writeSolid( gmf.mergeIndexedFaceSets(ifs) , out);
-	}
-	
-	private static void write(Geometry geometry, PrintWriter out, List ifsList) {
-		if( !(geometry instanceof IndexedFaceSet) )
-			return;
-		
-		ifsList.add( geometry );
+		endFile(out);
 	}
 
+	private static void endFile(PrintWriter out) {
+		out.println("endsolid");
+		out.flush();
+	}
+
+	private static void beginFile(PrintWriter out) {
+		out.println("solid");
+	}
+	
 	static public void main( String [] arg ) {
-		writeSolid( Primitives.coloredCube(), System.out );
+		SceneGraphComponent sgc = new SceneGraphComponent();
+		sgc.setGeometry(Primitives.coloredCube());
+		write(sgc, System.out );
 	}
 }
