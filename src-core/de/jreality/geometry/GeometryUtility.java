@@ -396,7 +396,11 @@ public class GeometryUtility {
         }
     }
 	
-	/**
+	 public static SceneGraphComponent flatten(SceneGraphComponent sgc)		{
+		 return flatten(sgc, false);
+	 }
+
+     /**
 	 * Apply transformations recursively to all instances of {@link PointSet} and
 	 * produce a flat scene graph with no transformations.  
 	 * It collects these instances, and transforms them into world coordinates. 
@@ -404,10 +408,10 @@ public class GeometryUtility {
 	 * Geometry that is not PointSet is simply ignored. Attributes are copied as much
 	 * as possible, normals are also transformed.  The code is not robust.
 	 * @param sgc
+	 * @param rejectInvis	if true, non-visible scene graph components are skipped (default: false)
 	 * @return
 	 */
-	 public static SceneGraphComponent flatten(SceneGraphComponent sgc)		{
-		
+	 public static SceneGraphComponent flatten(SceneGraphComponent sgc, final boolean rejectInvis)		{
 	    final double[] flipit = P3.makeStretchMatrix(null, new double[] {-1,0, -1,0, -1.0});
 		final ArrayList geoms = new ArrayList();
 		//TODO evaluate the appearance also and stick it in the flattened node with the geometry.
@@ -466,7 +470,8 @@ public class GeometryUtility {
 //          	   }
              }
             public void visit(SceneGraphComponent c) {
-            	   thePath.push(c);
+            	if (rejectInvis && !c.isVisible()) return;
+            	thePath.push(c);
                 c.childrenAccept(this);
                //if (c.getTransformation() != null) c.getTransformation().setMatrix(Rn.identityMatrix(4));
                //c.setName(c.getName() + "_flat");
