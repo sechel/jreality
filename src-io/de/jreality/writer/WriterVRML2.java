@@ -1,14 +1,19 @@
 package de.jreality.writer;
 
 /**
+ * this is a vrml-writer.
+ * it can be set up with these options:
+ *   useDefs, 
+ *   drawTubes, drawSpheres,
+ *   moveLightsToSceneRoot 
+ *   and    writeTextureFiles
+ *   (describtion below)
  * @author gonska
- * 
  */
 
+//TODO: moeglw. Camera falsch positioniert
+//TODO: Labels sind noch unbehandelt
 
-/**TODO 
- * Labels
- */
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -80,15 +85,23 @@ public class WriterVRML2{
 	
 	private static enum GeoTyp{FACE,TUBE,LINE,SPHERE,POINT}
 	// -----------------constructor----------------------
+	/** this Writer can write vrml2 */
 	public WriterVRML2(OutputStream outS) {	
 		out=new PrintWriter( outS );
 	}
+	/** this Writer can write vrml2 */
 	public WriterVRML2(FileWriter outS) {
 		out=new PrintWriter( outS );
 	}
+	/** this Writer can write vrml2 */
 	public WriterVRML2(PrintWriter outS) {
 		out=outS;
 	}
+	/** writes a vrml2-file of the scene into the stream
+	 * (use default settings)  
+	 * @param sceneRoot
+	 * @param stream
+	 */
 	public static void write(SceneGraphComponent sceneRoot, FileOutputStream stream)   {
 		WriterVRML writer = new WriterVRML(stream);
 		writer.write(sceneRoot);
@@ -100,9 +113,6 @@ public class WriterVRML2{
 		if (!writePath.endsWith("/")) writePath = writePath + "/";
 	}
 
-	public void setWriteTextureFiles(boolean writeTextureFiles2) {
-		writeTextureFiles = writeTextureFiles2;
-	}
 //	---------------------------------------
 
 	public void write( SceneGraphNode sgn ){
@@ -338,7 +348,7 @@ public class WriterVRML2{
 		out.println(hist2+"translation  "+trans[0]/trans[3]+" "+trans[1]/trans[3]);
 		out.println(hist+"}");
 	}
-	private void writeApp(GeoTyp typ){// TODO texture stuff unhandled
+	private void writeApp(GeoTyp typ){
 		String histOld=hist;
 		String hist2=hist+spacing;
 		String hist3=hist2+spacing;
@@ -940,27 +950,53 @@ public class WriterVRML2{
 		}
 	}
 	//--------------------getter&setter-------------
+	/** sets if a texture wil be written into a file, instead of writing the data directly into the vrml-file. */
+	public void setWriteTextureFiles(boolean writeTextureFiles2) {
+		writeTextureFiles = writeTextureFiles2;
+	}
+	/** indicates if a texture wil be written into a file, instead of writing the data directly into the vrml-file. */
+	public boolean isWriteTextureFiles() {
+		return writeTextureFiles;
+	}
+	/** indicates if a vertex will be written as the primitive Sphere, if Spheredraw is enabled */
 	public boolean isDrawSpheres() {
 		return drawSpheres;
 	}
+	/** indicates if a linesegment will be written as the primitive Tube, if Tubedraw is enabled */
 	public boolean isDrawTubes() {
 		return drawTubes;
 	}
+	/** indicates if all ligths will be written into the sceneRoot-node instead
+	 *  of their correct place in the scene.
+	 *  Use this if lights in the scene are used as global lights.   
+	 */
 	public boolean isMoveLightsToSceneRoot() {
 		return moveLightsToSceneRoot;
 	}
+	/** indicates if Geometrys which have multiple places in the scenegraph
+	 * will be written only ones and be refferenced multiple times, instead of multiple writings. 
+	 */
 	public boolean isUseDefs() {
 		return useDefs;
 	}
+	/** sets if a vertex will be written as the primitive Sphere, if Spheredraw is enabled */
 	public void setDrawSpheres(boolean drawSpheres) {
 		this.drawSpheres = drawSpheres;
 	}
+	/** sets if a linesegment will be written as the primitive Tube, if Tubedraw is enabled */
 	public void setDrawTubes(boolean drawTubes) {
 		this.drawTubes = drawTubes;
 	}
+	/** sets if Geometrys which have multiple places in the scenegraph
+	 * will be written only ones and be refferenced multiple times, instead of multiple writings. 
+	 */
 	public void setUseDefs(boolean useDefs) {
 		this.useDefs = useDefs;
 	}
+	/** sets if all ligths will be written into the sceneRoot-node instead
+	 *  of their correct place in the scene.
+	 *  Use this if lights in the scene are used as global lights.   
+	 */
 	public void setMoveLightsToSceneRoot(boolean moveLightsToSceneRoot) {
 		this.moveLightsToSceneRoot = moveLightsToSceneRoot;
 	}

@@ -1,14 +1,19 @@
 package de.jreality.writer;
 
 /**
+ * this is a vrml-writer.
+ * it can be set up with these options:
+ *   useDefs, 
+ *   drawTubes, drawSpheres,
+ *   moveLightsToSceneRoot 
+ *   and    writeTextureFiles
+ *   (describtion below)
  * @author gonska
- * 
  */
 
+//TODO: moeglw. Camera falsch positioniert
+//TODO: implement drawTubes/drawSpheres
 
-/**TODO 
- * Labels
- */
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -54,8 +59,6 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
 
-// TODO: moeglw. Camera falsch positioniert
-// TODO: benutze drawTubes/drawSpheres
 
 public class WriterVRML 
 {
@@ -80,15 +83,23 @@ public class WriterVRML
 	private static String hist="";// for outlay
 
 	// -----------------constructor----------------------
+	/** this Writer can write vrml1 */
 	public WriterVRML(OutputStream outS) {	
 		out=new PrintWriter( outS );
 	}
+	/** this Writer can write vrml1 */
 	public WriterVRML(FileWriter outS) {
 		out=new PrintWriter( outS );
 	}
+	/** this Writer can write vrml1 */
 	public WriterVRML(PrintWriter outS) {
 		out=outS;
 	}
+	/** writes a vrml1-file of the scene into the stream
+	 * (use default settings)  
+	 * @param sceneRoot
+	 * @param stream
+	 */
 	public static void write(SceneGraphComponent sceneRoot, FileOutputStream stream)   {
 		WriterVRML writer = new WriterVRML(stream);
 		writer.write(sceneRoot);
@@ -101,10 +112,7 @@ public class WriterVRML
 		if (!writePath.endsWith("/")) writePath = writePath + "/";
 	}
 
-	public void setWriteTextureFiles(boolean writeTextureFiles2) {
-		writeTextureFiles = writeTextureFiles2;
-	}
-//	---------------------------------------
+	//	---------------------------------------
 
 	public void write( SceneGraphNode sgn ){
 		out.println("#VRML V1.0 ascii");
@@ -470,7 +478,7 @@ public class WriterVRML
 		FactoredMatrix matrix= new FactoredMatrix(mat.getArray());
 		double[] trans=matrix.getTranslation();
 		double ang=matrix.getRotationAngle();
-		double[] rotA=matrix.getRotationAxis();
+		double[] rotA=matrix.getRotationAxis();// do we need that ?
 		double[] scale = matrix.getStretch();
 
 		out.println(hist+"Texture2Transform {");
@@ -789,7 +797,6 @@ public class WriterVRML
 		// ----------- cam ------------
 		public void visit(Camera c) {
 			if (c.isPerspective()){
-				//TODO: orientation
 				out.println(hist+"PerspectiveCamera { ");
 				String oldHist= hist;		hist=hist+spacing;
 				out.println(hist+"focalDistance "+c.getFocalLength());
@@ -849,32 +856,56 @@ public class WriterVRML
 		}
 	}
 	// --------------------------- setter getter ----------------
-	public boolean isDrawSpheres() {
-		return drawSpheres;
+	/** sets if a texture wil be written into a file, instead of writing the data directly into the vrml-file. */
+	public void setWriteTextureFiles(boolean writeTextureFiles2) {
+		writeTextureFiles = writeTextureFiles2;
 	}
-	public void setDrawSpheres(boolean drawSpheres) {
-		this.drawSpheres = drawSpheres;
-	}
-	public boolean isDrawTubes() {
-		return drawTubes;
-	}
-	public void setDrawTubes(boolean drawTubes) {
-		this.drawTubes = drawTubes;
-	}
-	public boolean isMoveLightsToSceneRoot() {
-		return moveLightsToSceneRoot;
-	}
-	public void setMoveLightsToSceneRoot(boolean moveLightsToSceneRoot) {
-		this.moveLightsToSceneRoot = moveLightsToSceneRoot;
-	}
-	public boolean isUseDefs() {
-		return useDefs;
-	}
-	public void setUseDefs(boolean useDefs) {
-		this.useDefs = useDefs;
-	}
+	/** indicates if a texture wil be written into a file, instead of writing the data directly into the vrml-file. */
 	public boolean isWriteTextureFiles() {
 		return writeTextureFiles;
 	}
+	/** indicates if a vertex will be written as the primitive Sphere, if Spheredraw is enabled */
+	public boolean isDrawSpheres() {
+		return drawSpheres;
+	}
+	/** indicates if a linesegment will be written as the primitive Tube, if Tubedraw is enabled */
+	public boolean isDrawTubes() {
+		return drawTubes;
+	}
+	/** indicates if all ligths will be written into the sceneRoot-node instead
+	 *  of their correct place in the scene.
+	 *  Use this if lights in the scene are used as global lights.   
+	 */
+	public boolean isMoveLightsToSceneRoot() {
+		return moveLightsToSceneRoot;
+	}
+	/** indicates if Geometrys which have multiple places in the scenegraph
+	 * will be written only ones and be refferenced multiple times, instead of multiple writings. 
+	 */
+	public boolean isUseDefs() {
+		return useDefs;
+	}
+	/** sets if a vertex will be written as the primitive Sphere, if Spheredraw is enabled */
+	public void setDrawSpheres(boolean drawSpheres) {
+		this.drawSpheres = drawSpheres;
+	}
+	/** sets if a linesegment will be written as the primitive Tube, if Tubedraw is enabled */
+	public void setDrawTubes(boolean drawTubes) {
+		this.drawTubes = drawTubes;
+	}
+	/** sets if Geometrys which have multiple places in the scenegraph
+	 * will be written only ones and be refferenced multiple times, instead of multiple writings. 
+	 */
+	public void setUseDefs(boolean useDefs) {
+		this.useDefs = useDefs;
+	}
+	/** sets if all ligths will be written into the sceneRoot-node instead
+	 *  of their correct place in the scene.
+	 *  Use this if lights in the scene are used as global lights.   
+	 */
+	public void setMoveLightsToSceneRoot(boolean moveLightsToSceneRoot) {
+		this.moveLightsToSceneRoot = moveLightsToSceneRoot;
+	}
+
 	
 }
