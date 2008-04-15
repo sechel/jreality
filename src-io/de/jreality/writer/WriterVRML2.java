@@ -10,8 +10,11 @@ package de.jreality.writer;
  * Labels
  */
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.WeakHashMap;
@@ -45,14 +48,15 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.ImageUtility;
 
-//TODO: moeglw. Camera falsch positioniert
 
 public class WriterVRML2{
 	private boolean useDefs = true;
 	private boolean drawTubes = false;
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
+	private boolean writeTextureFiles = false;
 	
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
@@ -167,30 +171,8 @@ public class WriterVRML2{
 //	---------------------------- start writing --------------------
 	// --------------- helper Classes ---------------------
 	
-	static boolean writeTextureFiles = false;
 	int textureCount = 0;
-	private  void writeImage(Texture2D tex,String hist) {//TODO
-		String hist2=hist+spacing;
-		ImageData id=tex.getImage();
-		byte[] data= id.getByteArray();
-		int w=id.getWidth();
-		int h=id.getHeight();
-		int dim= data.length/(w*h);
-		// write image
-		out.print(hist+"image ");
-		out.println(""+w+" "+h+" "+dim);
-		for (int i = 0; i < w*h; i++) {
-			int mergeVal=0;
-			// calculate hexvalue from colors
-			for (int k = 0; k < dim; k++) {
-				int val=data[i*4+k];
-				if (val<0)val=val+256;
-				mergeVal*=256;
-				mergeVal+=val;
-			}
-			out.println(hist2+"0x"+ Integer.toHexString(mergeVal).toUpperCase());
-		}
-	}
+
 	private   void writeCoords(double[][] coords,String hist) {// done
 		/*Coordinate {
 		  exposedField MFVec3f point  []
@@ -227,19 +209,6 @@ public class WriterVRML2{
 		out.println(hist+"]}");
 	}
 	
-	private  void writeDoubleMatrix(double[] d,int width, int depth, String hist) {//TODO
-		double[] n=new double[width];
-		for (int i=0;i<depth;i++){
-			System.arraycopy(d,i*width,n,0,4);
-			VRMLWriterHelper.writeDoubleArray(n,hist,"",n.length,out);
-		}
-	}
-	private  void writeInfoString(String info,String hist) {
-		/*Info {
-	          string  "<Undefined info>"      # SFString
-	     }	*/
-		out.println(hist+"Info { string \"" +info+ "\" }");	
-	}
 	private  void writeIndices(int[][] in,String hist) {
 		out.println(hist+"coordIndex ["); 		
 		for (int i=0;i<in.length;i++){
@@ -252,28 +221,59 @@ public class WriterVRML2{
 		}
 		out.println(hist+"]");
 	}
-	private  void writeTexTrans(String hist,Texture2D tex){//TODO
-		String hist2=hist+spacing;
-		/**		Texture2Transform {
-		 *		translation  0 0      # SFVec2f
-		 *		rotation     0        # SFFloat
-		 *		scaleFactor  1 1      # SFVec2f
-		 *		center       0 0      # SFVec2f
-		 *		}		*/
-		Matrix mat= tex.getTextureMatrix();
-		FactoredMatrix matrix= new FactoredMatrix(mat.getArray());
-		double[] trans=matrix.getTranslation();
-		double ang=matrix.getRotationAngle();
-		double[] rotA=matrix.getRotationAxis();
-		double[] scale = matrix.getStretch();
+	
+	private  void writeTexture(Texture2D tex ,GeoTyp typ){
+		/*ImageTexture {
+		  exposedField MFString url     []
+		  field        SFBool   repeatS TRUE
+		  field        SFBool   repeatT TRUE
+		}*/
+		/*PixelTexture {
+			  exposedField SFImage  image      0 0 0
+			  field        SFBool   repeatS    TRUE
+			  field        SFBool   repeatT    TRUE
+			}*/
+		//// ---------------- old -----------------
+		try {
+			Matrix mat= tex.getTextureMatrix();
+			if (mat==null) throw new IOException("missing texture component");
+			ImageData id=tex.getImage();
+			if (id==null) throw new IOException("missing texture component");
+			// write texture:
+			String hist2=hist+spacing;
+			if (writeTextureFiles)	{
+				String fileName = textureMaps.get(tex.getImage());
+				if (fileName == null)	{
+					fileName = fileStem+String.format("%04d", textureCount)+".png";
+					String fullName = writePath+fileName;
+					textureCount++;
+					ImageUtility.writeBufferedImage( new File(fullName),(BufferedImage) tex.getImage().getImage());				
+					textureMaps.put(tex.getImage(), fileName);
+				}
+				out.println(hist+"ImageTexture { ");
+				out.println(hist2+"url "+"\""+fileName+"\" ");
+				writeTextureRepeat(hist, tex);
+				out.println(hist+"}");
+			} 
+			else {
+				out.println(hist+"PixelTexture { ");
+				VRMLWriterHelper.writeImage(tex, hist2, out);
+				writeTextureRepeat(hist2, tex);					
+				out.println(hist+"}");
+			}
+		} catch (IOException e) {}
 
-		out.println(hist+"Texture2Transform {");
-		out.println(hist2+"translation  "+trans[0]/trans[3]+" "+trans[1]/trans[3]);
-		out.println(hist2+"rotation  "+ang);
-		out.println(hist2+"scaleFactor "+scale[0]+" "+scale[1]);
-		out.println(hist2+"center 0 0");
-		out.println(hist+"}");
+		//// ---------------- old end -----------------
 	}
+	private void writeTextureRepeat(String hist,Texture2D tex){
+		out.print(hist+"repeatS ");
+		if(tex.getRepeatS()==tex.REPEAT_S_DEFAULT)out.println("TRUE");
+		else out.println("FALSE");
+		out.print(hist+"repeatT ");
+		if(tex.getRepeatT()==tex.REPEAT_S_DEFAULT)out.println("TRUE");
+		else out.println("FALSE");
+	}
+
 	private  void writeTexCoords(double[][] texCoords,String hist) {//done
 		/*TextureCoordinate {
 			  exposedField MFVec2f point  []
@@ -314,6 +314,30 @@ public class WriterVRML2{
 		hist= histold;
 		out.println(hist+spacing+"}");
 	}
+	private  void writeTextureTransform(Texture2D tex,GeoTyp typ){
+		String hist2=hist+spacing;
+/*		TextureTransform {
+			  exposedField SFVec2f center      0 0
+			  exposedField SFFloat rotation    0
+			  exposedField SFVec2f scale       1 1
+			  exposedField SFVec2f translation 0 0
+		}*/
+		Matrix mat= tex.getTextureMatrix();
+		FactoredMatrix matrix= new FactoredMatrix(mat.getArray());
+		double[] trans=matrix.getTranslation();
+		double ang=matrix.getRotationAngle();
+		double[] rotA=matrix.getRotationAxis();
+		double[] scale = matrix.getStretch();
+		if(ang>0){
+			if(rotA[2]<0) ang=-ang;
+		}
+		out.println(hist+"TextureTransform {");
+		out.println(hist2+"center 0 0");
+		out.println(hist2+"rotation  "+ang);
+		out.println(hist2+"scale "+scale[0]+" "+scale[1]);
+		out.println(hist2+"translation  "+trans[0]/trans[3]+" "+trans[1]/trans[3]);
+		out.println(hist+"}");
+	}
 	private void writeApp(GeoTyp typ){// TODO texture stuff unhandled
 		String histOld=hist;
 		String hist2=hist+spacing;
@@ -324,13 +348,16 @@ public class WriterVRML2{
 		hist=hist3;
 		writeMaterial(typ);
 		hist=hist2;
-//		out.println(hist+"texture ");
+		out.println(hist+"texture ");
 		hist=hist3;
-		//writeTexture(typ);
-		hist=hist2;
-//		out.println(hist+"textureTransform ");
-		hist=hist3;
-		//writeTextureTranfsform(typ);
+		Texture2D tex=dps.getTexture2d();
+		if (tex!=null&&typ==GeoTyp.FACE){
+			writeTexture(tex,typ);
+			hist=hist2;
+			out.println(hist+"textureTransform ");
+			hist=hist3;
+			writeTextureTransform(tex,typ);
+		}
 		hist=histOld;
 		out.println(hist+"} ");		
 	}
@@ -395,13 +422,7 @@ public class WriterVRML2{
 		out.println(hist+"geometry ");
 		hist=hist3;// will be closed with closeShapeNode()
 	}
-	private boolean needShapeNode(){
-		Color amb = dps.getAmbientColor();
-		Color spec= dps.getSpecularColor();
-		Color diff= dps.getDiffuseColor();
-		double tra= dps.getTransparency();
-		return(tra!=0|diff!=null|spec!=null|amb!=null);
-	}
+
 	private void writeTrafo(Transformation trafo){
 		FactoredMatrix fm= new FactoredMatrix(trafo.getMatrix());
 		fm.update();

@@ -55,10 +55,16 @@ import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
 
 // TODO: moeglw. Camera falsch positioniert
+// TODO: benutze drawTubes/drawSpheres
+
 public class WriterVRML 
 {
-	boolean useDefs = true;
+	private boolean useDefs = true;
+	private boolean drawTubes = false;
+	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
+	private boolean writeTextureFiles = false;
+	
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
 	private DefaultPolygonShader dps;
@@ -342,15 +348,13 @@ public class WriterVRML
 				textureMaps.put(tex.getImage(), fileName);
 			}
 			out.println(hist+"filename "+"\""+fileName+"\" ");
-		} else 
-			writeImage(tex,hist2);
+		} else VRMLWriterHelper.writeImage(tex,hist2,out);
 		out.print(hist+"wrapS ");
 		writeTexWrap(tex.getRepeatS());
 		out.print(hist+"wrapT ");
 		writeTexWrap(tex.getRepeatT());
 		out.println(hist+"}");
 		writeTexTrans(hist2,tex);
-
 	}
 	private   void writeTexWrap(int wrap) {
 		switch (wrap) {
@@ -416,30 +420,8 @@ public class WriterVRML
 	}
 	// --------------- helper Classes ---------------------
 	
-	static boolean writeTextureFiles = false;
 	int textureCount = 0;
-	private  void writeImage(Texture2D tex,String hist) {
-		String hist2=hist+spacing;
-		ImageData id=tex.getImage();
-		byte[] data= id.getByteArray();
-		int w=id.getWidth();
-		int h=id.getHeight();
-		int dim= data.length/(w*h);
-		// write image
-		out.print(hist+"image ");
-		out.println(""+w+" "+h+" "+dim);
-		for (int i = 0; i < w*h; i++) {
-			int mergeVal=0;
-			// calculate hexvalue from colors
-			for (int k = 0; k < dim; k++) {
-				int val=data[i*4+k];
-				if (val<0)val=val+256;
-				mergeVal*=256;
-				mergeVal+=val;
-			}
-			out.println(hist2+"0x"+ Integer.toHexString(mergeVal).toUpperCase());
-		}
-	}
+	
 	private  void writeDoubleMatrix(double[] d,int width, int depth, String hist) {
 		d= Rn.transpose(null,d);
 		double[] n=new double[width];
@@ -633,7 +615,7 @@ public class WriterVRML
 			super.visit(a);
 		}
 		// ----- geometrys -----
-		public void visit(Sphere s) {// finished
+		public void visit(Sphere s) {
 			super.visit(s);
 			if ( !dgs.getShowFaces())	return;
 			// first write the appearance colors and texture outside the DEF/USE
@@ -650,7 +632,7 @@ public class WriterVRML
 			 *	}		*/
 			out.println(hist+"Sphere { radius  1}");
 		}
-		public void visit(Cylinder c) {//finished
+		public void visit(Cylinder c) {
 			super.visit(c);			
 			if ( !dgs.getShowFaces())	return;
 			// first write the appearance colors and texture outside the DEF/USE
@@ -687,7 +669,7 @@ public class WriterVRML
 			hist=oldHist;
 			out.println(""+hist+"} ");
 		}
-		public void visit(Geometry g) {//finished
+		public void visit(Geometry g) {
 			updateShaders(effApp);
 			super.visit(g);
 		}
@@ -784,7 +766,7 @@ public class WriterVRML
 			out.println(""+hist+"} ");
 		}
 		// ---- Lights ----
-		public void visit(Light l) {//finished
+		public void visit(Light l) {
 			super.visit(l);
 		}
 		public void visit(DirectionalLight l) {
@@ -865,6 +847,34 @@ public class WriterVRML
 			}
 			super.visit(l);
 		}
+	}
+	// --------------------------- setter getter ----------------
+	public boolean isDrawSpheres() {
+		return drawSpheres;
+	}
+	public void setDrawSpheres(boolean drawSpheres) {
+		this.drawSpheres = drawSpheres;
+	}
+	public boolean isDrawTubes() {
+		return drawTubes;
+	}
+	public void setDrawTubes(boolean drawTubes) {
+		this.drawTubes = drawTubes;
+	}
+	public boolean isMoveLightsToSceneRoot() {
+		return moveLightsToSceneRoot;
+	}
+	public void setMoveLightsToSceneRoot(boolean moveLightsToSceneRoot) {
+		this.moveLightsToSceneRoot = moveLightsToSceneRoot;
+	}
+	public boolean isUseDefs() {
+		return useDefs;
+	}
+	public void setUseDefs(boolean useDefs) {
+		this.useDefs = useDefs;
+	}
+	public boolean isWriteTextureFiles() {
+		return writeTextureFiles;
 	}
 	
 }

@@ -14,12 +14,19 @@ import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.WriterVRML;
+import de.jreality.writer.WriterVRML2;
 
 public class ExportVRML extends AbstractJrAction {
 
 	private Viewer viewer;
 
 	private boolean writeTextureFiles = false;
+	private boolean writeVrml2 = false;
+	private boolean useDefs = true;
+	private boolean drawTubes = true;
+	private boolean drawSpheres = true;
+	private boolean moveLightsToSceneRoot=true;
+	
 	private JComponent options;
 
 	public ExportVRML(String name, Viewer viewer, Component parentComp) {
@@ -44,27 +51,84 @@ public class ExportVRML extends AbstractJrAction {
 
 		try {
 //			WriterVRML.write(viewer.getSceneRoot(), new FileOutputStream(file));
-			WriterVRML writer = new WriterVRML(new FileOutputStream(file));
-			writer.setWritePath(file.getParent()+"/");
-			writer.setWriteTextureFiles(writeTextureFiles);
-			writer.write(viewer.getSceneRoot());
+
+			if(writeVrml2){
+				WriterVRML2 writer = new WriterVRML2(new FileOutputStream(file));	
+				writer.setWritePath(file.getParent()+"/");
+				writer.setWriteTextureFiles(writeTextureFiles);
+				writer.setDrawSpheres(drawSpheres);
+				writer.setDrawTubes(drawTubes);
+				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
+				writer.setUseDefs(useDefs);
+				writer.write(viewer.getSceneRoot());
+			}
+			else{
+				WriterVRML writer = new WriterVRML(new FileOutputStream(file));
+				writer.setWritePath(file.getParent()+"/");
+				writer.setWriteTextureFiles(writeTextureFiles);
+				writer.setDrawSpheres(drawSpheres);
+				writer.setDrawTubes(drawTubes);
+				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
+				writer.setUseDefs(useDefs);
+				writer.write(viewer.getSceneRoot());
+			}
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}			
 	}
 	
-	
-	JCheckBox checkbox;
+	JCheckBox textureCB;
+	JCheckBox useDefsCB;
+	JCheckBox vrml2CB;
+	JCheckBox tubesCB;
+	JCheckBox spheresCB;
+	JCheckBox lightCB;
 	private JComponent createAccessory() {
-		
 		Box accessory = Box.createVerticalBox();
 		accessory.add(Box.createVerticalGlue());
-		checkbox = new JCheckBox(new AbstractAction("write texture files") {
+		textureCB = new JCheckBox(new AbstractAction("write texture files") {
 			public void actionPerformed(ActionEvent e) {
-				writeTextureFiles = checkbox.isSelected();
+				writeTextureFiles = textureCB.isSelected();
 			}
 		});
-		accessory.add(checkbox);
+		useDefsCB = new JCheckBox(new AbstractAction("useDefs") {
+			public void actionPerformed(ActionEvent e) {
+				useDefs= useDefsCB.isSelected();
+			}
+		});
+		vrml2CB= new JCheckBox(new AbstractAction("vrml2 instead of 1") {
+			public void actionPerformed(ActionEvent e) {
+				writeVrml2= vrml2CB.isSelected();
+			}
+		});
+		tubesCB= new JCheckBox(new AbstractAction("draw tube-lines as cylinder (vrml2)") {
+			public void actionPerformed(ActionEvent e) {
+				drawTubes= tubesCB.isSelected();
+			}
+		});
+		spheresCB= new JCheckBox(new AbstractAction("draw sphere-vertices as spheres (vrml2)") {
+			public void actionPerformed(ActionEvent e) {
+				drawSpheres= spheresCB.isSelected();
+			}
+		});
+		lightCB= new JCheckBox(new AbstractAction("move lights to root (make global lights)") {
+			public void actionPerformed(ActionEvent e) {
+				moveLightsToSceneRoot= lightCB.isSelected();
+			}
+		});
+		accessory.add(vrml2CB);
+		accessory.add(textureCB);
+		accessory.add(useDefsCB);
+		accessory.add(tubesCB);
+		accessory.add(spheresCB);
+		accessory.add(lightCB);
+		
+		vrml2CB.setSelected(writeVrml2);
+		textureCB.setSelected(writeTextureFiles);
+		useDefsCB.setSelected(useDefs);
+		tubesCB.setSelected(drawTubes);
+		spheresCB.setSelected(drawSpheres);
+		lightCB.setSelected(moveLightsToSceneRoot);
 		
 		return accessory;
 	}

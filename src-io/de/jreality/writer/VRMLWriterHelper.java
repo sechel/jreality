@@ -222,7 +222,28 @@ public class VRMLWriterHelper {
 			 out.print(String.format(" %13.7g",d[i]));
 		 out.println(append);
 	 }
-
+	 static void writeImage(Texture2D tex,String hist,PrintWriter out) {
+			String hist2=hist+"  ";
+			ImageData id=tex.getImage();
+			byte[] data= id.getByteArray();
+			int w=id.getWidth();
+			int h=id.getHeight();
+			int dim= data.length/(w*h);
+			// write image
+			out.print(hist+"image ");
+			out.println(""+w+" "+h+" "+dim);
+			for (int i = 0; i < w*h; i++) {
+				int mergeVal=0;
+				// calculate hexvalue from colors
+				for (int k = 0; k < dim; k++) {
+					int val=data[i*4+k];
+					if (val<0)val=val+256;
+					mergeVal*=256;
+					mergeVal+=val;
+				}
+				out.println(hist2+"0x"+ Integer.toHexString(mergeVal).toUpperCase());
+			}
+		}
 	 static double[] colorToDoubleArray(Color c){
 		 double[] d=new double[]{(double)c.getRed()/255,(double)c.getGreen()/255,(double)c.getBlue()/255};
 		 return d;
