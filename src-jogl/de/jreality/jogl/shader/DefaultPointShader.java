@@ -176,10 +176,6 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			tex.setMinFilter(Texture2D.GL_NEAREST);
 	}
 
-	/**
-	 * @param globalHandle
-	 * @param jpc
-	 */
 	static final int textureSize = 128;
 	static double[][] sphereVertices = new double[textureSize * textureSize][3];
 	private Color specularColor;
