@@ -43,30 +43,23 @@ package de.jreality.jogl;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.font.NumericShaper;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GL;
 
-import javax.media.opengl.*;
-import javax.swing.SwingConstants;
+import com.sun.opengl.util.BufferUtil;
 
-import com.sun.opengl.util.*;
-
-import com.sun.opengl.util.*;
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -74,16 +67,11 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.ClippingPlane;
-import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.Light;
-import de.jreality.scene.PointLight;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.SpotLight;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
@@ -96,7 +84,6 @@ import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**
