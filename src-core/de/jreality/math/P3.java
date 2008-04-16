@@ -634,16 +634,17 @@ public class P3 {
 	 * @return
 	 */public static double[] makeTranslationMatrix(double[] mat, double[] to, int sig)	{
 		if (mat == null) mat = new double[16];
-		double[] toL = null;
-		if (to.length == 3)	toL = Pn.homogenize(null, to);
-		else if (to.length == 4) toL = (double[]) to.clone();
-		if (toL == null || (sig == Pn.EUCLIDEAN && toL[3] == 0.0))	{
+		double[] toL1 = null;
+		if (to.length == 3)	toL1 = Pn.homogenize(null, to);
+		else if (to.length == 4) toL1 = (double[]) to.clone();
+		if ((sig == Pn.EUCLIDEAN && toL1[3] == 0.0))	{
 			throw new IllegalArgumentException("Infinite euclidean translation vector");
 		}
-		Pn.normalize(toL, toL, sig);
+		double[] toL = Pn.normalize(null, toL1, sig);
 //		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
-		if (Double.isNaN(toL[0]))
-			throw new IllegalStateException("NaN");
+		if (Double.isNaN(toL[0])) {
+			throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
+		}
 //		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
 		double f = 1.0/(1+toL[3]);
 		if (toL[3] <0) f = 1.0/(1-toL[3]);
