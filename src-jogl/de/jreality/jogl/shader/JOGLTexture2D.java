@@ -36,7 +36,7 @@ public class JOGLTexture2D implements Texture2D {
 	protected Matrix textureMatrix;
 	protected Integer repeatS;
 	protected Integer repeatT;
-	protected Boolean animated;
+	protected Boolean animated, mipmapMode;
 	public JOGLTexture2D(Texture2D t)	{
 		super();
 		proxy = t;
@@ -68,6 +68,7 @@ public class JOGLTexture2D implements Texture2D {
 		repeatT = proxy.getRepeatT();
 		externalSource = proxy.getExternalSource();
 		animated = proxy.getAnimated();
+		mipmapMode = proxy.getMipmapMode();
 	}
 	
 	public Integer getApplyMode() {
@@ -296,12 +297,11 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public Boolean getMipmapMode() {
-		// TODO Auto-generated method stub
-		return null;
+		return mipmapMode;
 	}
 
 	public void setMipmapMode(Boolean b) {
-		// TODO Auto-generated method stub
+		mipmapMode = b;
 	}
 
 }
