@@ -294,16 +294,20 @@ import de.jreality.scene.data.IntArrayArray;
 			int k = oldIndices[i].length;
 			newIndices[i+m] = new int[k];
 			for (int j = 0; j<k; ++j)	{
-				newIndices[i+m][j] = oldIndices[i][k-1-j]+n;	// opposite orientation!
+				newIndices[i+m][j] = oldIndices[i][j]+n;
 			}
 		}
 		for (int i = 0; i<nm; ++i)	{
 			newIndices[2*m+i] = new int[4];
 			Pair p = edgelist.get(i);
-			newIndices[2*m+i][0] = p.h;
-			newIndices[2*m+i][1] = p.l;
-			newIndices[2*m+i][2] = p.l+n;
-			newIndices[2*m+i][3] = p.h+n;
+			int h = p.h, l = p.l;
+//			if (p.flipped)	{
+//				h = p.l; l = p.h;
+//			} 
+			newIndices[2*m+i][0] = h;
+			newIndices[2*m+i][1] = l;
+			newIndices[2*m+i][2] = l+n;
+			newIndices[2*m+i][3] = h+n;				
 		}
 		if (!makeHoles)	{
 			//thickSurfaceIFSF = new IndexedFaceSetFactory();
