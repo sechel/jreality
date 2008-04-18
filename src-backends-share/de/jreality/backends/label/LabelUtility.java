@@ -337,7 +337,9 @@ public static double[] calculateBillboardMatrix(double[] result,
     	case SwingConstants.NORTH_WEST : align=-xscale; break;
     }
     double[] euclideanTranslation = P3.makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), signature); //Pn.EUCLIDEAN);
-    double[] pointTranslation = P3.makeTranslationMatrix(null, point, signature);
+    double[] pointTranslation;
+    if (Double.isNaN(point[0])) pointTranslation = Rn.identityMatrix(4);
+    else pointTranslation = P3.makeTranslationMatrix(null, point, signature);
 
     Rn.times(result, pointTranslation, Rn.times(null, orientation, Rn.times(null, euclideanTranslation, scale)));
 	return result;
