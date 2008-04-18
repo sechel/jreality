@@ -132,7 +132,7 @@ public class Texture2DLoaderJOGL {
     }
     /******************* new Textures *******************/
     public static void render(GL gl, Texture2D tex) {
-      render(gl, tex, true);
+      render(gl, tex, tex.getMipmapMode());
     }
     static Texture2D lastRendered = null;
     static boolean haveAutoMipmapGeneration, haveCheckedAutoMipmapGeneration;
@@ -281,6 +281,7 @@ public class Texture2DLoaderJOGL {
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 
+	 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
 	 	    DataBuffer data = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
 	 	    Buffer buffer;
 	 	    if (data instanceof DataBufferByte) {
