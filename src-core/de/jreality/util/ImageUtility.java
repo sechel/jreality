@@ -1,5 +1,8 @@
 package de.jreality.util;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
@@ -52,6 +55,21 @@ public class ImageUtility {
 		}
 	}
 
+	public static BufferedImage resizeToPowerOfTwo(BufferedImage input)	{
+		BufferedImage output;
+		int w = input.getWidth();
+		int h = input.getHeight();
+		int w2 = 1;
+		while (w2 < w)	w2 *= 2;
+		int h2 = 1;
+		while (h2 < h) h2 *= 2;
+		System.err.println("input type is "+input.getType());
+		output = new BufferedImage(w2, h2, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = (Graphics2D) output.getGraphics();
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		output.getGraphics().drawImage(input, 0, 0, w2, h2, null);
+		return output;
+	}
 	private static String getFileSuffix(File file) {
 		int lastDot = file.getName().lastIndexOf('.');
 		if (lastDot == -1) return "png";
