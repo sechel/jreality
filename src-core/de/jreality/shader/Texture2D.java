@@ -173,45 +173,20 @@ public interface Texture2D extends AttributeEntity {
    */
   public abstract void setRepeatT(Integer repeatT);
 
-  /**
-   * @return
-   */
   public abstract Integer getMagFilter();
 
-  /**
-   * @return
-   */
   public abstract Integer getMinFilter();
 
-  /**
-   * @param i
-   */
   public abstract void setMagFilter(Integer i);
 
-  /**
-   * @param i
-   */
   public abstract void setMinFilter(Integer i);
 
-  /**
-   * @return
-   */
   public abstract Matrix getTextureMatrix();
 
-  /**
-   * @param ds
-   */
   public abstract void setTextureMatrix(Matrix matrix);
 
-  /**
-   * @return Returns the applyMode.
-   */
   public abstract Integer getApplyMode();
 
-  /**
-   * @param applyMode
-   *          The applyMode to set.
-   */
   public abstract void setApplyMode(Integer applyMode);
   
   public abstract Boolean getMipmapMode();
@@ -270,6 +245,8 @@ public interface Texture2D extends AttributeEntity {
   
   public abstract Boolean getAnimated();
   public abstract void setAnimated(Boolean b);
+  public abstract Runnable getRunnable();
+  public abstract void setRunnable(Runnable r);
   
   public abstract ImageData getImage();
 }
