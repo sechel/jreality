@@ -269,6 +269,7 @@ public class Texture2DLoaderJOGL {
 	        }
 	    }
 	    boolean animated = tex.getAnimated();
+	    // shouldn't this happen before the texture is rendered?
 	    if (animated)	{
 	    	List<ImageData> list = animatedTextures.get(gl);
 	    	if (list == null)	{
@@ -277,11 +278,15 @@ public class Texture2DLoaderJOGL {
 	    	}
 	    	boolean done = animatedTextures.get(gl).contains(image);
 	    	if (done) return;
+	    	Runnable r = tex.getRunnable();
+	    	if (r != null) {
+	    		r.run();
+	    	}
 	        gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 
-	 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
+//	 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
 	 	    DataBuffer data = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
 	 	    Buffer buffer;
 	 	    if (data instanceof DataBufferByte) {

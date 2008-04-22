@@ -204,11 +204,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 		
 		if (!sphereDraw)	{
-			LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
+			//LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
 			lighting = false;
 			gl.glPointSize((float)pointSize);
 			jrs.pointSize = pointSize;
-			// temporarily commented out since this doesn't work on my powerbook with ati radeon
+			// this doesn't work on my powerbook with ati radeon
 			// (no exception, but the points don't show up no matter what the arguments given
 			try {
 				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
