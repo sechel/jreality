@@ -13,7 +13,6 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 
 /**
- * Research version of this class; production version is in de.jreality.geometry
  * 
  * This factory class allows you to create a <i>thickened</i> surface from a given surface (given as an instance of {@link IndexedFaceSet}.
  * The result is a closed surface with a well-defined interior and exterior.
@@ -294,7 +293,8 @@ import de.jreality.scene.data.IntArrayArray;
 			int k = oldIndices[i].length;
 			newIndices[i+m] = new int[k];
 			for (int j = 0; j<k; ++j)	{
-				newIndices[i+m][j] = oldIndices[i][j]+n;
+				if (makeHoles) newIndices[i+m][j] = oldIndices[i][j]+n;
+				else newIndices[i+m][j] = oldIndices[i][k-1-j]+n; // for correct normal orientation
 			}
 		}
 		for (int i = 0; i<nm; ++i)	{
