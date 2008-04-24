@@ -126,6 +126,7 @@ public interface Texture2D extends AttributeEntity {
 
   public static final int APPLY_MODE_DEFAULT = GL_MODULATE;
   public static final Boolean MIPMAP_MODE_DEFAULT = true;
+  public static final Boolean ANIMATED_DEFAULT = false;
   //public static final int APPLY_MODE_DEFAULT = GL_COMBINE;
   
   public static final int MAG_FILTER_DEFAULT = GL_LINEAR;
@@ -149,7 +150,6 @@ public interface Texture2D extends AttributeEntity {
  public static final Matrix TEXTURE_MATRIX_DEFAULT=new Matrix();
   public static final Color BLEND_COLOR_DEFAULT=Color.WHITE;
   public static final String EXTERNAL_SOURCE_DEFAULT=null;
-  public static final Boolean ANIMATED_DEFAULT = false;
   
   /**
    * @return Returns the repeatS.
