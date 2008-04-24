@@ -111,7 +111,7 @@ void flight(in vec3 normal, in vec4 ecPosition, float alphaFade)
     directionalLight(1, normal);
 
 
-    color = gl_FrontLightModelProduct.sceneColor +
+    color = //gl_FrontLightModelProduct.sceneColor +
       Ambient  * gl_FrontMaterial.ambient +
       Diffuse  * gl_FrontMaterial.diffuse;
     color += Specular * gl_FrontMaterial.specular;
@@ -138,7 +138,7 @@ void blight(in vec3 normal, in vec4 ecPosition, float alphaFade)
     directionalLight(1, normal);
 
 
-    color = gl_BackLightModelProduct.sceneColor +
+    color = //gl_BackLightModelProduct.sceneColor +
       Ambient  * gl_BackMaterial.ambient +
       Diffuse  * gl_BackMaterial.diffuse;
     color += Specular * gl_BackMaterial.specular;

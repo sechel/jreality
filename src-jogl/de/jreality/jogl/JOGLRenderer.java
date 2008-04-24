@@ -243,6 +243,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 	public void render() {
 // 		following optimization has been abandoned for now
+//		System.err.println("in render");
 		Texture2DLoaderJOGL.markAnimatedTexturesDirty(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());

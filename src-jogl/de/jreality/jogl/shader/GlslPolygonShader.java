@@ -55,6 +55,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
@@ -67,6 +68,7 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.event.GeometryEvent;
 import de.jreality.scene.event.GeometryListener;
 import de.jreality.shader.CommonAttributes;
@@ -256,6 +258,31 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		renderFaces(sg, alpha, gl, pickMode, colorBind, normalBind, colorLength, vertices, vertexNormals, faceNormals, vertexColors, faceColors, texCoords, lightMapCoords, vertexLength, smooth);
 	}
 
+	public static void correctNormalLength(IndexedFaceSet sg) {
+		DataList vNormals = sg.getVertexAttributes(Attribute.NORMALS);
+		if (vNormals != null && vNormals.toDoubleArrayArray().item(0).size() == 4) {
+			double[][] norms = vNormals.toDoubleArrayArray(null);
+			double[][] norms3 = new double[norms.length][3];
+			Pn.dehomogenize(norms3, norms);
+			sg.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3));
+		}
+		DataList fNormals = sg.getFaceAttributes(Attribute.NORMALS);
+		if (fNormals != null && fNormals.toDoubleArrayArray().item(0).size() == 4) {
+			double[][] norms = fNormals.toDoubleArrayArray(null);
+			double[][] norms3 = new double[norms.length][3];
+			Pn.dehomogenize(norms3, norms);
+			sg.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3));			
+		}
+	}
+	private static DataList correctNormals(DataList n)	{
+		if (n != null && n.toDoubleArrayArray().item(0).size() == 4) {
+			double[][] norms = n.toDoubleArrayArray(null);
+			double[][] norms3 = new double[norms.length][3];
+			Pn.dehomogenize(norms3, norms);
+			return StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3);			
+		}		
+		return n;
+	}
 	private static void renderFaces(IndexedFaceSet sg, double alpha, GL gl, boolean pickMode, int colorBind, int normalBind, int colorLength, DataList vertices, DataList vertexNormals, DataList faceNormals, DataList vertexColors, DataList faceColors, DataList texCoords, DataList lightMapCoords, int vertexLength, boolean smooth) {
 		Attribute TANGENTS=Attribute.attributeForName("TANGENTS");
 
@@ -265,6 +292,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		
 		boolean faceC = colorBind == PER_FACE;
 		
+		faceNormals = correctNormals(faceNormals);
+		vertexNormals = correctNormals(vertexNormals);
 		// what does this flag mean??? it is always true.
 		boolean renderInlined = (normalBind == PER_VERTEX || faceN) && (colorBind == PER_VERTEX || colorBind == PER_PART || faceC);
 

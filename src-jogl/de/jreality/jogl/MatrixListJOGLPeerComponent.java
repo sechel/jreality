@@ -170,13 +170,17 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	double[] o2c, o2ndc;
 	@Override
 	protected void renderChildren() {
-		if (!jr.offscreenMode && isCopyCat)		{
+		if (isCopyCat)		{
 			signature = jr.renderingState.currentSignature;
 			if (debug) theLog.fine("In renderChildren()"+name);
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
-			if (theDropBox.clipToCamera && !useOldMatrices)	{
+			if (!useOldMatrices && theDropBox.followCamera && theDropBox.dgcf != null)	{
+				((Updateable) theDropBox.dgcf).update();
+			}
+			boolean clipToCamera = theDropBox.clipToCamera && !jr.offscreenMode;
+			if (clipToCamera && !useOldMatrices)	{
 				o2ndc = jr.context.getObjectToNDC();
 				o2c = jr.context.getObjectToCamera();	
 				inverseDMin = Pn.inverseDistance(theDropBox.minDistance, signature);
@@ -187,7 +191,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			int count = 0;
 			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
 			for (int j = 0; j<nn; ++j)	{
-				if (theDropBox.clipToCamera)	{
+				if (clipToCamera)	{
 					if (!useOldMatrices) 
 						accepted[j] = accept(matrices[j]);
 					if (!accepted[j]) 	continue; 

@@ -18,7 +18,7 @@ float length31(in vec4 P)	{
 }
 
 float acosh(in float x) {
-    return log(abs(x) + sqrt(x*x-1.0));
+    return log(abs(x) + sqrt(abs(x*x-1.0)));
 }
 
 float distance31(in vec4 a, in vec4 b)    {
@@ -26,18 +26,11 @@ float distance31(in vec4 a, in vec4 b)    {
     float ab = dot31(a,b);
     float bb = dot31(b,b);
     float d = ab/sqrt(aa*bb);
-    return d;
+    return abs(acosh(d));
 }
 // project the vector T into the hyperbolic tangent space of P
 vec4 projectToTS31(in vec4 P, in vec4 T) {
-	return T - (dot31(P,T)/dot31(P,P)) * P;
-}
-
-// set a vector to a specified hyperbolic length.
-vec4 setToLength31(in vec4 P, in float d)	{
-    float l = length31(P);
-    float f = d/l;
-    return f * P;
+	return dot31(P,P) * T - dot31(P,T) * P;
 }
 
 // find the representative of the given point with length 1
@@ -62,18 +55,17 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
    float pf;           // power factor
    float attenuation;  // computed attenuation factor
    float d;            // distance from surface to light source
-   vec4  VP;           // direction from surface to light position
+   vec4  toLight;           // direction from surface to light position
    vec4  halfVector;   // direction of maximum highlights
 
    // Compute vector from surface to light position
-   VP = gl_LightSource[i].position - ecPosition4;
+   toLight = gl_LightSource[i].position - ecPosition4;
 
    // Compute distance between surface and light position
-   //d = length31(VP);
    d = distance31(gl_LightSource[i].position, ecPosition4);
-
+   
    // Normalize the vector from surface to light position
-   VP = normalize31(ecPosition4, VP);
+   toLight = normalize31(ecPosition4, toLight);
 
  //   Compute attenuation
 //   attenuation = 1.0 / (gl_LightSource[i].constantAttenuation +
@@ -81,20 +73,14 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
 //       gl_LightSource[i].quadraticAttenuation * d * d);
    attenuation = 1.0;
 
-    halfVector = normalize31(ecPosition4, VP + eye);
-
-   nDotVP = max(0.0, dot31(normal, VP));
+    halfVector = normalize31(ecPosition4, toLight + eye); //gl_LightSource[i].halfVector; //
+		//halfVector = normalize31(ecPosition4, halfVector);
+   nDotVP = max(0.0, dot31(normal, toLight));
    nDotHV = max(0.0, dot31(normal, halfVector));
 
-   if (nDotVP == 0.0)
-   {
-       pf = 0.0;
-   }
-   else
-   {
-       pf = pow(nDotHV, gl_FrontMaterial.shininess);
+   if (nDotVP == 0.0) pf = 0.0;
+   else pf = pow(nDotHV, gl_FrontMaterial.shininess);
 
-   }
    Ambient  += gl_LightSource[i].ambient * attenuation;
    Diffuse  += gl_LightSource[i].diffuse * nDotVP * attenuation;
    Specular += gl_LightSource[i].specular * pf * attenuation;
@@ -107,7 +93,8 @@ void ftexgen(in vec4 normal, in vec4 ecPosition)
 }
 
 void light(vec4 normal, vec4 ecPosition) {
-   vec4 eye = vec4(0.0, 0.0, 1.0, 0.0);
+	// the eye is at the origin of the coordinate system
+   vec4 eye = vec4(0.0, 0.0, 0.0, 1.0);
     // Clear the light intensity accumulators
     Ambient  = vec4 (0.0);
     Diffuse  = vec4 (0.0);
@@ -115,18 +102,19 @@ void light(vec4 normal, vec4 ecPosition) {
 
     pointLight(0, normal, eye, ecPosition);
 
-    pointLight(1, normal, eye, ecPosition);
+//    pointLight(1, normal, eye, ecPosition);
 }
 
 void flight(in vec4 normal, in vec4 ecPosition)
 {
     vec4 color;
     light(normal, ecPosition);
-    color = gl_FrontLightModelProduct.sceneColor +
+    color = //gl_FrontLightModelProduct.sceneColor +
       Ambient  * gl_FrontMaterial.ambient +
       Diffuse  * gl_FrontMaterial.diffuse;
     color += Specular * gl_FrontMaterial.specular;
     color = clamp( color, 0.0, 1.0 );
+//    color.a = 1.0;
     gl_FrontColor = color;
 }
 
@@ -139,6 +127,7 @@ void blight(in vec4 normal, in vec4 ecPosition)
       Diffuse  * gl_BackMaterial.diffuse;
     color += Specular * gl_BackMaterial.specular;
     color = clamp( color, 0.0, 1.0 );
+//    color.a = 1.0;
     gl_BackColor = color;
 }
 
@@ -152,12 +141,13 @@ void main (void)
     // attempt to debug by moving points in the normal direction
     //gl_Position = gl_ModelViewProjectionMatrix * (gl_Vertex - vec4(.5) * transformedNormal); //ftransform();
     flight(transformedNormal, ecPosition);
-//    transformedNormal = transformedNormal;
+//    transformedNormal = -transformedNormal;
 //    blight(transformedNormal, ecPosition);
-//    if (dot31(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
-    float inpro = dot31(ecPosition, transformedNormal);
-    //if (dot31(ecPosition, ecPosition) > 0.0) 
-        gl_FrontColor = vec4(inpro,1.0-inpro,0.0, 1.0);
+    if (dot31(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
+//    float inpro = dot31(ecPosition, transformedNormal);
+//    if (dot31(ecPosition, ecPosition) > 0.0) 
+//        gl_FrontColor = vec4(1,0,0.0, 1.0);
      ftexgen(transformedNormal, ecPosition);
+     gl_Position = ftransform();
 }
 
