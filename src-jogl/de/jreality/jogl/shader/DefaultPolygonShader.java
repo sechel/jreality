@@ -87,7 +87,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public VertexShader vertexShader = new DefaultVertexShader();
 	boolean useGLSL = false;
 	int texUnit = 0, refMapUnit = 0;
-	GlslDefaultPolygonShader glslShader;
+	GlslPolygonShader glslShader = new GlslPolygonShader();
 	boolean inheritGLSL = false;
 	boolean fastAndDirty = false;
 	boolean geometryHasTextureCoordinates = false, hasTextures = false;
@@ -138,9 +138,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					String fragmentShader = (String) eap.getAttribute(ShaderUtility.nameSpace(name,"glslFragmentShader"), "");	
 					if (fragmentShader == "") fragmentShader = null;
 					System.err.println("Setting glsl vertex shader to "+vertShader);
-					glslShader  = new GlslDefaultPolygonShader(vertShader, fragmentShader);
 				}
-			glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
+				glslShader.setFromEffectiveAppearance(eap, name);
+//			glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
 		    }
 	    }  else useGLSL = false;
 	    
@@ -203,11 +203,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	      	gl.glActiveTexture(texUnit);
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 			refMapUnit = texUnit;
-			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
+//			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, joglCubeMap);
 			texUnit++;
 		} else if (useGLSL)
-			glslShader.reflectionTextureUnit = -1;    	
+//			glslShader.reflectionTextureUnit = -1;    	
     
 	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
