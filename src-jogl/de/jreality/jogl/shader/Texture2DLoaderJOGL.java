@@ -144,6 +144,7 @@ public class Texture2DLoaderJOGL {
         gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
         gl.glMatrixMode(GL.GL_MODELVIEW);  
         
+        // can't do this statically at start-up since we need a GL context to inquire
 		if (!haveCheckedForAnisotropy)	{
 			if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_filter_anisotropic")) {
 				gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
@@ -247,12 +248,13 @@ public class Texture2DLoaderJOGL {
 	        if (mipmapped) {
 	        	// the following code executes painfully slowly
 	        	if (false && haveAutoMipmapGeneration) {
+	        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
 	                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
 	                        image.getWidth(), image.getHeight(), 0, srcPixelFormat,
 	                        GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
-	        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
 	        	}
 	        	else {
+//	        		System.err.println("Building mipmaps");
 	                GLU glu = new GLU();
 	                glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
 	              		  GL.GL_RGBA, 
@@ -286,7 +288,7 @@ public class Texture2DLoaderJOGL {
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 
-//	 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
+	 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
 	 	    DataBuffer data = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
 	 	    Buffer buffer;
 	 	    if (data instanceof DataBufferByte) {
