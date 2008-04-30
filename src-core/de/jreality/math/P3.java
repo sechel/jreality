@@ -638,7 +638,8 @@ public class P3 {
 		if (to.length == 3)	toL1 = Pn.homogenize(null, to);
 		else if (to.length == 4) toL1 = (double[]) to.clone();
 		if ((sig == Pn.EUCLIDEAN && toL1[3] == 0.0))	{
-			throw new IllegalArgumentException("Infinite euclidean translation vector");
+			return Rn.identityMatrix(4);
+//			throw new IllegalArgumentException("Infinite euclidean translation vector");
 		}
 		double[] toL = Pn.normalize(null, toL1, sig);
 //		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
