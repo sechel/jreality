@@ -89,7 +89,7 @@ public class Graphics3D {
 			setCurrentPath(sgp);
 			setAspectRatio(ar);
 	 }
-	private void setAspectRatio(double ar) {
+	public void setAspectRatio(double ar) {
 		aspectRatio = ar;
 	}
 
