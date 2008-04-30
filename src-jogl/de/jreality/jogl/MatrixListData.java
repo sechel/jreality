@@ -9,8 +9,9 @@ public class MatrixListData extends Geometry {
 		super(name);
 	}
 	public double[][] matrixList = {Rn.identityMatrix(4)};
+	public boolean[] acceptedList;
 	public double minDistance = -1, maxDistance = -1;
-	public double ndcFudgeFactor = 1.3;
+	public double ndcFudgeFactor = 1.4;
 	public boolean clipToCamera = false;
 	public boolean followCamera = false;
 	public boolean componentDisplayLists = false;

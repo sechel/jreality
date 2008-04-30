@@ -126,7 +126,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			super.render();			
 		} catch (GLException e) {
 			System.err.println("Got exception "+name);
-//			e.printStackTrace();
+			e.printStackTrace();
 			if (theDropBox != null) setDisplayListDirty();
 			else throw e;
 		}
@@ -176,25 +176,26 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
-			if (!useOldMatrices && theDropBox.followCamera && theDropBox.dgcf != null)	{
-				((Updateable) theDropBox.dgcf).update();
-			}
+//			if (!useOldMatrices && theDropBox.followCamera && theDropBox.dgcf != null)	{
+//				((Updateable) theDropBox.dgcf).update();
+//			}
 			boolean clipToCamera = theDropBox.clipToCamera && !jr.offscreenMode;
-			if (clipToCamera && !useOldMatrices)	{
-				o2ndc = jr.context.getObjectToNDC();
-				o2c = jr.context.getObjectToCamera();	
-				inverseDMin = Pn.inverseDistance(theDropBox.minDistance, signature);
-				inverseDMax = Pn.inverseDistance(theDropBox.maxDistance, signature);
-//				System.err.println("min max: "+inverseDMin+" "+inverseDMax);
-			}
+//			if (clipToCamera && !useOldMatrices)	{
+//				o2ndc = jr.context.getObjectToNDC();
+//				o2c = jr.context.getObjectToCamera();	
+//				inverseDMin = Pn.inverseDistance(theDropBox.minDistance, signature);
+//				inverseDMax = Pn.inverseDistance(theDropBox.maxDistance, signature);
+////				System.err.println("min max: "+inverseDMin+" "+inverseDMax);
+//			}
 
 			int count = 0;
+//			accepted = theDropBox.acceptedList;
 			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera)	{
-					if (!useOldMatrices) 
-						accepted[j] = accept(matrices[j]);
-					if (!accepted[j]) 	continue; 
+//					if (!useOldMatrices) 
+//						accepted[j] = accept(matrices[j]);
+					if (!theDropBox.acceptedList[j]) 	continue; 
 				}
 				count++;
 				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
@@ -207,8 +208,8 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				popTransformation();
 			}
 //	childrenDLDirty = child.isVisible ? child.displayListDirty : false;
-			theDropBox.count = count;
-//			theLog.fine("Rendered "+count);
+//			theDropBox.count = count;
+//			theLog.fine("MLJOGLPC: Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;
