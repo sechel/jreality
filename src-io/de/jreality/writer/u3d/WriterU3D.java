@@ -1319,6 +1319,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
 		*/
+//		ViewerApp.display(scene.getSceneRoot());
 	}
 
 

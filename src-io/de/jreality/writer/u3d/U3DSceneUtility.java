@@ -424,8 +424,19 @@ public class U3DSceneUtility {
 					
 				}
 				c.childrenWriteAccept(this, false, false, false, false, false, true);
-				if (basPoints != null) c.addChild(basPoints);
-				if (basLines != null) c.addChild(basLines);
+				
+//				if (flat) {
+//					if (basPoints != null) 
+//						basPoints = flatten(basPoints, true);
+//					if (basLines != null) 
+//						basLines = flatten(basLines, true);
+//				}
+				if (basPoints != null) { 
+					c.addChild(basPoints);
+				}
+				if (basLines != null) { 
+					c.addChild(basLines);
+				}
 				p.pop();
 			}
 		}, false, false, false, false, false, true);
