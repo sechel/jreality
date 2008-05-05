@@ -258,23 +258,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		renderFaces(sg, alpha, gl, pickMode, colorBind, normalBind, colorLength, vertices, vertexNormals, faceNormals, vertexColors, faceColors, texCoords, lightMapCoords, vertexLength, smooth);
 	}
 
-	public static void correctNormalLength(IndexedFaceSet sg) {
-		DataList vNormals = sg.getVertexAttributes(Attribute.NORMALS);
-		if (vNormals != null && vNormals.toDoubleArrayArray().item(0).size() == 4) {
-			double[][] norms = vNormals.toDoubleArrayArray(null);
-			double[][] norms3 = new double[norms.length][3];
-			Pn.dehomogenize(norms3, norms);
-			sg.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3));
-		}
-		DataList fNormals = sg.getFaceAttributes(Attribute.NORMALS);
-		if (fNormals != null && fNormals.toDoubleArrayArray().item(0).size() == 4) {
-			double[][] norms = fNormals.toDoubleArrayArray(null);
-			double[][] norms3 = new double[norms.length][3];
-			Pn.dehomogenize(norms3, norms);
-			sg.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3));			
-		}
-	}
-	private static DataList correctNormals(DataList n)	{
+	public static DataList correctNormals(DataList n)	{
 		if (n != null && n.toDoubleArrayArray().item(0).size() == 4) {
 			double[][] norms = n.toDoubleArrayArray(null);
 			double[][] norms3 = new double[norms.length][3];
