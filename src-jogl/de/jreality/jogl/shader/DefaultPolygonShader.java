@@ -213,7 +213,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
     if (useGLSL)		{
-    	glslShader.render(jrs);
+    	//glslShader.render(jrs);
+    	GlslLoader.render(glslShader.program, gl);
     }
     jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
 }
