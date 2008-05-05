@@ -62,6 +62,7 @@ import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultPolygonShader;
+import de.jreality.jogl.shader.GlslPolygonShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -479,7 +480,9 @@ public class JOGLRendererHelper {
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
+		vertexNormals = GlslPolygonShader.correctNormals(vertexNormals);
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
+		faceNormals = GlslPolygonShader.correctNormals(faceNormals);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
 		DataList texCoords = sg
