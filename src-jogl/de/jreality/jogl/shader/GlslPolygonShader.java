@@ -176,8 +176,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				if (jr.isPickMode()) jr.globalGL.glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
-				drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
-//				JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
+//				drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
+				JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
 			}
 		}
 	}
@@ -259,7 +259,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		renderFaces(sg, alpha, gl, pickMode, colorBind, normalBind, colorLength, vertices, vertexNormals, faceNormals, vertexColors, faceColors, texCoords, lightMapCoords, vertexLength, smooth);
 	}
 
-	private static DataList correctNormals(DataList n)	{
+	public static DataList correctNormals(DataList n)	{
 		if (n != null && n.toDoubleArrayArray().item(0).size() == 4) {
 			double[][] norms = n.toDoubleArrayArray(null);
 			double[][] norms3 = new double[norms.length][3];
