@@ -52,10 +52,12 @@ import javax.media.opengl.GL;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
+import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
@@ -136,6 +138,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			Texture2DLoaderJOGL.render(jr.globalGL, diffuseTex);
 			gl.glEnable(GL.GL_TEXTURE_2D);
+			if (program != null && program.getSource().getUniformParameter("texture") != null) 
+					program.setUniform("texture",  GL.GL_TEXTURE0);
 		}
 		if (normalTex != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
@@ -219,10 +223,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
-		DataList texCoords = sg
-		.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-		DataList lightMapCoords = sg.getVertexAttributes(Attribute
-				.attributeForName("lightmap coordinates"));
+		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+		DataList lightMapCoords = sg.getVertexAttributes(Attribute.attributeForName("lightmap coordinates"));
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		// JOGLConfiguration.theLog.log(Level.INFO,"alpha value is "+alpha);
@@ -233,7 +235,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		if (vertexColors != null && smooth) {
 			colorBind = PER_VERTEX;
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
-		} else if (faceColors != null && colorBind != PER_VERTEX) {
+		} else if (faceColors != null) {
 			colorBind = PER_FACE;
 			colorLength = GeometryUtility.getVectorLength(faceColors);
 		} else
@@ -250,19 +252,22 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		}
 		if (vertexNormals != null && smooth) {
 			normalBind = PER_VERTEX;
-		} else if (faceNormals != null && (vertexNormals == null || !smooth)) {
+		} else if (faceNormals != null) {
 			normalBind = PER_FACE;
 		} else
 			normalBind = PER_PART;
-
 		renderFaces(sg, alpha, gl, pickMode, colorBind, normalBind, colorLength, vertices, vertexNormals, faceNormals, vertexColors, faceColors, texCoords, lightMapCoords, vertexLength, smooth);
 	}
 
-	public static DataList correctNormals(DataList n)	{
+	private static DataList correctNormals(DataList n)	{
 		if (n != null && n.toDoubleArrayArray().item(0).size() == 4) {
 			double[][] norms = n.toDoubleArrayArray(null);
 			double[][] norms3 = new double[norms.length][3];
-			Pn.dehomogenize(norms3, norms);
+			for (int i = 0; i<norms.length; ++i)	{
+				Pn.dehomogenize(norms3[i], norms[i]);
+				if (norms[i][3] < 0) Rn.times(norms3[i], -1, norms3[i]);
+			}
+//			Pn.dehomogenize(norms3, norms);
 			return StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3);			
 		}		
 		return n;
@@ -276,8 +281,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		
 		boolean faceC = colorBind == PER_FACE;
 		
-		faceNormals = correctNormals(faceNormals);
-		vertexNormals = correctNormals(vertexNormals);
+		if (faceN) faceNormals = correctNormals(faceNormals);
+		else vertexNormals = correctNormals(vertexNormals);
 		// what does this flag mean??? it is always true.
 		boolean renderInlined = (normalBind == PER_VERTEX || faceN) && (colorBind == PER_VERTEX || colorBind == PER_PART || faceC);
 
