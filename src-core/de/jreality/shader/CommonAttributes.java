@@ -97,6 +97,7 @@ import de.jreality.scene.Appearance;
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
 	public final static String IGNORE_ALPHA0	=			"ignoreAlpha0";	// reject pixel writes for pixels with alpha == 0
 	public final static String BACK_FACE_CULLING_ENABLED = 		"backFaceCulling";
+	public final static String FLIP_NORMALS_ENABLED = 		"flipNormals";
 	public final static String MANY_DISPLAY_LISTS = "manyDisplayLists";		// if true, one display list per scene graph path
 	public final static String ANY_DISPLAY_LISTS = "anyDisplayLists";		// if true, use Display lists.
 	public final static String SEPARATE_SPECULAR_COLOR = "separateSpecularColor";
