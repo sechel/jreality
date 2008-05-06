@@ -62,6 +62,7 @@ public class RenderingHintsShader  {
 	   lightingEnabled = true, 
 	   antiAliasingEnabled = false,				// do we need this anymore?
 	   backFaceCullingEnabled = false,
+	   flipNormalsEnabled = false,
 	   useDisplayLists = true,
 	   clearColorBuffer = true,
 	   localLightModel = false,
@@ -70,9 +71,6 @@ public class RenderingHintsShader  {
 	   componentDisplayLists = false;
 	   
 
-	/**
-	 * 
-	 */
 	public RenderingHintsShader() {
 		super();
 	}
@@ -90,6 +88,7 @@ public class RenderingHintsShader  {
 		ignoreAlpha0 = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.IGNORE_ALPHA0), true);
 		antiAliasingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANTIALIASING_ENABLED), false);
 		backFaceCullingEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.BACK_FACE_CULLING_ENABLED), false);
+		flipNormalsEnabled = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FLIP_NORMALS_ENABLED), false);
 		useDisplayLists = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ANY_DISPLAY_LISTS), true);
 		levelOfDetail = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LEVEL_OF_DETAIL),CommonAttributes.LEVEL_OF_DETAIL_DEFAULT);
 		clearColorBuffer = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.CLEAR_COLOR_BUFFER),true);
@@ -98,40 +97,15 @@ public class RenderingHintsShader  {
 				false);
 	}
 
-	public boolean isAntiAliasingEnabled() {
-		return antiAliasingEnabled;
-	}
-
-	/**
-	 * @return
-	 */
-	public double getLevelOfDetail() {
-		return levelOfDetail;
-	}
-
-	/**
-	 * @return
-	 */
 	public boolean isLightingEnabled() {
 		return lightingEnabled;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isTransparencyEnabled() {
 		return transparencyEnabled;
 	}
 
-
-	public boolean isBackFaceCullingEnabled() {
-		return backFaceCullingEnabled;
-	}
-	
-	public boolean isClearColorBuffer() {
-		return clearColorBuffer;
-	}
-
+	private boolean oldFlipped = flipNormalsEnabled;
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
@@ -146,11 +120,22 @@ public class RenderingHintsShader  {
 		jr.renderingState.transparencyEnabled = transparencyEnabled;
 		if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
 		else							gl.glDisable(GL.GL_LIGHTING);
+		
 		if (backFaceCullingEnabled)  {
 			gl.glEnable(GL.GL_CULL_FACE);
 			gl.glCullFace(GL.GL_BACK);
 		} else
 			gl.glDisable(GL.GL_CULL_FACE);
+		
+		oldFlipped = jr.renderingState.flipped;
+		boolean newf = flipNormalsEnabled ^ oldFlipped;
+		System.err.println("flip = "+flipNormalsEnabled);
+		if (oldFlipped != newf) {
+			jr.renderingState.flipped = newf;
+			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
+			System.err.println("Flipping normals");
+		}
+		
 		jr.renderingState.levelOfDetail = levelOfDetail;
 //		if (ignoreAlpha0 != jr.getRenderingState().ignoreAlpha0)	{
 			gl.glAlphaFunc(ignoreAlpha0 ? GL.GL_GREATER : GL.GL_ALWAYS, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
@@ -171,6 +156,11 @@ public class RenderingHintsShader  {
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
+		if ( oldFlipped != jr.renderingState.flipped) {
+			jr.globalGL.glFrontFace(oldFlipped ? GL.GL_CW : GL.GL_CCW);
+			jr.renderingState.flipped = oldFlipped;
+		}
+
 //		if (transparencyEnabled)	{
 //			  gl.glDepthMask(true);
 //			  gl.glDisable(GL.GL_BLEND);

@@ -61,6 +61,7 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -88,6 +89,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	boolean useGLSL = false;
 	int texUnit = 0, refMapUnit = 0;
 	GlslPolygonShader glslShader = new GlslPolygonShader();
+	GlslProgram glslProgram;
 	boolean inheritGLSL = false;
 	boolean fastAndDirty = false;
 	boolean geometryHasTextureCoordinates = false, hasTextures = false;
@@ -118,6 +120,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    	//LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
 				joglTexture2D = new JOGLTexture2D(texture2D);
 				hasTextures = true;
+				System.err.println("Got texture for name "+ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D));
 			}
 		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
 		    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
@@ -133,12 +136,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		inheritGLSL= eap.getAttribute(ShaderUtility.nameSpace(name,"inheritGLSL"), false);	
 	    if (!inheritGLSL)		{
 		    if (useGLSL)		{
-				if (glslShader == null)	{
-					String vertShader = (String) eap.getAttribute(ShaderUtility.nameSpace(name,"glslVertexShader"), "standard3dlabs.vert");	
-					String fragmentShader = (String) eap.getAttribute(ShaderUtility.nameSpace(name,"glslFragmentShader"), "");	
-					if (fragmentShader == "") fragmentShader = null;
-					System.err.println("Setting glsl vertex shader to "+vertShader);
-				}
+				if (GlslProgram.hasGlslProgram(eap, name)) {
+					// dummy to write glsl values like "lightingEnabled"
+					Appearance app = new Appearance();
+					EffectiveAppearance eap2 = eap.create(app);
+					glslProgram = new GlslProgram(app, eap2, name);
+				} else glslProgram = null;
 				glslShader.setFromEffectiveAppearance(eap, name);
 //			glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
 		    }
@@ -195,7 +198,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		      	gl.glEnable(GL.GL_TEXTURE_2D);
 				Texture2DLoaderJOGL.render(gl, joglTexture2D);
 			    texUnit++;
-			    texunitcoords++;		    	
+			    texunitcoords++;		
+			    if (glslProgram != null) glslProgram.setUniform("texture", texUnit);
 		    }
 	    }
 
@@ -212,9 +216,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
-    if (useGLSL)		{
+    if (glslProgram != null)		{
     	//glslShader.render(jrs);
-    	GlslLoader.render(glslShader.program, gl);
+    	GlslLoader.render(glslProgram, jr);
     }
     jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
 }

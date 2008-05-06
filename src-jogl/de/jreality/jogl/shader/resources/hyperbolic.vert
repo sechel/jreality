@@ -6,43 +6,50 @@
 vec4 Ambient;
 vec4 Diffuse;
 vec4 Specular;
+vec4 texcoord;
+uniform sampler2D texture;
+uniform int signature;
+uniform int doTexture;
 
 // the inner product in klein model of hyperbolic space
-float dot31(in vec4 P, in vec4 Q)	{
-	return P.x*Q.x+P.y*Q.y+P.z*Q.z-P.w*Q.w;
+float dot4(in vec4 P, in vec4 Q)	{
+	return P.x*Q.x+P.y*Q.y+P.z*Q.z + signature* P.w*Q.w;
 }
 
 // the derived length function
-float length31(in vec4 P)	{
-    return sqrt(abs(dot31(P,P)));
+float length4(in vec4 P)	{
+    return sqrt(abs(dot4(P,P)));
 }
 
 float acosh(in float x) {
     return log(abs(x) + sqrt(abs(x*x-1.0)));
 }
 
-float distance31(in vec4 a, in vec4 b)    {
-    float aa = dot31(a,a);
-    float ab = dot31(a,b);
-    float bb = dot31(b,b);
-    float d = ab/sqrt(aa*bb);
-    return abs(acosh(d));
+float distance4(in vec4 a, in vec4 b)    {
+    float aa = dot4(a,a);
+    float ab = dot4(a,b);
+    float bb = dot4(b,b);
+    float d = -ab/sqrt(abs(aa*bb));
+    if (signature == -1) return abs(acosh(d));
+    else return acos(d);
 }
 // project the vector T into the hyperbolic tangent space of P
-vec4 projectToTS31(in vec4 P, in vec4 T) {
-	return dot31(P,P) * T - dot31(P,T) * P;
+vec4 projectToTangent(in vec4 P, in vec4 T) {
+	float pp = dot4(P,P);
+	float pt = dot4(P,T);
+	return (pp * T - pt * P);
 }
 
-// find the representative of the given point with length 1
-void normalize31(inout vec4 P)	{
-    float l = 1.0/length31(P);
+// find the representative of the given point with length +/- 1
+void normalize4(inout vec4 P)	{
+    float l = 1.0/length4(P);
     P = l * P;
  }
  
 // adjust T to be a unit tangent vector to the point P
-vec4 normalize31(in vec4 P, in vec4 T)	{
-	vec4 X = projectToTS31(P, T);
-	normalize31(X);
+vec4 normalize4(in vec4 P, in vec4 T)	{
+	vec4 X = projectToTangent(P, T);
+	normalize4(X);
 	return X;
 }
 
@@ -62,21 +69,22 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
    toLight = gl_LightSource[i].position - ecPosition4;
 
    // Compute distance between surface and light position
-   d = distance31(gl_LightSource[i].position, ecPosition4);
+   d = distance4(gl_LightSource[i].position, ecPosition4);
    
    // Normalize the vector from surface to light position
-   toLight = normalize31(ecPosition4, toLight);
+   toLight = normalize4(ecPosition4, toLight);
 
  //   Compute attenuation
 //   attenuation = 1.0 / (gl_LightSource[i].constantAttenuation +
 //       gl_LightSource[i].linearAttenuation * d +
 //       gl_LightSource[i].quadraticAttenuation * d * d);
-   attenuation = 1.0;
+   if (signature == -1) attenuation = gl_LightSource[i].constantAttenuation * exp(-gl_LightSource[i].linearAttenuation * d);
+   else attenuation =  gl_LightSource[i].constantAttenuation * cos(d);
 
-    halfVector = normalize31(ecPosition4, toLight + eye); //gl_LightSource[i].halfVector; //
-		//halfVector = normalize31(ecPosition4, halfVector);
-   nDotVP = max(0.0, dot31(normal, toLight));
-   nDotHV = max(0.0, dot31(normal, halfVector));
+    halfVector = -normalize4(ecPosition4, toLight + eye); //gl_LightSource[i].halfVector; //
+		//halfVector = normalize4(ecPosition4, halfVector);
+   nDotVP = max(0.0, dot4(normal, toLight));
+   nDotHV = max(0.0, dot4(normal, halfVector));
 
    if (nDotVP == 0.0) pf = 0.0;
    else pf = pow(nDotHV, gl_FrontMaterial.shininess);
@@ -86,68 +94,47 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
    Specular += gl_LightSource[i].specular * pf * attenuation;
 }
 
-void ftexgen(in vec4 normal, in vec4 ecPosition)
+//void ftexgen(in vec4 normal, in vec4 ecPosition)
+//{
+//    gl_TexCoord[0] = gl_TextureMatrix[0]*gl_MultiTexCoord0;
+//}
+
+vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 {
-
-    gl_TexCoord[0] = gl_TextureMatrix[0]*gl_MultiTexCoord0;
-}
-
-void light(vec4 normal, vec4 ecPosition) {
-	// the eye is at the origin of the coordinate system
-   vec4 eye = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 color;
+    vec4 eye = vec4(0.0, 0.0, 0.0, 1.0);
+    eye = normalize4(ecPosition, eye);
     // Clear the light intensity accumulators
     Ambient  = vec4 (0.0);
     Diffuse  = vec4 (0.0);
     Specular = vec4 (0.0);
-
     pointLight(0, normal, eye, ecPosition);
 
-//    pointLight(1, normal, eye, ecPosition);
-}
-
-void flight(in vec4 normal, in vec4 ecPosition)
-{
-    vec4 color;
-    light(normal, ecPosition);
+	vec4 diff = matpar.diffuse;
+	if (doTexture != 0) diff = diff *  texture2D(texture, texcoord.st);
     color = //gl_FrontLightModelProduct.sceneColor +
-      Ambient  * gl_FrontMaterial.ambient +
-      Diffuse  * gl_FrontMaterial.diffuse;
-    color += Specular * gl_FrontMaterial.specular;
+      	Ambient  * matpar.ambient +
+      	Diffuse  * diff;
+    color += Specular * matpar.specular;
     color = clamp( color, 0.0, 1.0 );
-//    color.a = 1.0;
-    gl_FrontColor = color;
-}
-
-void blight(in vec4 normal, in vec4 ecPosition)
-{
-    vec4 color;
-    light(normal, ecPosition);
-    color = gl_BackLightModelProduct.sceneColor +
-      Ambient  * gl_BackMaterial.ambient +
-      Diffuse  * gl_BackMaterial.diffuse;
-    color += Specular * gl_BackMaterial.specular;
-    color = clamp( color, 0.0, 1.0 );
-//    color.a = 1.0;
-    gl_BackColor = color;
+    color.a = 1.0;
+   return color;
 }
 
 void main (void)
 {
     vec4  transformedNormal = gl_ModelViewMatrix * vec4( gl_Normal, 1.0);
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
-    normalize31(ecPosition);
-    transformedNormal = normalize31(ecPosition, transformedNormal);
+    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
+    normalize4(ecPosition);
+    transformedNormal = normalize4(ecPosition, transformedNormal);
+//    faceforward4(transformedNormal);
     // Do fixed functionality vertex transform
-    // attempt to debug by moving points in the normal direction
-    //gl_Position = gl_ModelViewProjectionMatrix * (gl_Vertex - vec4(.5) * transformedNormal); //ftransform();
-    flight(transformedNormal, ecPosition);
+    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
 //    transformedNormal = -transformedNormal;
-//    blight(transformedNormal, ecPosition);
-    if (dot31(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
-//    float inpro = dot31(ecPosition, transformedNormal);
-//    if (dot31(ecPosition, ecPosition) > 0.0) 
-//        gl_FrontColor = vec4(1,0,0.0, 1.0);
-     ftexgen(transformedNormal, ecPosition);
+//    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
+//    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
+//     ftexgen(transformedNormal, ecPosition);
      gl_Position = ftransform();
 }
 

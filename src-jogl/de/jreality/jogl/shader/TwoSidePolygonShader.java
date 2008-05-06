@@ -58,13 +58,10 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 	   private PolygonShader front;
 	   private PolygonShader back;
 
-		/**
-		 * 
-		 */
 	public TwoSidePolygonShader() {
 		super();
-		front = new ImplodePolygonShader();
-		back = new ImplodePolygonShader();
+		front = new DefaultPolygonShader();
+		back = new DefaultPolygonShader();
 	}
 
 

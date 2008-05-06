@@ -72,7 +72,7 @@ public class RenderingHintsInfo  {
 	 final static int LL = 5;
 	 final static int SS = 6;
 	 final static int IA = 7;
-	 final static int SMPG = 8;
+	 final static int FN = 8;
 	 final static int SM = 9;
 	 final static int FF = 10;
 	 final static int LD = 11;
@@ -88,7 +88,7 @@ public class RenderingHintsInfo  {
 		RenderingHintsShader.LOCAL_LIGHT_MODEL_DEFAULT,
 		RenderingHintsShader.SEPARATE_SPECULAR_DEFAULT,
 		RenderingHintsShader.IGNORE_ALPHA0_DEFAULT,
-		DefaultPolygonShader.SMOOTH_SHADING_DEFAULT,
+		RenderingHintsShader.FLIP_NORMALS_DEFAULT,
 		DefaultPolygonShader.SMOOTH_SHADING_DEFAULT};
 	String[] attributes = {
 			CommonAttributes.TRANSPARENCY_ENABLED,
@@ -99,7 +99,7 @@ public class RenderingHintsInfo  {
 			CommonAttributes.LOCAL_LIGHT_MODEL,
 			CommonAttributes.SEPARATE_SPECULAR_COLOR,
 			CommonAttributes.IGNORE_ALPHA0,
-			"polygonShader."+CommonAttributes.SMOOTH_SHADING,		// Experiment w/ handling "polygonShader.smoothShading"
+			CommonAttributes.FLIP_NORMALS_ENABLED,		// Experiment w/ handling "polygonShader.smoothShading"
 			CommonAttributes.SMOOTH_SHADING,						// or just "smoothShading"
 			CommonAttributes.DEPTH_FUDGE_FACTOR,
 			CommonAttributes.LEVEL_OF_DETAIL
@@ -165,7 +165,7 @@ public class RenderingHintsInfo  {
 		}
 		_render(jrs, OLD);
 	}
-	
+
 	public void _render(JOGLRenderingState jrs, int which)	{
 		if (!hasSomeActiveField) return;
 		JOGLRenderer jr = jrs.renderer;
@@ -213,18 +213,18 @@ public class RenderingHintsInfo  {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
 		}
+		if (values[FN][ACTIVE]) {
+			if (values[FN][which] != jr.renderingState.flipped) {
+				jr.renderingState.flipped = values[FN][which];
+				jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
+			}
+		}
 //		if (values[SM][ACTIVE])	{
 //			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
 //			else		gl.glShadeModel(GL.GL_FLAT);
 //			jr.renderingState.smoothShading = values[SM][which];
 ////			System.err.println("SM: Setting ss to "+values[SM][which]);
 //		}
-		if (values[SMPG][ACTIVE])	{
-			if (values[SMPG][which]) gl.glShadeModel(GL.GL_SMOOTH);
-			else		gl.glShadeModel(GL.GL_FLAT);
-			jr.renderingState.smoothShading = values[SMPG][which];
-//			System.err.println("SMPG: Setting ss to "+values[SMPG][which]);
-		}
 		if (values[DL][ACTIVE])
 			jr.renderingState.useDisplayLists = values[DL][which]; 
 		if (values[LD][ACTIVE])
