@@ -72,7 +72,7 @@ public class U3DSceneUtility {
 
 	static final Geometry 
 		POINT_SPHERE = SphereUtility.tessellatedIcosahedronSphere(1),
-		LINE_CYLINDER = new U3DClosedCylinder(8, 1.0);//Primitives.cylinder(8, 1, -0.5, 0.5, 2 * PI);
+		LINE_CYLINDER = new U3DClosedCylinder(8, 1.0);
 	
 	private static final IndexedFaceSet 
 		SPHERE = SphereUtility.tessellatedIcosahedronSphere(4, true),

@@ -4,6 +4,8 @@ import static de.jreality.scene.data.Attribute.COORDINATES;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.StorageModel.DOUBLE3_ARRAY;
 import static de.jreality.scene.data.StorageModel.INT_ARRAY_ARRAY;
+import static de.jreality.writer.u3d.U3DAttribute.U3D_FLAG;
+import static de.jreality.writer.u3d.U3DAttribute.U3D_NONORMALS;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -20,10 +22,12 @@ public class U3DClosedCylinder extends IndexedFaceSet{
 	
 	public U3DClosedCylinder(int resolution, double thickness){
 		makeDisk(resolution, thickness);
+		setVertexAttributes(U3D_NONORMALS, U3D_FLAG);
 	}
 	
 	public U3DClosedCylinder(int resolution){
 		makeDiskNoThickness(resolution);
+		setVertexAttributes(U3D_NONORMALS, U3D_FLAG);
 	}
 	
 	
@@ -71,8 +75,6 @@ public class U3DClosedCylinder extends IndexedFaceSet{
 		setVertexCountAndAttributes(COORDINATES, vList);
 		DataList iList = INT_ARRAY_ARRAY.createReadOnly(indices);
 		setFaceCountAndAttributes(INDICES, iList);
-//		DataList nList = DOUBLE_ARRAY_ARRAY.createReadOnly(normals);
-//		setFaceAttributes(Attribute.NORMALS, nList);
 		setName("disk");
 	}
 	
@@ -105,8 +107,6 @@ public class U3DClosedCylinder extends IndexedFaceSet{
 		setVertexCountAndAttributes(COORDINATES, vList);
 		DataList iList = INT_ARRAY_ARRAY.createReadOnly(indices);
 		setFaceCountAndAttributes(INDICES, iList);
-//		DataList nList = DOUBLE_ARRAY_ARRAY.createReadOnly(normals);
-//		setVertexAttributes(Attribute.NORMALS, nList);
 	}
 	
 
