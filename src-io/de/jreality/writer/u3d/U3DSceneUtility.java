@@ -75,7 +75,7 @@ public class U3DSceneUtility {
 		LINE_CYLINDER = new U3DClosedCylinder(8, 1.0);
 	
 	private static final IndexedFaceSet 
-		SPHERE = SphereUtility.tessellatedIcosahedronSphere(4, true),
+		SPHERE = SphereUtility.tessellatedIcosahedronSphere(2, true),
 		CYLINDER = Primitives.cylinder(60);
 	
 	
@@ -360,7 +360,7 @@ public class U3DSceneUtility {
 						ils = new IndexedLineSet();
 						ils.setVertexCountAndAttributes(((PointSet)g).getVertexAttributes());
 					}
-					if (dgs.getShowPoints()) {
+					if (dgs.getShowPoints()) { // create spheres for point set 
 						BallAndStickFactory bsf = new BallAndStickFactory(ils);
 						bsf.setBallGeometry(POINT_SPHERE);
 						bsf.setBallColor(dpos.getDiffuseColor());
@@ -390,7 +390,7 @@ public class U3DSceneUtility {
 							cmDest.setBlendColor(cm.getBlendColor());
 						} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
 					}
-					if (g instanceof IndexedLineSet && dgs.getShowLines()) {
+					if (g instanceof IndexedLineSet && dgs.getShowLines()) { // create sticks for line set
 						DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
 						BallAndStickFactory bsf = new BallAndStickFactory(ils);
 						bsf.setStickGeometry(LINE_CYLINDER);

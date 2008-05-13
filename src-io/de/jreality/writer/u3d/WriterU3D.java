@@ -39,6 +39,7 @@ import static de.jreality.writer.u3d.U3DConstants.TYPE_GROUP_NODE;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_LIGHT_NODE;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_LIGHT_RESOURCE;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_LINE_SET_CONTINUATION;
+import static de.jreality.writer.u3d.U3DConstants.TYPE_LINE_SET_DECLARATION;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_LIT_TEXTURE_SHADER;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_MATERIAL_RESOURCE;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_MESH_GENERATOR_CONTINUATION;
@@ -83,6 +84,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
@@ -107,6 +109,7 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
@@ -386,9 +389,96 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getLineSetContinuation(IndexedLineSet g){
-		System.out.println("writing line set continuation");
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
+		w.WriteU32(0); // chain index 
+		
+		DoubleArrayArray vData = (DoubleArrayArray)g.getVertexAttributes(COORDINATES);
+		double[][] vertices = null;
+		if (vData != null)
+			vertices = vData.toDoubleArrayArray(null);
+		else
+			vertices = new double[0][];
+		int[][] indices = null;
+		IntArrayArray iData = (IntArrayArray)g.getEdgeAttributes(INDICES);
+		if (iData != null)
+			indices = iData.toIntArrayArray(null);
+		else
+			indices = new int[0][];
+		
+		DoubleArrayArray nData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
+		nData = null; // TODO write no normals for the moment
+		double[][] normals = null;
+		if (nData != null)
+			normals = nData.toDoubleArrayArray(null);
+		// point resolution range
+		w.WriteU32(0); // start
+		w.WriteU32(vertices.length);
+		
+		float m_fQuantPosition = (float)pow(2.0,18.0);
+		m_fQuantPosition = (float)max(m_fQuantPosition, fLimit);
+		float m_fQuantNormal = (float) pow(2.0,14.0);
+		
+		// points
+		for (int currPosInd = 0; currPosInd < vertices.length; currPosInd++) {
+			int splitPosInd = currPosInd-1;
+			// split position
+			if (splitPosInd == -1) {
+				w.WriteCompressedU32(uACStaticFull+1,0);
+			} else {
+				w.WriteCompressedU32(uACStaticFull+currPosInd, splitPosInd);
+			}
+			// new position info
+			double[] vPosition = vertices[currPosInd];
+			double[] vPredictedPosition = new double[3];
+			if (splitPosInd >= 0)
+				vPredictedPosition = vertices[splitPosInd];
+			double[] vPositionDifference = Rn.subtract(null, vPosition, vPredictedPosition);
+			double[] v = vPositionDifference;
+			
+			short u8Signs = (short)((v[0] < 0.0 ? 1 : 0) | ((v[1] < 0.0 ? 1 : 0) << 1) | ((v[2] < 0.0 ? 1 : 0) << 2));
+			long udX = (long)(0.5 + m_fQuantPosition * abs(v[0]));
+			long udY = (long)(0.5 + m_fQuantPosition * abs(v[1]));
+			long udZ = (long)(0.5 + m_fQuantPosition * abs(v[2]));
+			w.WriteCompressedU8(uACContextPositionDiffSigns, u8Signs);
+			w.WriteCompressedU32(uACContextPositionDiffMagX, udX);
+			w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
+			w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
+			
+//			if (nData != null) {
+//				// new normal count
+//				w.WriteCompressedU32(uACContextNumLocalNormals, 1);
+//				double[] nPosition = normals[currPosInd];
+//				double[] nPredictedPosition = new double[3];
+//				if ( splitPosInd>=0 )
+//					nPredictedPosition = normals[splitPosInd];
+//				double[] nPositionDifference = Rn.subtract(null, nPosition, nPredictedPosition);
+//				double[] n = nPositionDifference;
+//				// new normal info
+//				u8Signs = (short)((n[0] < 0.0 ? 1 : 0) | ((n[1] < 0.0 ? 1 : 0) << 1) | ((n[2] < 0.0 ? 1 : 0) << 2));
+//				udX = (long)(0.5f + m_fQuantNormal * abs(n[0]));
+//				udY = (long)(0.5f + m_fQuantNormal * abs(n[1]));
+//				udZ = (long)(0.5f + m_fQuantNormal * abs(n[2]));
+//				w.WriteCompressedU8(uACContextPositionDiffSigns,u8Signs);
+//				w.WriteCompressedU32(uACContextPositionDiffMagX, udX);
+//				w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
+//				w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
+//			} else {
+				// new normal count
+				w.WriteCompressedU32(uACContextNumLocalNormals, 0);
+//			}
+			// count lines with current origin
+			LinkedList<Integer> connectedPoints = new LinkedList<Integer>();
+			for (int i = 0; i < indices.length; i++) {
+				if (indices[i][0] == currPosInd)
+					connectedPoints.add(indices[i][1]);
+			}
+			// write new line count
+			w.WriteCompressedU32(uACContextNumNewFaces, connectedPoints.size());
+			for (Integer i : connectedPoints) {
+				w.WriteCompressedU32(uACStaticFull + currPosInd, i);
+			}
+		}
 		
 		DataBlock b = w.GetDataBlock();
 		b.setBlockType(TYPE_LINE_SET_CONTINUATION);
@@ -570,6 +660,8 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	
+	
+	
 	protected DataBlock getPointSetDeclaration(PointSet g) {
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
@@ -640,13 +732,75 @@ public class WriterU3D implements SceneWriter {
 		return b;
 	}
 	
+	
+	
 	protected DataBlock getLineSetDeclaration(IndexedLineSet g) {
-		System.out.println("writing line set declaration");
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
+		w.WriteU32(0);
+		
+		// reserved
+		w.WriteU32(0);
+		// number of lines
+		w.WriteU32(g.getNumEdges());
+		w.WriteU32(g.getNumPoints());
+		
+		// vertex normals
+		DoubleArrayArray nData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
+		if (nData != null) {
+			w.WriteU32(nData.size());
+		} else {
+			w.WriteU32(0);
+		}
+		// diffuse colors
+		DoubleArrayArray vColors = (DoubleArrayArray)g.getVertexAttributes(COLORS);
+		if (vColors != null) {
+			w.WriteU32(vColors.size());
+		} else {
+			w.WriteU32(0);
+		}
+		// specular colors
+		w.WriteU32(0);
+		
+		// texture coordinates
+		w.WriteU32(0);
+		
+		// shading count
+		w.WriteU32(1);
+		// standard shading
+		w.WriteU32(0x00000000);
+		w.WriteU32(1);
+		w.WriteU32(2);
+		w.WriteU32(0);
+		
+		// not relevant for point sets
+		w.WriteU32(1000);
+		w.WriteU32(1000);
+		w.WriteU32(1000);
+		
+		// Resource Inverse Quantization
+		float m_fQuantPosition = (float)pow(2.0,18.0);
+		m_fQuantPosition = (float)max(m_fQuantPosition, fLimit);
+		float m_fQuantNormal = (float) pow(2.0,14.0);
+		float m_fQuantTexCoord = (float) pow(2.0,14.0);
+		float m_fQuantDiffuseColor  = (float) pow(2.0,14.0);
+		float m_fQuantSpecularColor  = (float) pow(2.0,14.0);
+		
+		w.WriteF32(1.0f / m_fQuantPosition);
+		w.WriteF32(1.0f / m_fQuantNormal);
+		w.WriteF32(1.0f / m_fQuantTexCoord);
+		w.WriteF32(1.0f / m_fQuantDiffuseColor);
+		w.WriteF32(1.0f / m_fQuantSpecularColor);
+	
+		// Resource parameters
+		for (int i = 0; i < 3; i++)
+			w.WriteF32(0.0f);
+		
+		// no bones
+		w.WriteU32(0);
 		
 		DataBlock b = w.GetDataBlock();
-		b.setBlockType(TYPE_LINE_SET_CONTINUATION);
+		b.setBlockType(TYPE_LINE_SET_DECLARATION);
 		return b;
 	}
 	
@@ -1260,7 +1414,7 @@ public class WriterU3D implements SceneWriter {
 		JrScene scene = new JrScene(copy);
 		rootNode = scene.getSceneRoot();
 		
-		U3DSceneUtility.prepareTubesAndSpheres(rootNode);
+//		U3DSceneUtility.prepareTubesAndSpheres(rootNode);
 		
 		// add skybox helper component
 		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
@@ -1342,4 +1496,11 @@ public class WriterU3D implements SceneWriter {
 		return copy;
 	}
 
+	
+	
+	public static void main(String[] args) {
+		ViewerApp.display(Primitives.discreteTorusKnot(1.0, 0.1, 10, 10, 100));
+	}
+		
+	
 }
