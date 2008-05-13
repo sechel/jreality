@@ -223,8 +223,7 @@ public class BitStreamWrite {
 			rEscape = true;
 		}
 		long range = this.high + 1 - this.low;
-		this.high = this.low - 1 + range * (symbolCumFreq + symbolFreq)
-				/ totalCumFreq;
+		this.high = this.low - 1 + range * (symbolCumFreq + symbolFreq) / totalCumFreq;
 		this.low = this.low + range * symbolCumFreq / totalCumFreq;
 		this.contextManager.AddSymbol(context, symbol);
 		//write bits

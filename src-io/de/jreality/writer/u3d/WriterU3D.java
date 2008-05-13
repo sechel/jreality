@@ -55,6 +55,7 @@ import static de.jreality.writer.u3d.U3DConstants.TYPE_VIEW_NODE;
 import static de.jreality.writer.u3d.U3DConstants.TYPE_VIEW_RESOURCE;
 import static de.jreality.writer.u3d.U3DConstants.fLimit;
 import static de.jreality.writer.u3d.U3DConstants.uACContextBaseShadingID;
+import static de.jreality.writer.u3d.U3DConstants.uACContextLineShadingID;
 import static de.jreality.writer.u3d.U3DConstants.uACContextNumLocalNormals;
 import static de.jreality.writer.u3d.U3DConstants.uACContextNumNewFaces;
 import static de.jreality.writer.u3d.U3DConstants.uACContextPositionDiffMagX;
@@ -82,8 +83,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
@@ -307,6 +310,7 @@ public class WriterU3D implements SceneWriter {
 
 		
 	protected DataBlock getPointSetContinuation(PointSet g){
+		// TODO Does not work very well with acrobat, is replaced by tubes and spheres
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0); // chain index 
@@ -389,6 +393,7 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getLineSetContinuation(IndexedLineSet g){
+		// TODO untested replaced by tubes and spheres at the moment
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0); // chain index 
@@ -407,7 +412,6 @@ public class WriterU3D implements SceneWriter {
 			indices = new int[0][];
 		
 		DoubleArrayArray nData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
-		nData = null; // TODO write no normals for the moment
 		double[][] normals = null;
 		if (nData != null)
 			normals = nData.toDoubleArrayArray(null);
@@ -445,28 +449,28 @@ public class WriterU3D implements SceneWriter {
 			w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
 			w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
 			
-//			if (nData != null) {
-//				// new normal count
-//				w.WriteCompressedU32(uACContextNumLocalNormals, 1);
-//				double[] nPosition = normals[currPosInd];
-//				double[] nPredictedPosition = new double[3];
-//				if ( splitPosInd>=0 )
-//					nPredictedPosition = normals[splitPosInd];
-//				double[] nPositionDifference = Rn.subtract(null, nPosition, nPredictedPosition);
-//				double[] n = nPositionDifference;
-//				// new normal info
-//				u8Signs = (short)((n[0] < 0.0 ? 1 : 0) | ((n[1] < 0.0 ? 1 : 0) << 1) | ((n[2] < 0.0 ? 1 : 0) << 2));
-//				udX = (long)(0.5f + m_fQuantNormal * abs(n[0]));
-//				udY = (long)(0.5f + m_fQuantNormal * abs(n[1]));
-//				udZ = (long)(0.5f + m_fQuantNormal * abs(n[2]));
-//				w.WriteCompressedU8(uACContextPositionDiffSigns,u8Signs);
-//				w.WriteCompressedU32(uACContextPositionDiffMagX, udX);
-//				w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
-//				w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
-//			} else {
+			if (nData != null) {
+				// new normal count
+				w.WriteCompressedU32(uACContextNumLocalNormals, 1);
+				double[] nPosition = normals[currPosInd];
+				double[] nPredictedPosition = new double[3];
+				if ( splitPosInd>=0 )
+					nPredictedPosition = normals[splitPosInd];
+				double[] nPositionDifference = Rn.subtract(null, nPosition, nPredictedPosition);
+				double[] n = nPositionDifference;
+				// new normal info
+				u8Signs = (short)((n[0] < 0.0 ? 1 : 0) | ((n[1] < 0.0 ? 1 : 0) << 1) | ((n[2] < 0.0 ? 1 : 0) << 2));
+				udX = (long)(0.5f + m_fQuantNormal * abs(n[0]));
+				udY = (long)(0.5f + m_fQuantNormal * abs(n[1]));
+				udZ = (long)(0.5f + m_fQuantNormal * abs(n[2]));
+				w.WriteCompressedU8(uACContextPositionDiffSigns,u8Signs);
+				w.WriteCompressedU32(uACContextPositionDiffMagX, udX);
+				w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
+				w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
+			} else {
 				// new normal count
 				w.WriteCompressedU32(uACContextNumLocalNormals, 0);
-//			}
+			}
 			// count lines with current origin
 			LinkedList<Integer> connectedPoints = new LinkedList<Integer>();
 			for (int i = 0; i < indices.length; i++) {
@@ -476,7 +480,8 @@ public class WriterU3D implements SceneWriter {
 			// write new line count
 			w.WriteCompressedU32(uACContextNumNewFaces, connectedPoints.size());
 			for (Integer i : connectedPoints) {
-				w.WriteCompressedU32(uACStaticFull + currPosInd, i);
+				w.WriteCompressedU32(uACContextLineShadingID, 0);
+				w.WriteCompressedU32(uACStaticFull + currPosInd + 1, i);
 			}
 		}
 		
@@ -663,6 +668,7 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getPointSetDeclaration(PointSet g) {
+		// TODO Does not work very well with acrobat, is replaced by tubes and spheres
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0);
@@ -735,6 +741,7 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getLineSetDeclaration(IndexedLineSet g) {
+		// TODO untested replaced by tubes and spheres at the moment
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0);
@@ -1414,7 +1421,7 @@ public class WriterU3D implements SceneWriter {
 		JrScene scene = new JrScene(copy);
 		rootNode = scene.getSceneRoot();
 		
-//		U3DSceneUtility.prepareTubesAndSpheres(rootNode);
+		U3DSceneUtility.prepareTubesAndSpheres(rootNode);
 		
 		// add skybox helper component
 		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
@@ -1472,7 +1479,6 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
 		*/
-//		ViewerApp.display(scene.getSceneRoot());
 	}
 
 
@@ -1499,7 +1505,23 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	public static void main(String[] args) {
-		ViewerApp.display(Primitives.discreteTorusKnot(1.0, 0.1, 10, 10, 100));
+		SceneGraphComponent c = new SceneGraphComponent();
+		SceneGraphComponent c1 = new SceneGraphComponent();
+		c1.setGeometry(Primitives.discreteTorusKnot(10.0, 1.1, 10, 20, 100));
+		SceneGraphComponent c2 = new SceneGraphComponent();
+		PointSetFactory psf = new PointSetFactory();
+		Random rnd = new Random();
+		double[][] points = new double[100][];
+		for (int i = 0; i < points.length; i++) {
+			points[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble(), 1.0};
+		}
+		psf.setVertexCount(points.length);
+		psf.setVertexCoordinates(points);
+		psf.update();
+		c2.setGeometry(psf.getGeometry());
+		c.addChild(c1);
+		c.addChild(c2);
+		ViewerApp.display(c);
 	}
 		
 	
