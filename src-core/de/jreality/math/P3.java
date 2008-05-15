@@ -644,7 +644,9 @@ public class P3 {
 		double[] toL = Pn.normalize(null, toL1, sig);
 //		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
 		if (Double.isNaN(toL[0])) {
-			throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
+			Rn.setIdentityMatrix(mat);
+			return mat;
+			//throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
 		}
 //		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
 		double f = 1.0/(1+toL[3]);
