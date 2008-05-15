@@ -60,8 +60,6 @@ public class JOGLSphereHelper extends SphereUtility {
 	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
 	static WeakHashMap sphereDListsTable = new WeakHashMap();
 	static int[] globalSharedSphereDisplayLists = null;
-	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
-	// no longer exists.  So ... these display lists have to be tied to a specific context.
 	public static void setupSphereDLists(JOGLRenderer jr)	{
 		int[] dlists = null; //getSphereDLists(jr);
 //		if (dlists != null)	{
@@ -73,11 +71,11 @@ public class JOGLSphereHelper extends SphereUtility {
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 
 		dlists = new int[n];
-		JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
+//		JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
 			tessellatedCubeSphere(i);
 			dlists[i] = gl.glGenLists(1);
-			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
+//			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet qms = SphereUtility.cubePanels[i];

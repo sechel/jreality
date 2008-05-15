@@ -521,16 +521,6 @@ public class JOGLRendererHelper {
 		} else
 			normalBind = PER_PART;
 
-		// if (vertices != null) {
-		// int vlength = GeometryUtility.getVectorLength(vertices);
-		// JOGLConfiguration.theLog.log(Level.INFO,"Vertics have length
-		// "+vlength);
-		// }
-		// if (faceNormals != null) {
-		// int vlength = GeometryUtility.getVectorLength(faceNormals);
-		// JOGLConfiguration.theLog.log(Level.INFO,("Normals have length
-		// "+vlength);
-		// }
 		DoubleArray da = null;
 		boolean isQuadMesh = false;
 		boolean isRegularDomainQuadMesh = false;
