@@ -71,16 +71,18 @@ public class GlslLoader {
     for (UniformParameter param : prog.getSource().getUniformParameters()) {
       Object value = prog.getUniform(param.getName());
       Object oldValue = context.getUniform(param);
-//      System.out.println("checking "+param);
+ //     System.out.println("checking "+param);
 //      System.out.println("\t old="+oldValue+ " new="+value);
       if (compare(oldValue, value, param.getPrimitiveType())) {
         context.writeValue(gl, param, value);
+//        System.out.println("putting "+param);
       }
     }
     int k = 9;
     for (AttributeParameter param : prog.getSource().getAttributes()) {
     	gl.glBindAttribLocation(context.progID.intValue(), k, param.getName());
-    	k++;
+//    	System.err.println("Binding parameter "+param.getName()+"to "+k);
+     	k++;
     }
   }
   
@@ -159,7 +161,7 @@ public class GlslLoader {
       params[param.isMatrix() ? 3 : 2] = value;
       params[param.isMatrix() ? 4 : 3] = new Integer(0);
       Statement s = new Statement(gl, rep, params);
-      //System.out.println("will call: "+s);
+      System.out.println("will call: "+s);
       try {
         s.execute();
         //printInfoLog(param.toString(), progID.intValue(), gl);

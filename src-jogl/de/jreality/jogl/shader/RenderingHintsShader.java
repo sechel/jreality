@@ -129,7 +129,7 @@ public class RenderingHintsShader  {
 		
 		oldFlipped = jr.renderingState.flipped;
 		boolean newf = flipNormalsEnabled ^ oldFlipped;
-		System.err.println("flip = "+flipNormalsEnabled);
+//		System.err.println("flip = "+flipNormalsEnabled);
 		if (oldFlipped != newf) {
 			jr.renderingState.flipped = newf;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);

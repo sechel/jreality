@@ -62,6 +62,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
+import de.jreality.shader.GlslSource;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -143,10 +144,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					glslProgram = new GlslProgram(app, eap2, name);
 				} else glslProgram = null;
 				glslShader.setFromEffectiveAppearance(eap, name);
-//			glslShader.setFromEffectiveAppearance(eap,name+".vertexShader");
 		    }
 	    }  else useGLSL = false;
-	    
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;
@@ -199,7 +198,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				Texture2DLoaderJOGL.render(gl, joglTexture2D);
 			    texUnit++;
 			    texunitcoords++;		
-			    if (glslProgram != null) glslProgram.setUniform("texture", texUnit);
+			    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
+			    	glslProgram.setUniform("texture", texUnit);
 		    }
 	    }
 
@@ -207,7 +207,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	      	gl.glActiveTexture(texUnit);
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 			refMapUnit = texUnit;
-//			if (useGLSL) glslShader.reflectionTextureUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, joglCubeMap);
 			texUnit++;
 		} //else if (useGLSL)
@@ -216,7 +215,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs);    	
-    if (glslProgram != null)		{
+    if (useGLSL && glslProgram != null)		{
     	//glslShader.render(jrs);
     	GlslLoader.render(glslProgram, jr);
     }
