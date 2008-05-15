@@ -152,6 +152,10 @@ public class GlslSource implements Serializable {
 	    return ATTRIBUTES;
 	  }
 	  
+  public AttributeParameter getAttribute(String name)	{
+	  return (AttributeParameter) attribs.get(name);
+  }
+  
   public UniformParameter getUniformParameter(String name) {
     return (UniformParameter) uniforms.get(name);
   }
