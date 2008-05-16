@@ -137,7 +137,7 @@ public class P3 {
 	
 		//LoggingSystem.getLogger().log(Level.FINER,Rn.matrixToString(stretchT));
 		if (isFlipped == true)	{
-			Rn.times(tmp, -1.0, stretchV);
+			tmp = Rn.times(null, -1.0, stretchV);
 		} else {
 			System.arraycopy(stretchV, 0, tmp, 0, 3);
 		}
