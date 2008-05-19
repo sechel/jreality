@@ -13,11 +13,19 @@ import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
-/** Tool to fly to a picked Point
+
+/** Tool to fly to a picked target
+ * 
+ *   without "fixedYAxis" the avatar will Fly to the picked destination, while rotating around the target.
+ *   The animation stops at a fixed Ratio of the way from start to picked destination.
  *   
+ *   with "fixedYAxis" enabled, the avatar will only rotate around the vertical Axis by the target, changing hight and distance.
+ *   The Avatar and Camera stay in the same allign except turning around the Y Axis. 
+ *   
+ *    By simulating a Scene with no specified up/Down-direktion one should use "fixedYAxis=false"
+ *    Otherwise  "fixedYAxis=true" is strongly recommend
  * 
  * @author gonska
- *
  */
 public class FlyToPickTool  extends AbstractTool {
 
@@ -33,13 +41,12 @@ public class FlyToPickTool  extends AbstractTool {
 	private SceneGraphComponent arrowNode;
 	private boolean attached=false;
 	private boolean reverse=false;
-	private boolean holdYAxis=true;
-
-
+	private boolean fixYAxis=true;
 
 	// a "P" means "Point" 
 	// a "V" means "Vector" 
 	// a "W" means "in WorldCoords" 
+	// a "T" means "relative to Target" 
 	// a "A" means "in AvatarCoords"
 	// a "S" means "in SceneCoords"
 	// a number means the dimension
@@ -48,9 +55,20 @@ public class FlyToPickTool  extends AbstractTool {
 	private double[] toW4P;
 	private double[] axisW3V;
 	private double angleW;
+	double[] fromToW4V;
+	double dist;
 	private double[] startMatrixAvatar;
 	private SceneGraphPath avaPath;
+	private SceneGraphPath camPath;
 	private SceneGraphComponent avaNode;
+	
+// for fixed Y Axis	
+	double turnAngle;
+	double[] turnAxis=new double []{0,1,0};
+				
+	double hightAngle;
+	double[] hightAxis;
+
 
 	public FlyToPickTool() {
 		super(zoomActivateSlot);
@@ -70,13 +88,13 @@ public class FlyToPickTool  extends AbstractTool {
 	public void activate(ToolContext tc) {
 		avaPath=tc.getAvatarPath();
 		avaNode = avaPath.getLastComponent();
+		camPath=tc.getViewer().getCameraPath();
 		AnimatorTool.getInstance(tc).deschedule(avaNode);
 		if ( tc.getCurrentPick()!=null){
-			fromW4P=Rn.matrixTimesVector(null, avaPath.getMatrix(null), new double[]{0,0,0,1});
+			fromW4P=Rn.matrixTimesVector(null, camPath.getMatrix(null), new double[]{0,0,0,1});
 			toW4P=tc.getCurrentPick().getWorldCoordinates();
 			// remember mousePos:
 			double[] temp=tc.getTransformationMatrix(mouseAimer).toDoubleArray(null);
-
 			mousePosFirst=new double[]{temp[3],temp[7]};
 			// starting trafo
 			Transformation cmpTrafo= avaNode.getTransformation();
@@ -84,9 +102,12 @@ public class FlyToPickTool  extends AbstractTool {
 			startMatrixAvatar=cmpTrafo.getMatrix();
 			arrowNode.setVisible(true);
 		}
+		assureAttached(tc);
 	}
 	@Override
 	public void deactivate(ToolContext tc) {
+		// reverse
+		reverse=tc.getAxisState(reverseSlot).isPressed();
 		timeNow=0;
 		AnimatorTask task= new AnimatorTask(){
 			public boolean run(double time, double dt) {
@@ -110,39 +131,57 @@ public class FlyToPickTool  extends AbstractTool {
 		arrowNode.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
 	}
 
+	private double[] toR3(double[] d){return new double[]{d[0],d[1],d[2]};}
 	@Override
 	public void perform(ToolContext tc) {
-		assureAttached(tc);
-		// reverse
-		reverse=tc.getAxisState(reverseSlot).isPressed();
 		///calculate mouseAiming
 		double[] temp=tc.getTransformationMatrix(mouseAimer).toDoubleArray(null);
 		double[] relMousePos=new double[]{mousePosFirst[0]-temp[3],mousePosFirst[1]-temp[7]};
-		///rotation axis:
-		axisW3V=new double[]{relMousePos[1],-relMousePos[0],0,0};
-		axisW3V=Rn.matrixTimesVector(null, avaPath.getMatrix(null), axisW3V);// "W" 
-		axisW3V= new double[]{axisW3V[0],axisW3V[1],axisW3V[2]};// "3"
-		Rn.normalize(axisW3V,axisW3V);
-		if(holdYAxis) axisW3V=new double[]{0,Math.signum(axisW3V[1]),0};
-		///angle:
-		angleW=Rn.euclideanNorm(relMousePos)*4;
-		if(holdYAxis) angleW= Math.abs(relMousePos[0])*4;
-		while(angleW>Math.PI) angleW-=Math.PI*2;
-		while(angleW<-Math.PI) angleW+=Math.PI*2;
-		/// show DestPoint with arrow:
-		double[]a=new double[]{toW4P[0],toW4P[1],toW4P[2]};
-		double[]b=new double[]{fromW4P[0],fromW4P[1],fromW4P[2]};
-		double dist=Rn.euclideanDistance(a, b);
-		MatrixBuilder.euclidean()
-		.translate(toW4P).rotate(angleW, axisW3V)
-		.rotateFromTo(new double[]{1,0,0}, Rn.subtract(null, fromW4P,toW4P ))
-		.scale((1-goFactor)*dist).assignTo(arrowNode);
+		fromToW4V=Rn.subtract(null, fromW4P, toW4P); 
+		double[]a=toR3(toW4P);
+		double[]b=toR3(fromW4P);
+		dist=Rn.euclideanDistance(a, b)*(1-goFactor);
+		
+		if(!fixYAxis){
+			///rotation axis:
+			axisW3V=new double[]{relMousePos[1],-relMousePos[0],0,0};
+			axisW3V=Rn.matrixTimesVector(null, camPath.getMatrix(null), axisW3V);// "W" 
+			axisW3V= new double[]{axisW3V[0],axisW3V[1],axisW3V[2]};// "3"
+			Rn.normalize(axisW3V,axisW3V);
+			///angle:
+			angleW=Rn.euclideanNorm(relMousePos)*4;
+			while(angleW>Math.PI) angleW-=Math.PI*2;
+			while(angleW<-Math.PI) angleW+=Math.PI*2;
+			/// show Destination-Point with arrow:
+			
+			MatrixBuilder.euclidean()
+			.translate(toW4P).rotate(angleW, axisW3V)
+			.rotateFromTo(new double[]{1,0,0}, fromToW4V)
+			.scale(dist).assignTo(arrowNode);
+		}
+		else{
+			turnAngle=-relMousePos[0]*4;
+
+			hightAngle=relMousePos[1]*4;
+			hightAxis=Rn.crossProduct(null,turnAxis, fromToW4V);
+			Rn.normalize(hightAxis,hightAxis);
+			
+			MatrixBuilder.euclidean()
+			.translate(toW4P)
+			.rotate(turnAngle, turnAxis)
+			.rotate(hightAngle, hightAxis)
+			.rotateFromTo(new double[]{1,0,0}, fromToW4V)
+			.scale(dist).assignTo(arrowNode);
+		}
 	}
 	private Transformation getNextTrafoOfN(double s){
-		/// make smoth:
+		/// make smoth motion:
 		s=smothFlight(s);
-		/// cam to unrotated Dest translation
+		double[] toTargetMatrixW =MatrixBuilder.euclidean().translate(toW4P).getArray();// ohne s !
+		/// camera move to unrotated Destination (mit s)
 		double[] moveNearW4V;
+		double[] translMatrixW;
+		double[] combinedMatrix;
 		if (!reverse){
 			moveNearW4V=Rn.times(null, goFactor*s,Rn.subtract(null, toW4P, fromW4P));
 		}
@@ -150,15 +189,34 @@ public class FlyToPickTool  extends AbstractTool {
 			moveNearW4V=Rn.times(null, (1-(1.0/(1-goFactor)))*s,Rn.subtract(null, toW4P, fromW4P));
 		}
 		moveNearW4V[3]=1;// to Point
-		double[] translMatrixW=MatrixBuilder.euclidean().translate(moveNearW4V).getArray();
-		/// rotate on target 
-		double[] toTargetMatrixW =MatrixBuilder.euclidean().translate(toW4P).getArray();
-		double[]rotateMatrixW=MatrixBuilder.euclidean().rotate(angleW*s, axisW3V).getArray();
-		rotateMatrixW= Rn.conjugateByMatrix(null, rotateMatrixW, toTargetMatrixW);
-
-		double[] result=Rn.times(null, rotateMatrixW,translMatrixW);
-		result=Rn.times(null,result, startMatrixAvatar);
-		return new Transformation(result);
+		translMatrixW=MatrixBuilder.euclidean().translate(moveNearW4V).getArray();
+		/// Fallunterscheidung:
+		if(!fixYAxis){
+			/// rotate around target 
+			double[]rotateMatrixW=MatrixBuilder.euclidean().rotate(angleW*s, axisW3V).getArray();
+			rotateMatrixW= Rn.conjugateByMatrix(null, rotateMatrixW, toTargetMatrixW);
+			// combine
+			combinedMatrix=Rn.times(null, rotateMatrixW,translMatrixW);
+			combinedMatrix=Rn.times(null,combinedMatrix, startMatrixAvatar);
+		}
+		else{
+			/// turn around target
+			double[]rotateMatrixW=MatrixBuilder.euclidean().rotate(turnAngle*s, turnAxis).getArray();
+			rotateMatrixW= Rn.conjugateByMatrix(null, rotateMatrixW, toTargetMatrixW);
+			
+			// move up/Down around target
+			double alpha=Math.acos(fromToW4V[1]/Rn.euclideanNorm(toR3(fromToW4V)));
+			double y=dist*(Math.cos(hightAngle*s+alpha)-Math.cos(alpha));
+			double z=dist*(Math.sin(hightAngle*s+alpha)-Math.sin(alpha));
+			double[] moveAroundMatrixT=MatrixBuilder.euclidean()
+			.translate(0,y,z).getArray();
+			combinedMatrix= MatrixBuilder.euclidean().getArray();
+			combinedMatrix=Rn.times(null,combinedMatrix,rotateMatrixW);
+			combinedMatrix=Rn.times(null,combinedMatrix,moveAroundMatrixT);
+			combinedMatrix=Rn.times(null,combinedMatrix,translMatrixW);
+			combinedMatrix=Rn.times(null,combinedMatrix, startMatrixAvatar);
+		}
+		return new Transformation(combinedMatrix);
 	}
 	private double smothFlight(double in){
 		return -(Math.cos(in*Math.PI))/2+1.0/2;
@@ -184,9 +242,9 @@ public class FlyToPickTool  extends AbstractTool {
 		this.goFactor = goFactor;
 	}
 	public boolean isHoldYAxis() {
-		return holdYAxis;
+		return fixYAxis;
 	}
 	public void setHoldYAxis(boolean holdYAxis) {
-		this.holdYAxis = holdYAxis;
+		this.fixYAxis = holdYAxis;
 	}
 }
