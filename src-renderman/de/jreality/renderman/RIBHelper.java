@@ -77,11 +77,11 @@ public class RIBHelper {
 			rdps.setFromEffectiveAppearance(ribv, ribv.eAppearance, name);
 			rs = rdps;
 			Cs = dps.getDiffuseColor();
-			transparency = (float)dps.getTransparency().floatValue();
-//			if (ribv.useOldTransparency)	{
-//				double alpha = Cs.getAlpha()/255.0;
-//				transparency = (1-alpha) * transparency;
-//			}
+			transparency = dps.getTransparency();
+			if (ribv.useOldTransparency)	{
+				double alpha = Cs.getAlpha()/255.0;
+				transparency = (1-alpha) * transparency;
+			}
 			ribv.cs=dps.getDiffuseColor();
 			ribv.smooth = dps.getSmoothShading();
 		} 
@@ -92,11 +92,11 @@ public class RIBHelper {
 			rs = rdps;
 			de.jreality.shader.DefaultPolygonShader dpss = ((de.jreality.shader.DefaultPolygonShader)dps.getFront());
 			Cs = dpss.getDiffuseColor();
-			transparency = (float)dpss.getTransparency().floatValue();
-//			if (ribv.useOldTransparency)	{
-//				double alpha = Cs.getAlpha()/255.0;
-//				transparency = (1-alpha) * transparency;
-//			}
+			transparency = dpss.getTransparency();
+			if (ribv.useOldTransparency)	{
+				double alpha = Cs.getAlpha()/255.0;
+				transparency = (1-alpha) * transparency;
+			}
 			ribv.cs=dpss.getDiffuseColor();
 			ribv.smooth = dpss.getSmoothShading();
 			// TODO figure out how to read out a reasonable "smooth" and "cs" value from this shader
