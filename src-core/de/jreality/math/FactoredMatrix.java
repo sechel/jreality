@@ -186,6 +186,10 @@ public class FactoredMatrix extends Matrix {
       this(Pn.EUCLIDEAN, trafo.getMatrix());
   }
 
+	public double[] getArray() {
+		if (factorHasChanged) update();
+		return super.getArray();
+	}
     /**
      * 
      * @return <code>true</code> if the matrix has negative determinant.
