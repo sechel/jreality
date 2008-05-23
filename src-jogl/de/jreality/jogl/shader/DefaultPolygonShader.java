@@ -121,7 +121,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    	//LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
 				joglTexture2D = new JOGLTexture2D(texture2D);
 				hasTextures = true;
-				System.err.println("Got texture for name "+ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D));
 			}
 		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
 		    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
