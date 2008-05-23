@@ -196,10 +196,18 @@ public class RenderingHintsInfo  {
 			else							gl.glDisable(GL.GL_LIGHTING);		
 			jrs.lighting = values[LE][which];
 		}
+		if (values[FN][ACTIVE]) {
+			if (values[FN][which] != jr.renderingState.flipped) {
+				jr.renderingState.flipped = values[FN][which];
+				jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
+//				System.err.println("flipped "+jr.renderingState.flipped);
+			}
+		}
 		if (values[BF][ACTIVE])	{
 			if (values[BF][which])  {
 				gl.glEnable(GL.GL_CULL_FACE);
-				gl.glCullFace(GL.GL_BACK);
+				gl.glCullFace(GL.GL_BACK); //jr.renderingState.flipped ? GL.GL_FRONT : GL.GL_BACK);//
+//				System.err.println("Culling "+(jr.renderingState.flipped ? "front" : "back"));
 			} else
 				gl.glDisable(GL.GL_CULL_FACE);			
 		}
@@ -212,12 +220,6 @@ public class RenderingHintsInfo  {
 		if (values[SS][ACTIVE]) {
 			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
 			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
-		}
-		if (values[FN][ACTIVE]) {
-			if (values[FN][which] != jr.renderingState.flipped) {
-				jr.renderingState.flipped = values[FN][which];
-				jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
-			}
 		}
 //		if (values[SM][ACTIVE])	{
 //			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);
