@@ -1192,4 +1192,8 @@ public class ViewerVR {
 	public void setDoAlign(boolean doAlign) {
 		this.doAlign = doAlign;
 	}
+
+	public SceneGraphComponent getAvatarNode() {
+		return avatarNode;
+	}
 }
