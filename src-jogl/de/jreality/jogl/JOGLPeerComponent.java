@@ -333,7 +333,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 		} else  if (goBetween.originalComponent.getGeometry() != null ){		
 			if (debug) theLog.log(Level.FINER,"Updating shaders for "+name);
-			if (geometryShader == null || geometryShader == parent.geometryShader)
+			if (geometryShader == null || parent == null || geometryShader == parent.geometryShader)
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 			else 
 				geometryShader.setFromEffectiveAppearance(eAp, "");
