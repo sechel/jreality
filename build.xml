@@ -77,6 +77,7 @@
   <path id="sunflow.classpath">
     <path refid="backend.classpath"/>
     <fileset dir="dist">
+        <include name="jReality-soft.jar"/>
         <include name="jReality-io.jar"/>
     </fileset>
     <fileset dir="lib">
