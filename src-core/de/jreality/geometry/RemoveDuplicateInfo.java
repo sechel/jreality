@@ -107,21 +107,15 @@ public class RemoveDuplicateInfo {
 		points=source.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	}
 	// methods----------------------------------------
+	/**  merges vertices which appears more than once in the geometry
+	 *  the result of type PointSet is especialy the same typ as the given geometry 
+	 */
 	public static PointSet removeDuplicateVertices(PointSet ps, Attribute ...attributes ) {
 		return removeDuplicateVertices(ps,0.00000001,attributes);		
 	}
-	public static IndexedLineSet removeDuplicateVertices(IndexedLineSet ils, Attribute ...attributes ) {
-		return (IndexedLineSet)removeDuplicateVertices(ils,0.00000001,attributes);		
-	}
-	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ifs, Attribute ...attributes ) {
-		return (IndexedFaceSet)removeDuplicateVertices(ifs,0.00000001,attributes);		
-	}
-	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ifs, double eps, Attribute ...attributes ) {
-		return (IndexedFaceSet) removeDuplicateVertices(ifs,eps,attributes);
-	}
-	public static IndexedLineSet removeDuplicateVertices(IndexedLineSet ils, double eps, Attribute ...attributes ) {
-		return (IndexedLineSet) removeDuplicateVertices(ils,eps,attributes);
-	}
+	/**  merges vertices which appears more than once in the geometry
+	 *  the result of type PointSet is especialy the same typ as the given geometry 
+	 */
 	public static PointSet removeDuplicateVertices(PointSet ps, double eps, Attribute ...attributes ) {
 		// inittialize some data
 		RemoveDuplicateInfo r= new RemoveDuplicateInfo(ps);
