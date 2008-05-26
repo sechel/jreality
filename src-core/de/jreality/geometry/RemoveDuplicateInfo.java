@@ -62,7 +62,7 @@ import de.jreality.scene.data.StringArray;
 import de.jreality.scene.data.StringArrayArray;
 
 public class RemoveDuplicateInfo {
-	
+
 
 	/** retains only vertices which differs enough in the coordinstes. 
 	 * <i>enough</i> means the distance in the three directions is smaler than <code>eps</code> 
@@ -84,36 +84,40 @@ public class RemoveDuplicateInfo {
 	 * 					(others will be ignored) they will be respected by testing equality of Vertices.
 	 * @return IndexedFaceSet  
 	 */
-////---------- new start-----------------
+////	---------- new start-----------------
 	private int[] refferenceTable;
 	private int[] mergeRefferenceTable;
 	private int[] removeRefferenceTable;
 	private int[] sublistTable;
-	
-	
-	private IndexedFaceSet source;
-	private IndexedFaceSet geo= new IndexedFaceSet();
+
+
+	private PointSet source;
+	private PointSet geo;
 	private double[][] points; // the vertices
 	private double[][] attrVals; // the vertices
-	
+
 	private double eps; // Tolereanz for merging
 	private int dim;// =points[x].length
 	private int maxPointPerBoxCount=50;
 	private int numSubBoxes;
 	private int numNewVerts;
 	// constr ----------------------------------------
-	private RemoveDuplicateInfo(IndexedFaceSet ifs, Attribute ...attributes ){
-		source=ifs;
+	private RemoveDuplicateInfo(PointSet ps, Attribute ...attributes ){
+		source=ps;
 		points=source.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 	}
 	// methods----------------------------------------
-	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, Attribute ...attributes ) {
+	public static PointSet removeDuplicateVertices(PointSet ps, Attribute ...attributes ) {
 		return removeDuplicateVertices(ps,0.00000001,attributes);		
 	}
-	public static IndexedFaceSet removeDuplicateVertices(PointSet ps, double eps, Attribute ...attributes ) {
-		IndexedFaceSet ifs= pointSetToIndexedFaceSet(ps);		
+	public static PointSet removeDuplicateVertices(PointSet ps, double eps, Attribute ...attributes ) {
 		// inittialize some data
-		RemoveDuplicateInfo r= new RemoveDuplicateInfo(ifs);
+		RemoveDuplicateInfo r= new RemoveDuplicateInfo(ps);
+		if (ps instanceof IndexedFaceSet) 
+			r.geo=new IndexedFaceSet();
+		else if (ps instanceof IndexedLineSet) 
+			r.geo=new IndexedLineSet();
+		else r.geo=new PointSet();
 		{
 			// TODO: make better output
 			if(r.points.length==0) return null;
@@ -173,7 +177,7 @@ public class RemoveDuplicateInfo {
 			dimCount++;
 		}
 	}
-	
+
 	/** inserts all points in the first Box	 */
 	private Box fillFirstBox(){
 		double[] max= new double[dim];
@@ -193,12 +197,12 @@ public class RemoveDuplicateInfo {
 		}
 		return b;
 	}
-	
-	
-/** fills the refferences 
- * of the Vertices in the Box
- * in the refferenceTable
- */	
+
+
+	/** fills the refferences 
+	 * of the Vertices in the Box
+	 * in the refferenceTable
+	 */	
 	private void processBox(Box b){
 		if(b.numOfPoints<=1) return;
 		// case of to small Box:
@@ -254,7 +258,7 @@ public class RemoveDuplicateInfo {
 	private boolean isLegalPoint(int p){
 		return (mergeRefferenceTable[p]==p);
 	}
-	
+
 	private Box[] createSubBoxes(Box b) { 
 		Box[] result= new Box[numSubBoxes];
 		for (int i = 0; i < result.length; i++) {
@@ -340,14 +344,20 @@ public class RemoveDuplicateInfo {
 			return size;
 		}
 	}
-	
-// post calculation -------------------------------------------------------
-	
+
+//	post calculation -------------------------------------------------------
+
 	private void postCalulation(){
 		newTables();
-		geo.setNumPoints(numNewVerts);		
-		geo.setNumFaces(source.getNumFaces());
-		geo.setNumEdges(source.getNumEdges());
+		geo.setNumPoints(numNewVerts);
+		if (geo instanceof IndexedFaceSet) {
+			IndexedFaceSet ifs = (IndexedFaceSet) geo;
+			ifs.setNumFaces(((IndexedFaceSet)source).getNumFaces());
+		}
+		if (geo instanceof IndexedLineSet) {
+			IndexedLineSet ils = (IndexedLineSet) geo;
+			ils.setNumEdges(((IndexedLineSet)source).getNumEdges());
+		}
 		newDatalists();
 		newIndices();
 	} 
@@ -383,7 +393,7 @@ public class RemoveDuplicateInfo {
 				pos++;
 			}
 	}
-	
+
 	/** 
 	 * @param oldRefferences (for ecx.: face indices)
 	 * @param refferenceTable (result of start)
@@ -391,24 +401,32 @@ public class RemoveDuplicateInfo {
 	 */
 	private void newIndices(){
 		// face Indices
-		DataList data=source.getFaceAttributes(Attribute.INDICES);
-		if(data!=null && data.size()>0 ){
-			int[][] fIndis=data.toIntArrayArray(null);
-			int[][] result= new int[fIndis.length][];
-			for (int i = 0; i < result.length; i++) {
-				result[i]=newIndices(fIndis[i], refferenceTable);
-			}
-			geo.setFaceAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
+		if (geo instanceof IndexedFaceSet) {
+			IndexedFaceSet ifs = (IndexedFaceSet) geo;
+			IndexedFaceSet sou = (IndexedFaceSet) source;
+			DataList data=sou.getFaceAttributes(Attribute.INDICES);
+			if(data!=null && data.size()>0 ){
+				int[][] fIndis=data.toIntArrayArray(null);
+				int[][] result= new int[fIndis.length][];
+				for (int i = 0; i < result.length; i++) {
+					result[i]=newIndices(fIndis[i], refferenceTable);
+				}
+				ifs.setFaceAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
+			}	
 		}
 		// edge Indices
-		data=source.getEdgeAttributes(Attribute.INDICES);
-		if(data!=null && data.size()>0 ){
-			int[][] eIndis=data.toIntArrayArray(null);
-			int[][] result= new int[eIndis.length][];
-			for (int i = 0; i < result.length; i++) {
-				result[i]=newIndices(eIndis[i], refferenceTable);
-			}
-			geo.setEdgeAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
+		if (geo instanceof IndexedLineSet) {
+			IndexedLineSet ils = (IndexedLineSet) geo;
+			IndexedLineSet sou = (IndexedLineSet) source;
+			DataList data=sou.getEdgeAttributes(Attribute.INDICES);
+			if(data!=null && data.size()>0 ){
+				int[][] eIndis=data.toIntArrayArray(null);
+				int[][] result= new int[eIndis.length][];
+				for (int i = 0; i < result.length; i++) {
+					result[i]=newIndices(eIndis[i], refferenceTable);
+				}
+				ils.setEdgeAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
+			}	
 		}
 	}
 	private static int[] newIndices(int[] oldRefferences, int[] refferenceTable){
@@ -425,27 +443,33 @@ public class RemoveDuplicateInfo {
 		for(Attribute at : atts){
 			DataList dl=datas.getList(at);
 			if (dl instanceof DoubleArrayArray) {DoubleArrayArray dd = (DoubleArrayArray) dl;
-				geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
+			geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
 			}
 			if (dl instanceof DoubleArray) {DoubleArray dd = (DoubleArray) dl;
-				geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
+			geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
 			}
 			if (dl instanceof IntArrayArray) {IntArrayArray dd = (IntArrayArray) dl;
-				geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
+			geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
 			}
 			if (dl instanceof IntArray) {IntArray dd = (IntArray) dl;
-				geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
+			geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
 			}
 			if (dl instanceof StringArrayArray) {
 				StringArrayArray dd = (StringArrayArray) dl;
 				geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
 			}
 			if (dl instanceof StringArray) {StringArray dd = (StringArray) dl;
-				geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
+			geo.setVertexAttributes(at, RemoveDuplicateInfo.getSublist(dd, sublistTable));
 			}
 		}
-		geo.setEdgeAttributes(source.getEdgeAttributes());
-		geo.setFaceAttributes(source.getFaceAttributes());
+		if (geo instanceof IndexedFaceSet) {
+			IndexedFaceSet ifs = (IndexedFaceSet) geo;
+			ifs.setFaceAttributes(((IndexedFaceSet)source).getFaceAttributes());	
+		}
+		if (geo instanceof IndexedLineSet) {
+			IndexedLineSet ils = (IndexedLineSet) geo;
+			ils.setEdgeAttributes(((IndexedLineSet)source).getEdgeAttributes());
+		}
 		geo.setGeometryAttributes(source.getGeometryAttributes());
 		geo.setGeometryAttributes("quadMesh",null);
 	}
@@ -586,7 +610,7 @@ public class RemoveDuplicateInfo {
 			newList[i]=d[referenceTable[i]];
 		return new StringArray(newList);
 	}
-	
+
 	/** simplifys the SceneGraphComponent tree recursivly
 	 * 
 	 *  Nodes with cameras, geometrys and lights will not be changed
@@ -697,5 +721,5 @@ public class RemoveDuplicateInfo {
 		f.setEdgeCountAndAttributes(l.getEdgeAttributes());
 		return f;
 	}
-	
+
 }
