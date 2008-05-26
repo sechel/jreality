@@ -155,13 +155,13 @@ public class LoadFile extends AbstractJrAction {
         	if(removeDuplicateVertices.isSelected()){
         		if(removeDuplicateVerticesWithNormals.isSelected()
         			&&removeDuplicateVerticesWithColors.isSelected())
-        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS,Attribute.COLORS);
+        			geo = (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS,Attribute.COLORS);
         		else if (removeDuplicateVerticesWithNormals.isSelected())
-        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS);
+        			geo = (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.NORMALS);
         		else if (removeDuplicateVerticesWithColors.isSelected())
-        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.COLORS);
+        			geo = (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(geo,Attribute.COLORS);
         		else	
-        			geo = RemoveDuplicateInfo.removeDuplicateVertices(geo);        		
+        			geo = (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(geo);        		
         	}
         	comp.setGeometry(geo);	
         	sgc=comp;
