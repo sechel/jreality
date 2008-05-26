@@ -12,7 +12,7 @@ public class TestTriangulate {
 				new double[][]{
 						{0,.01,0},{0,.5,0},{.3333,.5,0},{.3333,.25,0},{.6666,.25,0},{.6666,.5,0},{1,.5,0},{1,.01,0}},
 						5, Math.PI*2);
-		dumbbell = RemoveDuplicateInfo.removeDuplicateVertices(dumbbell, 10E-6);
+		dumbbell = (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(dumbbell, 10E-6);
 		
 		// following call doesn't terminate in versions before SVN2945
 		dumbbell = IndexedFaceSetUtility.triangulate(dumbbell);
