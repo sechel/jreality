@@ -82,7 +82,7 @@ public class RemoveDuplicateInfo {
 	 * @param ps       can be <code>IndexedFaceSet,IndexedLineSet or PointSet</code>
 	 * @param atts	   this Attributes must be DoubleArray or DoubleArrayArray Attributes 
 	 * 					(others will be ignored) they will be respected by testing equality of Vertices.
-	 * @return IndexedFaceSet  
+	 * @return  returns IndexedFaceSet,  IndexedLineSet or PointSet depending on input.
 	 */
 ////	---------- new start-----------------
 	private int[] refferenceTable;
@@ -109,6 +109,18 @@ public class RemoveDuplicateInfo {
 	// methods----------------------------------------
 	public static PointSet removeDuplicateVertices(PointSet ps, Attribute ...attributes ) {
 		return removeDuplicateVertices(ps,0.00000001,attributes);		
+	}
+	public static IndexedLineSet removeDuplicateVertices(IndexedLineSet ils, Attribute ...attributes ) {
+		return (IndexedLineSet)removeDuplicateVertices(ils,0.00000001,attributes);		
+	}
+	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ifs, Attribute ...attributes ) {
+		return (IndexedFaceSet)removeDuplicateVertices(ifs,0.00000001,attributes);		
+	}
+	public static IndexedFaceSet removeDuplicateVertices(IndexedFaceSet ifs, double eps, Attribute ...attributes ) {
+		return (IndexedFaceSet) removeDuplicateVertices(ifs,eps,attributes);
+	}
+	public static IndexedLineSet removeDuplicateVertices(IndexedLineSet ils, double eps, Attribute ...attributes ) {
+		return (IndexedLineSet) removeDuplicateVertices(ils,eps,attributes);
 	}
 	public static PointSet removeDuplicateVertices(PointSet ps, double eps, Attribute ...attributes ) {
 		// inittialize some data
