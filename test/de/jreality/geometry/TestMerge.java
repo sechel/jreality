@@ -78,7 +78,7 @@ public class TestMerge {
 		
 		//IndexedFaceSet i= Primitives.torus(20,10 , 20, 10);
 		//System.out.println("TestMerge.main(i)"+i);
-		IndexedFaceSet j= RemoveDuplicateInfo.removeDuplicateVertices(i,new Attribute[]{Attribute.COLORS} );
+		IndexedFaceSet j= (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(i,new Attribute[]{Attribute.COLORS} );
 		//System.out.println("TestMerge.main(j)"+j);
 		
 		vApp.display(j);
