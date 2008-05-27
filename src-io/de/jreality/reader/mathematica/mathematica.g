@@ -515,7 +515,7 @@ lineBlock [Appearance app] returns[Appearance app2]
 		SceneGraphComponent geo=new SceneGraphComponent();
 		geo.setAppearance(lineApp);
 		IndexedLineSet ils=lineset.getIndexedLineSet();
-		ils=RemoveDuplicateInfo.removeDuplicateVertices(ils,Attribute.COLORS);
+		ils=(IndexedLineSet)RemoveDuplicateInfo.removeDuplicateVertices(ils,Attribute.COLORS);
 		geo.setGeometry(ils);
 		geo.setName("Lines");
 		current.addChild(geo);
@@ -625,7 +625,7 @@ polygonBlock [Appearance app, Object edgeF] returns[Appearance app2]
 		faceSet.setGenerateFaceNormals(true);
 		faceSet.update();
 		IndexedFaceSet ifs= faceSet.getIndexedFaceSet();
-		ifs=RemoveDuplicateInfo.removeDuplicateVertices(ifs,Attribute.COLORS);
+		ifs=(IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(ifs,Attribute.COLORS);
 		IndexedFaceSetUtility.assignSmoothVertexNormals(ifs,-1);
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
 		geo.setAppearance(faceApp);

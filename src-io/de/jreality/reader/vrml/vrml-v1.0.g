@@ -511,18 +511,8 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	ifsf.setFaceCount(coordIndex2.length);
 	ifsf.setVertexAttribute(Attribute.COORDINATES,new DoubleArrayArray.Array(state.coords) );
 	ifsf.setFaceIndices(coordIndex2);
-	if (state.normalBinding 
-	    ==State.Binding.PER_VERTEX
-	    |state.normalBinding ==State.Binding.PER_VERTEX_INDEXED
-	// >=6 ohne NONE
-	| state.materialBinding
-		==State.Binding.PER_VERTEX
-	    |state.materialBinding ==State.Binding.PER_VERTEX_INDEXED
-	// >=6 ohne NONE
-	
-		| state.textureFile.equals("")	|state.textureData.length!=0 )
-		{
-		// have to separate the vertices!
+
+	if (state.haveToSeparateVertices()){
 		int[] reffTab=VRMLHelper.separateVerticesAndVNormals(coordIndex2,state);
 		// make new Factory
 		ifsf = new IndexedFaceSetFactory();

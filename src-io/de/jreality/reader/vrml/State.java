@@ -261,6 +261,16 @@ public class State {
 					 	CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY,transparency[0]);
 			}
 	}
+	/** Falls jeder Vertex Daten per Index erhaelt, muessen die Vertices mehrfach angelegt werden.  
+	 */
+	public boolean haveToSeparateVertices(){
+		if (normalBinding  ==Binding.PER_VERTEX && normals.length>0) return true;
+		if (normalBinding  ==Binding.PER_VERTEX_INDEXED && normals.length>0)return true;
+		if (materialBinding ==Binding.PER_VERTEX && colorLength()>0) return true;
+	    if (materialBinding ==Binding.PER_VERTEX_INDEXED && colorLength()>0) return true;
+		if (!textureFile.equals("")|textureData.length!=0 ) return true;
+		return false;
+	}
 	
 	/** sets the transformation resulting of trafo and 
 	 * extraGeoTrans to the given SceneGraphComponent 
