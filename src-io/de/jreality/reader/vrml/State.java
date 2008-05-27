@@ -268,7 +268,8 @@ public class State {
 		if (normalBinding  ==Binding.PER_VERTEX_INDEXED && normals.length>0)return true;
 		if (materialBinding ==Binding.PER_VERTEX && colorLength()>0) return true;
 	    if (materialBinding ==Binding.PER_VERTEX_INDEXED && colorLength()>0) return true;
-		if (!textureFile.equals("")|textureData.length!=0 ) return true;
+		if (!textureFile.equals(""))return true;
+		if (textureData.length!=0&&textureData[0].length!=0 && textureData[0][0].length!=0)return true;
 		return false;
 	}
 	
