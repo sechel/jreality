@@ -94,7 +94,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	boolean inheritGLSL = false;
 	boolean fastAndDirty = false;
 	boolean geometryHasTextureCoordinates = false, hasTextures = false;
-	private transient boolean needsChecked = true;
+	protected transient boolean needsChecked = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
 	static {
 		Appearance ap = new Appearance();
