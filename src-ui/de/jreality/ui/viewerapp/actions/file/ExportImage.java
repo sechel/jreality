@@ -119,7 +119,7 @@ public class ExportImage extends AbstractJrAction {
 		BufferedImage scaledImg = null;
 		try {
 			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height});
-			expr.execute();
+//			expr.execute();
 			scaledImg = (BufferedImage) expr.getValue();
 		} catch (Exception e1) {
 			e1.printStackTrace();
