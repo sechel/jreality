@@ -443,6 +443,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	public void display(GL gl) {
 		globalGL=gl;
 		renderingState.initializeGLState();
+		renderingState.currentEye = CameraUtility.MIDDLE_EYE;
 		beginRenderTime = 0;
 		if (collectFrameRate) beginRenderTime = System.currentTimeMillis();
 		Camera theCamera;
@@ -543,8 +544,10 @@ public class JOGLRenderer  implements AppearanceListener {
 			offscreenMode = false;
 		} else if (theCamera.isStereo())		{
 			setupRightEye(width, height);
+			renderingState.currentEye = whichEye;
 			render();
 			setupLeftEye(width, height);
+			renderingState.currentEye = whichEye;
 			render();
 			renderingState.colorMask =15; //globalGL.glColorMask(true, true, true, true);
 		} 
@@ -827,11 +830,14 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		lightsChanged = true;
 		numTiles = Math.max(imageWidth/1024, imageHeight/1024);
-		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
+//		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
 		tileSizeX = imageWidth/numTiles;
 		tileSizeY = imageHeight/numTiles;
 		imageWidth = (tileSizeX) * numTiles;
 		imageHeight = (tileSizeY) * numTiles;
+		System.err.println("Tile size x = "+tileSizeX);
+		System.err.println("Tile sizey = "+tileSizeY);
+		System.err.println("Image size = "+imageWidth+":"+imageHeight);
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
 		if (offscreenPBuffer == null) offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(

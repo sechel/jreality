@@ -50,6 +50,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn
@@ -77,6 +78,7 @@ public class JOGLRenderingState {
 	public Geometry currentGeometry = null;
 	public double currentAlpha = 1.0;
 	public int currentClippingPlane = 0;
+	public int currentEye = CameraUtility.MIDDLE_EYE;
 	public boolean useDisplayLists=true;
 	public boolean clearColorBuffer=true;
 	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT;
