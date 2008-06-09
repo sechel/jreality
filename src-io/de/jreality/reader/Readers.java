@@ -145,7 +145,9 @@ public final class Readers {
 		String lc = input.getDescription();
 		String format = findFormat(lc);
 		if (format == null) throw new IllegalArgumentException("unknown file format");
-		return read(format, input);
+		SceneGraphComponent sgc = read(format, input);
+		if (sgc.getAppearance() == null) sgc.setAppearance(new Appearance());
+		return sgc;
 	}
 
 	public static String findFormat(String resourceName) {
