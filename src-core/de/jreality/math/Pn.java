@@ -225,6 +225,19 @@ public class Pn {
 	}
 	
 	/**
+	 * Return the value <i>z</i> so that the point <i>(0,0,z,1)</i> lies a distance <i>d</i>
+	 * from the origin <i>(0,0,0,1)</i> in the given metric.
+	 * @param d
+	 * @param sig
+	 * @return
+	 */public static double coordForDistance(double d, int sig)	{
+		switch(sig)	{
+		case HYPERBOLIC: return Math.tanh(d); 
+		case EUCLIDEAN: default: return d;
+		case ELLIPTIC: return Math.tan(d);
+		}
+	}
+	/**
 	 * A vectorized version of {@link #dehomogenize(double[], double[])}.
 	 * @param dst
 	 * @param src
