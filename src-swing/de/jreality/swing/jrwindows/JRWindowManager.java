@@ -36,6 +36,7 @@ public class JRWindowManager implements ActionListener{
     sgc=new SceneGraphComponent("window manager");
     sgc.setAppearance(new Appearance());
     sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);    
+    sgc.getAppearance().setAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);    
     avatar.addChild(sgc);
     setPosition(defaultDesktopWindowPos);
     initDragTool();
