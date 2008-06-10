@@ -78,7 +78,7 @@ public class RenderingHintsInfo  {
 	 final static int LD = 11;
 	 final static int numBooleans = SM+1;
 	 boolean[][] values = new boolean[LD+1][3];		// 0: active, 1: current value, 2: old value
-	boolean hasSomeActiveField = false, merged = false;
+	public boolean hasSomeActiveField = false, merged = false;
 	static boolean[] defaultValues = {
 		RenderingHintsShader.TRANSPARENCY_ENABLED_DEFAULT,
 		RenderingHintsShader.Z_BUFFER_ENABLED_DEFAULT,

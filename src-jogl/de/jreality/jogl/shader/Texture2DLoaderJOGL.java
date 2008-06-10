@@ -205,7 +205,7 @@ public class Texture2DLoaderJOGL {
 	    gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
 	    
 	    int srcPixelFormat = GL.GL_RGBA;
-	//    if (first || lastRendered  == null  || image != lastRendered.getImage()) {
+    if (first || lastRendered  == null  || image != lastRendered.getImage()) {
 	    	// calls to glTexParameter get saved and restored by "bind()" so should be handled separately
 	    if (canFilterAnisotropic)  {
 	        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
@@ -315,12 +315,14 @@ public class Texture2DLoaderJOGL {
 
 	    	animatedTextures.get(gl).add(image);
 	    }
+    }
 } 
 	 	static GLU glu = null;
   public static void render(JOGLRenderer jr, CubeMap ref) {
 //  public static void render(GL gl, CubeMap ref, double[] c2w) {
     boolean first = true;
     boolean mipmapped = true;
+    lastRendered = null;	
     GL gl = jr.globalGL;
     WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
     
