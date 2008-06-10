@@ -9,15 +9,15 @@ public class MatrixListData extends Geometry {
 		super(name);
 	}
 	public double[][] matrixList = {Rn.identityMatrix(4)};
-	public boolean[] acceptedList;
-	public double minDistance = -1, maxDistance = -1;
+	public boolean[] visibleList;
+//	public double minDistance = -1, maxDistance = -1;
 	public double ndcFudgeFactor = 1.0;
 	public double ztlate = .5;
-	public boolean clipToCamera = false;
-	public boolean followCamera = false;
+	public boolean clipToCamera = true;
+//	public boolean followCamera = false;
 	public boolean componentDisplayLists = false;
-	public Object dgcf;
-	public int signature;
+//	public Object dgcf;
+//	public int signature;
 	public int count;
 	public int delay = 150;
 	public SceneGraphComponent child;

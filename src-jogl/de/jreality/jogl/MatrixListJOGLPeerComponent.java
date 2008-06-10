@@ -108,7 +108,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				if (!someSubNodeIsDirty()) {  // we can't use the current display list AND we can't generate a new one
 					if (!displayListDirty)	{
 						jr.globalGL.glCallList(displayList);
-						//System.err.println("dgjoglpc: Calling dlist");
+//						System.err.println("dgjoglpc: Calling dlist");
 						return;
 					}
 					if (jr.renderingState.insideDisplayList) {
@@ -133,15 +133,8 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 		if (insideDL)	{
 			jr.globalGL.glEndList();
 			jr.globalGL.glCallList(displayList);
-//	displayListDirty = jr.renderingState.insideDisplayList = false;
 		} 
 		displayListDirty = false;
-//		else if (!isCopyCat) {
-//			if (goBetween.peerGeometry != null && !goBetween.peerGeometry.displayListsDirty) 
-//				geometryDLDirty = false;
-//			displayListDirty = childrenDLDirty || geometryDLDirty;	
-//			if (displayListDirty) setDisplayListDirty();
-//		}
 	}
 	@Override
 	protected boolean someSubNodeIsDirty()	{
@@ -176,26 +169,13 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
-//			if (!useOldMatrices && theDropBox.followCamera && theDropBox.dgcf != null)	{
-//				((Updateable) theDropBox.dgcf).update();
-//			}
 			boolean clipToCamera = theDropBox.clipToCamera && !jr.offscreenMode;
-//			if (clipToCamera && !useOldMatrices)	{
-//				o2ndc = jr.context.getObjectToNDC();
-//				o2c = jr.context.getObjectToCamera();	
-//				inverseDMin = Pn.inverseDistance(theDropBox.minDistance, signature);
-//				inverseDMax = Pn.inverseDistance(theDropBox.maxDistance, signature);
-////				System.err.println("min max: "+inverseDMin+" "+inverseDMax);
-//			}
 
 			int count = 0;
-//			accepted = theDropBox.acceptedList;
 			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera)	{
-//					if (!useOldMatrices) 
-//						accepted[j] = accept(matrices[j]);
-					if (!theDropBox.acceptedList[j]) 	continue; 
+					if (!theDropBox.visibleList[j]) 	continue; 
 				}
 				count++;
 				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
@@ -207,22 +187,19 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				child.render();
 				popTransformation();
 			}
-//	childrenDLDirty = child.isVisible ? child.displayListDirty : false;
-//			theDropBox.count = count;
 //			theLog.fine("MLJOGLPC: Rendered "+count);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;
 
 		} else {
-//	childrenDLDirty = false;		// think positive!
+			// TODO can't I just call super.renderChildren()?
 			int n = childCount; //children.size();
 			for (int i = 0; i<n; ++i)	{	
 				JOGLPeerComponent child = children.get(i);					
 				if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
 				child.render();
 				MatrixListJOGLPeerComponent r = ((MatrixListJOGLPeerComponent) child);
-//		if ( r.isVisible ? r.displayListDirty : false) childrenDLDirty = true;
 				if (jr.pickMode)	jr.globalGL.glPopName();
 			}
 		}
@@ -290,41 +267,6 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 		//propagateSGCDisplayListDirtyUp();
 		displayListDirty = true;
 		super.visibilityChanged(ev);
-	}
-	//o2ndc, o2c, minDistance, maxDistance, matrices[j], jr.renderingState.currentSignature)) continue;
-	private double[] mat = new double[16], mat2, mat3;
-	private double[] tmp2 = new double[4];
-	private double inverseDMin, inverseDMax;
-	protected  boolean accept(final double[] m) { //double[] objectToNDC, double[] o2c, double minDistance, double maxDistance, double[] m, int signature) {
-			mat3 = m;
-			mat2 = o2c; if (mat2 == null) return false; 
-			fastTimes();
-			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
-			double d = Pn.inverseDistanceToOrigin(tmp2,  signature);
-//			System.err.println("coshd = "+d);
-			if (theDropBox.minDistance > 0.0 &&  d < inverseDMin) return true;
-			if (theDropBox.maxDistance > 0 && d > inverseDMax) return false;
-			mat2 = o2ndc; fastTimes();
-			tmp2[0] = mat[3];  tmp2[1] = mat[7];  tmp2[2] = mat[11];  tmp2[3] = mat[15];
-			Pn.dehomogenize(tmp2,tmp2);
-			if (tmp2[0] > theDropBox.ndcFudgeFactor || tmp2[0] < -theDropBox.ndcFudgeFactor) return false;
-			if (tmp2[1] > theDropBox.ndcFudgeFactor || tmp2[1] < -theDropBox.ndcFudgeFactor) return false;
-			if (tmp2[2] > 1.0 || tmp2[2] < -1.0) return false;
-			return true;
-		}
-
-	private void fastTimes()	{
-		for (int i=0; i<4; ++i)	{	
-			for (int j=0; j<4; ++j)	{
-				mat[i*4+j] = 0.0;
-				for (int k=0; k<4; ++k)		{
-					// the (i,j)th position is the inner product of the ith row and 
-					// the jth column of the two factors
-					mat[i*4+j] += mat2[i*4+k]*mat3[k*4+j];
-				}
-			}
-		}
-
 	}
 
 
