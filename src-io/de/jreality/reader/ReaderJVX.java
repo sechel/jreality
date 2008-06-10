@@ -191,9 +191,9 @@ public class ReaderJVX extends AbstractReader {
         if(qName.equals("pointSet")) {
         	String point = attributes.getValue("point");
             if(point!= null && point.equals("show")) 
-                currentComponent.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, "true");
+                currentComponent.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
             else
-                currentComponent.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, "false");
+                currentComponent.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
             return;
         }
 
@@ -213,9 +213,9 @@ public class ReaderJVX extends AbstractReader {
         if(qName.equals("lineSet")) {
             String point = attributes.getValue("line");
             if(point!= null && point.equals("show")) 
-                currentComponent.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, "true");
+                currentComponent.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, true);
             else 
-                currentComponent.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, "false");
+                currentComponent.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
             return;
         }
  
@@ -235,9 +235,9 @@ public class ReaderJVX extends AbstractReader {
         if(qName.equals("faceSet")) {
         	String point = attributes.getValue("face");
             if(point!= null && point.equals("show")) 
-                currentComponent.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, "true");
+                currentComponent.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, true);
             else 
-                currentComponent.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, "false");
+                currentComponent.getAppearance().setAttribute(CommonAttributes.FACE_DRAW, false);
             return;
         }
 
