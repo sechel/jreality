@@ -83,11 +83,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.PointSetFactory;
-import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
@@ -112,7 +109,6 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 import de.jreality.writer.u3d.u3dencoding.BitStreamWrite;
@@ -1503,26 +1499,26 @@ public class WriterU3D implements SceneWriter {
 	}
 
 	
-	
-	public static void main(String[] args) {
-		SceneGraphComponent c = new SceneGraphComponent();
-		SceneGraphComponent c1 = new SceneGraphComponent();
-		c1.setGeometry(Primitives.discreteTorusKnot(10.0, 1.1, 10, 20, 100));
-		SceneGraphComponent c2 = new SceneGraphComponent();
-		PointSetFactory psf = new PointSetFactory();
-		Random rnd = new Random();
-		double[][] points = new double[100][];
-		for (int i = 0; i < points.length; i++) {
-			points[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble(), 1.0};
-		}
-		psf.setVertexCount(points.length);
-		psf.setVertexCoordinates(points);
-		psf.update();
-		c2.setGeometry(psf.getGeometry());
-		c.addChild(c1);
-		c.addChild(c2);
-		ViewerApp.display(c);
-	}
+//	
+//	public static void main(String[] args) {
+//		SceneGraphComponent c = new SceneGraphComponent();
+//		SceneGraphComponent c1 = new SceneGraphComponent();
+//		c1.setGeometry(Primitives.discreteTorusKnot(10.0, 1.1, 10, 20, 100));
+//		SceneGraphComponent c2 = new SceneGraphComponent();
+//		PointSetFactory psf = new PointSetFactory();
+//		Random rnd = new Random();
+//		double[][] points = new double[100][];
+//		for (int i = 0; i < points.length; i++) {
+//			points[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble(), 1.0};
+//		}
+//		psf.setVertexCount(points.length);
+//		psf.setVertexCoordinates(points);
+//		psf.update();
+//		c2.setGeometry(psf.getGeometry());
+//		c.addChild(c1);
+//		c.addChild(c2);
+//		ViewerApp.display(c);
+//	}
 		
 	
 }
