@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -451,15 +450,10 @@ public class ToolSystem implements ToolEventReceiver {
 						currentPointer);
 		//if (Rn.equals(pointerTrafo, currentPointer)) return;
 		Rn.copy(pointerTrafo, currentPointer);
+		double[] to = new double[] { -pointerTrafo[2], -pointerTrafo[6],
+				-pointerTrafo[10], -pointerTrafo[14], };
 		double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
 				pointerTrafo[11], pointerTrafo[15], };
-		Pn.dehomogenize(from, from);
-		double[] to = new double[] { pointerTrafo[2], pointerTrafo[6],
-				pointerTrafo[10], pointerTrafo[14], };
-		// fix a discontinuity in the pointerTrafo
-		double sign = from[2] < 0 ? -1 : 1;
-		Rn.times(to, sign, to);
-		Pn.dehomogenize(to, to);
 		pickResults = pickSystem.computePick(from, to);
 	}
 
