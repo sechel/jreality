@@ -92,10 +92,9 @@ class BruteForcePicking {
         
         if (intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
           double[] pw = m.multiplyVector(pobj);
+          if (pw[3] < 0) break;
           Pn.dehomogenize(pw, pw);
- //         System.err.println("p-f w coords: "+Rn.toString(Rn.subtract(null, pw, from)));
- //         if ((pw[2]-from[2])*to[2] < 0) break;
-        hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw, Pn.EUCLIDEAN), 0, PickResult.PICK_TYPE_FACE, i,j));
+         hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw, Pn.EUCLIDEAN), 0, PickResult.PICK_TYPE_FACE, i,j));
         }
         
       }
@@ -107,7 +106,8 @@ class BruteForcePicking {
     double[] plane = P3.planeFromPoints(null, p1, p2, p3);
     pobj = P3.lineIntersectPlane(pobj, fromLocal, toLocal, plane);
     //if(pobj[3]*pobj[3]<Rn.TOLERANCE) return false; // parallel
-
+    if (pobj[3] < 0) return false;
+    
     Pn.dehomogenize(p1, p1);
     Pn.dehomogenize(p2, p2);
     Pn.dehomogenize(p3, p3);
