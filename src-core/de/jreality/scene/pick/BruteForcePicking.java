@@ -76,8 +76,6 @@ class BruteForcePicking {
     
     double[] fromLocal=mInv.multiplyVector(from);
     double[] toLocal=mInv.multiplyVector(to);
-//    System.err.println("f w coords: "+Rn.toString(from));
-//    System.err.println("to w coords: "+Rn.toString(to2));
     double[] p1=new double[4], p2=new double[4], p3=new double[4], pobj=new double[4];
     p1[3]=p2[3]=p3[3]=1;
     IntArrayArray faces=getFaces(ifs);
@@ -125,7 +123,11 @@ class BruteForcePicking {
     }
     // TODO: the barycentric coordinates should be used in the PickResult for tex coordindates
     
-    return true;
+    // check if for fromLocal + lambda * dirLocal = pobj: lambda > 0
+    double[] d1 = Rn.subtract(null, pobj, fromLocal);
+    double[] dir = (toLocal[3]==0) ? toLocal : Rn.subtract(null, toLocal, fromLocal); 
+    return (Rn.innerProduct(d1, dir)>0);
+
   }
 
   public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double tubeRadius, ArrayList<Hit> localHits) {
