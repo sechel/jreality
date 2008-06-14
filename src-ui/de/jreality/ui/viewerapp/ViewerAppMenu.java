@@ -65,6 +65,10 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
+import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
+import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
+import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
+import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
 import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.CreateAppearance;
@@ -102,6 +106,7 @@ import de.jreality.ui.viewerapp.actions.view.ToggleExternalNavigator;
 import de.jreality.ui.viewerapp.actions.view.ToggleMenu;
 import de.jreality.ui.viewerapp.actions.view.ToggleNavigator;
 import de.jreality.ui.viewerapp.actions.view.ToggleRenderSelection;
+import de.jreality.ui.viewerapp.actions.view.ToggleShowCursor;
 import de.jreality.ui.viewerapp.actions.view.ToggleViewerFullScreen;
 import de.jreality.util.LoggingSystem;
 
@@ -151,14 +156,15 @@ public class ViewerAppMenu {
 	public static String ADD_TOOL = "Add Tools";
 
 	//CAMERA MENU
-//	public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
-//	public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
-//	public static String DECREASE_FOCUS = "Decrease focus";
-//	public static String INCREASE_FOCUS = "Increase focus";
-//	public static String DECREASE_EYE_SEPARATION = "Decrease eyeSeparation";
-//	public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
-//	public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
-//	public static String TOGGLE_STEREO = "Toggle stereo";
+	public static String DECREASE_FIELD_OF_VIEW = "Decrease fieldOfView";
+	public static String INCREASE_FIELD_OF_VIEW = "Increase fieldOfView";
+	public static String DECREASE_FOCUS = "Decrease focus";
+	public static String INCREASE_FOCUS = "Increase focus";
+	public static String DECREASE_EYE_SEPARATION = "Decrease eyeSeparation";
+	public static String INCREASE_EYE_SEPARATION = "Increase eyeSeparation";
+	public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
+	public static String TOGGLE_STEREO = "Toggle stereo";
+	public static String TOGGLE_CURSOR = "Toggle cursor";
 
 	//VIEW MENU
 	public static String TOGGLE_NAVIGATOR = "Show navigator";
@@ -215,7 +221,7 @@ public class ViewerAppMenu {
 		editMenu.insertSeparator(1);
 		addMenu(editMenu);
 		
-		//addMenu(createCameraMenu());
+		addMenu(createCameraMenu());
 		addMenu(createViewMenu());
 	}
 
@@ -327,24 +333,25 @@ private JMenu createFileMenu() {
 	}
 	
 	
-//	private JMenu createCameraMenu() {
-//		JMenu cameraMenu = new JMenu(CAMERA_MENU);
-//		cameraMenu.setMnemonic(KeyEvent.VK_C);
-//
-//		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewer, true)));
-//		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewer, false)));
-//		cameraMenu.addSeparator();
-//		cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewer, true)));
-//		cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewer, false)));
-//		cameraMenu.addSeparator();
-//		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewer, true)));
-//		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewer, false)));
-//		cameraMenu.addSeparator();
-////		cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
-//		cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
-//
-//		return cameraMenu;
-//	}
+	private JMenu createCameraMenu() {
+		JMenu cameraMenu = new JMenu(CAMERA_MENU);
+		cameraMenu.setMnemonic(KeyEvent.VK_C);
+
+		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(DECREASE_FIELD_OF_VIEW, viewer, true)));
+		cameraMenu.add(new JMenuItem(new ShiftFieldOfView(INCREASE_FIELD_OF_VIEW, viewer, false)));
+		cameraMenu.addSeparator();
+		cameraMenu.add(new JMenuItem(new ShiftFocus(DECREASE_FOCUS, viewer, true)));
+		cameraMenu.add(new JMenuItem(new ShiftFocus(INCREASE_FOCUS, viewer, false)));
+		cameraMenu.addSeparator();
+		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(DECREASE_EYE_SEPARATION, viewer, true)));
+		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation(INCREASE_EYE_SEPARATION, viewer, false)));
+		cameraMenu.addSeparator();
+//		cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
+		cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
+		cameraMenu.add(new JMenuItem(new ToggleShowCursor(TOGGLE_CURSOR, viewerApp)));
+
+		return cameraMenu;
+	}
 
 
 	private JMenu createViewMenu() {

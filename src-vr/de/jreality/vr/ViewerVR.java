@@ -121,6 +121,8 @@ import de.jreality.util.SystemProperties;
 
 
 public class ViewerVR {
+	
+	PickShowTool pickShowTool = new PickShowTool();
 
 	// defaults for light panel
 	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
@@ -129,6 +131,8 @@ public class ViewerVR {
 
 	// defaults for preferences:
 	private static final boolean DEFAULT_PANEL_IN_SCENE = false;
+
+	private static final boolean DEFAULT_SHOW_PICK_IN_SCENE = false;
 
 
 	// other static constants:
@@ -206,6 +210,8 @@ public class ViewerVR {
 
 	// list of registered plugins
 	private List<PluginVR> plugins=new ArrayList<PluginVR>();
+
+	private JCheckBoxMenuItem showPickInSceneCheckBox;
 
 	@SuppressWarnings("serial")
 	public ViewerVR() {
@@ -308,7 +314,6 @@ public class ViewerVR {
 				t.printStackTrace();
 			}
 		}
-		//sceneRoot.addTool(new PickShowTool());
 
 		terrainAppearance.setAttribute("showLines", false);
 		terrainAppearance.setAttribute("showPoints", false);
@@ -341,6 +346,12 @@ public class ViewerVR {
 		panelInSceneCheckBox = new JCheckBoxMenuItem( new AbstractAction("Show frames in scene") {
 			public void actionPerformed(ActionEvent e) {
 				setPanelInScene(panelInSceneCheckBox.getState());
+			}
+		});
+
+		showPickInSceneCheckBox = new JCheckBoxMenuItem( new AbstractAction("Show pick in scene") {
+			public void actionPerformed(ActionEvent e) {
+				setShowPickInScene(showPickInSceneCheckBox.getState());
 			}
 		});
 
@@ -377,6 +388,16 @@ public class ViewerVR {
 		setAvatarPosition(0, 0, 25);
 
 		setTerrain(TerrainPluginVR.FLAT_TERRAIN);
+	}
+
+	protected void setShowPickInScene(boolean state) {
+		if (state && !getSceneRoot().getTools().contains(pickShowTool)) {
+			getSceneRoot().addTool(pickShowTool);
+		}
+		if (!state && getSceneRoot().getTools().contains(pickShowTool)) {
+			getSceneRoot().removeTool(pickShowTool);
+		}
+		showPickInSceneCheckBox.setSelected(state);
 	}
 
 	public SceneGraphComponent getTerrain() {
@@ -678,12 +699,14 @@ public class ViewerVR {
 
 	public void restoreDefaults() {
 		setPanelInScene(DEFAULT_PANEL_IN_SCENE);	
+		setShowPickInScene(DEFAULT_SHOW_PICK_IN_SCENE);	
 		for (PluginVR plugin : plugins) plugin.restoreDefaults();
 
 	}
 
 	public void savePreferences(Preferences prefs) {
 		prefs.putBoolean("panelInScene", isPanelInScene());
+		prefs.putBoolean("showPickInScene", isShowPickInScene());
 		for (PluginVR plugin : plugins) {
 			Preferences p = prefs.node(plugin.getName());
 			plugin.storePreferences(p);
@@ -693,6 +716,10 @@ public class ViewerVR {
 		} catch(BackingStoreException e){
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isShowPickInScene() {
+		return showPickInSceneCheckBox.isSelected();
 	}
 
 	private Preferences getPreferences() {
@@ -709,6 +736,7 @@ public class ViewerVR {
 			return;
 		}
 		setPanelInScene(prefs.getBoolean("panelInScene", DEFAULT_PANEL_IN_SCENE));
+		setShowPickInScene(prefs.getBoolean("showPickInScene", DEFAULT_SHOW_PICK_IN_SCENE));
 		for (PluginVR plugin : plugins) {
 			Preferences p = prefs.node(plugin.getName());
 			plugin.restorePreferences(p);
@@ -757,7 +785,7 @@ public class ViewerVR {
 	public void setGeneratePickTrees(boolean generatePickTrees) {
 		this.generatePickTrees = generatePickTrees;
 	}
-
+	
 	@SuppressWarnings("serial")
 	private void tweakMenu(final ViewerApp vapp) {
 		ViewerAppMenu menu = vapp.getMenu();
@@ -802,6 +830,7 @@ public class ViewerVR {
 		settings.add(bakeTerrain);
 
 		settings.add(panelInSceneCheckBox);
+		settings.add(showPickInSceneCheckBox);
 
 		settings.addSeparator();
 

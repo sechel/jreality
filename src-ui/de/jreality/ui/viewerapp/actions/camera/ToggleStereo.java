@@ -58,7 +58,6 @@ import de.jreality.util.CameraUtility;
  */
 public class ToggleStereo extends AbstractCameraAction {
 	
-
 	public ToggleStereo(String name, Viewer v) {
 		super(name, v);
 		
@@ -66,11 +65,10 @@ public class ToggleStereo extends AbstractCameraAction {
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F8, InputEvent.SHIFT_MASK));
 	}
 	
-	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-    Camera camera = CameraUtility.getCamera(viewer);
-    camera.setStereo(!camera.isStereo());
+	    Camera camera = CameraUtility.getCamera(viewer);
+	    camera.setStereo(!camera.isStereo());
 		viewer.render();
 	}
 

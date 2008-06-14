@@ -65,6 +65,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.GuiUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
@@ -104,14 +105,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     frame = new JFrame("no title");
     hv = new HeadTrackedViewer();
     frame.getContentPane().add((Component) hv.getViewingComponent());
-    // disable mouse cursor in fullscreen mode
-    BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D gfx = cursorImg.createGraphics();
-    gfx.setColor(new Color(0, 0, 0, 0));
-    gfx.fillRect(0, 0, 16, 16);
-    gfx.dispose();
-    frame.setCursor(frame.getToolkit().createCustomCursor(cursorImg,
-        new Point(), ""));
+    GuiUtility.hideCursor(frame);
     frame.dispose();
     frame.setUndecorated(true);
     frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
