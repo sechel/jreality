@@ -10,6 +10,8 @@ public class MatrixListData extends Geometry {
 	}
 	public double[][] matrixList = {Rn.identityMatrix(4)};
 	public boolean[] visibleList;
+	public boolean newVisibleList;
+	public boolean rendering = false;
 //	public double minDistance = -1, maxDistance = -1;
 	public double ndcFudgeFactor = 1.0;
 	public double ztlate = .5;
