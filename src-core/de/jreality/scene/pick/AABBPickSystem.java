@@ -253,22 +253,6 @@ public class AABBPickSystem implements PickSystem {
       }
     }
     
-    // TODO simplify this to only read appearances
-//    private void readEApp() {
-//    	// test to see how fast picking is without having to access effective appearance
-////    	pickPoints = pickEdges = false;
-////    	pickFaces = true;
-////    	pointRadius = .02;
-////    	tubeRadius = .02;
-//     pickPoints=eap.getAttribute(CommonAttributes.VERTEX_DRAW, true)
-//        && eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE, true);
-//      pickEdges=eap.getAttribute(CommonAttributes.EDGE_DRAW, true)
-//        && eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE, true);
-//      pickFaces=eap.getAttribute(CommonAttributes.FACE_DRAW, true)
-//      && eap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE, true);
-//      pointRadius=eap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, CommonAttributes.POINT_RADIUS_DEFAULT);
-//      tubeRadius=eap.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_RADIUS, CommonAttributes.TUBE_RADIUS_DEFAULT);
-//    }
     
     private boolean isPickable(Geometry g) {
     	Boolean boo = isPickableMap.get(g);
