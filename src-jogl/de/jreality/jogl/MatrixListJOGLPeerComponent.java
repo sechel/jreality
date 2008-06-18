@@ -161,6 +161,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	}
 	int signature;
 	double[] o2c, o2ndc;
+	private boolean[] localVisibleList;
 	@Override
 	protected void renderChildren() {
 		if (isCopyCat)		{
@@ -169,13 +170,18 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 
 			int nn = matrices.length;
+			theDropBox.rendering = true;
 			boolean clipToCamera = theDropBox.clipToCamera && !jr.offscreenMode;
 
 			int count = 0;
 			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
+			if (theDropBox.newVisibleList || localVisibleList == null) {
+				localVisibleList = theDropBox.visibleList.clone();
+				theDropBox.newVisibleList = false;
+			}
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera)	{
-					if (!theDropBox.visibleList[j]) 	continue; 
+					if (!localVisibleList[j]) 	continue; 
 				}
 				count++;
 				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
@@ -188,6 +194,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				popTransformation();
 			}
 //			theLog.fine("MLJOGLPC: Rendered "+count);
+			theDropBox.rendering = false;
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;
