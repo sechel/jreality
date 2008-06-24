@@ -91,5 +91,7 @@ public interface PickResult {
    * @return the coordinates of null.
    */
   public double[] getTextureCoordinates();
+  
+  public double getAffineCoordinate();
 
 }
