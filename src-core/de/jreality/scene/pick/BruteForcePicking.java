@@ -61,18 +61,17 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.util.PickUtility;
 
 // TODO: currently 3vectors (from, to) are NOT supported
 
+/**
+ * TODO: get rid of the maxDist parameter, use the from  and to vectors as the endpoints of the 
+ *   segment of valid pick-points
+ */
 class BruteForcePicking {
 
-//  private static Matrix m=new Matrix();
-//  private static Matrix mInv=new Matrix();
-  
-  //private static double[] bary = new double[4], p1=new double[4], p2=new double[4], p3=new double[4], plane=new double[4], pobj=new double[4];
-  public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList<Hit> hits) {
-//    path.getMatrix(m.getArray());
-//    path.getInverseMatrix(mInv.getArray());
+    public static void intersectPolygons(IndexedFaceSet ifs, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList<Hit> hits) {
     
     double[] fromLocal=mInv.multiplyVector(from);
     double[] toLocal=mInv.multiplyVector(to);
@@ -85,16 +84,17 @@ class BruteForcePicking {
     for (int i = 0, n=faces.getLength(); i<n; i++) {
       IntArray face = faces.getValueAt(i);
       // simple triangulation:
-      for (int j=0, c=face.getLength()-2; j<c; j++) {
+      for (int j=0, dd=face.getLength()-2; j<dd; j++) {
         p1=points.getValueAt(face.getValueAt(0)).toDoubleArray(p1);
         p2=points.getValueAt(face.getValueAt(1+j)).toDoubleArray(p2);
         p3=points.getValueAt(face.getValueAt(2+j)).toDoubleArray(p3);
         
         if (intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
           double[] pw = m.multiplyVector(pobj);
-          if (pw[3] < 0) break;
-          Pn.dehomogenize(pw, pw);
-         hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw, Pn.EUCLIDEAN), 0, PickResult.PICK_TYPE_FACE, i,j));
+          double d =  Pn.distanceBetween(from, pw,signature);
+          double affCoord = PickUtility.affineCoord(from, to, pw);
+          hits.add(new Hit(path.pushNew(ifs), pw, d, affCoord, PickResult.PICK_TYPE_FACE, i,j));
+//          System.err.println("polygon hit");
         }
         
       }
@@ -102,12 +102,11 @@ class BruteForcePicking {
 
   }
 
-  static boolean intersects(double[] pobj, double[] fromLocal, double[] toLocal, double[] p1, double[] p2, double[] p3) {
+  public static boolean intersects(double[] pobj, double[] fromLocal, double[] toLocal, double[] p1, double[] p2, double[] p3) {
     double[] plane = P3.planeFromPoints(null, p1, p2, p3);
     pobj = P3.lineIntersectPlane(pobj, fromLocal, toLocal, plane);
     //if(pobj[3]*pobj[3]<Rn.TOLERANCE) return false; // parallel
-    if (pobj[3] < 0) return false;
-    
+
     Pn.dehomogenize(p1, p1);
     Pn.dehomogenize(p2, p2);
     Pn.dehomogenize(p3, p3);
@@ -121,18 +120,14 @@ class BruteForcePicking {
         )||((bary[0]+bary[1]+bary[2]-1)*(bary[0]+bary[1]+bary[2]-1)> Rn.TOLERANCE)) {
       return false;
     }
-    // TODO: the barycentric coordinates should be used in the PickResult for tex coordindates
-    
-    // check if for fromLocal + lambda * dirLocal = pobj: lambda > 0
-    double[] d1 = Rn.subtract(null, pobj, fromLocal);
-    double[] dir = (toLocal[3]==0) ? toLocal : Rn.subtract(null, toLocal, fromLocal); 
-    return (Rn.innerProduct(d1, dir)>0);
-
+//    if (Rn.innerProduct(pobj, p1) < 0) {
+//    	Rn.times(pobj,-1,pobj);
+//    	System.err.println("Reversing pick");
+//    }
+    return true;
   }
 
   public static void intersectEdges(IndexedLineSet ils, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double tubeRadius, ArrayList<Hit> localHits) {
-//    path.getMatrix(m.getArray());
-//    path.getInverseMatrix(mInv.getArray()); 
     
     double[] fromOb=mInv.multiplyVector(from);
     double[] toOb=mInv.multiplyVector(to);
@@ -164,18 +159,12 @@ class BruteForcePicking {
     double[] vertex2 = new double[3];
     double[] vecRaw1 = vec3?null:new double[4];
     double[] vecRaw2 = vec3?null:new double[4];
-    //double[] vecRaw=vec3?null:new double[4];
-//    if(edge.getLength()>=2){
-//      points.getValueAt(edge.getValueAt(0)).toDoubleArray(vertex1);
-//      points.getValueAt(edge.getValueAt(1)).toDoubleArray(vertex2);
-//    }
     
-    LinkedList MY_HITS = new LinkedList();
+    LinkedList<double[]> MY_HITS = new LinkedList<double[]>();
     DoubleArray edgeRadii = getRadii(ils);
     int mm = edges.getLength();
     for(int i=0;i<mm;i++){
       edge = edges.getValueAt(i);
-//      tubeRadius = edgeRadii==null?tubeRadius:edgeRadii.getValueAt(i);
       double realRad =  tubeRadius;
       if (edgeRadii != null) realRad = realRad*edgeRadii.getValueAt(i);
       for(int j=0, n=edge.getLength()-1;j<n;j++){
@@ -187,16 +176,8 @@ class BruteForcePicking {
           points.getValueAt(edge.getValueAt(j+1)).toDoubleArray(vecRaw2);
           if(vecRaw1[3]== 0) {
         	  Rn.linearCombination(vecRaw1, .99, vecRaw1, .01, vecRaw2);
-//              vecRaw1[0] = .99 *vecRaw1[0]+ .01*vecRaw2[0];
-//              vecRaw1[1] = .99 *vecRaw1[1]+ .01*vecRaw2[1];
-//              vecRaw1[2] = .99 *vecRaw1[2]+ .01*vecRaw2[2];
-//              vecRaw1[3] = .99 *vecRaw1[3]+ .01*vecRaw2[3];
           } else if(vecRaw2[3]== 0) {
         	  Rn.linearCombination(vecRaw2, .99, vecRaw2, .01, vecRaw1);
-//             vecRaw2[0] = .99 *vecRaw2[0]+ .01*vecRaw1[0];
-//              vecRaw2[1] = .99 *vecRaw2[1]+ .01*vecRaw1[1];
-//              vecRaw2[2] = .99 *vecRaw2[2]+ .01*vecRaw1[2];
-//              vecRaw2[3] = .99 *vecRaw2[3]+ .01*vecRaw1[3];
           }
           Pn.dehomogenize(vertex1, vecRaw1);
           Pn.dehomogenize(vertex2, vecRaw2);
@@ -207,7 +188,8 @@ class BruteForcePicking {
           it.remove();
           double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
           // TODO: pass index j (index in the edge) to the Hit?
-          Hit h = new Hit(path.pushNew(ils), hitPoint, dist ,0 , PickResult.PICK_TYPE_LINE, i, -1);
+          double affCoord = PickUtility.affineCoord(from, to, hitPoint);
+          Hit h = new Hit(path.pushNew(ils), hitPoint, dist , affCoord , PickResult.PICK_TYPE_LINE, i, -1);
           localHits.add(h);
         }       
       } 
@@ -273,7 +255,7 @@ class BruteForcePicking {
     double[] vertexRaw = vec3 ? new double[3] : new double[4];
     double[] vertex = new double[3];
     
-    LinkedList MY_HITS = new LinkedList();
+    LinkedList<double[]> MY_HITS = new LinkedList<double[]>();
     DoubleArray pointRadii = getRadii(ps);
     for (int j = 0, n=points.getLength(); j<n; j++) {
       if (!vec3) {
@@ -291,7 +273,8 @@ class BruteForcePicking {
         hitPoint = m.multiplyVector(hitPoint);
         i.remove();
         double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
-        Hit h = new Hit(path.pushNew(ps), hitPoint, dist ,0 , PickResult.PICK_TYPE_POINT, j,-1);
+        double affCoord = PickUtility.affineCoord(from, to, hitPoint);
+       Hit h = new Hit(path.pushNew(ps), hitPoint, dist , affCoord , PickResult.PICK_TYPE_POINT, j,-1);
         localHits.add(h);
       }       
     }
@@ -299,8 +282,8 @@ class BruteForcePicking {
   }
 
 
-  private static final List SPHERE_HIT_LIST=new LinkedList();
-  public static void intersectSphere(Sphere sphere, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList localHits) {
+  private static final List<double[]> SPHERE_HIT_LIST=new LinkedList<double[]>();
+  public static void intersectSphere(Sphere sphere, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList<Hit> localHits) {
     
 //    path.getMatrix(m.getArray());
 //    path.getInverseMatrix(mInv.getArray());   
@@ -329,7 +312,8 @@ class BruteForcePicking {
       hitPoint = m.multiplyVector(hitPoint);
       i.remove();
         double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
-      Hit h = new Hit(path.pushNew(sphere), hitPoint, dist ,0 , PickResult.PICK_TYPE_OBJECT, -1,-1);
+        double affCoord = PickUtility.affineCoord(from, to, hitPoint);
+      Hit h = new Hit(path.pushNew(sphere), hitPoint, dist ,affCoord , PickResult.PICK_TYPE_OBJECT, -1,-1);
       localHits.add(h);
     }   
   }
@@ -342,7 +326,7 @@ class BruteForcePicking {
    * @param dir in local coordinates !!!!!MUST BE NORMALIZED !!!!
    * @param r in local coordinates
    */
-  private static void intersectSphere(List hits, final double[] vertex, final double[] f, final double[] dir, double r) {
+  private static void intersectSphere(List<double[]> hits, final double[] vertex, final double[] f, final double[] dir, double r) {
     double[] from=f;
     Rn.normalize(dir,dir);
     if(vertex!=null) from=Rn.subtract(null,from,vertex);
@@ -369,8 +353,9 @@ class BruteForcePicking {
     }
   }
   
-  private static final List CYLINDER_HIT_LIST=new LinkedList();
-  public static void intersectCylinder(Cylinder cylinder, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList localHits) {
+  // TODO this is not thread safe
+  private static final List<double[]> CYLINDER_HIT_LIST=new LinkedList<double[]>();
+  public static void intersectCylinder(Cylinder cylinder, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, ArrayList<Hit> localHits) {
 //    path.getMatrix(m.getArray());
 //    path.getInverseMatrix(mInv.getArray());
     
@@ -398,8 +383,9 @@ class BruteForcePicking {
     for (Iterator i = CYLINDER_HIT_LIST.iterator(); i.hasNext(); ) {
       double[] hitPoint = (double[]) i.next();
       i.remove();
-        double dist=Rn.euclideanNorm(Rn.subtract(tmp,hitPoint,from));
-      Hit h = new Hit(path.pushNew(cylinder), hitPoint, dist ,0 , PickResult.PICK_TYPE_OBJECT, -1,-1);
+      double affCoord = PickUtility.affineCoord(from, to, hitPoint);
+      double dist=Rn.euclideanNorm(Rn.subtract(tmp,hitPoint,from));
+      Hit h = new Hit(path.pushNew(cylinder), hitPoint, dist ,affCoord, PickResult.PICK_TYPE_OBJECT, -1,-1);
       localHits.add(h);
     }  
   }
@@ -413,95 +399,11 @@ class BruteForcePicking {
    * @param v2 lower point of cylinder-axis
    * @param r in local coordinates, radius
    */
-  private static void intersectCylinder(List hits, Matrix m, final double[] f, final double[] d, final double[] v1, final double[] v2, double r) {
+  private static void intersectCylinder(List<double[]> hits, Matrix m, final double[] f, final double[] d, final double[] v1, final double[] v2, double r) {
 
     
     boolean debug=false;
     long time=System.currentTimeMillis();
-    /*
-    //Methode1:
-    double[] from;
-    double[] dir;
-    double[] top={0,0,1};
-    double[] bottom={0,0,-1};
-    boolean objTransformed;
-    Matrix objTrans=new Matrix();
-    if(!((v1[0]==top[0]&&v1[1]==top[1]&&v1[2]==top[2] && v2[0]==bottom[0]&&v2[1]==bottom[1]&&v2[2]==bottom[2]) || (v1[0]==bottom[0]&&v1[1]==bottom[1]&&v1[2]==bottom[2] && v2[0]==top[0]&&v2[1]==top[1]&&v2[2]==top[2]))){
-      double[] cNeg=Rn.times(null,-0.5,Rn.add(null,v1,v2));
-      double[] aCentered=Rn.normalize(null,Rn.add(null,v1,cNeg));
-      MatrixBuilder.euclidian().scale(1/r,1/r,2/Rn.euclideanDistance(v1,v2)).rotateFromTo(aCentered, new double[] {0,0,1}).translate(cNeg).assignTo(objTrans);
-      from=objTrans.multiplyVector(f);
-      dir=objTrans.multiplyVector(d);
-      objTransformed=true;
-      //System.out.println("object transformed");
-    }else{
-      from=f;
-      dir=d;
-      objTransformed=false;
-    }
-    
-    double a=Math.pow(dir[0],2)+Math.pow(dir[1],2);
-    double b=2*(from[0]*dir[0]+from[1]*dir[1]);
-    double c=Math.pow(from[0],2)+Math.pow(from[1],2)-1;
-    
-    double dis=Math.pow(b,2)-4*a*c;
-    if(dis>=0){
-      double t=(-b-Math.sqrt(dis))/(2*a);
-      if(t>=0){
-        double[] hitPointOb3=new double[3];
-        Rn.times(hitPointOb3,t,dir);
-        Rn.add(hitPointOb3,hitPointOb3,from); //from+t*dir        
-        if(hitPointOb3[2]<top[2]&&hitPointOb3[2]>bottom[2]){
-          
-          if(debug){
-            System.out.println("Methode1: cylinder matched_1");
-            System.out.println("Methode1: hitPointOb: "+hitPointOb3[0]+", "+hitPointOb3[1]+", "+hitPointOb3[2]);
-          }
-            
-          double[] hitPoint=new double[4];
-          Pn.homogenize(hitPoint,hitPointOb3);
-          hitPoint=m.multiplyVector(hitPoint);
-          if(objTransformed){
-            Matrix objTransInv=objTrans.getInverse();
-            hitPoint=objTransInv.multiplyVector(hitPoint);
-          }
-          hits.add(hitPoint); 
-        }
-      }
-      t=(-b+Math.sqrt(dis))/(2*a);
-      if(t>=0){
-        double[] hitPointOb3=new double[3];
-        Rn.times(hitPointOb3,t,dir);
-        Rn.add(hitPointOb3,hitPointOb3,from); //from+t*dir
-        if(hitPointOb3[2]<top[2]&&hitPointOb3[2]>bottom[2]){ 
-          
-          if(debug){
-            System.out.println("Methode1: cylinder matched_2");
-            System.out.println("Methode1: hitPointOb: "+hitPointOb3[0]+", "+hitPointOb3[1]+", "+hitPointOb3[2]);
-          }
-            
-          double[] hitPoint=new double[4];
-          Pn.homogenize(hitPoint,hitPointOb3);
-          hitPoint=m.multiplyVector(hitPoint);
-          if(objTransformed){
-            Matrix objTransInv=objTrans.getInverse();
-            hitPoint=objTransInv.multiplyVector(hitPoint);
-          }
-          hits.add(hitPoint); 
-        }       
-      }   
-    } 
-    
-    if(debug){
-      System.out.println("Methode1: "+(System.currentTimeMillis()-time)+" ms");
-    }
-    
-    
-    time=System.currentTimeMillis();
-    
-    */
-    
-    
     //Methode2:
     
     double[] from=f;
