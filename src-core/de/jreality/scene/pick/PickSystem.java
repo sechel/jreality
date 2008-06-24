@@ -60,6 +60,8 @@ public interface PickSystem {
    *          foot point of ray in world coordinates
    * @param to
    *          end point of ray in world coordinates (can be at infinity)
+   * Valid pick points are of the form p = a*from+b*to where a*b >= 0
+   * That is, the affine coordinate (b/a) of p on the line with basis (from,to) is non-negative
    * @return list of PickResults sorted by distance from foot point
    */
   public abstract List<PickResult> computePick(double[] from, double[] to);
