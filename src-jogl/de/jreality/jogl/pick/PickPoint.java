@@ -45,6 +45,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.scene.pick.PickResult;
 
 
@@ -368,6 +369,9 @@ public class PickPoint implements PickResult {
   public double[] getObjectCoordinates() {
     return getPointObject();
   }
+public double getAffineCoordinate() {
+	return 0;
+}
 	
 }
 

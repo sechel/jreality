@@ -63,6 +63,7 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;

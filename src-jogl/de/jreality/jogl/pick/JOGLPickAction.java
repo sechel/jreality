@@ -64,6 +64,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
+import de.jreality.scene.pick.Graphics3D;
 /**
  * @author gunn
  *

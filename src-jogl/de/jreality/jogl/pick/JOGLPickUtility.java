@@ -43,6 +43,7 @@ package de.jreality.jogl.pick;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.util.CameraUtility;
 
 public class JOGLPickUtility {
