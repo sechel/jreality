@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
@@ -76,16 +75,14 @@ public class AABBPickSystem implements PickSystem {
   
   private Impl impl;
   private SceneGraphComponent root;
-  
-  private double maxDist;
-  
   private ArrayList<Hit> hits = new ArrayList<Hit>();
   private HashMap<IndexedFaceSet, AABBTree> aabbTreeExists = new HashMap<IndexedFaceSet, AABBTree>();
   private HashMap<Geometry, Boolean> isPickableMap = new HashMap<Geometry, Boolean>();
   private Comparator<Hit> cmp = new Hit.HitComparator();
   private double[] from;
   private double[] to;
-//  private double[] dir;
+  private HitFilter hitFilter;
+  private int signature;
   
   public void setSceneRoot(SceneGraphComponent root) {
     impl= new Impl();
@@ -93,41 +90,20 @@ public class AABBPickSystem implements PickSystem {
   }
   
   public List<PickResult> computePick(double[] f, double[] t) {
-    if (f.length == 4) Pn.dehomogenize(f, f);
-    if (t.length == 4) Pn.dehomogenize(t, t);
-    // XXX: somehow calculate maxDist depending on the far clipping plane
-    double maxDist = 1E9;
-    if (t.length == 3 || t[3] == 0) return new ArrayList<PickResult>(computePickImpl(f, t, t, maxDist));
-    double[] dir = new double[3];
-    dir[0] = t[0]-f[0];
-    dir[1] = t[1]-f[1];
-    dir[2] = t[2]-f[2];
-    return new ArrayList<PickResult>(computePickImpl(f, t, dir, Rn.euclideanNorm(dir)));
-  }
-  
-  private List<Hit> computePickImpl(double[] from, double[] to, double[] dir, double maxDist) {
-    this.from=(double[]) from.clone();
-    this.to=(double[]) to.clone();
-//    this.dir=(double[]) dir.clone();
-    this.maxDist=maxDist;
+    from=(double[]) f.clone();
+    to=(double[]) t.clone();
+    hits.clear();
+    // get the signature fresh each invocation
+    if (root.getAppearance() != null) {
+    	Object sig = root.getAppearance().getAttribute(CommonAttributes.SIGNATURE, Integer.class);
+    	if (sig instanceof Integer)	signature = (Integer) sig;
+    } else signature = Pn.EUCLIDEAN;
+    // if no hit filter has been set, use the default one
+    if (hitFilter == null) hitFilter = new AffineCoordinateFilter();
     impl.visit();
     if (hits.isEmpty()) return Collections.emptyList();
-    List<Hit> tmp = hits;
-    hits = new ArrayList<Hit>();
-    if (tmp.size()>1) {
-      sort(tmp);
-//      System.out.println("hits="+tmp);
-    }
-    return tmp;
-  }
-
-  private void sort(List<Hit> tmp) {
-    Collections.sort(tmp, cmp);
-    double dist=0;
-    for (Hit h : tmp) {
-      if (h.getDist() < dist) throw new Error("unsorted!");
-      dist=h.getDist();
-    }
+    Collections.sort(hits, cmp);
+    return new ArrayList<PickResult>(hits);
   }
 
   /**
@@ -142,15 +118,14 @@ public class AABBPickSystem implements PickSystem {
     Impl()	{
     	appStack.push(currentPI = new PickInfo(null, null));
     }
-//    private EffectiveAppearance eap = EffectiveAppearance.create();
-    
+   
     private SceneGraphPath path=new SceneGraphPath();
     private ArrayList<Hit> localHits=new ArrayList<Hit>();
 
     private Matrix m=new Matrix();
     private Matrix mInv=new Matrix();
     
-    private int signature=Pn.EUCLIDEAN;
+//    private int signature=Pn.EUCLIDEAN;
     private Matrix[] matrixStack = new Matrix[256];
     int stackCounter = 0;
     /**
@@ -165,7 +140,7 @@ public class AABBPickSystem implements PickSystem {
         private boolean hasNewPickInfo = false;
         private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
         private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
-        int signature = Pn.EUCLIDEAN;
+        int signature = AABBPickSystem.this.signature;
         PickInfo(PickInfo old, Appearance ap)	{
         	if (old != null)	{
                	drawVertices = old.drawVertices;
@@ -269,6 +244,7 @@ public class AABBPickSystem implements PickSystem {
     	matrixStack[0] = new Matrix();
     	aabbTreeExists.clear();
     	isPickableMap.clear();
+    	path.clear();
     	visit(root);
     }
 
@@ -338,13 +314,18 @@ public class AABBPickSystem implements PickSystem {
       extractHits(localHits);        
     }
 
-    private void extractHits(List l) {
-      for (Iterator i = l.iterator(); i.hasNext(); ) {
-        Hit h = (Hit) i.next();
-        if (h.getDist() <= maxDist) AABBPickSystem.this.hits.add(h);
-      }
+    private void extractHits(List<Hit> l) {
+      for (Hit h : l ) {
+    	  if (h.affineCoordinate < 0) continue;
+//      	System.err.println("affine coord = "+h.getDistRay());
+//      	System.err.println("object  coord = "+Rn.toString(h.getObjectCoordinates()));
+//    		System.err.println("path  = "+h.getPickPath());
+    	  AABBPickSystem.this.hits.add(h);
+      	}
     }
-
   }
-  
+	public void setHitFilter(HitFilter hf) {
+		hitFilter = hf;
+	}
+
 }
