@@ -71,7 +71,18 @@ import de.jreality.scene.SceneGraphPath;
  * 
  */
 public class EffectiveAppearance {
-  private EffectiveAppearance parentApp;
+  @Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		EffectiveAppearance pea = this;
+		do {
+			sb.append(pea.app.getName()+":");
+			pea = pea.parentApp;
+		} while (pea != null);
+		return sb.toString();
+	}
+
+private EffectiveAppearance parentApp;
   private Appearance app;
 
   private EffectiveAppearance(EffectiveAppearance parent, Appearance app)
