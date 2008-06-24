@@ -84,7 +84,6 @@ public class AABBPickSystem implements PickSystem {
   private Comparator<Hit> cmp = new Hit.HitComparator();
   private double[] from;
   private double[] to;
-  private HitFilter hitFilter;
   private int signature;
   
   public void setSceneRoot(SceneGraphComponent root) {
@@ -101,8 +100,6 @@ public class AABBPickSystem implements PickSystem {
     	Object sig = root.getAppearance().getAttribute(CommonAttributes.SIGNATURE, Integer.class);
     	if (sig instanceof Integer)	signature = (Integer) sig;
     } else signature = Pn.EUCLIDEAN;
-    // if no hit filter has been set, use the default one
-    if (hitFilter == null) hitFilter = new AffineCoordinateFilter();
     impl.visit();
     if (hits.isEmpty()) return Collections.emptyList();
     Collections.sort(hits, cmp);
@@ -320,16 +317,10 @@ public class AABBPickSystem implements PickSystem {
     private void extractHits(List<Hit> l) {
       for (Hit h : l ) {
     	  if (h.affineCoordinate < 0) continue;
-//      	System.err.println("affine coord = "+h.getDistRay());
-//      	System.err.println("object  coord = "+Rn.toString(h.getObjectCoordinates()));
-//    		System.err.println("path  = "+h.getPickPath());
     	  AABBPickSystem.this.hits.add(h);
       	}
     }
   }
-	public void setHitFilter(HitFilter hf) {
-		hitFilter = hf;
-	}
 
 	public static void normalizeIntervalBounds(double[] to, double[] from, Viewer viewer) {
 			double[] c2w = viewer.getCameraPath().getMatrix(null); //deviceManager.getTransformationMatrix(camera2worldSlot).toDoubleArray(null);
