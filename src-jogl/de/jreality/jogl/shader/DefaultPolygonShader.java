@@ -145,6 +145,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				glslShader.setFromEffectiveAppearance(eap, name);
 		    }
 	    }  else useGLSL = false;
+//	    System.err.println("In DPS: eap = "+eap.toString());
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;
@@ -213,7 +214,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     
 	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
-	vertexShader.render(jrs);    	
+	vertexShader.render(jrs); 
     if (useGLSL && glslProgram != null)		{
     	//glslShader.render(jrs);
     	GlslLoader.render(glslProgram, jr);
@@ -225,7 +226,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.renderer.globalGL;
 		if (useGLSL)
-			glslShader.postRender(jrs);
+			GlslLoader.postRender(glslProgram, gl);
 		for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
 			gl.glActiveTexture(i);
 			gl.glDisable(GL.GL_TEXTURE_2D);
