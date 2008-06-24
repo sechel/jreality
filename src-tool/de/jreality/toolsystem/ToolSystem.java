@@ -40,6 +40,7 @@
 
 package de.jreality.toolsystem;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,7 +73,6 @@ import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.PickUtility;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
@@ -464,12 +464,19 @@ public class ToolSystem implements ToolEventReceiver {
 				pointerTrafo[10], pointerTrafo[14] };
 		double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
 				pointerTrafo[11], pointerTrafo[15] };
-		PickUtility.normalizeIntervalBounds(to, from, viewer);
+		AABBPickSystem.normalizeIntervalBounds(to, from, viewer);
 		pickResults =  pickSystem.computePick(from, to);
 		if (hitFilter == null)
 			hitFilter = new PosWHitFilter(viewer);
 		hitFilter.update();
-		PickUtility.accept(hitFilter, from, to, pickResults);
+		AABBPickSystem.accept(hitFilter, from, to, pickResults);
+//		System.err.println("Hits");
+//		ArrayList<Object> hits = new ArrayList<Object>(pickResults);
+//	    for (Object obj : hits)	{
+//	    	Hit h = (Hit) obj;
+//	    	System.err.println("dist = "+h.getDist());
+//	    }
+
 	}
 
 	private SceneGraphPath calculatePickPath() {
