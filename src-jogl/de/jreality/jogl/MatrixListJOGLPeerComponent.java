@@ -201,14 +201,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 
 		} else {
 			// TODO can't I just call super.renderChildren()?
-			int n = childCount; //children.size();
-			for (int i = 0; i<n; ++i)	{	
-				JOGLPeerComponent child = children.get(i);					
-				if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
-				child.render();
-				MatrixListJOGLPeerComponent r = ((MatrixListJOGLPeerComponent) child);
-				if (jr.pickMode)	jr.globalGL.glPopName();
-			}
+			super.renderChildren();
 		}
 	}
 	@Override

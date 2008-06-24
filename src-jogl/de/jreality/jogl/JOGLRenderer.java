@@ -72,7 +72,6 @@ import javax.media.opengl.GLPbuffer;
 import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.ImageUtil;
 
-import de.jreality.jogl.pick.Graphics3D;
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.RenderingHintsShader;
@@ -92,6 +91,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.util.CameraUtility;

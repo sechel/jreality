@@ -165,7 +165,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (appearanceDirty )  	handleAppearanceChanged();
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		jr.renderingState.currentSignature = signature;
-		if (rhInfo != null && rhInfo.hasSomeActiveField())	{
+		if (rhInfo != null && rhInfo.hasSomeActiveField)	{
 			rhInfo.render(jr.renderingState, jr.rhStack.lastElement());
 			jr.rhStack.push(rhInfo);
 		}
@@ -315,6 +315,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 				}
 			}
 		}
+//		if (thisAp != null) {
+//			System.err.println("sgc = "+goBetween.originalComponent.getName()+" ap = "+thisAp.getName()+" eap="+eAp.toString());
+//		}
 		updateShaders();
 		effectiveAppearanceDirty = false;
 		appearanceDirty = false;
