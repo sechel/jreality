@@ -92,6 +92,4 @@ public interface PickResult {
    */
   public double[] getTextureCoordinates();
   
-  public double getAffineCoordinate();
-
-}
+ }
