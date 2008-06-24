@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -57,8 +58,12 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.pick.AABBPickSystem;
+import de.jreality.scene.pick.Hit;
+import de.jreality.scene.pick.HitFilter;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.pick.PickSystem;
+import de.jreality.scene.pick.AffineCoordinateFilter;
+import de.jreality.scene.pick.PosWHitFilter;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
@@ -67,6 +72,7 @@ import de.jreality.tools.AnimatorTool;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.PickUtility;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
@@ -122,6 +128,7 @@ public class ToolSystem implements ToolEventReceiver {
 	private final LinkedList<ToolEvent> triggerQueue = new LinkedList<ToolEvent>();
 	private final HashMap<Tool, List<SceneGraphPath>> toolToPath = new HashMap<Tool, List<SceneGraphPath>>();
 	private List<PickResult> pickResults = Collections.emptyList();
+	private PosWHitFilter hitFilter;
 
 	private SceneGraphPath emptyPickPath=new SceneGraphPath();
 
@@ -134,6 +141,7 @@ public class ToolSystem implements ToolEventReceiver {
 	private ToolUpdateProxy updater;
 	private ToolEventQueue eventQueue;
 	ToolSystemConfiguration config;
+	private static InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
 
 	protected boolean executing;
 
@@ -269,6 +277,8 @@ public class ToolSystem implements ToolEventReceiver {
 	    // provide a reasonable default empty pick path
 	    emptyPickPath = new SceneGraphPath();
 	    emptyPickPath.push(viewer.getSceneRoot());
+	    // for reasons unknown the viewer has no camera path at this point!
+//	    hitFilter = new PosWHitFilter(viewer);
 	}
 
 	Thread getThread() {
@@ -291,7 +301,9 @@ public class ToolSystem implements ToolEventReceiver {
 		if (emptyPickPath.getLength() == 0) {
 			emptyPickPath.push(viewer.getSceneRoot());
 		}
-		if (pickSystem != null) pickSystem.setSceneRoot(viewer.getSceneRoot());
+		if (pickSystem != null) {
+			pickSystem.setSceneRoot(viewer.getSceneRoot());
+		}
 		eventQueue.start();
 	    System.err.println("initializing tool system");
 	}
@@ -445,16 +457,19 @@ public class ToolSystem implements ToolEventReceiver {
 			pickResults = Collections.emptyList();
 			return;
 		}
-		currentPointer = deviceManager.getTransformationMatrix(
-				InputSlot.getDevice("PointerTransformation")).toDoubleArray(
-						currentPointer);
+		currentPointer = deviceManager.getTransformationMatrix(pointerSlot).toDoubleArray(currentPointer);
 		//if (Rn.equals(pointerTrafo, currentPointer)) return;
 		Rn.copy(pointerTrafo, currentPointer);
-		double[] to = new double[] { -pointerTrafo[2], -pointerTrafo[6],
-				-pointerTrafo[10], -pointerTrafo[14], };
+		double[] to = new double[] { pointerTrafo[2], pointerTrafo[6],
+				pointerTrafo[10], pointerTrafo[14] };
 		double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
-				pointerTrafo[11], pointerTrafo[15], };
-		pickResults = pickSystem.computePick(from, to);
+				pointerTrafo[11], pointerTrafo[15] };
+		PickUtility.normalizeIntervalBounds(to, from, viewer);
+		pickResults =  pickSystem.computePick(from, to);
+		if (hitFilter == null)
+			hitFilter = new PosWHitFilter(viewer);
+		hitFilter.update();
+		PickUtility.accept(hitFilter, from, to, pickResults);
 	}
 
 	private SceneGraphPath calculatePickPath() {
@@ -551,7 +566,9 @@ public class ToolSystem implements ToolEventReceiver {
 
 	public void setPickSystem(PickSystem pickSystem) {
 		this.pickSystem = pickSystem;
-		if (pickSystem != null) pickSystem.setSceneRoot(viewer.getSceneRoot());
+		if (pickSystem != null) {
+			pickSystem.setSceneRoot(viewer.getSceneRoot());
+		}
 	}
 
 	public PickSystem getPickSystem() {
