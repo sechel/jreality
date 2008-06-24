@@ -63,16 +63,16 @@ public class Hit implements PickResult {
   final int index;
   final int triIndex;
   final double dist;
-  final double distRay;
+  final double affineCoordinate;		// pointWorld = lambda(from + affineCoord*to)
 
-  public Hit(SceneGraphPath path, double[] pointWorld, double dist, double distRay, int pickType, int index,int triIndex) {
+  public Hit(SceneGraphPath path, double[] pointWorld, double dist, double affineCoord, int pickType, int index,int triIndex) {
     this.path = (SceneGraphPath) path;
     Matrix m = new Matrix();
     path.getInverseMatrix(m.getArray());
     this.pointWorld= pointWorld;
     this.pointObject=m.multiplyVector(pointWorld);
     this.dist = dist;
-    this.distRay = distRay;
+    this.affineCoordinate = affineCoord;
     this.pickType=pickType;
     this.index=index;
     this.triIndex=triIndex;
@@ -103,7 +103,7 @@ public class Hit implements PickResult {
     sb.append(" tc=").append(Arrays.toString(getTextureCoordinates()));
     sb.append(" world=").append(Arrays.toString(pointWorld));
     sb.append(" path=").append(path.toString());
-    sb.append(" distRay=").append(distRay);
+    sb.append(" affine coordinate =").append(affineCoordinate);
     return sb.toString();
   }
 
@@ -111,8 +111,8 @@ public class Hit implements PickResult {
     return pickType;
   }
 
-  public double getDistRay() {
-    return distRay;
+  public double getAffineCoordinate() {
+    return affineCoordinate;
   }
 
   private int hasTextureCoordinates() {
@@ -141,7 +141,7 @@ public class Hit implements PickResult {
                       // two methods the first one uses a smart algorithm
                       // grabed from Markus code in numerical methods
                       // the second is straight and dumb
-if(false) {
+                  if(true) {
                       // get the points
                       double[] a = new double[3];
                       DoubleArray     pt = points.item(ptIndex0).toDoubleArray();
@@ -182,7 +182,7 @@ if(false) {
                       for(int j = 0 ; j<textureLength;j++) {
                           texCoords[j] = bc[0]*tc0.getValueAt(j) + bc[1] * tc1.getValueAt(j) + bc[2] * tc2.getValueAt(j);
                       }
-} else {                           
+                  } else {                           
                       DoubleArray     pt = points.item(ptIndex2).toDoubleArray();
                       final double cx = pt.getValueAt(0);
                       final double cy = pt.getValueAt(1);
@@ -287,12 +287,10 @@ if(false) {
 
       /* calculate barycentric coordinates */
       bary[0] =
-          (x1[i0] * x2[i1]
-              - x1[i1] * x2[i0]
-              - (x[i0] * x2[i1] - x[i1] * x2[i0])
-              + x[i0] * x1[i1]
-              - x[i1] * x1[i0])
-              / det;
+          (x1[i0] * x2[i1]- x1[i1] * x2[i0]
+           - (x[i0] * x2[i1] - x[i1] * x2[i0])
+           + x[i0] * x1[i1]- x[i1] * x1[i0])
+           / det;
       bary[1] =
           (x[i0] * x2[i1]
               - x[i1] * x2[i0]
@@ -344,8 +342,8 @@ if(false) {
   public static class HitComparator implements Comparator<Hit> {
     public int compare(Hit hit1, Hit hit2) {
       // distance from ray
-      double a = hit1.getDist();
-      double b = hit2.getDist();
+      double a = hit1.getAffineCoordinate();
+      double b = hit2.getAffineCoordinate();
       return a>b ? 1 : b>a ? -1:0;
       
     }
