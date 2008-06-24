@@ -42,8 +42,11 @@ package de.jreality.shader;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.WeakHashMap;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.event.AppearanceEvent;
+import de.jreality.scene.event.AppearanceListener;
 import de.jreality.shader.GlslSource.UniformParameter;
 import de.jreality.util.Input;
 
@@ -54,6 +57,7 @@ public class GlslProgram {
   private final GlslSource source;
   private final Appearance app;
   private final EffectiveAppearance eApp;
+  private final WeakHashMap<String, Object> uniforms = new WeakHashMap<String, Object>();
   
   private final String pre;
   
@@ -77,6 +81,7 @@ public class GlslProgram {
 	    this.eApp = EffectiveAppearance.create().create(app);
 	    pre = prefix+"::glsl-";
 	    app.setAttribute(pre+"source", source);
+	    addAppListener(app);
   }
  
   public GlslProgram(Appearance app, String prefix, String vertexProgram, String fragmentProgram) {
@@ -85,7 +90,7 @@ public class GlslProgram {
 	    this.eApp = EffectiveAppearance.create().create(app);
 	    pre = prefix+"::glsl-";
 	    app.setAttribute(pre+"source", source);
-	  
+	    addAppListener(app);
   }
 
   public GlslProgram(Appearance app, String prefix, String[] vertexProgram, String[] fragmentProgram) {
@@ -94,6 +99,7 @@ public class GlslProgram {
     this.eApp = EffectiveAppearance.create().create(app);
     pre = prefix+"::glsl-";
     app.setAttribute(pre+"source", source);
+    addAppListener(app);
   }
   
   public GlslProgram(EffectiveAppearance eap, String prefix) {
@@ -110,8 +116,18 @@ public class GlslProgram {
 	    pre = prefix+"::"+"glsl-";
 	    if (!hasGlslProgram(app, prefix)) throw new IllegalStateException("no program!");
 	    source = (GlslSource) app.getAttribute(pre+"source");
+	    addAppListener(app);
   }
 
+  private void addAppListener(Appearance ap)	{
+	  ap.addAppearanceListener(new AppearanceListener() {
+
+		public void appearanceChanged(AppearanceEvent ev) {
+			uniforms.clear();
+		}
+		  
+	  });
+  }
   /**
    * this makes only sense if app is the last appearance pushed on the EffectiveAppearance stack!
    */
@@ -121,6 +137,7 @@ public class GlslProgram {
 	    pre = prefix+"::"+"glsl-";
 	    if (!hasGlslProgram(eap, prefix)) throw new IllegalStateException("no program!");
 	    source = (GlslSource) eap.getAttribute(pre+"source", EMPTY, Object.class);
+	    addAppListener(app);
   }
 	  
   private void checkWrite() {
@@ -199,13 +216,17 @@ public class GlslProgram {
     setUniformMatrix(name, floats);
   }
   
-  public Object getUniform(String name) {
-    UniformParameter param = source.getUniformParameter(name);
-    if (param == null) throw new IllegalArgumentException("no such uniform param");
-    Object val = eApp.getAttribute(pre+name, EMPTY, Object.class);
-    if (val == EMPTY) return null;
-    return val;
-  }
+  	public Object getUniform(String name) {
+  		UniformParameter param = source.getUniformParameter(name);
+  		if (param == null) throw new IllegalArgumentException("no such uniform param");
+  		Object val = uniforms.get(name);
+  		if (val == null)	{
+		    val = eApp.getAttribute(pre+name, EMPTY, Object.class);
+	  		if (val == EMPTY) return null;
+		    uniforms.put(name, val);
+  		}
+  		return val;
+  	}
   
   public GlslSource getSource() {
     return source;
