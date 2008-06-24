@@ -63,6 +63,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.PickUtility;
 
 /**
  * An AABB tree for IndexedFaceSets.
@@ -209,7 +210,7 @@ public class AABBTree {
      *            intersections.
      */
     void intersect(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, List<Hit> hits) {
-      path.getMatrix(m.getArray());
+       path.getMatrix(m.getArray());
       path.getInverseMatrix(mInv.getArray());
       
       double[] fromLocal=mInv.multiplyVector(from);
@@ -235,7 +236,9 @@ public class AABBTree {
             tempt.getTriangle(j, p1, p2, p3);
             if (BruteForcePicking.intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
               double[] pw = m.multiplyVector(pobj);
-              hits.add(new Hit(path.pushNew(ifs), pw, Rn.euclideanDistance(from, pw), 0, PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
+              hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw,signature), 
+            		  PickUtility.affineCoord(from, to, pw), PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
+//              System.err.println("AABB polygon hit");
             }
           }
         }
