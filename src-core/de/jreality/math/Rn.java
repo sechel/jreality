@@ -1273,11 +1273,11 @@ final public class Rn {
 	 */public static double[]  subtract(double[]  dst, double[]  src1, double[]  src2)	{
 		int n = Math.min(src1.length, src2.length);
 		if (dst == null) dst = new double[n];
-		if (dst.length != n) {
+		if (dst.length > n) {
 			throw new IllegalArgumentException("Invalid dimension for target");
 		}
 		int x = 0;
-		for (int i=0; i<n; ++i)	dst[i] = src1[i] - src2[i];
+		for (int i=0; i<dst.length; ++i)	dst[i] = src1[i] - src2[i];
 		return dst;
 	}
 	
@@ -1311,7 +1311,7 @@ final public class Rn {
 		if (dst.length != src.length) {
 			throw new IllegalArgumentException("Vectors must be same length");
 		}
-		int n = Math.min(dst.length, src.length);
+		int n = dst.length;
 		for (int i=0; i<n; ++i)	dst[i] = factor * src[i];
 		return dst;
 	}
