@@ -51,6 +51,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -60,7 +61,9 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.PickUtility;
 
 /**
@@ -327,5 +330,49 @@ public class AABBPickSystem implements PickSystem {
 	public void setHitFilter(HitFilter hf) {
 		hitFilter = hf;
 	}
+
+	public static void normalizeIntervalBounds(double[] to, double[] from, Viewer viewer) {
+			double[] c2w = viewer.getCameraPath().getMatrix(null); //deviceManager.getTransformationMatrix(camera2worldSlot).toDoubleArray(null);
+			Camera cam = CameraUtility.getCamera(viewer);
+			double[] eyeW = Rn.matrixTimesVector(null, c2w, cam.isPerspective() ? Pn.originP3 : Pn.zDirectionP3);
+			double[] fromndc, tondc;
+			Graphics3D gc = new Graphics3D(viewer);
+			double[] w2ndc = gc.getWorldToNDC(); //deviceManager.getTransformationMatrix(world2ndcSlot).toDoubleArray(null);
+			fromndc = Rn.matrixTimesVector(null, w2ndc, from);
+			Pn.dehomogenize(fromndc, fromndc);
+			tondc = Rn.matrixTimesVector(null, w2ndc, to);
+			Pn.dehomogenize(tondc, tondc);
+			double[] v = Rn.subtract(null, tondc, fromndc);
+			double zto = v[2];
+			// we're assuming here that from[2] == -1 (near clipping plane
+			tondc = Rn.linearCombination(null, zto, fromndc, 2, v);
+			double[] ndc2w = gc.getNDCToWorld(); //deviceManager.getTransformationMatrix(ndc2worldSlot).toDoubleArray(null);
+			Pn.dehomogenize(to, Rn.matrixTimesVector(null, ndc2w, tondc));
+	//		System.err.println("fromndc = "+Rn.toString(fromndc));
+	//		System.err.println("tondc = "+Rn.toString(Pn.dehomogenize(tondc, tondc))); //tondc));
+			// the origin should have negative affine coordinate with respect to the to and from points
+			// so that valid pick points have positive affine coordinate
+			double[] weights = Pn.barycentricCoordinates(null, from, to, eyeW);
+			if (weights[0] * weights[1] > 0) {
+				Rn.times(to, -1, to);
+			}
+		}
+
+	public static void accept(HitFilter hf, double[] from, double[] to, List<PickResult> list)	{
+		ArrayList<PickResult> rejected = new ArrayList<PickResult>();
+		for (PickResult h : list)	{
+			if (!hf.accept(from, to, h)) rejected.add(h);
+		}
+		list.removeAll(rejected);
+	}
+
+	public static double affineCoord(double[] from ,double[] to, double[] pw )	{
+	      double[] weights = Pn.barycentricCoordinates(null, from, to, pw);
+		  if (weights[1] == 0) return 0;
+	      double affCoord = Double.MAX_VALUE;
+	      if (weights[0] != 0.0) affCoord = weights[1]/weights[0];
+	      else if (weights[1] < 0) affCoord = -Double.MAX_VALUE;
+	      return affCoord;
+	  }
 
 }
