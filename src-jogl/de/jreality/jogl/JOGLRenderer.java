@@ -139,7 +139,9 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected Transformation pickT = new Transformation();
 	protected PickPoint[] hits;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
-	protected boolean backSphere = false;
+	protected boolean renderSpherical = false,
+		frontBanana = true;
+	protected static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
 	protected double framerate;
 	protected int nodeCount = 0;
 
@@ -149,6 +151,11 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int stereoType;
 	protected boolean flipped;
 
+	static {
+		MatrixBuilder.euclidean().translate(0,0,-.5).scale(1,1,.5).assignTo(frontZBuffer);
+		MatrixBuilder.euclidean().translate(0,0,.5).scale(1,1,.5).assignTo(backZBuffer);
+		Rn.times(backZBuffer, -1, backZBuffer);
+	}
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
 		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
@@ -209,7 +216,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		Appearance ap = theRoot.getAppearance();
 		if (ap == null) return;
 //		theLog.finer("In extractGlobalParameters");
-		Object obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
+		Object obj = ap.getAttribute("spherical", Boolean.class);		// assume the best ...
+		if (obj instanceof Boolean) frontBanana = renderSpherical = ((Boolean) obj).booleanValue();
+		System.err.println("render spherical = "+renderSpherical);
+		obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
 		obj = ap.getAttribute(CommonAttributes.ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
@@ -261,22 +271,46 @@ public class JOGLRenderer  implements AppearanceListener {
 		else
 			JOGLRendererHelper.handleBackground(this, width, height, theRoot.getAppearance());
 
+		frontBanana = true;
+		renderOnePass();
+		if (renderSpherical)	{
+			frontBanana = false;
+			renderOnePass();
+		}
+		if (forceResidentTextures) forceResidentTextures();
+
+		lightListDirty = false;
+	}
+
+
+	private void renderOnePass() {
 		double aspectRatio = getAspectRatio();
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
+		globalGL.glMatrixMode(GL.GL_PROJECTION);
+		globalGL.glLoadIdentity();
 		double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
 				aspectRatio,
 				whichEye);
+		if (renderSpherical)	
+		{
+			globalGL.glMultTransposeMatrixd(frontBanana ? frontZBuffer : backZBuffer, 0);
+//			System.err.println("c2ndc = "+Rn.matrixToString(
+//					Rn.times(null, frontBanana ? frontZBuffer : backZBuffer, c2ndc)));
+		}
 		globalGL.glMultTransposeMatrixd(c2ndc, 0);
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
 
-		if (backSphere) {  globalGL.glLoadTransposeMatrixd(P3.p3involution, 0);	globalGL.glPushMatrix(); }
+		if (renderSpherical && !frontBanana) {  
+//			globalGL.glMultTransposeMatrixd(P3.p3involution, 0);	
+			globalGL.glPushMatrix(); 
+		}
 		renderingState.cameraToWorld = context.getCameraToWorld();
 		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
-		globalGL.glLoadTransposeMatrixd(renderingState.worldToCamera, 0);
+		globalGL.glMultTransposeMatrixd(renderingState.worldToCamera, 0);
 		renderingState.flipped = (Rn.determinant(renderingState.worldToCamera) < 0.0);
 		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
@@ -295,11 +329,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		currentPath.clear();
 		thePeerRoot.render();		
 		if (!pickMode && thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
-		if (backSphere) globalGL.glPopMatrix();
-		globalGL.glLoadIdentity();
-		if (forceResidentTextures) forceResidentTextures();
-
-		lightListDirty = false;
+		if (renderSpherical && !frontBanana) globalGL.glPopMatrix();
 	}
 
 	List clipPlanes = null;
