@@ -76,7 +76,7 @@ public class P3 {
 	private static boolean debug = false;
 
 	private final static double[] hzaxis = {0,0,1,1};
-	public static double[] p3involution = makeStretchMatrix(null, new double[]{-1d,-1d,-1d,1d});
+	public static double[] p3involution = Rn.diagonalMatrix(null, new double[]{-1d,-1d,-1d,-1d});
 	public static double[] Q_HYPERBOLIC, Q_EUCLIDEAN, Q_ELLIPTIC;
 
 	private static double[][] Q_LIST;
