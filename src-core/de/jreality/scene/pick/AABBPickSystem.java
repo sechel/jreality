@@ -322,7 +322,15 @@ public class AABBPickSystem implements PickSystem {
     }
   }
 
-	public static void normalizeIntervalBounds(double[] to, double[] from, Viewer viewer) {
+	/**
+	 * Calculate the segment of the line spanned by <code>from</code> and <code>to</code> which lies within the
+	 * viewing frustum.  We assume the from lies on the near plane of the frustum.  <code>from</code> and <code>to</code>
+	 * are assumed to be in world coordinates.
+	 * @param from
+	 * @param to
+	 * @param viewer
+	 */
+  public static void getFrustumInterval(double[] from, double[] to, Viewer viewer) {
 			double[] c2w = viewer.getCameraPath().getMatrix(null); //deviceManager.getTransformationMatrix(camera2worldSlot).toDoubleArray(null);
 			Camera cam = CameraUtility.getCamera(viewer);
 			double[] eyeW = Rn.matrixTimesVector(null, c2w, cam.isPerspective() ? Pn.originP3 : Pn.zDirectionP3);
@@ -349,7 +357,7 @@ public class AABBPickSystem implements PickSystem {
 			}
 		}
 
-	public static void accept(HitFilter hf, double[] from, double[] to, List<PickResult> list)	{
+	public static void filterList(HitFilter hf, double[] from, double[] to, List<PickResult> list)	{
 		ArrayList<PickResult> rejected = new ArrayList<PickResult>();
 		for (PickResult h : list)	{
 			if (!hf.accept(from, to, h)) rejected.add(h);
