@@ -76,6 +76,7 @@ private void init() {
 	c.setAppearance(a);
 	PickUtility.setPickable(c, false);
 	a.setAttribute(CommonAttributes.FACE_DRAW, true);
+	a.setAttribute(CommonAttributes.PICKABLE, false);
 }
 
   public PickShowTool() {
