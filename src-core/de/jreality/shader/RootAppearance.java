@@ -51,6 +51,7 @@ public interface RootAppearance extends AttributeEntity {
   public final static boolean  FOG_ENABLED_DEFAULT = false;
   public final static Color  FOG_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
   public final static double FOG_DENSITY_DEFAULT = 0.1;
+  public final static boolean RENDER_S3_DEFAULT = false;
 
 
   Color getBackgroundColor();
@@ -67,4 +68,7 @@ public interface RootAppearance extends AttributeEntity {
   
   Double getFogDensity();
   void setFogDensity(Double density);
+  
+  Boolean getRenderS3();
+  void setRenderS3(Boolean b);
 }

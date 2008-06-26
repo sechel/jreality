@@ -188,6 +188,7 @@ import de.jreality.scene.Appearance;
 	public static final String FONT	= "font";
 	
 	// miscellaneous
+	public static final String RENDER_S3 = "renderS3";
 	public static final String PICKABLE = "pickable";
 	public static final String SIGNATURE= "signature";
 	public static final String INFO_STRING = "infoString";
