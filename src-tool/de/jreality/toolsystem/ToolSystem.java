@@ -464,18 +464,13 @@ public class ToolSystem implements ToolEventReceiver {
 				pointerTrafo[10], pointerTrafo[14] };
 		double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
 				pointerTrafo[11], pointerTrafo[15] };
-		AABBPickSystem.normalizeIntervalBounds(to, from, viewer);
+		AABBPickSystem.getFrustumInterval(from, to, viewer);
 		pickResults =  pickSystem.computePick(from, to);
 		if (hitFilter == null)
 			hitFilter = new PosWHitFilter(viewer);
 		hitFilter.update();
-		AABBPickSystem.accept(hitFilter, from, to, pickResults);
-//		System.err.println("Hits");
-//		ArrayList<Object> hits = new ArrayList<Object>(pickResults);
-//	    for (Object obj : hits)	{
-//	    	Hit h = (Hit) obj;
-//	    	System.err.println("dist = "+h.getDist());
-//	    }
+		// throw out pick results whose NDC w-coordinate is negative
+		AABBPickSystem.filterList(hitFilter, from, to, pickResults);
 
 	}
 
