@@ -98,6 +98,7 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
+import static de.jreality.shader.CommonAttributes.*;
 /**
  * @author gunn
  *
@@ -141,7 +142,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
 	protected boolean renderSpherical = false,
 		frontBanana = true;
-	protected static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
+	public static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
 	protected double framerate;
 	protected int nodeCount = 0;
 
@@ -216,28 +217,26 @@ public class JOGLRenderer  implements AppearanceListener {
 		Appearance ap = theRoot.getAppearance();
 		if (ap == null) return;
 //		theLog.finer("In extractGlobalParameters");
-		Object obj = ap.getAttribute("spherical", Boolean.class);		// assume the best ...
+		Object obj = ap.getAttribute(RENDER_S3, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) frontBanana = renderSpherical = ((Boolean) obj).booleanValue();
-		System.err.println("render spherical = "+renderSpherical);
-		obj = ap.getAttribute(CommonAttributes.FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
+		obj = ap.getAttribute(FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-		obj = ap.getAttribute(CommonAttributes.ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
+		obj = ap.getAttribute(ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
 //		theLog.fine("one texture per image: "+oneTexture2DPerImage);
-		obj = ap.getAttribute(CommonAttributes.CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
+		obj = ap.getAttribute(CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) {
 			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
 //			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
 		}
-		obj = ap.getAttribute(CommonAttributes.USE_OLD_TRANSPARENCY, Boolean.class);		
+		obj = ap.getAttribute(USE_OLD_TRANSPARENCY, Boolean.class);		
 		// a bit ugly: we make this a static variable so shaders can access it easily
 		if (obj instanceof Boolean) JOGLRenderingState.useOldTransparency = ((Boolean)obj).booleanValue();
 //		theLog.fine("forceResTex = "+forceResidentTextures);
 //		theLog.info("component display lists = "+renderingState.componentDisplayLists);
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
-				CommonAttributes.SKY_BOX, ap)) {
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,SKY_BOX, ap)) {
 			skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
-				CommonAttributes.SKY_BOX, ap, true);
+				SKY_BOX, ap, true);
 		} else skyboxCubemap = null;
 	}
 
@@ -304,10 +303,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
 
-		if (renderSpherical && !frontBanana) {  
+//		if (renderSpherical && !frontBanana) {  
 //			globalGL.glMultTransposeMatrixd(P3.p3involution, 0);	
-			globalGL.glPushMatrix(); 
-		}
+//			globalGL.glPushMatrix(); 
+//		}
 		renderingState.cameraToWorld = context.getCameraToWorld();
 		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
 		globalGL.glMultTransposeMatrixd(renderingState.worldToCamera, 0);
@@ -504,8 +503,8 @@ public class JOGLRenderer  implements AppearanceListener {
 			Color[] bg=null;
 			float[][] bgColors=null;
 			if (numTiles > 1) {
-				if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
-					bg = (Color[]) theRoot.getAppearance().getAttribute(CommonAttributes.BACKGROUND_COLORS, Color[].class);
+				if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
+					bg = (Color[]) theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class);
 					bgColors=new float[4][];
 					bgColors[0]=bg[0].getRGBComponents(null);
 					bgColors[1]=bg[1].getRGBComponents(null);
@@ -549,7 +548,7 @@ public class JOGLRenderer  implements AppearanceListener {
 							currentBg[2]=interpolateBG(bgColors, i, j);
 							currentBg[3]=interpolateBG(bgColors, i, j+1);
 							currentBg[0]=interpolateBG(bgColors, i+1, j+1);
-							theRoot.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, currentBg);
+							theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, currentBg);
 						}
 						
 						render();
@@ -565,7 +564,7 @@ public class JOGLRenderer  implements AppearanceListener {
 				
 			}
 
-			if (bgColors != null) theRoot.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, bg);
+			if (bgColors != null) theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, bg);
 			
 			context.release();
 			theCamera.setOnAxis(isOnAxis);
