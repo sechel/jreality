@@ -43,6 +43,7 @@ class FakeFramePeer {
     private JFakeFrame frame;
     private Runnable repaintAction;
     Rectangle bounds;
+	private Image backBuffer;
     
     FakeFramePeer(JFakeFrame f) {
         frame = f;
@@ -53,6 +54,7 @@ class FakeFramePeer {
         if(d.height==0) d.height=1;
         bounds = new Rectangle(d.width, d.height);
         bi= new BufferedImage(d.width,d.height,BufferedImage.TYPE_INT_ARGB);
+        backBuffer= new BufferedImage(d.width,d.height,BufferedImage.TYPE_INT_ARGB);
         vi = new FakeVolatileImage(bi);
     }
 
@@ -87,6 +89,7 @@ class FakeFramePeer {
         if(bi.getWidth()!=width || bi.getHeight()!= height) {
             bi =new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
             vi=new FakeVolatileImage(bi);
+            backBuffer = new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
         }
     }
 
@@ -330,8 +333,7 @@ class FakeFramePeer {
 	}
 
 	public Image getBackBuffer() {
-		// TODO Auto-generated method stub
-		return null;
+		return backBuffer;
 	}
 
 	public Rectangle getBounds() {

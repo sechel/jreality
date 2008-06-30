@@ -3,9 +3,12 @@ package de.jreality.swing;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Rectangle;
+import java.awt.BufferCapabilities.FlipContents;
+import java.awt.image.BufferedImage;
 import java.awt.peer.FramePeer;
 
 import sun.awt.CausedFocusEvent.Cause;
+import sun.java2d.pipe.Region;
 
 class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 
@@ -41,6 +44,31 @@ class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 	public boolean requestFocus(Component lightweightChild, boolean temporary, boolean focusedWindowChangeAllowed, long time, Cause cause) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public void setOpacity(float arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setOpaque(boolean arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void updateWindow(BufferedImage arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void applyShape(Region arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void flip(int arg0, int arg1, int arg2, int arg3, FlipContents arg4) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
