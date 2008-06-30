@@ -31,8 +31,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	boolean isCopyCat = false,
 		isTopCat = false,
 		isCameraRepn = false,
-		visibilityChanged = false,
-		useOldMatrices = false;
+		visibilityChanged = false;
 	boolean insideDL = false;
 	double[][] matrices = null;
 	boolean[] accepted;
@@ -82,18 +81,20 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 		if (!isVisible) return;
 		if (childCount == 0 && goBetween.peerGeometry == null) return;
 		insideDL = false;
-		useOldMatrices = true;
 		if (isCopyCat) {
-//			System.err.println("Matrices length "+((PointSet) trojanHorse).getVertexAttributes(Attribute.COLORS).size());
 			if (matrices.length != theDropBox.matrixList.length) {
 				readMatrices();				
 				displayListDirty = true;			
 			}
 //			if (displayListDirty) setDisplayListDirty();
 			// figure out whether to use display lists
-			if (jr.beginRenderTime - currentTime > theDropBox.delay)	{
+			if ((theDropBox.newVisibleList || localVisibleList == null)) {
+				localVisibleList = theDropBox.visibleList.clone();
+				theDropBox.newVisibleList = false;
+				displayListDirty = true;
+//				System.err.println("Got visible list");
+			} else if (jr.beginRenderTime - currentTime > 250)	{
 				currentTime = jr.beginRenderTime;
-				useOldMatrices = false;
 				displayListDirty = true;
 			}
 			jr.renderingState.componentDisplayLists = theDropBox.componentDisplayLists;
@@ -168,17 +169,12 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			signature = jr.renderingState.currentSignature;
 			if (debug) theLog.fine("In renderChildren()"+name);
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
-
 			int nn = matrices.length;
 			theDropBox.rendering = true;
 			boolean clipToCamera = theDropBox.clipToCamera && !jr.offscreenMode;
 
 			int count = 0;
 			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
-			if (theDropBox.newVisibleList || localVisibleList == null) {
-				localVisibleList = theDropBox.visibleList.clone();
-				theDropBox.newVisibleList = false;
-			}
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera)	{
 					if (!localVisibleList[j]) 	continue; 
@@ -193,14 +189,12 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				child.render();
 				popTransformation();
 			}
-//			theLog.fine("MLJOGLPC: Rendered "+count);
 			theDropBox.rendering = false;
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;
 
 		} else {
-			// TODO can't I just call super.renderChildren()?
 			super.renderChildren();
 		}
 	}

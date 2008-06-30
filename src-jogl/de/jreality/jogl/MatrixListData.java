@@ -14,14 +14,14 @@ public class MatrixListData extends Geometry {
 	public boolean rendering = false;
 	public boolean copycat = true;
 //	public double minDistance = -1, maxDistance = -1;
-	public double ndcFudgeFactor = 1.0;
-	public double ztlate = .5;
+//	public double ndcFudgeFactor = 1.0;
+//	public double ztlate = .5;
 	public boolean clipToCamera = true;
 //	public boolean followCamera = false;
-	public boolean componentDisplayLists = false;
+	public boolean componentDisplayLists = true;
 //	public Object dgcf;
 //	public int signature;
 	public int count;
-	public int delay = 150;
-	public SceneGraphComponent child;
+//	public int delay = 150;
+//	public SceneGraphComponent child;
 }

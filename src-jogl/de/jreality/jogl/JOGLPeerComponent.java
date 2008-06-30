@@ -153,15 +153,14 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			pushTransformation(goBetween.originalComponent.getTransformation().getMatrix());
 			mustPop = true;
 		}
-
+//		if (name.indexOf("root")  != -1)
+//			System.err.println("JOGLPC: flipped = "+jr.renderingState.flipped);
 		oldFlipped = jr.renderingState.flipped;
 		jr.renderingState.flipped = isReflection ^ jr.renderingState.flipped;
 		if (oldFlipped != jr.renderingState.flipped) {
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 		}
 
-		if (originalAppearanceDirty) propagateAppearanceChanged();
-		if (effectiveAppearanceDirty)  	propagateEffectiveAppearanceChanged();
 		if (appearanceDirty )  	handleAppearanceChanged();
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
 		jr.renderingState.currentSignature = signature;
@@ -179,12 +178,11 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected void renderChildren() {
 //		theLog.finest("Processing sgc, clipToCamera is "+goBetween.originalComponent.getName()+" "+clipToCamera);
 		int n = childCount; //children.size();
+//		System.err.println("JOGLPC: child count = "+n);
 		childlock.readLock();
 		for (int i = 0; i<n; ++i)	{	
 			JOGLPeerComponent child = children.get(i);					
-			if (jr.pickMode)	jr.globalGL.glPushName(JOGLPickAction.SGCOMP_BASE+child.childIndex);
 			child.render();
-			if (jr.pickMode)	jr.globalGL.glPopName();
 		}
 		childlock.readUnlock();
 	}
@@ -269,7 +267,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	public void appearanceChanged(AppearanceEvent ev) {
 		//LoggingSystem.getLogger(this).finer("JOGLPeerComponent: appearance changed: "+goBetween.getOriginalComponent().getName());
-		originalAppearanceDirty = true;
+		appearanceDirty = originalAppearanceDirty = true;
 	}
 
 	protected void propagateAppearanceChanged()	{
@@ -291,6 +289,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	private void handleAppearanceChanged() {
+		if (originalAppearanceDirty) propagateAppearanceChanged();
+		if (effectiveAppearanceDirty)  	propagateEffectiveAppearanceChanged();
 		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (parent == null)	{
 			if (eAp == null || eAp.getAppearanceHierarchy().indexOf(thisAp) == -1) {
@@ -477,7 +477,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	private void handleNewAppearance() {
 		if (debug) 
 			LoggingSystem.getLogger(this).info("handle new appearance "+name);
-		effectiveAppearanceDirty=true;
+		appearanceDirty = effectiveAppearanceDirty=true;
 		propagateGeometryChanged(ALL_CHANGED);
 	}
 

@@ -255,7 +255,6 @@ public class JOGLRendererHelper {
 
 	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {
     GL gl = jr.globalGL;
-    boolean pickMode=jr.isPickMode();
     JOGLRenderingState openGLState = jr.renderingState;
 		if (sg.getNumPoints() == 0)
 			return;
@@ -280,22 +279,16 @@ public class JOGLRendererHelper {
 
 		DoubleArray da, ra=null;
 		if (pointSize != null) ra = pointSize.toDoubleArray();
-		if (pickMode)
-			gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
-		// if (pickMode) JOGLConfiguration.theLog.log(Level.INFO,"Rendering
 		// vertices in picking mode");
-		if (!pickMode && pointSize == null)
-			gl.glBegin(GL.GL_POINTS);
+		if (pointSize == null) gl.glBegin(GL.GL_POINTS);
 		for (int i = 0; i < sg.getNumPoints(); ++i) {
 			// double vv;
 			if (vind != null && vind.getValueAt(i) == 0) continue;
-			if (pickMode)
-				gl.glPushName(i);
 			if (pointSize != null) {
 				float ps = (float) (jr.renderingState.pointSize * ra.getValueAt(i));
 				gl.glPointSize(ps);
 			}
-			if (pickMode || pointSize != null)
+			if (pointSize != null)
 				gl.glBegin(GL.GL_POINTS);
 			// if (pointSize != null) gl.glBegin(GL.GL_POINTS);
 			if (vertexColors != null) {
@@ -311,15 +304,10 @@ public class JOGLRendererHelper {
 				gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 			else if (vertexLength == 4)
 				gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
-			if (pickMode || pointSize != null) 
+			if (pointSize != null) 
 				gl.glEnd();
-			if (pickMode)
-				gl.glPopName();
 		}
-		if (!pickMode)
-			gl.glEnd();
-		if (pickMode)
-			gl.glPopName();
+		gl.glEnd();
 	}
 
 	// static Texture2D tex2d=(Texture2D)
@@ -350,30 +338,6 @@ public class JOGLRendererHelper {
 		if (lineWidth != null) ra = lineWidth.toDoubleArray();
 		boolean hasNormals = vertexNormals == null ? false : true;
 		DoubleArray da;
-		// SJOGLConfiguration.theLog.log(Level.INFO,"Processing ILS");
-//		boolean testArrays =false;
-//		 if (testArrays) {
-//		 double[] varray = vertices.toDoubleArray(null);
-//		 ByteBuffer bb = ByteBuffer.allocateDirect(8*varray.length).order(ByteOrder.nativeOrder());
-//		 bb.asDoubleBuffer().put(varray);
-//		 bb.flip();
-//		 gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, bb);
-//		 
-//		 gl.glDisableClientState(GL.GL_COLOR_ARRAY);
-//		 gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-//		 gl.glDrawArrays(GL.GL_POINTS, 0, sg.getNumPoints());
-//		 
-//		 for (int i = 0; i < sg.getNumEdges(); ++i) {
-//			 gl.glBegin(GL.GL_LINE_STRIP);
-//			 IntArray ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
-//			 int m = ed.getLength();
-//			 for (int j = 0; j < m; ++j) {
-//				 gl.glArrayElement(ed.getValueAt(j));
-//			 }
-//			 gl.glEnd();
-//		 }
-//		 return;
-//		 }
 		if (sg.getEdgeAttributes(Attribute.INDICES) == null)
 			return;
 		int colorBind = 0, colorLength = 0;
@@ -392,24 +356,14 @@ public class JOGLRendererHelper {
 				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
-		boolean pickMode = jr.isPickMode();
-		if (pickMode)
-			gl.glPushName(JOGLPickAction.GEOMETRY_LINE);
 		int numEdges = sg.getNumEdges();
 		// if (pickMode) JOGLConfiguration.theLog.log(Level.INFO,"Rendering
 		// edges in picking mode");
 		for (int i = 0; i < numEdges; ++i) {
-			if (pickMode)
-				gl.glPushName(i);
-//			if (ra != null) {
-//				float ps = (float) (jr.renderingState.lineWidth * ra.getValueAt(i));
-//				gl.glLineWidth(ps);
-//			}
-			if (!pickMode)
-				gl.glBegin(GL.GL_LINE_STRIP);
+			gl.glBegin(GL.GL_LINE_STRIP);
 			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);
 			int m = ed.length;
-			if (!pickMode && colorBind == PER_EDGE) {
+			if (colorBind == PER_EDGE) {
 				da = edgeColors.item(i).toDoubleArray();
 				if (colorLength == 3) {
 					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
@@ -419,18 +373,11 @@ public class JOGLRendererHelper {
 			}
 
 			for (int j = 0; j < m; ++j) {
-				if (pickMode) {
-					if (j == m - 1)
-						break;
-					gl.glPushName(j);
-					gl.glBegin(GL.GL_LINES);
-				}
 				int k = ed[j];
-				if (!pickMode && colorBind == PER_VERTEX) {
+				if (colorBind == PER_VERTEX) {
 					da = vertexColors.item(k).toDoubleArray();
 					if (colorLength == 3) {
-						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
-								.getValueAt(2), alpha);
+						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), alpha);
 					} else if (colorLength == 4) {
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
 								.getValueAt(2), alpha * da.getValueAt(3));
@@ -443,40 +390,18 @@ public class JOGLRendererHelper {
 				}
 				da = vertices.item(k).toDoubleArray();
 				if (vertexLength == 3)
-					gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2));
+					gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				else if (vertexLength == 4)
-					gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2), da.getValueAt(3));
-				// if (pickMode) gl.glPopName();
-				if (pickMode) {
-					k = ed[j + 1];
-					da = vertices.item(k).toDoubleArray();
-					if (vertexLength == 3)
-						gl.glVertex3d(da.getValueAt(0), da.getValueAt(1), da
-								.getValueAt(2));
-					else if (vertexLength == 4)
-						gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da
-								.getValueAt(2), da.getValueAt(3));
-					gl.glEnd();
-					gl.glPopName();
-				}
+					gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 			}
-			if (!pickMode)
-				gl.glEnd();
-			if (pickMode)
-				gl.glPopName();
+			gl.glEnd();
 		}
-		if (pickMode)
-			gl.glPopName();
-		// gl.glDepthRange(0d, 1d);
 	}
 
 	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha) {
 		if (sg.getNumFaces() == 0)
 			return;
 		GL gl = jr.globalGL;
-		boolean pickMode = jr.isPickMode();
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
@@ -544,7 +469,7 @@ public class JOGLRendererHelper {
 		}
 
 		numF = sg.getNumFaces();
-		if (!pickMode && isQuadMesh) {
+		if (isQuadMesh) {
 			double[] pt = new double[3];
 			// this loops through the "rows" of the mesh (v is constant on each
 			// row)
@@ -554,10 +479,6 @@ public class JOGLRendererHelper {
 				// of 2 * (maxFU + 1) vertices
 				for (int j = 0; j <= maxFU; ++j) {
 					int u = j % maxU;
-					// if (pickMode) {
-					// //JOGLConfiguration.theLog.log(Level.INFO,"+G"+faceCount+"\n");
-					// gl.glPushName(faceCount++);
-					// }
 					// draw two points: one on "this" row, the other directly
 					// below on the next "row"
 					for (int incr = 0; incr < 2; ++incr) {
@@ -625,9 +546,6 @@ public class JOGLRendererHelper {
 			}
 		} else	{
 			// signal a geometry
-			if (pickMode)
-				gl.glPushName(JOGLPickAction.GEOMETRY_FACE); // pickName);
-
 			for (int i = 0; i < sg.getNumFaces(); ++i) {
 				if (colorBind == PER_FACE) {
 					da = faceColors.item(i).toDoubleArray();
@@ -638,9 +556,6 @@ public class JOGLRendererHelper {
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da
 								.getValueAt(2), alpha * da.getValueAt(3));
 					}
-				}
-				if (pickMode) {
-					gl.glPushName(i);
 				}
 				if (normalBind == PER_FACE) {
 					da = faceNormals.item(i).toDoubleArray();
@@ -686,12 +601,7 @@ public class JOGLRendererHelper {
 								.getValueAt(2), da.getValueAt(3));
 				}
 				gl.glEnd();
-				if (pickMode) {
-					gl.glPopName();
-				}
 			}
-			if (pickMode)
-				gl.glPopName();
 		}
 	}
 

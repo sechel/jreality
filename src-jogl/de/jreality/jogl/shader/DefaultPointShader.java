@@ -327,8 +327,6 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			double[] scale = Rn.identityMatrix(4);
 			scale[0] = scale[5] = scale[10] = pointRadius;
 			int length = n; //vind == null ? n : vind.getLength();
-			boolean pickMode = jr.isPickMode();
-			if (pickMode) gl.glPushName(JOGLPickAction.GEOMETRY_POINT);
 			for (int i = 0; i< length; ++i)	{
 				if (vind != null && vind.getValueAt(i) == 0) continue;
 				int index = i;
@@ -350,12 +348,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 					} 
 				}
-				if (pickMode) gl.glPushName(index);
 				gl.glCallList(dlist);
-				if (pickMode) gl.glPopName();
 				gl.glPopMatrix();
 			}
-			if (pickMode) gl.glPopName();
 			if (useDisplayLists) gl.glEndList();
 			return nextDL;
 //		}
@@ -375,7 +370,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
-				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
+				if (!useDisplayLists || dListProxy == -1) {
 					dListProxy  = proxyGeometryFor(jrs);						
 					displayListsDirty = false;
 				}
@@ -383,7 +378,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				jr.renderingState.polygonCount += polygonCount;
 			}
 			else {
-				if (!useDisplayLists || jr.isPickMode()) {
+				if (!useDisplayLists) {
 					JOGLRendererHelper.drawVertices(jr, (PointSet) g, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{

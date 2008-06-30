@@ -205,7 +205,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	        final int[] dlist = new int[1];
 	        Scene.executeReader(original, new Runnable() {
 	        	public void run() {
-	    			dlist[0] = createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, jr.isPickMode(), useDisplayLists);
+	    			dlist[0] = createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, false, useDisplayLists);
 				    //JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes with radius "+tubeRadius);
 	        	}
 	        });
@@ -334,7 +334,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (g != null)	{
 			if (providesProxyGeometry())	{
 				//System.err.println("count is: "+jr.getRenderingState().polygonCount);
-				if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
+				if (!useDisplayLists  || dListProxy == -1) {
 					dListProxy  = proxyGeometryFor(jrs);						
 					displayListsDirty = false;
 				}
@@ -342,7 +342,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				jr.renderingState.polygonCount += faceCount;
 			}
 			else 	{
-				if (!useDisplayLists || jr.isPickMode()) {
+				if (!useDisplayLists ) {
 					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList == -1)	{

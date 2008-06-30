@@ -135,10 +135,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected boolean oneTexture2DPerImage = true;
 
 	// pick-related stuff
-	public boolean pickMode = false, offscreenMode = false;
-	protected final double pickScale = 10000.0;
-	protected Transformation pickT = new Transformation();
-	protected PickPoint[] hits;
+	public boolean offscreenMode = false;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
 	protected boolean renderSpherical = false,
 		frontBanana = true;
@@ -265,10 +262,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
-		if (pickMode)
-			globalGL.glMultTransposeMatrixd(pickT.getMatrix(), 0);
-		else
-			JOGLRendererHelper.handleBackground(this, width, height, theRoot.getAppearance());
+		JOGLRendererHelper.handleBackground(this, width, height, theRoot.getAppearance());
 
 		frontBanana = true;
 		renderOnePass();
@@ -285,18 +279,17 @@ public class JOGLRenderer  implements AppearanceListener {
 	private void renderOnePass() {
 		double aspectRatio = getAspectRatio();
 		// for pick mode the aspect ratio has to be set to that of the viewer component
-		if (pickMode) aspectRatio = CameraUtility.getAspectRatio(theViewer);
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
-		double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
-				aspectRatio,
-				whichEye);
 		if (renderSpherical)	
 		{
 			globalGL.glMultTransposeMatrixd(frontBanana ? frontZBuffer : backZBuffer, 0);
 //			System.err.println("c2ndc = "+Rn.matrixToString(
 //					Rn.times(null, frontBanana ? frontZBuffer : backZBuffer, c2ndc)));
 		}
+		double[] c2ndc = CameraUtility.getCameraToNDC(CameraUtility.getCamera(theViewer), 
+				aspectRatio,
+				whichEye);
 		globalGL.glMultTransposeMatrixd(c2ndc, 0);
 
 		// prepare for rendering the geometry
@@ -310,24 +303,25 @@ public class JOGLRenderer  implements AppearanceListener {
 		renderingState.cameraToWorld = context.getCameraToWorld();
 		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
 		globalGL.glMultTransposeMatrixd(renderingState.worldToCamera, 0);
-		renderingState.flipped = (Rn.determinant(renderingState.worldToCamera) < 0.0);
-		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
-
 		if (skyboxCubemap != null) 
 			JOGLSkyBox.render(globalGL, renderingState.worldToCamera, skyboxCubemap, CameraUtility.getCamera(theViewer));
 
-		if (!pickMode) processLights();
+		processLights();
 
 		processClippingPlanes();
 
 		rhStack.clear();
 		rhStack.push(RenderingHintsInfo.defaultRHInfo);
 		RenderingHintsInfo.defaultRHInfo.render(renderingState, null);
+		renderingState.flipped = (Rn.determinant(renderingState.worldToCamera) < 0.0);
+//		System.err.println("JOGLR: flipped = "+renderingState.flipped);
+		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
+
 		nodeCount = renderingState.polygonCount = 0;			// for profiling info
 		texResident=true;
 		currentPath.clear();
 		thePeerRoot.render();		
-		if (!pickMode && thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
 		if (renderSpherical && !frontBanana) globalGL.glPopMatrix();
 	}
 
@@ -410,19 +404,6 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 	
 	private static  int bufsize =16384;
-	double[] pickPoint = new double[2];
-	public PickPoint[] performPick(double[] p)	{
-		if (CameraUtility.getCamera(theViewer).isStereo())		{
-			theLog.log(Level.WARNING,"Can't pick in stereo mode");
-			return null;
-		}
-		pickPoint[0] = p[0];  pickPoint[1] = p[1];
-		pickMode = true;
-		renderingState.currentPickMode = true;
-		// TODO!!!
-		//theCanvas.display();	// this calls our display() method  directly
-		return hits;
-	}
 
 	protected void myglViewport(int lx, int ly, int rx, int ry)	{
 		globalGL.glViewport(lx, ly, rx, ry);
@@ -584,28 +565,7 @@ public class JOGLRenderer  implements AppearanceListener {
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			myglViewport(0,0,width, height);
 			whichEye=CameraUtility.MIDDLE_EYE;
-			if (pickMode)	{
-				myglViewport(0,0, 2,2);
-				IntBuffer selectBuffer = BufferUtil.newIntBuffer(bufsize);
-				//JOGLConfiguration.theLog.log(Level.INFO,"Picking "+frameCount);
-				double[] pp3 = new double[3];
-				pp3[0] = -pickScale * pickPoint[0]; pp3[1] = -pickScale * pickPoint[1]; pp3[2] = 0.0;
-				MatrixBuilder.euclidean().translate(pp3).scale(pickScale, pickScale, 1.0).assignTo(pickT);
-				thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
-				globalGL.glSelectBuffer(bufsize, selectBuffer);		
-				globalGL.glRenderMode(GL.GL_SELECT);
-				globalGL.glInitNames();
-				globalGL.glPushName(0);
-				render();
-				pickMode = false;
-				thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
-				//int numberHits = globalGL.glRenderMode(GL.GL_RENDER);
-				// HACK
-				//hits = JOGLPickAction.processOpenGLSelectionBuffer(numberHits, selectBuffer, pickPoint,theViewer);
-				display(globalGL);
-			}			
-			else	 
-				render();			
+			render();			
 		}
 
 		if (collectFrameRate)	{
@@ -828,12 +788,6 @@ public class JOGLRenderer  implements AppearanceListener {
 	public Graphics3D getContext() {
 		return context;
 	}
-	public boolean isPickMode() {
-		return pickMode;
-	}
-	public void setPickMode(boolean pickMode) {
-		this.pickMode = pickMode;
-	}
 
 	public int[] getCurrentViewport()	{
 		return currentViewport;
@@ -888,6 +842,11 @@ public class JOGLRenderer  implements AppearanceListener {
 		// force alpha channel to be "pre-multiplied"
 		img.coerceData(true);
 		return img;
+	}
+
+
+	public PickPoint[] performPick(double[] pickPointNDC) {
+		throw new IllegalArgumentException("Picking has been removed from JOGL renderer");
 	}
 
 }

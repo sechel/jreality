@@ -179,9 +179,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				int dlist;
 				if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
 				else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
-				if (jr.isPickMode()) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
 				jr.globalGL.glCallList(dlist);
-				if (jr.isPickMode()) jr.globalGL.glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
 				if (useVertexArrays) 
@@ -233,7 +231,6 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		if (sg.getNumFaces() == 0)
 			return;
 		GL gl = jr.globalGL;
-		boolean pickMode = jr.isPickMode();
 
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -274,7 +271,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			normalBind = PER_FACE;
 		} else
 			normalBind = PER_PART;
-		renderFaces(sg, alpha, gl, pickMode, colorBind, normalBind, colorLength, 
+		renderFaces(sg, alpha, gl, false, colorBind, normalBind, colorLength, 
 				vertices, vertexNormals, faceNormals, vertexColors, 
 				faceColors, texCoords, lightMapCoords, vertexLength, smooth, doNormals4);
 	}

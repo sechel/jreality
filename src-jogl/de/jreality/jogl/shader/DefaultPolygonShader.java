@@ -256,10 +256,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (g != null)	{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
 				int i = 3;
-//				if (jr.debugGL)	{
-//					double lod = jr.getRenderingState().levelOfDetail;
-//					i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
-//				}
 				int dlist;
 				if (g instanceof Sphere) {
 					jr.renderingState.polygonCount += 24*(i*(i+1)+3);
@@ -269,24 +265,20 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					jr.renderingState.polygonCount += 4*Math.pow(2, i);
 					dlist = jr.renderingState.getCylinderDisplayLists(i);
 				}
-				if (jr.isPickMode()) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-//				if (jr.debugGL) 
-//					jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
 				jr.globalGL.glCallList(dlist);
 				displayListsDirty = false;
-				if (jr.isPickMode()) jr.globalGL.glPopName();
 			}
 			else if ( g instanceof IndexedFaceSet)	{
 				jr.renderingState.polygonCount += ((IndexedFaceSet) g).getNumFaces();
 				if (providesProxyGeometry())	{
-					if (!useDisplayLists || jr.isPickMode() || dListProxy == -1) {
+					if (!useDisplayLists  || dListProxy == -1) {
 						dListProxy  = proxyGeometryFor(jrs);
 						displayListsDirty = false;
 					}
 					jr.globalGL.glCallList(dListProxy);
 				}
 				else 	{
-					if (!jr.isPickMode() && useDisplayLists)	{
+					if (useDisplayLists)	{
 						if (dList == -1)	{
 							dList = jr.globalGL.glGenLists(1);
 							LoggingSystem.getLogger(this).fine(" PolygonShader: is "+this+" Allocating new dlist "+dList+" for gl "+jr.globalGL);
@@ -309,18 +301,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     	
 		if (g instanceof Sphere || g instanceof Cylinder)	{	
 			int i = 3;
-//			if (jr.debugGL)	{
-//				double lod = jr.getRenderingState().levelOfDetail;
-//				i = JOGLSphereHelper.getResolutionLevel(jr.context.getObjectToNDC(), lod);
-//			}
 			int dlist;
 			if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
 			else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
-			if (jr.isPickMode()) jr.globalGL.glPushName(JOGLPickAction.GEOMETRY_BASE);
-//			if (jr.debugGL) 
-//				jr.getGL().glColor4fv(cdbg[i].getRGBComponents(null));
 			jr.globalGL.glCallList(dlist);
-			if (jr.isPickMode()) jr.globalGL.glPopName();
 		}
 		else if ( g instanceof IndexedFaceSet)	{
       JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, jrs.diffuseColor[3]);			
