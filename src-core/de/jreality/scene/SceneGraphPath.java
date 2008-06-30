@@ -134,7 +134,7 @@ public class SceneGraphPath implements Cloneable {
 
 	/**
 	 * 
-	 * @param start how many knodes from the end of the path should we leave out?
+	 * @param start how many nodes from the end of the path should we leave out?
 	 * i.e.: p.reverseIterator(p.getLength()) gives the same result as p.reverseIterator()
 	 * @return a reverse iterator from the given position
 	 */
@@ -213,6 +213,20 @@ public class SceneGraphPath implements Cloneable {
 		path.clear();
 	}
 
+	public void replace(SceneGraphNode old, SceneGraphNode nnew) {
+		int index = path.indexOf(old);
+		if (index == -1) 
+			throw new IllegalArgumentException("no such node in path: "+old.getName());
+		path.remove(index);
+		path.add(index, nnew);
+	}
+	
+	public void insertAfter(SceneGraphNode toInsert, SceneGraphNode exists)	{
+		int index = path.indexOf(exists);
+		if (index == -1) 
+			throw new IllegalArgumentException("no such node in path: "+exists.getName());
+		path.add(index, toInsert);
+	}
 	/**
 	 * Checks if the path is really an existing path in the scenegraph.
 	 * 
