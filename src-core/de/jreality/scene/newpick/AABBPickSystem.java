@@ -62,6 +62,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.pick.PickSystem;
 import de.jreality.shader.CommonAttributes;
