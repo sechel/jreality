@@ -87,7 +87,11 @@ import de.jreality.util.SystemProperties;
 public class ToolSystem implements ToolEventReceiver {
 
     static WeakHashMap<Viewer, ToolSystem> globalTable = new WeakHashMap<Viewer, ToolSystem>();
-    
+    static String hostname = "foo";
+    static {
+    	hostname = SystemProperties.hostname;
+    	System.err.println("host = "+hostname);
+    }
 	/**
 	 * If <i>v</i> has a tool system already associated to it, return it. Otherwise allocate a default one
 	 * @param v
@@ -376,7 +380,9 @@ public class ToolSystem implements ToolEventReceiver {
 
 		SceneGraphPath pickPath = null;
 
-		for (Iterator iter = triggerQueue.iterator(); iter.hasNext();) {
+//	int i = 0;
+	for (Iterator iter = triggerQueue.iterator(); iter.hasNext();) {
+
 			ToolEvent event = (ToolEvent) iter.next();
 			toolContext.event = event;
 			InputSlot slot = event.getInputSlot();
@@ -432,7 +438,10 @@ public class ToolSystem implements ToolEventReceiver {
 				stillActiveTools.addAll(active);
 				processToolSet(active);
 			}
+//			i++;
 		}
+//	System.err.println("tq non empty "+i);
+
 		triggerQueue.clear();
 		// NEW: this is now obsolete
 		// // don't update used slots for deactivated tools!
@@ -471,7 +480,8 @@ public class ToolSystem implements ToolEventReceiver {
 		hitFilter.update();
 		// throw out pick results whose NDC w-coordinate is negative
 		AABBPickSystem.filterList(hitFilter, from, to, pickResults);
-
+		if (pickResults.size() != 0) 
+			System.err.println(hostname+" Got "+pickResults.size()+" picks");
 	}
 
 	private SceneGraphPath calculatePickPath() {
