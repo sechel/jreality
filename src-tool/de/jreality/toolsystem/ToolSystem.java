@@ -40,7 +40,6 @@
 
 package de.jreality.toolsystem;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,20 +50,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.newpick.HitFilter;
+import de.jreality.scene.newpick.PosWHitFilter;
 import de.jreality.scene.pick.AABBPickSystem;
-import de.jreality.scene.pick.Hit;
-import de.jreality.scene.pick.HitFilter;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.pick.PickSystem;
-import de.jreality.scene.pick.AffineCoordinateFilter;
-import de.jreality.scene.pick.PosWHitFilter;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
@@ -141,7 +137,6 @@ public class ToolSystem implements ToolEventReceiver {
 	private ToolUpdateProxy updater;
 	private ToolEventQueue eventQueue;
 	ToolSystemConfiguration config;
-	private static InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
 
 	protected boolean executing;
 
@@ -273,12 +268,10 @@ public class ToolSystem implements ToolEventReceiver {
 		updater = new ToolUpdateProxy(this);
 		this.renderTrigger = renderTrigger;
 		// this code moved over from the ToolSystemViewer constructor
-	    setPickSystem(new AABBPickSystem());
+	    setPickSystem(doOldPick ? new AABBPickSystem() : new de.jreality.scene.newpick.AABBPickSystem());
 	    // provide a reasonable default empty pick path
 	    emptyPickPath = new SceneGraphPath();
 	    emptyPickPath.push(viewer.getSceneRoot());
-	    // for reasons unknown the viewer has no camera path at this point!
-//	    hitFilter = new PosWHitFilter(viewer);
 	}
 
 	Thread getThread() {
@@ -301,9 +294,7 @@ public class ToolSystem implements ToolEventReceiver {
 		if (emptyPickPath.getLength() == 0) {
 			emptyPickPath.push(viewer.getSceneRoot());
 		}
-		if (pickSystem != null) {
-			pickSystem.setSceneRoot(viewer.getSceneRoot());
-		}
+		if (pickSystem != null) pickSystem.setSceneRoot(viewer.getSceneRoot());
 		eventQueue.start();
 	    System.err.println("initializing tool system");
 	}
@@ -452,28 +443,44 @@ public class ToolSystem implements ToolEventReceiver {
 
 	private SceneGraphPath avatarPath;
 
+	boolean doOldPick = false;
+	private static InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
 	private void performPick() {
 		if (pickSystem == null) {
 			pickResults = Collections.emptyList();
 			return;
 		}
-		pointerSlot = InputSlot.getDevice("PointerTransformation");
-		currentPointer = deviceManager.getTransformationMatrix(pointerSlot).toDoubleArray(currentPointer);
-		//if (Rn.equals(pointerTrafo, currentPointer)) return;
-		Rn.copy(pointerTrafo, currentPointer);
-		double[] to = new double[] { pointerTrafo[2], pointerTrafo[6],
-				pointerTrafo[10], pointerTrafo[14] };
-		double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
-				pointerTrafo[11], pointerTrafo[15] };
-		AABBPickSystem.getFrustumInterval(from, to, viewer);
-		pickResults =  pickSystem.computePick(from, to);
-		if (hitFilter == null)
-			hitFilter = new PosWHitFilter(viewer);
-		hitFilter.update();
-		// throw out pick results whose NDC w-coordinate is negative
-		AABBPickSystem.filterList(hitFilter, from, to, pickResults);
-		if (pickResults.size() != 0) 
-			System.err.println(SystemProperties.hostname+" Got "+pickResults.size()+" picks");
+		if (doOldPick)	{
+			currentPointer = deviceManager.getTransformationMatrix(
+					InputSlot.getDevice("PointerTransformation")).toDoubleArray(
+							currentPointer);
+			//if (Rn.equals(pointerTrafo, currentPointer)) return;
+			Rn.copy(pointerTrafo, currentPointer);
+			double[] to = new double[] { -pointerTrafo[2], -pointerTrafo[6],
+					-pointerTrafo[10], -pointerTrafo[14], };
+			double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
+					pointerTrafo[11], pointerTrafo[15], };
+			pickResults = pickSystem.computePick(from, to);			
+		}  else {
+//			pointerSlot = InputSlot.getDevice("PointerTransformation");
+			currentPointer = deviceManager.getTransformationMatrix(pointerSlot).toDoubleArray(currentPointer);
+			//if (Rn.equals(pointerTrafo, currentPointer)) return;
+			Rn.copy(pointerTrafo, currentPointer);
+			double[] to = new double[] { pointerTrafo[2], pointerTrafo[6],
+					pointerTrafo[10], pointerTrafo[14] };
+			double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
+					pointerTrafo[11], pointerTrafo[15] };
+			de.jreality.scene.newpick.AABBPickSystem.getFrustumInterval(from, to, viewer);
+			pickResults =  pickSystem.computePick(from, to);
+			if (hitFilter == null)
+				hitFilter = new PosWHitFilter(viewer);
+			hitFilter.update();
+			// throw out pick results whose NDC w-coordinate is negative
+			de.jreality.scene.newpick.AABBPickSystem.filterList(hitFilter, from, to, pickResults);
+//			if (pickResults.size() != 0) 
+				System.err.println(SystemProperties.hostname+" Got "+pickResults.size()+" picks");
+
+		}
 	}
 
 	private SceneGraphPath calculatePickPath() {
@@ -570,9 +577,7 @@ public class ToolSystem implements ToolEventReceiver {
 
 	public void setPickSystem(PickSystem pickSystem) {
 		this.pickSystem = pickSystem;
-		if (pickSystem != null) {
-			pickSystem.setSceneRoot(viewer.getSceneRoot());
-		}
+		if (pickSystem != null) pickSystem.setSceneRoot(viewer.getSceneRoot());
 	}
 
 	public PickSystem getPickSystem() {
