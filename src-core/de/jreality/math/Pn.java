@@ -1013,10 +1013,15 @@ public class Pn {
 	static double[] zeroVector = {0,0,0,0};
 	public static double[] barycentricCoordinates(double[] weights, double[] p0,
 			double[] p1, double[] p) {
-		 // TODO throw exception if p0,p1,p not linearly dependent
+		// handle the case that p0,p1,p are linearly independent
+		// project p onto the line through p0 and p1
 		double[] plane = P3.planeFromPoints(null, p0, p1, p);
-		 if ( !Rn.equals(zeroVector, plane, 10E-8)) 
-			 throw new IllegalArgumentException("Not linearly dependent.");
+		 if ( !Rn.equals(zeroVector, plane, 10E-8)) {
+				plane = Rn.subtract(null, p0, p1);
+				plane[3] = -Rn.innerProduct(plane, p, 3);
+				p = P3.lineIntersectPlane(null, p0, p1, plane);
+		 }
+//			 throw new IllegalArgumentException("Not linearly dependent.");
          if (weights == null) weights = new double[2];
          // find two indices which are linearly independent in p0 and p1
          double det = 0;
