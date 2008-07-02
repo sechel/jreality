@@ -355,6 +355,11 @@ public class AABBPickSystem implements PickSystem {
 			if (weights[0] * weights[1] > 0) {
 				Rn.times(to, -1, to);
 			}
+//			double d1 = Rn.innerProduct(eyeW, from);
+//			double d2 = Rn.innerProduct(eyeW, to);
+//			if (d1*d2 > 0) {
+//				Rn.times(to, -1, to);
+//			}
 		}
 
 	public static void filterList(HitFilter hf, double[] from, double[] to, List<PickResult> list)	{
