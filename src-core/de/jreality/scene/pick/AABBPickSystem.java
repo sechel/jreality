@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Stack;
 
 import de.jreality.math.Matrix;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -65,6 +66,8 @@ import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.PickUtility;
+import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /**
  * 
@@ -96,6 +99,8 @@ public class AABBPickSystem implements PickSystem {
     to=(double[]) t.clone();
     hits.clear();
     // get the signature fresh each invocation
+    // this is actually dangerous since signature may change inside the scene graph
+    // (e.g., in ViewerVR there are euclidean 2D Frames inside the (possibly noneuclidean) scene.
     if (root.getAppearance() != null) {
     	Object sig = root.getAppearance().getAttribute(CommonAttributes.SIGNATURE, Integer.class);
     	if (sig instanceof Integer)	signature = (Integer) sig;
@@ -316,7 +321,10 @@ public class AABBPickSystem implements PickSystem {
 
     private void extractHits(List<Hit> l) {
       for (Hit h : l ) {
-    	  if (h.affineCoordinate < 0) continue;
+    	  if (h.affineCoordinate < 0) {
+    		  System.err.println(SystemProperties.hostname+" rejecting "+h.getPickPath().getLastComponent().getName());
+    		  continue;
+    	  }
     	  AABBPickSystem.this.hits.add(h);
       	}
     }
@@ -330,7 +338,16 @@ public class AABBPickSystem implements PickSystem {
 	 * @param to
 	 * @param viewer
 	 */
+  static boolean isPortal = false;
+  static {
+	  String foo = Secure.getProperty(SystemProperties.ENVIRONMENT);
+	  if (foo != null && foo.indexOf("portal") != -1) isPortal = true;
+  }
   public static void getFrustumInterval(double[] from, double[] to, Viewer viewer) {
+	  if (isPortal)	{
+		  //System.err.println(SystemProperties.hostname+"from = "+Rn.toString(from)+" to = "+Rn.toString(to));
+		  return;
+	  }
 			double[] c2w = viewer.getCameraPath().getMatrix(null); //deviceManager.getTransformationMatrix(camera2worldSlot).toDoubleArray(null);
 			Camera cam = CameraUtility.getCamera(viewer);
 			double[] eyeW = Rn.matrixTimesVector(null, c2w, cam.isPerspective() ? Pn.originP3 : Pn.zDirectionP3);
