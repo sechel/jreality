@@ -225,7 +225,8 @@ public class SceneGraphPath implements Cloneable {
 		int index = path.indexOf(exists);
 		if (index == -1) 
 			throw new IllegalArgumentException("no such node in path: "+exists.getName());
-		path.add(index, toInsert);
+		if (index < path.size()-1) path.add(index+1, toInsert);
+		else path.addLast(toInsert);
 	}
 	/**
 	 * Checks if the path is really an existing path in the scenegraph.
