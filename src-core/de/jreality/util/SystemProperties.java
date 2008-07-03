@@ -55,6 +55,7 @@ public class SystemProperties {
 	private SystemProperties() {}
 	
 	public static String hostname="localhost";
+	public static boolean isPortal = false;
 	static {
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
@@ -62,6 +63,8 @@ public class SystemProperties {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		String foo = Secure.getProperty(SystemProperties.ENVIRONMENT);
+		if (foo != null && foo.indexOf("portal") != -1) isPortal = true;
 	}
 	
 	/** 
