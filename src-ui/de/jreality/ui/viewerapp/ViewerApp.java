@@ -490,7 +490,8 @@ public class ViewerApp {
 				return null;
 			}
 		});
-		toolSystem.setPickSystem(new AABBPickSystem());
+		if (toolSystem.getPickSystem() == null)
+			toolSystem.setPickSystem(new AABBPickSystem());
 		//set sceneRoot and paths of viewer
 		sceneRoot = sc.getSceneRoot();
 		System.err.println("scene root is "+sceneRoot.getName());
