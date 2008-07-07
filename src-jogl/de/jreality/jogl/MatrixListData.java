@@ -22,6 +22,6 @@ public class MatrixListData extends Geometry {
 //	public Object dgcf;
 //	public int signature;
 	public int count;
-//	public int delay = 150;
+	public int delay = 500;
 //	public SceneGraphComponent child;
 }

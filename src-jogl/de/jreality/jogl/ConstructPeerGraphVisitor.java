@@ -52,9 +52,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 		if (c.getAppearance() != null)	{
 			Object foo = c.getAppearance().getAttribute("singlePeer",Boolean.class);
 			if (foo != null && foo instanceof Boolean) {
-				if (((Boolean)foo).booleanValue()) {
-					singlePeer = true;
-				} else singlePeer = false;
+				singlePeer = ((Boolean)foo).booleanValue();
 			} 			
 		}
 //		System.err.println("OSP: "+oldSinglePeer+" "+c.getName()+" NSP: "+singlePeer);

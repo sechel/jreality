@@ -93,7 +93,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				theDropBox.newVisibleList = false;
 				displayListDirty = true;
 //				System.err.println("Got visible list");
-			} else if (jr.beginRenderTime - currentTime > 250)	{
+			} else if (jr.beginRenderTime - currentTime > theDropBox.delay)	{
 				currentTime = jr.beginRenderTime;
 				displayListDirty = true;
 			}
