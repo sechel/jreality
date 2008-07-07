@@ -322,7 +322,7 @@ public class AABBPickSystem implements PickSystem {
     private void extractHits(List<Hit> l) {
       for (Hit h : l ) {
     	  if (h.affineCoordinate < 0) {
-    		  System.err.println(SystemProperties.hostname+" rejecting "+h.getPickPath().getLastComponent().getName());
+//    		  System.err.println(SystemProperties.hostname+" rejecting "+h.getPickPath().getLastComponent().getName());
     		  continue;
     	  }
     	  AABBPickSystem.this.hits.add(h);
