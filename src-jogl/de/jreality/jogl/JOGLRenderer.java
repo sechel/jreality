@@ -323,6 +323,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		thePeerRoot.render();		
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
 		if (renderSpherical && !frontBanana) globalGL.glPopMatrix();
+		globalGL.glLoadIdentity();
 	}
 
 	List clipPlanes = null;
