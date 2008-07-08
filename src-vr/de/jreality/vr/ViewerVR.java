@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
@@ -68,6 +69,8 @@ import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -76,6 +79,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import de.jreality.geometry.GeometryUtility;
@@ -898,7 +902,8 @@ public class ViewerVR {
 						helpURL.toURI()
 					}).execute();
 				} catch(Exception e2) {
-					JOptionPane.showMessageDialog(null, "Please visit "+helpURL);
+//					JOptionPane.showMessageDialog(null, "Please visit "+helpURL);
+					makeHelpPopup();
 				}
 			}
 
@@ -1224,5 +1229,32 @@ public class ViewerVR {
 
 	public SceneGraphComponent getAvatarNode() {
 		return avatarNode;
+	}
+
+	private void makeHelpPopup() {
+		final JFrame jf = new JFrame("viewerVR help link");
+		Box vbox = Box.createVerticalBox();
+		JTextField tf = new JTextField("Please visit http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual");
+		tf.setEditable(false);
+		vbox.add(Box.createVerticalStrut(5));
+		vbox.add(tf);
+		JButton okb = new JButton("OK");
+		okb.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				jf.dispose();
+			}
+			
+		});
+		Box hbox = Box.createHorizontalBox();
+		hbox.add(Box.createHorizontalGlue());
+		hbox.add(okb);
+		hbox.add(Box.createHorizontalGlue());
+		vbox.add(Box.createVerticalStrut(5));
+		vbox.add(hbox);
+		vbox.add(Box.createVerticalStrut(5));
+		jf.add(vbox);
+		jf.pack();
+		jf.setVisible(true);
 	}
 }
