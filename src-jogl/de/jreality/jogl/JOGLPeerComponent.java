@@ -70,7 +70,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	int geometryDirtyBits  = ALL_GEOMETRY_CHANGED, displayList = -1;
 	protected int childCount = 0;
 	// copycat related fields
-	long currentTime = 0;
+	long lastDisplayListCreationTime = 0;
 	protected final static int POINTS_CHANGED = 1;
 	protected final static int LINES_CHANGED = 2;
 	protected final static int FACES_CHANGED = 4;

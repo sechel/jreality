@@ -93,8 +93,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				theDropBox.newVisibleList = false;
 				displayListDirty = true;
 //				System.err.println("Got visible list");
-			} else if (jr.beginRenderTime - currentTime > theDropBox.delay)	{
-				currentTime = jr.beginRenderTime;
+			} else if (jr.beginRenderTime - lastDisplayListCreationTime > theDropBox.delay)	{
 				displayListDirty = true;
 			}
 			jr.renderingState.componentDisplayLists = theDropBox.componentDisplayLists;
@@ -119,7 +118,9 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 					if (displayList < 0) displayList = jr.globalGL.glGenLists(1);
 					jr.globalGL.glNewList(displayList, GL.GL_COMPILE);
 					insideDL = jr.renderingState.insideDisplayList = true;
-//					theLog.fine("Turning on dlist for "+goBetween.getOriginalComponent().getName());
+					System.err.println("dlist elapsed time: "+(jr.beginRenderTime-lastDisplayListCreationTime));
+					lastDisplayListCreationTime = jr.beginRenderTime;
+					//					theLog.fine("Turning on dlist for "+goBetween.getOriginalComponent().getName());
 				}	
 			}
 		}
