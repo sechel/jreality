@@ -55,13 +55,6 @@ import de.jreality.util.Input;
 public class Icosahedron {
   
   public static void main(String[] args) throws IOException {
-    IndexedFaceSet ico = new CatenoidHelicoid(10);
-    SceneGraphComponent sgc = new SceneGraphComponent();
-    sgc.setGeometry(ico);
-    if (args.length > 0) {
-      sgc.setAppearance(new Appearance());
-      TextureUtility.createTexture(sgc.getAppearance(), "polygonShader", ImageData.load(Input.getInput(args[0])));
-    }
-    ViewerApp.display(sgc);
+    ViewerApp.display(Primitives.icosahedron());
   }
 }
