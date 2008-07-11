@@ -1000,53 +1000,6 @@ public class Pn {
 		for (int i = 0; i<sl; ++i)	setToLength(dst[i], src[i], d, signature);
 		return dst;
 	}
-
-	/**
-	 * Assuming <code>p0,p1,p</code> are linearly dependent, calculate weights such that
-	 * <code>p = weights[0]*p0 + weights[1]*p1</code>.
-	 * @param weights
-	 * @param p0
-	 * @param p1
-	 * @param p
-	 * @return	
-	 */
-	static double[] zeroVector = {0,0,0,0};
-	public static double[] barycentricCoordinates(double[] weights, double[] p0,
-			double[] p1, double[] p) {
-		// handle the case that p0,p1,p are linearly independent
-		// project p onto the line through p0 and p1
-		double[] plane = P3.planeFromPoints(null, p0, p1, p);
-		 if ( !Rn.equals(zeroVector, plane, 10E-8)) {
-				plane = Rn.subtract(null, p0, p1);
-				plane[3] = -Rn.innerProduct(plane, p, 3);
-				p = P3.lineIntersectPlane(null, p0, p1, plane);
-		 }
-//			 throw new IllegalArgumentException("Not linearly dependent.");
-         if (weights == null) weights = new double[2];
-         // find two indices which are linearly independent in p0 and p1
-         double det = 0;
-         int index0= 0, index1 = 0;
-         int n = Math.min(p0.length, p1.length);
-         for (; index0<n-1; ++index0)	{
-        	 for (index1 = index0+1; index1 < n; ++index1)	{
-        		 det = p0[index0]*p1[index1] - p0[index1]*p1[index0];
-        		 if (Math.abs(det) > 10E-8) break;
-        	 }
-        	 if (index1 != n) break;
-         }
-         if (index0 == n-1 && index1 == n) return weights;
-//          System.err.println("i:j= "+index0+":"+index1);
-        double a = p0[index0], b = p1[index0], c = p0[index1], d = p1[index1];
-         weights[0] = (d*p[index0] - b*p[index1])/det;
-         weights[1] = (-c*p[index0] + a*p[index1])/det;
-         double[] p2 = Rn.linearCombination(null, weights[0], p0, weights[1], p1);
-//         System.err.println("p0= "+Rn.toString(p0));
-//         System.err.println("p1="+Rn.toString(p1));
-//         System.err.println("p= "+Rn.toString(p));
-//         System.err.println("alpha:beta= "+weights[0]+":"+weights[1]);
-//         System.err.println("p2="+Rn.toString(p2));
-         return weights;
-	}
 	
 	//public static double[] barycentricCoordinates
 
