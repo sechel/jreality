@@ -324,7 +324,7 @@ public class U3DSceneUtility {
 				}
 				if (v % 2 != 0) {
 					int k = v / 2 - 1;
-					newFaceData[j++] = new int[]{ f[k-1], f[k], f[k+1]};
+					newFaceData[j++] = new int[]{ f[k], f[k+1], f[k+2]};
 				}
 			} else {
 				newFaceData[j++] = f;
