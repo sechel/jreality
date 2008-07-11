@@ -389,11 +389,15 @@ public class CameraUtility {
 	    Matrix camMatrix = new Matrix();
 	    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
 	    
-	    ((Camera)cameraPath.getLastElement()).setFar(margin*5*radius);
-	    ((Camera)cameraPath.getLastElement()).setNear(.002*radius);
+	    Camera camera = ((Camera)cameraPath.getLastElement());
+		camera.setFar(margin*5*radius);
+	    camera.setNear(.002*radius);
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
 	    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);
+		camera.setFocus(Math.abs(m.getColumn(3)[2]) ); 		//focus);
+		camera.setEyeSeparation(camera.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
+		System.err.println("setting focus to "+camera.getFocus());
 	}
 
 }
