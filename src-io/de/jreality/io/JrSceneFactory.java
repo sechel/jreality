@@ -54,6 +54,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.PickShowTool;
@@ -222,6 +223,7 @@ public class JrSceneFactory {
 		scene.addTool(rotateTool);
 		scene.addTool(draggingTool);
 		sceneRoot.addChild(scene);
+		sceneRoot.addTool(new ClickWheelCameraZoomTool());
 		//lightComp 1
 		SceneGraphComponent lightNode = new SceneGraphComponent("lightNode");
 		lightNode.setVisible(true);
