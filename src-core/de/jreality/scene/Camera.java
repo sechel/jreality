@@ -291,7 +291,7 @@ public class Camera extends SceneGraphNode {
 		return fstop;
 	}
 
-	public void setFstop(double fstop) {
+	public void setFStop(double fstop) {
 		this.fstop = fstop;
 	}
 
