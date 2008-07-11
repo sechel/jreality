@@ -250,6 +250,7 @@ class BoundingBoxTraversal extends SceneGraphVisitor {
 	} catch (IllegalStateException e){
 		e.printStackTrace();
 	}
+	if (Rn.isNan(tmpVec[0]) || Rn.isNan(tmpVec[1])) return;
 	bound.xmin = Math.min(bound.xmin,tmpVec[0][0]);
 	bound.xmax = Math.max(bound.xmax,tmpVec[1][0]);
 	bound.ymin = Math.min(bound.ymin,tmpVec[0][1]);
