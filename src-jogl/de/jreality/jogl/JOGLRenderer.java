@@ -249,7 +249,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 	public void render() {
 // 		following optimization has been abandoned for now
-//		System.err.println("in render");
+//		System.err.println("in render "+frameCount);
 		Texture2DLoaderJOGL.markAnimatedTexturesDirty(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
@@ -814,6 +814,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		lightsChanged = true;
 		numTiles = Math.max(imageWidth/1024, imageHeight/1024);
+		if (numTiles == 0) numTiles = 1;
 //		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
 		tileSizeX = imageWidth/numTiles;
 		tileSizeY = imageHeight/numTiles;
