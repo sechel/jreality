@@ -91,7 +91,7 @@ class BruteForcePicking {
         if (intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
           double[] pw = m.multiplyVector(pobj);
           double d =  Pn.distanceBetween(from, pw,signature);
-          double affCoord = AABBPickSystem.affineCoord(from, to, pw);
+          double affCoord = P3.affineCoordinate(from, to, pw);
           hits.add(new Hit(path.pushNew(ifs), pw, d, affCoord, PickResult.PICK_TYPE_FACE, i,j));
 //          System.err.println("polygon hit");
         }
@@ -187,7 +187,7 @@ class BruteForcePicking {
           it.remove();
           double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
           // TODO: pass index j (index in the edge) to the Hit?
-          double affCoord = AABBPickSystem.affineCoord(from, to, hitPoint);
+          double affCoord = P3.affineCoordinate(from, to, hitPoint);
           Hit h = new Hit(path.pushNew(ils), hitPoint, dist , affCoord , PickResult.PICK_TYPE_LINE, i, -1);
           localHits.add(h);
         }       
@@ -272,7 +272,7 @@ class BruteForcePicking {
         hitPoint = m.multiplyVector(hitPoint);
         i.remove();
         double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
-        double affCoord = AABBPickSystem.affineCoord(from, to, hitPoint);
+        double affCoord = P3.affineCoordinate(from, to, hitPoint);
        Hit h = new Hit(path.pushNew(ps), hitPoint, dist , affCoord , PickResult.PICK_TYPE_POINT, j,-1);
         localHits.add(h);
       }       
@@ -311,7 +311,7 @@ class BruteForcePicking {
       hitPoint = m.multiplyVector(hitPoint);
       i.remove();
         double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
-        double affCoord = AABBPickSystem.affineCoord(from, to, hitPoint);
+        double affCoord = P3.affineCoordinate(from, to, hitPoint);
       Hit h = new Hit(path.pushNew(sphere), hitPoint, dist ,affCoord , PickResult.PICK_TYPE_OBJECT, -1,-1);
       localHits.add(h);
     }   
@@ -382,7 +382,7 @@ class BruteForcePicking {
     for (Iterator i = CYLINDER_HIT_LIST.iterator(); i.hasNext(); ) {
       double[] hitPoint = (double[]) i.next();
       i.remove();
-      double affCoord = AABBPickSystem.affineCoord(from, to, hitPoint);
+      double affCoord = P3.affineCoordinate(from, to, hitPoint);
       double dist=Rn.euclideanNorm(Rn.subtract(tmp,hitPoint,from));
       Hit h = new Hit(path.pushNew(cylinder), hitPoint, dist ,affCoord, PickResult.PICK_TYPE_OBJECT, -1,-1);
       localHits.add(h);

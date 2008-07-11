@@ -51,6 +51,7 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -236,7 +237,7 @@ public class AABBTree {
             if (BruteForcePicking.intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
               double[] pw = m.multiplyVector(pobj);
               hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw,signature), 
-            		  AABBPickSystem.affineCoord(from, to, pw), PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
+            		  P3.affineCoordinate(from, to, pw), PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
 //              System.err.println("AABB polygon hit");
             }
           }

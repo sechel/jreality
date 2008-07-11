@@ -368,7 +368,7 @@ public class AABBPickSystem implements PickSystem {
 	//		System.err.println("tondc = "+Rn.toString(Pn.dehomogenize(tondc, tondc))); //tondc));
 			// the origin should have negative affine coordinate with respect to the to and from points
 			// so that valid pick points have positive affine coordinate
-			double[] weights = Pn.barycentricCoordinates(null, from, to, eyeW);
+			double[] weights = P3.barycentricCoordinates(null, from, to, eyeW);
 			if (weights[0] * weights[1] > 0) {
 				Rn.times(to, -1, to);
 			}
@@ -386,14 +386,5 @@ public class AABBPickSystem implements PickSystem {
 		}
 		list.removeAll(rejected);
 	}
-
-	public static double affineCoord(double[] from ,double[] to, double[] pw )	{
-	      double[] weights = Pn.barycentricCoordinates(null, from, to, pw);
-		  if (weights[1] == 0) return 0;
-	      double affCoord = Double.MAX_VALUE;
-	      if (weights[0] != 0.0) affCoord = weights[1]/weights[0];
-	      else if (weights[1] < 0) affCoord = -Double.MAX_VALUE;
-	      return affCoord;
-	  }
 
 }
