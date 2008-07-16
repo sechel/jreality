@@ -62,6 +62,7 @@ import de.jreality.tools.FlyToPickTool;
 import de.jreality.tools.FlyTool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.LookAtTool;
+import de.jreality.tools.PickShowTool;
 import de.jreality.tools.PointerDisplayTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tools.ScaleTool;
@@ -137,6 +138,7 @@ public class AddTool extends AbstractSelectionListenerAction {
     tools.add(FlyTool.class.getName());
     tools.add(HeadTransformationTool.class.getName());
     tools.add(LookAtTool.class.getName());
+    tools.add(PickShowTool.class.getName());
     tools.add(PointerDisplayTool.class.getName());
     tools.add(RotateTool.class.getName());
     tools.add(ScaleTool.class.getName());
