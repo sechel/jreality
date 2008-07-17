@@ -1,10 +1,11 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.tool;
 
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -98,17 +99,20 @@ public class DragExample {
 				
 				faceSet = e.getIndexedFaceSet();
 				points=new double[faceSet.getNumPoints()][];
-				faceSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(points);
+				points = faceSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 			}
 
 			public void faceDragged(FaceDragEvent e) {
 				double[][] newPoints=(double[][])points.clone();
 				Matrix trafo=new Matrix();
 				MatrixBuilder.euclidean().translate(e.getTranslation()).assignTo(trafo);
+				System.err.println("trans = "+Rn.toString(e.getTranslation()));
+				System.err.println("Trafo = "+trafo.toString());
 				int[] faceIndices=e.getFaceIndices();
 				for(int i=0;i<faceIndices.length;i++){
 					newPoints[faceIndices[i]]=trafo.multiplyVector(points[faceIndices[i]]);
 				}
+				System.err.println("Face verts = "+Rn.toString(newPoints));
 				faceSet.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(newPoints));	
 			}
 

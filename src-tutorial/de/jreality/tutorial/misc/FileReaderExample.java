@@ -1,4 +1,4 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.misc;
 
 import java.io.IOException;
 

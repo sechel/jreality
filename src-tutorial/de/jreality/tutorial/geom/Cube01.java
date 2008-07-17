@@ -38,37 +38,26 @@
  */
 
 
-package de.jreality.tutorial;
+package de.jreality.tutorial.geom;
 
-import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
 
-public class Cube04 {
+public class Cube01 {
   
   public static void main(String[] args) {
     
-    IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+    PointSetFactory psf = new PointSetFactory();
     
-    double [][] vertices  = new double[][] {
-      {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0},
-      {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}
+    double [][] vertices = new double[][] {
+      {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}
     };
     
-    int [][] faceIndices = new int [][] {
-      {0, 1, 2, 3}, {7, 6, 5, 4}, {0, 1, 5, 4}, 
-      {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7} 
-    };
+    psf.setVertexCount( vertices.length );
+    psf.setVertexCoordinates( vertices );
     
-    ifsf.setVertexCount( vertices.length );
-    ifsf.setVertexCoordinates( vertices );
-    ifsf.setFaceCount( faceIndices.length);
-    ifsf.setFaceIndices( faceIndices );
+    psf.update();
     
-    ifsf.setGenerateEdgesFromFaces( true );
-    ifsf.setGenerateFaceNormals( true );
-
-    ifsf.update();
-    
-    ViewerApp.display(ifsf.getIndexedFaceSet());
+    ViewerApp.display(psf.getPointSet());
   }
 }

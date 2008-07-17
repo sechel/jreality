@@ -1,10 +1,11 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.tform;
 
 import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
@@ -16,12 +17,14 @@ import de.jreality.util.SceneGraphUtility;
  * each time being rendered according to the {@link de.jreality.scene.Transformation} and {@link de.jreality.scene.Appearance} contained
  * in that instance.
  * 
+ * We use direct calls to {@link Appearance#setAttribute(String, Object)} instead of using shader interfaces.
  * @author gunn
  *
- */public class Icosahedra {
+ */
+public class Icosahedra {
 
 	 public static void main(String[] args) throws IOException {
-		 Color[] faceColors = {new Color(100, 200, 100), new Color(100, 100, 200), new Color(100,200,200), new Color(200,100,100)};
+		Color[] faceColors = {new Color(100, 200, 100), new Color(100, 100, 200), new Color(100,200,200), new Color(200,100,100)};
 	    IndexedFaceSet ico = Primitives.sharedIcosahedron;
 	    SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
 	    // set up the colors and sizes for edge and point rendering
@@ -54,6 +57,6 @@ import de.jreality.util.SceneGraphUtility;
 	    	}
 	    }
 	    ViewerApp.display(world);
-		  }
+	}
 
 }

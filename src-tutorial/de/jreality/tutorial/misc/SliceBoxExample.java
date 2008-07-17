@@ -1,4 +1,4 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.misc;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -20,10 +20,10 @@ import de.jreality.util.SceneGraphUtility;
  * @author Charles Gunn
  *
  */
-public class LocalClippingPlaneExample{
+public class SliceBoxExample{
 
 	public static void main(String[] args) throws IOException {
-		LocalClippingPlaneExample lcpe = new LocalClippingPlaneExample();
+		SliceBoxExample lcpe = new SliceBoxExample();
 		SceneGraphComponent root = lcpe.makeExample();
 		ViewerApp va = ViewerApp.display(root);
 	}

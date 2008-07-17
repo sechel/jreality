@@ -1,4 +1,4 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.tool;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;

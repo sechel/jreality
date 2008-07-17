@@ -38,22 +38,37 @@
  */
 
 
-package de.jreality.tutorial;
+package de.jreality.tutorial.geom;
 
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.geometry.IndexedLineSetUtility;
+import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
 
-public class Cube03 {
+public class Cube04 {
   
   public static void main(String[] args) {
     
-    double [][] vertices = new double[][] {
-      {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}
+    IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+    
+    double [][] vertices  = new double[][] {
+      {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0},
+      {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}
     };
     
-    IndexedLineSet ils = IndexedLineSetUtility.createCurveFromPoints(vertices, true);
+    int [][] faceIndices = new int [][] {
+      {0, 1, 2, 3}, {7, 6, 5, 4}, {0, 1, 5, 4}, 
+      {1, 2, 6, 5}, {2, 3, 7, 6}, {3, 0, 4, 7} 
+    };
     
-    ViewerApp.display(ils);
+    ifsf.setVertexCount( vertices.length );
+    ifsf.setVertexCoordinates( vertices );
+    ifsf.setFaceCount( faceIndices.length);
+    ifsf.setFaceIndices( faceIndices );
+    
+    ifsf.setGenerateEdgesFromFaces( true );
+    ifsf.setGenerateFaceNormals( true );
+
+    ifsf.update();
+    
+    ViewerApp.display(ifsf.getIndexedFaceSet());
   }
 }

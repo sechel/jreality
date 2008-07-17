@@ -1,4 +1,4 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.util;
 
 import de.jreality.shader.ImageData;
 

@@ -1,4 +1,4 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.misc;
 
 import java.awt.Component;
 
@@ -21,7 +21,6 @@ import de.jreality.util.SystemProperties;
 public class SimpleViewer {
 
 	public static void main(String[] args)	{
-		Secure.setProperty(SystemProperties.VIEWER,	 "de.jreality.jogl.Viewer"); //de.jreality.portal.DesktopPortalViewer");
 		SceneGraphComponent world = new SceneGraphComponent();
 		world.setGeometry(Primitives.sharedIcosahedron);
 		world.addTool(new DraggingTool());

@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.tutorial;
+package de.jreality.tutorial.geom;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.ui.viewerapp.ViewerApp;

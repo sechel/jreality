@@ -38,26 +38,22 @@
  */
 
 
-package de.jreality.tutorial;
+package de.jreality.tutorial.geom;
 
-import de.jreality.geometry.PointSetFactory;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 
-public class Cube01 {
+public class Cube03 {
   
   public static void main(String[] args) {
-    
-    PointSetFactory psf = new PointSetFactory();
     
     double [][] vertices = new double[][] {
       {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}
     };
     
-    psf.setVertexCount( vertices.length );
-    psf.setVertexCoordinates( vertices );
+    IndexedLineSet ils = IndexedLineSetUtility.createCurveFromPoints(vertices, true);
     
-    psf.update();
-    
-    ViewerApp.display(psf.getPointSet());
+    ViewerApp.display(ils);
   }
 }

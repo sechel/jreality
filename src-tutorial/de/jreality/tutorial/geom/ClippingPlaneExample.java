@@ -1,4 +1,4 @@
-package de.jreality.tutorial;
+package de.jreality.tutorial.geom;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
