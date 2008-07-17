@@ -160,7 +160,7 @@ public class DragEventTool extends AbstractTool {
       factor=factor/Rn.euclideanNorm(root2local.multiplyVector(dir)); 
       Rn.times(translation3,factor,dir);
     }   
-    double[] translation={translation3[0],translation3[1],translation3[2],0};
+    double[] translation={translation3[0],translation3[1],translation3[2],1};
     double[] position = new double[4];
 	  if (pickType == PickResult.PICK_TYPE_OBJECT) {
 		    firePrimitiveDragged(Rn.add(translation,translation,pickPoint));
