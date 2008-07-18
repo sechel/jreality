@@ -43,6 +43,7 @@ package de.jreality.tutorial.geom;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.CameraUtility;
 
 public class Cube03 {
   
@@ -54,6 +55,7 @@ public class Cube03 {
     
     IndexedLineSet ils = IndexedLineSetUtility.createCurveFromPoints(vertices, true);
     
-    ViewerApp.display(ils);
+    ViewerApp va = ViewerApp.display(ils);
+    CameraUtility.encompass(va.getCurrentViewer());
   }
 }

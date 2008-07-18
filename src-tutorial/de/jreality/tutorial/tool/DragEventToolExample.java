@@ -12,7 +12,7 @@ import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
 import de.jreality.ui.viewerapp.ViewerApp;
 
-public class PointDragExample {
+public class DragEventToolExample {
 
 	public static void main(String[] args) {
 		SceneGraphComponent cmp = new SceneGraphComponent();

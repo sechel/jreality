@@ -42,6 +42,7 @@ package de.jreality.tutorial.geom;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.CameraUtility;
 
 public class Cube04 {
   
@@ -69,6 +70,7 @@ public class Cube04 {
 
     ifsf.update();
     
-    ViewerApp.display(ifsf.getIndexedFaceSet());
-  }
+    ViewerApp va = ViewerApp.display(ifsf.getIndexedFaceSet());
+    CameraUtility.encompass(va.getCurrentViewer());
+ }
 }

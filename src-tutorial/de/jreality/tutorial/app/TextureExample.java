@@ -73,13 +73,13 @@ public static void main(String[] args) throws IOException {
       sgc.getAppearance().setAttribute(EDGE_DRAW, false);
       ImageData id = null;
       sgc.getAppearance().setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.GREEN);
-      double scale = 3;
+      double scale = 1;
+      // load a file if argument is present
       if (args.length > 0) {
     	  id =  ImageData.load(Input.getInput(args[0]));
           sgc.getAppearance().setAttribute(DIFFUSE_COLOR, Color.WHITE);
-          scale = 1;
       }
-      else  {
+      else  {	// use a procedural texture
     	  SimpleTextureFactory stf = new SimpleTextureFactory();
     	  stf.update();
     	  id = stf.getImageData();

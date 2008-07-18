@@ -44,8 +44,11 @@ import de.jreality.geometry.IndexedFaceSetFactory;
 import java.awt.Color;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Appearance;
-import de.jreality.shader.CommonAttributes;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.StorageModel;
+import static de.jreality.shader.CommonAttributes.*;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.CameraUtility;
 
 public class Cube05 {
   
@@ -63,28 +66,30 @@ public class Cube05 {
       {2, 3, 7, 6}, {1, 2, 6, 5}, {3, 0, 4, 7} 
     };
     
+    int [][] edgeIndices = new int [][] {
+    		{0,1},{1,2},{2,6},{6,7},{7,4},{4,0}
+    };
+    
+    Color[] faceColors = new Color[]{
+      Color.BLUE, Color.BLUE, Color.GREEN, Color.GREEN, Color.RED, Color.RED 
+    };
     ifsf.setVertexCount( vertices.length );
     ifsf.setVertexCoordinates( vertices );
     ifsf.setFaceCount( faceIndices.length);
-    ifsf.setFaceIndices( faceIndices );
-    
+    ifsf.setFaceIndices( faceIndices ); 
+    ifsf.setFaceColors(faceColors);    
     ifsf.setGenerateFaceNormals( true );
-
-    ifsf.setGenerateEdgesFromFaces( false );
-    
-    ifsf.setFaceColors(new Color[]{
-      Color.BLUE, Color.BLUE, Color.GREEN, Color.GREEN, Color.RED, Color.RED 
-    });
-    
+    ifsf.setGenerateEdgesFromFaces(false);
     ifsf.update();
     
     SceneGraphComponent sgc = new SceneGraphComponent();
     sgc.setGeometry(ifsf.getIndexedFaceSet());
     
     Appearance app = new Appearance();
-    app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+    app.setAttribute(VERTEX_DRAW, false);
     sgc.setAppearance(app);
     
-    ViewerApp.display(sgc);
+    ViewerApp va = ViewerApp.display(sgc);
+    CameraUtility.encompass(va.getCurrentViewer());
   }
 }

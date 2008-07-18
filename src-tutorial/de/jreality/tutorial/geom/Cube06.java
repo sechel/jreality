@@ -40,32 +40,69 @@
 
 package de.jreality.tutorial.geom;
 
-import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.geometry.IndexedFaceSetFactory;
+import java.awt.Color;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.StorageModel;
+import static de.jreality.shader.CommonAttributes.*;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 
-public class Cube02 {
+/**
+ * This example builds on {@link Cube05}. It shows how to set the edge list by hand, and
+ * also a JOGL backend feature to allow display of only certain vertices
+ * (in this case, only the vertices appearing in the edge list).
+ * 
+ * @author Charles Gunn
+ *
+ */public class Cube06 {
   
   public static void main(String[] args) {
     
-    IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+    IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
     
-    double [][] vertices = new double[][] {
-      {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}
+    double [][] vertices  = new double[][] {
+      {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0},
+      {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}
     };
     
-    int[][] edgeIndices = new int[][]{
-      {0, 1}, {1, 2}, {2, 3}, {3, 0}  
+    int [][] faceIndices = new int [][] {
+      {0, 1, 2, 3}, {7, 6, 5, 4}, {0, 1, 5, 4}, 
+      {2, 3, 7, 6}, {1, 2, 6, 5}, {3, 0, 4, 7} 
     };
     
-    ilsf.setVertexCount( vertices.length );
-    ilsf.setVertexCoordinates( vertices );
-    ilsf.setLineCount(edgeIndices.length);
-    ilsf.setEdgeIndices(edgeIndices);
+    int [][] edgeIndices = new int [][] {
+    		{0,1},{1,2},{2,6},{6,7},{7,4},{4,0}
+    };
     
-    ilsf.update();
+    int [] pointIndices = {1,1,1,0,1,0,1,1};
+    Color[] faceColors = new Color[]{
+      Color.BLUE, Color.BLUE, Color.GREEN, Color.GREEN, Color.RED, Color.RED 
+    };
+    ifsf.setVertexCount( vertices.length );
+    ifsf.setVertexCoordinates( vertices );
+    ifsf.setFaceCount( faceIndices.length);
+    ifsf.setFaceIndices( faceIndices ); 
+    ifsf.setFaceColors(faceColors);    
+    ifsf.setLineCount(edgeIndices.length);
+    ifsf.setEdgeIndices(edgeIndices);
+    ifsf.setGenerateFaceNormals( true );
+    ifsf.update();
     
-    ViewerApp va = ViewerApp.display(ilsf.getIndexedLineSet());
+    ifsf.getIndexedFaceSet().setVertexAttributes(Attribute.INDICES,
+    		StorageModel.INT_ARRAY.createReadOnly(pointIndices));
+    SceneGraphComponent sgc = new SceneGraphComponent();
+    sgc.setGeometry(ifsf.getIndexedFaceSet());
+    
+    Appearance app = new Appearance();
+//    app.setAttribute(VERTEX_DRAW, false);
+    app.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
+    app.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
+    sgc.setAppearance(app);
+    
+    ViewerApp va = ViewerApp.display(sgc);
     CameraUtility.encompass(va.getCurrentViewer());
   }
 }
