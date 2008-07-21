@@ -175,11 +175,21 @@ public class CameraUtility {
 		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"translate: "+Rn.toString(from));
 		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, viewer.getSignature());
 		double[] newWorldToCam = Rn.inverse(null, newCamToWorld);
-		getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);
-		double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );
-		if (setStereoParameters)	{
-			cam.setFocus(Math.abs(centerWorld[2]) ); 		//focus);
-			cam.setEyeSeparation(cam.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
+		if (cam.isPerspective())	{
+			getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);			
+			double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );
+			if (setStereoParameters)	{
+				cam.setFocus(Math.abs(centerWorld[2]) ); 		//focus);
+				cam.setEyeSeparation(cam.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
+			}
+		}
+		else 
+		{
+			if (setStereoParameters)	{
+				cam.setFocus(Math.abs(2*focus) ); 		//focus);
+				cam.setEyeSeparation(cam.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
+			}
+			
 		}
 		//TODO figure out why setting the near/far clipping planes sometimes doesn't work
 		Rectangle3D cameraBox = worldBox.transformByMatrix(null, newWorldToCam);
@@ -394,8 +404,14 @@ public class CameraUtility {
 	    camera.setNear(.002*radius);
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
-	    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);
-		camera.setFocus(Math.abs(m.getColumn(3)[2]) ); 		//focus);
+	    if (camera.isPerspective()) {
+		    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);	    	
+			camera.setFocus(Math.abs(m.getColumn(3)[2]) ); 		//focus);
+	    } else {
+			double ww = (e[1] > e[0]) ? e[1] : e[0];
+			double focus =   ww / Math.tan(Math.PI*(camera.getFieldOfView())/360.0);
+			camera.setFocus(Math.abs(focus) ); 		//focus);	    	
+	    }
 		camera.setEyeSeparation(camera.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
 		System.err.println("setting focus to "+camera.getFocus());
 	}
