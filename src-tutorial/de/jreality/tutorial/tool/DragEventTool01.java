@@ -1,33 +1,33 @@
 package de.jreality.tutorial.tool;
 
+import java.awt.Color;
+
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultLineShader;
+import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
 import de.jreality.ui.viewerapp.ViewerApp;
 
-public class DragEventToolExample {
+public class DragEventTool01 {
 
 	public static void main(String[] args) {
 		SceneGraphComponent cmp = new SceneGraphComponent();
 
 		cmp.setGeometry(Primitives.icosahedron());
+		Appearance ap = new Appearance();
+		cmp.setAppearance(ap);
+		setupAppearance(ap);
 		
-		cmp.setAppearance(new Appearance());
-		cmp.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.05);
-		cmp.getAppearance().setAttribute(CommonAttributes.SMOOTH_SHADING,false);
-		
-		/**tool:*/
 		DragEventTool t = new DragEventTool();
-		double[] highlightColor = {1,0,0,1};		// highlight point in red
 		t.addPointDragListener(new PointDragListener() {
 
 			public void pointDragStart(PointDragEvent e) {
@@ -50,5 +50,18 @@ public class DragEventToolExample {
 		cmp.addTool(t);
 
 		ViewerApp.display(cmp);
+	}
+
+	private static void setupAppearance(Appearance ap) {
+		DefaultGeometryShader dgs;
+		DefaultLineShader dls;
+		DefaultPointShader dpts;
+		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+		dls = (DefaultLineShader) dgs.createLineShader("default");
+		dls.setDiffuseColor(Color.yellow);
+		dls.setTubeRadius(.03);
+		dpts = (DefaultPointShader) dgs.createPointShader("default");
+		dpts.setDiffuseColor(Color.red);
+		dpts.setPointRadius(.05);
 	}
 }

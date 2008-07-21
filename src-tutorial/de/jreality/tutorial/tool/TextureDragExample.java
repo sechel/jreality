@@ -40,11 +40,10 @@
 
 package de.jreality.tutorial.tool;
 
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.math.Matrix;
@@ -55,51 +54,47 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
-import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.tools.DragEventTool;
-import de.jreality.tools.FaceDragEvent;
-import de.jreality.tools.FaceDragListener;
 import de.jreality.tutorial.util.SimpleTextureFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 
-public class TextureExample2 {
-  
-  // java de.jreality.tutorial.TextureExample grid.jpeg
-  
-  private static double[] texMatrix;
-private static Texture2D texture2d;
+public class TextureDragExample {
 
 public static void main(String[] args) throws IOException {
-	  IndexedFaceSet ico = new CatenoidHelicoid(40);
-	  SceneGraphComponent sgc = new SceneGraphComponent();
-	  sgc.setGeometry(ico);
-      sgc.setAppearance(new Appearance());
-      sgc.getAppearance().setAttribute(CommonAttributes.DIFFUSE_COLOR, Color.YELLOW);
-      sgc.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
-      sgc.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
-      ImageData id = null;
-      sgc.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.GREEN);
-      double scale = 3;
-      if (args.length > 0) id =  ImageData.load(Input.getInput(args[0]));
-      else  {
-    	  SimpleTextureFactory stf = new SimpleTextureFactory();
-    	  stf.update();
-    	  id = stf.getImageData();
-    	  scale = 10;
-      }
-      texture2d = TextureUtility.createTexture(sgc.getAppearance(), CommonAttributes.POLYGON_SHADER,id);
-      texture2d.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
-      texture2d.setApplyMode(Texture2D.GL_MODULATE);
+  	IndexedFaceSet geom = new CatenoidHelicoid(40);
+	SceneGraphComponent sgc = new SceneGraphComponent("TextureExample");
+	sgc.setGeometry(geom);
+	Appearance ap = new Appearance();
+	sgc.setAppearance(ap);
+	DefaultGeometryShader dgs = (DefaultGeometryShader) ShaderUtility.createDefaultGeometryShader(ap, true);
+	dgs.setShowLines(false);
+	dgs.setShowPoints(false);
+	DefaultPolygonShader dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+	dps.setDiffuseColor(Color.white);
+	ImageData id = null;
+	double scale = 1;
+	// get the image for the texture first
+	if (args.length > 0) {
+		id = ImageData.load(Input.getInput(args[0]));
+	} else { // use a procedural texture
+		SimpleTextureFactory stf = new SimpleTextureFactory();
+		stf.update();
+		id = stf.getImageData();
+		scale = 10;
+		dps.setDiffuseColor(Color.yellow);
+	}
+	final Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
+	tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
     
     Tool t = new AbstractTool(InputSlot.getDevice("AllDragActivation")) {
 
@@ -107,13 +102,12 @@ public static void main(String[] args) throws IOException {
     	Matrix origTexMatrix;
 
 		{
-    		addCurrentSlot(InputSlot.getDevice("PointerTransformation"), "drags the texture");
+   		addCurrentSlot(InputSlot.getDevice("PointerTransformation"), "drags the texture");
     	}
     	
 		public void activate(ToolContext tc) {
 			origTexCoords = tc.getCurrentPick().getTextureCoordinates();
-			origTexMatrix = texture2d.getTextureMatrix();
-			System.err.println("Activating texture tool");
+			origTexMatrix = tex.getTextureMatrix();
 		}
 
 		public void perform(ToolContext tc) {
@@ -122,10 +116,7 @@ public static void main(String[] args) throws IOException {
 			double[] diff = Rn.subtract(null, origTexCoords, texCoords);
 			double[] diff4 = {diff[0], diff[1], 0, 1.0};
 			double[] trans = P3.makeTranslationMatrix(null, diff4, Pn.EUCLIDEAN);
-			texture2d.setTextureMatrix(new Matrix(Rn.times(null, origTexMatrix.getArray(), trans)));
-		}
-
-		public void deactivate(ToolContext tc) {
+			tex.setTextureMatrix(new Matrix(Rn.times(null, origTexMatrix.getArray(), trans)));
 		}
 
 		public String getDescription(InputSlot slot) {
@@ -133,7 +124,7 @@ public static void main(String[] args) throws IOException {
 		}
 
 		public String getDescription() {
-			return null;
+			return "A tool which drags a texture around";
 		}
     	
     };

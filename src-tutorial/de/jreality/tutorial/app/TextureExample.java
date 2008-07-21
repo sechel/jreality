@@ -40,11 +40,7 @@
 
 package de.jreality.tutorial.app;
 
-import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
-import static de.jreality.shader.CommonAttributes.EDGE_DRAW;
-import static de.jreality.shader.CommonAttributes.LINE_SHADER;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
-import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -54,7 +50,10 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
@@ -65,31 +64,31 @@ public class TextureExample {
   
   
 public static void main(String[] args) throws IOException {
-	  IndexedFaceSet ico = new CatenoidHelicoid(40);
-	  SceneGraphComponent sgc = new SceneGraphComponent();
-	  sgc.setGeometry(ico);
-      sgc.setAppearance(new Appearance());
-      sgc.getAppearance().setAttribute(VERTEX_DRAW, false);
-      sgc.getAppearance().setAttribute(EDGE_DRAW, false);
-      ImageData id = null;
-      sgc.getAppearance().setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.GREEN);
-      double scale = 1;
-      // load a file if argument is present
-      if (args.length > 0) {
-    	  id =  ImageData.load(Input.getInput(args[0]));
-          sgc.getAppearance().setAttribute(DIFFUSE_COLOR, Color.WHITE);
-      }
-      else  {	// use a procedural texture
-    	  SimpleTextureFactory stf = new SimpleTextureFactory();
-    	  stf.update();
-    	  id = stf.getImageData();
-    	  scale = 10;
-          sgc.getAppearance().setAttribute(DIFFUSE_COLOR, Color.YELLOW);
-     }
-      Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
-      tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
-      tex.setApplyMode(Texture2D.GL_MODULATE);
+	  	IndexedFaceSet geom = new CatenoidHelicoid(40);
+		SceneGraphComponent sgc = new SceneGraphComponent("TextureExample");
+		sgc.setGeometry(geom);
+		Appearance ap = new Appearance();
+		sgc.setAppearance(ap);
+		DefaultGeometryShader dgs = (DefaultGeometryShader) ShaderUtility.createDefaultGeometryShader(ap, true);
+		dgs.setShowLines(false);
+		dgs.setShowPoints(false);
+		DefaultPolygonShader dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+		dps.setDiffuseColor(Color.white);
+		ImageData id = null;
+		double scale = 1;
+		// get the image for the texture first
+		if (args.length > 0) {
+			id = ImageData.load(Input.getInput(args[0]));
+		} else { // use a procedural texture
+			SimpleTextureFactory stf = new SimpleTextureFactory();
+			stf.update();
+			id = stf.getImageData();
+			scale = 10;
+			dps.setDiffuseColor(Color.yellow);
+		}
+		Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
+		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
     	
-    ViewerApp.display(sgc);
+		ViewerApp.display(sgc);
   }
 }

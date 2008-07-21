@@ -5,7 +5,6 @@ import java.awt.Color;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -13,7 +12,10 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultLineShader;
+import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.FaceDragEvent;
 import de.jreality.tools.FaceDragListener;
@@ -23,26 +25,17 @@ import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
 import de.jreality.ui.viewerapp.ViewerApp;
 
-public class DragExample {
+public class DragEventTool02 {
 
 	public static void main(String[] args) {
 		SceneGraphComponent cmp = new SceneGraphComponent();		
 		cmp.setGeometry(Primitives.icosahedron());	
 		
-		cmp.setAppearance(new Appearance());
-		cmp.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.TUBES_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.TUBE_RADIUS,0.025);
-		cmp.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.SPHERES_DRAW,true);
-		cmp.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS,0.05);
-		// set differing diffuse colors for tubes and spheres
-		cmp.getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+
-				CommonAttributes.DIFFUSE_COLOR,new Color(250, 250, 0));
-		cmp.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+
-				CommonAttributes.DIFFUSE_COLOR,new Color(250, 0, 0));
+		cmp.setGeometry(Primitives.icosahedron());
+		Appearance ap = new Appearance();
+		cmp.setAppearance(ap);
+		setupAppearance(ap);
 		
-		/**tool:*/
 		DragEventTool t = new DragEventTool();
 		
 		t.addPointDragListener(new PointDragListener() {
@@ -95,8 +88,6 @@ public class DragExample {
 			private double[][] points;
 			
 			public void faceDragStart(FaceDragEvent e) {
-				System.out.println("start dragging face "+e.getIndex());
-				
 				faceSet = e.getIndexedFaceSet();
 				points=new double[faceSet.getNumPoints()][];
 				points = faceSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
@@ -106,13 +97,10 @@ public class DragExample {
 				double[][] newPoints=(double[][])points.clone();
 				Matrix trafo=new Matrix();
 				MatrixBuilder.euclidean().translate(e.getTranslation()).assignTo(trafo);
-				System.err.println("trans = "+Rn.toString(e.getTranslation()));
-				System.err.println("Trafo = "+trafo.toString());
 				int[] faceIndices=e.getFaceIndices();
 				for(int i=0;i<faceIndices.length;i++){
 					newPoints[faceIndices[i]]=trafo.multiplyVector(points[faceIndices[i]]);
 				}
-				System.err.println("Face verts = "+Rn.toString(newPoints));
 				faceSet.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(newPoints));	
 			}
 
@@ -124,4 +112,18 @@ public class DragExample {
 
 	    ViewerApp.display(cmp);
 	}
+	
+	private static void setupAppearance(Appearance ap) {
+		DefaultGeometryShader dgs;
+		DefaultLineShader dls;
+		DefaultPointShader dpts;
+		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+		dls = (DefaultLineShader) dgs.createLineShader("default");
+		dls.setDiffuseColor(Color.yellow);
+		dls.setTubeRadius(.03);
+		dpts = (DefaultPointShader) dgs.createPointShader("default");
+		dpts.setDiffuseColor(Color.red);
+		dpts.setPointRadius(.05);
+	}
+
 }
