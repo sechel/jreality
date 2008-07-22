@@ -65,7 +65,7 @@ public class EncompassTool extends AbstractTool {
   public EncompassTool() {
     addCurrentSlot(encompassSlot);
   }
-
+  boolean doAlternative = true;
   transient SceneGraphComponent comp;
 
   transient Matrix centerTranslation = new Matrix();
@@ -75,7 +75,7 @@ public class EncompassTool extends AbstractTool {
     if (tc.getAxisState(SHIFT).isPressed() || 
         tc.getAxisState(CTRL).isPressed()) return;
     if (tc.getAxisState(encompassSlot).isPressed()) {
-      if (false) {
+      if (doAlternative) {
         CameraUtility.encompass(tc.getViewer());
       }
       // TODO get the signature from the effective appearance of avatar path
@@ -90,4 +90,12 @@ public class EncompassTool extends AbstractTool {
   public double getMargin()	{
 	  return margin;
   }
+
+public boolean isDoAlternative() {
+	return doAlternative;
+}
+
+public void setDoAlternative(boolean doAlternative) {
+	this.doAlternative = doAlternative;
+}
 }
