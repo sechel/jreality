@@ -153,6 +153,11 @@ public class CameraUtility {
 	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters)	{
 		Rectangle3D worldBox = GeometryUtility.calculateBoundingBox(sgc);//. bbv.getBoundingBox();
 		
+		SceneGraphPath w2a = viewer.getCameraPath().popNew();
+		w2a.pop();
+		double[] w2ava = w2a.getInverseMatrix(null);
+		worldBox.transformByMatrix(worldBox, w2ava);
+		
 		if (worldBox == null || worldBox.isEmpty())	{
 			LoggingSystem.getLogger(CameraUtility.class).log(Level.WARNING,"encompass: empty bounding box");
 			return;	
