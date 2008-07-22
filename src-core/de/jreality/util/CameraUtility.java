@@ -175,21 +175,11 @@ public class CameraUtility {
 		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"translate: "+Rn.toString(from));
 		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, viewer.getSignature());
 		double[] newWorldToCam = Rn.inverse(null, newCamToWorld);
-		if (cam.isPerspective())	{
-			getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);			
-			double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );
-			if (setStereoParameters)	{
+		getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);			
+		double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );
+		if (setStereoParameters)	{
 				cam.setFocus(Math.abs(centerWorld[2]) ); 		//focus);
 				cam.setEyeSeparation(cam.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
-			}
-		}
-		else 
-		{
-			if (setStereoParameters)	{
-				cam.setFocus(Math.abs(2*focus) ); 		//focus);
-				cam.setEyeSeparation(cam.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
-			}
-			
 		}
 		//TODO figure out why setting the near/far clipping planes sometimes doesn't work
 		Rectangle3D cameraBox = worldBox.transformByMatrix(null, newWorldToCam);
