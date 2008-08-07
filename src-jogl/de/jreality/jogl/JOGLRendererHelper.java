@@ -525,7 +525,13 @@ public class JOGLRendererHelper {
 							else if (texCoords != null) {
 								da = texCoords.item(vnn).toDoubleArray();
 							}
-							gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
+							if (da.size() == 2) {
+								gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
+							} else if (da.size() == 3) {
+								gl.glMultiTexCoord3d(texunit, da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+							} else if (da.size() > 3) {
+								gl.glMultiTexCoord4d(texunit, da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+							}
 						}
 						da = vertices.item(vnn).toDoubleArray();
 						if (vertexLength == 1 && isRegularDomainQuadMesh) {
@@ -590,7 +596,13 @@ public class JOGLRendererHelper {
 						else if (texCoords != null) {
 							da = texCoords.item(k).toDoubleArray();
 						}
-						gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
+						if (da.size() == 2) {
+							gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
+						} else if (da.size() == 3) {
+							gl.glMultiTexCoord3d(texunit, da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+						} else if (da.size() > 3) {
+							gl.glMultiTexCoord4d(texunit, da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+						}
 					}
 					da = vertices.item(k).toDoubleArray();
 					if (vertexLength == 3)
