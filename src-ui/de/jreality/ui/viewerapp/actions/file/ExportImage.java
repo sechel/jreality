@@ -39,10 +39,7 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -128,10 +125,15 @@ public class ExportImage extends AbstractJrAction {
 //		img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
 //		if(realViewer instanceof SoftViewer)
 //		img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-		BufferedImage img = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_RGB);
+        
+        // timh: I changed the type from INT_RGB to INT_ARGB since the soft vierwer can generate images with transparent background
+		BufferedImage img = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = (Graphics2D) img.getGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		img.getGraphics().drawImage(
+
+        g.setColor(new Color(255,255,255,0));
+        g.fillRect(0,0,dim.width,dim.height);
+        g.drawImage(
 				scaledImg.getScaledInstance(
 						dim.width,
 						dim.height,
