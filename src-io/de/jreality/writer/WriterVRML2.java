@@ -162,7 +162,7 @@ public class WriterVRML2{
 			}
 			else dlts=null;
 			if (dls.getPolygonShader() instanceof DefaultPolygonShader){
-				dlps=(DefaultPolygonShader)dvs.getPolygonShader();
+				dlps=(DefaultPolygonShader)dls.getPolygonShader();
 			}
 			else dlps=null;
 		}
@@ -320,6 +320,7 @@ public class WriterVRML2{
 		case LINE:
 		case POINT:
 			if(diff!=null)	out.println(hist+"emissiveColor " + VRMLWriterHelper.ColorToString(diff) );
+			break;
 		}
 		hist= histold;
 		out.println(hist+spacing+"}");
@@ -387,6 +388,7 @@ public class WriterVRML2{
 			diff= dps.getDiffuseColor();
 			tra= dps.getTransparency();			
 			if(tra==0&&diff==null&&forcedDiffuseColor==null&&spec==null&&amb==null) return false;
+			break;
 		}
 		case TUBE:{
 			amb = dlps.getAmbientColor();
@@ -394,10 +396,12 @@ public class WriterVRML2{
 			diff= dlps.getDiffuseColor();
 			tra= dlps.getTransparency();
 			if(tra==0&&diff==null&&forcedDiffuseColor==null&&spec==null&&amb==null) return false;
+			break;
 		}
 		case LINE:{
 			diff= dls.getDiffuseColor();
 			if(diff==null) return false;
+			break;
 		}
 		case SPHERE:{
 			amb = dvps.getAmbientColor();
@@ -405,10 +409,12 @@ public class WriterVRML2{
 			diff= dvps.getDiffuseColor();
 			tra= dvps.getTransparency();
 			if(tra==0&&diff==null&&forcedDiffuseColor==null&&spec==null&&amb==null) return false;
+			break;
 		}
 		case POINT:{
 			diff= dvs.getDiffuseColor();
 			if(diff==null) return false;
+			break;
 		}
 		}
 		if(forcedDiffuseColor!=null)
