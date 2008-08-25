@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -76,7 +75,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
@@ -574,8 +572,8 @@ public class ViewerVR {
 		if (panel != null) {
 			// XXX: macosx hack...
 			((plugins.size() % 2) == 0 ? appearanceTabs:geomTabs).add(plugin.getName(), panel);
+			sp.getFrame().pack();
 		}
-		sp.getFrame().pack();
 		plugins.add(plugin);
 	}
 
