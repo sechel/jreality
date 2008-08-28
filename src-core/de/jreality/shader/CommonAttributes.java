@@ -83,6 +83,7 @@ import de.jreality.scene.Appearance;
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
 	public final static String ANTIALIASING_ENABLED = 	"antiAliasing";
 	public final static String TRANSPARENCY_ENABLED = 	"transparencyEnabled";
+    public static final String ADDITIVE_BLENDING_ENABLED = "additiveBlendingEnabled";
 	public final static String Z_BUFFER_ENABLED = 		"zBufferEnabled";
 	public final static String LEVEL_OF_DETAIL = 			"levelOfDetail";
 	public final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;

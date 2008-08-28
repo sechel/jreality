@@ -48,7 +48,8 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  Object CREATE_DEFAULT=new Object();
 	  
 	  final static boolean LIGHTING_ENABLED_DEFAULT = true;			// do lighting or not
-	  final static boolean TRANSPARENCY_ENABLED_DEFAULT = false;		// do transparency or not
+      final static boolean TRANSPARENCY_ENABLED_DEFAULT = false;        // do transparency or not
+      final static boolean ADDITIVE_BLENDING_ENABLED_DEFAULT = false;        // do transparency or not
 	  final static boolean Z_BUFFER_ENABLED_DEFAULT = false;			// can help to switch this in transparency mode
 	  final static boolean IGNORE_ALPHA0_DEFAULT = true;				// pseudo-transparency available in OpenGL
 	  final static boolean ANY_DISPLAY_LISTS_DEFAULT = true;			// use display lists at all?
@@ -63,8 +64,11 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  Boolean getLightingEnabled();
 	  void setLightingEnabled(Boolean b);
 
-	  Boolean getTransparencyEnabled();
-	  void setTransparencyEnabled(Boolean d);
+      Boolean getTransparencyEnabled();
+      void setTransparencyEnabled(Boolean d);
+
+      Boolean getAdditiveBlendingEnabled();
+      void setAdditiveBlendingEnabled(Boolean d);
 
 	  Boolean getZBufferEnabled();
 	  void setZBufferEnabled(Boolean d);
