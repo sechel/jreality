@@ -687,4 +687,8 @@ public class ToolSystem implements ToolEventReceiver {
 		}
 	}
 
+    public RenderTrigger getRenderTrigger() {
+        return renderTrigger;
+    }
+
 }
