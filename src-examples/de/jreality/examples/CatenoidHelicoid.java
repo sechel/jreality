@@ -133,8 +133,8 @@ private int[][] faceIndices;
     for (int i= 0; i < d; i++) {
         for (int j= 0; j < d; j++) {
             int pos= 2 * (i + d * j);
-            texCoords[pos] = i/(double)d;
-            texCoords[pos+1] = j/(double)d;
+            texCoords[pos] = i/(double)(d-1);
+            texCoords[pos+1] = j/(double)(d-1);
         }
     }
   }
