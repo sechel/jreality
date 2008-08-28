@@ -98,6 +98,11 @@ public class DragEventTool extends AbstractTool {
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
       MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);  
+      // timh: should be replaced by the folowing if the tool should respect trafos of the object while dragging...
+      //Matrix m = new Matrix(tc.getRootToLocal().getMatrix(null));
+      //m.invert();      
+      //MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint).times(m);  
+      //
 	    firePointDragStart(pickPoint);        
 	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE) {	            
 	    if (lineDragListener == null) {
@@ -111,7 +116,12 @@ public class DragEventTool extends AbstractTool {
 	    double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
-	    MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
+      MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
+      // timh: as above 
+      //Matrix m = new Matrix(tc.getRootToLocal().getMatrix(null));
+      //m.invert();      
+      //MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint).times(m);  
+      //
 	    fireLineDragStart(new double[]{0,0,0,1},pickPoint);        
 	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
       if (faceDragListener == null) {
@@ -125,8 +135,13 @@ public class DragEventTool extends AbstractTool {
 	    double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
-	    MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint); 	            
-	    fireFaceDragStart(new double[]{0,0,0,1});        
+      MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);
+      // timh as above
+      //Matrix m = new Matrix(tc.getRootToLocal().getMatrix(null));
+      //m.invert();      
+      //MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint).times(m);  
+      //
+	    fireFaceDragStart(new double[]{0,0,0,1},pickPoint);
 	  }else {
       active=false;
       tc.reject();
@@ -143,6 +158,8 @@ public class DragEventTool extends AbstractTool {
  		if (!active) return;    
     tc.getTransformationMatrix(pointerSlot).toDoubleArray(result.getArray());     
     result.multiplyOnRight(pointerToPoint);
+    // timh : get root to local on every event instead of the beginning only: 
+    //result.multiplyOnRight(tc.getRootToLocal().getMatrix(null));
     result.multiplyOnLeft(tc.getRootToLocal().getInverseMatrix(null));
     
     double[] newPoint3=new double[3];   Pn.dehomogenize(newPoint3,result.getColumn(3));
@@ -169,7 +186,7 @@ public class DragEventTool extends AbstractTool {
 	  }else if (pickType == PickResult.PICK_TYPE_LINE) {
 	    fireLineDragged(translation,Rn.add(position,translation,pickPoint));    	
 	  }else if (pickType == PickResult.PICK_TYPE_FACE) {
-      fireFaceDragged(translation);
+      fireFaceDragged(translation,Rn.add(position,translation,pickPoint));	    	
 	  }
 	}
 
@@ -177,8 +194,8 @@ public class DragEventTool extends AbstractTool {
 		  if (!active) return;   
 	      if (pickType == PickResult.PICK_TYPE_OBJECT) firePrimitiveDragEnd(new double[]{0,0,0,1});
 	      else if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(new double[]{0,0,0,1});
-	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1},new double[]{0,0,0,1});
-	      else if (pickType == PickResult.PICK_TYPE_FACE) fireFaceDragEnd(new double[]{0,0,0,1});
+	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1}, new double[]{0,0,0,1});
+	      else if (pickType == PickResult.PICK_TYPE_FACE) fireFaceDragEnd(new double[]{0,0,0,1}, new double[]{0,0,0,1});
 	      index=-1;
 	      pointSet=null;
 	      lineSet=null;
@@ -252,16 +269,16 @@ public class DragEventTool extends AbstractTool {
 		if (l != null) l.lineDragEnd(new LineDragEvent(lineSet, index, translation, position));
 	}
 		   
-	protected void fireFaceDragStart(double[] translation) {
+	protected void fireFaceDragStart(double[] translation, double[] position) {
 		final FaceDragListener l=faceDragListener;
-		if (l != null) l.faceDragStart(new FaceDragEvent(faceSet, index, translation));
+		if (l != null) l.faceDragStart(new FaceDragEvent(faceSet, index, translation,position));
 	}
-    protected void fireFaceDragged(double[] translation) {
+    protected void fireFaceDragged(double[] translation, double[] position) {
 		final FaceDragListener l=faceDragListener;
-		if (l != null) l.faceDragged(new FaceDragEvent(faceSet, index, translation));
+		if (l != null) l.faceDragged(new FaceDragEvent(faceSet, index, translation, position));
 	}
-    protected void fireFaceDragEnd(double[] translation) {
+    protected void fireFaceDragEnd(double[] translation, double[] position) {
 		final FaceDragListener l=faceDragListener;
-		if (l != null) l.faceDragEnd(new FaceDragEvent(faceSet, index, translation));
+		if (l != null) l.faceDragEnd(new FaceDragEvent(faceSet, index, translation, position));
 	}
 }
