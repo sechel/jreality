@@ -60,17 +60,17 @@ import de.jreality.softviewer.*;
  */
 public class DefaultPolygonShader extends PolygonShader {
     private boolean interpolateColor=true;
-    private VertexShader vertexShader;
+    protected VertexShader vertexShader;
     protected boolean outline = false;
     private final boolean smooth;
     private final boolean needsNormals;
     
-    final private double[] d1;
-    final private double[] d2;
-    final private double[] d3;
+//    final private double[] d1;
+//    final private double[] d2;
+//    final private double[] d3;
     //final private double[] v;
     
-    final de.jreality.shader.DefaultPolygonShader ps;
+    final private de.jreality.shader.DefaultPolygonShader ps;
     public  DefaultPolygonShader() {
         this(new DefaultVertexShader());
     }
@@ -78,9 +78,9 @@ public class DefaultPolygonShader extends PolygonShader {
         super();
         vertexShader= v;
         smooth = true;
-        d1 = null;
-        d2 = null;
-        d3 = null;
+//        d1 = null;
+//        d2 = null;
+//        d3 = null;
         //v = null;
         ps = null;
         needsNormals = false;
@@ -93,6 +93,7 @@ public class DefaultPolygonShader extends PolygonShader {
         Texture2D tex = ps.getTexture2d();
         if (tex != null && tex.getImage() != null) {
             texture = new SimpleTexture(tex);
+            //texture = MipMapedTexture.create(tex);
         }
         CubeMap cm = ps.getReflectionMap();
         if(cm != null) {
@@ -103,17 +104,18 @@ public class DefaultPolygonShader extends PolygonShader {
             needsNormals = false;
         }
         //outline = eAppearance.getAttribute(ShaderUtility.nameSpace(name, "outline"), outline);
-        if(smooth = ps.getSmoothShading()) {
-            d1 = null;
-            d2 = null;
-            d3 = null;
-            //v = null;
-        } else {
-            d1 = new double[3];
-            d2 = new double[3];
-            d3 = new double[3];
-            //v = new double[Polygon.VERTEX_LENGTH]; 
-        }
+        smooth = ps.getSmoothShading();
+//        if(smooth = ps.getSmoothShading()) {
+//            d1 = null;
+//            d2 = null;
+//            d3 = null;
+//            //v = null;
+//        } else {
+//            d1 = new double[3];
+//            d2 = new double[3];
+//            d3 = new double[3];
+//            //v = new double[Polygon.VERTEX_LENGTH]; 
+//        }
         
     }
     

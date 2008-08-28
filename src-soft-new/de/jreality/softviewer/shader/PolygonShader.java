@@ -71,11 +71,17 @@ public abstract class PolygonShader {
     public static PolygonShader createFrom(de.jreality.shader.PolygonShader ps) {
         if(ps instanceof de.jreality.shader.HatchPolygonShader)
             return new HatchPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
+        if(ps instanceof de.jreality.shader.InvertPolygonShader)
+            return new InvertPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
+        if(ps instanceof de.jreality.shader.EtchPolygonShader)
+            return new EtchPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
+
         if(ps instanceof de.jreality.shader.DefaultPolygonShader)
             return new DefaultPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
         if(ps instanceof de.jreality.shader.TwoSidePolygonShader)
             return new TwoSidePolygonShader((de.jreality.shader.TwoSidePolygonShader) ps);
-        return null;
+        
+return null;
     }
     public void setTexture(Texture texture) {
         this.texture = texture;

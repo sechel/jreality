@@ -94,4 +94,9 @@ public class HatchTexture implements Texture {
         return false;
     }
 
+    public void getMipMapedColor(double u, double dxu, double dyu, double v, double dxv, double dyv, double nx, double ny, double nz, int x, int y, double[] color) {
+        getColor(u, v, nx, ny, nz, x, y, color);
+        
+    }
+
 }

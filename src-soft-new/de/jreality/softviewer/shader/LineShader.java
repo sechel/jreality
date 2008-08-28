@@ -52,7 +52,8 @@ public abstract class LineShader {
     public abstract PolygonShader getPolygonShader();
     public abstract double getLineWidth();
     public abstract double getTubeRadius();
-    
+    public abstract boolean isDrawTubes();
+
     public void startGeometry(Geometry geom) {
         
     }

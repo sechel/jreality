@@ -104,7 +104,7 @@ public class DefaultVertexShader extends VertexShader {
 		double csg = 0;
 		double csb = 0;
 
-		//double normalflip = nz<0?1:-1;
+		//double normalflip = nz<0?-1:1;
         double normalflip = (px * nx + py * ny + pz * nz)*pw <= 0 ? 1 : -1;
         //double normalflip = 1;
 		//
@@ -129,6 +129,8 @@ public class DefaultVertexShader extends VertexShader {
             //double fac = -normalflip * (nx * lx + ny * ly + nz * lz) * 2;
             double fac = normalflip * ntl;
 
+            //fac =1-  normalflip *(ntl);
+            
             if (fac < 0)
 				continue;
 			fac *= intensity;
@@ -205,6 +207,10 @@ public class DefaultVertexShader extends VertexShader {
             double ntl = (nx * lx + ny * ly + nz * lz) ;
             //double fac = -normalflip * (nx * lx + ny * ly + nz * lz) * 2;
             double fac = normalflip *ntl;
+            
+            //fac = 1- normalflip * (ntl);
+
+            
             if (fac < 0)
 				continue;
 			fac *= intensity;

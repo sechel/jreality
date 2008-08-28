@@ -53,6 +53,7 @@ import de.jreality.shader.ShaderUtility;
 public class DefaultLineShader extends LineShader {
     private double lineWidth =0.01;
     private double tubeRadius =0.01;
+    private boolean drawTubes = true;
     PolygonShader polygonShader =null;
     /**
      * 
@@ -62,6 +63,7 @@ public class DefaultLineShader extends LineShader {
         polygonShader = PolygonShader.createFrom(lis.getPolygonShader());
         lineWidth = lis.getLineWidth();
         tubeRadius = lis.getTubeRadius();
+        drawTubes = lis.getTubeDraw();
     }
 
     /* (non-Javadoc)
@@ -86,5 +88,10 @@ public class DefaultLineShader extends LineShader {
     @Override
     public double getTubeRadius() {
         return tubeRadius;
+    }
+
+    @Override
+    public boolean isDrawTubes() {
+        return drawTubes;
     }
 }
