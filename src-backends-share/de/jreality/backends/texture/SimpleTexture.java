@@ -40,9 +40,12 @@
 
 package de.jreality.backends.texture;
 
+import java.util.WeakHashMap;
+
 import de.jreality.math.Matrix;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
+
 
 /**
  * 
@@ -65,13 +68,16 @@ public class SimpleTexture implements Texture {
     
     private static final double[] identity = new Matrix().getArray();
 	
-	public SimpleTexture(ImageData id) {
+    public SimpleTexture(ImageData id) {
+      this(id,true,true);
+    }
+	public SimpleTexture(ImageData id, boolean clampU, boolean clampV) {
 		this.bytes = (byte[]) id.getByteArray();//.clone();
 	      this.width=id.getWidth();
 	      this.height = id.getHeight();
 		this.matrix = identity;
-	      this.clampU = true;
-	      this.clampV = true;
+	      this.clampU = clampU;
+	      this.clampV = clampV;
 		interpolate = true;
         incr =3*width*height== bytes.length?3:4;
         transparent = incr ==4;
@@ -304,4 +310,24 @@ public class SimpleTexture implements Texture {
     }
 
      */
+    /*
+ private static WeakHashMap<ImageData, SimpleTexture> map = new WeakHashMap<ImageData, SimpleTexture>();
+    
+    public static SimpleTexture create(Texture2D tex) {
+        SimpleTexture t = map.get(tex.getImage());
+        if(t == null) {
+            t = new SimpleTexture(tex);
+            map.put(tex.getImage(),t);
+        }
+        return t;
+    }
+    public static SimpleTexture create(ImageData id) {
+        SimpleTexture t = map.get(id);
+        if(t == null) {
+            t = new SimpleTexture(id);
+            map.put(id,t);
+        }
+        return t;
+    }
+    */
 }
