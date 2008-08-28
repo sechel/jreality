@@ -43,6 +43,9 @@ import java.awt.Color;
 import java.util.Arrays;
 
 import de.jreality.backends.texture.Texture;
+import de.jreality.softviewer.shader.OutlineImager;
+import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 
 /*
  * implementation notes: for speed reasons we do not interpolate y coordinates
@@ -144,6 +147,18 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
     private int background;
 
+private Imager imager = null;
+    
+    {
+        try {
+            String img = Secure.getProperty(SystemProperties.SOFT_IMAGER);
+            //if (img != null && img.equals("hatch")) imager = new HatchImager();
+            if (img != null && img.equals("outline")) imager = new OutlineImager();
+        } catch (SecurityException se) {
+            //webstart
+        }
+    }
+    
     /**
      *  
      */
@@ -225,7 +240,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         if (!interpolateA)
             aaa.value = 1;
 
-        if (outline) {
+       if (outline) {
             transparency = 0;
             for (int j = 0; j < 3 - 1; j++) {
                 line(polygon[j][Polygon.SX], polygon[j][Polygon.SY],
@@ -710,7 +725,7 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
         double dirY = y2 - y1;
         double dirZ = z2 - z1;
         double l = ((double) dirX) * dirX + ((double) dirY) * dirY;
-        l = Math.sqrt(l);
+        l = Math.sqrt(l)/4;
         if (l < 1)
             return;
         dirX /= l;
@@ -783,6 +798,8 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
     }
 
     public final void stop() {
+        if(imager != null)
+            imager.process(pixels,zBuffer,w,h);
     }
 
     public boolean isInterpolateUV() {
@@ -830,6 +847,11 @@ public class DoubleTriangleRasterizer extends TriangleRasterizer {
 
     public void setTransparencyEnabled(boolean transparencyEnabled) {
         this.transparencyEnabled = transparencyEnabled;
+    }
+
+    @Override
+    public double getMinDim() {
+        return 2*minDim;
     }
 
 }

@@ -772,22 +772,26 @@ private final void rasterRemaining() {
         if (lineShader == null)
             return;
         shader = lineShader.getPolygonShader();
-        double lineWidth = lineShader.getTubeRadius();
+        double lineWidth = lineShader.getLineWidth();
         double w = 1;
         if (from.size() == 4)
             w = from.getValueAt(3);
         VecMat.transform(matrix, from.getValueAt(0), from.getValueAt(1), from
-                .getValueAt(2), 1, point0, 0);
+                .getValueAt(2), w, point0, 0);
 
         VecMat.transformUnNormalized(matrix, 0, 0, lineWidth, normal0, 0);
-
+        //Rn.normalize(normal0, normal0);
+        //Rn.times(normal0, lineWidth/rasterizer.getMinDim(), normal0);
         w = 1;
         if (to.size() == 4)
             w = from.getValueAt(3);
         VecMat.transform(matrix, to.getValueAt(0), to.getValueAt(1), to
-                .getValueAt(2), 1, point1, 0);
+                .getValueAt(2), w, point1, 0);
         // VecMat.transformUnNormalized(matrix,0,0,.2,normal0,0);
 
+        
+        
+        
         double[] mat = matrix;
         double[] tmat = inverseTransposeMatrix;
         matrix = identity;

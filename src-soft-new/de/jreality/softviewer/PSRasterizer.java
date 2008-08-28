@@ -237,4 +237,9 @@ public class PSRasterizer extends TriangleRasterizer {
         
     }
 
+    @Override
+    public double getMinDim() {
+        return 2*mh;
+    }
+
 }

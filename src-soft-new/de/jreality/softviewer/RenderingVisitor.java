@@ -289,18 +289,17 @@ public class RenderingVisitor extends SceneGraphVisitor {
             pipeline.startGeometry(g);
             for (int i = 0, n = edgeIndices.size(); i < n; i++) {
                 IntArray edge = edgeIndices.item(i).toIntArray();
-                double radius = 0;
+                double radius = lineShader.getTubeRadius();
                 if(radiiArray != null)
-                    radius = radiiArray.getValueAt(i);
-                else radius = lineShader.getTubeRadius();
+                    radius *= radiiArray.getValueAt(i);
                 
                 for (int j = 0; j < edge.getLength() - 1; j++) {
                     DoubleArray p1 = vertices.item(edge.getValueAt(j))
                             .toDoubleArray();
                     DoubleArray p2 = vertices.item(edge.getValueAt(j + 1))
                             .toDoubleArray();
-                    // pipeline.processLine(p1, p2);
-                    if(LINE_CYLINDERS) {
+                    if(lineShader.isDrawTubes()) {
+                        if(LINE_CYLINDERS) {
                         /*
                         DefaultGeometryShader gs = ShaderUtility
                         .createDefaultGeometryShader(eAppearance);
@@ -335,8 +334,11 @@ public class RenderingVisitor extends SceneGraphVisitor {
                         pipeline.setFaceShader(polygonShader);
                         //eAppearance = apOld;
                         //shaderUptodate = false;
-                    } else
-                        pipeline.processPseudoTube(p1, p2,radius,colors!=null?colors.item(i).toDoubleArray():null);
+                        } else
+                            pipeline.processPseudoTube(p1, p2,radius,colors!=null?colors.item(i).toDoubleArray():null);
+                    } else { // lineShader.isDrawTubes == false:
+                        pipeline.processLine(p1, p2);
+                    }
                 }
                 // int ix1=edge.getValueAt(0), ix2=edge.getValueAt(1);
                 // DoubleArray p1=vertices.item(ix1).toDoubleArray();
@@ -590,7 +592,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                         pipeline.processPoint(a, i,vertexColors,vertexRadii);
             else
                 for (int i = 0; i < n; i++) {
-                    double r = vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):pointShader.getPointRadius();
+                    double r = pointShader.getPointRadius()*(vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):1);
                     pmat[0]  = pmat[5]  = pmat[10] = r;
                     DoubleArray da = a.item(i).toDoubleArray();
                     pmat[3] = da.getValueAt(0);

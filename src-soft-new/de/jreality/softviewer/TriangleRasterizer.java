@@ -57,5 +57,5 @@ public abstract class TriangleRasterizer {
     public abstract void setSize(final double width, final double height);
     public abstract void setBackgroundColors(Color[] c);
     public abstract void setTransparencyEnabled(boolean transparencyEnabled);
-
+    public abstract double getMinDim();
 }

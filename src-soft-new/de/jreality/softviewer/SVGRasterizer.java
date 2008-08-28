@@ -367,4 +367,9 @@ public class SVGRasterizer extends TriangleRasterizer {
         this.transparencyEnabled = transparencyEnabled;
         
     }
+
+    @Override
+    public double getMinDim() {
+        return 2*mh;
+    }
 }

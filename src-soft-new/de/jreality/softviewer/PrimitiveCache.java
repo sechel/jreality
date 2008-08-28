@@ -204,32 +204,32 @@ public class PrimitiveCache {
     public static void renderSky(TrianglePipeline pipeline, CubeMap sky) {
         pipeline.setFaceShader(skybox);
         
-        SimpleTexture tex = new SimpleTexture(sky.getBack());
+        SimpleTexture tex = SimpleTexture.create(sky.getBack());
         skybox.setTexture(tex);
         pipeline.processPolygon(cubeVertices[0], cubeIndices, null, null, cubeTex,
                 null, cubeNormals[0], null);
 
-        tex = new SimpleTexture(sky.getFront());
+        tex = SimpleTexture.create(sky.getFront());
         skybox.setTexture(tex);
         pipeline.processPolygon(cubeVertices[1], cubeIndices, null, null, cubeTex,
                 null, cubeNormals[1], null);
 
-        tex = new SimpleTexture(sky.getTop());
+        tex = SimpleTexture.create(sky.getTop());
         skybox.setTexture(tex);
         pipeline.processPolygon(cubeVertices[2], cubeIndices, null, null, cubeTex,
                 null, cubeNormals[2], null);
 
-        tex = new SimpleTexture(sky.getBottom());
+        tex = SimpleTexture.create(sky.getBottom());
         skybox.setTexture(tex);
         pipeline.processPolygon(cubeVertices[3], cubeIndices, null, null, cubeTex,
                 null, cubeNormals[3], null);
 
-        tex = new SimpleTexture(sky.getLeft());
+        tex = SimpleTexture.create(sky.getLeft());
         skybox.setTexture(tex);
         pipeline.processPolygon(cubeVertices[4], cubeIndices, null, null, cubeTex,
                 null, cubeNormals[4], null);
 
-        tex = new SimpleTexture(sky.getRight());
+        tex = SimpleTexture.create(sky.getRight());
         skybox.setTexture(tex);
         pipeline.processPolygon(cubeVertices[5], cubeIndices, null, null, cubeTex,
                 null, cubeNormals[5], null);
