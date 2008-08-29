@@ -52,6 +52,8 @@ public abstract class PointShader {
     public abstract PolygonShader getCoreShader();
     public abstract PolygonShader getOutlineShader();
     public abstract double getPointRadius();
+    public abstract double getPointSize();
+    public abstract boolean isSphereDraw();
     public double getOutlineFraction() {
         return 0.5;
     }

@@ -41,10 +41,7 @@
 package de.jreality.softviewer.shader;
 
 import de.jreality.backends.texture.SimpleTexture;
-import de.jreality.shader.CubeMap;
 import de.jreality.shader.Texture2D;
-import de.jreality.softviewer.EnvironmentTexture;
-import de.jreality.softviewer.MipMapedTexture;
 
 
 

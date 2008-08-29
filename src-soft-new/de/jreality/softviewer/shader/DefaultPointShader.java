@@ -57,6 +57,8 @@ public class DefaultPointShader extends PointShader {
     //private double pointRadius =0.025;
     private double pointRadius;
     private double outlineFraction;
+    private boolean sphereDraw;
+    private double pointSize;
     
 //    public DefaultPointShader(PolygonShader coreShader, PolygonShader outlineShader) {
 //        super();
@@ -71,6 +73,8 @@ public class DefaultPointShader extends PointShader {
         this.coreShader = this.outlineShader = PolygonShader.createFrom(pts.getPolygonShader());
         this.outlineFraction = .6;
         this.pointRadius = pts.getPointRadius();
+        this.pointSize = pts.getPointSize();
+        this.sphereDraw = pts.getSpheresDraw();
     }
 
     
@@ -88,6 +92,18 @@ public class DefaultPointShader extends PointShader {
 
     public double getOutlineFraction() {
         return outlineFraction;
+    }
+
+
+    @Override
+    public double getPointSize() {
+        return pointSize;
+    }
+
+
+    @Override
+    public boolean isSphereDraw() {
+        return sphereDraw;
     }
 
 //    public void startGeometry(Geometry geom)
