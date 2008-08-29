@@ -310,7 +310,7 @@ public class SimpleTexture implements Texture {
     }
 
      */
-    /*
+    
  private static WeakHashMap<ImageData, SimpleTexture> map = new WeakHashMap<ImageData, SimpleTexture>();
     
     public static SimpleTexture create(Texture2D tex) {
@@ -329,5 +329,5 @@ public class SimpleTexture implements Texture {
         }
         return t;
     }
-    */
+    
 }
