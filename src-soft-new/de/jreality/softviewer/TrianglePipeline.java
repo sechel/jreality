@@ -1,41 +1,41 @@
 /**
-*
-* This file is part of jReality. jReality is open source software, made
-* available under a BSD license:
-*
-* Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
-* Schmies, Steffen Weissmann.
-*
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* - Redistributions of source code must retain the above copyright notice, this
-*   list of conditions and the following disclaimer.
-*
-* - Redistributions in binary form must reproduce the above copyright notice,
-*   this list of conditions and the following disclaimer in the documentation
-*   and/or other materials provided with the distribution.
-*
-* - Neither the name of jReality nor the names of its contributors nor the
-*   names of their associated organizations may be used to endorse or promote
-*   products derived from this software without specific prior written
-*   permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*
-*/
+ *
+ * This file is part of jReality. jReality is open source software, made
+ * available under a BSD license:
+ *
+ * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+ * Schmies, Steffen Weissmann.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ * - Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ * - Neither the name of jReality nor the names of its contributors nor the
+ *   names of their associated organizations may be used to endorse or promote
+ *   products derived from this software without specific prior written
+ *   permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
 
 package de.jreality.softviewer;
 
@@ -44,13 +44,7 @@ import java.util.Arrays;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.data.*;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArray;
-import de.jreality.softviewer.shader.LineShader;
-import de.jreality.softviewer.shader.PointShader;
-import de.jreality.softviewer.shader.PolygonShader;
+import de.jreality.softviewer.shader.*;
 
 /**
  * A render pass will consit of the following: 1. calls to processPolygon for
@@ -112,7 +106,8 @@ public class TrianglePipeline {
     private PolygonShader faceShader; // = new DefaultPolygonShader();
 
     private LineShader lineShader; // = new ConstantPolygonShader(.2,.1,.1);
-
+    private VertexShader constantVertexShader = new de.jreality.softviewer.shader.ConstantVertexShader(0,0,0);
+    private PolygonShader constantLineShader = new DefaultPolygonShader(constantVertexShader);
     // private PolygonShader pointOutlineShader;
     // = new ConstantPolygonShader(.0,.0,.0);
     private PointShader pointShader;
@@ -124,15 +119,15 @@ public class TrianglePipeline {
     private double[] pointVertices = new double[48];
     private DoubleArrayArray pointVerticesDataList = new DoubleArrayArray.Inlined(pointVertices,3);
 
-    //private static int[] pointIndices = { 0, 3, 6, 9, 12, 15, 18, 21 };
+    // private static int[] pointIndices = { 0, 3, 6, 9, 12, 15, 18, 21 };
     private static int[] pointIndices = { 0, 1, 2, 3, 4, 5, 6, 7 };
     private IntArray pointIndicesDataList = new IntArray(pointIndices);
 
     
-//    private static int[][] pointOutlineIndices = { { 0, 24, 27, 3 },
-//        { 3, 27, 30, 6 }, { 6, 30, 33, 9 }, { 9, 33, 36, 12 },
-//        { 12, 36, 39, 15 }, { 15, 39, 42, 18 }, { 18, 42, 45, 21 },
-//        { 21, 45, 24, 0 } };
+// private static int[][] pointOutlineIndices = { { 0, 24, 27, 3 },
+// { 3, 27, 30, 6 }, { 6, 30, 33, 9 }, { 9, 33, 36, 12 },
+// { 12, 36, 39, 15 }, { 15, 39, 42, 18 }, { 18, 42, 45, 21 },
+// { 21, 45, 24, 0 } };
     private static int[][] pointOutlineIndices = { { 0, 8, 9, 1 },
         { 1, 9, 10, 2 }, { 2, 10, 11, 3 }, { 3, 11, 12, 4 },
         { 4, 12, 13, 5 }, { 5, 13, 14, 6 }, { 6, 14, 15, 7 },
@@ -147,17 +142,17 @@ public class TrianglePipeline {
     private DoubleArrayArray lineFaceColorsDataList = new DoubleArrayArray.Array(lineFaceColors);
 
     
-//    private DataList pointColorDataList = StorageModel.DOUBLE_ARRAY_ARRAY
-//            .createWritableDataList(pointColors);
+// private DataList pointColorDataList = StorageModel.DOUBLE_ARRAY_ARRAY
+// .createWritableDataList(pointColors);
 
     private static int[] pointNormals = { 0, 0, 0, 0, 0, 0, 0, 0 };
     private IntArray pointNormalsDataList = new IntArray(pointNormals);
 
     
-//    private static int[][] pointOutlineNormals = { { 0, 3, 6, 0 },
-//            { 0, 6, 9, 0 }, { 0, 9, 12, 0 }, { 0, 12, 15, 0 },
-//            { 0, 15, 18, 0 }, { 0, 18, 21, 0 }, { 0, 21, 24, 0 },
-//            { 0, 24, 3, 0 } };
+// private static int[][] pointOutlineNormals = { { 0, 3, 6, 0 },
+// { 0, 6, 9, 0 }, { 0, 9, 12, 0 }, { 0, 12, 15, 0 },
+// { 0, 15, 18, 0 }, { 0, 18, 21, 0 }, { 0, 21, 24, 0 },
+// { 0, 24, 3, 0 } };
     private static int[][] pointOutlineNormals = { { 0, 1, 2, 0 },
         { 0, 2, 3, 0 }, { 0, 3, 4, 0 }, { 0, 4, 5, 0 },
         { 0, 5, 6, 0 }, { 0, 6, 7, 0 }, { 0, 7, 8, 0 },
@@ -170,7 +165,7 @@ public class TrianglePipeline {
     private static double[] zNormal = new double[3 * 9];
     private DoubleArrayArray zNormalDataList = new DoubleArrayArray.Inlined(zNormal,3);
 
-    //private static int[] lineIndices = { 0, 3, 6, 9 };
+    // private static int[] lineIndices = { 0, 3, 6, 9 };
     private static int[] lineIndices = { 0, 1, 2, 3 };
     private IntArray lineIndicesDataList = new IntArray(lineIndices);
     
@@ -243,7 +238,7 @@ public class TrianglePipeline {
         shader.shadePolygon(polygon, environment,vertexColors!=null | faceColor!=null);
         
         // return early if polygon is clipped out
-        //TODO: debug clipPlanes
+        // TODO: debug clipPlanes
         if (clipPlanes())
             return;
         computePerspective();
@@ -260,7 +255,7 @@ public class TrianglePipeline {
 
     private void triangulateAndRaster() {
         boolean isTransparent = transparencyEnabled && shader.needsSorting();
-        //boolean isTransparent = shader.needsSorting();
+        // boolean isTransparent = shader.needsSorting();
 
         int n = polygon.getLength() - 2;
         trisFromPoly = polygon.triangulate(trisFromPoly, freeTriangles);
@@ -408,7 +403,7 @@ public class TrianglePipeline {
                  vertexData[Polygon.NX] = normal.getValueAt(0);
                  vertexData[Polygon.NY] = normal.getValueAt(1);
                  vertexData[Polygon.NZ] = normal.getValueAt(2);
-                 //VecMat.normalize(vertexData, vc + Polygon.NX);
+                 // VecMat.normalize(vertexData, vc + Polygon.NX);
             }
             
             if(buildFaceNormal) {
@@ -442,9 +437,9 @@ public class TrianglePipeline {
             }
         }
         if(buildFaceNormal) {
-//            center[AbstractPolygon.NX] /= n;
-//            center[AbstractPolygon.NY] /= n;
-//            center[AbstractPolygon.NZ] /= n;
+// center[AbstractPolygon.NX] /= n;
+// center[AbstractPolygon.NY] /= n;
+// center[AbstractPolygon.NZ] /= n;
             VecMat.normalize(center,AbstractPolygon.NX);
         }
         // compute(vertices.getLength());
@@ -524,7 +519,7 @@ public class TrianglePipeline {
             clipToHalfspace(AbstractPolygon.SZ, 1, perspective.getFrustumZmax());
 
         if (polygon.getLength() == 0)
-            return true; //should not happen...
+            return true; // should not happen...
         else
             return false;
     }
@@ -588,8 +583,8 @@ public class TrianglePipeline {
     }
 
     public final void sortTriangles() {
-        //int n = triangles.getSize();
-        //System.err.println(" "+n+" sorted trinagles to render");
+        // int n = triangles.getSize();
+        // System.err.println(" "+n+" sorted trinagles to render");
         // eSystem.out.println("scheduled polys "+polygonCount);
         // it might be better to sort the non transparent polygons too
         // since the setPixel call is one of the most speed relevant. If the
@@ -667,23 +662,19 @@ private final void rasterRemaining() {
 
     private double[] substMatrix = new double[16];
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.jreality.soft.PointProcessor#processPoint(double[], int)
-     */
-    public final void processPoint(final double[] data, int index, int length) {
+    
+    public final void processPseudoSphere(final double[] data, int index, int length) {
         if (pointShader == null)
             return;
         double r = pointShader.getPointRadius();
         if (length == 4)
-            processPoint(data[index], data[index + 1], data[index + 2],
+            processPseudoSphere(data[index], data[index + 1], data[index + 2],
                     data[index + 3],r,null);
         else
-            processPoint(data[index], data[index + 1], data[index + 2], 1,r,null);
+            processPseudoSphere(data[index], data[index + 1], data[index + 2], 1,r,null);
     }
 
-    public final void processPoint(final DoubleArrayArray data, int index,DataList vertexColors,DataList vertexRadii) {
+    public final void processPseudoSphere(final DoubleArrayArray data, int index,DataList vertexColors,DataList vertexRadii) {
         DoubleArray da = data.item(index).toDoubleArray();
         double w = 1;
         if (da.size() == 4)
@@ -702,13 +693,13 @@ private final void rasterRemaining() {
         if(vertexRadii != null)
             r = vertexRadii.toDoubleArray().getValueAt(index);
             else r = pointShader.getPointRadius();
-        //vertexColorsOld = vertexColors;
-        //vertexColors = pointColorsDataList;
-        processPoint(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), w,r,vertexColors!=null?pointColorsDataList:null);
-        //vertexColors = vertexColorsOld;
+        // vertexColorsOld = vertexColors;
+        // vertexColors = pointColorsDataList;
+        processPseudoSphere(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), w,r,vertexColors!=null?pointColorsDataList:null);
+        // vertexColors = vertexColorsOld;
     }
 
-    public final void processPoint(final double x, final double y,
+    public final void processPseudoSphere(final double x, final double y,
             final double z, final double w,double pointRadius,DataList pointColors) {
         if (pointShader == null)
             return;
@@ -729,7 +720,7 @@ private final void rasterRemaining() {
         Rn.transpose(inverseTransposeMatrix, matrix);
         Rn.inverse(inverseTransposeMatrix, inverseTransposeMatrix);
         shader = pointShader.getCoreShader();
-        //computeArray(pointVertices, pointIndices, zNormal, pointNormals);
+        // computeArray(pointVertices, pointIndices, zNormal, pointNormals);
         
         process(pointVerticesDataList,pointIndicesDataList,zNormalDataList,pointNormalsDataList,null,pointColors,null,null,true);
         // outline :
@@ -743,8 +734,8 @@ private final void rasterRemaining() {
                 pointVertices[26 + i] = -d;
             }
             for (int i = 0; i < 8; i++) {
-//                computeArray(pointVertices, pointOutlineIndices[i], zNormal,
-//                        pointOutlineNormals[i]);
+// computeArray(pointVertices, pointOutlineIndices[i], zNormal,
+// pointOutlineNormals[i]);
                 process(pointVerticesDataList,pointOutlineIndicesDataList.item(i).toIntArray(),zNormalDataList,pointOutlineNormalsDataList.item(i).toIntArray(),null,pointColorsDataList,null,null,true);
             }
         }
@@ -754,6 +745,66 @@ private final void rasterRemaining() {
         inverseTransposeMatrix = tmat;
 
     }
+    
+    private final static DoubleArrayArray procPointNormalData = new DoubleArrayArray.Array(new double[][] {{0,0,1}});
+    private final static IntArray procPointNormals = new IntArray(new int[]{0,0,0,0});
+    private final static DoubleArray zNormalDoubleArray = new DoubleArray(new double[] {0,0,1});
+    
+    public final void processPoint(final DoubleArrayArray data, int index,DataList vertexColors,DataList vertexRadii) {
+        if (vertexColors!=null) {
+            DoubleArray color = vertexColors.item(index).toDoubleArray();
+            constantVertexShader.setColor(color.getValueAt(0),color.getValueAt(1),color.getValueAt(2));
+        }        
+        shader = pointShader.getCoreShader();
+        constantVertexShader.setColor(shader.getRed(), shader.getGreen(), shader.getBlue());
+        shader = constantLineShader;
+        // the following is similar to a
+        // process(...); call
+        // 
+        polygon.setLength(0);
+        tmpPolygon.setLength(0);
+       
+        IntArray vertices = new IntArray(new int[]{index,index,index,index});
+        fillVertexData(data, vertices, procPointNormalData, procPointNormals, null, null,
+                zNormalDoubleArray, null,true);
+        
+        // shade
+        shader.shadePolygon(polygon, environment,false);
+        
+        // return early if polygon is clipped out
+        // TODO: debug clipPlanes
+        if (clipPlanes())
+            return;
+        computePerspective();
+        
+        //
+        // now we add width to the line:
+        //
+        double minDim = rasterizer.getMinDim();
+        double pointSize = pointShader.getPointSize();
+        
+        double[] f1 = polygon.getPoint(0);
+        double[] f2 = polygon.getPoint(1);
+        double[] t1 = polygon.getPoint(2);
+        double[] t2 = polygon.getPoint(3);
+        
+        pointSize/= minDim;
+        f1[Polygon.SX] += f1[Polygon.SW]*pointSize;
+        
+        f2[Polygon.SY] += f2[Polygon.SW]*pointSize;
+
+        t1[Polygon.SX] -= t1[Polygon.SW]*pointSize;
+        
+        t2[Polygon.SY] -= t2[Polygon.SW]*pointSize;
+
+        // clip to frustum:
+        if (clipFrustum())
+           return;
+        
+        triangulateAndRaster();
+    }
+    
+    
 
     private static final double[] identity = new double[] { 1, 0, 0, 0, 0, 1,
             0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
@@ -763,12 +814,82 @@ private final void rasterRemaining() {
     
     private double[] direction = new double[3];
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.jreality.soft.LineProcessor#processLine(double[], int, int)
-     */
+    
+    private static final IntArray procLineVertices = new IntArray(new int[]{0,0,1,1});
+    private static final IntArray procLineNormals = new IntArray(new int[]{0,0,0,0});
+    private static final DoubleArray faceNormalDataList = new DoubleArray(new double[] {0,0,1});
+    
     public final void processLine(DoubleArray from, DoubleArray to) {
+        if (lineShader == null)
+            return;
+        shader = lineShader.getPolygonShader();
+        constantVertexShader.setColor(shader.getRed(), shader.getGreen(), shader.getBlue());
+        shader = constantLineShader;
+        // the following is similar to a
+        // process(...); call
+        // 
+        polygon.setLength(0);
+        tmpPolygon.setLength(0);
+        
+        DoubleArrayArray vd = new DoubleArrayArray.Array(new double[][] { from.toDoubleArray(null), to.toDoubleArray(null)});
+        
+        fillVertexData(vd, procLineVertices, zNormalDataList, procLineNormals, null, null,
+                faceNormalDataList,null,true);
+        
+        // shade
+        shader.shadePolygon(polygon, environment,false);
+        
+        // return early if polygon is clipped out
+        // TODO: debug clipPlanes
+        if (clipPlanes())
+            return;
+        computePerspective();
+        
+        //
+        // now we add width to the line:
+        //
+        double lineWidth = lineShader.getLineWidth();
+        double minDim = rasterizer.getMinDim();
+        
+        double[] f1 = polygon.getPoint(0);
+        double[] f2 = polygon.getPoint(1);
+        double[] t1 = polygon.getPoint(2);
+        double[] t2 = polygon.getPoint(3);
+        
+        double fx = f1[Polygon.SX]*minDim/f1[Polygon.SW];
+        double fy = f1[Polygon.SY]*minDim/f1[Polygon.SW];
+        double tx = t1[Polygon.SX]*minDim/t1[Polygon.SW];
+        double ty = t1[Polygon.SY]*minDim/t1[Polygon.SW];
+        
+        double dirx = tx - fx;
+        double diry = ty - fy;
+        double fac = lineWidth/Math.sqrt(dirx*dirx + diry*diry);
+        dirx *= fac/minDim;
+        diry *= fac/minDim;
+        
+        f1[Polygon.SX] += -f1[Polygon.SW]*diry;
+        f1[Polygon.SY] += f1[Polygon.SW]*dirx;
+        f2[Polygon.SX] -= -f2[Polygon.SW]*diry;
+        f2[Polygon.SY] -= f2[Polygon.SW]*dirx;
+
+        t1[Polygon.SX] -= -t1[Polygon.SW]*diry;
+        t1[Polygon.SY] -= t1[Polygon.SW]*dirx;
+        t2[Polygon.SX] += -t2[Polygon.SW]*diry;
+        t2[Polygon.SY] += t2[Polygon.SW]*dirx;
+
+
+        // clip to frustum:
+        // TODO: debug clipPlanes
+
+        if (clipFrustum())
+           return;
+
+        
+        
+        triangulateAndRaster();
+    }
+    
+    public final void processLineOld(DoubleArray from, DoubleArray to) {
         if (lineShader == null)
             return;
         shader = lineShader.getPolygonShader();
@@ -780,8 +901,8 @@ private final void rasterRemaining() {
                 .getValueAt(2), w, point0, 0);
 
         VecMat.transformUnNormalized(matrix, 0, 0, lineWidth, normal0, 0);
-        //Rn.normalize(normal0, normal0);
-        //Rn.times(normal0, lineWidth/rasterizer.getMinDim(), normal0);
+        // Rn.normalize(normal0, normal0);
+        // Rn.times(normal0, lineWidth/rasterizer.getMinDim(), normal0);
         w = 1;
         if (to.size() == 4)
             w = from.getValueAt(3);
@@ -834,7 +955,7 @@ private final void rasterRemaining() {
         line[10] = point1[1] - normal0[1];
         line[11] = point1[2] + length; // + normal0[2];
 
-//        computeArray(line, lineIndices, normal1, pointNormals);
+// computeArray(line, lineIndices, normal1, pointNormals);
         process(lineDataList,lineIndicesDataList,normal1DataList,pointNormalsDataList,null,null,null,null,true);
         matrix = mat;
         inverseTransposeMatrix = tmat;
@@ -844,7 +965,7 @@ private final void rasterRemaining() {
     private double[] normal2 = new double[6];
     private DoubleArrayArray normal2DataList = new DoubleArrayArray.Inlined(normal2,3);
     
-    //private static int[] nIndices = { 0, 3, 3, 0 };
+    // private static int[] nIndices = { 0, 3, 3, 0 };
     private static int[] nIndices = { 0, 1, 1, 0 };
     private final IntArray nIndicesDataList = new IntArray(nIndices);
     
@@ -852,22 +973,22 @@ private final void rasterRemaining() {
 
     private static final double ss = Math.sin(0.2);
 /*
-    private double test1[] = new double[3];
-
-    private double test2[] = new double[3];
-
-    private DoubleArray tda1 = new DoubleArray(test1);
-
-    private DoubleArray tda2 = new DoubleArray(test2);
-
-    private double test3[] = new double[3];
-
-    private double test4[] = new double[3];
-
-    private DoubleArray tda3 = new DoubleArray(test3);
-
-    private DoubleArray tda4 = new DoubleArray(test4);
-*/
+ * private double test1[] = new double[3];
+ * 
+ * private double test2[] = new double[3];
+ * 
+ * private DoubleArray tda1 = new DoubleArray(test1);
+ * 
+ * private DoubleArray tda2 = new DoubleArray(test2);
+ * 
+ * private double test3[] = new double[3];
+ * 
+ * private double test4[] = new double[3];
+ * 
+ * private DoubleArray tda3 = new DoubleArray(test3);
+ * 
+ * private DoubleArray tda4 = new DoubleArray(test4);
+ */
     private double[] zzNormal = new double[3];
 
 private boolean transparencyEnabled;
@@ -878,7 +999,7 @@ private boolean transparencyEnabled;
         if (lineShader == null)
             return;
         shader = lineShader.getPolygonShader();
-        //double lineWidth = lineShader.getTubeRadius();
+        // double lineWidth = lineShader.getTubeRadius();
         double w = 1;
         if (from.size() == 4)
             w = from.getValueAt(3);
@@ -958,7 +1079,7 @@ private boolean transparencyEnabled;
         normal2[4] = normal1[1];
         normal2[5] = normal1[2];
 
-        //computeArrayNoTransform(line, lineIndices, normal2, nIndices);
+        // computeArrayNoTransform(line, lineIndices, normal2, nIndices);
         process(lineDataList,lineIndicesDataList,normal2DataList,nIndicesDataList,null,null,null,colors,false);
 
         // ///
@@ -987,7 +1108,7 @@ private boolean transparencyEnabled;
         normal2[4] = -cs / length * normal0[1] + ss * normal1[1];
         normal2[5] = ss * normal1[2];
 
-        //computeArrayNoTransform(line, lineIndices, normal2, nIndices);
+        // computeArrayNoTransform(line, lineIndices, normal2, nIndices);
         process(lineDataList,lineIndicesDataList,normal2DataList,nIndicesDataList,null,null,null,colors,false);
         /*
          * test1[0] = point1[0]; test1[1] = point1[1]; test1[2] = point1[2];
@@ -1096,9 +1217,9 @@ private boolean transparencyEnabled;
     /**
      * @return double
      */
-//    public double getOutlineFraction() {
-//        return outlineFraction;
-//    }
+// public double getOutlineFraction() {
+// return outlineFraction;
+// }
 
     /**
      * Sets the outlineFraction.
@@ -1106,7 +1227,7 @@ private boolean transparencyEnabled;
      * @param outlineFraction
      *            The outlineFraction to set
      */
-//    public void setOutlineFraction(double outlineFraction) {
-//        this.outlineFraction = outlineFraction;
-//    }
+// public void setOutlineFraction(double outlineFraction) {
+// this.outlineFraction = outlineFraction;
+// }
 }

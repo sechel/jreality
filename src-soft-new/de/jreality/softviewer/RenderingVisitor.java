@@ -587,9 +587,12 @@ public class RenderingVisitor extends SceneGraphVisitor {
             pipeline.startGeometry(p);
             DataList vertexColors = p.getVertexAttributes(Attribute.COLORS);
             DataList vertexRadii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
-            if(!POINT_SPHERES)
+            if(!pointShader.isSphereDraw())
                     for (int i = 0; i < n; i++)
                         pipeline.processPoint(a, i,vertexColors,vertexRadii);
+            else if(!POINT_SPHERES )
+                for (int i = 0; i < n; i++)
+                    pipeline.processPseudoSphere(a, i,vertexColors,vertexRadii);
             else
                 for (int i = 0; i < n; i++) {
                     double r = pointShader.getPointRadius()*(vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):1);
