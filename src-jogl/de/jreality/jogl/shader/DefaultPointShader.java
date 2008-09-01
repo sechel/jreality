@@ -48,7 +48,6 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
-import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -62,7 +61,6 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.LoggingSystem;
@@ -89,6 +87,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	double specularExponent = 60.0;
 	int polygonCount = 0;
 	boolean changedTransp, changedLighting;
+	double[] lightDirection = {1,-1,2};
+	private Color specularColor;
+	static int textureSize = 128;
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
@@ -123,16 +124,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		return diffuseColor;
 	}
 
-	byte[] sphereTex;
-	double[] lightDirection = {1,-1,2};
 	float[] oldDiffuseColorAsFloat = new float[4];
 	private void setupTexture() {
-		int I = 0, II = 0;
-		double[] reflected = new double[3];
-//		if (sphereTex != null) return;
-		// TODO check here to see if it's possible to avoid recomputing by comparing to old values
-		// for diffuse color, specular color, and exponent.
-		if (sphereTex == null) sphereTex = new byte[textureSize * textureSize * 4];
+		
 		float sum = 0;
 		for (int i = 0; i<4; ++i) {
 			float diff = diffuseColorAsFloat[i] - oldDiffuseColorAsFloat[i];
@@ -140,62 +134,13 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			sum += Math.abs(diff);
 		}
 		if (sum < 10E-4) return;
-		for (int i = 0; i<textureSize; ++i)	{
-			for (int j = 0; j< textureSize; ++j)	{
-				if (sphereVertices[I][0] != -1)	{	
-					double diffuse = Rn.innerProduct(lightDirection, sphereVertices[I]);
-					if (diffuse < 0) diffuse = 0;
-					if (diffuse > 1.0) diffuse =1.0;
-					double z = sphereVertices[I][2];
-					reflected[0] = 2*sphereVertices[I][0]*z;
-					reflected[1] = 2*sphereVertices[I][1]*z;
-					reflected[2] = 2*z*z-1;
-					double specular = Rn.innerProduct(lightDirection, reflected);
-					if (specular < 0.0) specular = 0.0;
-					if (specular > 1.0) specular = 1.0;
-					specular = Math.pow(specular, specularExponent);
-					for (int k = 0; k<3; ++k)	{
-						double f = (diffuse * diffuseColorAsFloat[k] + specular * specularColorAsFloat[k]);
-						if (f < 0) f = 0;
-						if (f > 1) f = 1;
-						sphereTex[II+k] =  (byte) (255 * f); 
-					}
-					sphereTex[II+3] = sphereVertices[I][2] < .1 ? (byte) (2550*sphereVertices[I][2]) : -128;
-				}
-				else	{
-					sphereTex[II] =  sphereTex[II+1] = sphereTex[II+2] = sphereTex[II+3]  = 0;  
-					}
-				II += 4;
-				I++;
-				}
-			}
-			ImageData id = new ImageData(sphereTex, textureSize, textureSize) ;
-			tex.setImage(id);
-			tex.setApplyMode(Texture2D.GL_MODULATE);
-			// use nearest filter to avoid corrupting the alpha = 0 transparency trick
-			tex.setMinFilter(Texture2D.GL_NEAREST);
+		tex.setImage(ShadedSphereImage.shadedSphereImage(
+				lightDirection,diffuseColor, specularColor, specularExponent, textureSize, null));
+		tex.setApplyMode(Texture2D.GL_MODULATE);
+		// use nearest filter to avoid corrupting the alpha = 0 transparency trick
+		tex.setMinFilter(Texture2D.GL_NEAREST);
 	}
 
-	static final int textureSize = 128;
-	static double[][] sphereVertices = new double[textureSize * textureSize][3];
-	private Color specularColor;
-	static {
-		double x,y,z;
-		int I = 0;
-		for (int i = 0; i<textureSize; ++i)	{
-			y = 2*(i+.5)/textureSize - 1.0;
-			for (int j = 0; j< textureSize; ++j)	{
-				x = 2*(j+.5)/textureSize - 1.0;
-				double dsq = x*x+y*y;
-				if (dsq <= 1.0)	{	
-					z = Math.sqrt(1.0-dsq);
-					sphereVertices[I][0] = x; sphereVertices[I][1] = y; sphereVertices[I][2] = z;
-					}
-				else sphereVertices[I][0] = sphereVertices[I][1] = sphereVertices[I][2] = -1;
-				I++;
-			}
-		}
-	}
 	private void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.renderer.globalGL;
