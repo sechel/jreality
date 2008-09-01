@@ -40,6 +40,8 @@
 
 package de.jreality.geometry;
 
+import java.awt.Color;
+
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -92,6 +94,10 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 		setVertexColors(ncs);
 	}
 
+	public void setVertexColors( Color [] data ) {
+		setVertexColors( toDoubleArray( data ) );
+	}
+	
 	/**
 	 * @param points
 	 * @return
