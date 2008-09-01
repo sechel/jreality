@@ -421,7 +421,7 @@ public class JOGLRendererHelper {
 		// vertex color has priority over face color
 		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
-		if (vertexColors != null && smooth) {
+		if (vertexColors != null && (faceColors == null || smooth)) {
 			colorBind = PER_VERTEX;
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
 		} else if (faceColors != null && colorBind != PER_VERTEX) {

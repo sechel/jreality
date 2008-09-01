@@ -56,7 +56,8 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 			} 			
 		}
 //		System.err.println("OSP: "+oldSinglePeer+" "+c.getName()+" NSP: "+singlePeer);
-		GoBetween gb = jr.goBetweenFor(c, singlePeer);
+		sgp.push(c);
+		GoBetween gb = GoBetween.goBetweenFor(jr, c, singlePeer);
 		JOGLPeerComponent peer = null;
 		boolean alreadySinglePeer = false;
 		if (gb.isSinglePeer() && (gb.getSinglePeer()) != null) {
@@ -83,8 +84,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 			} catch(SecurityException se)	{
 				LoggingSystem.getLogger(this).warning("Security exception in setting configuration options");
 			}
-			sgp.push(c);
-			peer.init(sgp, myParent, jr);
+			peer.init(gb, sgp, myParent, jr);
 		}
 //			System.err.println("Got sgc of class "+peer.getClass().getName());
 //			System.err.println("peerClass is "+JOGLConfiguration.peerClass.getName());

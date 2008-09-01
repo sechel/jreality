@@ -54,7 +54,10 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	
 	@Override
 	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
-		super.init(sgp,p,jr);
+		init(null, sgp, p, jr);
+	}
+	public void init(GoBetween gb, SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
+		super.init(gb, sgp,p,jr);
 		Geometry trojanHorse = goBetween.originalComponent.getGeometry();
 		isCopyCat = (trojanHorse != null &&  
 				trojanHorse instanceof MatrixListData);
@@ -208,6 +211,8 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				framecount = jr.frameCount;
 				Rn.times(camera2CameraRepn,world2CameraRepn,  jr.renderingState.cameraToWorld);
 				Rn.times(camera2CameraRepn, camera2CameraRepn , CameraUtility.inverseCameraOrientation.getArray());
+				isReflection = Rn.determinant(camera2CameraRepn) < 0;
+				isIdentity = Rn.isIdentityMatrix(camera2CameraRepn, 10E-8);
 
 //				System.err.println("Setting up final thing");
 			}

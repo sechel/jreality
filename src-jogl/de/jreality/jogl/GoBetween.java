@@ -40,10 +40,39 @@ public class GoBetween extends JOGLPeerNode implements
 	Lock peersLock = new Lock();
 	boolean singlePeer = false;
 
-	public GoBetween()	{
+	static Class<? extends GoBetween> gbClass = GoBetween.class;
+	public static void setGoBetweenClass(Class<? extends GoBetween> c)	{
+		gbClass = c; 
+	}
+	static WeakHashMap<JOGLRenderer, WeakHashMap> rendererTable = 
+		new WeakHashMap<JOGLRenderer, WeakHashMap>();
+	
+	public   static GoBetween goBetweenFor(JOGLRenderer jr, SceneGraphComponent sgc, boolean singlePeer)	{
+		if (sgc == null) return null;
+		WeakHashMap<SceneGraphComponent, GoBetween> gbt = rendererTable.get(jr);
+		if (gbt == null) {
+			gbt = new WeakHashMap<SceneGraphComponent, GoBetween>();
+			rendererTable.put(jr,gbt);
+		}
+		GoBetween gb = gbt.get(sgc);
+		if (gb != null)	return gb;
+		try {
+			gb = gbClass.newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} 
+		gb.init(sgc, jr, singlePeer);
+		gbt.put(sgc, gb);
+		return gb;
+//		System.err.println("Already have gb for "+sgc.getName());
+	}
+
+	protected GoBetween()	{
 		super();
 	}
-	public GoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean inheritSinglePeer)	{
+	protected GoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean inheritSinglePeer)	{
 		super();
 		init(sgc, jr, inheritSinglePeer);
 	}
@@ -59,6 +88,7 @@ public class GoBetween extends JOGLPeerNode implements
 //			System.err.println("Adding geom listener for "+originalComponent.getGeometry().getName());
 		} else peerGeometry = null;
 		originalComponent.addSceneGraphComponentListener(this);
+//		System.err.println("adding listener for "+originalComponent.getName());
 		singlePeer = inheritSinglePeer;
 		if (originalComponent.getAppearance() != null)  {
 			originalComponent.getAppearance().addAppearanceListener(this);
@@ -71,6 +101,8 @@ public class GoBetween extends JOGLPeerNode implements
 
 
 	public void dispose()	{
+//		System.err.println("disposing "+originalComponent.getName());
+//		if (singlePeer) return; // need to do reference counting!
 		originalComponent.removeSceneGraphComponentListener(this);
 		if (originalComponent.getAppearance() != null) 
 			originalComponent.getAppearance().removeAppearanceListener(this);
@@ -83,6 +115,10 @@ public class GoBetween extends JOGLPeerNode implements
 			originalComponent.getTransformation().removeTransformationListener(this);
 		if (originalComponent.getLight() != null)
 			originalComponent.getLight().removeLightListener(this);
+		if (rendererTable.get(jr).containsKey(originalComponent)) {
+			rendererTable.get(jr).remove(originalComponent);
+//			System.err.println("removing go between for "+originalComponent.getName());
+		}
 	}
 
 	public boolean isSinglePeer()	{
@@ -119,6 +155,7 @@ public class GoBetween extends JOGLPeerNode implements
 
 	public void geometryChanged(GeometryEvent ev) {
 //		peersLock.readLock();
+		LoggingSystem.getLogger(this).fine("sgc "+originalComponent.getName()+" Geometry changed");
 		for ( JOGLPeerComponent peer: peers)	{
 			peer.setDisplayListDirty();
 		}
@@ -199,6 +236,7 @@ public class GoBetween extends JOGLPeerNode implements
 	}
 
 	public void childRemoved(SceneGraphComponentEvent ev) {
+		theLog.log(Level.FINE,"GoBetween: Container Child removed: "+originalComponent.getName());
 		if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
 			if (peerGeometry != null) {
 				((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
@@ -219,12 +257,12 @@ public class GoBetween extends JOGLPeerNode implements
 		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
 			peer.childRemoved(ev);
-			//peer.addSceneGraphComponentEvent(ev);
 		}
 		peersLock.readUnlock();
 	}
 
 	public void childReplaced(SceneGraphComponentEvent ev) {
+		theLog.log(Level.FINE,"GoBetween: Container Child replaced: "+originalComponent.getName());
 		if  (ev.getChildType() ==  SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY) {
 			if (peerGeometry != null && peerGeometry.originalGeometry == originalComponent.getGeometry()) return;		// no change, really
 			if (peerGeometry != null) {
@@ -258,7 +296,6 @@ public class GoBetween extends JOGLPeerNode implements
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
 //		peersLock.readLock();
 		for ( JOGLPeerComponent peer: peers)	{
-			//peer.addSceneGraphComponentEvent(ev);
 			peer.visibilityChanged(ev);
 		}				
 //		peersLock.readUnlock();
@@ -266,5 +303,6 @@ public class GoBetween extends JOGLPeerNode implements
 	public void lightChanged(LightEvent ev) {
 		jr.lightsChanged=true;
 	}
+
 
 }

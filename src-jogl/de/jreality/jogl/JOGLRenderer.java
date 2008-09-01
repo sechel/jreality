@@ -655,12 +655,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 
-	static Class<? extends GoBetween> gbClass = GoBetween.class;
-	public static void setGoBetweenClass(Class<? extends GoBetween> c)	{
-		gbClass = c; 
-	}
-
-//	static {
+	//	static {
 //		try {
 //			String foo = Secure.getProperty("jreality.jogl.goBetweenClass");  //TODO: move to de.jreality.util.SystemProperties
 //			if (foo != null)
@@ -677,33 +672,11 @@ public class JOGLRenderer  implements AppearanceListener {
 //		}	
 //	}
 	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
+	/**
+	 * @deprecated
+	 */
 	public   GoBetween goBetweenFor(SceneGraphComponent sgc, boolean singlePeer)	{
-		if (sgc == null) return null;
-		GoBetween gb = null;
-		Object foo = goBetweenTable.get(sgc);
-		if (foo == null)	{
-			try {
-				gb = gbClass.newInstance();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} //new GoBetween(); //sgc, this);
-			gb.init(sgc, this, singlePeer);
-			goBetweenTable.put(sgc, gb);
-			return gb;
-		}
-		return ((GoBetween) foo);
-	}
-
-	public   GoBetween goBetweenFor(SceneGraphComponent sgc)	{
-		if (sgc == null) return null;
-		GoBetween gb = null;
-		Object foo = goBetweenTable.get(sgc);
-		if (foo == null) throw new IllegalStateException("No go between for "+sgc.getName());
-		return ((GoBetween) foo);
+		return GoBetween.goBetweenFor(this, sgc, singlePeer);
 	}
 
 	int geomDiff = 0;

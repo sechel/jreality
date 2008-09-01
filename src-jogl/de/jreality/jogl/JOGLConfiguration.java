@@ -118,7 +118,7 @@ public class JOGLConfiguration {
 					ConstructPeerGraphVisitor.setPeerClass(peerClass);
 					System.err.println("Got peer class "+peerClass);
 					goBetweenClass = (Class<? extends GoBetween>) Class.forName("de.jreality.jogl.MatrixListGoBetween");
-					JOGLRenderer.setGoBetweenClass(goBetweenClass);
+					GoBetween.setGoBetweenClass(goBetweenClass);
 					System.err.println("Got go betwen class "+goBetweenClass);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block

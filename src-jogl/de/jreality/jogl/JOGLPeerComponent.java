@@ -93,11 +93,16 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 	
 	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
+		init(null, sgp, p, jr);
+	}
+	public void init(GoBetween gb, SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
 		this.jr = jr;
 		if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
 			throw new IllegalArgumentException("Not a valid SceneGraphComponenet");
 		}
-		goBetween = jr.goBetweenFor(sgp.getLastComponent());
+		if (gb == null) 		
+			goBetween = GoBetween.goBetweenFor(jr, sgp.getLastComponent(), false);
+		else goBetween = gb;
 		goBetween.addJOGLPeer(this);
 		name = "JOGLPeer:"+goBetween.originalComponent.getName();
 		children = new Vector<JOGLPeerComponent>();
