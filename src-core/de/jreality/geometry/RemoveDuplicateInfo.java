@@ -46,8 +46,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import com.sun.tools.javac.comp.Attr;
-
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
