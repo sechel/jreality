@@ -46,6 +46,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import com.sun.tools.javac.comp.Attr;
+
+import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.PointSet;
@@ -85,9 +88,9 @@ public class RemoveDuplicateInfo {
 	 * @return  returns IndexedFaceSet,  IndexedLineSet or PointSet depending on input.
 	 */
 ////	---------- new start-----------------
-	private int[] refferenceTable;
-	private int[] mergeRefferenceTable;
-	private int[] removeRefferenceTable;
+	private int[] referenceTable;
+	private int[] mergeReferenceTable;
+	private int[] removeReferenceTable;
 	private int[] sublistTable;
 
 
@@ -111,7 +114,7 @@ public class RemoveDuplicateInfo {
 	 *  the result of type PointSet is especialy the same typ as the given geometry 
 	 */
 	public static PointSet removeDuplicateVertices(PointSet ps, Attribute ...attributes ) {
-		return removeDuplicateVertices(ps,0.00000001,attributes);		
+		return removeDuplicateVertices(ps,10E-8,attributes);		
 	}
 	/**  merges vertices which appears more than once in the geometry
 	 *  the result of type PointSet is especialy the same typ as the given geometry 
@@ -131,9 +134,9 @@ public class RemoveDuplicateInfo {
 		}
 		r.eps=Math.max(0, eps);
 		r.dim=r.points[0].length;
-		r.mergeRefferenceTable=new int[r.points.length];
+		r.mergeReferenceTable=new int[r.points.length];
 		for (int i = 0; i < r.points.length; i++) {
-			r.mergeRefferenceTable[i]=i;
+			r.mergeReferenceTable[i]=i;
 		}
 		r.numSubBoxes=(int)Math.pow(2, r.dim);
 		r.readOutAttributes(attributes);
@@ -149,10 +152,12 @@ public class RemoveDuplicateInfo {
 	 * to be compared for equality.
 	 * @param attributes
 	 */
+	public final static Attribute[] defaultAttrs = {Attribute.COORDINATES};
 	private void readOutAttributes(Attribute ... attributes ){
 		List<double[][]> DAAList= new LinkedList<double[][]>();
 		List<double[]> DAList= new LinkedList<double[]>();
 		int dim= 0;
+		if (attributes == null) attributes = defaultAttrs;
 		// sort and remember meaningfull Atributes
 		for(Attribute at: attributes){
 			if(at.getName().equals(Attribute.COORDINATES.getName()))continue;
@@ -168,6 +173,7 @@ public class RemoveDuplicateInfo {
 				dim++;
 			}
 		}
+		System.err.println("dim = "+dim);
 		// put the doubles into an array
 		attrVals= new double[source.getNumPoints()][dim];
 		int dimCount=0;
@@ -205,9 +211,9 @@ public class RemoveDuplicateInfo {
 	}
 
 
-	/** fills the refferences 
+	/** fills the references 
 	 * of the Vertices in the Box
-	 * in the refferenceTable
+	 * in the referenceTable
 	 */	
 	private void processBox(Box b){
 		if(b.numOfPoints<=1) return;
@@ -243,11 +249,9 @@ public class RemoveDuplicateInfo {
 		double[] c2=points[p2];
 		double[] a1=attrVals[p1];//important double attributes (inlined)
 		double[] a2=attrVals[p2];
-		if(inBetween(c1,c1, eps, c2)&&inBetween(a1,a1, eps, a2))
-			return true; 
-		return false;
+		return (inBetween(c1,c1, eps, c2) && inBetween(a1,a1, eps, a2)); 
 	}
-	/** sets the refferences of all Vertices in the box	
+	/** sets the references of all Vertices in the box	
 	 */ 
 	private void compareInBox(Box b) {
 		for (int p1: b.innerPoints){
@@ -256,13 +260,13 @@ public class RemoveDuplicateInfo {
 				if(p1>=p2)continue;
 				if(!isLegalPoint(p2)) continue;
 				if (isEqualByEps(p1, p2))
-					mergeRefferenceTable[p2]=p1;
+					mergeReferenceTable[p2]=p1;
 			}
 		}
 	}
-	/** indicates if a point is not refferenced to an other; */
+	/** indicates if a point is not referenced to an other; */
 	private boolean isLegalPoint(int p){
-		return (mergeRefferenceTable[p]==p);
+		return (mergeReferenceTable[p]==p);
 	}
 
 	private Box[] createSubBoxes(Box b) { 
@@ -367,43 +371,43 @@ public class RemoveDuplicateInfo {
 		newDatalists();
 		newIndices();
 	} 
-	/** calculates refferenceTable 
+	/** calculates referenceTable 
 	 * new Vertices 
 	 * (unused Vertices will be taken out) 
 	 */
 	private void newTables(){
 		// remove Table:
-		removeRefferenceTable= new int[points.length];
+		removeReferenceTable= new int[points.length];
 		int numUsedVerts=0;
 		int pos=0;
 		for (int i = 0; i < points.length; i++)
-			if (mergeRefferenceTable[i]==i){
-				removeRefferenceTable[i]=numUsedVerts;
+			if (mergeReferenceTable[i]==i){
+				removeReferenceTable[i]=numUsedVerts;
 				numUsedVerts++;
 			}
 			else{
-				removeRefferenceTable[i]=-1;
+				removeReferenceTable[i]=-1;
 			}
 		// direct referenceTable:
-		refferenceTable= new int[points.length];
+		referenceTable= new int[points.length];
 		for (int i = 0; i < points.length; i++) {
-			refferenceTable[i]=removeRefferenceTable[mergeRefferenceTable[i]];
+			referenceTable[i]=removeReferenceTable[mergeReferenceTable[i]];
 		}
 		numNewVerts=numUsedVerts;
 		// sublist Table:
 		sublistTable= new int[numUsedVerts];
 		pos=0;
 		for (int i = 0; i < points.length; i++) 
-			if(removeRefferenceTable[i]!=-1){
+			if(removeReferenceTable[i]!=-1){
 				sublistTable[pos]=i;
 				pos++;
 			}
 	}
 
 	/** 
-	 * @param oldRefferences (for ecx.: face indices)
-	 * @param refferenceTable (result of start)
-	 * @return new refferences (for ecx.: new face indices)
+	 * @param oldReferences (for ecx.: face indices)
+	 * @param referenceTable (result of start)
+	 * @return new references (for ecx.: new face indices)
 	 */
 	private void newIndices(){
 		// face Indices
@@ -415,7 +419,7 @@ public class RemoveDuplicateInfo {
 				int[][] fIndis=data.toIntArrayArray(null);
 				int[][] result= new int[fIndis.length][];
 				for (int i = 0; i < result.length; i++) {
-					result[i]=newIndices(fIndis[i], refferenceTable);
+					result[i]=newIndices(fIndis[i], referenceTable);
 				}
 				ifs.setFaceAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
 			}	
@@ -429,16 +433,16 @@ public class RemoveDuplicateInfo {
 				int[][] eIndis=data.toIntArrayArray(null);
 				int[][] result= new int[eIndis.length][];
 				for (int i = 0; i < result.length; i++) {
-					result[i]=newIndices(eIndis[i], refferenceTable);
+					result[i]=newIndices(eIndis[i], referenceTable);
 				}
 				ils.setEdgeAttributes(Attribute.INDICES,new IntArrayArray.Array(result));
 			}	
 		}
 	}
-	private static int[] newIndices(int[] oldRefferences, int[] refferenceTable){
-		int[] result= new int[oldRefferences.length];
-		for (int i = 0; i < oldRefferences.length; i++) {
-			result[i]=refferenceTable[oldRefferences[i]];
+	private static int[] newIndices(int[] oldReferences, int[] referenceTable){
+		int[] result= new int[oldReferences.length];
+		for (int i = 0; i < oldReferences.length; i++) {
+			result[i]=referenceTable[oldReferences[i]];
 		}
 		return result;
 	} 
@@ -488,8 +492,8 @@ public class RemoveDuplicateInfo {
 	public void setEps(double eps) {
 		this.eps = eps;
 	}
-	public int[] getRefferenceTable() {
-		return refferenceTable;
+	public int[] getReferenceTable() {
+		return referenceTable;
 	}
 	/** removes vertices which are not used by faces.
 	 * changes faceIndices.
@@ -508,21 +512,21 @@ public class RemoveDuplicateInfo {
 			for (int j = 0; j < faces[i].length; j++) 
 				usedVertices[faces[i][j]]=true;	
 		int count=0; 
-		int[] refferenceTabel= new int[numVOld];
+		int[] referenceTabel= new int[numVOld];
 		for (int i = 0; i < numVOld; i++) {
 			if(usedVertices[i]){
-				refferenceTabel[i]=count;
+				referenceTabel[i]=count;
 				vertices[count]=vertices[i];// vertices gleich richtig einschreiben
 				count++;
 			}
 			else{
-				refferenceTabel[i]=-1;
+				referenceTabel[i]=-1;
 			}
 		}
 		// faces umindizieren
 		for (int i = 0; i < numF; i++) 
 			for (int j = 0; j < faces[i].length; j++) 
-				faces[i][j]=refferenceTabel[faces[i][j]];
+				faces[i][j]=referenceTabel[faces[i][j]];
 		// VertexListe erneuern
 		double[][] newVertices= new double[count][];
 		System.arraycopy(vertices, 0, newVertices, 0, count);
