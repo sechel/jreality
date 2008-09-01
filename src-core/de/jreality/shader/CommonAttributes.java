@@ -193,6 +193,7 @@ import de.jreality.scene.Appearance;
 	public static final String PICKABLE = "pickable";
 	public static final String SIGNATURE= "signature";
 	public static final String INFO_STRING = "infoString";
+	public static final String GLSL = "glsl";
 	
 	// RenderMan backend attributes
 	public final static String RMAN_ATTRIBUTE = "rendermanAttribute";
