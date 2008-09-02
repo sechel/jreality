@@ -39,7 +39,11 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -52,6 +56,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -76,6 +81,8 @@ public class ExportImage extends AbstractJrAction {
 	private DimensionPanel dimPanel;
 	private JComponent options;
 	private int antialiasing;
+	private boolean saveAlpha = true;
+	private JCheckBox checkbox;
 
 	
 	public ExportImage(String name, ViewerSwitch viewer, Component parentComp) {
@@ -121,13 +128,8 @@ public class ExportImage extends AbstractJrAction {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-//		if(realViewer instanceof de.jreality.jogl.Viewer)   
-//		img = ((de.jreality.jogl.Viewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-//		if(realViewer instanceof SoftViewer)
-//		img = ((SoftViewer)realViewer).renderOffscreen(4*dim.width, 4*dim.height);
-        
-        // timh: I changed the type from INT_RGB to INT_ARGB since the soft vierwer can generate images with transparent background
-		BufferedImage img = new BufferedImage(dim.width, dim.height,BufferedImage.TYPE_INT_ARGB);
+		int type = saveAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
+		BufferedImage img = new BufferedImage(dim.width, dim.height, type);
 		Graphics2D g = (Graphics2D) img.getGraphics();
 		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
@@ -143,7 +145,7 @@ public class ExportImage extends AbstractJrAction {
 				0,
 				null
 		);
-//		System.out.println("\nWriting to file "+file.getPath());
+		if (saveAlpha) img.coerceData(true);
 
 		//JOGLRenderer.writeBufferedImage(file,img2); :
 		try {
@@ -215,6 +217,17 @@ public class ExportImage extends AbstractJrAction {
 		p.setToolTipText("<html><body>Choose the factor of dimension scaling<br>" +
 				"for \"antialiased\" offscreen rendering</body></html>");
 		accessory.add(p);
+		checkbox = new JCheckBox(new AbstractAction("save alpha") {
+			public void actionPerformed(ActionEvent e) {
+				saveAlpha = checkbox.isSelected();
+			}
+		});
+		checkbox.setSelected(saveAlpha);
+		Box hbox = Box.createHorizontalBox();
+		hbox.add(Box.createHorizontalGlue());
+		hbox.add(checkbox);
+		hbox.add(Box.createHorizontalGlue());
+		accessory.add(hbox);
 		
 		return accessory;
 	}
