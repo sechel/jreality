@@ -47,6 +47,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.nio.Buffer;
@@ -540,7 +541,7 @@ public class JOGLRenderer  implements AppearanceListener {
 						globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
 
 						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
-								GL.GL_BGR, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
 					}
 				}
 				
@@ -780,6 +781,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	BufferedImage img;
+	boolean preMultiplied = true;		// not sure about this!
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLCanvas canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
@@ -798,6 +800,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		System.err.println("Image size = "+imageWidth+":"+imageHeight);
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
+		caps.setAlphaBits(8);
 		if (offscreenPBuffer == null) offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
@@ -805,18 +808,32 @@ public class JOGLRenderer  implements AppearanceListener {
 //		offscreenBuffer = null;
 //		imageWidth = numTiles*tileSizeX;
 //		imageHeight = numTiles*tileSizeY;
-		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
+		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR);
 		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
 		offscreenMode = true;
 		lightListDirty = true;
 		canvas.display();
-		//display(offscreenPBuffer);
-
-		ImageUtil.flipImageVertically(img);
+	    BufferedImage bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+		WritableRaster raster = bi.getRaster();
+		byte[] byteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
+		int[] dst = new int[4];
+        for (int y = 0, ptr = 0; y < imageHeight; y++)
+	          for (int x = 0; x < imageWidth; x++, ptr += 4) {
+	            dst[3] =  byteArray[ptr+3];  //(byte) (px & 255); //
+	            if (dst[3] < 0) dst[3] += 256;
+	            double d = dst[3]/255.0;
+	            for (int j = 0; j<3; ++j)	{
+		            dst[j] = (int) (byteArray[ptr+j]); //(byte) ((px >> 8) & 255); //
+	            	if (dst[j] < 0) dst[j] += 256;
+	            	if (preMultiplied) dst[j] = (int) (dst[j] * d);
+	            }
+	            raster.setPixel(x, y, dst);
+          }
+		ImageUtil.flipImageVertically(bi);
 	
-		// force alpha channel to be "pre-multiplied"
-		img.coerceData(true);
-		return img;
+		// a magic incantation to get the alpha channel to show up correctly
+		bi.coerceData(true);
+		return bi;
 	}
 
 

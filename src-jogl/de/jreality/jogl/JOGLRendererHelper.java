@@ -242,12 +242,6 @@ public class JOGLRendererHelper {
 			gl.glDisable(GL.GL_FOG);
 	}
 
-	// TODO don't do this every render, attach an Appearance listener and cache the value
-	// between changes
-	public static void handleSkyBox(JOGLRenderer jr, CubeMap cm, Camera cam) {
-	    GL gl = jr.globalGL;
-			JOGLSkyBox.render(gl, jr.renderingState.worldToCamera, cm, cam);
-	}
 
 	private static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 

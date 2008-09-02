@@ -165,13 +165,14 @@ public class DefaultVertexShader implements VertexShader {
 //			jr.openGLState.frontBack = frontBack;
 //		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
-			gl.glColor4fv( diffuseColorAsFloat,0);
+			if (jr.renderingState.transparencyEnabled) gl.glColor4fv( diffuseColorAsFloat,0);
+			else gl.glColor3fv(diffuseColorAsFloat,0);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 //		}
 			//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat,0);
 		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat,0);
-		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) getSpecularExponent());
+		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) specularExponent);
 //		LoggingSystem.getLogger(this).finest("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
