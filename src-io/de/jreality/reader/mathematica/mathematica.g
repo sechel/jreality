@@ -256,6 +256,8 @@ private
 faceThing [Appearance app, Object edgeF] returns[Appearance app2]
 {app2=MathematicaHelper.copyApp(app);}
 	:	cuboid[app2,edgeF]					// Wuerfel 
+	|	sphere[app2,edgeF]					// Sphaere
+	|	cylinder[app2,edgeF]				// Zylinder
 	|	app2=polygonBlock[app2,edgeF]		// Abfolge von Polygonen (IndexedFaceSet)
 	|	app2=faceColor[app2]				// Farbe die Flaechen beeinflusst
 	;
@@ -318,6 +320,64 @@ cuboid [Appearance app,Object edgeF]
 			 geo.setAppearance(cubicApp);
 			 MatrixBuilder.euclidean().scale(v2[0],v2[1],v2[2])
 			    .translate(v[0],v[1],v[2]).assignTo(geo);
+ 			}
+ 	;
+
+private 
+sphere[Appearance app,Object edgeF]
+	// eine Sphaere gegeben durch ein Zentrum und ggf. einen Raduis(default=1).
+	:"Sphere"
+	 OPEN_BRACKET 
+			{
+			double[] center=new double [3]; 
+			double radius=1;
+			}
+			center=vektor
+			( 
+			  COLON	
+			  radius=doublething 
+			)?
+	 CLOSE_BRACKET 
+			{
+			 SceneGraphComponent geo=Primitives.sphere(radius, center);
+			 current.addChild(geo);
+	 		 geo.setName("Cylinder");
+	 		 Appearance App =MathematicaHelper.copyApp(app);
+	 		 App.setAttribute(CommonAttributes.EDGE_DRAW, false);
+			 geo.setAppearance(App);
+ 			}
+ 	;
+
+private 
+cylinder [Appearance app,Object edgeF]
+	// ein Zylinder gegeben durch eine Strecke(Anfang und Ende) und ggf. einen Raduis(default=1).
+	:"Cylinder"
+	 OPEN_BRACKET 
+			{
+			double[] anfg=new double [3]; 
+			double[] ende=new double [3]; 
+			double radius=1;
+			}
+			OPEN_BRACE
+			anfg=vektor
+			COLON 
+			ende=vektor
+			CLOSE_BRACE
+			( 
+			  COLON	
+			  radius=doublething 
+			)?
+	 CLOSE_BRACKET 
+			{
+			// realisiert durch gestreckten Zylinder
+			 SceneGraphComponent geo=new SceneGraphComponent();
+			 current.addChild(geo);
+			 geo.setGeometry(MathematicaHelper.makeCylinder(anfg,ende,radius));
+	 		 geo.setName("Cylinder");
+	 		 Appearance cylApp =MathematicaHelper.copyApp(app);
+	 		 cylApp.setAttribute(CommonAttributes.EDGE_DRAW, false);
+	 		 cylApp.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+			 geo.setAppearance(cylApp);
  			}
  	;
  	

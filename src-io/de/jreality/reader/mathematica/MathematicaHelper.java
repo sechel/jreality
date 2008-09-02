@@ -4,11 +4,16 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.jreality.geometry.GeometryMergeFactory;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 
 public class MathematicaHelper {
@@ -121,7 +126,17 @@ public class MathematicaHelper {
 		MatrixBuilder.euclidean().translate(0,-1,-1).assignTo(light6Node);
 		return lightNode; 
 	} 
-
+	static IndexedFaceSet makeCylinder(double[] start, double[] end, double radius){
+		GeometryMergeFactory gem= new GeometryMergeFactory();
+		SceneGraphComponent sgc= new SceneGraphComponent();
+		double len=Rn.euclideanDistance(start, end);
+		sgc.addChild(Primitives.closedCylinder(20, radius,0, len, Math.PI*2));
+		double[] diff=Rn.subtract(null, end, start);
+		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, diff).assignTo(sgc);
+		IndexedFaceSet ifs=gem.mergeGeometrySets(sgc);
+		ifs.setVertexAttributes(Attribute.COLORS, null);
+		ifs.setFaceAttributes(Attribute.COLORS, null);
+		return ifs;
+	}
 	
-
 }
