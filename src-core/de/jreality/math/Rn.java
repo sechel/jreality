@@ -40,6 +40,7 @@
 
 package de.jreality.math;
 
+import java.awt.geom.IllegalPathStateException;
 import java.util.Arrays;
 import java.util.logging.Level;
 
@@ -394,6 +395,15 @@ final public class Rn {
 		return det;
 	}
 	
+	public static double determinant(double[][] m)	{
+		int n = m.length;
+		if (n != m[0].length)	
+			throw new IllegalArgumentException("Must be square matrix");
+		double[] lm = new double[n*n];
+		for (int i = 0; i<m.length; ++i) 
+			System.arraycopy(m[i], 0, lm, n*i, n);
+		return determinant(lm);
+	}
 	/**
 	 * This is optimized for low dimensional determinants.
 	 * @param m
