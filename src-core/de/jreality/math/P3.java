@@ -944,6 +944,11 @@ public class P3 {
 		return lineIntersectPlane(plane, p1, p2, point);
 	}
 
+	public static boolean areCollinear(double[] p0, double[] p1, double[] p2, double tol) {
+		double[] plane = planeFromPoints(null, p0, p1, p2);
+		return Rn.equals(plane, P3.zeroVector, tol);
+	}
+	
 	public static double[] barycentricCoordinates(double[] weights, double[] p0,
 				double[] p1, double[] p) {
 			// handle the case that p0,p1,p are linearly independent
