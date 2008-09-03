@@ -781,7 +781,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	BufferedImage img;
-	boolean preMultiplied = true;		// not sure about this!
+	boolean preMultiplied = false;		// not sure about this!
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLCanvas canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
@@ -813,27 +813,30 @@ public class JOGLRenderer  implements AppearanceListener {
 		offscreenMode = true;
 		lightListDirty = true;
 		canvas.display();
-	    BufferedImage bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
-		WritableRaster raster = bi.getRaster();
-		byte[] byteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
-		int[] dst = new int[4];
-        for (int y = 0, ptr = 0; y < imageHeight; y++)
-	          for (int x = 0; x < imageWidth; x++, ptr += 4) {
-	            dst[3] =  byteArray[ptr+3];  //(byte) (px & 255); //
-	            if (dst[3] < 0) dst[3] += 256;
-	            double d = dst[3]/255.0;
-	            for (int j = 0; j<3; ++j)	{
-		            dst[j] = (int) (byteArray[ptr+j]); //(byte) ((px >> 8) & 255); //
-	            	if (dst[j] < 0) dst[j] += 256;
-	            	if (preMultiplied) dst[j] = (int) (dst[j] * d);
-	            }
-	            raster.setPixel(x, y, dst);
-          }
-		ImageUtil.flipImageVertically(bi);
-	
-		// a magic incantation to get the alpha channel to show up correctly
-		bi.coerceData(true);
-		return bi;
+		if (true)	{
+			// don't understand why I have to do this.
+			// When premultiplied == false, it doesn't look like I'm doing anything!
+		    BufferedImage bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+			WritableRaster raster = bi.getRaster();
+			byte[] byteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
+			int[] dst = new int[4];
+	        for (int y = 0, ptr = 0; y < imageHeight; y++)
+		          for (int x = 0; x < imageWidth; x++, ptr += 4) {
+		            dst[3] =  byteArray[ptr+3];  //(byte) (px & 255); //
+		            if (dst[3] < 0) dst[3] += 256;
+		            double d = dst[3]/255.0;
+		            for (int j = 0; j<3; ++j)	{
+			            dst[j] = (int) (byteArray[ptr+j]); //(byte) ((px >> 8) & 255); //
+		            	if (dst[j] < 0) dst[j] += 256;
+		            	if (preMultiplied) dst[j] = (int) (dst[j] * d);
+		            }
+		            raster.setPixel(x, y, dst);
+	          }
+			ImageUtil.flipImageVertically(bi);
+		
+			return bi;
+		}
+		return img;
 	}
 
 
