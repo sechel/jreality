@@ -211,7 +211,7 @@ public class ViewerVR {
 	private Matrix contentMatrix=null;
 
 	// list of registered plugins
-	private List<PluginVR> plugins=new ArrayList<PluginVR>();
+	protected List<PluginVR> plugins=new ArrayList<PluginVR>();
 
 	private JCheckBoxMenuItem showPickInSceneCheckBox;
 
