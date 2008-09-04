@@ -175,20 +175,13 @@ public class ShipNavigationTool extends AbstractTool {
 			}
 			double[] pickStart= Rn.linearCombination(null, 1, dest, 1.7, upDir4);
 
-			List picks = Collections.EMPTY_LIST;
+			double[] hit = null;
 			if (isGravitEnabled()) {
 				if (!fall) {
-					try {
-						picks = tc.getPickSystem().computePick(pickStart, dest);
-					} catch (Exception e) {
-						LoggingSystem.getLogger(this).warning("pick system error");
-						return;
-					}
+					hit = getHit(tc, pickStart, dest);
 				}
 				
-				if (!picks.isEmpty()) {
-					PickResult pr = (PickResult) picks.get(0);
-					double[] hit = pr.getWorldCoordinates();
+				if (hit != null) {
 					dest = hit;
 					velocity[1] = 0;
 					touchGround = true;
@@ -226,6 +219,22 @@ public class ShipNavigationTool extends AbstractTool {
 			myMatrix.setColumn(3, dest);
 			myMatrix.assignTo(myComponent);
 		}
+	}
+	
+	protected double[] getHit(ToolContext tc, double[] pickStart, double[] dest) {
+		double[] hit = null;
+		List picks = Collections.EMPTY_LIST;
+		try {
+			picks = tc.getPickSystem().computePick(pickStart, dest);
+		} catch (Exception e) {
+			LoggingSystem.getLogger(this).warning("pick system error");
+			return null;
+		}
+		if (!picks.isEmpty()) {
+			PickResult pr = (PickResult) picks.get(0);
+			hit = pr.getWorldCoordinates();
+		}
+		return hit;
 	}
 
 	private transient boolean timerOnline;
