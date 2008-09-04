@@ -724,7 +724,7 @@ public class ViewerVR {
 		return showPickInSceneCheckBox.isSelected();
 	}
 
-	private Preferences getPreferences() {
+	protected Preferences getPreferences() {
 		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
 			public Preferences run() {
 				return Preferences.userNodeForPackage(ViewerVR.class);
