@@ -52,5 +52,4 @@ public interface VertexShader extends Shader {
 	public void setFrontBack(int f);
 	public Color getDiffuseColor();
 	public float[] getDiffuseColorAsFloat();
-	public void setGlsl(GlslProgram gp);
 }

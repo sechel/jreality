@@ -82,13 +82,14 @@ public class DefaultGeometryShader  implements Shader {
 		vertexDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
 		edgeDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT );
 		faceDraw = eap.getAttribute(ShaderUtility.nameSpace(geomShaderName, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		de.jreality.shader.DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(eap);
 		if(faceDraw) {
 	        	if (polygonShader == null) {
 	        		LoggingSystem.getLogger(this).finer("null polygonshader");
-	        		polygonShader =(PolygonShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POLYGON_SHADER);
+	        		polygonShader =createFrom(dgs.getPolygonShader());
 	        	}
-	        	else 
-	        		polygonShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER));
+
+	        	polygonShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER));
 	    } else {
 	    		polygonShader = null;
 	    }
@@ -170,4 +171,14 @@ public class DefaultGeometryShader  implements Shader {
 		public void render(JOGLRenderingState jrs) {
 		}
 
+	    public static PolygonShader createFrom(de.jreality.shader.PolygonShader ps) {
+	    	PolygonShader ret = null;
+	    	if(ps instanceof de.jreality.shader.TwoSidePolygonShader)
+		           ret = new TwoSidePolygonShader((de.jreality.shader.TwoSidePolygonShader) ps);
+	        else if(ps instanceof de.jreality.shader.ImplodePolygonShader)
+		           ret = new ImplodePolygonShader((de.jreality.shader.ImplodePolygonShader) ps);
+	        else ret = new DefaultPolygonShader();
+	        System.err.println("ret = "+ret.getClass().getName());
+	        return ret;
+	    }
 }

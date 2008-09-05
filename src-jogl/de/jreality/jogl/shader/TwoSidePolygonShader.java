@@ -48,6 +48,7 @@ import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -64,7 +65,12 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 		back = new DefaultPolygonShader();
 	}
 
-
+	public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader tsps)	{
+		front = DefaultGeometryShader.createFrom(tsps.getFront());
+	    front.setFrontBack(DefaultPolygonShader.FRONT);
+		back = DefaultGeometryShader.createFrom(tsps.getFront());
+	    back.setFrontBack(DefaultPolygonShader.BACK);
+	}
 	public void render(JOGLRenderingState jrs) {
 		Geometry g = jrs.currentGeometry;
 		jrs.currentGeometry = null;
@@ -80,11 +86,13 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 	}
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
-	      front = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName, CommonAttributes.POLYGON_SHADER, "front");
-	      LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
-	      front.setFrontBack(DefaultPolygonShader.FRONT);
-	      back = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName,CommonAttributes.POLYGON_SHADER, "back");
-	      back.setFrontBack(DefaultPolygonShader.BACK);
+//	      front = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName, CommonAttributes.POLYGON_SHADER, "front");
+//	      LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
+//	      front.setFrontBack(DefaultPolygonShader.FRONT);
+//	      back = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName,CommonAttributes.POLYGON_SHADER, "back");
+//	      back.setFrontBack(DefaultPolygonShader.BACK);
+		front.setFromEffectiveAppearance(eap, shaderName+".front");
+		back.setFromEffectiveAppearance(eap, shaderName+".back");
 	}
 
 	public void setFrontBack(int f) {

@@ -83,7 +83,9 @@ public class SimpleVertexShader implements VertexShader {
 			jr.renderingState.frontBack = frontBack;
 		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
-			gl.glColor4fv( diffuseColorAsFloat,0);
+		if (jr.renderingState.transparencyEnabled || diffuseColorAsFloat[3] == 0.0) gl.glColor4fv( diffuseColorAsFloat,0);
+		else gl.glColor3fv(diffuseColorAsFloat,0);
+//			gl.glColor4fv( diffuseColorAsFloat,0);
 //			System.err.println("Setting diffuse color to "+diffuseColor);
 //			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
 //		}
@@ -95,8 +97,5 @@ public class SimpleVertexShader implements VertexShader {
 		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-	}
-	public void setGlsl(GlslProgram glProgram) {
-		glProgram.setUniform("diffuseColor", diffuseColorAsFloat);
 	}
 }

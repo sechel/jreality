@@ -60,6 +60,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
+import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.GlslSource;
@@ -103,7 +104,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		defaultShader.setFromEffectiveAppearance(eap, "");
 	}
 	
+	public DefaultPolygonShader()	{
 		
+	}
+	
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap,name);

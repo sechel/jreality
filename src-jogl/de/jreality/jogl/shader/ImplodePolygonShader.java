@@ -61,11 +61,16 @@ import de.jreality.util.LoggingSystem;
  */
 public class ImplodePolygonShader extends DefaultPolygonShader {
     double implodeFactor;
+	public ImplodePolygonShader(de.jreality.shader.ImplodePolygonShader ps) {
+		System.err.println("implode factor = "+ps.getImplodeFactor());
+		
+	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		implodeFactor = eap.getAttribute(ShaderUtility.nameSpace(name, "implodeFactor"), implodeFactor);
-     }
+		System.err.println("implode factor = "+implodeFactor);
+	}
     
 	public double getImplodeFactor() {
 		return implodeFactor;
