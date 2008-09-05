@@ -257,7 +257,8 @@ public class P3 {
 
 
 	/**
-	 * Generate a glide reflection in the plane through the origin whose normal vector is given by vec
+	 * Generate a glide reflection in  <i>plane</i> with translation vector given by the vector from
+	 * <i>p1</i> to </i>p2</i>.  Both these points must lie in the plane.
 	 * Under construction.
 	 * @param m
 	 * @param vec
