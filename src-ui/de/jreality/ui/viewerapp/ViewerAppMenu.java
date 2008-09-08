@@ -85,6 +85,7 @@ import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
 import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
+import de.jreality.ui.viewerapp.actions.file.ExportPDF;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
 import de.jreality.ui.viewerapp.actions.file.ExportSTL;
@@ -254,6 +255,7 @@ private JMenu createFileMenu() {
 		exportImageAction = new ExportImage("Image",viewerApp.getViewerSwitch(), parentComp);
 		export.add(new JMenuItem(exportImageAction));
 		export.add(new JMenuItem(new ExportU3D("U3D", viewer, parentComp)));
+		export.add(new JMenuItem(new ExportPDF("PDF", viewer, parentComp)));
 //		}
 
 		if (!Beans.isDesignTime()) {
