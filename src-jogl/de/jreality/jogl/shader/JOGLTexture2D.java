@@ -38,6 +38,7 @@ public class JOGLTexture2D implements Texture2D {
 	protected Integer repeatT;
 	protected Boolean animated, mipmapMode;
 	protected Runnable runnable;
+	protected Integer pixelFormat;
 	public JOGLTexture2D(Texture2D t)	{
 		super();
 		proxy = t;
@@ -71,6 +72,7 @@ public class JOGLTexture2D implements Texture2D {
 		animated = proxy.getAnimated();
 		mipmapMode = proxy.getMipmapMode();
 		runnable = proxy.getRunnable();
+		pixelFormat = proxy.getPixelFormat();
 	}
 	
 	public Integer getApplyMode() {
@@ -312,6 +314,14 @@ public class JOGLTexture2D implements Texture2D {
 
 	public void setRunnable(Runnable r) {
 		runnable = r;
+	}
+
+	public Integer getPixelFormat() {
+		return pixelFormat;
+	}
+
+	public void setPixelFormat(Integer i) {
+		pixelFormat = i;
 	}
 
 }

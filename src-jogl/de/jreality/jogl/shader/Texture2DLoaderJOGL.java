@@ -204,7 +204,7 @@ public class Texture2DLoaderJOGL {
 //    System.err.println("Binding 2d texture for "+texid);
 	    gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
 	    
-	    int srcPixelFormat = GL.GL_RGBA;
+	    int srcPixelFormat = tex.getPixelFormat();
 	    boolean animated = tex.getAnimated();
 //	    // shouldn't this happen before the texture is rendered?
 	    if (animated)	{
