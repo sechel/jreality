@@ -53,7 +53,7 @@ import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
-import de.jreality.writer.WriterPDF;
+import de.jreality.writer.pdf.WriterPDF;
 import de.jreality.writer.u3d.WriterU3D;
 
 

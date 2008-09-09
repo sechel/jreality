@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene>
+  <sceneRoot>
+    <name>root</name>
+    <visible>true</visible>
+    <transformation/>
+    <appearance>
+      <name>root appearance</name>
+      <attribute name="backgroundColors">
+        <awt-color-array>
+          <awt-color>
+            <red>225</red>
+            <green>225</green>
+            <blue>225</blue>
+            <alpha>255</alpha>
+          </awt-color>
+          <awt-color>
+            <red>225</red>
+            <green>225</green>
+            <blue>225</blue>
+            <alpha>255</alpha>
+          </awt-color>
+          <awt-color>
+            <red>255</red>
+            <green>225</green>
+            <blue>180</blue>
+            <alpha>255</alpha>
+          </awt-color>
+          <awt-color>
+            <red>255</red>
+            <green>225</green>
+            <blue>180</blue>
+            <alpha>255</alpha>
+          </awt-color>
+        </awt-color-array>
+      </attribute>
+      <attribute name="&lt;de.jreality.shader.RootAppearance&gt;">
+        <java-class>de.jreality.shader.RootAppearance</java-class>
+      </attribute>
+    </appearance>
+    <camera/>
+    <light/>
+    <geometry/>
+    <children>
+      <child>
+        <name>scene</name>
+        <visible>true</visible>
+        <transformation>
+          <name>scene trafo</name>
+          <matrix>0.10227491452293583 -0.9936253654941305 0.04741808627505412 -3.4590310854429966 0.6722701055132435 0.1041750388619191 0.7329396063191854 -4.762554543765306 -0.7332071651944866 -0.04308357372340556 0.6786391224963984 5.15714945443032 0.0 0.0 0.0 1.0</matrix>
+        </transformation>
+        <appearance/>
+        <camera/>
+        <light/>
+        <geometry/>
+        <children>
+          <child>
+            <name>sgc 2177</name>
+            <visible>true</visible>
+            <transformation/>
+            <appearance>
+              <name>app 18</name>
+            </appearance>
+            <camera/>
+            <light/>
+            <geometry/>
+            <children>
+              <child>
+                <name>default01</name>
+                <visible>true</visible>
+                <transformation/>
+                <appearance>
+                  <name>app 19</name>
+                </appearance>
+                <camera/>
+                <light/>
+                <geometry type="IndexedFaceSet">
+                  <name>face-set 20</name>
+                  <attributes/>
+                  <vertexAttributes size="12">
+                    <DataList attribute="coordinates" data="double[][3]">-3.25693 -1.45896 2.036307 -2.497295 -2.520834 1.481804 -1.530816 -1.503169 0.946315 -2.358905 -0.504452 1.539386 -0.604292 -0.778453 1.586542 -1.292678 -0.043754 2.011948 -1.414263 -3.410498 1.62438 -0.520672 -2.479168 1.132783 0.121408 -1.581058 1.691124 -0.398867 -3.972663 2.13241 0.384338 -3.163053 1.705932 0.778575 -2.219326 2.091775</DataList>
+                  </vertexAttributes>
+                  <edgeAttributes size="23">
+                    <DataList attribute="indices" data="int[][2]">10 11 0 1 2 3 4 5 6 7 8 11 0 2 0 3 2 7 2 4 2 8 6 10 4 8 6 9 9 10 1 2 3 5 1 7 3 4 1 6 7 11 7 10 7 8</DataList>
+                  </edgeAttributes>
+                  <faceAttributes size="12">
+                    <DataList attribute="normals" data="double[][3]">0.5318355914408066 -0.06062288351339159 0.8446749491202691 0.5318355961358687 -0.06062279100636316 0.8446749528033869 -0.11145277630447253 -0.5741052109783769 0.8111605792822397 -0.11145286030380572 -0.5741058257523536 0.8111601326293771 0.15662739978517423 0.3393163795259529 0.9275409706433105 0.1566273635151246 0.33931681549586473 0.9275408172797823 -0.407408466352092 -0.2540708793598515 0.8771922992171943 -0.4074085297716903 -0.2540699600061495 0.8771925360442504 -0.11279078627621016 0.5463076022220684 0.8299555664525471 -0.11279077148991468 0.5463074641238749 0.8299556593633487 -0.5799569990967472 -0.08880956617952541 0.8097917881490897 -0.5799569016007871 -0.08881009665870357 0.8097917997961493</DataList>
+                    <DataList attribute="indices" data="int[][]">
+                      <int-array>0 1 2</int-array>
+                      <int-array>0 2 3</int-array>
+                      <int-array>3 2 4</int-array>
+                      <int-array>3 4 5</int-array>
+                      <int-array>1 6 7</int-array>
+                      <int-array>1 7 2</int-array>
+                      <int-array>2 7 8</int-array>
+                      <int-array>2 8 4</int-array>
+                      <int-array>6 9 10</int-array>
+                      <int-array>6 10 7</int-array>
+                      <int-array>7 10 11</int-array>
+                      <int-array>7 11 8</int-array>
+                    </DataList>
+                  </faceAttributes>
+                </geometry>
+                <children/>
+                <tools/>
+              </child>
+            </children>
+            <tools/>
+          </child>
+        </children>
+        <tools>
+          <de.jreality.tools.EncompassTool>
+            <margin>1.75</margin>
+            <doAlternative>true</doAlternative>
+          </de.jreality.tools.EncompassTool>
+          <de.jreality.tools.RotateTool>
+            <fixOrigin>false</fixOrigin>
+            <rotateOnPick>false</rotateOnPick>
+            <moveChildren>false</moveChildren>
+            <animTimeMin>250.0</animTimeMin>
+            <animTimeMax>750.0</animTimeMax>
+            <updateCenter>false</updateCenter>
+          </de.jreality.tools.RotateTool>
+          <de.jreality.tools.DraggingTool>
+            <moveChildren>false</moveChildren>
+          </de.jreality.tools.DraggingTool>
+        </tools>
+      </child>
+      <child>
+        <name>lightNode</name>
+        <visible>true</visible>
+        <transformation>
+          <name>lightNode trafo</name>
+          <matrix>0.8535533905932737 0.14644660940672619 -0.4999999999999999 0.0 0.14644660940672619 0.8535533905932737 0.4999999999999999 0.0 0.4999999999999999 -0.4999999999999999 0.7071067811865476 0.0 0.0 0.0 0.0 1.0</matrix>
+        </transformation>
+        <appearance/>
+        <camera/>
+        <light type="DirectionalLight">
+          <name>light</name>
+          <color>
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+            <alpha>255</alpha>
+          </color>
+          <intensity>0.75</intensity>
+        </light>
+        <geometry/>
+        <children/>
+        <tools/>
+      </child>
+      <child>
+        <name>avatar</name>
+        <visible>true</visible>
+        <transformation>
+          <name>avatar trafo</name>
+          <matrix>1.0 0.0 0.0 -1.4967406393391696 0.0 1.0 0.0 -4.71581360651919 0.0 0.0 1.0 16.587836548624686 0.0 0.0 0.0 1.0</matrix>
+        </transformation>
+        <appearance/>
+        <camera/>
+        <light/>
+        <geometry/>
+        <children>
+          <child>
+            <name>cameraNode</name>
+            <visible>true</visible>
+            <transformation>
+              <name>camera trafo</name>
+              <matrix>1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0</matrix>
+            </transformation>
+            <appearance/>
+            <camera>
+              <name>camera</name>
+              <eyeSeparation>1.3823197123853905</eyeSeparation>
+              <far>46.94729468808892</far>
+              <fieldOfView>23.505784994053762</fieldOfView>
+              <focus>16.587836548624686</focus>
+              <near>0.010730810214420324</near>
+              <onAxis>true</onAxis>
+              <orientationMatrix/>
+              <perspective>true</perspective>
+              <stereo>false</stereo>
+            </camera>
+            <light type="DirectionalLight">
+              <name>camera light</name>
+              <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+                <alpha>255</alpha>
+              </color>
+              <intensity>0.75</intensity>
+            </light>
+            <geometry/>
+            <children/>
+            <tools/>
+          </child>
+        </children>
+        <tools/>
+      </child>
+    </children>
+    <tools/>
+  </sceneRoot>
+  <scenePaths>
+    <path name="cameraPath">
+      <node reference="../../../sceneRoot"/>
+      <node reference="../../../sceneRoot/children/child[3]"/>
+      <node reference="../../../sceneRoot/children/child[3]/children/child"/>
+      <node reference="../../../sceneRoot/children/child[3]/children/child/camera"/>
+    </path>
+    <path name="emptyPickPath">
+      <node reference="../../../sceneRoot"/>
+      <node reference="../../../sceneRoot/children/child"/>
+    </path>
+    <path name="avatarPath">
+      <node reference="../../../sceneRoot"/>
+      <node reference="../../../sceneRoot/children/child[3]"/>
+    </path>
+  </scenePaths>
+  <sceneAttributes/>
+</scene>
