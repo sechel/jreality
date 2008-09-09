@@ -62,7 +62,8 @@ public interface Texture2D extends AttributeEntity {
   public static final int GL_LUMINANCE = 0x1909;
   public static final int GL_LUMINANCE_ALPHA = 0x190A;
   public static final int GL_INTENSITY = 0x8049;
-  // types of application of texture
+  public static final int GL_BGRA = 0x80E1;
+// types of application of texture
   
   public static final int GL_TEXTURE = 0x1702;
   public static final int GL_DECAL = 0x2101;
@@ -147,6 +148,7 @@ public interface Texture2D extends AttributeEntity {
   public static final int OPERAND0_ALPHA_DEFAULT = GL_SRC_ALPHA;
   public static final int OPERAND1_ALPHA_DEFAULT = GL_SRC_ALPHA;
   public static final int OPERAND2_ALPHA_DEFAULT = GL_SRC_ALPHA;
+ public static final int PIXEL_FORMAT_DEFAULT = GL_RGBA;
  public static final Matrix TEXTURE_MATRIX_DEFAULT=new Matrix();
   public static final Color BLEND_COLOR_DEFAULT=Color.WHITE;
   public static final String EXTERNAL_SOURCE_DEFAULT=null;
@@ -236,6 +238,8 @@ public interface Texture2D extends AttributeEntity {
   public abstract void setCombineModeColor(Integer i);
   public abstract void setCombineModeAlpha(Integer i);
   
+  public abstract Integer getPixelFormat();
+  public abstract void setPixelFormat(Integer i);
   
   public abstract void setImage(ImageData image);
   
