@@ -124,10 +124,11 @@ public class WriterPDF implements SceneWriter {
             	SceneGraphComponent c = path.getLastComponent();
             	Camera cam = c.getCamera();
             	float[] T1 = toU3DMatrix(path.getMatrix(null));
+            	T1 = new float[]{0,0,0, 0,0,0, 0,0,0, 0,0,0};
 	            PdfDictionary viewDict = new PdfDictionary(new PdfName(PDF_NAME_3DVIEW));
 	            viewDict.put(new PdfName(PDF_NAME_MS), new PdfString("M"));viewDict.put(new PdfName(PDF_NAME_MS), new PdfString("M"));
-	            viewDict.put(PdfName.CO, new PdfNumber(10.0f));
-	            viewDict.put(new PdfName(PDF_NAME_C2W), new PdfArray(T1));
+//	            viewDict.put(PdfName.CO, new PdfNumber(10.0f));
+	            viewDict.put(new PdfName("C2W"), new PdfArray(T1));
 	            viewDict.put(new PdfName(PDF_NAME_XN), new PdfString(cam.getName()));
 	            PdfIndirectReference ref = wr.addToBody(viewDict).getIndirectReference(); // Write view dictionary, get reference
 	            viewList.add(ref);
@@ -215,7 +216,7 @@ public class WriterPDF implements SceneWriter {
 		ReaderJRS reader = new ReaderJRS();
 		SceneGraphComponent root = null;
 		try {
-			root = reader.read(Input.getInput(WriterPDF.class.getResource("test2.jrs")));
+			root = reader.read(Input.getInput(WriterPDF.class.getResource("test.jrs")));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
