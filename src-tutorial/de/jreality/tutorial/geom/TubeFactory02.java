@@ -1,6 +1,7 @@
 package de.jreality.tutorial.geom;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -90,31 +91,33 @@ public class TubeFactory02 {
 
   private static Component getInspector() {
     Box container = Box.createVerticalBox();
-    final TextSlider RSlider = new TextSlider.Double("R",  SwingConstants.HORIZONTAL, 0.0, 2, R);
+    final TextSlider.Double RSlider = new TextSlider.Double("R",  SwingConstants.HORIZONTAL, 0.0, 2, R);
     RSlider.addActionListener(new ActionListener()  {
       public void actionPerformed(ActionEvent e)  {
-        R = RSlider.getValue().doubleValue();
+        R = RSlider.getValue();
         updateGeometry();
       }
     });
     container.add(RSlider);
-    final TextSlider rSlider = new TextSlider.Double("r",  SwingConstants.HORIZONTAL, 0.0, 1, r);
+    final TextSlider.Double rSlider = new TextSlider.Double("r",  SwingConstants.HORIZONTAL, 0.0, 1, r);
     rSlider.addActionListener(new ActionListener()  {
       public void actionPerformed(ActionEvent e)  {
-        r = rSlider.getValue().doubleValue();
+        r = rSlider.getValue();
         updateGeometry();
       }
     });
     container.add(rSlider);
-    final TextSlider rtSlider = new TextSlider.Double("tube radius",  SwingConstants.HORIZONTAL, 0.0, 1, tubeRadius);
+    final TextSlider.Double rtSlider = new TextSlider.Double("tube radius",  SwingConstants.HORIZONTAL, 0.0, 1, tubeRadius);
     rtSlider.addActionListener(new ActionListener()  {
       public void actionPerformed(ActionEvent e)  {
-        tubeRadius = rtSlider.getValue().doubleValue();
+        tubeRadius = rtSlider.getValue();
         updateGeometry();
       }
     });
     container.add(rtSlider);
     container.setName("Parameters");
+    Dimension d = container.getPreferredSize();
+    container.setPreferredSize(new Dimension(d.width/2,d.height));
     return container;
   }
 

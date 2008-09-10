@@ -1,19 +1,16 @@
-/*
- * Author	gunn
- * Created on Mar 30, 2005
- *
- */
 package de.jreality.tutorial.util;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -23,222 +20,165 @@ import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+
 /**
- * @author gunn
+ * @author Charles Gunn, G. Paul Peters
+ * 
+ * This is the generic base for the TextSliders.
  *
+ * @param <T> data type.
  */
-public abstract  class TextSlider extends JPanel  {
-	public JSlider slider;
-	public JLabel label;
-//	public JFormattedTextField textField;
-	public JTextField textField;
-	protected String textContents;
+public abstract class TextSlider<T extends Number> extends JPanel  {
 	
-	protected TextSlider(String l, int o, int min, int max, int c)	{
+	/** An <code>enum</code> indicating the possible compositions of the {@link TextSlider}. 
+	 */
+	public static enum SliderComposition {SliderOnly,SliderAndTextField,SliderTextFieldAndMaxMinButtons}
+	public static SliderComposition DEFAULT_SLIDER_COMPOSITION=SliderComposition.SliderAndTextField;
+
+	public static int DEFAULT_TEXT_FIELD_COLUMNS = 6;
+	public static float DEFAULT_MAX_TEXT_FIELD_STRETCH = 1.5f;
+	public static float DEFAULT_MAX_TEXT_FIELD_SHRINK = .8f;
+	public static int DEFAULT_HIGHT = 35;
+	
+	
+	private final JSlider slider;
+	private final JLabel label;
+	private final JTextField textField;
+	private String textContents;
+	private T min, max;
+	
+	private TextSlider(String label, int orientation, 
+			T min, T max, T value, 
+			int sliderMin, int sliderMax, int sliderValue, 
+			SliderComposition sliderComp)	{
 		super();
- 	    //setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-		max = (max < c) ? c : max;
-//		System.err.println("Slider:  "+max+":"+c);
-		slider = new JSlider(o, min, max, c);
-		label  = new JLabel(l, JLabel.LEFT);
+		if (sliderMax < sliderValue) sliderMax= sliderValue;
+		this.label  = new JLabel(label, JLabel.LEFT);
+	    textField = new JTextField();
+		slider = new JSlider(orientation, sliderMin, sliderMax, sliderValue);
 		Font  f = new Font("Helvetica",Font.PLAIN, 10);
 	    slider.setFont(f);
-
-		// here the constructor leaves off, the sub-classes do some sub-class specific work
-		// and then call init(), which then results in the super-class init eventually being
-		// called to finish the construction
-	}
-	
-	protected void init()	{
-	    textField = new JTextField();
-	    textField.setText(getFormattedValue());
+	    this.min=min; this.max=max; 
+	    
+		textField.setText(getFormattedValue());
 	    textContents = textField.getText();
-	    textField.setColumns(10); //get some space
+	    textField.setColumns(DEFAULT_TEXT_FIELD_COLUMNS);
 	    textField.setEditable(true);
+	    Dimension d = textField.getPreferredSize();
+	    textField.setMaximumSize(new Dimension((int)(d.width*DEFAULT_MAX_TEXT_FIELD_STRETCH),(int) (d.height*DEFAULT_MAX_TEXT_FIELD_STRETCH)));
+	    textField.setMinimumSize(new Dimension((int)(d.width*DEFAULT_MAX_TEXT_FIELD_SHRINK),(int) (d.height*DEFAULT_MAX_TEXT_FIELD_SHRINK)));
 	    textField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				textField.setForeground(Color.black);
-				//System.err.println("changing color to black");
 				adjustSliderMinMax();
 				slider.setValue(textToSlider());
 				textContents = textField.getText();
-				broadcastChange();
+				textField.setForeground(Color.black);
+//				System.err.println("changing color to black");
+				fireActionPerformed();
 			}
  	    	
  	    });
 	    textField.addCaretListener(new CaretListener() {
-
 			public void caretUpdate(CaretEvent e) {
 				if (textField.getText().compareTo(textContents) != 0)
 					textField.setForeground(Color.RED);
-				//System.err.println("changing color to red");
-			}
-	    	
+//				System.err.println("changing color to red");
+			}	    	
 	    });
 		slider.addChangeListener( new ChangeListener()	{
 		    public void stateChanged(ChangeEvent e) {
 			    textField.setText(getFormattedValue());
-		        //textField.setText(sliderToText().toString());
-		        broadcastChange();
+				textField.setForeground(Color.black);
+				//System.err.println("changing color to black");
+		        fireActionPerformed();
 		    }
 		});
-//		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-		Box box = Box.createHorizontalBox();
-		box.add(label);
-		box.add(Box.createHorizontalStrut(8));
-		box.add(textField);
-		box.add(slider);
-		box.add(Box.createHorizontalGlue());
-//		setPreferredSize(new Dimension(400,40));
-		setMaximumSize(new Dimension(10000,40));
-		add(box);
+		setLayout(new BoxLayout(this,BoxLayout.LINE_AXIS));
+		add(this.label);
+		add(Box.createHorizontalStrut(8));
+		add(textField);
+		final Component s1 = Box.createHorizontalStrut(2);
+		add(s1);
+		add(slider);
+
+		final JButton minButton=new JButton("min");
+		minButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setMin(getValue());
+			}
+		});
+		
+		final JButton maxButton=new JButton("max");
+		maxButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setMax(getValue());
+			}
+		});
+			
+		final Component s2 = Box.createHorizontalStrut(8);
+		add(s2);
+		add(minButton);
+		final Component s3 = Box.createHorizontalStrut(2);
+		add(s3);
+		add(maxButton);
+		//don't stretch the Buttons
+		minButton.setMaximumSize(minButton.getPreferredSize());
+		maxButton.setMaximumSize(maxButton.getPreferredSize());
+
+		//visibility of elements
+		int preferredSize=slider.getPreferredSize().width
+			+ textField.getPreferredSize().width  
+			+ this.label.getPreferredSize().width
+			+ minButton.getPreferredSize().width 
+			+ maxButton.getPreferredSize().width
+			+ 70;
+		switch (sliderComp) {
+		case SliderOnly: 
+			textField.setVisible(false); 
+			s1.setVisible(false);
+			preferredSize-=textField.getPreferredSize().width+8;
+		case SliderAndTextField: maxButton.setVisible(false); 
+			minButton.setVisible(false);
+			s2.setVisible(false);
+			s3.setVisible(false);
+			preferredSize-=minButton.getPreferredSize().width + maxButton.getPreferredSize().width+50;
+		}
+
+		setPreferredSize(new Dimension(preferredSize,DEFAULT_HIGHT));
+		setMaximumSize(new Dimension(10000,DEFAULT_HIGHT));
 	}
 	
-	public abstract Number getMin();
-	public abstract Number getMax();
+	public T getMin() {
+		return min;
+	}
+	public T getMax() {
+		return max;
+	}
+	public void setMin(T min) {
+		this.min=min;
+	}
+	public void setMax(T max) {
+		this.max=max;
+	}
+	
 	abstract void adjustSliderMinMax();
-	abstract Number sliderToText();
+	abstract T sliderToText();
 	abstract int textToSlider();
-	abstract int numberToSlider(Number n);
+	abstract int numberToSlider(T n);
 	abstract String getFormattedValue();
-	
-	public static class Integer extends TextSlider	{
-		int min, max, c;
-		public Integer(String l, int o, int min, int max, int c)	{
-			super(l, o, min, max, c);
-			this.min = min;
-			this.max = max;
-			this.c = c;
-			init();
-		}
-		Number sliderToText() {
-			return new java.lang.Integer((slider.getValue()));
-		}
-			
-		int textToSlider()	{
-			java.lang.Integer dd = new java.lang.Integer(textField.getText());
-			return dd.intValue();
-		}
-		
-		int numberToSlider(Number val)	{
-			return val.intValue();	
-		}
-		void adjustSliderMinMax() {
-			int foo = textToSlider();
-			if (foo > slider.getMaximum()) { max = foo; slider.setMaximum(foo); }
-			if (foo < slider.getMinimum()) { min = foo; slider.setMinimum(foo); }
-		}
-		@Override
-		String getFormattedValue() {
-			return String.format("%d",sliderToText().intValue());
-		}
-//		@Override
-//		void setMinMax(Number min, Number max) {
-//			if (max.intValue() > slider.getMaximum()) { this.max = max.intValue(); slider.setMaximum(this.max); }
-//			if (min.intValue() < slider.getMinimum()) { this.min = min.intValue(); slider.setMinimum(this.min); }
-//			
-//		}
-		@Override
-		public Number getMax() {
-			return max;
-		}
-		@Override
-		public Number getMin() {
-			return min;
-		}
-				
-	}
-	private static double scaler = 10E8;
-	public static class Double extends TextSlider	{
-		double min, max, c;
-		public Double(String l, int o, double min, double max, double c)	{
-			super(l, o, 0, (int) scaler,  ((int) (scaler*(c-min)/(max-min)) ));
-			this.min = min;
-			this.max = max;
-			this.c = c;
-			init();
-		}
-		Number sliderToText() {
-			return new java.lang.Double(sliderToDouble(slider.getValue()));
-		}
-		
-		int textToSlider()	{
-			java.lang.Double dd = new java.lang.Double(textField.getText());
-			return numberToSlider(dd);
-		}
-		
-		int numberToSlider(Number val)	{
-			return ((int) (scaler * (val.doubleValue()-min)/(max-min)));			
-		}
-		
-		double sliderToDouble(int val)		{ return (min + (max-min)*(val/scaler)); }
 
-		void adjustSliderMinMax() {
-			java.lang.Double dd = new java.lang.Double(textField.getText());
-			double val = dd.doubleValue();
-			System.err.println("value is "+val);
-			
-			if (val > max) {
-				max  = val;
-				System.err.println("Setting max to "+max);
-			}
-			if (val < min) {
-				min = val; 
-				System.err.println("Setting min to "+min);
-			}
-		}
-						
-		String getFormattedValue() {
-			return String.format("%8.4g",sliderToText().doubleValue());
-		}
-		@Override
-		public Number getMax() {
-			return max;
-		}
-		@Override
-		public Number getMin() {
-			return min;
-		}
-				
-	}
-	
-	public static class DoubleLog extends TextSlider.Double	{
-		public DoubleLog(String l, int o, double min, double max, double c)	{
-			super(l, o, min, max, (max-min)*(Math.log(c/min)/Math.log(max/min)));
-			if (this.min < 0 || this.max < 0)
-				throw new IllegalArgumentException("DoubleLog slider only accepts positive limits");
-		    textField.setText(getFormattedValue());
-		}
-		
-		@Override
-		int numberToSlider(Number val)	{
-			double f = Math.log(val.doubleValue()/min)/Math.log(max/min);
-			int ret = ((int) (scaler * f));
-			return ret;		
-		}
-		
-		@Override
-		double sliderToDouble(int val)		{ 
-			double f = val/scaler;
-			double a = Math.pow(min, 1.0-f);
-			double b = Math.pow(max, f);
-			double ret = a*b; 
-			return ret;
-		}
-
-				
-	}
-	public Number getValue()	{
+	public T getValue()	{
 		return sliderToText();
 	}
-	public boolean changeFromOutside = false;
-	public void setValue(Number n)	{
-	    changeFromOutside = true;
+
+	public void setValue(T n)	{
 	    Vector<ActionListener> remember = listeners;
 	    listeners = null;
 		slider.setValue(numberToSlider(n));
 	    textField.setText(getFormattedValue());
-	    changeFromOutside = false;
+	    textField.postActionEvent();
 	    listeners = remember;
 		//textField.setText(sliderToText().toString());
 	}
@@ -247,10 +187,9 @@ public abstract  class TextSlider extends JPanel  {
 	Vector<ActionListener> listeners;
 	
 	public void addActionListener(ActionListener l)	{
-		if (listeners == null)	listeners = new Vector();
+		if (listeners == null)	listeners = new Vector<ActionListener>();
 		if (listeners.contains(l)) return;
 		listeners.add(l);
-		//System.err.println("ToolManager: Adding geometry listener"+l+"to this:"+this);
 	}
 	
 	public void removeActionListener(ActionListener l)	{
@@ -258,17 +197,158 @@ public abstract  class TextSlider extends JPanel  {
 		listeners.remove(l);
 	}
 
-	public void broadcastChange()	{
+	public Vector<ActionListener> getActionListeners() {
+		return listeners;
+	}
+
+	
+	public void fireActionPerformed()	{
 		if (listeners == null) return;
-		//System.err.println("ToolManager: broadcasting"+listeners.size()+" listeners");
 		if (!listeners.isEmpty())	{
-			//System.err.println("ToolManager: broadcasting"+listeners.size()+" listeners");
-			ActionEvent ae = new ActionEvent(this, changeFromOutside ? 1 : 0, "");
+			ActionEvent ae = new ActionEvent(this, 0, "");
 			for (int i = 0; i<listeners.size(); ++i)	{
 				ActionListener l = (ActionListener) listeners.get(i);
 				l.actionPerformed(ae);
 			}
 		}
+	}
+	
+	public static class Integer extends TextSlider<java.lang.Integer>	{
+		public Integer(String l, int orientation, int min, int max, int value)	{
+			this(l, orientation, min, max, value, DEFAULT_SLIDER_COMPOSITION);
+		}
+
+		public Integer(String l, int orientation, int min, int max, int value, SliderComposition sliderComp) {
+			super(l, orientation, min, max, value, min, max, value, sliderComp);
+		}
+		
+		java.lang.Integer sliderToText() {
+			return super.slider.getValue();
+		}
+			
+		int textToSlider()	{
+			return java.lang.Integer.valueOf(super.textField.getText());
+		}
+		
+		int numberToSlider(java.lang.Integer val)	{
+			return val.intValue();	
+		}
+		
+		void adjustSliderMinMax() {
+			int foo = textToSlider();
+			if (foo > super.slider.getMaximum()) setMax(foo); 
+			if (foo < super.slider.getMinimum()) setMin(foo); 
+		}
+		@Override
+		String getFormattedValue() {
+			return String.format("%d",sliderToText());
+		}
+		@Override
+		public void setMax(java.lang.Integer max) {
+			super.setMax(max); 
+		    Vector<ActionListener> remember = listeners;
+		    listeners = null;
+			String text=super.textField.getText();
+			super.slider.setMaximum(max);
+			super.textField.setText(text);
+		    super.textField.postActionEvent();
+		    listeners=remember;
+		}
+		@Override
+		public void setMin(java.lang.Integer min) {
+			super.setMin(min); 
+		    Vector<ActionListener> remember = listeners;
+		    listeners = null;
+			String text=super.textField.getText();
+			super.slider.setMinimum(min);
+			super.textField.setText(text);
+		    super.textField.postActionEvent();
+		    listeners=remember;
+	}
+
+		@Override
+		public void setValue(java.lang.Integer n) {
+			if (n > super.slider.getMaximum()) setMax(n);
+			if (n < super.slider.getMinimum()) setMin(n); 		
+			super.setValue(n);
+		}
+	}
+	
+	private static double scaler = 10E8;
+	public static class Double extends TextSlider<java.lang.Double>	{
+		public Double(String l, int orientation, double min, double max, double value)	{
+			this(l, orientation, min, max, value, DEFAULT_SLIDER_COMPOSITION);
+		}
+		public Double(String l, int orientation, double min, double max, double value, SliderComposition sliderComp)	{
+			super(l, orientation, min, max, value, 
+					0, (int) scaler,  ((int) (scaler*(value-min)/(max-min))), sliderComp);
+		}
+		
+		@Override
+		java.lang.Double sliderToText() {
+			return sliderToDouble(super.slider.getValue());
+		}
+		
+		@Override
+		int textToSlider()	{
+			return numberToSlider(java.lang.Double.valueOf(super.textField.getText()));
+		}
+		
+		@Override
+		int numberToSlider(java.lang.Double val)	{
+			return ((int) (scaler * (val-super.min)/(super.max-super.min)));			
+		}
+		
+		double sliderToDouble(int val) { 
+			return (super.min + (super.max-super.min)*(val/scaler)); 
+		}
+
+		@Override
+		void adjustSliderMinMax() {
+			double val= java.lang.Double.valueOf(super.textField.getText());
+			//System.err.println("value is "+val);
+			if (val > super.max) {
+				setMax(val);
+//				System.err.println("Setting max to "+max);
+			}
+			if (val < super.min) {
+				setMin(val); 
+//				System.err.println("Setting min to "+min);
+			}
+		}
+						
+		String getFormattedValue() {
+			return String.format("%8.4g",sliderToText().doubleValue());
+		}
+	}
+	
+	public static class DoubleLog extends TextSlider.Double	{
+		public DoubleLog(String l, int orientation, double min, double max, double value)	{
+			this(l, orientation, min, max,value,DEFAULT_SLIDER_COMPOSITION);
+		}
+		public DoubleLog(String l, int orientation, double min, double max, double value, SliderComposition sliderComp)	{
+			super(l, orientation, min, max, (max-min)*(Math.log(value/min)/Math.log(max/min)),sliderComp);
+			if (min < 0 || max < 0)
+				throw new IllegalArgumentException("DoubleLog slider only accepts positive limits");
+		}
+		
+		@Override
+		int numberToSlider(java.lang.Double val)	{
+			double f = Math.log(val.doubleValue()/getMin())/Math.log(getMax()/getMin());
+			int ret = ((int) (scaler * f));
+			return ret;		
+		}
+		
+		@Override
+		double sliderToDouble(int val)		{ 
+			double f = val/scaler;
+			double a = Math.pow(getMin(), 1.0-f);
+			double b = Math.pow(getMax(), f);
+			double ret = a*b; 
+			return ret;
+		}
+
+				
 	}
 
 }
