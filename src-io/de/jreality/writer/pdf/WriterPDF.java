@@ -2,6 +2,7 @@ package de.jreality.writer.pdf;
 
 import static de.jreality.util.SceneGraphUtility.getPathsBetween;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,7 +26,6 @@ import com.lowagie.text.pdf.PdfDictionary;
 import com.lowagie.text.pdf.PdfEncodings;
 import com.lowagie.text.pdf.PdfIndirectReference;
 import com.lowagie.text.pdf.PdfName;
-import com.lowagie.text.pdf.PdfNumber;
 import com.lowagie.text.pdf.PdfStream;
 import com.lowagie.text.pdf.PdfString;
 import com.lowagie.text.pdf.PdfWriter;
@@ -56,10 +56,21 @@ public class WriterPDF implements SceneWriter {
 	    PDF_NAME_U3DPATH = "U3DPath",
 	    PDF_NAME_XN = "XN";
 	
+    
+    public enum PDF3DPreferences {
+    	Default,
+    	ViewerVR,
+    	ViewerApp
+    }
+    
+    
+    private PDF3DPreferences
+    	prefs = PDF3DPreferences.Default;
+    private Dimension
+    	size = new Dimension(800, 600);
     private static final String
-//    	encompassScript = getJSScript("encompass.js"),
-//    	rotateToolScript = getJSScript("rotateTool.js"),
-    	defaultScript = getJSScript("defaultCamera.js");
+    	viewerVRScript = getJSScript("viewerVRPrefs.js"),
+    	defaultScript = getJSScript("defaultPrefs.js");
     
 	/**
 	 * Exports a given {@link SceneGraphNode} into a PDF document. 
@@ -97,8 +108,8 @@ public class WriterPDF implements SceneWriter {
 	 */
 	public void writeScene(JrScene scene, OutputStream out) throws IOException {
 		// Write U3D data to temporary file
-		File u3dTmp = File.createTempFile("jralityPDFExport", "u3d");
-//		File u3dTmp = new File("test2.u3d");
+//		File u3dTmp = File.createTempFile("jralityPDFExport", "u3d");
+		File u3dTmp = new File("test.u3d");
 		FileOutputStream u3dout = new FileOutputStream(u3dTmp); 
 		WriterU3D.write(scene, u3dout);
 
@@ -107,15 +118,29 @@ public class WriterPDF implements SceneWriter {
 		for (SceneGraphComponent c : cameraNodes) {
 			camPaths.addAll(getPathsBetween(scene.getSceneRoot(), c));
 		}
+		String script = null;
+		switch (prefs) {
+			case Default:
+			case ViewerApp:
+				script = defaultScript;
+				break;
+			case ViewerVR:
+				script = viewerVRScript;
+				break;
+		}
+		if (cameraNodes.size() > 0) {
+			SceneGraphComponent cam0 = cameraNodes.get(0);
+			script = script.replace("##cam##", cam0.getName() + ".camera");
+		}
 		
 		// Create PDF
-		Rectangle pageSize = new Rectangle(50f, 50f);
+		Rectangle pageSize = new Rectangle(size.width, size.height);
 		Document doc = new Document(pageSize);
 		try {
 			PdfWriter wr = PdfWriter.getInstance(doc, out);
 			doc.open();			
 			
-			PdfStream oni = new PdfStream(PdfEncodings.convertToBytes(defaultScript, null));
+			PdfStream oni = new PdfStream(PdfEncodings.convertToBytes(script, null));
             oni.flateCompress();
             PdfIndirectReference initScriptRef = wr.addToBody(oni).getIndirectReference();
 
@@ -138,8 +163,8 @@ public class WriterPDF implements SceneWriter {
 			stream.put(new PdfName("OnInstantiate"), initScriptRef);
 			stream.put(PdfName.TYPE, new PdfName(PDF_NAME_3D)); // Mandatory keys
 			stream.put(PdfName.SUBTYPE, new PdfName(PDF_NAME_U3D));
-			stream.put(new PdfName("VA"), new PdfArray(viewList));
-			stream.put(new PdfName("VD"), new PdfNumber(0));
+//			stream.put(new PdfName("VA"), new PdfArray(viewList));
+//			stream.put(new PdfName("VD"), new PdfNumber(0));
 			stream.flateCompress();
 			PdfIndirectReference u3dStreamRef = wr.addToBody(stream).getIndirectReference(); // Write stream contents, get reference to stream object, write actual stream length
 			stream.writeLength();
@@ -156,8 +181,8 @@ public class WriterPDF implements SceneWriter {
             annot.put(PdfName.SUBTYPE, new PdfName(PDF_NAME_3D)); // Mandatory keys
             annot.put(PdfName.TYPE, PdfName.ANNOT);
             annot.put(new PdfName(PDF_NAME_3DD), u3dStreamRef); // Reference to stream object
-            annot.put(new PdfName("3DI"), PdfBoolean.PDFTRUE);
-            annot.put(new PdfName("3DV"), new PdfName("F")); // First view is the default one
+            annot.put(new PdfName("3DI"), PdfBoolean.PDFFALSE);
+//            annot.put(new PdfName("3DV"), new PdfName("F")); // First view is the default one
             annot.setAppearance(PdfAnnotation.APPEARANCE_NORMAL, ap); // Assign appearance and page
             annot.put(new PdfName("3DA"), activationDict);
             annot.setPage(1);
@@ -209,6 +234,23 @@ public class WriterPDF implements SceneWriter {
 			e.printStackTrace();
 		}
 		return result.toString();
+	}
+
+	
+	/**
+	 * Sets the viewer preferences
+	 * @param prefs
+	 */
+	public void setPreferences(PDF3DPreferences prefs) {
+		this.prefs = prefs;
+	}
+	
+	/**
+	 * The Dimension of the 3D Annotaion. Only the ratio is used
+	 * @param size
+	 */
+	public void setSize(Dimension size) {
+		this.size = size;
 	}
 	
 	

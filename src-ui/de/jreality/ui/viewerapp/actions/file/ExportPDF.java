@@ -37,16 +37,26 @@
  *
  */
 
-
 package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import de.jreality.io.JrScene;
 import de.jreality.scene.Viewer;
@@ -54,8 +64,7 @@ import de.jreality.toolsystem.ToolSystem;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.pdf.WriterPDF;
-import de.jreality.writer.u3d.WriterU3D;
-
+import de.jreality.writer.pdf.WriterPDF.PDF3DPreferences;
 
 /**
  * Saves the current scene.
@@ -64,42 +73,98 @@ import de.jreality.writer.u3d.WriterU3D;
  */
 public class ExportPDF extends AbstractJrAction {
 
-  private Viewer viewer;
-  
+	private static final long 
+		serialVersionUID = 1L;
+	private Viewer 
+		viewer = null;
+	private PDFExportAccessory
+		accessory = new PDFExportAccessory();
 
-  public ExportPDF(String name, Viewer viewer, Component parentComp) {
-    super(name, parentComp);
-    
-    if (viewer == null) 
-      throw new IllegalArgumentException("Viewer is null!");
-    this.viewer = viewer;
-    
-    setShortDescription("Save scene as a PDF file");
-  }
+	public ExportPDF(String name, Viewer viewer, Component parentComp) {
+		super(name, parentComp);
 
-//  public SaveScene(String name, ViewerApp v) {
-//    this(name, v.getViewer(), v.getFrame());
-//  }
-  
-  
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    File file = FileLoaderDialog.selectTargetFile(parentComp, "pdf", "PDF files");
-    if (file == null) return;  //dialog cancelled
-   
-    try {
-      WriterPDF writer = new WriterPDF();
-      JrScene s = new JrScene(viewer.getSceneRoot());
-      s.addPath("cameraPath", viewer.getCameraPath());
-      ToolSystem ts = ToolSystem.toolSystemForViewer(viewer);
-      if (ts.getAvatarPath() != null)  s.addPath("avatarPath", ts.getAvatarPath());
-      if (ts.getEmptyPickPath() != null) s.addPath("emptyPickPath", ts.getEmptyPickPath());
-      FileOutputStream fileOutputStream = new FileOutputStream(file);
-	writer.writeScene(s, fileOutputStream);
-	fileOutputStream.close();
-    } catch (IOException ioe) {
-      JOptionPane.showMessageDialog(parentComp, "Save failed: "+ioe.getMessage());
-    }
-  }
+		if (viewer == null)
+			throw new IllegalArgumentException("Viewer is null!");
+		this.viewer = viewer;
+
+		setShortDescription("Save scene as a PDF file");
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		File file = FileLoaderDialog.selectTargetFile(parentComp, accessory, "pdf",
+				"PDF files");
+		if (file == null)
+			return; // dialog canceled
+
+		try {
+			WriterPDF writer = new WriterPDF();
+			writer.setPreferences(accessory.getPreferences());
+			writer.setSize(accessory.getPDFSize());
+			JrScene s = new JrScene(viewer.getSceneRoot());
+			s.addPath("cameraPath", viewer.getCameraPath());
+			ToolSystem ts = ToolSystem.toolSystemForViewer(viewer);
+			if (ts.getAvatarPath() != null)
+				s.addPath("avatarPath", ts.getAvatarPath());
+			if (ts.getEmptyPickPath() != null)
+				s.addPath("emptyPickPath", ts.getEmptyPickPath());
+			FileOutputStream fileOutputStream = new FileOutputStream(file);
+			writer.writeScene(s, fileOutputStream);
+			fileOutputStream.close();
+		} catch (IOException ioe) {
+			JOptionPane.showMessageDialog(parentComp, "Save failed: "
+					+ ioe.getMessage());
+		}
+	}
+
+	private class PDFExportAccessory extends JPanel {
+
+		private static final long 
+			serialVersionUID = 1L;
+		private JComboBox 
+			prefsCombo = new JComboBox(PDF3DPreferences.values());
+		private SpinnerNumberModel
+			widthModel = new SpinnerNumberModel(800, 1, 10000, 10),
+			heightModel = new SpinnerNumberModel(600, 1, 10000, 10);
+		private JSpinner
+			widthSpinner = new JSpinner(widthModel),
+			heightSpinner = new JSpinner(heightModel);
+		
+		public PDFExportAccessory() {
+			setBorder(BorderFactory.createTitledBorder("PDF Options"));
+			setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			c.insets = new Insets(0, 5, 0, 0);
+			c.weightx = 1.0;
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.gridwidth = GridBagConstraints.RELATIVE;
+			add(new JLabel("Tool Set:"), c);
+			c.gridwidth = GridBagConstraints.REMAINDER;
+			add(prefsCombo, c);
+			c.gridwidth = GridBagConstraints.RELATIVE;
+			add(new JLabel("Size:"), c);
+			c.gridwidth = GridBagConstraints.REMAINDER;
+			JPanel sizePanel = new JPanel();
+			sizePanel.setLayout(new FlowLayout());
+			sizePanel.add(widthSpinner);
+			sizePanel.add(new JLabel("X"));
+			sizePanel.add(heightSpinner);
+			add(sizePanel, c);
+		}
+
+		public PDF3DPreferences getPreferences() {
+			PDF3DPreferences prefs = (PDF3DPreferences)prefsCombo.getSelectedItem();
+			if (prefs != null)
+				return prefs;
+			else
+				return PDF3DPreferences.Default;
+		}
+
+		public Dimension getPDFSize() {
+			return new Dimension(widthModel.getNumber().intValue(), heightModel.getNumber().intValue());
+		}
+		
+	}
 
 }
