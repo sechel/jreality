@@ -108,8 +108,7 @@ public class WriterPDF implements SceneWriter {
 	 */
 	public void writeScene(JrScene scene, OutputStream out) throws IOException {
 		// Write U3D data to temporary file
-//		File u3dTmp = File.createTempFile("jralityPDFExport", "u3d");
-		File u3dTmp = new File("test.u3d");
+		File u3dTmp = File.createTempFile("jralityPDFExport", "u3d");
 		FileOutputStream u3dout = new FileOutputStream(u3dTmp); 
 		WriterU3D.write(scene, u3dout);
 
