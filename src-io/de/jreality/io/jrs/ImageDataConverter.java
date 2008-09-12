@@ -108,7 +108,7 @@ class ImageDataConverter implements Converter {
 	  Inflater decompressor = new Inflater();
 	  decompressor.setInput(data);
 	  ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-	  byte[] buf = new byte[1024];
+	  byte[] buf = new byte[1024*1024];
 	  while (!decompressor.finished()) {
 		  try {
 			  int count = decompressor.inflate(buf);
@@ -124,12 +124,13 @@ class ImageDataConverter implements Converter {
   }
   
   private static byte[] compress(byte[] data) {
+	  //System.out.println("data.length="+data.length);
 	  Deflater compressor = new Deflater();
 	  compressor.setLevel(Deflater.BEST_COMPRESSION);
 	  compressor.setInput(data);
 	  compressor.finish();
-	  ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
-	  byte[] buf = new byte[1024];
+	  ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length/2);
+	  byte[] buf = new byte[1024*1024];
 	  while (!compressor.finished()) {
 		  int count = compressor.deflate(buf);
 		  bos.write(buf, 0, count);
@@ -138,7 +139,9 @@ class ImageDataConverter implements Converter {
 		  bos.close();
 	  } catch (IOException e) {
 	  }
-	  return bos.toByteArray();
+	  byte[] compressedData = bos.toByteArray();
+	  //System.out.println("compressedData.length="+compressedData.length+" compression="+((double)compressedData.length/data.length));
+	return compressedData;
   }
 
 }
