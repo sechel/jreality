@@ -33,13 +33,12 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	/** An <code>enum</code> indicating the possible compositions of the {@link TextSlider}. 
 	 */
 	public static enum SliderComposition {SliderOnly,SliderAndTextField,SliderTextFieldAndMaxMinButtons}
-	public static SliderComposition DEFAULT_SLIDER_COMPOSITION=SliderComposition.SliderAndTextField;
+	public static final SliderComposition DEFAULT_SLIDER_COMPOSITION=SliderComposition.SliderAndTextField;
 
-	public static int DEFAULT_TEXT_FIELD_COLUMNS = 6;
-	public static float DEFAULT_MAX_TEXT_FIELD_STRETCH = 1.5f;
-	public static float DEFAULT_MAX_TEXT_FIELD_SHRINK = .8f;
-	public static int DEFAULT_HIGHT = 35;
-	
+	private static final int TEXT_FIELD_COLUMNS = 6;
+	private static final float MAX_TEXT_FIELD_STRETCH = 1.5f;
+	private static final float MAX_TEXT_FIELD_SHRINK = .8f;
+	private static final int PREFERRED_HEIGHT = 35;
 	
 	private final JSlider slider;
 	private final JLabel label;
@@ -62,11 +61,11 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    
 		textField.setText(getFormattedValue());
 	    textContents = textField.getText();
-	    textField.setColumns(DEFAULT_TEXT_FIELD_COLUMNS);
+	    textField.setColumns(TEXT_FIELD_COLUMNS);
 	    textField.setEditable(true);
 	    Dimension d = textField.getPreferredSize();
-	    textField.setMaximumSize(new Dimension((int)(d.width*DEFAULT_MAX_TEXT_FIELD_STRETCH),(int) (d.height*DEFAULT_MAX_TEXT_FIELD_STRETCH)));
-	    textField.setMinimumSize(new Dimension((int)(d.width*DEFAULT_MAX_TEXT_FIELD_SHRINK),(int) (d.height*DEFAULT_MAX_TEXT_FIELD_SHRINK)));
+	    textField.setMaximumSize(new Dimension((int)(d.width*MAX_TEXT_FIELD_STRETCH),(int) (d.height*MAX_TEXT_FIELD_STRETCH)));
+	    textField.setMinimumSize(new Dimension((int)(d.width*MAX_TEXT_FIELD_SHRINK),(int) (d.height*MAX_TEXT_FIELD_SHRINK)));
 	    textField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				adjustSliderMinMax();
@@ -146,8 +145,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			preferredSize-=minButton.getPreferredSize().width + maxButton.getPreferredSize().width+50;
 		}
 
-		setPreferredSize(new Dimension(preferredSize,DEFAULT_HIGHT));
-		setMaximumSize(new Dimension(10000,DEFAULT_HIGHT));
+		setPreferredSize(new Dimension(preferredSize,PREFERRED_HEIGHT));
+		setMaximumSize(new Dimension(10000,PREFERRED_HEIGHT));
 	}
 	
 	public T getMin() {
