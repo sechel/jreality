@@ -83,6 +83,7 @@ import javax.swing.KeyStroke;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.reader.Readers;
@@ -432,7 +433,8 @@ public class ViewerVR {
 					// determine offset in y-direction (up/down)
 					AABBPickSystem ps = new AABBPickSystem();
 					ps.setSceneRoot(terrainNode);
-					List<PickResult> picks = ps.computePick(translation, new double[]{0,-1,0,0});
+					
+					List<PickResult> picks = ps.computePick(Pn.homogenize(null, translation), new double[]{0,-1,0,0});
 					if (picks.isEmpty()) {
 						picks = ps.computePick(translation, new double[]{0,1,0,0});
 					}
