@@ -157,9 +157,17 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	}
 	public void setMin(T min) {
 		this.min=min;
+	    Vector<ActionListener> remember = listeners;
+	    listeners = null;
+	    textField.postActionEvent();
+	    listeners=remember;
 	}
 	public void setMax(T max) {
 		this.max=max;
+	    Vector<ActionListener> remember = listeners;
+	    listeners = null;
+	    textField.postActionEvent();
+	    listeners=remember;
 	}
 	
 	abstract void adjustSliderMinMax();
@@ -244,26 +252,24 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		}
 		@Override
 		public void setMax(java.lang.Integer max) {
-			super.setMax(max); 
 		    Vector<ActionListener> remember = listeners;
 		    listeners = null;
 			String text=super.textField.getText();
 			super.slider.setMaximum(max);
 			super.textField.setText(text);
-		    super.textField.postActionEvent();
 		    listeners=remember;
+			super.setMax(max); 
 		}
 		@Override
 		public void setMin(java.lang.Integer min) {
-			super.setMin(min); 
 		    Vector<ActionListener> remember = listeners;
 		    listeners = null;
 			String text=super.textField.getText();
 			super.slider.setMinimum(min);
 			super.textField.setText(text);
-		    super.textField.postActionEvent();
 		    listeners=remember;
-	}
+			super.setMin(min); 
+		}
 
 		@Override
 		public void setValue(java.lang.Integer n) {
