@@ -264,6 +264,12 @@
   	<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${io}" destdir="${build}/io" debug="true">
       <classpath refid="io.classpath"/>
     </javac>
+    <copy todir="build/io"> <!-- copy shader progs -->
+      <fileset dir="${io}">
+        <exclude name="**/*.java"/>
+        <exclude name="**/*.gif"/>
+      </fileset>
+    </copy>
     <jar jarfile="${dist}/jReality-io.jar" basedir="${build}/io"/>
   </target>
 	  
