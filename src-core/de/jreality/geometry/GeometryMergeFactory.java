@@ -135,10 +135,10 @@ package de.jreality.geometry;
  * TODO: merge FaceSets and linesets seperate to avoid "holes" in the AttributeList 
  *       and gather in the end 
  *  
- * @author gonska
+ * @author gonska    
+ * 
  */
-//  TODO Face Colors werden zu Grundfarben!!!! (wiso?)
-// 		  aehnliches passiert offensichtlich mit Normalen
+
 
 import java.awt.Color;
 import java.util.Iterator;
@@ -160,6 +160,7 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
@@ -179,6 +180,11 @@ public class GeometryMergeFactory {
 
 	private boolean generateFaceNormals=true;// 
 	private boolean generateVertexNormals=true;// 
+	
+	private boolean hasFaceColors=true;// 
+	private boolean hasVertexColors=true;// 
+	private boolean hasEdgeColors=true;// 
+	
 
 	// attribute-values which are set if the named 
 	// attribute is not supported in a geometry. 
@@ -196,23 +202,11 @@ public class GeometryMergeFactory {
 	private List<Attribute> importantEdgeDefaultAttributes= new LinkedList<Attribute>();
 	private List<Attribute> importantVertexDefaultAttributes= new LinkedList<Attribute>();
 
-	// TODO:	
-	// will be used intern if only this attributes have to be respected
-	// wil be ignored if they are null
-	private List<Attribute> onlyThisFaceAttributes=null;// []
-	private List<Attribute> onlyThisEdgeAttributes=null;// []
-	private List<Attribute> onlyThisVertexAttributes=null;// []
-	private boolean SpheresAsFacesSets;//	[]
-	private boolean tubesAsFaceSets;// 		[]
-	// END TODO
-	
-
 	public GeometryMergeFactory() {
 		importantFaceDefaultAttributes.add(Attribute.COLORS);
 		importantEdgeDefaultAttributes.add(Attribute.COLORS);
 		importantVertexDefaultAttributes.add(Attribute.COLORS);
 	}
-	
 	
 	private static List<Attribute> collectAttributes(List<List<Attribute>> atLists, List<Attribute> defAtt, List<Attribute> impAtt){
 		//	keep in mind unnesscesary defaults 
@@ -457,7 +451,7 @@ public class GeometryMergeFactory {
 		}
 	}
 
-	private static void collectMergeData(
+	private void collectMergeData(
 			List<IndexedFaceSet> g,
 			List<double[]> tra,
 			List<double[]> fCol,
@@ -491,6 +485,7 @@ public class GeometryMergeFactory {
 			g.add(myface);
 			// color
 			Color Mycol;
+			checkColorNeed(eApp,myface);
 			Mycol=dps.getDiffuseColor();
 			fCol.add(new double[]{((double)Mycol.getRed())/255,((double)Mycol.getGreen())/255,((double)Mycol.getBlue())/255,((double)Mycol.getAlpha())/255});
 			Mycol=dls.getDiffuseColor();
@@ -540,9 +535,29 @@ public class GeometryMergeFactory {
 		}
 		else dps = null;
 	}
+	private void checkColorNeed(EffectiveAppearance eApp, IndexedFaceSet ifs) {
+		if(eApp.getAttribute(CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED)!=Appearance.INHERITED){
+			hasEdgeColors=true;
+			hasFaceColors=true;
+			hasVertexColors=true;
+		}
+		if(eApp.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED)!=Appearance.INHERITED)
+			hasFaceColors=true;
+		if(	eApp.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED)!=Appearance.INHERITED
+				||eApp.getAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED)!=Appearance.INHERITED)
+			hasEdgeColors=true;
+		if(	eApp.getAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED)!=Appearance.INHERITED
+				||eApp.getAttribute(CommonAttributes.VERTEX_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED)!=Appearance.INHERITED)
+			hasVertexColors=true;
+		if(ifs.getVertexAttributes(Attribute.COLORS)!=null)
+			hasVertexColors=true;
+		if(ifs.getEdgeAttributes(Attribute.COLORS)!=null)
+			hasEdgeColors=true;
+		if(ifs.getFaceAttributes(Attribute.COLORS)!=null)
+			hasFaceColors=true;
+		
+	}
 	// --------- public methods ------------
-
-	
 	/** merges all IndexedFaceSets, IndexeedLineSets and PointSets
 	 *  of the given SceneGraph to one IndexedFaceSet
 	 *  Attention: several values can be set bevorhand
@@ -561,6 +576,9 @@ public class GeometryMergeFactory {
 		List<double[]> eCol=new LinkedList<double[]>();
 		List<double[]> vCol=new LinkedList<double[]>();
 		List<double[]> trafos= new LinkedList<double[]>();
+		hasEdgeColors=false;
+		hasFaceColors=false;
+		hasVertexColors=false;
 		collectMergeData(geos, trafos,fCol,eCol,vCol, cmp,new SceneGraphPath(),eApp);
 
 		///// geather and compute:
@@ -583,27 +601,31 @@ public class GeometryMergeFactory {
 		}		
 		//  mergen
 		IndexedFaceSet f= new IndexedFaceSet();
-		
-		if(respectFacesIntern)
-			if(!defaultFaceAttributes.contains(Attribute.COLORS)){
-				defaultFaceAttributes.add(Attribute.COLORS);
-				defaultFaceAttributeValues.add(fCol);
-			}
-			else defaultFaceAttributeValues.set(
-					defaultFaceAttributes.indexOf(Attribute.COLORS)	, fCol);
-		if(respectEdgesIntern)
-			if(!defaultEdgeAttributes.contains(Attribute.COLORS)){
-				defaultEdgeAttributes.add(Attribute.COLORS);
-				defaultEdgeAttributeValues.add(eCol);
-			}
-			else defaultEdgeAttributeValues.set(
-					defaultEdgeAttributes.indexOf(Attribute.COLORS)	, eCol);
-		if(!defaultVertexAttributes.contains(Attribute.COLORS)){
-			defaultVertexAttributes.add(Attribute.COLORS);
-			defaultVertexAttributeValues.add(vCol);
+
+		if(hasFaceColors&&respectFacesIntern){
+				if(!defaultFaceAttributes.contains(Attribute.COLORS)){
+					defaultFaceAttributes.add(Attribute.COLORS);
+					defaultFaceAttributeValues.add(fCol);
+				}
+				else defaultFaceAttributeValues.set(
+						defaultFaceAttributes.indexOf(Attribute.COLORS)	, fCol);
 		}
-		else defaultVertexAttributeValues.set(
-				defaultVertexAttributes.indexOf(Attribute.COLORS)	, vCol);
+		if(hasEdgeColors&&respectEdgesIntern){
+				if(!defaultEdgeAttributes.contains(Attribute.COLORS)){
+					defaultEdgeAttributes.add(Attribute.COLORS);
+					defaultEdgeAttributeValues.add(eCol);
+				}
+				else defaultEdgeAttributeValues.set(
+						defaultEdgeAttributes.indexOf(Attribute.COLORS)	, eCol);
+		}
+		if(hasVertexColors){
+			if(!defaultVertexAttributes.contains(Attribute.COLORS)){
+				defaultVertexAttributes.add(Attribute.COLORS);
+				defaultVertexAttributeValues.add(vCol);
+			}
+			else defaultVertexAttributeValues.set(
+					defaultVertexAttributes.indexOf(Attribute.COLORS)	, vCol);
+		}
 		f=mergeIndexedFaceSets(faces);
 		return f;
 	}  
