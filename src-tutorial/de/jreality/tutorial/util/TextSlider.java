@@ -71,8 +71,6 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 				adjustSliderMinMax();
 				slider.setValue(textToSlider());
 				textContents = textField.getText();
-				textField.setForeground(Color.black);
-//				System.err.println("changing color to black");
 				fireActionPerformed();
 			}
  	    	
@@ -81,14 +79,12 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			public void caretUpdate(CaretEvent e) {
 				if (textField.getText().compareTo(textContents) != 0)
 					textField.setForeground(Color.RED);
-//				System.err.println("changing color to red");
 			}	    	
 	    });
 		slider.addChangeListener( new ChangeListener()	{
 		    public void stateChanged(ChangeEvent e) {
 			    textField.setText(getFormattedValue());
 				textField.setForeground(Color.black);
-				//System.err.println("changing color to black");
 		        fireActionPerformed();
 		    }
 		});
@@ -108,7 +104,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		});
 		
 		final JButton maxButton=new JButton("max");
-		maxButton.addActionListener(new ActionListener() {			public void actionPerformed(ActionEvent e) {
+		maxButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				setMax(getValue());
 			}
 		});
