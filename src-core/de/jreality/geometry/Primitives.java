@@ -464,7 +464,7 @@ public class Primitives {
 			result.addChild(d1);
 			result.addChild(d2);
 			MatrixBuilder.euclidean().translate(0,0,zmin).scale(r,R,1).assignTo(d1);
-			MatrixBuilder.euclidean().translate(0,0,zmax).scale(-r,R,1).assignTo(d2);
+			MatrixBuilder.euclidean().translate(0,0,zmax).rotateX(Math.PI).scale(r,R,1).assignTo(d2);
 			return result;
 		}
 		/** a simple cone with tip at (0,0,1) 
