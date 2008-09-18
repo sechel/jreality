@@ -85,8 +85,11 @@ public class ShaderLookup
 	      ps=new DefaultPolygonShader();
 	    }
 	    return ps;
-	  }
-	  public static Shader getShaderAttr(
+  }
+  /**
+   * 
+   * @deprecated 
+   */public static Shader getShaderAttr(
   	          EffectiveAppearance eAppearance, String base,  String type) {
 		  return getShaderAttr(eAppearance, base, type, type);
 	  }

@@ -277,6 +277,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				int index = i;
 				double[] transVec =  vertices.item(index).toDoubleArray(null);
 				if (! Pn.isValidCoordinate(transVec, 3, sig)) continue;
+				if (!P3.isValidTranslationVector(transVec, sig)) continue;
 				if (ra != null)	{
                     double radius = ra.getValueAt(i);
 					scale[0] = scale[5] = scale[10] = pointRadius*radius;

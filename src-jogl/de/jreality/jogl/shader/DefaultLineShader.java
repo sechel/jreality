@@ -223,7 +223,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		p1[3] = p2[3] = 1.0;
 		double[][] oneCurve = null;
 		double[][] crossSection = TubeUtility.octagonalCrossSection;
-		if (jr.renderingState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
+//		if (jr.renderingState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		DataList radiidl = ils.getEdgeAttributes(Attribute.RELATIVE_RADII);
 		DoubleArray radii = null;
@@ -334,8 +334,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (g != null)	{
 			if (providesProxyGeometry())	{
 				//System.err.println("count is: "+jr.getRenderingState().polygonCount);
-				if (!useDisplayLists  || dListProxy == -1) {
+				if (!useDisplayLists  || (useDisplayLists && dListProxy  == -1)) {
 					dListProxy  = proxyGeometryFor(jrs);						
+					System.err.println("rendering tubes w/ dlist");
 					displayListsDirty = false;
 				}
 				jr.globalGL.glCallList(dListProxy);
@@ -343,13 +344,15 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			}
 			else 	{
 				if (!useDisplayLists ) {
+					System.err.println("rendering lines w/o dlist");
 					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
 				} else {
-					if (useDisplayLists && dList == -1)	{
+					if (useDisplayLists && dList== -1)	{
 						dList = jr.globalGL.glGenLists(1);
 						//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
 						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
+						System.err.println("rendering lines w/ dlist");
 						jr.globalGL.glEndList();									
 						displayListsDirty = false;
 					}
@@ -360,7 +363,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
-		LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+dList+" : "+dListProxy);
+		LoggingSystem.getLogger(this).info("LineShader: Flushing display lists "+dList+" : "+dListProxy);
 		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
 		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;

@@ -156,15 +156,6 @@ public class DefaultGeometryShader  implements Shader {
 			return polygonShader;
 		}
 
-		/* (non-Javadoc)
-		 * @see de.jreality.jogl.shader.Shader#render(de.jreality.jogl.JOGLRendererNew)
-		 */
-		public void renderOld(JOGLRenderer jr) {
-		}
-
-		public void postRenderOld(JOGLRenderer jr) {
-		}
-
 		public void postRender(JOGLRenderingState jrs) {
 		}
 
@@ -177,6 +168,8 @@ public class DefaultGeometryShader  implements Shader {
 		           ret = new TwoSidePolygonShader((de.jreality.shader.TwoSidePolygonShader) ps);
 	        else if(ps instanceof de.jreality.shader.ImplodePolygonShader)
 		           ret = new ImplodePolygonShader((de.jreality.shader.ImplodePolygonShader) ps);
+	        else if(ps instanceof de.jreality.shader.GlslPolygonShader)
+		           ret = new GlslPolygonShader();
 	        else ret = new DefaultPolygonShader();
 //	        System.err.println("ret = "+ret.getClass().getName());
 	        return ret;
