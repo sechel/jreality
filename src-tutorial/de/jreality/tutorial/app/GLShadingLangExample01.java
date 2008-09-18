@@ -26,14 +26,13 @@ public class GLShadingLangExample01 {
 		SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
 		Appearance ap = world.getAppearance();
 		DefaultGeometryShader dgs = (DefaultGeometryShader) 
-   		ShaderUtility.createDefaultGeometryShader(ap, true);
+   			ShaderUtility.createDefaultGeometryShader(ap, true);
 		dgs.setShowLines(false);
 		dgs.setShowPoints(false);
-
+		dgs.createPolygonShader("glsl");
 		GlslProgram brickProg = null;		
 		world.setGeometry(SphereUtility.tessellatedIcosahedronSphere(3, true)); 
 		try {
-			ap.setAttribute(POLYGON_SHADER+"name", "glsl");
 			brickProg = new GlslProgram(ap, "polygonShader",   
 					Input.getInput("de/jreality/jogl/shader/resources/brick.vert"),
 					Input.getInput("de/jreality/jogl/shader/resources/brick.frag")

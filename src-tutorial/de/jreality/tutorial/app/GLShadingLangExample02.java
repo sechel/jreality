@@ -30,6 +30,7 @@ public class GLShadingLangExample02 {
    		ShaderUtility.createDefaultGeometryShader(ap, true);
 		dgs.setShowLines(true);
 		dgs.setShowPoints(false);
+		dgs.createPolygonShader("glsl");
 
 		GlslProgram brickProg = null;		
 		ap.setAttribute(CommonAttributes.EDGE_DRAW, false);
@@ -55,7 +56,6 @@ public class GLShadingLangExample02 {
 			mortarPct[1] = 1.0 - brickPct[1];
 			lightPosition[0] = i-2.0;
 			try {
-				ap.setAttribute("polygonShadername", "glsl");
 				brickProg = new GlslProgram(ap, "polygonShader",   
 						Input.getInput("de/jreality/jogl/shader/resources/brick.vert"),
 						Input.getInput("de/jreality/jogl/shader/resources/brick.frag")
