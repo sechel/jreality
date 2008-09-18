@@ -336,7 +336,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				//System.err.println("count is: "+jr.getRenderingState().polygonCount);
 				if (!useDisplayLists  || (useDisplayLists && dListProxy  == -1)) {
 					dListProxy  = proxyGeometryFor(jrs);						
-					System.err.println("rendering tubes w/ dlist");
+//					System.err.println("rendering tubes w/ dlist");
 					displayListsDirty = false;
 				}
 				jr.globalGL.glCallList(dListProxy);
@@ -344,7 +344,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			}
 			else 	{
 				if (!useDisplayLists ) {
-					System.err.println("rendering lines w/o dlist");
+//					System.err.println("rendering lines w/o dlist");
 					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList== -1)	{
@@ -352,7 +352,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 						//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
 						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
-						System.err.println("rendering lines w/ dlist");
+//						System.err.println("rendering lines w/ dlist");
 						jr.globalGL.glEndList();									
 						displayListsDirty = false;
 					}
