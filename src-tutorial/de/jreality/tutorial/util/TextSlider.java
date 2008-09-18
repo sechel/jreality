@@ -102,16 +102,13 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 
 		final JButton minButton=new JButton("min");
 		minButton.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				setMin(getValue());
 			}
 		});
 		
 		final JButton maxButton=new JButton("max");
-		maxButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
+		maxButton.addActionListener(new ActionListener() {			public void actionPerformed(ActionEvent e) {
 				setMax(getValue());
 			}
 		});
