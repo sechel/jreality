@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Box;
 import javax.swing.SwingConstants;
@@ -17,6 +19,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tutorial.util.TextSlider;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -27,19 +30,50 @@ public class TubeFactory02 {
 
   static double R = 1, r = .25, tubeRadius = .04;
   private static SceneGraphComponent torussgc;
-  
+  static boolean isSmooth = true;
+  static boolean drawEdges = false;
+  static DefaultGeometryShader dgs;
+  static DefaultPolygonShader dps;
   public static void main(String[] args)  {
     torussgc = SceneGraphUtility.createFullSceneGraphComponent("torus knot");
-    DefaultGeometryShader dgs = (DefaultGeometryShader) 
+    dgs = (DefaultGeometryShader) 
            ShaderUtility.createDefaultGeometryShader(torussgc.getAppearance(), true);
-    dgs.setShowLines(false);
+    dgs.setShowLines(drawEdges);
     dgs.setShowPoints(false);
+    dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+    dps.setSmoothShading(isSmooth);
     updateGeometry();
     ViewerApp va = ViewerApp.display(torussgc);
     Component insp = getInspector();
     va.addAccessory(insp);
     va.setFirstAccessory(insp);
     CameraUtility.encompass(va.getCurrentViewer());
+    Component comp =  ((Component) va.getCurrentViewer().getViewingComponent());
+    comp.addKeyListener(new KeyAdapter() {
+ 				public void keyPressed(KeyEvent e)	{ 
+					switch(e.getKeyCode())	{
+						
+					case KeyEvent.VK_H:
+						System.err.println("	1: toggle smooth shading");
+						System.out.println("	2: toggle edge drawing");
+						break;
+		
+					case KeyEvent.VK_1:
+						isSmooth = !isSmooth;
+						dps.setSmoothShading(isSmooth);
+						break;
+
+					case KeyEvent.VK_2:
+						drawEdges = !drawEdges;
+						dgs.setShowLines(drawEdges);
+						break;
+						
+	
+				}
+		
+				}
+			});
+  
   }
 
   private static void updateGeometry() {
