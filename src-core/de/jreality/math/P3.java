@@ -645,21 +645,22 @@ public class P3 {
 	 * @param to
 	 * @param sig
 	 * @return
-	 */public static double[] makeTranslationMatrix(double[] mat, double[] to, int sig)	{
+	 */
+	  public static double[] makeTranslationMatrix(double[] mat, double[] to, int sig)	{
 		if (mat == null) mat = new double[16];
 		double[] toL1 = null;
 		if (to.length == 3)	toL1 = Pn.homogenize(null, to);
 		else if (to.length == 4) toL1 = (double[]) to.clone();
 		if ((sig == Pn.EUCLIDEAN && toL1[3] == 0.0))	{
-			return Rn.identityMatrix(4);
-//			throw new IllegalArgumentException("Infinite euclidean translation vector");
+//			return Rn.identityMatrix(4);
+			throw new IllegalArgumentException("Infinite euclidean translation vector");
 		}
 		double[] toL = Pn.normalize(null, toL1, sig);
 //		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
 		if (Double.isNaN(toL[0])) {
-			Rn.setIdentityMatrix(mat);
-			return mat;
-			//throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
+//			Rn.setIdentityMatrix(mat);
+//			return mat;
+			throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
 		}
 //		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
 		double f = 1.0/(1+toL[3]);
@@ -686,6 +687,12 @@ public class P3 {
 		}
 		return mat;
 	}
+	  
+	  public static boolean isValidTranslationVector(double[] vec, int sig)	{
+		  if (vec.length < 4) return true;
+		  return !((sig == Pn.EUCLIDEAN && vec[3] == 0.0) || Double.isNaN(vec[0]));
+	  
+	  }
 
 	/**
 	 * Calculate a translation in the given geometry which carries the origin of P3 (0,0,0,1) to the input <i>point</i>.
