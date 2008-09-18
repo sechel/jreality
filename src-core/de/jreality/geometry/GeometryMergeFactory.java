@@ -902,26 +902,28 @@ public class GeometryMergeFactory {
 		
 		for(IndexedFaceSet ifs: list){
 			DataList d= ifs.getFaceAttributes(Attribute.NORMALS);
-			if(d!=null){
-				double[][] ds=d.toDoubleArrayArray(null);
-				equalizeTo4D(ds);
-				ifs.setFaceAttributes(Attribute.NORMALS,null);
-				ifs.setFaceAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
-			}
-			d= ifs.getEdgeAttributes(Attribute.NORMALS);
-			if(d!=null){
-				double[][] ds=d.toDoubleArrayArray(null);
-				equalizeTo4D(ds);
-				ifs.setEdgeAttributes(Attribute.NORMALS,null);
-				ifs.setEdgeAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
-			}
-			d= ifs.getVertexAttributes(Attribute.NORMALS);
-			if(d!=null){
-				double[][] ds=d.toDoubleArrayArray(null);
-				equalizeTo4D(ds);
-				ifs.setVertexAttributes(Attribute.NORMALS,null);
-				ifs.setVertexAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
-			}
+// it's too dangerous to allow possible mixture of 3D and 4D normals
+// this code needs to check for this possibility before it gets reactivated [gunn 18.09.08]
+//			if(d!=null){
+//				double[][] ds=d.toDoubleArrayArray(null);
+//				equalizeTo4D(ds);
+//				ifs.setFaceAttributes(Attribute.NORMALS,null);
+//				ifs.setFaceAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
+//			}
+//			d= ifs.getEdgeAttributes(Attribute.NORMALS);
+//			if(d!=null){
+//				double[][] ds=d.toDoubleArrayArray(null);
+//				equalizeTo4D(ds);
+//				ifs.setEdgeAttributes(Attribute.NORMALS,null);
+//				ifs.setEdgeAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
+//			}
+//			d= ifs.getVertexAttributes(Attribute.NORMALS);
+//			if(d!=null){
+//				double[][] ds=d.toDoubleArrayArray(null);
+//				equalizeTo4D(ds);
+//				ifs.setVertexAttributes(Attribute.NORMALS,null);
+//				ifs.setVertexAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(ds));
+//			}
 			//
 			d= ifs.getFaceAttributes(Attribute.COLORS);
 			if(d!=null){
