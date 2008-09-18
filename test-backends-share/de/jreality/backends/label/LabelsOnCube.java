@@ -114,11 +114,9 @@ public class LabelsOnCube {
     ets.setOffset(offset);
     fts.setOffset(offset);
     
-    dgs.setShowPoints(Boolean.TRUE);
+    dgs.setShowPoints(true);
     
-    System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
-
-		ViewerApp.display(cmp);
+ 	ViewerApp.display(cmp);
 	}
 
 }
