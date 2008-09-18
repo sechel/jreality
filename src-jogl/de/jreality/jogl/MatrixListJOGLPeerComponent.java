@@ -121,7 +121,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 					if (displayList < 0) displayList = jr.globalGL.glGenLists(1);
 					jr.globalGL.glNewList(displayList, GL.GL_COMPILE);
 					insideDL = jr.renderingState.insideDisplayList = true;
-					System.err.println("dlist elapsed time: "+(jr.beginRenderTime-lastDisplayListCreationTime));
+//					System.err.println("dlist elapsed time: "+(jr.beginRenderTime-lastDisplayListCreationTime));
 					lastDisplayListCreationTime = jr.beginRenderTime;
 					//					theLog.fine("Turning on dlist for "+goBetween.getOriginalComponent().getName());
 				}	
