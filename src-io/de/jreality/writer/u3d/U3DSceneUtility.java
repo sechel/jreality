@@ -114,10 +114,11 @@ public class U3DSceneUtility {
 		T extends SceneGraphNode
 	> HashMap<T, String> getUniqueNames(Collection<T> l) 
 	{
+		HashSet<T> uniqueNodes = new HashSet<T>(l);
 		HashMap<String, List<T>>
 			nameMap = new HashMap<String, List<T>>();
 		HashMap<T, String> r = new HashMap<T, String>();
-		for (T c : l) {
+		for (T c : uniqueNodes) {
 			if (c == null) continue;
 			String name = c.getName();
 			List<T> cList = nameMap.get(c.getName());

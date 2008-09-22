@@ -137,7 +137,8 @@ public class WriterU3D implements SceneWriter {
 	protected HashMap<SceneGraphComponent, Boolean>
 		visibilityMap = null;
 	protected Collection<Geometry>
-		geometries = null;
+		geometries = null,
+		preparedGeometries = null;
 	protected Collection<SceneGraphComponent>
 		viewNodes = null;
 	protected Collection<Camera>
@@ -1336,10 +1337,8 @@ public class WriterU3D implements SceneWriter {
 		for (SceneGraphComponent lightNode: lightNodes) {
 			writeDataBlock(getLightNodeModifierChain(lightNode), o);
 		}
-		for (Geometry g : geometries){
-			Geometry p = preparedGeometryMap.get(g);
-			if (p != null)
-				writeDataBlock(getModifierChain(p), o);
+		for (Geometry g : preparedGeometries){
+			writeDataBlock(getModifierChain(g), o);
 		}
 		for (U3DTexture tex : textures) 
 			writeDataBlock(getModifierChain(tex), o);
@@ -1352,11 +1351,9 @@ public class WriterU3D implements SceneWriter {
 			writeDataBlock(getViewResource(c), o);	
 		for (Light l : lights) 
 			writeDataBlock(getLightResource(l), o);
-		for (Geometry g : geometries){
-			Geometry p = preparedGeometryMap.get(g);
-			if (p != null)
-				for (DataBlock b : getContinuations(p)) 
-					writeDataBlock(b, o);
+		for (Geometry g : preparedGeometries){
+			for (DataBlock b : getContinuations(g)) 
+				writeDataBlock(b, o);
 		}
 		for (U3DTexture tex : textures) {
 			for (DataBlock b : getContinuations(tex))
@@ -1438,6 +1435,7 @@ public class WriterU3D implements SceneWriter {
 		geometries = U3DSceneUtility.getGeometries(scene);
 		preparedGeometryMap = U3DSceneUtility.prepareGeometry(geometries);
 		geometryNameMap = U3DSceneUtility.getUniqueNames(preparedGeometryMap.values());
+		preparedGeometries = new HashSet<Geometry>(preparedGeometryMap.values());
 		
 		appearanceMap = U3DSceneUtility.getAppearanceMap(scene);
 		appearances = new HashSet<EffectiveAppearance>(appearanceMap.values());
@@ -1458,7 +1456,7 @@ public class WriterU3D implements SceneWriter {
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
 		
-		/*		
+//		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
 		U3DSceneUtility.printNodes("View Nodes", viewNodes);
@@ -1474,7 +1472,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
-		*/
+//		*/
 	}
 
 
