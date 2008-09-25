@@ -1456,7 +1456,7 @@ public class WriterU3D implements SceneWriter {
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
 		
-//		/*		
+		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
 		U3DSceneUtility.printNodes("View Nodes", viewNodes);
@@ -1472,7 +1472,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
-//		*/
+		*/
 	}
 
 
