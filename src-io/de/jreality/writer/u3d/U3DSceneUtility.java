@@ -114,11 +114,9 @@ public class U3DSceneUtility {
 		T extends SceneGraphNode
 	> HashMap<T, String> getUniqueNames(Collection<T> l) 
 	{
-		HashSet<T> uniqueNodes = new HashSet<T>(l);
-		HashMap<String, List<T>>
-			nameMap = new HashMap<String, List<T>>();
+		HashMap<String, List<T>> nameMap = new HashMap<String, List<T>>();
 		HashMap<T, String> r = new HashMap<T, String>();
-		for (T c : uniqueNodes) {
+		for (T c : l) {
 			if (c == null) continue;
 			String name = c.getName();
 			List<T> cList = nameMap.get(c.getName());
@@ -425,7 +423,6 @@ public class U3DSceneUtility {
 					
 				}
 				c.childrenWriteAccept(this, false, false, false, false, false, true);
-				
 //				if (flat) {
 //					if (basPoints != null) 
 //						basPoints = flatten(basPoints, true);
@@ -443,6 +440,7 @@ public class U3DSceneUtility {
 		}, false, false, false, false, false, true);
 	}
 	
+	
 	public static HashMap<Geometry, Geometry> prepareGeometry(Collection<Geometry> geometry) {
 		HashMap<Geometry, Geometry> r = new HashMap<Geometry, Geometry>();
 		for (Geometry g : geometry) {
@@ -451,14 +449,13 @@ public class U3DSceneUtility {
 				r.put(g, p);
 			}
 			else if (g instanceof IndexedLineSet)
-				r.put(g, null);
+				r.put(g, g);
 			else if (g instanceof PointSet)
-				r.put(g, null);
+				r.put(g, g);
 			else if (g instanceof Sphere)
 				r.put(g, SPHERE);
 			else if (g instanceof Cylinder) {
 				r.put(g, CYLINDER);
-				
 			}
 		}
 		return r;

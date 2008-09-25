@@ -1434,8 +1434,8 @@ public class WriterU3D implements SceneWriter {
 		
 		geometries = U3DSceneUtility.getGeometries(scene);
 		preparedGeometryMap = U3DSceneUtility.prepareGeometry(geometries);
-		geometryNameMap = U3DSceneUtility.getUniqueNames(preparedGeometryMap.values());
 		preparedGeometries = new HashSet<Geometry>(preparedGeometryMap.values());
+		geometryNameMap = U3DSceneUtility.getUniqueNames(preparedGeometries);
 		
 		appearanceMap = U3DSceneUtility.getAppearanceMap(scene);
 		appearances = new HashSet<EffectiveAppearance>(appearanceMap.values());
@@ -1468,6 +1468,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printNameMap(lightNameMap);
 		
 		U3DSceneUtility.printNodes("Geometries", geometries);
+		U3DSceneUtility.printNodes("Prepared Geometries", preparedGeometries);
 		U3DSceneUtility.printNameMap(geometryNameMap);
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
