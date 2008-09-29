@@ -59,7 +59,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    slider.setFont(f);
 	    this.min=min; this.max=max; 
 	    
-		textField.setText(getFormattedValue());
+		textField.setText(getFormattedValue(sliderToText()));
 	    textContents = textField.getText();
 	    textField.setColumns(TEXT_FIELD_COLUMNS);
 	    textField.setEditable(true);
@@ -72,6 +72,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 				slider.setValue(textToSlider());
 				textContents = textField.getText();
 				fireActionPerformed();
+				textField.setForeground(Color.black);
 			}
  	    	
  	    });
@@ -83,8 +84,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    });
 		slider.addChangeListener( new ChangeListener()	{
 		    public void stateChanged(ChangeEvent e) {
-			    textField.setText(getFormattedValue());
-				textField.setForeground(Color.black);
+			    textField.setText(getFormattedValue(sliderToText()));
 		        fireActionPerformed();
 		    }
 		});
@@ -168,7 +168,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	abstract T sliderToText();
 	abstract int textToSlider();
 	abstract int numberToSlider(T n);
-	abstract String getFormattedValue();
+	abstract String getFormattedValue(T n);
 
 	public T getValue()	{
 		return sliderToText();
@@ -178,7 +178,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    Vector<ActionListener> remember = listeners;
 	    listeners = null;
 		slider.setValue(numberToSlider(n));
-	    textField.setText(getFormattedValue());
+	    textField.setText(getFormattedValue(n));
 	    textField.postActionEvent();
 	    listeners = remember;
 		//textField.setText(sliderToText().toString());
@@ -232,7 +232,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		}
 		
 		int numberToSlider(java.lang.Integer val)	{
-			return val.intValue();	
+			return val;	
 		}
 		
 		void adjustSliderMinMax() {
@@ -241,8 +241,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			if (foo < super.slider.getMinimum()) setMin(foo); 
 		}
 		@Override
-		String getFormattedValue() {
-			return String.format("%d",sliderToText());
+		String getFormattedValue(java.lang.Integer n) {
+			return String.format("%d",n);
 		}
 		@Override
 		public void setMax(java.lang.Integer max) {
@@ -302,6 +302,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			return (super.min + (super.max-super.min)*(val/scaler)); 
 		}
 
+		
 		@Override
 		void adjustSliderMinMax() {
 			double val= java.lang.Double.valueOf(super.textField.getText());
@@ -316,8 +317,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			}
 		}
 						
-		String getFormattedValue() {
-			return String.format("%8.4g",sliderToText().doubleValue());
+		String getFormattedValue(java.lang.Double n) {
+			return String.format("%8.4g",n);
 		}
 	}
 	
