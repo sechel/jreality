@@ -21,7 +21,9 @@ public class ParametricSurfaceExample {
 		}
 		// how many dimensions in the image space?
 		public int getDimensionOfAmbientSpace() { return 3;	}
-		// not sure what this implies
+		// Does evaluate() always put the same value into xyz for a given pair (u,v)?
+		// If the immersion has parameters that affect the result evaluate() then isImmutable()
+		// should return false.
 		public boolean isImmutable() { return true; }
 	};
 	
