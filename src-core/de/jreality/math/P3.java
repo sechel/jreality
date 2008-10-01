@@ -79,7 +79,7 @@ public class P3 {
 	public static double[] p3involution = Rn.diagonalMatrix(null, new double[]{-1d,-1d,-1d,-1d});
 	public static double[] Q_HYPERBOLIC, Q_EUCLIDEAN, Q_ELLIPTIC;
 
-	private static double[][] Q_LIST;
+	public static double[][] Q_LIST;
 
 	 
    final static double[] xaxis = {1,0,0};
