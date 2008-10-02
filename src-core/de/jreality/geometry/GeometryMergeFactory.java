@@ -509,14 +509,10 @@ public class GeometryMergeFactory {
 			tra.add(mat);
 		}
 		// append subnode Data
-		List<SceneGraphComponent> childs =cmp.getChildNodes();
-		for (Iterator iter = childs.iterator(); iter.hasNext();) {
-			Object o=iter.next();
-			if (o instanceof SceneGraphComponent) {
-				SceneGraphComponent child = (SceneGraphComponent) o;
+		for (SceneGraphComponent child : cmp.getChildComponents()) {
 				collectMergeData(g,tra,fCol,eCol,vCol,child,p,eApp);
-			}
 		}
+		
 		// undo scenegraphpath extention
 		p.pop();
 	}
