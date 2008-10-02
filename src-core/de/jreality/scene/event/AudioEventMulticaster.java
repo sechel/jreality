@@ -38,85 +38,40 @@
  */
 
 
-package de.jreality.scene;
+package de.jreality.scene.event;
 
 
-
-/**
- * A visitor for traversing the scene graph. All visit methods are implemented
- * as a call to the visit() method with the supertype parameter.
- * 
- * @author Holger Pietsch
- * 
- * TODO: explain how this works better
- */
-public class SceneGraphVisitor {
-
-  protected SceneGraphVisitor() {}
-
-  public void visit(SceneGraphNode m) {}
-
-  public void visit(SceneGraphComponent c) {
-    SceneGraphComponent.superAccept(c, this);
+public final class AudioEventMulticaster implements AudioListener {
+  private final AudioListener a, b;
+  private AudioEventMulticaster(AudioListener a, AudioListener b) {
+      this.a = a; this.b = b;
+  }
+  private AudioListener remove(AudioListener oldl) {
+    if(oldl == a)  return b;
+    if(oldl == b)  return a;
+    AudioListener a2 = remove(a, oldl);
+    AudioListener b2 = remove(b, oldl);
+    if(a2 == a && b2 == b) return this;
+    return add(a2, b2);
+  }
+  public static AudioListener add(AudioListener a, AudioListener b)
+  {
+    final AudioListener result;
+    if(a==null) result=b; else if(b==null) result=a;
+    else result=new AudioEventMulticaster(a, b);
+    return result;
+  }
+  public static AudioListener remove(AudioListener l, AudioListener oldl)
+  {
+    final AudioListener result;
+    if(l==oldl||l==null) result=null;
+    else if(l instanceof AudioEventMulticaster)
+      result=((AudioEventMulticaster)l).remove(oldl);
+    else result=l;
+    return result;
   }
 
-  public void visit(Appearance a) {
-    Appearance.superAccept(a, this);
-  }
-
-  public void visit(Transformation t) {
-    Transformation.superAccept(t, this);
-  }
-
-  public void visit(Light l) {
-    Light.superAccept(l, this);
-  }
-
-  public void visit(DirectionalLight l) {
-    DirectionalLight.superAccept(l, this);
-  }
-  
-  public void visit(PointLight l) {
-      PointLight.superAccept(l, this);
-    }
-
-  public void visit(SpotLight l) {
-    SpotLight.superAccept(l, this);
-  }
-
-  public void visit(Geometry g) {
-    Geometry.superAccept(g, this);
-  }
-
-  public void visit(Sphere s) {
-    Sphere.superAccept(s, this);
-  }
-  
-  public void visit(Cylinder c) {
-      Cylinder.superAccept(c, this);
-  }
-
-  public void visit(PointSet p) {
-    PointSet.superAccept(p, this);
-  }
-
-  public void visit(IndexedLineSet g) {
-    IndexedLineSet.superAccept(g, this);
-  }
-
-  public void visit(IndexedFaceSet i) {
-    IndexedFaceSet.superAccept(i, this);
-  }
-
-  public void visit(AudioSource a) {
-	  AudioSource.superAccept(a, this);
-  }
-
-  public void visit(Camera c) {
-    Camera.superAccept(c, this);
-  }
-  
-  public void visit(ClippingPlane c) {
-      ClippingPlane.superAccept(c, this);
+  public void audioChanged(AudioEvent ev) {
+	  a.audioChanged(ev); b.audioChanged(ev);
   }
 }

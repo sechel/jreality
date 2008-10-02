@@ -54,6 +54,7 @@ public class SceneGraphComponentEvent extends SceneEvent
   public static final int CHILD_TYPE_GEOMETRY       = 4;
   public static final int CHILD_TYPE_LIGHT          = 5;
   public static final int CHILD_TYPE_TRANSFORMATION = 7;
+  public static final int CHILD_TYPE_AUDIONODE      = 9;
   public static final int CHILD_TYPE_NONE           = 8;
 
   public static final int EVENT_TYPE_ADDED              = 21;

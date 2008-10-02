@@ -43,7 +43,6 @@ package de.jreality.scene;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,17 +56,19 @@ import de.jreality.scene.event.ToolListener;
 import de.jreality.scene.tool.Tool;
 
 /**
- * This basic building block of the jReality scene graph. It's 
- * the only node that can have another
- * SceneGraphComponent instance as a child (see {{@link #addChild(SceneGraphComponent)}).
- * <p>
- * A SceneGraphComponent can contain other instances of {@link SceneGraphNode}. To be exact,
- * it can have one each of the following: {@link Appearance}, {@link Transformation}, {@link Geometry}, {@link Light}, or
- * {@link Camera}. It also has a list of {@link Tool} instances, which may be empty.
- * <p>
- * To traverse the resulting scene graph, 
- * use subclasses of {@link de.jreality.scene.SceneGraphVisitor}.
- * <p>
+ * <p>This basic building block of the jReality scene graph. It's the
+ * only node that can have another SceneGraphComponent instance as a
+ * child (see {@link #addChild(SceneGraphComponent)}).</p>
+ *
+ * <p>A SceneGraphComponent can contain other instances of
+ * {@link SceneGraphNode}. To be exact, it can have one each of the
+ * following: {@link Appearance}, {@link Transformation},
+ * {@link Geometry}, {@link Light}, {@link Camera}, and {@link AudioSource}.
+ * It also has a list of {@link Tool} instances, which may be empty.</p>
+ *
+ * <p>To traverse the resulting scene graph, use subclasses of
+ * {@link de.jreality.scene.SceneGraphVisitor}.</p>
+ *
  * @author Unknown
  * 
  */
@@ -78,27 +79,27 @@ public class SceneGraphComponent extends SceneGraphNode {
   private Camera camera;
   private Light light;
   private Geometry geometry;
+  private AudioSource audioSource;
   private boolean visible = true;
-  protected List<SceneGraphComponent> children= Collections.emptyList();
+  protected List<SceneGraphComponent> children = Collections.emptyList();
   protected List<Tool> tools = Collections.emptyList();
 
   private transient ToolListener toolListener;
   private transient SceneGraphComponentListener containerListener;
   
-  private transient List<SceneEvent> cachedEvents=new LinkedList<SceneEvent>();
+  private transient List<SceneEvent> cachedEvents = new LinkedList<SceneEvent>();
 
-	private static int UNNAMED_ID;
+  private static int UNNAMED_ID;
 
-	public SceneGraphComponent(String name) {
-		super(name);
-	}
+  public SceneGraphComponent(String name) {
+	  super(name);
+  }
 
-	public SceneGraphComponent() {
-		this("sgc " + (UNNAMED_ID++));
-	}
+  public SceneGraphComponent() {
+	  this("sgc " + (UNNAMED_ID++));
+  }
 
-
-  public List getChildNodes() {
+  public List<SceneGraphNode> getChildNodes() {
     startReader();
     try {
       ArrayList<SceneGraphNode> list=new ArrayList<SceneGraphNode>();
@@ -107,8 +108,9 @@ public class SceneGraphComponent extends SceneGraphNode {
       if(camera!=null) list.add(camera);
       if(light!=null) list.add(light);
       if(geometry!=null) list.add(geometry);
+      if(audioSource!=null) list.add(audioSource);
       list.addAll(children);
-      return list.isEmpty()? Collections.EMPTY_LIST: list;
+      return list.isEmpty() ? Collections.EMPTY_LIST : list;
     } finally {
       finishReader();
     }
@@ -264,6 +266,24 @@ public class SceneGraphComponent extends SceneGraphNode {
     finishWriter();
   }
 
+  public AudioSource getAudioSource() {
+	  startReader();
+	  try {
+		  return audioSource;
+	  } finally {
+		  finishReader();
+	  }
+  }
+
+  public void setAudioSource(AudioSource a) {
+	  checkReadOnly();
+	  startWriter();
+	  final AudioSource old=audioSource;
+	  audioSource=a;
+	  fireSceneGraphElementSet(old, a, SceneGraphComponentEvent.CHILD_TYPE_AUDIONODE);
+	  finishWriter();
+  }
+
   /**
    * Returns the light child if any.
    * @return Light
@@ -351,6 +371,7 @@ public class SceneGraphComponent extends SceneGraphNode {
   private void superAccept(SceneGraphVisitor v) {
     super.accept(v);
   }
+  
   /**
    * This method calls the accept method on all childMembers in the following order
    * <ul>
@@ -365,25 +386,27 @@ public class SceneGraphComponent extends SceneGraphNode {
    * calls <code>childrenAccept(this)</code> in its visit implementations.
    */
   public void childrenAccept(SceneGraphVisitor v) {
-    startReader();
-    try {
-      if(transformation != null) transformation.accept(v);
-      if(appearance != null)     appearance.accept(v);
-      if(camera != null)         camera.accept(v);
-      if(light != null)          light.accept(v);
-      if(geometry!=null)         geometry.accept(v);
-      if (children.size() > 0) {		// save time?
-    		for(Iterator iter=children.iterator(); iter.hasNext();) {
-    		  SceneGraphComponent c=(SceneGraphComponent)iter.next();
-    		  c.accept(v);
-    		}
-      }
-    } finally {
-      finishReader();
-    }
+	  startReader();
+	  try {
+		  if(transformation != null) transformation.accept(v);
+		  if(appearance != null)     appearance.accept(v);
+		  if(camera != null)         camera.accept(v);
+		  if(light != null)          light.accept(v);
+		  if(geometry!=null)         geometry.accept(v);
+		  if(audioSource!=null)        audioSource.accept(v);
+		  for(SceneGraphComponent c: children) {
+			  c.accept(v);
+		  }
+	  } finally {
+		  finishReader();
+	  }
   }
 
   public void childrenWriteAccept(SceneGraphVisitor v, boolean writeTransformation, boolean writeAppearance, boolean writeCamera, boolean writeLight, boolean writeGeometry, boolean writeChildren) {
+	  childrenWriteAccept(v, writeTransformation, writeAppearance, writeCamera, writeLight, writeGeometry, writeChildren, false);
+  }
+  
+  public void childrenWriteAccept(SceneGraphVisitor v, boolean writeTransformation, boolean writeAppearance, boolean writeCamera, boolean writeLight, boolean writeGeometry, boolean writeChildren, boolean writeAudio) {
     startReader();
     try {
       if(transformation != null) { 
@@ -426,16 +449,21 @@ public class SceneGraphComponent extends SceneGraphNode {
           if (writeGeometry) geometry.finishWriter();
         }
       }
-      if (children.size() > 0) {    // save time?
-        for(Iterator iter=children.iterator(); iter.hasNext();) {
-          SceneGraphComponent c=(SceneGraphComponent)iter.next();
-          if (writeChildren) c.startWriter();
+      if(audioSource != null) { 
+          if (writeAudio) audioSource.startWriter();
           try {
-            c.accept(v);
+            audioSource.accept(v);
           } finally {
-            if (writeChildren) c.finishWriter();
+            if (writeAudio) audioSource.finishWriter();
           }
-        }
+      }
+      for(SceneGraphComponent c: children) {
+    	  if (writeChildren) c.startWriter();
+    	  try {
+    		  c.accept(v);
+    	  } finally {
+    		  if (writeChildren) c.finishWriter();
+    	  }
       }
     } finally {
       finishReader();
@@ -617,9 +645,7 @@ public class SceneGraphComponent extends SceneGraphNode {
   protected void writingFinished() {
     // we are in a readLock and broadcast all cached events - TODO: merge if possible
     try {
-      for (Iterator it = cachedEvents.iterator(); it.hasNext(); ) {
-        SceneEvent event = (SceneEvent) it.next();
-        it.remove();
+      for (SceneEvent event: cachedEvents) {
         // TODO: try catch ?
         fire(event);
       }
