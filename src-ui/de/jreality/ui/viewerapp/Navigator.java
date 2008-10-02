@@ -151,6 +151,8 @@ public class Navigator implements SelectionListener {
 				Selection currentSelection = e.getSelection();
 				//update inspector
 				inspector.setObject(currentSelection.getLastElement());
+				inspector.refresh();
+				
 				//update selection managers
 				selectionManager.setSelection(currentSelection);
 				if (propagateSelections) externalSelectionManager.setSelection(currentSelection);  //does nothing if already selected
