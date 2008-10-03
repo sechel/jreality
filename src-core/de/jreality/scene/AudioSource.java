@@ -47,18 +47,21 @@ public abstract class AudioSource extends SceneGraphNode {
 	}
     
 	public int readSamples(RingBuffer.Reader reader, float buffer[], int initialIndex, int nSamples) {
-		if (nSamples>reader.valuesLeft()) {
-			startReader();
-			try {
-				int needed = nSamples-reader.valuesLeft();  // valuesLeft() may have changed before lock was acquired
-				if (needed>0 && state == State.RUNNING) {
-					writeSamples(needed);
+		if (!reader.checkBuffer(ringBuffer)) throw new IllegalArgumentException("reader does not match ringbuffer!");
+		startReader();
+		try {
+			synchronized (this) {
+				int needed = nSamples-reader.valuesLeft();
+				if (nSamples>reader.valuesLeft()) {
+					if (needed>0 && state == State.RUNNING) {
+						writeSamples(needed);
+					}
 				}
-			} finally {
-				finishReader();
 			}
+			return reader.read(buffer, initialIndex, nSamples);
+		} finally {
+			finishReader();
 		}
-		return reader.read(buffer, initialIndex, nSamples);
 	}
 
 	// actual handling of parameter changes, sync and other administrative stuff taken care of in setParameter
