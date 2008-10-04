@@ -50,12 +50,13 @@ public abstract class AudioSource extends SceneGraphNode {
 		if (!reader.checkBuffer(ringBuffer)) throw new IllegalArgumentException("reader does not match ringbuffer!");
 		startReader();
 		try {
-			synchronized (this) {
+			if (state != State.RUNNING) {
+				return 0;
+			}
+			synchronized(this) {
 				int needed = nSamples-reader.valuesLeft();
-				if (nSamples>reader.valuesLeft()) {
-					if (needed>0 && state == State.RUNNING) {
-						writeSamples(needed);
-					}
+				if (needed>0) {
+					writeSamples(needed);
 				}
 			}
 			return reader.read(buffer, initialIndex, nSamples);
