@@ -287,6 +287,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
             DoubleArray radiiArray = null;
             if(radii != null) radiiArray = radii.toDoubleArray();
             pipeline.startGeometry(g);
+            PolygonShader dps = lineShader.getPolygonShader();
             for (int i = 0, n = edgeIndices.size(); i < n; i++) {
                 IntArray edge = edgeIndices.item(i).toIntArray();
                 double radius = lineShader.getTubeRadius();
@@ -319,7 +320,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                         eAppearance = eAppearance.create(pApp);
                         setupShader();
                         */
-                        PolygonShader dps = lineShader.getPolygonShader();
+                        //PolygonShader dps = lineShader.getPolygonShader();
                         
                         double red = dps.getRed();
                         double green = dps.getGreen();
@@ -337,6 +338,11 @@ public class RenderingVisitor extends SceneGraphVisitor {
                         } else
                             pipeline.processPseudoTube(p1, p2,radius,colors!=null?colors.item(i).toDoubleArray():null);
                     } else { // lineShader.isDrawTubes == false:
+                        //PolygonShader dps = lineShader.getPolygonShader();
+                        if(colors!= null) {
+                            DoubleArray  cc = colors.item(i).toDoubleArray();
+                            dps.setColor(cc.getValueAt(0), cc.getValueAt(1), cc.getValueAt(2));
+                        }
                         pipeline.processLine(p1, p2);
                     }
                 }
