@@ -28,6 +28,8 @@
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
 	<classpathentry kind="src" path="src-jinput"/>
+	<classpathentry excluding="de/jreality/audio/jack/" kind="src" path="src-audio"/>
+	<classpathentry excluding="de/jreality/audio/jack/" kind="src" path="test-audio"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/antlr.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
