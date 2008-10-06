@@ -1,4 +1,4 @@
-package de.jreality.audio;
+package de.jreality.audio.jack;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackAudioProcessor;

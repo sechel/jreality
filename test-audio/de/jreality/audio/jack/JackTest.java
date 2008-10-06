@@ -1,4 +1,4 @@
-package de.jreality.audio;
+package de.jreality.audio.jack;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
