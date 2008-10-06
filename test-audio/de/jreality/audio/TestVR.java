@@ -17,6 +17,12 @@ import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.vr.ViewerVR;
 
+/**
+ * Basic test to check spatial audio.
+ * 
+ * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
+ *
+ */
 public class TestVR {
 
 	public static void main(String[] args) throws Exception {
