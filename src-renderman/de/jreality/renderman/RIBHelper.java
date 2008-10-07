@@ -165,7 +165,8 @@ public class RIBHelper {
 		if (vs instanceof de.jreality.shader.DefaultPointShader)	{
 			de.jreality.shader.DefaultPointShader dvs=(de.jreality.shader.DefaultPointShader)vs;			
 			ribv.drawSpheres=dvs.getSpheresDraw();
-			ribv.pointRadius=new Float(dvs.getPointRadius()).floatValue();
+			double rad = dvs.getPointRadius();
+			ribv.pointRadius= (float) rad;
 			ribv.cs=dvs.getDiffuseColor();
 			if(dvs.getSpheresDraw()){			
 				return processPolygonShader(dvs.getPolygonShader(), ribv, name+".polygonShader");

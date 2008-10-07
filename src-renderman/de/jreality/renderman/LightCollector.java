@@ -118,6 +118,7 @@ public class LightCollector extends SceneGraphVisitor {
     public void visit(SceneGraphComponent c) {
         EffectiveAppearance tmp =eAppearance;
         Appearance a = c.getAppearance();
+        if (!c.isVisible()) return;
         if(a!= null ) eAppearance = eAppearance.create(a);
         currentPath.push(c);
         shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);

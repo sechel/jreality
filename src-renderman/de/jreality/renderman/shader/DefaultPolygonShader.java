@@ -88,7 +88,6 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
    */
   public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name, String side) {
     map.clear();
-    String realName =  (side != "") ? name+"."+side : name;
     
     int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
     boolean lighting = (boolean) eap.getAttribute(CommonAttributes.LIGHTING_ENABLED, true);

@@ -50,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import quicktime.sound.SICompletion;
+
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -84,6 +86,7 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.StorageModel;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultGeometryShader;
@@ -111,6 +114,7 @@ import de.jreality.util.SceneGraphUtility;
  * <b>TODO list and Known issues</b>:
  * <ul>
  * <li> "implode", "flat" polygon shaders not supported</li>
+ * <li> "transparency" attribute not correctly read from EffectiveAppearance. "polygonShader.transparency" for example is NOT seen</li>
  * <li> Clipping planes written but not tested</li>
  * <li> Add control over global options using (something like) "renderingHints"
  * shader {@link de.jreality.shader.RenderingHintsShader}</li>
@@ -135,11 +139,13 @@ import de.jreality.util.SceneGraphUtility;
  * @see de.jreality.shader.CommonAttributes
  */
 public class RIBVisitor extends SceneGraphVisitor {
+	transient static double[] zflip = Rn.diagonalMatrix(null, new double[]{1,1,-1,1});
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	transient protected double[] world2Camera;
 	transient protected double[] object2worldTrafo;
 	transient protected SceneGraphPath object2world = new SceneGraphPath();
+	transient protected Graphics3D context;
 	transient private Camera camera;
 	transient private int width = 640;
 	transient private int height = 480;
@@ -177,7 +183,10 @@ public class RIBVisitor extends SceneGraphVisitor {
 	transient public EffectiveAppearance eAppearance = EffectiveAppearance.create();
 	transient private int textureCount = 0;
 	transient private Map<ImageData, String> textures = new HashMap<ImageData, String>();
-	transient private Hashtable<SceneGraphNode, String> archivedTable = new Hashtable<SceneGraphNode, String>();
+	transient private Hashtable<SceneGraphComponent, String> archivedSGCTable = new Hashtable<SceneGraphComponent, String>();
+	transient private Hashtable<PointSet, String> archivedPSTable = new Hashtable<PointSet, String>();
+	transient private Hashtable<IndexedLineSet, String> archivedILSTable = new Hashtable<IndexedLineSet, String>();
+	transient private Hashtable<IndexedFaceSet, String> archivedIFSTable = new Hashtable<IndexedFaceSet, String>();
 	transient int archiveCount = 0;
 	transient protected Ri ri = new Ri();
 	transient int whichEye = CameraUtility.MIDDLE_EYE;
@@ -225,7 +234,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			rootAppearance = new Appearance();
 		eAppearance = EffectiveAppearance.create();
 		eAppearance = eAppearance.create(rootAppearance);
-
+		context = new Graphics3D(cameraPath, object2world, ((double)width)/height);
 		world2Camera = cameraPath.getInverseMatrix(null);
 
 		if (writeShadersToFile) {
@@ -546,6 +555,8 @@ public class RIBVisitor extends SceneGraphVisitor {
 		fogMap.put("background",fogcolor);
 		fogMap.put("distance",new Float(1/(double)eAppearance.getAttribute(CommonAttributes.FOG_DENSITY, CommonAttributes.FOG_DENSITY_DEFAULT)));
 		ri.atmosphere("fog", fogMap);    
+//		ri.interior("fog", fogMap);    
+		ri.exterior("fog", fogMap);    
 	}
 
 	private void processClippingPlanes() {
@@ -586,7 +597,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				archive = ((Boolean) obj).booleanValue();
 			}
 			if (archive)	{
-				Object which = archivedTable.get(c);
+				Object which = archivedSGCTable.get(c);
 				if (which != null) {
 					ri.readArchive((String) which);
 					return;
@@ -614,7 +625,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		if (archive)	{
 			ri.archiveEnd();
 			ri.readArchive(archiveName);
-			archivedTable.put(c, archiveName);
+			archivedSGCTable.put(c, archiveName);
 			archiveCount++;
 		}
 		// restore effective appearance
@@ -695,7 +706,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			double d = eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
 			currentOpacity = 1f - (float) d;
 		}
-		//System.err.println("Current opacity is "+currentOpacity);
+//		System.err.println("Current opacity is "+currentOpacity);
 	}
 
 	/**
@@ -780,40 +791,122 @@ public class RIBVisitor extends SceneGraphVisitor {
 	// we need this to know whether we're generating tubes and spheres; if so, we don't generate more
 	transient boolean insidePointset = false;
 	public void visit(PointSet g) {
-		ri.comment("PointSet " + g.getName());
-		if (!insidePointset) {
-			// p is not a subclass of PointSet
-			insidePointset = true;
-			if (retainGeometry) {
-				Object which = archivedTable.get(g);
-				if (which != null) {
-					ri.readArchive((String) which);
-				} else {
-					ri.comment("Retained geometry " + g.getName());
-					String finalname = g.getName() + archiveCount;
-					ri.archiveBegin(finalname);
+		boolean drawPoints = dgs.getShowPoints();
+		if (drawPoints)	{
+			ri.attributeBegin();
+			RIBHelper.processShader(dgs.getPointShader(), this, "pointShader");
+			if (!insidePointset) {
+				insidePointset = true;
+				if (retainGeometry) {
+					Object which = archivedPSTable.get(g);
+					if (which != null) {
+						ri.readArchive((String) which);
+					} else {
+						ri.comment("Retained point set " + g.getName());
+						String finalname = g.getName() + archiveCount;
+						ri.archiveBegin(finalname);
+						_visit(g);
+						ri.archiveEnd();
+						ri.readArchive(finalname);
+						archivedPSTable.put(g, finalname);
+						archiveCount++;
+					}
+				} else
 					_visit(g);
-					ri.archiveEnd();
-					ri.readArchive(finalname);
-					archivedTable.put(g, finalname);
-					archiveCount++;
-				}
 			} else
 				_visit(g);
-		} else
-			_visit(g);
-		insidePointset = false;
+			insidePointset = false;
+			ri.attributeEnd();
+		}
 	}
 	
+	public void visit(IndexedLineSet g) {
+		boolean drawLines = dgs.getShowLines();
+		if (drawLines)	{
+			ri.attributeBegin();
+			RIBHelper.processShader(dgs.getLineShader(), this, "lineShader");
+			ri.comment("IndexedLineSet " + g.getName());
+			checkForProxy(g);
+			if (hasProxy(g)) {
+				handleCurrentProxy();
+				insidePointset = false;
+			} else {
+				if (!insidePointset) {
+					insidePointset = true;
+					// p is not a proper subclass of IndexedLineSet
+					if (retainGeometry) {
+						Object which = archivedILSTable.get(g);
+						if (which != null) {
+							ri.readArchive((String) which);
+						} else {
+							ri.comment("Retained line set " + g.getName());
+							String finalname = g.getName() + archiveCount;
+							ri.archiveBegin(finalname);
+							_visit(g);
+							ri.archiveEnd();
+							ri.readArchive(finalname);
+							archivedILSTable.put(g, finalname);
+							archiveCount++;
+						}
+					} else _visit(g);
+					visit((PointSet) g);
+					insidePointset = false;
+				} else
+					_visit(g);
+				visit((PointSet) g);
+			}
+			ri.attributeEnd();			
+		}  else
+			visit((PointSet) g);
+	}
+
+
+	
+
+	public void visit(IndexedFaceSet g) {
+		boolean faceDraw = dgs.getShowFaces();
+		if (faceDraw) {
+			ri.attributeBegin();
+			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
+			checkForProxy(g);
+			if (hasProxy((Geometry) g)) {
+				handleCurrentProxy();
+				insidePointset = false;
+			} else {
+				if (!insidePointset) {
+					insidePointset = true;
+					if (retainGeometry) {
+						Object which = archivedIFSTable.get(g);
+						if (which != null) {
+							ri.readArchive((String) which);
+						} else {
+							ri.comment("Retained geometry " + g.getName());
+							String finalname = g.getName() + "_" + archiveCount;
+							ri.archiveBegin(finalname);
+							_visit(g);
+							ri.archiveEnd();
+							ri.readArchive(finalname);
+							archivedIFSTable.put(g, finalname);
+							archiveCount++;
+						}
+					} else _visit(g);
+					visit((IndexedLineSet) g);
+					insidePointset = false;
+				} else
+					_visit(g);
+			}
+			ri.attributeEnd();
+		} else visit ((IndexedLineSet) g);
+	}
+
+	 // here are the methods which actually render the geometric primitives
 	float[] raw = new float[4];
 	private void _visit(PointSet p) {		
-		boolean vertexDraw = dgs.getShowPoints();
-		if (vertexDraw) {			
+			ri.comment("PointSet " + p.getName());
 			int n = p.getNumPoints();
 			DataList coord = p.getVertexAttributes(Attribute.COORDINATES);
 			if (coord == null)return;
 			ri.attributeBegin();
-			RIBHelper.processShader(dgs.getPointShader(), this, "pointShader");
 
 			DataList radii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
 			DoubleArray da = null;
@@ -893,7 +986,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		        	float[] vOs=new float[3*vCol.size()];
 		        	for(int i=0;i<vCol.size();i++){
 		        		DoubleArray rgba = vCol.item(i).toDoubleArray();
-		        		System.out.println(new Color((int)rgba.getValueAt(0),(int)rgba.getValueAt(1),(int)rgba.getValueAt(2)));
+//		        		System.out.println(new Color((int)rgba.getValueAt(0),(int)rgba.getValueAt(1),(int)rgba.getValueAt(2)));
 		        		vCs[3*i] = (float) rgba.getValueAt(0);
 		        		vCs[3*i+1] = (float) rgba.getValueAt(1);
 		        		vCs[3*i+2] = (float) rgba.getValueAt(2);
@@ -921,54 +1014,9 @@ public class RIBVisitor extends SceneGraphVisitor {
 					System.err.println("textshaders only for defaultshaders");
 			}			
 		}
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see de.jreality.scene.SceneGraphVisitor#visit(de.jreality.scene.IndexedLineSet)
-	 */
-	public void visit(IndexedLineSet g) {
-		ri.comment("IndexedLineSet " + g.getName());
-		ri.attributeBegin();				
-		checkForProxy(g);
-		if (hasProxy(g)) {
-			handleCurrentProxy();
-			insidePointset = false;
-		} else {
-			if (!insidePointset) {
-				insidePointset = true;
-				// p is not a proper subclass of IndexedLineSet
-				if (retainGeometry) {
-					Object which = archivedTable.get(g);
-					if (which != null) {
-						ri.readArchive((String) which);
-					} else {
-						ri.comment("Retained geometry " + g.getName());
-						String finalname = g.getName() + archiveCount;
-						ri.archiveBegin(finalname);
-						_visit(g);
-						ri.archiveEnd();
-						ri.readArchive(finalname);
-						archivedTable.put(g, finalname);
-						archiveCount++;
-					}
-				} else
-					_visit(g);
-			} else
-				_visit(g);
-		}
-		ri.attributeEnd();
-	}
-
-
-	
-	 
 	private void _visit(IndexedLineSet g)	{
 
-		boolean lineDraw = dgs.getShowLines();
-		if (lineDraw)	{
-			RIBHelper.processShader(dgs.getLineShader(), this, "lineShader");
 			DataList dl = g.getEdgeAttributes(Attribute.INDICES);
 			if(dl != null){
 				if (drawTubes)  {
@@ -1085,44 +1133,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 			
 			
 		}
-		_visit((PointSet) g);
-	}
-
-	public void visit(IndexedFaceSet g) {
-		ri.comment("IndexedFaceSet " + g.getName());
-		ri.attributeBegin();
-		checkForProxy(g);
-		if (hasProxy((Geometry) g)) {
-			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
-			handleCurrentProxy();
-			insidePointset = false;
-		} else {
-			if (!insidePointset) {
-				insidePointset = true;
-				// p is not a subclass of PointSet
-				if (retainGeometry) {
-					Object which = archivedTable.get(g);
-					if (which != null) {
-						ri.readArchive((String) which);
-					} else {
-						ri.comment("Retained geometry " + g.getName());
-						String finalname = g.getName() + "_" + archiveCount;
-						ri.archiveBegin(finalname);
-						_visit(g);
-						ri.archiveEnd();
-						ri.readArchive(finalname);
-						archivedTable.put(g, finalname);
-						archiveCount++;
-					}
-				} else
-					_visit(g);
-				insidePointset = false;
-			} else
-				_visit(g);
-		}
-		ri.attributeEnd();
-	}
-
 	/**
 	 * The second argument here is a short-term solution to an apparent bug in
 	 * the Renderman renderer which makes it impossible to pass the transparency
@@ -1135,9 +1145,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 	 * @param color
 	 */
 	protected void _visit(IndexedFaceSet i) {
-		boolean faceDraw = dgs.getShowFaces();
-		if (faceDraw)	{
-			RIBHelper.processShader(dgs.getPolygonShader(), this, "polygonShader");
+			ri.comment("IndexedFaceSet " + i.getName());
 			DataList colors = i.getFaceAttributes(Attribute.COLORS);
 			// if (colors !=null && currentOpacity != 1.0) {
 			// the bug occurs when one attempts to set uniform colors or opacity
@@ -1157,19 +1165,20 @@ public class RIBVisitor extends SceneGraphVisitor {
 						for (int j = 0; j < nn; j++)
 							colorArrayf[k][j] = (float) colorArray[k][j];
 					}
-					IndexedFaceSet[] faceList = IndexedFaceSetUtility
-					.splitIfsToPrimitiveFaces(i);
+//					double[] m = getCurrentObjectToCamera();
+//					currentPoints = i.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+//					if (currentPoints[0].length == 3) currentPoints = Pn.homogenize(null, currentPoints);
+//					Pn.setToLength(currentPoints, currentPoints, 1.0, currentSignature);
+//					currentPoints2 = Rn.matrixTimesVector(null,m, currentPoints);
+//					System.err.println("point = "+Rn.toString(currentPoints2));
+					IndexedFaceSet[] faceList = IndexedFaceSetUtility.splitIfsToPrimitiveFaces(i);
 					for (int k = 0; k < numFaces; k++) {
 						pointPolygon(faceList[k], colorArrayf[k]);
 					}
-				}
-			}
-			if (opaqueColors) {
-				if (hasProxy((Geometry) i)) {
-					insidePointset = false;
-				} else
+				} 
+				else pointPolygon(i,null);
+			} else
 					pointPolygon(i, null);
-			}
 
 			DataList labelsList=i.getFaceAttributes(Attribute.LABELS);
 			if(labelsList!=null){
@@ -1179,9 +1188,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 					System.err.println("textshaders only for defaultshaders");
 			}
 			
-		}
-		if (insidePointset)
-			_visit((IndexedLineSet) i);
 	}
 
 	/**
@@ -1278,11 +1284,22 @@ public class RIBVisitor extends SceneGraphVisitor {
 					// float[] type.
 					float[] fnormals = new float[4 * da.getLength()];
 					double[][] dnormals = da.toDoubleArrayArray(null);
+					double[] m = getCurrentObjectToCamera();
+					double[][] dnormals2 = Rn.matrixTimesVector(null,m, dnormals);
+//					System.err.println("normals = "+Rn.toString(dnormals2));
 					int nn = dnormals[0].length;
+					int[][] ind = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 					for (int ii = 0, j = 0; j < dnormals.length; ++j) {
+//						if (currentPoints2 != null)	{
+//							for (int jj = 0; jj<ind[0].length; ++jj) {
+//							System.err.println("P.N="+Pn.innerProduct(currentPoints[ind[0][jj]], dnormals[j], currentSignature));						
+//							System.err.println("TP.N="+Pn.innerProduct(currentPoints2[ind[0][jj]], dnormals2[j], currentSignature));						
+//							}
+//							}
 						for (int k = 0; k < 4; ++k)
 							if (k < nn) fnormals[ii++] = (float) dnormals[j][k];
 							else fnormals[ii++] = 0f;
+//						System.err.println("P.N="+Pn.innerProduct(dpoints[j], dnormals[j], currentSignature));
 					}
 					map.put(((vertexNormals) ? "vertex" : "uniform") + " float[4] Nw", fnormals);
 				}
@@ -1497,5 +1514,6 @@ public class RIBVisitor extends SceneGraphVisitor {
 		double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
 		double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera), o2w);
 		return o2c;
+//		return Rn.times(null, zflip, context.getObjectToCamera());
 	}
 }
