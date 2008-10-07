@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.net.URL;
 
 import de.jreality.audio.SignalSource;
+import de.jreality.audio.jack.JackAmbisonicsRenderer;
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
@@ -127,8 +128,8 @@ public class TestVR {
 
 		vr.setContent(cmp);
 
-		JavaAmbisonicsStereoDecoder.launch(va.getCurrentViewer());
-		//JackAmbisonicsRenderer.launch(va.getCurrentViewer());
+		//JavaAmbisonicsStereoDecoder.launch(va.getCurrentViewer());
+		JackAmbisonicsRenderer.launch(va.getCurrentViewer());
 		
 	}
 
