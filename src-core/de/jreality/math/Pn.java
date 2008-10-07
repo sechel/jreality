@@ -115,10 +115,10 @@ public class Pn {
 		return Math.log(x+Math.sqrt(x*x+1));
 	}
 	
-	 // can this be right?
 	public static double atanh(double x)	{
-		return asinh(x)/acosh(x);
+		return .5*(Math.log((1+x)/(1-x)));
 	}
+	
 	 
 	/**
 	 * Calculate the angle between the points <i>u</i> and <i>v</i> with respect to
@@ -261,7 +261,10 @@ public class Pn {
 	 * Calculate the distance between the two points <i>u</i> and <i>v</i>. In hyperbolic
 	 * geometry distances may be imaginary; here we only return the absolute value of the distance.
 	 * <b>Note:</b> This method does not attempt to handle all possible special cases correctly,
-	 * as when for example the input points lie on the Absolute Quadric, etc.
+	 * as when for example the input points lie on the Absolute Quadric, etc.  It does however handle correctly
+	 * various cases in the hyperbolic case, when one or both of the points lie strictly outside the hyperbolic
+	 * disk.  For example, when the first lies inside and the second outside, the method returns the signed 
+	 * distance of the first point to the polar line of the second (which is a hyperbolic line).
 	 * @param u
 	 * @param v
 	 * @param sig
@@ -290,9 +293,12 @@ public class Pn {
 				vv = innerProduct(v, v, sig);
 				uv = innerProduct(u, v, sig);
 				if (uu == 0 || vv == 0) 	// error: infinite distance
-					return (Double.MAX_VALUE);
+					throw new IllegalArgumentException("Points cannot lie on the hyperbolic absolute");
+					//return (Double.MAX_VALUE);
 				double k =  (uv)/Math.sqrt(Math.abs(uu*vv));
-				d = acosh(k);
+				if (uu < 0 && vv < 0) d = acosh(k);
+				else if ((uu < 0 && vv > 0) || (uu > 0 && vv < 0)) d = asinh(k);
+				else if (uu > 0 && vv > 0) d = Math.acos(k);
 				break;
 			case ELLIPTIC:
 				uu = innerProduct(u, u, sig);
@@ -304,56 +310,6 @@ public class Pn {
 		return d;
 	}
 	
-	/**
-	 * optimize calculation of the cosh of  the distance to (0,0,0,1)
-	 * @param src
-	 * @param signature
-	 * @return
-	 */
-	public static double inverseDistanceToOrigin(double[] u, int sig)	{
-		// assert dim checks
-		double d = 0;
-		int n = u.length;
-		switch(sig)	{
-			default:
-				// error: no such signature.  fall through to euclidean case
-			case EUCLIDEAN:
-				double ul,  tmp;
-				ul = u[n-1]; 
-				d = Rn.innerProduct(u,u,n-1);
-				d = Math.sqrt(d);
-				if ( !(d==0 || d == 1.0))	d /= ul;
-				break;
-			case HYPERBOLIC:
-				double uu, uv;
-				uu = innerProduct(u, u, sig);
-				uu = (uu>0? uu : -uu);
-				uv = u[n-1] > 0 ? u[n-1] : -u[n-1];
-				if (uu == 0) 	// error: infinite distance
-					return (Double.MAX_VALUE);
-				d = (uv)/Math.sqrt(uu);
-				break;
-			case ELLIPTIC:
-				uu = innerProduct(u, u, sig);
-				uv = u[n-1];
-				d = (uv)/Math.sqrt(Math.abs(uu));
-				break;
-			}
-		return d;
-		
-	}
-	
-	public static double inverseDistance(double d, int signature)	{
-		switch (signature) {
-			case EUCLIDEAN:
-				return d;
-			case HYPERBOLIC:
-				return cosh(d);
-			case ELLIPTIC:
-				return Math.cos(d);
-		}
-		return d;
-	}
 	/**
 	 * Drag a tangent vector <i>sdir</i> based at point <i>src</i> with initial direction given by <i>sdir</i>, a distance
 	 * of <i>length</i> in the given metric.  
@@ -782,9 +738,10 @@ public class Pn {
 	 
 
 	/**
+	 * For the euclidean special case:
 	 * Normalize a hyper-plane (represented as a vector of length n) so that the direction vector 
 	 * (the first n-1 coordinates) has 
-	 * euclidean length 1 but represents the same projective hyper-plane.
+	 * euclidean length 1 but represents the same projective hyper-plane. Otherwise normalize to have unit length;
 	 * @param dst
 	 * @param src
 	 * @return
