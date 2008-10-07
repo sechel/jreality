@@ -120,11 +120,11 @@ void main (void)
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
-//    if (transformedNormal.w * transformedNormal.z < 0) transformedNormal = -transformedNormal;
+//    if (transformedNormal.w * transformedNormal.z < 0) 
+    	transformedNormal = -transformedNormal;
 //    faceforward4(transformedNormal);
 //    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
-//    transformedNormal = -transformedNormal;
 //    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
 //     ftexgen(transformedNormal, ecPosition);
