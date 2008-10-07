@@ -1,4 +1,4 @@
-package de.jreality.audio;
+package de.jreality.audio.jack;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,7 +6,6 @@ import java.net.URL;
 
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
-import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
@@ -19,13 +18,7 @@ import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.vr.ViewerVR;
 
-/**
- * Basic test to check spatial audio for Java Sound.
- * 
- * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
- *
- */
-public class TestVR {
+public class JackTest {
 
 	public static void main(String[] args) throws Exception {
 
@@ -54,34 +47,20 @@ public class TestVR {
 		
 		SceneGraphComponent cmp2 = new SceneGraphComponent();
 		cmp.addChild(cmp2);
-		
-		final SignalSource sin = new SignalSource("wave", 44100) {
-			float amplitude=0.03f;
-			double frequency=440;
-			@Override
-			public float evaluateSignal(double t) {
-				//double x = 2*(-0.5+Math.random());
-				//return (float) x;
-				//return x>0.85 ? 1 : 0;
-				t*=frequency;
-				return amplitude * (float) Math.sin(2*Math.PI*t);
-				//return 0.03f*(float) (t-Math.floor(t));
-			}
-		};
-		
+		final AudioSource s2 = new JackNode("jack_input", 0);
 		cmp2.setGeometry(Primitives.icosahedron());
 		MatrixBuilder.euclidean().translate(0, 0, 0).assignTo(cmp2);
-		cmp2.setAudioSource(sin);
+		cmp2.setAudioSource(s2);
 		ActionTool at2 = new ActionTool("PanelActivation");
 		at2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (sin.getState() == AudioSource.State.RUNNING) sin.pause();
-				else sin.start();
+				if (s2.getState() == AudioSource.State.RUNNING) s2.pause();
+				else s2.start();
 			}
 		});
 		cmp2.addTool(at2);
 		cmp2.addTool(dragtool);
-		sin.start();
+		s2.start();
 
 		
 		SceneGraphComponent cmp3 = new SceneGraphComponent();
@@ -119,14 +98,13 @@ public class TestVR {
 
 		
 		ViewerVR vr = ViewerVR.createDefaultViewerVR(null);
-		// ViewerApp va = ViewerApp.display(cmp);
 		ViewerApp va = vr.initialize();
 		va.update();
 		va.display();
 
 		vr.setContent(cmp);
 
-		JavaAmbisonicsStereoDecoder.launch(va.getCurrentViewer());
+		JackAmbisonicsRenderer.launch(va.getCurrentViewer());
 		
 	}
 
