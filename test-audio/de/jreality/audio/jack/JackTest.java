@@ -1,6 +1,5 @@
 package de.jreality.audio.jack;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,10 +7,7 @@ import java.util.List;
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.jreality.audio.AudioReader;
 import de.jreality.audio.SampleReader;
-import de.jreality.audio.WavNode;
-import de.jreality.audio.jack.JackHub;
-import de.jreality.audio.jack.JackNode;
-import de.jreality.audio.jack.JackSink;
+import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.scene.AudioSource;
 import de.jreality.util.Input;
 
@@ -64,7 +60,7 @@ public class JackTest implements JackSink {
 	public static void main(String args[]) throws Exception {
 		AudioSource s1 = new JackNode("jack node 1", 0);
 		AudioSource s2 = new JackNode("jack node 2", 1);
-		AudioSource s3 = new WavNode("wavnode", Input.getInput("data/waterdrop.wav"), true);
+		AudioSource s3 = new CachedAudioInputStreamSource("wavnode", Input.getInput("data/waterdrop.wav"), true);
 		
 		s1.start();
 		s2.start();

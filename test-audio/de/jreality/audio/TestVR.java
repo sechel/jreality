@@ -88,35 +88,35 @@ public class TestVR {
 		SceneGraphComponent cmp3 = new SceneGraphComponent();
 		cmp.addChild(cmp3);
 		
-		// works with mp3spi from javazoom in classpath:
-		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
-		Input input = Input.getInput(url); 
-		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
-			@Override
-			public int readSamples(Reader reader, float[] buffer,
-					int initialIndex, int samples) {
-				// TODO Auto-generated method stub
-				int ret = super.readSamples(reader, buffer, initialIndex, samples);
-				for (int i=0; i<buffer.length; i++) {
-					buffer[i]*=0.3f;
-				}
-				return ret;
-			}
-		};
+//		// works with mp3spi from javazoom in classpath:
+//		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
+//		Input input = Input.getInput(url); 
+//		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
+//			@Override
+//			public int readSamples(Reader reader, float[] buffer,
+//					int initialIndex, int samples) {
+//				// TODO Auto-generated method stub
+//				int ret = super.readSamples(reader, buffer, initialIndex, samples);
+//				for (int i=0; i<buffer.length; i++) {
+//					buffer[i]*=0.3f;
+//				}
+//				return ret;
+//			}
+//		};
 			
-		cmp3.setGeometry(Primitives.cube());
-		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
-		cmp3.setAudioSource(s3);
-		ActionTool at3 = new ActionTool("PanelActivation");
-		at3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (s3.getState() == AudioSource.State.RUNNING) s3.pause();
-				else s3.start();
-			}
-		});
-		cmp3.addTool(at3);
-		cmp3.addTool(dragtool);
-		s3.start();
+//		cmp3.setGeometry(Primitives.cube());
+//		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
+//		cmp3.setAudioSource(s3);
+//		ActionTool at3 = new ActionTool("PanelActivation");
+//		at3.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				if (s3.getState() == AudioSource.State.RUNNING) s3.pause();
+//				else s3.start();
+//			}
+//		});
+//		cmp3.addTool(at3);
+//		cmp3.addTool(dragtool);
+//		s3.start();
 
 		
 		ViewerVR vr = ViewerVR.createDefaultViewerVR(null);
