@@ -355,6 +355,14 @@ public class CameraUtility {
 		return viewPort;
 	}
 	
+	public static double[][] getNearViewport(Viewer v)	{
+		Rectangle2D vp = null;
+		Camera camera = getCamera(v);
+		Rectangle2D vp1 = getViewport(camera, getAspectRatio(v));
+		double near = camera.getNear();
+		double[][] nearCorners = new double[4][];
+		return nearCorners;
+	}
 
 	public static double[] getNDCToCamera(Viewer v)	{
 		return Rn.inverse(null, getCameraToNDC(v));
