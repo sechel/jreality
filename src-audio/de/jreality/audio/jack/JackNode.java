@@ -5,6 +5,13 @@ import java.nio.FloatBuffer;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
 
+/**
+ * An audio source that reads from Jack inputs.  Combined with MIDI or OSC tools, this class should serve
+ * as universal glue between jReality and Jack-enabled audio software.
+ * 
+ * @author brinkman
+ *
+ */
 public class JackNode extends AudioSource implements JackSource {
 
 	private int port;

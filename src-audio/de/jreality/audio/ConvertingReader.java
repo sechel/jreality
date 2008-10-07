@@ -1,5 +1,14 @@
 package de.jreality.audio;
 
+/**
+ * A simple sample rate converter, to be used as a transparent plugin between AudioSource and audio renderer.
+ * 
+ * TODO: Implement something better than linear interpolation; the current version is only a proof of concept
+ * and introduces too much noise.
+ * 
+ * @author brinkman
+ *
+ */
 
 public class ConvertingReader implements SampleReader {
 

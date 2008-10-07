@@ -5,6 +5,14 @@ import de.gulden.framework.jjack.JJackAudioProcessor;
 import de.gulden.framework.jjack.JJackSystem;
 import de.jreality.audio.AmbisonicsEncoder;
 
+/**
+ * 
+ * Hello World for Ambisonics and Jack, sort of.  Reads a mono signal from a Jack input channel and renders an
+ * Ambisonics B-signal that circles around the listener once in ten seconds.
+ * 
+ * @author brinkman
+ *
+ */
 public class AmbisonicsTest {
 
 	public static void main(String args[]) throws InterruptedException {

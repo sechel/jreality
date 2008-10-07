@@ -6,6 +6,16 @@ import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackAudioProcessor;
 import de.gulden.framework.jjack.JJackSystem;
 
+/**
+ * An Ambisonics stereo decoder for Jack, mostly for testing on desktop systems; reads an Ambisonics
+ * B-signal and writes a stereo signal.  In a production environment, one should use a serious decoder
+ * such as Fons Adriaensen's AmbDec.
+ * 
+ * Note that this decoder has to run in its own JVM due to limitations of the JJack bindings.
+ * 
+ * @author brinkman
+ *
+ */
 public class JackAmbisonicsStereoDecoder {
 
 	private static final float wScale = (float) Math.sqrt(0.5);

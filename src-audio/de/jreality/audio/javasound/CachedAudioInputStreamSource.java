@@ -17,7 +17,7 @@ import de.jreality.util.Input;
  * 
  * An AudioSource getting data from a JavaSound AudioInputStream. The whole
  * Stream is read into a buffer which makes it easy to loop the sample - but
- * this requires very much memory for longer samples. 
+ * this requires much memory for longer samples. 
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *

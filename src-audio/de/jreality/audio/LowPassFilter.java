@@ -1,7 +1,13 @@
 package de.jreality.audio;
 
-// simple RC low-pass filter, just for fun
-
+/**
+ * Simple low-pass filter, mostly as a proof of concept.
+ * 
+ * TODO: Implement a better algorithm than the current discretization of an RC circuit.
+ * 
+ * @author brinkman
+ *
+ */
 public class LowPassFilter implements SampleReader {
 
 	private SampleReader reader;

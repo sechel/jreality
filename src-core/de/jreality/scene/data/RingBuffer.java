@@ -2,6 +2,13 @@ package de.jreality.scene.data;
 
 import java.nio.FloatBuffer;
 
+/**
+ * Ring buffer for audio sources.  Each ring buffer has one writer, the audio source that owns it, and any
+ * number of readers that can access the buffer concurrently.
+ * 
+ * @author brinkman
+ *
+ */
 public class RingBuffer {
 
 	private float buffer[];
@@ -42,6 +49,7 @@ public class RingBuffer {
 			}
 			return n;
 		}
+		
 		public boolean checkBuffer(RingBuffer buf) {
 			return RingBuffer.this == buf;
 		}

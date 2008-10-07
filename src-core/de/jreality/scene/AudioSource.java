@@ -6,6 +6,17 @@ import de.jreality.scene.event.AudioEvent;
 import de.jreality.scene.event.AudioEventMulticaster;
 import de.jreality.scene.event.AudioListener;
 
+/**
+ * The core of audio for jReality.  The basic idea is that a scene graph component can have an audio source
+ * attached to it.  An audio source writes a mono signal into a ring buffer upon request, and audio renderers
+ * request readers for the ring buffer, one for each occurrence of the source in the scene graph.  An audio
+ * source keeps track of time in terms of the number of samples requested so far.  Readers can read samples
+ * concurrently, and sample requests are queued and managed so that an audio source only writes as many samples
+ * as the fastest renderer requests.
+ * 
+ * @author brinkman
+ *
+ */
 public abstract class AudioSource extends SceneGraphNode {
 	
 	protected transient AudioListener audioListener = null;

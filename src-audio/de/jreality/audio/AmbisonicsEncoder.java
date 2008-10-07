@@ -1,10 +1,20 @@
 package de.jreality.audio;
 
-/*
+/**
+ * 
+ * A simple Ambisonics encoder that takes an array of samples as well as a location in space and computes
+ * a signal in Ambisonics B-format.
+ * 
  * Note that computer graphics and Ambisonics use different conventions regarding the the labelling of
  * coordinate axes.  Both use right-handed coordinate systems, but graphics has the x-axis pointing right
  * and the y-axis pointing up, while Ambisonics has the x-axis pointing forward and the y-axis pointing
  * left.  In other words, the point (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics.
+ * 
+ * TODO: add distance cues such as delay, attenuation, low-pass filtering, and reverberation; implement
+ * interpolation of delays to achieve Doppler effects; contemplate waves other than spherical waves
+ * 
+ * @author brinkman
+ * 
  */
 public class AmbisonicsEncoder {
 	

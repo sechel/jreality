@@ -6,6 +6,17 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 
+/**
+ * 
+ * Simple Jack back-end for Ambisonics.  All the real work occurs in the Ambisonics visitor; this class
+ * merely takes care of the Jack init (which is a bit dicey; see comment in JackSource.java), collects
+ * the samples and writes them to the Jack output buffers.
+ * 
+ * Use the {@code launch}-method to activate this renderer for a given {@link Viewer}.
+ * 
+ * @author brinkman
+ *
+ */
 public class JackAmbisonicsRenderer implements JackSink {
 
 	private AmbisonicsVisitor visitor = null;

@@ -11,6 +11,10 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 
+/* TODO: do one traversal of the scene graph before audio rendering begins, in order to avoid the creation
+ * of readers, buffers, etc. in the audio rendering callback; the current version sometimes zombifies the
+ * jack client on startup.
+ */
 public class AmbisonicsVisitor extends SceneGraphVisitor {
 	
 	private static class PathEnc extends AmbisonicsEncoder {

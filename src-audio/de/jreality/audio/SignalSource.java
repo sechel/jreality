@@ -33,6 +33,8 @@ public abstract class SignalSource extends AudioSource {
 	/**
 	 * Evaluate the signal at a given time.
 	 * 
+	 * TODO: include suitable filtering to avoid reflection at the Nyquist frequency
+	 * 
 	 * @param t evaluation time in seconds
 	 * @return the signal sample at time {@code t}. 
 	 */

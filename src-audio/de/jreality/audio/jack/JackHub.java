@@ -9,6 +9,16 @@ import de.gulden.framework.jjack.JJackAudioProcessor;
 import de.gulden.framework.jjack.JJackException;
 import de.gulden.framework.jjack.JJackSystem;
 
+/**
+ * This class manages Jack sources as well as the Jack sink.  Due to the design of JJack, there can only
+ * be one Jack hub per JVM, so that JackHub is implemented as a singleton.  Note that the sink and all
+ * sources have to be created before the hub is initialized; once the hub is initialized, the number of
+ * input channels cannot be changed.  JackHub also takes care of the correct initialization order (see
+ * comment in JackSource.java for details).
+ * 
+ * @author brinkman
+ *
+ */
 public final class JackHub implements JJackAudioProcessor {
 
 	private static final JackHub hub = new JackHub();
@@ -81,7 +91,6 @@ public final class JackHub implements JJackAudioProcessor {
 		System.setProperty("jjack.ports.in", Integer.toString(nSources+1));
 		System.setProperty("jjack.ports.out", Integer.toString((hub.sink!=null) ? hub.sink.highestPort()+1 : 0));
 		System.setProperty("jjack.client.name", name);
-		//System.setProperty("jjack.ports.out.autoconnect", "true");
 		
 		// then we can initialize JJackSystem
 		hub.sampleRate = JJackSystem.getSampleRate();
