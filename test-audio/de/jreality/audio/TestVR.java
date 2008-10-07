@@ -6,7 +6,6 @@ import java.net.URL;
 
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
-import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
@@ -20,7 +19,7 @@ import de.jreality.util.Input;
 import de.jreality.vr.ViewerVR;
 
 /**
- * Basic test to check spatial audio for Java Sound.
+ * Basic test to check spatial audio.
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *
@@ -126,7 +125,7 @@ public class TestVR {
 
 		vr.setContent(cmp);
 
-		JavaAmbisonicsStereoDecoder.launch(va.getCurrentViewer());
+		AudioLauncher.launch(va.getCurrentViewer());
 		
 	}
 
