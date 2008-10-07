@@ -19,14 +19,20 @@ public class AudioLauncher {
 	 * @return flag indicating whether a sound renderer was successfully launched.
 	 */
 	public static boolean launch(Viewer v) {
+		Class<?> jackrenderer = null;
 		try {
-			new Statement(Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer"), "launch", new Object[]{v}).execute();
+			jackrenderer = Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer");
+		} catch (ClassNotFoundException e1) {
+			// ignore this, just use java sound.
+		}
+		if (jackrenderer != null) try {
+			new Statement(jackrenderer, "launch", new Object[]{v}).execute();
 			System.out.println("Jack launch OK.");
 			return true;
 		} catch (Exception e) {
+			System.err.println("Jack launch FAILED (fallback to java sound):");
 			e.printStackTrace();
 		}
-		System.out.println("Jack launch FAILED. Using JavaSound Stereo Renderer...");
 		try {
 			JavaAmbisonicsStereoDecoder.launch(v);
 			return true;
