@@ -42,6 +42,7 @@ package de.jreality.tools;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
@@ -130,8 +131,9 @@ public class DraggingTool extends AbstractTool {
         if (signature==Pn.EUCLIDEAN) tlate[3] = 1.0;
         MatrixBuilder.init(null, signature).translate(tlate).assignTo(evolution);
       } 
-      evolution.conjugateBy(local2world.getInverse());
-      result.multiplyOnRight(evolution);
+     evolution.conjugateBy(local2world.getInverse());
+     P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, signature);
+     result.multiplyOnRight(evolution);
       comp.getTransformation().setMatrix(result.getArray());
     }
 

@@ -149,7 +149,7 @@ public class RotateTool extends AbstractTool {
     	else
     	center = getCenter(comp);
     }
-    
+//   P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, signature);
 	result.assignFrom(comp.getTransformation());
     if (!fixOrigin) result.multiplyOnRight(center);
     result.multiplyOnRight(evolution);
