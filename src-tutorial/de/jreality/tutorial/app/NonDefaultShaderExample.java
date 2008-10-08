@@ -29,8 +29,8 @@ public class NonDefaultShaderExample {
 		ImplodePolygonShader dps = (ImplodePolygonShader) tsps.createFront("implode");
 		DefaultPolygonShader dps2 = (DefaultPolygonShader) tsps.createBack("default");
 		dps.setImplodeFactor(-.5);
-		ap.setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
-		ap.setAttribute(CommonAttributes.POLYGON_SHADER+".back."+CommonAttributes.DIFFUSE_COLOR, new Color(204,204,0));
+		dps.setDiffuseColor(new Color(0,204,204));
+		dps2.setDiffuseColor(new Color(204,204,0));
 		DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
 		dls.setTubeDraw(true);
 		dls.setTubeRadius(.005);
