@@ -41,6 +41,7 @@
 package de.jreality.geometry;
 
 import java.awt.geom.Rectangle2D;
+import java.lang.ref.PhantomReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -255,15 +256,9 @@ public class GeometryUtility {
 				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
 				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);	
 				Pn.setToLength(normal, normal, 1.0, signature);
-//				if (normal[3] < 0) 
-					Rn.times(normal, -1, normal);
-	//				double[] np = new double[3];
-	//				for (int k = 0; k<3; ++k)	{
-	//					np[k] = Pn.innerProduct(normal, verts[indices[i][k]], signature);
-	//				}
-//				double[] v4 = Pn.homogenize(null, verts[indices[i][0]]);
-//				System.err.println("N.P "+Pn.innerProduct(normal,v4, signature));
-//					System.err.println("Normal is "+Rn.toString(normal));
+				for (int j = 0; j<3; ++j)	{
+					double[] point = (verts[indices[i][j]].length == 3) ? Pn.homogenize(null, verts[indices[i][j]]) : verts[indices[i][j]];
+				}
 				System.arraycopy(normal, 0, fn[i], 0, normalLength);				
 			}
 		}
@@ -465,6 +460,7 @@ public class GeometryUtility {
 	                if (thePath.getLastComponent().getAppearance() != null)	{
 	                	foo.setAppearance(thePath.getLastComponent().getAppearance());
 	                }
+	                foo.setVisible(thePath.getLastComponent().isVisible());
 	                geoms.add(foo);
 	         	   	
 //          	   }

@@ -192,59 +192,6 @@ public class IndexedFaceSetUtility {
 
 
 	/**
-	 * Rough clipping: retains all faces one of whose vertices lies within the clipping box <i>box</i>.
-	 * Currently not all attributes are retained.
-	 * @param ifs
-	 * @param box
-	 * @return
-	 */
-	public static IndexedFaceSet clipToBox(IndexedFaceSet ifs, Rectangle3D box)	{
-//		IndexedFaceSet clipped = new IndexedFaceSet();
-		int n = ifs.getNumFaces();
-//		clipped.setNumPoints(ifs.getNumPoints());
-//		clipped.setNumEdges(ifs.getNumEdges());
-//		clipped.setNumFaces(ifs.getNumFaces());
-//		clipped.setVertexAttributes(ifs.getVertexAttributes());
-//		clipped.setFaceAttributes(ifs.getFaceAttributes());
-//		clipped.setEdgeAttributes(ifs.getEdgeAttributes());
-		DataList verts = ifs.getVertexAttributes(Attribute.COORDINATES);
-		ArrayList inBounds = new ArrayList();
-		double[][] bnds = box.getBounds();
-		for (int i = 0; i<n; ++i)	{
-			int[] tf = ifs.getFaceAttributes(Attribute.INDICES).item(i).toIntArray(null);
-			boolean outside = true;
-			for (int j = 0; (j<tf.length) && outside; ++j)	{
-				int k = tf[j];
-				double[] vec = verts.item(k).toDoubleArray(null);
-				if (vec.length == 4) Pn.dehomogenize(vec,vec);
-				if (bnds[0][0] < vec[0] && bnds[1][0] > vec[0] 
-				&& bnds[0][1] < vec[1] && bnds[1][1] > vec[1] 
-				&& bnds[0][2] < vec[2] && bnds[1][2] > vec[2]	 ) 
-						outside = false;
-			}
-			if (!outside)	{
-				inBounds.add(tf);
-			}
-		}
-		int m = inBounds.size();
-		int[][] newIndices = new int[m][];
-		for (int i =0; i<m; ++i)	{
-			newIndices[i] = (int[] ) inBounds.get(i);
-		}
-		LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINE,"In, out face count: "+n+"  "+m);
-		//TODO rescue the other face attributes
-		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-		ifsf.setVertexCount(ifs.getNumPoints());
-		ifsf.setVertexAttributes(ifs.getVertexAttributes());
-		ifsf.setFaceCount(m);
-		ifsf.setFaceIndices(newIndices);		
-		ifsf.setGenerateEdgesFromFaces(true);
-
-		ifsf.update();
-		return ifsf.getIndexedFaceSet();
-	}
-
-	/**
 	 * A simple constructor for an IndexedFaceSet with a single face.
 	 * @param points
 	 * @return
