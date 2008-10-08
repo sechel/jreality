@@ -26,6 +26,7 @@ import java.util.WeakHashMap;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -189,8 +190,11 @@ public class WriterVRML2{
 		}*/
 		out.println(hist+"Coordinate { point [");
 		String hist2=hist+spacing;
+		double[][] coords3 = coords;
+		if (coords[0].length == 4)
+			 coords3 = Pn.dehomogenize(null, coords3);
 		for(int i=0;i<coords.length;i++){
-			VRMLWriterHelper.writeDoubleArray(coords[i],hist2,",",3,out);
+			VRMLWriterHelper.writeDoubleArray(coords3[i],hist2,",",3,out);
 		}
 		out.println(hist+"]}");
 	}
