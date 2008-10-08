@@ -132,7 +132,7 @@ public class DraggingTool extends AbstractTool {
         MatrixBuilder.init(null, signature).translate(tlate).assignTo(evolution);
       } 
      evolution.conjugateBy(local2world.getInverse());
-     P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, signature);
+     if (signature != Pn.EUCLIDEAN) P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, signature);
      result.multiplyOnRight(evolution);
       comp.getTransformation().setMatrix(result.getArray());
     }
