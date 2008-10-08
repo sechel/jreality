@@ -137,7 +137,7 @@ import de.jreality.util.SceneGraphUtility;
  * @see de.jreality.shader.CommonAttributes
  */
 public class RIBVisitor extends SceneGraphVisitor {
-	transient static double[] zflip = Rn.diagonalMatrix(null, new double[]{1,1,-1,1});
+	
 	private SceneGraphComponent root;
 	private SceneGraphPath cameraPath;
 	transient protected double[] world2Camera;
@@ -1512,6 +1512,5 @@ public class RIBVisitor extends SceneGraphVisitor {
 		double[] rmanc = P3.makeScaleMatrix(null, 1, 1, -1);
 		double[] o2c = Rn.times(null, Rn.times(null, rmanc, world2Camera), o2w);
 		return o2c;
-//		return Rn.times(null, zflip, context.getObjectToCamera());
 	}
 }
