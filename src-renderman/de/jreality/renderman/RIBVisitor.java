@@ -50,8 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import quicktime.sound.SICompletion;
-
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
