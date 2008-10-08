@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 import de.jreality.math.Matrix;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.shader.EffectiveAppearance;
 
 /* TODO: do one traversal of the scene graph before audio rendering begins, in order to avoid the creation
  * of readers, buffers, etc. in the audio rendering callback; the current version sometimes zombifies the
@@ -40,7 +42,8 @@ public class AmbisonicsVisitor extends SceneGraphVisitor {
 	private Matrix pathMatrix = new Matrix();
 	
 	private SceneGraphComponent root;
-	private SceneGraphPath currentPath = new SceneGraphPath(); 
+	private SceneGraphPath currentPath = new SceneGraphPath();
+	private EffectiveAppearance appStack=EffectiveAppearance.create();
 	
 	private float[] bw;
 	private float[] bx;
@@ -48,6 +51,13 @@ public class AmbisonicsVisitor extends SceneGraphVisitor {
 	private float[] bz;
 
 	private int frameSize;
+	
+	
+	// appearance values:
+	public static final double DEFAULT_VOLUME=1;
+	private double volume;
+	public static final boolean DEFAULT_VOLUME_ATTENUATION=false;
+	private boolean attenuation;
 	
 	public AmbisonicsVisitor(int sampleRate) {
 		this.sampleRate = sampleRate;
@@ -82,12 +92,20 @@ public class AmbisonicsVisitor extends SceneGraphVisitor {
 	@Override
 	public void visit(SceneGraphComponent c) {
 		currentPath.push(c);
+		EffectiveAppearance currentAppStack = appStack;
 		c.childrenAccept(this);
+		appStack = currentAppStack;
 		currentPath.pop();
 	}
 	
 	@Override
+	public void visit(Appearance a) {
+		appStack = appStack.create(a);
+	}
+	
+	@Override
 	public void visit(AudioSource snd) {
+		readAttributes();
 		currentPath.getMatrix(pathMatrix.getArray());
 		Matrix currentMatrix = Matrix.times(inverseMicrophoneMatrix, pathMatrix);
 
@@ -131,6 +149,11 @@ public class AmbisonicsVisitor extends SceneGraphVisitor {
 			encList.add(enc);
 		}
 		// (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics.
-		enc.addSignal(frame, frameSize, bw, bx, by, bz, (float) -z, (float) -x, (float) y, true);
+		enc.addSignal(frame, frameSize, bw, bx, by, bz, (float) -z, (float) -x, (float) y, true, (float) volume, attenuation);
+	}
+
+	private void readAttributes() {
+		volume = appStack.getAttribute("volume", DEFAULT_VOLUME);
+		attenuation = appStack.getAttribute("volume_attenuation", DEFAULT_VOLUME_ATTENUATION);
 	}
 }

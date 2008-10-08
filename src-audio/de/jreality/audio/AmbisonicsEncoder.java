@@ -18,8 +18,6 @@ package de.jreality.audio;
  */
 public class AmbisonicsEncoder {
 	
-	private static final boolean distanceFalloff = false;
-		
 	private float xPos, yPos, zPos;
 	private boolean hasPos = false;
 	private static final float wScale = (float) Math.sqrt(.5);
@@ -34,11 +32,7 @@ public class AmbisonicsEncoder {
 		}
 	}
 	
-	public void addSignal(float raw[], int nSamples, float bw[], float bx[], float by[], float bz[], float x, float y, float z, boolean ramp) {
-		float r = (float) (Math.sqrt(x*x+y*y+z*z)+1e-5);
-		x /= r;
-		y /= r;
-		z /= r;
+	public void addSignal(float raw[], int nSamples, float bw[], float bx[], float by[], float bz[], float x, float y, float z, boolean ramp, float volume, boolean falloff) {
 		
 		if (!hasPos || !ramp) {
 			xPos = x;
@@ -57,21 +51,20 @@ public class AmbisonicsEncoder {
 			xPos += dx;
 			yPos += dy;
 			zPos += dz;
+
+			float r = (float) (Math.sqrt(xPos*xPos+yPos*yPos+zPos*zPos)+1e-5);
 			
-			float v = distanceFalloff(raw[i], r);
+			float v = volume*distanceFalloff(falloff, raw[i], r);
 			bw[i] += v*wScale;
-			bx[i] += v*xPos;
-			by[i] += v*yPos;
-			bz[i] += v*zPos;
+			bx[i] += v*xPos/r;
+			by[i] += v*yPos/r;
+			bz[i] += v*zPos/r;
 		}
 	}
 
-	private static final float distanceFalloff(float f, float r) {
-		if (!distanceFalloff) return f;
-		final float falloffMin=5, falloffMax=100;
-		float damping = (r-falloffMin)/(falloffMax-falloffMin);
-		if (damping < 0f) damping = 0f;
-		if (damping > 1f) damping = 1f;
-		return f*(1f-damping);
+	private static final float distanceFalloff(boolean falloff, float signal, float r) {
+		if (!falloff) return signal;
+		float den = (float) Math.sqrt(r*r+1);
+		return signal/den;
 	}
 }
