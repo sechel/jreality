@@ -77,6 +77,7 @@ class LightCollector extends SceneGraphVisitor {
 	}
 	
 	public void visit(SceneGraphComponent c) {
+		if (!c.isVisible()) return;
 		currentPath.push(c);
 		c.childrenAccept(this);
 		currentPath.pop();
