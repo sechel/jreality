@@ -72,6 +72,7 @@ import de.jreality.util.LoggingSystem;
  *
  */
 public class DefaultLineShader extends AbstractPrimitiveShader implements LineShader  {
+	protected de.jreality.shader.DefaultLineShader templateShader = null;
 	FrameFieldType 	tubeStyle = FrameFieldType.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0;
@@ -89,6 +90,12 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	boolean changedTransp, changedLighting;
 	float[] diffuseColorAsFloat;
 	 
+	public DefaultLineShader(de.jreality.shader.DefaultLineShader orig)	{
+		templateShader = orig;
+	}
+	
+	public DefaultLineShader()	{
+	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		tubeDraw = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
@@ -106,7 +113,11 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		double transp = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
+		if (templateShader != null)  {
+			polygonShader = DefaultGeometryShader.createFrom(templateShader.getPolygonShader());
+			polygonShader.setFromEffectiveAppearance(eap, name+".polygonShader");
+		}
+		else polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		//LoggingSystem.getLogger(this).info("Line shader is smooth: "+smoothShading);
 	}

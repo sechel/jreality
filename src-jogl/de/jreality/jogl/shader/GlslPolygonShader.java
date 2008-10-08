@@ -102,7 +102,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	private int frontBack=DefaultPolygonShader.FRONT_AND_BACK;
 	private boolean useVertexArrays = true,
 		doNormals4 = false;
-	RenderingHintsShader rhsShader=new RenderingHintsShader();
+//	RenderingHintsShader rhsShader=new RenderingHintsShader();
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
@@ -125,11 +125,11 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap);
 		} else environmentMap = null;
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
-		rhsShader.setFromEffectiveAppearance(eap, "");
+//		rhsShader.setFromEffectiveAppearance(eap, "");
 	}
 
 	public void render(JOGLRenderingState jrs) {
-		rhsShader.render(jrs);
+//		rhsShader.render(jrs);
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
@@ -158,10 +158,10 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		}
 		if (program != null) {
 			if (program.getSource().getUniformParameter("lightingEnabled") != null) {
-				program.setUniform("lightingEnabled", rhsShader.isLightingEnabled());
+				program.setUniform("lightingEnabled", jrs.lighting);
 			}
 			if (program.getSource().getUniformParameter("transparency") != null) {
-				program.setUniform("transparency", rhsShader.isTransparencyEnabled() ? vertexShader.getDiffuseColorAsFloat()[3] : 0f);
+				program.setUniform("transparency", jrs.transparencyEnabled ? vertexShader.getDiffuseColorAsFloat()[3] : 0f);
 			}
 			if (program.getSource().getAttribute("normals4") != null)	{
 				doNormals4 = true;

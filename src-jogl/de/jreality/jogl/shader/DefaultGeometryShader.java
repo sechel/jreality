@@ -88,7 +88,6 @@ public class DefaultGeometryShader  implements Shader {
 	        		LoggingSystem.getLogger(this).finer("null polygonshader");
 	        		polygonShader =createFrom(dgs.getPolygonShader());
 	        	}
-
 	        	polygonShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER));
 	    } else {
 	    		polygonShader = null;
@@ -96,9 +95,9 @@ public class DefaultGeometryShader  implements Shader {
 	    if(edgeDraw) {
 	    	if (lineShader == null) {
         		LoggingSystem.getLogger(this).finer("null lineshader");
-	    		lineShader =(LineShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.LINE_SHADER);
+	    		lineShader = createFrom(dgs.getLineShader());
 	    	}
-	    	else
+	    	
 	    		lineShader.setFromEffectiveAppearance( eap,ShaderUtility.nameSpace(name,CommonAttributes.LINE_SHADER) );
 	    } else {
 	        	lineShader = null;
@@ -106,8 +105,8 @@ public class DefaultGeometryShader  implements Shader {
 	       
 	    if(vertexDraw) {
 	        if (pointShader == null)
-	        	pointShader=(PointShader) ShaderLookup.getShaderAttr(eap, geomShaderName, CommonAttributes.POINT_SHADER);
-	        else
+	    		pointShader = createFrom(dgs.getPointShader());
+	        
 	        	pointShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POINT_SHADER) );
 	    } else {
 	        pointShader=null;
@@ -171,6 +170,23 @@ public class DefaultGeometryShader  implements Shader {
 	        else if(ps instanceof de.jreality.shader.GlslPolygonShader)
 		           ret = new GlslPolygonShader();
 	        else ret = new DefaultPolygonShader();
+//	        System.err.println("ret = "+ret.getClass().getName());
+	        return ret;
+	    }
+	    public static LineShader createFrom(de.jreality.shader.LineShader ps) {
+	    	LineShader ret = null;
+	    	if (ps instanceof de.jreality.shader.DefaultLineShader)
+	    		 ret =  new DefaultLineShader((de.jreality.shader.DefaultLineShader) ps);
+	    	else ret = new DefaultLineShader();
+//	        System.err.println("ret = "+ret.getClass().getName());
+	        return ret;
+	    }
+	    
+	    public static PointShader createFrom(de.jreality.shader.PointShader ps) {
+	    	PointShader ret = null;
+	    	if (ps instanceof de.jreality.shader.DefaultPointShader)
+	    		 ret =  new DefaultPointShader((de.jreality.shader.DefaultPointShader) ps);
+	    	else ret = new DefaultPointShader();
 //	        System.err.println("ret = "+ret.getClass().getName());
 	        return ret;
 	    }

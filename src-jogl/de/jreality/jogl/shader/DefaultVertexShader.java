@@ -76,9 +76,6 @@ public class DefaultVertexShader implements VertexShader {
 		defaultShader.setFromEffectiveAppearance(eap, "");
 	}
 	
-	/**
-	 * 
-	 */
 	public DefaultVertexShader() {
 		super();
 	}

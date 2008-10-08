@@ -90,7 +90,15 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	double[] lightDirection = {1,-1,2};
 	private Color specularColor;
 	static int textureSize = 128;
+	de.jreality.shader.DefaultPointShader templateShader;
 
+	public DefaultPointShader(de.jreality.shader.DefaultPointShader orig)	{
+		templateShader = orig;
+	}
+	
+	public DefaultPointShader() {
+		
+	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
 		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
@@ -104,7 +112,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		double t = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-		polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
+		if (templateShader != null)  {
+			polygonShader = DefaultGeometryShader.createFrom(templateShader.getPolygonShader());
+			polygonShader.setFromEffectiveAppearance(eap, name+".polygonShader");
+		}
+		else polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 		//System.err.println("Attenuate point size is "+attenuatePointSize);
 		if (!sphereDraw)	{
 	      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap))
