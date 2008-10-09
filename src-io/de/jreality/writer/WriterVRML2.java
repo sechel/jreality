@@ -248,6 +248,7 @@ public class WriterVRML2{
 			  field        SFBool   repeatT    TRUE
 			}*/
 		//// ---------------- old -----------------
+		int[] channels = {1,2,3,0};
 		try {
 			Matrix mat= tex.getTextureMatrix();
 			if (mat==null) throw new IOException("missing texture component");
@@ -258,10 +259,12 @@ public class WriterVRML2{
 			if (writeTextureFiles)	{
 				String fileName = textureMaps.get(tex.getImage());
 				if (fileName == null)	{
-					fileName = fileStem+String.format("%04d", textureCount)+".png";
+					fileName = fileStem+String.format("%04d", textureCount)+".tiff";
 					String fullName = writePath+fileName;
 					textureCount++;
-					ImageUtility.writeBufferedImage( new File(fullName),(BufferedImage) tex.getImage().getImage());				
+					BufferedImage image = (BufferedImage) tex.getImage().getImage();
+					image = ImageUtility.getValidBufferedImage(tex.getImage());
+					ImageUtility.writeBufferedImage( new File(fullName),image);				
 					textureMaps.put(tex.getImage(), fileName);
 				}
 				out.println(hist+"ImageTexture { ");
