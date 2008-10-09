@@ -44,6 +44,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
+import java.util.prefs.Preferences;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Matrix;
@@ -417,6 +418,36 @@ public class CameraUtility {
 	    }
 		camera.setEyeSeparation(camera.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
 		System.err.println("setting focus to "+camera.getFocus());
+	}
+
+	
+	private static final String FOV = "camera:field_of_view";
+	private static final String FOCUS = "camera:focus";
+	private static final String FOCLEN = "camera:focal_length";
+	private static final String EYESEP = "camera:eye_separation";
+	private static final String PERSP = "camera:perspective";
+	private static final String ONAXIS = "camera:on_axis";
+	private static final String STEREO = "camera:stereo";
+	
+	public static void loadPreferences(Camera cam) {
+		Preferences prefs = Preferences.userNodeForPackage(cam.getClass());
+		cam.setFieldOfView(prefs.getDouble(FOV, cam.getFieldOfView()));
+		cam.setFocus(prefs.getDouble(FOCUS, cam.getFocus()));
+		cam.setFocalLength(prefs.getDouble(FOCLEN, cam.getFocalLength()));
+		cam.setEyeSeparation(prefs.getDouble(EYESEP, cam.getEyeSeparation()));
+		cam.setPerspective(prefs.getBoolean(PERSP, cam.isPerspective()));
+		cam.setOnAxis(prefs.getBoolean(ONAXIS, cam.isOnAxis()));
+		cam.setStereo(prefs.getBoolean(STEREO, cam.isStereo()));
+	}
+	public static void savePreferences(Camera cam) {
+		Preferences prefs = Preferences.userNodeForPackage(cam.getClass());
+		prefs.putDouble(FOV, cam.getFieldOfView());
+		prefs.putDouble(FOCUS, cam.getFocus());
+		prefs.putDouble(FOCLEN, cam.getFocalLength());
+		prefs.putDouble(EYESEP, cam.getEyeSeparation());
+		prefs.putBoolean(PERSP, cam.isPerspective());
+		prefs.putBoolean(ONAXIS, cam.isOnAxis());
+		prefs.putBoolean(STEREO, cam.isStereo());
 	}
 
 }

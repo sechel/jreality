@@ -65,6 +65,8 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
+import de.jreality.ui.viewerapp.actions.camera.LoadCameraPreferences;
+import de.jreality.ui.viewerapp.actions.camera.SaveCameraPreferences;
 import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
@@ -166,6 +168,8 @@ public class ViewerAppMenu {
 	public static String TOGGLE_PERSPECTIVE = "Toggle perspective";
 	public static String TOGGLE_STEREO = "Toggle stereo";
 	public static String TOGGLE_CURSOR = "Toggle cursor";
+	public static String LOAD_CAMERA_PREFERENCES = "Load camera preferences";
+	public static String SAVE_CAMERA_PREFERENCES = "Save camera preferences";
 
 	//VIEW MENU
 	public static String TOGGLE_NAVIGATOR = "Show navigator";
@@ -351,6 +355,9 @@ private JMenu createFileMenu() {
 //		cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
 		cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
 		cameraMenu.add(new JMenuItem(new ToggleShowCursor(TOGGLE_CURSOR, viewerApp)));
+		cameraMenu.addSeparator();
+        cameraMenu.add(new JMenuItem(new LoadCameraPreferences(LOAD_CAMERA_PREFERENCES, viewer)));
+        cameraMenu.add(new JMenuItem(new SaveCameraPreferences(SAVE_CAMERA_PREFERENCES, viewer)));
 
 		return cameraMenu;
 	}
