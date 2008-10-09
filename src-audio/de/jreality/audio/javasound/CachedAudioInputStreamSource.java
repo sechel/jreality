@@ -111,7 +111,9 @@ public class CachedAudioInputStreamSource extends AudioSource {
 				ringBuffer.write(samples, 0, index);
 			}
 			else {
-				index = nSamples;
+				reset();
+				state = State.STOPPED;  // to let listeners know that we're done
+				hasChanged = true;
 			}
 		}
 	}

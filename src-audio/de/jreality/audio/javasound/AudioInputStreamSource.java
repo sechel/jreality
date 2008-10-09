@@ -120,6 +120,8 @@ public class AudioInputStreamSource extends AudioSource {
 				if (loop) {
 					reset();
 				} else {
+					state = State.STOPPED;  // to let listeners know that we're done
+					hasChanged = true;
 					break label;
 				}
 					
