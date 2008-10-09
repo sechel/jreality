@@ -26,6 +26,9 @@ public final class JackHub implements JJackAudioProcessor {
 	private List<JackSource> sources = new LinkedList<JackSource>();
 	private JackSink sink = null;
 	private int sampleRate = 0;
+
+	private static int highestInPort = -1;
+	private static int highestOutPort = -1;
 	
 	private JackHub() {
 		// do nothing
@@ -55,21 +58,26 @@ public final class JackHub implements JJackAudioProcessor {
 
 	public static synchronized boolean addSource(JackSource source) {
 		if (hub.sampleRate!=0) {
-			throw new IllegalStateException("can't add sources after initialization");
+			if (source.highestPort()<=highestInPort) {
+				source.init(hub.sampleRate);
+			} else {
+				throw new IllegalStateException("highest port out of range (can't add input ports after initialization)");
+			}
 		}
 		return hub.sources.add(source);
 	}
 	
 	public static synchronized boolean removeSource(JackSource source) {
-		if (hub.sampleRate!=0) {
-			throw new IllegalStateException("can't remove sources after initialization");
-		}
 		return hub.sources.remove(source);
 	}
 	
 	public static synchronized void setSink(JackSink sink) {
 		if (hub.sampleRate!=0) {
-			throw new IllegalStateException("can't set sink after initialization");
+			if (sink.highestPort()<=highestOutPort) {
+				sink.init(hub.sampleRate);
+			} else {
+				throw new IllegalStateException("highest port out of range (can't add output ports after initialization)");
+			}
 		}
 		hub.sink = sink;
 	}
@@ -79,17 +87,17 @@ public final class JackHub implements JJackAudioProcessor {
 			throw new IllegalStateException("jack client is already initialized");
 		}
 		
-		int nSources = -1;
 		for(JackSource source: hub.sources) {
 			int n = source.highestPort();
-			if (n>nSources) {
-				nSources = n;
+			if (n>highestInPort) {
+				highestInPort = n;
 			}
 		}
+		highestOutPort = (hub.sink!=null) ? hub.sink.highestPort() : -1;
 		
 		// first we need to set system properties
-		System.setProperty("jjack.ports.in", Integer.toString(nSources+1));
-		System.setProperty("jjack.ports.out", Integer.toString((hub.sink!=null) ? hub.sink.highestPort()+1 : 0));
+		System.setProperty("jjack.ports.in", Integer.toString(highestInPort+1));
+		System.setProperty("jjack.ports.out", Integer.toString(highestOutPort+1));
 		System.setProperty("jjack.client.name", name);
 		
 		// then we can initialize JJackSystem
