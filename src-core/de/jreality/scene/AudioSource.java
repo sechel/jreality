@@ -33,6 +33,9 @@ public abstract class AudioSource extends SceneGraphNode {
 		super(name);
 	}	
  
+	// to be called when instance is permanently removed from scene graph
+	public void dispose() {}
+	
 	public int getSampleRate() {
 		return sampleRate;  // need sync?
 	}

@@ -23,6 +23,11 @@ public class JackNode extends AudioSource implements JackSource {
 	}
 
 	@Override
+	public void dispose() {
+		JackHub.removeSource(this);
+	}
+	
+	@Override
 	protected void reset() {
 		// do nothing
 	}
