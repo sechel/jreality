@@ -14,6 +14,8 @@ import de.jreality.scene.event.AudioListener;
  * concurrently, and sample requests are queued and managed so that an audio source only writes as many samples
  * as the fastest renderer requests.
  * 
+ * Samples are floats in the range from -1 to 1.
+ * 
  * @author brinkman
  *
  */
