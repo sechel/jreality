@@ -43,6 +43,7 @@ package de.jreality.util;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
+import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
@@ -430,7 +431,11 @@ public class CameraUtility {
 	private static final String STEREO = "camera:stereo";
 	
 	public static void loadPreferences(Camera cam) {
-		Preferences prefs = Preferences.userNodeForPackage(cam.getClass());
+		Preferences prefs = getCameraPreferences();
+		if (prefs == null) {
+			LoggingSystem.getLogger(CameraUtility.class).log(Level.INFO, "could not get camera preferences");
+			return;
+		}
 		cam.setFieldOfView(prefs.getDouble(FOV, cam.getFieldOfView()));
 		cam.setFocus(prefs.getDouble(FOCUS, cam.getFocus()));
 		cam.setFocalLength(prefs.getDouble(FOCLEN, cam.getFocalLength()));
@@ -439,8 +444,13 @@ public class CameraUtility {
 		cam.setOnAxis(prefs.getBoolean(ONAXIS, cam.isOnAxis()));
 		cam.setStereo(prefs.getBoolean(STEREO, cam.isStereo()));
 	}
+
 	public static void savePreferences(Camera cam) {
-		Preferences prefs = Preferences.userNodeForPackage(cam.getClass());
+		Preferences prefs = getCameraPreferences();
+		if (prefs == null) {
+			LoggingSystem.getLogger(CameraUtility.class).log(Level.INFO, "could not get camera preferences");
+			return;
+		}
 		prefs.putDouble(FOV, cam.getFieldOfView());
 		prefs.putDouble(FOCUS, cam.getFocus());
 		prefs.putDouble(FOCLEN, cam.getFocalLength());
@@ -450,4 +460,11 @@ public class CameraUtility {
 		prefs.putBoolean(STEREO, cam.isStereo());
 	}
 
+	private static Preferences getCameraPreferences() {
+		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
+			public Preferences run() {
+				return Preferences.userNodeForPackage(Camera.class);
+			}
+		});
+	}
 }
