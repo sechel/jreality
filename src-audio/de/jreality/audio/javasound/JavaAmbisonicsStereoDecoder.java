@@ -24,6 +24,8 @@ import de.jreality.scene.Viewer;
  */
 public class JavaAmbisonicsStereoDecoder {
 
+	private static final boolean SLEEP=false;
+	
 	private static final float wScale = (float) Math.sqrt(0.5);
 	private static final float yScale = 0.5f;
 
@@ -33,7 +35,7 @@ public class JavaAmbisonicsStereoDecoder {
 	int bytesPerSample = 4;
 
 	SourceDataLine stereoOut;
-	byte[] buffer = new byte[4096];
+	byte[] buffer = new byte[1024];
 	private int frameSize;
 
 	public JavaAmbisonicsStereoDecoder() throws LineUnavailableException {
@@ -44,31 +46,38 @@ public class JavaAmbisonicsStereoDecoder {
 		Mixer mixer = AudioSystem.getMixer(info);
 		mixer.open();
 
-		int sampleSizeInBits = 8 * bytesPerSample;
-		frameSize = channels * bytesPerSample;
+		loop: while (bytesPerSample > 0) {
+			System.out.println("checking "+bytesPerSample+" bytes per sample...");
+			int sampleSizeInBits = 8 * bytesPerSample;
+			frameSize = channels * bytesPerSample;
+	
+			
+			AudioFormat audioFormat = new AudioFormat(encoding, // the audio
+																// encoding
+																// technique
+					samplerate, // the number of samples per second
+					sampleSizeInBits, // the number of bits in each sample
+					channels, // the number of channels (1 for mono, 2 for stereo,
+								// and so on)
+					frameSize, // the number of bytes in each frame
+					samplerate, // the number of frames per second
+					false); // big endian ?
+	
+			DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,
+					audioFormat);
+			if (!mixer.isLineSupported(dataLineInfo)) {
+				bytesPerSample--;
+				continue loop;
+			}
+		
+			stereoOut = (SourceDataLine) mixer.getLine(dataLineInfo);
 
-		AudioFormat audioFormat = new AudioFormat(encoding, // the audio
-															// encoding
-															// technique
-				samplerate, // the number of samples per second
-				sampleSizeInBits, // the number of bits in each sample
-				channels, // the number of channels (1 for mono, 2 for stereo,
-							// and so on)
-				frameSize, // the number of bytes in each frame
-				samplerate, // the number of frames per second
-				false); // big endian ?
-
-		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,
-				audioFormat);
-		if (!mixer.isLineSupported(dataLineInfo)) {
-			throw new RuntimeException();
+			stereoOut.open(audioFormat);
+			stereoOut.start();
+			break loop;
 		}
-
-		stereoOut = (SourceDataLine) mixer.getLine(dataLineInfo);
-
-		stereoOut.open(audioFormat);
-		stereoOut.start();
-
+		if (stereoOut == null) throw new RuntimeException("no source data line found.");
+		System.out.println("found source data line with "+bytesPerSample+" bytes per sample.");
 	}
 
 	public void renderAmbisonics(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf, int samples) {
@@ -186,7 +195,7 @@ public class JavaAmbisonicsStereoDecoder {
 				while (true) {
 					ambiVisitor.collateAmbisonics(bw, bx, by, bz, frameSize);
 					dec.renderAmbisonics(bw, bx, by, bz, frameSize);
-					try {
+					if (SLEEP) try {
 						Thread.sleep(1);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
@@ -196,7 +205,10 @@ public class JavaAmbisonicsStereoDecoder {
 			}
 		};
 
-		new Thread(soundRenderer).start();
+		Thread soundThread = new Thread(soundRenderer);
+		soundThread.setName("jReality audio renderer");
+		soundThread.setPriority(Thread.MAX_PRIORITY);
+		soundThread.start();
 	}
 
 }
