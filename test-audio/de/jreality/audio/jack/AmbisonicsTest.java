@@ -38,7 +38,7 @@ public class AmbisonicsTest {
 				ev.getInput(0).get(inBuf, 0, n);
 				
 				AmbisonicsEncoder.clearBuffers(bw, bx, by, bz, n);
-				enc.addSignal(inBuf, n, bw, bx, by, bz, x, y, 0.0f, true);
+				enc.addSignal(inBuf, n, bw, bx, by, bz, x, y, 0.0f, true, 1.0f, false);
 				ev.getOutput(0).put(bw, 0, n);
 				ev.getOutput(1).put(bx, 0, n);
 				ev.getOutput(2).put(by, 0, n);

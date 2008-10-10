@@ -11,6 +11,7 @@ import javax.sound.sampled.AudioFormat.Encoding;
 
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
+import de.jreality.scene.event.AudioEvent;
 import de.jreality.util.Input;
 
 /**
@@ -121,8 +122,8 @@ public class AudioInputStreamSource extends AudioSource {
 					reset();
 				} else {
 					state = State.STOPPED;  // to let listeners know that we're done
+					reset();
 					hasChanged = true;
-					break label;
 				}
 					
 			} else {

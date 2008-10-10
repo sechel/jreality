@@ -11,6 +11,7 @@ import javax.sound.sampled.AudioFormat.Encoding;
 
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
+import de.jreality.scene.event.AudioEvent;
 import de.jreality.util.Input;
 
 /**
@@ -111,8 +112,8 @@ public class CachedAudioInputStreamSource extends AudioSource {
 				ringBuffer.write(samples, 0, index);
 			}
 			else {
-				reset();
 				state = State.STOPPED;  // to let listeners know that we're done
+				reset();
 				hasChanged = true;
 			}
 		}

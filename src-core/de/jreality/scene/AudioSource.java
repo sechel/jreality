@@ -77,6 +77,7 @@ public abstract class AudioSource extends SceneGraphNode {
 			}
 			return reader.read(buffer, initialIndex, nSamples);
 		} finally {
+			writingFinished();
 			finishReader();
 		}
 	}
