@@ -1,24 +1,27 @@
 package de.jreality.audio.csound;
 
 import csnd.Csound;
+import csnd.CsoundMYFLTArray;
+import csnd.SWIGTYPE_p_float;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
 
 /**
- * Not finished yet!!!
+ * Audio source that uses Csound as its synthesis engine.
  * 
  * @author brinkman
  *
  */
-
-
 public class CsoundNode extends AudioSource {
 
 	private Csound csnd;
-	private CsoundBuffer csBuf;
-	private float fBuf[];
+	private CsoundMYFLTArray auxBuffer;
+	private SWIGTYPE_p_float csOutBuffer;
+	private float floatBuffer[];
 	private int ksmps;
 	private int nchnls;
+	private int bufSize;
+	private float scale;
 	
 	public CsoundNode(String name, String csd) {
 		super(name);
@@ -26,11 +29,13 @@ public class CsoundNode extends AudioSource {
 		csnd.Compile(csd, "-n", "-d");
 		ksmps = csnd.GetKsmps();
 		nchnls = csnd.GetNchnls();
+		bufSize = ksmps*nchnls;
 		sampleRate = (int) csnd.GetSr();
+		scale = csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
-		fBuf = new float[ksmps];
-		csBuf = new CsoundBuffer(csnd.GetSpout());
-		csBuf.reserve(ksmps*nchnls);
+		floatBuffer = new float[ksmps];
+		csOutBuffer = csnd.GetSpout();
+		auxBuffer = new CsoundMYFLTArray(bufSize);  // too many buffers...
 	}
 
 	public Csound getCsound() {
@@ -61,32 +66,17 @@ public class CsoundNode extends AudioSource {
 				state = State.STOPPED;
 				reset();
 				hasChanged = true;
+				return; // TODO: find out whether there are still be useful samples in csOutBuffer
 			}
-			System.err.println("***************************** buf cap: "+csBuf.capacity());
+			auxBuffer.SetValues(0, bufSize, csOutBuffer);
 			for(int j=0; j<ksmps; j++) {
 				float v = 0.0f;
-				for(int k=0; k<nchnls; k++) {
-					v += csBuf.get(j+k*ksmps);
+				for(int k=j; k<bufSize; k+=ksmps) {
+					v += auxBuffer.GetValue(k);
 				}
-				fBuf[j] = v;
+				floatBuffer[j] = v/scale;
 			}
-			ringBuffer.write(fBuf, 0, ksmps);
-		}
-	}
-	
-	public static void main(String args[]) {
-		CsoundNode csn = new CsoundNode("csnode", "/Users/brinkman/Documents/Csound/tr.csd");
-		Csound cs = csn.getCsound();
-		int ksmps = cs.GetKsmps();
-		float buf[] = new float[ksmps];
-		RingBuffer.Reader r = csn.createReader();
-		
-		csn.start();
-		
-		while (csn.getState() == AudioSource.State.RUNNING) {
-			csn.writeSamples(ksmps);
-			r.read(buf, 0, ksmps);
-			System.out.println(buf);
+			ringBuffer.write(floatBuffer, 0, ksmps);
 		}
 	}
 }
