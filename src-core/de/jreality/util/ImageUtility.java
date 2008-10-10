@@ -4,16 +4,22 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
 import java.awt.image.RenderedImage;
+import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
 import java.beans.Statement;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
+
+import de.jreality.shader.ImageData;
 
 
 public class ImageUtility {
@@ -76,4 +82,52 @@ public class ImageUtility {
 		return file.getName().substring(lastDot+1);
 	}
 
+	/**
+	 * I need this when i do offscreen rendering in the JOGL backend .. don't really understand why
+	 * since it appears I'm just copying from one image to the other.  -gunn
+	 * @param img
+	 * @return
+	 *
+	 */
+	public static BufferedImage rearrangeChannels(BufferedImage img)	{
+		 if (! (img.getRaster().getDataBuffer() instanceof DataBufferByte)) return img;
+		int imageHeight = img.getHeight();
+		int imageWidth = img.getWidth();
+	    BufferedImage bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+		WritableRaster raster = bi.getRaster();
+		byte[] byteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
+		int[] dst = new int[4];
+	    for (int y = 0, ptr = 0; y < imageHeight; y++)
+	          for (int x = 0; x < imageWidth; x++, ptr += 4) {
+	            dst[3] =  byteArray[ptr+3];  //(byte) (px & 255); //
+	            if (dst[3] < 0) dst[3] += 256;
+	            double d = dst[3]/255.0;
+	            for (int j = 0; j<3; ++j)	{
+		            dst[j] = (int) (byteArray[ptr+j]); //(byte) ((px >> 8) & 255); //
+	            	if (dst[j] < 0) dst[j] += 256;
+	            }
+	            raster.setPixel(x, y, dst);
+	      }
+	    return bi;
+	}
+
+
+	public static BufferedImage getValidBufferedImage(ImageData data)	{
+		   byte[] byteArray = data.getByteArray();
+		   int dataHeight = data.getHeight();
+		   int dataWidth = data.getWidth();
+		   BufferedImage img = new BufferedImage(dataWidth, dataHeight, BufferedImage.TYPE_INT_ARGB);
+		   WritableRaster raster = img.getRaster();
+		   int[] pix = new int[4];
+	         for (int y = 0, ptr = 0; y < dataHeight; y++) {
+	           for (int x = 0; x < dataWidth; x++, ptr += 4) {             
+	             pix[0] = byteArray[ptr];
+	             pix[1] = byteArray[ptr + 1];
+	             pix[2] = byteArray[ptr + 2];
+	             pix[3] = byteArray[ptr + 3]; 
+	             raster.setPixel(x, y, pix);
+	           }
+	         }                      
+		return img;
+	}
 }
