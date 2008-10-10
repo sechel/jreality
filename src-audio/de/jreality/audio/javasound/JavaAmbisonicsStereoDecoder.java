@@ -25,6 +25,8 @@ import de.jreality.scene.Viewer;
 public class JavaAmbisonicsStereoDecoder {
 
 	private static final boolean SLEEP=false;
+
+	private static final double MAX_SIGNAL_INCREASE_FACTOR = 0.995;
 	
 	private static final float wScale = (float) Math.sqrt(0.5);
 	private static final float yScale = 0.5f;
@@ -36,6 +38,7 @@ public class JavaAmbisonicsStereoDecoder {
 
 	SourceDataLine stereoOut;
 	byte[] buffer = new byte[1024];
+	float[] fbuffer = new float[2*1024];
 	private int frameSize;
 
 	public JavaAmbisonicsStereoDecoder() throws LineUnavailableException {
@@ -80,17 +83,42 @@ public class JavaAmbisonicsStereoDecoder {
 		System.out.println("found source data line with "+bytesPerSample+" bytes per sample.");
 	}
 
+	private static float maxSignal = 1f;
+	static boolean limit=true;
+	
 	public void renderAmbisonics(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf, int samples) {
 		int byteLen = samples * bytesPerSample * channels;
-		if (buffer.length < byteLen)
+		if (buffer.length < byteLen) {
 			buffer = new byte[byteLen];
-
+		}
+		if (fbuffer.length < 2*samples) {
+			fbuffer = new float[2*samples];
+		}
 		for (int i = 0; i < samples; i++) {
 			float w = wBuf[i] * wScale;
 			float y = yBuf[i] * yScale;
-			fromDouble(w + y, buffer, frameSize * i, bytesPerSample, false);
-			fromDouble(w - y, buffer, frameSize * i + frameSize / 2,
-					bytesPerSample, false);
+			fbuffer[2*i]=w+y;
+			fbuffer[2*i+1]=w-y;
+		}
+        if(limit) {
+            for(int i=0, n=2*samples;i<n;i++) {
+                float tmpAbs = Math.abs(fbuffer[i]);
+                if(tmpAbs > maxSignal) {
+                    maxSignal = tmpAbs;
+                    //System.out.println("max signal="+maxSignal);
+                }
+            }
+        }
+        if(maxSignal > 1) {
+            for(int i=0, n=2*samples;i<n;i++) {
+            	fbuffer[i] /= maxSignal;
+            }
+            maxSignal *= MAX_SIGNAL_INCREASE_FACTOR;
+        }
+		for (int i=0; i<samples; i++) {
+			fromDouble(fbuffer[2*i], buffer, frameSize * i, bytesPerSample, false);
+			fromDouble(fbuffer[2*i+1], buffer, frameSize * i + frameSize / 2, bytesPerSample, false);
+
 		}
 		stereoOut.write(buffer, 0, byteLen);
 	}
