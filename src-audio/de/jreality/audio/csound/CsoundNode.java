@@ -66,7 +66,6 @@ public class CsoundNode extends AudioSource {
 				state = State.STOPPED;
 				reset();
 				hasChanged = true;
-				return; // TODO: find out whether there are still useful samples in csOutBuffer
 			}
 			auxBuffer.SetValues(0, bufSize, csOutBuffer);
 			for(int j=0; j<ksmps; j++) {
