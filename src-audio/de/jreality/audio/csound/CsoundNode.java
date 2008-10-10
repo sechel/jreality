@@ -17,7 +17,7 @@ public class CsoundNode extends AudioSource {
 	private Csound csnd;
 	private CsoundMYFLTArray auxBuffer;
 	private SWIGTYPE_p_float csOutBuffer;
-	private float floatBuffer[];
+	private float cumulativeBuffer[];
 	private int ksmps;
 	private int nchnls;
 	private int bufSize;
@@ -33,7 +33,7 @@ public class CsoundNode extends AudioSource {
 		sampleRate = (int) csnd.GetSr();
 		scale = csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
-		floatBuffer = new float[ksmps];
+		cumulativeBuffer = new float[ksmps];
 		csOutBuffer = csnd.GetSpout();
 		auxBuffer = new CsoundMYFLTArray(bufSize);  // too many buffers...
 	}
@@ -66,7 +66,7 @@ public class CsoundNode extends AudioSource {
 				state = State.STOPPED;
 				reset();
 				hasChanged = true;
-				return; // TODO: find out whether there are still be useful samples in csOutBuffer
+				return; // TODO: find out whether there are still useful samples in csOutBuffer
 			}
 			auxBuffer.SetValues(0, bufSize, csOutBuffer);
 			for(int j=0; j<ksmps; j++) {
@@ -74,9 +74,9 @@ public class CsoundNode extends AudioSource {
 				for(int k=j; k<bufSize; k+=ksmps) {
 					v += auxBuffer.GetValue(k);
 				}
-				floatBuffer[j] = v/scale;
+				cumulativeBuffer[j] = v/scale;
 			}
-			ringBuffer.write(floatBuffer, 0, ksmps);
+			ringBuffer.write(cumulativeBuffer, 0, ksmps);
 		}
 	}
 }
