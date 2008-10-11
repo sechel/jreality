@@ -1,10 +1,14 @@
 package de.jreality.audio.csound;
 
-import csnd.Csound;
+import java.io.IOException;
+
+import csnd.CppSound;
+import csnd.CsoundFile;
 import csnd.CsoundMYFLTArray;
 import csnd.SWIGTYPE_p_float;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
+import de.jreality.util.Input;
 
 /**
  * Audio source that uses Csound as its synthesis engine.
@@ -14,7 +18,7 @@ import de.jreality.scene.data.RingBuffer;
  */
 public class CsoundNode extends AudioSource {
 
-	private Csound csnd;
+	private CppSound csnd = new CppSound();
 	private CsoundMYFLTArray auxBuffer;
 	private SWIGTYPE_p_float csOutBuffer;
 	private float cumulativeBuffer[];
@@ -25,8 +29,32 @@ public class CsoundNode extends AudioSource {
 	
 	public CsoundNode(String name, String csd) {
 		super(name);
-		csnd = new Csound();
 		csnd.Compile(csd, "-n", "-d");
+		initFields();
+	}
+
+//	public CsoundNode(String name, Input csd) throws IOException {
+//		super(name);
+//		CsoundFile csf = csnd.getCsoundFile();
+//		csf.setCSD(csd.getContentAsString());
+//		csf.setCommand("-n -d");
+//		csf.exportForPerformance();
+//		csnd.compile();
+//		initFields();
+//	}
+//	
+//	public CsoundNode(String name, Input orc, Input score) throws IOException {
+//		super(name);
+//		CsoundFile csf = csnd.getCsoundFile();
+//		csf.setOrchestra(orc.getContentAsString());
+//		csf.setScore(score.getContentAsString());
+//		csf.setCommand("-n -d");
+//		csf.exportForPerformance();
+//		csnd.compile();
+//		initFields();
+//	}
+	
+	private void initFields() {
 		ksmps = csnd.GetKsmps();
 		nchnls = csnd.GetNchnls();
 		bufSize = ksmps*nchnls;
@@ -38,7 +66,7 @@ public class CsoundNode extends AudioSource {
 		auxBuffer = new CsoundMYFLTArray(bufSize);  // too many buffers...
 	}
 
-	public Csound getCsound() {
+	public CppSound getCppSound() {
 		return csnd;
 	}
 	
