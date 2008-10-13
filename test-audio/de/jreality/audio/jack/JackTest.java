@@ -83,7 +83,7 @@ public class JackTest {
 //			}
 //		};
 			
-		final AudioSource s3 = new CsoundNode("csnode", "/Users/brinkman/Documents/Csound/trapped.csd");
+		final AudioSource s3 = new CsoundNode("csnode", Input.getInput("data/trapped.csd"));
 		cmp3.setGeometry(Primitives.cube());
 		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
 		cmp3.setAudioSource(s3);

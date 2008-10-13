@@ -33,26 +33,26 @@ public class CsoundNode extends AudioSource {
 		initFields();
 	}
 
-//	public CsoundNode(String name, Input csd) throws IOException {
-//		super(name);
-//		CsoundFile csf = csnd.getCsoundFile();
-//		csf.setCSD(csd.getContentAsString());
-//		csf.setCommand("-n -d");
-//		csf.exportForPerformance();
-//		csnd.compile();
-//		initFields();
-//	}
-//	
-//	public CsoundNode(String name, Input orc, Input score) throws IOException {
-//		super(name);
-//		CsoundFile csf = csnd.getCsoundFile();
-//		csf.setOrchestra(orc.getContentAsString());
-//		csf.setScore(score.getContentAsString());
-//		csf.setCommand("-n -d");
-//		csf.exportForPerformance();
-//		csnd.compile();
-//		initFields();
-//	}
+	public CsoundNode(String name, Input csd) throws IOException {
+		super(name);
+		CsoundFile csf = csnd.getCsoundFile();
+		csf.setCSD(csd.getContentAsString());
+		csf.setCommand("-n -d foo.orc foo.sco");
+		csf.exportForPerformance();
+		csnd.compile();
+		initFields();
+	}
+	
+	public CsoundNode(String name, Input orc, Input score) throws IOException {
+		super(name);
+		CsoundFile csf = csnd.getCsoundFile();
+		csf.setOrchestra(orc.getContentAsString());
+		csf.setScore(score.getContentAsString());
+		csf.setCommand("-n -d foo.orc foo.sco");
+		csf.exportForPerformance();
+		csnd.compile();
+		initFields();
+	}
 	
 	private void initFields() {
 		ksmps = csnd.GetKsmps();
