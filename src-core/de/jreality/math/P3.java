@@ -783,6 +783,12 @@ public class P3 {
 	 */
 	 public static double[] orthonormalizeMatrix(double[] dst, double[] m, double tolerance, int signature)		{
 		if (dst == null) dst = new double[16];
+		if (signature == Pn.EUCLIDEAN)	{
+			// TODO fix the euclidean case; in the meantime punt
+			if (dst == m) return dst;
+			System.arraycopy(m, 0, dst, 0, 16);
+			return dst;
+		}
 		double[] diagnosis = Rn.subtract(null, Q_LIST[signature+1], 
 				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[signature+1], m )));
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
@@ -801,7 +807,7 @@ public class P3 {
 		for (int i = 0; i<4; ++i)	 for (int j = 0; j<4; ++j)	basis[i][j] = m[j*4+i];
 		// first orthogonalize
 		for (int i = 0; i<3; ++i)		
-			for (int j = i+1; j<4; ++j)	{
+			for (int j = i+1; j<4; ++j)	{	
 				if (Q[5*j] == 0.0) continue;
 				if (Math.abs(diagnosis[4*i+j]) > tolerance)	{
 					Pn.projectOntoComplement(basis[j], basis[i], basis[j], signature);
