@@ -40,15 +40,6 @@ public abstract class AudioSource extends SceneGraphNode {
 		return sampleRate;  // need sync?
 	}
 	
-	public void setParameter(String name, Object value) {
-		startWriter();
-		try {
-			setParameterImpl(name, value);
-		} finally {
-			finishWriter();
-		}
-	}
-	
 	public RingBuffer.Reader createReader() {
 		return ringBuffer.createReader();
 	}
@@ -82,9 +73,6 @@ public abstract class AudioSource extends SceneGraphNode {
 		}
 	}
 
-	// actual handling of parameter changes, sync and other administrative stuff taken care of in setParameter
-	protected abstract void setParameterImpl(String name, Object value);
-	
 	// reset audio engine; no sync necessary, only to be called from stop method
 	protected abstract void reset();
 

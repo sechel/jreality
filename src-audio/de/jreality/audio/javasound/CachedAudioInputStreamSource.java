@@ -94,11 +94,6 @@ public class CachedAudioInputStreamSource extends AudioSource {
 	}
 
 	@Override
-	protected void setParameterImpl(String name, Object value) {
-		// do nothing
-	}
-
-	@Override
 	protected void writeSamples(int nRequested) {
 		if (index+nRequested<samples.length) {
 			ringBuffer.write(samples, index, nRequested);

@@ -33,11 +33,6 @@ public class JackNode extends AudioSource implements JackSource {
 	}
 
 	@Override
-	protected void setParameterImpl(String name, Object value) {
-		// do nothing
-	}
-
-	@Override
 	protected void writeSamples(int n) {
 		// do nothing; samples are written in process callback
 	}

@@ -87,11 +87,6 @@ public class AudioInputStreamSource extends AudioSource {
 	}
 
 	@Override
-	protected void setParameterImpl(String name, Object value) {
-		
-	}
-
-	@Override
 	protected void writeSamples(int nRequested) {
 		
 		int bytesPerSample = format.getSampleSizeInBits()/8;

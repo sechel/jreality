@@ -67,18 +67,6 @@ public class CsoundNode extends AudioSource {
 	}
 
 	@Override
-	protected void setParameterImpl(String name, Object value) {
-		if (value instanceof String) {
-			csnd.SetChannel(name, (String) value);
-		} else if (value instanceof Double) {
-			csnd.SetChannel(name, ((Double) value).doubleValue());
-		} else {
-			throw new IllegalArgumentException("parameters must be String or Double");
-		}
-		// any other options for real-time interaction?
-	}
-
-	@Override
 	protected void writeSamples(int n) {
 		for(int i=0; i<n; i+=ksmps) {
 			if (csnd.PerformKsmps()!=0) {
