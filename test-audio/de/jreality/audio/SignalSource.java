@@ -44,11 +44,4 @@ public abstract class SignalSource extends AudioSource {
 	protected void reset() {
 		index=0;
 	}
-
-	@Override
-	protected void setParameterImpl(String name, Object value) {
-		
-	}
-
-
 }
