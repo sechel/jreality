@@ -17,7 +17,7 @@ import de.jreality.scene.data.RingBuffer;
 
 /**
  * 
- * An Ambisonics Decoder which renders into the default JavaSound stereo output.
+ * An Ambisonics Decoder which renders into the default JavaSound stereo output, 44.1 kHz, 16 bit signed PCM.
  * Use the {@code launch}-method to activate this renderer for a given {@link Viewer}.
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
@@ -25,19 +25,12 @@ import de.jreality.scene.data.RingBuffer;
  */
 public class JavaAmbisonicsStereoDecoder {
 
-	private static final boolean SLEEP=false;
-
-	private static final double MAX_SIGNAL_INCREASE_FACTOR = 0.995;
+	private static final boolean SLEEP=true;
 	
 	private static final float wScale = (float) Math.sqrt(0.5);
 	private static final float yScale = 0.5f;
 
-	static Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
-	static int channels = 2; // stereo!
-	static int samplerate = 44100; // cd sampling rate
-
-	int bytesPerSample = 4;
-	private int javaOutFormatFrameSize;
+	private static final boolean BIG_ENDIAN = false;
 
 	SourceDataLine stereoOut;
 	byte[] buffer;
@@ -51,7 +44,7 @@ public class JavaAmbisonicsStereoDecoder {
 	public JavaAmbisonicsStereoDecoder(int framesize) throws LineUnavailableException {
 
 		this.framesize = framesize;
-		byteLen = framesize * bytesPerSample * channels;
+		byteLen = framesize * 2 * 2;
 		buffer = new byte[byteLen];
 		fbuffer = new float[2*framesize];
 		lookAheadBuffer = new RingBuffer(4*framesize); // 1 frame look ahead
@@ -63,167 +56,115 @@ public class JavaAmbisonicsStereoDecoder {
 		Mixer mixer = AudioSystem.getMixer(info);
 		mixer.open();
 
-		loop: while (bytesPerSample > 0) {
-			System.out.println("checking "+bytesPerSample+" bytes per sample...");
-			int sampleSizeInBits = 8 * bytesPerSample;
-			javaOutFormatFrameSize = channels * bytesPerSample;
-	
-			
-			AudioFormat audioFormat = new AudioFormat(encoding, // the audio
-																// encoding
-																// technique
-					samplerate, // the number of samples per second
-					sampleSizeInBits, // the number of bits in each sample
-					channels, // the number of channels (1 for mono, 2 for stereo,
-								// and so on)
-					javaOutFormatFrameSize, // the number of bytes in each frame
-					samplerate, // the number of frames per second
-					false); // big endian ?
-	
-			DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,
-					audioFormat);
-			if (!mixer.isLineSupported(dataLineInfo)) {
-				bytesPerSample--;
-				continue loop;
-			}
+		AudioFormat audioFormat = new AudioFormat(
+					44100, // the number of samples per second
+					16, // the number of bits in each sample
+					2, // the number of channels
+					true, // signed/unsigned PCM
+					BIG_ENDIAN); // big endian ?
 		
-			stereoOut = (SourceDataLine) mixer.getLine(dataLineInfo);
-
-			stereoOut.open(audioFormat);
-			stereoOut.start();
-			break loop;
+		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat, framesize);
+		if (!mixer.isLineSupported(dataLineInfo)) {
+			throw new RuntimeException("no source data line found.");
 		}
-		if (stereoOut == null) throw new RuntimeException("no source data line found.");
-		System.out.println("found source data line with "+bytesPerSample+" bytes per sample.");
+	
+		stereoOut = (SourceDataLine) mixer.getLine(dataLineInfo);
+
+		stereoOut.open(audioFormat);
+		stereoOut.start();
 	}
 
-	
-	boolean limit=true;
-	float maxSignal=1f;
-	int holdcnt;
+//	private static final double MAX_SIGNAL_INCREASE_FACTOR = 0.995;
+//	boolean limit=true;
+//	float maxSignal=1f;
+//	int holdcnt;
+//	
+//	public void renderAmbisonics(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
+//		
+//		float frameMaxSignal = maxSignal;
+//		
+//		for (int i = 0; i < framesize; i++) {
+//			float w = wBuf[i] * wScale;
+//			float y = yBuf[i] * yScale;
+//			fbuffer[2*i]=w+y;
+//			fbuffer[2*i+1]=w-y;
+//			float abs = Math.abs(w)+Math.abs(y);
+//			if (abs > frameMaxSignal) {
+//				frameMaxSignal=abs;
+//				holdcnt=16;
+//			}
+//		}
+//		
+//		lookAheadBuffer.write(fbuffer, 0, framesize);
+//		lastFrameReader.read(fbuffer, 0, framesize);
+//		float delta = Math.abs(frameMaxSignal-maxSignal);
+//		//System.out.println("delta="+delta);
+//		if (delta == 0) {
+//			//if (holdcnt > 0) System.out.println("decreasing hold cnt "+holdcnt);
+//			if (holdcnt == 0) {
+//				//System.out.println("ramp down...");
+//				//start ramp down...
+//				delta = - (float) (maxSignal*(1-MAX_SIGNAL_INCREASE_FACTOR));
+//			} else {
+//				holdcnt--;
+//			}
+//		}
+//		
+//		float dd = delta/framesize;
+//		for (int i=0; i<framesize; i++) {
+//			maxSignal+=dd;
+//			if (maxSignal < 1) maxSignal = 1;
+//			fromDouble(fbuffer[2*i]/maxSignal, buffer, javaOutFormatFrameSize * i, bytesPerSample, false);
+//			fromDouble(fbuffer[2*i+1]/maxSignal, buffer, javaOutFormatFrameSize * i + javaOutFormatFrameSize / 2, bytesPerSample, false);
+//		}
+//		stereoOut.write(buffer, 0, byteLen);
+//		//System.out.println("maxSignal="+maxSignal);
+//	}
 	
 	public void renderAmbisonics(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
-		
-		float frameMaxSignal = maxSignal;
-		
 		for (int i = 0; i < framesize; i++) {
 			float w = wBuf[i] * wScale;
 			float y = yBuf[i] * yScale;
 			fbuffer[2*i]=w+y;
 			fbuffer[2*i+1]=w-y;
-			float abs = Math.abs(w)+Math.abs(y);
-			if (abs > frameMaxSignal) {
-				frameMaxSignal=abs;
-				holdcnt=16;
-			}
 		}
-		
-		lookAheadBuffer.write(fbuffer, 0, framesize);
-		lastFrameReader.read(fbuffer, 0, framesize);
-		float delta = Math.abs(frameMaxSignal-maxSignal);
-		//System.out.println("delta="+delta);
-		if (delta == 0) {
-			//if (holdcnt > 0) System.out.println("decreasing hold cnt "+holdcnt);
-			if (holdcnt == 0) {
-				//System.out.println("ramp down...");
-				//start ramp down...
-				delta = - (float) (maxSignal*(1-MAX_SIGNAL_INCREASE_FACTOR));
-			} else {
-				holdcnt--;
-			}
-		}
-		
-		float dd = delta/framesize;
-		for (int i=0; i<framesize; i++) {
-			maxSignal+=dd;
-			if (maxSignal < 1) maxSignal = 1;
-			fromDouble(fbuffer[2*i]/maxSignal, buffer, javaOutFormatFrameSize * i, bytesPerSample, false);
-			fromDouble(fbuffer[2*i+1]/maxSignal, buffer, javaOutFormatFrameSize * i + javaOutFormatFrameSize / 2, bytesPerSample, false);
-		}
+		floatToByte(buffer, fbuffer);
 		stereoOut.write(buffer, 0, byteLen);
-		//System.out.println("maxSignal="+maxSignal);
-	}
-
-	public void renderMono(float[] data, int frames) {
-
-		int byteLen = frames * bytesPerSample * channels;
-
-		if (buffer.length < byteLen)
-			buffer = new byte[byteLen];
-
-		for (int i = 0; i < frames; i++) {
-			fromDouble(data[i], buffer, javaOutFormatFrameSize * i, bytesPerSample, false);
-			fromDouble(data[i], buffer, javaOutFormatFrameSize * i + javaOutFormatFrameSize / 2,
-					bytesPerSample, false);
-		}
-		stereoOut.write(buffer, 0, byteLen);
-	}
-
-	public void renderStereo(float[] dataLeft, float[] dataRight, int frames) {
-
-		int byteLen = frames * bytesPerSample * channels;
-
-		if (buffer.length < byteLen)
-			buffer = new byte[byteLen];
-
-		for (int i = 0; i < frames; i++) {
-			fromDouble(dataLeft[i], buffer, javaOutFormatFrameSize * i, bytesPerSample,
-					false);
-			fromDouble(dataRight[i], buffer, javaOutFormatFrameSize * i + javaOutFormatFrameSize / 2,
-					bytesPerSample, false);
-		}
-		stereoOut.write(buffer, 0, byteLen);
-	}
-
-	static final void fromDouble(float value, byte[] b, int offset, int bytes, boolean bigEndian) {
-		int ival = -1;
-		switch (bytes) {
-		case 1: // 8 bit
-			b[offset + 0] = new Float(value * (double) Byte.MAX_VALUE)
-					.byteValue();
-			break;
-		case 2: // 16 bit
-			short sval = new Float(value * (double) Short.MAX_VALUE)
-					.shortValue();
-			if (bigEndian) {
-				b[offset + 0] = (byte) ((sval & 0x0000ff00) >> 8);
-				b[offset + 1] = (byte) (sval & 0x000000ff);
-			} else {
-				b[offset + 0] = (byte) (sval & 0x000000ff);
-				b[offset + 1] = (byte) ((sval & 0x0000ff00) >> 8);
-			}
-			break;
-		case 3: // 24 bit
-			ival = new Float(value * (double) 8388608).intValue();
-			if (bigEndian) {
-				b[offset + 0] = (byte) ((ival & 0x00ff0000) >> (8 * 2));
-				b[offset + 1] = (byte) ((ival & 0x0000ff00) >> 8);
-				b[offset + 2] = (byte) (ival  & 0x000000ff);
-			} else {
-				b[offset + 0] = (byte) (ival  & 0x000000ff);
-				b[offset + 1] = (byte) ((ival & 0x0000ff00) >> 8);
-				b[offset + 2] = (byte) ((ival & 0x00ff0000) >> (8 * 2));
-			}
-			break;
-		case 4: // 32 bit
-			ival = new Float(value * (double) Integer.MAX_VALUE).intValue();
-			if (bigEndian) {
-				b[offset + 0] = (byte) ((ival & 0xff000000) >> (8 * 3));
-				b[offset + 1] = (byte) ((ival & 0x00ff0000) >> (8 * 2));
-				b[offset + 2] = (byte) ((ival & 0x0000ff00) >> 8);
-				b[offset + 3] = (byte) (ival  & 0x000000ff);
-			} else {
-				b[offset + 0] = (byte) (ival  & 0x000000ff);
-				b[offset + 1] = (byte) ((ival & 0x0000ff00) >> 8);
-				b[offset + 2] = (byte) ((ival & 0x00ff0000) >> (8 * 2));
-				b[offset + 3] = (byte) ((ival & 0xff000000) >> (8 * 3));
-			}
-			break;
-		}
 	}
 	
+    /**
+	 * Convert float array to byte array.
+	 * 
+	 * @param byteSound
+	 *            User provided byte array to return result in.
+	 * @param dbuf
+	 *            User provided float array to convert.
+	 */
+	static final public void floatToByte(byte[] byteSound, float[] dbuf) {
+		int bufsz = dbuf.length;
+		int ib = 0;
+		if (BIG_ENDIAN) {
+			for (int i = 0; i < bufsz; i++) {
+				short y = (short) (32767. * dbuf[i]);
+				byteSound[ib] = (byte) (y >> 8);
+				ib++;
+				byteSound[ib] = (byte) (y & 0x00ff);
+				ib++;
+			}
+		} else {
+			for (int i = 0; i < bufsz; i++) {
+				short y = (short) (32767. * dbuf[i]);
+				byteSound[ib] = (byte) (y & 0x00ff);
+				ib++;
+				byteSound[ib] = (byte) (y >> 8);
+				ib++;
+			}
+		}
+	}
+
+	
 	public int getSamplerate() {
-		return samplerate;
+		return 44100;
 	}
 	
 	public static void launch(Viewer viewer) throws LineUnavailableException {
