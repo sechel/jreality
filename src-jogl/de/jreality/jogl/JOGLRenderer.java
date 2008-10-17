@@ -48,7 +48,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
-import java.awt.image.WritableRaster;
 import java.io.File;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -813,29 +812,14 @@ public class JOGLRenderer  implements AppearanceListener {
 		offscreenMode = true;
 		lightListDirty = true;
 		canvas.display();
-	    BufferedImage bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
-		WritableRaster raster = bi.getRaster();
-		byte[] byteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
-		int[] dst = new int[4];
-        for (int y = 0, ptr = 0; y < imageHeight; y++)
-	          for (int x = 0; x < imageWidth; x++, ptr += 4) {
-	            dst[3] =  byteArray[ptr+3];  //(byte) (px & 255); //
-	            if (dst[3] < 0) dst[3] += 256;
-	            double d = dst[3]/255.0;
-	            for (int j = 0; j<3; ++j)	{
-		            dst[j] = (int) (byteArray[ptr+j]); //(byte) ((px >> 8) & 255); //
-	            	if (dst[j] < 0) dst[j] += 256;
-	            	if (preMultiplied) dst[j] = (int) (dst[j] * d);
-	            }
-	            raster.setPixel(x, y, dst);
-          }
+		// why I can't just use img is a mystery to me ... go figure
+		// I seem to be just copying the data directly from one image to the other.
+		BufferedImage bi = ImageUtility.rearrangeChannels(img);
 		ImageUtil.flipImageVertically(bi);
-	
 		// a magic incantation to get the alpha channel to show up correctly
 		bi.coerceData(true);
 		return bi;
 	}
-
 
 	public PickPoint[] performPick(double[] pickPointNDC) {
 		throw new IllegalArgumentException("Picking has been removed from JOGL renderer");
