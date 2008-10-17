@@ -31,15 +31,6 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 
 
-//protected JOGLPeerComponent constructPeerForSceneGraphComponent(final SceneGraphComponent sgc, final JOGLPeerComponent p) {
-//	if (sgc == null) return null;
-//	final JOGLPeerComponent[] peer = new JOGLPeerComponent[1];
-//	ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p);
-//	peer[0] = (JOGLPeerComponent) constructPeer.visit();
-//	return peer[0];
-//}
-//
-
 public class JOGLPeerComponent extends JOGLPeerNode implements TransformationListener, AppearanceListener,SceneGraphComponentListener {
 
 	protected EffectiveAppearance eAp;
@@ -177,6 +168,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			JOGLRendererHelper.pushClippingPlane(jr, null);
 		}
 		else if (renderGeometry != null )	{
+//			LoggingSystem.getLogger(this).info("rendering geometry");
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
 	}
@@ -275,6 +267,32 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		appearanceDirty = originalAppearanceDirty = true;
 	}
 
+	private void handleNewAppearance() {
+//		if (debug) 
+//			LoggingSystem.getLogger(this).fine("handle new appearance "+name);
+		appearanceDirty = effectiveAppearanceDirty=true;
+		thisAp = goBetween.originalComponent.getAppearance(); 
+		geometryDirtyBits = ALL_CHANGED; //propagateGeometryChanged(ALL_CHANGED);
+	}
+
+	protected void handleChangedGeometry() {
+		if (goBetween.peerGeometry != null)	{
+			if (geometryShader == null) updateShaders();
+			if (geometryShader == null) return;
+			//theLog.fine("Handling bits: "+geometryDirtyBits+" for "+name);
+			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) 
+				geometryShader.pointShader.flushCachedState(jr);
+			if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) 
+				geometryShader.lineShader.flushCachedState(jr);
+			if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) 
+				geometryShader.polygonShader.flushCachedState(jr);				
+			if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0)geometryShader.pointShader = null;
+			if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
+			if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
+			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
+            geometryDirtyBits  = 0;
+		}
+	}
 	protected void propagateAppearanceChanged()	{
 		if (debug) LoggingSystem.getLogger(this).finer("JOGLPeerComponent: propagate: "+name);
 		appearanceDirty = true;
@@ -291,6 +309,16 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		for (JOGLPeerComponent child : children) {
 			child.propagateEffectiveAppearanceChanged();
 		}	
+	}
+
+	public void propagateGeometryChanged(int changed) {
+		geometryDirtyBits  = changed;
+		childlock.readLock();
+		for (JOGLPeerComponent child: children){		
+			child.propagateGeometryChanged(changed);
+		}	
+		childlock.readUnlock();
+
 	}
 
 	private void handleAppearanceChanged() {
@@ -345,6 +373,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 			else 
 				geometryShader.setFromEffectiveAppearance(eAp, "");
+//	    	LoggingSystem.getLogger(this).info("Updating shader for "+getName());
 		} 	
 		if (thisAp != null) {
 			if (rhInfo == null) 	rhInfo =  new RenderingHintsInfo();
@@ -479,41 +508,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		}
 	}
 
-	private void handleNewAppearance() {
-		if (debug) 
-			LoggingSystem.getLogger(this).info("handle new appearance "+name);
-		appearanceDirty = effectiveAppearanceDirty=true;
-		propagateGeometryChanged(ALL_CHANGED);
-	}
-
-	public void propagateGeometryChanged(int changed) {
-		geometryDirtyBits  = changed;
-		childlock.readLock();
-		for (JOGLPeerComponent child: children){		
-			child.propagateGeometryChanged(changed);
-		}	
-		childlock.readUnlock();
-
-	}
-
-	protected void handleChangedGeometry() {
-		if (goBetween.peerGeometry != null)	{
-			if (geometryShader == null) updateShaders();
-			if (geometryShader == null) return;
-			//theLog.fine("Handling bits: "+geometryDirtyBits+" for "+name);
-			if (geometryShader.pointShader != null && (geometryDirtyBits  & POINTS_CHANGED) != 0) 
-				geometryShader.pointShader.flushCachedState(jr);
-			if (geometryShader.lineShader != null && (geometryDirtyBits  & LINES_CHANGED) != 0) 
-				geometryShader.lineShader.flushCachedState(jr);
-			if (geometryShader.polygonShader != null && (geometryDirtyBits  & FACES_CHANGED) != 0) 
-				geometryShader.polygonShader.flushCachedState(jr);				
-			if ((geometryDirtyBits  & POINT_SHADER_CHANGED) != 0)geometryShader.pointShader = null;
-			if ((geometryDirtyBits  & LINE_SHADER_CHANGED) != 0) geometryShader.lineShader = null;
-			if ((geometryDirtyBits  & POLYGON_SHADER_CHANGED) != 0) geometryShader.polygonShader = null;
-			if ((geometryDirtyBits  & ALL_SHADERS_CHANGED) != 0)updateShaders();
-            geometryDirtyBits  = 0;
-		}
-	}
 
 	void setDisplayListDirty()	{
         geometryDirtyBits = POINTS_CHANGED | LINES_CHANGED | FACES_CHANGED;
