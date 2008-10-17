@@ -8,12 +8,10 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.Mixer.Info;
 
 import de.jreality.audio.AmbisonicsVisitor;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.data.RingBuffer;
 
 /**
  * 
