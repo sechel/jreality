@@ -169,6 +169,8 @@ public class DefaultGeometryShader  implements Shader {
 		           ret = new ImplodePolygonShader((de.jreality.shader.ImplodePolygonShader) ps);
 	        else if(ps instanceof de.jreality.shader.GlslPolygonShader)
 		           ret = new GlslPolygonShader();
+	        else if(ps instanceof de.jreality.shader.DefaultPolygonShader)
+	        	ret = new DefaultPolygonShader((de.jreality.shader.DefaultPolygonShader)ps);
 	        else ret = new DefaultPolygonShader();
 //	        System.err.println("ret = "+ret.getClass().getName());
 	        return ret;

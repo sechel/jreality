@@ -41,16 +41,12 @@
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
-import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 
-import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
@@ -60,10 +56,8 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
-import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
-import de.jreality.shader.GlslSource;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -97,6 +91,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	boolean geometryHasTextureCoordinates = false, hasTextures = false;
 	protected transient boolean needsChecked = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
+	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	static {
 		Appearance ap = new Appearance();
 		EffectiveAppearance eap = EffectiveAppearance.create();
@@ -108,6 +103,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		
 	}
 	
+	public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader ps) {
+		templateShader = ps;
+	}
+
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap,name);
@@ -121,8 +120,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    hasTextures = false;
 	    if (!fastAndDirty) {
 			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
-				texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
-		    	//LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
+				if (false && templateShader != null) texture2D = templateShader.createTexture2d();
+				else texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
+//		    	LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
 				joglTexture2D = new JOGLTexture2D(texture2D);
 				hasTextures = true;
 			}
@@ -199,7 +199,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    if (geometryHasTextureCoordinates) {
 		    	gl.glActiveTexture(texUnit);
 		      	gl.glEnable(GL.GL_TEXTURE_2D);
-				Texture2DLoaderJOGL.render(gl, joglTexture2D);
+		 //     	System.err.println("rendering texture height "+joglTexture2D.getImage().getHeight());
+				Texture2DLoaderJOGL.render(gl, texture2D); //joglTexture2D);
 			    texUnit++;
 			    texunitcoords++;		
 			    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
