@@ -25,18 +25,17 @@ import de.jreality.scene.data.RingBuffer;
  */
 public class JavaAmbisonicsStereoDecoder {
 
-	private static final boolean SLEEP=true;
+	private static final boolean LIMIT = true;
 	
-	private static final float wScale = (float) Math.sqrt(0.5);
-	private static final float yScale = 0.5f;
+	private static final float W_SCALE = (float) Math.sqrt(0.5);
+	private static final float Y_SCALE = 0.5f;
 
 	private static final boolean BIG_ENDIAN = false;
 
 	SourceDataLine stereoOut;
 	byte[] buffer;
 	float[] fbuffer;
-	RingBuffer lookAheadBuffer;
-	RingBuffer.Reader lastFrameReader;
+	float[] fbuffer_lookAhead;
 	
 	private int byteLen;
 	private int framesize;
@@ -44,11 +43,10 @@ public class JavaAmbisonicsStereoDecoder {
 	public JavaAmbisonicsStereoDecoder(int framesize) throws LineUnavailableException {
 
 		this.framesize = framesize;
-		byteLen = framesize * 2 * 2;
+		byteLen = framesize * 2 * 2; // 2 channels, 2 bytes per sample
 		buffer = new byte[byteLen];
-		fbuffer = new float[2*framesize];
-		lookAheadBuffer = new RingBuffer(4*framesize); // 1 frame look ahead
-		lastFrameReader = lookAheadBuffer.createReader();
+		fbuffer = new float[2*framesize]; // 2 channels
+		fbuffer_lookAhead = new float[2*framesize];
 		
 		Info[] mixerInfos = AudioSystem.getMixerInfo();
 		System.out.println(Arrays.toString(mixerInfos));
@@ -63,68 +61,81 @@ public class JavaAmbisonicsStereoDecoder {
 					true, // signed/unsigned PCM
 					BIG_ENDIAN); // big endian ?
 		
-		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat, framesize);
+		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
 		if (!mixer.isLineSupported(dataLineInfo)) {
 			throw new RuntimeException("no source data line found.");
 		}
 	
 		stereoOut = (SourceDataLine) mixer.getLine(dataLineInfo);
 
-		stereoOut.open(audioFormat);
+		//stereoOut.open(audioFormat);
+		stereoOut.open(audioFormat, 2*byteLen);
+		System.out.println("stereoOut bufferSize="+stereoOut.getBufferSize());
 		stereoOut.start();
 	}
 
-//	private static final double MAX_SIGNAL_INCREASE_FACTOR = 0.995;
-//	boolean limit=true;
-//	float maxSignal=1f;
-//	int holdcnt;
-//	
-//	public void renderAmbisonics(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
-//		
-//		float frameMaxSignal = maxSignal;
-//		
-//		for (int i = 0; i < framesize; i++) {
-//			float w = wBuf[i] * wScale;
-//			float y = yBuf[i] * yScale;
-//			fbuffer[2*i]=w+y;
-//			fbuffer[2*i+1]=w-y;
-//			float abs = Math.abs(w)+Math.abs(y);
-//			if (abs > frameMaxSignal) {
-//				frameMaxSignal=abs;
-//				holdcnt=16;
-//			}
-//		}
-//		
-//		lookAheadBuffer.write(fbuffer, 0, framesize);
-//		lastFrameReader.read(fbuffer, 0, framesize);
-//		float delta = Math.abs(frameMaxSignal-maxSignal);
-//		//System.out.println("delta="+delta);
-//		if (delta == 0) {
-//			//if (holdcnt > 0) System.out.println("decreasing hold cnt "+holdcnt);
-//			if (holdcnt == 0) {
-//				//System.out.println("ramp down...");
-//				//start ramp down...
-//				delta = - (float) (maxSignal*(1-MAX_SIGNAL_INCREASE_FACTOR));
-//			} else {
-//				holdcnt--;
-//			}
-//		}
-//		
-//		float dd = delta/framesize;
-//		for (int i=0; i<framesize; i++) {
-//			maxSignal+=dd;
-//			if (maxSignal < 1) maxSignal = 1;
-//			fromDouble(fbuffer[2*i]/maxSignal, buffer, javaOutFormatFrameSize * i, bytesPerSample, false);
-//			fromDouble(fbuffer[2*i+1]/maxSignal, buffer, javaOutFormatFrameSize * i + javaOutFormatFrameSize / 2, bytesPerSample, false);
-//		}
-//		stereoOut.write(buffer, 0, byteLen);
-//		//System.out.println("maxSignal="+maxSignal);
-//	}
-	
 	public void renderAmbisonics(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
+		if (LIMIT) renderAmbisonicsLimited(wBuf, xBuf, yBuf, zBuf);
+		else renderAmbisonicsPlain(wBuf, xBuf, yBuf, zBuf);
+	}
+		
+
+	private static final double RELEASE_FACTOR = 0.99;
+	private static final int HOLD_COUNT = 16;
+	float maxSignal=1f;
+	int holdcnt;
+	
+	public void renderAmbisonicsLimited(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
+		
+		float nextFrameMaxSignal = maxSignal;
+		
 		for (int i = 0; i < framesize; i++) {
-			float w = wBuf[i] * wScale;
-			float y = yBuf[i] * yScale;
+			float w = wBuf[i] * W_SCALE;
+			float y = yBuf[i] * Y_SCALE;
+			fbuffer_lookAhead[2*i]=w+y;
+			fbuffer_lookAhead[2*i+1]=w-y;
+			float abs = Math.abs(w)+Math.abs(y);
+			if (abs > nextFrameMaxSignal) {
+				nextFrameMaxSignal=abs;
+				holdcnt=HOLD_COUNT;
+			}
+		}
+		
+		boolean rampUp = (nextFrameMaxSignal > maxSignal);
+
+		float delta = Math.abs(nextFrameMaxSignal-maxSignal);
+		
+		float dd=0;
+		if (!rampUp) {
+			if (holdcnt == 0 && maxSignal > 1f) {
+				//start ramp down...
+				delta = - (float) (maxSignal*(1-RELEASE_FACTOR));
+			} else {
+				holdcnt--;
+			}
+		} else {
+			dd = delta/framesize;
+		}
+		
+		for (int i=0; i<framesize; i++) {
+			if (maxSignal >= 1) maxSignal+=dd;
+			else maxSignal = 1;
+			fbuffer[2*i]/=maxSignal;
+			fbuffer[2*i+1]/=maxSignal;
+		}
+		floatToByte(buffer, fbuffer);
+		stereoOut.write(buffer, 0, byteLen);
+		
+		// swap buffers
+		float[] tmpF = fbuffer;
+		fbuffer = fbuffer_lookAhead;
+		fbuffer_lookAhead = tmpF;
+	}
+	
+	public void renderAmbisonicsPlain(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
+		for (int i = 0; i < framesize; i++) {
+			float w = wBuf[i] * W_SCALE;
+			float y = yBuf[i] * Y_SCALE;
 			fbuffer[2*i]=w+y;
 			fbuffer[2*i+1]=w-y;
 		}
@@ -187,12 +198,6 @@ public class JavaAmbisonicsStereoDecoder {
 				while (true) {
 					ambiVisitor.collateAmbisonics(bw, bx, by, bz, frameSize);
 					dec.renderAmbisonics(bw, bx, by, bz);
-					if (SLEEP) try {
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
 				}
 			}
 		};
