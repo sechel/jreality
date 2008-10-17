@@ -137,13 +137,15 @@ public class Texture2DLoaderJOGL {
     static Texture2D lastRendered = null;
     static boolean haveAutoMipmapGeneration, haveCheckedAutoMipmapGeneration;
     public static void render(GL gl, Texture2D tex, boolean mipmapped) {
+//    	System.err.println("rendering texture length "+tex.getImage().getByteArray().length);
+//        gl.glMatrixMode(GL.GL_TEXTURE);
+//        gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
+//        gl.glMatrixMode(GL.GL_MODELVIEW);  
+ 
       	ImageData image = tex.getImage();
     	if (image == null) return;
-
-        gl.glMatrixMode(GL.GL_TEXTURE);
-        gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
-        gl.glMatrixMode(GL.GL_MODELVIEW);  
-        
+    	byte[] data = image.getByteArray();
+    	int width = image.getWidth(), height = image.getHeight();
         // can't do this statically at start-up since we need a GL context to inquire
 		if (!haveCheckedForAnisotropy)	{
 			if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_filter_anisotropic")) {
@@ -169,7 +171,7 @@ public class Texture2DLoaderJOGL {
     	if (texid != null) {
     		first = false;
     	} else {
-    		Dimension dim = new Dimension(image.getWidth(), image.getHeight());
+    		Dimension dim = new Dimension(width, height);
     		{ // delete garbage collected textures or reuse if possible
     			for (Object ref=refQueue.poll(); ref != null; ref=refQueue.poll()) {
     				Integer id = (Integer) refToID.remove(ref);
@@ -184,7 +186,7 @@ public class Texture2DLoaderJOGL {
     					first = false;
     				} else {
     					LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("deleted texture...");
-//            g.glDeleteTextures(1, new int[]{id.intValue()},0);
+    					g.glDeleteTextures(1, new int[]{id.intValue()},0);
     				}
     			}
     			LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine("creating texture... ");
@@ -201,21 +203,22 @@ public class Texture2DLoaderJOGL {
     		refToDim.put(ref, new Dimension(image.getWidth(), image.getHeight()));
     	}
 
-//    System.err.println("Binding 2d texture for "+texid);
+//	    System.err.println("Binding 2d texture for "+texid);
 	    gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
-	    
+        gl.glMatrixMode(GL.GL_TEXTURE);
+        gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
+        gl.glMatrixMode(GL.GL_MODELVIEW);  
 	    int srcPixelFormat = tex.getPixelFormat();
 	    boolean animated = tex.getAnimated();
-//	    // shouldn't this happen before the texture is rendered?
 	    if (animated)	{
 	    	List<ImageData> list = animatedTextures.get(gl);
 	    	if (list == null)	{
 	    		list = new Vector<ImageData>();
 	    		animatedTextures.put(gl, list);
 	    	}
-//	    	System.err.println("rendering animated texture");
 	    	boolean done = animatedTextures.get(gl).contains(image);
 	    	if (!done) {
+//	        	System.err.println("updating animated texture id:" + texid);
 		    	Runnable r = tex.getRunnable();
 		    	if (r != null) {
 		    		r.run();
@@ -225,46 +228,44 @@ public class Texture2DLoaderJOGL {
 		        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 
 //		 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
-		 	    DataBuffer data = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
+		 	    DataBuffer dataBuffer = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
 		 	    Buffer buffer;
-		 	    if (data instanceof DataBufferByte) {
-		 	      buffer =  ByteBuffer.wrap(((DataBufferByte) data).getData());
-		 	    } else if (data instanceof DataBufferDouble) {
+		 	    if (dataBuffer instanceof DataBufferByte) {
+		 	      buffer =  ByteBuffer.wrap(((DataBufferByte) dataBuffer).getData());
+		 	    } else if (dataBuffer instanceof DataBufferDouble) {
 		 	      throw new RuntimeException("DataBufferDouble rasters not supported by OpenGL");
-		 	    } else if (data instanceof DataBufferFloat) {
-		 	      buffer =  FloatBuffer.wrap(((DataBufferFloat) data).getData());
-		 	    } else if (data instanceof DataBufferInt) {
-		 	      buffer =  IntBuffer.wrap(((DataBufferInt) data).getData());
-		 	    } else if (data instanceof DataBufferShort) {
-		 	      buffer =  ShortBuffer.wrap(((DataBufferShort) data).getData());
-		 	    } else if (data instanceof DataBufferUShort) {
-		 	      buffer =  ShortBuffer.wrap(((DataBufferUShort) data).getData());
+		 	    } else if (dataBuffer instanceof DataBufferFloat) {
+		 	      buffer =  FloatBuffer.wrap(((DataBufferFloat) dataBuffer).getData());
+		 	    } else if (dataBuffer instanceof DataBufferInt) {
+		 	      buffer =  IntBuffer.wrap(((DataBufferInt) dataBuffer).getData());
+		 	    } else if (dataBuffer instanceof DataBufferShort) {
+		 	      buffer =  ShortBuffer.wrap(((DataBufferShort) dataBuffer).getData());
+		 	    } else if (dataBuffer instanceof DataBufferUShort) {
+		 	      buffer =  ShortBuffer.wrap(((DataBufferUShort) dataBuffer).getData());
 		 	    } else {
 		 	      throw new RuntimeException("Unexpected DataBuffer type?");
 		 	    }
 		        gl.glTexSubImage2D(GL.GL_TEXTURE_2D, 0,
-		                           0, 0, image.getWidth(), image.getHeight(),
+		                           0, 0, width, height,
 		                           srcPixelFormat, GL.GL_UNSIGNED_BYTE,
 		                           buffer);
-//		        gl.glCopyTexSubImage2D(GL.GL_TEXTURE_2D, 0, 0, 0, 
-//		        		0,0, image.getWidth(), image.getHeight());
 
 		    	animatedTextures.get(gl).add(image);	    		
 	    	}
 	    }
+	    
     if (first || lastRendered  == null  || image != lastRendered.getImage()) {
+//    	System.err.println("rerendering texture id:" + texid);
 	    	// calls to glTexParameter get saved and restored by "bind()" so should be handled separately
+	    lastRendered = tex;
 	    if (canFilterAnisotropic)  {
 	        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
-	    } else {
-	        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
-	    }
+	    } 
 	    
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, tex.getRepeatS()); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, tex.getRepeatT()); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, mipmapped ? GL.GL_TRUE : GL.GL_FALSE);
 	
 	    float[] texcolor = tex.getBlendColor().getRGBComponents(null);
 	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
@@ -287,17 +288,18 @@ public class Texture2DLoaderJOGL {
 	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_ALPHA, tex.getSource2Alpha()); // GL.GL_CONSTANT);
 	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_ALPHA,tex.getOperand2Alpha()); // GL.GL_SRC_ALPHA);
 	    }    
-	    lastRendered = tex;
 	     // create either a series of mipmaps of a single texture image based on
 	    // what's loaded
 	    if (first || replace) {
-	    	byte[] data = image.getByteArray();
+            gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
+	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
+	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 	        if (mipmapped) {
 	        	// the following code executes painfully slowly
-	        	if (false && haveAutoMipmapGeneration) {
+	        	if (haveAutoMipmapGeneration) {
 	        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
 	                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
-	                        image.getWidth(), image.getHeight(), 0, srcPixelFormat,
+	                        width, height, 0, srcPixelFormat,
 	                        GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
 	        	}
 	        	else {
@@ -305,8 +307,8 @@ public class Texture2DLoaderJOGL {
 	                GLU glu = new GLU();
 	                glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
 	              		  GL.GL_RGBA, 
-	              		  image.getWidth(),
-	              		  image.getHeight(), 
+	              		  width,
+	              		  height,
 	              		  srcPixelFormat, 
 	              		  GL.GL_UNSIGNED_BYTE, 
 	              		  ByteBuffer.wrap(data));
