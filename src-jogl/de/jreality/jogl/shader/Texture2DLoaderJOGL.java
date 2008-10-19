@@ -147,21 +147,7 @@ public class Texture2DLoaderJOGL {
     	byte[] data = image.getByteArray();
     	int width = image.getWidth(), height = image.getHeight();
         // can't do this statically at start-up since we need a GL context to inquire
-		if (!haveCheckedForAnisotropy)	{
-			if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_filter_anisotropic")) {
-				gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-				canFilterAnisotropic = true;
-		    }
-		    else canFilterAnisotropic = false;
-			haveCheckedForAnisotropy = true;
-		}
-        if (!haveCheckedAutoMipmapGeneration)	{
-        	haveAutoMipmapGeneration =
-                (gl.isExtensionAvailable("GL_VERSION_1_4") ||
-                 gl.isExtensionAvailable("GL_SGIS_generate_mipmap"));
-        	haveCheckedAutoMipmapGeneration = true;
-        	System.err.println("Have automipmap generation = "+haveAutoMipmapGeneration);
-        }
+		checkForTextureExtensions(gl);
     	boolean first = true;
     	boolean replace = false;
     
@@ -295,7 +281,6 @@ public class Texture2DLoaderJOGL {
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 	        if (mipmapped) {
-	        	// the following code executes painfully slowly
 	        	if (haveAutoMipmapGeneration) {
 	        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
 	                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
@@ -306,7 +291,7 @@ public class Texture2DLoaderJOGL {
 //	        		System.err.println("Building mipmaps");
 	                GLU glu = new GLU();
 	                glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
-	              		  GL.GL_RGBA, 
+	              		  GL.GL_COMPRESSED_RGBA, 
 	              		  width,
 	              		  height,
 	              		  srcPixelFormat, 
@@ -320,7 +305,8 @@ public class Texture2DLoaderJOGL {
 	        }
 	    }
     }
-} 
+}
+
 	 	static GLU glu = null;
   public static void render(JOGLRenderer jr, CubeMap ref) {
 //  public static void render(GL gl, CubeMap ref, double[] c2w) {
@@ -329,7 +315,7 @@ public class Texture2DLoaderJOGL {
     lastRendered = null;	
     GL gl = jr.globalGL;
     WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
-    
+    checkForTextureExtensions(gl);
     //hash one side of the cube map and do only render sides when hashed image data changed
     Integer texid = (Integer) ht.get(ref.getLeft());
     int textureID;
@@ -395,19 +381,29 @@ public class Texture2DLoaderJOGL {
         byte[] data = faces[i].getByteArray();
         int width = faces[i].getWidth();
         int height = faces[i].getHeight();
+        gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, width);
+        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
+        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
    	 	if (glu == null) glu = new GLU();
          if (mipmapped) 
-          glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
+	       if (haveAutoMipmapGeneration) {
+	        		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
+	                gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL.GL_COMPRESSED_RGBA, 
+	                        width, height, 0, srcPixelFormat,
+	                        GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
+	       	} else {
+	       		glu.gluBuild2DMipmaps(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
                       GL.GL_RGBA, 
                       width,
                       height, 
                       srcPixelFormat, 
                       GL.GL_UNSIGNED_BYTE, 
-                      ByteBuffer.wrap(data)); 
+                      ByteBuffer.wrap(data));
+	       	}
         else    
           gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
                   0, 
-                  GL.GL_COMPRESSED_RGBA, //GL.GL_RGBA, //tex.getPixelFormat(), 
+                  GL.GL_COMPRESSED_RGBA, 
                 width, 
                 height, 
                   0, 
@@ -423,6 +419,24 @@ public class Texture2DLoaderJOGL {
   private static FloatBuffer maxAnisotropy = FloatBuffer.allocate(1);
   private static boolean canFilterAnisotropic=false, haveCheckedForAnisotropy = false;
  
+	private static void checkForTextureExtensions(GL gl) {
+		if (!haveCheckedForAnisotropy)	{
+			if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_filter_anisotropic")) {
+				gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+				canFilterAnisotropic = true;
+		    }
+		    else canFilterAnisotropic = false;
+			haveCheckedForAnisotropy = true;
+		}
+        if (!haveCheckedAutoMipmapGeneration)	{
+        	haveAutoMipmapGeneration =
+                (gl.isExtensionAvailable("GL_VERSION_1_4") ||
+                 gl.isExtensionAvailable("GL_SGIS_generate_mipmap"));
+        	haveCheckedAutoMipmapGeneration = true;
+        	System.err.println("Have automipmap generation = "+haveAutoMipmapGeneration);
+        }
+        haveAutoMipmapGeneration = false;
+	} 
   /**
 	 * 
 	 */
