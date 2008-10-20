@@ -50,6 +50,7 @@ import java.util.ListIterator;
 import java.util.logging.Level;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.AudioSource;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Light;
@@ -90,6 +91,8 @@ public class SceneTreeNode {
 	private boolean hasCam;
 	private boolean hasLight;
 	private boolean hasGeom;
+	private boolean hasAudio;
+	
 
 	protected SceneTreeNode(SceneGraphNode node) {
 		this.node = node;
@@ -192,6 +195,18 @@ public class SceneTreeNode {
 					childList.add(idx, child);
 				}
 				hasGeom = true;
+			} else if (ch instanceof AudioSource) {
+				if (hasTrafo) idx++;
+				if (hasApp) idx++;        
+				if (hasCam) idx++;
+				if (hasLight) idx++;
+				if (hasGeom) idx++;
+				if (hasAudio) {
+					childList.set(idx, child);
+				} else {
+					childList.add(idx, child);
+				}
+				hasAudio = true;
 			}
 		}
 		connector.add(getProxy(), child.getProxy());
@@ -234,6 +249,7 @@ public class SceneTreeNode {
 		if (prevChild instanceof Camera) hasCam = false;
 		if (prevChild instanceof Light) hasLight = false;
 		if (prevChild instanceof Geometry) hasGeom = false;
+		if (prevChild instanceof AudioSource) hasAudio = false;
 		return ret;
 	}
 	

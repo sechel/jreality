@@ -47,6 +47,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.AudioSource;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.Light;
@@ -87,6 +88,7 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
   static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.jpg");
   static final ImageIcon shaderIcon = createImageIcon("icons/ShaderIcon.jpg");
   static final ImageIcon toolIcon = createImageIcon("icons/ToolIcon.jpg");
+  static final ImageIcon audioIcon = createImageIcon("icons/AudioSourceIcon.jpg");
 
   final SceneGraphVisitor iconSelector = new SceneGraphVisitor() {
     public void visit(Appearance a) {
@@ -108,6 +110,9 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
     }
     public void visit(Light l) {
       setIcon(lightIcon);
+    }
+    public void visit(AudioSource a) {
+    	setIcon(audioIcon);
     }
   };
   

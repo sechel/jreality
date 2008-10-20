@@ -34,6 +34,7 @@ public abstract class AudioSource extends SceneGraphNode {
 	}	
  
 	// to be called when instance is permanently removed from scene graph
+	// TODO: i think this method should not be here - steffen.
 	public void dispose() {}
 	
 	public int getSampleRate() {
@@ -50,6 +51,31 @@ public abstract class AudioSource extends SceneGraphNode {
 			return state;
 		} finally {
 			finishReader();
+		}
+	}
+	
+	/**
+	 * set the state of the node.
+	 * 
+	 * TODO: 1. is stop a reasonable state for a basic audio source/what if reset is not possible?
+	 *       2. do we need the explicit start/pause/stop methods? for one property a setter should be enough
+	 *       3. think of a DISPOSED-state vs. public dispose()-method (if we _really_ need that)
+	 *       
+	 * @param state set the state of the audio source
+	 */
+	public void setState(State state) {
+		switch (state) {
+		case RUNNING:
+			start();
+			break;
+		case PAUSED:
+			pause();
+			break;
+		case STOPPED:
+			stop();
+			break;
+		default:
+			break;
 		}
 	}
     
