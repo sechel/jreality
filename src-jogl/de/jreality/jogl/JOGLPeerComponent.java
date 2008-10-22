@@ -519,6 +519,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	public void visibilityChanged(SceneGraphComponentEvent ev) {
 		isVisible = ev.getSceneGraphComponent().isVisible();
+		jr.lightListDirty = true;
 	}
 
 }
