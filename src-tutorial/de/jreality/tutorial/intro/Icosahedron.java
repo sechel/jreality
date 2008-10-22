@@ -38,27 +38,17 @@
  */
 
 
-package de.jreality.tutorial;
+package de.jreality.tutorial.intro;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.vr.ViewerVR;
- 
-public class IcosahedronVR {
-  
-  public static void main(String[] args) {
-    
-	ViewerVR vvr=ViewerVR.createDefaultViewerVR(null);
-	
-	SceneGraphComponent sgc = new SceneGraphComponent("Icosahedron");
-	vvr.setContent(sgc);
-	
-	sgc.setGeometry(Primitives.icosahedron());
-	
-	final ViewerApp vapp=vvr.initialize();
-	vapp.update();
-	vapp.display();			
 
+ 
+ 
+public class Icosahedron {
+  
+  public static void  main(String[] args) {
+	  
+    ViewerApp.display(Primitives.icosahedron());
   }
 }

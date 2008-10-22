@@ -1,8 +1,10 @@
 package de.jreality.tutorial.app;
 
+import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CubeMap;
@@ -13,6 +15,12 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
+/**
+ * Shows how to add a skybox to a jReality scene, and also use it as the source for a reflection map
+ * 
+ * @author Charles Gunn
+ *
+ */
 public class SkyboxAndReflMapExample {
 
 	public static void main(String[] args)	{
@@ -22,6 +30,8 @@ public class SkyboxAndReflMapExample {
 		DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
 		dgs.setShowLines(false);
 		dgs.setShowPoints(false);
+		DefaultPolygonShader dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+		dps.setDiffuseColor(Color.white);
 		// basic class needed for both reflection maps and skyboxes is a CubeMap
 		CubeMap rm = null;
 		// we load this over the net since 
