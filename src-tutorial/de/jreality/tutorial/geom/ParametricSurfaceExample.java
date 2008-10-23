@@ -1,6 +1,8 @@
 package de.jreality.tutorial.geom;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.util.prefs.InvalidPreferencesFormatException;
 
 import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
@@ -8,12 +10,13 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.Secure;
 import de.jreality.vr.ViewerVR;
 
 public class ParametricSurfaceExample {
 	// to use the ParametricSurfaceFactory one needs an instance of immersion
 	// That is, a function that maps  (u,v) values into a 3- or 4-space
-	static Immersion myImmersion = new Immersion() {
+	Immersion myImmersion = new Immersion() {
 		public void evaluate(double u, double v, double[] xyz, int index) {
 			xyz[index]= 10*(u-v*v);
 			xyz[index+1]= 10*u*v;
@@ -27,8 +30,7 @@ public class ParametricSurfaceExample {
 		public boolean isImmutable() { return true; }
 	};
 	
-	public static void main(String[] args) {
-		// allocate and set values in a parametric surface factory
+	public void doIt()	{
 		ParametricSurfaceFactory psf = new ParametricSurfaceFactory(myImmersion);
 		psf.setUMin(-.3);
 		psf.setUMax(.3);
@@ -45,16 +47,35 @@ public class ParametricSurfaceExample {
 		Appearance ap = new Appearance();
 		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.yellow);
 		sgc.setAppearance(ap);
+		// to run the application inside of ViewerVR, set the VM argument 
+		// -DuseViewerVR=true  
+		// In eclipse: Run->Run..., click on "Arguments", enter this in "VM Arguments" text field
 		boolean useViewerVR = false;
+		String foo = Secure.getProperty("useViewerVR");
+		if (foo != null && foo.equals("true")) useViewerVR = true;
 		if (useViewerVR)	{
-			ViewerVR vvr=ViewerVR.createDefaultViewerVR(null);
-			vvr.setContent(sgc);
+			ViewerVR vr=ViewerVR.createDefaultViewerVR(null);
+			vr.setContent(sgc);
 			
-			ViewerApp vapp=vvr.initialize();
+			ViewerApp vapp=vr.initialize();
+			try {
+				vr.importPreferences(ParametricSurfaceExample.class
+						.getResourceAsStream("vrprefsParametricExample.xml"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InvalidPreferencesFormatException e) {
+				e.printStackTrace();
+			}
+			vr.setAvatarPosition(0, 0, 6);
 			vapp.update();
 			vapp.display();			
 		} else {
 			ViewerApp.display(sgc);		
 		}
+	}
+	
+	public static void main(String[] args) {
+		ParametricSurfaceExample pse = new ParametricSurfaceExample();
+		pse.doIt();
 	}
 }
