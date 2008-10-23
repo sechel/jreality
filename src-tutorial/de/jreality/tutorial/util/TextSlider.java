@@ -220,9 +220,15 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		}
 
 		public Integer(String l, int orientation, int min, int max, int value, SliderComposition sliderComp) {
-			super(l, orientation, min, max, value, min, max, value, sliderComp);
+			this(l, orientation, min, max, value, min, max, value, sliderComp);
 		}
 		
+		public Integer(String l, int orientation, 
+			int min, int max, int value, 
+			int sliderMin, int sliderMax, int sliderValue, 
+			SliderComposition sliderComp) {
+			super(l, orientation, min, max, value, sliderMin, sliderMax, sliderValue, sliderComp);
+		}
 		java.lang.Integer sliderToText() {
 			return super.slider.getValue();
 		}
@@ -348,6 +354,29 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			return ret;
 		}
 
+				
+	}
+
+	public static class IntegerLog extends TextSlider.DoubleLog	{
+		
+		
+		public IntegerLog(String l, int orientation, double min, double max, double value) {
+			super(l, orientation, min, max, value);
+		}
+
+		@Override
+		double sliderToDouble(int val)		{ 
+			double f = val/scaler;
+			double a = Math.pow(getMin(), 1.0-f);
+			double b = Math.pow(getMax(), f);
+			double ret = a*b; 
+			return ret;
+		}
+
+		@Override
+		String getFormattedValue(java.lang.Double n) {
+			return String.format("%8d",(int)(n+.5));
+		}
 				
 	}
 
