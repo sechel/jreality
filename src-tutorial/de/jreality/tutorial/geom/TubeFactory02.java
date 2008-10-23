@@ -36,22 +36,31 @@ import de.jreality.util.SceneGraphUtility;
 /**
  * This example shows how to use {@link PolygonalTubeFactory} to create a tube around a torus knot. 
  * 
- * @see InspectorExample (same code but categorized according to its GUI features).
+ * It's organized with a single doIt() method to allow creation of other classes which refer to the same
+ * code but in a different package of the tutorial. In this case, see {@link InspectorExample}.
+ * 
  * @author Charles Gunn
  *
  */
 public class TubeFactory02 {
 
-	static double R = 1, r = .25, tubeRadius = .04;
-	static SceneGraphComponent torussgc;
-	static boolean isSmooth = true;
-	static boolean drawEdges = false;
-	static DefaultGeometryShader dgs;
-	static DefaultPolygonShader dps;
-	static FrameFieldType currentFrameType = FrameFieldType.PARALLEL;
-	static PolygonalTubeFactory polygonalTubeFactory;
+	 double 	R = 1, 
+	 	r = .25, 
+	 	tubeRadius = .04;
+	 SceneGraphComponent torussgc;
+	 boolean isSmooth = true;
+	 boolean drawEdges = false;
+	 DefaultGeometryShader dgs;
+	 DefaultPolygonShader dps;
+	 FrameFieldType currentFrameType = FrameFieldType.PARALLEL;
+	 PolygonalTubeFactory polygonalTubeFactory;
 	
 	public static void main(String[] args) {
+		TubeFactory02 tf02 = new TubeFactory02();
+		tf02.doIt();
+	}
+	
+	public void doIt()	{
 		torussgc = SceneGraphUtility
 				.createFullSceneGraphComponent("torus knot");
 		dgs = (DefaultGeometryShader) ShaderUtility
@@ -97,12 +106,12 @@ public class TubeFactory02 {
   
   }
 
-	private static void updateGeometry() {
+	private void updateGeometry() {
 		IndexedFaceSet tubedTorusKnot = tubedTorusKnot(R, r, tubeRadius);
 		torussgc.setGeometry(tubedTorusKnot);
 	}
 
-	private static IndexedFaceSet tubedTorusKnot(
+	private  IndexedFaceSet tubedTorusKnot(
 			double R, 
 			double r,
 			double tubeRadius) {
@@ -136,7 +145,7 @@ public class TubeFactory02 {
 		return torus1Tubes;
 	}
   
-	public static void colorVertices(IndexedLineSet ils, double[] color1,
+	public  void colorVertices(IndexedLineSet ils, double[] color1,
 			double[] color2) {
 		int nPts = ils.getNumPoints();
 		double[][] colors = new double[nPts][3];
@@ -154,7 +163,7 @@ public class TubeFactory02 {
 				.array(3).createReadOnly(colors));
 	}
 
-	private static Component getInspector() {
+	private  Component getInspector() {
 		Box container = Box.createVerticalBox();
 		container.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5),
 				BorderFactory.createTitledBorder(BorderFactory
