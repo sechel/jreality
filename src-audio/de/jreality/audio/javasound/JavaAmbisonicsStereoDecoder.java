@@ -23,6 +23,7 @@ import de.jreality.scene.Viewer;
  */
 public class JavaAmbisonicsStereoDecoder {
 
+	public static int SAMPLE_RATE = 11025;
 	private static final boolean LIMIT = true;
 	
 	private static final float W_SCALE = (float) Math.sqrt(0.5);
@@ -53,7 +54,7 @@ public class JavaAmbisonicsStereoDecoder {
 		mixer.open();
 
 		AudioFormat audioFormat = new AudioFormat(
-					44100, // the number of samples per second
+					SAMPLE_RATE, // the number of samples per second
 					16, // the number of bits in each sample
 					2, // the number of channels
 					true, // signed/unsigned PCM
@@ -173,7 +174,7 @@ public class JavaAmbisonicsStereoDecoder {
 
 	
 	public int getSamplerate() {
-		return 44100;
+		return SAMPLE_RATE;
 	}
 	
 	public static void launch(Viewer viewer) throws LineUnavailableException {
