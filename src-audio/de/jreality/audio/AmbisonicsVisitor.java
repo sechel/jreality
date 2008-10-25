@@ -56,7 +56,7 @@ public class AmbisonicsVisitor extends SceneGraphVisitor {
 	// appearance values:
 	public static final double DEFAULT_VOLUME=1;
 	private double volume;
-	public static final boolean DEFAULT_VOLUME_ATTENUATION=false;
+	public static final boolean DEFAULT_VOLUME_ATTENUATION=true;
 	private boolean attenuation;
 	
 	public AmbisonicsVisitor(int sampleRate) {
