@@ -23,7 +23,7 @@ import de.jreality.scene.Viewer;
  */
 public class JavaAmbisonicsStereoDecoder {
 
-	public static int SAMPLE_RATE = 11025;
+	public static int SAMPLE_RATE = 44100;
 	private static final boolean LIMIT = true;
 	
 	private static final float W_SCALE = (float) Math.sqrt(0.5);
