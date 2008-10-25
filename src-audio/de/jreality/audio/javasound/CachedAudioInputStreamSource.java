@@ -25,10 +25,10 @@ import de.jreality.util.Input;
  */
 public class CachedAudioInputStreamSource extends AudioSource {
 
-	private float[] samples;
-	private int nSamples;
-	private int index;
-	private boolean loop;
+	protected float[] samples;
+	protected int nSamples;
+	protected int index;
+	protected boolean loop;
 
 	public CachedAudioInputStreamSource(String name, AudioInputStream ain, boolean loop) {
 		super(name);
