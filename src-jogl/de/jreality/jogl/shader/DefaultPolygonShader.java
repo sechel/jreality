@@ -200,7 +200,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    	gl.glActiveTexture(texUnit);
 		      	gl.glEnable(GL.GL_TEXTURE_2D);
 		 //     	System.err.println("rendering texture height "+joglTexture2D.getImage().getHeight());
-				Texture2DLoaderJOGL.render(gl, texture2D); //joglTexture2D);
+				Texture2DLoaderJOGL.render(gl, joglTexture2D);
 			    texUnit++;
 			    texunitcoords++;		
 			    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)

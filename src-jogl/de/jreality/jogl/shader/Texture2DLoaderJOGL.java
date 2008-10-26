@@ -435,7 +435,6 @@ public class Texture2DLoaderJOGL {
         	haveCheckedAutoMipmapGeneration = true;
         	System.err.println("Have automipmap generation = "+haveAutoMipmapGeneration);
         }
-        haveAutoMipmapGeneration = false;
 	} 
   /**
 	 * 
