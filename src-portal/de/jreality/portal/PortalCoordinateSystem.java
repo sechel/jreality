@@ -79,7 +79,7 @@ public class PortalCoordinateSystem {
 	static {
 		String bar = Secure.getProperty(SystemProperties.PORTAL_SCALE);
 		if (bar != null) setPortalScale(Double.parseDouble(bar));
-		System.err.println("PCS: Portal scale is "+getPortalScale());         
+//		System.err.println("PCS: Portal scale is "+getPortalScale());         
 	}
 	
 	public static double[] getPortalCenter() {
