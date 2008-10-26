@@ -565,9 +565,9 @@ private JMenu createFileMenu() {
 	 */
 	public JMenu getMenu(String menuName) {
 		JMenu menu = null;
-		for (int i = 0; i < menuBar.getComponentCount(); i++) {
-			if ( ((JMenu)menuBar.getComponent(i)).getText().equals(menuName) )
-				menu = (JMenu)menuBar.getComponent(i);
+		for (int i = 0; i < menuBar.getMenuCount(); i++) {
+			if (menuBar.getMenu(i).getText().equals(menuName))
+				menu = menuBar.getMenu(i);
 		}
 		return menu;
 	}
