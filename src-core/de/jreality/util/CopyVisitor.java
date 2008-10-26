@@ -249,7 +249,7 @@ public class CopyVisitor extends SceneGraphVisitor {
   	dst.setPerspective(src.isPerspective());
 //  	dst.setSignature(src.getSignature());
   	dst.setStereo(src.isStereo());
-  	dst.setViewPort(src.getViewPort());
+  	if (!src.isOnAxis()) dst.setViewPort(src.getViewPort());
     copyAttr((SceneGraphNode)src, (SceneGraphNode)dst);
   }
 
