@@ -55,10 +55,10 @@ class LightCollector extends SceneGraphVisitor {
 
 	SceneGraphComponent sgc;
 	SceneGraphPath currentPath;
-	Vector lightList;
+	Vector<SceneGraphPath> lightList;
 	public LightCollector(SceneGraphComponent b)	{
 	  	sgc = b;
-	  	lightList = new Vector();
+	  	lightList = new Vector<SceneGraphPath>();
 	}
 
 	 public Object visit()	{
@@ -70,8 +70,7 @@ class LightCollector extends SceneGraphVisitor {
 	 }
 
 	public void visit(Light l) {
-		SceneGraphPath foundOne ;
-		foundOne = (SceneGraphPath) currentPath.clone();
+		SceneGraphPath foundOne  = new SceneGraphPath(currentPath);
 		foundOne.push(l);
 		lightList.add(foundOne);
 	}
