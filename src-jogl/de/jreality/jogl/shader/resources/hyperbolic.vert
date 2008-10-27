@@ -121,7 +121,7 @@ void main (void)
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
 //    if (transformedNormal.w * transformedNormal.z < 0) 
-    	transformedNormal = -transformedNormal;
+//    	transformedNormal = -transformedNormal;
 //    faceforward4(transformedNormal);
 //    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
