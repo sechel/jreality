@@ -340,6 +340,10 @@ public final class MatrixBuilder {
     return this;
   }
   
+  public MatrixBuilder conjugateBy(double[] c)	{
+	  Rn.conjugateByMatrix(matrix.getArray(), matrix.getArray(), c);
+	  return this;
+  }
   /**
    * multiplies the given Matrix on the right hand side
    * @param matrix
