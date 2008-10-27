@@ -386,7 +386,7 @@ public class Texture2DLoaderJOGL {
         gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
    	 	if (glu == null) glu = new GLU();
          if (mipmapped) 
-	       if (haveAutoMipmapGeneration) {
+	       if (false && haveAutoMipmapGeneration) {
 	        		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
 	                gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL.GL_COMPRESSED_RGBA, 
 	                        width, height, 0, srcPixelFormat,
