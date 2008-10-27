@@ -139,8 +139,8 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
 			// this results in attatching the whole 
 			// tree below the new child to each tree node
 			// of the parent entity
-			for (Iterator i = sge.getTreeNodes(); i.hasNext(); ) {
-				traversal.proxyParent = (SceneTreeNode) i.next();
+			for (SceneTreeNode node : sge.getTreeNodes()) {
+				traversal.proxyParent = node;
 				LoggingSystem.getLogger(this).log(loglevel, 
 						"attatching child {0} to {1}", new Object[]{newChild.getName(), parent.getName()});
 				ev.getNewChildElement().accept(traversal);
@@ -160,18 +160,18 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
 			}
 			// remove child from all parent tree nodes
 			ArrayList<SceneGraphNodeEntity> disposedEntities = new ArrayList<SceneGraphNodeEntity>();
-			for (Iterator i = parentEntity.getTreeNodes(); i.hasNext(); ) {
-				SceneTreeNode deleted = ((SceneTreeNode)i.next()).removeChildForNode(prevChild);
+			for (SceneTreeNode node : parentEntity.getTreeNodes()) {
+				SceneTreeNode deleted = node.removeChildForNode(prevChild);
 				deleted.dispose(disposedEntities);
 			}
-			for (Iterator i = disposedEntities.iterator(); i.hasNext(); )
-				disposeEntity((SceneGraphNodeEntity) i.next(), true);
+			for (SceneGraphNodeEntity entity : disposedEntities)
+				disposeEntity(entity, true);
 		}
 	}
 
 	/**
 	 * move the listener from this class to the entity itself?
-	 * NO: so we can syncronize all changes in this class!
+	 * NO: so we can synchronize all changes in this class!
 	 * @param entity
 	 */
 	private void disposeEntity(SceneGraphNodeEntity entity, boolean assertEmpty) {

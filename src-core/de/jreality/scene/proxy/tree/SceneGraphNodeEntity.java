@@ -41,6 +41,7 @@
 package de.jreality.scene.proxy.tree;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -96,8 +97,8 @@ public class SceneGraphNodeEntity {
     treeNodes.remove(tn);
   }
   
-  public Iterator<SceneTreeNode> getTreeNodes() {
-    return Collections.unmodifiableCollection(treeNodes).iterator();
+  public Collection<SceneTreeNode> getTreeNodes() {
+    return Collections.unmodifiableCollection(treeNodes);
   }
   
   boolean isEmpty() {

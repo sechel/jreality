@@ -42,11 +42,13 @@ package de.jreality.scene.proxy.tree;
 
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.AudioSource;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.event.AppearanceListener;
+import de.jreality.scene.event.AudioListener;
 import de.jreality.scene.event.GeometryListener;
 import de.jreality.scene.event.TransformationListener;
 
@@ -71,108 +73,130 @@ import de.jreality.scene.event.TransformationListener;
  */
 public class EntityFactory {
 
-  private SceneGraphNodeEntity produced;
+	private SceneGraphNodeEntity produced;
 
-  private boolean updateTransformation;
-  private boolean updateAppearance;
-  private boolean updateGeometry;
-  
-  public boolean isUpdateAppearance() {
-    return updateAppearance;
-  }
-  public void setUpdateAppearance(boolean updateAppearance) {
-    this.updateAppearance = updateAppearance;
-  }
-  public boolean isUpdateGeometry() {
-    return updateGeometry;
-  }
-  public void setUpdateGeometry(boolean updateGeometry) {
-    this.updateGeometry = updateGeometry;
-  }
-  public boolean isUpdateTransformation() {
-    return updateTransformation;
-  }
-  public void setUpdateTransformation(boolean updateTransformation) {
-    this.updateTransformation = updateTransformation;
-  }
-  
-  SceneGraphNodeEntity createEntity(SceneGraphNode node) {
-    node.accept(createTraversal);
-    return produced;
-  }
-  private SceneGraphVisitor createTraversal = new SceneGraphVisitor() {
-    public void visit(Appearance a) {
-      if (updateAppearance) {
-        produced=produceAppearanceEntity(a);
-        a.addAppearanceListener((AppearanceListener) produced);
-      }
-      else super.visit(a);
-    }
-    public void visit(Geometry g) {
-      if (updateGeometry) {
-        produced=produceGeometryEntity(g);
-        g.addGeometryListener((GeometryListener) produced);
-      }
-      else super.visit(g);
-    }
-    public void visit(Transformation t) {
-      if (updateTransformation) {
-        produced=produceTransformationEntity(t);
-        t.addTransformationListener((TransformationListener) produced);
-      }
-      else super.visit(t);
-    }
-    public void visit(SceneGraphNode n) {
-      produced=produceSceneGraphNodeEntity(n);
-    }
-  };
-  
-  public void disposeEntity(SceneGraphNodeEntity entity) {
-    produced=entity;
-    entity.getNode().accept(disposeTraversal); // remove listeners
-    entity.dispose();
-  }
-  
-  private SceneGraphVisitor disposeTraversal = new SceneGraphVisitor() {
-    public void visit(Appearance a) {
-      if (updateAppearance) {
-        a.removeAppearanceListener((AppearanceListener) produced);
-      }
-    }
-    public void visit(Geometry g) {
-      if (updateGeometry) {
-        g.removeGeometryListener((GeometryListener) produced);
-      }
-    }
-    public void visit(Transformation t) {
-      if (updateTransformation) {
-        t.removeTransformationListener((TransformationListener) produced);
-      }
-    }
-  };
+	private boolean updateTransformation;
+	private boolean updateAppearance;
+	private boolean updateAudioSource;
+	private boolean updateGeometry;
 
-  protected SceneGraphNodeEntity produceSceneGraphNodeEntity(SceneGraphNode n) {
-    return new SceneGraphNodeEntity(n);
-  }
-  /**
-   * this method must return a SceneGraphNodeEntity that
-   * implements TransformationListener!
-   */
-  protected SceneGraphNodeEntity produceTransformationEntity(Transformation t) {
-    throw new IllegalStateException("not implemented");
-  }
-  /**
-   * this method must return a SceneGraphNodeEntity that
-   * implements AppearanceListener!
-   */
-  protected SceneGraphNodeEntity produceAppearanceEntity(Appearance a) {
-    throw new IllegalStateException("not implemented");
-  }
-  /**
-   * this method must return a SceneGraphNodeEntity that
-   * implements GeometryListener!
-   */
-  protected SceneGraphNodeEntity produceGeometryEntity(Geometry g) {
-    throw new IllegalStateException("not implemented");
-  }
+	public boolean isUpdateAppearance() {
+		return updateAppearance;
+	}
+	public void setUpdateAppearance(boolean updateAppearance) {
+		this.updateAppearance = updateAppearance;
+	}
+	public boolean isUpdateAudioSource() {
+		return updateAudioSource;
+	}
+	public void setUpdateAudioSource(boolean updateAudioSource) {
+		this.updateAudioSource = updateAudioSource;
+	}
+	public boolean isUpdateGeometry() {
+		return updateGeometry;
+	}
+	public void setUpdateGeometry(boolean updateGeometry) {
+		this.updateGeometry = updateGeometry;
+	}
+	public boolean isUpdateTransformation() {
+		return updateTransformation;
+	}
+	public void setUpdateTransformation(boolean updateTransformation) {
+		this.updateTransformation = updateTransformation;
+	}
+
+	SceneGraphNodeEntity createEntity(SceneGraphNode node) {
+		node.accept(createTraversal);
+		return produced;
+	}
+	private SceneGraphVisitor createTraversal = new SceneGraphVisitor() {
+		@Override
+		public void visit(AudioSource a) {
+			if (updateAudioSource) {
+				produced = produceAudioSourceEntity(a);
+				a.addAudioListener((AudioListener) produced);
+			}
+			else super.visit(a);
+		}
+		public void visit(Appearance a) {
+			if (updateAppearance) {
+				produced=produceAppearanceEntity(a);
+				a.addAppearanceListener((AppearanceListener) produced);
+			}
+			else super.visit(a);
+		}
+		public void visit(Geometry g) {
+			if (updateGeometry) {
+				produced=produceGeometryEntity(g);
+				g.addGeometryListener((GeometryListener) produced);
+			}
+			else super.visit(g);
+		}
+		public void visit(Transformation t) {
+			if (updateTransformation) {
+				produced=produceTransformationEntity(t);
+				t.addTransformationListener((TransformationListener) produced);
+			}
+			else super.visit(t);
+		}
+		public void visit(SceneGraphNode n) {
+			produced=produceSceneGraphNodeEntity(n);
+		}
+	};
+
+	public void disposeEntity(SceneGraphNodeEntity entity) {
+		produced=entity;
+		entity.getNode().accept(disposeTraversal); // remove listeners
+		entity.dispose();
+	}
+
+	private SceneGraphVisitor disposeTraversal = new SceneGraphVisitor() {
+		public void visit(Appearance a) {
+			if (updateAppearance) {
+				a.removeAppearanceListener((AppearanceListener) produced);
+			}
+		}
+		public void visit(Geometry g) {
+			if (updateGeometry) {
+				g.removeGeometryListener((GeometryListener) produced);
+			}
+		}
+		public void visit(Transformation t) {
+			if (updateTransformation) {
+				t.removeTransformationListener((TransformationListener) produced);
+			}
+		}
+	};
+
+	protected SceneGraphNodeEntity produceSceneGraphNodeEntity(SceneGraphNode n) {
+		return new SceneGraphNodeEntity(n);
+	}
+	/**
+	 * this method must return a SceneGraphNodeEntity that
+	 * implements TransformationListener!
+	 */
+	protected SceneGraphNodeEntity produceTransformationEntity(Transformation t) {
+		throw new IllegalStateException("not implemented");
+	}
+	/**
+	 * this method must return a SceneGraphNodeEntity that
+	 * implements AppearanceListener!
+	 */
+	protected SceneGraphNodeEntity produceAppearanceEntity(Appearance a) {
+		throw new IllegalStateException("not implemented");
+	}
+	/**
+	 * this method must return a SceneGraphNodeEntity that
+	 * implements GeometryListener!
+	 */
+	protected SceneGraphNodeEntity produceGeometryEntity(Geometry g) {
+		throw new IllegalStateException("not implemented");
+	}
+	/**
+	 * this method must return a SceneGraphNodeEntity that
+	 * implements AudioListener!
+	 */
+	protected SceneGraphNodeEntity produceAudioSourceEntity(AudioSource g) {
+		throw new IllegalStateException("not implemented");
+	}
 }

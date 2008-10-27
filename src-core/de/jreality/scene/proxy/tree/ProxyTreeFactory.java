@@ -47,7 +47,9 @@ import de.jreality.scene.proxy.ProxyFactory;
 
 /**
  *
- * TODO: comment this
+ * creates SceneTreeNodes which are used to mirror the tree stucture
+ * of the scene graph. The proxyFactory is intended to produce the actual
+ * proxy objects if necessary (i.e. remote objects etc.).
  *
  * @author weissman
  *

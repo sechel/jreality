@@ -40,8 +40,6 @@
 
 package de.jreality.toolsystem;
 
-import java.util.Iterator;
-
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.event.ToolEvent;
@@ -106,26 +104,36 @@ public class ToolUpdateProxy {
 
     protected void addTreeNode(SceneTreeNode tn) {
       super.addTreeNode(tn);
-      if (toolSystem != null) for (Iterator i = comp.getTools().iterator(); i.hasNext();)
-        toolSystem.addTool((Tool) i.next(), tn.toPath());
+      if (toolSystem != null) {
+    	  for (Tool tool : comp.getTools()) {
+    		  toolSystem.addTool(tool, tn.toPath());
+    	  }
+      }
     }
 
     protected void removeTreeNode(SceneTreeNode tn) {
       super.removeTreeNode(tn);
-      if (toolSystem != null) for (Iterator i = comp.getTools().iterator(); i.hasNext();)
-        toolSystem.removeTool((Tool) i.next(), tn.toPath());
+      if (toolSystem != null) {
+    	  for (Tool tool : comp.getTools()) {
+    		  toolSystem.removeTool(tool, tn.toPath());
+    	  }
+      }
     }
 
     public void toolAdded(ToolEvent ev) {
-      if (toolSystem != null) for (Iterator i = getTreeNodes(); i.hasNext();) {
-        toolSystem.addTool(ev.getTool(), ((SceneTreeNode) i.next()).toPath());
+      if (toolSystem != null) {
+    	  for (SceneTreeNode node : getTreeNodes()) {
+    		  toolSystem.addTool(ev.getTool(), node.toPath());
+    	  }
       }
     }
 
     public void toolRemoved(ToolEvent ev) {
-      if (toolSystem != null) for (Iterator i = getTreeNodes(); i.hasNext();) {
-        toolSystem.removeTool(ev.getTool(), ((SceneTreeNode) i.next()).toPath());
-      }
+    	if (toolSystem != null) {
+    		for (SceneTreeNode node : getTreeNodes()) {
+    			toolSystem.removeTool(ev.getTool(), node.toPath());
+    		}
+    	}
     }
 
     protected void dispose() {
