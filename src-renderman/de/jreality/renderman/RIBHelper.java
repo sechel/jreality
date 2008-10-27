@@ -52,6 +52,7 @@ import de.jreality.shader.PolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 
 public class RIBHelper {
@@ -324,21 +325,7 @@ public class RIBHelper {
 	        
 	  if (true) {
 	   // TODO temporary as long as ImageData does not return a propper BufferedImage
-	   byte[] byteArray = data.getByteArray();
-	   int dataHeight = data.getHeight();
-	   int dataWidth = data.getWidth();
-	   img = new BufferedImage(dataWidth, dataHeight, BufferedImage.TYPE_INT_ARGB);
-	   WritableRaster raster = img.getRaster();
-	   int[] pix = new int[4];
-         for (int y = 0, ptr = 0; y < dataHeight; y++) {
-           for (int x = 0; x < dataWidth; x++, ptr += 4) {             
-             pix[0] = byteArray[ptr];
-             pix[1] = byteArray[ptr + 1];
-             pix[2] = byteArray[ptr + 2];
-             pix[3] = byteArray[ptr + 3]; 
-             raster.setPixel(x, y, pix);
-           }
-         }                      
+		  img = ImageUtility.getValidBufferedImage(data);
 	  } else {
 	   img = (BufferedImage) data.getImage();
 	  }
