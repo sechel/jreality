@@ -10,6 +10,10 @@ import de.jreality.scene.Viewer;
 
 public class AudioLauncher {
 
+	private static boolean TRY_JACK=true;
+	private static boolean PLANAR=false;
+	
+	
 	private AudioLauncher() {}
 	
 	/**
@@ -20,23 +24,26 @@ public class AudioLauncher {
 	 * @return flag indicating whether a sound renderer was successfully launched.
 	 */
 	public static boolean launch(Viewer v) {
-		Class<?> jackrenderer = null;
-		try {
-			jackrenderer = Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer");
-		} catch (ClassNotFoundException e1) {
-			// ignore this, just use java sound.
+		if (TRY_JACK) {
+			Class<?> jackrenderer = null;
+			try {
+				String classname = PLANAR ? "de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer" : "de.jreality.audio.jack.JackAmbisonicsRenderer";
+				jackrenderer = Class.forName(classname);
+			} catch (ClassNotFoundException e1) {
+				// ignore this, just use java sound.
+			}
+			if (jackrenderer != null) try {
+				new Statement(jackrenderer, "launch", new Object[]{v}).execute();
+				System.out.println("Jack launch OK.");
+				return true;
+			} catch (Exception e) {
+				System.err.println("Jack launch FAILED (fallback to java sound):");
+				e.printStackTrace();
+			}
 		}
-		if (jackrenderer != null) try {
-			new Statement(jackrenderer, "launch", new Object[]{v}).execute();
-			System.out.println("Jack launch OK.");
-			return true;
-		} catch (Exception e) {
-			System.err.println("Jack launch FAILED (fallback to java sound):");
-			e.printStackTrace();
-		}
 		try {
-			JavaAmbisonicsStereoDecoder.launch(v);
-			//VbapSurroundRenderer.launch(v);
+			//JavaAmbisonicsStereoDecoder.launch(v);
+			VbapSurroundRenderer.launch(v);
 			return true;
 		} catch (LineUnavailableException e) {
 			// TODO Auto-generated catch block
