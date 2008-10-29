@@ -1,7 +1,10 @@
 package de.jreality.audio.jack;
 
+import java.nio.FloatBuffer;
+
 import de.gulden.framework.jjack.JJackAudioEvent;
-import de.jreality.audio.AmbisonicsVisitor;
+import de.jreality.audio.AmbisonicsSoundEncoder;
+import de.jreality.audio.AudioBackend;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
@@ -17,30 +20,16 @@ import de.jreality.scene.Viewer;
  * @author brinkman
  *
  */
-public class JackAmbisonicsRenderer implements JackSink {
+public class JackAmbisonicsRenderer extends AmbisonicsSoundEncoder implements JackSink {
 
-	private AmbisonicsVisitor visitor = null;
+	private AudioBackend backend;
+	
 	private SceneGraphComponent root;
 	private SceneGraphPath microphonePath;
-	
-	private float bw[];
-	private float bx[];
-	private float by[];
-	private float bz[];
-	
-	public JackAmbisonicsRenderer() {
-		// do nothing
-	}
 	
 	public void setRootAndMicrophonePath(SceneGraphComponent root, SceneGraphPath microphonePath) {
 		this.root = root;
 		this.microphonePath = microphonePath;
-		if (visitor != null) {
-			synchronized(this) {
-				visitor.setRoot(root);
-				visitor.setMicrophonePath(microphonePath);
-			}
-		}
 	}
 	
 	public int highestPort() {
@@ -48,31 +37,39 @@ public class JackAmbisonicsRenderer implements JackSink {
 	}
 
 	public void init(int sampleRate) {
-		visitor = new AmbisonicsVisitor(sampleRate);
-		visitor.setRoot(root);
-		visitor.setMicrophonePath(microphonePath);
-		
-		bw = new float[sampleRate];  // way too big, but we don't care
-		bx = new float[sampleRate];
-		by = new float[sampleRate];
-		bz = new float[sampleRate];
+		backend=new AudioBackend(root, microphonePath, sampleRate);
 	}
 
+	FloatBuffer outbufW;
+	FloatBuffer outbufX;
+	FloatBuffer outbufY;
+	FloatBuffer outbufZ;
+	
 	public void process(JJackAudioEvent ev) {
+
+		outbufW=ev.getOutput(0);
+		outbufX=ev.getOutput(1);
+		outbufY=ev.getOutput(2);
+		outbufZ=ev.getOutput(3);
+
 		int frameSize = ev.getOutput().capacity();
-		synchronized(this) {
-			visitor.collateAmbisonics(bw, bx, by, bz, frameSize);
-		}
-		ev.getOutput(0).put(bw, 0, frameSize);
-		ev.getOutput(1).put(bx, 0, frameSize);
-		ev.getOutput(2).put(by, 0, frameSize);
-		ev.getOutput(3).put(bz, 0, frameSize);
+
+		backend.encodeSound(this, frameSize);
+
 	}
 
+	@Override
+	public void finishFrame() {
+		outbufW.put(bw);
+		outbufX.put(bx);
+		outbufY.put(by);
+		outbufZ.put(bz);
+	}
+	
 	public static void launch(Viewer viewer) {
 		JackAmbisonicsRenderer renderer = new JackAmbisonicsRenderer();
 		renderer.setRootAndMicrophonePath(viewer.getSceneRoot(), viewer.getCameraPath());
-		
+
 		JackHub.setSink(renderer);
 		JackHub.initializeClient("jrAmbisonics");
 	}

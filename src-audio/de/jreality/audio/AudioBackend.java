@@ -35,7 +35,6 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		private SceneGraphPath path;
 
 		Matrix previousPosition;
-		EffectiveAppearance eapp;
 		
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
@@ -50,11 +49,10 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			}
 			if (path == null) {
 				path = toPath();
-				eapp = EffectiveAppearance.create(path);
 				previousPosition = new Matrix();
 				path.getMatrix(previousPosition.getArray());
 				previousPosition.multiplyOnLeft(micInvMatrix);
-			}	
+			}
 		}
 		
 		void encodeSound(SoundEncoder enc, int frameSize) {
@@ -64,6 +62,12 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			previousPosition.multiplyOnLeft(micInvMatrix);
 			p1.assignFrom(previousPosition);
 			int read = reader.read(sampleBuffer, 0, frameSize);
+			
+			// TODO: use a SceneGraphPathObserver to create a new EffectiveAppearance
+			// only when appearances were added/removed along the path.
+			// TODO: For this we need to extend SceneGraphPathObserver.
+			soundPath.setFromEffectiveAppearance(EffectiveAppearance.create(path));
+			
 			soundPath.processSamples(sampleBuffer, read, p0, p1);
 			enc.encodeSignal(sampleBuffer, read, p0, p1);
 		}

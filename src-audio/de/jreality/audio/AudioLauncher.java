@@ -5,6 +5,7 @@ import java.beans.Statement;
 import javax.sound.sampled.LineUnavailableException;
 
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
+import de.jreality.audio.javasound.VbapSurroundRenderer;
 import de.jreality.scene.Viewer;
 
 public class AudioLauncher {
@@ -35,6 +36,7 @@ public class AudioLauncher {
 		}
 		try {
 			JavaAmbisonicsStereoDecoder.launch(v);
+			//VbapSurroundRenderer.launch(v);
 			return true;
 		} catch (LineUnavailableException e) {
 			// TODO Auto-generated catch block
