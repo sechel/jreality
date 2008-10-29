@@ -33,10 +33,6 @@ public abstract class AudioSource extends SceneGraphNode {
 		super(name);
 	}	
  
-	// to be called when instance is permanently removed from scene graph
-	// TODO: i think this method should not be here - steffen.
-	public void dispose() {}
-	
 	public int getSampleRate() {
 		return sampleRate;  // need sync?
 	}
@@ -100,7 +96,9 @@ public abstract class AudioSource extends SceneGraphNode {
 	}
 
 	// reset audio engine; no sync necessary, only to be called from stop method
-	protected abstract void reset();
+	protected void reset() {
+		// default: do nothing
+	}
 
 	// write _at least_ n samples to ringBuffer if available, no sync necessary
 	protected abstract void writeSamples(int n);
