@@ -13,6 +13,7 @@ import javax.sound.sampled.Mixer.Info;
 import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AmbisonicsVisitor;
 import de.jreality.audio.AudioBackend;
+import de.jreality.audio.util.Limiter;
 import de.jreality.scene.Viewer;
 
 /**
@@ -81,50 +82,19 @@ public class JavaAmbisonicsStereoDecoder {
 	}
 		
 
-	private static final double RELEASE_FACTOR = 0.99;
-	private static final int HOLD_COUNT = 16;
-	float maxSignal=1f;
-	int holdcnt;
+	Limiter limiter = new Limiter();
 	
 	public void renderAmbisonicsLimited(float[] wBuf, float[] xBuf, float[] yBuf, float[] zBuf) {
-		
-		float nextFrameMaxSignal = maxSignal;
 		
 		for (int i = 0; i < framesize; i++) {
 			float w = wBuf[i] * W_SCALE;
 			float y = yBuf[i] * Y_SCALE;
 			fbuffer_lookAhead[2*i]=w+y;
 			fbuffer_lookAhead[2*i+1]=w-y;
-			float abs = Math.abs(w)+Math.abs(y);
-			if (abs > nextFrameMaxSignal) {
-				nextFrameMaxSignal=abs;
-				holdcnt=HOLD_COUNT;
-			}
 		}
-		
-		boolean rampUp = (nextFrameMaxSignal > maxSignal);
 
-		float delta = Math.abs(nextFrameMaxSignal-maxSignal);
+		limiter.limit(fbuffer, fbuffer_lookAhead);
 		
-		float dd=0;
-		if (!rampUp) {
-			if (holdcnt == 0 && maxSignal > 1f) {
-				//start ramp down...
-				delta = - (float) (maxSignal*(1-RELEASE_FACTOR));
-				dd = delta/framesize;
-			} else {
-				holdcnt--;
-			}
-		} else {
-			dd = delta/framesize;
-		}
-		
-		for (int i=0; i<framesize; i++) {
-			if (maxSignal >= 1) maxSignal+=dd;
-			else maxSignal = 1;
-			fbuffer[2*i]/=maxSignal;
-			fbuffer[2*i+1]/=maxSignal;
-		}
 		floatToByte(buffer, fbuffer, BIG_ENDIAN);
 		stereoOut.write(buffer, 0, byteLen);
 		

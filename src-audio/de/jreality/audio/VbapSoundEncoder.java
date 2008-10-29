@@ -11,7 +11,7 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 	int channels;
 	
 	List<float[]> speakerInverseMatrices = new ArrayList<float[]>();
-	List<float[]> speakerMatrices = new ArrayList<float[]>();
+	double[][] speakers;
 	float[] speakerDistances;
 	
 	protected float[] buf;
@@ -24,9 +24,22 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 	 * in cyclic order.
 	 * @param channelIDs the corresponding channel IDs for the given speakers.
 	 */
-	public VbapSoundEncoder(double[][] speakers, int[] channelIDs) {
-		channels = channelIDs.length;
-		this.channelIDs = channelIDs;
+	public VbapSoundEncoder(int numSpeakers, double[][] speakers, int[] channelIDs) {
+		this.channels=numSpeakers;
+		setSpeakerIDs(channelIDs);
+		setSpeakerPositions(speakers);
+	}
+	
+	public synchronized void setSpeakerPositions(double[][] speakers) {
+		System.out.println("new speaker pos: "+Arrays.toString(speakers));
+		
+		speakerInverseMatrices.clear();
+		
+		this.speakers=speakers;
+		for (int i=0; i<channels; i++) {
+			this.speakers[i][0]=speakers[i][0];
+			this.speakers[i][1]=speakers[i][1];
+		}
 		speakerDistances = new float[channels];
 		float maxDist=0;
 		for (int i=0; i<channels; i++) {
@@ -38,15 +51,26 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 			double d = 1./(m[0]*m[3]-m[1]*m[2]);
 			float[] mi = new float[]{(float) (d*m[3]), (float) (-d*m[1]), (float) (-d*m[2]), (float) (d*m[0])};
 			speakerInverseMatrices.add(mi);
-			speakerMatrices.add(m);
 			speakerDistances[i]=n1;
 			maxDist=Math.max(maxDist, n1);
 		}
 		for (int i=0; i<channels; i++) speakerDistances[i]/=maxDist;
 	}
+
+	public synchronized double[][] getSpeakerPositions() {
+		return speakers;
+	}
+	
+	public synchronized int[] getSpeakerIDs() {
+		return channelIDs;
+	}
+	
+	public synchronized void setSpeakerIDs(int[] channelIDs) {
+		this.channelIDs = channelIDs;
+	}
 	
 	@Override
-	public void encodeSignal(float[] samples, int nSamples, Matrix p0, Matrix p1) {
+	public synchronized void encodeSignal(float[] samples, int nSamples, Matrix p0, Matrix p1) {
 		
 		// read start and dest directions from matrices: 
 		float x0 = (float) p0.getEntry(0, 3);

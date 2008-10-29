@@ -10,9 +10,9 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.Mixer.Info;
 
-import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.VbapSoundEncoder;
+import de.jreality.audio.util.Limiter;
 import de.jreality.scene.Viewer;
 
 public class VbapSurroundRenderer {
@@ -24,7 +24,13 @@ public class VbapSurroundRenderer {
 	private int byteLen;
 	private int channels=5;
 	
+	float[] fbuffer;
+	float[] fbuffer_lookAhead;
+	
 	public VbapSurroundRenderer(int framesize) throws LineUnavailableException {
+		fbuffer = new float[channels*framesize];
+		fbuffer_lookAhead = new float[channels*framesize];
+		
 		byteLen = framesize * channels * 2; // channels * 2 bytes per sample
 		buffer = new byte[byteLen];
 		
@@ -53,14 +59,20 @@ public class VbapSurroundRenderer {
 		surroundOut.start();
 	}
 	
+	Limiter limiter = new Limiter();
+	
 	public void render(float[] surroundSamples) {
-		JavaAmbisonicsStereoDecoder.floatToByte(buffer, surroundSamples, BIG_ENDIAN);
+		System.arraycopy(surroundSamples, 0, fbuffer_lookAhead, 0, surroundSamples.length);
+		limiter.limit(fbuffer, fbuffer_lookAhead);
+		JavaAmbisonicsStereoDecoder.floatToByte(buffer, fbuffer, BIG_ENDIAN);
 		surroundOut.write(buffer, 0, byteLen);
+		// swap buffers
+		float[] tmpF = fbuffer;
+		fbuffer = fbuffer_lookAhead;
+		fbuffer_lookAhead = tmpF;
 	}
 	
 	public static void launch(Viewer viewer) throws LineUnavailableException {
-		
-		double sqr = Math.sqrt(0.5);
 		
 		double[][] speakers = new double[][]{
 				{0.5, 0},
@@ -78,23 +90,25 @@ public class VbapSurroundRenderer {
 		
 		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), SAMPLE_RATE);
 
-		final VbapSoundEncoder enc = new VbapSoundEncoder(speakers, channelIDs) {
+		final VbapSoundEncoder enc = new VbapSoundEncoder(speakers.length, speakers, channelIDs) {
 
-			long st;
-			@Override
-			public void startFrame(int framesize) {
-				super.startFrame(framesize);
-				st=System.currentTimeMillis();
-			}
 			@Override
 			public void finishFrame() {
-				long dt = System.currentTimeMillis()-st;
-				//System.out.println("dt="+dt);
-				//System.out.println("buf="+Arrays.toString(buf));
 				dec.render(buf);
 			}
 			
 		};
+		
+		/*
+		
+		// Visual Editor for speaker positions, uses java2d, java2dx, modelling.
+		
+		VbapSpeakerEditor editor = new VbapSpeakerEditor(enc);
+		JFrame f = new JFrame("VBAP Speakers");
+		f.setSize(800, 600);
+		f.getContentPane().add(editor);
+		f.setVisible(true);
+		*/
 		
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
