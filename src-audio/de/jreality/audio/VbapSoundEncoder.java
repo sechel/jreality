@@ -69,7 +69,6 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 		this.channelIDs = channelIDs;
 	}
 	
-	@Override
 	public synchronized void encodeSignal(float[] samples, int nSamples, Matrix p0, Matrix p1) {
 		
 		// read start and dest directions from matrices: 
@@ -131,7 +130,6 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 
 	public abstract void finishFrame();
 
-	@Override
 	public void startFrame(int framesize) {
 		if (buf == null || buf.length != framesize*channels) buf = new float[framesize*channels];
 		else Arrays.fill(buf, 0f);

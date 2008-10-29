@@ -8,7 +8,6 @@ public class InstantSoundPath implements SoundPath {
 	boolean distanceFalloff=false;
 	float gain=1f;
 	
-	@Override
 	public int processSamples(float[] samples, int nSamples, Matrix p0, Matrix p1) {
 	
 		if (distanceFalloff) {
@@ -39,7 +38,6 @@ public class InstantSoundPath implements SoundPath {
 		return nSamples;
 	}	
 
-	@Override
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
 		distanceFalloff = eapp.getAttribute("volumeAttenuation", true);
 		gain = eapp.getAttribute("volumeCoefficient", 1f);
