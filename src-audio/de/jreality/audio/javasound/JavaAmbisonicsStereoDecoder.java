@@ -10,7 +10,9 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.Mixer.Info;
 
+import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AmbisonicsVisitor;
+import de.jreality.audio.AudioBackend;
 import de.jreality.scene.Viewer;
 
 /**
@@ -109,6 +111,7 @@ public class JavaAmbisonicsStereoDecoder {
 			if (holdcnt == 0 && maxSignal > 1f) {
 				//start ramp down...
 				delta = - (float) (maxSignal*(1-RELEASE_FACTOR));
+				dd = delta/framesize;
 			} else {
 				holdcnt--;
 			}
@@ -122,7 +125,7 @@ public class JavaAmbisonicsStereoDecoder {
 			fbuffer[2*i]/=maxSignal;
 			fbuffer[2*i+1]/=maxSignal;
 		}
-		floatToByte(buffer, fbuffer);
+		floatToByte(buffer, fbuffer, BIG_ENDIAN);
 		stereoOut.write(buffer, 0, byteLen);
 		
 		// swap buffers
@@ -138,7 +141,7 @@ public class JavaAmbisonicsStereoDecoder {
 			fbuffer[2*i]=w+y;
 			fbuffer[2*i+1]=w-y;
 		}
-		floatToByte(buffer, fbuffer);
+		floatToByte(buffer, fbuffer, BIG_ENDIAN);
 		stereoOut.write(buffer, 0, byteLen);
 	}
 	
@@ -150,10 +153,10 @@ public class JavaAmbisonicsStereoDecoder {
 	 * @param dbuf
 	 *            User provided float array to convert.
 	 */
-	static final public void floatToByte(byte[] byteSound, float[] dbuf) {
+	static final public void floatToByte(byte[] byteSound, float[] dbuf, boolean bigEndian) {
 		int bufsz = dbuf.length;
 		int ib = 0;
-		if (BIG_ENDIAN) {
+		if (bigEndian) {
 			for (int i = 0; i < bufsz; i++) {
 				short y = (short) (32767. * dbuf[i]);
 				byteSound[ib] = (byte) (y >> 8);
@@ -182,6 +185,46 @@ public class JavaAmbisonicsStereoDecoder {
 		final int frameSize = 1024;
 
 		final JavaAmbisonicsStereoDecoder dec = new JavaAmbisonicsStereoDecoder(frameSize);
+		
+		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), SAMPLE_RATE);
+
+		final AmbisonicsSoundEncoder enc = new AmbisonicsSoundEncoder() {
+
+			long st;
+			@Override
+			public void startFrame(int framesize) {
+				super.startFrame(framesize);
+				st=System.currentTimeMillis();
+			}
+			@Override
+			public void finishFrame() {
+				long dt = System.currentTimeMillis()-st;
+				System.out.println("dt="+dt);
+				dec.renderAmbisonics(bw, bx, by, bz);
+			}
+			
+		};
+		
+		Runnable soundRenderer = new Runnable() {
+			public void run() {
+				while (true) {
+					backend.encodeSound(enc, frameSize);
+					
+				}
+			}
+		};
+
+		Thread soundThread = new Thread(soundRenderer);
+		soundThread.setName("jReality audio renderer");
+		soundThread.setPriority(Thread.MAX_PRIORITY);
+		soundThread.start();
+	}
+
+	public static void launchOld(Viewer viewer) throws LineUnavailableException {
+		
+		final int frameSize = 1024;
+
+		final JavaAmbisonicsStereoDecoder dec = new JavaAmbisonicsStereoDecoder(frameSize);
 		final AmbisonicsVisitor ambiVisitor = new AmbisonicsVisitor(dec.getSamplerate());
 		ambiVisitor.setRoot(viewer.getSceneRoot());
 		ambiVisitor.setMicrophonePath(viewer.getCameraPath());
@@ -194,8 +237,11 @@ public class JavaAmbisonicsStereoDecoder {
 		
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
+				long st;
 				while (true) {
+					st=System.currentTimeMillis();
 					ambiVisitor.collateAmbisonics(bw, bx, by, bz, frameSize);
+					System.out.println("dt="+(System.currentTimeMillis()-st));
 					dec.renderAmbisonics(bw, bx, by, bz);
 				}
 			}
