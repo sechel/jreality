@@ -189,17 +189,8 @@ public class JavaAmbisonicsStereoDecoder {
 		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), SAMPLE_RATE);
 
 		final AmbisonicsSoundEncoder enc = new AmbisonicsSoundEncoder() {
-
-			long st;
-			@Override
-			public void startFrame(int framesize) {
-				super.startFrame(framesize);
-				st=System.currentTimeMillis();
-			}
 			@Override
 			public void finishFrame() {
-				long dt = System.currentTimeMillis()-st;
-				System.out.println("dt="+dt);
 				dec.renderAmbisonics(bw, bx, by, bz);
 			}
 			
