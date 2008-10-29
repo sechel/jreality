@@ -52,10 +52,6 @@ public abstract class AudioSource extends SceneGraphNode {
 	
 	/**
 	 * set the state of the node.
-	 * 
-	 * TODO: 1. is stop a reasonable state for a basic audio source/what if reset is not possible?
-	 *       2. do we need the explicit start/pause/stop methods? for one property a setter should be enough
-	 *       3. think of a DISPOSED-state vs. public dispose()-method (if we _really_ need that)
 	 *       
 	 * @param state set the state of the audio source
 	 */
