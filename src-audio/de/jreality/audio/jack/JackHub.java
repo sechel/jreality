@@ -1,6 +1,8 @@
 package de.jreality.audio.jack;
 
+import java.lang.ref.WeakReference;
 import java.nio.FloatBuffer;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,9 +23,10 @@ import de.gulden.framework.jjack.JJackSystem;
  */
 public final class JackHub implements JJackAudioProcessor {
 
+	
 	private static final JackHub hub = new JackHub();
 	
-	private List<JackSource> sources = new LinkedList<JackSource>();
+	private List<WeakReference<JackSource>> sources = new LinkedList<WeakReference<JackSource>>();
 	private JackSink sink = null;
 	private int sampleRate = 0;
 
@@ -40,11 +43,23 @@ public final class JackHub implements JJackAudioProcessor {
 	
 	public void process(JJackAudioEvent ev) {;
 		FloatBuffer inputs[] = ev.getInputs();
-		for(JackSource source: sources) {
+		boolean disposedSources=false;
+		for(WeakReference<JackSource> ref: sources) {
 			try {
-				source.process(inputs);
+				JackSource source = ref.get();
+				if (source != null) {
+					source.process(inputs);
+				} else {
+					disposedSources=true;
+				}
 			} catch (Exception e) {
 				// silent failures aren't nice, but we can't risk zombifying the jack client
+			}
+		}
+		if (disposedSources) {
+			for (Iterator<WeakReference<JackSource>> iter = sources.iterator(); iter.hasNext(); ) {
+				WeakReference<JackSource> ref = iter.next();
+				if (ref.get() == null) iter.remove();
 			}
 		}
 		if (sink!=null) {
@@ -64,11 +79,18 @@ public final class JackHub implements JJackAudioProcessor {
 				throw new IllegalStateException("highest port out of range (can't add input ports after initialization)");
 			}
 		}
-		return hub.sources.add(source);
+		return hub.sources.add(new WeakReference<JackSource>(source));
 	}
 	
 	public static synchronized boolean removeSource(JackSource source) {
-		return hub.sources.remove(source);
+		for (Iterator<WeakReference<JackSource>> iter = hub.sources.iterator(); iter.hasNext(); ) {
+			WeakReference<JackSource> src = iter.next();
+			if (src.get() == source) {
+				iter.remove();
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static synchronized void setSink(JackSink sink) {
@@ -87,7 +109,9 @@ public final class JackHub implements JJackAudioProcessor {
 			throw new IllegalStateException("jack client is already initialized");
 		}
 		
-		for(JackSource source: hub.sources) {
+		for(WeakReference<JackSource> ref : hub.sources) {
+			JackSource source = ref.get();
+			if (source == null) continue;
 			int n = source.highestPort();
 			if (n>highestInPort) {
 				highestInPort = n;
@@ -102,7 +126,9 @@ public final class JackHub implements JJackAudioProcessor {
 		
 		// then we can initialize JJackSystem
 		hub.sampleRate = JJackSystem.getSampleRate();
-		for(JackSource source: hub.sources) {
+		for(WeakReference<JackSource> ref : hub.sources) {
+			JackSource source = ref.get();
+			if (source == null) continue;
 			source.init(hub.sampleRate);
 		}
 		if (hub.sink!=null) {
