@@ -20,11 +20,11 @@ import de.jreality.scene.event.TransformationListener;
 public class JOGLLightHelper {
 
 	private  double mat[] = new double[16];
+	private transient double[][] matlist;
 	private  int lightCount = GL.GL_LIGHT0;
 	private  GL lightGL = null;
 	private  int maxLights = 8;
 	protected JOGLRenderer jr;
-	
 	protected JOGLLightHelper(JOGLRenderer r)	{
 		jr = r;
 	}
@@ -59,6 +59,8 @@ public class JOGLLightHelper {
 					0.0f);
 			globalGL.glDisable(GL.GL_LIGHT0 + i);
 		}
+		int n = lights.size();
+		for (int i = 8; i<n; ++i)	lights.remove(i);
 		for (SceneGraphPath sgp : lights)	{
 			SceneGraphPathObserver sgpo = new SceneGraphPathObserver(sgp);
 			sgpo.addTransformationListener(new TransformationListener() {
@@ -70,8 +72,23 @@ public class JOGLLightHelper {
 			});
 			lightListeners.put(sgp, sgpo);
 		}
+		cacheLightMatrices(lights);
 	}
 
+	protected void cacheLightMatrices( List<SceneGraphPath> lights)	{
+		int n = lights.size();
+		matlist = new double[n][16];
+		for (int i = 0; i < n; ++i) {
+			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
+			SceneGraphNode light = lp.getLastElement();
+			if (!(light instanceof Light)) {
+				JOGLConfiguration.theLog.warning("Invalid light path: no light there");
+				continue;
+			}
+			lp.getMatrix(matlist[i]);
+		}
+
+	}
 	protected void disposeLights() {
 		for (SceneGraphPathObserver obs : lightListeners.values())	{
 			obs.dispose();
@@ -89,24 +106,12 @@ public class JOGLLightHelper {
 		lightGL = globalGL;
 		int n = lights.size();
 		for (int i = 0; i < n; ++i) {
-			SceneGraphPath lp = (SceneGraphPath) lights.get(i);
-			SceneGraphNode light = lp.getLastElement();
-			if (!(light instanceof Light)) {
-				JOGLConfiguration.theLog
-						.warning("Invalid light path: no light there");
-				continue;
-			}
-			lp.getMatrix(mat);
+			SceneGraphNode light = lights.get(i).getLastElement();
 			globalGL.glPushMatrix();
-			globalGL.glMultTransposeMatrixd(mat, 0);
+			globalGL.glMultTransposeMatrixd(matlist[i], 0);
 			light.accept(ogllv);
 			globalGL.glPopMatrix();
 			lightCount++;
-			if (lightCount > GL.GL_LIGHT7) {
-				JOGLConfiguration.theLog.log(Level.WARNING,
-						"Max. # lights exceeded");
-				break;
-			}
 		}
 	}
 
