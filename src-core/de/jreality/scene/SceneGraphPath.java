@@ -196,6 +196,10 @@ public class SceneGraphPath implements Cloneable {
 		return ret;
 	}
 
+	public boolean contains(SceneGraphNode n)	{
+		return path.contains(n);
+	}
+	
 	public SceneGraphNode getFirstElement() {
 		return (SceneGraphNode) path.getFirst();
 	}
