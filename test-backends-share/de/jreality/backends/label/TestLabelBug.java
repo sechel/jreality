@@ -68,7 +68,7 @@ public class TestLabelBug {
 		      e.printStackTrace();
 		    }
 		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
-		ilsf.setLineCount(12);
+		ilsf.setEdgeCount(12);
 		ilsf.setVertexCount(8);
 		ilsf.setEdgeIndices(lines);
 		ilsf.setVertexCoordinates(pts);

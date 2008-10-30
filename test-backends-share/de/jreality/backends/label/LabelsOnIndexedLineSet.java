@@ -92,7 +92,7 @@ public class LabelsOnIndexedLineSet {
 		ilsf.setVertexCount(8);
 		ilsf.setVertexCoordinates(ils.getVertexAttributes(Attribute.COORDINATES));
 		int[][] edges = {{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{7,0}};
-		ilsf.setLineCount(8);
+		ilsf.setEdgeCount(8);
 		ilsf.setEdgeIndices(edges);
 		ilsf.update();
 		label(ilsf.getIndexedLineSet());
