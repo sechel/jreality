@@ -122,7 +122,7 @@ public class DebugLattice  {
         IndexedLineSetFactory ifsf = new IndexedLineSetFactory();
         ifsf.setVertexCount(total);
         ifsf.setVertexCoordinates(verts);
-        ifsf.setLineCount(edges.length);
+        ifsf.setEdgeCount(edges.length);
         ifsf.setEdgeIndices(edges);
         ifsf.update();
         IndexedLineSet ils = ifsf.getIndexedLineSet();
