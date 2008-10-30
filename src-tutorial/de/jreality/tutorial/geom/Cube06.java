@@ -86,7 +86,7 @@ import de.jreality.util.CameraUtility;
     ifsf.setFaceCount( faceIndices.length);
     ifsf.setFaceIndices( faceIndices ); 
     ifsf.setFaceColors(faceColors);    
-    ifsf.setLineCount(edgeIndices.length);
+    ifsf.setEdgeCount(edgeIndices.length);
     ifsf.setEdgeIndices(edgeIndices);
     ifsf.setGenerateFaceNormals( true );
     ifsf.update();

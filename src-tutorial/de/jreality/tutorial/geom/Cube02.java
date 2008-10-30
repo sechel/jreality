@@ -60,7 +60,7 @@ public class Cube02 {
     
     ilsf.setVertexCount( vertices.length );
     ilsf.setVertexCoordinates( vertices );
-    ilsf.setLineCount(edgeIndices.length);
+    ilsf.setEdgeCount(edgeIndices.length);
     ilsf.setEdgeIndices(edgeIndices);
     
     ilsf.update();
