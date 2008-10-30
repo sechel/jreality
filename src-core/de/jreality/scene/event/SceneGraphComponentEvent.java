@@ -61,7 +61,8 @@ public class SceneGraphComponentEvent extends SceneEvent
   public static final int EVENT_TYPE_REMOVED            = 22;
   public static final int EVENT_TYPE_REPLACED           = 23;
   public static final int EVENT_TYPE_VISIBILITY_CHANGED = 24;
-  
+  public static final int EVENT_TYPE_PICKABILITY_CHANGED = 25;
+ 
   private final SceneGraphComponent component;
   private final SceneGraphNode oldChildElement, newChildElement;
   private final int            childIndex;
@@ -98,14 +99,14 @@ public class SceneGraphComponentEvent extends SceneEvent
     childType=nodeType(childNodeType);
   }
 
-  public SceneGraphComponentEvent(SceneGraphComponent source)
+  public SceneGraphComponentEvent(SceneGraphComponent source, int type)
     {
       super(source);
       component=source;
       oldChildElement=null;
       newChildElement=null;
       childIndex=0;
-      eventType=EVENT_TYPE_VISIBILITY_CHANGED;
+      eventType=type;
       childType=CHILD_TYPE_NONE;
     }
 
