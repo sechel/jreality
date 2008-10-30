@@ -65,7 +65,7 @@ public class RendermanTestScene {
 		IndexedLineSetFactory ils=new IndexedLineSetFactory();
 		ils.setVertexCount(8);
 		ils.setVertexCoordinates(new double[][] {{-2,2,0},{-2,-2,0},{2,-2,0},{2,2,0},{-3,3,1},{-3,0,1},{0,0,1},{0,3,1}});
-		ils.setLineCount(8);
+		ils.setEdgeCount(8);
 		ils.setEdgeIndices(new int[][]{{0,1},{1,2},{2,3},{3,0},{4,5},{5,6},{6,7},{7,4}});
 		ils.setVertexTextureCoordinates(new double[][] {{0,0},{0,1},{1,1},{1,0},{0,0},{0,1},{1,1},{1,0}});
 		ils.setVertexColors(new Color[] {Color.CYAN,Color.GRAY,Color.BLACK,Color.MAGENTA,Color.BLUE,Color.ORANGE,Color.PINK,Color.GREEN});
