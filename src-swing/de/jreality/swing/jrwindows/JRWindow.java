@@ -275,7 +275,7 @@ public class JRWindow {
 		IndexedLineSetFactory borders=new IndexedLineSetFactory();
 		borders.setVertexCount(4);
 		borders.setVertexCoordinates(cornerPos);
-		borders.setLineCount(4);
+		borders.setEdgeCount(4);
 		borders.setEdgeIndices(new int[][] {{0,1},{1,2},{2,3},{3,0}});
 		borders.update();
 		this.borders=borders.getIndexedLineSet();
