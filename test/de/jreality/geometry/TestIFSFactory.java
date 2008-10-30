@@ -21,7 +21,7 @@ public class TestIFSFactory extends TestCase {
 				borromeanRectFactory.setFaceIndices(jitterbugFaceIndices);	
 				borromeanRectFactory.setFaceColors(new double[][]{{1,0,0}});
 				borromeanRectFactory.setGenerateFaceNormals(true);
-				borromeanRectFactory.setLineCount(jitterbugSegmentIndices1.length);
+				borromeanRectFactory.setEdgeCount(jitterbugSegmentIndices1.length);
 				borromeanRectFactory.setEdgeIndices(jitterbugSegmentIndices1);
 				borromeanRectFactory.update();
 				borromeanRectFactory.getIndexedLineSet();			

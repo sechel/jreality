@@ -150,7 +150,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 			ifsf.setFaceCount(faceI.length);
 			ifsf.setFaceIndices(faceI);
 			ifsf.setFaceColors(fc);
-			ifsf.setLineCount(edgeI.length);
+			ifsf.setEdgeCount(edgeI.length);
 			ifsf.setEdgeIndices(edgeI);
 			if (j == 1) ifsf.setEdgeColors(edgeC);
 			ifsf.setGenerateEdgesFromFaces(false);
@@ -239,7 +239,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory.setFaceIndices(jitterbugFaceIndices);	
 		factory.setFaceColors(new double[][]{{0,1,0}});
 		factory.setGenerateFaceNormals(true);
-		factory.setLineCount(jitterbugSegmentIndices1.length);
+		factory.setEdgeCount(jitterbugSegmentIndices1.length);
 		factory.setEdgeIndices(jitterbugSegmentIndices1);
 		factory.update();
 		
@@ -283,7 +283,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		assertEquals( 12, ifs.getNumEdges() );
 		
 		try {
-		factory.setLineCount( edges.length );
+		factory.setEdgeCount( edges.length );
 		} catch( UnsupportedOperationException e ) {	
 		}
 		assertEquals( 12, ifs.getNumEdges() );
@@ -330,7 +330,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		
 		assertEquals( 0, ifs.getNumEdges() );
 		
-		factory.setLineCount( edges.length );
+		factory.setEdgeCount( edges.length );
 		factory.setEdgeIndices( edges );
 	}
 	

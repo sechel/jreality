@@ -102,7 +102,7 @@ public class IndexedLineSetFactoryTest extends TestCase {
 
 		factory.setVertexCount( 8 );
 		factory.setVertexCoordinates( vertices );
-		factory.setLineCount(6);
+		factory.setEdgeCount(6);
 		factory.setEdgeIndices( indices );
 		
 		factory.update();
@@ -123,7 +123,7 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		
 		factory.setVertexCount( 8 );
 		factory.setVertexCoordinates( vertices );
-		factory.setLineCount(6);
+		factory.setEdgeCount(6);
 		factory.setEdgeIndices( indices );
 		
 		factory.setGenerateEdgeLabels( true );
@@ -177,7 +177,7 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		double[][] pts = new double[10][3];
 		ilsf.setVertexCount(pts.length);
 		ilsf.setVertexCoordinates(pts);
-		ilsf.setLineCount(ind1.length);
+		ilsf.setEdgeCount(ind1.length);
 		ilsf.setEdgeIndices(ind1);
 		ilsf.update();
 
@@ -193,12 +193,12 @@ public class IndexedLineSetFactoryTest extends TestCase {
 
 
 		factory.setVertexCount( 8 );
-		factory.setLineCount( 6 );	
+		factory.setEdgeCount( 6 );	
 		factory.setVertexCoordinates( vertices );
 		factory.setEdgeIndices( indices );
 	    factory.setGenerateEdgeLabels(true);
 	    factory.setGenerateVertexLabels(true);
-		factory.setLineCount( 2 );
+		factory.setEdgeCount( 2 );
 		factory.setEdgeIndices( new int[][] {{0,1},{2,3}} );
 		factory.setEdgeColors( new Color[] {Color.RED, Color.YELLOW} );
 		//factory.setEdgeLabels( new String[] {"A","B"} );
