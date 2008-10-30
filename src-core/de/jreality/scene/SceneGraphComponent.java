@@ -80,7 +80,8 @@ public class SceneGraphComponent extends SceneGraphNode {
   private Light light;
   private Geometry geometry;
   private AudioSource audioSource;
-  private boolean visible = true;
+  private boolean visible = true,
+  	pickable = true;
   protected List<SceneGraphComponent> children = Collections.emptyList();
   protected List<Tool> tools = Collections.emptyList();
 
@@ -560,6 +561,33 @@ public class SceneGraphComponent extends SceneGraphNode {
     finishWriter();
   }
 
+  /**
+   * @return a boolean that indicates wether the geometry of this SceneGraphNode 
+   * and its children can be picked.
+   */
+  public boolean isPickable() {
+    startReader();
+    try {
+      return pickable;
+    } finally {
+      finishReader();
+    }
+  }
+  /**
+   * Sets the pickability of this SceneGraphComponent and its children. This
+   * flag affects picking calculations only .
+   * @param pickable sets wether this barnch of the scene graph should be pickable or not
+   */
+  public void setPickable(boolean newPickableState) {
+    checkReadOnly();
+    startWriter();
+    if (pickable != newPickableState) {
+      pickable=newPickableState;
+      firePickabilityChanged();
+    }
+    finishWriter();
+  }
+
   public void addSceneGraphComponentListener(SceneGraphComponentListener listener) {
     startReader();
     containerListener=SceneGraphComponentEventMulticaster.add(containerListener, listener);
@@ -606,9 +634,17 @@ public class SceneGraphComponent extends SceneGraphNode {
   void fireVisibilityChanged() {
     // we are in write lock
     if (containerListener == null) return;
-    final SceneGraphComponentEvent event = new SceneGraphComponentEvent(this);
+    final SceneGraphComponentEvent event = 
+    	new SceneGraphComponentEvent(this,SceneGraphComponentEvent.EVENT_TYPE_VISIBILITY_CHANGED);
     cachedEvents.add(event);
   }
+
+  void firePickabilityChanged() {
+	    if (containerListener == null) return;
+	    final SceneGraphComponentEvent event = 
+	    	new SceneGraphComponentEvent(this,SceneGraphComponentEvent.EVENT_TYPE_VISIBILITY_CHANGED);
+	    cachedEvents.add(event);
+	  }
 
   private void fire(SceneGraphComponentEvent event) {
     switch (event.getEventType()) {
