@@ -89,6 +89,7 @@ public class PickUtility {
    * If this isn't desired, use {@link #setPickable(SceneGraphComponent, boolean, boolean, boolean)}.
    * @param cmp
    * @param pickable
+   * @deprecated	Use {@link SceneGraphComponent#setPickable(boolean)}.
    */
   public static void setPickable(SceneGraphComponent cmp, final boolean pickable) {
 	  if (cmp.getAppearance() ==null) cmp.setAppearance(new Appearance());
