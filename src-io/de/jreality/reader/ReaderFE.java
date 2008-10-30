@@ -143,7 +143,7 @@ public class ReaderFE extends AbstractReader {
     }
     
     ifsf.setVertexCount(v.size());
-    ifsf.setLineCount(edges.size());
+    ifsf.setEdgeCount(edges.size());
     ifsf.setFaceCount(faces.size());
     ifsf.setVertexCoordinates(v.toArray(new double[0][]));
     ifsf.setEdgeIndices(edges.toArray(new int[0][]));
