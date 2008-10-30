@@ -89,7 +89,7 @@ public class IndexedLineSetUtility {
 		IndexedLineSetFactory ifsf = new IndexedLineSetFactory();
 		ifsf.setVertexCount(newVerts.length);
 		ifsf.setVertexCoordinates(newVerts);
-		ifsf.setLineCount(newIndices.length);
+		ifsf.setEdgeCount(newIndices.length);
 		ifsf.setEdgeIndices(newIndices);
 		ifsf.update();
 		return ifsf.getIndexedLineSet();

@@ -482,7 +482,7 @@ public class CoordinateSystemFactory {
 	
 		IndexedLineSetFactory lineLSF = new IndexedLineSetFactory();
 		lineLSF.setVertexCount(2);
-		lineLSF.setLineCount(1);
+		lineLSF.setEdgeCount(1);
 		lineLSF.setVertexCoordinates(new double[][]{min, max});
 		lineLSF.setEdgeIndices(new int[]{0,1});
 		lineLSF.update();
@@ -657,7 +657,7 @@ public class CoordinateSystemFactory {
 		for (double level=minLevel; level<=maxLevel; level=round(level+axisScale) ) {
 			newTick = new IndexedLineSetFactory();
 			newTick.setVertexCount(3);
-			newTick.setLineCount(2);
+			newTick.setEdgeCount(2);
 			newTick.setVertexCoordinates(new double[][]{{5,0,level},{0,0,level},{0,5,level}});
 			newTick.setEdgeIndices(new int[][]{{0,1},{1,2}});
 			newTick.update();
@@ -753,7 +753,7 @@ public class CoordinateSystemFactory {
 				//create line set
 				IndexedLineSetFactory fac = new IndexedLineSetFactory();
 				fac.setVertexCount(vertices.length);
-				fac.setLineCount(indices.length);
+				fac.setEdgeCount(indices.length);
 				fac.setVertexCoordinates(vertices);
 				fac.setEdgeIndices(indices);
 				fac.update();
@@ -846,7 +846,7 @@ public class CoordinateSystemFactory {
 		//create new IndexedLineSet
 		IndexedLineSetFactory fac = new IndexedLineSetFactory();
 		fac.setVertexCount(vertices.length/3);
-		fac.setLineCount(indices.length/2);
+		fac.setEdgeCount(indices.length/2);
 		fac.setVertexCoordinates(vertices);
 		fac.setEdgeIndices(indices);
 		fac.update();

@@ -92,13 +92,27 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		return (Integer)edgeCount.getObject();
 	}
 	
-	public int getLineCount() {
+	public int getEdgeCount() {
 		return noe();
 	}
 	
-	void setLineCount( int count ) {
+	void setEdgeCount( int count ) {
 		edge.setCount(count);
 		edgeCount.setObject(new Integer(count));
+	}
+	
+	/** 
+	 * @deprecated Use {@link #setEdgeCount(int)}.
+	 */
+	public int getLineCount() { 
+		return getEdgeCount();
+	}
+	
+	/**
+	 * @deprecated Use {@link #setEdgeCount(int)}.
+	 */
+	public void setLineCount(int count) {
+		setEdgeCount(count);
 	}
 	
 	protected void setEdgeAttribute( Attribute attr, DataList data ) {
@@ -206,8 +220,8 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		
 		super.updateImpl();
 		
-		if( ils.getNumEdges() != getLineCount() )
-			ils.setNumEdges( getLineCount() );
+		if( ils.getNumEdges() != getEdgeCount() )
+			ils.setNumEdges( getEdgeCount() );
 		
 		updateGeometryAttributeCathegory( edge );
 

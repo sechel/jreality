@@ -223,7 +223,7 @@ public class IndexedFaceSetUtility {
 		ifsf.setFaceCount(1);
 		ifsf.setVertexCoordinates(points);
 		ifsf.setFaceIndices(ind);
-		ifsf.setLineCount(1);
+		ifsf.setEdgeCount(1);
 		ind = new int[1][points.length+1];
 		for (int i = 0; i<=points.length; ++i)	ind[0][i] = (i%points.length);
 		ifsf.setEdgeIndices(ind);

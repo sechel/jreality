@@ -127,8 +127,8 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 	}
 	/* edge attributes */
 
-	public void setLineCount( int count ) {
-		super.setLineCount(count);
+	public void setEdgeCount( int count ) {
+		super.setEdgeCount(count);
 	}
 	
 	public void setEdgeIndices( int[][] data ) {

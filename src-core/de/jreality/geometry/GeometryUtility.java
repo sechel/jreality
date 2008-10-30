@@ -255,7 +255,7 @@ public class GeometryUtility {
 				// TODO find non-degenerate set of 3 vertices here also
 				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
 				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);	
-				Pn.setToLength(normal, normal, 1.0, signature);
+				Pn.setToLength(normal, normal, -1.0, signature);
 				for (int j = 0; j<3; ++j)	{
 					double[] point = (verts[indices[i][j]].length == 3) ? Pn.homogenize(null, verts[indices[i][j]]) : verts[indices[i][j]];
 				}

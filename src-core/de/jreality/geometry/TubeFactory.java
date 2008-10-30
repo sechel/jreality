@@ -649,7 +649,7 @@ public  class TubeFactory {
 			IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
 			ilsf.setVertexCount(4);
 			ilsf.setVertexCoordinates(axes);
-			ilsf.setLineCount(3);
+			ilsf.setEdgeCount(3);
 			ilsf.setEdgeIndices(axesIndices);
 			ilsf.setEdgeColors(axesColors);
 			ilsf.update();

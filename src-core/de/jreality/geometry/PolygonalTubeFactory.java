@@ -216,7 +216,6 @@ import de.jreality.util.LoggingSystem;
 			radii[0] = radius;
 		}
 		theTubeVertices = makeTube(theCurve, radii, crossSection, frameFieldType, closedCurve, signature, twists);
-//		System.err.println("PTF: frame type is "+frameFieldType);
 //		System.err.println("PTF: signature is "+signature);
 		qmf = new QuadMeshFactory();
 		qmf.setSignature(signature);

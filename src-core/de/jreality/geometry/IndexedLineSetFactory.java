@@ -128,8 +128,8 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 	
 	/* edge attributes */
 	
-	public void setLineCount( int count ) {
-		super.setLineCount(count);
+	public void setEdgeCount( int count ) {
+		super.setEdgeCount(count);
 	}
 	
     public void setEdgeIndices( DataList data ) {
