@@ -91,7 +91,7 @@ public class ScenePanel {
 		});
 
 		rack.setVertexCount(8);
-		rack.setLineCount(8);
+		rack.setEdgeCount(8);
 		rack.setEdgeIndices(rackEdgeIndices);
 		rackNode.setGeometry(rack.getIndexedLineSet());
 
