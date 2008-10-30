@@ -81,7 +81,7 @@ public class PointerDisplayTool extends AbstractTool {
 		
 		ilsf = new IndexedLineSetFactory();
 		ilsf.setVertexCount(2);
-		ilsf.setLineCount(1);
+		ilsf.setEdgeCount(1);
 		ilsf.setEdgeIndices(new int[]{0, 1});
 		cmp.setGeometry(ilsf.getGeometry());
 		setLength(1);
