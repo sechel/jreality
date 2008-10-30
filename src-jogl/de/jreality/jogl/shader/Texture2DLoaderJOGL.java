@@ -138,9 +138,6 @@ public class Texture2DLoaderJOGL {
     static boolean haveAutoMipmapGeneration, haveCheckedAutoMipmapGeneration;
     public static void render(GL gl, Texture2D tex, boolean mipmapped) {
 //    	System.err.println("rendering texture length "+tex.getImage().getByteArray().length);
-//        gl.glMatrixMode(GL.GL_TEXTURE);
-//        gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
-//        gl.glMatrixMode(GL.GL_MODELVIEW);  
  
       	ImageData image = tex.getImage();
     	if (image == null) return;
@@ -288,7 +285,7 @@ public class Texture2DLoaderJOGL {
 	                        GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
 	        	}
 	        	else {
-//	        		System.err.println("Building mipmaps");
+	        		System.err.println("Building mipmaps");
 	                GLU glu = new GLU();
 	                glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
 	              		  GL.GL_COMPRESSED_RGBA, 
@@ -429,9 +426,11 @@ public class Texture2DLoaderJOGL {
 			haveCheckedForAnisotropy = true;
 		}
         if (!haveCheckedAutoMipmapGeneration)	{
+        	String vendor = gl.glGetString(GL.GL_VENDOR);
+        	System.err.println("Vendor = "+vendor);
         	haveAutoMipmapGeneration =
-                (gl.isExtensionAvailable("GL_VERSION_1_4") ||
-                 gl.isExtensionAvailable("GL_SGIS_generate_mipmap"));
+                (vendor.startsWith("NVIDIA") && (gl.isExtensionAvailable("GL_VERSION_1_4") ||
+                 gl.isExtensionAvailable("GL_SGIS_generate_mipmap")));
         	haveCheckedAutoMipmapGeneration = true;
         	System.err.println("Have automipmap generation = "+haveAutoMipmapGeneration);
         }
