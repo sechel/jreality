@@ -77,6 +77,8 @@ public class VbapSurroundRenderer {
 		
 		
 		
+		/*
+
 		// Visual Editor for speaker positions, uses java2d, java2dx, modelling.
 		
 		de.jreality.audio.VbapSpeakerEditor editor = new de.jreality.audio.VbapSpeakerEditor(enc);
@@ -84,7 +86,8 @@ public class VbapSurroundRenderer {
 		f.setSize(800, 600);
 		f.getContentPane().add(editor);
 		f.setVisible(true);
-		
+
+		*/
 		
 		Runnable soundRenderer = new Runnable() {
 			public void run() {

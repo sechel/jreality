@@ -11,7 +11,7 @@ import de.jreality.scene.Viewer;
 
 public class AudioLauncher {
 
-	public static boolean TRY_JACK=false;
+	public static boolean TRY_JACK=true;
 	public static boolean PLANAR=false;
 	public static boolean TRY_5_1=false;
 	
