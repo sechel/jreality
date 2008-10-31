@@ -1,14 +1,8 @@
 package de.jreality.audio.javasound;
 
-import java.util.Arrays;
-
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.Mixer.Info;
 
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.VbapSoundEncoder;
@@ -17,8 +11,6 @@ import de.jreality.scene.Viewer;
 
 public class VbapSurroundRenderer {
 
-	private static final int SAMPLE_RATE = 44100;
-	private static final boolean BIG_ENDIAN = false;
 	SourceDataLine surroundOut;
 	byte[] buffer;
 	private int byteLen;
@@ -33,28 +25,12 @@ public class VbapSurroundRenderer {
 		
 		byteLen = framesize * channels * 2; // channels * 2 bytes per sample
 		buffer = new byte[byteLen];
-		
-		Info[] mixerInfos = AudioSystem.getMixerInfo();
-		System.out.println(Arrays.toString(mixerInfos));
-		Info info = mixerInfos[0];
-		Mixer mixer = AudioSystem.getMixer(info);
-		mixer.open();
 
-		AudioFormat audioFormat = new AudioFormat(
-					SAMPLE_RATE, // the number of samples per second
-					16, // the number of bits in each sample
-					channels, // the number of channels
-					true, // signed/unsigned PCM
-					BIG_ENDIAN); // big endian ?
+		AudioFormat outFormat = JavaSoundUtility.outputFormat(channels);
 		
-		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
-		if (!mixer.isLineSupported(dataLineInfo)) {
-			throw new RuntimeException("no source data line found.");
-		}
-	
-		surroundOut = (SourceDataLine) mixer.getLine(dataLineInfo);
+		surroundOut = JavaSoundUtility.createSourceDataLine(outFormat);
 
-		surroundOut.open(audioFormat, channels*byteLen);
+		surroundOut.open(outFormat, channels*byteLen);
 		System.out.println("surroundOut bufferSize="+surroundOut.getBufferSize());
 		surroundOut.start();
 	}
@@ -64,7 +40,7 @@ public class VbapSurroundRenderer {
 	public void render(float[] surroundSamples) {
 		System.arraycopy(surroundSamples, 0, fbuffer_lookAhead, 0, surroundSamples.length);
 		limiter.limit(fbuffer, fbuffer_lookAhead);
-		JavaAmbisonicsStereoDecoder.floatToByte(buffer, fbuffer, BIG_ENDIAN);
+		JavaSoundUtility.floatToByte(buffer, fbuffer);
 		surroundOut.write(buffer, 0, byteLen);
 		// swap buffers
 		float[] tmpF = fbuffer;
@@ -88,7 +64,7 @@ public class VbapSurroundRenderer {
 
 		final VbapSurroundRenderer dec = new VbapSurroundRenderer(frameSize);
 		
-		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), SAMPLE_RATE);
+		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), JavaSoundUtility.SAMPLE_RATE);
 
 		final VbapSoundEncoder enc = new VbapSoundEncoder(speakers.length, speakers, channelIDs) {
 
@@ -99,16 +75,16 @@ public class VbapSurroundRenderer {
 			
 		};
 		
-		/*
+		
 		
 		// Visual Editor for speaker positions, uses java2d, java2dx, modelling.
 		
-		VbapSpeakerEditor editor = new VbapSpeakerEditor(enc);
-		JFrame f = new JFrame("VBAP Speakers");
+		de.jreality.audio.VbapSpeakerEditor editor = new de.jreality.audio.VbapSpeakerEditor(enc);
+		javax.swing.JFrame f = new javax.swing.JFrame("VBAP Speakers");
 		f.setSize(800, 600);
 		f.getContentPane().add(editor);
 		f.setVisible(true);
-		*/
+		
 		
 		Runnable soundRenderer = new Runnable() {
 			public void run() {

@@ -11,7 +11,6 @@ import javax.sound.sampled.AudioFormat.Encoding;
 
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
-import de.jreality.scene.event.AudioEvent;
 import de.jreality.util.Input;
 
 /**
@@ -98,7 +97,7 @@ public class AudioInputStreamSource extends AudioSource {
 			
 			float[] fbuf = new float[nRequested];
 			for (int i=0; i<read; i++) {
-				fbuf[i] = CachedAudioInputStreamSource.getFloat(buf, frameSize*i, bytesPerSample, false);
+				fbuf[i] = JavaSoundUtility.getFloat(buf, frameSize*i, bytesPerSample, false);
 			}
 			ringBuffer.write(fbuf, 0, read);
 		} catch (IOException e) {
