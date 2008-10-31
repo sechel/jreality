@@ -5,14 +5,15 @@ import java.beans.Statement;
 import javax.sound.sampled.LineUnavailableException;
 
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
+import de.jreality.audio.javasound.JavaSoundUtility;
 import de.jreality.audio.javasound.VbapSurroundRenderer;
 import de.jreality.scene.Viewer;
 
 public class AudioLauncher {
 
-	private static boolean TRY_JACK=true;
-	private static boolean PLANAR=false;
-	
+	public static boolean TRY_JACK=false;
+	public static boolean PLANAR=false;
+	public static boolean TRY_5_1=false;
 	
 	private AudioLauncher() {}
 	
@@ -27,8 +28,13 @@ public class AudioLauncher {
 		if (TRY_JACK) {
 			Class<?> jackrenderer = null;
 			try {
-				String classname = PLANAR ? "de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer" : "de.jreality.audio.jack.JackAmbisonicsRenderer";
+				
+				String classname = PLANAR ? 
+			"de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer"
+		:	"de.jreality.audio.jack.JackAmbisonicsRenderer";
+				
 				jackrenderer = Class.forName(classname);
+				
 			} catch (ClassNotFoundException e1) {
 				// ignore this, just use java sound.
 			}
@@ -42,8 +48,14 @@ public class AudioLauncher {
 			}
 		}
 		try {
-			//JavaAmbisonicsStereoDecoder.launch(v);
-			VbapSurroundRenderer.launch(v);
+			if (TRY_5_1 && JavaSoundUtility.supportsChannels(5)) {
+				System.out.println("Launching 5.1 backend...");
+				VbapSurroundRenderer.launch(v);
+			} else {
+				// stereo backend...
+				//BinauralDecoder.launch(v);
+				JavaAmbisonicsStereoDecoder.launch(v);
+			}
 			return true;
 		} catch (LineUnavailableException e) {
 			// TODO Auto-generated catch block

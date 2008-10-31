@@ -68,6 +68,6 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AmbisonicsPlanar2ndOrd
 		renderer.setRootAndMicrophonePath(viewer.getSceneRoot(), viewer.getCameraPath());
 
 		JackHub.setSink(renderer);
-		JackHub.initializeClient("jrAmbisonics");
+		JackHub.initializeClient("jrPlanar2ndOrderAmbisonics");
 	}
 }

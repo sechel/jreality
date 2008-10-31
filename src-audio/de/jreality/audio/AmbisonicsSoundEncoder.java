@@ -6,7 +6,7 @@ import de.jreality.math.Matrix;
 
 public abstract class AmbisonicsSoundEncoder implements SoundEncoder {
 
-	private static final float W_SCALE = (float) Math.sqrt(0.5);
+	protected static final float W_SCALE = (float) Math.sqrt(0.5);
 	protected float[] bw, bx, by, bz;
 	
 	public void encodeSignal(float[] samples, int nSamples, Matrix p0, Matrix p1) {
@@ -21,7 +21,7 @@ public abstract class AmbisonicsSoundEncoder implements SoundEncoder {
 		float z1 = (float) p1.getEntry(2, 3);
 		
 		// the point (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics
-		encodeFrame(samples, nSamples, bw, bx, by, bz, -z0, -x0, y0, -z1, -x1, y1);
+		encodeFrame(samples, nSamples, -z0, -x0, y0, -z1, -x1, y1);
 	}
 
 	public abstract void finishFrame();
@@ -40,9 +40,7 @@ public abstract class AmbisonicsSoundEncoder implements SoundEncoder {
 		}
 	}
 
-	public static void encodeFrame(float[] raw, int nSamples, float[] bw, float[] bx,
-			float[] by, float[] bz, float x0, float y0, float z0, float x1,
-			float y1, float z1) {
+	private void encodeFrame(float[] samples, int nSamples, float x0, float y0, float z0, float x1, float y1, float z1) {
 		
 		float dx = (x1-x0)/nSamples;
 		float dy = (y1-y0)/nSamples;
@@ -52,15 +50,19 @@ public abstract class AmbisonicsSoundEncoder implements SoundEncoder {
 			x0 += dx;
 			y0 += dy;
 			z0 += dz;
-
-			float r = (float) (Math.sqrt(x0*x0+y0*y0+z0*z0)+1e-5);
 			
-			float v = raw[i];
-			bw[i] += v*W_SCALE;
-			bx[i] += v*x0/r;
-			by[i] += v*y0/r;
-			bz[i] += v*z0/r;
+			float r = (float) (Math.sqrt(x0*x0+y0*y0+z0*z0)+1e-5);			
+			
+			encodeOneSample(i, samples, x0/r, y0/r, z0/r);
 		}
+	}
+
+	protected void encodeOneSample(int idx, float[] samples, float x0, float y0, float z0) {
+		float v = samples[idx];
+		bw[idx] += v*W_SCALE;
+		bx[idx] += v*x0;
+		by[idx] += v*y0;
+		bz[idx] += v*z0;
 	}
 
 }
