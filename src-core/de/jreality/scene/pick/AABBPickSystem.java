@@ -344,7 +344,7 @@ public class AABBPickSystem implements PickSystem {
 	  if (foo != null && foo.indexOf("portal") != -1) isPortal = true;
   }
   public static void getFrustumInterval(double[] from, double[] to, Viewer viewer) {
-	  if (isPortal)	{
+	  if (!CameraUtility.getCamera(viewer).isPerspective() || isPortal)	{
 		  //System.err.println(SystemProperties.hostname+"from = "+Rn.toString(from)+" to = "+Rn.toString(to));
 		  return;
 	  }
