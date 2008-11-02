@@ -66,6 +66,7 @@ public class JRWindow {
 	private Tool mouseEventTool;
 	private Tool vertexPopUpTool;
 
+	private SceneGraphComponent sgc;
 	private SceneGraphComponent positionSgc; 
 	private SceneGraphComponent frameSgc;
 	private SceneGraphComponent borderSgc;
@@ -127,11 +128,14 @@ public class JRWindow {
 		positionSgc.setAppearance(new Appearance());
 		positionSgc.getAppearance().setAttribute("pointShader.pickable", true);
 		positionSgc.getAppearance().setAttribute("lineShader.pickable", true);
-		positionSgc.getAppearance().setAttribute("polygonShader.pickable", true);  
+		positionSgc.getAppearance().setAttribute("polygonShader.pickable", true); 
+		sgc = new SceneGraphComponent();
+		positionSgc.addChild(sgc);
 	}
+	
 	private void initFrame(){
 		frameSgc=new SceneGraphComponent("content");
-		positionSgc.addChild(frameSgc);    
+		sgc.addChild(frameSgc);    
 		faceCorners=new double[cornerPos.length][cornerPos[0].length];
 		calculateFaceCorners(faceCorners,cornerPos);    
 		IndexedFaceSetFactory face=new IndexedFaceSetFactory();
@@ -194,7 +198,7 @@ public class JRWindow {
 
 	private void initDecoration(){
 		decoControlSgc=new SceneGraphComponent("controls");    
-		positionSgc.addChild(decoControlSgc);      
+		sgc.addChild(decoControlSgc);      
 		decoControlCorners=new double[cornerPos.length][cornerPos[0].length];
 		for(int i=0; i<cornerPos.length;i++)
 			decoControlCorners[i][2]=0;
@@ -244,7 +248,7 @@ public class JRWindow {
 
 		////decoDragFace////////////////////////////////////
 		decoDragSgc=new SceneGraphComponent("title");
-		positionSgc.addChild(decoDragSgc);     
+		sgc.addChild(decoDragSgc);     
 		decoDragCorners=new double[cornerPos.length][cornerPos[0].length];
 		for(int i=0; i<cornerPos.length;i++)
 			decoDragCorners[i][2]=0;
@@ -271,7 +275,7 @@ public class JRWindow {
 
 		////borders///////////////////////
 		borderSgc=new SceneGraphComponent("border");
-		positionSgc.addChild(borderSgc);
+		sgc.addChild(borderSgc);
 		IndexedLineSetFactory borders=new IndexedLineSetFactory();
 		borders.setVertexCount(4);
 		borders.setVertexCoordinates(cornerPos);
@@ -342,6 +346,15 @@ public class JRWindow {
 					cornerPos[n][1]=newCornerPos[n][1];
 			}
 		}else return;
+		
+		// rotate window (Ulrich)
+		double centerX = (cornerPos[3][0]+ cornerPos[0][0])/2;
+		//double centerZ = (cornerPos[3][3]+ cornerPos[0][3])/2;
+		MatrixBuilder.euclidean().
+			//translate(centerX,0,centerZ).
+			rotateY(-.2*centerX).
+			translate(0, 0,-.3 * centerX*centerX).
+			assignTo(sgc);
 
 		calculateFaceCorners(faceCorners,cornerPos);
 		frameFace.setVertexAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(faceCorners));
