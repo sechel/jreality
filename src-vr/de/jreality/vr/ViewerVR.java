@@ -1112,6 +1112,7 @@ public class ViewerVR {
 		vr.addTerrainTab();
 		vr.addToolTab();
 		vr.addTexTab();
+		vr.registerPlugin(new AvatarAppearancePluginVR("avapp"));
 		vr.setGeneratePickTrees(true);
 		return vr;
 	}
