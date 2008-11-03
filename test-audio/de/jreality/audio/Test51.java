@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import de.jreality.audio.AudioReader;
 import de.jreality.audio.SampleReader;
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
+import de.jreality.audio.javasound.JavaSoundUtility;
 import de.jreality.scene.AudioSource;
 import de.jtem.beans.InspectorPanel;
 
@@ -65,7 +66,7 @@ public class Test51 {
 		for (int i=0; i<framesize; i++) {
 			fbuffer[channels*i+channel]=monoSamples[i];
 		}
-		JavaAmbisonicsStereoDecoder.floatToByte(buffer, fbuffer, BIG_ENDIAN);
+		JavaSoundUtility.floatToByte(buffer, fbuffer, BIG_ENDIAN);
 		stereoOut.write(buffer, 0, byteLen);
 	}
 	
