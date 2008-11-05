@@ -40,29 +40,29 @@ public class JavaSoundUtility {
 		}
 		
 		Info[] mixerInfos = AudioSystem.getMixerInfo();
-		for (Info info : mixerInfos) {;
-		System.out.println("Checking mixer "+info);
-		Mixer mixer = AudioSystem.getMixer(info);
-		try {
-			mixer.open();
-		} catch (LineUnavailableException e) {
-			mixer.close();
-			continue;
-		}
-
-		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
-		if (!mixer.isLineSupported(dataLineInfo)) {
-			mixer.close();
-			continue;
-		}
-
-		try {
-			SourceDataLine ret = (SourceDataLine) mixer.getLine(dataLineInfo);
-			CURRENT_MIXER=mixer;
-			return ret;
-		} catch (LineUnavailableException e) {
-			continue;
-		}
+		for (Info info : mixerInfos) {
+			System.out.println("Checking mixer "+info);
+			Mixer mixer = AudioSystem.getMixer(info);
+			try {
+				mixer.open();
+			} catch (LineUnavailableException e) {
+				mixer.close();
+				continue;
+			}
+	
+			DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
+			if (!mixer.isLineSupported(dataLineInfo)) {
+				mixer.close();
+				continue;
+			}
+	
+			try {
+				SourceDataLine ret = (SourceDataLine) mixer.getLine(dataLineInfo);
+				CURRENT_MIXER=mixer;
+				return ret;
+			} catch (LineUnavailableException e) {
+				continue;
+			}
 		}
 		return null;
 	}
