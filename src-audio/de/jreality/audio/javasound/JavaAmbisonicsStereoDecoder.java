@@ -6,6 +6,7 @@ import javax.sound.sampled.SourceDataLine;
 
 import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AudioBackend;
+import de.jreality.audio.AudioLauncher;
 import de.jreality.audio.util.Limiter;
 import de.jreality.scene.Viewer;
 
@@ -93,7 +94,7 @@ public class JavaAmbisonicsStereoDecoder {
 	}
 		
 	public int getSamplerate() {
-		return JavaSoundUtility.SAMPLE_RATE;
+		return AudioLauncher.getSampleRate();
 	}
 	
 	public static void launch(Viewer viewer) throws LineUnavailableException {
@@ -102,7 +103,7 @@ public class JavaAmbisonicsStereoDecoder {
 
 		final JavaAmbisonicsStereoDecoder dec = new JavaAmbisonicsStereoDecoder(frameSize);
 		
-		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), JavaSoundUtility.SAMPLE_RATE);
+		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), AudioLauncher.getSampleRate());
 
 		final AmbisonicsSoundEncoder enc = new AmbisonicsSoundEncoder() {
 			@Override

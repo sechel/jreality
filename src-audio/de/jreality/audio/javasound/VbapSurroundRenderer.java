@@ -5,6 +5,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 import de.jreality.audio.AudioBackend;
+import de.jreality.audio.AudioLauncher;
 import de.jreality.audio.VbapSoundEncoder;
 import de.jreality.audio.util.Limiter;
 import de.jreality.scene.Viewer;
@@ -64,7 +65,7 @@ public class VbapSurroundRenderer {
 
 		final VbapSurroundRenderer dec = new VbapSurroundRenderer(frameSize);
 		
-		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), JavaSoundUtility.SAMPLE_RATE);
+		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), AudioLauncher.getSampleRate());
 
 		final VbapSoundEncoder enc = new VbapSoundEncoder(speakers.length, speakers, channelIDs) {
 
