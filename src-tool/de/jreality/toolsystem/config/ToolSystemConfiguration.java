@@ -46,6 +46,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,7 +76,11 @@ public class ToolSystemConfiguration {
   
   public static ToolSystemConfiguration loadDefaultConfiguration() {
     try {
-      return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml")));
+      final URL toolconfig = ToolSystemConfiguration.class.getResource("toolconfig.xml");
+      if (toolconfig == null)
+    	  throw new RuntimeException("Resource \"toolconfig.xml\" not found.\n Expected in "+ToolSystemConfiguration.class.getPackage().toString()
+		  +".\n This is often caused by Eclipse when Preferences->Java->Building->Filtered Resources includes \"*.xml\"." );
+      return loadConfiguration(Input.getInput(toolconfig));
     } catch (IOException e) {
       throw new Error();
     }
