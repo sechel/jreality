@@ -202,10 +202,6 @@ public class SceneView {
 		return viewerSwitch;
 	}
 
-	public ToolSystem getToolSystem()	{
-		return toolSystem;
-	}
-
 	/**
 	 * Get the root node of the scene.
 	 * @return the root
@@ -305,10 +301,6 @@ public class SceneView {
 		Selection s = new Selection(emptyPickPath);
 		selectionManager.setDefaultSelection(new Selection(s));
 		selectionManager.setSelection(s);
-	}
-	
-	public SelectionManagerInterface getSelectionManager() {
-		return selectionManager;
 	}
 	
 	public SceneGraphPath getCameraPath() {
