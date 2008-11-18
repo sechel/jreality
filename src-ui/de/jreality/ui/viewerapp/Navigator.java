@@ -285,6 +285,7 @@ public class Navigator implements SelectionListener {
 
 			JSplitPane navigator = new JSplitPane(
 					JSplitPane.VERTICAL_SPLIT, top, bottom);
+			navigator.setDividerLocation(350);
 			navigator.setContinuousLayout(true);
 			navigator.setOneTouchExpandable(true);
 			navigator.setResizeWeight(1.0);  //use extra space for sceneTree
