@@ -97,10 +97,6 @@ public class JOGLConfiguration {
 			foo = Secure.getProperty("jreality.jogl.sharedContexts");  //TODO: move to de.jreality.util.SystemProperties
 			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
 			if (sharedContexts)	{
-//				GLCapabilities capabilities = new GLCapabilities();
-//				firstOne = GLDrawableFactory.getFactory().createGLCanvas(capabilities, null, null);	
-//				JOGLConfiguration.theLog.log(Level.WARNING,"Not allowing shared contexts now");
-//				sharedContexts=false;
 				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
 			}
 			quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));

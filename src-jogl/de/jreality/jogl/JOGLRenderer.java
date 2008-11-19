@@ -100,10 +100,7 @@ import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
 import static de.jreality.shader.CommonAttributes.*;
-/**
- * @author gunn
- *
- */
+
 public class JOGLRenderer  implements AppearanceListener {
 
 	private final  Logger theLog = LoggingSystem.getLogger(this);
@@ -350,9 +347,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		}
 		lightHelper.enableLights(globalGL, lights.size());
 		if (lightsChanged) {
-			lightHelper.processLights(globalGL, lights);
+			lightHelper.cacheLightMatrices(lights);
 			lightsChanged = false;
 		}
+		lightHelper.processLights(globalGL, lights);
 	}
 
 	private void forceResidentTextures() {
