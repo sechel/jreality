@@ -58,6 +58,7 @@ import javax.swing.KeyStroke;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.ToolSystem;
@@ -90,6 +91,22 @@ public class SceneView {
 	private ExportImage exportImageAction;
 	private ToolSystemConfiguration toolSystemConfiguration;
 	private String toolConfig;
+	private SceneGraphComponent contentParent;
+
+	public SceneGraphComponent getContentParent() {
+		return contentParent != null ? contentParent : viewerSwitch.getSceneRoot();
+	}
+
+	/*
+	 * Sets the <code>SceneGraphComponent</code> that is meant to hold the principal
+	 * content of the scene. If <code>contentParent</code> is <code>null</code> then
+	 * <code>getContentParent()</code> will henceforth return the scene root.
+	 * 
+	 * @argument the new <code>contentParent</code>
+	 */
+	public void setContentParent(SceneGraphComponent contentParent) {
+		this.contentParent = contentParent;
+	}
 
 	public SceneView() { 
 		
@@ -187,11 +204,17 @@ public class SceneView {
 		} else {
 			throw new IllegalStateException("unknown environment: "+environment);
 		}
+		SceneGraphPath path = jrScene.getPath("emptyPickPath");
+		SceneGraphComponent parent = null;
+		if (path != null) {
+			parent = path.getLastComponent();
+		}
 		setScene(
 				jrScene.getSceneRoot(),
 				jrScene.getPath("cameraPath"),
 				jrScene.getPath("emptyPickPath"),
-				jrScene.getPath("avatarPath")
+				jrScene.getPath("avatarPath"),
+				parent
 		);
 		
 		// set preferred size
@@ -242,11 +265,16 @@ public class SceneView {
 		return menu;
 	}
 	
+	public void setScene(SceneGraphComponent root, SceneGraphPath cameraPath) {
+		setScene(root, cameraPath, null, null, null);
+	}
+	
 	public void setScene(
 			SceneGraphComponent root,
 			SceneGraphPath cameraPath,
 			SceneGraphPath emptyPickPath,
-			SceneGraphPath avatarPath
+			SceneGraphPath avatarPath,
+			SceneGraphComponent contentParent
 	) {
 		// make new root known to renderTrigger
 		if (autoRender) {
@@ -293,6 +321,7 @@ public class SceneView {
 		setCameraPath(cameraPath);
 		setAvatarPath(avatarPath);
 		setEmptyPickPath(emptyPickPath);
+		setContentParent(contentParent);
 
 		toolSystem.initializeSceneTools();
 		
@@ -323,21 +352,27 @@ public class SceneView {
 	
 	/*
 	 * Sets the <code>avatarPath</code> of the ToolSystem. If <code>path</code> is
-	 * <code>null</code>, the <code>avatarPath</code> will be set to the  starting
-	 * and ending at the scene root. Otherwise <code>path</code> has to have the
+	 * <code>null</code>, the <code>avatarPath</code> will be set to the  last
+	 * component of the camera path. Otherwise <code>path</code> has to have the
 	 * current scene root as its first element (failure will result in exception).
 	 * 
 	 * @argument The new <code>avatarPath</code>.
 	 */
 	public void setAvatarPath(SceneGraphPath path) {
-		if (path != null) toolSystem.setAvatarPath(path);
 		if (path != null) {
+			if (!path.isValid()) {
+				throw new IllegalArgumentException("emptyPickPath is not a valid SceneGraphPath");
+			}
 			if (path.getFirstElement() != viewerSwitch.getSceneRoot()) {
 				throw new IllegalArgumentException("emptyPickPath does not start with the current scene root");
 			}
 		} else {
+			List<SceneGraphNode> nodes = getCameraPath().toList();
+			nodes.remove(nodes.size()-1);
 			path = new SceneGraphPath();
-			path.push(getViewer().getSceneRoot());
+			for (SceneGraphNode node : nodes) {
+				path.push(node);
+			}
 		}
 		toolSystem.setAvatarPath(path);
 	}
@@ -373,6 +408,7 @@ public class SceneView {
 		}
 		toolSystem.setEmptyPickPath(path);
 	}
+	
 	
 	public void dispose() {
 		if (autoRender) {
