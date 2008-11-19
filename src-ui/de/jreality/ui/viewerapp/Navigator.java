@@ -43,6 +43,7 @@ package de.jreality.ui.viewerapp;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -277,16 +278,17 @@ public class Navigator implements SelectionListener {
 		if (navigator == null) {
 			sceneTree.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
 			JScrollPane top = new JScrollPane(sceneTree);
+			top.setPreferredSize(new Dimension(1, 1));
 			top.setBorder(BorderFactory.createEmptyBorder());
 
 			inspector.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
 			JScrollPane bottom = new JScrollPane(inspector);
+			bottom.setPreferredSize(new Dimension(1, 1));
 			bottom.setBorder(BorderFactory.createEmptyBorder());
 
-			JSplitPane navigator = new JSplitPane(
-					JSplitPane.VERTICAL_SPLIT, top, bottom);
+			JSplitPane navigator = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
 			navigator.setDividerLocation(350);
-			navigator.setResizeWeight(0.7);
+			navigator.setResizeWeight(1.0);
 			navigator.setContinuousLayout(true);
 			navigator.setOneTouchExpandable(true);
 			navigator.setBorder(BorderFactory.createEmptyBorder());
