@@ -94,7 +94,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	private static final int PER_PART = 2;
 	GlslProgram program;
 
-	Texture2D normalTex, diffuseTex;
+	Texture2D texture1, texture0;
 	
 	CubeMap environmentMap;
 	private VertexShader vertexShader;
@@ -116,15 +116,15 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			program = new GlslProgram(app, eap2, name);
 		} else program = null;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap)) {
-			diffuseTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap);
+			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap);
 		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit0"), eap)) {
-			diffuseTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit0"), eap);
-		} else diffuseTex = null;
+			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit0"), eap);
+		} else texture0 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap)) {
-			normalTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap);
+			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap);
 		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit1"), eap)) {
-			normalTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit1"), eap);
-		} else normalTex = null;
+			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit1"), eap);
+		} else texture1 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap)) {
 			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap);
 		} else if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "textureUnit2"), eap)) {
@@ -135,7 +135,6 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	}
 
 	public void render(JOGLRenderingState jrs) {
-//		rhsShader.render(jrs);
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
 		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
@@ -145,16 +144,14 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jrs);
 	   
-		if (diffuseTex != null) {
+		if (texture0 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE0);
-			Texture2DLoaderJOGL.render(jr.globalGL, diffuseTex);
+			Texture2DLoaderJOGL.render(jr.globalGL, texture0);
 			gl.glEnable(GL.GL_TEXTURE_2D);
-			if (program != null && program.getSource().getUniformParameter("texture") != null) 
-					program.setUniform("texture",  GL.GL_TEXTURE0);
 		}
-		if (normalTex != null) {
+		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
-			Texture2DLoaderJOGL.render(jr.globalGL, normalTex);
+			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		}
 		if (environmentMap != null) {
@@ -208,11 +205,11 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
 		if (program != null)  GlslLoader.postRender(program, jr);
-		if (diffuseTex != null) {
+		if (texture0 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
-		if (normalTex != null) {
+		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
@@ -372,8 +369,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (inlineV) {
 				vertexBuffer = BufferCache.vertex(sg, triagCnt, vertexLength);
 			}
-
-			double[] tmpTex = new double[2];
+			DoubleArrayArray tc = texCoords.toDoubleArrayArray();
+			int texLength = tc.getLengthAt(0);
+			double[] tmpTex = new double[texLength];
 			boolean inlineTex = texCoords != null;
 			DoubleBuffer texBuffer = null;
 			if (inlineTex) {
@@ -407,7 +405,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				DoubleArray da;
 
 				DoubleArrayArray verts = vertices.toDoubleArrayArray();
-				DoubleArrayArray tc = inlineTex ? texCoords.toDoubleArrayArray() : null;
+				tc = inlineTex ? tc : null;
 				DoubleArrayArray t = inlineTan ? tanCoords.toDoubleArrayArray() : null;
 				DoubleArrayArray norms = null;
 				if (!doNormals4) norms = faceN ? faceNormals.toDoubleArrayArray() : vertexNormals.toDoubleArrayArray();
@@ -515,7 +513,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (texCoords != null) {
 				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
 				texBuffer.rewind();
-				gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, texBuffer);
+				gl.glTexCoordPointer(texLength, GL.GL_DOUBLE, 0, texBuffer);
 			}
 			int TANGENT_ID=9;
 			if (tanCoords != null) {
