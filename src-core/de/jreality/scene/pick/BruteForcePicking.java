@@ -225,7 +225,7 @@ class BruteForcePicking {
     return dl.toIntArrayArray();
   }
 
-  public static void intersectPoints(PointSet ps, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double pointRadius, ArrayList localHits) {
+  public static void intersectPoints(PointSet ps, int signature, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, double pointRadius, ArrayList<Hit> localHits) {
 //    path.getMatrix(m.getArray());
 //    path.getInverseMatrix(mInv.getArray()); 
     
