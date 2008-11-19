@@ -201,7 +201,7 @@ public class AABBPickSystem implements PickSystem {
    }
     
     public void visit(SceneGraphComponent c) {
-      if (!c.isVisible()) return;
+      if (!c.isVisible() || !c.isPickable()) return;
       PickInfo pickInfo = null;
       if (c.getAppearance()!=null) {
           Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
