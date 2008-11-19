@@ -1,6 +1,6 @@
 package de.jreality.ui.sceneview;
 
-import java.awt.Window;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
-import javax.swing.SwingUtilities;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -31,10 +30,12 @@ public class SceneContentLoader {
 	private final JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
 	private JMenuItem menuItem;
 	private JFileChooser chooser;
+	private Component parent;
 
 	@SuppressWarnings("serial")
 	
-	public SceneContentLoader() {
+	public SceneContentLoader(Component parent) {
+		this.parent = parent;
 		Box checkBoxPanel = new Box(BoxLayout.Y_AXIS);
 		JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
 		JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
@@ -62,8 +63,6 @@ public class SceneContentLoader {
 
 	private void loadFile() {
 		File file = null;
-		Window  parent = SwingUtilities.getWindowAncestor(menuItem);
-		System.out.println("parent is"+parent);
 	    if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
 	    	file = chooser.getSelectedFile();
 	    }
