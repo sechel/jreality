@@ -12,15 +12,12 @@ public class SceneViewTest {
 	public static void main(String[] args) {
 
 		SceneView view = new SceneView();
-		SceneViewContent content = new SceneViewContent();
 		SceneViewBackground backgroundManager = new SceneViewBackground();
-
-		content.install(view);
 		backgroundManager.install(view);
 
 		SceneGraphComponent sgc = new SceneGraphComponent();
 		sgc.setGeometry(Primitives.cube(true));
-		content.addContent(sgc);
+		view.getContentParent().addChild(sgc);
 
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
