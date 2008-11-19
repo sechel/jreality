@@ -93,6 +93,11 @@ public class SceneView {
 	private String toolConfig;
 	private SceneGraphComponent contentParent;
 
+	/*
+	 * Returns the the <code>SceneGraphComponent</code> that is meant to hold the principal
+	 * content of the scene. Guaranteed to be non-null.
+	 * @return the content parent
+	 */
 	public SceneGraphComponent getContentParent() {
 		return contentParent != null ? contentParent : viewerSwitch.getSceneRoot();
 	}
