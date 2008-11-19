@@ -7,20 +7,21 @@ import javax.swing.JMenuBar;
 public class SceneViewTest {
 
 	public static void main(String[] args) {
-
+		JFrame frame = new JFrame();
+		
 		SceneView view = new SceneView();
 		SceneViewBackground backgroundManager = new SceneViewBackground();
 		backgroundManager.install(view);
 		SceneViewContentManager contentManager = new SceneViewContentManager();
 		contentManager.install(view);
-		SceneContentLoader loader = new SceneContentLoader();
+		SceneContentLoader loader = new SceneContentLoader(frame);
 		loader.install(contentManager);
 
 //		SceneGraphComponent sgc = new SceneGraphComponent();
 //		sgc.setGeometry(Primitives.cube(true));
 //		view.getContentParent().addChild(sgc);
 
-		JFrame frame = new JFrame();
+
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(view.getViewer().getViewingComponent());
 		JMenuBar mbar = new JMenuBar();
