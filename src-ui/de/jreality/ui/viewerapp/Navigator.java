@@ -44,6 +44,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -54,8 +57,10 @@ import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JMenu;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
@@ -294,20 +299,29 @@ public class Navigator implements SelectionListener {
 			navigator.setBorder(BorderFactory.createEmptyBorder());
 
 //			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
-			this.navigator = new Container();
-			this.navigator.setLayout(new BorderLayout());
-			this.navigator.add(navigator);
-			this.navigator.add(createToolBar(), BorderLayout.NORTH);
+			this.navigator = new JPanel();
+			this.navigator.setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			c.fill = GridBagConstraints.BOTH;
+			c.gridwidth = GridBagConstraints.REMAINDER;
+			c.weightx = 1.0;
+			c.weighty = 0.0;
+			this.navigator.add(createToolBar(), c);
+			this.navigator.add(new JSeparator(), c);
+			c.weighty = 1.0;
+			this.navigator.add(navigator, c);
 		}
 
 		return navigator;
 	}
 
 	
-	private JToolBar createToolBar() {
+	private Component createToolBar() {
 		
-		JToolBar jtb = new JToolBar(SwingConstants.HORIZONTAL);
-		jtb.setFloatable(false);
+		JPanel checkerPanel = new JPanel();
+		checkerPanel.setLayout(new GridLayout(1, 2));
+//		JToolBar jtb = new JToolBar(SwingConstants.HORIZONTAL);
+//		jtb.setFloatable(false);
 		
 		Action a;
 		final JCheckBox propagate = new JCheckBox();
@@ -321,7 +335,9 @@ public class Navigator implements SelectionListener {
 		};
 		propagate.setAction(a);
 		propagate.setSelected(propagateSelections);
-		jtb.add(propagate);
+		checkerPanel.add(propagate);
+//		jtb.add(propagate);
+		
 		
 		final JCheckBox receive = new JCheckBox();
 //		final URL receiveImg = Navigator.class.getResource("receive.png");
@@ -334,9 +350,11 @@ public class Navigator implements SelectionListener {
 		};
 		receive.setAction(a);
 		receive.setSelected(receiveSelections);
-		jtb.add(receive);
+		checkerPanel.add(receive);
+//		jtb.add(receive);
 		
-		return jtb;
+//		return jtb;
+		return checkerPanel;
 	}
 	
 	
