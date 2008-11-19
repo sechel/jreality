@@ -642,7 +642,7 @@ public class SceneGraphComponent extends SceneGraphNode {
   void firePickabilityChanged() {
 	    if (containerListener == null) return;
 	    final SceneGraphComponentEvent event = 
-	    	new SceneGraphComponentEvent(this,SceneGraphComponentEvent.EVENT_TYPE_VISIBILITY_CHANGED);
+	    	new SceneGraphComponentEvent(this,SceneGraphComponentEvent.EVENT_TYPE_PICKABILITY_CHANGED);
 	    cachedEvents.add(event);
 	  }
 
