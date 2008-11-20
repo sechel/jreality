@@ -298,7 +298,6 @@ public class ToolSystem implements ToolEventReceiver {
 			pickSystem.setSceneRoot(viewer.getSceneRoot());
 		}
 		eventQueue.start();
-	    System.err.println("initializing tool system");
 	}
 
 	public void processToolEvent(ToolEvent event) {
