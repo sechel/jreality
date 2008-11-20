@@ -23,9 +23,9 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.util.Input;
 
-public class SceneContentLoader {
+public class ContentLoader {
 
-	private SceneContentManager sceneContentManager;
+	private ContentManager sceneContentManager;
 	private final JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
 	private final JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
 	private JMenuItem menuItem;
@@ -34,7 +34,7 @@ public class SceneContentLoader {
 
 	@SuppressWarnings("serial")
 	
-	public SceneContentLoader(Component parent) {
+	public ContentLoader(Component parent) {
 		this.parent = parent;
 		Box checkBoxPanel = new Box(BoxLayout.Y_AXIS);
 		JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
@@ -93,11 +93,11 @@ public class SceneContentLoader {
 		}
 	}
 
-	public void install(SceneContentManager sceneContentManager) {
+	public void install(ContentManager sceneContentManager) {
 		this.sceneContentManager = sceneContentManager;
 	}
 
-	private SceneContentManager getSceneContentManager() {
+	private ContentManager getSceneContentManager() {
 		return sceneContentManager;
 	}
 }

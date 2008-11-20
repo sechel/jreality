@@ -78,7 +78,7 @@ import de.jreality.util.SystemProperties;
 /**
  * @author pinkall
  */
-public class SceneView {
+public class SceneView extends ChangeEventSource {
 
 	private ViewerSwitch viewerSwitch;
 	private ToolSystem toolSystem;

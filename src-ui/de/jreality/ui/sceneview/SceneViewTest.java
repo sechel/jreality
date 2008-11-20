@@ -9,30 +9,32 @@ public class SceneViewTest {
 	public static void main(String[] args) {
 		JFrame frame = new JFrame();
 		
-		SceneView view = new SceneView();
+		SceneView sceneView = new SceneView();
 		SceneViewBackground backgroundManager = new SceneViewBackground();
-		backgroundManager.install(view);
+		backgroundManager.install(sceneView);
 		SceneViewContentManager contentManager = new SceneViewContentManager();
-		contentManager.install(view);
-		SceneContentLoader loader = new SceneContentLoader(frame);
+		contentManager.install(sceneView);
+		ContentLoader loader = new ContentLoader(frame);
+		ContentAppearanceManager contentAppearanceManager = new ContentAppearanceManager();
+		contentAppearanceManager.install(sceneView, contentManager);
 		loader.install(contentManager);
 
-//		SceneGraphComponent sgc = new SceneGraphComponent();
-//		sgc.setGeometry(Primitives.cube(true));
-//		view.getContentParent().addChild(sgc);
-
-
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(view.getViewer().getViewingComponent());
+		frame.add(sceneView.getViewer().getViewingComponent());
 		JMenuBar mbar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.add(loader.getMenuItem());
 		mbar.add(fileMenu);
-		JMenu viewMenu = view.getMenu(); 
+		JMenu viewMenu = sceneView.getMenu(); 
 		viewMenu.add(backgroundManager.getBackgroundColorMenu());
 		mbar.add(viewMenu);
 		frame.setJMenuBar(mbar);
 		frame.pack();
-		frame.setVisible(true); 
+		frame.setVisible(true);
+		
+		JFrame appearanceFrame = new JFrame();
+		appearanceFrame.add(contentAppearanceManager.getAppearancePanel());
+		appearanceFrame.setSize(250, 300);
+		appearanceFrame.setVisible(true);
 	}
 }
