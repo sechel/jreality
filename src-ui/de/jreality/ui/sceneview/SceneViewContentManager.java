@@ -19,7 +19,6 @@ public class SceneViewContentManager implements SceneContentManager {
 	}
 	
 	public void install(SceneView sceneView) {
-		System.out.println("SceneViewContentManager.install() "+sceneView);
 		this.sceneView = sceneView;
 	}
 
