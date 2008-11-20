@@ -322,7 +322,7 @@ public class AppearancePanel extends JPanel {
 		appearancePanel.add(appBox);
 	}
 	
-	protected void setTubes(boolean b) {
+	public void setTubes(boolean b) {
 		tubes.setSelected(b);
 		getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, b);
 		tubeRadiusSlider.setEnabled(b);
@@ -332,7 +332,7 @@ public class AppearancePanel extends JPanel {
 		return tubes.isSelected();
 	}
 	
-	protected void setSpheres(boolean b) {
+	public void setSpheres(boolean b) {
 		spheres.setSelected(b);
 		getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, b);
 	}
