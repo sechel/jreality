@@ -8,7 +8,7 @@ import de.jtem.beans.ChangeEventMulticaster;
 public abstract class ChangeEventSource {
 	private transient ChangeListener changeListener;
 
-	public void fireStateChange() {
+	public void fireStateChanged() {
 		if (changeListener != null) {
 			changeListener.stateChanged(new ChangeEvent(this));
 		}

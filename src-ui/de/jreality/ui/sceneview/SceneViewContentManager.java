@@ -32,7 +32,7 @@ public class SceneViewContentManager extends ChangeEventSource implements Change
 		this.content = content;
 		if (scale != contentScale) {
 			contentScale = scale;
-			fireStateChange();
+			fireStateChanged();
 		}
 	}
 	
