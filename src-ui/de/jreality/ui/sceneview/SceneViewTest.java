@@ -12,12 +12,12 @@ public class SceneViewTest {
 		SceneView sceneView = new SceneView();
 		SceneViewBackground backgroundManager = new SceneViewBackground();
 		backgroundManager.install(sceneView);
-		SceneViewContentManager contentManager = new SceneViewContentManager();
-		contentManager.install(sceneView);
+		SceneViewContent sceneViewContent = new SceneViewContent();
+		sceneViewContent.install(sceneView);
 		ContentLoader loader = new ContentLoader(frame);
 		ContentAppearanceManager contentAppearanceManager = new ContentAppearanceManager();
-		contentAppearanceManager.install(sceneView, contentManager);
-		loader.install(contentManager);
+		contentAppearanceManager.install(sceneView, sceneViewContent);
+		loader.install(sceneViewContent);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(sceneView.getViewer().getViewingComponent());

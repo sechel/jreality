@@ -7,17 +7,16 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.vr.AppearancePanel;
 
 public class ContentAppearanceManager implements ChangeListener {
 	
 	public static final boolean DEFAULT_SHOW_POINTS = false;
 	public static final boolean DEFAULT_POINTS_REFLECTING = false;
-	public static final double DEFAULT_POINT_RADIUS = .4;
+	public static final double DEFAULT_POINT_RADIUS = .6;
 	public static final Color DEFAULT_POINT_COLOR = Color.blue;
 	public static final boolean DEFAULT_SHOW_LINES = false;
 	public static final boolean DEFAULT_LINES_REFLECTING = false;
-	public static final double DEFAULT_TUBE_RADIUS = .3;
+	public static final double DEFAULT_TUBE_RADIUS = .5;
 	public static final Color DEFAULT_LINE_COLOR = Color.red;
 	public static final boolean DEFAULT_SHOW_FACES = true;
 	public static final boolean DEFAULT_FACES_REFLECTING = true;
@@ -35,16 +34,16 @@ public class ContentAppearanceManager implements ChangeListener {
 	private ContentManager contentManager;
 	private Appearance contentAppearance;
 	private SceneGraphComponent contentParent;
-	private AppearancePanel appearancePanel;
+	private AppearanceInspector appearanceInspector;
 
-	public AppearancePanel getAppearancePanel() {
-		return appearancePanel;
+	public AppearanceInspector getAppearancePanel() {
+		return appearanceInspector;
 	}
 
 	public ContentAppearanceManager() {
-		appearancePanel = new AppearancePanel();
-		contentAppearance = new Appearance();
-		appearancePanel.setAppearance(contentAppearance);
+		appearanceInspector = new AppearanceInspector();
+		contentAppearance = new Appearance("content appearance");
+		appearanceInspector.setAppearance(contentAppearance);
 		restoreDefaults();
 	}
 	
@@ -73,31 +72,31 @@ public class ContentAppearanceManager implements ChangeListener {
 		}
 		if (e.getSource() == contentManager) {
 			double scale = contentManager.getContentScale();
-			if (scale != appearancePanel.getObjectScale()) {
-				appearancePanel.setObjectScale(scale);
+			if (scale != appearanceInspector.getObjectScale()) {
+				appearanceInspector.setObjectScale(scale);
 			}
 		}
 	}
 	
 	public void restoreDefaults() {
-		appearancePanel.setShowPoints(DEFAULT_SHOW_POINTS);
-		appearancePanel.setPointsReflecting(DEFAULT_POINTS_REFLECTING);
-		appearancePanel.setPointRadius(DEFAULT_POINT_RADIUS);
-		appearancePanel.setPointColor(DEFAULT_POINT_COLOR);
-		appearancePanel.setShowLines(DEFAULT_SHOW_LINES);
-		appearancePanel.setLinesReflecting(DEFAULT_LINES_REFLECTING);
-		appearancePanel.setTubeRadius(DEFAULT_TUBE_RADIUS);
-		appearancePanel.setLineColor(DEFAULT_LINE_COLOR);
-		appearancePanel.setShowFaces(DEFAULT_SHOW_FACES);
-		appearancePanel.setFacesReflecting(DEFAULT_FACES_REFLECTING);
-		appearancePanel.setFaceReflection(DEFAULT_FACE_REFLECTION);
-		appearancePanel.setFaceReflection(DEFAULT_LINE_REFLECTION);
-		appearancePanel.setFaceReflection(DEFAULT_POINT_REFLECTION);
-		appearancePanel.setFaceColor(DEFAULT_FACE_COLOR);
-		appearancePanel.setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
-		appearancePanel.setTransparency(DEFAULT_TRANSPARENCY);
-		appearancePanel.setFacesFlat(DEFAULT_FACES_FLAT);
-		appearancePanel.setTubes(DEFAULT_TUBES);
-		appearancePanel.setSpheres(DEFAULT_SPHERES);
+		appearanceInspector.setShowPoints(DEFAULT_SHOW_POINTS);
+		appearanceInspector.setPointsReflecting(DEFAULT_POINTS_REFLECTING);
+		appearanceInspector.setPointRadius(DEFAULT_POINT_RADIUS);
+		appearanceInspector.setPointColor(DEFAULT_POINT_COLOR);
+		appearanceInspector.setShowLines(DEFAULT_SHOW_LINES);
+		appearanceInspector.setLinesReflecting(DEFAULT_LINES_REFLECTING);
+		appearanceInspector.setTubeRadius(DEFAULT_TUBE_RADIUS);
+		appearanceInspector.setLineColor(DEFAULT_LINE_COLOR);
+		appearanceInspector.setShowFaces(DEFAULT_SHOW_FACES);
+		appearanceInspector.setFacesReflecting(DEFAULT_FACES_REFLECTING);
+		appearanceInspector.setFaceReflection(DEFAULT_FACE_REFLECTION);
+		appearanceInspector.setFaceReflection(DEFAULT_LINE_REFLECTION);
+		appearanceInspector.setFaceReflection(DEFAULT_POINT_REFLECTION);
+		appearanceInspector.setFaceColor(DEFAULT_FACE_COLOR);
+		appearanceInspector.setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
+		appearanceInspector.setTransparency(DEFAULT_TRANSPARENCY);
+		appearanceInspector.setFacesFlat(DEFAULT_FACES_FLAT);
+		appearanceInspector.setTubes(DEFAULT_TUBES);
+		appearanceInspector.setSpheres(DEFAULT_SPHERES);
 	}
 }
