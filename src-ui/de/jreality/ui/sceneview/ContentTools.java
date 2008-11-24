@@ -1,13 +1,9 @@
 package de.jreality.ui.sceneview;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,7 +11,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
@@ -41,11 +36,9 @@ public class ContentTools {
 	private JCheckBox pickFaces;
 	private JCheckBox pickEdges;
 	private JCheckBox pickVertices;
-	private Content content;
 	private Appearance contentAppearance;
 	
 	public ContentTools(Content content) {
-		this.content = content;
 		contentParent  = content.getContentParent();
 		contentAppearance = content.getContentAppearance();
 		
