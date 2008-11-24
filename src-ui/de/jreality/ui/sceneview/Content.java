@@ -5,6 +5,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
 
 public class Content extends ChangeEventSource implements ChangeListener {
 
@@ -16,6 +17,7 @@ public class Content extends ChangeEventSource implements ChangeListener {
 	private SceneGraphComponent contentParent;
 	private Appearance contentAppearance;
 	private Appearance scaledAppearance;
+	private Transformation toolTransformation;
 	
 	public Appearance getContentAppearance() {
 		return contentAppearance;
@@ -30,10 +32,13 @@ public class Content extends ChangeEventSource implements ChangeListener {
 		contentComponent.setAppearance(contentAppearance);
 		sceneRoot.addChild(contentComponent);
 		
-		alignmentComponent = new SceneGraphComponent();
+		alignmentComponent = new SceneGraphComponent("alignment");
+		alignmentComponent.setTransformation(new Transformation("align transformation"));
 		contentComponent.addChild(alignmentComponent);
 		
-		contentParent = new SceneGraphComponent();
+		contentParent = new SceneGraphComponent("content parent");
+		toolTransformation = new Transformation("tool transformation");
+		contentParent.setTransformation(toolTransformation);
 		scaledAppearance = new Appearance("scaled appearance");
 		contentParent.setAppearance(scaledAppearance);
 		alignmentComponent.addChild(contentParent);

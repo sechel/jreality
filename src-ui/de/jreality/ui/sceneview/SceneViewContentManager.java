@@ -53,7 +53,8 @@ public class SceneViewContentManager extends ChangeEventSource implements Conten
 			objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
 		}
 		double scale = contentSize/objectSize;
-		MatrixBuilder.euclidean().scale(scale).assignTo(alignmentComponent);;
+		MatrixBuilder.euclidean().scale(scale).assignTo(alignmentComponent);
+		MatrixBuilder.euclidean().assignTo(contentParent);
 		if (scale != contentScale) {
 			contentScale = scale;
 			fireStateChanged();

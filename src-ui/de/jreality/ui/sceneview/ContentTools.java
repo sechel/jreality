@@ -109,7 +109,7 @@ public class ContentTools {
 
 	private void setToolEnabled(Tool tool, boolean b) {
 		if (!b && contentParent.getTools().contains(tool)) {
-			contentParent.removeTool(rotateTool);
+			contentParent.removeTool(tool);
 		}
 		if (b && !contentParent.getTools().contains(tool)) {
 			contentParent.addTool(tool);
