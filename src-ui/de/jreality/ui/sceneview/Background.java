@@ -16,7 +16,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
 
-public class SceneViewBackground {
+public class Background {
 
 	public static Color[] defaultBackgroundColor = new Color[]{
 		new Color(225, 225, 225), new Color(225, 225, 225),
@@ -27,8 +27,9 @@ public class SceneViewBackground {
 	private ButtonGroup buttonGroup;
 	private ButtonModel defaultModel;
 
-	public SceneViewBackground() {
-
+	public Background(SceneView view) {
+		this.view = view;
+		
 		backgroundColorMenu = new JMenu("Set background color");
 		buttonGroup = new ButtonGroup();
 		LinkedList<JRadioButtonMenuItem> items = new LinkedList<JRadioButtonMenuItem>();
@@ -44,10 +45,6 @@ public class SceneViewBackground {
 			buttonGroup.add(item);
 			backgroundColorMenu.add(item);
 		}
-	}
-
-	public void install(SceneView view) {
-		this.view = view;
 
 		//set viewer background color if not specified already
 		Appearance app = view.getSceneRoot().getAppearance();
@@ -88,7 +85,7 @@ public class SceneViewBackground {
 		app.setAttribute("backgroundColors", (colors.length==4)? colors : Appearance.INHERITED); 
 	}
 
-	public JMenu getBackgroundColorMenu() {
+	public JMenu getMenu() {
 		return backgroundColorMenu;
 	}
 

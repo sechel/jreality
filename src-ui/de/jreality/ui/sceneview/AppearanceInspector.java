@@ -68,10 +68,13 @@ public class AppearanceInspector extends JPanel {
 		}
 	};
 	private Appearance appearance;
+	private Appearance scaledAppearance;
 	private double objectScale=1;
 
-	public AppearanceInspector() {
+	public AppearanceInspector(Appearance appearance, Appearance scaledAppearance) {
 		super(new BorderLayout());
+		this.appearance = appearance;
+		this.scaledAppearance = scaledAppearance;
 		makePanel();
 		add(panel);
 		revalidate();
@@ -328,7 +331,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setTubes(boolean b) {
 		tubes.setSelected(b);
-		getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, b);
+		appearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, b);
 		tubeRadiusSlider.setEnabled(b);
 	}
 
@@ -338,7 +341,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setSpheres(boolean b) {
 		spheres.setSelected(b);
-		getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, b);
+		appearance.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.SPHERES_DRAW, b);
 	}
 
 	boolean getSpheres() {
@@ -372,7 +375,7 @@ public class AppearanceInspector extends JPanel {
 	public void setFaceReflection(double d) {
 		faceReflectionSlider.setValue((int)(100*d));
 		if (facesReflecting.isSelected()) {
-			getAppearance().setAttribute(
+			appearance.setAttribute(
 					"polygonShader.reflectionMap:blendColor",
 					new Color(1f, 1f, 1f, (float) d)
 			);
@@ -382,7 +385,7 @@ public class AppearanceInspector extends JPanel {
 	public void setLineReflection(double d) {
 		lineReflectionSlider.setValue((int)(100*d));
 		if (linesReflecting.isSelected()) {
-			getAppearance().setAttribute(
+			appearance.setAttribute(
 					"lineShader.reflectionMap:blendColor",
 					new Color(1f, 1f, 1f, (float) d)
 			);
@@ -392,7 +395,7 @@ public class AppearanceInspector extends JPanel {
 	public void setPointReflection(double d) {
 		pointReflectionSlider.setValue((int)(100*d));
 		if (pointsReflecting.isSelected()) {
-			getAppearance().setAttribute(
+			appearance.setAttribute(
 					"pointShader.reflectionMap:blendColor",
 					new Color(1f, 1f, 1f, (float) d)
 			);
@@ -405,7 +408,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setTransparency(double d) {
 		transparencySlider.setValue((int)(100 * d));
-		getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, d);
+		appearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, d);
 	}
 
 	public double getPointRadius() {
@@ -415,12 +418,18 @@ public class AppearanceInspector extends JPanel {
 	public void setPointRadius(double d) {
 		pointRadiusSlider.setValue((int) (d * 100));
 		double r = Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
-		/ LOGARITHMIC_RANGE * MAX_RADIUS;
-		getAppearance().setAttribute(
+			/ LOGARITHMIC_RANGE * MAX_RADIUS;
+		appearance.setAttribute(
 				CommonAttributes.POINT_SHADER + "."+ CommonAttributes.POINT_RADIUS,
-				r / getObjectScale()
+				r
 		);
-		getAppearance().setAttribute(
+		if (scaledAppearance != null) {
+			scaledAppearance.setAttribute(
+					CommonAttributes.POINT_SHADER + "."+ CommonAttributes.POINT_RADIUS,
+					r / getObjectScale()
+			);
+		}
+		appearance.setAttribute(
 				CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_SIZE,
 				d*64
 		);
@@ -443,15 +452,21 @@ public class AppearanceInspector extends JPanel {
 	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
 		double r = Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
-		/ LOGARITHMIC_RANGE * MAX_RADIUS;
-		getAppearance().setAttribute(
+			/ LOGARITHMIC_RANGE * MAX_RADIUS;
+		appearance.setAttribute(
 				CommonAttributes.LINE_SHADER + "."	+ CommonAttributes.TUBE_RADIUS,
-				r/getObjectScale()
+				r
 		);
+		if (scaledAppearance != null) {
+			scaledAppearance.setAttribute(
+					CommonAttributes.LINE_SHADER + "."	+ CommonAttributes.TUBE_RADIUS,
+					r/getObjectScale()
+			);
+		}
 	}
 
 	public Color getPointColor() {
-		return (Color) getAppearance().getAttribute(
+		return (Color) appearance.getAttribute(
 				CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
 		);
 	}
@@ -459,11 +474,11 @@ public class AppearanceInspector extends JPanel {
 	public void setPointColor(Color c) {
 		pointColorChooser.setColor(c);
 		String attribute = CommonAttributes.POINT_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
-		getAppearance().setAttribute(attribute,c);
+		appearance.setAttribute(attribute,c);
 	}
 
 	public Color getLineColor() {
-		return (Color) getAppearance().getAttribute(
+		return (Color) appearance.getAttribute(
 				CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
 		);
 	}
@@ -471,7 +486,7 @@ public class AppearanceInspector extends JPanel {
 	public void setLineColor(Color c) {
 		lineColorChooser.setColor(c);
 		String attribute = CommonAttributes.LINE_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
-		getAppearance().setAttribute(attribute,c);
+		appearance.setAttribute(attribute,c);
 	}
 
 	public boolean isPointsReflecting() {
@@ -491,7 +506,7 @@ public class AppearanceInspector extends JPanel {
 		if (b) {
 			setPointReflection(getPointReflection());
 		} else {
-			getAppearance().setAttribute(
+			appearance.setAttribute(
 					"pointShader.reflectionMap:blendColor",
 					new Color(1f, 1f, 1f, 0f)
 			);
@@ -503,7 +518,7 @@ public class AppearanceInspector extends JPanel {
 		if (b) {
 			setLineReflection(getLineReflection());
 		} else {
-			getAppearance().setAttribute(
+			appearance.setAttribute(
 					"lineShader.reflectionMap:blendColor",
 					new Color(1f, 1f, 1f, 0f)
 			);
@@ -515,7 +530,7 @@ public class AppearanceInspector extends JPanel {
 		if (b) {
 			setFaceReflection(getFaceReflection());
 		} else {
-			getAppearance().setAttribute(
+			appearance.setAttribute(
 					"polygonShader.reflectionMap:blendColor",
 					new Color(1f, 1f, 1f, 0f)
 			);
@@ -523,7 +538,7 @@ public class AppearanceInspector extends JPanel {
 	}
 
 	public Color getFaceColor() {
-		return (Color) getAppearance().getAttribute(
+		return (Color) appearance.getAttribute(
 				CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR
 		);
 	}
@@ -531,7 +546,7 @@ public class AppearanceInspector extends JPanel {
 	public void setFaceColor(Color c) {
 		faceColorChooser.setColor(c);
 		String attribute = CommonAttributes.POLYGON_SHADER + "."+ CommonAttributes.DIFFUSE_COLOR;
-		getAppearance().setAttribute(attribute,c);
+		appearance.setAttribute(attribute,c);
 	}
 
 	public boolean isFacesFlat() {
@@ -540,7 +555,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setFacesFlat(boolean b) {
 		facesFlat.setSelected(b);
-		getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, !b);
+		appearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, !b);
 	}
 
 	public boolean isShowLines() {
@@ -549,7 +564,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setShowLines(boolean selected) {
 		showLines.setSelected(selected);
-		getAppearance().setAttribute("showLines", selected);
+		appearance.setAttribute("showLines", selected);
 	}
 
 	public boolean isShowPoints() {
@@ -558,7 +573,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setShowPoints(boolean selected) {
 		showPoints.setSelected(selected);
-		getAppearance().setAttribute("showPoints", selected);
+		appearance.setAttribute("showPoints", selected);
 	}
 
 	public boolean isShowFaces() {
@@ -567,7 +582,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setShowFaces(boolean selected) {
 		showFaces.setSelected(selected);
-		getAppearance().setAttribute("showFaces", selected);
+		appearance.setAttribute("showFaces", selected);
 	}
 
 	public boolean isTransparencyEnabled() {
@@ -576,7 +591,7 @@ public class AppearanceInspector extends JPanel {
 
 	public void setTransparencyEnabled(boolean b) {
 		transparency.setSelected(b);
-		getAppearance().setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, b);
+		appearance.setAttribute(CommonAttributes.TRANSPARENCY_ENABLED, b);
 	}
 
 	private void switchToLineColorChooser() {

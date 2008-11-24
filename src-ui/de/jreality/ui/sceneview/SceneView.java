@@ -90,28 +90,14 @@ public class SceneView extends ChangeEventSource {
 	private JMenu menu;
 	private ExportImage exportImageAction;
 	private ToolSystemConfiguration toolSystemConfiguration;
+	private RunningEnvironment runningEnvironment;
 	private String toolConfig;
-	private SceneGraphComponent contentParent;
-
-	/*
-	 * Returns the the <code>SceneGraphComponent</code> that is meant to hold the principal
-	 * content of the scene. Guaranteed to be non-null.
-	 * @return the content parent
-	 */
-	public SceneGraphComponent getContentParent() {
-		return contentParent != null ? contentParent : viewerSwitch.getSceneRoot();
-	}
-
-	/*
-	 * Sets the <code>SceneGraphComponent</code> that is meant to hold the principal
-	 * content of the scene. If <code>contentParent</code> is <code>null</code> then
-	 * <code>getContentParent()</code> will henceforth return the scene root.
-	 * 
-	 * @argument the new <code>contentParent</code>
-	 */
-	public void setContentParent(SceneGraphComponent contentParent) {
-		this.contentParent = contentParent;
-	}
+	
+	public enum RunningEnvironment {
+		PORTAL,
+		PORTAL_REMOTE,
+		DESKTOP
+	};
 
 	public SceneView() { 
 		
@@ -132,8 +118,17 @@ public class SceneView extends ChangeEventSource {
 			else LoggingSystem.getLogger(this).config("Inconsistant settings: no autoRender but synchRender!!");
 		}
 		
-		// load tool system configuration
+		// determine running environment
 		toolConfig = Secure.getProperty(SystemProperties.TOOL_CONFIG, SystemProperties.TOOL_CONFIG_DEFAULT);
+		if (toolConfig == "portal") {
+			runningEnvironment = RunningEnvironment.PORTAL; 
+		} else if (toolConfig == "portal-remote") {
+			runningEnvironment = RunningEnvironment.PORTAL_REMOTE;
+		} else {
+			runningEnvironment = RunningEnvironment.DESKTOP;
+		}
+		
+		// load tool system configuration
 		toolSystemConfiguration = Secure.doPrivileged(new PrivilegedAction<ToolSystemConfiguration>() {
 			public ToolSystemConfiguration run() {
 				ToolSystemConfiguration cfg=null;
@@ -209,17 +204,12 @@ public class SceneView extends ChangeEventSource {
 		} else {
 			throw new IllegalStateException("unknown environment: "+environment);
 		}
-		SceneGraphPath path = jrScene.getPath("emptyPickPath");
-		SceneGraphComponent parent = null;
-		if (path != null) {
-			parent = path.getLastComponent();
-		}
+
 		setScene(
 				jrScene.getSceneRoot(),
 				jrScene.getPath("cameraPath"),
 				jrScene.getPath("emptyPickPath"),
-				jrScene.getPath("avatarPath"),
-				parent
+				jrScene.getPath("avatarPath")
 		);
 		
 		// set preferred size
@@ -238,6 +228,10 @@ public class SceneView extends ChangeEventSource {
 		return viewerSwitch.getSceneRoot();
 	}
 	
+	public RunningEnvironment getRunningEnvironment() {
+		return runningEnvironment;
+	}
+
 	public JMenu getMenu() {
 		if (menu == null) {
 			menu = new JMenu("Viewer");
@@ -271,15 +265,14 @@ public class SceneView extends ChangeEventSource {
 	}
 	
 	public void setScene(SceneGraphComponent root, SceneGraphPath cameraPath) {
-		setScene(root, cameraPath, null, null, null);
+		setScene(root, cameraPath, null, null);
 	}
 	
 	public void setScene(
 			SceneGraphComponent root,
 			SceneGraphPath cameraPath,
 			SceneGraphPath emptyPickPath,
-			SceneGraphPath avatarPath,
-			SceneGraphComponent contentParent
+			SceneGraphPath avatarPath
 	) {
 		// make new root known to renderTrigger
 		if (autoRender) {
@@ -326,7 +319,6 @@ public class SceneView extends ChangeEventSource {
 		setCameraPath(cameraPath);
 		setAvatarPath(avatarPath);
 		setEmptyPickPath(emptyPickPath);
-		setContentParent(contentParent);
 
 		toolSystem.initializeSceneTools();
 		

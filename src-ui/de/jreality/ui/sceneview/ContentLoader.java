@@ -25,7 +25,8 @@ import de.jreality.util.Input;
 
 public class ContentLoader {
 
-	private ContentManager sceneContentManager;
+	private Content sceneViewContent;
+	
 	private final JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
 	private final JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
 	private JMenuItem menuItem;
@@ -34,8 +35,10 @@ public class ContentLoader {
 
 	@SuppressWarnings("serial")
 	
-	public ContentLoader(Component parent) {
-		this.parent = parent;
+	public ContentLoader(SceneView sceneView, Content sceneViewContent) {
+		parent = sceneView.getViewer().getViewingComponent();
+		this.sceneViewContent = sceneViewContent;
+		
 		Box checkBoxPanel = new Box(BoxLayout.Y_AXIS);
 		JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
 		JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
@@ -84,20 +87,12 @@ public class ContentLoader {
 					}
 				});
 				tempRoot.removeChild(read);
-				getSceneContentManager().setContent(read);
+				sceneViewContent.setContent(read);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			smoothNormalsCheckBox.setSelected(false);
 			removeAppsCheckBox.setSelected(false);
 		}
-	}
-
-	public void install(ContentManager sceneContentManager) {
-		this.sceneContentManager = sceneContentManager;
-	}
-
-	private ContentManager getSceneContentManager() {
-		return sceneContentManager;
 	}
 }

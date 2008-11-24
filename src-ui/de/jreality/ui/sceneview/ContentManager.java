@@ -8,6 +8,8 @@ public interface ContentManager {
 
 		public void setContent(SceneGraphComponent content);
 		
+		public void alignContent();
+		
 		public void setContentSize(double size);
 		
 		public double getContentScale();
@@ -16,7 +18,8 @@ public interface ContentManager {
 		
 		public void removeChangeListener(ChangeListener listener);
 		
-		public void install(SceneView sceneView);
-		
-		public void unInstall();
+		public void setPath(
+				SceneGraphComponent alignmentComponent,
+				SceneGraphComponent contentParent
+		);
 }
