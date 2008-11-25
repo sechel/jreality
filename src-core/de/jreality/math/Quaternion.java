@@ -69,9 +69,9 @@ final public class Quaternion implements Cloneable, Serializable {
 	/**
 	 * A copy constructor.
 	 * @param nq
-	 */public Quaternion(Quaternion nq) {
+	 */
+	public Quaternion(Quaternion nq) {
 		this(nq.re, nq.x, nq.y, nq.z);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public Quaternion(double r, double dx, double dy, double dz)	{
@@ -82,9 +82,6 @@ final public class Quaternion implements Cloneable, Serializable {
 		z = dz;
 	}
 	
-	/**
-	 * 
-	 */
 	public String toString()	{
 		return "re: "+Double.toString(re)+
 		"i: "+Double.toString(x)+
@@ -123,6 +120,7 @@ final public class Quaternion implements Cloneable, Serializable {
 	 */
 	public static double[] IJK(double[] dst, Quaternion q)	{
 		// assert dim checks
+		if (dst == null) dst = new double[3];
 		dst[0] = q.x;
 		dst[1] = q.y;
 		dst[2] = q.z;
