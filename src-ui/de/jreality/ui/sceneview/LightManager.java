@@ -8,8 +8,13 @@ import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.SceneGraphComponent;
 
 public class LightManager {
-
+	
+	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
+	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
+	
 	private SceneGraphComponent lights;
+	private DirectionalLight sunLight;
+	private DirectionalLight skyLight;
 	private final SceneView sceneView;
 	private SceneGraphComponent sceneRoot;
 	
@@ -34,14 +39,16 @@ public class LightManager {
 		lights = new SceneGraphComponent("lights");
 
 		SceneGraphComponent sun = new SceneGraphComponent("sun");
-		DirectionalLight sunLight = new DirectionalLight("sun light");
+		sunLight = new DirectionalLight("sun light");
+		sunLight.setIntensity(DEFAULT_SUN_LIGHT_INTENSITY);
 		sun.setLight(sunLight);
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
 				new double[] { 0, 1, 1 }).assignTo(sun);
 		lights.addChild(sun);
 
 		SceneGraphComponent sky = new SceneGraphComponent("sky");
-		DirectionalLight skyLight = new DirectionalLight();
+		skyLight = new DirectionalLight();
+		skyLight.setIntensity(DEFAULT_SKY_LIGHT_INTENSITY);
 		skyLight.setAmbientFake(true);
 		skyLight.setName("sky light");
 		sky.setLight(skyLight);
@@ -58,5 +65,21 @@ public class LightManager {
 	
 	public void unInstall() {
 		sceneView.getSceneRoot().removeChild(lights);
+	}
+	
+	public double getSkyLightIntensity() {
+		return skyLight.getIntensity();
+	}
+
+	public void setSkyLightIntensity(double x) {
+		skyLight.setIntensity(x);
+	}
+
+	public void setLightIntensity(double intensity) {
+		sunLight.setIntensity(intensity);
+	}
+
+	public double getLightIntensity() {
+		return sunLight.getIntensity();
 	}
 }

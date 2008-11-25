@@ -1,11 +1,13 @@
 package de.jreality.ui.sceneview;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.pick.PickResult;
@@ -17,10 +19,13 @@ import de.jreality.ui.sceneview.SceneView.RunningEnvironment;
 
 public class CameraManager {
 
+	private static final double DEFAULT_CAMERA_LIGHT_INTENSITY = .3;
+	
 	private SceneView sceneView;
 	private SceneGraphComponent cameraBase;
 	private SceneGraphComponent cameraComponent;
 	private SceneGraphPath cameraBasePath;
+	private PointLight cameraLight;
 
 	private SceneGraphPath cameraPath;
 
@@ -45,6 +50,14 @@ public class CameraManager {
 			cam.setViewPort(new Rectangle2D.Double(-1, -1, 2, 2));
 		}
 		cameraComponent.setCamera(cam);
+		cameraLight = new PointLight();
+		cameraLight.setIntensity(DEFAULT_CAMERA_LIGHT_INTENSITY);
+		cameraLight.setAmbientFake(true);
+		cameraLight.setFalloff(1, 0, 0);
+		cameraLight.setName("camera light");
+		cameraLight.setColor(new Color(255,255,255,255));
+		cameraComponent.setLight(cameraLight);
+
 		cameraBase.addChild(cameraComponent);
 
 		cameraBasePath = new SceneGraphPath();
