@@ -34,10 +34,10 @@ import de.jtem.beans.SimpleColorChooser;
 public class AppearanceInspector extends JPanel {
 
 	// maximal radius of tubes or points compared to content size
-	public static final double MAX_RADIUS = 0.5;
+	private double maximalRadius = 1.5;
 
 	// ratio of maximal versus minimal value for logarithmic sliders
-	public static final int LOGARITHMIC_RANGE = 200;
+	private int logarithmicRange = 200;
 
 	private JPanel panel;
 	private SimpleColorChooser lineColorChooser;
@@ -417,8 +417,8 @@ public class AppearanceInspector extends JPanel {
 
 	public void setPointRadius(double d) {
 		pointRadiusSlider.setValue((int) (d * 100));
-		double r = Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
-			/ LOGARITHMIC_RANGE * MAX_RADIUS;
+		double r = Math.exp(Math.log(logarithmicRange) * d)
+			/ logarithmicRange * maximalRadius;
 		appearance.setAttribute(
 				CommonAttributes.POINT_SHADER + "."+ CommonAttributes.POINT_RADIUS,
 				r
@@ -451,8 +451,8 @@ public class AppearanceInspector extends JPanel {
 
 	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
-		double r = Math.exp(Math.log(LOGARITHMIC_RANGE) * d)
-			/ LOGARITHMIC_RANGE * MAX_RADIUS;
+		double r = Math.exp(Math.log(logarithmicRange) * d)
+			/ logarithmicRange * maximalRadius;
 		appearance.setAttribute(
 				CommonAttributes.LINE_SHADER + "."	+ CommonAttributes.TUBE_RADIUS,
 				r
@@ -621,4 +621,23 @@ public class AppearanceInspector extends JPanel {
 		this.appearance = app;
 	}
 
+	public double getMaximalRadius() {
+		return maximalRadius;
+	}
+
+	public void setMaximalRadius(double maximalRadius) {
+		this.maximalRadius = maximalRadius;
+		setPointRadius(getPointRadius());
+		setTubeRadius(getTubeRadius());
+	}
+
+	public int getLogarithmicRange() {
+		return logarithmicRange;
+	}
+
+	public void setLogarithmicRange(int logarithmicRange) {
+		this.logarithmicRange = logarithmicRange;
+		setPointRadius(getPointRadius());
+		setTubeRadius(getTubeRadius());
+	}
 }

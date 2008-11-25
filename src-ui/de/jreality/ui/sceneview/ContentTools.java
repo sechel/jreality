@@ -57,6 +57,9 @@ public class ContentTools {
 		makePanel();
 		setRotationEnabled(true);
 		setDragEnabled(true);
+		setPickEdges(DEFAULT_PICK_EDGES);
+		setPickFaces(DEFAULT_PICK_FACES);
+		setPickVertices(DEFAULT_PICK_VERTICES);
 	}
 	
 	public JPanel getPanel() {

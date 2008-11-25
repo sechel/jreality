@@ -6,6 +6,7 @@ import javax.swing.event.ChangeListener;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.proxy.scene.SceneGraphPath;
 
 public class Content extends ChangeEventSource implements ChangeListener {
 
@@ -42,6 +43,13 @@ public class Content extends ChangeEventSource implements ChangeListener {
 		scaledAppearance = new Appearance("scaled appearance");
 		contentParent.setAppearance(scaledAppearance);
 		alignmentComponent.addChild(contentParent);
+		
+		SceneGraphPath path = new SceneGraphPath();
+		path.push(sceneView.getSceneRoot());
+		path.push(contentComponent);
+		path.push(alignmentComponent);
+		path.push(contentParent);
+		sceneView.setEmptyPickPath(path);
 		
 		contentManager = new SceneViewContentManager(alignmentComponent, contentParent);
 		contentManager.addChangeListener(this);

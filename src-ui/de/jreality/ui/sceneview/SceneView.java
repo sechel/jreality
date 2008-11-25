@@ -55,12 +55,12 @@ import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
-import de.jreality.io.JrScene;
-import de.jreality.io.JrSceneFactory;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.Selection;
@@ -86,20 +86,29 @@ public class SceneView extends ChangeEventSource {
 	private boolean autoRender = true;
 	private boolean synchRender = false;
 
-	private SelectionManagerInterface selectionManager;
 	private JMenu menu;
 	private ExportImage exportImageAction;
 	private ToolSystemConfiguration toolSystemConfiguration;
 	private RunningEnvironment runningEnvironment;
 	private String toolConfig;
-	
+
 	public enum RunningEnvironment {
 		PORTAL,
 		PORTAL_REMOTE,
 		DESKTOP
 	};
 
-	public SceneView() { 
+	public SceneView() {
+		
+		// determine running environment
+		String environment = Secure.getProperty(SystemProperties.ENVIRONMENT, SystemProperties.ENVIRONMENT_DEFAULT);
+		if (environment == "portal") {
+			runningEnvironment = RunningEnvironment.PORTAL; 
+		} else if (environment == "portal-remote") {
+			runningEnvironment = RunningEnvironment.PORTAL_REMOTE;
+		} else {
+			runningEnvironment = RunningEnvironment.DESKTOP;
+		}
 		
 		// retrieve autoRender & synchRender system properties
 		String autoRenderProp = Secure.getProperty(SystemProperties.AUTO_RENDER, SystemProperties.AUTO_RENDER_DEFAULT);
@@ -117,17 +126,10 @@ public class SceneView extends ChangeEventSource {
 			if (autoRender) renderTrigger.setAsync(false);
 			else LoggingSystem.getLogger(this).config("Inconsistant settings: no autoRender but synchRender!!");
 		}
-		
+
 		// determine running environment
 		toolConfig = Secure.getProperty(SystemProperties.TOOL_CONFIG, SystemProperties.TOOL_CONFIG_DEFAULT);
-		if (toolConfig == "portal") {
-			runningEnvironment = RunningEnvironment.PORTAL; 
-		} else if (toolConfig == "portal-remote") {
-			runningEnvironment = RunningEnvironment.PORTAL_REMOTE;
-		} else {
-			runningEnvironment = RunningEnvironment.DESKTOP;
-		}
-		
+
 		// load tool system configuration
 		toolSystemConfiguration = Secure.doPrivileged(new PrivilegedAction<ToolSystemConfiguration>() {
 			public ToolSystemConfiguration run() {
@@ -189,29 +191,16 @@ public class SceneView extends ChangeEventSource {
 			renderTrigger.addViewer(viewerSwitch);
 		}
 		
-		// create selection manager
-		selectionManager = SelectionManager.selectionManagerForViewer(viewerSwitch);
-		
-		// create default scene
-		String environment = Secure.getProperty(SystemProperties.ENVIRONMENT, SystemProperties.ENVIRONMENT_DEFAULT);
-		JrScene jrScene;
-		if (environment.equals("desktop")) {
-			jrScene = JrSceneFactory.getDefaultDesktopScene();
-		} else if (environment.equals("portal")) {
-			jrScene = JrSceneFactory.getDefaultPortalScene();
-		} else if (environment.equals("portal-remote")) {
-			jrScene = JrSceneFactory.getDefaultPortalRemoteScene();
-		} else {
-			throw new IllegalStateException("unknown environment: "+environment);
-		}
+		SceneGraphComponent root = new SceneGraphComponent("root");
+		Appearance rootAppearance = new Appearance("root appearance");
+		ShaderUtility.createRootAppearance(rootAppearance);
+		root.setAppearance(rootAppearance);
 
-		setScene(
-				jrScene.getSceneRoot(),
-				jrScene.getPath("cameraPath"),
-				jrScene.getPath("emptyPickPath"),
-				jrScene.getPath("avatarPath")
-		);
-		
+		SceneGraphPath emptyPickPath = new SceneGraphPath();
+		emptyPickPath.push(root);
+
+		setScene(root, null, emptyPickPath, null);
+
 		// set preferred size
 		viewerSwitch.getViewingComponent().setPreferredSize(new Dimension(600,600));
 	}
@@ -227,7 +216,7 @@ public class SceneView extends ChangeEventSource {
 	public SceneGraphComponent getSceneRoot() {
 		return viewerSwitch.getSceneRoot();
 	}
-	
+
 	public RunningEnvironment getRunningEnvironment() {
 		return runningEnvironment;
 	}
@@ -263,80 +252,102 @@ public class SceneView extends ChangeEventSource {
 		}
 		return menu;
 	}
-	
+
 	public void setScene(SceneGraphComponent root, SceneGraphPath cameraPath) {
 		setScene(root, cameraPath, null, null);
 	}
-	
+
 	public void setScene(
 			SceneGraphComponent root,
 			SceneGraphPath cameraPath,
 			SceneGraphPath emptyPickPath,
 			SceneGraphPath avatarPath
 	) {
-		// make new root known to renderTrigger
-		if (autoRender) {
-			if (viewerSwitch.getSceneRoot() != null) {
-				renderTrigger.removeSceneGraphComponent(viewerSwitch.getSceneRoot());
-			}
-			renderTrigger.addSceneGraphComponent(root);
-		}
-		
-		// set the root of the viewer
-		viewerSwitch.setSceneRoot(root);
-		
-		// make a new toolSystem
-		if (toolSystem != null)	toolSystem.dispose();
-		Secure.doPrivileged(new PrivilegedAction<ToolSystem>() {
-			public ToolSystem run() {
-				try {
-					if (!(toolConfig == "portal-remote")) {
-						toolSystem = new ToolSystem(
-								viewerSwitch,
-								toolSystemConfiguration,
-								synchRender ? renderTrigger : null
-						);
-					}
-					else  {
-						try {
-							Class<?> clazz = Class.forName("de.jreality.toolsystem.PortalToolSystemImpl");
-							Class<? extends ToolSystem> portalToolSystem = clazz.asSubclass(ToolSystem.class);
-							Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{de.jreality.jogl.Viewer.class, ToolSystemConfiguration.class});
-							de.jreality.jogl.Viewer cv = (de.jreality.jogl.Viewer) viewerSwitch.getCurrentViewer();
-							toolSystem = cc.newInstance(new Object[]{cv, toolSystemConfiguration});
-						} catch (Throwable t) {
-							t.printStackTrace();
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
+		boolean changed = false;
+
+		if (root != viewerSwitch.getSceneRoot()) {
+			changed = true;
+			// make new root known to renderTrigger
+			if (autoRender) {
+				if (viewerSwitch.getSceneRoot() != null) {
+					renderTrigger.removeSceneGraphComponent(viewerSwitch.getSceneRoot());
 				}
-				viewerSwitch.setToolSystem(toolSystem);
-				return null;
+				renderTrigger.addSceneGraphComponent(root);
 			}
-		});
 
-		setCameraPath(cameraPath);
-		setAvatarPath(avatarPath);
-		setEmptyPickPath(emptyPickPath);
+			// set the root of the viewer
+			viewerSwitch.setSceneRoot(root);
 
-		toolSystem.initializeSceneTools();
-		
+			// make a new toolSystem
+			if (toolSystem != null)	toolSystem.dispose();
+			Secure.doPrivileged(new PrivilegedAction<ToolSystem>() {
+				public ToolSystem run() {
+					try {
+						if (!(toolConfig == "portal-remote")) {
+							toolSystem = new ToolSystem(
+									viewerSwitch,
+									toolSystemConfiguration,
+									synchRender ? renderTrigger : null
+							);
+						}
+						else  {
+							try {
+								Class<?> clazz = Class.forName("de.jreality.toolsystem.PortalToolSystemImpl");
+								Class<? extends ToolSystem> portalToolSystem = clazz.asSubclass(ToolSystem.class);
+								Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{de.jreality.jogl.Viewer.class, ToolSystemConfiguration.class});
+								de.jreality.jogl.Viewer cv = (de.jreality.jogl.Viewer) viewerSwitch.getCurrentViewer();
+								toolSystem = cc.newInstance(new Object[]{cv, toolSystemConfiguration});
+							} catch (Throwable t) {
+								t.printStackTrace();
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					viewerSwitch.setToolSystem(toolSystem);
+					return null;
+				}
+			});
+		}
+		if (cameraPath  != viewerSwitch.getCameraPath()) {
+			viewerSwitch.setCameraPath(cameraPath);
+			changed = true;
+		}
+		if (avatarPath  != toolSystem.getAvatarPath()) {
+			toolSystem.setAvatarPath(avatarPath);
+			changed = true;
+		}
+		if (emptyPickPath  != toolSystem.getEmptyPickPath()) {
+			toolSystem.setEmptyPickPath(emptyPickPath);
+			changed = true;
+		}
+
 		// set the default selection of the selection manager
+		SelectionManagerInterface selectionManager =
+			SelectionManager.selectionManagerForViewer(viewerSwitch);
 		emptyPickPath = toolSystem.getEmptyPickPath();
 		Selection s = new Selection(emptyPickPath);
 		selectionManager.setDefaultSelection(new Selection(s));
 		selectionManager.setSelection(s);
+
+		//initialize tools in the new scene
+		toolSystem.initializeSceneTools();
+		
+		// notify listeners
+		if (changed) fireStateChanged();
 	}
-	
+
 	public SceneGraphPath getCameraPath() {
 		return viewerSwitch.getCameraPath();
 	}
-	
+
 	public void setCameraPath(SceneGraphPath path) {
-		if (path != null) viewerSwitch.setCameraPath(path);
+		if (path != viewerSwitch.getCameraPath()) {
+			viewerSwitch.setCameraPath(path);
+			fireStateChanged();
+		}
 	}
-	
+
 	/*
 	 * Returns the avatarPath of the ToolSystem. The result is guaranteed to be
 	 * non-null and to have the current scene root as its first element.
@@ -346,7 +357,7 @@ public class SceneView extends ChangeEventSource {
 	public SceneGraphPath getAvatarPath() {
 		return toolSystem.getAvatarPath();
 	}
-	
+
 	/*
 	 * Sets the <code>avatarPath</code> of the ToolSystem. If <code>path</code> is
 	 * <code>null</code>, the <code>avatarPath</code> will be set to the  last
@@ -356,24 +367,27 @@ public class SceneView extends ChangeEventSource {
 	 * @argument The new <code>avatarPath</code>.
 	 */
 	public void setAvatarPath(SceneGraphPath path) {
-		if (path != null) {
-			if (!path.isValid()) {
-				throw new IllegalArgumentException("emptyPickPath is not a valid SceneGraphPath");
+		if (path != toolSystem.getAvatarPath()) {
+			if (path != null) {
+				if (!path.isValid()) {
+					throw new IllegalArgumentException("emptyPickPath is not a valid SceneGraphPath");
+				}
+				if (path.getFirstElement() != viewerSwitch.getSceneRoot()) {
+					throw new IllegalArgumentException("emptyPickPath does not start with the current scene root");
+				}
+			} else {
+				List<SceneGraphNode> nodes = getCameraPath().toList();
+				nodes.remove(nodes.size()-1);
+				path = new SceneGraphPath();
+				for (SceneGraphNode node : nodes) {
+					path.push(node);
+				}
 			}
-			if (path.getFirstElement() != viewerSwitch.getSceneRoot()) {
-				throw new IllegalArgumentException("emptyPickPath does not start with the current scene root");
-			}
-		} else {
-			List<SceneGraphNode> nodes = getCameraPath().toList();
-			nodes.remove(nodes.size()-1);
-			path = new SceneGraphPath();
-			for (SceneGraphNode node : nodes) {
-				path.push(node);
-			}
+			toolSystem.setAvatarPath(path);
+			fireStateChanged();
 		}
-		toolSystem.setAvatarPath(path);
 	}
-	
+
 	/*
 	 * Returns the <code>emptyPickPath</code> of the ToolSystem. The result is
 	 * guaranteed to be non-null and to have the current scene root as its first
@@ -384,7 +398,7 @@ public class SceneView extends ChangeEventSource {
 	public SceneGraphPath getEmptyPickPath() {
 		return toolSystem.getEmptyPickPath();
 	}
-	
+
 	/*
 	 * Sets the emptyPickPath of the ToolSystem. If <code>path</code> is 
 	 * <code>null</code>, the <code>emptyPickPath</code> will be set to a
@@ -395,18 +409,20 @@ public class SceneView extends ChangeEventSource {
 	 * @argument The new <code>emptyPickPath</code>.
 	 */
 	public void setEmptyPickPath(SceneGraphPath path) {
-		if (path != null) {
-			if (path.getFirstElement() != viewerSwitch.getSceneRoot()) {
-				throw new IllegalArgumentException("emptyPickPath does not start with the current scene root");
+		if (path != toolSystem.getEmptyPickPath()) {
+			if (path != null) {
+				if (path.getFirstElement() != viewerSwitch.getSceneRoot()) {
+					throw new IllegalArgumentException("emptyPickPath does not start with the current scene root");
+				}
+			} else {
+				path = new SceneGraphPath();
+				path.push(viewerSwitch.getSceneRoot());
 			}
-		} else {
-			path = new SceneGraphPath();
-			path.push(viewerSwitch.getSceneRoot());
+			toolSystem.setEmptyPickPath(path);
+			fireStateChanged();
 		}
-		toolSystem.setEmptyPickPath(path);
 	}
-	
-	
+
 	public void dispose() {
 		if (autoRender) {
 			renderTrigger.removeSceneGraphComponent(viewerSwitch.getSceneRoot());

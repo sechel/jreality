@@ -13,7 +13,7 @@ public class SceneViewContentManager extends ChangeEventSource implements Conten
 	private SceneGraphComponent contentParent;
 
 
-	private double contentSize = 6;
+	private double contentSize = 20;
 	
 	public SceneViewContentManager(
 			SceneGraphComponent alignmentComponent,
