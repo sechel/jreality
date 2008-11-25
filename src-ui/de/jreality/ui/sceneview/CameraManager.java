@@ -10,6 +10,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
@@ -41,6 +42,7 @@ public class CameraManager {
 		sceneRoot.addChild(cameraBase);
 		
 		cameraComponent = new SceneGraphComponent("camera");
+		cameraComponent.setTransformation(new Transformation());
 		Camera cam = new Camera("camera");
 		cam.setNear(0.01);
 		cam.setFar(1500);
