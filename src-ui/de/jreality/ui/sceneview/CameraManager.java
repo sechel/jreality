@@ -43,15 +43,15 @@ public class CameraManager {
 		
 		cameraComponent = new SceneGraphComponent("camera");
 		cameraComponent.setTransformation(new Transformation());
-		Camera cam = new Camera("camera");
-		cam.setNear(0.01);
-		cam.setFar(1500);
+		Camera camera = new Camera("camera");
+		camera.setNear(0.01);
+		camera.setFar(1500);
 		if (portal || portalRemote) {
-			cam.setOnAxis(false);
-			cam.setStereo(true);
-			cam.setViewPort(new Rectangle2D.Double(-1, -1, 2, 2));
+			camera.setOnAxis(false);
+			camera.setStereo(true);
+			camera.setViewPort(new Rectangle2D.Double(-1, -1, 2, 2));
 		}
-		cameraComponent.setCamera(cam);
+		cameraComponent.setCamera(camera);
 		cameraLight = new PointLight();
 		cameraLight.setIntensity(DEFAULT_CAMERA_LIGHT_INTENSITY);
 		cameraLight.setAmbientFake(true);
@@ -70,7 +70,7 @@ public class CameraManager {
 		cameraPath.push(sceneRoot);
 		cameraPath.push(cameraBase);
 		cameraPath.push(cameraComponent);
-		cameraPath.push(cam);
+		cameraPath.push(camera);
 
 		if (portal || portalRemote) {
 			cameraBase.addTool(new PointerDisplayTool() {
