@@ -2,12 +2,17 @@ package de.jreality.ui.sceneview;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -70,11 +75,41 @@ public class AppearanceInspector extends JPanel {
 	private Appearance appearance;
 	private Appearance scaledAppearance;
 	private double objectScale=1;
+	private TextureInspector textureInspector;
+	private JPanel texturePanel;
 
-	public AppearanceInspector(Appearance appearance, Appearance scaledAppearance) {
+	public AppearanceInspector(
+			Appearance appearance,
+			Appearance scaledAppearance,
+			Component parent
+	) {
 		super(new BorderLayout());
 		this.appearance = appearance;
 		this.scaledAppearance = scaledAppearance;
+		
+		texturePanel = new JPanel(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.fill = GridBagConstraints.BOTH;
+		texturePanel.setBorder(new EmptyBorder(8,8,8,8));
+		HashMap<String, String> textureNameToTexture = new HashMap<String, String>();
+		textureNameToTexture.put("none", null);
+		textureNameToTexture.put("metal grid", "textures/boysurface.png");
+		textureNameToTexture.put("metal floor", "textures/metal_basic88.png");
+		textureNameToTexture.put("chain-link fence", "textures/chainlinkfence.png");
+		textureInspector = new TextureInspector(
+				textureNameToTexture,
+				appearance,
+				parent
+		);
+		texturePanel.add(textureInspector, gbc);
+		JButton closeButton = new JButton("close");
+		closeButton.addActionListener(closeListener);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		texturePanel.add(closeButton, gbc);
+		
 		makePanel();
 		add(panel);
 		revalidate();
@@ -313,6 +348,7 @@ public class AppearanceInspector extends JPanel {
 		transparencyBox.add(transparency);
 
 		faceBox.add(transparencyBox);
+		
 		JPanel flatPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		//flatPanel.setBorder(new EmptyBorder(5,5,5,5));
 		facesFlat = new JCheckBox("flat shading");
@@ -323,6 +359,19 @@ public class AppearanceInspector extends JPanel {
 			}
 		});
 		flatPanel.add(facesFlat);
+		
+		JButton textureButton = new JButton("texture");
+		textureButton.setMargin(new Insets(0,5,0,5));
+		textureButton.addActionListener(new AbstractAction() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switchTo(texturePanel);
+			}
+			
+		});
+		flatPanel.add(textureButton);
+		
 		faceBox.add(flatPanel);
 		appBox.add(faceBox);
 

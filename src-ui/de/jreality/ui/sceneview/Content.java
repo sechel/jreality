@@ -55,6 +55,10 @@ public class Content extends ChangeEventSource implements ChangeListener {
 		contentManager.addChangeListener(this);
 	}
 	
+	public SceneGraphComponent getContentComponent() {
+		return contentComponent;
+	}
+	
 	public Appearance getScaledAppearance() {
 		return scaledAppearance;
 	}

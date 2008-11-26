@@ -34,11 +34,12 @@ public class ContentAppearance implements ChangeListener {
 		return appearanceInspector;
 	}
 
-	public ContentAppearance(Content content) {
+	public ContentAppearance(SceneView sceneView, Content content) {
 		this.content = content;
 		appearanceInspector = new AppearanceInspector(
 				content.getContentAppearance(),
-				content.getScaledAppearance()
+				content.getScaledAppearance(),
+				sceneView.getViewer().getViewingComponent()
 		);
 		appearanceInspector.setAppearance(content.getContentAppearance());
 		restoreDefaults();

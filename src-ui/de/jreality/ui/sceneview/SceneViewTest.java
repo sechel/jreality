@@ -12,7 +12,7 @@ public class SceneViewTest {
 		Background background = new Background(sceneView);
 		Content content = new Content(sceneView);
 		ContentLoader loader = new ContentLoader(sceneView, content);
-		ContentAppearance contentAppearance = new ContentAppearance(content);
+		ContentAppearance contentAppearance = new ContentAppearance(sceneView, content);
 
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
