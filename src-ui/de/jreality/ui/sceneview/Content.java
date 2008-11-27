@@ -6,14 +6,10 @@ import javax.swing.event.ChangeListener;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.proxy.scene.SceneGraphPath;
 
 public class Content extends ChangeEventSource implements ChangeListener {
 
 	private ContentManager contentManager;
-	private SceneView sceneView;
-	private SceneGraphComponent sceneRoot;
-	private SceneGraphComponent contentComponent;
 	private SceneGraphComponent alignmentComponent;
 	private SceneGraphComponent contentParent;
 	private Appearance contentAppearance;
@@ -24,18 +20,12 @@ public class Content extends ChangeEventSource implements ChangeListener {
 		return contentAppearance;
 	}
 
-	public Content(SceneView sceneView) {
-		this.sceneView = sceneView;
-		sceneRoot = sceneView.getSceneRoot();
-		
-		contentComponent = new SceneGraphComponent("content");
-		contentAppearance = new Appearance("content appearance");
-		contentComponent.setAppearance(contentAppearance);
-		sceneRoot.addChild(contentComponent);
-		
+	public Content() {
+
 		alignmentComponent = new SceneGraphComponent("alignment");
+		contentAppearance = new Appearance("content appearance");
+		alignmentComponent.setAppearance(contentAppearance);
 		alignmentComponent.setTransformation(new Transformation("align transformation"));
-		contentComponent.addChild(alignmentComponent);
 		
 		contentParent = new SceneGraphComponent("content parent");
 		toolTransformation = new Transformation("tool transformation");
@@ -44,27 +34,16 @@ public class Content extends ChangeEventSource implements ChangeListener {
 		contentParent.setAppearance(scaledAppearance);
 		alignmentComponent.addChild(contentParent);
 		
-		SceneGraphPath path = new SceneGraphPath();
-		path.push(sceneView.getSceneRoot());
-		path.push(contentComponent);
-		path.push(alignmentComponent);
-		path.push(contentParent);
-		sceneView.setEmptyPickPath(path);
-		
 		contentManager = new SceneViewContentManager(alignmentComponent, contentParent);
 		contentManager.addChangeListener(this);
 	}
 	
-	public SceneGraphComponent getContentComponent() {
-		return contentComponent;
+	public SceneGraphComponent getAlignmentComponent() {
+		return alignmentComponent;
 	}
 	
 	public Appearance getScaledAppearance() {
 		return scaledAppearance;
-	}
-
-	public void unInstall() {
-		sceneRoot.removeChild(alignmentComponent);
 	}
 	
 	public SceneGraphComponent getContentParent() {
@@ -82,19 +61,6 @@ public class Content extends ChangeEventSource implements ChangeListener {
 	public double getContentScale() {
 		return contentManager.getContentScale();
 	}
-
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == contentManager) {
-			fireStateChanged();
-		}
-		if (e.getSource() == sceneView) {
-			if (sceneView.getSceneRoot() != sceneRoot) {
-				sceneRoot.removeChild(alignmentComponent);
-				sceneRoot = sceneView.getSceneRoot();
-				sceneRoot.addChild(alignmentComponent);
-			}
-		}
-	}
 	
 	public void setContentManager(ContentManager contentManager) {
 		if (contentManager == null) {
@@ -109,5 +75,12 @@ public class Content extends ChangeEventSource implements ChangeListener {
 
 	public void setContentSize(double size) {
 		contentManager.setContentSize(size);
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() == contentManager) {
+			fireStateChanged();
+		}
 	}
 }
