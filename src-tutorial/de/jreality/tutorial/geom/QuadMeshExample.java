@@ -27,11 +27,10 @@ import de.jreality.util.SceneGraphUtility;
 public class QuadMeshExample {
 
 	public static IndexedFaceSet createOloid( int N ) {
-
-		QuadMeshFactory factory = new QuadMeshFactory();
-			
+		// generate the coordinates for the surface as a 2D array of 3-vectors
+		// QuadMeshFactory is the only factory which accepts such a data structure
+		// as the argument of its setVertexCoordinates() method!
 		double [][][] coords = new double [5][2*N-1][];
-		
 		for( int i=0; i<N; i++) {
 			double alpha = Math.PI/2 * i / (N-1);
 			double beta  = Math.asin( -  Math.cos(alpha) / ( Math.cos(alpha)+1));
@@ -50,12 +49,18 @@ public class QuadMeshExample {
 			coords[4][2*N-2-i] = coords[0][2*N-2-i];
 		}
 		
+		// QuadMeshFactory knows how to build an IndexedFaceSet from a rectangular array
+		// of vectors.  
+		QuadMeshFactory factory = new QuadMeshFactory();
 		factory.setVLineCount(5);		// important: the v-direction is the left-most index
 		factory.setULineCount(2*N-1);	// and the u-direction the next-left-most index
-		factory.setVertexCoordinates(coords);
+		factory.setClosedInUDirection(false);	// looks like, but isn't closed in u-direction
+		factory.setClosedInVDirection(true);	// wraps in the V-direction
+		factory.setVertexCoordinates(coords);	
 		factory.setGenerateFaceNormals(true);
 		factory.setGenerateTextureCoordinates(true);
 		factory.setGenerateEdgesFromFaces(true);
+		factory.setEdgeFromQuadMesh(true);	// generate "long" edges: one for each u-, v- parameter curve
 		
 		factory.update();
 		
