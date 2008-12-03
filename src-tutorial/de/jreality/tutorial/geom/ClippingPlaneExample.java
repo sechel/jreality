@@ -80,7 +80,7 @@ public class ClippingPlaneExample{
 		});
 		clipIcon.addChild(clipPlane);
 		
-		PickUtility.setPickable(sgc, false);
+		sgc.setPickable( false);
 		sgc.addChild(SphereUtility.tessellatedCubeSphere(SphereUtility.SPHERE_SUPERFINE));
 		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"name","twoSide");
 		sgc.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER,TwoSidePolygonShader.class);
