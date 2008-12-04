@@ -658,9 +658,9 @@ public class P3 {
 		double[] toL = Pn.normalize(null, toL1, sig);
 //		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
 		if (Double.isNaN(toL[0])) {
-//			Rn.setIdentityMatrix(mat);
-//			return mat;
-			throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
+			Rn.setIdentityMatrix(mat);
+			return mat;
+//			throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
 		}
 //		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
 		double f = 1.0/(1+toL[3]);
@@ -791,14 +791,17 @@ public class P3 {
 		}
 		double[] diagnosis = Rn.subtract(null, Q_LIST[signature+1], 
 				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[signature+1], m )));
+		double nn = 1.0;
+		if (diagnosis[0] != 0) nn = 1.0/diagnosis[0];
+		Rn.times(diagnosis, nn, diagnosis);
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
 //			return null;
 //		}
-		boolean mydebug = false;
+		boolean mydebug = true;
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m));
-			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Original is");
+			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Diagnosis is");
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis));			
 		}
 		double[][] basis = new double[4][4];
