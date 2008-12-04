@@ -357,14 +357,16 @@ final public class Quaternion implements Cloneable, Serializable {
 		if (rot == null) rot = new double[16];
 		Rn.setToValue(rot, 0.0);
 		Quaternion.normalize(qt, qt);
-		rot[0] = qt.re*qt.re + qt.x*qt.x - qt.y*qt.y - qt.z*qt.z;
-		rot[1] =  2*(-qt.re*qt.z + qt.x*qt.y);
-		rot[2] =  2*( qt.re*qt.y + qt.x*qt.z);
 		rot[4] =  2*( qt.re*qt.z + qt.y*qt.x);
-		rot[5] = qt.re*qt.re - qt.x*qt.x + qt.y*qt.y - qt.z*qt.z;
-		rot[6] = 2*(-qt.re*qt.x + qt.y*qt.z);
+		rot[1] =  2*(-qt.re*qt.z + qt.x*qt.y);
+
 		rot[8] = 2*(-qt.re*qt.y + qt.x*qt.z);
+		rot[2] =  2*( qt.re*qt.y + qt.x*qt.z);
+
 		rot[9] = 2*( qt.re*qt.x + qt.y*qt.z);
+		rot[6] = 2*(-qt.re*qt.x + qt.y*qt.z);
+		rot[0] = qt.re*qt.re + qt.x*qt.x - qt.y*qt.y - qt.z*qt.z;
+		rot[5] = qt.re*qt.re - qt.x*qt.x + qt.y*qt.y - qt.z*qt.z;
 		rot[10]= qt.re*qt.re - qt.x*qt.x - qt.y*qt.y + qt.z*qt.z;
 		rot[15] = 1.0;
 		return rot;
