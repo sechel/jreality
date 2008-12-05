@@ -141,7 +141,6 @@ public class Texture2DLoaderJOGL {
  
       	ImageData image = tex.getImage();
     	if (image == null) return;
-    	byte[] data = image.getByteArray();
     	int width = image.getWidth(), height = image.getHeight();
         // can't do this statically at start-up since we need a GL context to inquire
 		checkForTextureExtensions(gl);
@@ -274,7 +273,8 @@ public class Texture2DLoaderJOGL {
 	     // create either a series of mipmaps of a single texture image based on
 	    // what's loaded
 	    if (first || replace) {
-            gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
+	    	byte[] data = image.getByteArray();
+           gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
 	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
 	        if (mipmapped) {
