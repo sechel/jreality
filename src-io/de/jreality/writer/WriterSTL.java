@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jreality.geometry.GeometryMergeFactory;
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Geometry;
@@ -55,6 +54,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.IntArray;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author schmies
@@ -95,7 +95,7 @@ public class WriterSTL {
 		
 		double [][] normals;
 		if( ifs.getFaceAttributes( Attribute.NORMALS ) == null ) {
-			normals = GeometryUtility.calculateFaceNormals(ifs);
+			normals = IndexedFaceSetUtility.calculateFaceNormals(ifs);
 		} else {
 			normals = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray().toDoubleArrayArray(null);
 		}
@@ -127,7 +127,7 @@ public class WriterSTL {
 	
 	public static void write( SceneGraphComponent sgc, PrintWriter out ) {
 		
-		SceneGraphComponent flat = GeometryUtility.flatten(sgc, true);
+		SceneGraphComponent flat = SceneGraphUtility.flatten(sgc, true);
 		beginFile(out);
 		writeGeometry( flat.getGeometry(), out); //, ifsList );
 		

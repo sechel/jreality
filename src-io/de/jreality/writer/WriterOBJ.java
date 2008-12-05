@@ -53,6 +53,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.IntArray;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author schmies
@@ -107,7 +108,7 @@ public class WriterOBJ {
 	
 	public static void write( SceneGraphComponent sgc, PrintWriter out ) {
 		
-		SceneGraphComponent flat = GeometryUtility.flatten(sgc);
+		SceneGraphComponent flat = SceneGraphUtility.flatten(sgc);
 		
 		int vertex = write( flat.getGeometry(), flat.getName(), out, 0);
 		
