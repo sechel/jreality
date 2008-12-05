@@ -50,7 +50,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
@@ -441,10 +440,10 @@ public class ReaderOBJ extends AbstractReader {
       }
       boolean hasVertexNormals = ifs.getVertexAttributes(Attribute.NORMALS) != null;
       if (!hasVertexNormals && smooth) {
-        GeometryUtility.calculateAndSetVertexNormals(ifs);
+        IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
       }
       if (!smooth && !hasVertexNormals) {
-        GeometryUtility.calculateAndSetFaceNormals(ifs);
+        IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
       }
       IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
       return ifs;

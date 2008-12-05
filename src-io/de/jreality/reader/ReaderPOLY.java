@@ -47,7 +47,6 @@ import java.io.LineNumberReader;
 import java.util.HashMap;
 import java.util.Vector;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -129,8 +128,8 @@ public class ReaderPOLY extends AbstractReader {
      ifs.setVertexCountAndAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.inlined(3).createReadOnly(vertices));
      //ifs.setFaceCountAndAttributes(Attribute.INDICES,new IntArrayArray.Array(faces));
      ifs.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(faces));
-     GeometryUtility.calculateAndSetFaceNormals(ifs);
-     GeometryUtility.calculateAndSetVertexNormals(ifs);
+     IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
+     IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
      IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
      root.setGeometry(ifs);
 //     System.out.println("we return "+root+" with geometry "+root.getGeometry());

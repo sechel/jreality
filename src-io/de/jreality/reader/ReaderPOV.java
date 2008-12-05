@@ -47,7 +47,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Cylinder;
@@ -186,8 +185,8 @@ public class ReaderPOV extends AbstractReader {
       setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY
           .inlined(3).createReadOnly(faces));
       IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(this);
-      GeometryUtility.calculateAndSetFaceNormals(this);
-      GeometryUtility.calculateAndSetVertexNormals(this);
+      IndexedFaceSetUtility.calculateAndSetFaceNormals(this);
+      IndexedFaceSetUtility.calculateAndSetVertexNormals(this);
     }
 
     private void compute(double[] vertices, double[] normals, int[] faces) {

@@ -46,6 +46,7 @@ import java.io.LineNumberReader;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.PointSetFactory;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
@@ -110,7 +111,7 @@ public class ReaderPTS extends AbstractReader {
     psf.setVertexCoordinates(points);
     psf.setVertexColors(colors);
     psf.update();
-    Rectangle3D bb = GeometryUtility.calculateBoundingBox(psf.getPointSet());
+    Rectangle3D bb = BoundingBoxUtility.calculateBoundingBox(psf.getPointSet());
     psf.getPointSet().setGeometryAttributes(GeometryUtility.BOUNDING_BOX, bb);
     root.setGeometry(psf.getPointSet());
   }

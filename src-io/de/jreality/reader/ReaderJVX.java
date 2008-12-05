@@ -56,7 +56,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
@@ -297,7 +297,7 @@ public class ReaderJVX extends AbstractReader {
             		i.setFaceCountAndAttributes(faceAttributes);
             		if (!faceAttributes.containsAttribute(Attribute.NORMALS)
             			&& (edgeAttributes == null || !edgeAttributes.containsAttribute(Attribute.NORMALS))) {
-            			GeometryUtility.calculateAndSetFaceNormals(i);
+            			IndexedFaceSetUtility.calculateAndSetFaceNormals(i);
             		}
             	}
             	@Override
