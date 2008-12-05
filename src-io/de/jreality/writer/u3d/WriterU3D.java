@@ -84,7 +84,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
@@ -517,7 +517,7 @@ public class WriterU3D implements SceneWriter {
 			try {
 				vNormals = vnData.toDoubleArrayArray(null);
 			} catch (Exception e) {
-				vNormals = GeometryUtility.calculateVertexNormals(g);
+				vNormals = IndexedFaceSetUtility.calculateVertexNormals(g);
 			}
 			vnCount = vNormals.length;
 		}
@@ -530,7 +530,7 @@ public class WriterU3D implements SceneWriter {
 			try {
 				fNormals = fnData.toDoubleArrayArray(null);
 			} catch (Exception e) {
-				fNormals = GeometryUtility.calculateFaceNormals(g);
+				fNormals = IndexedFaceSetUtility.calculateFaceNormals(g);
 			}
 			fnCount = fNormals.length;
 		}

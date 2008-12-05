@@ -1,6 +1,5 @@
 package de.jreality.writer.u3d;
 
-import static de.jreality.geometry.GeometryUtility.calculateBoundingBox;
 import static de.jreality.math.MatrixBuilder.euclidean;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.Attribute.NORMALS;
@@ -35,8 +34,9 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import de.jreality.geometry.BallAndStickFactory;
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.io.JrScene;
@@ -332,7 +332,7 @@ public class U3DSceneUtility {
 		rifs.setVertexCountAndAttributes(ifs.getVertexAttributes());
 		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData).readOnlyList());
 		if (ifs.getFaceAttributes(NORMALS) != null)
-			GeometryUtility.calculateAndSetFaceNormals(rifs);
+			IndexedFaceSetUtility.calculateAndSetFaceNormals(rifs);
 		return rifs;
 	}
 	
@@ -610,7 +610,7 @@ public class U3DSceneUtility {
 		for (Geometry g : l) {
 			if (g instanceof PointSet) {
 				PointSet ps = (PointSet) g;
-				r.put(g, calculateBoundingBox(ps));
+				r.put(g, BoundingBoxUtility.calculateBoundingBox(ps));
 			} else {
 				r.put(g, new Rectangle3D(MAX_VALUE, MAX_VALUE, MAX_VALUE));
 			}
