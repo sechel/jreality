@@ -225,7 +225,7 @@ public class CoordinateSystemFactory {
 		component.setTransformation(new Transformation());
 				
 		//get boundingbox from componment
-		double[][] minMax = GeometryUtility.calculateBoundingBox(component).getBounds();
+		double[][] minMax = BoundingBoxUtility.calculateBoundingBox(component).getBounds();
 		this.boxMin = minMax[0];
 		this.boxMax = minMax[1];
 		

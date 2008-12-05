@@ -282,7 +282,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		
 		log( "compute", Attribute.NORMALS, "face");
 	
-		return GeometryUtility.calculateFaceNormals( fi, vc, getSignature() );
+		return IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getSignature() );
 		
 	}
 	
@@ -309,10 +309,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			return null;
 		
 		if( fn==null ) { 
-			fn = GeometryUtility.calculateFaceNormals( fi, vc, getSignature() );
+			fn = IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getSignature() );
 		}
 		
-		return GeometryUtility.calculateVertexNormals( fi, vc, fn, getSignature() );
+		return IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getSignature() );
 		
 	}
 	

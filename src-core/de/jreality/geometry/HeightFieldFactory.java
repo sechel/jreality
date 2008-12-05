@@ -135,7 +135,7 @@ import de.jreality.util.SceneGraphUtility;
 				fullcoords[k+j][2] = ds[k+j][0];
 			}
 		}
-		return GeometryUtility.calculateFaceNormals(is, fullcoords, signature);
+		return IndexedFaceSetUtility.calculateFaceNormals(is, fullcoords, signature);
 		
 	}
 

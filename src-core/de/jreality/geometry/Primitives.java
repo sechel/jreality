@@ -118,7 +118,7 @@ public class Primitives {
 			cube.setFaceAttributes(Attribute.INDICES, new IntArrayArray.Array(openCubeIndices));
 			cube.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeVerts3));
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
-			GeometryUtility.calculateAndSetFaceNormals(cube);		
+			IndexedFaceSetUtility.calculateAndSetFaceNormals(cube);		
 			return cube;
 			
 		}
@@ -137,7 +137,7 @@ public class Primitives {
 				cube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeColors));
 			}
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
-			GeometryUtility.calculateAndSetFaceNormals(cube);		
+			IndexedFaceSetUtility.calculateAndSetFaceNormals(cube);		
 			return cube;
 	}
 		/**
@@ -155,7 +155,7 @@ public class Primitives {
 				cube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(cubeColors));
 			}
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(cube);
-			GeometryUtility.calculateAndSetFaceNormals(cube);		
+			IndexedFaceSetUtility.calculateAndSetFaceNormals(cube);		
 			return cube;
 	}
 		/**
@@ -251,7 +251,7 @@ public class Primitives {
 				tetrahedron.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(tetrahedronColors));
 			}
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(tetrahedron);
-			GeometryUtility.calculateAndSetFaceNormals(tetrahedron);		
+			IndexedFaceSetUtility.calculateAndSetFaceNormals(tetrahedron);		
 			return tetrahedron;
 	}
 

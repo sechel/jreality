@@ -76,7 +76,7 @@ import de.jreality.util.SceneGraphUtility;
 		clipPlane2SGC.addChild(worldSGC);
 		
 		sliceBoxSGC = SceneGraphUtility.createFullSceneGraphComponent("slice box");
-		worldBoundingBox = GeometryUtility.calculateBoundingBox(worldSGC);
+		worldBoundingBox = BoundingBoxUtility.calculateBoundingBox(worldSGC);
 		double[] extents = worldBoundingBox.getExtent();
 		double[][] black = { { 0, 0, 0, 0 } };
 		double[][] blacks = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 }, { 0, 0, 0, 0 },

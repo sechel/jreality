@@ -123,7 +123,7 @@ import de.jreality.util.SceneGraphUtility;
 	private SceneGraphComponent arrow;
 	 static {
 		 urCone = Primitives.pyramid(octagonalCrossSection, new double[]{0,0,1});
-		 GeometryUtility.calculateAndSetVertexNormals(urCone);
+		 IndexedFaceSetUtility.calculateAndSetVertexNormals(urCone);
 	 }
 
 	public BallAndStickFactory(IndexedLineSet i)	{

@@ -422,7 +422,7 @@ public class GeometryMergeFactory {
 				} 
 				else{
 					if(generateFaceNormals)
-						GeometryUtility.calculateAndSetFaceNormals(ifs);
+						IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
 				}
 			}
 		}
@@ -437,7 +437,7 @@ public class GeometryMergeFactory {
 				} 
 				else{
 					if(generateVertexNormals){
-						GeometryUtility.calculateAndSetVertexNormals(ifs);
+						IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
 						if (!defaultVertexAttributes.contains(Attribute.NORMALS)){
 							defaultVertexAttributes.add(Attribute.NORMALS);
 							// avoid definition-holes by generating vertexnormals without faces: 
@@ -638,9 +638,9 @@ public class GeometryMergeFactory {
 		for (int i = 0; i < geo.length; i++) {
 			ifs[i]=pointSetToIndexedFaceSet(geo[i]);
 			if(generateFaceNormals && ifs[i].getNumFaces()>0 && ifs[i].getVertexAttributes(Attribute.NORMALS)==null)
-				GeometryUtility.calculateAndSetFaceNormals(ifs[i]);
+				IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs[i]);
 			if (generateFaceNormals && ifs[i].getNumFaces()>0 && ifs[i].getFaceAttributes(Attribute.NORMALS)==null)
-				GeometryUtility.calculateAndSetVertexNormals(ifs[i]);
+				IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs[i]);
 		}
 		//
 		indexedFaceSetTo4DColorNormalsAndCoords(ifs);

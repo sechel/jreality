@@ -51,9 +51,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -327,7 +329,7 @@ public class IndexedFaceSetUtility {
 			newc[0] = cc[which];
 			ifs2.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array().createReadOnly(newc));
 		}
-		GeometryUtility.calculateAndSetFaceNormals(ifs2);
+		IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs2);
 		return ifs2;
 	}
 	private static double[][] getMinMax(int[] indices, double[][] array2d)	{
@@ -442,7 +444,7 @@ public class IndexedFaceSetUtility {
 			double[][] fn = null, fc = null;
 			//imploded = new IndexedFaceSet(newind, new DataGrid(newverts, false), null, null, ifs.getFaceNormals(), ifs.getFaceColors());
 			if (ifs.getFaceAttributes(Attribute.NORMALS) != null) fn = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-			else fn = GeometryUtility.calculateFaceNormals(ifs);
+			else fn = IndexedFaceSetUtility.calculateFaceNormals(ifs);
 			if (ifs.getFaceAttributes(Attribute.COLORS) != null) fc = ifs.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null);
 
 			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
@@ -1155,7 +1157,7 @@ public class IndexedFaceSetUtility {
      DataList pointDL = fs.getVertexAttributes(Attribute.COORDINATES);
      DataList fNormalDL = fs.getFaceAttributes(Attribute.NORMALS);
      if (fNormalDL == null) {
-       double[][] fn = GeometryUtility.calculateFaceNormals(fs);
+       double[][] fn = IndexedFaceSetUtility.calculateFaceNormals(fs);
        fNormalDL = StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly(fn);
      }
      
@@ -1259,7 +1261,7 @@ public class IndexedFaceSetUtility {
      faces = (int[][]) triangles.toArray(faces);
      
      ts.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(faces));
-     GeometryUtility.calculateAndSetNormals(ts);
+     IndexedFaceSetUtility.calculateAndSetNormals(ts);
      return ts;
     }
        
@@ -1294,7 +1296,7 @@ public class IndexedFaceSetUtility {
     		calculateAndSetEdgesFromFaces(ifs);
     	}
     	if (hasFaceNormals)	{
-    		GeometryUtility.calculateAndSetFaceNormals(ifs);
+    		IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
     	}
     }
     /**
@@ -1529,7 +1531,7 @@ public class IndexedFaceSetUtility {
   			table.get(digits > 0 ? new Point(points.getValueAt(i), digits) : new Point(points.getValueAt(i))).add(i);
   		}
   		
-  		if (ifs.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(ifs);
+  		if (ifs.getVertexAttributes(Attribute.NORMALS) == null) IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
   		
   		DoubleArrayArray normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray();
   		double[][] na=normals.toDoubleArrayArray(null);
@@ -1905,6 +1907,213 @@ public class IndexedFaceSetUtility {
 				return false;
 			}
 		return false;
+	}
+
+	public static void calculateAndSetFaceNormals(IndexedFaceSet ifs)   {
+		if (ifs.getNumFaces() == 0) return;
+	    double[][] fn = IndexedFaceSetUtility.calculateFaceNormals(ifs);
+	    ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(fn[0].length).createReadOnly(fn));
+	}
+
+	public static void calculateAndSetNormals(IndexedFaceSet ifs)	{
+		calculateAndSetFaceNormals(ifs);
+		IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
+	}
+
+	public static void calculateAndSetVertexNormals(IndexedFaceSet ifs) {
+		if (ifs.getNumFaces() == 0) return;
+	    double[][] vn = IndexedFaceSetUtility.calculateVertexNormals(ifs);
+	    ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(vn[0].length).createReadOnly(vn));
+	}
+
+	public static double[][] calculateFaceNormals(IndexedFaceSet ifs)	{
+		Object sigO = ifs.getGeometryAttributes(GeometryUtility.SIGNATURE);
+		int sig = Pn.EUCLIDEAN;
+		if (sigO != null && sigO instanceof Integer)	{
+			sig = ((Integer) sigO).intValue();
+			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with signature "+sig);
+		}
+		return IndexedFaceSetUtility.calculateFaceNormals(ifs,sig);
+	}
+
+	public static double[][] calculateFaceNormals(IndexedFaceSet ifs, int signature) {
+	   int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+	   double[][] verts = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+	   return IndexedFaceSetUtility.calculateFaceNormals(indices, verts, signature);
+	}
+
+	/**
+	 * Calculate face normals for the faces defined by the index list <i>indices</i> and 
+	 * the vertex list <i>verts</i>, with respect to the given </i>signature</i>. The method attempts
+	 * to skip over degenerate vertices (in the euclidean case only currently!), 
+	 * but otherwise assumes the faces are planar.
+	 * @param indices
+	 * @param verts
+	 * @param signature
+	 * @return
+	 */
+	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int signature)	{
+		if (indices == null) return null;
+		int normalLength = 4;
+		//System.err.println("Sig is "+signature);
+		if (signature == Pn.EUCLIDEAN)	normalLength = 3;
+		double[][] fn = new double[indices.length][normalLength];
+		if (signature == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);
+		for (int i=0; i<indices.length; ++i)	{
+			int n = indices[i].length;
+			if (n < 3) continue;
+			if (signature == Pn.EUCLIDEAN)	{		
+				// not necessary but probably a bit faster
+				// have to find a non-degenerate set of 3 vertices
+				int count = 1;
+				double[] v1 = null;
+				do {
+					v1 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
+				} while (Rn.euclideanNorm(v1) < 10E-16 && count < (n-1));
+				double[] v2 = null;
+				do {
+					v2 = Rn.subtract(null, verts[indices[i][count++]], verts[indices[i][0]]);
+				} while (Rn.euclideanNorm(v2) < 10E-16 && count < (n));
+				if (count > n) continue;
+				Rn.crossProduct(fn[i], v1,v2);
+				Rn.normalize(fn[i], fn[i]);
+			} else {
+				// TODO find non-degenerate set of 3 vertices here also
+				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
+				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);	
+				Pn.setToLength(normal, normal, -1.0, signature);
+				for (int j = 0; j<3; ++j)	{
+					double[] point = (verts[indices[i][j]].length == 3) ? Pn.homogenize(null, verts[indices[i][j]]) : verts[indices[i][j]];
+				}
+				System.arraycopy(normal, 0, fn[i], 0, normalLength);				
+			}
+		}
+		return fn;
+	}
+
+	/**
+	  * Traverse a scene graph, calculating (and setting) face normals for 
+	  * all instances of {@link IndexedFaceSet}.  If face normals are already
+	  * present, they are not calculated again. The setting has to take place
+	  * after the traversal due to locking considerations.  
+	  * @param c
+	  */
+	 public static void calculateFaceNormals(SceneGraphComponent c) {
+	    // We have to use the map at the moment, since the visit sets
+	    // a read lock, that prevents us from modifying the indexed face set
+	    // while visiting it.
+	    final HashMap map =new HashMap();
+	    SceneGraphVisitor v =new SceneGraphVisitor() {
+	        public void visit(IndexedFaceSet i) {
+	            if(i.getFaceAttributes(Attribute.NORMALS)== null) {
+	                double[][] n = calculateFaceNormals(i);
+	                map.put(i,n);
+	                
+	            }
+	
+	            super.visit(i);
+	        }
+	        public void visit(SceneGraphComponent c) {
+	            c.childrenAccept(this);
+	        }
+	    };
+	    v.visit(c);
+	    Set keys = map.keySet();
+	    for (Iterator iter = keys.iterator(); iter.hasNext();) {
+	        IndexedFaceSet i = (IndexedFaceSet) iter.next();
+	        double[][] n = (double[][]) map.get(i);
+	        int nLength = n[0].length;
+	        i.setFaceAttributes(Attribute.NORMALS,
+	                StorageModel.DOUBLE_ARRAY.array(nLength).createWritableDataList(n));
+	    }
+	}
+
+	public static double[][] calculateVertexNormals(IndexedFaceSet ifs)	{
+		Object sigO = ifs.getGeometryAttributes(GeometryUtility.SIGNATURE);
+		int sig = Pn.EUCLIDEAN;
+		if (sigO != null && sigO instanceof Integer)	{
+			sig = ((Integer) sigO).intValue();
+		}
+		return IndexedFaceSetUtility.calculateVertexNormals(ifs, sig);
+	}
+
+	public static double[][] calculateVertexNormals(IndexedFaceSet ifs,
+			int signature) {
+		int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		if (indices == null)return null;
+		double[][] fn = null;
+		if (ifs.getFaceAttributes(Attribute.NORMALS) == null) {
+			fn = calculateFaceNormals(ifs, signature);
+		} else
+			fn = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+		double[][] vertsAs2D = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		return IndexedFaceSetUtility.calculateVertexNormals(indices, vertsAs2D, fn, signature);
+	}
+
+	/**
+	   * Calculate the vertex normals of the vertices by averaging the face normals 
+	   * of all faces to which the vertex belongs.  
+	   * <p>
+	   * <b>Note:</b> This method currently does not
+	   * correctly average vertices lying on the boundary of a closed {@link GeometryUtility#QUAD_MESH_SHAPE quad mesh}.
+	   * @param indices
+	   * @param vertsAs2D
+	   * @param fn
+	   * @param signature
+	   * @return
+	   */
+	 public static double[][] calculateVertexNormals(int[][] indices,
+				double[][] vertsAs2D, double[][] fn, int signature) {
+		 	int n = fn[0].length;
+			double[][] nvn = new double[vertsAs2D.length][n];
+			// TODO average only after normalizing wrt the signature
+			for (int j = 0; j < indices.length; ++j) {
+				for (int k = 0; k < indices[j].length; ++k) {
+					int m = indices[j][k];
+					Rn.add(nvn[m], fn[j], nvn[m]);
+				}
+			}
+			if (signature == Pn.EUCLIDEAN)
+				Rn.normalize(nvn, nvn);
+			else
+				Pn.normalize(nvn, nvn, signature);
+			return nvn;
+		}
+
+	/**
+	 * Traverse a scene graph, calculating (and setting) vertex normals for 
+	 * all instances of {@link IndexedFaceSet}.  If vertex normals are already
+	 * present, they are not calculated again. The setting has to take place
+	 * after the traversal due to locking considerations.  
+	 * @param c
+	 */
+	 public static void calculateVertexNormals(SceneGraphComponent c) {
+	    // We have to use the map at the moment, since the visit sets
+	    // a read lock, that prevents us from modifying the indexed face set
+	    // while visiting it.
+	    final HashMap map =new HashMap();
+	    	SceneGraphVisitor v =new SceneGraphVisitor() {
+	        public void visit(IndexedFaceSet i) {
+	            if(i.getVertexAttributes(Attribute.NORMALS)== null) {
+	                double[][] n = calculateVertexNormals(i);
+	                map.put(i,n);            
+	            }
+	
+	            super.visit(i);
+	        }
+	        public void visit(SceneGraphComponent c) {
+	            c.childrenAccept(this);
+	        }
+	    };
+	    v.visit(c);
+	    Set keys = map.keySet();
+	    for (Iterator iter = keys.iterator(); iter.hasNext();) {
+	        IndexedFaceSet i = (IndexedFaceSet) iter.next();
+	        double[][] n = (double[][]) map.get(i);
+	        int nLength = n[0].length;
+	         i.setVertexAttributes(Attribute.NORMALS,
+	                StorageModel.DOUBLE_ARRAY.array(nLength).createWritableDataList(n));
+	    }
 	}
 
 }

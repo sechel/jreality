@@ -116,7 +116,7 @@ public class SphereUtility {
 				tessellatedIcosahedra[i].setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vlength).createReadOnly(verts));
 			}
 			tessellatedIcosahedra[i].setVertexAttributes(Attribute.NORMALS, tessellatedIcosahedra[i].getVertexAttributes(Attribute.COORDINATES)); 
-			GeometryUtility.calculateAndSetFaceNormals(tessellatedIcosahedra[i]);
+			IndexedFaceSetUtility.calculateAndSetFaceNormals(tessellatedIcosahedra[i]);
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(tessellatedIcosahedra[i]);			
 		}
 		if (sharedInstance) return tessellatedIcosahedra[i];
