@@ -295,6 +295,20 @@ final public class Rn {
 		return dst;
 	}
 	
+	/**
+	 * inlines the given 2-dim array. Assumes equal length for sub-arrays
+	 * 
+	 * @return the target array (a new one if target == null)
+	 */
+	public static double[] convertArray2DToArray1D(double[] target, double[][] src) {
+			// TODO decide if this belongs here -- doesn't have anything to do with Geometry per se.
+	    final int slotLength = src[0].length;
+	    if(target==null) target=new double[src.length*slotLength];
+	    for (int i=0; i<src.length; i++)
+	        for (int j=0; j<slotLength; j++) target[i*slotLength+j]=src[i][j];
+	    return target;
+	}
+
 	  public static double[] convertArray3DToArray1D(double[][][] V) {
 		  return convertArray3DToArray1D(V, 1, 1);
 	  }
@@ -1611,6 +1625,8 @@ final public class Rn {
 //		}
 		return dst;
 	}
+
+
 
 }
 
