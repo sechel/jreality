@@ -157,6 +157,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			}
 			return false;
 		}
+		// the copy cat node only looks at his first child
 		JOGLPeerComponent child = children.get(0);
 		return (child.someSubNodeIsDirty());
 	}
