@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -229,7 +229,7 @@ public class SelectionManager implements SelectionManagerInterface {
 		if (selection.getLastComponent() == selectionKit) 
 			return;  //bounding box selected
 
-		Rectangle3D bbox = GeometryUtility.calculateChildrenBoundingBox( selection.getLastComponent() ); 
+		Rectangle3D bbox = BoundingBoxUtility.calculateChildrenBoundingBox( selection.getLastComponent() ); 
 
 		IndexedFaceSet box = null;
 		box = IndexedFaceSetUtility.representAsSceneGraph(box, bbox);
