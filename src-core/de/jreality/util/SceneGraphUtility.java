@@ -40,19 +40,31 @@
 
 package de.jreality.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
+import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -307,4 +319,102 @@ public class SceneGraphUtility {
 		gfgv.visit(sgc);
 		return gfgv.getGeometry();
 	}
+
+	public static SceneGraphComponent flatten(SceneGraphComponent sgc)		{
+		 return SceneGraphUtility.flatten(sgc, false);
+	 }
+
+
+	/**
+		 * Apply transformations recursively to all instances of {@link PointSet} and
+		 * produce a flat scene graph with no transformations.  
+		 * It collects these instances, and transforms them into world coordinates. 
+		 * All these instances are put into one parent, and this parent is returned. 
+		 * Geometry that is not PointSet is simply ignored. Attributes are copied as much
+		 * as possible, normals are also transformed.  The code is not robust.
+		 * @param sgc
+		 * @param rejectInvis	if true, non-visible scene graph components are skipped (default: false)
+		 * @return
+		 */
+		 public static SceneGraphComponent flatten(SceneGraphComponent sgc, final boolean rejectInvis)		{
+		    final double[] flipit = P3.makeStretchMatrix(null, new double[] {-1,0, -1,0, -1.0});
+			final ArrayList geoms = new ArrayList();
+			//TODO evaluate the appearance also and stick it in the flattened node with the geometry.
+		    SceneGraphVisitor v =new SceneGraphVisitor() {
+		    	    SceneGraphPath thePath = new SceneGraphPath();
+		    	    
+	            public void visit(PointSet oldi) {
+	            	// have to copy the geometry in case it is reused!
+	            	PointSet geometry = (PointSet) copy(oldi);
+	            	//System.err.println("point set is "+i);
+	            	if (geometry.getVertexAttributes(Attribute.COORDINATES) == null) return;
+	           	    double[][] v = geometry.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+	            	double[] currentMatrix = thePath.getMatrix(null);
+	            	double[][] nv = Rn.matrixTimesVector(null, currentMatrix, v);
+	            	geometry.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	                double[] cmp = null;
+	         	    if (geometry instanceof IndexedFaceSet)	{
+	            	    IndexedFaceSet ifs = (IndexedFaceSet) geometry; //(IndexedFaceSet) SceneGraphUtility.copy(i); //
+	                    double[] mat = Rn.transpose(null, currentMatrix);          	
+	                    mat[12] = mat[13] = mat[14] = 0.0;
+	                    Rn.inverse(mat, mat);
+	//             	   if (Rn.determinant(currentMatrix) < 0.0)	cmp = Rn.times(null, flipit, mat);
+	//             	   else 
+	             	   cmp = mat;
+	            	   if (ifs.getFaceAttributes(Attribute.NORMALS) != null)	{
+	               	   //System.out.println("Setting face normals");
+	            	v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+	                    nv = Rn.matrixTimesVector(null, cmp, v);
+	                    ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	            	       } else IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
+	               	   if (ifs.getVertexAttributes(Attribute.NORMALS) != null)	{
+	           	   		//System.out.println("Setting vertex normals");
+	                      v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+	                        nv = Rn.matrixTimesVector(null, cmp, v);
+	                        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	            	       } else IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
+	              	   if (Rn.determinant(currentMatrix) < 0.0)	{           	
+	               	   		//System.out.println("Flipping normals");
+	               	   		v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+	               	   		nv = Rn.matrixTimesVector(null, flipit, v);
+	               	   		ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	               	   		v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+	               	   		nv = Rn.matrixTimesVector(null, flipit, v);
+	               	   		ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	             	   }
+	           	   }
+	         	   //System.out.println("det is "+Rn.determinant(currentMatrix));
+	//	          if (Rn.determinant(currentMatrix) < 0.0)	{
+		                SceneGraphComponent foo = new SceneGraphComponent();
+		                foo.setGeometry(geometry);
+		                if (thePath.getLastComponent().getAppearance() != null)	{
+		                	foo.setAppearance(thePath.getLastComponent().getAppearance());
+		                }
+		                foo.setVisible(thePath.getLastComponent().isVisible());
+		                geoms.add(foo);
+		         	   	
+	//          	   }
+	             }
+	            public void visit(SceneGraphComponent c) {
+	            	if (rejectInvis && !c.isVisible()) return;
+	            	thePath.push(c);
+	                c.childrenAccept(this);
+	               //if (c.getTransformation() != null) c.getTransformation().setMatrix(Rn.identityMatrix(4));
+	               //c.setName(c.getName() + "_flat");
+	                thePath.pop();
+	            }
+	            public void visit(Sphere s)	{
+	            	    LoggingSystem.getLogger(GeometryUtility.class).log(Level.WARNING, "Can't flatten a sphere yet");
+	            }
+	        };
+	        v.visit(sgc);
+	        SceneGraphComponent flat = new SceneGraphComponent();
+	        if (sgc.getAppearance() != null) flat.setAppearance(sgc.getAppearance());
+	        for (Iterator iter = geoms.iterator(); iter.hasNext();) {
+	             SceneGraphComponent foo = (SceneGraphComponent)iter.next(); ;
+	             flat.addChild(foo);
+	       }
+	        return flat;
+		}
+
  }

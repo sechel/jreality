@@ -47,7 +47,7 @@ import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
@@ -153,7 +153,7 @@ public class CameraUtility {
 	 * @param setStereoParameters
 	 */
 	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters)	{
-		Rectangle3D worldBox = GeometryUtility.calculateBoundingBox(sgc);//. bbv.getBoundingBox();
+		Rectangle3D worldBox = BoundingBoxUtility.calculateBoundingBox(sgc);//. bbv.getBoundingBox();
 		
 		SceneGraphPath w2a = viewer.getCameraPath().popNew();
 		w2a.pop();
@@ -388,7 +388,7 @@ public class CameraUtility {
 	 * @param signature
 	 */
 	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
-	    Rectangle3D bounds = GeometryUtility.calculateBoundingBox(scene.getLastComponent());
+	    Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scene.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
 	    scene.getMatrix(rootToScene.getArray(), 0, scene.getLength()-2);

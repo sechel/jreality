@@ -115,7 +115,8 @@ public class SystemProperties {
 	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.Viewer";  //de.jreality.jogl.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
 //	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();
-	
+	public final static String CROSS_EYED_STEREO = "jreality.crossEyedStereo"; // set to false to get wall-eyed
+	public final static String CROSS_EYED_STEREO_DEFAULT = "true"; // set to false to get wall-eyed
 	/**
 	 * Specifies the path of the jReality data directory.<br>
 	 * Values: directory path
