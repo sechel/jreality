@@ -41,7 +41,6 @@
 package de.jreality.softviewer;
 
 import de.jreality.backends.texture.SimpleTexture;
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
@@ -132,10 +131,10 @@ public class PrimitiveCache {
                 StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(
                         tetrahedronVerts3));
 
-        GeometryUtility.calculateAndSetVertexNormals(tetra);
+        IndexedFaceSetUtility.calculateAndSetVertexNormals(tetra);
 
         sphere[0] = tetra;
-        GeometryUtility.calculateAndSetVertexNormals(sphere[0]);
+        IndexedFaceSetUtility.calculateAndSetVertexNormals(sphere[0]);
         for (int i = 0; i < sphere.length; i++) {
             if (i > 0)
                 sphere[i] = SphereUtility.tessellatedIcosahedronSphere(i - 1,
