@@ -46,7 +46,6 @@ import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.FactoredMatrix;
@@ -92,7 +91,7 @@ static {
     fs.setVertexCountAndAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(points));
     fs.setFaceCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(new int[][] {face0,face1,face2}));
     IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(fs);
-    GeometryUtility.calculateAndSetFaceNormals(fs);
+    IndexedFaceSetUtility.calculateAndSetFaceNormals(fs);
     IndexedFaceSet ts = IndexedFaceSetUtility.triangulate(fs);
     
     logo = new SceneGraphComponent();

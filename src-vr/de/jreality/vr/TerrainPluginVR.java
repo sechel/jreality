@@ -30,7 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
@@ -154,7 +154,7 @@ public class TerrainPluginVR extends AbstractPluginVR {
 				c.childrenWriteAccept(this, false, false, false, false, true, false);
 			}
 			public void visit(IndexedFaceSet i) {
-				GeometryUtility.calculateAndSetVertexNormals(i);		
+				IndexedFaceSetUtility.calculateAndSetVertexNormals(i);		
 			}
 		});
 		

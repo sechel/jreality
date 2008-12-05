@@ -80,7 +80,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
@@ -421,7 +421,7 @@ public class ViewerVR {
 				//while (terrainNode.getChildComponentCount() > 0) terrainNode.removeChild(terrainNode.getChildComponent(0));
 				MatrixBuilder.euclidean().assignTo(terrainNode);
 				terrainNode.addChild(c);
-				Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);
+				Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(terrainNode);
 				// scale
 				double[] extent = bounds.getExtent();
 				double maxExtent = Math.max(extent[0], extent[2]);
@@ -480,7 +480,7 @@ public class ViewerVR {
 			public void run() {
 				MatrixBuilder.euclidean().assignTo(terrainNode);
 				terrainNode.addChild(c);
-				Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);
+				Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(terrainNode);
 				// scale
 				double[] extent = bounds.getExtent();
 				double maxExtent = Math.max(extent[0], extent[2]);
@@ -518,7 +518,7 @@ public class ViewerVR {
 			terrainTrans.multiplyOnLeft(avatarTrans);				
 			terrainNode.setTransformation(new Transformation(terrainTrans.getArray()));	
 			
-			Rectangle3D bounds = GeometryUtility.calculateBoundingBox(terrainNode);	
+			Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(terrainNode);	
 			shipNavigationTool.setCenter(true);
 			shipNavigationTool.setCenter(bounds.getCenter());
 		}
@@ -624,7 +624,7 @@ public class ViewerVR {
 		alignmentComponent = parent;
 		currentContent = content;
 		if (isGeneratePickTrees()) PickUtility.assignFaceAABBTrees(content);
-		Rectangle3D bounds = GeometryUtility
+		Rectangle3D bounds = BoundingBoxUtility
 		.calculateChildrenBoundingBox(alignmentComponent);
 		// scale
 		double[] extent = bounds.getExtent();
@@ -644,7 +644,7 @@ public class ViewerVR {
 				if (rotation != null) {
 					rotation.assignTo(alignmentComponent);
 				}
-				Rectangle3D bounds = GeometryUtility
+				Rectangle3D bounds = BoundingBoxUtility
 				.calculateBoundingBox(sceneNode);
 				// scale
 				double[] extent = bounds.getExtent();

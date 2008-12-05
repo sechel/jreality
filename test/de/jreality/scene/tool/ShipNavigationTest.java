@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.reader.Readers;
@@ -25,7 +25,7 @@ public class ShipNavigationTest {
 		PickUtility.assignFaceAABBTrees(earth);
 		ViewerApp va = new ViewerApp(earth);
 		va.update();
-		Rectangle3D bb = GeometryUtility.calculateBoundingBox(earth);
+		Rectangle3D bb = BoundingBoxUtility.calculateBoundingBox(earth);
 		snt.setCenter(true);
 		snt.setCenter(bb.getCenter());
 		System.out.println(Arrays.toString(bb.getCenter()));

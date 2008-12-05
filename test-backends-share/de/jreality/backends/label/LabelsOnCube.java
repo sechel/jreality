@@ -42,7 +42,6 @@ package de.jreality.backends.label;
 
 import java.awt.Color;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
@@ -85,7 +84,7 @@ public class LabelsOnCube {
 	public static void main(String[] args) {
 
     IndexedFaceSet ifs = Primitives.cube();
-    GeometryUtility.calculateAndSetFaceNormals(ifs);
+    IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
     IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
     //ifs = new CatenoidHelicoid(7);
 		label(ifs);

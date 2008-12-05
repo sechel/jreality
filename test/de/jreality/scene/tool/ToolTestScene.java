@@ -42,7 +42,6 @@ package de.jreality.scene.tool;
 
 import java.awt.Color;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.P3;
@@ -97,7 +96,7 @@ public class ToolTestScene {
     IndexedFaceSet ifs = Primitives.torus(2, .5, 10, 10);
 	IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
     
-    GeometryUtility.calculateAndSetFaceNormals(ifs);
+    IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
     //AABBTree obbTree = AABBTree.constructEdgeAABB(ifs, 0.1);
     //ifs.setGeometryAttributes(Attribute.attributeForName("AABBTreeEdge"), obbTree);
     //AABBTree.constructAndRegister(ifs, null, 5);

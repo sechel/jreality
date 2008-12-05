@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
@@ -116,8 +115,8 @@ public class LoadPluginVR extends AbstractPluginVR {
 										true);
 							}
 							public void visit(IndexedFaceSet i) {
-								if (i.getFaceAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetFaceNormals(i);
-								if (i.getVertexAttributes(Attribute.NORMALS) == null) GeometryUtility.calculateAndSetVertexNormals(i);
+								if (i.getFaceAttributes(Attribute.NORMALS) == null) IndexedFaceSetUtility.calculateAndSetFaceNormals(i);
+								if (i.getVertexAttributes(Attribute.NORMALS) == null) IndexedFaceSetUtility.calculateAndSetVertexNormals(i);
 								if (smoothNormalsCheckBox.isSelected()) IndexedFaceSetUtility.assignSmoothVertexNormals(i, -1);
 							}
 						});
