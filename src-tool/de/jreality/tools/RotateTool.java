@@ -40,7 +40,7 @@
 
 package de.jreality.tools;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -106,7 +106,7 @@ public class RotateTool extends AbstractTool {
   
   private Matrix getCenter(SceneGraphComponent comp) {
 	  Matrix centerTranslation = new Matrix();
-	    Rectangle3D bb = GeometryUtility.calculateChildrenBoundingBox(comp);
+	    Rectangle3D bb = BoundingBoxUtility.calculateChildrenBoundingBox(comp);
 	    // need to respect the signature here
 	    MatrixBuilder.init(null, signature).translate(bb.getCenter()).assignTo(centerTranslation);
 	    return centerTranslation;

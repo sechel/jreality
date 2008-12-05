@@ -192,8 +192,8 @@ public class DragEventTool extends AbstractTool {
 
 	public void deactivate(ToolContext tc) {
 		  if (!active) return;   
-	      if (pickType == PickResult.PICK_TYPE_OBJECT) firePrimitiveDragEnd(new double[]{0,0,0,1});
-	      else if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(new double[]{0,0,0,1});
+	      if (pickType == PickResult.PICK_TYPE_OBJECT) firePrimitiveDragEnd(pickPoint);
+	      else if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(pickPoint);
 	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1}, new double[]{0,0,0,1});
 	      else if (pickType == PickResult.PICK_TYPE_FACE) fireFaceDragEnd(new double[]{0,0,0,1}, new double[]{0,0,0,1});
 	      index=-1;

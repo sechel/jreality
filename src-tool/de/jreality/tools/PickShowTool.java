@@ -74,7 +74,7 @@ private void init() {
 	c.addChild(Primitives.sphere(1, 0, 0, 0));
 	c.setName("pick display");
 	c.setAppearance(a);
-	PickUtility.setPickable(c, false);
+	c.setPickable( false);
 	a.setAttribute(CommonAttributes.FACE_DRAW, true);
 	a.setAttribute(CommonAttributes.PICKABLE, false);
 }

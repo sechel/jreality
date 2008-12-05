@@ -1,6 +1,6 @@
 package de.jreality.tools;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
@@ -77,7 +77,7 @@ public class ScaleTool extends DragEventTool {
     if (pickedSGC.getTransformation() == null) pickedSGC.setTransformation(new Transformation());
     oldSGCTrafo=pickedSGC.getTransformation();
     
-    objCenter=GeometryUtility.calculateBoundingBox(pickedSGC).getCenter();		
+    objCenter=BoundingBoxUtility.calculateBoundingBox(pickedSGC).getCenter();		
 		Matrix mtx=new Matrix(oldSGCTrafo);
 		mtx.invert();
 		objCenter=mtx.multiplyVector(objCenter);

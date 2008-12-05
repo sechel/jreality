@@ -74,7 +74,7 @@ import org.sunflow.math.Point3;
 import org.sunflow.math.Vector3;
 
 import de.jreality.backends.label.LabelUtility;
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -680,7 +680,7 @@ public class SunflowRenderer extends SunflowAPI {
 		geometry(POINT_SPHERE, new org.sunflow.core.primitive.Sphere());
 		geometry(LINE_CYLINDER, new de.jreality.sunflow.core.primitive.Cylinder());
 		
-		Rectangle3D sceneBounds = GeometryUtility.calculateBoundingBox(sceneRoot);
+		Rectangle3D sceneBounds = BoundingBoxUtility.calculateBoundingBox(sceneRoot);
 		double[] c = sceneBounds.getCenter();
 		Point3 sceneCenter = new Point3((float)c[0], (float)c[1], (float)c[2]);
 		double[] e = sceneBounds.getExtent();
