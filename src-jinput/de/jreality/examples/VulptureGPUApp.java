@@ -42,7 +42,7 @@ package de.jreality.examples;
 import java.awt.Color;
 import java.io.IOException;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
@@ -698,7 +698,7 @@ public class VulptureGPUApp implements Runnable {
             public void run() {
                 //ifs.setVertexCountAndAttributes(Attribute.COORDINATES,new DoubleArrayArray.Inlined(pts, 3));
                 ifsf.setVertexAttributes(Attribute.COORDINATES,new DoubleArrayArray.Inlined(fts, 3));
-                GeometryUtility.calculateAndSetVertexNormals(ifsf);
+                IndexedFaceSetUtility.calculateAndSetVertexNormals(ifsf);
             }
         }
         
