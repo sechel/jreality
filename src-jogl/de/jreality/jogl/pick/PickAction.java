@@ -46,7 +46,7 @@ import java.util.Comparator;
 import java.util.Vector;
 import java.util.logging.Level;
 
-import de.jreality.geometry.GeometryUtility;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.P2;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
@@ -330,7 +330,7 @@ public class PickAction extends SceneGraphVisitor{
 		if (verts.length>0) {	// are there any vertices?
 			pointsInNDC = Rn.matrixTimesVector(null, context3D.getObjectToNDC(), verts);
 			if (verts[0].length == 4) Pn.dehomogenize(pointsInNDC, pointsInNDC);
-			Rectangle3D box = GeometryUtility.calculateBoundingBox(pointsInNDC);
+			Rectangle3D box = BoundingBoxUtility.calculateBoundingBox(pointsInNDC);
 			double[][] bnds = box.getBounds();
 			if ((debug & 2) != 0) 	{
 				System.out.println("NDC bound: "+Rn.toString(bnds));
