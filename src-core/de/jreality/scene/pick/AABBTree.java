@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
@@ -376,7 +375,7 @@ public class AABBTree {
 			IndexedFaceSet box = Primitives.box(2*s[0], 2*s[1], 2*s[2], false);
 			myComp.setGeometry(box);
 			IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(box);
-			GeometryUtility.calculateAndSetNormals(box);
+			IndexedFaceSetUtility.calculateAndSetNormals(box);
 			Appearance a = new Appearance();
 			a.setAttribute("lineShader.diffuseColor", isLeft ? leftColor : rightColor);
 			a.setAttribute("lineShader."+CommonAttributes.TUBE_RADIUS, radius);
