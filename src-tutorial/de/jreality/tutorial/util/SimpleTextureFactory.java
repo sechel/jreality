@@ -1,5 +1,7 @@
 package de.jreality.tutorial.util;
 
+import java.awt.Color;
+
 import de.jreality.shader.ImageData;
 
 public class SimpleTextureFactory {
@@ -7,7 +9,7 @@ public class SimpleTextureFactory {
 		WEAVE,
 		GRAPH_PAPER,
 		DISK,
-		ANTI_DISK
+		ANTI_DISK, GRADIENT
 	};
 	TextureType type = TextureType.WEAVE;
 	ImageData id;
@@ -25,13 +27,31 @@ public class SimpleTextureFactory {
 		return id;
 	}
 	
+	int[] channels = {0,1,2,3};
+	Color[] colors = {Color.white, Color.LIGHT_GRAY, Color.yellow, new Color(0,0,0,0)};
+	byte[][] bcolors = { {(byte)255,(byte)255,(byte)255,(byte)255}, //{(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x0},
+			{(byte)200,(byte)200,(byte)200,(byte)0xff},
+			{(byte)255,(byte)255,(byte)255,(byte)255},
+			{(byte)0,(byte)0, (byte) 0, (byte) 255}};
+
+	public void setColors(Color[] colors) {
+		this.colors = colors;
+	}
+
+	public void setColor(int i, Color c)	{
+		colors[i] = c;
+		updatebcolors();
+	}
+	
+	private void updatebcolors() {
+		float[] cc = new float[4];
+		for (int i = 0; i<colors.length; ++i)	{
+			cc = colors[i].getRGBComponents(cc);
+			for (int j = 0; j<4; ++j)	bcolors[i][channels[j]] = (byte) (cc[j] * 255.0);
+		}
+	}
 	public void update()	{
 		byte[] im = new byte[size*size* 4];
-		byte[][] colors = {{(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x0},
-				{(byte)200,(byte)200,(byte)200,(byte)0xff},
-				{(byte)255,(byte)255,(byte)255,(byte)255},
-				{(byte)0,(byte)0, (byte) 0, (byte) 255}};
-
 		switch(type)	{
 		case ANTI_DISK:
 		    for (int i = 0; i<size; ++i)	{
@@ -119,7 +139,33 @@ public class SimpleTextureFactory {
 		    }			
 		    break;
 		
+		case GRADIENT:
+			double blend = 0.0;
+			int k1 = 0, k2 = size-k1;
+			float[] bcf = new float[4];
+			for (int i = 0; i<size; ++i)	{
+				for (int j = 0; j< size; ++j)	{
+					int I = 4*(j*size+i);
+					if (j <= k1 ) { blend = 1.0; }
+					else if (j >= k2) { blend = 0.0; }
+					else {
+						blend = 1.0-(1.0*(j-k1))/(k2-k1);
+					}
+					Color bc = linearInterpolation(colors[0], colors[1], blend);
+					bc.getRGBComponents(bcf);
+					for (int k=0; k<4; ++k) im[I+k] = (byte) (255 * bcf[k]);
+				}
+			}
+			break;
 		}
 		id = new de.jreality.shader.ImageData(im, size, size);
 	}
+	
+	private static Color linearInterpolation(Color c1, Color c2, double d) {
+		float[] fc1 = c1.getRGBComponents(null);
+		float[] fc2 = c2.getRGBComponents(null);
+		float fd = (float) d;
+		return new Color((1-fd)*fc1[0]+fd*fc2[0],(1-fd)*fc1[1]+fd*fc2[1],(1-fd)*fc1[2]+fd*fc2[2], (1-fd)*fc1[3]+fd*fc2[3]);
+	}
+
 }
