@@ -31,7 +31,7 @@ public class AnimatedTextureExample {
 	static int count = 0;
 	public static void main(String[] args)		{
 		SceneGraphComponent worldSGC = new SceneGraphComponent("AnimatedTextureExample");
-		worldSGC.setGeometry(Primitives.texturedQuadrilateral(null));
+		worldSGC.setGeometry(Primitives.texturedQuadrilateral());
 		Appearance ap = new Appearance();
 		worldSGC.setAppearance(ap);
 		DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
