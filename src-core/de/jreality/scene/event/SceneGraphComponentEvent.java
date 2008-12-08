@@ -119,6 +119,7 @@ public class SceneGraphComponentEvent extends SceneEvent
       case CHILD_TYPE_GEOMETRY:
       case CHILD_TYPE_LIGHT:
       case CHILD_TYPE_TRANSFORMATION:
+      case CHILD_TYPE_AUDIONODE:
         return childNodeType;
       default: throw
         new IllegalArgumentException("childNodeType "+childNodeType);
