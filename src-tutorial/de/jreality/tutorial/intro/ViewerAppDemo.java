@@ -75,117 +75,121 @@ import de.jreality.util.SceneGraphUtility;
 	public static void main(String[] args)	{
 		int steps = 0, count = 0;
 		if (args != null && args.length > 0) steps = Integer.parseInt(args[0]);
-		if (count++ == steps) {		// 0 empty viewer
-			ViewerApp va = ViewerApp.display((SceneGraphNode) null);
-			return;
-		}
-		
-		if (count++ == steps) {		// 1 dodecahedron with navigator
-			ViewerApp va = ViewerApp.display(readDodec());
-			va.setAttachNavigator(true);
-			va.setExternalNavigator(false);
-			va.update();
-			CameraUtility.encompass(va.getCurrentViewer());
-			return;
-		}
-		
-		if (count++ == steps) {		// 2 change material properties using setAttribute()
-			SceneGraphComponent dodecSGC = readDodec();
-			ViewerApp va = myViewerApp(dodecSGC);
-			va.update();
-			CameraUtility.encompass(va.getViewerSwitch());
-			Appearance ap = dodecSGC.getAppearance();
-			// change the color and size of the tubes and spheres
-			// do so without using shader interfaces
-			ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
-			ap.setAttribute(LINE_SHADER+"."+TUBE_RADIUS, .05);
-			ap.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR, Color.red);
-			ap.setAttribute(POINT_SHADER+"."+POINT_RADIUS, .1);
-			ap.setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, false);
-			// turn on transparency for faces but keep tubes and spheres opaque
-			ap.setAttribute(TRANSPARENCY_ENABLED, true);
-			ap.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
-			ap.setAttribute(POLYGON_SHADER+"."+TRANSPARENCY, .4);
-			return;			
-		}
-		
-		if (count == steps-1  || count == steps) {		// 3 same as 2, using shader interfaces						
-			SceneGraphComponent dodecSGC = readDodec();
-			ViewerApp va = myViewerApp(dodecSGC);
-			va.update();
-			CameraUtility.encompass(va.getViewerSwitch());
-			dodecSGC.addTool(new PickShowTool());
-			Appearance ap = dodecSGC.getAppearance();
-			dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
-			dls = (DefaultLineShader) dgs.createLineShader("default");
-			dls.setDiffuseColor(Color.yellow);
-			dls.setTubeRadius(.05);
-			dpts = (DefaultPointShader) dgs.createPointShader("default");
-			dpts.setDiffuseColor(Color.red);
-			dpts.setPointRadius(.1);
-			dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
-			dps.setSmoothShading(false);
-			rhs = ShaderUtility.createDefaultRenderingHintsShader(ap, true);
-			rhs.setTransparencyEnabled(true);
-			rhs.setOpaqueTubesAndSpheres(true);
-			dps.setTransparency(.5);
-			count++;
-			if (count++ == steps) {				// 4 turn off face display and activate stereo viewing
-				dgs.setShowFaces(false);
-				CameraUtility.getCamera(va.getViewerSwitch()).setStereo(true);
+		switch(steps)	{
+			case 0:		// 0 empty viewer
+			{
+				ViewerApp va = ViewerApp.display((SceneGraphNode) null);
 			}
-			return;			
-		} else count += 2;
-
-		if (count == steps -1 || count == steps)  {	  // 5 cylinder without texture, activate bean shell
-			SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
-			myscene.setGeometry(Primitives.cylinder(20));
-			ViewerApp va = myViewerApp(myscene);
-			va.update();
-			CameraUtility.encompass(va.getViewerSwitch());
-			Appearance ap = myscene.getAppearance();
-			dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
-			dgs.setShowLines(false);
-			dgs.setShowPoints(false);
-			dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
-			dps.setDiffuseColor(Color.white);
-			count++;
-			if (count++ == steps)	{		// 6 add texture
-				// following code shows 2 different ways to create texture, one based on URL and 
-				// the other based on file associated to the java package.
-				// If the first fails, try the second.  
-				Texture2D tex2d = null;
-//				try {
-//					tex2d = TextureUtility.createTexture(ap, POLYGON_SHADER,textureFileURL);
-//				} catch (IOException e) {
-//				}
-				// DO it this way since the previous doesn't seem to throw an IOException even if the
-				// URL cannot be loaded
-				if (tex2d == null || tex2d.getImage() == null || tex2d.getImage().getWidth() == -1)	{
-					tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, 
-							POLYGON_SHADER+"."+TEXTURE_2D,ap, true);
-					URL is = ViewerAppDemo.class.getResource("gridSmall.jpg");
-					ImageData id = null;
-					try {
-						id = ImageData.load(new Input(is));
-					} catch (IOException ee) {
-						ee.printStackTrace();
-					}
-				    tex2d.setImage(id);					
+				break;
+			case 1:		// 1 dodecahedron with navigator
+			{
+				ViewerApp va = ViewerApp.display(readDodec());
+				va.setAttachNavigator(true);
+				va.setExternalNavigator(false);
+				va.update();
+				CameraUtility.encompass(va.getCurrentViewer());
+			}
+				break;
+			case 2:		// 2 change material properties using setAttribute()
+			{
+				SceneGraphComponent dodecSGC = readDodec();
+				ViewerApp va = myViewerApp(dodecSGC);
+				va.update();
+				CameraUtility.encompass(va.getViewerSwitch());
+				Appearance ap = dodecSGC.getAppearance();
+				// change the color and size of the tubes and spheres
+				// do so without using shader interfaces
+				ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
+				ap.setAttribute(LINE_SHADER+"."+TUBE_RADIUS, .05);
+				ap.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR, Color.red);
+				ap.setAttribute(POINT_SHADER+"."+POINT_RADIUS, .1);
+				ap.setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, false);
+				// turn on transparency for faces but keep tubes and spheres opaque
+				ap.setAttribute(TRANSPARENCY_ENABLED, true);
+				ap.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
+				ap.setAttribute(POLYGON_SHADER+"."+TRANSPARENCY, .4);
+			}
+				break;
+			case 3:	// 3 same as 2, using shader interfaces	
+			case 4:	// same as 3 but also with stereo camera, and no faces shown
+			{					
+				SceneGraphComponent dodecSGC = readDodec();
+				ViewerApp va = myViewerApp(dodecSGC);
+				va.update();
+				CameraUtility.encompass(va.getViewerSwitch());
+				dodecSGC.addTool(new PickShowTool());
+				Appearance ap = dodecSGC.getAppearance();
+				dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+				dls = (DefaultLineShader) dgs.createLineShader("default");
+				dls.setDiffuseColor(Color.yellow);
+				dls.setTubeRadius(.05);
+				dpts = (DefaultPointShader) dgs.createPointShader("default");
+				dpts.setDiffuseColor(Color.red);
+				dpts.setPointRadius(.1);
+				dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+				dps.setSmoothShading(false);
+				rhs = ShaderUtility.createDefaultRenderingHintsShader(ap, true);
+				rhs.setTransparencyEnabled(true);
+				rhs.setOpaqueTubesAndSpheres(true);
+				dps.setTransparency(.5);			
+				if (steps == 4) {
+					dgs.setShowFaces(false);
+					CameraUtility.getCamera(va.getViewerSwitch()).setStereo(true);					
 				}
-				Matrix foo = new Matrix();
-				MatrixBuilder.euclidean().scale(10, 5, 1).assignTo(foo);
-				System.err.println("tm = "+Rn.matrixToString(foo.getArray()));
-				tex2d.setTextureMatrix(foo);
 			}
-		} else count += 2;
-		
-		if (count++ == steps)	{		// 7 colored cube
-			SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
-			myscene.setGeometry(Primitives.coloredCube());
-			ViewerApp va = myViewerApp(myscene);
-			va.update();
-			MatrixBuilder.euclidean().scale(2,.8,1).assignTo(myscene);
+				break;
+			case 5:		// 5 cylinder without texture, activate bean shell
+			case 6:		// 6 add texture
+			{	  
+				SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
+				myscene.setGeometry(Primitives.cylinder(20));
+				ViewerApp va = myViewerApp(myscene);
+				va.update();
+				CameraUtility.encompass(va.getViewerSwitch());
+				Appearance ap = myscene.getAppearance();
+				dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+				dgs.setShowLines(false);
+				dgs.setShowPoints(false);
+				dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+				dps.setDiffuseColor(Color.white);
+				if (steps == 6)	{	
+					// following code shows 2 different ways to create texture, one based on URL and 
+					// the other based on file associated to the java package.
+					// If the first fails, try the second.  
+					Texture2D tex2d = null;
+//					try {
+//						tex2d = TextureUtility.createTexture(ap, POLYGON_SHADER,textureFileURL);
+//					} catch (IOException e) {
+//					}
+					// DO it this way since the previous doesn't seem to throw an IOException even if the
+					// URL cannot be loaded
+					if (tex2d == null || tex2d.getImage() == null || tex2d.getImage().getWidth() == -1)	{
+						tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, 
+								POLYGON_SHADER+"."+TEXTURE_2D,ap, true);
+						URL is = ViewerAppDemo.class.getResource("gridSmall.jpg");
+						ImageData id = null;
+						try {
+							id = ImageData.load(new Input(is));
+						} catch (IOException ee) {
+							ee.printStackTrace();
+						}
+					    tex2d.setImage(id);					
+					}
+					Matrix foo = new Matrix();
+					MatrixBuilder.euclidean().scale(10, 5, 1).assignTo(foo);
+					tex2d.setTextureMatrix(foo);
+				}
+			}				
+				break;
+			case 7:
+			{		// 7 colored cube
+				SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
+				myscene.setGeometry(Primitives.coloredCube());
+				ViewerApp va = myViewerApp(myscene);
+				va.update();
+				MatrixBuilder.euclidean().scale(2,.8,1).assignTo(myscene);
+			}				
+			break;
 		}
 	}
 
