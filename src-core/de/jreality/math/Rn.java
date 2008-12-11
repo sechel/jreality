@@ -154,7 +154,9 @@ final public class Rn {
 	 */
 	public static double[]  add(double[]  dst, double[]  src1, double[]  src2)	{
 		if (dst == null) dst = new double[src1.length];
-		int n = Math.min(Math.min(dst.length, src1.length), src2.length);
+		int n = src1.length;
+		if (src1.length != src2.length)
+			n = Math.min(Math.min(dst.length, src1.length), src2.length);
 		for (int i=0; i<n; ++i)	dst[i] = src1[i] + src2[i];
 		return dst;
 	}
