@@ -250,11 +250,12 @@ public class JOGLRendererHelper {
 	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {
     GL gl = jr.globalGL;
     JOGLRenderingState openGLState = jr.renderingState;
-		if (sg.getNumPoints() == 0)
-			return;
+//		if (sg.getNumPoints() == 0)
+//			return;
 		// gl.glPointSize((float)
 		// currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
+		if (vertices.size() == 0) return;
 		DataList piDL = sg.getVertexAttributes(Attribute.INDICES);
 		IntArray vind = null;
 		if (piDL != null) vind = piDL.toIntArray();
