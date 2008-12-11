@@ -110,7 +110,7 @@ public class SimpleTextureFactory {
 					        if ((q == 0 || q ==3) && imod < (bandwidth + shwd)) which = 3;
 					    }
 					}
-					System.arraycopy(colors[which],0,im,where,4);
+					System.arraycopy(bcolors[which],0,im,where,4);
 				}
 		    }
 			break;
@@ -134,7 +134,7 @@ public class SimpleTextureFactory {
 				if (imod <=widths[iband]) {
 				    if (iband == 0) which = 2;
 				    else which = 1; }
-					System.arraycopy(colors[which],0,im,where,4);
+					System.arraycopy(bcolors[which],0,im,where,4);
 				}
 		    }			
 		    break;
