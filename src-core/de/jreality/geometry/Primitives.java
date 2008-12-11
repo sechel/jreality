@@ -789,6 +789,9 @@ public class Primitives {
 		    return factory.getIndexedFaceSet();
 		}
         
+		public static IndexedFaceSet texturedQuadrilateral() {
+		    return texturedQuadrilateral(new double[]{0,0,0, 1,0,0,  1,1,0,  0,1,0});
+		}
 	/**
 	 * Generate a textured quadrilateral using the given array <i>points</i>.  This
 	 * should have length 12 or 16, depending on whether the point coordinates are dehomogenized 
@@ -802,8 +805,7 @@ public class Primitives {
 	    
 	    factory.setVertexCount( 4 );
 	    factory.setFaceCount(1);
-	    factory.setVertexCoordinates(points == null ? 
-	    		new double[]{0,0,0, 1,0,0,  1,1,0,  0,1,0} : points);
+	    factory.setVertexCoordinates(points);
 	    factory.setFaceIndices(new int[][] {{ 0,1,2,3}});
 	    factory.setVertexTextureCoordinates(new double[] { 0,0,1,0,1,1,0,1});
 	    factory.setGenerateVertexNormals(true);
