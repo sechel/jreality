@@ -259,7 +259,7 @@ public class WriterVRML2{
 			if (writeTextureFiles)	{
 				String fileName = textureMaps.get(tex.getImage());
 				if (fileName == null)	{
-					fileName = fileStem+String.format("%04d", textureCount)+".tiff";
+					fileName = fileStem+String.format("%04d", textureCount)+".png";
 					String fullName = writePath+fileName;
 					textureCount++;
 					BufferedImage image = (BufferedImage) tex.getImage().getImage();
