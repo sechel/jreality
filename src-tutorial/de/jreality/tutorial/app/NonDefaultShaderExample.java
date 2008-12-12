@@ -25,10 +25,12 @@ public class NonDefaultShaderExample {
    			ShaderUtility.createDefaultGeometryShader(ap, true);
 		dgs.setShowLines(true);
 		dgs.setShowPoints(false);
+		// A non-default shader has to be set using the following method call
 		TwoSidePolygonShader tsps = (TwoSidePolygonShader) dgs.createPolygonShader("twoSide");
 		ImplodePolygonShader dps = (ImplodePolygonShader) tsps.createFront("implode");
 		DefaultPolygonShader dps2 = (DefaultPolygonShader) tsps.createBack("default");
-		dps.setImplodeFactor(-.5);
+		// but the attributes can be set directly using the Appearance.setAttribute() method
+		ap.setAttribute("polygonShader.implodeFactor", .5);
 		dps.setDiffuseColor(new Color(0,204,204));
 		dps2.setDiffuseColor(new Color(204,204,0));
 		DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
