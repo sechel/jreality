@@ -369,13 +369,16 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (inlineV) {
 				vertexBuffer = BufferCache.vertex(sg, triagCnt, vertexLength);
 			}
-			DoubleArrayArray tc = texCoords.toDoubleArrayArray();
-			int texLength = tc.getLengthAt(0);
-			double[] tmpTex = new double[texLength];
+			DoubleArrayArray tc = null;
+			int texLength = 0;
+			double[] tmpTex = null;
 			boolean inlineTex = texCoords != null;
 			DoubleBuffer texBuffer = null;
 			if (inlineTex) {
 				texBuffer = BufferCache.texCoord(sg, triagCnt);
+				tc = texCoords.toDoubleArrayArray();
+				texLength = tc.getLengthAt(0);
+				tmpTex = new double[texLength];
 			}
 
 			double[] tmpTan = new double[4];
