@@ -84,7 +84,7 @@ public class WriterVRML2{
 	private double tra;
 
 	
-	private static enum GeoTyp{FACE,TUBE,LINE,SPHERE,POINT}
+	private static enum GeoTyp{TEX_FACE,FACE,TUBE,LINE,SPHERE,POINT}
 	// -----------------constructor----------------------
 	/** this Writer can write vrml2 */
 	public WriterVRML2(OutputStream outS) {	
@@ -236,7 +236,7 @@ public class WriterVRML2{
 		out.println(hist+"]");
 	}
 	
-	private  void writeTexture(Texture2D tex ,GeoTyp typ){
+	private  void writeTexture(Texture2D tex){
 		/*ImageTexture {
 		  exposedField MFString url     []
 		  field        SFBool   repeatS TRUE
@@ -369,8 +369,8 @@ public class WriterVRML2{
 		out.println(hist+"texture ");
 		hist=hist3;
 		Texture2D tex=dps.getTexture2d();
-		if (tex!=null&&typ==GeoTyp.FACE){
-			writeTexture(tex,typ);
+		if (tex!=null&&typ==GeoTyp.TEX_FACE){
+			writeTexture(tex);
 			hist=hist2;
 			out.println(hist+"textureTransform ");
 			hist=hist3;
@@ -389,6 +389,7 @@ public class WriterVRML2{
 	 */
 	private boolean tryWriteShapeNode(GeoTyp typ,double[] forcedDiffuseColor){
 		switch (typ){
+		case TEX_FACE:
 		case FACE:{
 			amb = dps.getAmbientColor();
 			spec= dps.getSpecularColor();
@@ -776,8 +777,12 @@ public class WriterVRML2{
 			super.visit(g);
 			if ( !dgs.getShowFaces()|| g.getNumFaces()==0)	return;
 			String histOld= hist;
-			boolean hasShapeNode=tryWriteShapeNode(GeoTyp.FACE,null);
-			//			check if allready defined
+			GeoTyp typ= GeoTyp.FACE;
+			double[][] textCoords=VRMLWriterHelper.getDoubleDoubleVertexAttr(g, Attribute.TEXTURE_COORDINATES);
+			if(textCoords!=null)
+				typ=GeoTyp.TEX_FACE;
+			boolean hasShapeNode=tryWriteShapeNode(typ,null);
+			//	check if allready defined
 			if(useDefs){
 				if (wHelp.isDefinedFaceSet(g)){
 					out.println(""+hist+"USE "+ VRMLWriterHelper.str( g.hashCode()+"POLYGON")+" ");
@@ -820,7 +825,6 @@ public class WriterVRML2{
 				writeCoords(coords, hist+spacing);
 			}
 			// write Texture coordinates
-			double[][] textCoords=VRMLWriterHelper.getDoubleDoubleVertexAttr(g, Attribute.TEXTURE_COORDINATES);
 			if(textCoords!=null){
 				out.println(hist+"texCoord ");
 				writeTexCoords(textCoords, hist+spacing);
