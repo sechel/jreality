@@ -184,7 +184,7 @@ public class CameraUtility {
 		double[] tofrom = {0,0,focus}; 
 		double[] from = Rn.add(null, to, tofrom);
 		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"translate: "+Rn.toString(from));
-		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, viewer.getMetric());
+		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, Pn.EUCLIDEAN);
 		double[] newWorldToCam = Rn.inverse(null, newCamToWorld);
 		getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);			
 		double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );

@@ -191,9 +191,7 @@ import de.jreality.scene.Appearance;
 	// miscellaneous
 	public static final String RENDER_S3 = "renderS3";
 	public static final String PICKABLE = "pickable";
-	/**
-	 * @deprecated  Use {@link #METRIC}.
-	 */
+	/** @deprecated  Use {@link #METRIC}.*/
 	public static final String SIGNATURE= "metric";  
 	public static final String METRIC= "metric";
 	public static final String INFO_STRING = "infoString";

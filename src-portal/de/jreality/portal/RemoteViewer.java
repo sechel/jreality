@@ -57,6 +57,6 @@ public interface RemoteViewer {
   public void setRemoteCameraPath(List<SceneGraphNode> list);
   public void render();
   public void waitForRenderFinish();
-  public void setMetric(int sig);
+//  public void setMetric(int sig);
 //  public void swapBuffers();
 }

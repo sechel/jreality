@@ -138,14 +138,14 @@ public class PortalServerViewer implements Viewer {
     setAuxiliaryRoot(v.getAuxiliaryRoot());
 	}
 
-	public int getMetric() {
-		return metric;
-	}
+//	public int getMetric() {
+//		return metric;
+//	}
 
-	public void setMetric(int sig) {
-		this.metric = sig;
-		clients.setMetric(this.metric);
-	}
+//	public void setMetric(int sig) {
+//		this.metric = sig;
+////		clients.setMetric(this.metric);
+//	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {
 	  return auxRoot;

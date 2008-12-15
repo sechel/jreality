@@ -369,7 +369,7 @@ public class SoftViewer extends Component implements Runnable, Viewer {
         setSceneRoot(v.getSceneRoot());
         setCameraPath(v.getCameraPath());
         setAuxiliaryRoot(v.getAuxiliaryRoot());
-        setMetric(v.getMetric());
+//        setMetric(v.getMetric());
     }
 
     /*

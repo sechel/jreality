@@ -359,7 +359,7 @@ public void initializeFrom(Viewer v) {
     setSceneRoot(v.getSceneRoot());
     setCameraPath(v.getCameraPath());
     setAuxiliaryRoot(v.getAuxiliaryRoot());
-    setMetric(v.getMetric());
+//    setMetric(v.getMetric());
 }
 /* (non-Javadoc)
  * @see de.jreality.scene.Viewer#getMetric()
