@@ -69,6 +69,7 @@ import javax.swing.UIManager;
 
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
+import de.jreality.math.Pn;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
@@ -318,7 +319,7 @@ public class ViewerApp {
 			CameraUtility.encompass(va.getToolSystem().getAvatarPath(),
 					va.getToolSystem().getEmptyPickPath(),
 					va.getViewer().getCameraPath(),
-					1.75, va.getViewer().getMetric());
+					1.75, Pn.EUCLIDEAN); //va.getViewer().getMetric());
 		}
 
 		va.display();

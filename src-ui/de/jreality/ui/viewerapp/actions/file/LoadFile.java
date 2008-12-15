@@ -60,6 +60,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.RemoveDuplicateInfo;
+import de.jreality.math.Pn;
 import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -177,7 +178,7 @@ public class LoadFile extends AbstractJrAction {
         	CameraUtility.encompass(ts.getAvatarPath(),
         			ts.getEmptyPickPath(),
         			viewer.getCameraPath(),
-        			1.75, viewer.getMetric());
+        			1.75, Pn.EUCLIDEAN); //viewer.getMetric());
         	}
         }
       } 

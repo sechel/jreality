@@ -127,7 +127,7 @@ public class ViewerSwitch implements Viewer {
     newViewer.setCameraPath(currentViewer.getCameraPath());
     try {
       newViewer.setAuxiliaryRoot(currentViewer.getAuxiliaryRoot());
-      newViewer.setMetric(currentViewer.getMetric());
+ //     newViewer.setMetric(currentViewer.getMetric());
     } catch (Exception e) {}
    
 // I would like to know why these are set to null.  Viewer instances which 
@@ -182,9 +182,9 @@ public class ViewerSwitch implements Viewer {
     return currentViewer.getCameraPath();
   }
 
-  public int getMetric() {
-    return currentViewer.getMetric();
-  }
+//  public int getMetric() {
+//    return currentViewer.getMetric();
+//  }
 
   public Component getViewingComponent() {
     return component;
@@ -210,9 +210,9 @@ public class ViewerSwitch implements Viewer {
     currentViewer.setSceneRoot(r);
   }
 
-  public void setMetric(int sig) {
-    currentViewer.setMetric(sig);
-  }
+//  public void setMetric(int sig) {
+//    currentViewer.setMetric(sig);
+//  }
   
   private class EventDispatcher implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
     
