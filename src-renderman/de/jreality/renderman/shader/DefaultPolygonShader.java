@@ -89,7 +89,7 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
   public void setFromEffectiveAppearance(RIBVisitor ribv, EffectiveAppearance eap, String name, String side) {
     map.clear();
     
-    int signature = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+    int metric = eap.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
     boolean lighting = (boolean) eap.getAttribute(CommonAttributes.LIGHTING_ENABLED, true);
     map.put("float roughness"+side,new Float(1/attent.getSpecularExponent().floatValue()));
     map.put("float Ks"+side,new Float(attent.getSpecularCoefficient()));
@@ -102,8 +102,8 @@ public class DefaultPolygonShader extends AbstractRendermanShader {
     boolean transp = (boolean) eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED,false);
     map.put("float transparencyenabled"+side,new Float(transp ? 1 : 0));    
     
-    if (signature != Pn.EUCLIDEAN) {
-      map.put("float signature", signature);
+    if (metric != Pn.EUCLIDEAN) {
+      map.put("float metric", metric);
       map.put("float[16] objectToCamera", RIBHelper.fTranspose(ribv.getCurrentObjectToCamera()));
       shaderName = "noneuclideanpolygonshader";
     }

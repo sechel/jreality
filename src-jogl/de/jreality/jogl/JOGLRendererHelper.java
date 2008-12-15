@@ -699,7 +699,7 @@ public class JOGLRendererHelper {
 			LabelUtility.calculateBillboardMatrix(bbm, img.getWidth() * scale,
 					img.getHeight() * scale, offset, alignment, c2o,
 					LabelUtility.positionFor(i, vertices, indices),
-					jr.renderingState.currentSignature); //)Pn.EUCLIDEAN);
+					jr.renderingState.currentMetric); //)Pn.EUCLIDEAN);
 			Texture2DLoaderJOGL.render(gl, tex2d, true);
 			gl.glPushMatrix();
 			gl.glMultTransposeMatrixd(bbm, 0);

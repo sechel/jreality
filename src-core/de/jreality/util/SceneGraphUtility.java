@@ -124,26 +124,26 @@ public class SceneGraphUtility {
   	}
 	
   	/**
-  	 * Set the signature of this sub-graph by setting the appearance attribute
-  	 * {@link CommonAttributes.SIGNATURE}.
+  	 * Set the metric of this sub-graph by setting the appearance attribute
+  	 * {@link CommonAttributes.METRIC}.
   	 * @param r
-  	 * @param signature
-  	 */public static void setSignature(SceneGraphComponent r, int signature)	{
- 		final int sig = signature;
+  	 * @param metric
+  	 */public static void setMetric(SceneGraphComponent r, int metric)	{
+ 		final int sig = metric;
  		 if (r.getAppearance() == null) r.setAppearance(new Appearance());
- 		 r.getAppearance().setAttribute(CommonAttributes.SIGNATURE,sig);
+ 		 r.getAppearance().setAttribute(CommonAttributes.METRIC,sig);
     	}
   
      
  	/**
- 	 * Return the metric signature at the end of the path <i>sgp</i> by evaluating
- 	 * effective appearance for the attribute {@link CommonAttributes#SIGNATURE}.
+ 	 * Return the metric metric at the end of the path <i>sgp</i> by evaluating
+ 	 * effective appearance for the attribute {@link CommonAttributes#METRIC}.
  	 * @param sgp
  	 * @return
  	 */
-  	 public static int getSignature(SceneGraphPath sgp) {
+  	 public static int getMetric(SceneGraphPath sgp) {
  		EffectiveAppearance eap = EffectiveAppearance.create(sgp);
- 		int sig = eap.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+ 		int sig = eap.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
  		return sig;
  	}
  	

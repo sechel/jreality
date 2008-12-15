@@ -81,7 +81,7 @@ public class LightCollector extends SceneGraphVisitor {
     protected LightCollector reclaimableSubcontext;
     EffectiveAppearance eAppearance = null;
     boolean shadowEnabled = false;
-    int signature = Pn.EUCLIDEAN;
+    int metric = Pn.EUCLIDEAN;
     SceneGraphPath currentPath = null;
     Ri ri = null;
     String lightname;
@@ -122,7 +122,7 @@ public class LightCollector extends SceneGraphVisitor {
         if(a!= null ) eAppearance = eAppearance.create(a);
         currentPath.push(c);
         shadowEnabled = eAppearance.getAttribute(CommonAttributes.RMAN_SHADOWS_ENABLED, false);
-        signature = eAppearance.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+        metric = eAppearance.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
         c.childrenAccept(this); //subContext());
         eAppearance= tmp;
         currentPath.pop();
@@ -135,7 +135,7 @@ public class LightCollector extends SceneGraphVisitor {
 //        ri.concatTransform(fCurrentTrafo);
 //        map.put("to",zdirection);
         map.put("to",new float[] {(float)dto[0], (float) dto[1], (float) dto[2]});
-        if (signature == Pn.EUCLIDEAN)
+        if (metric == Pn.EUCLIDEAN)
         	lightname = shadowEnabled ? "shadowdistant": "distantlight";
          ri.lightSource(lightname,map);
          ri.transformEnd();
@@ -155,8 +155,8 @@ public class LightCollector extends SceneGraphVisitor {
 		map.put("intensity",new Float(l.getIntensity()));
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
 //        map.put("from",new float[] {0f,0f,0f});
-        if (signature != Pn.EUCLIDEAN)	{
-        	map.put("signature", new Float(signature));
+        if (metric != Pn.EUCLIDEAN)	{
+        	map.put("metric", new Float(metric));
      	   lightname = "noneuclideanlight";
         }
         else if (shadowEnabled){
@@ -169,7 +169,7 @@ public class LightCollector extends SceneGraphVisitor {
        handleCommon(l, map);
        map.put("from",new float[] {(float)dfrom[0], (float) dfrom[1], (float) dfrom[2]});
 //       ri.concatTransform(fCurrentTrafo);
-       if (signature == Pn.EUCLIDEAN)	
+       if (metric == Pn.EUCLIDEAN)	
     	   lightname = shadowEnabled ? "shadowpoint": "pointlight";
        ri.lightSource(lightname,map);
         
@@ -192,7 +192,7 @@ public class LightCollector extends SceneGraphVisitor {
             map.put("float a2", new Float(l.getFalloffA2()));
             ri.lightSource("spotlightFalloff",map);
         } else
-        if (signature == Pn.EUCLIDEAN)	
+        if (metric == Pn.EUCLIDEAN)	
         	lightname = shadowEnabled ? "shadowspot" : "spotlight";
         ri.lightSource(lightname,map);
          

@@ -102,11 +102,11 @@ public class SunflowViewer implements Viewer {
 		display.setPreferredSize(new Dimension(width,height));
 	}
 
-	public int getSignature() {
+	public int getMetric() {
 		return 0;
 	}
 
-	public void setSignature(int sig) {
+	public void setMetric(int sig) {
 	}
 
 	public void setAuxiliaryRoot(SceneGraphComponent ar) {

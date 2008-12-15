@@ -76,7 +76,7 @@ public class DampedDraggingTool extends AbstractTool {
 	private transient boolean dragInViewDirection;
 	protected transient SceneGraphComponent comp;
 	private transient EffectiveAppearance eap;
-	private transient int signature;
+	private transient int metric;
 	private transient Matrix result = new Matrix();
 	private transient Matrix local2world = new Matrix();
 	private transient Matrix pointer = new Matrix();
@@ -116,7 +116,7 @@ public class DampedDraggingTool extends AbstractTool {
 		catch (Exception me) {dragInViewDirection = false;}
 		if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) 
 			eap = EffectiveAppearance.create(tc.getRootToToolComponent()); 
-		signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+		metric = eap.getAttribute("metric", Pn.EUCLIDEAN);
 	}
 	
 	public void perform(ToolContext tc) {
@@ -130,15 +130,15 @@ public class DampedDraggingTool extends AbstractTool {
 		/// get evolution:
 		Matrix evolution = new Matrix(tc.getTransformationMatrix(evolutionSlot));
 		// need to convert from euclidean to possibly non-euclidean translation:
-		if (signature != Pn.EUCLIDEAN)
-			MatrixBuilder.init(null, signature).translate(evolution.getColumn(3)).assignTo(evolution);
+		if (metric != Pn.EUCLIDEAN)
+			MatrixBuilder.init(null, metric).translate(evolution.getColumn(3)).assignTo(evolution);
 		/// drag in View direction ( change evolution ) :
 		if (dragInViewDirection&& tc.getSource()!=timerSlot ) {
 			tc.getTransformationMatrix(InputSlot.getDevice("CameraToWorld")).toDoubleArray(pointer.getArray());
 			double dz = evolution.getEntry(0,3)+evolution.getEntry(1,3);
 			double[] tlate = Rn.times(null, dz, pointer.getColumn(2));
-			if (signature==Pn.EUCLIDEAN) tlate[3] = 1.0;
-			MatrixBuilder.init(null, signature).translate(tlate).assignTo(evolution);
+			if (metric==Pn.EUCLIDEAN) tlate[3] = 1.0;
+			MatrixBuilder.init(null, metric).translate(tlate).assignTo(evolution);
 		}
 		/// wo wird geaendert:
 		(moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getMatrix(local2world.getArray());		

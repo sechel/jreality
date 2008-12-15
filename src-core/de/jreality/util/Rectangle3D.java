@@ -148,7 +148,7 @@ public class Rectangle3D {
 		double[][] cube = new double[8][3], tcube = new double[8][3];
 		if (target == null)  target = new Rectangle3D();
 		//else target = this;
-
+		System.err.println("box = "+toString());
 		// create a cube with our bounds 
 		for (int i=0; i<2; ++i)	
 			for (int j=0; j<2; ++j)

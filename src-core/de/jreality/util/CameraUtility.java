@@ -154,6 +154,10 @@ public class CameraUtility {
 	 */
 	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters)	{
 		Rectangle3D worldBox = BoundingBoxUtility.calculateBoundingBox(sgc);//. bbv.getBoundingBox();
+		if (worldBox == null || worldBox.isEmpty())	{
+			LoggingSystem.getLogger(CameraUtility.class).log(Level.WARNING,"encompass: empty bounding box");
+			return;	
+		}
 		
 		SceneGraphPath w2a = viewer.getCameraPath().popNew();
 		w2a.pop();
@@ -180,7 +184,7 @@ public class CameraUtility {
 		double[] tofrom = {0,0,focus}; 
 		double[] from = Rn.add(null, to, tofrom);
 		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"translate: "+Rn.toString(from));
-		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, viewer.getSignature());
+		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, viewer.getMetric());
 		double[] newWorldToCam = Rn.inverse(null, newCamToWorld);
 		getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);			
 		double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );
@@ -257,7 +261,7 @@ public class CameraUtility {
 		return getCameraToNDC(cam, aspectRatio, which, Pn.EUCLIDEAN);
 	}
 	
-	public static double[] getCameraToNDC(Camera cam, double aspectRatio, int which, int signature)		{
+	public static double[] getCameraToNDC(Camera cam, double aspectRatio, int which, int metric)		{
 			/** 
 			* If the projectoin is orthogonal, scales the viewPort by the \IT{focus}.
 			* This method won't be called if the value of \IT{isOnAxis} is FALSE;
@@ -277,7 +281,7 @@ public class CameraUtility {
 		}  // else we're in a stereo mode
 		double[] eyePosition = getEyePosition(cam, which);
 		// TODO make this work also for non-euclidean cameras
-		double[] moveToEye = P3.makeTranslationMatrix(null, eyePosition, signature );
+		double[] moveToEye = P3.makeTranslationMatrix(null, eyePosition, metric );
 		Rectangle2D newVP = getOffAxisViewPort(cam, viewPort, eyePosition);
 		// TODO should we adjust near and far ?
 		double[] c2ndc = P3.makePerspectiveProjectionMatrix(null, newVP, cam.getNear(), cam.getFar());		
@@ -385,9 +389,9 @@ public class CameraUtility {
 	 * @param scene
 	 * @param cameraPath
 	 * @param margin
-	 * @param signature
+	 * @param metric
 	 */
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int signature) {
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric) {
 	    Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scene.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
@@ -406,11 +410,11 @@ public class CameraUtility {
 	    
 	    Camera camera = ((Camera)cameraPath.getLastElement());
 		camera.setFar(margin*5*radius);
-	    camera.setNear(.002*radius);
+	    camera.setNear(.02*radius);
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
 	    if (camera.isPerspective()) {
-		    MatrixBuilder.init(m, signature).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);	    	
+		    MatrixBuilder.init(m, metric).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);	    	
 			camera.setFocus(Math.abs(m.getColumn(3)[2]) ); 		//focus);
 	    } else {
 			double ww = (e[1] > e[0]) ? e[1] : e[0];

@@ -73,7 +73,7 @@ public class JOGLRenderingState {
 	protected int[] sphereDisplayLists = null;
 	protected int[] cylinderDisplayLists = null;
 	public JOGLRenderer renderer;
-	public int currentSignature = Pn.EUCLIDEAN;
+	public int currentMetric = Pn.EUCLIDEAN;
 	public boolean currentPickMode = false;
 	public Geometry currentGeometry = null;
 	public double currentAlpha = 1.0;

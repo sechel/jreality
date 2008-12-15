@@ -165,13 +165,13 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 		if (debug) theLog.info("dld\tcld:\t"+displayListDirty+"\t"+"\t"+name);
 		if (parent!=null)((MatrixListJOGLPeerComponent) parent).printUpState();
 	}
-	int signature;
+	int metric;
 	double[] o2c, o2ndc;
 	private boolean[] localVisibleList;
 	@Override
 	protected void renderChildren() {
 		if (isCopyCat)		{
-			signature = jr.renderingState.currentSignature;
+			metric = jr.renderingState.currentMetric;
 			if (debug) theLog.fine("In renderChildren()"+name);
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 			int nn = matrices.length;

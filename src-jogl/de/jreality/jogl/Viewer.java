@@ -86,7 +86,7 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 	SceneGraphComponent cameraNode;
 	public GLCanvas canvas;
 	protected JOGLRenderer renderer;
-	int signature;
+	int metric;
 	boolean isFlipped = false;
 	static GLContext firstOne = null;		// for now, all display lists shared with this one
 	public static final int 	CROSS_EYED_STEREO = 0;
@@ -219,12 +219,12 @@ public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnab
 		initializeFrom(v.getSceneRoot(), v.getCameraPath());
 	}
 	
-	public int getSignature() {
-		return signature;
+	public int getMetric() {
+		return metric;
 	}
-	public void setSignature(int signature) {
-		this.signature = signature;
-		SceneGraphUtility.setSignature(sceneRoot, signature);
+	public void setMetric(int metric) {
+		this.metric = metric;
+		SceneGraphUtility.setMetric(sceneRoot, metric);
 		
 	}
 	

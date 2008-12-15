@@ -209,7 +209,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
 		final Geometry original = jrs.currentGeometry;
 		final JOGLRenderer jr = jrs.renderer;
-		final int sig = jrs.currentSignature;
+		final int sig = jrs.currentMetric;
 		final boolean useDisplayLists = jrs.useDisplayLists;
 //		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
@@ -317,7 +317,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				}
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);
-				ptf.setSignature(sig);
+				ptf.setMetric(sig);
 				ptf.setRadius(effectiveRadius);
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();

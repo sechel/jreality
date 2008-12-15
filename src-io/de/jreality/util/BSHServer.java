@@ -156,7 +156,7 @@ public class BSHServer {
         return readerBSH.getComponent();
     }
 
-    public int getSignature() {
+    public int getMetric() {
         return Pn.EUCLIDEAN;
     }
 

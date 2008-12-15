@@ -36,7 +36,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected EffectiveAppearance eAp;
 	protected Vector<JOGLPeerComponent> children;
 	protected JOGLPeerComponent parent;
-	protected int childIndex, signature = Pn.EUCLIDEAN;
+	protected int childIndex, metric = Pn.EUCLIDEAN;
 	protected GoBetween goBetween;
 	double determinant = 0.0;
 	double[] cachedTform = new double[16];
@@ -159,7 +159,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 		if (appearanceDirty )  	handleAppearanceChanged();
 		if (geometryDirtyBits  != 0)	handleChangedGeometry();
-		jr.renderingState.currentSignature = signature;
+		jr.renderingState.currentMetric = metric;
 		if (rhInfo != null && rhInfo.hasSomeActiveField)	{
 			rhInfo.render(jr.renderingState, jr.rhStack.lastElement());
 			jr.rhStack.push(rhInfo);
@@ -362,7 +362,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected void updateShaders() {
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
-		signature = eAp.getAttribute(CommonAttributes.SIGNATURE, Pn.EUCLIDEAN);
+		metric = eAp.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
 		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;

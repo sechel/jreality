@@ -253,7 +253,7 @@ public class SMRJSceneGraphSynchronizer extends SceneGraphVisitor implements Tra
     dst.setOnAxis(src.isOnAxis());
     dst.setOrientationMatrix(src.getOrientationMatrix());
     dst.setPerspective(src.isPerspective());
-//    dst.setSignature(src.getSignature());
+//    dst.setMetric(src.getMetric());
     dst.setStereo(src.isStereo());
     if (src.getViewPort() != null)
       dst.setViewPort(src.getViewPort().getX(), src.getViewPort().getY(),

@@ -20,7 +20,7 @@ public class MatrixListData extends Geometry {
 //	public boolean followCamera = false;
 	public boolean componentDisplayLists = true;
 //	public Object dgcf;
-//	public int signature;
+//	public int metric;
 	public int count;
 	public int delay = 500;
 //	public SceneGraphComponent child;

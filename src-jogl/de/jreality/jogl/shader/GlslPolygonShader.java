@@ -106,7 +106,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
-		eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SIGNATURE), Pn.EUCLIDEAN);
+		eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.METRIC), Pn.EUCLIDEAN);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
 		useVertexArrays = eap.getAttribute(ShaderUtility.nameSpace(name,"useVertexArrays"), true);
 		if (GlslProgram.hasGlslProgram(eap, name)) {

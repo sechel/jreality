@@ -30,7 +30,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	IndexedLineSet ils;
 	PointSet ps;
 	int refCount = 0;
-	int signature = Pn.EUCLIDEAN;
+	int metric = Pn.EUCLIDEAN;
 	boolean isSurface = false;
 	boolean hasPointLabels = false, hasEdgeLabels = false, hasFaceLabels = false;
 	boolean forceRender = false;
@@ -106,10 +106,10 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		// todo: this needs to be pushed up the tree to the possible copycat component
 		displayListsDirty = true;
 		if (ev.getChangedGeometryAttributes().size() > 0)	{
-			Object foo = originalGeometry.getGeometryAttributes(GeometryUtility.SIGNATURE);
+			Object foo = originalGeometry.getGeometryAttributes(GeometryUtility.METRIC);
 			if (foo != null) {
 				Integer foo2 = (Integer) foo;
-				signature = foo2.intValue();
+				metric = foo2.intValue();
 			}				
 		}
 		updateLabelState();

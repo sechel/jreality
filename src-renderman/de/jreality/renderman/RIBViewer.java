@@ -145,12 +145,12 @@ public class RIBViewer implements Viewer {
         }
     }
 
-     public int getSignature() {
+     public int getMetric() {
         // TODO Auto-generated method stub
         return 0;
     }
 
-     public void setSignature(int sig) {
+     public void setMetric(int sig) {
      }
 
     public void setAuxiliaryRoot(SceneGraphComponent ar) {

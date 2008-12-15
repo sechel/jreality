@@ -129,7 +129,7 @@ public class PickAction extends SceneGraphVisitor{
 	//protected Viewer theViewer;
 	protected SceneGraphComponent theRoot;
 	protected SceneGraphPath cameraPath;
-	protected int signature = Pn.EUCLIDEAN;
+	protected int metric = Pn.EUCLIDEAN;
 	protected Graphics3D context3D;
 	protected int pickType, pickCoordinateSystem;
 	protected double[] pickPointNDC = new double[3];
@@ -227,7 +227,7 @@ public class PickAction extends SceneGraphVisitor{
 			theRoot.addChild(camNode);
 			camNode.setCamera(cam);
 			worldToNDC = new PickAction(theRoot);	
-			worldToNDC.setSignature(getSignature());
+			worldToNDC.setMetric(getMetric());
 			worldToNDC.setCameraPath(camPath);
 			//cam.setFieldOfView(1.0);
 		}
@@ -241,7 +241,7 @@ public class PickAction extends SceneGraphVisitor{
 		// create a transformation so that p0 and p1 lie along the negative z-axis, with p0 "close" to the camera.
 		double[] origin = Rn.linearCombination(null, 1.0,p04, -.1, p14);
 		Pn.dehomogenize(origin, origin);
-		camNode.getTransformation().setMatrix(Rn.inverse(null,P3.makeLookatMatrix(null, origin, p04, 0.0, signature)));
+		camNode.getTransformation().setMatrix(Rn.inverse(null,P3.makeLookatMatrix(null, origin, p04, 0.0, metric)));
 		// calculate min/max z-bounds
 		Graphics3D cg = new Graphics3D(worldToNDC.cameraPath, null, CameraUtility.getAspectRatio(theViewer));
 		double[] worldToNDCMatrix = cg.getWorldToNDC();
@@ -257,12 +257,12 @@ public class PickAction extends SceneGraphVisitor{
 		
 	}
 	
-	public int getSignature() {
-		return signature;
+	public int getMetric() {
+		return metric;
 	}
 	
-	public void setSignature(int signature) {
-		this.signature = signature;
+	public void setMetric(int metric) {
+		this.metric = metric;
 	}
 	
 	public PickPoint getFirstHit()	{

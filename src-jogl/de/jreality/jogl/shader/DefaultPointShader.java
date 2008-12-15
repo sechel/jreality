@@ -252,7 +252,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
 		Geometry original = jrs.currentGeometry;
 		JOGLRenderer jr = jrs.renderer;
-		int sig = jrs.currentSignature;
+		int sig = jrs.currentMetric;
 		boolean useDisplayLists = jrs.useDisplayLists;
 		GL gl = 	jr.globalGL;
 //		if (original instanceof PointSet)	{

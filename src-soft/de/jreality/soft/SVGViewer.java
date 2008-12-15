@@ -148,17 +148,17 @@ public class SVGViewer extends AbstractViewer implements Viewer {
     }
 
     /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#getSignature()
+     * @see de.jreality.scene.Viewer#getMetric()
      */
-    public int getSignature() {
+    public int getMetric() {
         // TODO Auto-generated method stub
         return 0;
     }
 
     /* (non-Javadoc)
-     * @see de.jreality.scene.Viewer#setSignature(int)
+     * @see de.jreality.scene.Viewer#setMetric(int)
      */
-    public void setSignature(int sig) {
+    public void setMetric(int sig) {
         // TODO Auto-generated method stub
         
     }

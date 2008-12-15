@@ -67,7 +67,7 @@ public class PortalServerViewer implements Viewer {
   SceneGraphComponent root;
   SceneGraphComponent auxRoot;
 	SceneGraphPath camPath;
-  private int signature;
+  private int metric;
 
 	RemoteViewer clients;
 
@@ -138,13 +138,13 @@ public class PortalServerViewer implements Viewer {
     setAuxiliaryRoot(v.getAuxiliaryRoot());
 	}
 
-	public int getSignature() {
-		return signature;
+	public int getMetric() {
+		return metric;
 	}
 
-	public void setSignature(int sig) {
-		this.signature = sig;
-		clients.setSignature(this.signature);
+	public void setMetric(int sig) {
+		this.metric = sig;
+		clients.setMetric(this.metric);
 	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {

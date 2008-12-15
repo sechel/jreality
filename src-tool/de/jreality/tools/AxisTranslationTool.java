@@ -60,7 +60,7 @@ public class AxisTranslationTool extends AbstractTool {
 	transient int direction;
 
 	transient EffectiveAppearance eap;
-	transient private int signature;
+	transient private int metric;
 	transient Matrix startMatrix = new Matrix();
 	transient double dx, dy, dz;
 	transient Matrix local2world = new Matrix();
@@ -98,7 +98,7 @@ public class AxisTranslationTool extends AbstractTool {
 		if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
 			eap = EffectiveAppearance.create(tc.getRootToToolComponent());
 		}
-		signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+		metric = eap.getAttribute("metric", Pn.EUCLIDEAN);
 		comp.getTransformation().getMatrix(startMatrix.getArray());
 		dx = 0;
 		dy = 0;
@@ -119,8 +119,8 @@ public class AxisTranslationTool extends AbstractTool {
 
 		Matrix evolution = new Matrix(tc.getTransformationMatrix(evolutionSlot));
 		// need to convert from euclidean to possibly non-euclidean translation
-		if (signature != Pn.EUCLIDEAN)
-			MatrixBuilder.init(null, signature).translate(evolution.getColumn(3)).assignTo(evolution);
+		if (metric != Pn.EUCLIDEAN)
+			MatrixBuilder.init(null, metric).translate(evolution.getColumn(3)).assignTo(evolution);
 
 		(moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getMatrix(local2world.getArray());
 

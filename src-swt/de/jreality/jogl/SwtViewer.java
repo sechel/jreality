@@ -79,7 +79,7 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 	
 
   GLCanvas canvas;
-  private int signature;
+  private int metric;
   
   private Dimension myDimension = new Dimension();
 
@@ -159,12 +159,12 @@ public class SwtViewer implements de.jreality.scene.Viewer, Runnable {
 		initializeFrom(v.getSceneRoot(), v.getCameraPath());
 	}
 	
-	public int getSignature() {
-		return signature;
+	public int getMetric() {
+		return metric;
 	}
-	public void setSignature(int signature) {
-		this.signature = signature;
-		SceneGraphUtility.setSignature(sceneRoot, signature);
+	public void setMetric(int metric) {
+		this.metric = metric;
+		SceneGraphUtility.setMetric(sceneRoot, metric);
 		
 	}
 	

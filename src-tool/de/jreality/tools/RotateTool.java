@@ -100,15 +100,15 @@ public class RotateTool extends AbstractTool {
     if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
-      signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+      metric = eap.getAttribute("metric", Pn.EUCLIDEAN);
 
   }
   
   private Matrix getCenter(SceneGraphComponent comp) {
 	  Matrix centerTranslation = new Matrix();
 	    Rectangle3D bb = BoundingBoxUtility.calculateChildrenBoundingBox(comp);
-	    // need to respect the signature here
-	    MatrixBuilder.init(null, signature).translate(bb.getCenter()).assignTo(centerTranslation);
+	    // need to respect the metric here
+	    MatrixBuilder.init(null, metric).translate(bb.getCenter()).assignTo(centerTranslation);
 	    return centerTranslation;
   }
   private Matrix getRotationPoint(ToolContext tc){
@@ -121,13 +121,13 @@ public class RotateTool extends AbstractTool {
 	  
 	  Matrix centerTranslation = new Matrix();
 	    MatrixBuilder
-	     .init(null, signature)
+	     .init(null, metric)
 	     .translate(rotationPoint)
 	     .assignTo(centerTranslation);
 	    return centerTranslation;
   }
   
-  transient private int signature;
+  transient private int metric;
 
   transient Matrix result = new Matrix();
   transient Matrix evolution = new Matrix();
@@ -149,8 +149,8 @@ public class RotateTool extends AbstractTool {
     	else
     	center = getCenter(comp);
     }
-   if (signature != Pn.EUCLIDEAN)
-	   P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, signature);
+   if (metric != Pn.EUCLIDEAN)
+	   P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, metric);
 	result.assignFrom(comp.getTransformation());
     if (!fixOrigin) result.multiplyOnRight(center);
     result.multiplyOnRight(evolution);
@@ -166,12 +166,12 @@ public class RotateTool extends AbstractTool {
     // TODO: see if we can't remove head dependency from Rotate device
 //    Matrix tmp = new Matrix(tc.getTransformationMatrix(camPath));
 //    Matrix avatarTrans = new Matrix();
-//    MatrixBuilder.init(null, signature).translate(tmp.getColumn(3)).assignTo(avatarTrans);
+//    MatrixBuilder.init(null, metric).translate(tmp.getColumn(3)).assignTo(avatarTrans);
 //    avatarTrans.setColumn(3, tmp.getColumn(3));
 //    object2avatar.multiplyOnLeft(avatarTrans);
     //object2avatar = object2avatar.getRotation();
     try {
-    	object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, signature));
+    	object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, metric));
     } catch (Exception e)	{
     	MatrixBuilder.euclidean().assignTo(object2avatar);
     }

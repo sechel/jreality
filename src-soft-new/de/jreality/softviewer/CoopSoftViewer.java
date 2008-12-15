@@ -208,7 +208,7 @@ public class CoopSoftViewer extends Component implements Runnable, Viewer {
 
   private boolean disposed;
 
-private int signature;
+private int metric;
   
   public void run() {
     if(EventQueue.isDispatchThread()) {
@@ -359,19 +359,19 @@ public void initializeFrom(Viewer v) {
     setSceneRoot(v.getSceneRoot());
     setCameraPath(v.getCameraPath());
     setAuxiliaryRoot(v.getAuxiliaryRoot());
-    setSignature(v.getSignature());
+    setMetric(v.getMetric());
 }
 /* (non-Javadoc)
- * @see de.jreality.scene.Viewer#getSignature()
+ * @see de.jreality.scene.Viewer#getMetric()
  */
-public int getSignature() {
-    return signature;
+public int getMetric() {
+    return metric;
 }
 /* (non-Javadoc)
- * @see de.jreality.scene.Viewer#setSignature(int)
+ * @see de.jreality.scene.Viewer#setMetric(int)
  */
-public void setSignature(int sig) {
-signature = sig;    
+public void setMetric(int sig) {
+metric = sig;    
 }
 /* (non-Javadoc)
  * @see de.jreality.scene.Viewer#setAuxiliaryRoot(de.jreality.scene.SceneGraphComponent)

@@ -170,7 +170,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 
 	transient private String globalIncludeFile = "";
 	transient private int rendererType = RIBViewer.TYPE_PIXAR;
-	transient private int currentSignature = Pn.EUCLIDEAN;
+	transient private int currentMetric = Pn.EUCLIDEAN;
 	transient private String outputDisplayFormat = "rgb";
 	transient protected String textureFileSuffix = "tex"; 
 	transient protected boolean handlingProxyGeometry = false;
@@ -293,7 +293,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 			ri.transform(RIBHelper.fTranspose(zFlipMatrix));
 			ri.comment("Home-grown camera transformation");
 			double[] c2ndc = CameraUtility.getCameraToNDC(camera, 1.0,
-					currentSignature);
+					currentMetric);
 			ri.concatTransform(RIBHelper.fTranspose(c2ndc));
 			// camera.setNear( camera.getNear() * -1);
 			// camera.setFar( camera.getFar() * -1);
@@ -308,7 +308,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				ri.screenWindow(vp);
 				ri.concatTransform(RIBHelper.fTranspose(zFlipMatrix));
 				double[] moveToEye = Rn.inverse(null, P3.makeTranslationMatrix(
-						null, eyeP, currentSignature));
+						null, eyeP, currentMetric));
 				ri.concatTransform(RIBHelper.fTranspose(moveToEye));
 			} else {
 				HashMap<String, Object> map = new HashMap<String, Object>();
@@ -375,7 +375,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 				CommonAttributes.RMAN_RAY_TRACING_REFLECTIONS, false);
 		raytracedVolumesEnabled = eAppearance.getAttribute(
 				CommonAttributes.RMAN_RAY_TRACING_VOLUMES, false);
-		currentSignature = eAppearance.getAttribute(CommonAttributes.SIGNATURE,
+		currentMetric = eAppearance.getAttribute(CommonAttributes.METRIC,
 				Pn.EUCLIDEAN);
 		outputDisplayFormat = (String) eAppearance.getAttribute(
 				CommonAttributes.RMAN_OUTPUT_DISPLAY_FORMAT, "rgb");
@@ -656,7 +656,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 		}
 		updateShaders(eap);
 		// read current values from the effective appearance
-		currentSignature = eap.getAttribute(CommonAttributes.SIGNATURE,Pn.EUCLIDEAN);
+		currentMetric = eap.getAttribute(CommonAttributes.METRIC,Pn.EUCLIDEAN);
 		retainGeometry = eap.getAttribute(CommonAttributes.BACKEND_RETAIN_GEOMETRY, false); 
 		//if(rhs.getOpaqueTubesAndSpheres()!=null)  
 		opaqueTubes = rhs.getOpaqueTubesAndSpheres();
@@ -939,7 +939,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 					float realR = pointRadius;
 					if (radii != null) realR = (float) (realR*da.getValueAt(i));
 					if (a[i].length == 4 && a[i][3] == 0.0) continue;
-					trns = MatrixBuilder.init(null, currentSignature).translate(a[i]).getArray();
+					trns = MatrixBuilder.init(null, currentMetric).translate(a[i]).getArray();
 					ri.transformBegin();
 					ri.concatTransform(RIBHelper.fTranspose(trns));          
 					//varying vertexColors
@@ -1025,7 +1025,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 					if (ga == null || !( ga instanceof Dimension))	{
 						// TODO make sure texture coordinates are not generated here!
 						BallAndStickFactory bsf = new BallAndStickFactory(g);
-						bsf.setSignature(currentSignature);
+						bsf.setMetric(currentMetric);
 						bsf.setStickRadius(tubeRadius);
 						bsf.setShowBalls(false);	// need to actually omit the balls
 						if (cs != null) bsf.setStickColor(cs);
@@ -1054,7 +1054,7 @@ public class RIBVisitor extends SceneGraphVisitor {
 							oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, g, i);
 							PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 							ptf.setCrossSection(crossSection);
-							ptf.setSignature(currentSignature);
+							ptf.setMetric(currentMetric);
 							ptf.setRadius(tubeRadius);
 							ptf.update();
 							IndexedFaceSet tube = ptf.getTube();
@@ -1263,11 +1263,11 @@ public class RIBVisitor extends SceneGraphVisitor {
 			if ( normals != null) {
 				da = normals.toDoubleArrayArray();
 				n = da.getLengthAt(0);
-				if (n == 4 && currentSignature == Pn.EUCLIDEAN) {
+				if (n == 4 && currentMetric == Pn.EUCLIDEAN) {
 //					throw new IllegalStateException(
-//							"4D normals only valid with non-euclidean signature");
+//							"4D normals only valid with non-euclidean metric");
 				}
-				if (currentSignature == Pn.EUCLIDEAN) {
+				if (currentMetric == Pn.EUCLIDEAN) {
 					float[] fnormals = new float[3 * da.getLength()];
 					for (int j = 0; j < da.getLength(); j++) {
 						fnormals[n * j + 0] = (float) da.getValueAt(j, 0);

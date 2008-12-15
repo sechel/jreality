@@ -103,16 +103,16 @@ public class FlyTool extends AbstractTool {
     if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
         eap = EffectiveAppearance.create(tc.getRootToToolComponent());
       }
-    int signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
-    LoggingSystem.getLogger(this).fine("signature is "+signature);
+    int metric = eap.getAttribute("metric", Pn.EUCLIDEAN);
+    LoggingSystem.getLogger(this).fine("metric is "+metric);
     SceneGraphComponent ship = tc.getRootToToolComponent().getLastComponent();
 
     Matrix pointerMatrix = new Matrix(tc.getTransformationMatrix(InputSlot.getDevice("PointerTransformation")));
     Matrix localPointer = ToolUtility.worldToTool(tc, pointerMatrix);
     double[] dir = localPointer.getColumn(2); // z-axis ( modulo +/- )
     //System.out.println("");
-    if (signature != Pn.EUCLIDEAN) {
-    	Pn.normalize(dir, dir, signature);
+    if (metric != Pn.EUCLIDEAN) {
+    	Pn.normalize(dir, dir, metric);
         // have to be careful in non-euclidean case that we don't flip the direction inadvertantly
         if (Rn.innerProduct(dir, olddir) < 0) for (int i = 0; i<4; ++i) dir[i] = -dir[i];
     }
@@ -122,17 +122,17 @@ public class FlyTool extends AbstractTool {
     Matrix shipMatrix = new Matrix();
     if (ship.getTransformation() != null) shipMatrix.assignFrom(ship.getTransformation());
       
-    // the new position also depends on the signature;
+    // the new position also depends on the metric;
     // val is the distance we have moved in the direction dir
     // use dragTowards to calculate the resulting point
     double val = tc.getAxisState(timerSlot).intValue()*0.001;    
     //Rn.times(dir, val*gain*velocity, dir);
     val = val*gain*velocity;
-    double[] newShipPosition = Pn.dragTowards(null, shipPosition, dir, val, signature);
-    //System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,signature)));
-    //System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, signature)));
-    MatrixBuilder.init(shipMatrix, signature).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
-    ship.getTransformation().setMatrix(P3.orthonormalizeMatrix(null, ship.getTransformation().getMatrix(), 10E-10, signature));    tc.getViewer().render();
+    double[] newShipPosition = Pn.dragTowards(null, shipPosition, dir, val, metric);
+    //System.out.println("FlyTool: old position is "+Rn.toString(Pn.normalize(shipPosition, shipPosition,metric)));
+    //System.out.println("FlyTool: new position is "+Rn.toString(Pn.normalize(newShipPosition,newShipPosition, metric)));
+    MatrixBuilder.init(shipMatrix, metric).translateFromTo(shipPosition,newShipPosition).assignTo(ship);
+    ship.getTransformation().setMatrix(P3.orthonormalizeMatrix(null, ship.getTransformation().getMatrix(), 10E-10, metric));    tc.getViewer().render();
     System.arraycopy(dir, 0, olddir, 0, 4);
   }
 

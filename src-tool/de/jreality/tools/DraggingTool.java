@@ -94,11 +94,11 @@ public class DraggingTool extends AbstractTool {
       if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
           eap = EffectiveAppearance.create(tc.getRootToToolComponent());
         }
-        signature = eap.getAttribute("signature", Pn.EUCLIDEAN);
+        metric = eap.getAttribute("metric", Pn.EUCLIDEAN);
     }
 
     transient EffectiveAppearance eap;
-    transient private int signature;
+    transient private int metric;
     transient Matrix result = new Matrix();
     transient Matrix local2world = new Matrix();
     transient Matrix dragFrame;
@@ -117,8 +117,8 @@ public class DraggingTool extends AbstractTool {
 
       Matrix evolution = new Matrix(tc.getTransformationMatrix(evolutionSlot));
       // need to convert from euclidean to possibly non-euclidean translation
-	  if (signature != Pn.EUCLIDEAN)
-		  MatrixBuilder.init(null, signature).translate(evolution.getColumn(3)).assignTo(evolution);
+	  if (metric != Pn.EUCLIDEAN)
+		  MatrixBuilder.init(null, metric).translate(evolution.getColumn(3)).assignTo(evolution);
     
       (moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getMatrix(local2world.getArray());
       
@@ -128,11 +128,11 @@ public class DraggingTool extends AbstractTool {
         tc.getTransformationMatrix(InputSlot.getDevice("CameraToWorld")).toDoubleArray(pointer.getArray());
         double dz = evolution.getEntry(0,3)+evolution.getEntry(1,3);
         double[] tlate = Rn.times(null, dz, pointer.getColumn(2));
-        if (signature==Pn.EUCLIDEAN) tlate[3] = 1.0;
-        MatrixBuilder.init(null, signature).translate(tlate).assignTo(evolution);
+        if (metric==Pn.EUCLIDEAN) tlate[3] = 1.0;
+        MatrixBuilder.init(null, metric).translate(tlate).assignTo(evolution);
       } 
      evolution.conjugateBy(local2world.getInverse());
-     if (signature != Pn.EUCLIDEAN) P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, signature);
+     if (metric != Pn.EUCLIDEAN) P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, metric);
      result.multiplyOnRight(evolution);
       comp.getTransformation().setMatrix(result.getArray());
     }

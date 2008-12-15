@@ -100,7 +100,7 @@ public class LookAtTool extends AbstractTool {
       currentAngleV+=dAngle;
     }
     EffectiveAppearance eap = EffectiveAppearance.create(tc.getRootToToolComponent());
-    int sig = eap.getAttribute("signature", Pn.EUCLIDEAN);
+    int sig = eap.getAttribute("metric", Pn.EUCLIDEAN);
     
     Matrix m = MatrixBuilder.init(null, sig).rotateY(currentAngleH).rotateX(currentAngleV).translate(0,0,rodLength).getMatrix();
 

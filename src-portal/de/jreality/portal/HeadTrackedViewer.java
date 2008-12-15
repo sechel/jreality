@@ -174,8 +174,8 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     return viewer.getSceneRoot();
   }
 
-  public int getSignature() {
-    return viewer.getSignature();
+  public int getMetric() {
+    return viewer.getMetric();
   }
 
   public Object getViewingComponent() {
@@ -253,8 +253,8 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
     viewer.setSceneRoot(r);
   }
 
-  public void setSignature(int sig) {
-    viewer.setSignature(sig);
+  public void setMetric(int sig) {
+    viewer.setMetric(sig);
   }
   
   double[] tmp1 = new double[16];
