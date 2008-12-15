@@ -487,7 +487,7 @@ public class Primitives {
 			verts[n]= new double[]{0,0,h};
 			int[][] indices = new int[n][];
 			for (int i = 0; i<n; ++i)	{
-				indices[i] = new int[]{i,(i+1)%n,n};
+				indices[i] = new int[]{i,n,(i+1)%n};
 			}
 			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 			ifsf.setVertexCount(n+1);
