@@ -41,6 +41,7 @@
 package de.jreality.tools;
 
 import de.jreality.math.Matrix;
+import de.jreality.math.Pn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
@@ -79,7 +80,11 @@ public class EncompassTool extends AbstractTool {
         CameraUtility.encompass(tc.getViewer());
       }
       // TODO get the metric from the effective appearance of avatar path
-      CameraUtility.encompass(tc.getAvatarPath(), tc.getRootToLocal(), tc.getViewer().getCameraPath(), margin, tc.getViewer().getMetric());
+      CameraUtility.encompass(tc.getAvatarPath(), 
+    		  tc.getRootToLocal(), 
+    		  tc.getViewer().getCameraPath(), 
+    		  margin, 
+    		  Pn.EUCLIDEAN); //tc.getViewer().getMetric());
     }
   }
 
