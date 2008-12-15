@@ -122,7 +122,7 @@ public interface Viewer {
    * @see de.jreality.math.Pn
    * @deprecated	Use {@link Appearance#getAttribute("metric")}.
    */
-	public int getMetric();
+//	public int getMetric();
   
   /**
    * Some viewers (at least the jogl viewer) support rendering
@@ -133,7 +133,7 @@ public interface Viewer {
    * @see de.jreality.math.Pn
    * @deprecated  Use {@link Appearance#setAttribute("metric", Integer)}
    */
-	public void setMetric(int sig);
+//	public void setMetric(int sig);
   
   /**
    * Some viewers (at least the jogl viewer) support an auxilary
