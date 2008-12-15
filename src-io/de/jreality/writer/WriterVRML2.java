@@ -26,7 +26,9 @@ import java.util.WeakHashMap;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -63,7 +65,10 @@ public class WriterVRML2{
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
 	private boolean writeTextureFiles = false;
-	
+	private boolean flipTextureUpsideDown = false; // TODO
+	private boolean evaluateTextureMatrix =false;
+	private boolean writeTextureCoordIndices=true;
+
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
 	private DefaultPolygonShader dps;
@@ -83,7 +88,7 @@ public class WriterVRML2{
 	private Color diff;
 	private double tra;
 
-	
+
 	private static enum GeoTyp{TEX_FACE,FACE,TUBE,LINE,SPHERE,POINT}
 	// -----------------constructor----------------------
 	/** this Writer can write vrml2 */
@@ -129,7 +134,7 @@ public class WriterVRML2{
 			hist=hist+spacing;
 			out.println(hist+"children [");
 			hist=hist+spacing;
-			
+
 			sgn.accept(new MyLightVisitor());
 			sgn.accept(new MyVisitor());
 			hist=oldhist;
@@ -181,7 +186,7 @@ public class WriterVRML2{
 //	---------------------
 //	---------------------------- start writing --------------------
 	// --------------- helper Classes ---------------------
-	
+
 	int textureCount = 0;
 
 	private   void writeCoords(double[][] coords,String hist) {// done
@@ -192,14 +197,14 @@ public class WriterVRML2{
 		String hist2=hist+spacing;
 		double[][] coords3 = coords;
 		if (coords[0].length == 4)
-			 coords3 = Pn.dehomogenize(null, coords3);
+			coords3 = Pn.dehomogenize(null, coords3);
 		for(int i=0;i<coords.length;i++){
 			VRMLWriterHelper.writeDoubleArray(coords3[i],hist2,",",3,out);
 		}
 		out.println(hist+"]}");
 	}
-	
-	
+
+
 	private  void writeColors(double[][] colors,String hist) {//done
 		/*	Color {
 		  exposedField MFColor color  []
@@ -222,7 +227,7 @@ public class WriterVRML2{
 		}
 		out.println(hist+"]}");
 	}
-	
+
 	private  void writeIndices(int[][] in,String hist) {
 		out.println(hist+"coordIndex ["); 		
 		for (int i=0;i<in.length;i++){
@@ -235,7 +240,6 @@ public class WriterVRML2{
 		}
 		out.println(hist+"]");
 	}
-	
 	private  void writeTexture(Texture2D tex){
 		/*ImageTexture {
 		  exposedField MFString url     []
@@ -295,6 +299,25 @@ public class WriterVRML2{
 		/*TextureCoordinate {
 			  exposedField MFVec2f point  []
 			}*/
+		if(evaluateTextureMatrix){
+			Texture2D tex=dps.getTexture2d();
+			Matrix mat= new Matrix(tex.getTextureMatrix().getArray());
+			if(flipTextureUpsideDown){
+				Matrix flip=MatrixBuilder.euclidean().translate(0,1,0).scale(1,-1,1).getMatrix();
+				mat.multiplyOnRight(flip);
+			}
+			int dim=texCoords[0].length;
+			for (int i = 0; i < texCoords.length; i++) {
+				if ( dim == 2)	
+					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1],0,1};
+				if( dim == 3)
+					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1],texCoords[i][2],1};
+			}
+			//mat.transpose();
+			Rn.matrixTimesVector(texCoords, mat.getArray(), texCoords );
+			for (int i = 0; i < texCoords.length; i++)// truncate 
+					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1]};
+		}
 		String hist2=hist+spacing;
 		out.println(hist+"TextureCoordinate { point [");
 		for(int i=0;i<texCoords.length;i++)
@@ -334,13 +357,17 @@ public class WriterVRML2{
 	}
 	private  void writeTextureTransform(Texture2D tex,GeoTyp typ){
 		String hist2=hist+spacing;
-/*		TextureTransform {
+		/*		TextureTransform {
 			  exposedField SFVec2f center      0 0
 			  exposedField SFFloat rotation    0
 			  exposedField SFVec2f scale       1 1
 			  exposedField SFVec2f translation 0 0
 		}*/
-		Matrix mat= tex.getTextureMatrix();
+		Matrix mat= new Matrix(tex.getTextureMatrix().getArray());
+		if(flipTextureUpsideDown){
+			Matrix flip=MatrixBuilder.euclidean().translate(0,1,0).scale(1,-1,1).getMatrix();
+			mat.multiplyOnRight(flip);				
+		}
 		FactoredMatrix matrix= new FactoredMatrix(mat.getArray());
 		double[] trans=matrix.getTranslation();
 		double ang=matrix.getRotationAngle();
@@ -374,7 +401,8 @@ public class WriterVRML2{
 			hist=hist2;
 			out.println(hist+"textureTransform ");
 			hist=hist3;
-			writeTextureTransform(tex,typ);
+			if(!evaluateTextureMatrix)
+				writeTextureTransform(tex,typ);
 		}
 		hist=histOld;
 		out.println(hist+"} ");		
@@ -471,22 +499,22 @@ public class WriterVRML2{
 //		exposedField SFBool  on                TRUE 
 	}*/
 
-	double di=l.getIntensity();
-	double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
-	out.println(hist+"DirectionalLight { # "+ l.getName());
-	String oldHist= hist;
-	hist=hist+spacing;
-	out.println(hist + "intensity " +di);
-	out.print(hist + "color " );
-	VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
-	if(dir==null)
-		out.println(hist + "direction  0 0 1");
-	else{
-		out.print(hist + "direction ");
-		VRMLWriterHelper.writeDoubleArray(dir, "", "", 3,out);
-	}
-	hist=oldHist;
-	out.println(hist+"}");
+		double di=l.getIntensity();
+		double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
+		out.println(hist+"DirectionalLight { # "+ l.getName());
+		String oldHist= hist;
+		hist=hist+spacing;
+		out.println(hist + "intensity " +di);
+		out.print(hist + "color " );
+		VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
+		if(dir==null)
+			out.println(hist + "direction  0 0 1");
+		else{
+			out.print(hist + "direction ");
+			VRMLWriterHelper.writeDoubleArray(dir, "", "", 3,out);
+		}
+		hist=oldHist;
+		out.println(hist+"}");
 	}
 	private void writePointLight(PointLight l,String hist,PrintWriter out,double[] location){
 		/*PointLight {
@@ -498,23 +526,23 @@ public class WriterVRML2{
 //		  exposedField SFBool  on                TRUE 
 //		  exposedField SFFloat radius            100
 		}*/
-	double di=l.getIntensity();
-	double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
-	out.println(hist+"PointLight { # "+ l.getName());
-	String oldHist= hist;
-	hist=hist+spacing;
-	out.println(hist + "intensity " +di);
-	if(location!=null){
-		out.print(hist + "location ");
-		VRMLWriterHelper.writeDoubleArray(location, "", "", 3,out);
-	}
-	out.print(hist + "color " );
-	VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
-	hist=oldHist;
-	out.println(hist+"}");			
+		double di=l.getIntensity();
+		double[] dc=VRMLWriterHelper.colorToDoubleArray(l.getColor());
+		out.println(hist+"PointLight { # "+ l.getName());
+		String oldHist= hist;
+		hist=hist+spacing;
+		out.println(hist + "intensity " +di);
+		if(location!=null){
+			out.print(hist + "location ");
+			VRMLWriterHelper.writeDoubleArray(location, "", "", 3,out);
+		}
+		out.print(hist + "color " );
+		VRMLWriterHelper.writeDoubleArray(dc, "", "", 3,out);
+		hist=oldHist;
+		out.println(hist+"}");			
 	}
 	private void writeSpotLight(SpotLight l,String hist,PrintWriter out,double[] location, double[] dir){
-		
+
 		/*SpotLight {
 //			  exposedField SFFloat ambientIntensity  0 
 //			  exposedField SFVec3f attenuation       1 0 0
@@ -548,11 +576,11 @@ public class WriterVRML2{
 		out.println(hist+"}");
 
 	}
-	
+
 	// -------------- Visitor -------------------
 	private class MyVisitor extends SceneGraphVisitor{
 		protected EffectiveAppearance effApp= EffectiveAppearance.create();
-		
+
 		public MyVisitor() {}
 		public MyVisitor(MyVisitor mv) {
 			effApp=mv.effApp;
@@ -649,7 +677,7 @@ public class WriterVRML2{
 			if (useDefs && wHelp.isMultipleUsedPointSet(p)){
 				out.print(""+hist+"DEF "+VRMLWriterHelper.str(p.hashCode()+"POINT")+" ");
 				wHelp.setDefinedPointSet(p);
-				}
+			}
 			else out.print(""+hist);
 			// write object:
 			/*PointSet {
@@ -677,10 +705,10 @@ public class WriterVRML2{
 			if(hasShapeNode) closeShapeNode(histOld);
 			/// --------------- Labels -------------------
 //			if(dvts.getShowLabels())
-//				if (p.getVertexAttributes(Attribute.LABELS)!=null){
-//					String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
-//					writeLabelsAtPoints(coords, labels, hist);
-//				}
+//			if (p.getVertexAttributes(Attribute.LABELS)!=null){
+//			String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
+//			writeLabelsAtPoints(coords, labels, hist);
+//			}
 		}
 		public void visit(IndexedLineSet g) {
 			super.visit(g);
@@ -734,7 +762,7 @@ public class WriterVRML2{
 			if (useDefs && wHelp.isMultipleUsedLineSet(g)){
 				out.print(""+hist+"DEF "+VRMLWriterHelper.str(g.hashCode()+"LINE")+" ");
 				wHelp.setDefinedLineSet(g);
-				}
+			}
 			else out.print(""+hist);
 			// write object:
 			/*IndexedLineSet {
@@ -768,10 +796,10 @@ public class WriterVRML2{
 			if(hasShapeNode) closeShapeNode(histOld);
 			/// --------------- Labels -------------------
 //			if(dvts.getShowLabels())
-//				if (p.getVertexAttributes(Attribute.LABELS)!=null){
-//					String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
-//					writeLabelsAtPoints(coords, labels, hist);
-//				}
+//			if (p.getVertexAttributes(Attribute.LABELS)!=null){
+//			String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
+//			writeLabelsAtPoints(coords, labels, hist);
+//			}
 		}
 		public void visit(IndexedFaceSet g) {//done
 			super.visit(g);
@@ -793,7 +821,7 @@ public class WriterVRML2{
 			if (useDefs && wHelp.isMultipleUsedFaceSet(g)){
 				out.print(""+hist+"DEF "+VRMLWriterHelper.str(g.hashCode()+"POLYGON")+" ");
 				wHelp.setDefinedFaceSet(g);
-				}
+			}
 			else out.print(""+hist);
 			String hist2=hist;
 			hist=hist+spacing;
@@ -824,14 +852,16 @@ public class WriterVRML2{
 				out.println(hist+"coord ");
 				writeCoords(coords, hist+spacing);
 			}
+			// writes Indices			
+			int[][] indis=VRMLWriterHelper.getIntIntFaceAttr(g, Attribute.INDICES);
+			if(indis!=null) writeIndices(indis, hist);
 			// write Texture coordinates
 			if(textCoords!=null){
 				out.println(hist+"texCoord ");
 				writeTexCoords(textCoords, hist+spacing);
+				if(writeTextureCoordIndices)
+					out.println(hist+"texCoordIndex ");
 			}
-			// writes Indices			
-			int[][] indis=VRMLWriterHelper.getIntIntFaceAttr(g, Attribute.INDICES);
-			if(indis!=null) writeIndices(indis, hist);
 			// writes Colors
 			double[][] vertColors=VRMLWriterHelper.getDoubleDoubleVertexAttr(g, Attribute.COLORS);
 			double[][] faceColors=VRMLWriterHelper.getDoubleDoubleFaceAttr(g, Attribute.COLORS);
@@ -865,10 +895,10 @@ public class WriterVRML2{
 			if(hasShapeNode) closeShapeNode(histOld);
 			/// --------------- Labels? -------------------
 //			if(dvts.getShowLabels())
-//				if (p.getVertexAttributes(Attribute.LABELS)!=null){
-//					String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
-//					writeLabelsAtPoints(coords, labels, hist);
-//				}
+//			if (p.getVertexAttributes(Attribute.LABELS)!=null){
+//			String[] labels=p.getVertexAttributes(Attribute.LABELS).toStringArray(null);
+//			writeLabelsAtPoints(coords, labels, hist);
+//			}
 		}
 		// ---- Lights ----
 		public void visit(Light l) {
@@ -908,7 +938,7 @@ public class WriterVRML2{
 			out.println(hist+"fieldOfView "+c.getFieldOfView()*Math.PI/180);
 
 			// ---------------------
-			
+
 			double[] m=c.getOrientationMatrix();
 			FactoredMatrix fm= new FactoredMatrix(m);
 			fm.update();
@@ -916,7 +946,7 @@ public class WriterVRML2{
 			double ang=fm.getRotationAngle();
 			double[] pos=fm.getTranslation();
 			out.println(hist + "position 0 0 0");
-				// ---------------------
+			// ---------------------
 			hist=oldHist;
 			out.println(hist+"}");
 			super.visit(c);
@@ -1016,5 +1046,41 @@ public class WriterVRML2{
 	 */
 	public void setMoveLightsToSceneRoot(boolean moveLightsToSceneRoot) {
 		this.moveLightsToSceneRoot = moveLightsToSceneRoot;
+	}
+	/** indicates if textureMatrix information schould be assigned to the Texturecoordinates
+	 * @return
+	 */
+	public boolean isEvaluateTextureMatrix() {
+		return evaluateTextureMatrix;
+	}
+	/** indicates if the texture schould be fliped upside down (the correct orientation depends on the software) 
+	 * @return
+	 */
+	public boolean isFlipTextureUpsideDown() {
+		return flipTextureUpsideDown;
+	}
+	/** indicates if textureMatrix information schould be assigned to the Texturecoordinates
+	 * @param evaluateTextureMatrix
+	 */
+	public void setEvaluateTextureMatrix(boolean evaluateTextureMatrix) {
+		this.evaluateTextureMatrix = evaluateTextureMatrix;
+	}
+	/** indicates if the texture schould be fliped upside down (the correct orientation depends on the software) 
+	 * @param flipTextureUpsideDown
+	 */
+	public void setFlipTextureUpsideDown(boolean flipTextureUpsideDown) {
+		this.flipTextureUpsideDown = flipTextureUpsideDown;
+	}
+	/** indicates if texturecoordinate indices should be written extra.  
+	 * @param writeTextureCoordIndices
+	 */
+	public void setWriteTextureCoordIndices(boolean writeTextureCoordIndices) {
+		this.writeTextureCoordIndices = writeTextureCoordIndices;
+	}
+	/** indicates if texturecoordinate indices should be written extra.  
+	 * @return
+	 */
+	public boolean isWriteTextureCoordIndices() {
+		return writeTextureCoordIndices;
 	}
 }
