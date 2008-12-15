@@ -55,7 +55,7 @@ import de.jreality.toolsystem.VirtualDeviceContext;
 
 /**
  *
- * TODO: comment this, add signature support etc...
+ * TODO: comment this, add metric support etc...
  *
  * @author weissman
  *
