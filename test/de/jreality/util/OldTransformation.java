@@ -64,7 +64,7 @@ class OldTransformation implements Serializable {
       invCenterMatrix;
   protected Quaternion rotationQ, 
       stretchRotationQ;
-  protected int signature;
+  protected int metric;
   protected boolean factorHasChanged,
       matrixHasChanged,
       isFactored,
@@ -77,12 +77,12 @@ class OldTransformation implements Serializable {
   static final double TOLERANCE = 10E-8;
   
   /**
-   * Generate a new transform with given signature and matrix
+   * Generate a new transform with given metric and matrix
    * If <i>m</i> is null, use identity matrix.  
-   * @param signature   See {@link Pn}.
+   * @param metric   See {@link Pn}.
    * @param m
    */
-  public OldTransformation(int signature, double[] m) {
+  public OldTransformation(int metric, double[] m) {
     super();
     // TODO need to consider a clone() method
     if (m == null)  {
@@ -103,12 +103,12 @@ class OldTransformation implements Serializable {
     isEditable = true;
     useCenter = false;
     doFactor = true;
-    this.signature = signature;
+    this.metric = metric;
     update();
   }
 
-  public OldTransformation(int signature)  {
-    this(signature, null);
+  public OldTransformation(int metric)  {
+    this(metric, null);
   }
   
   public OldTransformation(double[] m) {
@@ -385,22 +385,22 @@ class OldTransformation implements Serializable {
 
   /**
    * See {@link Pn}, {@link Pn#ELLIPTIC}, {@link Pn#EUCLIDEAN}, and {@link Pn#HYPERBOLIC}.
-   * @return  the metric signature
-   */public int getSignature()  
+   * @return  the metric metric
+   */public int getMetric()  
   {
-    return signature;
+    return metric;
   }
   
   /**
-   * Sets the metric signature of this transform. See {@link Pn}.
+   * Sets the metric metric of this transform. See {@link Pn}.
    * @param aSig
-   */public void setSignature( int aSig)
+   */public void setMetric( int aSig)
   {
     if (!isEditable)  return;
     synchronized(this)  {
-      if (signature == aSig)  return;
-      signature = aSig;
-      System.out.println("Changing signatures is dangerous:");// resetting to identity");
+      if (metric == aSig)  return;
+      metric = aSig;
+      System.out.println("Changing metrics is dangerous:");// resetting to identity");
       //setMatrix(Rn.identityMatrix(4));
       matrixHasChanged = true;
       update();
@@ -437,7 +437,7 @@ class OldTransformation implements Serializable {
       if (invCenterMatrix == null)    invCenterMatrix = new double[16];
       centerVector[3] = 1.0;
       System.arraycopy(aVec,0,centerVector,0,aVec.length);
-      P3.makeTranslationMatrix(centerMatrix, centerVector, signature);
+      P3.makeTranslationMatrix(centerMatrix, centerVector, metric);
       Rn.inverse(invCenterMatrix, centerMatrix);
 
       if (keepMatrix) {
@@ -467,8 +467,8 @@ class OldTransformation implements Serializable {
   {
     if (!isEditable)  return;
     synchronized(this)  {
-      if (signature != Pn.EUCLIDEAN) {
-        System.err.println("Transform: setTranslation: Invalid signature");
+      if (metric != Pn.EUCLIDEAN) {
+        System.err.println("Transform: setTranslation: Invalid metric");
         return;
       }
       //ASSERT( aTransV, OE_NULLPTR, OE_DEFAULT, "", return nil);
@@ -748,7 +748,7 @@ class OldTransformation implements Serializable {
     synchronized(this)  {
       if (factorHasChanged )  {
         isFlipped[0]  = isReflection;
-        P3.composeMatrixFromFactors(theMatrix, translationVector, rotationQ, stretchRotationQ, stretchVector, isReflection, signature);
+        P3.composeMatrixFromFactors(theMatrix, translationVector, rotationQ, stretchRotationQ, stretchVector, isReflection, metric);
         if (useCenter)  {
           Rn.times(theMatrix, theMatrix, invCenterMatrix);
           Rn.times(theMatrix, centerMatrix, theMatrix);
@@ -760,7 +760,7 @@ class OldTransformation implements Serializable {
           TTmp = MC;
         }else 
           TTmp = theMatrix;
-        P3.factorMatrix(TTmp, translationVector, rotationQ, stretchRotationQ, stretchVector, isFlipped, signature); 
+        P3.factorMatrix(TTmp, translationVector, rotationQ, stretchRotationQ, stretchVector, isFlipped, metric); 
         isReflection = isFlipped[0];
       }
       isSpecial = Rn.isSpecialMatrix(theMatrix, TOLERANCE);

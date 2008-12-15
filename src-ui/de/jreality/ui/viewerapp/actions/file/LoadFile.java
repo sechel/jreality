@@ -177,7 +177,7 @@ public class LoadFile extends AbstractJrAction {
         	CameraUtility.encompass(ts.getAvatarPath(),
         			ts.getEmptyPickPath(),
         			viewer.getCameraPath(),
-        			1.75, viewer.getSignature());
+        			1.75, viewer.getMetric());
         	}
         }
       } 

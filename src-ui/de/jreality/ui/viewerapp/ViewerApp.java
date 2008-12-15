@@ -318,7 +318,7 @@ public class ViewerApp {
 			CameraUtility.encompass(va.getToolSystem().getAvatarPath(),
 					va.getToolSystem().getEmptyPickPath(),
 					va.getViewer().getCameraPath(),
-					1.75, va.getViewer().getSignature());
+					1.75, va.getViewer().getMetric());
 		}
 
 		va.display();
@@ -368,7 +368,7 @@ public class ViewerApp {
 //		CameraUtility.encompass(currViewer.getAvatarPath(),
 //		currViewer.getEmptyPickPath(),
 //		currViewer.getCameraPath(),
-//		1.75, currViewer.getSignature());
+//		1.75, currViewer.getMetric());
 
 		frame.setVisible(true);
 
