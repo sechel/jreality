@@ -58,9 +58,11 @@ public class TransformationHierarchy {
 	    			sgc2.setGeometry(ico);
 	    			// set appearance individually
 	    			sgc2.getAppearance().setAttribute(DIFFUSE_COLOR, faceColors[2*j+k]);
-	    			sgc2.getAppearance().setAttribute(FACE_DRAW, i == 0);
-	    			sgc2.getAppearance().setAttribute(EDGE_DRAW, j == 0);
-	    			sgc2.getAppearance().setAttribute(VERTEX_DRAW, k == 0);
+	    			DefaultGeometryShader dgs;
+	    			dgs = ShaderUtility.createDefaultGeometryShader(sgc2.getAppearance(), true);
+	    			dgs.setShowFaces(i==0);
+	    			dgs.setShowLines(j==0);
+	    			dgs.setShowPoints(k==0);
 	    		}
 	    	}
 	    }

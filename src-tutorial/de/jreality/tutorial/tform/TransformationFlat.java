@@ -47,9 +47,11 @@ public class TransformationFlat {
 	    			sgc.setGeometry(ico);
 	    			// set appearance individually
 	    			sgc.getAppearance().setAttribute(DIFFUSE_COLOR, faceColors[2*j+k]);
-	    			sgc.getAppearance().setAttribute(FACE_DRAW, i == 0);
-	    			sgc.getAppearance().setAttribute(EDGE_DRAW, j == 0);
-	    			sgc.getAppearance().setAttribute(VERTEX_DRAW, k == 0);
+	    			DefaultGeometryShader dgs;
+	    			dgs = ShaderUtility.createDefaultGeometryShader(sgc.getAppearance(), true);
+	    			dgs.setShowFaces(i==0);
+	    			dgs.setShowLines(j==0);
+	    			dgs.setShowPoints(k==0);
 	    			world.addChild(sgc);
 	    		}
 	    	}

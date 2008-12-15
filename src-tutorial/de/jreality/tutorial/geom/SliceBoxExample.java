@@ -1,4 +1,4 @@
-package de.jreality.tutorial.misc;
+package de.jreality.tutorial.geom;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class SliceBoxExample{
 	  protected SceneGraphComponent makeWorld()	{	
 			SceneGraphComponent world;
 			world = SceneGraphUtility.createFullSceneGraphComponent("container");
-			PickUtility.setPickable(world, false);
+			world.setPickable( false);
 			world.addChild(SphereUtility.tessellatedCubeSphere(SphereUtility.SPHERE_SUPERFINE));
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"name","twoSide");
 			world.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+".front."+CommonAttributes.DIFFUSE_COLOR, new Color(0,204,204));
