@@ -65,8 +65,8 @@ public class WriterVRML2{
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
 	private boolean writeTextureFiles = false;
-	private boolean flipTextureUpsideDown = false; // TODO
-	private boolean evaluateTextureMatrix =false;
+	private boolean flipTextureUpsideDown = true;
+	private boolean evaluateTextureMatrix =true;
 	private boolean writeTextureCoordIndices=true;
 
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
