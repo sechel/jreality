@@ -122,16 +122,16 @@ public class Pn {
 	 
 	/**
 	 * Calculate the angle between the points <i>u</i> and <i>v</i> with respect to
-	 * the signature <i>sig</i>.
+	 * the metric <i>metric</i>.
 	 * @param u
 	 * @param v
-	 * @param sig
+	 * @param metric
 	 * @return
 	 */
-	public static double angleBetween(double[] u, double[]v, int sig)	{
-		double uu = innerProductPlanes(u, u, sig);
-		double vv = innerProductPlanes(v, v, sig);
-		double uv = innerProductPlanes(u, v, sig);
+	public static double angleBetween(double[] u, double[]v, int metric)	{
+		double uu = innerProductPlanes(u, u, metric);
+		double vv = innerProductPlanes(v, v, metric);
+		double uv = innerProductPlanes(u, v, metric);
 		if (uu == 0 || vv == 0) 	// error: infinite distance
 			return (Double.MAX_VALUE);
 		double f =  uv/Math.sqrt(Math.abs(uu*vv));
@@ -174,25 +174,25 @@ public class Pn {
 	}
 	 
 	/**
-	 * Calculate the centroid of <i>points</i> with respect to <i>signature</i>. This basically involves
-	 * normalizing the points to have unit length with respect to the given <i>signature</i>
+	 * Calculate the centroid of <i>points</i> with respect to <i>metric</i>. This basically involves
+	 * normalizing the points to have unit length with respect to the given <i>metric</i>
 	 * before averaging them.
 	 * 
 	 * @param average
 	 * @param points
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] centroid(double[] average, double[][] points,int signature) {
+	public static double[] centroid(double[] average, double[][] points,int metric) {
 		if (average == null)
 			average = new double[points[0].length];
 		double[] tmp = new double[average.length];
 		for (int i = 0; i < points.length; ++i) {
-			normalize(tmp, points[i], signature);
+			normalize(tmp, points[i], metric);
 			Rn.add(average, tmp, average);
 		}
 		Rn.times(average, 1.0 / points.length, average);
-		normalize(average, average, signature);
+		normalize(average, average, metric);
 		return average;
 	}
 		
@@ -228,10 +228,10 @@ public class Pn {
 	 * Return the value <i>z</i> so that the point <i>(0,0,z,1)</i> lies a distance <i>d</i>
 	 * from the origin <i>(0,0,0,1)</i> in the given metric.
 	 * @param d
-	 * @param sig
+	 * @param metric
 	 * @return
-	 */public static double coordForDistance(double d, int sig)	{
-		switch(sig)	{
+	 */public static double coordForDistance(double d, int metric)	{
+		switch(metric)	{
 		case HYPERBOLIC: return Math.tanh(d); 
 		case EUCLIDEAN: default: return d;
 		case ELLIPTIC: return Math.tan(d);
@@ -263,20 +263,20 @@ public class Pn {
 	 * <b>Note:</b> This method does not attempt to handle all possible special cases correctly,
 	 * as when for example the input points lie on the Absolute Quadric, etc.  It does however handle correctly
 	 * various cases in the hyperbolic case, when one or both of the points lie strictly outside the hyperbolic
-	 * disk.  For example, when the first lies inside and the second outside, the method returns the signed 
+	 * disk.  For example, when the first lies inside and the second outside, the method returns the metricned 
 	 * distance of the first point to the polar line of the second (which is a hyperbolic line).
 	 * @param u
 	 * @param v
-	 * @param sig
+	 * @param metric
 	 * @return	the distance
 	 */
-	public static double distanceBetween(double[] u, double[] v, int sig)	{
+	public static double distanceBetween(double[] u, double[] v, int metric)	{
 		// assert dim checks
 		double d = 0;
 		int n = u.length;
-		switch(sig)	{
+		switch(metric)	{
 			default:
-				// error: no such signature.  fall through to euclidean case
+				// error: no such metric.  fall through to euclidean case
 			case EUCLIDEAN:
 				double ul, vl, ulvl, tmp;
 				ul = u[n-1]; vl = v[n-1]; ulvl = ul*vl;
@@ -289,9 +289,9 @@ public class Pn {
 				break;
 			case HYPERBOLIC:
 				double uu, uv, vv;
-				uu = innerProduct(u, u, sig);
-				vv = innerProduct(v, v, sig);
-				uv = innerProduct(u, v, sig);
+				uu = innerProduct(u, u, metric);
+				vv = innerProduct(v, v, metric);
+				uv = innerProduct(u, v, metric);
 				if (uu == 0 || vv == 0) 	// error: infinite distance
 					throw new IllegalArgumentException("Points cannot lie on the hyperbolic absolute");
 					//return (Double.MAX_VALUE);
@@ -301,9 +301,9 @@ public class Pn {
 				else if (uu > 0 && vv > 0) d = Math.acos(k);
 				break;
 			case ELLIPTIC:
-				uu = innerProduct(u, u, sig);
-				vv = innerProduct(v, v, sig);
-				uv = innerProduct(u, v, sig);
+				uu = innerProduct(u, u, metric);
+				vv = innerProduct(v, v, metric);
+				uv = innerProduct(u, v, metric);
 				d = Math.acos( (uv)/Math.sqrt(Math.abs(uu*vv)));
 				break;
 			}
@@ -323,10 +323,10 @@ public class Pn {
 	 * @param src
 	 * @param sdir
 	 * @param length
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] dragTangentVector(double[] dst, double[] ddir, double[] src, double[] sdir, double  length, int signature)
+	public static double[] dragTangentVector(double[] dst, double[] ddir, double[] src, double[] sdir, double  length, int metric)
 	{
 	    double  c, s;
 	    double[] tdir;
@@ -345,9 +345,9 @@ public class Pn {
 	    if (dst == null)	{
 	    		dst = new double[n];
 	    }
-	    switch (signature)     {
+	    switch (metric)     {
 	      case  Pn.EUCLIDEAN:
-	      	tdir = setToLength(null, sdir, length, signature); 
+	      	tdir = setToLength(null, sdir, length, metric); 
 	      	tdir[n-1] = 0.0;
 	        Rn.add(dst, src, tdir);
 	        if (ddir != null) Rn.copy(ddir, sdir);
@@ -376,13 +376,13 @@ public class Pn {
 	 * @param ds2
 	 * @param ds3
 	 * @param ds4
-	 * @param signature
+	 * @param metric
 	 * @see #dragTangentVector(double[], double[], double[], double, int)
 	 */
-	public static double[] dragTangentVector(double[] dstTangent, double[] sourcePoint, double[] sourceTangent, double[] dstPoint, int signature) {
-		double d = distanceBetween(sourcePoint, dstPoint, signature);
+	public static double[] dragTangentVector(double[] dstTangent, double[] sourcePoint, double[] sourceTangent, double[] dstPoint, int metric) {
+		double d = distanceBetween(sourcePoint, dstPoint, metric);
 		if (dstTangent == null) dstTangent = new double[sourcePoint.length];
-		dragTangentVector(null, dstTangent, sourcePoint, sourceTangent, d, signature);
+		dragTangentVector(null, dstTangent, sourcePoint, sourceTangent, d, metric);
 		return dstTangent;
 		}
 	
@@ -395,27 +395,27 @@ public class Pn {
 	 * @param p0
 	 * @param p1
 	 * @param length
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] dragTowards(double[] result, double[] p0, double[] p1, double  length, int signature)
+	public static double[] dragTowards(double[] result, double[] p0, double[] p1, double  length, int metric)
 	{
-		double[] np0 = new double[p0.length]; //normalize(null, p0, signature);
+		double[] np0 = new double[p0.length]; //normalize(null, p0, metric);
 		double[] np1 = new double[p1.length];
-		if (signature == EUCLIDEAN)	{
+		if (metric == EUCLIDEAN)	{
 			int last = p0.length-1;
-			normalize(np0, p0, signature);
-			normalize(np1, p1, signature);
+			normalize(np0, p0, metric);
+			normalize(np1, p1, metric);
 			if (np1[last] == 1 && np0[last] == 1) Rn.subtract(np1, np1, np0);
 			double norm = Rn.euclideanNorm(np1);
 			return Rn.add(result, Rn.times(np1, length/norm, np1), np0);
 		}
 //		System.out.println("Dragging 1"+Rn.toString(p0)+"to "+Rn.toString(p1));
-		normalize(np0, p0, signature);
-		projectToTangentSpace(np1, np0, p1, signature);
-		normalize(np1, np1, signature);
+		normalize(np0, p0, metric);
+		projectToTangentSpace(np1, np0, p1, metric);
+		normalize(np1, np1, metric);
 //		System.out.println("Dragging 2"+Rn.toString(np0)+"to "+Rn.toString(np1));
-		double[] res = dragTangentVector(result, null, np0, np1, length, signature);
+		double[] res = dragTangentVector(result, null, np0, np1, length, metric);
 //		System.out.println("Result is"+Rn.toString(res));
 		return res;
 	}
@@ -460,10 +460,10 @@ public class Pn {
 	 * Returns the inner product of the two vectors for the given metric.
 	 * @param dst
 	 * @param src
-	 * @param sig
+	 * @param metric
 	 * @return	the inner product
 	 */
-	public static double innerProduct(double dst[], double[] src, int sig)	{
+	public static double innerProduct(double dst[], double[] src, int metric)	{
 		// assert dim checks
 		double sum = 0;
 		if (src.length != dst.length)		{
@@ -474,14 +474,14 @@ public class Pn {
 		for (int i = 0; i< n-1; ++i)	sum += dst[i] * src[i];
 		double ff = dst[n-1] * src[n-1];
 		
-		switch(sig)	{
-			case HYPERBOLIC:		// signature (n-1,1)
+		switch(metric)	{
+			case HYPERBOLIC:		// metric (n-1,1)
 				sum -= ff;
 				break;
-			case EUCLIDEAN:		// signature (n-1, 0)				
+			case EUCLIDEAN:		// metric (n-1, 0)				
 				if (!(ff == 1.0 || ff == 0.0))	sum /= ff;
 				break;
-			case ELLIPTIC:		// signature (n, 0)
+			case ELLIPTIC:		// metric (n, 0)
 				sum += ff;	
 		}
 		return sum;
@@ -492,11 +492,11 @@ public class Pn {
 	 * inner product of planes
 	 * @param dst
 	 * @param src
-	 * @param sig
+	 * @param metric
 	 * @return
 	 */
-	public static double innerProductPlanes(double dst[], double[] src, int sig)	{
-		if (sig != Pn.EUCLIDEAN) return innerProduct(dst, src, sig);
+	public static double innerProductPlanes(double dst[], double[] src, int metric)	{
+		if (metric != Pn.EUCLIDEAN) return innerProduct(dst, src, metric);
 		int n = src.length;
 		double sum = 0;
 		for (int i = 0; i< n-1; ++i)	sum += dst[i] * src[i];
@@ -507,31 +507,31 @@ public class Pn {
 	 * An alias for {@link #innerProduct(double[], double[], int)}.
 	 * @param dst
 	 * @param src
-	 * @param sig
+	 * @param metric
 	 * @return
 	 */
-	public static double innerProductPoints(double[] dst, double[] src, int sig)	{
-		return innerProduct(dst, src, sig);
+	public static double innerProductPoints(double[] dst, double[] src, int metric)	{
+		return innerProduct(dst, src, metric);
 	}
 	 
-	public static boolean isValidCoordinate(double[] transVec, int dim, int sig) {
+	public static boolean isValidCoordinate(double[] transVec, int dim, int metric) {
 		boolean ret = true;
-		if (sig == Pn.EUCLIDEAN && transVec.length == (dim+1) && transVec[dim] == 0.0) {
+		if (metric == Pn.EUCLIDEAN && transVec.length == (dim+1) && transVec[dim] == 0.0) {
 			ret = false;
 		}
-		else if (sig == Pn.HYPERBOLIC)	{
-			if (transVec.length == (dim+1) && !(Pn.innerProduct(transVec, transVec, sig) < 0)) ret = false;
+		else if (metric == Pn.HYPERBOLIC)	{
+			if (transVec.length == (dim+1) && !(Pn.innerProduct(transVec, transVec, metric) < 0)) ret = false;
 			else if (transVec.length == dim && !(Rn.innerProduct(transVec, transVec) < 1)) ret = false;
 		}
 		if (!ret) {
-			LoggingSystem.getLogger(Pn.class).warning("Invalid coordinate: "+Rn.toString(transVec)+" sig: "+sig);
+			LoggingSystem.getLogger(Pn.class).warning("Invalid coordinate: "+Rn.toString(transVec)+" metric: "+metric);
 		}
 		return ret;
 	}
 
 		
 	 /**
-	 * Linear interpolate respecting the given metric <i>sig</i>.  
+	 * Linear interpolate respecting the given metric <i>metric</i>.  
 	 * That is, find the point <i>p</i> in the linear
 	 * span of <i>u</i> and <i>v</i> such that the distance(u,p):distance(u,v) = t.  
 	 * For the euclidean case
@@ -540,50 +540,50 @@ public class Pn {
 	 * @param u
 	 * @param v
 	 * @param t
-	 * @param sig
+	 * @param metric
 	 * @return	dst
 	 * @see Rn#linearCombination(double[], double, double[], double, double[]).
 	 */
-	 public static double[] linearInterpolation(double[] dst, double[] u, double[] v, double t, int sig)	{
+	 public static double[] linearInterpolation(double[] dst, double[] u, double[] v, double t, int metric)	{
 		// assert dim check
 		double dot = 0.0, angle, s0 = 0.0, s1= 0.0, s2;
 		if (dst == null) dst = new double[u.length];
 		double[] uu = new double[dst.length];
 		double[] vv = new double[dst.length];
-		int realSignature = sig;		// points in hyperbolic metric can behave like elliptic points
+		int realmetric = metric;		// points in hyperbolic metric can behave like elliptic points
 
-		if (sig != EUCLIDEAN)	{
-			normalize(uu, u, sig);
-			normalize(vv, v, sig);			
+		if (metric != EUCLIDEAN)	{
+			normalize(uu, u, metric);
+			normalize(vv, v, metric);			
 		} else {
 			uu = u;  vv = v;
 		}
 		
 		// find the proper factors s0 and s1 to perform a traditional linear combination
-		switch(sig)	{
+		switch(metric)	{
 			case PROJECTIVE:
 			case EUCLIDEAN:
 				s0 = 1-t;
 				s1 = t;
 				break;
 			case HYPERBOLIC:
-				dot = innerProduct(uu,vv,sig);
-				if (Math.abs(dot) <= 1.0)	realSignature = Pn.ELLIPTIC;
+				dot = innerProduct(uu,vv,metric);
+				if (Math.abs(dot) <= 1.0)	realmetric = Pn.ELLIPTIC;
 				break;
 			case ELLIPTIC:
-				dot = innerProduct(uu,vv,sig);
+				dot = innerProduct(uu,vv,metric);
 				if (dot > 1.0) dot = 1.0;
 				if (dot < -1.0) dot = -1.0;
 				break;
 		}
-		if (realSignature == Pn.ELLIPTIC)	{
+		if (realmetric == Pn.ELLIPTIC)	{
 			angle = Math.acos(dot);
 			s2 = Math.sin(angle);
 			if (s2 != 0.0)	{
 				s0 = Math.sin((1-t) * angle)/s2;
 				s1 = Math.sin(t*angle) /s2;
 			} else { s0 = 1.0; s1 = 0.0; }			
-		} else if (realSignature == Pn.HYPERBOLIC)	{
+		} else if (realmetric == Pn.HYPERBOLIC)	{
 			angle = acosh(dot);
 			s2 =  sinh(angle);
 			if (s2 != 0.0)	{
@@ -600,7 +600,7 @@ public class Pn {
 	 * @param dst
 	 * @param center
 	 * @param axis
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
 	public static double[] makeHarmonicHarmology(double[] dst, double[] center, double[] axis){ 
@@ -649,27 +649,27 @@ public class Pn {
 	  * @param midp
 	  * @param pl1
 	  * @param pl2
-	  * @param signature
+	  * @param metric
 	  * @return
 	  */
-	 public static double[] midPlane(double[] midp, double[] pl1, double[] pl2, int signature)	{
+	 public static double[] midPlane(double[] midp, double[] pl1, double[] pl2, int metric)	{
 		if (midp == null)	midp = new double[4];
 		double[] pt1, pt2;
-		pt1 = normalizePlane(null,pl1, signature);
-		pt2 = normalizePlane(null,pl2, signature);
-		linearInterpolation(midp, pt1, pt2, .5, signature);
+		pt1 = normalizePlane(null,pl1, metric);
+		pt2 = normalizePlane(null,pl2, metric);
+		linearInterpolation(midp, pt1, pt2, .5, metric);
 		return midp;
 	}
 	 
 	 /**
-	 * Calculates the norm of the vector in the given metric <i>sig</i>.  Actually returns the absolute 
+	 * Calculates the norm of the vector in the given metric <i>metric</i>.  Actually returns the absolute 
 	 * value of the norm, since hyperbolic points can have imaginary norm.
 	 * @param src
-	 * @param sig
+	 * @param metric
 	 * @return	the norm
 	 */
-	 public static double norm(double[] src, int sig)	{
-		return Math.sqrt(Math.abs(innerProduct(src,src,sig)));
+	 public static double norm(double[] src, int metric)	{
+		return Math.sqrt(Math.abs(innerProduct(src,src,metric)));
 	}
 	
 	/**
@@ -679,26 +679,26 @@ public class Pn {
 	 * @param dvec
 	 * @param src
 	 * @param svec
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	 public static double[] normalize(double[] dst, double[] dvec, double[] src, double[] svec, int signature)	{
+	 public static double[] normalize(double[] dst, double[] dvec, double[] src, double[] svec, int metric)	{
 	 	if (dst == null)		dst = new double[src.length];
-	 	if (signature == EUCLIDEAN)	{
+	 	if (metric == EUCLIDEAN)	{
 	 		dehomogenize(dst, src);
 	 		dehomogenize(dvec, svec);
 	 		dvec[dvec.length-1] = 0.0;
 	 		return dst;
 	 	}
-	 	Pn.normalize(dst, src, signature);
-	 	dvec = projectToTangentSpace(dvec, dst, svec, signature);
-	 	normalize(dvec, dvec, signature);
+	 	Pn.normalize(dst, src, metric);
+	 	dvec = projectToTangentSpace(dvec, dst, svec, metric);
+	 	normalize(dvec, dvec, metric);
 	 	return dst;
 	 }
 	
 	/**
 	 * Normalizes the vector <i>src</i> to have unit length (either 1 or <i>i</i>), or, 
-	 * if <i>signature</i> 
+	 * if <i>metric</i> 
 	 * is EUCLIDEAN, then the input vector is dehomogenized.  
 	 * To set a Euclidean vector to length 1, use
 	 * {@link #setToLength(double[], double[], double, int)}.  
@@ -708,30 +708,30 @@ public class Pn {
 	 * 
 	 * @param dst
 	 * @param src
-	 * @param sig
+	 * @param metric
 	 * @return	dst
 	 */
-	 public static double[] normalize(double[] dst, double[] src, int sig)	{
+	 public static double[] normalize(double[] dst, double[] src, int metric)	{
 	 	if (dst == null) dst = new double[src.length];
-	 	if (sig == EUCLIDEAN) return dehomogenize(dst, src);
-	 	return setToLength(dst, src, 1.0, sig);
+	 	if (metric == EUCLIDEAN) return dehomogenize(dst, src);
+	 	return setToLength(dst, src, 1.0, metric);
 	 }
 
 	 /**
 	  * A vectorized version of {@link #normalize(double[], double[], int)}.
 	  * @param dst
 	  * @param src
-	  * @param sig
+	  * @param metric
 	  * @return
 	  */
-	 public static double[][] normalize(double[][] dst, double[][] src, int sig)	{
+	 public static double[][] normalize(double[][] dst, double[][] src, int metric)	{
 	 	if (dst == null)	dst = new double[src.length][src[0].length];
 		if (dst.length != src.length)	{
 			throw new IllegalArgumentException("Incompatible lengths");
 		}
 	 	int n = dst.length;
 	 	for (int i = 0; i<n; ++i)	{
-	 	  	normalize(dst[i], src[i], sig);
+	 	  	normalize(dst[i], src[i], metric);
 	 	}
 	 	return dst;
 	 }
@@ -746,9 +746,9 @@ public class Pn {
 	 * @param src
 	 * @return
 	 */
-	public static double[]  normalizePlane(double[]  dst, double[]  src, int signature)	{
-		if (signature != EUCLIDEAN)	{
-			return normalize(dst, src, signature);
+	public static double[]  normalizePlane(double[]  dst, double[]  src, int metric)	{
+		if (metric != EUCLIDEAN)	{
+			return normalize(dst, src, metric);
 		}
 		int n = src.length;
 		if (dst == null) dst = new double[n];
@@ -765,35 +765,35 @@ public class Pn {
 	 * An alias for {@link #normalize(double[], double[], int)}.
 	 * @param dst
 	 * @param src
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] normalizePoint(double[] dst, double[] src, int signature){
-	 	return normalize(dst, src,signature);
+	public static double[] normalizePoint(double[] dst, double[] src, int metric){
+	 	return normalize(dst, src,metric);
 	 }
 	
 	/**
 	 * @param src
-	 * @param sig
+	 * @param metric
 	 * @return	square of norm
 	 */
-	public static double normSquared(double[] src, int sig)	{
-		return innerProduct(src, src, sig);
+	public static double normSquared(double[] src, int metric)	{
+		return innerProduct(src, src, metric);
 	}
 
 	/**
 	 * Polarize the input point <i>p</i> with respect to the quadradic form associated to
-	 *  <i>signature</i>.
+	 *  <i>metric</i>.
 	 * @param polar
 	 * @param p
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] polarize(double[] polar, double[] p, int signature)	{
+	public static double[] polarize(double[] polar, double[] p, int metric)	{
 		if (polar == null)	polar = (double[]) p.clone();
 		else System.arraycopy(p,0,polar, 0, p.length);
-		// last element is multiplied by the signature!
-		switch (signature)	{
+		// last element is multiplied by the metric!
+		switch (metric)	{
 			case Pn.ELLIPTIC:
 				// self-polar!
 				break;
@@ -811,14 +811,14 @@ public class Pn {
 	 * A vectorized version of {@link #polarize(double[], double[], int)}.
 	 * @param polar
 	 * @param p
-	 * @param signature
+	 * @param metric
 	 * @return
-	 */public static double[][] polarize(double[][] polar, double[][] p, int signature)	{
+	 */public static double[][] polarize(double[][] polar, double[][] p, int metric)	{
 		if (polar == null)	polar = new double[p.length][];
 		if (polar.length != p.length)	 throw new IllegalArgumentException("dst has invalid length");
 		int n = p.length;
 		for (int i = 0; i<n; ++i)	{
-			polar[i] = polarize(polar[i], p[i], signature);
+			polar[i] = polarize(polar[i], p[i], metric);
 		}
 		return polar;
 	}
@@ -829,10 +829,10 @@ public class Pn {
 	 * 
 	 * @param dst
 	 * @param ds
-	 * @param signature
+	 * @param metric
 	 * @return
-	 */public static double[] polarizePlane(double[] dst, double[] plane, int signature) {
-		return polarize(dst, plane, signature);
+	 */public static double[] polarizePlane(double[] dst, double[] plane, int metric) {
+		return polarize(dst, plane, metric);
 	}
 
 	/**
@@ -840,42 +840,42 @@ public class Pn {
 	 * the ideal plane. Otherwise it just returns {@link #polarize(double[], double[], int)}.
 	 * @param object
 	 * @param ds
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] polarizePoint(double[] dst, double[] point, int signature) {
-		if (signature == Pn.EUCLIDEAN)	{
+	public static double[] polarizePoint(double[] dst, double[] point, int metric) {
+		if (metric == Pn.EUCLIDEAN)	{
 			// there is only one polar plane: the plane at infinity
 			if (dst == null) dst = new double[point.length];
 			for (int i = 0; i< (dst.length-1); ++i) dst[i] = 0.0;
 			dst[dst.length-1] = -1.0;
 			return dst;
 		}
-		return polarize(dst, point, signature);
+		return polarize(dst, point, metric);
 	}
 	
 	/**
 	 * Determine the projection of the point <i>victim</i> onto the point <i>master</i>.  
-	 * This is orthogonal projection with respect to the metric associated to <i>signature</i>.
+	 * This is orthogonal projection with respect to the metric associated to <i>metric</i>.
 	 * @param result
 	 * @param master
 	 * @param victim
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] projectOnto(double[] result, double[] master, double[] victim, int signature)	{
+	public static double[] projectOnto(double[] result, double[] master, double[] victim, int metric)	{
 		if (master.length != victim.length)	{
 			throw new IllegalArgumentException("Arguments must be same dimension");
 		}
 		int n = master.length;
 		if (result == null) result = new double[n];
-//		if (signature == EUCLIDEAN)	{
+//		if (metric == EUCLIDEAN)	{
 //			// set the last coordinate to 0: becomes a direction
-//			polarizePlane(result, victim, signature);
+//			polarizePlane(result, victim, metric);
 //			return result;
 //		}
-		double factor = innerProductPlanes(master, victim, signature);
-		double pp = innerProductPlanes(master, master, signature);
+		double factor = innerProductPlanes(master, victim, metric);
+		double pp = innerProductPlanes(master, master, metric);
 		if (pp != 0.0)	factor = factor / pp;
 		Rn.times(result, factor, master );
 		return result;
@@ -883,34 +883,34 @@ public class Pn {
 	
 	/**
 	 * Project <i>victim</i> onto the othogonal complement of <i>master</i> (all with respect to the
-	 * given signature). See {@link #projectOnto(double[], double[], double[], int)}.
+	 * given metric). See {@link #projectOnto(double[], double[], double[], int)}.
 	 * @param result
 	 * @param master
 	 * @param victim
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] projectOntoComplement(double[] result, double[] master, double[] victim, int signature)	{
-		return Rn.subtract(result, victim, projectOnto(null, master, victim, signature));
+	public static double[] projectOntoComplement(double[] result, double[] master, double[] victim, int metric)	{
+		return Rn.subtract(result, victim, projectOnto(null, master, victim, metric));
 	}
 	
 	/**
 	 * @param result
 	 * @param point
 	 * @param tangentToBe
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] projectToTangentSpace(double[] result, double[] point, double[] tangentToBe, int signature)	{
+	public static double[] projectToTangentSpace(double[] result, double[] point, double[] tangentToBe, int metric)	{
 		 // TODO rephrase this method in terms of the following two
 		int n = point.length;
 		if (result == null) result = new double[n];
-		if (signature == EUCLIDEAN)	{
-			polarizePlane(result, tangentToBe, signature);
+		if (metric == EUCLIDEAN)	{
+			polarizePlane(result, tangentToBe, metric);
 			return result;
 		}
-		double factor = innerProduct(point, tangentToBe, signature);
-		double pp = innerProduct(point, point, signature);
+		double factor = innerProduct(point, tangentToBe, metric);
+		double pp = innerProduct(point, point, metric);
 		if (pp != 0.0)	factor = factor / pp;
 		Rn.subtract(result, tangentToBe, Rn.times(null, factor, point ));
 		return result;
@@ -921,21 +921,21 @@ public class Pn {
 	 * @param dst
 	 * @param src
 	 * @param length
-	 * @param sig
+	 * @param metric
 	 * @return
-	 */public static double[] setToLength(double[] dst, double[] src, double length, int sig)	{
+	 */public static double[] setToLength(double[] dst, double[] src, double length, int metric)	{
 		// assert dim checks
 		if (dst == null) dst = new double[src.length];
 	 	if (dst.length != src.length)	
 	 		throw new IllegalArgumentException("Incompatible lengths");
-		if (sig == EUCLIDEAN)	dehomogenize(dst, src);
+		if (metric == EUCLIDEAN)	dehomogenize(dst, src);
 		else					System.arraycopy(src,0,dst,0,dst.length);
 		
-		double ll = norm(dst, sig);
+		double ll = norm(dst, metric);
 		if (ll == 0.0)	return dst;
 		ll = length/ll;
 		Rn.times(dst, ll, dst);
-		if (sig == EUCLIDEAN && dst[dst.length-1] != 0.0) 	dst[dst.length-1] = 1.0;
+		if (metric == EUCLIDEAN && dst[dst.length-1] != 0.0) 	dst[dst.length-1] = 1.0;
 		return dst;
 	}
 
@@ -946,7 +946,7 @@ public class Pn {
 	 * @param d
 	 * @param euclidean2
 	 */
-	public static double[][] setToLength(double[][] dst, double[][] src, double d, int signature) {
+	public static double[][] setToLength(double[][] dst, double[][] src, double d, int metric) {
 		// assert dim checks
 		int sl = src.length;
 		if (dst == null) dst = new double[sl][src[0].length-1];
@@ -954,7 +954,7 @@ public class Pn {
 		if (dl != sl)	{
 			throw new IllegalArgumentException("Incompatible lengths");
 		}
-		for (int i = 0; i<sl; ++i)	setToLength(dst[i], src[i], d, signature);
+		for (int i = 0; i<sl; ++i)	setToLength(dst[i], src[i], d, metric);
 		return dst;
 	}
 	

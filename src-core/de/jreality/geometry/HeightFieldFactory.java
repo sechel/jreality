@@ -117,11 +117,11 @@ import de.jreality.util.SceneGraphUtility;
 		double [][] vc = (double[][])vertexCoordinates.getObject();
 		if( fi==null || vc==null)
 			return null;
-		return calculateFaceNormals( fi, vc, getSignature() );
+		return calculateFaceNormals( fi, vc, getMetric() );
 		
 	}
 	
-	private double[][] calculateFaceNormals(int[][] is, double[][] ds, int signature) {
+	private double[][] calculateFaceNormals(int[][] is, double[][] ds, int metric) {
 		double[][] fullcoords = new double[ds.length][3];
 		double[] foo = new double[2];
 		int maxu = getULineCount();
@@ -135,7 +135,7 @@ import de.jreality.util.SceneGraphUtility;
 				fullcoords[k+j][2] = ds[k+j][0];
 			}
 		}
-		return IndexedFaceSetUtility.calculateFaceNormals(is, fullcoords, signature);
+		return IndexedFaceSetUtility.calculateFaceNormals(is, fullcoords, metric);
 		
 	}
 

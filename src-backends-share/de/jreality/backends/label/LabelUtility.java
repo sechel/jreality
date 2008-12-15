@@ -318,10 +318,10 @@ public static double[] calculateBillboardMatrix(double[] result,
 		int alignment,	     		// alignment of billboard in compass-direction from anchor point (using SwingConstants)
 		double[] cameraToObject, 	// the transformation from camera to object coordinates
 		double[] point, 			// the position of the anchor point in object coordinate system
-		int signature)	{
+		int metric)	{
 	if (result == null) result = new double[16];
 	// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
-    double[] orientation = P3.extractOrientationMatrix(null, cameraToObject, Pn.originP3, signature);
+    double[] orientation = P3.extractOrientationMatrix(null, cameraToObject, Pn.originP3, metric);
     double[] scale = P3.makeStretchMatrix(null, xscale, yscale, 1.0);
     //calculate translation for alignment
     double align=0, valign=0;  // default
@@ -336,10 +336,10 @@ public static double[] calculateBillboardMatrix(double[] result,
     	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
     	case SwingConstants.NORTH_WEST : align=-xscale; break;
     }
-    double[] euclideanTranslation = P3.makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), signature); //Pn.EUCLIDEAN);
+    double[] euclideanTranslation = P3.makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), metric); //Pn.EUCLIDEAN);
     double[] pointTranslation;
     if (Double.isNaN(point[0])) pointTranslation = Rn.identityMatrix(4);
-    else pointTranslation = P3.makeTranslationMatrix(null, point, signature);
+    else pointTranslation = P3.makeTranslationMatrix(null, point, metric);
 
     Rn.times(result, pointTranslation, Rn.times(null, orientation, Rn.times(null, euclideanTranslation, scale)));
 	return result;

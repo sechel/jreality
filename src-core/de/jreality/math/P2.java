@@ -47,7 +47,7 @@ import de.jreality.util.LoggingSystem;
 /**
  * Static methods for geometry of the real projective plane RP2.
  * 
- * {@see de.jreality.math.Rn}  for method conventions and discussion of the ubiquitous <i>signature</i> parameter.
+ * {@see de.jreality.math.Rn}  for method conventions and discussion of the ubiquitous <i>metricnature</i> parameter.
  * {@see de.jreality.math.Pn}  for other methods applicable in n-dimensional projective space.
  * @author Charles Gunn
  *
@@ -80,25 +80,25 @@ final public class P2 {
 	}
 	
 	/**
-	 * Calculate the perpendicular bisector of the segment <i>p1</i> and <i>p2</i> with signature <i>signature</i>
+	 * Calculate the perpendicular bisector of the segment <i>p1</i> and <i>p2</i> with metricnature <i>metricnature</i>
 	 * @param dst
 	 * @param p1
 	 * @param p2
-	 * @param signature
+	 * @param metricnature
 	 * @return
 	 */
-	public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int signature)	{
+	public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int metricnature)	{
 		if (p1.length != 3 || p2.length != 3)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
 		}
-		if (signature == Pn.EUCLIDEAN) return perpendicularBisector(dst, p1, p2);
+		if (metricnature == Pn.EUCLIDEAN) return perpendicularBisector(dst, p1, p2);
 		if (dst == null) dst = new double[3];
 		double[] midpoint = new double[3];
-		Pn.linearInterpolation(midpoint,p1,p2, .5, signature);
+		Pn.linearInterpolation(midpoint,p1,p2, .5, metricnature);
 		double[] line = lineFromPoints(null, p1, p2);
-		double[] polarM = Pn.polarize(null, midpoint, signature);
+		double[] polarM = Pn.polarize(null, midpoint, metricnature);
 		double[] pb = pointFromLines(null, polarM, line);
-		Pn.polarize(dst, pb, signature);
+		Pn.polarize(dst, pb, metricnature);
 		if (Rn.innerProduct(dst,p1) < 0)	Rn.times(dst, -1.0, dst);
 		return dst;
 	}
@@ -142,7 +142,7 @@ final public class P2 {
 		if (point.length != 3)	{
 			throw new IllegalArgumentException("Input point must be homogeneous vector");
 		}
-		double sign = 0.0;
+		double metricn = 0.0;
 		int n = polygon.length, j;
 		double[] p1 = new double[3];
 		double[] p2 = new double[3];
@@ -154,8 +154,8 @@ final public class P2 {
 			p2[0] = polygon[j][0]; p2[1] = polygon[j][1];
 			double[] line = lineFromPoints(null, p1, p2);
 			double ip = Rn.innerProduct(line, point);
-			if (sign == 0.0) sign = ip;
-			else if (sign * ip < 0.0) return false;
+			if (metricn == 0.0) metricn = ip;
+			else if (metricn * ip < 0.0) return false;
 			tmp = p1;
 			p1 = p2;
 			p2 = tmp;
@@ -171,7 +171,7 @@ final public class P2 {
 	 */
 	 public static boolean isConvex(double[][] polygon)	{
 		int n = polygon.length, j;
-		double sign = 0.0;
+		double metricn = 0.0;
 		double[][] diffs = new double[n][polygon[0].length];
 		for (int i = 0; i<n; ++i)	{
 			j = (i+1) % n;
@@ -186,8 +186,8 @@ final public class P2 {
 		for (int i = 0; i<n; ++i)	{
 			j = (i+1) % n;
 			Rn.crossProduct(tmp, diffs[i],diffs[j]);
-			if (sign == 0.0)	sign = tmp[2];
-			else if (sign * tmp[2] < 0.0) return false;
+			if (metricn == 0.0)	metricn = tmp[2];
+			else if (metricn * tmp[2] < 0.0) return false;
 		}
 		
 		return true;

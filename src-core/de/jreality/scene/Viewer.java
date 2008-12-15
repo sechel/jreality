@@ -115,23 +115,25 @@ public interface Viewer {
   
   /**
    * Some viewers (at least the jogl viewer) support rendering
-   * of non-euclidean geometries. The definition of the signature is
+   * of non-euclidean geometries. The definition of the metric is
    * in de.jreality.math.Pn.
    * 
-   * @return the signature of the viewer.
+   * @return the metric of the viewer.
    * @see de.jreality.math.Pn
+   * @deprecated	Use {@link Appearance#getAttribute("metric")}.
    */
-	public int getSignature();
+	public int getMetric();
   
   /**
    * Some viewers (at least the jogl viewer) support rendering
-   * of non-euclidean geometries. The definition of the signature is
+   * of non-euclidean geometries. The definition of the metric is
    * in de.jreality.math.Pn.
    * 
-   * @param the signature of the viewer as defined in de.jreality.math.Pn
+   * @param the metric of the viewer as defined in de.jreality.math.Pn
    * @see de.jreality.math.Pn
+   * @deprecated  Use {@link Appearance#setAttribute("metric", Integer)}
    */
-	public void setSignature(int sig);
+	public void setMetric(int sig);
   
   /**
    * Some viewers (at least the jogl viewer) support an auxilary

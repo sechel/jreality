@@ -77,8 +77,8 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	AttributeGenerator faceLabels        = attributeGeneratorNode( face, String[].class,     Attribute.LABELS );
 	AttributeGenerator faceNormals       = attributeGeneratorNode( face, double[][].class,   Attribute.NORMALS );
 
-	AbstractIndexedFaceSetFactory( IndexedFaceSet ifs, int signature, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
-		super( ifs, signature );	
+	AbstractIndexedFaceSetFactory( IndexedFaceSet ifs, int metric, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
+		super( ifs, metric );	
 
 		this.ifs = ifs;
 		
@@ -87,16 +87,16 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		setGenerateFaceNormals( generateFaceNormals );
 	}
 	
-	AbstractIndexedFaceSetFactory( int signature, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
-		this( new IndexedFaceSet(0,0), signature, generateEdgesFromFaces, generateVertexNormals, generateFaceNormals );	
+	AbstractIndexedFaceSetFactory( int metric, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
+		this( new IndexedFaceSet(0,0), metric, generateEdgesFromFaces, generateVertexNormals, generateFaceNormals );	
 	}
 	
-	AbstractIndexedFaceSetFactory( IndexedFaceSet existing, int signature ) {
-		this(existing,  signature, false, false, false );
+	AbstractIndexedFaceSetFactory( IndexedFaceSet existing, int metric ) {
+		this(existing,  metric, false, false, false );
 	}
 	
-	AbstractIndexedFaceSetFactory( int signature ) {
-		this( signature, false, false, false );
+	AbstractIndexedFaceSetFactory( int metric ) {
+		this( metric, false, false, false );
 	}
 	
 	AbstractIndexedFaceSetFactory(IndexedFaceSet existing) {
@@ -258,7 +258,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	}
 	
 	{
-		faceNormals.addIngr(signature);
+		faceNormals.addIngr(metric);
 		faceNormals.addIngr(faceIndices);
 		faceNormals.addIngr(vertexCoordinates);
 		faceNormals.setUpdateMethod(
@@ -282,12 +282,12 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		
 		log( "compute", Attribute.NORMALS, "face");
 	
-		return IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getSignature() );
+		return IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
 		
 	}
 	
 	{
-		vertexNormals.addIngr(signature);
+		vertexNormals.addIngr(metric);
 		vertexNormals.addIngr(faceNormals);
 		
 		vertexNormals.setUpdateMethod(
@@ -309,10 +309,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			return null;
 		
 		if( fn==null ) { 
-			fn = IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getSignature() );
+			fn = IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
 		}
 		
-		return IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getSignature() );
+		return IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getMetric() );
 		
 	}
 	

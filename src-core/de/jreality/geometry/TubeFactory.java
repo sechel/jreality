@@ -91,7 +91,7 @@ import de.jreality.util.LoggingSystem;
  * <li>Whether the curve is closed, </li>
  * <li>The radius of the tube,</li>
  * <li>A cross-section curve in 3-space. </li>
- * <li>An ambient metric (specified by a signature (see {@link Pn})</li>
+ * <li>An ambient metric (specified by a metric (see {@link Pn})</li>
  * <li>A list of edge colors (optional), </li>
  * <li>A list of vertex colors (optional), </li>
  * <li>The type of frame family to use (Frenet or parallel), </li>
@@ -123,7 +123,7 @@ public  class TubeFactory {
 		public double[] radii = null;
 		public double radius = .05;
 		public FrameFieldType frameFieldType = FrameFieldType.PARALLEL;
-		public int signature = Pn.EUCLIDEAN;
+		public int metric = Pn.EUCLIDEAN;
 		public int twists = 0;
 		public boolean generateTextureCoordinates = false;
 		boolean arcLengthTextureCoordinates = false;
@@ -212,11 +212,11 @@ public  class TubeFactory {
 			 this.radii = radii;
 		 }
 		/**
-		 * Set the signature of the ambient space. See {@link Pn}.
-		 * @param signature
+		 * Set the metric of the ambient space. See {@link Pn}.
+		 * @param metric
 		 */
-		 public void setSignature(int signature) {
-			this.signature = signature;
+		 public void setMetric(int metric) {
+			this.metric = metric;
 			framesDirty = true;
 		}
 
@@ -443,25 +443,25 @@ public  class TubeFactory {
 		 *  <p>
 		 * @param polygon	the curve to frame (as array of 3- or 4-d points)
 		 * @param type		{@link TubeUtility.PARALLEL} or {TubeUtility.FRENET}
-		 * @param signature	the metric signature {@link Pn}
+		 * @param metric	the metric metric {@link Pn}
 		 * @return	an array of length (n-2) of type {@link TubeUtility.FrameInfo} containing an orthonormal frame for each internal point in the initial polygon array.
 		 */
-		public  FrameInfo[] makeFrameField(double[][] polygon, FrameFieldType type, int signature)		{
+		public  FrameInfo[] makeFrameField(double[][] polygon, FrameFieldType type, int metric)		{
 			if (frames!= null && !framesDirty) return frames;
 		 	int numberJoints = polygon.length;
 		 	double[][] polygonh;
 		 	// to simplify life, convert all points to homogeneous coordinates
 		 	if (polygon[0].length == 3) {
 		 		polygonh = Pn.homogenize(null, polygon);
-		 		Pn.normalize(polygonh, polygonh, signature);
+		 		Pn.normalize(polygonh, polygonh, metric);
 		 	}
 			else if (polygon[0].length == 4)	
-				polygonh = Pn.normalize(null, polygon, signature);
+				polygonh = Pn.normalize(null, polygon, metric);
 			else {
 				throw new IllegalArgumentException("Points must have dimension 4");
 			}
 		 	if ((debug & 1) != 0)	
-		 		theLogger.log(Level.FINER,"Generating frame field for signature "+signature);
+		 		theLogger.log(Level.FINER,"Generating frame field for metric "+metric);
 		 	if (tangentField == null || tangentField.length != (numberJoints-2))	{
 				tangentField = new double[numberJoints-2][4];
 				frenetNormalField = new double[numberJoints-2][4];
@@ -478,7 +478,7 @@ public  class TubeFactory {
 			double[] frame = new double[16];
 			double totalLength = 0.0;
 			for (int i = 1; i<numberJoints-1; ++i)	{
-				d[i-1] = (totalLength += Pn.distanceBetween(polygonh[i-1], polygonh[i], signature));
+				d[i-1] = (totalLength += Pn.distanceBetween(polygonh[i-1], polygonh[i], metric));
 			}
 			totalLength = 1.0/totalLength;
 			// Normalize the distances between points to have total sum 1.
@@ -491,7 +491,7 @@ public  class TubeFactory {
 				 */
 				double theta = 0.0, phi=0.0;
 				boolean collinear = false;
-				double[] polarPlane = Pn.polarizePoint(null, polygonh[i], signature);
+				double[] polarPlane = Pn.polarizePoint(null, polygonh[i], metric);
 				if ((debug & 2) != 0) theLogger.log(Level.FINER,"Polar plane is: "+Rn.toString(polarPlane));					
 				
 				double[] osculatingPlane = P3.planeFromPoints(null, polygonh[i-1], polygonh[i], polygonh[i+1]);
@@ -499,13 +499,13 @@ public  class TubeFactory {
 				if (size < 10E-16)	{			// collinear points!
 					collinear = true;
 					if ((debug & 2) != 0) theLogger.log(Level.FINER,"degenerate binormal");
-					if (i == 1)		binormalField[i-1] = getInitialBinormal(polygonh, signature);
-					else Pn.projectToTangentSpace(binormalField[i-1], polygonh[i], binormalField[i-2], signature);
+					if (i == 1)		binormalField[i-1] = getInitialBinormal(polygonh, metric);
+					else Pn.projectToTangentSpace(binormalField[i-1], polygonh[i], binormalField[i-2], metric);
 				} else
-					Pn.polarizePlane(binormalField[i-1], osculatingPlane,signature);
+					Pn.polarizePlane(binormalField[i-1], osculatingPlane,metric);
 				if (userBinormals != null) 
 					System.arraycopy(userBinormals[i-1], 0, binormalField[i-1], 0, userBinormals[i-1].length);
-				Pn.setToLength(binormalField[i-1], binormalField[i-1], 1.0, signature);
+				Pn.setToLength(binormalField[i-1], binormalField[i-1], 1.0, metric);
 				if ((debug & 2) != 0) theLogger.log(Level.FINER,"Binormal is "+Rn.toString(binormalField[i-1]));
 
 				/*
@@ -515,10 +515,10 @@ public  class TubeFactory {
 					if (!collinear)	{
 						plane1 = P3.planeFromPoints(null, binormalField[i-1], polygonh[i], polygonh[i-1]);
 						plane2 = P3.planeFromPoints(null, binormalField[i-1], polygonh[i], polygonh[i+1]);
-						midPlane = Pn.midPlane(null, plane1, plane2, signature);
+						midPlane = Pn.midPlane(null, plane1, plane2, metric);
 						size = Rn.euclideanNormSquared(midPlane);
 						if ((debug & 2) != 0) theLogger.log(Level.FINER,"tangent norm squared is "+size);					
-						theta = Pn.angleBetween(plane1, plane2, signature);
+						theta = Pn.angleBetween(plane1, plane2, metric);
 					}
 					/*
 					 * if this is degenerate, then the curve must be collinear at this node
@@ -533,8 +533,8 @@ public  class TubeFactory {
 						if ((debug & 2) != 0) theLogger.log(Level.FINE,"pseudo-Tangent vector is "+Rn.toString(pseudoT));
 						// more euclidean/noneuclidean trouble
 						// we want the plane equation of the midplane 
-						if (signature != Pn.EUCLIDEAN)	{
-							midPlane = Pn.polarizePoint(null, pseudoT, signature);
+						if (metric != Pn.EUCLIDEAN)	{
+							midPlane = Pn.polarizePoint(null, pseudoT, metric);
 						} else {
 							// TODO figure out why the vector (the output of lineIntersectPlane)
 							// has to be flipped in this case but not in the non-euclidean case
@@ -550,13 +550,13 @@ public  class TubeFactory {
 					}
 					//System.err.println("calc'ed midplane is "+Rn.toString(midPlane));
 					if ((debug & 2) != 0) theLogger.log(Level.FINE,"Midplane is "+Rn.toString(midPlane));
-						Pn.polarizePlane(tangentField[i-1], midPlane, signature);						
+						Pn.polarizePlane(tangentField[i-1], midPlane, metric);						
 				if (userTangents == null){
 				} else {
 					System.arraycopy(userTangents[i-1], 0, tangentField[i-1], 0, userTangents[i-1].length);
 					midPlane = Rn.planeParallelToPassingThrough(null, userTangents[i-1], polygonh[i]);
 					//System.err.println("given midplane is "+Rn.toString(midPlane));
-					if (i>1) theta = Pn.angleBetween(userTangents[i-2], userTangents[i-1], signature);
+					if (i>1) theta = Pn.angleBetween(userTangents[i-2], userTangents[i-1], metric);
 					else theta = 0;
 				}
 				// This is a hack to try to choose the correct version of the tangent vector:
@@ -566,11 +566,11 @@ public  class TubeFactory {
 				if (Rn.innerProduct(diff, tangentField[i-1]) < 0.0)  
 					Rn.times(tangentField[i-1], -1.0, tangentField[i-1]);
 
-				Pn.setToLength(tangentField[i-1], tangentField[i-1], 1.0, signature);
+				Pn.setToLength(tangentField[i-1], tangentField[i-1], 1.0, metric);
 				//System.err.println("tangent is "+Rn.toString(tangentField[i-1]));
 				// finally calculate the normal vector
-				Pn.polarizePlane(frenetNormalField[i-1], P3.planeFromPoints(null,binormalField[i-1], tangentField[i-1],  polygonh[i]),signature);					
-				Pn.setToLength(frenetNormalField[i-1], frenetNormalField[i-1], 1.0, signature);
+				Pn.polarizePlane(frenetNormalField[i-1], P3.planeFromPoints(null,binormalField[i-1], tangentField[i-1],  polygonh[i]),metric);					
+				Pn.setToLength(frenetNormalField[i-1], frenetNormalField[i-1], 1.0, metric);
 				if ((debug & 2) != 0) theLogger.log(Level.FINE,"frenet normal is "+Rn.toString(frenetNormalField[i-1]));
 
 				if (type == FrameFieldType.PARALLEL)	{
@@ -583,7 +583,7 @@ public  class TubeFactory {
 							theLogger.log(Level.FINE,"degenerate normal");
 							projectedN = parallelNormalField[i-2];		// try something!
 						}
-						parallelNormalField[i-1] = Pn.normalizePlane(null, projectedN, signature);
+						parallelNormalField[i-1] = Pn.normalizePlane(null, projectedN, metric);
 						if ((debug & 128) != 0)	theLogger.log(Level.FINE,"Parallel normal is "+Rn.toString(parallelNormalField[i-1]));
 					}
 //					if (size < 10E-16)	{
@@ -594,9 +594,9 @@ public  class TubeFactory {
 						parallelNormalField[i-1] = parallelNormalField[i-2];
 //						throw new IllegalStateException("Null vector");
 					} else 
-						Pn.setToLength(parallelNormalField[i-1], parallelNormalField[i-1], 1.0, signature);
-					phi = Pn.angleBetween(frenetNormalField[i-1],parallelNormalField[i-1],signature);
-					double a = Pn.angleBetween(parallelNormalField[i-1],binormalField[i-1],signature);
+						Pn.setToLength(parallelNormalField[i-1], parallelNormalField[i-1], 1.0, metric);
+					phi = Pn.angleBetween(frenetNormalField[i-1],parallelNormalField[i-1],metric);
+					double a = Pn.angleBetween(parallelNormalField[i-1],binormalField[i-1],metric);
 					if (a > Math.PI/2) phi = -phi;
 				} 
 //				size = Rn.euclideanNormSquared(pN[i-1]);
@@ -619,14 +619,14 @@ public  class TubeFactory {
 		/**
 		 * 
 		 * @param polygon
-		 * @param signature
+		 * @param metric
 		 * @return
 		 */
-		 protected static double[] getInitialBinormal(double[][] polygon, int signature)	{
+		 protected static double[] getInitialBinormal(double[][] polygon, int metric)	{
 			int n = polygon.length;
 			for (int i = 1; i<n-1; ++i)	{
 				double[] bloop = 
-				Pn.polarize(null, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),signature);	
+				Pn.polarize(null, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),metric);	
 				if (Rn.euclideanNormSquared(bloop) > 10E-16) {
 					Pn.dehomogenize(bloop,bloop);
 					boolean flip = false;
@@ -637,7 +637,7 @@ public  class TubeFactory {
 					return bloop;
 				}
 			}
-			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),signature);
+			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),metric);
 		}
 
 		 static double[][] axes = {{0,0,0},{1,0,0},{0,1,0},{0,0,1}};

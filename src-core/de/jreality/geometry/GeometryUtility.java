@@ -94,35 +94,35 @@ public class GeometryUtility {
 	 */
 	 public static String HEIGHT_FIELD_SHAPE = "heightField";	// value:	java.awt.Rectangle2D
 	/**
-	 * For setting the signature ({@link Pn}) of the geometry; 
+	 * For setting the metric ({@link Pn}) of the geometry; 
 	 * Value: {@link Integer}
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 */
-	 public static String SIGNATURE = "signature";		// value:	Integer
+	 public static String METRIC = "metric";		// value:	Integer
 
 	private GeometryUtility() {}
 	
-	public static int getSignature(Geometry g ) {
-		Object sigO = g.getGeometryAttributes(SIGNATURE);
+	public static int getMetric(Geometry g ) {
+		Object sigO = g.getGeometryAttributes(METRIC);
 		int sig = Pn.EUCLIDEAN;
 		if (sigO != null && sigO instanceof Integer)	{
 			sig = ((Integer) sigO).intValue();
-			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with signature "+sig);
+			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with metric "+sig);
 		}
 		return sig;
 	}
 
 	/**
-	 * Set the signature ({@link Pn}) associated to this geometry.
+	 * Set the metric ({@link Pn}) associated to this geometry.
 	 * @param g
 	 * @param s
 	 */
-    public static void setSignature(Geometry g, int s)	{
-		Object o = g.getGeometryAttributes(SIGNATURE);
+    public static void setMetric(Geometry g, int s)	{
+		Object o = g.getGeometryAttributes(METRIC);
 		if (o != null && o instanceof Integer)		{
 			if (((Integer) o).intValue() == s) return;			//unchanged
 		}
-		g.setGeometryAttributes(SIGNATURE, new Integer(s));
+		g.setGeometryAttributes(METRIC, new Integer(s));
 	}
     
 	/**
@@ -226,16 +226,16 @@ public class GeometryUtility {
 	/**
 	 * @deprecated Use {@link IndexedFaceSetUtility#calculateFaceNormals(IndexedFaceSet,int)} instead
 	 */
-	public static double[][] calculateFaceNormals(IndexedFaceSet ifs, int signature) {
-		return IndexedFaceSetUtility.calculateFaceNormals(ifs, signature);
+	public static double[][] calculateFaceNormals(IndexedFaceSet ifs, int metric) {
+		return IndexedFaceSetUtility.calculateFaceNormals(ifs, metric);
 	}
    
 	/**
 	 * @deprecated Use {@link IndexedFaceSetUtility#calculateFaceNormals(int[][],double[][],int)} instead
 	 */
-	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int signature)	{
+	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int metric)	{
 		return IndexedFaceSetUtility.calculateFaceNormals(indices, verts,
-				signature);
+				metric);
 	}
 	
 	  /**
@@ -256,9 +256,9 @@ public class GeometryUtility {
 	 * @deprecated Use {@link IndexedFaceSetUtility#calculateVertexNormals(IndexedFaceSet,int)} instead
 	 */
 	public static double[][] calculateVertexNormals(IndexedFaceSet ifs,
-				int signature) {
+				int metric) {
 					return IndexedFaceSetUtility.calculateVertexNormals(ifs,
-							signature);
+							metric);
 				}
 
 
@@ -266,9 +266,9 @@ public class GeometryUtility {
 	 * @deprecated Use {@link IndexedFaceSetUtility#calculateVertexNormals(int[][],double[][],double[][],int)} instead
 	   */
 	 public static double[][] calculateVertexNormals(int[][] indices,
-				double[][] vertsAs2D, double[][] fn, int signature) {
+				double[][] vertsAs2D, double[][] fn, int metric) {
 					return IndexedFaceSetUtility.calculateVertexNormals(
-							indices, vertsAs2D, fn, signature);
+							indices, vertsAs2D, fn, metric);
 				}
 
 	/**

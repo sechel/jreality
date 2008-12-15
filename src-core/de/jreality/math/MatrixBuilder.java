@@ -78,13 +78,13 @@ import de.jreality.scene.Transformation;
  *              .assignTo(camComp); // Transformation gets set and assigned
  * </pre>
  * 
- * For explanation of signature, see {@link de.jreality.math.P3 P3}.
+ * For explanation of metric, see {@link de.jreality.math.P3 P3}.
  * @author weissman
  */
 public final class MatrixBuilder {
   
   private final Matrix matrix;
-  private final int signature;
+  private final int metric;
 
   private final double[] tmp = new double[16];
   
@@ -178,17 +178,17 @@ public final class MatrixBuilder {
   }
 
   /**
-   * This constructor accepts the signature as an argument.
-   * It's often convenient to be able to specify the signature in this way rather than 
-   * searching for the specific signature-specific method.
+   * This constructor accepts the metric as an argument.
+   * It's often convenient to be able to specify the metric in this way rather than 
+   * searching for the specific metric-specific method.
    */
-  public static MatrixBuilder init(Matrix m, int signature)	{
-  	return new MatrixBuilder(m==null ? new Matrix() : m, signature);
+  public static MatrixBuilder init(Matrix m, int metric)	{
+  	return new MatrixBuilder(m==null ? new Matrix() : m, metric);
   }
   
-  protected MatrixBuilder(Matrix m, int signature) {
+  protected MatrixBuilder(Matrix m, int metric) {
     matrix = m;
-    this.signature = signature;
+    this.metric = metric;
   }
 
   public MatrixBuilder rotate(double angle, double axisX, double axisY, double axisZ) {
@@ -210,7 +210,7 @@ public final class MatrixBuilder {
    * @see P3#makeRotationMatrix(double[], double[], double[], double, int)
    */
   public MatrixBuilder rotate(double[] p1, double[] p2, double angle) {
-    P3.makeRotationMatrix(tmp, p1, p2, angle, signature);
+    P3.makeRotationMatrix(tmp, p1, p2, angle, metric);
     matrix.multiplyOnRight(tmp);
     return this;
   }
@@ -284,7 +284,7 @@ public final class MatrixBuilder {
   }
 
   public MatrixBuilder translate(double[] vector) {
-    P3.makeTranslationMatrix(tmp, vector, signature);
+    P3.makeTranslationMatrix(tmp, vector, metric);
     matrix.multiplyOnRight(tmp);
     return this;
   }
@@ -307,7 +307,7 @@ public final class MatrixBuilder {
    * @see P3#makeTranslationMatrix(double[], double[], double[], int)
    */
    public MatrixBuilder translateFromTo(double[] p1, double[] p2) {
-    P3.makeTranslationMatrix(tmp, p1, p2, signature);
+    P3.makeTranslationMatrix(tmp, p1, p2, metric);
     matrix.multiplyOnRight(tmp);
     return this;
   }
@@ -335,7 +335,7 @@ public final class MatrixBuilder {
    * @see P3#makeReflectionMatrix(double[], double[], int)
    */
   public MatrixBuilder reflect(double[] plane) {
-    P3.makeReflectionMatrix(tmp, plane, signature);
+    P3.makeReflectionMatrix(tmp, plane, metric);
     matrix.multiplyOnRight(tmp);
     return this;
   }

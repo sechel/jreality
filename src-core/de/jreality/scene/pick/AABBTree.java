@@ -208,7 +208,7 @@ public class AABBTree {
      *            The arraylist to hold indexes of this OBBTree's triangle
      *            intersections.
      */
-    void intersect(IndexedFaceSet ifs, int signature, SceneGraphPath path, double[] from, double[] to, List<Hit> hits) {
+    void intersect(IndexedFaceSet ifs, int metric, SceneGraphPath path, double[] from, double[] to, List<Hit> hits) {
        path.getMatrix(m.getArray());
       path.getInverseMatrix(mInv.getArray());
       
@@ -220,11 +220,11 @@ public class AABBTree {
         return;
       }
       if (left != null) {
-        left.intersect(ifs, signature, path, from, to, hits);
+        left.intersect(ifs, metric, path, from, to, hits);
       }
   
       if (right != null) {
-        right.intersect(ifs, signature, path, from, to, hits);
+        right.intersect(ifs, metric, path, from, to, hits);
       } else if (left == null) { // left == right == null
         double[] p1=new double[4], p2=new double[4], p3=new double[4], pobj=new double[4];
         p1[3]=p2[3]=p3[3]=1;
@@ -235,7 +235,7 @@ public class AABBTree {
             tempt.getTriangle(j, p1, p2, p3);
             if (BruteForcePicking.intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
               double[] pw = m.multiplyVector(pobj);
-              hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw,signature), 
+              hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw,metric), 
             		  P3.affineCoordinate(from, to, pw), PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
 //              System.err.println("AABB polygon hit");
             }

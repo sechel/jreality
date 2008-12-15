@@ -77,6 +77,11 @@ public class GeometryAttributeListSet {
 	void setAttribute(Attribute attr, DataList data) {
 		if( isBlockedAttribute(attr))
 			throw new UnsupportedOperationException( "cannot set attribute " + attr );
+		// problem with indices; easiest way around is to remove old indices before setting new
+		// we need a way to check if the complete 2D array of the new data 
+		// is the same dimension as the old; if not, we get exception when a copy
+		// lacking that, we assume they're different.
+		if (attr == Attribute.INDICES)	DLS.remove(attr);
 		setAttrImpl(DLS, attr, data);
 		attributeNode(attr).setObject(data);
 	}

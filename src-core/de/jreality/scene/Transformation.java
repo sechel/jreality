@@ -72,7 +72,7 @@ public class Transformation extends SceneGraphNode {
 	/**
 	 * Generate a new transform with given matrix
 	 * If <i>m</i> is null, use identity matrix.  
-	 * @param signature		See {@link Pn}.
+	 * @param metric		See {@link Pn}.
 	 * @param m
 	 */
 	public Transformation(String name, double[] m) {

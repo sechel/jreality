@@ -68,7 +68,7 @@ import de.jreality.scene.data.IntArrayArray;
 	double holeFactor = 1.0;
 	double shiftAlongNormal = .5;
 	int stepsPerEdge = 3;
-	int signature = Pn.EUCLIDEAN;
+	int metric = Pn.EUCLIDEAN;
 	boolean keepFaceColors = false;
 	double[][] profileCurve = {{0,0}, {.5,1}, {1,0}};
 	boolean getGoodTextureCoordinates = true;
@@ -167,17 +167,17 @@ import de.jreality.scene.data.IntArrayArray;
 		return keepFaceColors;
 	}
 
-	public int getSignature() {
-		return signature;
+	public int getMetric() {
+		return metric;
 	}
 
 	/**
 	 * For working in non-euclidean geometries, set this.  Default: {@link Pn#EUCLIDEAN}.
 	 * Warning: currently ignored.
-	 * @param signature
+	 * @param metric
 	 */
-	public void setSignature(int signature) {
-		this.signature = signature;
+	public void setMetric(int metric) {
+		this.metric = metric;
 	}
 
 	/**
@@ -261,7 +261,7 @@ import de.jreality.scene.data.IntArrayArray;
 			System.arraycopy(origVertices[i], 0, newVertices[i], 0, fiberlength);
 			if (fiberlength == 3) newVertices[i][3] = 1.0;
 			// estimate adjustment factor to attain perpendicular thickness
-			//double factor = Math.abs(Math.cos(Pn.angleBetween(oldVN[i], oldFN[anyFace[i]], signature)));
+			//double factor = Math.abs(Math.cos(Pn.angleBetween(oldVN[i], oldFN[anyFace[i]], metric)));
 			//System.err.println("cos of angle is "+factor);
 			// TODO make this correct for noneuclidean case too
 			//Pn.dragTowards(newV[i+n], oldV[i], oldN[i], thickness, Pn.EUCLIDEAN);
@@ -618,12 +618,12 @@ import de.jreality.scene.data.IntArrayArray;
 					vb2 = Pn.homogenize(vb2, vb2);
 				}
 				double[] dv = Rn.subtract(null, vb2, vb1);
-				double length = Pn.norm(dv, signature);
-				double[] t1 = Pn.projectOntoComplement(null, nv[face[j]], dv, signature);
-				Pn.setToLength(t1, t1, length/3, signature);
+				double length = Pn.norm(dv, metric);
+				double[] t1 = Pn.projectOntoComplement(null, nv[face[j]], dv, metric);
+				Pn.setToLength(t1, t1, length/3, metric);
 				dv = Rn.subtract(null, vb1, vb2);
-				double[] t2 = Pn.projectOntoComplement(null, nv[face[(j+1)%fsize]], dv, signature);
-				Pn.setToLength(t2, t2, length/3, signature);
+				double[] t2 = Pn.projectOntoComplement(null, nv[face[(j+1)%fsize]], dv, metric);
+				Pn.setToLength(t2, t2, length/3, metric);
 				double[] m1 = Rn.add(null, vb1, t1);
 				double[] m2 = Rn.add(null, vb2, t2);
 				for (int jj = 0; jj<stepsPerEdge; ++jj)	{

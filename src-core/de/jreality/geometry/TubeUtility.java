@@ -136,15 +136,15 @@ public class TubeUtility {
 		static double[] px1 = {0,0,-.5,1};
 		static double[] px2 = {0,0,.5,1};
 
-		protected static double[] getInitialBinormal(double[][] polygon, int signature)	{
+		protected static double[] getInitialBinormal(double[][] polygon, int metric)	{
 			int n = polygon.length;
 			double[] B = new double[4];
 			for (int i = 1; i<n-1; ++i)	{
-				Pn.polarize(B, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),signature);	
+				Pn.polarize(B, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),metric);	
 				if (Rn.euclideanNormSquared(B) > 10E-16) return B;
 			}
 			B = new double[] {Math.random(), Math.random(), Math.random(), 1.0};
-			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),signature);
+			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),metric);
 		}
 
 		protected static double[] e1 = 	{Math.random(), Math.random(), Math.random(), 1.0};
@@ -152,7 +152,7 @@ public class TubeUtility {
 		private static double[][] urTubeVerts;
 		public static double[][] canonicalTranslation=new double[3][];
 		private static double[] translation = {0,0,.5,1};
-		private static int[] signatures = {Pn.HYPERBOLIC, Pn.EUCLIDEAN, Pn.ELLIPTIC};
+		private static int[] metrics = {Pn.HYPERBOLIC, Pn.EUCLIDEAN, Pn.ELLIPTIC};
 		static int urTubeLength;
 		static {
 		    int n = octagonalCrossSection.length;
@@ -168,9 +168,9 @@ public class TubeUtility {
 			}
 			DataList verts = StorageModel.DOUBLE_ARRAY.array(urTubeVerts[0].length).createReadOnly(urTubeVerts);
 			for (int k = 0; k<3; ++k)	{
-				canonicalTranslation[k] = P3.makeTranslationMatrix(null, translation, signatures[k]);
-				QuadMeshFactory qmf = new QuadMeshFactory();//signatures[k], n, 2, true, false);
-				qmf.setSignature(signatures[k]);
+				canonicalTranslation[k] = P3.makeTranslationMatrix(null, translation, metrics[k]);
+				QuadMeshFactory qmf = new QuadMeshFactory();//metrics[k], n, 2, true, false);
+				qmf.setMetric(metrics[k]);
 				qmf.setULineCount(n);
 				qmf.setVLineCount(2);
 				qmf.setClosedInUDirection(true);
@@ -192,13 +192,13 @@ public class TubeUtility {
 		 * @param ip2
 		 * @param rad
 		 * @param crossSection
-		 * @param signature
+		 * @param metric
 		 * @return
 		 */
-		 public static SceneGraphComponent tubeOneEdge(double[] ip1, double[] ip2, double rad, double[][] crossSection, int signature)	{
-			 return tubeOneEdge(null, ip1, ip2, rad, crossSection, signature);
+		 public static SceneGraphComponent tubeOneEdge(double[] ip1, double[] ip2, double rad, double[][] crossSection, int metric)	{
+			 return tubeOneEdge(null, ip1, ip2, rad, crossSection, metric);
 		 }
-		public static SceneGraphComponent tubeOneEdge(SceneGraphComponent sgc, double[] ip1, double[] ip2, double rad, double[][] crossSection, int signature)	{
+		public static SceneGraphComponent tubeOneEdge(SceneGraphComponent sgc, double[] ip1, double[] ip2, double rad, double[][] crossSection, int metric)	{
 			if (ip1.length < 3 || ip1.length > 4 || ip2.length < 3 || ip2.length > 4)	{
 				throw new IllegalArgumentException("Invalid dimension");
 			}
@@ -208,19 +208,19 @@ public class TubeUtility {
 			else p1 = ip1;
 			if (ip2.length == 3) Pn.homogenize(p2, ip2);
 			else p2 = ip2;
-			boolean isValid1 = Pn.isValidCoordinate(p1, 3, signature);
-			boolean isValid2 = Pn.isValidCoordinate(p2, 3, signature);
+			boolean isValid1 = Pn.isValidCoordinate(p1, 3, metric);
+			boolean isValid2 = Pn.isValidCoordinate(p2, 3, metric);
 			if ( !isValid1 && !isValid2) return new SceneGraphComponent();
 			if (!isValid1)	
-				Rn.linearCombination(p1, .99, p1, .01, p2);//(p1, p1, p2, .999, signature);
+				Rn.linearCombination(p1, .99, p1, .01, p2);//(p1, p1, p2, .999, metric);
 			else if (!isValid2) 
-				Rn.linearCombination(p2, .99, p2, .01, p1); //(p2, p2, p1, .999, signature);
-			Pn.normalize(p1, p1, signature);
-			Pn.normalize(p2, p2, signature);
+				Rn.linearCombination(p2, .99, p2, .01, p1); //(p2, p2, p1, .999, metric);
+			Pn.normalize(p1, p1, metric);
+			Pn.normalize(p2, p2, metric);
 			
 			if ((debug & 2) != 0) theLogger.log(Level.FINE,"p1 is "+Rn.toString(p1));					
 			if ((debug & 2) != 0) theLogger.log(Level.FINE,"p2 is "+Rn.toString(p2));					
-			double[] polarPlane = Pn.polarizePoint(null, p1, signature);
+			double[] polarPlane = Pn.polarizePoint(null, p1, metric);
 			if ((debug & 2) != 0) theLogger.log(Level.FINE,"Polar plane is "+Rn.toString(polarPlane));					
 
 			double[] tangent = P3.lineIntersectPlane(null, p1, p2, polarPlane);	
@@ -228,12 +228,12 @@ public class TubeUtility {
 			double[] diff = Rn.subtract(null, p2, p1);
 			if (Rn.innerProduct(diff, tangent) < 0.0)  Rn.times(tangent, -1.0, tangent);
 
-			Pn.setToLength(tangent,tangent, 1.0, signature);
+			Pn.setToLength(tangent,tangent, 1.0, metric);
 			
-			double[] normal = Pn.polarizePlane(null, P3.planeFromPoints(null,  p1, tangent, e1),signature);		
-			double[] binormal = Pn.polarizePlane(null, P3.planeFromPoints(null, p1, tangent, normal),signature);
-			Pn.setToLength(normal, normal, 1.0, signature);			
-			Pn.setToLength(binormal, binormal, 1.0, signature);
+			double[] normal = Pn.polarizePlane(null, P3.planeFromPoints(null,  p1, tangent, e1),metric);		
+			double[] binormal = Pn.polarizePlane(null, P3.planeFromPoints(null, p1, tangent, normal),metric);
+			Pn.setToLength(normal, normal, 1.0, metric);			
+			Pn.setToLength(binormal, binormal, 1.0, metric);
 
 			double[] frame = new double[16];
 			// for reasons unknown/murky, to get a RH.C.S. the vectors have to be assembled as follows in the matrix
@@ -255,20 +255,20 @@ public class TubeUtility {
 			Rn.transpose(frame, frame);
 			
 			double[] scaler = Rn.identityMatrix(4);
-			double dist = Pn.distanceBetween(p1, p2, signature);
+			double dist = Pn.distanceBetween(p1, p2, metric);
 			double coord = dist/2;
 			if (Double.isNaN(coord)){
 				LoggingSystem.getLogger(TubeUtility.class).warning("bad coord");
 				return new SceneGraphComponent();
 				//throw new IllegalStateException("bad coord");
 			}
-			if (signature == Pn.HYPERBOLIC)	coord = Pn.tanh(dist/2.0);
-			else if (signature == Pn.ELLIPTIC)	coord = Math.tan(dist/2.0);
+			if (metric == Pn.HYPERBOLIC)	coord = Pn.tanh(dist/2.0);
+			else if (metric == Pn.ELLIPTIC)	coord = Math.tan(dist/2.0);
 			scaler[10] = 2*coord;
 			
 			double radcoord = rad;
-			if (signature == Pn.HYPERBOLIC)	radcoord = Math.sqrt(1-coord*coord)*Pn.tanh(rad);
-			else if (signature == Pn.ELLIPTIC)	radcoord = Math.sqrt(1+coord*coord)*Math.tan(rad);
+			if (metric == Pn.HYPERBOLIC)	radcoord = Math.sqrt(1-coord*coord)*Pn.tanh(rad);
+			else if (metric == Pn.ELLIPTIC)	radcoord = Math.sqrt(1+coord*coord)*Math.tan(rad);
 			scaler[0] = scaler[5] = radcoord; 
 			
 			if ((debug & 1) != 0)	{
@@ -277,7 +277,7 @@ public class TubeUtility {
 			//LoggingSystem.getLogger().log(Level.FINE,"Frame is "+Rn.matrixToString(frames[0]));
 			//LoggingSystem.getLogger().log(Level.FINE,"Scaler is "+Rn.matrixToString(scaler));
 			double[] translate = {0,0,coord,1};
-			double[] translateM = P3.makeTranslationMatrix(null, translate, signature);
+			double[] translateM = P3.makeTranslationMatrix(null, translate, metric);
 			// the matrix net should  be a transformation that takes the two input points
 			// to the (dehomogenized) points (0,0,+/-.5,1).
 			double[] net = Rn.times(null, frame, Rn.times(null, translateM, scaler));
@@ -287,7 +287,7 @@ public class TubeUtility {
 //			double[] inp2 = Rn.matrixTimesVector(null, inet, p2);
 //			if ((debug & 64) != 0) theLogger.log(Level.FINE,"Image of end points: "+Rn.toString(Pn.dehomogenize(null,inp1), 6)+"  "+Rn.toString(Pn.dehomogenize(null,inp2),6));
 			if (sgc == null) sgc = new SceneGraphComponent();
-			sgc.setGeometry(urTube[signature+1]);
+			sgc.setGeometry(urTube[metric+1]);
 			if (sgc.getTransformation() == null) sgc.setTransformation(new Transformation());
 			sgc.getTransformation().setMatrix(net); 
 			//LoggingSystem.getLogger().log(Level.FINE,"Matrix is "+Rn.matrixToString(sgc.getTransformation().getMatrix()));

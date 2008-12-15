@@ -87,7 +87,7 @@ public class AABBPickSystem implements PickSystem {
   private Comparator<Hit> cmp = new Hit.HitComparator();
   private double[] from;
   private double[] to;
-  private int signature;
+  private int metric;
   
   public void setSceneRoot(SceneGraphComponent root) {
     impl= new Impl();
@@ -98,13 +98,13 @@ public class AABBPickSystem implements PickSystem {
     from=(double[]) f.clone();
     to=(double[]) t.clone();
     hits.clear();
-    // get the signature fresh each invocation
-    // this is actually dangerous since signature may change inside the scene graph
+    // get the metric fresh each invocation
+    // this is actually dangerous since metric may change inside the scene graph
     // (e.g., in ViewerVR there are euclidean 2D Frames inside the (possibly noneuclidean) scene.
     if (root.getAppearance() != null) {
-    	Object sig = root.getAppearance().getAttribute(CommonAttributes.SIGNATURE, Integer.class);
-    	if (sig instanceof Integer)	signature = (Integer) sig;
-    } else signature = Pn.EUCLIDEAN;
+    	Object sig = root.getAppearance().getAttribute(CommonAttributes.METRIC, Integer.class);
+    	if (sig instanceof Integer)	metric = (Integer) sig;
+    } else metric = Pn.EUCLIDEAN;
     impl.visit();
     if (hits.isEmpty()) return Collections.emptyList();
     Collections.sort(hits, cmp);
@@ -130,7 +130,7 @@ public class AABBPickSystem implements PickSystem {
     private Matrix m=new Matrix();
     private Matrix mInv=new Matrix();
     
-//    private int signature=Pn.EUCLIDEAN;
+//    private int metric=Pn.EUCLIDEAN;
     private Matrix[] matrixStack = new Matrix[256];
     int stackCounter = 0;
     /**
@@ -139,13 +139,13 @@ public class AABBPickSystem implements PickSystem {
      *
      */
     private class PickInfo {
-        private boolean pickPoints=true, drawVertices = false;
+        private boolean pickPoints=true, drawVertices = true;
         private boolean pickEdges=true, drawEdges = true;
         private boolean pickFaces=true, drawFaces = true;
         private boolean hasNewPickInfo = false;
         private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
         private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
-        int signature = AABBPickSystem.this.signature;
+        int metric = AABBPickSystem.this.metric;
         PickInfo(PickInfo old, Appearance ap)	{
         	if (old != null)	{
                	drawVertices = old.drawVertices;
@@ -156,11 +156,11 @@ public class AABBPickSystem implements PickSystem {
             	pickFaces = old.pickFaces;
             	tubeRadius = old.tubeRadius;
             	pointRadius = old.pointRadius;    
-            	signature = old.signature;
+            	metric = old.metric;
         	}
         	if (ap == null) return;
             Object foo = ap.getAttribute(CommonAttributes.VERTEX_DRAW, Boolean.class);
-            if (foo != Appearance.INHERITED) pickPoints = drawVertices = (Boolean) foo;
+            if (foo != Appearance.INHERITED) drawVertices = (Boolean) foo;
             if (drawVertices)	{
             	foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
                 if (foo != Appearance.INHERITED) { hasNewPickInfo = true; pickPoints = (Boolean) foo; }
@@ -189,8 +189,8 @@ public class AABBPickSystem implements PickSystem {
               foo = ap.getAttribute(CommonAttributes.TUBE_RADIUS, Double.class);
               if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; tubeRadius = (Double) foo;}
           }
-          foo = ap.getAttribute(CommonAttributes.SIGNATURE, Integer.class);
-          if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; signature = (Integer) foo; }
+          foo = ap.getAttribute(CommonAttributes.METRIC, Integer.class);
+          if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; metric = (Integer) foo; }
          }
         public String toString()	{
         	return "Pick vef = "+pickPoints+" "+pickEdges+" "+pickFaces+" "+pointRadius+" "+tubeRadius;
@@ -258,7 +258,7 @@ public class AABBPickSystem implements PickSystem {
       
       localHits.clear();
       
-      BruteForcePicking.intersectSphere(s, signature, path, m, mInv, from, to, localHits);
+      BruteForcePicking.intersectSphere(s, metric, path, m, mInv, from, to, localHits);
       
       extractHits(localHits);
     }
@@ -268,7 +268,7 @@ public class AABBPickSystem implements PickSystem {
       
       localHits.clear();
       
-      BruteForcePicking.intersectCylinder(c, signature, path, m, mInv, from, to, localHits);
+      BruteForcePicking.intersectCylinder(c, metric, path, m, mInv, from, to, localHits);
 
       extractHits(localHits);
     }
@@ -290,9 +290,9 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
       
         if (tree == AABBTree.nullTree) {
-          BruteForcePicking.intersectPolygons(ifs, signature, path, m, mInv, from, to, localHits);
+          BruteForcePicking.intersectPolygons(ifs, metric, path, m, mInv, from, to, localHits);
         } else {
-          tree.intersect(ifs, signature, path, from, to, localHits);
+          tree.intersect(ifs, metric, path, from, to, localHits);
         }
         extractHits(localHits);
     }
@@ -305,7 +305,7 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
 
  //     System.err.println("Picking indexed line set "+ils.getName());
-       BruteForcePicking.intersectEdges(ils, signature, path, m, mInv, from, to, currentPI.tubeRadius, localHits);
+       BruteForcePicking.intersectEdges(ils, metric, path, m, mInv, from, to, currentPI.tubeRadius, localHits);
        extractHits(localHits);
     }
 
@@ -315,7 +315,7 @@ public class AABBPickSystem implements PickSystem {
 
       localHits.clear();
 
-      BruteForcePicking.intersectPoints(ps, signature, path, m, mInv, from, to, currentPI.pointRadius, localHits);
+      BruteForcePicking.intersectPoints(ps, metric, path, m, mInv, from, to, currentPI.pointRadius, localHits);
       extractHits(localHits);        
     }
 

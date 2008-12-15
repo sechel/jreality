@@ -91,12 +91,12 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		this(Pn.EUCLIDEAN, mMaxU, mMaxV, closeU, closeV);
 	}
 	
-	AbstractQuadMeshFactory( int signature, int mMaxU, int mMaxV, boolean closeU, boolean closeV ) {
-		this(new IndexedFaceSet(), signature, mMaxU, mMaxV, closeU, closeV);
+	AbstractQuadMeshFactory( int metric, int mMaxU, int mMaxV, boolean closeU, boolean closeV ) {
+		this(new IndexedFaceSet(), metric, mMaxU, mMaxV, closeU, closeV);
 	}
 	
-	AbstractQuadMeshFactory( IndexedFaceSet existing, int signature, int mMaxU, int mMaxV, boolean closeU, boolean closeV ) {
-		super(existing == null ? new IndexedFaceSet() : existing, signature );
+	AbstractQuadMeshFactory( IndexedFaceSet existing, int metric, int mMaxU, int mMaxV, boolean closeU, boolean closeV ) {
+		super(existing == null ? new IndexedFaceSet() : existing, metric );
 		
 		setMeshSize( mMaxU, mMaxV );
 
@@ -331,7 +331,7 @@ class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		if( !isClosedInUDirection() && !isClosedInVDirection() )
 			return vertexNormals;
 		
-		if( getSignature() != Pn.EUCLIDEAN )
+		if( getMetric() != Pn.EUCLIDEAN )
 			LoggingSystem.getLogger(this).log(Level.WARNING, 
 					"currently only eucledian normals used for smoothing");
 		

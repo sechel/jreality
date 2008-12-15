@@ -12,7 +12,7 @@ import de.jreality.scene.data.DataList;
 
 public class AbstractGeometryFactory {
 
-	final OoNode signature;
+	final OoNode metric;
 	
 	UpdateCounter update = new UpdateCounter();
 	
@@ -25,11 +25,11 @@ public class AbstractGeometryFactory {
 	
 	final Geometry geometry;
 	
-	AbstractGeometryFactory( Geometry geometry, int signature ) {
+	AbstractGeometryFactory( Geometry geometry, int metric ) {
 		
-		this.signature = node( new Integer( signature ), "signature" );
+		this.metric = node( new Integer( metric ), "metric" );
 		this.geometry = geometry;
-		GeometryUtility.setSignature( geometry,signature);
+		GeometryUtility.setMetric( geometry,metric);
 	}
 	
 	public Geometry getGeometry() {
@@ -59,12 +59,12 @@ public class AbstractGeometryFactory {
 		return node.getCounterOfLastUpdate() == update.getUpdateCount();
 	}
 
-	public int getSignature() {
-		return ((Integer)signature.getObject()).intValue();
+	public int getMetric() {
+		return ((Integer)metric.getObject()).intValue();
 	}
 
-	public void setSignature(int signature) {
-		this.signature.setObject( new Integer( signature) );
+	public void setMetric(int metric) {
+		this.metric.setObject( new Integer( metric) );
 	}
 
 	
@@ -87,7 +87,7 @@ public class AbstractGeometryFactory {
 	}
 
 	void updateImpl() {
-		GeometryUtility.setSignature( geometry, getSignature());	
+		GeometryUtility.setMetric( geometry, getMetric());	
 	}
 
 	void updateGeometryAttributeCathegory( GeometryAttributeListSet gals ) {

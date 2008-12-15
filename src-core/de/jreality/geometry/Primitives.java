@@ -177,9 +177,9 @@ public class Primitives {
 		 * @param height		y-dim
 		 * @param depth		z-dim
 		 * @param colored	provide face colors?
-		 * @param signature	the metric
+		 * @param metric	the metric
 		 * @return
-		 */public static IndexedFaceSet box(double width,double height,double depth,boolean colored, int signature){
+		 */public static IndexedFaceSet box(double width,double height,double depth,boolean colored, int metric){
 			double w=width/2;	double h=height/2;	double d=depth/2;
 			double[][] points =  
 			 {{w,h,d},{w,h,-d},{w,-h,d},{w,-h,-d},
@@ -190,7 +190,7 @@ public class Primitives {
 			ifsf.setFaceCount(cubeIndices.length);
 			ifsf.setFaceIndices(cubeIndices);
 			if (colored) ifsf.setFaceColors(cubeColors);
-			ifsf.setSignature(signature);
+			ifsf.setMetric(metric);
 			ifsf.setGenerateFaceNormals(true);
 			ifsf.setGenerateEdgesFromFaces(true);
 			ifsf.update();
@@ -364,16 +364,16 @@ public class Primitives {
 		}
 		
 		/**
-		 * A sphere with given radius and center, with the given metric signature.
+		 * A sphere with given radius and center, with the given metric metric.
 		 * @param radius
 		 * @param center
-		 * @param signature
+		 * @param metric
 		 * @return
 		 */
-		 public static SceneGraphComponent sphere(double radius, double[] center, int signature) {
+		 public static SceneGraphComponent sphere(double radius, double[] center, int metric) {
 			SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
 			if (center == null)  center = Pn.originP3;
-			MatrixBuilder.init(null,signature).translate(center).scale(radius).assignTo(sgc.getTransformation());
+			MatrixBuilder.init(null,metric).translate(center).scale(radius).assignTo(sgc.getTransformation());
 			sgc.setGeometry(new Sphere());
 			return sgc;
 		}
@@ -657,7 +657,7 @@ public class Primitives {
 		}
 
 		/**
-		 * Create a  clipping plane with the given plane equation with the given signature. 
+		 * Create a  clipping plane with the given plane equation with the given metric. 
 		 * The points whose inner product with <i>plane</i> are negative, will be clipped away. 
 		 * @param plane
 		 * @param sig	

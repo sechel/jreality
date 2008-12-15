@@ -63,9 +63,9 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 	
 	AttributeGenerator vertexLabels = attributeGeneratorNode( vertex, String[].class, Attribute.LABELS );
 	
-	AbstractPointSetFactory( PointSet ps, int signature ) {
+	AbstractPointSetFactory( PointSet ps, int metric ) {
 		
-		super( ps, signature );
+		super( ps, metric );
 		
 		this.ps = ps;
 	}

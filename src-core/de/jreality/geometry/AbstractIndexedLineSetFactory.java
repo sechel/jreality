@@ -70,14 +70,14 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		
 	AttributeGenerator edgeLabels = attributeGeneratorNode( edge, String[].class, Attribute.LABELS );
 	
-	AbstractIndexedLineSetFactory( IndexedLineSet ils, int signature ) {
-		super( ils, signature );	
+	AbstractIndexedLineSetFactory( IndexedLineSet ils, int metric ) {
+		super( ils, metric );	
 
 		this.ils = ils;
 	}
 	
-	AbstractIndexedLineSetFactory( int signature ) {
-		this( new IndexedLineSet(0,0), signature );
+	AbstractIndexedLineSetFactory( int metric ) {
+		this( new IndexedLineSet(0,0), metric );
 	}
 	
 	AbstractIndexedLineSetFactory(IndexedLineSet existing) {
@@ -141,20 +141,20 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		setEdgeIndices( data, 2 );
 	}
 	
-//	protected void setEdgeNormals( DataList data ) {
-//		setEdgeAttribute( Attribute.NORMALS, data );
-//	}
-//	
-//	protected void setEdgeNormals( double [] data ) {
-//		if( data != null && data.length % noe() != 0 )
-//			throw new IllegalArgumentException( "array has wrong length" );	
-//		setEdgeAttribute( Attribute.NORMALS, data == null ? null : new DoubleArrayArray.Inlined( data, data.length / noe() ) );
-//	}
-//	
-//	protected void setEdgeNormals( double [][] data ) {
-//		setEdgeAttribute( Attribute.NORMALS, new DoubleArrayArray.Array( data ) );
-//	}
-//	
+	protected void setEdgeNormals( DataList data ) {
+		setEdgeAttribute( Attribute.NORMALS, data );
+	}
+	
+	protected void setEdgeNormals( double [] data ) {
+		if( data != null && data.length % noe() != 0 )
+			throw new IllegalArgumentException( "array has wrong length" );	
+		setEdgeAttribute( Attribute.NORMALS, data == null ? null : new DoubleArrayArray.Inlined( data, data.length / noe() ) );
+	}
+	
+	protected void setEdgeNormals( double [][] data ) {
+		setEdgeAttribute( Attribute.NORMALS, new DoubleArrayArray.Array( data ) );
+	}
+	
 	protected void setEdgeColors( DataList data ) {
 		setEdgeAttribute( Attribute.COLORS, data );
 	}

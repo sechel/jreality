@@ -127,7 +127,7 @@ public class CoordinateSystemFactory {
 		//GeometryUtility.calculateAndSetVertexNormals(urCone);
 	}
 	
-	//private int signature = Pn.EUCLIDEAN;
+	//private int metric = Pn.EUCLIDEAN;
 	
 	private int currentClosestBoxVertex = -1;  //index of a currently closest box vertex in boxVertices[0] 
 	
@@ -539,7 +539,7 @@ public class CoordinateSystemFactory {
 		geom.setName("arrow");
 		arrow.setGeometry(geom);
 		//get rotation for axis
-		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, signature).getTransformation());
+		//FactoredMatrix m = new FactoredMatrix(TubeUtility.tubeOneEdge(min, max, 0.025, null, metric).getTransformation());
 		//above method results in incorrect translation
 		FactoredMatrix m = new FactoredMatrix();
 		m.setRotation(getAxisRotation(axis));

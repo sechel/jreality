@@ -100,7 +100,7 @@ import de.jreality.util.SceneGraphUtility;
 	 IndexedLineSet ils;
 	 double stickRadius=.025, ballRadius=.05;
 	 Color stickColor = Color.YELLOW, ballColor=Color.GREEN, arrowColor = Color.RED;
-	 int signature = Pn.EUCLIDEAN;
+	 int metric = Pn.EUCLIDEAN;
 	 boolean showBalls = true, showSticks = true, realSpheres = true, drawArrows = false;
 	 SceneGraphComponent theResult;
 	 double arrowPosition = .5;		// where is tip of arrow placed?
@@ -148,7 +148,7 @@ import de.jreality.util.SceneGraphUtility;
 	 }
 
 	 public void update()	{
-			topAp.setAttribute("signature", signature);
+			topAp.setAttribute("metric", metric);
 			sticks.setVisible(showSticks);
 			balls.setVisible(showBalls);
 			if (stickColor != null) sticksAp.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, stickColor);
@@ -182,7 +182,7 @@ import de.jreality.util.SceneGraphUtility;
 					for (int i = 0; i<n; ++i)	{
 							double[] p1 = vertices.item(i).toDoubleArray(null);	
 							SceneGraphComponent cc = new SceneGraphComponent("ball"+i);
-							MatrixBuilder.init(null, signature).translate(p1).scale(ballRadius).assignTo(cc);
+							MatrixBuilder.init(null, metric).translate(p1).scale(ballRadius).assignTo(cc);
 							if (ballGeometry != null) cc.setGeometry(ballGeometry);
 							else cc.setGeometry(new Sphere());
 							if (vertexColors != null) {
@@ -213,7 +213,7 @@ import de.jreality.util.SceneGraphUtility;
 						double[] p1 = vertices.item(k).toDoubleArray(null);	
 						k = ed[j+1];
 						double[] p2 = vertices.item(k).toDoubleArray(null);	
-						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, stickRadius, crossSection, signature);
+						SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, stickRadius, crossSection, metric);
 						if (stickGeometry != null) cc.setGeometry(stickGeometry);
 						if (edgeColors != null) {
 							Color ccc = null;
@@ -227,10 +227,10 @@ import de.jreality.util.SceneGraphUtility;
 						if (cc != null) sticks.addChild(cc);
 						if (drawArrows)		{
 							arrow = new SceneGraphComponent("Arrows");
-							FactoredMatrix arrowM = new FactoredMatrix(signature);
+							FactoredMatrix arrowM = new FactoredMatrix(metric);
 							double d;
 							if (p1.length == 3) d = Rn.euclideanDistance(p1, p2);
-							else d = Pn.distanceBetween(p1, p2, signature);
+							else d = Pn.distanceBetween(p1, p2, metric);
 							double flatten = arrowSlope/(d);
 							double stretch = arrowScale/stickRadius;
 							arrowM.setStretch(stretch, stretch, arrowScale*flatten);
@@ -265,18 +265,18 @@ import de.jreality.util.SceneGraphUtility;
 		this.stickColor = stickColor;
 	}
 
-	public void setSignature(int signature) {
-		this.signature = signature;
+	public void setMetric(int metric) {
+		this.metric = metric;
 	}
 	
 	public SceneGraphComponent getSceneGraphComponent()	{
 		return theResult;
 	}
 
-	protected static SceneGraphComponent sticks(IndexedLineSet ifs, double rad, int signature)	{
-		return sticks(null, ifs, rad, signature);
+	protected static SceneGraphComponent sticks(IndexedLineSet ifs, double rad, int metric)	{
+		return sticks(null, ifs, rad, metric);
 	}
-	public static SceneGraphComponent sticks(SceneGraphComponent sgc, IndexedLineSet ifs, double rad, int signature)	{
+	public static SceneGraphComponent sticks(SceneGraphComponent sgc, IndexedLineSet ifs, double rad, int metric)	{
 		if (sgc == null) sgc = new SceneGraphComponent();
 		DataList vertices = ifs.getVertexAttributes(Attribute.COORDINATES);
 		int n = ifs.getNumEdges();
@@ -288,7 +288,7 @@ import de.jreality.util.SceneGraphUtility;
 				double[] p1 = vertices.item(k).toDoubleArray(null);	
 				k = ed[j+1];
 				double[] p2 = vertices.item(k).toDoubleArray(null);	
-				SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, null, signature);
+				SceneGraphComponent cc = TubeUtility.tubeOneEdge(p1, p2, rad, null, metric);
 				if (cc != null) sgc.addChild(cc);
 			}
 		}

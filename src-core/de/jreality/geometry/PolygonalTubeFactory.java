@@ -111,11 +111,11 @@ import de.jreality.util.LoggingSystem;
 	 * @param xsec
 	 * @param type
 	 * @param closed
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
 	private double[][] polygon2, vals;
-	protected  double[][] makeTube(double[][] curve, double[] radii, double[][] xsec, FrameFieldType type, boolean closed, int signature, int twists)	{
+	protected  double[][] makeTube(double[][] curve, double[] radii, double[][] xsec, FrameFieldType type, boolean closed, int metric, int twists)	{
 
 		int n = curve.length;
 		int vl = xsec[0].length;
@@ -165,11 +165,11 @@ import de.jreality.util.LoggingSystem;
 			}
 		}
 //		FrameInfo[] 
-		          frames = makeFrameField(polygon2, type, signature);
+		          frames = makeFrameField(polygon2, type, metric);
 		LoggingSystem.getLogger(PolygonalTubeFactory.class).fine("Last phi is "+frames[frames.length-1].phi);
 		if (frames == null) 
 			throw new NullPointerException("No frames!");
-//		System.err.println("makeTube: sig = "+signature);
+//		System.err.println("makeTube: sig = "+metric);
 		double[] rad = Rn.identityMatrix(4);
 		int nn = frames.length;
 		double lastphi = frames[frames.length-1].phi;
@@ -215,11 +215,11 @@ import de.jreality.util.LoggingSystem;
 		if (radii.length == 1) {
 			radii[0] = radius;
 		}
-		theTubeVertices = makeTube(theCurve, radii, crossSection, frameFieldType, closedCurve, signature, twists);
-//		System.err.println("PTF: signature is "+signature);
+		theTubeVertices = makeTube(theCurve, radii, crossSection, frameFieldType, closedCurve, metric, twists);
+//		System.err.println("PTF: metric is "+metric);
 		qmf = new QuadMeshFactory();
-		qmf.setSignature(signature);
-//		System.err.println("PTF: sig = "+signature);
+		qmf.setMetric(metric);
+//		System.err.println("PTF: sig = "+metric);
 		qmf.setGenerateTextureCoordinates(generateTextureCoordinates && !arcLengthTextureCoordinates);
 		qmf.setULineCount(crossSection.length);
 		qmf.setVLineCount(theTubeVertices.length/crossSection.length);
@@ -236,7 +236,7 @@ import de.jreality.util.LoggingSystem;
 		if (generateTextureCoordinates)	{
 			if (!arcLengthTextureCoordinates) qmf.setGenerateTextureCoordinates(true);
 			else {
-				qmf.setVertexTextureCoordinates(arcLengthTextureCoordinates(theCurve, crossSection, signature));
+				qmf.setVertexTextureCoordinates(arcLengthTextureCoordinates(theCurve, crossSection, metric));
 			}
 		}
 		if (vertexColors != null || edgeColors != null)	{
@@ -278,7 +278,7 @@ import de.jreality.util.LoggingSystem;
 		theTube = qmf.getIndexedFaceSet();
 	}
 	
-	private double[][] arcLengthTextureCoordinates(double[][] theCurve, double[][] crossSection, int signature) {
+	private double[][] arcLengthTextureCoordinates(double[][] theCurve, double[][] crossSection, int metric) {
 			
 			final int vLineCount = theCurve.length;
 			final int uLineCount = crossSection.length;
@@ -289,7 +289,7 @@ import de.jreality.util.LoggingSystem;
 			lengths[0] = 0.0;
 			for (int i = 1; i<vLineCount; ++i)	{
 				if (vLength == 3)		lengths[i] = lengths[i-1] + Rn.euclideanDistance(theCurve[i], theCurve[i-1]);
-				else lengths[i] = lengths[i-1] + Pn.distanceBetween(theCurve[i], theCurve[i-1], signature);
+				else lengths[i] = lengths[i-1] + Pn.distanceBetween(theCurve[i], theCurve[i-1], metric);
 			}
 			final double du= 1.0 / (uLineCount - 1);
 			

@@ -218,7 +218,7 @@ public class IndexedFaceSetUtility {
 		if (ifs == null) ifs = new IndexedFaceSet();
 		// TODO replace this code when it's fixed to initialize the factory with the existing ifs.
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();// Pn.EUCLIDEAN, true, false, true);
-		ifsf.setSignature(sig);
+		ifsf.setMetric(sig);
 //		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setVertexCount(points.length);
@@ -1927,42 +1927,42 @@ public class IndexedFaceSetUtility {
 	}
 
 	public static double[][] calculateFaceNormals(IndexedFaceSet ifs)	{
-		Object sigO = ifs.getGeometryAttributes(GeometryUtility.SIGNATURE);
+		Object sigO = ifs.getGeometryAttributes(GeometryUtility.METRIC);
 		int sig = Pn.EUCLIDEAN;
 		if (sigO != null && sigO instanceof Integer)	{
 			sig = ((Integer) sigO).intValue();
-			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with signature "+sig);
+			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with metric "+sig);
 		}
 		return IndexedFaceSetUtility.calculateFaceNormals(ifs,sig);
 	}
 
-	public static double[][] calculateFaceNormals(IndexedFaceSet ifs, int signature) {
+	public static double[][] calculateFaceNormals(IndexedFaceSet ifs, int metric) {
 	   int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 	   double[][] verts = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	   return IndexedFaceSetUtility.calculateFaceNormals(indices, verts, signature);
+	   return IndexedFaceSetUtility.calculateFaceNormals(indices, verts, metric);
 	}
 
 	/**
 	 * Calculate face normals for the faces defined by the index list <i>indices</i> and 
-	 * the vertex list <i>verts</i>, with respect to the given </i>signature</i>. The method attempts
+	 * the vertex list <i>verts</i>, with respect to the given </i>metric</i>. The method attempts
 	 * to skip over degenerate vertices (in the euclidean case only currently!), 
 	 * but otherwise assumes the faces are planar.
 	 * @param indices
 	 * @param verts
-	 * @param signature
+	 * @param metric
 	 * @return
 	 */
-	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int signature)	{
+	public static double[][] calculateFaceNormals(int[][] indices, double[][] verts, int metric)	{
 		if (indices == null) return null;
 		int normalLength = 4;
-		//System.err.println("Sig is "+signature);
-		if (signature == Pn.EUCLIDEAN)	normalLength = 3;
+		//System.err.println("Sig is "+metric);
+		if (metric == Pn.EUCLIDEAN)	normalLength = 3;
 		double[][] fn = new double[indices.length][normalLength];
-		if (signature == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);
+		if (metric == Pn.EUCLIDEAN && verts[0].length == 4) Pn.dehomogenize(verts,verts);
 		for (int i=0; i<indices.length; ++i)	{
 			int n = indices[i].length;
 			if (n < 3) continue;
-			if (signature == Pn.EUCLIDEAN)	{		
+			if (metric == Pn.EUCLIDEAN)	{		
 				// not necessary but probably a bit faster
 				// have to find a non-degenerate set of 3 vertices
 				int count = 1;
@@ -1980,8 +1980,8 @@ public class IndexedFaceSetUtility {
 			} else {
 				// TODO find non-degenerate set of 3 vertices here also
 				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
-				double[] normal = Pn.polarizePlane(null, osculatingPlane,signature);	
-				Pn.setToLength(normal, normal, -1.0, signature);
+				double[] normal = Pn.polarizePlane(null, osculatingPlane,metric);	
+				Pn.setToLength(normal, normal, -1.0, metric);
 				for (int j = 0; j<3; ++j)	{
 					double[] point = (verts[indices[i][j]].length == 3) ? Pn.homogenize(null, verts[indices[i][j]]) : verts[indices[i][j]];
 				}
@@ -2029,7 +2029,7 @@ public class IndexedFaceSetUtility {
 	}
 
 	public static double[][] calculateVertexNormals(IndexedFaceSet ifs)	{
-		Object sigO = ifs.getGeometryAttributes(GeometryUtility.SIGNATURE);
+		Object sigO = ifs.getGeometryAttributes(GeometryUtility.METRIC);
 		int sig = Pn.EUCLIDEAN;
 		if (sigO != null && sigO instanceof Integer)	{
 			sig = ((Integer) sigO).intValue();
@@ -2038,16 +2038,16 @@ public class IndexedFaceSetUtility {
 	}
 
 	public static double[][] calculateVertexNormals(IndexedFaceSet ifs,
-			int signature) {
+			int metric) {
 		int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		if (indices == null)return null;
 		double[][] fn = null;
 		if (ifs.getFaceAttributes(Attribute.NORMALS) == null) {
-			fn = calculateFaceNormals(ifs, signature);
+			fn = calculateFaceNormals(ifs, metric);
 		} else
 			fn = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
 		double[][] vertsAs2D = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		return IndexedFaceSetUtility.calculateVertexNormals(indices, vertsAs2D, fn, signature);
+		return IndexedFaceSetUtility.calculateVertexNormals(indices, vertsAs2D, fn, metric);
 	}
 
 	/**
@@ -2059,24 +2059,24 @@ public class IndexedFaceSetUtility {
 	   * @param indices
 	   * @param vertsAs2D
 	   * @param fn
-	   * @param signature
+	   * @param metric
 	   * @return
 	   */
 	 public static double[][] calculateVertexNormals(int[][] indices,
-				double[][] vertsAs2D, double[][] fn, int signature) {
+				double[][] vertsAs2D, double[][] fn, int metric) {
 		 	int n = fn[0].length;
 			double[][] nvn = new double[vertsAs2D.length][n];
-			// TODO average only after normalizing wrt the signature
+			// TODO average only after normalizing wrt the metric
 			for (int j = 0; j < indices.length; ++j) {
 				for (int k = 0; k < indices[j].length; ++k) {
 					int m = indices[j][k];
 					Rn.add(nvn[m], fn[j], nvn[m]);
 				}
 			}
-			if (signature == Pn.EUCLIDEAN)
+			if (metric == Pn.EUCLIDEAN)
 				Rn.normalize(nvn, nvn);
 			else
-				Pn.normalize(nvn, nvn, signature);
+				Pn.normalize(nvn, nvn, metric);
 			return nvn;
 		}
 

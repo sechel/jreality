@@ -71,7 +71,7 @@ import de.jreality.scene.data.DoubleArray;
  * <p>
  * 
  * This class is designed to work with any of the classical homogeneous
- * geometries: euclidean, elliptic, or hyperbolic. The variable {\it signature}
+ * geometries: euclidean, elliptic, or hyperbolic. The variable {\it metric}
  * controls which geometry is active. [Note: Probably should be constructor
  * parameter and not allowed to change].
  * <p>
@@ -95,7 +95,7 @@ import de.jreality.scene.data.DoubleArray;
  * <p>
  * 
  * It is also possible to factor isometries of non-euclidean space.  In this case 
- * use a constructor that allows specifying the <i>signature</i>.  See {@link Pn} for a
+ * use a constructor that allows specifying the <i>metric</i>.  See {@link Pn} for a
  * more complete description of the non-euclidean isometries.  Then the above remarks
  * should be extended whereever they refer to euclidean metric. 
  * <p>
@@ -124,19 +124,19 @@ public class FactoredMatrix extends Matrix {
     protected boolean factorHasChanged, matrixHasChanged, isFactored,
             isIdentity, isSpecial, isReflection, useCenter;
 
-    private int signature;
+    private int metric;
 
     /**
-     * Generate a new transform with given signature and matrix If <i>m </i> is
+     * Generate a new transform with given metric and matrix If <i>m </i> is
      * null, use identity matrix.
      * 
-     * @param signature
+     * @param metric
      *            See {@link Pn}.
      * @param m
      */
-    public FactoredMatrix(int signature, double[] m) {
+    public FactoredMatrix(int metric, double[] m) {
         super(m);
-        this.signature = signature;
+        this.metric = metric;
         translationVector = new double[4];
         stretchVector = new double[4];
         rotationAxis = new double[3];
@@ -150,11 +150,11 @@ public class FactoredMatrix extends Matrix {
     /**
      * copy constructor
      * 
-     * @param signature the signature
+     * @param metric the metric
      * @param m the matrixc to copy
      */
-    public FactoredMatrix(Matrix m, int signature) {
-      this(signature, (double[]) m.getArray().clone());
+    public FactoredMatrix(Matrix m, int metric) {
+      this(metric, (double[]) m.getArray().clone());
     }
     
     /**
@@ -163,11 +163,11 @@ public class FactoredMatrix extends Matrix {
      * @param fm the FactoredMatrix to copy
      */
     public FactoredMatrix(FactoredMatrix fm) {
-      this(fm, fm.getSignature());
+      this(fm, fm.getMetric());
     }
     
-    public FactoredMatrix(int signature) {
-        this(signature, null);
+    public FactoredMatrix(int metric) {
+        this(metric, null);
     }
 
     public FactoredMatrix(double[] m) {
@@ -272,7 +272,7 @@ public class FactoredMatrix extends Matrix {
             invCenterMatrix = new double[16];
         centerVector[3] = 1.0;
         System.arraycopy(aVec, 0, centerVector, 0, aVec.length);
-        P3.makeTranslationMatrix(centerMatrix, centerVector, signature);
+        P3.makeTranslationMatrix(centerMatrix, centerVector, metric);
         Rn.inverse(invCenterMatrix, centerMatrix);
 
         if (keepMatrix) {
@@ -300,8 +300,8 @@ public class FactoredMatrix extends Matrix {
      * @param tz
      */
     public void setTranslation(double tx, double ty, double tz) {
-        if (signature != Pn.EUCLIDEAN)
-            throw new IllegalStateException("Transform: setTranslation: Invalid signature");
+        if (metric != Pn.EUCLIDEAN)
+            throw new IllegalStateException("Transform: setTranslation: Invalid metric");
         translationVector[0] = tx;
         translationVector[1] = ty;
         translationVector[2] = tz;
@@ -317,7 +317,7 @@ public class FactoredMatrix extends Matrix {
      * @param aTransV
      */
     public void setTranslation(double[] aTransV) {
-        if (aTransV.length == 4 && signature == Pn.EUCLIDEAN
+        if (aTransV.length == 4 && metric == Pn.EUCLIDEAN
                 && aTransV[3] == 0.0) {
             // TODO: how does that fit to the input validation of the previous method???
             throw new IllegalArgumentException("Invalid euclidean translation");
@@ -512,7 +512,7 @@ public class FactoredMatrix extends Matrix {
             isFlipped[0] = isReflection;
             P3.composeMatrixFromFactors(matrix, translationVector,
                     rotationQ, stretchRotationQ, stretchVector, isReflection,
-                    signature);
+                    metric);
             if (useCenter) {
                 Rn.times(matrix, matrix, invCenterMatrix);
                 Rn.times(matrix, centerMatrix, matrix);
@@ -525,7 +525,7 @@ public class FactoredMatrix extends Matrix {
             } else
                 TTmp = matrix;
             P3.factorMatrix(TTmp, translationVector, rotationQ,
-                    stretchRotationQ, stretchVector, isFlipped, signature);
+                    stretchRotationQ, stretchVector, isFlipped, metric);
             isReflection = isFlipped[0];
         }
         isSpecial = Rn.isSpecialMatrix(matrix, TOLERANCE);
@@ -533,13 +533,13 @@ public class FactoredMatrix extends Matrix {
     }
 
     public FactoredMatrix getInverseFactored() {
-        return new FactoredMatrix(getSignature(), Rn.inverse(null, matrix));
+        return new FactoredMatrix(getMetric(), Rn.inverse(null, matrix));
     }
 
     // need this to be public in order to, for example, interpolate properly between two
     // existing instances [gunn]
-    public int getSignature() {
-        return signature;
+    public int getMetric() {
+        return metric;
     }
 	
    public boolean isMatrixHasChanged() {
