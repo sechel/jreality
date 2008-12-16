@@ -23,6 +23,9 @@ public class ExportVRML extends AbstractJrAction {
 	private boolean writeTextureFiles = false;
 	private boolean writeVrml2 = false;
 	private boolean useDefs = true;
+	private boolean evalTexMatrix= true;
+	private boolean writeTexIndis = true;
+	private boolean flipTexture = true;
 	private boolean drawTubes = true;
 	private boolean drawSpheres = true;
 	private boolean moveLightsToSceneRoot=true;
@@ -58,6 +61,9 @@ public class ExportVRML extends AbstractJrAction {
 				writer.setWriteTextureFiles(writeTextureFiles);
 				writer.setDrawSpheres(drawSpheres);
 				writer.setDrawTubes(drawTubes);
+				writer.setEvaluateTextureMatrix(evalTexMatrix);
+				writer.setFlipTextureUpsideDown(flipTexture);
+				writer.setWriteTextureCoordIndices(writeTexIndis);
 				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
 				writer.setUseDefs(useDefs);
 				writer.write(viewer.getSceneRoot());
@@ -83,6 +89,10 @@ public class ExportVRML extends AbstractJrAction {
 	JCheckBox tubesCB;
 	JCheckBox spheresCB;
 	JCheckBox lightCB;
+	JCheckBox evalTexMatrixCB;
+	JCheckBox writeTexIndisCB;
+	JCheckBox flipTextureCB;
+	
 	private JComponent createAccessory() {
 		Box accessory = Box.createVerticalBox();
 		accessory.add(Box.createVerticalGlue());
@@ -96,17 +106,32 @@ public class ExportVRML extends AbstractJrAction {
 				useDefs= useDefsCB.isSelected();
 			}
 		});
+		evalTexMatrixCB = new JCheckBox(new AbstractAction("evaluate texture matrices -> only texturecoords. (problems with 'useDefs' ?)[vrml2]") {
+			public void actionPerformed(ActionEvent e) {
+				evalTexMatrix= evalTexMatrixCB.isSelected();
+			}
+		});
+		writeTexIndisCB = new JCheckBox(new AbstractAction("write texture indices (only for compatibility)[vrml2]") {
+			public void actionPerformed(ActionEvent e) {
+				writeTexIndis= writeTexIndisCB.isSelected();
+			}
+		});
+		flipTextureCB = new JCheckBox(new AbstractAction("texture upside down [vrml2]") {
+			public void actionPerformed(ActionEvent e) {
+				flipTexture= flipTextureCB.isSelected();
+			}
+		});
 		vrml2CB= new JCheckBox(new AbstractAction("vrml2 instead of 1") {
 			public void actionPerformed(ActionEvent e) {
 				writeVrml2= vrml2CB.isSelected();
 			}
 		});
-		tubesCB= new JCheckBox(new AbstractAction("draw tube-lines as cylinder (vrml2)") {
+		tubesCB= new JCheckBox(new AbstractAction("draw tube-lines as cylinder [vrml2]") {
 			public void actionPerformed(ActionEvent e) {
 				drawTubes= tubesCB.isSelected();
 			}
 		});
-		spheresCB= new JCheckBox(new AbstractAction("draw sphere-vertices as spheres (vrml2)") {
+		spheresCB= new JCheckBox(new AbstractAction("draw sphere-vertices as spheres [vrml2]") {
 			public void actionPerformed(ActionEvent e) {
 				drawSpheres= spheresCB.isSelected();
 			}
@@ -119,6 +144,9 @@ public class ExportVRML extends AbstractJrAction {
 		accessory.add(vrml2CB);
 		accessory.add(textureCB);
 		accessory.add(useDefsCB);
+		accessory.add(evalTexMatrixCB);
+		accessory.add(writeTexIndisCB);
+		accessory.add(flipTextureCB);
 		accessory.add(tubesCB);
 		accessory.add(spheresCB);
 		accessory.add(lightCB);
@@ -126,6 +154,9 @@ public class ExportVRML extends AbstractJrAction {
 		vrml2CB.setSelected(writeVrml2);
 		textureCB.setSelected(writeTextureFiles);
 		useDefsCB.setSelected(useDefs);
+		evalTexMatrixCB.setSelected(evalTexMatrix);
+		writeTexIndisCB.setSelected(writeTexIndis);
+		flipTextureCB.setSelected(flipTexture);
 		tubesCB.setSelected(drawTubes);
 		spheresCB.setSelected(drawSpheres);
 		lightCB.setSelected(moveLightsToSceneRoot);
