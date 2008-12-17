@@ -156,7 +156,7 @@ public class LightCollector extends SceneGraphVisitor {
         map.put("lightcolor",l.getColor().getRGBColorComponents(null));
 //        map.put("from",new float[] {0f,0f,0f});
         if (metric != Pn.EUCLIDEAN)	{
-        	map.put("metric", new Float(metric));
+        	map.put("signature", new Float(metric));
      	   lightname = "noneuclideanlight";
         }
         else if (shadowEnabled){
