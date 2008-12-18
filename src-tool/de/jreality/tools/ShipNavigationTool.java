@@ -90,6 +90,7 @@ public class ShipNavigationTool extends AbstractTool {
 	private transient boolean rotate=false;
 	private transient boolean fall;
 	private double minHeight;
+	private PickDelegate pickDelegate;
 
 	public ShipNavigationTool() {
 		addCurrentSlot(forwardBackward);
@@ -222,19 +223,23 @@ public class ShipNavigationTool extends AbstractTool {
 	}
 	
 	protected double[] getHit(ToolContext tc, double[] pickStart, double[] dest) {
-		double[] hit = null;
-		List picks = Collections.EMPTY_LIST;
-		try {
-			picks = tc.getPickSystem().computePick(pickStart, dest);
-		} catch (Exception e) {
-			LoggingSystem.getLogger(this).warning("pick system error");
-			return null;
+		if (pickDelegate != null) {
+			return pickDelegate.getHit(tc, pickStart, dest);
+		} else {
+			double[] hit = null;
+			List picks = Collections.EMPTY_LIST;
+			try {
+				picks = tc.getPickSystem().computePick(pickStart, dest);
+			} catch (Exception e) {
+				LoggingSystem.getLogger(this).warning("pick system error");
+				return null;
+			}
+			if (!picks.isEmpty()) {
+				PickResult pr = (PickResult) picks.get(0);
+				hit = pr.getWorldCoordinates();
+			}
+			return hit;
 		}
-		if (!picks.isEmpty()) {
-			PickResult pr = (PickResult) picks.get(0);
-			hit = pr.getWorldCoordinates();
-		}
-		return hit;
 	}
 
 	private transient boolean timerOnline;
@@ -339,5 +344,21 @@ public class ShipNavigationTool extends AbstractTool {
 
 	public void setMinHeight(double minHeight) {
 		this.minHeight = minHeight;
+	}
+	
+	public static interface PickDelegate {
+		public double[] getHit(
+				ToolContext tc,
+				double[] pickStart,
+				double[] dest
+		);
+	}
+
+	public PickDelegate getPickDelegate() {
+		return pickDelegate;
+	}
+
+	public void setPickDelegate(PickDelegate pickDelegate) {
+		this.pickDelegate = pickDelegate;
 	}
 }
