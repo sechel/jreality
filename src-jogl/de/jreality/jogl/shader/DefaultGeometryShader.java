@@ -104,10 +104,23 @@ public class DefaultGeometryShader  implements Shader {
 	    }
 	       
 	    if(vertexDraw) {
-	        if (pointShader == null)
-	    		pointShader = createFrom(dgs.getPointShader());
-	        
-	        	pointShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POINT_SHADER) );
+	        if (pointShader == null) {
+	        	Class psClass = (Class) eap.getAttribute("pointShaderClass", Object.class);
+	        	if (psClass != Object.class) {
+	        		try {
+						pointShader = (PointShader) psClass.newInstance();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	        	}
+	        	// fallback...
+	        	if (pointShader == null) pointShader = createFrom(dgs.getPointShader());
+	        }
+	        pointShader.setFromEffectiveAppearance(eap, ShaderUtility.nameSpace(name,CommonAttributes.POINT_SHADER) );
 	    } else {
 	        pointShader=null;
 	    }
