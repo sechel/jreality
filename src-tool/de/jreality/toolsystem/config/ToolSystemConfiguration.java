@@ -140,7 +140,9 @@ public class ToolSystemConfiguration {
         public void exceptionThrown(Exception e) {
           e.printStackTrace();
         }
-      });
+      },
+      ToolSystemConfiguration.class.getClassLoader()
+    );
     ToolSystemConfiguration tsc = (ToolSystemConfiguration) dec.readObject();
     return tsc;
   }
