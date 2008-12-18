@@ -154,6 +154,7 @@ import de.jreality.scene.Appearance;
 	public final static String LINE_FACTOR = 		"lineFactor";
 	public final static String LINE_STIPPLE_PATTERN = "lineStipplePattern";
 	public static final Color LINE_DIFFUSE_COLOR_DEFAULT = Color.BLACK;
+	public final static String POINT_SPRITE = "pointSprite";
 
 	// default polygon shader
 	public final static String SMOOTH_SHADING = 	"smoothShading";		// interpolate vertex shading values?
