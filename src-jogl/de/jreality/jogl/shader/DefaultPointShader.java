@@ -39,6 +39,29 @@
 
 package de.jreality.jogl.shader;
 
+import static de.jreality.shader.CommonAttributes.ATTENUATE_POINT_SIZE;
+import static de.jreality.shader.CommonAttributes.ATTENUATE_POINT_SIZE_DEFAULT;
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
+import static de.jreality.shader.CommonAttributes.LIGHTING_ENABLED;
+import static de.jreality.shader.CommonAttributes.LIGHT_DIRECTION;
+import static de.jreality.shader.CommonAttributes.OPAQUE_TUBES_AND_SPHERES;
+import static de.jreality.shader.CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT;
+import static de.jreality.shader.CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT;
+import static de.jreality.shader.CommonAttributes.POINT_RADIUS;
+import static de.jreality.shader.CommonAttributes.POINT_RADIUS_DEFAULT;
+import static de.jreality.shader.CommonAttributes.POINT_SIZE;
+import static de.jreality.shader.CommonAttributes.POINT_SIZE_DEFAULT;
+import static de.jreality.shader.CommonAttributes.POINT_SPRITE;
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.SPECULAR_COLOR;
+import static de.jreality.shader.CommonAttributes.SPECULAR_COLOR_DEFAULT;
+import static de.jreality.shader.CommonAttributes.SPECULAR_EXPONENT;
+import static de.jreality.shader.CommonAttributes.SPECULAR_EXPONENT_DEFAULT;
+import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
+import static de.jreality.shader.CommonAttributes.SPHERES_DRAW_DEFAULT;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY_DEFAULT;
+
 import java.awt.Color;
 
 import javax.media.opengl.GL;
@@ -59,16 +82,11 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.LoggingSystem;
 
-/**
- * @author Charles Gunn
- *
- */
 public class DefaultPointShader  extends AbstractPrimitiveShader implements PointShader {
 	double pointSize = 1.0;
 	// on my mac, the only value for the following array that seems to "work" is {1,0,0}.  WHY?
@@ -82,7 +100,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	boolean attenuatePointSize = true;
 	PolygonShader polygonShader = null;
 	Appearance a=new Appearance();
-	Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
+	Texture2D spriteTexture=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
 	Texture2D currentTex;
 	double specularExponent = 60.0;
 	int polygonCount = 0;
@@ -101,15 +119,15 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
-		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
-		opaqueSpheres = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
-		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHT_DIRECTION),lightDirection);
-		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), true);
-		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_SIZE), CommonAttributes.POINT_SIZE_DEFAULT);
-		attenuatePointSize = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.ATTENUATE_POINT_SIZE), CommonAttributes.ATTENUATE_POINT_SIZE_DEFAULT);
-		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POINT_RADIUS),CommonAttributes.POINT_RADIUS_DEFAULT);
-		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.POINT_DIFFUSE_COLOR_DEFAULT);	
-		double t = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
+		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,SPHERES_DRAW), SPHERES_DRAW_DEFAULT);
+		opaqueSpheres = eap.getAttribute(ShaderUtility.nameSpace(name, OPAQUE_TUBES_AND_SPHERES), OPAQUE_TUBES_AND_SPHERES_DEFAULT);
+		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,LIGHT_DIRECTION),lightDirection);
+		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,LIGHTING_ENABLED), true);
+		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,POINT_SIZE), POINT_SIZE_DEFAULT);
+		attenuatePointSize = eap.getAttribute(ShaderUtility.nameSpace(name,ATTENUATE_POINT_SIZE), ATTENUATE_POINT_SIZE_DEFAULT);
+		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,POINT_RADIUS),POINT_RADIUS_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,DIFFUSE_COLOR), POINT_DIFFUSE_COLOR_DEFAULT);	
+		double t = eap.getAttribute(ShaderUtility.nameSpace(name,TRANSPARENCY), TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		if (templateShader != null)  {
@@ -119,15 +137,15 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		else polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 		//System.err.println("Attenuate point size is "+attenuatePointSize);
 		if (!sphereDraw)	{
-	      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap))
-	    	  currentTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "pointSprite"), eap);
+	      if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, POINT_SPRITE+".texture2d"), eap))
+	    	  currentTex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, POINT_SPRITE+".texture2d"), eap);
 	      else {
 	  			Rn.normalize(lightDirection, lightDirection);
-	  			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
+	  			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,POLYGON_SHADER+"."+SPECULAR_COLOR), SPECULAR_COLOR_DEFAULT);
 	  			specularColorAsFloat = specularColor.getRGBComponents(null);
-	  			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+	  			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,POLYGON_SHADER+"."+SPECULAR_EXPONENT), SPECULAR_EXPONENT_DEFAULT);
 	  			setupTexture();
-	  			currentTex=tex;
+	  			currentTex=spriteTexture;
 	      }
 	  }
 	}
@@ -146,11 +164,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			sum += Math.abs(diff);
 		}
 		if (sum < 10E-4) return;
-		tex.setImage(ShadedSphereImage.shadedSphereImage(
+		spriteTexture.setImage(ShadedSphereImage.shadedSphereImage(
 				lightDirection,diffuseColor, specularColor, specularExponent, textureSize, null));
-		tex.setApplyMode(Texture2D.GL_MODULATE);
+		spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
 		// use nearest filter to avoid corrupting the alpha = 0 transparency trick
-		tex.setMinFilter(Texture2D.GL_NEAREST);
+		spriteTexture.setMinFilter(Texture2D.GL_NEAREST);
 	}
 
 	private void preRender(JOGLRenderingState jrs)	{
@@ -178,10 +196,10 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 //			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
 			PointSet ps = (PointSet) jrs.currentGeometry;
-			if (currentTex == tex && ps.getVertexAttributes(Attribute.COLORS) != null)
-				tex.setApplyMode(Texture2D.GL_MODULATE);
+			if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null)
+				spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
 			else 
-				tex.setApplyMode(Texture2D.GL_REPLACE);
+				spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 			Texture2DLoaderJOGL.render(gl, currentTex);
