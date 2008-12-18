@@ -260,6 +260,7 @@ public class LabelUtility {
 		  if (background.equals(TRANSPARENT)) return bi;
 		  else s = " ";
 	  }
+	  if (f == null) f = new Font("Sans Serif",Font.PLAIN,48);
 	  TextLayout tl = new TextLayout(s,f,frc);
 	  Rectangle r = tl.getBounds().getBounds();
 	  
