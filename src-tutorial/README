@@ -1,6 +1,14 @@
+See http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Developer_Tutorial
+for an up-to-date documentation of these tutorial examples.  
+
+The following directions stem from a much earlier release of jReality and 
+are intended to be used only if you do not have access to an IDE such as 
+eclipse (www.eclipse.org).
+
+Old directions:
 tutorial readme:
 
-To get started, download the r file from www.jreality.de.
+To get started, download the jar file from www3.math.tu-berlin.de/jreality.
 Add it into your classpath. Then change to this folder and type
   
   javac de/jreality/tutorial/*.java
