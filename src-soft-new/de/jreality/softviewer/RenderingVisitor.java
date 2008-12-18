@@ -586,10 +586,9 @@ public class RenderingVisitor extends SceneGraphVisitor {
         DoubleArrayArray a = null;
         int n = p.getNumPoints();
         if (pointShader != null) {
-            a = p.getVertexAttributes(Attribute.COORDINATES)
-                    .toDoubleArrayArray();
-            if (a == null)
-                return;
+            DataList vertexCoordinates = p.getVertexAttributes(Attribute.COORDINATES);
+            if (vertexCoordinates == null) return;
+			a = vertexCoordinates.toDoubleArrayArray();
             pipeline.startGeometry(p);
             DataList vertexColors = p.getVertexAttributes(Attribute.COLORS);
             DataList vertexRadii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
