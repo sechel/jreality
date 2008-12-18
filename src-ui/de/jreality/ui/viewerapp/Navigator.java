@@ -40,7 +40,6 @@
 
 package de.jreality.ui.viewerapp;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -62,10 +61,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
-import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -102,7 +99,9 @@ public class Navigator implements SelectionListener {
 	private Container navigator;
 	private Component parentComp;
 	
-	private boolean propagateSelections, receiveSelections;
+	private Component toolBar;
+	private JCheckBox receiveCheckBox;
+	private JCheckBox propagateCheckBox;
 
 
 	/**
@@ -124,7 +123,7 @@ public class Navigator implements SelectionListener {
 		externalSelectionManager = SelectionManager.selectionManagerForViewer(viewer);
 		selectionManager = new SelectionManager(externalSelectionManager.getDefaultSelection());
 		//selectionManager.addSelectionListener(this);
-		
+		toolBar = createToolBar();
 		setPropagateSelections(true);
 		setReceiveSelections(true);
 
@@ -161,7 +160,7 @@ public class Navigator implements SelectionListener {
 				
 				//update selection managers
 				selectionManager.setSelection(currentSelection);
-				if (propagateSelections) externalSelectionManager.setSelection(currentSelection);  //does nothing if already selected
+				if (isPropagateSelections()) externalSelectionManager.setSelection(currentSelection);  //does nothing if already selected
 			}
 		});
 
@@ -306,7 +305,7 @@ public class Navigator implements SelectionListener {
 			c.gridwidth = GridBagConstraints.REMAINDER;
 			c.weightx = 1.0;
 			c.weighty = 0.0;
-			this.navigator.add(createToolBar(), c);
+			this.navigator.add(toolBar, c);
 			this.navigator.add(new JSeparator(), c);
 			c.weighty = 1.0;
 			this.navigator.add(navigator, c);
@@ -324,60 +323,69 @@ public class Navigator implements SelectionListener {
 //		jtb.setFloatable(false);
 		
 		Action a;
-		final JCheckBox propagate = new JCheckBox();
+		propagateCheckBox = new JCheckBox();
 //		final URL propagateImg = Navigator.class.getResource("propagate.png");
 		a = new AbstractAction("Propagate"){
-			{	//putValue(Action.SMALL_ICON, new ImageIcon(propagateImg));
-				putValue(Action.SHORT_DESCRIPTION, "Propagate selections to the SelectionManager"); }
+			
+			private static final long serialVersionUID = 1L;
+			{	
+				putValue(Action.SHORT_DESCRIPTION, "Propagate selections to the SelectionManager");
+			}
 			public void actionPerformed(ActionEvent e) {
-				setPropagateSelections(propagate.isSelected());
+				// nothing to do
 			}
 		};
-		propagate.setAction(a);
-		propagate.setSelected(propagateSelections);
-		checkerPanel.add(propagate);
-//		jtb.add(propagate);
-		
-		
-		final JCheckBox receive = new JCheckBox();
-//		final URL receiveImg = Navigator.class.getResource("receive.png");
+		propagateCheckBox.setAction(a);
+		checkerPanel.add(propagateCheckBox);
+		receiveCheckBox = new JCheckBox();
 		a = new AbstractAction("Receive"){
-			{	//putValue(Action.SMALL_ICON, new ImageIcon(receiveImg));
-				putValue(Action.SHORT_DESCRIPTION, "Receive selections from the SelectionManager"); }
+			private static final long serialVersionUID = 1L;
+			{
+				putValue(Action.SHORT_DESCRIPTION, "Receive selections from the SelectionManager");
+			}
 			public void actionPerformed(ActionEvent e) {
-				 setReceiveSelections(receive.isSelected());
+				updateReceiveSelections();
 			}
 		};
-		receive.setAction(a);
-		receive.setSelected(receiveSelections);
-		checkerPanel.add(receive);
-//		jtb.add(receive);
-		
-//		return jtb;
+		receiveCheckBox.setAction(a);
+		checkerPanel.add(receiveCheckBox);
+
 		return checkerPanel;
 	}
-	
-	
-	/**
-	 * Propagate selections to the underlying viewer's selection manager.
-	 */
-	public void setPropagateSelections(boolean propagate) {
-		propagateSelections = propagate;
-	}
-	
 
 	/**
 	 * Receive selections from the underlying viewer's selection manager.
 	 */
 	public void setReceiveSelections(boolean receive) {
-		receiveSelections = receive;
-		if (receive) 
-			externalSelectionManager.addSelectionListener(Navigator.this);
-		else externalSelectionManager.removeSelectionListener(Navigator.this);
+		receiveCheckBox.setSelected(receive);
 	}
 	
+	public boolean isReceiveSelections() {
+		return receiveCheckBox.isSelected();
+	}
+	
+	private void updateReceiveSelections() {
+		if (receiveCheckBox.isSelected()) {
+			externalSelectionManager.addSelectionListener(Navigator.this);
+		} else {
+			externalSelectionManager.removeSelectionListener(Navigator.this);
+		}
+	}
+
+	public boolean isPropagateSelections() {
+		return propagateCheckBox.isSelected();
+	}
+	
+	/**
+	 * Propagate selections to the underlying viewer's selection manager.
+	 */
+	public void setPropagateSelections(boolean propagate) {
+		propagateCheckBox.setSelected(propagate);
+	}
 
 //	-- INNER CLASSES -----------------------------------
+
+
 
 	public static abstract class SelectionListener implements TreeSelectionListener {
 
@@ -399,6 +407,8 @@ public class Navigator implements SelectionListener {
 
 
 	public static class SelectionEvent extends TreeSelectionEvent {
+		
+		private static final long serialVersionUID = 1L;
 
 		/** calls TreeSelectionEvent(...) */
 		public SelectionEvent(Object source, TreePath[] paths, boolean[] areNew, TreePath oldLeadSelectionPath, TreePath newLeadSelectionPath) {
