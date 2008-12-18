@@ -255,7 +255,7 @@ public class JOGLRendererHelper {
 		// gl.glPointSize((float)
 		// currentGeometryShader.pointShader.getPointSize());
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
-		if (vertices.size() == 0) return;
+		if (vertices == null || vertices.size() == 0) return;
 		DataList piDL = sg.getVertexAttributes(Attribute.INDICES);
 		IntArray vind = null;
 		if (piDL != null) vind = piDL.toIntArray();
