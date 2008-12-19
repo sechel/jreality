@@ -14,4 +14,4 @@
 # **/Fake*5.java
 
 **/SwtExample.java
-
+**/CsoundNode.java
