@@ -267,6 +267,7 @@
     <copy todir="build/io"> <!-- copy shader progs -->
       <fileset dir="${io}">
         <exclude name="**/*.java"/>
+        <exclude name="**/*.pdf"/>
         <exclude name="**/*.gif"/>
       </fileset>
     </copy>
