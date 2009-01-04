@@ -30,6 +30,7 @@ public class AbstractGeometryFactory {
 		this.metric = node( new Integer( metric ), "metric" );
 		this.geometry = geometry;
 		GeometryUtility.setMetric( geometry,metric);
+		geometry.setGeometryAttributes(GeometryUtility.FACTORY, this);
 	}
 	
 	public Geometry getGeometry() {
