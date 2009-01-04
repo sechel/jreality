@@ -43,6 +43,7 @@ package de.jreality.shader;
 import java.awt.Color;
 
 import de.jreality.geometry.FrameFieldType;
+import de.jreality.geometry.TubeUtility;
 
 /**
  * This is the default line shader used in jReality. 
@@ -87,9 +88,11 @@ import de.jreality.geometry.FrameFieldType;
 	 public static final boolean SMOOTH_LINE_SHADING_DEFAULT = false;	// if true, then interpolate vertex colors
 	 public final static double LINE_WIDTH_DEFAULT = 1.0;
 	 public final static boolean LINE_STIPPLE_DEFAULT = false;
+	 public final static boolean VERTEX_COLORS_DEFAULT = false;
 	 public final static int LINE_STIPPLE_PATTERN_DEFAULT = 0x7e7e;
 	 public final static int LINE_FACTOR_DEFAULT = 	1;
 	 public static final Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
+	 public static final double[][] CROSS_SECTION_DEFAULT = TubeUtility.octagonalCrossSection;
 
 	 public abstract Boolean getTubeDraw();
 	 public abstract void setTubeDraw(Boolean b);
@@ -100,15 +103,19 @@ import de.jreality.geometry.FrameFieldType;
 	 public abstract Double getLineWidth();
 	 public abstract void setLineWidth(Double d);
 	 public abstract Boolean getLineStipple();
-	 public abstract void setLineLineStipple(Boolean b);
+	 public abstract void setLineStipple(Boolean b);
 	 public abstract Integer getLineStipplePattern();
-	 public abstract void setLineLineStipplePattern(Integer i);
+	 public abstract void setLineStipplePattern(Integer i);
 	 public abstract Integer getLineFactor();
-	 public abstract void setLineLineFactor(Integer i);
+	 public abstract void setLineFactor(Integer i);
 	 public abstract Boolean isSmoothLineShading();
 	 public abstract void setSmoothLineShading(Boolean d);
 	 public abstract Color getDiffuseColor();
 	 public abstract void setDiffuseColor(Color c);
+	 public abstract Boolean getVertexColors();
+	 public abstract void setVertexColors(Boolean b);
+	 public abstract double[][] getCrossSection();
+	 public abstract void setCrossSection(double[][] crossSection);
 
 	 PolygonShader getPolygonShader();
 	 PolygonShader createPolygonShader(String shaderName);
