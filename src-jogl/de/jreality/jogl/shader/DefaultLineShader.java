@@ -53,6 +53,7 @@ import de.jreality.geometry.TubeUtility;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -89,6 +90,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	private PolygonShader polygonShader;
 	boolean changedTransp, changedLighting;
 	float[] diffuseColorAsFloat;
+	double[][] crossSection, defaultCrossSection = TubeUtility.octagonalCrossSection;
 	 
 	public DefaultLineShader(de.jreality.shader.DefaultLineShader orig)	{
 		templateShader = orig;
@@ -103,6 +105,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
 		tubeStyle = (FrameFieldType) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
 		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
+		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), false);
 		vertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.VERTEX_COLORS_ENABLED), false);
 		lineStipple = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE), lineStipple);
@@ -113,12 +116,13 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		double transp = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
+		crossSection = (double[][]) eap.getAttribute(ShaderUtility.nameSpace(name,"crossSection"),defaultCrossSection);
+		System.err.println("xsec length = "+crossSection.length);
 		if (templateShader != null)  {
 			polygonShader = DefaultGeometryShader.createFrom(templateShader.getPolygonShader());
 			polygonShader.setFromEffectiveAppearance(eap, name+".polygonShader");
 		}
 		else polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
-		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
 		//LoggingSystem.getLogger(this).info("Line shader is smooth: "+smoothShading);
 	}
 
@@ -129,9 +133,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 
-		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-		else		gl.glShadeModel(GL.GL_FLAT);
-		jrs.smoothShading = smoothShading;
+//		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
+//		else		gl.glShadeModel(GL.GL_FLAT);
+//		jrs.smoothShading = smoothShading;
 		gl.glLineWidth((float) lineWidth);
 		jrs.lineWidth = lineWidth;
 		if (lineStipple) {
@@ -233,7 +237,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
 		double[][] oneCurve = null;
-		double[][] crossSection = TubeUtility.octagonalCrossSection;
 //		if (jr.renderingState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		DataList radiidl = ils.getEdgeAttributes(Attribute.RELATIVE_RADII);
@@ -309,6 +312,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				oneCurve = IndexedLineSetUtility.extractCurve(oneCurve, ils, i);
 				double[][] clrs = null;
 				if (vertexColors) clrs = IndexedLineSetUtility.extractCurveColors(clrs, ils, i);
+				DataList dl = ils.getVertexAttributes(Attribute.RELATIVE_RADII);
 				PolygonalTubeFactory ptf = new PolygonalTubeFactory(oneCurve);
 				ptf.setClosed(false);
 				if (clrs != null) {
@@ -319,6 +323,11 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.setFrameFieldType(tubeStyle);
 				ptf.setMetric(sig);
 				ptf.setRadius(effectiveRadius);
+				if (dl != null) {
+					double[] relrad = IndexedLineSetUtility.extractRadii(null, ils, i);
+					double[] relrad2 = Rn.times(null, rad, relrad);
+					ptf.setRadii(relrad2);
+				}
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{

@@ -206,6 +206,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		} else	{
 			// really need to call the preRender() method on the polygonShader, but it doesn't exist.
 			Geometry g = jrs.currentGeometry;
+			// TODO fix this hack
 			jrs.currentGeometry = null;
 			polygonShader.render(jrs);
 			jrs.currentGeometry = g;
@@ -273,63 +274,62 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		int sig = jrs.currentMetric;
 		boolean useDisplayLists = jrs.useDisplayLists;
 		GL gl = 	jr.globalGL;
-//		if (original instanceof PointSet)	{
-			PointSet ps = (PointSet) original;
-			DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
-			if (vertices == null)	
-				return -1; //throw new IllegalStateException("No vertex coordinates for "+ps.getName());
-			DataList piDL = ps.getVertexAttributes(Attribute.INDICES);
-			IntArray vind = null;
-			if (piDL != null) vind = piDL.toIntArray();
-			DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
-			DataList radii = ps.getVertexAttributes(Attribute.RELATIVE_RADII);
-			DoubleArray da = null, ra = null;
-			if (radii != null) ra = radii.toDoubleArray();
-			//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
-			int colorLength = 0;
-			if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
-			int n = ps.getNumPoints();
-			int resolution = 1;
-			if (jr.renderingState.levelOfDetail == 0.0) resolution = 0;
-			int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
-			polygonCount = n*24*resolution*(resolution+1)+6;
-			int nextDL = -1;
-			if (useDisplayLists)	{
-				nextDL = gl.glGenLists(1);
-				gl.glNewList(nextDL, GL.GL_COMPILE);				
+		PointSet ps = (PointSet) original;
+		DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
+		if (vertices == null)	
+			return -1; //throw new IllegalStateException("No vertex coordinates for "+ps.getName());
+		DataList piDL = ps.getVertexAttributes(Attribute.INDICES);
+		IntArray vind = null;
+		if (piDL != null) vind = piDL.toIntArray();
+		DataList vertexColors = ps.getVertexAttributes(Attribute.COLORS);
+		DataList radii = ps.getVertexAttributes(Attribute.RELATIVE_RADII);
+		DoubleArray da = null, ra = null;
+		if (radii != null) ra = radii.toDoubleArray();
+		//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
+		int colorLength = 0;
+		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
+		int n = ps.getNumPoints();
+		int resolution = 1;
+		if (jr.renderingState.levelOfDetail == 0.0) resolution = 0;
+		int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
+		polygonCount = n*24*resolution*(resolution+1)+6;
+		int nextDL = -1;
+		if (useDisplayLists)	{
+			nextDL = gl.glGenLists(1);
+			gl.glNewList(nextDL, GL.GL_COMPILE);				
+		}
+		double[] mat = Rn.identityMatrix(4);
+		double[] scale = Rn.identityMatrix(4);
+		scale[0] = scale[5] = scale[10] = pointRadius;
+		int length = n; //vind == null ? n : vind.getLength();
+		for (int i = 0; i< length; ++i)	{
+			if (vind != null && vind.getValueAt(i) == 0) continue;
+			int index = i;
+			double[] transVec =  vertices.item(index).toDoubleArray(null);
+			if (! Pn.isValidCoordinate(transVec, 3, sig)) continue;
+			if (!P3.isValidTranslationVector(transVec, sig)) continue;
+			if (ra != null)	{
+                double radius = ra.getValueAt(i);
+				scale[0] = scale[5] = scale[10] = pointRadius*radius;
 			}
-			double[] mat = Rn.identityMatrix(4);
-			double[] scale = Rn.identityMatrix(4);
-			scale[0] = scale[5] = scale[10] = pointRadius;
-			int length = n; //vind == null ? n : vind.getLength();
-			for (int i = 0; i< length; ++i)	{
-				if (vind != null && vind.getValueAt(i) == 0) continue;
-				int index = i;
-				double[] transVec =  vertices.item(index).toDoubleArray(null);
-				if (! Pn.isValidCoordinate(transVec, 3, sig)) continue;
-				if (!P3.isValidTranslationVector(transVec, sig)) continue;
-				if (ra != null)	{
-                    double radius = ra.getValueAt(i);
-					scale[0] = scale[5] = scale[10] = pointRadius*radius;
-				}
-				gl.glPushMatrix();
-				P3.makeTranslationMatrix(mat, transVec,sig);
-				Rn.times(mat, mat, scale);
-				gl.glMultTransposeMatrixd(mat,0);
-				if (vertexColors != null)	{
-					da = vertexColors.item(index).toDoubleArray();
-					if (colorLength == 3) 	{
-						gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
-					} else if (colorLength == 4) 	{
-						gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
-					} 
-				}
-				gl.glCallList(dlist);
-				gl.glPopMatrix();
+			gl.glPushMatrix();
+			P3.makeTranslationMatrix(mat, transVec,sig);
+			Rn.times(mat, mat, scale);
+			gl.glMultTransposeMatrixd(mat,0);
+			if (vertexColors != null)	{
+				da = vertexColors.item(index).toDoubleArray();
+				if (colorLength == 3) 	{
+					gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
+				} else if (colorLength == 4) 	{
+					System.err.println("RGBA color");
+					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
+				} 
 			}
-			if (useDisplayLists) gl.glEndList();
-			return nextDL;
-//		}
+			gl.glCallList(dlist);
+			gl.glPopMatrix();
+		}
+		if (useDisplayLists) gl.glEndList();
+		return nextDL;
 	}
 	
 	public Shader getPolygonShader() {
