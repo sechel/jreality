@@ -50,6 +50,7 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.AABBTree;
@@ -122,6 +123,17 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	protected void setFaceAttribute( Attribute attr, DataList data ) {
 		face.setAttribute(attr, data);
+	}
+	
+	protected void setFaceAttribute(Attribute attr, double [] data ) {
+		if( data != null && (nof() == 0 && data.length != 0 || data.length % nof() != 0) )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setEdgeAttribute( attr, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nof() ) );
+	}
+	
+	protected void setFaceAttribute(Attribute attr,  double [][] data ) {
+		setFaceAttribute( attr,
+				StorageModel.DOUBLE_ARRAY.array(data[0].length).createReadOnly(data));
 	}
 	
 	protected void setFaceAttributes(DataListSet dls ) {

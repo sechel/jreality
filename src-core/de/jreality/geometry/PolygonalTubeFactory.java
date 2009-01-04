@@ -173,9 +173,10 @@ import de.jreality.util.LoggingSystem;
 		double[] rad = Rn.identityMatrix(4);
 		int nn = frames.length;
 		double lastphi = frames[frames.length-1].phi;
-		double correction = (closed && matchClosedTwist) ? ( lastphi > Math.PI ? (2*Math.PI-lastphi) : -lastphi) / nn : 0.0;
+		// calculation an angle per joint which will result in "matching" begin and end sections
+		double correction = (closed && matchClosedTwist) ? 
+				( lastphi > Math.PI ? (2*Math.PI-lastphi) : -lastphi) / nn : 0.0;
 		for (int i = 0; i<nn; ++i)	{
-			// scale normal vector
 			double sangle = Math.sin( frames[i].theta/2.0);
 			double factor = 1.0;
 			if (sangle != 0) factor = 1.0/sangle;

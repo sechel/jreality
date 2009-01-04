@@ -63,6 +63,14 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 		super.setVertexAttribute( attr, data );
 	}
 	
+	public void setVertexAttribute(Attribute attr, double [] data ) {
+		super.setVertexAttribute( attr, data );
+	}
+	
+	public void setVertexAttribute(Attribute attr,  double [][] data ) {
+		super.setVertexAttribute( attr, data);
+	}
+	
 	public void setVertexAttributes(DataListSet dls ) {
 		super.setVertexAttributes( dls );
 	}
@@ -170,10 +178,25 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	}
 	/* face attributes */
 	
+	/**
+	 * Superclass methods are protected so we override to make public
+	 * Documentation is lacking ...
+	 */
+	@Override
 	public void setFaceAttribute( Attribute attr, DataList data) {
 		super.setFaceAttribute( attr, data );
 	}
 	
+	@Override
+	public void setFaceAttribute(Attribute attr, double[] data) {
+		super.setFaceAttribute(attr, data);
+	}
+
+	@Override
+	public void setFaceAttribute(Attribute attr, double[][] data) {
+		super.setFaceAttribute(attr, data);
+	}
+
 	public void setFaceAttributes(DataListSet dls ) {
 		super.setFaceAttributes(dls);
 	}

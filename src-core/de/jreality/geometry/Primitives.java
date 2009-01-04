@@ -442,6 +442,7 @@ public class Primitives {
 				qmf.setGenerateEdgesFromFaces(true);
 				qmf.setGenerateFaceNormals(true);
 				qmf.setGenerateVertexNormals(true);
+				qmf.setGenerateTextureCoordinates(true);
 				qmf.update();
 				IndexedFaceSet ifs = qmf.getIndexedFaceSet();
 				ifs.setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND, "Cylinder "+r+" "+zmin+" "+zmax+" "+180.0/Math.PI * thetamax);

@@ -62,6 +62,14 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 		super.setVertexAttribute( attr, data );
 	}
 	
+	public void setVertexAttribute(Attribute attr, double [] data ) {
+		super.setVertexAttribute( attr, data );
+	}
+	
+	public void setVertexAttribute(Attribute attr,  double [][] data ) {
+		super.setVertexAttribute( attr, data);
+	}
+	
 	public void setVertexAttributes(DataListSet dls ) {
 		super.setVertexAttributes( dls );
 	}
@@ -132,7 +140,26 @@ public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 		super.setEdgeCount(count);
 	}
 	
-    public void setEdgeIndices( DataList data ) {
+	/**
+	 * It's not documented why, but the superclass methods are protected, so we
+	 * have to implement these as public
+	 */
+	@Override
+	public void setEdgeAttribute(Attribute attr, DataList data)	{
+		super.setEdgeAttribute(attr, data);
+	}
+	
+	@Override
+	public void setEdgeAttribute(Attribute attr, double[] data) {
+		super.setEdgeAttribute(attr, data);
+	}
+
+	@Override
+	public void setEdgeAttribute(Attribute attr, double[][] data) {
+		super.setEdgeAttribute(attr, data);
+	}
+
+   public void setEdgeIndices( DataList data ) {
         super.setEdgeIndices(data);
     }
     

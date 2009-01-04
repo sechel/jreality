@@ -119,6 +119,17 @@ class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 		edge.setAttribute(attr,data);
 	}
 	
+	protected void setEdgeAttribute(Attribute attr, double [] data ) {
+		if( data != null && (noe() == 0 && data.length != 0 || data.length % noe() != 0) )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setEdgeAttribute( attr, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nov() ) );
+	}
+	
+	protected void setEdgeAttribute(Attribute attr,  double [][] data ) {
+		setEdgeAttribute( attr,
+				StorageModel.DOUBLE_ARRAY.array(data[0].length).createReadOnly(data));
+	}
+	
 	protected void setEdgeAttributes(DataListSet dls ) {
 		edge.setAttributes(dls);
 	}

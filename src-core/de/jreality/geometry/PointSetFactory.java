@@ -47,6 +47,8 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.StorageModel;
 
 public class PointSetFactory extends AbstractPointSetFactory {
 
@@ -60,6 +62,14 @@ public class PointSetFactory extends AbstractPointSetFactory {
 	
 	public void setVertexAttribute( Attribute attr, DataList data ) {
 		super.setVertexAttribute( attr, data );
+	}
+	
+	public void setVertexAttribute(Attribute attr, double [] data ) {
+		super.setVertexAttribute( attr, data );
+	}
+	
+	public void setVertexAttribute(Attribute attr,  double [][] data ) {
+		super.setVertexAttribute( attr, data);
 	}
 	
 	public void setVertexAttributes(DataListSet dls ) {

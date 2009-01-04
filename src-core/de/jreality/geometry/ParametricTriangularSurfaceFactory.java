@@ -43,7 +43,12 @@ package de.jreality.geometry;
 import de.jreality.math.Rn;
 import de.jreality.scene.data.Attribute;
 
-public class ParametricTriangularSurfaceFactory extends AbstractIndexedFaceSetFactory {
+/**
+ * This class is similar to {@link ParametricSurfaceFactory} but it works with a triangular
+ * rather than rectangular parametric domain.
+ * @author gunn
+ *
+ */public class ParametricTriangularSurfaceFactory extends AbstractIndexedFaceSetFactory {
 
 	final OoNode immersion = node( "immersion" );
 	double[][] uvTriangle = {{0,0},{1,0},{0,1}};
@@ -151,7 +156,12 @@ public class ParametricTriangularSurfaceFactory extends AbstractIndexedFaceSetFa
 		return vertexCoordinates;
 	}
 
-	public double[][] getDomainVertices( double[][] uvpoints)	{
+	/**
+	 * generate regularly-spaced (u,v) points in the <i>uvTriangle</i> by subdividing
+	 * each side into <i>subdivision</i> points.
+	 * @param uvpoints
+	 * @return
+	 */public double[][] getDomainVertices( double[][] uvpoints)	{
 		
 		if (uvpoints == null || uvpoints.length != nov() || uvpoints[0].length != 2)
 			uvpoints = new double[nov()][2];

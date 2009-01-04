@@ -85,7 +85,7 @@ public class TubeUtility {
 		 * <p>
 		 * The fields can be accessed directly, as they are declared <code>public</code>.
 		 * <p>
-		 * The frame is stored as 4 row vectors in the following order: normal, binormal, tangent,
+		 * The frame is stored as 4 column vectors in the following order: normal, binormal, tangent,
 		 * base point.
 		 * @author Charles Gunn
 		 *

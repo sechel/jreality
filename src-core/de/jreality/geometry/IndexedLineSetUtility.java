@@ -46,6 +46,7 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
@@ -134,6 +135,22 @@ public class IndexedLineSetUtility {
 		return output;
 	}
 
+	public static double[] extractRadii(double[] curve, IndexedLineSet ils, int i)	{
+		DoubleArray verts = ils.getVertexAttributes(Attribute.RELATIVE_RADII).toDoubleArray();
+		if (verts == null) return null;
+		DataList indices = ils.getEdgeAttributes(Attribute.INDICES);
+		IntArray thisEdge = indices.item(i).toIntArray();
+		int n = thisEdge.getLength();
+		double[] output = null;
+		if (curve == null || curve.length != n) output = new double[n];
+		else output = curve;
+		for (int j = 0; j<n; ++j)	{
+			int which = thisEdge.getValueAt(j);
+			output[j] = verts.getValueAt(which);
+		}
+		return output;
+		
+	}
 	public static IndexedLineSet createCurveFromPoints(double[][] points, boolean closed)	{
 		return createCurveFromPoints(null, points,  closed);
 	}

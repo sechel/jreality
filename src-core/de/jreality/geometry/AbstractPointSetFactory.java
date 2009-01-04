@@ -91,6 +91,17 @@ class AbstractPointSetFactory extends AbstractGeometryFactory {
 		vertex.setAttribute( attr, data );
 	}
 	
+	protected void setVertexAttribute(Attribute attr, double [] data ) {
+		if( data != null && (nov() == 0 && data.length != 0 || data.length % nov() != 0) )
+			throw new IllegalArgumentException( "array has wrong length" );
+		setVertexAttribute( attr, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nov() ) );
+	}
+	
+	protected void setVertexAttribute(Attribute attr,  double [][] data ) {
+		setVertexAttribute( attr,
+				StorageModel.DOUBLE_ARRAY.array(data[0].length).createReadOnly(data));
+	}
+	
 	protected void setVertexAttributes( DataListSet dls ) {
 		vertex.setAttributes( dls );
 	}

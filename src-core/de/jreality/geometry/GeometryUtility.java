@@ -99,6 +99,8 @@ public class GeometryUtility {
 	 * @see Geometry#setGeometryAttributes(Attribute, Object).
 	 */
 	 public static String METRIC = "metric";		// value:	Integer
+	 
+	 public static String FACTORY = "factory";
 
 	private GeometryUtility() {}
 	
@@ -107,9 +109,17 @@ public class GeometryUtility {
 		int sig = Pn.EUCLIDEAN;
 		if (sigO != null && sigO instanceof Integer)	{
 			sig = ((Integer) sigO).intValue();
-			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with metric "+sig);
 		}
 		return sig;
+	}
+
+	public static AbstractGeometryFactory getFactory(Geometry g ) {
+		Object factory = g.getGeometryAttributes(FACTORY);
+		if (factory != null && factory instanceof AbstractGeometryFactory)	{
+			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Factory found");
+			return (AbstractGeometryFactory) factory;
+		}
+		return null;
 	}
 
 	/**

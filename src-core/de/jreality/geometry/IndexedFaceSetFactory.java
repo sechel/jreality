@@ -62,6 +62,14 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setVertexAttribute( attr, data );
 	}
 	
+	public void setVertexAttribute(Attribute attr, double [] data ) {
+		super.setVertexAttribute( attr, data );
+	}
+	
+	public void setVertexAttribute(Attribute attr,  double [][] data ) {
+		super.setVertexAttribute( attr, data);
+	}
+	
 	public void setVertexAttributes(DataListSet dls ) {
 		super.setVertexAttributes( dls );
 	}
@@ -131,6 +139,21 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setEdgeCount(count);
 	}
 	
+	@Override
+	public void setEdgeAttribute(Attribute attr, DataList data)	{
+		super.setEdgeAttribute(attr, data);
+	}
+	
+	@Override
+	public void setEdgeAttribute(Attribute attr, double[] data) {
+		super.setEdgeAttribute(attr, data);
+	}
+
+	@Override
+	public void setEdgeAttribute(Attribute attr, double[][] data) {
+		super.setEdgeAttribute(attr, data);
+	}
+
 	public void setEdgeIndices( int[][] data ) {
 		super.setEdgeIndices(data);
 	}
@@ -174,10 +197,25 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 		super.setFaceCount( count );
 	}
 	
+	/**
+	 * Superclass methods are protected so we override to make public
+	 * Documentation is lacking ...
+	 */
+	@Override
 	public void setFaceAttribute( Attribute attr, DataList data) {
 		super.setFaceAttribute( attr, data );
 	}
 	
+	@Override
+	public void setFaceAttribute(Attribute attr, double[] data) {
+		super.setFaceAttribute(attr, data);
+	}
+
+	@Override
+	public void setFaceAttribute(Attribute attr, double[][] data) {
+		super.setFaceAttribute(attr, data);
+	}
+
 	public void setFaceAttributes(DataListSet dls ) {
 		super.setFaceAttributes(dls);
 	}
