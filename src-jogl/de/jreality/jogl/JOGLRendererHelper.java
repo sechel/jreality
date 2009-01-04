@@ -440,7 +440,6 @@ public class JOGLRendererHelper {
 			normalBind = PER_FACE;
 		} else
 			normalBind = PER_PART;
-
 		DoubleArray da = null;
 		boolean isQuadMesh = false;
 		boolean isRegularDomainQuadMesh = false;
@@ -566,7 +565,8 @@ public class JOGLRendererHelper {
 				IntArray tf = sg.getFaceAttributes(Attribute.INDICES).item(i)
 						.toIntArray();
 				gl.glBegin(GL.GL_POLYGON);
-				for (int j = 0; j < tf.getLength(); ++j) {
+				final int nf = tf.getLength();
+				for (int j = 0; j < nf; ++j) {
 					int k = tf.getValueAt(j);
 					if (normalBind == PER_VERTEX) {
 						da = vertexNormals.item(k).toDoubleArray();
