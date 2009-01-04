@@ -304,7 +304,10 @@ public class WriterVRML2{
 			Matrix mat= new Matrix(tex.getTextureMatrix().getArray());
 			if(flipTextureUpsideDown){
 				Matrix flip=MatrixBuilder.euclidean().translate(0,1,0).scale(1,-1,1).getMatrix();
-				mat.multiplyOnRight(flip);
+//	Oops! I got my matrix arithmetic mixed up; this has to happen "LAST", before
+//	the texture is looked up in the image
+//				mat.multiplyOnRight(flip);
+				mat.multiplyOnLeft(flip);
 			}
 			int dim=texCoords[0].length;
 			for (int i = 0; i < texCoords.length; i++) {
