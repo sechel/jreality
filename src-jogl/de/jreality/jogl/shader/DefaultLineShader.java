@@ -117,7 +117,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transp, JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 		crossSection = (double[][]) eap.getAttribute(ShaderUtility.nameSpace(name,"crossSection"),defaultCrossSection);
-		System.err.println("xsec length = "+crossSection.length);
+//		System.err.println("xsec length = "+crossSection.length);
 		if (templateShader != null)  {
 			polygonShader = DefaultGeometryShader.createFrom(templateShader.getPolygonShader());
 			polygonShader.setFromEffectiveAppearance(eap, name+".polygonShader");
