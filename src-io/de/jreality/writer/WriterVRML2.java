@@ -318,8 +318,10 @@ public class WriterVRML2{
 			}
 			//mat.transpose();
 			Rn.matrixTimesVector(texCoords, mat.getArray(), texCoords );
-			for (int i = 0; i < texCoords.length; i++)// truncate 
-					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1]};
+			Pn.dehomogenize(texCoords, texCoords);
+			for (int i = 0; i < texCoords.length; i++)	{
+				texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1]};
+			}
 		}
 		String hist2=hist+spacing;
 		out.println(hist+"TextureCoordinate { point [");
