@@ -649,24 +649,8 @@ public  class TubeFactory {
 		 
 		public static SceneGraphComponent getSceneGraphRepresentation(FrameInfo[] frames)	{
 			SceneGraphComponent result = new SceneGraphComponent();
-			IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
-			ilsf.setVertexCount(4);
-			ilsf.setVertexCoordinates(axes);
-			ilsf.setEdgeCount(3);
-			ilsf.setEdgeIndices(axesIndices);
-			ilsf.setEdgeColors(axesColors);
-			ilsf.update();
-			IndexedLineSet ils = ilsf.getIndexedLineSet();
-			BallAndStickFactory basf = new BallAndStickFactory(ils);
-			basf.setShowArrows(true);
-			basf.setArrowPosition(1.2);
-			basf.setStickRadius(.05);
-			basf.setArrowScale(.15);
-			basf.setArrowSlope(2.0);
-			basf.setShowBalls(false);
-			basf.setShowSticks(true);
-			basf.update();
-			SceneGraphComponent geometry = basf.getSceneGraphComponent();
+			IndexedLineSet ils;
+			SceneGraphComponent geometry = getXYZAxes();
 			MatrixBuilder.euclidean().scale(.2).assignTo(geometry);
 			double[][] verts = new double[frames.length][];
 			int i = 0;
@@ -689,5 +673,27 @@ public  class TubeFactory {
 			sgc.setGeometry(ils);
 			result.addChild(sgc);
 			return result;
+		}
+
+		public static SceneGraphComponent getXYZAxes() {
+			IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+			ilsf.setVertexCount(4);
+			ilsf.setVertexCoordinates(axes);
+			ilsf.setEdgeCount(3);
+			ilsf.setEdgeIndices(axesIndices);
+			ilsf.setEdgeColors(axesColors);
+			ilsf.update();
+			IndexedLineSet ils = ilsf.getIndexedLineSet();
+			BallAndStickFactory basf = new BallAndStickFactory(ils);
+			basf.setShowArrows(true);
+			basf.setArrowPosition(1.0);
+			basf.setStickRadius(.05);
+			basf.setArrowScale(.15);
+			basf.setArrowSlope(2.0);
+			basf.setShowBalls(false);
+			basf.setShowSticks(true);
+			basf.update();
+			SceneGraphComponent geometry = basf.getSceneGraphComponent();
+			return geometry;
 		}
 }
