@@ -13,6 +13,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
@@ -22,6 +23,7 @@ import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
+import static de.jreality.shader.CommonAttributes.*;
 
 /**
  * Features shown:
@@ -90,6 +92,8 @@ public class LineShaderExample {
 	pts.setAlignment(SwingConstants.CENTER);
  
 	SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
+	world.getAppearance().setAttribute(LINE_SHADER+"."+POLYGON_SHADER+"."+SMOOTH_SHADING, true);
+	world.getAppearance().setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, false);
 	int numSamples = 8;
 	for (int i = 0; i<numSamples; ++i)	{
 		SceneGraphComponent child = SceneGraphUtility.createFullSceneGraphComponent("child"+i);
@@ -109,6 +113,7 @@ public class LineShaderExample {
 		IndexedLineSetFactory lsf = new IndexedLineSetFactory();
 		lsf.setVertexCount(numPoints);
 		lsf.setVertexCoordinates(verts);
+		if (i == 1) lsf.setVertexNormals(verts);	// outward pointing normals for lighting enabled 
 		lsf.setEdgeCount(numPoints);
 		lsf.setEdgeIndices(edges);
 		lsf.setVertexColors(edgeColors);
@@ -147,8 +152,9 @@ public class LineShaderExample {
 			case 1:		// bresenham again, but with "stippling" (dots and dashes) -JOGL only
 				dls.setTubeDraw(false);
 				dls.setLineWidth(2.0);
-				dls.setDiffuseColor(Color.black);
-				if (i == 1) {	// activate stippling
+				if (i == 1) {	// activate stippling and lighting
+					dls.setDiffuseColor(Color.red);
+					dls.setLineLighting(true);
 					dls.setLineStipple(true);
 					dls.setLineStipplePattern(0xf0f0);
 					dls.setLineFactor(2);	// scales the dots and dashes
@@ -167,7 +173,7 @@ public class LineShaderExample {
 				dpls.setDiffuseColor(Color.cyan);
 				rhs.setTransparencyEnabled(true);
 				rhs.setOpaqueTubesAndSpheres(i != 3);
-				if (i == 5 || i == 6 || i == 7)	{	// vertex colors
+				if (i == 5 || i == 6 || i == 7)	{	// use vertex colors
 					dls.setVertexColors(true);
 				} 
 				if (i == 6) dpls.setSmoothShading(false);

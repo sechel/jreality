@@ -48,12 +48,13 @@ public class PointShaderExample {
  * 		When this is set to true, the sprites appear more realistic, but it is more difficult
  * 		to control and in this example, I didn't have time to fine tube it.
  *   2. Size of points (Examples 1 and 2) and spheres (the rest) are set independently
- *   	since "pointSize" is specified in pixels, and "tubeRadius" in object coordinates.
- *   	This is obviously inconvenient.  A good reliable fix is welcome.
+ *   	since the Attributes POINT_SIZE and POINT_RADIUS are specified in different coordinate
+ *   	systems.  The former is in screen pixels, and the latter in object coordinates.
+ *   	This is obviously inconvenient.  A good reliable solution is welcome.
  *   3. Colors specified in the shader are ALWAYS RGB values; alpha (transparency) values
- *   	must be set using the separate "transparency" attribute.  Vertex colors however,
+ *   	must be set using the separate TRANSPARENCY attribute.  Vertex colors however,
  *   	are RGBA values -- see Example 5.
- *   4. This example has been tested on the JOGL backend; other backends may not yield the
+ *   4. This example program has been tested on the JOGL backend; other backends may not yield the
  *   	same behavior, particularly where rendering hints are involved.
  * @author gunn
  *
@@ -62,11 +63,12 @@ public static void main(String[] args) {
 	// prepare a circle of points to be used as the example geometry
 	int numPoints = 20;
 	double[][] verts = new double[numPoints][], 
-		vcolors = new double[numPoints][];
+		vcolors = new double[numPoints][];		// optional vertex colors
 	double[] relrad = new double[numPoints];
 	for (int i=0; i<numPoints; ++i)	{ 
 		double angle = (Math.PI*2*i)/numPoints;
 		verts[i] = new double[]{Math.cos(angle), Math.sin(angle), 0};
+		// make color a linear mix of red and green, based on x- and y- coordinates
 		vcolors[i] = new double[]{verts[i][0]*.5+.5, verts[i][1]*.5+.5,0.0, 0.5};
 		relrad[i] = verts[i][0]+1.5;
 	}
@@ -84,6 +86,7 @@ public static void main(String[] args) {
 	pts.setOffset(new double[]{0,0,0});
 	pts.setAlignment(SwingConstants.CENTER);
 
+	// Prepare the six different examples
 	SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
 	int numSamples = 6;
 	for (int i = 0; i<numSamples; ++i)	{
@@ -123,8 +126,8 @@ public static void main(String[] args) {
 			case 0:		// default rendering with sprites which look like spheres
 			case 1:		// sprites again, but this shows an image of the string "SPR"
 				dps.setSpheresDraw(false);
-				dps.setAttenuatePointSize(false);
-				dps.setPointSize(20.0);
+				dps.setAttenuatePointSize(true);	// quality is better when set to true
+				dps.setPointSize(200.0);
 				dps.setDiffuseColor(Color.yellow);
 				if (i == 1)	{
 					ImageData id = new ImageData(LabelUtility.createImageFromString("SPR", null, Color.white));

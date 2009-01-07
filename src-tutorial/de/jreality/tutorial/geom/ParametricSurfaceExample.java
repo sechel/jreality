@@ -30,7 +30,7 @@ public class ParametricSurfaceExample {
 		public boolean isImmutable() { return true; }
 	};
 	
-	public void doIt()	{
+	public void doIt(		boolean useViewerVR)	{
 		ParametricSurfaceFactory psf = new ParametricSurfaceFactory(myImmersion);
 		psf.setUMin(-.3);
 		psf.setUMax(.3);
@@ -50,7 +50,6 @@ public class ParametricSurfaceExample {
 		// to run the application inside of ViewerVR, set the VM argument 
 		// -DuseViewerVR=true  
 		// In eclipse: Run->Run..., click on "Arguments", enter this in "VM Arguments" text field
-		boolean useViewerVR = false;
 		String foo = Secure.getProperty("useViewerVR");
 		if (foo != null && foo.equals("true")) useViewerVR = true;
 		if (useViewerVR)	{
@@ -76,6 +75,6 @@ public class ParametricSurfaceExample {
 	
 	public static void main(String[] args) {
 		ParametricSurfaceExample pse = new ParametricSurfaceExample();
-		pse.doIt();
+		pse.doIt(false);
 	}
 }

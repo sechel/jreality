@@ -13,7 +13,7 @@ import de.jreality.tutorial.geom.ParametricSurfaceExample;
 public class ViewerVRExample {
 	public static void main(String[] args) {
 		ParametricSurfaceExample pse = new ParametricSurfaceExample();
-		pse.doIt();
+		pse.doIt(true);
 	}
 
 }
