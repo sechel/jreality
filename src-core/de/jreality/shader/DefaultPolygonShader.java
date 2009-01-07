@@ -42,6 +42,8 @@ package de.jreality.shader;
 
 import java.awt.Color;
 
+import de.jreality.scene.IndexedFaceSet;
+
 /**
  * This interface represents the default polygon shader used in jReality.
  * This interface can be used in conjunction with the {@link de.jreality.scene.data.AttributeEntity} 
@@ -57,13 +59,13 @@ import java.awt.Color;
  * Cs = Ka*ambient + Kd*(N.L)*diffuse + Ks*pow((L.R),Kexp)*specular
  * </code>
  * where R is the reflected eye vector.  Here, ambient, diffuse, and specular are
- * colors which are set using the methods {@link #setAmbientColor(Color)), etc. --
+ * colors which are set using the methods {@link #setAmbientColor(Color)}), etc. --
  * but see below for exceptions related to the diffuse term.
  * <p>
  * The transparency value determines how much light the surface lets through. A value of 0
- * is opaque.  (See {@link de.jreality.shader.RenderingHintsShader#getTransparencyEnabled()).\
+ * is opaque.  (See {@link de.jreality.shader.RenderingHintsShader#getTransparencyEnabled()}).
  * <p>
- * There is also a flag to determine whether facets are smooth-shaded or not ({@link #setSmoothShading(Boolean)).
+ * There is also a flag to determine whether facets are smooth-shaded or not ({@link #setSmoothShading(Boolean)}).
  * If <code>true</code>, then the shader uses vertex colors and vertex normals (assuming they are present)
  * as the <code>diffuse</code> color and the <code>N</code> vector in the above formula; 
  * if <code>false</code>, then the shader uses face colors and face normals instead (assuming they are present). 

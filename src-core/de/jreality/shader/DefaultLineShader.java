@@ -65,8 +65,8 @@ import de.jreality.geometry.TubeUtility;
  * lighting is disabled so no shading effects are present. If tubes are enabled, then lighting is enabled, --- and the 
  * tube radius is in object coordinates.  
  * <p>
- * If the underlying geometry has vertex colors and/or edge colors attached to it, then the diffuse color is determined as
- * follows: if {@link #isSmoothLineShading()} returns <code>true</code> then vertex colors are used and are interpolated;
+ * When tubes are NOT drawn:  If the underlying geometry has vertex colors and/or edge colors attached to it, then the diffuse color is determined as
+ * follows: if {@link #getVertexColors()} returns <code>true</code> then vertex colors are used and are interpolated;
  * if not, then edge colors, if present are used, and are constant per edge; otherwise the value of {@link #getDiffuseColor()}
  * is used.
  * <p>
@@ -93,13 +93,23 @@ import de.jreality.geometry.TubeUtility;
 	 public final static int LINE_FACTOR_DEFAULT = 	1;
 	 public static final Color DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 	 public static final double[][] CROSS_SECTION_DEFAULT = TubeUtility.octagonalCrossSection;
-
+	 public static final boolean LIGHTING_ENABLED_DEFAULT = false;
+	 
+	 // general attributes
+	 public abstract Color getDiffuseColor();
+	 public abstract void setDiffuseColor(Color c);
 	 public abstract Boolean getTubeDraw();
 	 public abstract void setTubeDraw(Boolean b);
+	 
+	 // tube-related attributes
 	 public abstract Double getTubeRadius();
 	 public abstract void setTubeRadius(Double d);
 	 public abstract FrameFieldType getTubeStyle();
 	 public abstract void setTubeStyle(FrameFieldType i);
+	 public abstract double[][] getCrossSection();
+	 public abstract void setCrossSection(double[][] crossSection);
+	 
+	 // non-tube style related attributes
 	 public abstract Double getLineWidth();
 	 public abstract void setLineWidth(Double d);
 	 public abstract Boolean getLineStipple();
@@ -108,15 +118,11 @@ import de.jreality.geometry.TubeUtility;
 	 public abstract void setLineStipplePattern(Integer i);
 	 public abstract Integer getLineFactor();
 	 public abstract void setLineFactor(Integer i);
-	 public abstract Boolean isSmoothLineShading();
-	 public abstract void setSmoothLineShading(Boolean d);
-	 public abstract Color getDiffuseColor();
-	 public abstract void setDiffuseColor(Color c);
 	 public abstract Boolean getVertexColors();
 	 public abstract void setVertexColors(Boolean b);
-	 public abstract double[][] getCrossSection();
-	 public abstract void setCrossSection(double[][] crossSection);
-
+	 public abstract Boolean getLineLighting(Boolean b);
+	 public abstract void setLineLighting(Boolean b);
+	 
 	 PolygonShader getPolygonShader();
 	 PolygonShader createPolygonShader(String shaderName);
 
