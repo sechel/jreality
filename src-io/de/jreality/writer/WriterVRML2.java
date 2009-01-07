@@ -301,26 +301,28 @@ public class WriterVRML2{
 			}*/
 		if(evaluateTextureMatrix){
 			Texture2D tex=dps.getTexture2d();
-			Matrix mat= new Matrix(tex.getTextureMatrix().getArray());
-			if(flipTextureUpsideDown){
-				Matrix flip=MatrixBuilder.euclidean().translate(0,1,0).scale(1,-1,1).getMatrix();
-//	Oops! I got my matrix arithmetic mixed up; this has to happen "LAST", before
-//	the texture is looked up in the image
-//				mat.multiplyOnRight(flip);
-				mat.multiplyOnLeft(flip);
-			}
-			int dim=texCoords[0].length;
-			for (int i = 0; i < texCoords.length; i++) {
-				if ( dim == 2)	
-					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1],0,1};
-				if( dim == 3)
-					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1],texCoords[i][2],1};
-			}
-			//mat.transpose();
-			Rn.matrixTimesVector(texCoords, mat.getArray(), texCoords );
-			Pn.dehomogenize(texCoords, texCoords);
-			for (int i = 0; i < texCoords.length; i++)	{
-				texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1]};
+			if (tex != null && tex instanceof Texture2D) {
+				Matrix mat= new Matrix(tex.getTextureMatrix().getArray());
+				if(flipTextureUpsideDown){
+					Matrix flip=MatrixBuilder.euclidean().translate(0,1,0).scale(1,-1,1).getMatrix();
+//		Oops! I got my matrix arithmetic mixed up; this has to happen "LAST", before
+//		the texture is looked up in the image
+//					mat.multiplyOnRight(flip);
+					mat.multiplyOnLeft(flip);
+				}
+				int dim=texCoords[0].length;
+				for (int i = 0; i < texCoords.length; i++) {
+					if ( dim == 2)	
+						texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1],0,1};
+					if( dim == 3)
+						texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1],texCoords[i][2],1};
+				}
+				//mat.transpose();
+				Rn.matrixTimesVector(texCoords, mat.getArray(), texCoords );
+				Pn.dehomogenize(texCoords, texCoords);
+				for (int i = 0; i < texCoords.length; i++)	{
+					texCoords[i]=new double[]{texCoords[i][0],texCoords[i][1]};
+				}				
 			}
 		}
 		String hist2=hist+spacing;
