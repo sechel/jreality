@@ -865,7 +865,7 @@ public class ViewerApp {
 		if (showFirstAccessory != null) 	{
 			JScrollPane jsp = accessoryScrolls.get(showFirstAccessory);
 			if (jsp != null) navigatorTabs.setSelectedComponent(jsp);
-			else navigatorTabs.setSelectedComponent(showFirstAccessory); //scroll);
+//			else navigatorTabs.setSelectedComponent(showFirstAccessory); //scroll);
 		}
 
 
