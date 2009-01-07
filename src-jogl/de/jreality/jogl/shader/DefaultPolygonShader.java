@@ -120,10 +120,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    hasTextures = false;
 	    if (!fastAndDirty) {
 			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
-				if (false && templateShader != null) texture2D = templateShader.createTexture2d();
-				else texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
+//				if (false && templateShader != null) texture2D = templateShader.createTexture2d();
+//				else 
+					texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
 //		    	LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
-				System.err.println("Have texture2d");
 				joglTexture2D = new JOGLTexture2D(texture2D);
 				hasTextures = true;
 			}
@@ -150,7 +150,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				glslShader.setFromEffectiveAppearance(eap, name);
 		    }
 	    }  else useGLSL = false;
-//	    System.err.println("In DPS: eap = "+eap.toString());
+//	    System.err.println("In DPS: smooth = "+smoothShading);
 		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;

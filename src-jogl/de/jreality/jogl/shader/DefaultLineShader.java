@@ -77,20 +77,21 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	FrameFieldType 	tubeStyle = FrameFieldType.PARALLEL;
 	double	tubeRadius = 0.05,
 		 	lineWidth = 1.0;
-	boolean smoothLineShading = false, lighting, vertexColors;
-	boolean smoothShading = true;		// this applies to the tubes, not the edges
-	int	lineFactor = 1;
-	int 	lineStipplePattern = 0x1c47; 
-	 
+
 	boolean lineStipple = false;
-	boolean tubeDraw = false;
-	boolean opaqueTubes = false;
-	int faceCount = 0;		
+	int		lineFactor = 1;
+	int 	lineStipplePattern = 0x1c47; 
+	boolean tubeDraw = false,
+		lineLighting = false,
+		opaqueTubes = false,
+		vertexColors = false;
 	Color diffuseColor = java.awt.Color.BLACK;
-	private PolygonShader polygonShader;
-	boolean changedTransp, changedLighting;
-	float[] diffuseColorAsFloat;
 	double[][] crossSection, defaultCrossSection = TubeUtility.octagonalCrossSection;
+
+	private PolygonShader polygonShader;
+	transient boolean changedTransp, changedLighting;
+	transient float[] diffuseColorAsFloat;
+	transient int faceCount = 0;		
 	 
 	public DefaultLineShader(de.jreality.shader.DefaultLineShader orig)	{
 		templateShader = orig;
@@ -104,9 +105,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		tubeRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
 		tubeStyle = (FrameFieldType) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_STYLE),CommonAttributes.TUBE_STYLE_DEFAULT);
-		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
-		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
-		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LIGHTING_ENABLED), false);
+//		smoothLineShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_LINE_SHADING), CommonAttributes.SMOOTH_LINE_SHADING_DEFAULT);
+//		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
+		lineLighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_LIGHTING_ENABLED), false);
 		vertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.VERTEX_COLORS_ENABLED), false);
 		lineStipple = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
@@ -133,9 +134,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 
-//		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-//		else		gl.glShadeModel(GL.GL_FLAT);
-//		jrs.smoothShading = smoothShading;
 		gl.glLineWidth((float) lineWidth);
 		jrs.lineWidth = lineWidth;
 		if (lineStipple) {
@@ -144,19 +142,19 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		} 
 		else gl.glDisable(GL.GL_LINE_STIPPLE);
 
+		changedLighting = false;
 		if (tubeDraw)	{
 			Geometry g = jrs.currentGeometry;
-			jrs.currentGeometry = null;
+			jrs.currentGeometry = null;	// hack!
 			polygonShader.render(jrs);
 			jrs.currentGeometry = g;
-			lighting=true;
-		} else lighting = smoothLineShading;
-//		jr.renderingState.lighting = lighting;
-		changedLighting = false;
-		if (lighting != jrs.lighting)	{
-			if (lighting) gl.glEnable(GL.GL_LIGHTING);
-			else gl.glDisable(GL.GL_LIGHTING);
-			changedLighting = true;
+		} else {
+//			System.err.println("line lighting = "+lineLighting);
+			if (lineLighting != jrs.lighting)	{
+				if (lineLighting) gl.glEnable(GL.GL_LIGHTING);
+				else gl.glDisable(GL.GL_LIGHTING);
+				changedLighting = true;
+			}			
 		}
 
 		// this little bit of code forces tubes to be opaque: could add
@@ -251,7 +249,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			tubeDL[sig+1] = gl.glGenLists(1);
 			//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.globalGL);
 			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
-			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], smoothShading , alpha );
+			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], jr.renderingState.smoothShading , alpha );
 			gl.glEndList();	
 		}
 		faceCount = 0;
@@ -331,7 +329,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
-					JOGLRendererHelper.drawFaces(jr, tube, smoothShading, alpha);			
+					JOGLRendererHelper.drawFaces(jr, tube, jr.renderingState.smoothShading, alpha);			
 					faceCount += tube.getNumFaces();
 				}
 			}
@@ -365,13 +363,13 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			else 	{
 				if (!useDisplayLists ) {
 //					System.err.println("rendering lines w/o dlist");
-					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
+					JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  vertexColors, jr.renderingState.diffuseColor[3]);
 				} else {
 					if (useDisplayLists && dList== -1)	{
 						dList = jr.globalGL.glGenLists(1);
 						//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
 						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  smoothLineShading, jr.renderingState.diffuseColor[3]);
+						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  vertexColors, jr.renderingState.diffuseColor[3]);
 //						System.err.println("rendering lines w/ dlist");
 						jr.globalGL.glEndList();									
 						displayListsDirty = false;

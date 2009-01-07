@@ -331,7 +331,7 @@ public class JOGLRendererHelper {
 		DataList lineWidth = sg.getVertexAttributes(Attribute.RELATIVE_RADII);
 		DoubleArray ra=null;
 		if (lineWidth != null) ra = lineWidth.toDoubleArray();
-		boolean hasNormals = vertexNormals == null ? false : true;
+		boolean hasNormals = vertexNormals != null;
 		DoubleArray da;
 		if (sg.getEdgeAttributes(Attribute.INDICES) == null)
 			return;
@@ -463,7 +463,7 @@ public class JOGLRendererHelper {
 		}
 
 		numF = sg.getNumFaces();
-		if (isQuadMesh) {
+		if (false && isQuadMesh) {
 			double[] pt = new double[3];
 			// this loops through the "rows" of the mesh (v is constant on each
 			// row)
