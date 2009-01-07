@@ -488,88 +488,6 @@ import de.jreality.scene.data.IntArrayArray;
 				allFaceCount++;
 			}
 		}
-		// now merge the boundary edges identified as duplicated
-		if (false)
-		  for (SharedEdge se : dupEdgeList) {
-			Pair p1 = se.p1, p2 = se.p2;
-			System.err.println("handling duplicate edge");
-			int fsize1 = origIndices[p1.face].length;
-			int diff1 = (profileCurveSize - 1) * (fsize1 * stepsPerEdge + 1);
-			int ul1 = faceOffsets[p1.face]+stepsPerEdge*p1.edge,
-				ur1 = faceOffsets[p1.face]+stepsPerEdge*((p1.edge+1)),
-				ll1 = ul1+diff1,
-				lr1 = ur1+diff1,
-				first1 = faceOffsets[p1.face],
-				last1 = faceOffsets[p1.face] + stepsPerEdge * fsize1;
-			int fsize2 = origIndices[p1.face].length;
-			int diff2 = (profileCurveSize - 1) * (fsize2 * stepsPerEdge + 1);
-			int ul2 = faceOffsets[p2.face]+stepsPerEdge*p2.edge,
-				ur2 = faceOffsets[p2.face]+stepsPerEdge*((p2.edge+1)),
-				ll2 = ul2+diff2,
-				lr2 = ur2+diff2,
-				first2 = faceOffsets[p2.face],
-				last2 = faceOffsets[p2.face] + stepsPerEdge * fsize2;
-
-			int step2 = 1;
-			if (se.flipped)	{
-				int tmp = ul2;
-				ul2 = ur2;
-				ur2 = tmp;
-				tmp = ll2;
-				ll2 = lr2;
-				lr2 = tmp;
-				step2 = -1;
-			}
-			boolean normalflip = false;
-			int normalFactor = 1;
-			double[] v1 = allVertices[ul1], v2 = allVertices[ul2];
-			double d1 = Rn.euclideanDistance(allVertices[ul1], v2 = allVertices[ul2]),
-				d2 = Rn.euclideanDistance(allVertices[ul1], v2 = allVertices[ll2]);
-			if (d2 < d1) normalflip = true;
-			if (normalflip)	{
-				int tmp = ul2;
-				ul2 = ll2;
-				ll2 = tmp;
-				tmp = ur2;
-				ur2 = lr2;
-				lr2 = tmp;
-			}
-			// assume orientation is good, glue corresponding vertices
-			for (int j = 0, u1 = ul1, u2 = ul2, l1 = ll1, l2 = ll2; 
-				j<=stepsPerEdge; 
-				++j, u1++, u2 += step2, l1++, l2 += step2) {
-				v1 = allVertices[u1]; v2 = allVertices[u2];
-//				System.err.println("redefining vertices "+Rn.toString(v1));
-//				System.err.println("redefining vertices "+Rn.toString(v2));
-				double[] vv = Rn.times(null, .5, Rn.add(null, v1, v2));
-//				System.err.println("new vertex "+Rn.toString(vv));
-				allVertices[u1] = allVertices[u2] = vv;
-				if (u1 == first1) setVertex(last1, vv); //allVertices[last1]  = vv;
-				if (u2 == first2) setVertex(last2, vv);
-				if (u1 == last1) setVertex(first1, vv);
-				if (u2 == last2) setVertex(first2, vv);
-				if (u1 == first1+diff1) setVertex(last1+diff1, vv);
-				if (u2 == first2+diff2) setVertex(last2+diff2, vv);
-				if (u1 == last1+diff1) setVertex(first1+diff1, vv);
-				if (u2 == last2+diff2) setVertex(first2+diff2, vv);
-				v1 = allVertices[l1]; v2 = allVertices[l2];
-//				System.err.println("redefining vertices "+Rn.toString(v1));
-//				System.err.println("redefining vertices "+Rn.toString(v2));
-				vv = Rn.times(null, .5, Rn.add(null, v1, v2));
-				allVertices[l1] = allVertices[l2] = vv;
-				if (l1 == first1) setVertex(last1, vv); //allVertices[last1]  = vv;
-				if (l2 == first2) setVertex(last2, vv);
-				if (l1 == last1) setVertex(first1, vv);
-				if (l2 == last2) setVertex(first2, vv);
-				if (l1 == first1+diff1) setVertex(last1+diff1, vv);
-				if (l2 == first2+diff2) setVertex(last2+diff2, vv);
-				if (l1 == last1+diff1) setVertex(first1+diff1, vv);
-				if (l2 == last2+diff2) setVertex(first2+diff2, vv);
-				
-//				System.err.println("new vertex "+Rn.toString(vv));
-//				System.err.println("redefining vertices "+u1+":"+u2+":"+l1+":"+l2);
-			}
-		}
 
 //		System.err.println("Found "+foundSharedVerts+" shared vertices");
 		thickSurfaceIFSF.setVertexCount(allVerts);
@@ -589,8 +507,8 @@ import de.jreality.scene.data.IntArrayArray;
 
 	private void mergeVertices(double[][] newVertices, int ul1, int ul2) {
 		double[] v1 = newVertices[ul1], v2 = newVertices[ul2];
-//				System.err.println("redefining vertices "+Rn.toString(v1));
-//				System.err.println("redefining vertices "+Rn.toString(v2));
+				System.err.println("redefining vertices "+Rn.toString(v1));
+				System.err.println("redefining vertices "+Rn.toString(v2));
 		double[] vv = Rn.times(null, .5, Rn.add(null, v1, v2));
 //				System.err.println("new vertex "+Rn.toString(vv));
 		newVertices[ul1] = newVertices[ul2] = vv;
@@ -765,7 +683,13 @@ import de.jreality.scene.data.IntArrayArray;
 		    if(this==obj) return true;
 		    try {
 		      final Pair p=(Pair)obj;
-		      return (l == p.l && h == p.h) || (l==p.h && h == p.l);
+		      boolean sameSense = (l == p.l && h == p.h);
+		      boolean flippedSense = (l==p.h && h == p.l);
+//		      if (sameSense || flippedSense)	{
+//		    	  if (sameSense) System.err.println("same = "+sameSense);
+//		    	  return true;
+//		      } else return false;
+		      return flippedSense || sameSense;
 		    } catch(ClassCastException ex) {
 		      return false;
 		    }
@@ -780,6 +704,10 @@ import de.jreality.scene.data.IntArrayArray;
 		if (theSurface.getFaceAttributes(Attribute.attributeForName("faceIndices")) != null) {
 			faceIndices = theSurface.getFaceAttributes(Attribute.attributeForName("faceIndices"));
 		}
+		DataList faceNormals = theSurface.getFaceAttributes(Attribute.NORMALS);
+		double[][] fn = null;
+		if (faceNormals != null) fn = faceNormals.toDoubleArrayArray(null);
+		
 		IntArrayArray faces = faceIndices.toIntArrayArray(); 
 	    edgelist =new ArrayList<Pair>();
 	   
@@ -788,7 +716,8 @@ import de.jreality.scene.data.IntArrayArray;
 	        IntArray f= faces.getValueAt(i);
 	        for (int j= 0; j < f.getLength(); j++)
 	        {
-	        	Pair p = new Pair(f.getValueAt(j), f.getValueAt((j + 1)%f.getLength()), i, j);
+	        	int i1 = f.getValueAt(j), j1 = f.getValueAt((j + 1)%f.getLength());
+	        	Pair p = new Pair(i1, j1, i, j);
 	            if (edgelist.contains(p)) edgelist.remove(p);
 	            else edgelist.add(p);
 	        }
@@ -830,6 +759,7 @@ import de.jreality.scene.data.IntArrayArray;
 	    			}
 	    		}
 	    	}
+	    	System.err.println("Found duplicate edges: "+dupEdgeList.size());
 	    	edgelist.removeAll(toRemove);
 	    }
 	}
