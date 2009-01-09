@@ -47,6 +47,7 @@ import de.jreality.math.Pn;
 import de.jreality.scene.event.CameraEvent;
 import de.jreality.scene.event.CameraEventMulticaster;
 import de.jreality.scene.event.CameraListener;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 /**
  *
@@ -76,12 +77,12 @@ import de.jreality.util.LoggingSystem;
  * </ul>  
  * For CAVE-like environments
  * where the eyes are not always oriented horizontally, there is an additional parameter:
- *  an orientation matrix (@link #setOrientationMatrix(double[])), a 4x4 transformation matrix
+ *  an orientation matrix ({@link #setOrientationMatrix(double[])}), a 4x4 transformation matrix
  *  which  defines the rotation that has to be applied to the x-axis to get the
  *  line in camera coordinates on which the eyes lie. (This matrix should fix (0,0,0,1)!).
  *  <p> 
  * Default eye positions are (-eyeSeparation/2,0,0) and (eyeSeparation, 0,0) in the 
- * camera coordinate system.  Use {@link de.jreality.util.CameraUtility#getNDCToCamera(Camera, double, int)} to generate 
+ * camera coordinate system.  Use {@link CameraUtility#getNDCToCamera(Camera, double, int)} to generate 
  * the appropriate projection matrices.
  * <p>
  * Instances of {@link de.jreality.scene.event.CameraListener} can register with the camera
