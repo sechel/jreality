@@ -81,6 +81,7 @@ public static void main(String[] args) throws IOException {
 			id = ImageData.load(Input.getInput(args[0]));
 		} else { // use a procedural texture
 			SimpleTextureFactory stf = new SimpleTextureFactory();
+			stf.setColor(0, new Color(0,0,0,0));
 			stf.update();
 			id = stf.getImageData();
 			scale = 10;

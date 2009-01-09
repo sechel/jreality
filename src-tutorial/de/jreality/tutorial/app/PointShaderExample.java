@@ -140,8 +140,8 @@ public static void main(String[] args) {
 			case 5:		// opaque spheres with vertex colors, relative radii
 				dps.setSpheresDraw(true);		// the default
 				dpls.setTransparency(.6);
-				rhs.setTransparencyEnabled(true);
-				rhs.setOpaqueTubesAndSpheres(i != 3 && i != 5);
+				rhs.setTransparencyEnabled(i==3);
+				rhs.setOpaqueTubesAndSpheres(i != 3);
 				dps.setPointRadius(.05);
 				break;
 		}
