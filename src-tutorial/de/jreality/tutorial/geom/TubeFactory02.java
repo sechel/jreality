@@ -111,7 +111,7 @@ public class TubeFactory02 {
 		torussgc.setGeometry(tubedTorusKnot);
 	}
 
-	private  IndexedFaceSet tubedTorusKnot(
+	public  IndexedFaceSet tubedTorusKnot(
 			double R, 
 			double r,
 			double tubeRadius) {
