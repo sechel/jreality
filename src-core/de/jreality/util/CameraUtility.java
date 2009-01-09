@@ -422,7 +422,7 @@ public class CameraUtility {
 			camera.setFocus(Math.abs(focus) ); 		//focus);	    	
 	    }
 		camera.setEyeSeparation(camera.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
-		System.err.println("setting focus to "+camera.getFocus());
+//		System.err.println("setting focus to "+camera.getFocus());
 	}
 
 	
