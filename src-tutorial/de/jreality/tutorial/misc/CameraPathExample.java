@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.List;
 
 import javax.swing.Timer;
 
@@ -24,6 +25,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.Light;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -46,13 +48,16 @@ import de.jreality.util.SceneGraphUtility;
 
 public class CameraPathExample {
 
+	private static List<SceneGraphPath> lightPaths;
+	private static SceneGraphComponent movingLightSGC;
+
 	public static void main(String[] args) {
 		SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
 		final SceneGraphComponent child1 =  SceneGraphUtility.createFullSceneGraphComponent("knot"),
 			child2 = SceneGraphUtility.createFullSceneGraphComponent("point");
 		
 		world.addChildren(child1, child2);
-		IndexedLineSet torus1 = Primitives.discreteTorusKnot(1, .4, 2, 3, 500);
+		IndexedLineSet torus1 = Primitives.discreteTorusKnot(1, .4, 2, 3, 1000);
 		PolygonalTubeFactory polygonalTubeFactory = new PolygonalTubeFactory(torus1, 0);
 		polygonalTubeFactory.setClosed(true);
 		polygonalTubeFactory.setMatchClosedTwist(true);
@@ -73,12 +78,13 @@ public class CameraPathExample {
 		dls.setDiffuseColor(Color.green);
 
 		SimpleTextureFactory stf = new SimpleTextureFactory();
+		stf.setColor(0, new Color(0,0,0,0));
 		stf.update();
 		ImageData id = stf.getImageData();
 		DefaultPolygonShader dpls = (DefaultPolygonShader) dgs.createPolygonShader("default");
-		dpls.setDiffuseColor(Color.white);
+		dpls.setDiffuseColor(Color.pink);
 		Texture2D tex = TextureUtility.createTexture(child1.getAppearance(), POLYGON_SHADER,id);
-		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(5,200,1).getMatrix());
+		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(5,50,1).getMatrix());
 
 		final SceneGraphComponent axes = TubeFactory.getXYZAxes();
 		MatrixBuilder.euclidean().scale(1,1,-1).assignTo(axes);
@@ -113,11 +119,19 @@ public class CameraPathExample {
 		Camera camera = new Camera();
 		camera.setNear(.015);
 		camera.setFieldOfView(90);
+		// set up second camera path, ending in the moving point on the curve
 		child2.setCamera(camera);
 		final SceneGraphPath campath2 = SceneGraphUtility.getPathsBetween(
 				viewer.getSceneRoot(), 
 				child2).get(0);
 		campath2.push(child2.getCamera());
+		movingLightSGC = new SceneGraphComponent("moving light");
+		child2.addChild(movingLightSGC);
+		movingLightSGC.setVisible(false);
+		
+		lightPaths = SceneGraphUtility.collectLights(viewer.getSceneRoot());
+		Light l = (Light) lightPaths.get(0).getLastElement();
+		movingLightSGC.setLight(l);
 		
 		Component comp = ((Component) viewer.getViewingComponent());
 		comp.addKeyListener(new KeyAdapter() {
@@ -136,6 +150,11 @@ public class CameraPathExample {
 								boolean alternative = cp == campath;
 								va.getCurrentViewer().setCameraPath(alternative ? campath2 : campath);
 								axes.setVisible(!alternative);
+								movingLightSGC.setVisible(alternative);
+								for (SceneGraphPath sgp : lightPaths)	{
+									sgp.getLastComponent().setVisible(!alternative);
+								}
+
 							}
 							
 						});
