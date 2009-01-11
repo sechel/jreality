@@ -81,8 +81,9 @@ public class CameraPathExample {
 		stf.setColor(0, new Color(0,0,0,0));
 		stf.update();
 		ImageData id = stf.getImageData();
-		DefaultPolygonShader dpls = (DefaultPolygonShader) dgs.createPolygonShader("default");
+		final DefaultPolygonShader dpls = (DefaultPolygonShader) dgs.createPolygonShader("default");
 		dpls.setDiffuseColor(Color.pink);
+		dpls.setAmbientCoefficient(.05);
 		Texture2D tex = TextureUtility.createTexture(child1.getAppearance(), POLYGON_SHADER,id);
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(5,50,1).getMatrix());
 
@@ -150,6 +151,7 @@ public class CameraPathExample {
 								boolean alternative = cp == campath;
 								va.getCurrentViewer().setCameraPath(alternative ? campath2 : campath);
 								axes.setVisible(!alternative);
+								dpls.setAmbientCoefficient(alternative ? .2 : .05);
 								movingLightSGC.setVisible(alternative);
 								for (SceneGraphPath sgp : lightPaths)	{
 									sgp.getLastComponent().setVisible(!alternative);
