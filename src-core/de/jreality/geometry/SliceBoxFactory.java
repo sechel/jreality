@@ -71,7 +71,6 @@ import de.jreality.util.SceneGraphUtility;
 		clippingPlane2 = new ClippingPlane();
 		clippingPlane2.setLocal(true);
 		clipPlane2SGC.setGeometry(clippingPlane2);
-		MatrixBuilder.euclidean().translate(0,0,-separation).reflect(new double[]{0,0,1,0}).assignTo(clipPlane2SGC);
 		clipPlane1SGC.addChild(clipPlane2SGC);
 		clipPlane2SGC.addChild(worldSGC);
 		
@@ -97,6 +96,7 @@ import de.jreality.util.SceneGraphUtility;
 		sliceBoxSGC.addChild(clipPlane1SGC);
 		sliceBoxSGC.addChild(clipIcon1);
 		clipper = new SceneGraphPath(sliceBoxSGC,clipPlane1SGC, clipPlane2SGC);
+		update();
 	}
 	
 	private void updateClipIcon(int i) {
@@ -113,8 +113,16 @@ import de.jreality.util.SceneGraphUtility;
 		return sliceBoxSGC;
 	}
 	
+	public double getSeparation() {
+		return separation;
+	}
+
+	public void setSeparation(double separation) {
+		this.separation = separation;
+	}
 	public void update()	{
-		
+		MatrixBuilder.euclidean().translate(0,0,-separation).reflect(new double[]{0,0,1,0}).assignTo(clipPlane2SGC);
+		MatrixBuilder.euclidean().translate(0,0,-separation).assignTo(clipIcon2);
 	}
 	  private final InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
 	  private final InputSlot activeSlot = InputSlot.getDevice("PrimaryAction");
@@ -134,8 +142,7 @@ import de.jreality.util.SceneGraphUtility;
 
 		public void setSeparation(double d)	{
 			separation = d;
-			MatrixBuilder.euclidean().translate(0,0,-separation).reflect(new double[]{0,0,1,0}).assignTo(clipPlane2SGC);
-			MatrixBuilder.euclidean().translate(0,0,-separation).assignTo(clipIcon2);
+			update();
 		}
 		
 		public double getSeparation()	{
