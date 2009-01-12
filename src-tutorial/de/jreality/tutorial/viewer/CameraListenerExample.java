@@ -121,7 +121,7 @@ import de.jreality.util.SceneGraphUtility;
 		if (logs < 0) logs = 0;
 		if (logs > (numLevels-1)) logs = (numLevels-1);
 		int which = (int) logs;
-//		System.err.println("size = "+size+" which = "+which);
+		System.err.println("size = "+size+" which = "+which);
 		if (which == lastLevel) return;
 		sphereSGC.setGeometry(levelsOfDetailSpheres[which]);
 		dls.setTubeRadius(.033*Math.pow(.5, which));

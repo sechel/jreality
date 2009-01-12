@@ -88,7 +88,9 @@ public class CameraPathExample {
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(5,50,1).getMatrix());
 
 		final SceneGraphComponent axes = TubeFactory.getXYZAxes();
-		MatrixBuilder.euclidean().scale(1,1,-1).assignTo(axes);
+		// flip the z-direction of the axes to agree with fact that the camera
+		// points in the negative z-direction
+		MatrixBuilder.euclidean().scale(.5).scale(1,1,-1).assignTo(axes);
 		child2.addChild(axes);
 		dgs = ShaderUtility.createDefaultGeometryShader(child2.getAppearance(), true);
 		dgs.setShowPoints(true);
@@ -98,6 +100,10 @@ public class CameraPathExample {
 		dps.setDiffuseColor(Color.white);
 		
 		final TubeUtility.FrameInfo[] frames = polygonalTubeFactory.getFrameField();
+		// set up a timer to move the position of the second camera along the
+		// torus knot, using the frame field from the tube factory.
+		// the z-direction has to be flipped to agree with the fact that the
+		// jReality camera points in the negative z-direction
 		final Timer movepoint = new Timer(20, new ActionListener() {
 			int count = 0;
 			public void actionPerformed(ActionEvent e) {
@@ -109,7 +115,7 @@ public class CameraPathExample {
 		});
 		movepoint.start();
 		
-		final ViewerApp va = new ViewerApp(world); // ViewerApp.display(torussgc);
+		final ViewerApp va = new ViewerApp(world); 
 		va.setAttachNavigator(true);
 		va.setExternalNavigator(false);
 		va.update();
