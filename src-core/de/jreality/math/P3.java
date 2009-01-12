@@ -1025,17 +1025,19 @@ public class P3 {
 		 */
 		public static double getNDCExtent(double[] o2ndc) {
 			double[][] images = new double[4][4];
+			// we can't just use the columns of o2ndc since there's no easy way to
+			// dehomogenize them (they are generally points at infinity)
 			Matrix imageFrame = new Matrix(Rn.times(null, o2ndc, P3.standardFrame));
 			for (int i = 0; i<4; ++i)	{
 				images[i] = imageFrame.getColumn(i);
 				images[i] = Pn.dehomogenize(null, images[i]);
-	//			System.err.println(i+"image = "+Rn.toString(images[i]));
 			}
 			double d = 0.0;
 			// find the maximum xy extent in ndc coordinates of the three unit vectors
 			// in object space
 			for (int i = 0; i<3; ++i)	 {
-				double[] tmp = images[i]; //Rn.subtract(null, images[3], images[i]);
+				// now we subtract off the "origin" to get a vector
+				double[] tmp = Rn.subtract(null, images[3], images[i]);
 				double t = Math.sqrt(Rn.innerProduct(tmp,tmp,2));
 				if (t > d) d = t;
 			}
