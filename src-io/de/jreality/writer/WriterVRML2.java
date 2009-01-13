@@ -346,6 +346,7 @@ public class WriterVRML2{
 		hist=hist+spacing;
 		// have to set all colors at once, otherwise unset colors return to defaultValue
 		switch (typ){
+		case TEX_FACE:
 		case FACE: 
 		case SPHERE: 
 		case TUBE:{
