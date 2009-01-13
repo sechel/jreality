@@ -22,12 +22,10 @@ public class JackNode extends AudioSource implements JackSource {
 		JackHub.addSource(this);
 	}
 	
-	@Override
 	protected void reset() {
 		// do nothing
 	}
 
-	@Override
 	protected void writeSamples(int n) {
 		// do nothing; samples are written in process callback
 	}

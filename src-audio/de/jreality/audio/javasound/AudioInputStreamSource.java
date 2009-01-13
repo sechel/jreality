@@ -108,7 +108,7 @@ public class AudioInputStreamSource extends AudioSource {
 
 	private int readAMAP(int nRequested, int frameSize, byte[] buf) throws IOException {
 		int read = audioStream.read(buf)/frameSize;
-		label: while (read < nRequested) {
+		while (read < nRequested) {
 			// check if stream is at end:
 			int nowRead = audioStream.read(buf, read*frameSize, (nRequested-read)*frameSize)/frameSize;
 			if (nowRead == -1) { // stream at end

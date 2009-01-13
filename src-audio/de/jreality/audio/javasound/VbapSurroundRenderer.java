@@ -93,7 +93,7 @@ public class VbapSurroundRenderer {
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
 				while (true) {
-					backend.encodeSound(enc, frameSize);
+					backend.processFrame(enc, frameSize);
 				}
 			}
 		};

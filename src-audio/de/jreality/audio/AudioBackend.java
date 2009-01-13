@@ -17,61 +17,81 @@ import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
 import de.jreality.shader.EffectiveAppearance;
 
+/**
+ * 
+ * Audio backend; collects audio sources and appearances from the scene graph, keeps them up to date,
+ * and provides an audio processing callback.
+ *
+ */
 public class AudioBackend extends UpToDateSceneProxyBuilder {
 
-	int samplerate;
+	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int samplerate) {
+		super(root);
+		this.microphonePath = microphonePath;
+		microphonePath.getInverseMatrix(micInvMatrix.getArray());
+		this.samplerate=samplerate;
+		setEntityFactory(factory);
+		
+		setProxyTreeFactory(new ProxyTreeFactory() {
+			public void visit(AudioSource a) {
+				proxyNode = new AudioTreeNode(a);
+			}
+		});
+		super.createProxyTree();
+	}
 	
-	class AudioTreeNode extends SceneTreeNode {
+	public void processFrame(SoundEncoder enc, int framesize) {
+		microphonePath.getInverseMatrix(micInvMatrix.getArray());
+		
+		enc.startFrame(framesize);
+		synchronized (audioSources) {
+			for (AudioTreeNode node : audioSources) {
+				node.processFrame(enc, framesize);
+			}
+		}
+		enc.finishFrame();
+	}
+	
+	private int samplerate;
+	private SceneGraphPath microphonePath;
+	private Matrix micInvMatrix = new Matrix();
+	private List<AudioTreeNode> audioSources = new ArrayList<AudioTreeNode>();
+	
+	private class AudioTreeNode extends SceneTreeNode {
 
-		AudioSource audio;
 		SoundPath soundPath;
 		SampleReader reader;
-	
-		float[] sampleBuffer;
+		Matrix curPos = new Matrix();
+		SceneGraphPath path;
 
-		Matrix p0 = new Matrix();
-		Matrix p1 = new Matrix();
-		
-		private SceneGraphPath path;
-
-		Matrix previousPosition;
-		
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
-			this.audio=audio;
+
 			soundPath = new InstantSoundPath();
 			reader = AudioReader.createReader(audio, samplerate);
+			path = toPath();
 		}
 		
-		void init(int frameSize) {
-			if (sampleBuffer == null || sampleBuffer.length != frameSize) {
-				sampleBuffer = new float[frameSize];
-			}
-			if (path == null) {
-				path = toPath();
-				previousPosition = new Matrix();
-				path.getMatrix(previousPosition.getArray());
-				previousPosition.multiplyOnLeft(micInvMatrix);
-			}
-		}
-		
-		void encodeSound(SoundEncoder enc, int frameSize) {
-			init(frameSize);
-			p0.assignFrom(previousPosition);
-			path.getMatrix(previousPosition.getArray());
-			previousPosition.multiplyOnLeft(micInvMatrix);
-			p1.assignFrom(previousPosition);
-			int read = reader.read(sampleBuffer, 0, frameSize);
+		void processFrame(SoundEncoder enc, int frameSize) {
+			path.getMatrix(curPos.getArray());
 			
 			// TODO: use a SceneGraphPathObserver to create a new EffectiveAppearance
 			// only when appearances were added/removed along the path.
 			// TODO: For this we need to extend SceneGraphPathObserver.
 			soundPath.setFromEffectiveAppearance(EffectiveAppearance.create(path));
-			
-			soundPath.processSamples(sampleBuffer, read, p0, p1);
-			enc.encodeSignal(sampleBuffer, read, p0, p1);
+			soundPath.processFrame(reader, enc, frameSize, curPos, micInvMatrix);
 		}
 	}
+	
+	private EntityFactory factory = new EntityFactory() {
+		{
+			setUpdateAudioSource(true);
+		}
+
+		protected SceneGraphNodeEntity produceAudioSourceEntity(AudioSource g) {
+			return new AudioSourceEntity(g);
+		}
+	};
 	
 	private class AudioSourceEntity extends SceneGraphNodeEntity implements AudioListener {
 
@@ -83,7 +103,6 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			//System.out.println("AudioSourceEntity.audioChanged() "+ev+" src="+ev.getSourceNode());
 		}
 		
-		@Override
 		protected void addTreeNode(SceneTreeNode tn) {
 			super.addTreeNode(tn);
 			synchronized (audioSources) {
@@ -91,7 +110,6 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			}
 		}
 		
-		@Override
 		protected void removeTreeNode(SceneTreeNode tn) {
 			super.removeTreeNode(tn);
 			synchronized (audioSources) {
@@ -99,47 +117,4 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			}
 		}
 	}
-	
-	List<AudioTreeNode> audioSources = new ArrayList<AudioTreeNode>();
-	
-	EntityFactory factory = new EntityFactory() {
-		{
-			setUpdateAudioSource(true);
-		}
-		@Override
-		protected SceneGraphNodeEntity produceAudioSourceEntity(AudioSource g) {
-			return new AudioSourceEntity(g);
-		}
-	};
-
-	private SceneGraphPath microphonePath;
-	private Matrix micInvMatrix = new Matrix();
-	
-	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int samplerate) {
-		super(root);
-		this.microphonePath = microphonePath;
-		microphonePath.getInverseMatrix(micInvMatrix.getArray());
-		this.samplerate=samplerate;
-		setEntityFactory(factory);
-		
-		setProxyTreeFactory(new ProxyTreeFactory() {
-			@Override
-			public void visit(AudioSource a) {
-				proxyNode = new AudioTreeNode(a);
-			}
-		});
-		super.createProxyTree();
-	}
-	
-	public void encodeSound(SoundEncoder enc, int framesize) {
-		enc.startFrame(framesize);
-		microphonePath.getInverseMatrix(micInvMatrix.getArray());
-		synchronized (audioSources) {
-			for (AudioTreeNode node : audioSources) {
-				node.encodeSound(enc, framesize);
-			}
-		}
-		enc.finishFrame();
-	}
-	
 }

@@ -1,7 +1,5 @@
 package de.jreality.audio.jack;
 
-import java.nio.FloatBuffer;
-
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AudioBackend;
@@ -11,8 +9,8 @@ import de.jreality.scene.Viewer;
 
 /**
  * 
- * Simple Jack back-end for Ambisonics.  All the real work occurs in the Ambisonics visitor; this class
- * merely takes care of the Jack init (which is a bit dicey; see comment in JackSource.java), collects
+ * Simple Jack back-end for Ambisonics.  All the real work occurs in {@link AudioBackend}; this class
+ * merely takes care of the Jack init (which is a bit dicey; see comment in {@link JackSource}), collects
  * the samples and writes them to the Jack output buffers.
  * 
  * Use the {@code launch}-method to activate this renderer for a given {@link Viewer}.
@@ -27,6 +25,8 @@ public class JackAmbisonicsRenderer extends AmbisonicsSoundEncoder implements Ja
 	private SceneGraphComponent root;
 	private SceneGraphPath microphonePath;
 	
+	private JJackAudioEvent currentJJackEvent;
+	
 	public void setRootAndMicrophonePath(SceneGraphComponent root, SceneGraphPath microphonePath) {
 		this.root = root;
 		this.microphonePath = microphonePath;
@@ -40,30 +40,16 @@ public class JackAmbisonicsRenderer extends AmbisonicsSoundEncoder implements Ja
 		backend=new AudioBackend(root, microphonePath, sampleRate);
 	}
 
-	FloatBuffer outbufW;
-	FloatBuffer outbufX;
-	FloatBuffer outbufY;
-	FloatBuffer outbufZ;
-	
 	public void process(JJackAudioEvent ev) {
-
-		outbufW=ev.getOutput(0);
-		outbufX=ev.getOutput(1);
-		outbufY=ev.getOutput(2);
-		outbufZ=ev.getOutput(3);
-
-		int frameSize = ev.getOutput().capacity();
-
-		backend.encodeSound(this, frameSize);
-
+		currentJJackEvent = ev;
+		backend.processFrame(this, ev.getOutput().capacity());
 	}
 
-	@Override
 	public void finishFrame() {
-		outbufW.put(bw);
-		outbufX.put(bx);
-		outbufY.put(by);
-		outbufZ.put(bz);
+		currentJJackEvent.getOutput(0).put(bw);
+		currentJJackEvent.getOutput(1).put(bx);
+		currentJJackEvent.getOutput(2).put(by);
+		currentJJackEvent.getOutput(3).put(bz);
 	}
 	
 	public static void launch(Viewer viewer) {

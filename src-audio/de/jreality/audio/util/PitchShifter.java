@@ -2,8 +2,6 @@ package de.jreality.audio.util;
 
 import java.util.Arrays;
 
-import de.jreality.audio.SampleReader;
-
 /*
  *
  * NAME: smbPitchShift.cpp

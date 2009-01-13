@@ -210,7 +210,7 @@ public class JavaSoundUtility {
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
 				while (true) {
-					backend.encodeSound(enc, framesize);
+					backend.processFrame(enc, framesize);
 					
 				}
 			}

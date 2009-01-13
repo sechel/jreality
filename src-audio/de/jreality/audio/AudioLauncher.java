@@ -63,13 +63,11 @@ public class AudioLauncher {
 				System.out.println("Launching 5.1 backend...");
 				VbapSurroundRenderer.launch(v);
 			} else {
-				// stereo backend...
-				//BinauralDecoder.launch(v);
+				System.out.println("Launching stereo backend...");
 				JavaAmbisonicsStereoDecoder.launch(v);
 			}
 			return true;
 		} catch (LineUnavailableException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

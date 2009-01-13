@@ -42,7 +42,7 @@ public class LowPassFilter implements SampleReader {
 	public int read(float[] buffer, int initialIndex, int nSamples) {
 		int nRead = reader.read(samples, 0, nSamples);
 		
-		for(int i = 0; i<nRead; i++) {
+		for(int i = initialIndex; i<nRead; i++) {
 			prevValue += alpha*(samples[i]-prevValue);
 			buffer[i] = prevValue;
 		}

@@ -5,7 +5,7 @@ import de.jreality.scene.data.RingBuffer;
 
 /**
  * 
- * An AudioSource getting data from aprecomputed sample buffer.
+ * An AudioSource getting data from a precomputed sample buffer.
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *
@@ -28,12 +28,10 @@ public class SampleBufferAudioSource extends AudioSource {
 		reset();
 	}
 
-	@Override
 	protected void reset() {
 		index = 0;
 	}
 
-	@Override
 	protected void writeSamples(int nRequested) {
 		if (index+nRequested<samples.length) {
 			ringBuffer.write(samples, index, nRequested);

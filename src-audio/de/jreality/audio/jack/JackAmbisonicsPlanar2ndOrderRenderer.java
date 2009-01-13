@@ -1,6 +1,4 @@
-package de.jreality.audio.jack;
-
-import java.nio.FloatBuffer;
+ package de.jreality.audio.jack;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.jreality.audio.AmbisonicsPlanar2ndOrderSoundEncoder;
@@ -21,6 +19,8 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AmbisonicsPlanar2ndOrd
 	private SceneGraphComponent root;
 	private SceneGraphPath microphonePath;
 	
+	private JJackAudioEvent currentJJackEvent;
+	
 	public void setRootAndMicrophonePath(SceneGraphComponent root, SceneGraphPath microphonePath) {
 		this.root = root;
 		this.microphonePath = microphonePath;
@@ -34,33 +34,17 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AmbisonicsPlanar2ndOrd
 		backend=new AudioBackend(root, microphonePath, sampleRate);
 	}
 
-	FloatBuffer outbufW;
-	FloatBuffer outbufX;
-	FloatBuffer outbufY;
-	FloatBuffer outbufU;
-	FloatBuffer outbufV;
-	
 	public void process(JJackAudioEvent ev) {
-
-		outbufW=ev.getOutput(0);
-		outbufX=ev.getOutput(1);
-		outbufY=ev.getOutput(2);
-		outbufU=ev.getOutput(3);
-		outbufV=ev.getOutput(4);
-
-		int frameSize = ev.getOutput().capacity();
-
-		backend.encodeSound(this, frameSize);
-
+		currentJJackEvent = ev;
+		backend.processFrame(this, ev.getOutput().capacity());
 	}
 
-	@Override
 	public void finishFrame() {
-		outbufW.put(bw);
-		outbufX.put(bx);
-		outbufY.put(by);
-		outbufU.put(bu);
-		outbufV.put(bu);
+		currentJJackEvent.getOutput(0).put(bw);
+		currentJJackEvent.getOutput(1).put(bx);
+		currentJJackEvent.getOutput(2).put(by);
+		currentJJackEvent.getOutput(3).put(bu);
+		currentJJackEvent.getOutput(4).put(bu);
 	}
 	
 	public static void launch(Viewer viewer) {

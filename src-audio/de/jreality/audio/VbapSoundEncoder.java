@@ -68,52 +68,30 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 	public synchronized void setSpeakerIDs(int[] channelIDs) {
 		this.channelIDs = channelIDs;
 	}
+
+
+	public void startFrame(int framesize) {
+		if (buf == null || buf.length != framesize*channels) buf = new float[framesize*channels];
+		else Arrays.fill(buf, 0f);
+	}
+
+	public abstract void finishFrame();
+
+	private float g[] = new float[2];
 	
-	public synchronized void encodeSignal(float[] samples, int nSamples, Matrix p0, Matrix p1) {
+	public void encodeSample(float v, int i, float x0, float y0, float z0, float r) {
+		float x = -z0;
+		float y = -x0;
 		
-		// read start and dest directions from matrices: 
-		float x0 = (float) p0.getEntry(0, 3);
-		float y0 = (float) p0.getEntry(1, 3);
-		float z0 = (float) p0.getEntry(2, 3);
-
-		float x1 = (float) p1.getEntry(0, 3);
-		float y1 = (float) p1.getEntry(1, 3);
-		float z1 = (float) p1.getEntry(2, 3);
-
-		float dx = (x1-x0)/nSamples;
-		float dy = (y1-y0)/nSamples;
-		float dz = (z1-z0)/nSamples;
-		
-		float[] g = new float[2];
-		
-		for(int i = 0; i<nSamples; i++) {
-			x0 += dx;
-			y0 += dy;
-			z0 += dz;
-
-			float r = (float) (Math.sqrt(x0*x0+y0*y0+z0*z0)+1e-5);
-			
-			float v = samples[i];
-			
-			float x = -z0/r;
-			float y = -x0/r;
-			
-			int j;
-			for (j=0; j<channels; j++) {
-				if (solve(g, speakerInverseMatrices.get(j), x, y)) break;
-			}
-			
-			//System.out.println("j="+j+" g="+Arrays.toString(g));
-			
-			int jn = (j+1)%channels; 
-			
-			buf[i*channels+channelIDs[j]] += speakerDistances[j]*v*g[0];
-			buf[i*channels+channelIDs[jn]] += speakerDistances[jn]*v*g[1];
-			
-//			System.out.println("ch["+ch1id+"]="+v*g[0]);
-//			System.out.println("ch["+ch2id+"]="+v*g[1]);
-			
+		int j;
+		for (j=0; j<channels; j++) {
+			if (solve(g, speakerInverseMatrices.get(j), x, y)) break;
 		}
+		
+		int jn = (j+1)%channels; 
+		
+		buf[i*channels+channelIDs[j]] += speakerDistances[j]*v*g[0];
+		buf[i*channels+channelIDs[jn]] += speakerDistances[jn]*v*g[1];
 	}
 
 	private boolean solve(float[] g, float[] m, float x, float y) {
@@ -127,12 +105,4 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 		}
 		return false;
 	}
-
-	public abstract void finishFrame();
-
-	public void startFrame(int framesize) {
-		if (buf == null || buf.length != framesize*channels) buf = new float[framesize*channels];
-		else Arrays.fill(buf, 0f);
-	}
-
 }

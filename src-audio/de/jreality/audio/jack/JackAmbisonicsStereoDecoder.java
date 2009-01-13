@@ -9,7 +9,7 @@ import de.gulden.framework.jjack.JJackSystem;
 /**
  * An Ambisonics stereo decoder for Jack, mostly for testing on desktop systems; reads an Ambisonics
  * B-signal and writes a stereo signal.  In a production environment, one should use a serious decoder
- * such as Fons Adriaensen's AmbDec.
+ * such as Fons Adriaensen's AmbDec.  For mathematical background, see http://www.muse.demon.co.uk/ref/speakers.html.
  * 
  * Note that this decoder has to run in its own JVM due to limitations of the JJack bindings.
  * 
