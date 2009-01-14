@@ -17,6 +17,7 @@ public class SimpleTextureFactory {
 	
 	public SimpleTextureFactory() {
 		super();
+		updatebcolors();
 	}
 	
 	public void setType(TextureType foo)	{
@@ -29,10 +30,7 @@ public class SimpleTextureFactory {
 	
 	int[] channels = {0,1,2,3};
 	Color[] colors = {Color.white, Color.LIGHT_GRAY, Color.yellow, new Color(0,0,0,0)};
-	byte[][] bcolors = { {(byte)255,(byte)255,(byte)255,(byte)255}, //{(byte)0x0,(byte)0x0,(byte)0x0,(byte)0x0},
-			{(byte)200,(byte)200,(byte)200,(byte)0xff},
-			{(byte)255,(byte)255,(byte)255,(byte)255},
-			{(byte)0,(byte)0, (byte) 0, (byte) 255}};
+	byte[][] bcolors = new byte[4][4];
 
 	public void setColors(Color[] colors) {
 		this.colors = colors;

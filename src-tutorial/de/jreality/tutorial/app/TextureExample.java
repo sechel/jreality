@@ -81,11 +81,13 @@ public static void main(String[] args) throws IOException {
 			id = ImageData.load(Input.getInput(args[0]));
 		} else { // use a procedural texture
 			SimpleTextureFactory stf = new SimpleTextureFactory();
-			stf.setColor(0, new Color(0,0,0,0));
+			stf.setColor(0, new Color(0,0,0,0));	// gap color in weave pattern is totally transparent
+			stf.setColor(1, new Color(255,0,100));
+			stf.setColor(2, new Color(255,255,0));
 			stf.update();
 			id = stf.getImageData();
 			scale = 10;
-			dps.setDiffuseColor(Color.yellow);
+			dps.setDiffuseColor(Color.white);
 		}
 		Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());

@@ -88,10 +88,13 @@ public static void main(String[] args) throws IOException {
 		id = ImageData.load(Input.getInput(args[0]));
 	} else { // use a procedural texture
 		SimpleTextureFactory stf = new SimpleTextureFactory();
+		stf.setColor(0, new Color(0,0,0,0));	// gap color in weave pattern is totally transparent
+		stf.setColor(1, new Color(255,0,100));
+		stf.setColor(2, new Color(255,255,0));
 		stf.update();
 		id = stf.getImageData();
 		scale = 10;
-		dps.setDiffuseColor(Color.yellow);
+		dps.setDiffuseColor(Color.white);
 	}
 	final Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
 	tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
@@ -113,6 +116,8 @@ public static void main(String[] args) throws IOException {
 		public void perform(ToolContext tc) {
 			if (tc.getCurrentPick() == null) return;
 			double[] texCoords = tc.getCurrentPick().getTextureCoordinates();
+			if (texCoords == null || texCoords.length < 2) return;
+			System.err.println("tc = "+Rn.toString(texCoords));
 			double[] diff = Rn.subtract(null, origTexCoords, texCoords);
 			double[] diff4 = {diff[0], diff[1], 0, 1.0};
 			double[] trans = P3.makeTranslationMatrix(null, diff4, Pn.EUCLIDEAN);
