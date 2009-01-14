@@ -9,6 +9,11 @@ import de.jreality.audio.javasound.JavaSoundUtility;
 import de.jreality.audio.javasound.VbapSurroundRenderer;
 import de.jreality.scene.Viewer;
 
+/**
+ * 
+ * Convenience class for launching audio backends.
+ *
+ */
 public class AudioLauncher {
 
 	public static boolean TRY_JACK=true;
@@ -31,21 +36,17 @@ public class AudioLauncher {
 	/**
 	 * Launches Jack backend if possible, otherwise Java sound backend.
 	 *   
-	 * @param v A viewer which defines the scene root and the microphone path (which is for now the camera path).
+	 * @param v A viewer that defines the scene root and the microphone path (which is for now the camera path).
 	 * 
 	 * @return flag indicating whether a sound renderer was successfully launched.
 	 */
 	public static boolean launch(Viewer v) {
 		if (TRY_JACK) {
 			Class<?> jackrenderer = null;
-			try {
-				
-				String classname = PLANAR ? 
-			"de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer"
-		:	"de.jreality.audio.jack.JackAmbisonicsRenderer";
-				
+			try {	
+				String classname = PLANAR ?	"de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer" :
+											"de.jreality.audio.jack.JackAmbisonicsRenderer";
 				jackrenderer = Class.forName(classname);
-				
 			} catch (ClassNotFoundException e1) {
 				// ignore this, just use java sound.
 			}
@@ -72,5 +73,4 @@ public class AudioLauncher {
 		}
 		return false;
 	}
-	
 }

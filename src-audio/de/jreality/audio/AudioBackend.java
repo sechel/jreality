@@ -25,13 +25,24 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class AudioBackend extends UpToDateSceneProxyBuilder {
 
+	private int samplerate;
+	private SceneGraphPath microphonePath;
+	private Matrix micInvMatrix = new Matrix();
+	private List<AudioTreeNode> audioSources = new ArrayList<AudioTreeNode>();
+	
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int samplerate) {
 		super(root);
 		this.microphonePath = microphonePath;
-		microphonePath.getInverseMatrix(micInvMatrix.getArray());
 		this.samplerate=samplerate;
-		setEntityFactory(factory);
-		
+		setEntityFactory(new EntityFactory() {
+			{
+				setUpdateAudioSource(true);
+			}
+
+			protected SceneGraphNodeEntity produceAudioSourceEntity(AudioSource g) {
+				return new AudioSourceEntity(g);
+			}
+		});
 		setProxyTreeFactory(new ProxyTreeFactory() {
 			public void visit(AudioSource a) {
 				proxyNode = new AudioTreeNode(a);
@@ -52,27 +63,24 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		enc.finishFrame();
 	}
 	
-	private int samplerate;
-	private SceneGraphPath microphonePath;
-	private Matrix micInvMatrix = new Matrix();
-	private List<AudioTreeNode> audioSources = new ArrayList<AudioTreeNode>();
-	
 	private class AudioTreeNode extends SceneTreeNode {
 
-		SoundPath soundPath;
-		SampleReader reader;
-		Matrix curPos = new Matrix();
-		SceneGraphPath path;
+		private SoundPath soundPath;
+		private SampleReader reader;
+		private Matrix curPos = new Matrix();
+		private SceneGraphPath path;
 
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
 			soundPath = new InstantSoundPath();
 			reader = AudioReader.createReader(audio, samplerate);
-			path = toPath();
 		}
 		
 		void processFrame(SoundEncoder enc, int frameSize) {
+			if (path==null) {
+				path = toPath();
+			}
 			path.getMatrix(curPos.getArray());
 			
 			// TODO: use a SceneGraphPathObserver to create a new EffectiveAppearance
@@ -82,16 +90,6 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			soundPath.processFrame(reader, enc, frameSize, curPos, micInvMatrix);
 		}
 	}
-	
-	private EntityFactory factory = new EntityFactory() {
-		{
-			setUpdateAudioSource(true);
-		}
-
-		protected SceneGraphNodeEntity produceAudioSourceEntity(AudioSource g) {
-			return new AudioSourceEntity(g);
-		}
-	};
 	
 	private class AudioSourceEntity extends SceneGraphNodeEntity implements AudioListener {
 

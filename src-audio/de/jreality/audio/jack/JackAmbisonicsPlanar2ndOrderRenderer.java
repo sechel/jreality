@@ -13,12 +13,11 @@ import de.jreality.scene.Viewer;
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  */
 public class JackAmbisonicsPlanar2ndOrderRenderer extends AmbisonicsPlanar2ndOrderSoundEncoder implements JackSink {
-
-	private AudioBackend backend;
 	
 	private SceneGraphComponent root;
 	private SceneGraphPath microphonePath;
 	
+	private AudioBackend backend;
 	private JJackAudioEvent currentJJackEvent;
 	
 	public void setRootAndMicrophonePath(SceneGraphComponent root, SceneGraphPath microphonePath) {

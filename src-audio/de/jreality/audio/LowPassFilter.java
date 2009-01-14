@@ -20,7 +20,6 @@ public class LowPassFilter implements SampleReader {
 	public LowPassFilter(SampleReader reader, int sampleRate, float cutoff) {
 		this.reader = reader;
 		this.sampleRate = sampleRate;
-		samples = new float[sampleRate];
 		setCutoff(cutoff);
 	}
 	
@@ -40,6 +39,9 @@ public class LowPassFilter implements SampleReader {
 	}
 
 	public int read(float[] buffer, int initialIndex, int nSamples) {
+		if (samples==null || samples.length<nSamples) {
+			samples = new float[nSamples];
+		}
 		int nRead = reader.read(samples, 0, nSamples);
 		
 		for(int i = initialIndex; i<nRead; i++) {
