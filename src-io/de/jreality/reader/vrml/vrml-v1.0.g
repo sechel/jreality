@@ -105,7 +105,7 @@ options {
 	int[] ls = new int[INITIAL_SIZE];				// for storing int arrays
 	String [] strs = new String [INITIAL_SIZE]; 	// for storing vec2 & vec3 arrays
 	double [][] vecs = new double [INITIAL_SIZE][]; // for storing vec2 & vec3 arrays
-	
+	boolean generateEdgesFromFaces = true;		// this should be a flag controllable from outside
 //	double[] tempVector3 = new double[3];
 //	boolean collectingMFVec3 = false;		
 	
@@ -525,7 +525,7 @@ indexedFaceSetNode [State state, Appearance app] returns [IndexedFaceSet ifs=nul
 	}
 	VRMLHelper.setNormals(ifsf,coordIndex2,normalIndex2,state);//werden nicht generiert wenn vorhanden
 	VRMLHelper.setColors(ifsf,coordIndex2,materialIndex2,state);
-	ifsf.setGenerateEdgesFromFaces(false);
+	ifsf.setGenerateEdgesFromFaces(generateEdgesFromFaces);
 	ifsf.update();
 	ifs = ifsf.getIndexedFaceSet();
 	state.assignTexture(app, ifs);
