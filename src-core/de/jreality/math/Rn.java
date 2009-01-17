@@ -1628,6 +1628,17 @@ final public class Rn {
 	}
 
 
+	public static double[] permutationMatrix(double[] dst, int[] perm) {
+		int n = perm.length;
+		if (dst == null) dst = new double[n*n];
+		for (int i = 0; i<n; ++i)	{
+			dst[i*n+perm[i]] = 1;
+		}
+		Rn.transpose(dst, dst);
+		return dst;
+	}
+
+
 
 }
 
