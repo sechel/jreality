@@ -46,7 +46,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Statement;
 import java.io.File;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.HashSet;
@@ -84,11 +83,15 @@ public class SunflowMenu extends JMenu {
 	private Object previewOptions;
 	private DimensionPanel dimPanel;
 
-	private ViewerApp va;
+	private Viewer viewer;
 
 	public SunflowMenu(ViewerApp vapp) {
+		this(vapp.getViewerSwitch());
+	}
+	
+	public SunflowMenu(Viewer viewer) {
 		super("Sunflow");
-		va = vapp;
+		this.viewer = viewer;
 		settingsFrame = new JFrame("Sunflow Settings");
 		JTabbedPane tabs = new JTabbedPane();
 
@@ -121,7 +124,8 @@ public class SunflowMenu extends JMenu {
 			public void actionPerformed(ActionEvent arg0) {
 				Secure.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
-						render(va.getCurrentViewer(), va.getCurrentViewer().getViewingComponentSize(), getPreviewOptions());
+						Viewer v = getViewer();
+						render(v, v.getViewingComponentSize(), getPreviewOptions());
 						return null;
 					}
 				});
@@ -137,7 +141,7 @@ public class SunflowMenu extends JMenu {
 			public void actionPerformed(ActionEvent arg0) {
 				Secure.doPrivileged(new PrivilegedAction<Object>() {
 					public Object run() {
-						renderAndSave(va.getCurrentViewer(), getRenderOptions());
+						renderAndSave(getViewer(), getRenderOptions());
 						return null;
 					}
 				});
@@ -173,6 +177,10 @@ public class SunflowMenu extends JMenu {
 		}
 	}
 
+	public Viewer getViewer() {
+		return viewer;
+	}
+	
 	protected void renderAndSave(Viewer viewer, Object opts) {
 		if (dimPanel == null) {
 			dimPanel = new DimensionPanel();
