@@ -12,7 +12,7 @@ public class LowPassFilter implements SampleReader {
 
 	private SampleReader reader;
 	private int sampleRate;
-	private float cutoff;
+	private float cutOff;
 	private float alpha;
 	private float prevValue = 0.0f;
 	private float samples[];
@@ -20,17 +20,17 @@ public class LowPassFilter implements SampleReader {
 	public LowPassFilter(SampleReader reader, int sampleRate, float cutoff) {
 		this.reader = reader;
 		this.sampleRate = sampleRate;
-		setCutoff(cutoff);
+		setCutOff(cutoff);
 	}
 	
-	public void setCutoff(float cutoff) {
-		this.cutoff = cutoff;
-		double tau = 1/(2*Math.PI*cutoff);   // RC time constant
+	public void setCutOff(float cutOff) {
+		this.cutOff = cutOff;
+		double tau = 1/(2*Math.PI*cutOff);   // RC time constant
 		alpha = (float) (1/(1+tau*sampleRate));
 	}
 
 	public float getCutoff() {
-		return cutoff;
+		return cutOff;
 	}
 	
 	public void clear() {

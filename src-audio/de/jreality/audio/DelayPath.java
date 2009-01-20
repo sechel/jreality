@@ -10,39 +10,69 @@ import de.jreality.shader.EffectiveAppearance;
  * 
  * Rough first draft of sound paths with delay (for Doppler shifts and such).
  * 
- * TODO: improve interpolation, low-pass filter source and mic positions, deal with supersonic phenomena
+ * TODO: improve interpolation, deal with supersonic phenomena, fix short distance bug
  * 
  * @author brinkman
  *
  */
 public class DelayPath implements SoundPath {
 
-	private int sampleRate;
 	private boolean attenuate = false;
 	private float gain = 1f;
 	private float speedOfSound = 300f;
+	private float updateCutOff = 10f;
+	
+	private int sampleRate;
 	private float gamma;
+	
 	private Queue<float[]> frames = new LinkedList<float[]>();
 	private Queue<Float> xSrc = new LinkedList<Float>();
 	private Queue<Float> ySrc = new LinkedList<Float>();
 	private Queue<Float> zSrc = new LinkedList<Float>();
+	
+	private LPF xLpfSrc = new LPF(), yLpfSrc = new LPF(), zLpfSrc = new LPF();
+	private LPF xLpfMic = new LPF(), yLpfMic = new LPF(), zLpfMic = new LPF();
+	
 	private float x0Src, y0Src, z0Src;
 	private float x1Src, y1Src, z1Src;
 	private float dxSrc, dySrc, dzSrc;
 	private float x0Mic, y0Mic, z0Mic;
+	
 	private int relativeTime = 0;
 	private float[] currentFrame = null;
 
-
+	private class LPF { // crude low-pass filter to smooth out difference between frame rate and video update rate
+		float value;
+		boolean firstValue = true;
+		
+		float nextValue(float v, float alpha) { // coefficient alpha cannot be static because it may differ across backends
+			if (firstValue) {
+				firstValue = false;
+				value = v;
+			} else {
+				value += alpha*(v-value);
+			}
+			return value;
+		}
+	}
+	
 	public DelayPath(int sampleRate) {
 		this.sampleRate = sampleRate;
 		gamma = sampleRate/speedOfSound;
 	}
 	
 	public int processFrame(SampleReader reader, SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
-		xSrc.add((float) sourcePos.getEntry(0, 3));
-		ySrc.add((float) sourcePos.getEntry(1, 3));
-		zSrc.add((float) sourcePos.getEntry(2, 3));
+		float frameRate = ((float) sampleRate)/frameSize;
+		float tau = (float) (1/(2*Math.PI*updateCutOff));
+		float alpha = 1/(1+tau*frameRate);
+		
+		float x1Mic = xLpfMic.nextValue((float) invMicPos.getEntry(0, 3), alpha);
+		float y1Mic = yLpfMic.nextValue((float) invMicPos.getEntry(1, 3), alpha);
+		float z1Mic = zLpfMic.nextValue((float) invMicPos.getEntry(2, 3), alpha);
+	
+		xSrc.add(xLpfSrc.nextValue((float) sourcePos.getEntry(0, 3), alpha));
+		ySrc.add(yLpfSrc.nextValue((float) sourcePos.getEntry(1, 3), alpha));
+		zSrc.add(zLpfSrc.nextValue((float) sourcePos.getEntry(2, 3), alpha));
 
 		if (currentFrame==null) {
 			advanceFrame();
@@ -51,10 +81,6 @@ public class DelayPath implements SoundPath {
 		float[] newFrame = new float[frameSize];
 		int nRead = reader.read(newFrame, 0, frameSize);
 		frames.add(newFrame);
-
-		float x1Mic = (float) invMicPos.getEntry(0, 3);
-		float y1Mic = (float) invMicPos.getEntry(1, 3);
-		float z1Mic = (float) invMicPos.getEntry(2, 3);
 
 		if (currentFrame==null) {
 			x0Mic = x1Mic;
@@ -153,6 +179,7 @@ public class DelayPath implements SoundPath {
 		attenuate = eapp.getAttribute("volumeAttenuation", true);
 		gain = eapp.getAttribute("volumeCoefficient", 1f);
 		speedOfSound = eapp.getAttribute("speedOfSound", 300f);
+		updateCutOff = eapp.getAttribute("updateCutOff", 10f);
 		gamma = sampleRate/speedOfSound;
 	}
 }
