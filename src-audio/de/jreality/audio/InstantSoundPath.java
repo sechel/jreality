@@ -11,8 +11,8 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class InstantSoundPath implements SoundPath {
 
-	private boolean attenuate=false;
-	private float gain=1f;
+	private boolean attenuate = false;
+	private float gain = 1f;
 	
 	private float samples[];
 	
@@ -20,7 +20,7 @@ public class InstantSoundPath implements SoundPath {
 	private boolean firstFrame = true;
 	
 	public int processFrame(SampleReader reader, SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
-		if (samples == null || samples.length<frameSize) {
+		if (samples==null || samples.length<frameSize) {
 			samples = new float[frameSize];
 		}
 		int nRead = reader.read(samples, 0, frameSize);

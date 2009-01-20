@@ -25,15 +25,15 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class AudioBackend extends UpToDateSceneProxyBuilder {
 
-	private int samplerate;
+	private int sampleRate;
 	private SceneGraphPath microphonePath;
 	private Matrix micInvMatrix = new Matrix();
 	private List<AudioTreeNode> audioSources = new ArrayList<AudioTreeNode>();
 	
-	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int samplerate) {
+	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
 		this.microphonePath = microphonePath;
-		this.samplerate=samplerate;
+		this.sampleRate=sampleRate;
 		setEntityFactory(new EntityFactory() {
 			{
 				setUpdateAudioSource(true);
@@ -73,8 +73,8 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
-			soundPath = new InstantSoundPath();
-			reader = AudioReader.createReader(audio, samplerate);
+			soundPath = new DelayPath(sampleRate);
+			reader = AudioReader.createReader(audio, sampleRate);
 		}
 		
 		void processFrame(SoundEncoder enc, int frameSize) {
