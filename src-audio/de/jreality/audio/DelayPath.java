@@ -8,7 +8,7 @@ import de.jreality.shader.EffectiveAppearance;
 
 /**
  * 
- * Rough first draft of sound paths with delay (for Doppler shifts and such).
+ * Sound paths with delay (for Doppler shifts and such).
  * 
  * TODO: possibly improve interpolation, optimize?
  * 
