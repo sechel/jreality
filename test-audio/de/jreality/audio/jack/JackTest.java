@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
+import de.jreality.audio.SignalSource;
 import de.jreality.audio.csound.CsoundNode;
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
@@ -21,6 +22,19 @@ import de.jreality.vr.ViewerVR;
 
 public class JackTest {
 
+	private static class SineSource extends SignalSource {
+		double omega;
+		
+		public SineSource(String name, int sr, double freq) {
+			super(name, sr);
+			omega = 2*Math.PI*freq;
+		}
+	
+		public float evaluateSignal(double t) {
+			return (float) Math.sin(omega*t);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 
 		SceneGraphComponent cmp = new SceneGraphComponent();
@@ -48,7 +62,8 @@ public class JackTest {
 		
 		SceneGraphComponent cmp2 = new SceneGraphComponent();
 		cmp.addChild(cmp2);
-		final AudioSource s2 = new JackNode("jack_input", 0);
+//		final AudioSource s2 = new JackNode("jack_input", 0);
+		final AudioSource s2 = new SineSource("sine", 44100, 440);
 		cmp2.setGeometry(Primitives.icosahedron());
 		MatrixBuilder.euclidean().translate(0, 0, 0).assignTo(cmp2);
 		cmp2.setAudioSource(s2);
@@ -70,6 +85,7 @@ public class JackTest {
 		// works with mp3spi from javazoom in classpath:
 		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
 		Input input = Input.getInput(url); 
+		//Input input = Input.getInput("data/nasa.mp3");
 		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
 			@Override
 			public int readSamples(Reader reader, float[] buffer,
@@ -83,7 +99,7 @@ public class JackTest {
 			}
 		};
 			
-	//	final AudioSource s3 = new CsoundNode("csnode", Input.getInput("data/trapped.csd"));
+		//final AudioSource s3 = new CsoundNode("csnode", Input.getInput("data/trapped.csd"));
 		
 		cmp3.setGeometry(Primitives.cube());
 		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
@@ -108,7 +124,5 @@ public class JackTest {
 		vr.setContent(cmp);
 
 		JackAmbisonicsRenderer.launch(va.getCurrentViewer());
-		
 	}
-
 }
