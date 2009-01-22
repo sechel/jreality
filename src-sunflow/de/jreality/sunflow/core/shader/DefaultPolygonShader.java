@@ -11,7 +11,6 @@ import org.sunflow.math.Point2;
 import org.sunflow.math.Vector3;
 
 import de.jreality.backends.texture.SimpleTexture;
-import de.jreality.backends.texture.Texture;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.RenderingHintsShader;
 
@@ -23,9 +22,15 @@ public class DefaultPolygonShader implements Shader {
 	private RenderingHintsShader rhs;
 	private CubeMap cm;
 	
-	public DefaultPolygonShader(de.jreality.shader.DefaultPolygonShader dps, RenderingHintsShader rhs) {
+	public DefaultPolygonShader(
+			de.jreality.shader.DefaultPolygonShader dps,
+			RenderingHintsShader rhs,
+			boolean hasTextureCoordinates
+	) {
 		this.dps=dps;
-		if (dps.getTexture2d() != null) tex = new SimpleTexture(dps.getTexture2d());
+		if (dps.getTexture2d() != null && hasTextureCoordinates) {
+			tex = new SimpleTexture(dps.getTexture2d());
+		}
 		this.rhs=rhs;
 		this.cm = dps.getReflectionMap();
 	}

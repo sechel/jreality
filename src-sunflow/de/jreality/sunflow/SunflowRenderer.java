@@ -178,23 +178,13 @@ public class SunflowRenderer extends SunflowAPI {
 			Boolean infPlane = (Boolean)ifs.getGeometryAttributes("infinite plane");
 			if (infPlane!= null && infPlane.booleanValue()) {
 				dps = (DefaultPolygonShader) dgs.getPolygonShader();
-				applyShader(dps);
+				applyShader(dps, true);
 				parameter("point1", new Point3(1,0,0));
 				parameter("point2", new Point3(0,1,0));
 				geometry(getName(ifs), new Plane());
 			}  else {
 				visit((IndexedLineSet)ifs);
 				if (ifs.getNumFaces() > 0 && dgs.getShowFaces()) {
-					dps = (DefaultPolygonShader) dgs.getPolygonShader();
-					applyShader(dps);
-					float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
-					float[] normals = null;
-					if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
-						normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
-						parameter("normals", "vector", "vertex", normals);
-					} else {
-						// sunflow calculates the face normal from the triangle points...
-					}
 					DataList tex = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 					float[] texCoords = null;
 					if (tex != null) {
@@ -204,6 +194,17 @@ public class SunflowRenderer extends SunflowAPI {
 						//texMat.multiplyOnRight(tex2d.getTextureMatrix());
 						texCoords = convert(tex.toDoubleArrayArray(), 2, texMat);
 					}
+					dps = (DefaultPolygonShader) dgs.getPolygonShader();
+					applyShader(dps, texCoords != null);
+					float[] points = convert(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(), 3, null);
+					float[] normals = null;
+					if (dps.getSmoothShading() && ifs.getVertexAttributes(Attribute.NORMALS) != null) {
+						normals = convert(ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(), 3, null);
+						parameter("normals", "vector", "vertex", normals);
+					} else {
+						// sunflow calculates the face normal from the triangle points...
+					}
+					
 					int[] faces = convert(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray());
 					parameter("triangles", faces);
 					parameter("points", "point", "vertex", points);
@@ -258,7 +259,7 @@ public class SunflowRenderer extends SunflowAPI {
 			if (particleSurface!= null) {
 				DefaultPointShader pointShader = (DefaultPointShader) dgs.getPointShader();
 				dps = (DefaultPolygonShader) pointShader.getPolygonShader();
-				applyShader(dps);
+				applyShader(dps, false);
 				float[] particles = (float[]) particleSurface.get("particles");
 				int n = (Integer) particleSurface.get("n");
 				double radius = pointShader.getPointRadius();
@@ -302,7 +303,7 @@ public class SunflowRenderer extends SunflowAPI {
 				boolean lineColors = colorAttributes != null;
 				DoubleArrayArray colors = lineColors ? colorAttributes.toDoubleArrayArray() : null;
 				if (!lineColors) {
-					applyShader(dps);
+					applyShader(dps, false);
 				}
 				for (int i=0; i<lines.getLength(); i++) {
 					double radius = radii != null ? radii.getValueAt(i) : r;
@@ -317,7 +318,7 @@ public class SunflowRenderer extends SunflowAPI {
 						if (vc.length == 4) {
 							app.setAttribute("lineShader.polygonShader.transparency", dps.getTransparency()*vc[3]);
 						}
-						applyShader(dps);
+						applyShader(dps, false);
 					}
 					for (int j=0; j<lines.getLengthAt(i)-1; j++) {
 						double[] p1 = pts.getValueAt(lines.getValueAt(i, j)).toDoubleArray(null);
@@ -373,7 +374,7 @@ public class SunflowRenderer extends SunflowAPI {
 				boolean vertexColors = colorAttributes != null;
 				DoubleArrayArray colors = vertexColors ? colorAttributes.toDoubleArrayArray() : null;
 				if (!vertexColors) {
-					applyShader(dps);
+					applyShader(dps, false);
 				}
 				for (int i=0; i<pts.getLength(); i++) {
 					if (vertexColors) {
@@ -387,7 +388,7 @@ public class SunflowRenderer extends SunflowAPI {
 						if (vc.length == 4) {
 							app.setAttribute("pointShader.polygonShader.transparency", dps.getTransparency()*vc[3]);
 						}
-						applyShader(dps);
+						applyShader(dps, false);
 					}
 					double w = pts.getLengthAt(i) == 3 ? 1 : pts.getValueAt(i, 3);
 					if (w != 0) {
@@ -477,10 +478,17 @@ public class SunflowRenderer extends SunflowAPI {
 			geometry(getName(c), new de.jreality.sunflow.core.primitive.Cylinder());
 		}
 
-		private void applyShader(DefaultPolygonShader ps) {
+		private void applyShader(DefaultPolygonShader ps, boolean hasTextureCoordinates) {
 			appCount++;
 			if ("default".equals(shader)) {
-				shader("default-shader"+appCount, new de.jreality.sunflow.core.shader.DefaultPolygonShader(ps, rhs));
+				shader(
+						"default-shader"+appCount,
+						new de.jreality.sunflow.core.shader.DefaultPolygonShader(
+								ps,
+								rhs,
+								hasTextureCoordinates
+						)
+				);
 			} else if ("glass".equals(shader)) {
 				System.out.println("applying glass shader");
 				parameter("color", ps.getDiffuseColor());
@@ -516,7 +524,7 @@ public class SunflowRenderer extends SunflowAPI {
 			    TextureUtility.createTexture(labelApp, "polygonShader", img, false);
 				dgs=ShaderUtility.createDefaultGeometryShader(labelApp,true);
 				dps=(DefaultPolygonShader)dgs.getPolygonShader();
-				applyShader(dps);
+				applyShader(dps, true);
 				
 				tempTrafo=new Matrix();	tempTrafo.multiplyOnRight(currentMatrix);
 				currentMatrix.multiplyOnRight(bbm);
@@ -549,12 +557,14 @@ public class SunflowRenderer extends SunflowAPI {
 
 	public float[] convert(DoubleArrayArray array, int slotLen, Matrix matrix) {
 		float[] ret = new float[array.getLength()*slotLen];
+		boolean dehomogenize = array.getLengthAt(0) > slotLen;
 		double[] tmp = new double[4];
 		tmp[3]=1;
 		int ind=0;
 		for (int i=0; i<array.getLength(); i++) {
+			double factor = dehomogenize ? 1/array.getValueAt(i, slotLen) : 1;
 			for (int j=0; j<slotLen; j++) {
-				tmp[j]=array.getValueAt(i, j);
+				tmp[j]=array.getValueAt(i, j) * factor;
 			}
 			if (matrix != null) tmp = matrix.multiplyVector(tmp);
 			for (int j=0; j<slotLen; j++) {
