@@ -562,7 +562,7 @@ public class SunflowRenderer extends SunflowAPI {
 		tmp[3]=1;
 		int ind=0;
 		for (int i=0; i<array.getLength(); i++) {
-			double factor = dehomogenize ? 1/array.getValueAt(i, slotLen) : 1;
+			double factor = dehomogenize ? 1/array.getValueAt(i, 3) : 1;
 			for (int j=0; j<slotLen; j++) {
 				tmp[j]=array.getValueAt(i, j) * factor;
 			}
