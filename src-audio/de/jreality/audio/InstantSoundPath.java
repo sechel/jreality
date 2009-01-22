@@ -25,6 +25,7 @@ public class InstantSoundPath implements SoundPath {
 		}
 		int nRead = reader.read(samples, 0, frameSize);
 		if (nRead == 0) {
+			firstFrame = true;
 			return 0;
 		}
 		
@@ -39,21 +40,22 @@ public class InstantSoundPath implements SoundPath {
 			firstFrame = false;
 		}
 		
-		float dx = (x1-x0)/nRead;
-		float dy = (y1-y0)/nRead;
-		float dz = (z1-z0)/nRead;
+		float dx = (x1-x0)/frameSize;
+		float dy = (y1-y0)/frameSize;
+		float dz = (z1-z0)/frameSize;
 		
 		for (int i=0; i<nRead; i++) {
+			float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
+			float v = samples[i]*gain;
+			
+			if (attenuate) {
+				v /= Math.max(r, 1);
+			}
+			enc.encodeSample(v, i, x0, y0, z0, r);
+			
 			x0 += dx;
 			y0 += dy;
 			z0 += dz;
-			float r = (float) (Math.sqrt(x0*x0+y0*y0+z0*z0)+1e-5);
-			
-			float v = samples[i]*gain;
-			if (attenuate) {
-				v /= r;
-			}
-			enc.encodeSample(v, i, x0/r, y0/r, z0/r, r);
 		}
 
 		return nRead;

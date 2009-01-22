@@ -64,7 +64,7 @@ public class DelayPath implements SoundPath {
 	public int processFrame(SampleReader reader, SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
 		float frameRate = ((float) sampleRate)/frameSize;
 		float tau = (float) (1/(2*Math.PI*updateCutOff));
-		float alpha = 1/(1+tau*frameRate); // see LowPassFilter.java for details
+		float alpha = 1/(1+tau*frameRate); // see LowPassReader.java for details
 		
 		float x1Mic = xLpfMic.nextValue((float) invMicPos.getEntry(0, 3), alpha);
 		float y1Mic = yLpfMic.nextValue((float) invMicPos.getEntry(1, 3), alpha);
@@ -157,13 +157,13 @@ public class DelayPath implements SoundPath {
 		float x = xMic+x0Src+dxSrc*st;
 		float y = yMic+y0Src+dySrc*st;
 		float z = zMic+z0Src+dzSrc*st;
-		float r = (float) (norm(x, y, z)+1e-5);
+		float r = norm(x, y, z);
 		
 		if (attenuate) {
-			v /= r;
+			v /= Math.max(r, 1);
 		}
 		
-		enc.encodeSample(v*gain, j, x/r, y/r, z/r, r);
+		enc.encodeSample(v*gain, j, x, y, z, r);
 	}
 
 	private float sourceTime() {

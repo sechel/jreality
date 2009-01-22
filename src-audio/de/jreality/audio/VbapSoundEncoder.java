@@ -80,18 +80,20 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 	private float g[] = new float[2];
 	
 	public void encodeSample(float v, int i, float x0, float y0, float z0, float r) {
-		float x = -z0;
-		float y = -x0;
-		
-		int j;
-		for (j=0; j<channels; j++) {
-			if (solve(g, speakerInverseMatrices.get(j), x, y)) break;
+		if (r>1e-6f) {
+			float x = -z0/r;
+			float y = -x0/r;
+
+			int j;
+			for (j=0; j<channels; j++) {
+				if (solve(g, speakerInverseMatrices.get(j), x, y)) break;
+			}
+
+			int jn = (j+1)%channels; 
+
+			buf[i*channels+channelIDs[j]] += speakerDistances[j]*v*g[0];
+			buf[i*channels+channelIDs[jn]] += speakerDistances[jn]*v*g[1];
 		}
-		
-		int jn = (j+1)%channels; 
-		
-		buf[i*channels+channelIDs[j]] += speakerDistances[j]*v*g[0];
-		buf[i*channels+channelIDs[jn]] += speakerDistances[jn]*v*g[1];
 	}
 
 	private boolean solve(float[] g, float[] m, float x, float y) {

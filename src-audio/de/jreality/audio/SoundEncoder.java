@@ -19,7 +19,7 @@ public interface SoundEncoder {
 	 * 
 	 * @param v:       sample, already processed for attenuation, reverberation, interpolation, etc.
 	 * @param idx:     index of sample
-	 * @param x, y, z: direction of sound source on _unit_ sphere
+	 * @param x, y, z: position of sound source relative to listener
 	 * @param r:       distance of sound source from listener
 	 */
 	void encodeSample(float v, int idx, float x, float y, float z, float r);

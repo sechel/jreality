@@ -8,7 +8,7 @@ package de.jreality.audio;
  * @author brinkman
  *
  */
-public class LowPassFilter implements SampleReader {
+public class LowPassReader implements SampleReader {
 
 	private SampleReader reader;
 	private int sampleRate;
@@ -17,7 +17,7 @@ public class LowPassFilter implements SampleReader {
 	private float prevValue = 0.0f;
 	private float samples[];
 	
-	public LowPassFilter(SampleReader reader, int sampleRate, float cutoff) {
+	public LowPassReader(SampleReader reader, int sampleRate, float cutoff) {
 		this.reader = reader;
 		this.sampleRate = sampleRate;
 		setCutOff(cutoff);
