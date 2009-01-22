@@ -119,21 +119,25 @@ public class ShaderUtility {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-         if (name.equals("etch"))
-                try {
-                    return Class.forName("de.jreality.shader.EtchPolygonShader");
-                } catch (ClassNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            try {
-                return Class.forName("de.jreality.shader."+name.substring(0,1).toUpperCase()+name.substring(1)+"PolygonShader");
+     if (name.equals("etch"))
+        try {
+                return Class.forName("de.jreality.shader.EtchPolygonShader");
             } catch (ClassNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+    try {
+        return Class.forName("de.jreality.shader."+name.substring(0,1).toUpperCase()+name.substring(1)+"PolygonShader");
+    } catch (ClassNotFoundException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
       throw new IllegalArgumentException(" no such polygon shader ["+name+"]");
     }
-    throw new IllegalArgumentException("unhandled entity class "+type);
+    if (TextShader.class.isAssignableFrom(type)) {
+        if (name.equals("default")) return DefaultTextShader.class;
+        throw new IllegalArgumentException(" no such text shader ["+name+"]");
+      }
+   throw new IllegalArgumentException("unhandled entity class "+type);
   }
 }
