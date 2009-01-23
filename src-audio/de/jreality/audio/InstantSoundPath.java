@@ -8,6 +8,8 @@ import de.jreality.shader.EffectiveAppearance;
  * A simple sound path that treats sound as instantaneous, i.e., delays and Doppler shifts and
  * such are disregarded.
  *
+ * TODO: handle curved geometries
+ * 
  */
 public class InstantSoundPath implements SoundPath {
 
@@ -24,8 +26,7 @@ public class InstantSoundPath implements SoundPath {
 			samples = new float[frameSize];
 		}
 		int nRead = reader.read(samples, 0, frameSize);
-		if (nRead == 0) {
-			firstFrame = true;
+		if (nRead==0) {
 			return 0;
 		}
 		

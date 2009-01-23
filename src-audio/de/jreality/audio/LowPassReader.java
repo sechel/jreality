@@ -1,9 +1,8 @@
 package de.jreality.audio;
 
 /**
- * Simple low-pass filter, mostly as a proof of concept.
  * 
- * TODO: Implement a better algorithm than the current discretization of an RC circuit.
+ * Simple reader with a low-pass filter, mostly as a proof of concept.
  * 
  * @author brinkman
  *
@@ -14,7 +13,7 @@ public class LowPassReader implements SampleReader {
 	private int sampleRate;
 	private float cutOff;
 	private float alpha;
-	private float prevValue = 0.0f;
+	private LowPassFilter lpf = new LowPassFilter();
 	private float samples[];
 	
 	public LowPassReader(SampleReader reader, int sampleRate, float cutoff) {
@@ -25,8 +24,7 @@ public class LowPassReader implements SampleReader {
 	
 	public void setCutOff(float cutOff) {
 		this.cutOff = cutOff;
-		double tau = 1/(2*Math.PI*cutOff);   // RC time constant
-		alpha = (float) (1/(1+tau*sampleRate));
+		alpha = LowPassFilter.filterCoefficient(sampleRate, cutOff);
 	}
 
 	public float getCutoff() {
@@ -35,7 +33,7 @@ public class LowPassReader implements SampleReader {
 	
 	public void clear() {
 		reader.clear();
-		prevValue = 0.0f;
+		lpf.reset();
 	}
 
 	public int read(float[] buffer, int initialIndex, int nSamples) {
@@ -45,8 +43,7 @@ public class LowPassReader implements SampleReader {
 		int nRead = reader.read(samples, 0, nSamples);
 		
 		for(int i = initialIndex; i<nRead; i++) {
-			prevValue += alpha*(samples[i]-prevValue);
-			buffer[i] = prevValue;
+			buffer[i] = lpf.nextValue(samples[i], alpha);
 		}
 		
 		return nRead;

@@ -73,6 +73,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
+//			soundPath = new InstantSoundPath();
 			soundPath = new DelayPath(sampleRate);
 			reader = AudioReader.createReader(audio, sampleRate);
 		}
