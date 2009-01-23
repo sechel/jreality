@@ -13,18 +13,23 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class InstantSoundPath implements SoundPath {
 
-	private boolean attenuate = false;
 	private float gain = 1f;
 	
+	private SampleReader reader;
 	private float samples[];
 	
 	private float x0, y0, z0;
 	private boolean firstFrame = true;
+
+	public InstantSoundPath(SampleReader reader) {
+		this.reader = reader;
+	}
 	
-	public int processFrame(SampleReader reader, SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
+	public int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
 		if (samples==null || samples.length<frameSize) {
 			samples = new float[frameSize];
 		}
+		
 		int nRead = reader.read(samples, 0, frameSize);
 		if (nRead==0) {
 			return 0;
@@ -34,6 +39,7 @@ public class InstantSoundPath implements SoundPath {
 		float x1 = (float) curPos.getEntry(0, 3);
 		float y1 = (float) curPos.getEntry(1, 3);
 		float z1 = (float) curPos.getEntry(2, 3);
+		
 		if (firstFrame) {
 			x0 = x1;
 			y0 = y1;
@@ -46,13 +52,7 @@ public class InstantSoundPath implements SoundPath {
 		float dz = (z1-z0)/frameSize;
 		
 		for (int i=0; i<nRead; i++) {
-			float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
-			float v = samples[i]*gain;
-			
-			if (attenuate) {
-				v /= Math.max(r, 1);
-			}
-			enc.encodeSample(v, i, x0, y0, z0, r);
+			enc.encodeSample(samples[i]*gain, i, x0, y0, z0);
 			
 			x0 += dx;
 			y0 += dy;
@@ -63,7 +63,6 @@ public class InstantSoundPath implements SoundPath {
 	}	
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
-		attenuate = eapp.getAttribute("volumeAttenuation", true);
 		gain = eapp.getAttribute("volumeCoefficient", 1f);
 	}
 }

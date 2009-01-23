@@ -66,16 +66,15 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 	private class AudioTreeNode extends SceneTreeNode {
 
 		private SoundPath soundPath;
-		private SampleReader reader;
 		private Matrix curPos = new Matrix();
 		private SceneGraphPath path;
 
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
-//			soundPath = new InstantSoundPath();
-			soundPath = new DelayPath(sampleRate);
-			reader = AudioReader.createReader(audio, sampleRate);
+			SampleReader reader = AudioReader.createReader(audio, sampleRate);
+//			soundPath = new InstantSoundPath(reader);
+			soundPath = new DelayPath(reader, sampleRate);
 		}
 		
 		void processFrame(SoundEncoder enc, int frameSize) {
@@ -88,7 +87,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			// only when appearances were added/removed along the path.
 			// TODO: For this we need to extend SceneGraphPathObserver.
 			soundPath.setFromEffectiveAppearance(EffectiveAppearance.create(path));
-			soundPath.processFrame(reader, enc, frameSize, curPos, micInvMatrix);
+			soundPath.processFrame(enc, frameSize, curPos, micInvMatrix);
 		}
 	}
 	

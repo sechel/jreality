@@ -17,11 +17,11 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class DelayPath implements SoundPath {
 
-	private boolean attenuate = false;
 	private float gain = 1f;
 	private float speedOfSound = 300f;
 	private float updateCutOff = 10f;
 	
+	private SampleReader reader;
 	private int sampleRate;
 	private float gamma;
 	
@@ -42,13 +42,13 @@ public class DelayPath implements SoundPath {
 	private float[] currentFrame = null;
 
 	
-	public DelayPath(int sampleRate) {
+	public DelayPath(SampleReader reader, int sampleRate) {
+		this.reader = reader;
 		this.sampleRate = sampleRate;
 		update();
 	}
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
-		attenuate = eapp.getAttribute("volumeAttenuation", true);
 		gain = eapp.getAttribute("volumeCoefficient", 1f);
 		speedOfSound = eapp.getAttribute("speedOfSound", 300f);
 		updateCutOff = eapp.getAttribute("updateCutOff", 10f);
@@ -59,7 +59,7 @@ public class DelayPath implements SoundPath {
 		gamma = speedOfSound/sampleRate;
 	}
 	
-	public int processFrame(SampleReader reader, SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
+	public int processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
 		float alpha = LowPassFilter.filterCoefficient(sampleRate, frameSize, updateCutOff);
 		
 		float x1Mic = xLpfMic.nextValue((float) invMicPos.getEntry(0, 3), alpha);
@@ -138,22 +138,17 @@ public class DelayPath implements SoundPath {
 		float v1 = (index<currentFrame.length) ? currentFrame[index] : nextFrame()[0];
 		float v = v0+fractionalTime*(v1-v0);
 		
-		float xs = xMic+x0Src+dxSrc*time;
-		float ys = yMic+y0Src+dySrc*time;
-		float zs = zMic+z0Src+dzSrc*time;
-		float r = norm(xs, ys, zs);
-		
-		if (attenuate) {
-			v /= Math.max(r, 1);
-		}
-		
-		enc.encodeSample(v*gain, j, xs, ys, zs, r);
+		float x = xMic+x0Src+dxSrc*time;
+		float y = yMic+y0Src+dySrc*time;
+		float z = zMic+z0Src+dzSrc*time;
+
+		enc.encodeSample(v*gain, j, x, y, z);
 	}
 
 	private float sourceTime() {
 		while (true) {
-			float d0 = norm(xMic+x0Src, yMic+y0Src, zMic+z0Src);
-			float d1 = norm(xMic+x1Src, yMic+y1Src, zMic+z1Src);
+			float d0 = distFromMic(x0Src, y0Src, z0Src);
+			float d1 = distFromMic(x1Src, y1Src, z1Src);
 			
 			float time = (relativeTime*gamma-d0)/(gamma+(d1-d0)/currentFrame.length)+0.5f; // fudge factor to deal with roundoff errors
 
@@ -165,7 +160,11 @@ public class DelayPath implements SoundPath {
 		}
 	}
 
-	private float norm(float x, float y, float z) {
+	private float distFromMic(float xs, float ys, float zs) {
+		float x = xMic+xs;
+		float y = yMic+ys;
+		float z = zMic+zs;
+		
 		return (float) Math.sqrt(x*x+y*y+z*z);
 	}
 }

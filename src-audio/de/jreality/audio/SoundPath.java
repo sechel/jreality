@@ -15,5 +15,5 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public interface SoundPath {	
 	void setFromEffectiveAppearance(EffectiveAppearance eapp);
-	int processFrame(SampleReader reader, SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
+	int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
 }
