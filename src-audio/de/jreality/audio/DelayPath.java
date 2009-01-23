@@ -72,17 +72,16 @@ public class DelayPath implements SoundPath {
 
 		if (currentFrame==null) {
 			advanceFrame();
+			xMic = x1Mic;
+			yMic = y1Mic;
+			zMic = z1Mic;
 		}
 		
 		float[] newFrame = new float[frameSize];
 		int nRead = reader.read(newFrame, 0, frameSize);
 		frames.add(newFrame);
 
-		if (currentFrame==null) {
-			xMic = x1Mic;
-			yMic = y1Mic;
-			zMic = z1Mic;
-		} else {
+		if (currentFrame!=null) {
 			float dxMic = (x1Mic-xMic)/frameSize;
 			float dyMic = (y1Mic-yMic)/frameSize;
 			float dzMic = (z1Mic-zMic)/frameSize;
