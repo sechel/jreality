@@ -63,6 +63,6 @@ public class InstantSoundPath implements SoundPath {
 	}	
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute("volumeCoefficient", 1f);
+		gain = eapp.getAttribute("volumeGain", 1f);
 	}
 }
