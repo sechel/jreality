@@ -4,14 +4,14 @@ import de.jreality.math.Matrix;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
+ * @deprecated
  * 
- * A simple sound path that treats sound as instantaneous, i.e., delays and Doppler shifts and
- * such are disregarded.
+ * Minimal implementation that treats sound as instantaneous, now largely obsolete
  *
  * TODO: handle curved geometries
  * 
  */
-public class InstantSoundPath implements SoundPath {
+public class InstantaneousPath implements SoundPath {
 
 	private float gain = DEFAULT_GAIN;
 	private Attenuation attenuation = DEFAULT_ATTENUATION;
@@ -22,7 +22,7 @@ public class InstantSoundPath implements SoundPath {
 	private float x0, y0, z0;
 	private boolean firstFrame = true;
 
-	public InstantSoundPath(SampleReader reader) {
+	public InstantaneousPath(SampleReader reader) {
 		this.reader = reader;
 	}
 	
@@ -64,7 +64,7 @@ public class InstantSoundPath implements SoundPath {
 	}	
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute("volumeGain", DEFAULT_GAIN);
+		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
 		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION);
 	}
 }

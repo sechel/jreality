@@ -73,7 +73,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			super(audio);
 
 			SampleReader reader = AudioReader.createReader(audio, sampleRate);
-//			soundPath = new InstantSoundPath(reader);
+//			soundPath = new InstantaneousPath(reader);
 			soundPath = new DelayPath(reader, sampleRate);
 		}
 		

@@ -10,6 +10,9 @@ import de.jreality.shader.EffectiveAppearance;
  * comparable to the various GeometryShaders and will be configured from an
  * EffectiveAppearance.
  * 
+ * Convention: Specifying a speed of sound of zero or less means infinite speed
+ * of sound, i.e., instantaneous propagation.
+ * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *
  */
