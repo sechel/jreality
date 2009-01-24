@@ -14,6 +14,17 @@ import de.jreality.shader.EffectiveAppearance;
  *
  */
 public interface SoundPath {	
+	
+	public static final String UPDATE_CUT_OFF_KEY = "updateCutOff";
+	public static final String SPEED_OF_SOUND_KEY = "speedOfSound";
+	public static final String VOLUME_GAIN_KEY = "volumeGain";
+	public static final String VOLUME_ATTENUATION_KEY = "volumeAttenuation";
+	
+	public static final float DEFAULT_GAIN = 1f;
+	public static final float DEFAULT_SPEED_OF_SOUND = 300f;
+	public static final float DEFAULT_UPDATE_CUTOFF = 10f;
+	public static final Attenuation DEFAULT_ATTENUATION = Attenuation.LINEAR;
+	
 	void setFromEffectiveAppearance(EffectiveAppearance eapp);
 	int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
 }

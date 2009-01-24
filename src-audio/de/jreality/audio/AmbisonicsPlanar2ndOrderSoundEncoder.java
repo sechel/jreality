@@ -31,14 +31,14 @@ public abstract class AmbisonicsPlanar2ndOrderSoundEncoder implements SoundEncod
 	
 	public abstract void finishFrame();
 
-	public void encodeSample(float v, int idx, float x, float y, float z) {
+	public void encodeSample(float v, int idx, float x, float y, float z, Attenuation attenuation) {
+		// The point (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics.
 		float rp2 = z*z+x*x;
 		float rp = (float) Math.sqrt(rp2);
 		float r = (float) Math.sqrt(rp2+y*y);
 
 		if (rp>1e-6f) {
-			// The point (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics.
-			encodeAmbiSample(v/Math.max(r, 1), idx, -z/rp, -x/rp);
+			encodeAmbiSample(attenuation.attenuate(v, r), idx, -z/rp, -x/rp);
 		}
 	}
 

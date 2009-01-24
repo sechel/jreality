@@ -13,7 +13,8 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class InstantSoundPath implements SoundPath {
 
-	private float gain = 1f;
+	private float gain = DEFAULT_GAIN;
+	private Attenuation attenuation = DEFAULT_ATTENUATION;
 	
 	private SampleReader reader;
 	private float samples[];
@@ -52,7 +53,7 @@ public class InstantSoundPath implements SoundPath {
 		float dz = (z1-z0)/frameSize;
 		
 		for (int i=0; i<nRead; i++) {
-			enc.encodeSample(samples[i]*gain, i, x0, y0, z0);
+			enc.encodeSample(samples[i]*gain, i, x0, y0, z0, attenuation);
 			
 			x0 += dx;
 			y0 += dy;
@@ -63,6 +64,7 @@ public class InstantSoundPath implements SoundPath {
 	}	
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute("volumeGain", 1f);
+		gain = eapp.getAttribute("volumeGain", DEFAULT_GAIN);
+		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION);
 	}
 }

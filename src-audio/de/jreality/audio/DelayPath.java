@@ -16,14 +16,11 @@ import de.jreality.shader.EffectiveAppearance;
  *
  */
 public class DelayPath implements SoundPath {
-
-	private static final float DEFAULT_GAIN = 1f;
-	private static final float DEFAULT_SPEED_OF_SOUND = 300f;
-	private static final float DEFAULT_UPDATE_CUTOFF = 10f;
 	
 	private float gain = DEFAULT_GAIN;
 	private float speedOfSound = DEFAULT_SPEED_OF_SOUND;
 	private float updateCutOff = DEFAULT_UPDATE_CUTOFF;
+	private Attenuation attenuation = DEFAULT_ATTENUATION;
 	
 	private SampleReader reader;
 	private int sampleRate;
@@ -102,9 +99,10 @@ public class DelayPath implements SoundPath {
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute("volumeGain", DEFAULT_GAIN);
-		speedOfSound = eapp.getAttribute("speedOfSound", DEFAULT_SPEED_OF_SOUND);
-		updateCutOff = eapp.getAttribute("updateCutOff", DEFAULT_UPDATE_CUTOFF);
+		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
+		speedOfSound = eapp.getAttribute(SPEED_OF_SOUND_KEY, DEFAULT_SPEED_OF_SOUND);
+		updateCutOff = eapp.getAttribute(UPDATE_CUT_OFF_KEY, DEFAULT_UPDATE_CUTOFF);
+		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION);
 		updateParameters();
 	}
 
@@ -153,7 +151,7 @@ public class DelayPath implements SoundPath {
 		float y = yMic+y0Src+dySrc*time;
 		float z = zMic+z0Src+dzSrc*time;
 
-		enc.encodeSample(v*gain, j, x, y, z);
+		enc.encodeSample(v*gain, j, x, y, z, attenuation);
 	}
 
 	private float sourceTime() {

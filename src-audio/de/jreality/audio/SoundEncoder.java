@@ -20,8 +20,9 @@ public interface SoundEncoder {
 	 * @param v:       sample, already processed for attenuation, reverberation, interpolation, etc.
 	 * @param idx:     index of sample
 	 * @param x, y, z: position of sound source relative to listener
+	 * @param attenuation: volume attenuation
 	 */
-	void encodeSample(float v, int idx, float x, float y, float z);
+	void encodeSample(float v, int idx, float x, float y, float z, Attenuation attenuation);
 	
 	void finishFrame();
 }
