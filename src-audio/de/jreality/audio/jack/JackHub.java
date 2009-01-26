@@ -18,6 +18,8 @@ import de.gulden.framework.jjack.JJackSystem;
  * input channels cannot be changed.  JackHub also takes care of the correct initialization order (see
  * comment in JackSource.java for details).
  * 
+ * Protip: Use Java option -XX:CompileThreshold=10 or similar to avoid zombifying the Jack client.
+ * 
  * @author brinkman
  *
  */
