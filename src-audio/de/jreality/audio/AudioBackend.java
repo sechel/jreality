@@ -33,7 +33,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
 		this.microphonePath = microphonePath;
-		this.sampleRate=sampleRate;
+		this.sampleRate = sampleRate;
 		setEntityFactory(new EntityFactory() {
 			{
 				setUpdateAudioSource(true);
