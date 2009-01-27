@@ -25,6 +25,7 @@ public class DelayPath implements SoundPath {
 	private SampleReader reader;
 	private int sampleRate;
 	private float gamma;
+	private float leadingCoefficient;
 	
 	private Queue<float[]> sourceFrames = new LinkedList<float[]>();
 	private Queue<Float> xSrc = new LinkedList<Float>(), ySrc = new LinkedList<Float>(), zSrc = new LinkedList<Float>();
@@ -106,17 +107,20 @@ public class DelayPath implements SoundPath {
 	}
 
 	private void updateParameters() {
-		gamma = speedOfSound/sampleRate;
+		float v = speedOfSound/sampleRate;
+		gamma = v*v;
 	}
 	
 	private void advanceSourceFrame() {
-		advanceSourcePosition();
-
 		currentFrame = sourceFrames.remove();
+		
+		advanceSourcePosition();
 		
 		dxSrc = (x1Src-x0Src)/currentFrame.length;
 		dySrc = (y1Src-y0Src)/currentFrame.length;
 		dzSrc = (z1Src-z0Src)/currentFrame.length;
+		
+		leadingCoefficient = dxSrc*dxSrc+dySrc*dySrc+dzSrc*dzSrc-gamma;
 	}
 
 	private void advanceSourcePosition() {
@@ -157,10 +161,14 @@ public class DelayPath implements SoundPath {
 		while (true) {
 			float time;
 			if (gamma>1e-6f) {  // positive speed of sound?
-				float d0 = distFromMic(x0Src, y0Src, z0Src);
-				float d1 = distFromMic(x1Src, y1Src, z1Src);
-
-				time = (relativeTime*gamma-d0)/(gamma+(d1-d0)/currentFrame.length)+0.5f; // fudge factor to deal with roundoff errors
+				float xRel = x0Src+xMic;
+				float yRel = y0Src+yMic;
+				float zRel = z0Src+zMic;
+				
+				float b = dxSrc*xRel+dySrc*yRel+dzSrc*zRel+gamma*relativeTime;
+				float c = xRel*xRel+yRel*yRel+zRel*zRel-gamma*relativeTime*relativeTime;
+				
+				time = (float) ((-b+Math.sqrt(b*b-leadingCoefficient*c))/leadingCoefficient+0.5); // quadratic formula (as^2+2bs+c=0, a=leadingCoefficient), plus fudge factor to address roundoff errors
 			} else {  // nonpositive speed of sound means instantaneous propagation
 				time = relativeTime;
 			}
@@ -172,13 +180,5 @@ public class DelayPath implements SoundPath {
 			relativeTime -= currentFrame.length;
 			advanceSourceFrame();
 		}
-	}
-
-	private float distFromMic(float xs, float ys, float zs) {
-		float x = xMic+xs;
-		float y = yMic+ys;
-		float z = zMic+zs;
-		
-		return (float) Math.sqrt(x*x+y*y+z*z);
 	}
 }
