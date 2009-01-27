@@ -25,7 +25,7 @@ public interface SoundPath {
 	
 	public static final float DEFAULT_GAIN = 1f;
 	public static final float DEFAULT_SPEED_OF_SOUND = 300f;
-	public static final float DEFAULT_UPDATE_CUTOFF = 10f;
+	public static final float DEFAULT_UPDATE_CUTOFF = 5f;
 	public static final Attenuation DEFAULT_ATTENUATION = Attenuation.LINEAR;
 	
 	void setFromEffectiveAppearance(EffectiveAppearance eapp);

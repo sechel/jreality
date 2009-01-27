@@ -25,21 +25,18 @@ public class DelayPath implements SoundPath {
 	private SampleReader reader;
 	private int sampleRate;
 	private float gamma;
-	private float leadingCoefficient;
-	
 	private Queue<float[]> sourceFrames = new LinkedList<float[]>();
-	private Queue<Float> xSrc = new LinkedList<Float>(), ySrc = new LinkedList<Float>(), zSrc = new LinkedList<Float>();
+	private Queue<Float> xSrcQueue = new LinkedList<Float>(), ySrcQueue = new LinkedList<Float>(), zSrcQueue = new LinkedList<Float>();
 	
 	private LowPassFilter xLpfSrc = new LowPassFilter(), yLpfSrc = new LowPassFilter(), zLpfSrc = new LowPassFilter();
 	private LowPassFilter xLpfMic = new LowPassFilter(), yLpfMic = new LowPassFilter(), zLpfMic = new LowPassFilter();
 	
+	private float xSrcPrev, ySrcPrev, zSrcPrev;
 	private float x0Src, y0Src, z0Src;
 	private float x1Src, y1Src, z1Src;
 	private float dxSrc, dySrc, dzSrc;
 	
 	private float xMic, yMic, zMic;
-	
-	private float x0Rel, y0Rel, z0Rel;
 	
 	private int relativeTime = 0;
 	private float[] currentFrame = null;
@@ -59,9 +56,9 @@ public class DelayPath implements SoundPath {
 	
 		float alpha = LowPassFilter.filterCoefficient(sampleRate, frameSize, updateCutOff);
 		
-		xSrc.add(xLpfSrc.nextValue((float) sourcePos.getEntry(0, 3), alpha));
-		ySrc.add(yLpfSrc.nextValue((float) sourcePos.getEntry(1, 3), alpha));
-		zSrc.add(zLpfSrc.nextValue((float) sourcePos.getEntry(2, 3), alpha));
+		xSrcQueue.add(xLpfSrc.nextValue((float) sourcePos.getEntry(0, 3), alpha));
+		ySrcQueue.add(yLpfSrc.nextValue((float) sourcePos.getEntry(1, 3), alpha));
+		zSrcQueue.add(zLpfSrc.nextValue((float) sourcePos.getEntry(2, 3), alpha));
 		
 		float x1Mic = xLpfMic.nextValue((float) invMicPos.getEntry(0, 3), alpha);
 		float y1Mic = yLpfMic.nextValue((float) invMicPos.getEntry(1, 3), alpha);
@@ -81,6 +78,10 @@ public class DelayPath implements SoundPath {
 			}
 
 			advanceSourceFrame();
+			
+			xSrcPrev = x0Src;
+			ySrcPrev = y0Src;
+			zSrcPrev = z0Src;
 		}
 	
 		float dxMic = (x1Mic-xMic)/frameSize;
@@ -109,8 +110,7 @@ public class DelayPath implements SoundPath {
 	}
 
 	private void updateParameters() {
-		float v = speedOfSound/sampleRate;
-		gamma = v*v;
+		gamma = sampleRate/speedOfSound; // samples per distance
 	}
 	
 	private void advanceSourceFrame() {
@@ -121,8 +121,6 @@ public class DelayPath implements SoundPath {
 		dxSrc = (x1Src-x0Src)/currentFrame.length;
 		dySrc = (y1Src-y0Src)/currentFrame.length;
 		dzSrc = (z1Src-z0Src)/currentFrame.length;
-		
-		leadingCoefficient = dxSrc*dxSrc+dySrc*dySrc+dzSrc*dzSrc-gamma;
 	}
 
 	private void advanceSourcePosition() {
@@ -130,9 +128,9 @@ public class DelayPath implements SoundPath {
 		y0Src = y1Src;
 		z0Src = z1Src;
 		
-		x1Src = xSrc.remove();
-		y1Src = ySrc.remove();
-		z1Src = zSrc.remove();
+		x1Src = xSrcQueue.remove();
+		y1Src = ySrcQueue.remove();
+		z1Src = zSrcQueue.remove();
 	}
 	
 	private float[] nextFrame() {
@@ -152,25 +150,22 @@ public class DelayPath implements SoundPath {
 		float v1 = (index<currentFrame.length) ? currentFrame[index] : nextFrame()[0];
 		float v = v0+fractionalTime*(v1-v0);
 		
-		float x = x0Rel+dxSrc*time;
-		float y = y0Rel+dySrc*time;
-		float z = z0Rel+dzSrc*time;
+		xSrcPrev = x0Src+dxSrc*time;
+		ySrcPrev = y0Src+dySrc*time;
+		zSrcPrev = z0Src+dzSrc*time;
 
-		enc.encodeSample(v*gain, j, x, y, z, attenuation);
+		enc.encodeSample(v*gain, j, xSrcPrev+xMic, ySrcPrev+yMic, zSrcPrev+zMic, attenuation);
 	}
 
 	private float sourceTime() {
 		while (true) {
 			float time;
 			if (gamma>1e-6f) {  // positive speed of sound?
-				x0Rel = x0Src+xMic;
-				y0Rel = y0Src+yMic;
-				z0Rel = z0Src+zMic;
+				float x = xSrcPrev+xMic;
+				float y = ySrcPrev+yMic;
+				float z = zSrcPrev+zMic;
 				
-				float b = dxSrc*x0Rel+dySrc*y0Rel+dzSrc*z0Rel+gamma*relativeTime;
-				float c = x0Rel*x0Rel+y0Rel*y0Rel+z0Rel*z0Rel-gamma*relativeTime*relativeTime;
-				
-				time = (float) ((-b+Math.sqrt(b*b-leadingCoefficient*c))/leadingCoefficient+0.5); // quadratic formula (as^2+2bs+c=0, a=leadingCoefficient), plus fudge factor to address roundoff errors
+				time = (float) (relativeTime-Math.sqrt(x*x+y*y+z*z)*gamma+0.5);
 			} else {  // nonpositive speed of sound means instantaneous propagation
 				time = relativeTime;
 			}
