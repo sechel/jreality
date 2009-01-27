@@ -39,6 +39,8 @@ public class DelayPath implements SoundPath {
 	
 	private float xMic, yMic, zMic;
 	
+	private float x0Rel, y0Rel, z0Rel;
+	
 	private int relativeTime = 0;
 	private float[] currentFrame = null;
 	private boolean firstFrame = true;
@@ -150,9 +152,9 @@ public class DelayPath implements SoundPath {
 		float v1 = (index<currentFrame.length) ? currentFrame[index] : nextFrame()[0];
 		float v = v0+fractionalTime*(v1-v0);
 		
-		float x = xMic+x0Src+dxSrc*time;
-		float y = yMic+y0Src+dySrc*time;
-		float z = zMic+z0Src+dzSrc*time;
+		float x = x0Rel+dxSrc*time;
+		float y = y0Rel+dySrc*time;
+		float z = z0Rel+dzSrc*time;
 
 		enc.encodeSample(v*gain, j, x, y, z, attenuation);
 	}
@@ -161,12 +163,12 @@ public class DelayPath implements SoundPath {
 		while (true) {
 			float time;
 			if (gamma>1e-6f) {  // positive speed of sound?
-				float xRel = x0Src+xMic;
-				float yRel = y0Src+yMic;
-				float zRel = z0Src+zMic;
+				x0Rel = x0Src+xMic;
+				y0Rel = y0Src+yMic;
+				z0Rel = z0Src+zMic;
 				
-				float b = dxSrc*xRel+dySrc*yRel+dzSrc*zRel+gamma*relativeTime;
-				float c = xRel*xRel+yRel*yRel+zRel*zRel-gamma*relativeTime*relativeTime;
+				float b = dxSrc*x0Rel+dySrc*y0Rel+dzSrc*z0Rel+gamma*relativeTime;
+				float c = x0Rel*x0Rel+y0Rel*y0Rel+z0Rel*z0Rel-gamma*relativeTime*relativeTime;
 				
 				time = (float) ((-b+Math.sqrt(b*b-leadingCoefficient*c))/leadingCoefficient+0.5); // quadratic formula (as^2+2bs+c=0, a=leadingCoefficient), plus fudge factor to address roundoff errors
 			} else {  // nonpositive speed of sound means instantaneous propagation
