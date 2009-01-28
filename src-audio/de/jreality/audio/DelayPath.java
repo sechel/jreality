@@ -29,6 +29,7 @@ public class DelayPath implements SoundPath {
 	
 	private Queue<float[]> sourceFrames = new LinkedList<float[]>();
 	private Queue<Matrix> sourcePositions = new LinkedList<Matrix>();
+	private Matrix currentMicPosition;
 	
 	private LowPassFilter xFilter, yFilter, zFilter; // TODO: consider better interpolation
 	private float xTarget, yTarget, zTarget;
@@ -36,12 +37,14 @@ public class DelayPath implements SoundPath {
 	
 	private int relativeTime = 0;
 	private float[] currentFrame = null;
-	private Matrix currentMicPosition;
 
 	
 	public DelayPath(SampleReader reader, int sampleRate) {
 		if (sampleRate<=0) {
 			throw new IllegalArgumentException("sample rate must be positive");
+		}
+		if (reader==null) {
+			throw new IllegalArgumentException("reader cannot be null");
 		}
 		this.reader = reader;
 		this.sampleRate = sampleRate;
@@ -78,13 +81,13 @@ public class DelayPath implements SoundPath {
 		if (currentFrame!=null) {
 			for(int j = 0; j<frameSize; j++) {
 				encodeSample(enc, j);
-				nextPosition();
+				updatePosition();
 				relativeTime++;
 			}
 		} else { // first frame, need to initialize fields
 			currentFrame = sourceFrames.remove();
 			sourcePositions.remove();
-			nextPosition();
+			initializePosition();
 		}
 	
 		return nRead;
@@ -108,7 +111,13 @@ public class DelayPath implements SoundPath {
 		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
 	}
 
-	private void nextPosition() {
+	private void initializePosition() {
+		xCurrent = xFilter.initialize(xTarget);
+		yCurrent = yFilter.initialize(yTarget);
+		zCurrent = zFilter.initialize(zTarget);
+	}
+
+	private void updatePosition() {
 		xCurrent = xFilter.nextValue(xTarget);
 		yCurrent = yFilter.nextValue(yTarget);
 		zCurrent = zFilter.nextValue(zTarget);

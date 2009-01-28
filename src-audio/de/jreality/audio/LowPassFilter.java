@@ -12,8 +12,7 @@ class LowPassFilter {
 	private float sampleRate;
 	private float cutOff;
 	private float alpha;
-	private float value;
-	private boolean firstValue = true;
+	private float value = 0f;
 	
 	public LowPassFilter(float sampleRate, float cutOff) {
 		this.sampleRate = sampleRate;
@@ -29,18 +28,14 @@ class LowPassFilter {
 	public float getCutOff() {
 		return cutOff;
 	}
-	
-	float nextValue(float v) {
-		if (firstValue) {
-			firstValue = false;
-			value = v;
-		} else {
-			value += alpha*(v-value);
-		}
-		return value;
+
+	public float initialize(float v) {
+		this.value = v;
+		return v;
 	}
 	
-	void reset() {
-		firstValue = true;
+	public float nextValue(float v) {
+		value += alpha*(v-value);
+		return value;
 	}
 }

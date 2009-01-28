@@ -27,7 +27,7 @@ public class LowPassReader implements SampleReader {
 	
 	public void clear() {
 		reader.clear();
-		lpf.reset();
+		lpf.initialize(0);
 	}
 
 	public int read(float[] buffer, int initialIndex, int nSamples) {
