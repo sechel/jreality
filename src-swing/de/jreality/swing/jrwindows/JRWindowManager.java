@@ -1,5 +1,6 @@
 package de.jreality.swing.jrwindows;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -36,7 +37,9 @@ public class JRWindowManager implements ActionListener{
     sgc=new SceneGraphComponent("window manager");
     sgc.setAppearance(new Appearance());
     sgc.getAppearance().setAttribute(CommonAttributes.LIGHTING_ENABLED, false);    
-    sgc.getAppearance().setAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);    
+    sgc.getAppearance().setAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
+    sgc.getAppearance().setAttribute("polygonShader.reflectionMap:blendColor", new Color(255,255,255,65));
+    sgc.getAppearance().setAttribute("lineShader.polygonShader.reflectionMap:blendColor", new Color(255,255,255,255));
     avatar.addChild(sgc);
     setPosition(defaultDesktopWindowPos);
     initDragTool();
