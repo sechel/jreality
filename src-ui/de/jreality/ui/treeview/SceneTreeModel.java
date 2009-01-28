@@ -247,8 +247,8 @@ public class SceneTreeModel extends AbstractTreeModel {
       };
       if (EventQueue.isDispatchThread()) runner.run();
       else try {
- //       EventQueue.invokeAndWait(runner);
-     EventQueue.invokeLater(runner);
+    	  EventQueue.invokeAndWait(runner);
+     //EventQueue.invokeLater(runner);
       } catch (Exception e) {
         throw new Error(e);
       }
