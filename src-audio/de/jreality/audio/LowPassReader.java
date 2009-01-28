@@ -10,25 +10,19 @@ package de.jreality.audio;
 public class LowPassReader implements SampleReader {
 
 	private SampleReader reader;
-	private int sampleRate;
-	private float cutOff;
-	private float alpha;
-	private LowPassFilter lpf = new LowPassFilter();
-	private float samples[];
+	private LowPassFilter lpf;
 	
-	public LowPassReader(SampleReader reader, int sampleRate, float cutoff) {
+	public LowPassReader(SampleReader reader, int sampleRate, float cutOff) {
 		this.reader = reader;
-		this.sampleRate = sampleRate;
-		setCutOff(cutoff);
+		lpf = new LowPassFilter(sampleRate, cutOff);
 	}
 	
 	public void setCutOff(float cutOff) {
-		this.cutOff = cutOff;
-		alpha = LowPassFilter.filterCoefficient(sampleRate, cutOff);
+		lpf.setCutOff(cutOff);
 	}
 
 	public float getCutoff() {
-		return cutOff;
+		return lpf.getCutOff();
 	}
 	
 	public void clear() {
@@ -37,13 +31,10 @@ public class LowPassReader implements SampleReader {
 	}
 
 	public int read(float[] buffer, int initialIndex, int nSamples) {
-		if (samples==null || samples.length<nSamples) {
-			samples = new float[nSamples];
-		}
-		int nRead = reader.read(samples, 0, nSamples);
+		int nRead = reader.read(buffer, initialIndex, nSamples);
 		
 		for(int i = initialIndex; i<nRead; i++) {
-			buffer[i] = lpf.nextValue(samples[i], alpha);
+			buffer[i] = lpf.nextValue(buffer[i]);
 		}
 		
 		return nRead;

@@ -9,35 +9,28 @@ package de.jreality.audio;
  *
  */
 class LowPassFilter {
+	private float sampleRate;
+	private float cutOff;
+	private float alpha;
 	private float value;
 	private boolean firstValue = true;
 	
-	/**
-	 * 
-	 * convenience method, intended for use in instances of {@link SoundEncoder}
-	 * 
-	 * @param sampleRate
-	 * @param frameSize
-	 * @param cutOff
-	 * @return
-	 */
-	static float filterCoefficient(int sampleRate, int frameSize, float cutOff) {
-		return filterCoefficient(((float) sampleRate)/frameSize, cutOff);
+	public LowPassFilter(float sampleRate, float cutOff) {
+		this.sampleRate = sampleRate;
+		setCutOff(cutOff);
 	}
 	
-	static float filterCoefficient(float rate, float cutOff) {
+	public void setCutOff(float cutOff) {
+		this.cutOff = cutOff;
 		float tau = (float) (1/(2*Math.PI*cutOff));  // RC time constant
-		float alpha = 1/(1+tau*rate);
-		return alpha;
+		alpha = 1/(1+tau*sampleRate);
 	}
 	
-	/**
-	 * 
-	 * @param v: next sample
-	 * @param alpha: filter coefficient
-	 * @return
-	 */
-	float nextValue(float v, float alpha) {
+	public float getCutOff() {
+		return cutOff;
+	}
+	
+	float nextValue(float v) {
 		if (firstValue) {
 			firstValue = false;
 			value = v;
