@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.jreality.math.Matrix;
-
 public abstract class VbapSoundEncoder implements SoundEncoder {
 	
 	int channels;
@@ -79,10 +77,9 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 
 	private float g[] = new float[2];
 	
-	public void encodeSample(float v, int i, float x0, float y0, float z0, Attenuation attenuation) {
+	public void encodeSample(float v, int i, float x0, float y0, float z0) {
 		float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
-		v = attenuation.attenuate(v, r);
-		
+
 		if (r>1e-6f) {
 			float x = -z0/r;
 			float y = -x0/r;

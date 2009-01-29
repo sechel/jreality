@@ -53,7 +53,9 @@ public class InstantaneousPath implements SoundPath {
 		float dz = (z1-z0)/frameSize;
 		
 		for (int i=0; i<nRead; i++) {
-			enc.encodeSample(samples[i]*gain, i, x0, y0, z0, attenuation);
+			float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
+			float v = attenuation.attenuate(samples[i]*gain, r);
+			enc.encodeSample(v, i, x0, y0, z0);
 			
 			x0 += dx;
 			y0 += dy;

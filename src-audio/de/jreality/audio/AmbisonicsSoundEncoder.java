@@ -27,12 +27,12 @@ public abstract class AmbisonicsSoundEncoder implements SoundEncoder {
 		}
 	}
 
-	public void encodeSample(float v, int idx, float x, float y, float z, Attenuation attenuation) {
+	public void encodeSample(float v, int idx, float x, float y, float z) {
 		// The point (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics.
 		float r = (float) Math.sqrt(x*x+y*y+z*z);
 		
 		if (r>1e-6f) {
-			encodeAmbiSample(attenuation.attenuate(v, r), idx, -z/r, -x/r, y/r);
+			encodeAmbiSample(v, idx, -z/r, -x/r, y/r);
 		}
 	}
 

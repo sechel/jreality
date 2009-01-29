@@ -124,30 +124,27 @@ public class DelayPath implements SoundPath {
 	}
 
 	private void encodeSample(SoundEncoder enc, int j) {
-		float time = sourceTime();
-		if (time<0f) {
-			return; // too early to start rendering
-		}
-		
-		int index = (int) time;
-		float fractionalTime = time-index;
-		
-		float v0 = currentFrame[index++];
-		float v1 = (index<currentFrame.length) ? currentFrame[index] : sourceFrames.element()[0];
-		float v = v0+fractionalTime*(v1-v0);
-		
-		enc.encodeSample(v*gain, j, xCurrent, yCurrent, zCurrent, attenuation);
-	}
-
-	private float sourceTime() {
+		float time, dist;
 		while (true) {
-			float time = relativeTime-gamma*distance()+0.5f; // fudge factor to avoid negative times due to roundoff errors
+			dist = distance();
+			time = relativeTime-gamma*dist+0.5f; // fudge factor to avoid negative times due to roundoff errors
 			
 			if (time<currentFrame.length) {
-				return time;
+				break;
 			}
 
 			advanceSourceFrame();
+		}
+		
+		if (time>=0f) {
+			int index = (int) time;
+			float fractionalTime = time-index;
+
+			float v0 = currentFrame[index++];
+			float v1 = (index<currentFrame.length) ? currentFrame[index] : sourceFrames.element()[0];
+			float v = v0+fractionalTime*(v1-v0);
+
+			enc.encodeSample(attenuation.attenuate(v*gain, dist), j, xCurrent, yCurrent, zCurrent);
 		}
 	}
 
