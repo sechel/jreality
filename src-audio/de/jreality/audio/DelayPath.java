@@ -33,7 +33,6 @@ public class DelayPath implements SoundPath {
 	
 	private LowPassFilter xFilter, yFilter, zFilter; // TODO: consider better interpolation
 	private float xTarget, yTarget, zTarget;
-	private float xCurrent, yCurrent, zCurrent;
 	
 	private int relativeTime = 0;
 	private float[] currentFrame = null;
@@ -81,23 +80,45 @@ public class DelayPath implements SoundPath {
 		if (currentFrame!=null) {
 			for(int j = 0; j<frameSize; j++) {
 				encodeSample(enc, j);
-				updatePosition();
-				relativeTime++;
 			}
 		} else { // first frame, need to initialize fields
 			currentFrame = sourceFrames.remove();
 			sourcePositions.remove();
-			initializePosition();
+			
+			xFilter.initialize(xTarget);
+			yFilter.initialize(yTarget);
+			zFilter.initialize(zTarget);
 		}
 	
 		return nRead;
 	}
 
-	private void advanceSourceFrame() {
-		relativeTime -= currentFrame.length;
-		currentFrame = sourceFrames.remove();
-		sourcePositions.remove();
-		updateTarget();
+	private void encodeSample(SoundEncoder enc, int j) {
+		float x = xFilter.nextValue(xTarget);
+		float y = yFilter.nextValue(yTarget);
+		float z = zFilter.nextValue(zTarget);
+		float dist = (float) Math.sqrt(x*x+y*y+z*z);
+
+		float time;
+		while ((time = relativeTime-gamma*dist+0.5f)>=currentFrame.length) {
+			relativeTime -= currentFrame.length;
+			currentFrame = sourceFrames.remove();
+			sourcePositions.remove();
+			updateTarget();
+		}
+		
+		if (time>=0f) {
+			int index = (int) time;
+			float fractionalTime = time-index;
+
+			float v0 = currentFrame[index++];
+			float v1 = (index<currentFrame.length) ? currentFrame[index] : sourceFrames.element()[0];
+			float v = v0+fractionalTime*(v1-v0);
+
+			enc.encodeSample(attenuation.attenuate(v*gain, dist), j, x, y, z);
+		}
+		
+		relativeTime++;
 	}
 	
 	private Matrix auxiliaryMatrix = new Matrix();
@@ -109,42 +130,5 @@ public class DelayPath implements SoundPath {
 		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
 		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
 		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
-	}
-
-	private void initializePosition() {
-		xCurrent = xFilter.initialize(xTarget);
-		yCurrent = yFilter.initialize(yTarget);
-		zCurrent = zFilter.initialize(zTarget);
-	}
-
-	private void updatePosition() {
-		xCurrent = xFilter.nextValue(xTarget);
-		yCurrent = yFilter.nextValue(yTarget);
-		zCurrent = zFilter.nextValue(zTarget);
-	}
-
-	private void encodeSample(SoundEncoder enc, int j) {
-		float time, dist;
-		while (true) {
-			dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
-			time = relativeTime-gamma*dist+0.5f; // fudge factor to avoid negative times due to roundoff errors
-			
-			if (time<currentFrame.length) {
-				break;
-			}
-
-			advanceSourceFrame();
-		}
-		
-		if (time>=0f) {
-			int index = (int) time;
-			float fractionalTime = time-index;
-
-			float v0 = currentFrame[index++];
-			float v1 = (index<currentFrame.length) ? currentFrame[index] : sourceFrames.element()[0];
-			float v = v0+fractionalTime*(v1-v0);
-
-			enc.encodeSample(attenuation.attenuate(v*gain, dist), j, xCurrent, yCurrent, zCurrent);
-		}
 	}
 }
