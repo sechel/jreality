@@ -61,7 +61,6 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import static de.jreality.shader.CommonAttributes.*;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 public class TrackballRotateTool extends AbstractTool {
@@ -163,30 +162,30 @@ public class TrackballRotateTool extends AbstractTool {
      	return allSGC;
      }
 
-    public static void main(String[] args)	{
-		SceneGraphComponent sgc = new SceneGraphComponent();
-		final SceneGraphComponent fr = TubeFactory.getXYZAxes();
-		sgc.addChild(fr);
-		TrackballRotateTool trt = new TrackballRotateTool();
-		fr.addChild(trt.getTrackball());
-		fr.addTool(trt);
-		fr.setTransformation(new Transformation());
-		fr.getTransformation().addTransformationListener(new TransformationListener()	{
-			
-			double[] themat = new double[16];
-			public void transformationMatrixChanged(TransformationEvent ev) {
-				ev.getMatrix(themat);
-				Matrix m = new Matrix(themat);
-				System.err.println("current matrix is "+Rn.matrixToString(m.getArray()));
-			}
-
-			
-		});
-
-		ViewerApp va = new ViewerApp(sgc);
-		va.update();
-		va.display();
-
-    }
+//    public static void main(String[] args)	{
+//		SceneGraphComponent sgc = new SceneGraphComponent();
+//		final SceneGraphComponent fr = TubeFactory.getXYZAxes();
+//		sgc.addChild(fr);
+//		TrackballRotateTool trt = new TrackballRotateTool();
+//		fr.addChild(trt.getTrackball());
+//		fr.addTool(trt);
+//		fr.setTransformation(new Transformation());
+//		fr.getTransformation().addTransformationListener(new TransformationListener()	{
+//			
+//			double[] themat = new double[16];
+//			public void transformationMatrixChanged(TransformationEvent ev) {
+//				ev.getMatrix(themat);
+//				Matrix m = new Matrix(themat);
+//				System.err.println("current matrix is "+Rn.matrixToString(m.getArray()));
+//			}
+//
+//			
+//		});
+//
+//		ViewerApp va = new ViewerApp(sgc);
+//		va.update();
+//		va.display();
+//
+//    }
 
 }
