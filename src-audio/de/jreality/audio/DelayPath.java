@@ -126,7 +126,7 @@ public class DelayPath implements SoundPath {
 	private void encodeSample(SoundEncoder enc, int j) {
 		float time, dist;
 		while (true) {
-			dist = distance();
+			dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
 			time = relativeTime-gamma*dist+0.5f; // fudge factor to avoid negative times due to roundoff errors
 			
 			if (time<currentFrame.length) {
@@ -146,9 +146,5 @@ public class DelayPath implements SoundPath {
 
 			enc.encodeSample(attenuation.attenuate(v*gain, dist), j, xCurrent, yCurrent, zCurrent);
 		}
-	}
-
-	private float distance() {
-		return (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
 	}
 }
