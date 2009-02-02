@@ -137,7 +137,6 @@ public class ContentViewer {
 			putValue(AbstractAction.NAME, "Exit");
 		}
 		
-		@Override
 		public void actionPerformed(ActionEvent e) {
 			System.exit(0);
 		}
