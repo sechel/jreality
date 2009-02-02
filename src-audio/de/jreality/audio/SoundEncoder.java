@@ -15,13 +15,21 @@ public interface SoundEncoder {
 	
 	/**
 	 * 
-	 * Encode one sample.
+	 * Encode one sample with location.
 	 * 
 	 * @param v:       sample, already processed for attenuation, reverberation, interpolation, etc.
 	 * @param idx:     index of sample
 	 * @param x, y, z: position of sound source relative to listener
 	 */
 	void encodeSample(float v, int idx, float x, float y, float z);
+	
+	/**
+	 * 
+	 * Encode one directionless sample.
+	 * 
+	 * @param v
+	 */
+	void encodeSample(float v, int idx);
 	
 	void finishFrame();
 }

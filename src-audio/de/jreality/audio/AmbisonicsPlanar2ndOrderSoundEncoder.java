@@ -37,11 +37,17 @@ public abstract class AmbisonicsPlanar2ndOrderSoundEncoder implements SoundEncod
 
 		if (rp>1e-6f) {
 			encodeAmbiSample(v, idx, -z/rp, -x/rp);
+		} else {
+			encodeSample(v, idx);
 		}
 	}
 
-	protected void encodeAmbiSample(float v, int idx, float x, float y) {
+	public void encodeSample(float v, int idx) {
 		bw[idx] += v*W_SCALE;
+	}
+	
+	protected void encodeAmbiSample(float v, int idx, float x, float y) {
+		encodeSample(v, idx);
 		bx[idx] += v*x;
 		by[idx] += v*y;
 		bu[idx] += v*(x*x-y*y);

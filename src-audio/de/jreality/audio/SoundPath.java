@@ -23,7 +23,7 @@ public interface SoundPath {
 	public static final String VOLUME_ATTENUATION_KEY = "volumeAttenuation";
 	
 	public static final float DEFAULT_GAIN = 1f;
-	public static final float DEFAULT_SPEED_OF_SOUND = 300f;
+	public static final float DEFAULT_SPEED_OF_SOUND = 332f;
 	public static final Attenuation DEFAULT_ATTENUATION = Attenuation.LINEAR;
 	
 	void setFromEffectiveAppearance(EffectiveAppearance eapp);

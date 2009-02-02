@@ -33,11 +33,17 @@ public abstract class AmbisonicsSoundEncoder implements SoundEncoder {
 		
 		if (r>1e-6f) {
 			encodeAmbiSample(v, idx, -z/r, -x/r, y/r);
+		} else {
+			encodeSample(v, idx);
 		}
 	}
 
-	protected void encodeAmbiSample(float v, int idx, float x, float y, float z) {
+	public void encodeSample(float v, int idx) {
 		bw[idx] += v*W_SCALE;
+	}
+
+	protected void encodeAmbiSample(float v, int idx, float x, float y, float z) {
+		encodeSample(v, idx);
 		bx[idx] += v*x;
 		by[idx] += v*y;
 		bz[idx] += v*z;
