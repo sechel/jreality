@@ -40,10 +40,17 @@
 
 package de.jreality.tools;
 
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
+import static de.jreality.shader.CommonAttributes.EDGE_DRAW;
+import static de.jreality.shader.CommonAttributes.METRIC;
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY_ENABLED;
+import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
+
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.geometry.TubeFactory;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -54,12 +61,9 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
-import static de.jreality.shader.CommonAttributes.*;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.SceneGraphUtility;
 
@@ -85,7 +89,7 @@ public class TrackballRotateTool extends AbstractTool {
     static double[][] fixedAxes = {{0,0,1},{1,0,0},{0,1,0}};
 
     public void activate(ToolContext tc) {
-    	System.err.println("Activating rotate tool");
+    	System.err.println("Activating trackball rotate tool");
         comp = tc.getRootToToolComponent().getLastComponent();
         if (comp.getTransformation() == null)
         	comp.setTransformation(new Transformation());
@@ -148,44 +152,19 @@ public class TrackballRotateTool extends AbstractTool {
        	MatrixBuilder.euclidean().scale(1,1,.1).assignTo(band);
        	band.setGeometry(Primitives.cylinder(50));
     	xyBand = SceneGraphUtility.createFullSceneGraphComponent("xyBand");
-    	xyBand.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.green);
+    	xyBand.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.blue);
       	xyBand.addChild(band);
        	yzBand = SceneGraphUtility.createFullSceneGraphComponent("yzBand");
        	yzBand.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.red);
        	MatrixBuilder.euclidean().rotateY(Math.PI/2).assignTo(yzBand);
        	yzBand.addChild(band);
        	zxBand = SceneGraphUtility.createFullSceneGraphComponent("zxBand");
-       	zxBand.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.blue);
+       	zxBand.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.green);
       	MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(zxBand);
       	zxBand.addChild(band);
       	allSGC.addChildren(ballSGC, xyBand, yzBand, zxBand);
      	return allSGC;
      }
 
-//    public static void main(String[] args)	{
-//		SceneGraphComponent sgc = new SceneGraphComponent();
-//		final SceneGraphComponent fr = TubeFactory.getXYZAxes();
-//		sgc.addChild(fr);
-//		TrackballRotateTool trt = new TrackballRotateTool();
-//		fr.addChild(trt.getTrackball());
-//		fr.addTool(trt);
-//		fr.setTransformation(new Transformation());
-//		fr.getTransformation().addTransformationListener(new TransformationListener()	{
-//			
-//			double[] themat = new double[16];
-//			public void transformationMatrixChanged(TransformationEvent ev) {
-//				ev.getMatrix(themat);
-//				Matrix m = new Matrix(themat);
-//				System.err.println("current matrix is "+Rn.matrixToString(m.getArray()));
-//			}
-//
-//			
-//		});
-//
-//		ViewerApp va = new ViewerApp(sgc);
-//		va.update();
-//		va.display();
-//
-//    }
-
+ 
 }
