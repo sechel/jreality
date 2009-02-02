@@ -1,3 +1,12 @@
+# This file, test.rb, is an example to show how to use jruby (jruby.codehaus.org) with jReality.  
+#
+#To run this example with the JOGL backend enabled:
+#1) download jruby (jruby.codehaus.org) 
+#2) setenv CLASSPATH  to include the jarfiles jReality.jar, jtem-beans.jar, and jogl.jar
+#3) setenv JAVA_LIBRARY_PATH to include the native libraries for jogl.
+#4) run "jruby test.rb"
+#
+#If successful, you should see a textured cylinder displayed in a ViewerApp application.
 require 'java' 
 import 'java.io.IOException' 
 import 'java.net.URL' 
