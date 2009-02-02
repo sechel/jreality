@@ -134,7 +134,7 @@ public class ContentSound extends ShrinkPanelPlugin {
 		try {
 			h = new CachedAudioInputStreamSource(
 					"hum",
-					Input.getInput("data/"+humName+".wav"),
+					Input.getInput("sound/"+humName+".wav"),
 					true
 			);
 			h.start();
