@@ -50,7 +50,6 @@ public class Lights extends Plugin {
 		sceneRoot = view.getSceneRoot();
 		view.addChangeListener(new ChangeListener() {
 
-			@Override
 			public void stateChanged(ChangeEvent e) {
 				if (e.getSource() == view) {
 					if (view.getSceneRoot() != sceneRoot) {

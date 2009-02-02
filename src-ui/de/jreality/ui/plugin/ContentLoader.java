@@ -54,7 +54,6 @@ public class ContentLoader extends Plugin implements UIFlavor {
 
 		Action action = new AbstractAction("Load Content") {
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				loadFile();
 			}
@@ -163,7 +162,6 @@ public class ContentLoader extends Plugin implements UIFlavor {
 		}
 	}
  	
- 	@Override
  	public void mainUIChanged(String uiClass) {
  		SwingUtilities.updateComponentTreeUI(chooser);
  	}

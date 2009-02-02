@@ -277,7 +277,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	}
 
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		// lines
@@ -327,7 +326,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	}
 	
 	
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		Object s = e.getSource();
 		// lines

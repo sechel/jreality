@@ -45,8 +45,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.BoundingBoxUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;

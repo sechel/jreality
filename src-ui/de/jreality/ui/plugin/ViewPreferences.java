@@ -77,7 +77,6 @@ public class ViewPreferences extends Plugin implements
 	}
 	
 	@SuppressWarnings("deprecation")
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		if (fullscreenItem == s) {
@@ -132,37 +131,30 @@ public class ViewPreferences extends Plugin implements
 		sceneViewMenu.removeMenuAll(getClass());
 	}
 
-	@Override
 	public Icon getMainIcon() {
 		return null;
 	}
 
-	@Override
 	public String getMainName() {
 		return "jReality Viewer";
 	}
 
-	@Override
 	public JPanel getMainPage() {
 		return mainPage;
 	}
 
-	@Override
 	public int getNumSubPages() {
 		return 0;
 	}
 
-	@Override
 	public JPanel getSubPage(int i) {
 		return null;
 	}
 
-	@Override
 	public Icon getSubPageIcon(int i) {
 		return null;
 	}
 
-	@Override
 	public String getSubPageName(int i) {
 		return null;
 	}

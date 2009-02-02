@@ -474,17 +474,14 @@ public class View extends SideContainerPerspective {
 		if (toolSystem != null) toolSystem.dispose();
 	}
 
-	@Override
 	public Icon getIcon() {
 		return getPluginInfo().icon;
 	}
 
-	@Override
 	public String getTitle() {
 		return getPluginInfo().name;
 	}
 
-	@Override
 	public void setVisible(boolean visible) {
 
 	}

@@ -50,7 +50,6 @@ public class ViewMenuBar extends MenuAggregator {
 
 	}
 	
-	@Override
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}

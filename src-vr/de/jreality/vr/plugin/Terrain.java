@@ -108,7 +108,6 @@ public class Terrain extends ShrinkPanelPlugin {
 		// color chooser
 		JButton closeButton = new JButton("<-- Back");
 		closeButton.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				switchTo(panel);
 			}
@@ -140,7 +139,6 @@ public class Terrain extends ShrinkPanelPlugin {
 		visibleCheckBox = new JCheckBox("Visible");
 		visibleCheckBox.setSelected(true);
 		visibleCheckBox.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				updateVisible();
 			}
@@ -407,17 +405,14 @@ public class Terrain extends ShrinkPanelPlugin {
 			this.contentSize = contentSize;
 		}
 
-		@Override
 		public double getScale() {
 			return scale;
 		}
 
-		@Override
 		public void setAlignedContent(AlignedContent alignedContent) {
 			this.alignedContent = alignedContent;
 		}
 
-		@Override
 		public void contentChanged() {
 			alignContent(false);
 		}
@@ -468,7 +463,6 @@ public class Terrain extends ShrinkPanelPlugin {
 			this.verticalOffset = verticalOffset;
 		}
 
-		@Override
 		public Rectangle3D getBounds() {
 			Rectangle3D boundingBox = new Rectangle3D();
 			bounds.copyInto(boundingBox);

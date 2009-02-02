@@ -121,7 +121,6 @@ public class TextureInspector extends JPanel {
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		removeButton.setToolTipText("Remove the current texture");
 		removeButton.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				removeTexture();
 			}

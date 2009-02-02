@@ -45,8 +45,6 @@ public class ContentSound extends ShrinkPanelPlugin {
 			loopToButton.put(material, button.getModel());
 			buttonToLoop.put(button.getModel(), material);
 			button.getModel().addActionListener(new ActionListener() {
-
-				@Override
 				public void actionPerformed(ActionEvent e) {
 					updateLoop();
 				}

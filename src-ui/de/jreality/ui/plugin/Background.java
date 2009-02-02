@@ -97,7 +97,6 @@ public class Background extends Plugin {
 		nameToColors.put(name, colors);
 		Action action = new AbstractAction(name) {
 
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				setColor(name);
 

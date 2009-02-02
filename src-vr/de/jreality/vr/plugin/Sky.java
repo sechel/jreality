@@ -191,8 +191,6 @@ public class Sky extends ShrinkPanelPlugin {
 		panel.add(loadButton, gbc);
 		showSkyCheckBox = new JCheckBox("show  sky");
 		showSkyCheckBox.addActionListener(new ActionListener() {
-
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				setShowSky(showSkyCheckBox.isSelected());
 			}

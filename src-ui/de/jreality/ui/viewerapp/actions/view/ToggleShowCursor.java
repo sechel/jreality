@@ -45,13 +45,10 @@ import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
 
-import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.GuiUtility;
 

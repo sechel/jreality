@@ -51,7 +51,6 @@ import java.beans.Statement;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -75,7 +75,6 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 		
 		shrinkPanel.add(masterPanelChecker);
 		masterPanelChecker.addActionListener(new ActionListener() {
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (mainPanel != null) {
 					SwingUtilities.updateComponentTreeUI(getMainFrame());
@@ -86,7 +85,6 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 	}
 	
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		ShrinkPanelPlugin plugin = commandMap.get(command);
@@ -269,7 +267,6 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) { }
 				Runnable r = new Runnable() {
-					@Override
 					public void run() {
 						updatePanels();						
 					}

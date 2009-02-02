@@ -78,7 +78,6 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		content.addChangeListener(this);
 	}
 
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == alignedContent) {
 
