@@ -25,7 +25,11 @@ public class Audio extends Plugin {
 			Viewer viewer = c.getPlugin(View.class).getViewer();
 			c.getPlugin(CameraStand.class);
 			AudioLauncher.suggestSampleRate(22050);
-			AudioLauncher.launch(viewer);
+			try {
+				AudioLauncher.launch(viewer); 
+			} catch (Exception e) {
+				System.out.println("Could not launch audio engine: " + e);
+			}
 		}
 
 		@Override
