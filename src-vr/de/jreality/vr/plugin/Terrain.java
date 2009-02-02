@@ -426,6 +426,9 @@ public class Terrain extends ShrinkPanelPlugin {
 			bounds =
 				BoundingBoxUtility.calculateBoundingBox(alignedContent.getContent());
 			double[] e = bounds.getExtent();
+			if (e[0] < 1E-20 || e[1] < 1E-20 || e[2] < 1E-20) {
+				return;
+			}
 			double[] center = bounds.getCenter();
 			double objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
 			scale = contentSize/objectSize;
