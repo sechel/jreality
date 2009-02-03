@@ -33,10 +33,10 @@ public class DelayPath implements SoundPath {
 	
 	private LowPassFilter xFilter, yFilter, zFilter; // TODO: consider better interpolation
 	private float xTarget, yTarget, zTarget;
+	private float xCurrent, yCurrent, zCurrent;
 	
 	private int relativeTime = 0;
 	private float[] currentFrame = null;
-
 	
 	public DelayPath(SampleReader reader, int sampleRate) {
 		if (sampleRate<=0) {
@@ -78,27 +78,27 @@ public class DelayPath implements SoundPath {
 		updateTarget();
 		
 		if (currentFrame!=null) {
-			for(int j = 0; j<frameSize; j++) {
-				encodeSample(enc, j);
+			for(int j = 0; j<frameSize; j++) {		
+				enc.encodeSample(nextSample(), j, xCurrent, yCurrent, zCurrent);
+				
+				xCurrent = xFilter.nextValue(xTarget);
+				yCurrent = yFilter.nextValue(yTarget);
+				zCurrent = zFilter.nextValue(zTarget);
 			}
 		} else { // first frame, need to initialize fields
 			currentFrame = sourceFrames.remove();
 			sourcePositions.remove();
 			
-			xFilter.initialize(xTarget);
-			yFilter.initialize(yTarget);
-			zFilter.initialize(zTarget);
+			xCurrent = xFilter.initialize(xTarget);
+			yCurrent = yFilter.initialize(yTarget);
+			zCurrent = zFilter.initialize(zTarget);
 		}
 	
 		return nRead;
 	}
 
-	private void encodeSample(SoundEncoder enc, int j) {
-		float x = xFilter.nextValue(xTarget);
-		float y = yFilter.nextValue(yTarget);
-		float z = zFilter.nextValue(zTarget);
-		float dist = (float) Math.sqrt(x*x+y*y+z*z);
-
+	private float nextSample() {
+		float dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
 		float time;
 		while ((time = relativeTime-gamma*dist+0.5f)>=currentFrame.length) {
 			relativeTime -= currentFrame.length;
@@ -106,6 +106,7 @@ public class DelayPath implements SoundPath {
 			sourcePositions.remove();
 			updateTarget();
 		}
+		relativeTime++;
 		
 		if (time>=0f) {
 			int index = (int) time;
@@ -115,13 +116,14 @@ public class DelayPath implements SoundPath {
 			float v1 = (index<currentFrame.length) ? currentFrame[index] : sourceFrames.element()[0];
 			float v = v0+fractionalTime*(v1-v0);
 
-			enc.encodeSample(attenuation.attenuate(v*gain, dist), j, x, y, z);
+			return attenuation.attenuate(v*gain, dist);
+		} else {
+			return 0f;
 		}
-		
-		relativeTime++;
 	}
 	
 	private Matrix auxiliaryMatrix = new Matrix();
+	
 	private void updateTarget() {
 		auxiliaryMatrix.assignFrom(sourcePositions.element());
 		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
