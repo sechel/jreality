@@ -22,8 +22,8 @@ public class InstantaneousPath implements SoundPath {
 	private float x0, y0, z0;
 	private boolean firstFrame = true;
 
-	public InstantaneousPath(SampleReader reader) {
-		this.reader = reader;
+	public InstantaneousPath(SampleReader reader, int sampleRate) {
+		this.reader = ConvertingReader.createReader(reader, sampleRate);
 	}
 	
 	public int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
@@ -65,7 +65,7 @@ public class InstantaneousPath implements SoundPath {
 		return nRead;
 	}	
 
-	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
+	public void setProperties(EffectiveAppearance eapp) {
 		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
 		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION);
 	}

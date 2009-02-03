@@ -45,9 +45,9 @@ public class DelayPath implements SoundPath {
 		if (reader==null) {
 			throw new IllegalArgumentException("reader cannot be null");
 		}
-		this.reader = reader;
+		this.reader = ConvertingReader.createReader(reader, sampleRate);
 		this.sampleRate = sampleRate;
-		
+	
 		xFilter = new LowPassFilter(sampleRate, UPDATE_CUTOFF);
 		yFilter = new LowPassFilter(sampleRate, UPDATE_CUTOFF);
 		zFilter = new LowPassFilter(sampleRate, UPDATE_CUTOFF);
@@ -55,7 +55,7 @@ public class DelayPath implements SoundPath {
 		updateParameters();
 	}
 
-	public void setFromEffectiveAppearance(EffectiveAppearance eapp) {
+	public void setProperties(EffectiveAppearance eapp) {
 		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
 		speedOfSound = eapp.getAttribute(SPEED_OF_SOUND_KEY, DEFAULT_SPEED_OF_SOUND);
 		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION);

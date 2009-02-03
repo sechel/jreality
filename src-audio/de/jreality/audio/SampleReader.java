@@ -8,6 +8,21 @@ package de.jreality.audio;
  *
  */
 public interface SampleReader {
+	/**
+	 * 
+	 * @return sample rate of output
+	 */
+	public int getSampleRate();
+	
+	/**
+	 * Writes nSamples samples to the given buffer, starting at initialIndex, if possible
+	 * 
+	 * @param buffer
+	 * @param initialIndex
+	 * @param nSamples
+	 * @return number of samples written (less than or equal to nSamples)
+	 */
 	public int read(float buffer[], int initialIndex, int nSamples);
+	
 	public void clear();
 }

@@ -15,19 +15,29 @@ public class ConvertingReader implements SampleReader {
 	private SampleReader reader;
 	private float inBuf[];
 	
-	private final int targetRate, sourceRate;
+	private final int targetRate, sourceRate, sampleRate;
 	private final float ratio;
 	private int targetIndex = 0;
 	private int samplesRead = 0;
 	private boolean firstSample = false;
 	
-	public ConvertingReader(SampleReader reader, int sourceRate, int targetRate) {
+	public static SampleReader createReader(SampleReader reader, int targetRate) {
+		return (reader.getSampleRate()==targetRate) ? reader : new ConvertingReader(reader, targetRate);
+	}
+	
+	private ConvertingReader(SampleReader reader, int targetRate) {
+		int sourceRate = reader.getSampleRate();
 		int q = gcd(targetRate, sourceRate);
 		this.reader = reader;
+		this.sampleRate = targetRate;
 		this.sourceRate = sourceRate/q;
 		this.targetRate = targetRate/q;
 		ratio = ((float) sourceRate)/((float) targetRate);
 		inBuf = new float[this.sourceRate+1];
+	}
+	
+	public int getSampleRate() {
+		return sampleRate;
 	}
 	
 	public void clear() {

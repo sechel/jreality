@@ -10,6 +10,9 @@ import de.jreality.shader.EffectiveAppearance;
  * comparable to the various GeometryShaders and will be configured from an
  * EffectiveAppearance.
  * 
+ * Sound paths are responsible for most of the audio processing, including
+ * resampling, interpolation, attenuation, distance cues, etc.
+ * 
  * Convention: Specifying a speed of sound of zero or less means infinite speed
  * of sound, i.e., instantaneous propagation.
  * 
@@ -26,6 +29,6 @@ public interface SoundPath {
 	public static final float DEFAULT_SPEED_OF_SOUND = 332f;
 	public static final Attenuation DEFAULT_ATTENUATION = Attenuation.LINEAR;
 	
-	void setFromEffectiveAppearance(EffectiveAppearance eapp);
+	void setProperties(EffectiveAppearance eapp);
 	int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
 }

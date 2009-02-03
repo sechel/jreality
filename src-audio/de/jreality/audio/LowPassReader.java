@@ -12,9 +12,13 @@ public class LowPassReader implements SampleReader {
 	private SampleReader reader;
 	private LowPassFilter lpf;
 	
-	public LowPassReader(SampleReader reader, int sampleRate, float cutOff) {
+	public LowPassReader(SampleReader reader, float cutOff) {
 		this.reader = reader;
-		lpf = new LowPassFilter(sampleRate, cutOff);
+		lpf = new LowPassFilter(reader.getSampleRate(), cutOff);
+	}
+	
+	public int getSampleRate() {
+		return reader.getSampleRate();
 	}
 	
 	public void setCutOff(float cutOff) {
