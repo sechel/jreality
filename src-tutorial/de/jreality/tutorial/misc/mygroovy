@@ -1,0 +1,6 @@
+#!/bin/csh
+setenv LIB ${HOME}/Software/workspace/lib
+setenv CLASSPATH ${LIB}/jReality.jar:${LIB}:${LIB}/jogl.jar:${LIB}/bsh.jar:${LIB}/antlr.jar:${LIB}/janino.jar:${LIB}/jtem-beans.jar:${LIB}/jterm.jar:${LIB}/sunflow.jar
+#uncomment this to activate JOGL native libraries, wherever they are
+#setenv JAVA_LIBRARY_PATH ${HOME}/Library/Java/Extensions/JOGL-1.1.1
+groovy $1
