@@ -28,10 +28,6 @@ public class ContentViewer {
 	public ContentViewer() {
 		controller = new SimpleController();
 		
-		viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuSeparator(ContentViewer.class, 19.0, "File");
-		viewMenuBar.addMenuItem(ContentViewer.class, 20.0, new ExitAction(), "File");
-		
 		view = new View();
 		controller.registerPlugin(view);
 		
