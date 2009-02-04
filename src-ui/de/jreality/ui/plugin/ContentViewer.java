@@ -68,6 +68,8 @@ public class ContentViewer {
 		
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
+		
+		controller.registerPlugin(new DisplayPanel());
 	}
 
 	public void registerPlugin(Plugin plugin) {
