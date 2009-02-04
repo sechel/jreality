@@ -3,13 +3,18 @@ package de.jreality.audio.plugin;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JRadioButton;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.scene.AudioSource;
@@ -18,6 +23,8 @@ import de.jreality.ui.plugin.AlignedContent;
 import de.jreality.ui.plugin.View;
 import de.jreality.ui.plugin.image.ImageHook;
 import de.jreality.util.Input;
+import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
@@ -27,20 +34,22 @@ public class ContentSound extends ShrinkPanelPlugin {
 	
 	private SceneGraphComponent hum;
 	private ButtonGroup buttonGroup;
+	private JButton loadButton;
+	private JFileChooser fileChooser;
 	private HashMap<String, ButtonModel> loopToButton =
 		new HashMap<String, ButtonModel>();
 	private HashMap<ButtonModel, String> buttonToLoop =
 		new HashMap<ButtonModel, String>();
 	private AudioSource defaultAudioSource;
-	private AudioSource customAudioSource; // TODO: do something with this?!?
+	private AudioSource customAudioSource;
 	private SceneGraphComponent parentForSoundLoop;
 	
 	
 	public ContentSound() {
 		buttonGroup = new ButtonGroup();
-		shrinkPanel.setLayout(new GridLayout());
+		shrinkPanel.setLayout(new GridLayout(2, 2));
 		buttonGroup = new ButtonGroup();
-		for (String material : new String[] {"default", "custom", "none"}) {
+		for (String material : new String[] {"default", "none", "custom"}) {
 			JRadioButton button = new JRadioButton(material);
 			loopToButton.put(material, button.getModel());
 			buttonToLoop.put(button.getModel(), material);
@@ -52,6 +61,17 @@ public class ContentSound extends ShrinkPanelPlugin {
 			buttonGroup.add(button);
 			shrinkPanel.add(button);
 		}
+		
+		loadButton = new JButton("load");
+		loadButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				loadSoundFile();
+			}
+		});
+		shrinkPanel.add(loadButton);
+		
+		makeFileChooser();
+		
 		defaultAudioSource = createDefaultAudioSource();
 		setLoop("none");
 	}
@@ -81,12 +101,14 @@ public class ContentSound extends ShrinkPanelPlugin {
 	@Override
 	public void restoreStates(Controller c) throws Exception {
 		setLoop(c.getProperty(getClass(), "loop", getLoop()));
+		setCurrentDirectory(c.getProperty(getClass(), "currentDirectory", getCurrentDirectory()));
 		super.restoreStates(c);
 	}
 
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "loop", getLoop());
+		c.storeProperty(getClass(), "currentDirectory", getCurrentDirectory());
 		super.storeStates(c);
 	}
 	
@@ -119,18 +141,21 @@ public class ContentSound extends ShrinkPanelPlugin {
 		String loop = getLoop();
 		if (loop == "default") {
 			hum.setAudioSource(defaultAudioSource);
+			loadButton.setEnabled(false);
 		}
 		if (loop == "custom") {
 			hum.setAudioSource(customAudioSource);
+			loadButton.setEnabled(true);
 		}
 		if (loop == "none") {
 			hum.setAudioSource(null);
+			loadButton.setEnabled(false);
 		}
 	}
 	
 	protected AudioSource createDefaultAudioSource() {
 		CachedAudioInputStreamSource h = null;
-		String humName = "churchbell_loop";
+		String humName = "inspace";
 		try {
 			h = new CachedAudioInputStreamSource(
 					"hum",
@@ -144,5 +169,58 @@ public class ContentSound extends ShrinkPanelPlugin {
 			e.printStackTrace();
 		}
 		return h;
+	}
+	
+	private void loadSoundFile() {
+		File file = null;
+		if (fileChooser.showOpenDialog(shrinkPanel) == JFileChooser.APPROVE_OPTION) {
+			file = fileChooser.getSelectedFile();
+		}
+		if (file != null) {
+			try {
+				customAudioSource = new CachedAudioInputStreamSource("custom hum", Input.getInput(file), true);
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			customAudioSource.start();
+			hum.setAudioSource(customAudioSource);
+		}
+	}
+	
+	private void makeFileChooser() {
+		FileSystemView view = FileSystemView.getFileSystemView();
+		FileFilter ff = new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().toLowerCase().endsWith(".wav");
+			}
+			@Override
+			public String getDescription() {
+				return "wav files";
+			}
+		};
+		String texDir = ".";
+		String dataDir = Secure.getProperty(SystemProperties.JREALITY_DATA);
+		if (dataDir!= null) texDir = dataDir;
+		File defaultDir = new File(texDir);
+		fileChooser = new JFileChooser(!defaultDir.exists() ? view.getHomeDirectory() : defaultDir, view);
+		fileChooser.setFileFilter(ff);
+	}
+	
+	public String getCurrentDirectory() {
+		return fileChooser.getCurrentDirectory().getAbsolutePath();
+	}
+
+	public void setCurrentDirectory(String directory) {
+		File dir = new File(directory);
+		if (dir.exists() && dir.isDirectory()) {
+			fileChooser.setCurrentDirectory(dir);
+		} else {
+			System.out.println(
+					"failed to restore sound directory "+directory
+			);
+		}
 	}
 }
