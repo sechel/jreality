@@ -32,7 +32,7 @@ public class ContentSound extends ShrinkPanelPlugin {
 	private HashMap<ButtonModel, String> buttonToLoop =
 		new HashMap<ButtonModel, String>();
 	private AudioSource defaultAudioSource;
-	private AudioSource customAudioSource;
+	private AudioSource customAudioSource; // TODO: do something with this?!?
 	private SceneGraphComponent parentForSoundLoop;
 	
 	
@@ -40,7 +40,7 @@ public class ContentSound extends ShrinkPanelPlugin {
 		buttonGroup = new ButtonGroup();
 		shrinkPanel.setLayout(new GridLayout());
 		buttonGroup = new ButtonGroup();
-		for (String material : new String[] {"default", "costum", "none"}) {
+		for (String material : new String[] {"default", "custom", "none"}) {
 			JRadioButton button = new JRadioButton(material);
 			loopToButton.put(material, button.getModel());
 			buttonToLoop.put(button.getModel(), material);
