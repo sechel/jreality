@@ -5,13 +5,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 import de.jreality.ui.plugin.AlignedContent;
-import de.jreality.audio.plugin.Audio;
+//import de.jreality.audio.plugin.Audio;
 import de.jreality.vr.plugin.Avatar;
 import de.jreality.ui.plugin.Background;
 import de.jreality.ui.plugin.CameraStand;
 import de.jreality.ui.plugin.ContentAppearance;
 import de.jreality.ui.plugin.ContentLoader;
-import de.jreality.audio.plugin.ContentSound;
+//import de.jreality.audio.plugin.ContentSound;
 import de.jreality.ui.plugin.ContentTools;
 import de.jreality.ui.plugin.Inspector;
 import de.jreality.ui.plugin.Lights;
@@ -46,8 +46,8 @@ public class ContentViewerVR {
 	
 	private HeadUpDisplay headUpDisplay;
 
-	private Audio audio;
-	private ContentSound contentSound;
+//	private Audio audio;
+//	private ContentSound contentSound;
 	
 	public ContentViewerVR(boolean withAudio) {
 		controller = new SimpleController();
@@ -98,12 +98,12 @@ public class ContentViewerVR {
 			terrain = new Terrain();
 			controller.registerPlugin(terrain);
 		
-		if (withAudio) {
-			audio = new Audio();
-			controller.registerPlugin(audio);
-			contentSound = new ContentSound();
-			controller.registerPlugin(contentSound);
-		}
+//		if (withAudio) {
+//			audio = new Audio();
+//			controller.registerPlugin(audio);
+//			contentSound = new ContentSound();
+//			controller.registerPlugin(contentSound);
+//		}
 		
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
@@ -179,10 +179,10 @@ public class ContentViewerVR {
 	public Terrain getTerrain() {
 		return terrain;
 	}
-
-	public Audio getAudio() {
-		return audio;
-	}
+//
+//	public Audio getAudio() {
+//		return audio;
+//	}
 	
 	private static class ExitAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
@@ -202,9 +202,9 @@ public class ContentViewerVR {
 		contentViewer.startup();
 	}
 
-	public ContentSound getContentSound() {
-		return contentSound;
-	}
+//	public ContentSound getContentSound() {
+//		return contentSound;
+//	}
 
 	public HeadUpDisplay getHeadUpDisplay() {
 		return headUpDisplay;
