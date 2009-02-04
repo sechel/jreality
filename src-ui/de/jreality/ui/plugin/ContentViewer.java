@@ -23,6 +23,7 @@ public class ContentViewer {
 	private ContentAppearance contentAppearance;
 	private Sky sky;
 	private ContentTools contentTools;
+	private DisplayPanel displayPanel;
 	
 	public ContentViewer() {
 		controller = new SimpleController();
@@ -69,7 +70,8 @@ public class ContentViewer {
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
 		
-		controller.registerPlugin(new DisplayPanel());
+		displayPanel = new DisplayPanel();
+		controller.registerPlugin(displayPanel);
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -131,7 +133,11 @@ public class ContentViewer {
 	public ContentTools getContentTools() {
 		return contentTools;
 	}
-	
+
+	public DisplayPanel getDisplayPanel() {
+		return displayPanel;
+	}
+
 	private static class ExitAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 
@@ -149,5 +155,4 @@ public class ContentViewer {
 		contentViewer.registerPlugin(new ContentLoader());
 		contentViewer.startup();
 	}
-
 }

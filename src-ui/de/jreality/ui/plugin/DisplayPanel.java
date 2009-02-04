@@ -86,7 +86,7 @@ public class DisplayPanel extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Display Panel";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("radioactive1.png");
+		info.icon = ImageHook.getIcon("camera.png");
 		return info;
 	}
 
