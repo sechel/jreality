@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.vr.plugin.Sky;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
@@ -21,7 +20,6 @@ public class ContentViewer {
 	private Inspector inspector;
 	private Shell shell;
 	private ContentAppearance contentAppearance;
-	private Sky sky;
 	private ContentTools contentTools;
 	private DisplayPanel displayPanel;
 	
@@ -59,9 +57,6 @@ public class ContentViewer {
 		
 		contentAppearance = new ContentAppearance();
 		controller.registerPlugin(contentAppearance);
-		
-		sky = new Sky();
-		controller.registerPlugin(sky);
 		
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
@@ -120,10 +115,6 @@ public class ContentViewer {
 
 	public ContentAppearance getContentAppearance() {
 		return contentAppearance;
-	}
-
-	public Sky getSky() {
-		return sky;
 	}
 
 	public ContentTools getContentTools() {
