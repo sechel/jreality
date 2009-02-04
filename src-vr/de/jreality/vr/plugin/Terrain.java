@@ -1,5 +1,7 @@
 package de.jreality.vr.plugin;
 
+import static de.jreality.geometry.BoundingBoxUtility.calculateBoundingBox;
+import static de.jreality.geometry.BoundingBoxUtility.removeZeroExtends;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.RELATIVE;
 import static java.awt.GridBagConstraints.REMAINDER;
@@ -28,7 +30,6 @@ import javax.swing.event.ChangeListener;
 
 import com.bric.swing.ColorPicker;
 
-import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
@@ -417,13 +418,11 @@ public class Terrain extends ShrinkPanelPlugin {
 			alignContent(false);
 		}
 
+		
 		public void alignContent(boolean fire) {
-			bounds =
-				BoundingBoxUtility.calculateBoundingBox(alignedContent.getContent());
+			bounds = calculateBoundingBox(alignedContent.getContent());
+			removeZeroExtends(bounds);
 			double[] e = bounds.getExtent();
-			if (e[0] < 1E-20 || e[1] < 1E-20 || e[2] < 1E-20) {
-				return;
-			}
 			double[] center = bounds.getCenter();
 			double objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
 			scale = contentSize/objectSize;

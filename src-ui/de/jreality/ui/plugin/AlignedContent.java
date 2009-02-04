@@ -1,9 +1,11 @@
 package de.jreality.ui.plugin;
 
+import static de.jreality.geometry.BoundingBoxUtility.calculateBoundingBox;
+import static de.jreality.geometry.BoundingBoxUtility.removeZeroExtends;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
@@ -116,12 +118,9 @@ public class AlignedContent extends Plugin {
 			contentDelegate.contentChanged();
 			contentScale = contentDelegate.getScale();
 		} else {
-			bounds =
-				BoundingBoxUtility.calculateBoundingBox(content);
+			bounds = calculateBoundingBox(content);
+			removeZeroExtends(bounds);
 			double[] e = bounds.getExtent();
-			if (e[0] < 1E-20 || e[1] < 1E-20 || e[2] < 1E-20) {
-				return;
-			}
 			double[] center = bounds.getCenter();
 			double objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
 			contentScale = 20/objectSize;

@@ -74,4 +74,31 @@ public class BoundingBoxUtility {
 		return calculateBoundingBox(null, tmp);
 	}
 
+	
+	/**
+	 * Adds a small value to a dimension of zero extend
+	 * @param r
+	 * @return
+	 */
+	public static Rectangle3D removeZeroExtends(Rectangle3D r) {
+		double[] e = r.getExtent();
+		double[][] bounds = r.getBounds();
+		if (e[0] < 1E-20) {
+			bounds[0][0] = -1E-5;
+			bounds[1][0] = -1E-5;
+		} 
+		if (e[1] < 1E-20) {
+			bounds[0][1] = -1E-5;
+			bounds[1][1] = -1E-5;
+		}
+		if (e[2] < 1E-20) {
+			bounds[0][2] = -1E-5;
+			bounds[1][2] = -1E-5;
+		}
+		Rectangle3D result = new Rectangle3D();
+		result.setBounds(bounds);
+		return result;
+	}
+	
+	
 }
