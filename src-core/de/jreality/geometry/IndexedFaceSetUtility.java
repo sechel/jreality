@@ -182,6 +182,7 @@ public class IndexedFaceSetUtility {
 		ifsf.setVertexCoordinates(newpptr);
 		ifsf.setFaceCount(newIndices.length);
 		ifsf.setFaceIndices(newIndices);
+		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.update();
 		return ifsf.getIndexedFaceSet();
 	}
