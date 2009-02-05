@@ -71,4 +71,9 @@ class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 		
 	}
 
+	public void repositionSecurityWarning() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
