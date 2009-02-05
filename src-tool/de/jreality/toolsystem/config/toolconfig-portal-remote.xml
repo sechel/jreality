@@ -11,10 +11,13 @@
     <mapping device="Remote" src="button_0" target="PrimaryAction"/>
     <mapping device="Remote" src="button_1" target="PrimaryMenu"/>
     <mapping device="Remote" src="button_2" target="PrimarySelection"/>
+    <mapping device="Remote" src="button_3" target="PanelActivation"/>
+    <!--mapping device="Remote" src="button_4" target="JumpActivation"/-->
+    <mapping device="Remote" src="button_5" target="GravityToggle"/>
     <mapping device="Remote" src="valuator_0" target="PrimaryNavigationNDC_X"/>
     <mapping device="Remote" src="valuator_1" target="PrimaryNavigationNDC_Y"/>
-    <mapping device="Remote" src="sensor_1" target="RawPointerShipTransformation"/>
-    <mapping device="Remote" src="sensor_0" target="RawShipHeadTransformation"/>
+    <mapping device="Remote" src="sensor_0" target="RawPointerShipTransformation"/>
+    <mapping device="Remote" src="sensor_1" target="RawShipHeadTransformation"/>
     
   </rawslots>
   
@@ -24,7 +27,7 @@
     <mapping src="PrimaryMenu" target="PanelMenu"/>
     <mapping src="PrimarySelection" target="PanelSelection"/>
 
-    <mapping src="PrimarySelection" target="ShowPanel"/>
+    <mapping src="PrimarySelection" target="PanelActivation"/>
     <mapping src="PrimaryAction" target="RotateActivation"/>
     <mapping src="PrimarySelection" target="JumpActivation"/>
     <mapping src="PrimaryAction" target="AllDragActivation"/>
@@ -47,10 +50,10 @@
       <outputslot>PanelActivation</outputslot>
     </virtualdevice>
 
-    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
+    <!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
       <inputslot>PrimarySelection</inputslot>
       <outputslot>GravityToggle</outputslot>
-    </virtualdevice>
+    </virtualdevice-->
 
     <constant name="FollowPointerSwitch">
       <double>1</double>
@@ -149,7 +152,7 @@
         <string>translationX</string>
       </prop>
       <prop name="gain">
-        <double>-1</double>
+        <double>1</double>
       </prop>
     </virtualdevice>
 

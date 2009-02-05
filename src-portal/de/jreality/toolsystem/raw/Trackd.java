@@ -9,19 +9,26 @@ import de.jreality.devicedriver.TrackdJNI;
 
 public class Trackd implements ActionListener, Runnable {
 
-	private final static long TIMESTEP = 100;
+	private final static long TIMESTEP = 1;
 
 	private Thread anim;
 
 	private static TrackdJNI trackdJNI = null;
 
 	int numSensors;
-
+	
 	int sensor;
 
 	private JRadioButton[] rbSensors = null;
 
-	private JTable jtData = null;
+	private JTable jtSensors = null;
+
+	
+	private int numButtons;
+	private JRadioButton[] rbButtons = null;
+	
+	private int numValuators;
+	private JTable jtValuators = null;
 
 	private void init() {
 
@@ -62,14 +69,47 @@ public class Trackd implements ActionListener, Runnable {
 				0, 0, 0)));
 		panel.add(pMatrix);
 
-		jtData = new JTable(4, 4);
-		pMatrix.add(jtData);
+		jtSensors = new JTable(4, 4);
+		jtSensors.setEnabled(false);
+		pMatrix.add(jtSensors);
 
 		sensor = 0;
 		rbSensors[sensor].setSelected(true);
+		
+		numButtons = trackdJNI.getNumButtons();
+		rbButtons = new JRadioButton[numButtons];
+		JPanel pButtons = new JPanel(new GridLayout(1, 0));
+		pButtons.setBorder(BorderFactory.createCompoundBorder(BorderFactory
+				.createTitledBorder("Buttons"), BorderFactory.createEmptyBorder(
+				5, 5, 5, 5)));
+		for (int i = 0; i < numButtons; i++) {
+			rbButtons[i] = new JRadioButton();
+			rbButtons[i].setEnabled(false);
+			pButtons.add(rbButtons[i]);
+		}
+		
+		panel.add(pButtons);
+
+		numValuators = trackdJNI.getNumValuators();
+		JPanel pValuators = new JPanel();
+		pValuators.setBorder(BorderFactory.createCompoundBorder(BorderFactory
+				.createTitledBorder("Valuators"), BorderFactory.createEmptyBorder(0,
+				0, 0, 0)));
+		panel.add(pValuators);
+
+		jtValuators = new JTable(1, numValuators);
+		jtValuators.setEnabled(false);
+		pValuators.add(jtValuators);
+		
 		update();
+		
 		frame.pack();
 		frame.setVisible(true);
+		
+		System.out.println("numSensors="+numSensors);
+		System.out.println("numButtons="+numButtons);
+		System.out.println("numValuators="+numValuators);
+		
 	}
 
 	public void run() {
@@ -97,7 +137,15 @@ public class Trackd implements ActionListener, Runnable {
 		trackdJNI.getMatrix(matrix, sensor);
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
-				jtData.setValueAt(new Float(matrix[4 * i + j]), i, j);
+				jtSensors.setValueAt(new Float(matrix[4 * i + j]), i, j);
+		for (int i=0; i<numButtons; i++) {
+			boolean pressed = trackdJNI.getButton(i) != 0;
+			rbButtons[i].setSelected(pressed);
+		}
+		for (int i=0; i<numValuators; i++) {
+			double val = trackdJNI.getValuator(i);
+			jtValuators.setValueAt(val, 0, i);
+		}
 	}
 
 	public void start() {

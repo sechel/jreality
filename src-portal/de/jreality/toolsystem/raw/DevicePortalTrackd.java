@@ -18,6 +18,8 @@ import de.jreality.util.Secure;
 
 public class DevicePortalTrackd extends DeviceTrackd {
 	
+	static final boolean ART=true;
+	
 //	public static double portalScale = 1.0;
 	static final Matrix HEAD_CALIB = MatrixBuilder.euclidean()
 										.rotateY(-Math.PI/2)
@@ -41,7 +43,7 @@ public class DevicePortalTrackd extends DeviceTrackd {
 //		SCALE_MATRIX = MatrixBuilder.euclidean().scale(PortalCoordinateSystem.getPortalScale()).getArray();
 //	}
 	public DevicePortalTrackd() {
-		JFrame f = new JFrame("Head tracking:");
+		JFrame f = new JFrame("Head tracking: FOO ART="+ART);
 		ButtonGroup bg = new ButtonGroup();
 		JRadioButton b1 = new JRadioButton("enabled");
 		b1.setSelected(true);
@@ -67,7 +69,7 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	
 	@SuppressWarnings("serial")
 	protected void fixHead() {
-		disableSensor(0);
+		disableSensor(ART ? 1 : 0);
 		if (queue != null) {
 			ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), sensorSlot(0), null, 
 					new DoubleArray(HEAD_CALIB.getArray()));
@@ -76,7 +78,7 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	}
 
 	protected void freeHead() {
-		enableSensor(0);
+		enableSensor(ART ? 1 : 0);
 	}
 
 	private static double rad(double deg) {
@@ -87,22 +89,35 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	protected void calibrate(double[] sensorMatrix, int index) {
 		Matrix m = new Matrix(sensorMatrix);
 		
-		// convert to coordinate system where the origin is in the middle of the bottom of the floor
-		m.setEntry(0, 3, m.getEntry(0, 3)/100-PortalCoordinateSystem.xDimPORTAL/2);
-		m.setEntry(1, 3, m.getEntry(1, 3)/100);
-		m.setEntry(2, 3, m.getEntry(2, 3)/100-PortalCoordinateSystem.xDimPORTAL/2);
-
-		// rotate:
-		if (index == 1) m.multiplyOnRight(WAND_CALIB); // wand
-		if (index == 0) m.multiplyOnRight(HEAD_CALIB); // head
-
-		// this is now done in the class VirtualPortalCoordinateSystemChange
-//		// apply portal scale separately to the translation part of the matrices
-//		if (index == 0 || index == 1  && PortalCoordinateSystem.getPortalScale() != 1.0) {
-//			double[] tlate = m.getColumn(3);
-//			tlate = Rn.matrixTimesVector(null, SCALE_MATRIX, tlate);
-//			m.setColumn(3, tlate);
-//		}
+		if (!ART) { // MotionStar calibration
+			// convert to coordinate system where the origin is in the middle of the bottom of the floor
+			m.setEntry(0, 3, m.getEntry(0, 3)/100-PortalCoordinateSystem.xDimPORTAL/2);
+			m.setEntry(1, 3, m.getEntry(1, 3)/100);
+			m.setEntry(2, 3, m.getEntry(2, 3)/100-PortalCoordinateSystem.xDimPORTAL/2);
+	
+			// rotate:
+			if (index == 1) m.multiplyOnRight(WAND_CALIB); // wand
+			if (index == 0) m.multiplyOnRight(HEAD_CALIB); // head
+	
+			// this is now done in the class VirtualPortalCoordinateSystemChange
+	//		// apply portal scale separately to the translation part of the matrices
+	//		if (index == 0 || index == 1  && PortalCoordinateSystem.getPortalScale() != 1.0) {
+	//			double[] tlate = m.getColumn(3);
+	//			tlate = Rn.matrixTimesVector(null, SCALE_MATRIX, tlate);
+	//			m.setColumn(3, tlate);
+	//		}
+		} else {
+			double x = m.getEntry(0, 3);
+			double y = m.getEntry(1, 3);
+			double z = m.getEntry(2, 3);
+			m.setEntry(0, 3, x*0.254);
+			m.setEntry(1, 3, y*0.254+0.25);
+			m.setEntry(2, 3, z*0.254);
+			//System.out.println("x="+m.getEntry(0, 3));
+			//System.out.println("y="+m.getEntry(1, 3));
+			//System.out.println("z="+m.getEntry(2, 3));
+			
+		}
 }
 	
 	@Override
