@@ -11,10 +11,10 @@ import javax.swing.AbstractAction;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.audio.plugin.Audio;
 import de.jreality.audio.plugin.AudioOptions;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Sphere;
 import de.jreality.tools.ActionTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.ui.plugin.AlignedContent;
@@ -47,14 +47,14 @@ public class AudioExample {
 		controller.registerPlugin(new AudioOptions());
 		controller.registerPlugin(new Audio());
 		
-		Input wavFile = Input.getInput("sound/zoom.wav");
+		Input wavFile = Input.getInput("sound/zarathustra.wav");
 		final AudioSource wavNode = new CachedAudioInputStreamSource("wavnode", wavFile, true);
 		wavNode.start();
 		
 		SceneGraphComponent audioComponent = new SceneGraphComponent();
 		audioComponent.setAudioSource(wavNode);
-		audioComponent.setGeometry(new Sphere());
-		MatrixBuilder.euclidean().translate(0, 2, 0).assignTo(audioComponent);
+		audioComponent.setGeometry(Primitives.cube());
+		MatrixBuilder.euclidean().translate(0, 5, 0).scale(2, 4.5, .5).assignTo(audioComponent);
 	
 		ActionTool actionTool = new ActionTool("PanelActivation");
 		actionTool.addActionListener(new ActionListener() {
