@@ -22,10 +22,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.swing.jrwindows.JRWindow;
 import de.jreality.swing.jrwindows.JRWindowManager;
 import de.jreality.ui.plugin.CameraStand;
 import de.jreality.ui.plugin.View;
+import de.jreality.ui.plugin.View.RunningEnvironment;
 import de.jreality.ui.plugin.image.ImageHook;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -145,8 +147,16 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 		this.c = c;
 		c.getPlugin(CameraStand.class);
 		view = c.getPlugin(View.class);
-		manager = new JRWindowManager(view.getCameraPath().getLastComponent());
+		
+		if (view.getRunningEnvironment() == RunningEnvironment.PORTAL || view.getRunningEnvironment() == RunningEnvironment.PORTAL_REMOTE) {
+			manager = new JRWindowManager(view.getAvatarPath().getLastComponent());
+			manager.setPosition(new double[]{0, PortalCoordinateSystem.convertMeters(1.24), PortalCoordinateSystem.convertMeters(-1.24)});
+		} else {
+			manager = new JRWindowManager(view.getCameraPath().getLastComponent());
+			manager.setPosition(new double[]{0, 0, -2});
+		}
 		manager.setWindowsInScene(true);
+
 		timer = new UpdateTimer();
 		timer.start();
 	}
@@ -251,6 +261,7 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 	}
 	
 	
+	// TODO: move to ToolSystem as AnimatorTask
 	private class UpdateTimer extends Thread {
 		
 		private boolean 

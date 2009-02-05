@@ -202,6 +202,14 @@ public class ContentViewerVR {
 		contentViewer.startup();
 	}
 
+	public static View remoteMain(String[] args) {
+		ContentViewerVR contentViewer = new ContentViewerVR(true);
+		contentViewer.registerPlugin(new ContentLoader());
+		contentViewer.startup();
+		return contentViewer.view;
+	}
+	
+	
 //	public ContentSound getContentSound() {
 //		return contentSound;
 //	}

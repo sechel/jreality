@@ -76,23 +76,9 @@ public class Avatar extends ShrinkPanelPlugin {
 		// head transformation tool
 		if (!portal && !portalRemote) {
 			headTool = new HeadTransformationTool();
-		} 
-		if (portal) {
-			try {
-				headTool = (Tool) Class.forName("de.jreality.tools.PortalHeadMoveTool").newInstance();
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
+			cameraComponent.addTool(headTool);
 		}
-		if (portalRemote) {
-			try {
-				headTool = (Tool) Class.forName("de.jreality.tools.RemotePortalHeadMoveTool").newInstance();
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}
-		cameraComponent.addTool(headTool);
-
+		
 		// set avatar path
 		sceneView.setAvatarPath(cameraManager.getCameraBasePath());
 		

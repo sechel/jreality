@@ -112,9 +112,9 @@ public class View extends SideContainerPerspective {
 
 		// determine running environment
 		String environment = Secure.getProperty(SystemProperties.ENVIRONMENT, SystemProperties.ENVIRONMENT_DEFAULT);
-		if (environment == "portal") {
+		if ("portal".equals(environment)) {
 			runningEnvironment = RunningEnvironment.PORTAL; 
-		} else if (environment == "portal-remote") {
+		} else if ("portal-remote".equals(environment)) {
 			runningEnvironment = RunningEnvironment.PORTAL_REMOTE;
 		} else {
 			runningEnvironment = RunningEnvironment.DESKTOP;
@@ -294,10 +294,11 @@ public class View extends SideContainerPerspective {
 
 			// make a new toolSystem
 			if (toolSystem != null)	toolSystem.dispose();
+			
 			Secure.doPrivileged(new PrivilegedAction<ToolSystem>() {
 				public ToolSystem run() {
 					try {
-						if (!(toolConfig == "portal-remote")) {
+						if (!("portal-remote".equals(toolConfig))) {
 							toolSystem = new ToolSystem(
 									viewerSwitch,
 									toolSystemConfiguration,
@@ -484,6 +485,10 @@ public class View extends SideContainerPerspective {
 
 	public void setVisible(boolean visible) {
 
+	}
+
+	public ToolSystem getToolSystem() {
+		return toolSystem;
 	}
 
 }
