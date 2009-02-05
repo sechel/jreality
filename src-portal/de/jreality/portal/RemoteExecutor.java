@@ -28,7 +28,7 @@ public class RemoteExecutor {
 		}
 		if (va == null) {
 			IllegalArgumentException ex = new IllegalArgumentException("calling remoteMain failed on "+clazz);
-			ex.initCause(ex);
+			ex.initCause(cause);
 			throw ex;
 		}
 
