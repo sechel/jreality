@@ -486,8 +486,8 @@ public class ViewerApp {
 			public ToolSystem run() {
 				try {
 					return createToolSystem();
-				} catch (Exception exc) { exc.printStackTrace(); }
-				return null;
+				} catch (Exception exc) { throw new RuntimeException(exc); }
+				//return null;
 			}
 		});
 		if (toolSystem.getPickSystem() == null)
