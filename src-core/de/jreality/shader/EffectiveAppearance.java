@@ -96,8 +96,8 @@ private EffectiveAppearance parentApp;
   }
   public static EffectiveAppearance create(SceneGraphPath p) {
     EffectiveAppearance eap = create();
-    for (Iterator i = p.iterator(); i.hasNext(); ) {
-      SceneGraphNode n = (SceneGraphNode) i.next();
+    for (Iterator<SceneGraphNode> i = p.iterator(); i.hasNext(); ) {
+      SceneGraphNode n = i.next();
       if (n instanceof SceneGraphComponent) {
         SceneGraphComponent sgc = (SceneGraphComponent) n;
         Appearance app = sgc.getAppearance();
@@ -166,8 +166,8 @@ private EffectiveAppearance parentApp;
   
   public static boolean matches(final EffectiveAppearance eap, final SceneGraphPath p) {
     EffectiveAppearance ea=eap;
-    for (Iterator li = p.reverseIterator(); li.hasNext(); ) {
-      SceneGraphNode n = (SceneGraphNode) li.next();
+    for (Iterator<SceneGraphNode> li = p.reverseIterator(); li.hasNext(); ) {
+      SceneGraphNode n = li.next();
       if (n instanceof SceneGraphComponent) {
         SceneGraphComponent sgc = (SceneGraphComponent) n;
         Appearance app = sgc.getAppearance();
