@@ -8,6 +8,11 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.util.Rectangle3D;
 
+/** A set of static methods for calculating rectangular bounding boxes in euclidean space 
+ * 
+ * @author gunn
+ *
+ */
 public class BoundingBoxUtility {
 
 	/**

@@ -38,6 +38,36 @@ package de.jreality.geometry;
 *
 */
 
+
+import java.awt.Color;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import de.jreality.math.Matrix;
+import de.jreality.math.P3;
+import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DataListSet;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StorageModel;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultLineShader;
+import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.DefaultPolygonShader;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ShaderUtility;
+import de.jreality.util.CopyVisitor;
+
 /** this Factory merges IndexedFaceSets, Indexed Line Sets, PointSets
  * or scenegraphs containing such things to a single geometry.
  * <p>
@@ -77,8 +107,8 @@ package de.jreality.geometry;
  * </ul>
  * 
  * excample:
- * <code>
- * import java.awt.Color;
+ * <code><b><pre>
+   import java.awt.Color;
 	import java.util.LinkedList;
 	import java.util.List;
 	import de.jreality.math.MatrixBuilder;
@@ -88,8 +118,8 @@ package de.jreality.geometry;
 	import de.jreality.scene.data.Attribute;
 	import de.jreality.shader.CommonAttributes;
 	import de.jreality.ui.viewerapp.ViewerApp;
- * 
- * // a little Scene (two boxes and a bangle, transfomation, appearance)
+ 
+ // a little Scene (two boxes and a bangle, transfomation, appearance)
    		IndexedFaceSet box= Primitives.box(2, .5, .5, false);
 		IndexedFaceSet box2= Primitives.box(2, .6, 0.4, true);
 		IndexedFaceSet zyl= Primitives.cylinder(20,1,0,.5,5);
@@ -126,48 +156,20 @@ package de.jreality.geometry;
 		IndexedFaceSet result=mergeFact.mergeGeometrySets(root);
 	// take a look :
 		vApp.display(result);
- * </code>
+</pre></b></code>
  * 
  * TODO Problems:
  * 	ifs and ils together
- * 
+ * <p>
  * TODO: merge only IndexedFaceSets of a SceneGraph
+ * <p>
  * TODO: merge FaceSets and linesets seperate to avoid "holes" in the AttributeList 
  *       and gather in the end 
- *  
+ *  <p>
  * @author gonska    
  * 
  */
 
-
-import java.awt.Color;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import de.jreality.math.Matrix;
-import de.jreality.math.P3;
-import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DataListSet;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StorageModel;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.DefaultGeometryShader;
-import de.jreality.shader.DefaultLineShader;
-import de.jreality.shader.DefaultPointShader;
-import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
-import de.jreality.util.CopyVisitor;
 
 public class GeometryMergeFactory {
 	private boolean respectFaces=true;// 

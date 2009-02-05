@@ -45,6 +45,24 @@ import java.awt.Dimension;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 
+/**
+ * This factory specializes the {@link QuadMeshFactory} further, replacing the explicit definition of the vertex coordinates with a
+ * functional definition.  To be precise, the constructor for this factory requires an instance of {@link Immersion}.
+ * <p>
+ * This instance defines a map from the plane to n-space using these methods:
+ * <ul>
+ * <li>{@link Immersion#getDimensionOfAmbientSpace()}</li>The dimension of the target space.
+ * <li>{@link Immersion#isImmutable()}</li> If <code>true</code>, ... it's immutable!
+ * <li>{@link Immersion#evaluate(double, double, double[], int)}</li> The first two arguments specify (u,v) position, the third is a vector of length n for filling, and
+ * the final argument for the purposes of this class is always 0.
+ * </ul>
+ * <p>
+ * The domain of the immersion is a rectangle in (u,v) space specified by the four methods {@link #setUMin(double)}, {@link #setUMax(double)}, etc.
+ * The number of samples in each direction is specified using the methods inherited from {@link QuadMeshFactory}: {@link QuadMeshFactory#setULineCount(int)}, etc.
+ * <p>
+ * @author gunn
+ *
+ */
 public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 
 	final OoNode uMin = node( new Double(0), "uMin" );
@@ -88,8 +106,14 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 	}
 	
 	public interface Immersion {
+		/** Is it immutable? (not sure what this implies!) */
 		public boolean isImmutable();
+		/** The dimension of the target space. */
 		public int getDimensionOfAmbientSpace();
+		/** The first two arguments specify (u,v) position, 
+		 * the third is a vector of length n for filling, and
+		 * the final argument gives an offset to use if you are  
+		 * an optimizing heiny and squashing all xyz results into a huge vector.*/		
 		public void evaluate(double u, double v, double[] xyz, int index);
 	}
 

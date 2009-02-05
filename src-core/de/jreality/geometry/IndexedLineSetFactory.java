@@ -42,10 +42,39 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
+/**
+ * This is a factory class for constructing and editing instances of {@link IndexedLineSet}. For an introduction
+ * to the way these geometry factories work, see the documentation for the superclass {@link PointSetFactory}.
+ * <p>
+ * In addition to the functionality inherited from PointSetFactory, this class offers methods to set and edit
+ * the edge information of an IndexedLineSet.  (Here <i>edge</i> is synonymous with 'line'.)  This is first and foremost
+ * an array of type <code>int[][]</code> which specifies the combinatorics: which vertices are connected by edges.
+ * First call {@link #setEdgeCount(int)} to set the number of edges, then
+ * use the method {@link #setEdgeIndices(int[][])} and its variants to set this information.
+ * <p>
+ * There are also methods for setting the builtin attributes colors and labels. For other attributes, use the
+ * methods:
+ *  * For attributes not included in the built-in set, use the methods
+ * <ul>
+ * <li>{@link #setEdgeAttribute(Attribute, DataList)}</li>
+ * <li>{@link #setEdgeAttribute(Attribute, double[])}</li>
+ * <li>{@link #setEdgeAttribute(Attribute, double[][])}</li>
+ * </ul>
+ * <p>
+ * <p>
+ * You can also request the factory to automatically generate edge labels (which are strings displayed 
+ * as 3D text at the midpoint of the edges) using the method {@link #setGenerateEdgeLabels(boolean)}. This 
+ * will generate labels showing the index of the edge within the edge array. (Probably only works correctly
+ * when all edges consist of two points).
+ * 
+ * @author gunn
+ *
+ */
 public class IndexedLineSetFactory extends AbstractIndexedLineSetFactory {
 
 	public IndexedLineSetFactory() {

@@ -62,7 +62,9 @@ import de.jreality.shader.CommonAttributes;
 
 
 /**
- * Factory for a coordinate system in Euclidean space, which is
+ * Factory for creating a representation of a coordinate system in Euclidean space.
+ * <p>
+ * This  is
  * created for an existing SceneGraphComponent (or for a given extent).<br> 
  * For a given SceneGraphComponent the factory creates a bounding box
  * and axes through the origin including ticks with their labels.<br>

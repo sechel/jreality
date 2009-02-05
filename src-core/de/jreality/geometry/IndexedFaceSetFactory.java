@@ -42,10 +42,42 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
+/**
+ * This factory classes can be used to create and edit instances of {@link IndexedFaceSet}.  See {@link IndexedLineSetFactory} and
+ * {@link PointSetFactory} for functionality inherited from the superclasses.
+ * <p>
+ * Faces are specified using the method {@link #setFaceIndices(int[][])} and its variants. 
+ * <p>
+ * There are methods for setting the built-in face attributes normals, colors, and labels.
+ * Texture coordinates can have fiber length 2, 3, or 4.  Normals in euclidean case must have fiber length 3; otherwise they should have 
+ * length 4. Labels are represented by an array of type <code>String[]</code>, and are displayed at the center of the face.
+ * <p>
+ * There are a number of boolean methods to control whether the factory generates various types of derivative information:
+ * <ul>
+ * <li>{@link #setGenerateAABBTree(boolean)}</li>
+ * <li>{@link #setGenerateFaceLabels(boolean)}</li>
+ * <li>{@link #setGenerateFaceNormals(boolean)}</li>
+ * <li>{@link #setGenerateVertexNormals(boolean)}</li>
+ * </ul>
+ * <p>
+ * By default, all these values are <code>false</code>.
+ * <p>
+ * The AABBTree is stored as an {@link Attribute} within the geometry and is used to optimize picking.
+ * <p>
+ * The face labels show the index of the face within the face array and are displayed at the midpoint of the face.
+ * <p> 
+ * The face normals are generated using the cross product of the specified metric (see {@link #setMetric(int)}.
+ * <p>
+ * The vertex normals are generated based on the face normals, by averaging using the combinatorial information in the face index array.
+ * @author gunn
+ *
+ */
 public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 
 	public IndexedFaceSetFactory() {

@@ -85,7 +85,7 @@ import de.jreality.util.Rectangle3D;
  *  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, Charles Gunn
  *
  */
-class BoundingBoxTraversal extends SceneGraphVisitor {
+public class BoundingBoxTraversal extends SceneGraphVisitor {
 
   private Bound bound;
   private double tmpVec[] = new double[4];

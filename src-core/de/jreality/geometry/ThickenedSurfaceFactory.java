@@ -51,9 +51,18 @@ import de.jreality.scene.data.IntArrayArray;
 
  * </pre></b></code>
  * <p>
- * Note: if the original surface is non-orientable surface, then the thickened version probably won't be
- * closed (the "top" surface will be on both sides of the "bottom" surface). The factory doesn't attempt to 
- * check this.
+ * Note: the case of a non-orientable surface represents special difficulties for the thicken factory.  Some remarks:
+ * <ul>
+ * <li>If a single vertex borders on two faces with opposite-facing normals, the factory will produce incorrect results, in which
+ * the two sides of the thickened surface cross each other.
+ * <li>If duplicate vertices are present on two face with opposite-facing normals, there is hope.  
+ * Call the the method {@link #setMergeDuplicateBoundaryVerts(boolean)}
+ * with the value <code>true</code>. The factory will then attempt to find such vertices and do surgery on the
+ * thickened surface to avoid the crossing.
+ * </ul>
+ * <p>
+ * See also <a href = "http://www.math.tu-berlin.de/~gunn/webstart/GeometryDemos/Thickener.jnlp">Thicken Factory webstart</a>.
+ * <p>
  * @author Charles Gunn
  *
  */public class ThickenedSurfaceFactory {

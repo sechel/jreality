@@ -50,7 +50,7 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 
 
-public class CoordinateSystemBeautifier extends AbstractTool {
+class CoordinateSystemBeautifier extends AbstractTool {
 
 	private static InputSlot evolutionSlot = InputSlot.getDevice("SystemTime");
 	

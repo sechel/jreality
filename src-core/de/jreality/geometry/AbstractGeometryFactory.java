@@ -9,7 +9,18 @@ import de.jreality.scene.Scene;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 
-
+/**
+ * The grandfather of all the jReality geometry factories.  
+ * <p>
+ * Allows user to set the ambient metric via {@link #setMetric(int)}.
+ * <p>
+ * And provides most general get method with {@link #getGeometry()}.
+ * <p>
+ * For an introduction to how the factories work, see {@link PointSetFactory}.
+ * 
+ * @author gunn
+ *
+ */
 public class AbstractGeometryFactory {
 
 	final OoNode metric;

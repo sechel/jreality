@@ -84,7 +84,8 @@ import de.jreality.util.SceneGraphUtility;
  * <b>Warning</b>: Not all jReality backends can handle such height fields.  JOGL and PORTAL can.
  * @author Charles Gunn
  *
- */public class HeightFieldFactory extends QuadMeshFactory {
+ */
+class HeightFieldFactory extends QuadMeshFactory {
 	Rectangle2D theDomain = new Rectangle2D.Double(-1.0, -1.0, 2.0, 2.0);
 	boolean domainHasChanged = true;
 	public HeightFieldFactory() {

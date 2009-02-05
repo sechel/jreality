@@ -41,12 +41,44 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
+import java.awt.Dimension;
 
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
 
+/**
+ * This factory class supports creating and editing of quad meshes, that is, regular meshes of quadrilaterals.  In contrast to the
+ * {@link IndexedFaceSetFactory} where the face indices must be explicitly set, this factory expects that the data provided to
+ * the {@link #setVertexCoordinates(DataList)} method and its variants, is arranged in the special form corresponding to a quad mesh, and
+ * does not allow the face indices to be explicitly set.
+ * <p>
+ * Instead of providing face indices, this factory has two methods {@link #setULineCount(int)} and {@link #setVLineCount(int)} to
+ * describe the dimensions of the quad mesh.  If you think of the data arranged in a 2D array, the rows have length u and there are v rows.
+ * To support this picture further, there is another method provided for specifying the underlying point set: {@link #setVertexCoordinates(double[][][])}.
+ * In this 3D array, the left-most index counts off the rows, the middle index runs through a given row, and the right most index runs through
+ * the data for a specific vertex. There are analogous methods for setting the vertex normals, texture coordinates, colors, and relative radii.
+ * <p>
+ * There are also methods for specifying whether the quad mesh <i>wraps around</i> in the two parameter directions: {@link #setClosedInUDirection(boolean)} and 
+ * {@link #setClosedInVDirection(boolean)}. Defaults for both is <code>false</code>. This is used for
+ * example in the case that vertex normals are automatically generated, to identify correctly which faces are adjecent
+ * to a given vertex.  Note: in case the surface <b>is</b> closed in one or the other direction, the factory does not remove the duplicated vertices.
+ * <p>
+ * There are also some other new control methods:
+ * <ul>
+ * <li>{@link #setGenerateTextureCoordinates(boolean)} Generate texture coordinates mapping quad-mesh to unit square in (u,v) space</li>
+ * <li>{@link #setEdgeFromQuadMesh(boolean)} If <code>true</code>, generate <i>long</i> edges, one for each row of the mesh. (See {@link IndexedLineSet}).</li>
+ * </ul>
+ * <p>
+ * The underlying geometry managed by this factory is an instance of {@link IndexedFaceSet} -- there is no QuadMesh class.  However,
+ * the factory provides the instance with an {@link Attribute}, {@link GeometryUtility#QUAD_MESH_SHAPE} whose value is an instance of {@link Dimension}
+ * specifying the (u,v) dimensions of the mesh -- in case a backend can optimize its handling of the geometry.
+ * <p>
+ * @author gunn
+ *
+ */
 public class QuadMeshFactory extends AbstractQuadMeshFactory {
 
 	public QuadMeshFactory() {

@@ -62,6 +62,15 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StringArray;
 import de.jreality.scene.data.StringArrayArray;
 
+/** A class for removing duplicate information in {@link PointSet} and its sub-classes.
+ * <p>
+ * The idea is to find data elements which are close in value to each other and
+ * merge them into a single instance, then change the indexing of the edges and faces
+ * to reflect these changes.
+ * 
+ * @author gonska
+ *
+ */
 public class RemoveDuplicateInfo {
 
 

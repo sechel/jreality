@@ -50,6 +50,56 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
 
+/**
+ * 
+ * A factory class for creating and updating point sets.  See {@link PointSet} for details of the
+ * underlying point set. 
+ * <p>
+ * There are different formats which can be used to set this data, and corresponding methods for setting
+ * this data.  You must first set the number of vertices using {@link #setVertexCount(int)}. Then 
+ * vertex attributes can be set.  For example to set the attribute {@link Attribute#COORDINATES}:
+ * <ul>
+ * <li>{@link #setVertexCoordinates(DataList)}</li>
+ * <li>{@link #setVertexCoordinates(double[])}</li>
+ * <li>{@link #setVertexCoordinates(double[][])}</li>
+ * </ul>
+ * <p>
+ * In the case the argument is <code>double[]</code> then the length must be length 3 or 4 times the number of vertices.
+ * (Point sets can have either ordinary or homogeneouse coordinates).  This vector length (3 or 4) is sometimes called the 
+ * <i>fiber length</i> of the data.
+ * <p>
+ * There are analogous methods for setting the built-in attributes normals, colors, texture coordinates, relative radii, and labels.
+ * Texture coordinates can have fiber length 2, 3, or 4.  Normals in euclidean case must have fiber length 3; otherwise they should have 
+ * length 4. Labels are represented by an array of type <code>String[]</code>.
+ * <p>
+ * For attributes not included in the built-in set, use the methods
+ * <ul>
+ * <li>{@link #setVertexAttribute(Attribute, DataList)}</li>
+ * <li>{@link #setVertexAttribute(Attribute, double[])}</li>
+ * <li>{@link #setVertexAttribute(Attribute, double[][])}</li>
+ * </ul>
+ * <p>
+ * Each instance of a factory always acts on the same instance of {@link PointSet}.  To get this instance use the
+ * method {@link #getPointSet()}.  To edit the instance, call the various set methods, then call {@link #update()}.
+ * You don't need to call {@link #getPointSet()} again, as it always returns the same value.
+ * <p>
+ * You can also request the factory to automatically generate vertex labels (which are strings displayed 
+ * as 3D text at the position of the vertices) using the method {@link #setGenerateVertexLabels(boolean)}. This 
+ * will generate labels showing the index of the point within the point array.
+ * <p>
+ * The abstract superclass {@link AbstractPointSetFactory} is not visible publicly. 
+ * It provides protected methods to subclasses.  Subclasses such as this one
+ * can then decide which of these methods to reveal by implementing them as public 
+ * methods.
+ * <p>
+ * To specify that the geometry should be handled according to non-euclidean metric, use the method {@link #setMetric(int)}. 
+ * This has little significance for the point sets, but becomes more important for subclasses such as {@link IndexedFaceSetFactory}.
+ * <p>
+ * See {@link DataList}.
+ *
+ * @author gunn
+ *
+ */
 public class PointSetFactory extends AbstractPointSetFactory {
 
 	public PointSetFactory() {
