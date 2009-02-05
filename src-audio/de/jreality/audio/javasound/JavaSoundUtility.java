@@ -207,22 +207,20 @@ public class JavaSoundUtility {
 		return sample;
 	}
 	
-	public static Thread launchAudioBackend(final AudioBackend backend, final SoundEncoder enc, final int framesize) {
+	public static Thread launchAudioThread(final AudioBackend backend, final SoundEncoder enc, final int framesize, String label) {
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
-				while (true) {
+				while (!Thread.interrupted()) {
 					backend.processFrame(enc, framesize);
-					
 				}
 			}
 		};
 
 		Thread soundThread = new Thread(soundRenderer);
-		soundThread.setName("jReality audio renderer");
+		soundThread.setName(label);
 		soundThread.setPriority(Thread.MAX_PRIORITY);
 		soundThread.start();
 		
 		return soundThread;
 	}
-
 }

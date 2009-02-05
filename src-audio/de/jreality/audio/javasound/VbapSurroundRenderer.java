@@ -67,6 +67,6 @@ public class VbapSurroundRenderer {
 			}
 		};
 		
-		JavaSoundUtility.launchAudioBackend(backend, enc, frameSize);
+		JavaSoundUtility.launchAudioThread(backend, enc, frameSize, "jreality VBAP renderer");
 	}
 }

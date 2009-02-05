@@ -107,7 +107,7 @@ public class JavaAmbisonicsStereoDecoder {
 			}
 		};
 		
-		JavaSoundUtility.launchAudioBackend(backend, enc, frameSize);
+		JavaSoundUtility.launchAudioThread(backend, enc, frameSize, "jReality stereo renderer");
 	}
 
 }
