@@ -38,7 +38,7 @@ public final class JackHub implements JJackAudioProcessor {
 	}
 	
 	protected void finalize() throws JJackException {
-		JJackSystem.shutdown();  // necessary?
+		removeClient();
 	}
 	
 	public void process(JJackAudioEvent ev) {;
@@ -142,4 +142,7 @@ public final class JackHub implements JJackAudioProcessor {
 		JJackSystem.setProcessor(hub);
 	}
 	
+	public static void removeClient() throws JJackException {
+		JJackSystem.shutdown();
+	}
 }
