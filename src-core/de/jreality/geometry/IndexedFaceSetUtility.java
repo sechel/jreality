@@ -75,6 +75,7 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
@@ -116,6 +117,11 @@ public class IndexedFaceSetUtility {
 				throw new IllegalArgumentException("Indexed face set must consist of triangles");
 		}
 	
+		indices = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().toIntArrayArray(null);
+		for (int i=0; i<indices.length; ++i)	{
+			if (indices[i].length != 2) 
+				throw new IllegalArgumentException("Indexed face set edges must all be line segments (no curves)");
+		}
 		Hashtable edgeVals = new Hashtable();	
 	
 		// the new triangulation will have:
@@ -226,10 +232,11 @@ public class IndexedFaceSetUtility {
 		ifsf.setFaceCount(1);
 		ifsf.setVertexCoordinates(points);
 		ifsf.setFaceIndices(ind);
-		ifsf.setEdgeCount(1);
-		ind = new int[1][points.length+1];
-		for (int i = 0; i<=points.length; ++i)	ind[0][i] = (i%points.length);
-		ifsf.setEdgeIndices(ind);
+//		ifsf.setEdgeCount(1);
+//		ind = new int[1][points.length+1];
+//		for (int i = 0; i<=points.length; ++i)	ind[0][i] = (i%points.length);
+//		ifsf.setEdgeIndices(ind);
+		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.update();
 		
 		return ifsf.getIndexedFaceSet();
@@ -487,11 +494,6 @@ public class IndexedFaceSetUtility {
 				}
 				count += thisf.length;
 			}
-//			//imploded = new IndexedFaceSet(newind, new DataGrid(newverts, false), null, null, null, null);
-//			imploded = createIndexedFaceSetFrom(newind,newverts, null, null, null, null);
-//			GeometryUtility.calculateAndSetFaceNormals(imploded);
-//			//imploded.setEdgeAttributes(Attribute.INDICES, ifs.getEdgeAttributes(Attribute.INDICES));
-//			imploded.setEdgeCountAndAttributes(Attribute.INDICES, ifs.getEdgeAttributes(Attribute.INDICES));
 			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 			ifsf.setVertexCount(vertcount+oldcount);
 			ifsf.setFaceCount(vertcount);
@@ -1910,6 +1912,59 @@ public class IndexedFaceSetUtility {
 		return false;
 	}
 
+	public static SceneGraphComponent displayFaceNormals(IndexedFaceSet ifs, double scale, int metric)	{
+    	SceneGraphComponent sgc = new SceneGraphComponent("displayFaceNormals()");
+    	System.err.println("display face normals metric = "+metric);
+    	Appearance ap  = new Appearance();
+    	ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
+       	ap.setAttribute("lineShader."+CommonAttributes.TUBES_DRAW, false);
+    	ap.setAttribute(CommonAttributes.FACE_DRAW, false);
+    	ap.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+    	sgc.setAppearance(ap);
+    	int[][] faces = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+   
+    	int n = faces.length;
+		int[][] edges = new int[n][2];
+		double[][] verts = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+    	int fiberlength = verts[0].length;
+		double[][] normals = null,
+    		nvectors = new double[2*n][fiberlength];
+    	if (ifs.getFaceAttributes(Attribute.NORMALS) != null)
+    		normals = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+     	else normals = IndexedFaceSetUtility.calculateFaceNormals(ifs);
+//    	System.err.println("Vertex fiber is "+fiberlength);
+//    	System.err.println("Normal fiber is "+normals[0].length);
+     	for (int i = 0; i<n; ++i)	{
+     		// find the center of the face
+    		for (int k = 0; k<faces[i].length; ++k)	{
+    			Rn.add(nvectors[i], verts[faces[i][k]], nvectors[i]);
+    		}
+    		double xx = 1.0/faces[i].length;
+    		if (metric == Pn.EUCLIDEAN) {
+    			Rn.times(nvectors[i], xx, nvectors[i]);
+        		Rn.add(nvectors[i+n], nvectors[i], Rn.times(null, scale, normals[i]));
+    		}
+    		else {
+//    			System.err.println("Dot product is "+Pn.innerProduct(nvectors[i], normals[i], metric));
+    			Pn.dragTowards(nvectors[i+n], nvectors[i], normals[i], scale, metric);
+    		}
+    		if (fiberlength == 4) {
+    			if (metric == Pn.EUCLIDEAN) nvectors[i+n][3] = 1.0;
+    			else Pn.dehomogenize(nvectors[i+n], nvectors[i+n]);
+    		}
+ //   		System.err.println("Normal length is "+Rn.euclideanNorm(normals[i]));
+    		edges[i][0] = i;
+    		edges[i][1] = i+n;
+    	}
+    	IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+    	ilsf.setVertexCount(2*n);
+    	ilsf.setVertexCoordinates(nvectors);
+    	ilsf.setEdgeCount(n);
+    	ilsf.setEdgeIndices(edges);
+    	ilsf.update();
+    	sgc.setGeometry(ilsf.getIndexedLineSet());
+    	return sgc;
+    }
 	public static void calculateAndSetFaceNormals(IndexedFaceSet ifs)   {
 		if (ifs.getNumFaces() == 0) return;
 	    double[][] fn = IndexedFaceSetUtility.calculateFaceNormals(ifs);
