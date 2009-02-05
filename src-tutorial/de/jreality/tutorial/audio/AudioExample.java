@@ -10,6 +10,7 @@ import javax.swing.AbstractAction;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.audio.plugin.Audio;
+import de.jreality.audio.plugin.AudioOptions;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
@@ -19,7 +20,7 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.ui.plugin.AlignedContent;
 import de.jreality.ui.plugin.CameraStand;
 import de.jreality.ui.plugin.ContentAppearance;
-import de.jreality.ui.plugin.DisplayPanel;
+import de.jreality.ui.plugin.DisplayOptions;
 import de.jreality.ui.plugin.Inspector;
 import de.jreality.ui.plugin.Lights;
 import de.jreality.ui.plugin.Shell;
@@ -38,11 +39,14 @@ public class AudioExample {
 	private SimpleController controller = new SimpleController();
 	
 	public AudioExample() throws IOException, UnsupportedAudioFileException {
-		registerPlugins();
-		createAudioContent();
+		basicSetup();
+		audioSetup();
 	}
 	
-	private void createAudioContent() throws IOException, UnsupportedAudioFileException {
+	private void audioSetup() throws IOException, UnsupportedAudioFileException {
+		controller.registerPlugin(new AudioOptions());
+		controller.registerPlugin(new Audio());
+		
 		Input wavFile = Input.getInput("sound/zoom.wav");
 		final AudioSource wavNode = new CachedAudioInputStreamSource("wavnode", wavFile, true);
 		wavNode.start();
@@ -69,7 +73,7 @@ public class AudioExample {
 		contentRoot.addChild(audioComponent);
 	}
 
-	private void registerPlugins() {
+	private void basicSetup() {
 		ViewMenuBar viewMenuBar = new ViewMenuBar();
 		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new ExitAction(), "File");
 		
@@ -85,8 +89,7 @@ public class AudioExample {
 		controller.registerPlugin(new Sky());
 		controller.registerPlugin(new Terrain());
 		controller.registerPlugin(new Avatar());
-		controller.registerPlugin(new DisplayPanel());
-		controller.registerPlugin(new Audio());
+		controller.registerPlugin(new DisplayOptions());
 	}
 
 	private static class ExitAction extends AbstractAction {

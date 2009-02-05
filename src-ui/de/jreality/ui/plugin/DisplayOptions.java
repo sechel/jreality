@@ -19,7 +19,14 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class DisplayPanel extends ShrinkPanelPlugin {
+/**
+ * 
+ * Plugin for quickly setting and saving camera settings and cursor/picking
+ * 
+ * @author brinkman
+ *
+ */
+public class DisplayOptions extends ShrinkPanelPlugin {
 
 	private JCheckBox pickBox;
 	private JButton loadButton;
@@ -28,7 +35,7 @@ public class DisplayPanel extends ShrinkPanelPlugin {
 	private View view;
 	private PickShowTool pickShowTool = new PickShowTool();
 	
-	public DisplayPanel() {
+	public DisplayOptions() {
 		shrinkPanel.setLayout(new GridLayout(3, 1));
 		shrinkPanel.add(loadButton = new JButton("Load camera preferences"));
 		shrinkPanel.add(saveButton = new JButton("Save camera preferences"));
@@ -84,7 +91,7 @@ public class DisplayPanel extends ShrinkPanelPlugin {
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
-		info.name = "Display Panel";
+		info.name = "Display Options";
 		info.vendorName = "Peter Brinkmann"; 
 		info.icon = ImageHook.getIcon("camera.png");
 		return info;
@@ -96,6 +103,11 @@ public class DisplayPanel extends ShrinkPanelPlugin {
 		view = c.getPlugin(View.class);
 		setPick(pickBox.isSelected());
 		loadPreferences();
+	}
+
+	@Override
+	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
 	}
 
 	@Override

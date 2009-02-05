@@ -1,6 +1,7 @@
  package de.jreality.audio.jack;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
+import de.gulden.framework.jjack.JJackException;
 import de.jreality.audio.AmbisonicsPlanar2ndOrderSoundEncoder;
 import de.jreality.audio.AudioBackend;
 import de.jreality.scene.SceneGraphComponent;
@@ -46,7 +47,7 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AmbisonicsPlanar2ndOrd
 		currentJJackEvent.getOutput(4).put(bu);
 	}
 	
-	public static void launch(Viewer viewer) {
+	public static void launch(Viewer viewer) throws JJackException {
 		JackAmbisonicsPlanar2ndOrderRenderer renderer = new JackAmbisonicsPlanar2ndOrderRenderer();
 		renderer.setRootAndMicrophonePath(viewer.getSceneRoot(), viewer.getCameraPath());
 

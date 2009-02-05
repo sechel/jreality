@@ -1,6 +1,7 @@
 package de.jreality.audio.jack;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
+import de.gulden.framework.jjack.JJackException;
 import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AudioBackend;
 import de.jreality.scene.SceneGraphComponent;
@@ -52,7 +53,7 @@ public class JackAmbisonicsRenderer extends AmbisonicsSoundEncoder implements Ja
 		currentJJackEvent.getOutput(3).put(bz);
 	}
 	
-	public static void launch(Viewer viewer) {
+	public static void launch(Viewer viewer) throws JJackException {
 		JackAmbisonicsRenderer renderer = new JackAmbisonicsRenderer();
 		renderer.setRootAndMicrophonePath(viewer.getSceneRoot(), viewer.getCameraPath());
 

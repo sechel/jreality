@@ -104,7 +104,7 @@ public final class JackHub implements JJackAudioProcessor {
 		hub.sink = sink;
 	}
 	
-	public static synchronized void initializeClient(String name) {
+	public static synchronized void initializeClient(String name) throws JJackException {
 		if (hub.sampleRate!=0) {
 			throw new IllegalStateException("jack client is already initialized");
 		}
@@ -126,6 +126,10 @@ public final class JackHub implements JJackAudioProcessor {
 		
 		// then we can initialize JJackSystem
 		hub.sampleRate = JJackSystem.getSampleRate();
+		if (hub.sampleRate==0) {
+			throw new JJackException("Jack unavailable");
+		}
+		
 		for(WeakReference<JackSource> ref : hub.sources) {
 			JackSource source = ref.get();
 			if (source == null) continue;

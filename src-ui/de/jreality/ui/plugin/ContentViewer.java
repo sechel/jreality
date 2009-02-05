@@ -21,7 +21,7 @@ public class ContentViewer {
 	private Shell shell;
 	private ContentAppearance contentAppearance;
 	private ContentTools contentTools;
-	private DisplayPanel displayPanel;
+	private DisplayOptions displayOptions;
 	
 	public ContentViewer() {
 		controller = new SimpleController();
@@ -61,8 +61,8 @@ public class ContentViewer {
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
 		
-		displayPanel = new DisplayPanel();
-		controller.registerPlugin(displayPanel);
+		displayOptions = new DisplayOptions();
+		controller.registerPlugin(displayOptions);
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -121,8 +121,8 @@ public class ContentViewer {
 		return contentTools;
 	}
 
-	public DisplayPanel getDisplayPanel() {
-		return displayPanel;
+	public DisplayOptions getDisplayPanel() {
+		return displayOptions;
 	}
 
 	private static class ExitAction extends AbstractAction {

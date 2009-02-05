@@ -99,7 +99,7 @@ public class Test51 {
 		
 		float[] fbuf = new float[1024];
 		
-		SampleReader sr = AudioReader.createReader(src, 44100);
+		SampleReader sr = ConvertingReader.createReader(new AudioReader(src), 44100);
 		
 		while (true) {
 			sr.read(fbuf, 0, 1024);

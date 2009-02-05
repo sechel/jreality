@@ -56,7 +56,6 @@ public class AudioLauncher {
 				return true;
 			} catch (Exception e) {
 				System.err.println("Jack launch FAILED (fallback to java sound):");
-				e.printStackTrace();
 			}
 		}
 		try {
