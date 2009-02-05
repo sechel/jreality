@@ -47,8 +47,16 @@ import de.jreality.scene.data.DataListSet;
 /**
  * A set of points in 3 space. 
  * <p>
- * Vertices can be specified with either 3- or 4-D coordinates.
- *  
+ * Vertices can be specified with either 3- or 4-D coordinates. The point set is represented as set of
+ * attribute/value pairs. The values are typically arrays of data, with one vector or scalar per point.
+ * Every point set must contain a value for the <code>{@link Attribute#COORDINATES}</code>.
+ * Other built-in attributes include:
+ * <ul>
+ * <li>{@link Attribute#COLORS}
+ * <li>{@link Attribute#NORMALS}
+ * <li>{@link Attribute#TEXTURE_COORDINATES}
+ * <li>{@link Attribute#LABELS}
+ * </ul>
  * End users are recommended to use {@link de.jreality.geometry.PointSetFactory}
  * to construct instances of this class.
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
