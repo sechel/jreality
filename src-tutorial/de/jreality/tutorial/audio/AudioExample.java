@@ -11,6 +11,7 @@ import javax.swing.AbstractAction;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.audio.plugin.Audio;
 import de.jreality.audio.plugin.AudioOptions;
+import de.jreality.audio.plugin.ContentSound;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
@@ -38,20 +39,41 @@ public class AudioExample {
 
 	private SimpleController controller = new SimpleController();
 	
+	
 	public AudioExample() throws IOException, UnsupportedAudioFileException {
-		basicSetup();
+		videoSetup();
 		audioSetup();
 	}
 	
+	private void videoSetup() {
+		ViewMenuBar viewMenuBar = new ViewMenuBar();
+		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new ExitAction(), "File");
+		
+		controller.registerPlugin(viewMenuBar);
+		controller.registerPlugin(new View());
+		controller.registerPlugin(new ViewPreferences());
+		controller.registerPlugin(new CameraStand());
+		controller.registerPlugin(new Lights());
+		controller.registerPlugin(new AlignedContent());
+		controller.registerPlugin(new ContentAppearance());
+		controller.registerPlugin(new Inspector());
+		controller.registerPlugin(new Shell());
+		controller.registerPlugin(new Sky());
+		controller.registerPlugin(new Terrain());
+		controller.registerPlugin(new Avatar());
+		controller.registerPlugin(new DisplayOptions());
+	}
+
 	private void audioSetup() throws IOException, UnsupportedAudioFileException {
 		controller.registerPlugin(new AudioOptions());
+		//controller.registerPlugin(new ContentSound());
 		controller.registerPlugin(new Audio());
 		
-		Input wavFile = Input.getInput("sound/zarathustra.wav");
-		final AudioSource wavNode = new CachedAudioInputStreamSource("wavnode", wavFile, true);
+		Input wavFile = Input.getInput(getClass().getResource("zarathustra.wav"));
+		final AudioSource wavNode = new CachedAudioInputStreamSource("zarathustra", wavFile, true);
 		wavNode.start();
 		
-		SceneGraphComponent audioComponent = new SceneGraphComponent();
+		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(wavNode);
 		audioComponent.setGeometry(Primitives.cube());
 		MatrixBuilder.euclidean().translate(0, 5, 0).scale(2, 4.5, .5).assignTo(audioComponent);
@@ -71,25 +93,6 @@ public class AudioExample {
 	
 		SceneGraphComponent contentRoot = controller.getPlugin(AlignedContent.class).getScalingComponent();
 		contentRoot.addChild(audioComponent);
-	}
-
-	private void basicSetup() {
-		ViewMenuBar viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new ExitAction(), "File");
-		
-		controller.registerPlugin(viewMenuBar);
-		controller.registerPlugin(new View());
-		controller.registerPlugin(new ViewPreferences());
-		controller.registerPlugin(new CameraStand());
-		controller.registerPlugin(new Lights());
-		controller.registerPlugin(new AlignedContent());
-		controller.registerPlugin(new ContentAppearance());
-		controller.registerPlugin(new Inspector());
-		controller.registerPlugin(new Shell());
-		controller.registerPlugin(new Sky());
-		controller.registerPlugin(new Terrain());
-		controller.registerPlugin(new Avatar());
-		controller.registerPlugin(new DisplayOptions());
 	}
 
 	private static class ExitAction extends AbstractAction {

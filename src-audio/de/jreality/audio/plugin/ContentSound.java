@@ -155,11 +155,11 @@ public class ContentSound extends ShrinkPanelPlugin {
 	
 	protected AudioSource createDefaultAudioSource() {
 		CachedAudioInputStreamSource h = null;
-		String humName = "inspace";
+		String humName = "zoom";
 		try {
 			h = new CachedAudioInputStreamSource(
 					"hum",
-					Input.getInput("sound/"+humName+".wav"),
+					Input.getInput(getClass().getResource(humName+".wav")),
 					true
 			);
 			h.start();
