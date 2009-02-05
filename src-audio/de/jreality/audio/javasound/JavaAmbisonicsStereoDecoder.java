@@ -12,7 +12,7 @@ import de.jreality.scene.Viewer;
 
 /**
  * 
- * An Ambisonics Decoder which renders into the default JavaSound stereo output, 44.1 kHz, 16 bit signed PCM.
+ * An Ambisonics Decoder that renders into the default JavaSound stereo output, 44.1 kHz, 16 bit signed PCM.
  * Use the {@code launch}-method to activate this renderer for a given {@link Viewer}.
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
@@ -98,15 +98,10 @@ public class JavaAmbisonicsStereoDecoder {
 	}
 	
 	public static void launch(Viewer viewer) throws LineUnavailableException {
-		
 		final int frameSize = 1024;
-
 		final JavaAmbisonicsStereoDecoder dec = new JavaAmbisonicsStereoDecoder(frameSize);
-		
 		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), AudioLauncher.getSampleRate());
-
 		final AmbisonicsSoundEncoder enc = new AmbisonicsSoundEncoder() {
-			@Override
 			public void finishFrame() {
 				dec.renderAmbisonics(bw, bx, by, bz);
 			}

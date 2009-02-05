@@ -30,7 +30,6 @@ public class VbapSurroundRenderer {
 		AudioFormat outFormat = JavaSoundUtility.outputFormat(channels);
 		
 		surroundOut = JavaSoundUtility.createSourceDataLine(outFormat);
-
 		surroundOut.open(outFormat, channels*byteLen);
 		System.out.println("surroundOut bufferSize="+surroundOut.getBufferSize());
 		surroundOut.start();
@@ -50,7 +49,6 @@ public class VbapSurroundRenderer {
 	}
 	
 	public static void launch(Viewer viewer) throws LineUnavailableException {
-		
 		double[][] speakers = new double[][]{
 				{0.5, 0},
 				{0.5, 0.5},
@@ -58,51 +56,17 @@ public class VbapSurroundRenderer {
 				{-1.5,-1},
 				{0.5,-0.5},
 		};
-		
 		int[] channelIDs = new int[]{4,0,2,3,1};
-		
 		final int frameSize = 512;
-
-		final VbapSurroundRenderer dec = new VbapSurroundRenderer(frameSize);
 		
+		final VbapSurroundRenderer dec = new VbapSurroundRenderer(frameSize);
 		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), AudioLauncher.getSampleRate());
-
 		final VbapSoundEncoder enc = new VbapSoundEncoder(speakers.length, speakers, channelIDs) {
-
-			@Override
 			public void finishFrame() {
 				dec.render(buf);
 			}
-			
 		};
 		
-		
-		
-		/*
-
-		// Visual Editor for speaker positions, uses java2d, java2dx, modelling.
-		
-		de.jreality.audio.VbapSpeakerEditor editor = new de.jreality.audio.VbapSpeakerEditor(enc);
-		javax.swing.JFrame f = new javax.swing.JFrame("VBAP Speakers");
-		f.setSize(800, 600);
-		f.getContentPane().add(editor);
-		f.setVisible(true);
-
-		*/
-		
-		Runnable soundRenderer = new Runnable() {
-			public void run() {
-				while (true) {
-					backend.processFrame(enc, frameSize);
-				}
-			}
-		};
-
-		Thread soundThread = new Thread(soundRenderer);
-		soundThread.setName("jReality audio renderer");
-		soundThread.setPriority(Thread.MAX_PRIORITY);
-		soundThread.start();
+		JavaSoundUtility.launchAudioBackend(backend, enc, frameSize);
 	}
-
-	
 }

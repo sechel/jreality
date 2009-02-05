@@ -85,7 +85,7 @@ import de.jreality.util.SceneGraphUtility;
  * @author Charles Gunn
  *
  */
-class HeightFieldFactory extends QuadMeshFactory {
+public class HeightFieldFactory extends QuadMeshFactory {
 	Rectangle2D theDomain = new Rectangle2D.Double(-1.0, -1.0, 2.0, 2.0);
 	boolean domainHasChanged = true;
 	public HeightFieldFactory() {

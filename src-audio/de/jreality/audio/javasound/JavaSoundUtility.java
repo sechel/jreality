@@ -206,6 +206,7 @@ public class JavaSoundUtility {
 		}
 		return sample;
 	}
+	
 	public static Thread launchAudioBackend(final AudioBackend backend, final SoundEncoder enc, final int framesize) {
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
