@@ -48,15 +48,13 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		attenuations.put("constant", Attenuation.CONSTANT);
 		attenuations.put("linear", Attenuation.LINEAR);
 		attenuations.put("exponential", Attenuation.EXPONENTIAL);
-		attenuationLabels.put(Attenuation.CONSTANT, "constant");
-		attenuationLabels.put(Attenuation.LINEAR, "linear");
-		attenuationLabels.put(Attenuation.EXPONENTIAL, "exponential");
 		
 		shrinkPanel.setLayout(new GridLayout(3, 2));
 		
 		attenuationWidget = new JComboBox();
 		for(String s: attenuations.keySet()) {
 			attenuationWidget.addItem(s);
+			attenuationLabels.put(attenuations.get(s), s);
 		}
 		
 		attenuationWidget.addActionListener(new ActionListener() {
