@@ -117,9 +117,9 @@ public class IndexedFaceSetUtility {
 				throw new IllegalArgumentException("Indexed face set must consist of triangles");
 		}
 	
-		indices = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().toIntArrayArray(null);
-		for (int i=0; i<indices.length; ++i)	{
-			if (indices[i].length != 2) 
+		int[][] eindices = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray().toIntArrayArray(null);
+		for (int i=0; i<eindices.length; ++i)	{
+			if (eindices[i].length != 2) 
 				throw new IllegalArgumentException("Indexed face set edges must all be line segments (no curves)");
 		}
 		Hashtable edgeVals = new Hashtable();	
