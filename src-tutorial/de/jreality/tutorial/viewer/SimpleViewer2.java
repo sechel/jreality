@@ -90,9 +90,6 @@ import de.jreality.util.RenderTrigger;
     Light dl=new DirectionalLight();
     lightNode.setLight(dl);
     
-    Camera camera = new Camera();
-    cameraNode.setCamera(camera);
-
     IndexedFaceSet ifs = Primitives.icosahedron(); 
     geometryNode.setGeometry(ifs);
     
@@ -106,9 +103,9 @@ import de.jreality.util.RenderTrigger;
     rootApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(1f, 0f, 0f));
     rootNode.setAppearance(rootApp);
         
-    SceneGraphPath camPath = new SceneGraphPath();
-    camPath.push(rootNode);
-    camPath.push(cameraNode);
+    Camera camera = new Camera();
+    cameraNode.setCamera(camera);
+    SceneGraphPath camPath = new SceneGraphPath(rootNode, cameraNode);
     camPath.push(camera);
     
     Viewer viewer = new Viewer();
