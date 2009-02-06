@@ -14,7 +14,6 @@ import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.Mixer.Info;
 
 import de.jreality.audio.AudioBackend;
-import de.jreality.audio.AudioLauncher;
 import de.jreality.audio.SoundEncoder;
 import de.jreality.util.Input;
 
@@ -23,8 +22,19 @@ public class JavaSoundUtility {
 	public static boolean BIG_ENDIAN = false;
 	public static int BITS_PER_SAMPLE = 16;
 	private static Mixer CURRENT_MIXER;
+	
+	private static int sampleRate;
+	
 
 	private JavaSoundUtility() {}
+
+	public static int getSampleRate() {
+		return sampleRate;
+	}
+
+	public static void setSampleRate(int sampleRate) {
+		JavaSoundUtility.sampleRate = sampleRate;
+	}
 
 	public static boolean supportsChannels(int n) {
 		AudioFormat f = outputFormat(n);
@@ -69,7 +79,7 @@ public class JavaSoundUtility {
 
 	public static AudioFormat outputFormat(int channels) {
 		return new AudioFormat(
-				AudioLauncher.getSampleRate(), // the number of samples per second
+				getSampleRate(), // the number of samples per second
 				BITS_PER_SAMPLE, // the number of bits in each sample
 				channels, // the number of channels
 				true, // signed/unsigned PCM

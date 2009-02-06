@@ -1,4 +1,4 @@
-package de.jreality.audio;
+package de.jreality.audio.util;
 
 import java.beans.Statement;
 
@@ -19,19 +19,10 @@ public class AudioLauncher {
 	public static boolean TRY_JACK=true;
 	public static boolean PLANAR=false;
 	public static boolean TRY_5_1=false;
-	
-	private static int sampleRate=44100;
-	
+
 
 	private AudioLauncher() {}
 	
-	public static int getSampleRate() {
-		return sampleRate;
-	}
-	
-	public static void suggestSampleRate(int sampleRate) {
-		AudioLauncher.sampleRate = sampleRate;
-	}
 
 	/**
 	 * Launches Jack backend if possible, otherwise Java sound backend.

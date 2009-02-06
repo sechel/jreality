@@ -1,6 +1,6 @@
 package de.jreality.audio.plugin;
 
-import de.jreality.audio.AudioLauncher;
+import de.jreality.audio.util.AudioLauncher;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.plugin.CameraStand;
 import de.jreality.ui.plugin.View;
@@ -24,7 +24,6 @@ public class Audio extends Plugin {
 		public void install(Controller c) throws Exception {
 			Viewer viewer = c.getPlugin(View.class).getViewer();
 			c.getPlugin(CameraStand.class);
-			AudioLauncher.suggestSampleRate(22050);
 			try {
 				AudioLauncher.launch(viewer); 
 			} catch (Exception e) {
