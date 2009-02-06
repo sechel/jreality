@@ -80,11 +80,11 @@ public class Test51 {
 	
 	public static void main(String[] args) throws Exception {
 		Test51 t = new Test51();
-		AudioSource src = new SignalSource("foo", 44100) {
+		AudioSource src = new SynthSource("foo", 44100) {
 			double frequency = 660;
 			@Override
-			public float evaluateSignal(double t) {
-				return (float) Math.sin(2*Math.PI*t*frequency);
+			public float nextSample() {
+				return (float) Math.sin(2*Math.PI*frequency*index/sampleRate);
 			}
 		};
 		

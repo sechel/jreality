@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
-import de.jreality.audio.SignalSource;
+import de.jreality.audio.SynthSource;
 import de.jreality.audio.csound.CsoundNode;
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
@@ -22,16 +22,16 @@ import de.jreality.vr.ViewerVR;
 
 public class JackTest {
 
-	private static class SineSource extends SignalSource {
+	private static class SineSource extends SynthSource {
 		double omega;
 		
 		public SineSource(String name, int sr, double freq) {
 			super(name, sr);
-			omega = 2*Math.PI*freq;
+			omega = 2*Math.PI*freq/sr;
 		}
 	
-		public float evaluateSignal(double t) {
-			return (float) Math.sin(omega*t);
+		public float nextSample() {
+			return (float) Math.sin(omega*index);
 		}
 	}
 	
@@ -83,9 +83,9 @@ public class JackTest {
 		cmp.addChild(cmp3);
 		
 		// works with mp3spi from javazoom in classpath:
-		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
-		Input input = Input.getInput(url); 
-		//Input input = Input.getInput("data/nasa.mp3");
+//		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
+//		Input input = Input.getInput(url); 
+		Input input = Input.getInput("data/nasa.mp3");
 		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
 			@Override
 			public int readSamples(Reader reader, float[] buffer,
@@ -123,6 +123,6 @@ public class JackTest {
 
 		vr.setContent(cmp);
 
-		JackAmbisonicsRenderer.launch(va.getCurrentViewer());
+		JackAmbisonicsRenderer.launch(va.getCurrentViewer(), "jR Ambisonics");
 	}
 }

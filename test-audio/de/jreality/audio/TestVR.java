@@ -6,6 +6,7 @@ import java.net.URL;
 
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
+import de.jreality.audio.util.AudioLauncher;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
@@ -94,17 +95,12 @@ public class TestVR {
 		SceneGraphComponent cmp2 = new SceneGraphComponent();
 		cmp.addChild(cmp2);
 		
-		final SignalSource sin = new SignalSource("wave", 44100) {
+		final SynthSource sin = new SynthSource("wave", 44100) {
 			float amplitude=0.03f;
 			double frequency=440;
 			@Override
-			public float evaluateSignal(double t) {
-				//double x = 2*(-0.5+Math.random());
-				//return (float) x;
-				//return x>0.85 ? 1 : 0;
-				t*=frequency;
-				return amplitude * (float) Math.sin(2*Math.PI*t);
-				//return 0.03f*(float) (t-Math.floor(t));
+			public float nextSample() {
+				return amplitude * (float) Math.sin(2*Math.PI*index*frequency/sampleRate);
 			}
 		};
 		
