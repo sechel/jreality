@@ -92,7 +92,7 @@ public class JavaAmbisonicsStereoDecoder {
 		stereoOut.write(buffer, 0, byteLen);
 	}
 
-	public static void launch(Viewer viewer) throws LineUnavailableException {
+	public static void launch(Viewer viewer, String label) throws LineUnavailableException {
 		final int frameSize = 1024;
 		final JavaAmbisonicsStereoDecoder dec = new JavaAmbisonicsStereoDecoder(frameSize);
 		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), JavaSoundUtility.getSampleRate());
@@ -102,7 +102,7 @@ public class JavaAmbisonicsStereoDecoder {
 			}
 		};
 		
-		JavaSoundUtility.launchAudioThread(backend, enc, frameSize, "jReality stereo renderer");
+		JavaSoundUtility.launchAudioThread(backend, enc, frameSize, label);
 	}
 
 }

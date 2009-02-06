@@ -14,8 +14,6 @@ import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.Mixer.Info;
 
 import de.jreality.audio.AudioBackend;
-import de.jreality.audio.AudioException;
-import de.jreality.audio.AudioHandler;
 import de.jreality.audio.SoundEncoder;
 import de.jreality.util.Input;
 
@@ -219,7 +217,7 @@ public class JavaSoundUtility {
 		return sample;
 	}
 	
-	public static AudioHandler launchAudioThread(final AudioBackend backend, final SoundEncoder enc, final int framesize, String label) {
+	public static void launchAudioThread(final AudioBackend backend, final SoundEncoder enc, final int framesize, String label) {
 		Runnable soundRenderer = new Runnable() {
 			public void run() {
 				while (!Thread.interrupted()) {
@@ -231,12 +229,7 @@ public class JavaSoundUtility {
 		final Thread soundThread = new Thread(soundRenderer);
 		soundThread.setName(label);
 		soundThread.setPriority(Thread.MAX_PRIORITY);
+		soundThread.setDaemon(true);
 		soundThread.start();
-		
-		return new AudioHandler() {
-			public void shutDown() throws AudioException {
-				soundThread.interrupt();
-			}
-		};
 	}
 }

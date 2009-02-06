@@ -47,7 +47,7 @@ public class VbapSurroundRenderer {
 		fbuffer_lookAhead = tmpF;
 	}
 	
-	public static void launch(Viewer viewer) throws LineUnavailableException {
+	public static void launch(Viewer viewer, String label) throws LineUnavailableException {
 		double[][] speakers = new double[][]{
 				{0.5, 0},
 				{0.5, 0.5},
@@ -66,6 +66,6 @@ public class VbapSurroundRenderer {
 			}
 		};
 		
-		JavaSoundUtility.launchAudioThread(backend, enc, frameSize, "jreality VBAP renderer");
+		JavaSoundUtility.launchAudioThread(backend, enc, frameSize, label);
 	}
 }

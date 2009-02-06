@@ -42,7 +42,7 @@ public class AudioLauncher {
 				// ignore this, just use java sound.
 			}
 			if (jackrenderer != null) try {
-				new Statement(jackrenderer, "launch", new Object[]{v}).execute();
+				new Statement(jackrenderer, "launch", new Object[]{v, "jR Ambisonics"}).execute();
 				System.out.println("Jack launch OK.");
 				return true;
 			} catch (Exception e) {
@@ -52,10 +52,10 @@ public class AudioLauncher {
 		try {
 			if (TRY_5_1 && JavaSoundUtility.supportsChannels(5)) {
 				System.out.println("Launching 5.1 backend...");
-				VbapSurroundRenderer.launch(v);
+				VbapSurroundRenderer.launch(v, "jR VBAP");
 			} else {
 				System.out.println("Launching stereo backend...");
-				JavaAmbisonicsStereoDecoder.launch(v);
+				JavaAmbisonicsStereoDecoder.launch(v, "jR Stereo");
 			}
 			return true;
 		} catch (LineUnavailableException e) {

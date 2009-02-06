@@ -53,11 +53,11 @@ public class JackAmbisonicsRenderer extends AmbisonicsSoundEncoder implements Ja
 		currentJJackEvent.getOutput(3).put(bz);
 	}
 	
-	public static void launch(Viewer viewer) throws JJackException {
+	public static void launch(Viewer viewer, String label) throws JJackException {
 		JackAmbisonicsRenderer renderer = new JackAmbisonicsRenderer();
 		renderer.setRootAndMicrophonePath(viewer.getSceneRoot(), viewer.getCameraPath());
 
 		JackHub.setSink(renderer);
-		JackHub.initializeClient("jrAmbisonics");
+		JackHub.initializeClient(label);
 	}
 }

@@ -36,7 +36,7 @@ public final class JackHub implements JJackAudioProcessor {
 	private JackHub() {
 		// do nothing
 	}
-	
+
 	protected void finalize() throws JJackException {
 		removeClient();
 	}
