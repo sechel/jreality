@@ -1188,6 +1188,7 @@ public class IndexedFaceSetUtility {
   			int[][] newFaces = tris.toArray(new int[0][]);
   			ifs.setFaceCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(newFaces));
   		}
+  		calculateAndSetEdgesFromFaces(ifs);
   	}
   	
   	/**

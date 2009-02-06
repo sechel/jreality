@@ -43,9 +43,6 @@ package de.jreality.geometry;
 import java.awt.geom.Rectangle2D;
 
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.Attribute;
-import de.jreality.util.SceneGraphUtility;
 
 /**
  * A factory for generating instances of {@link IndexedFaceSet} which
