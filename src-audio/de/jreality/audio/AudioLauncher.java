@@ -2,9 +2,12 @@ package de.jreality.audio;
 
 import de.jreality.scene.Viewer;
 
-/* Removing this class broke too much code in my students' projects.
+/* *
+ * Removing this class broke too much code in my students' projects.
  * 
+ * Deprecated: use audio.plugin.AudioLauncher instead, or directly launch the backend you want
  */
+@Deprecated
 public class AudioLauncher {
 	
 	@Deprecated
