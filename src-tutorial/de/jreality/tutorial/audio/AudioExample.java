@@ -44,9 +44,17 @@ public class AudioExample {
 		audioSetup();
 	}
 	
+	@SuppressWarnings("serial")
 	private void videoSetup() {
 		ViewMenuBar viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new ExitAction(), "File");
+		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new AbstractAction() {
+			{
+				putValue(AbstractAction.NAME, "Exit");
+			}
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		}, "File");
 		
 		controller.registerPlugin(viewMenuBar);
 		controller.registerPlugin(new View());
@@ -93,18 +101,6 @@ public class AudioExample {
 		contentRoot.addChild(audioComponent);
 	}
 
-	private static class ExitAction extends AbstractAction {
-		private static final long serialVersionUID = 1L;
-
-		public ExitAction() {
-			putValue(AbstractAction.NAME, "Exit");
-		}
-		
-		public void actionPerformed(ActionEvent e) {
-			System.exit(0);
-		}
-	}
-	
 	public void startup() {
 		controller.startup();
 	}
