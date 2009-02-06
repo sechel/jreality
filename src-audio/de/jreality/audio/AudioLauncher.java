@@ -11,4 +11,9 @@ public class AudioLauncher {
 	public static void launch(Viewer v) 	{
 		de.jreality.audio.util.AudioLauncher.launch(v);
 	}
+	
+	@Deprecated
+	public static void suggestSampleRate(int s)	{
+		
+	}
 }
