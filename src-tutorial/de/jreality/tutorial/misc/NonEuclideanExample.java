@@ -40,6 +40,8 @@ import de.jreality.shader.GlslProgram;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
+import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
@@ -109,10 +111,13 @@ public class NonEuclideanExample {
 		ViewerApp va = new ViewerApp(root, camPath, null, null);
 		va.setAttachNavigator(true);
 		va.setExternalNavigator(false);
-		va.setCreateMenu(false);
+		viewer = va.getCurrentViewer();
+		SelectionManagerInterface sm = SelectionManager.selectionManagerForViewer(viewer);
+		sm.setDefaultSelectionPath(new SceneGraphPath(va.getSceneRoot()));
+		sm.setSelection(null);
+//		va.setCreateMenu(false);
 		va.update();
 		va.display();
-		viewer = va.getCurrentViewer();
 		CameraUtility.encompass(viewer);
 		update();
 		Component comp = ((Component) viewer.getViewingComponent());
@@ -154,7 +159,6 @@ public class NonEuclideanExample {
 		
 		noneuclideanShader.setUniform("Nw", 0.00001);
 		noneuclideanShader.setUniform("useNormals4", false);
-		noneuclideanShader.setUniform("lightingEnabled", false);
 		ap.setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR,new Color(250, 250, 0));
 		ap.setAttribute(LINE_SHADER+"."+POLYGON_SHADER+"."+DIFFUSE_COLOR,new Color(250, 0, 250));
 		ap.setAttribute(SPECULAR_EXPONENT, 50.0);
@@ -164,7 +168,7 @@ public class NonEuclideanExample {
 		lightNode.getAppearance().setAttribute(LIGHTING_ENABLED, false);
 		lightNode.addChild(Primitives.sphere(.05, new double[]{0,0,0}, Pn.EUCLIDEAN));
 		pointLight = new PointLight();
-		pointLight.setIntensity(1);
+		pointLight.setIntensity(.9);
 		pointLight.setColor(new Color(250, 250, 250));
 		lightNode.setLight(pointLight);
 		world.addChild(lightNode);
