@@ -9,9 +9,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.AbstractAction;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
-import de.jreality.audio.plugin.Audio;
+import de.jreality.audio.plugin.AudioLauncher;
 import de.jreality.audio.plugin.AudioOptions;
-import de.jreality.audio.plugin.ContentSound;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
@@ -66,8 +65,7 @@ public class AudioExample {
 
 	private void audioSetup() throws IOException, UnsupportedAudioFileException {
 		controller.registerPlugin(new AudioOptions());
-		//controller.registerPlugin(new ContentSound());
-		controller.registerPlugin(new Audio());
+		controller.registerPlugin(new AudioLauncher());
 		
 		Input wavFile = Input.getInput(getClass().getResource("zarathustra.wav"));
 		final AudioSource wavNode = new CachedAudioInputStreamSource("zarathustra", wavFile, true);
