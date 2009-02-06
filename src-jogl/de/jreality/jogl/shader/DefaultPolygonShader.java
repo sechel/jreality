@@ -86,10 +86,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	int texUnit = 0, refMapUnit = 0;
 	GlslPolygonShader glslShader = new GlslPolygonShader();
 	GlslProgram glslProgram;
-	boolean inheritGLSL = false;
-	boolean fastAndDirty = false;
-	boolean geometryHasTextureCoordinates = false, hasTextures = false;
-	protected transient boolean needsChecked = true;
+	transient boolean inheritGLSL = false;
+	transient boolean fastAndDirty = false;
+	transient boolean geometryHasTextureCoordinates = false, hasTextures = false;
+	transient boolean needsChecked = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	static {
@@ -150,8 +150,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				glslShader.setFromEffectiveAppearance(eap, name);
 		    }
 	    }  else useGLSL = false;
-//	    System.err.println("In DPS: smooth = "+smoothShading);
-		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
+	    
+		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;
  	}

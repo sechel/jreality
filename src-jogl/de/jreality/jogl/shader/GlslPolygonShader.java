@@ -115,6 +115,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			EffectiveAppearance eap2 = eap.create(app);
 			program = new GlslProgram(app, eap2, name);
 		} else program = null;
+		// TODO remove duplicate names after steffen has refactored the texture and reflection map stuff
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap)) {
 			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap);
 		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit0"), eap)) {
@@ -162,6 +163,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		if (program != null) {
 			if (program.getSource().getUniformParameter("lightingEnabled") != null) {
 				program.setUniform("lightingEnabled", jrs.lighting);
+				System.err.println("setting lighting to "+jrs.lighting);
 			}
 			if (program.getSource().getUniformParameter("transparency") != null) {
 				program.setUniform("transparency", jrs.transparencyEnabled ? vertexShader.getDiffuseColorAsFloat()[3] : 0f);
