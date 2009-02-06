@@ -35,6 +35,8 @@ public class Shell extends ShrinkPanelPlugin {
 		return View.class;
 	}
 	
+	public static class H {
+	
 		public static String help(Object o) {
 			class MethodComparator implements Comparator<Method> {
 				public int compare(Method o1, Method o2) {
@@ -61,6 +63,8 @@ public class Shell extends ShrinkPanelPlugin {
 			return r.toString();
 		}
 		
+	}
+		
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
@@ -81,9 +85,10 @@ public class Shell extends ShrinkPanelPlugin {
 		beanShell.eval("import de.jreality.shader.*;");
 		beanShell.eval("import de.jreality.tools.*;");
 		beanShell.eval("import de.jreality.util.*;");
-		// TODO check whether a newer version of the bean shell supports static imports
-		// then we could implement utility methods like help directly
-		beanShell.eval("import de.varylab.jrworkspace.plugin.jreality.sceneview.SceneViewBeanShellPlugin.H;");
+		beanShell.eval("import de.jreality.ui.plugin.Shell.H;");
+		beanShell.eval("import de.jreality.ui.plugin.*");
+		beanShell.eval("import de.jreality.vr.plugin.*");
+		beanShell.eval("import de.jreality.audio.plugin.*");
 
 		//set some objects to be accessible from within the beanShell
 		try {
@@ -91,7 +96,7 @@ public class Shell extends ShrinkPanelPlugin {
 			Object interpreter = new Expression(bshEval, "getInterpreter", null).getValue();
 			new Statement(interpreter, "set", new Object[]{"_viewer", viewer}).execute();
 			new Statement(interpreter, "set", new Object[]{"_toolSystem", toolSystem}).execute();
-			new Statement(interpreter, "set", new Object[]{"_viewerApp", this}).execute();
+			new Statement(interpreter, "set", new Object[]{"_c", c}).execute();
 		} 
 		catch (Exception e) { e.printStackTrace(); }
 
