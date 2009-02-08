@@ -35,56 +35,36 @@ import de.jreality.vr.plugin.Terrain;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 
-public class AudioExample {
+public class MinimalExample {
 
 	private SimpleController controller = new SimpleController();
 	
 	
-	public AudioExample() throws IOException, UnsupportedAudioFileException {
+	public MinimalExample() throws IOException {
 		videoSetup();
 		audioSetup();
 	}
 	
-	@SuppressWarnings("serial")
 	private void videoSetup() {
-		ViewMenuBar viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new AbstractAction() {
-			{
-				putValue(AbstractAction.NAME, "Exit");
-			}
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		}, "File");
-		
-		controller.registerPlugin(viewMenuBar);
 		controller.registerPlugin(new View());
-		controller.registerPlugin(new ViewPreferences());
 		controller.registerPlugin(new CameraStand());
 		controller.registerPlugin(new Lights());
 		controller.registerPlugin(new AlignedContent());
-		controller.registerPlugin(new ContentAppearance());
 		controller.registerPlugin(new Inspector());
-		controller.registerPlugin(new Shell());
-		controller.registerPlugin(new Sky());
-		controller.registerPlugin(new Terrain());
 		controller.registerPlugin(new Avatar());
-		controller.registerPlugin(new DisplayOptions());
 	}
 
-	private void audioSetup() throws IOException, UnsupportedAudioFileException {
+	private void audioSetup() throws IOException {
 		controller.registerPlugin(new AudioOptions());
 		controller.registerPlugin(new AudioLauncher());
 		
-		Input wavFile = Input.getInput(getClass().getResource("zarathustra.wav"));
-		final AudioSource source = new CachedAudioInputStreamSource("zarathustra", wavFile, true);
+		final AudioSource source = new CsoundNode("csnode", Input.getInput(getClass().getResource("trapped.csd")));
 		source.start();
 		
-		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
+		SceneGraphComponent audioComponent = new SceneGraphComponent("sphere");
 		audioComponent.setAudioSource(source);
-		audioComponent.setGeometry(Primitives.cube());
-		MatrixBuilder.euclidean().translate(0, 5, 0).scale(2, 4.5, .5).assignTo(audioComponent);
-	
+		audioComponent.setGeometry(Primitives.sphere(10));
+		
 		ActionTool actionTool = new ActionTool("PanelActivation");
 		actionTool.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -96,8 +76,7 @@ public class AudioExample {
 			}
 		});
 		audioComponent.addTool(actionTool);
-		audioComponent.addTool(new DraggingTool());
-	
+		
 		SceneGraphComponent contentRoot = controller.getPlugin(AlignedContent.class).getScalingComponent();
 		contentRoot.addChild(audioComponent);
 	}
@@ -106,7 +85,7 @@ public class AudioExample {
 		controller.startup();
 	}
 	
-	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
-		new AudioExample().startup();
+	public static void main(String[] args) throws IOException {
+		new MinimalExample().startup();
 	}
 }
