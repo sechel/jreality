@@ -22,7 +22,7 @@ public class DopplerDemo {
 			ringBuffer = new RingBuffer(sampleRate);
 			buf = new float[sampleRate];
 		}
-		double frequency=110;
+		double frequency=440;
 		long index=0;
 		@Override
 		protected void writeSamples(int n) {
@@ -45,21 +45,16 @@ public class DopplerDemo {
 	double omega = 1;
 	
 	void setLocationForTime(double t) {
-		double x = a*Math.cos(t*omega);
-		double y = b*Math.sin(t*omega);
-		
-		double dxdt = -omega*a*Math.sin(t*omega);
-		double dydt = omega*b*Math.cos(t*omega);
-		
-		double nv = Math.sqrt(dxdt*dxdt+dydt*dydt);
-		
-		System.out.println("|v|="+nv);
-		
-		MatrixBuilder.euclidean().translate(x, y, 1.0).assignTo(audioCmp);
+		double angle = t*omega;
+		double x = a*Math.cos(angle);
+		double y = b*Math.sin(angle);
+		MatrixBuilder.euclidean().translate(x, y, 1.0).rotateZ(angle).assignTo(audioCmp);
 	}
 	
 	public static void main(String[] args) {
 		DopplerDemo dd = new DopplerDemo();
+		
+		
 		ViewerVR vr = ViewerVR.createDefaultViewerVR(null);
 		vr.setDoAlign(false);
 		vr.setContent(dd.centerCmp);
