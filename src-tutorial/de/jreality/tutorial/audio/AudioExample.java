@@ -8,7 +8,6 @@ import java.io.IOException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.AbstractAction;
 
-//import de.jreality.audio.csound.CsoundNode;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.audio.plugin.AudioLauncher;
 import de.jreality.audio.plugin.AudioOptions;
