@@ -77,6 +77,7 @@ public class Paint3DToolExample {
  				Color.white, 
  				10.0, 
  				brushSize, 
+ 				true,
  				new int[]{1,0,3,2});
  		final BufferedImage brush = (BufferedImage) bid.getImage();
 
