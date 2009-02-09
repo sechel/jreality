@@ -56,14 +56,14 @@ import de.jreality.util.SceneGraphUtility;
  * <li>5	ViewerApp with white cylinder</li>
  * <li>6	ViewerApp with texture-mapped cylinder</li>
  * <li>7	ViewerApp with scaled, colored cube</li>
- * <li>8	Render offscreen previous example </li>
  * </ul>
  * 
  * When the sequence of examples is stable, I will probably split it up into 8 different self-contained classes.
  * 
  * @author Charles Gunn
  *
- */public class ViewerAppDemo {
+ */
+public class ViewerAppDemo {
 
 	private static DefaultGeometryShader dgs;
 	private static DefaultLineShader dls;
