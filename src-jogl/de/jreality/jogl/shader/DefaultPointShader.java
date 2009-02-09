@@ -104,7 +104,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	Texture2D currentTex;
 	double specularExponent = 60.0;
 	int polygonCount = 0;
-	boolean changedTransp, changedLighting;
+	boolean changedTransp, changedLighting, spriteNeedsUpdated;
 	double[] lightDirection = {1,-1,2};
 	private Color specularColor;
 	static int textureSize = 128;
@@ -144,7 +144,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	  			specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,POLYGON_SHADER+"."+SPECULAR_COLOR), SPECULAR_COLOR_DEFAULT);
 	  			specularColorAsFloat = specularColor.getRGBComponents(null);
 	  			specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,POLYGON_SHADER+"."+SPECULAR_EXPONENT), SPECULAR_EXPONENT_DEFAULT);
-	  			setupTexture();
+	  			spriteNeedsUpdated = true;
 	  			currentTex=spriteTexture;
 	      }
 	  }
@@ -163,9 +163,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			oldDiffuseColorAsFloat[i] = diffuseColorAsFloat[i];
 			sum += Math.abs(diff);
 		}
-		if (sum < 10E-4) return;
+//		if (sum < 10E-4) return;
 		spriteTexture.setImage(ShadedSphereImage.shadedSphereImage(
-				lightDirection,diffuseColor, specularColor, specularExponent, textureSize, null));
+				lightDirection,diffuseColor, specularColor, specularExponent, textureSize, lighting, null));
 		spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
 		// use nearest filter to avoid corrupting the alpha = 0 transparency trick
 		spriteTexture.setMinFilter(Texture2D.GL_NEAREST);
@@ -180,6 +180,12 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		
 		if (!sphereDraw)	{
 			//LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
+  			if (spriteNeedsUpdated) {
+  				lighting = jrs.lighting;
+  				diffuseColor = Color.white;
+  				setupTexture();
+  				spriteNeedsUpdated = false;
+  			}
 			lighting = false;
 			gl.glPointSize((float)pointSize);
 			jrs.pointSize = pointSize;
@@ -195,11 +201,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 //			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-			PointSet ps = (PointSet) jrs.currentGeometry;
-			if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null)
+//			PointSet ps = (PointSet) jrs.currentGeometry;
+//			if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null) 
 				spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
-			else 
-				spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
+//			else 
+//				spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 			Texture2DLoaderJOGL.render(gl, currentTex);

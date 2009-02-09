@@ -21,6 +21,7 @@ public class ShadedSphereImage {
 			Color specularColor,
 			double specularExponent,
 			int textureSize,
+			boolean lighting,
 			int[] ch) {
 		int I = 0, II = 0;
 		if (lightDirection == null) lightDirection = defaultLightDirection;
@@ -52,7 +53,8 @@ public class ShadedSphereImage {
 					if (specular > 1.0) specular = 1.0;
 					specular = Math.pow(specular, specularExponent);
 					for (int k = 0; k<3; ++k)	{
-						double f = (diffuse * diffuseColorAsFloat[k] + specular * specularColorAsFloat[k]);
+						double f = diffuseColorAsFloat[k];
+						if (lighting) f = (diffuse * f + specular * specularColorAsFloat[k]);
 						if (f < 0) f = 0;
 						if (f > 1) f = 1;
 						sphereTex[II+ch[k]] =  (byte) (255 * f); 
