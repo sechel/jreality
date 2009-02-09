@@ -180,9 +180,10 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		
 		if (!sphereDraw)	{
 			//LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
+				PointSet ps = (PointSet) jrs.currentGeometry;
   			if (spriteNeedsUpdated) {
   				lighting = jrs.lighting;
-  				diffuseColor = Color.white;
+  				if (ps.getVertexAttributes(Attribute.COLORS) != null) diffuseColor = Color.white;
   				setupTexture();
   				spriteNeedsUpdated = false;
   			}
@@ -201,11 +202,10 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
 //			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
 			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-//			PointSet ps = (PointSet) jrs.currentGeometry;
-//			if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null) 
+			if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null) 
 				spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
-//			else 
-//				spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
+			else // this way we get real specular highlights
+				spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 			Texture2DLoaderJOGL.render(gl, currentTex);
