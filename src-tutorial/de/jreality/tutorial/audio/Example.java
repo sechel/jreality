@@ -37,6 +37,7 @@ public class Example {
 	  SimpleController c = 
 	        new SimpleController();
 	 
+	  // set up graphics
 	  c.registerPlugin(new ViewMenuBar());
 	  c.registerPlugin(new View());
 	  c.registerPlugin(new CameraStand());
@@ -44,23 +45,26 @@ public class Example {
 	  c.registerPlugin(new Inspector());
 	  c.registerPlugin(new Avatar());
 	  
-	  c.registerPlugin(new AudioOptions());
+	  // set up audio
 	  c.registerPlugin(new AudioLauncher());
+	  c.registerPlugin(new AudioOptions());
 	  
+	  // create visual content
+	  SceneGraphComponent content = Readers.read(
+	    Input.getInput(
+	      Example.class.getResource("schwarz.jrs")));
+	  
+	  // create audio content
 	  final AudioSource source = new CsoundNode(
 	    "csound node", Input.getInput(
 	      Example.class.getResource("trapped.csd")));
 	  source.start();
-	  
-	  SceneGraphComponent content = Readers.read(
-	    Input.getInput(
-	      Example.class.getResource("schwarz.jrs")));
 	  content.setAudioSource(source);
 	  
-	  ActionTool actionTool = 
+	  // create simple tool for pausing/starting audio
+	  ActionTool tool = 
 	        new ActionTool("PanelActivation");
-	  actionTool.addActionListener(
-	    new ActionListener() {
+	  tool.addActionListener(new ActionListener() {
 	      public void actionPerformed(
 	              ActionEvent e) {
 	        if (source.getState() ==
@@ -70,12 +74,14 @@ public class Example {
 	          source.start();
 	      }
 	    });
-	  content.addTool(actionTool);
+	  content.addTool(tool);
 	  
+	  // attach content to scene
 	  SceneGraphComponent parent = 
 	    c.getPlugin(View.class).getSceneRoot();
 	  parent.addChild(content);
 	  
+	  // launch viewer
 	  c.startup();
 	 }
 	}
