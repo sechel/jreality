@@ -1,10 +1,10 @@
 package de.jreality.tutorial.audio;
 
+import de.jreality.audio.SynthSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.RingBuffer;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.vr.ViewerVR;
 
@@ -15,23 +15,11 @@ public class DopplerDemo {
 	
 	final double a=50, b=10;
 
-	AudioSource asrc = new AudioSource("sin") {
-		float[] buf;
-		{
-			sampleRate = 44100;
-			ringBuffer = new RingBuffer(sampleRate);
-			buf = new float[sampleRate];
-		}
-		double frequency=440;
-		long index=0;
-		@Override
-		protected void writeSamples(int n) {
-			for (int i=0; i<n; i++) {
-				double t = (double)(index+i)/(double)sampleRate;
-				buf[i] = (float) Math.sin(t*frequency*2*Math.PI);
-			}
-			ringBuffer.write(buf, 0, n);
-			index+=n;
+	AudioSource asrc = new SynthSource("sin", 44100) {
+		final double omega = 2*Math.PI*440;
+
+		protected float nextSample() {
+			return (float) Math.sin(omega*index/sampleRate);
 		}
 	};
 	
