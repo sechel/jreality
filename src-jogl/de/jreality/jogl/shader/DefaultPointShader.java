@@ -327,7 +327,6 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				if (colorLength == 3) 	{
 					gl.glColor3d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2));
 				} else if (colorLength == 4) 	{
-					System.err.println("RGBA color");
 					gl.glColor4d(da.getValueAt(0), da.getValueAt(1), da.getValueAt(2), da.getValueAt(3));
 				} 
 			}
