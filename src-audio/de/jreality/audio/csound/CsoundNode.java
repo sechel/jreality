@@ -76,11 +76,11 @@ public class CsoundNode extends AudioSource {
 			}
 			auxBuffer.SetValues(0, bufSize, csOutBuffer);
 			for(int j=0; j<ksmps; j++) {
-				float v = 0.0f;
+				double v = 0;
 				for(int k=j; k<bufSize; k+=ksmps) {
 					v += auxBuffer.GetValue(k);
 				}
-				cumulativeBuffer[j] = v/scale;
+				cumulativeBuffer[j] = (float) (v/scale);
 			}
 			ringBuffer.write(cumulativeBuffer, 0, ksmps);
 		}
