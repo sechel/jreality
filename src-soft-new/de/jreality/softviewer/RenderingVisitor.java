@@ -250,6 +250,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         de.jreality.shader.PolygonShader pgs;
         de.jreality.shader.LineShader lis;
         de.jreality.shader.PointShader pts;
+        RenderingHintsShader rhs = ShaderUtility.createRenderingHintsShader(eAppearance);
         if (gs.getShowFaces()) {
             pgs = gs.getPolygonShader();
             // Texture2D tex = null;
@@ -259,17 +260,17 @@ public class RenderingVisitor extends SceneGraphVisitor {
             // AttributeEntityUtility.createAttributeEntity(Texture2D.class,
             // ShaderUtility.nameSpace(name,"texture2d"), eAppearance);
             // }
-
-            pipeline.setFaceShader(polygonShader = PolygonShader
-                    .createFrom(pgs));
+                pipeline.setFaceShader(polygonShader = PolygonShader
+                        .createFrom(pgs,rhs));
+                
         }
         if (gs.getShowLines()) {
             lis = gs.getLineShader();
-            pipeline.setLineShader(lineShader = LineShader.createFrom(lis));
+            pipeline.setLineShader(lineShader = LineShader.createFrom(lis,rhs));
         }
         if (gs.getShowPoints()) {
             pts = gs.getPointShader();
-            pipeline.setPointShader(pointShader = PointShader.createFrom(pts));
+            pipeline.setPointShader(pointShader = PointShader.createFrom(pts,rhs));
         }
         shaderUptodate = true;
     }
@@ -586,10 +587,11 @@ public class RenderingVisitor extends SceneGraphVisitor {
         DoubleArrayArray a = null;
         int n = p.getNumPoints();
         if (pointShader != null) {
-            DataList vertexCoordinates = p.getVertexAttributes(Attribute.COORDINATES);
-            if (vertexCoordinates == null || vertexCoordinates.size() == 0) return;
-			a = vertexCoordinates.toDoubleArrayArray();
-			pipeline.startGeometry(p);
+            a = p.getVertexAttributes(Attribute.COORDINATES)
+                    .toDoubleArrayArray();
+            if (a == null)
+                return;
+            pipeline.startGeometry(p);
             DataList vertexColors = p.getVertexAttributes(Attribute.COLORS);
             DataList vertexRadii = p.getVertexAttributes(Attribute.RELATIVE_RADII);
             if(!pointShader.isSphereDraw())
