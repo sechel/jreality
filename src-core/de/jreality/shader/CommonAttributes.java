@@ -161,6 +161,9 @@ import de.jreality.scene.Appearance;
 	public final static String SMOOTH_SHADING = 	"smoothShading";		// interpolate vertex shading values?
 	public final static boolean SMOOTH_SHADING_DEFAULT = true;
 	public final static String TEXTURE_2D = 		"texture2d";		
+	public final static String TEXTURE_2D_1 = 		"texture2d[1]";		
+	public final static String TEXTURE_2D_2 = 		"texture2d[2]";		
+	public final static String TEXTURE_2D_3 = 		"texture2d[3]";		
 	public static final String REFLECTION_MAP = "reflectionMap";
 	public final static String TRANSPARENCY = 		"transparency";		
     public final static double TRANSPARENCY_DEFAULT =  0.0;
