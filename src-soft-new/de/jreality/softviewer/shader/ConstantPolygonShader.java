@@ -117,9 +117,10 @@ public class ConstantPolygonShader extends PolygonShader {
 		if(needsNormals) {
             for(int i = 0; i< n;i++) {
                 double vertexData[] = p.getPoint(i);
-                vertexData[Polygon.R] = v[Polygon.R];
-                vertexData[Polygon.G] = v[Polygon.G];
-                vertexData[Polygon.B] = v[Polygon.B];
+                //vertexData[Polygon.R] = v[Polygon.R];
+                //vertexData[Polygon.G] = v[Polygon.G];
+                //vertexData[Polygon.B] = v[Polygon.B];
+                vertexShader.shadeVertex(vertexData,environment,vertexColors);
                 //if there is a reflection map we prepare the normals:
                 
                     double ff =( vertexData[Polygon.WX]*vertexData[Polygon.NX] + vertexData[Polygon.WY]*vertexData[Polygon.NY] + vertexData[Polygon.WZ]*vertexData[Polygon.NZ])/
@@ -137,9 +138,10 @@ public class ConstantPolygonShader extends PolygonShader {
         } else {
             for(int i = 0; i< n;i++) {
                 double[] vertexData = p.getPoint(i);
-                vertexData[Polygon.R] = v[Polygon.R];
-                vertexData[Polygon.G] = v[Polygon.G];
-                vertexData[Polygon.B] = v[Polygon.B];
+               // vertexData[Polygon.R] = v[Polygon.R];
+                //vertexData[Polygon.G] = v[Polygon.G];
+                //vertexData[Polygon.B] = v[Polygon.B];
+                vertexShader.shadeVertex(vertexData,environment,vertexColors);
             }
         }
     }
@@ -149,7 +151,7 @@ public class ConstantPolygonShader extends PolygonShader {
     }
 
     public final boolean interpolateColor() {
-        return hasTexture();
+        return hasTexture()|| vertexShader.isVertexColors();
     }
 
     public boolean interpolateAlpha() {

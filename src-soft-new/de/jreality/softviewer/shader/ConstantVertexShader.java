@@ -89,9 +89,6 @@ public class ConstantVertexShader extends VertexShader {
         }
 	}
 
-    public boolean interpolateAlpha() {
-        return false;
-    }
 
 	public double getTransparency() {
 
