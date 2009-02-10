@@ -62,9 +62,9 @@ public abstract class PointShader {
         
     }
     
-    public static PointShader createFrom(de.jreality.shader.PointShader pts) {
+    public static PointShader createFrom(de.jreality.shader.PointShader pts, de.jreality.shader.RenderingHintsShader rhs) {
         if(pts instanceof de.jreality.shader.DefaultPointShader)
-            return new DefaultPointShader((de.jreality.shader.DefaultPointShader) pts);
+            return new DefaultPointShader((de.jreality.shader.DefaultPointShader) pts,rhs);
         return null;
     }
 }

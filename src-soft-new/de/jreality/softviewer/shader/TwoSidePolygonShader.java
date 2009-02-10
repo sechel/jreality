@@ -57,10 +57,10 @@ public class TwoSidePolygonShader extends PolygonShader {
     private PolygonShader front;
     private PolygonShader back;
     
-    public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader ps) {
+    public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader ps, de.jreality.shader.RenderingHintsShader rhs) {
         super();
-        front = PolygonShader.createFrom(ps.getFront());
-        back = PolygonShader.createFrom(ps.getBack());
+        front = PolygonShader.createFrom(ps.getFront(), rhs);
+        back = PolygonShader.createFrom(ps.getBack(), rhs);
     }
     
 	 

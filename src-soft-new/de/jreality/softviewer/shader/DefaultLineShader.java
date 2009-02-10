@@ -58,9 +58,9 @@ public class DefaultLineShader extends LineShader {
     /**
      * 
      */
-    public DefaultLineShader(de.jreality.shader.DefaultLineShader lis) {
+    public DefaultLineShader(de.jreality.shader.DefaultLineShader lis,de.jreality.shader.RenderingHintsShader rhs) {
         super();
-        polygonShader = PolygonShader.createFrom(lis.getPolygonShader());
+        polygonShader = PolygonShader.createFrom(lis.getPolygonShader(),rhs);
         lineWidth = lis.getLineWidth();
         tubeRadius = lis.getTubeRadius();
         drawTubes = lis.getTubeDraw();

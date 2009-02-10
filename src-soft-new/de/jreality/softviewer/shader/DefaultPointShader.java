@@ -66,11 +66,11 @@ public class DefaultPointShader extends PointShader {
 //        this.outlineShader = outlineShader;
 //    }
 
-    public DefaultPointShader(de.jreality.shader.DefaultPointShader pts) {
+    public DefaultPointShader(de.jreality.shader.DefaultPointShader pts, de.jreality.shader.RenderingHintsShader rhs) {
         super();
         
         
-        this.coreShader = this.outlineShader = PolygonShader.createFrom(pts.getPolygonShader());
+        this.coreShader = this.outlineShader = PolygonShader.createFrom(pts.getPolygonShader(), rhs);
         this.outlineFraction = .6;
         this.pointRadius = pts.getPointRadius();
         this.pointSize = pts.getPointSize();

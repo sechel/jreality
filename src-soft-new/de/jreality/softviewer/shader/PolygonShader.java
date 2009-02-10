@@ -68,7 +68,7 @@ public abstract class PolygonShader {
         
     }
     
-    public static PolygonShader createFrom(de.jreality.shader.PolygonShader ps) {
+    public static PolygonShader createFrom(de.jreality.shader.PolygonShader ps,de.jreality.shader.RenderingHintsShader rs) {
         if(ps instanceof de.jreality.shader.HatchPolygonShader)
             return new HatchPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
         if(ps instanceof de.jreality.shader.InvertPolygonShader)
@@ -77,9 +77,11 @@ public abstract class PolygonShader {
             return new EtchPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
 
         if(ps instanceof de.jreality.shader.DefaultPolygonShader)
-            return new DefaultPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
+            return rs.getLightingEnabled() ? 
+                    new DefaultPolygonShader((de.jreality.shader.DefaultPolygonShader) ps) :
+                    new ConstantPolygonShader((de.jreality.shader.DefaultPolygonShader) ps);
         if(ps instanceof de.jreality.shader.TwoSidePolygonShader)
-            return new TwoSidePolygonShader((de.jreality.shader.TwoSidePolygonShader) ps);
+            return new TwoSidePolygonShader((de.jreality.shader.TwoSidePolygonShader) ps, rs);
         
 return null;
     }

@@ -58,9 +58,9 @@ public abstract class LineShader {
         
     }
     
-    public static LineShader createFrom(de.jreality.shader.LineShader lis) {
+    public static LineShader createFrom(de.jreality.shader.LineShader lis, de.jreality.shader.RenderingHintsShader rhs) {
         if(lis instanceof de.jreality.shader.DefaultLineShader) {
-            return new DefaultLineShader((de.jreality.shader.DefaultLineShader)lis);
+            return new DefaultLineShader((de.jreality.shader.DefaultLineShader)lis,rhs);
         }
         return null;
     }
