@@ -75,7 +75,8 @@ public class AudioExample {
 		controller.registerPlugin(new AudioOptions());
 		controller.registerPlugin(new AudioLauncher());
 		
-		Input wavFile = Input.getInput(getClass().getResource("zarathustra.wav"));
+//		Input wavFile = Input.getInput(getClass().getResource("zarathustra.wav"));
+		Input wavFile = Input.getInput("sound/zarathustra.wav");
 		final AudioSource source = new CachedAudioInputStreamSource("zarathustra", wavFile, true);
 		source.start();
 		

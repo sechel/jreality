@@ -48,8 +48,7 @@ public class Example {
 
 		// create visual content
 		SceneGraphComponent content = Readers.read(
-				Input.getInput(
-						Example.class.getResource("schwarz.jrs")));
+				Input.getInput("jrs/schwarz.jrs"));
 
 		// create audio content
 		final AudioSource source = new CsoundNode(
