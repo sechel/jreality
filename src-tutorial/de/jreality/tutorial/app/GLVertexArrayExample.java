@@ -28,32 +28,28 @@ public class GLVertexArrayExample {
 	private final static Appearance 
 		vertexArrayAp = new Appearance(), 
 		displayListAp = new Appearance();
-	static boolean vertexArrays = false;
+	static boolean vertexArrays = false,
+		displayLists = true;
 	public static void main(String[] args)	{
 		world = SceneGraphUtility.createFullSceneGraphComponent("world");
-		world.setGeometry(SphereUtility.sphericalPatch(0, 0.0, 180.0, 90.0, 100, 100, 1.0));
+		world.setGeometry(SphereUtility.sphericalPatch(0, 0.0, 180.0, 90.0, 256, 256, 1.0));
+		//set up two appearances, one that uses vertex arrays and one that doesn't
 		DefaultGeometryShader dgs = (DefaultGeometryShader) 
    			ShaderUtility.createDefaultGeometryShader(vertexArrayAp, true);
-		dgs.setShowLines(true);
+		dgs.setShowLines(false);
 		dgs.setShowPoints(false);
-		// A non-default shader has to be set using the following method call
+		dgs.setShowFaces(true);
 		GlslPolygonShader tsps = (GlslPolygonShader) dgs.createPolygonShader("glsl");
-		// but the attributes can be set directly using the Appearance.setAttribute() method
-		DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-		dls.setTubeDraw(true);
-		dls.setTubeRadius(.005);
-		dls.setDiffuseColor(Color.red);
+		vertexArrayAp.setAttribute("diffuseColor", Color.red);
 
 		dgs = (DefaultGeometryShader) 
    			ShaderUtility.createDefaultGeometryShader(displayListAp, true);
-		dgs.setShowLines(true);
+		dgs.setShowLines(false);
 		dgs.setShowPoints(false);
-		dls = (DefaultLineShader) dgs.getLineShader();
-		dls.setTubeDraw(true);
-		dls.setTubeRadius(.005);
-		dls.setDiffuseColor(Color.red);
+		dgs.setShowFaces(true);
 		
-		updateAp(vertexArrays);
+		world.setAppearance(vertexArrays ? vertexArrayAp : displayListAp);
+		System.err.println("vertex arrays = "+vertexArrays);
 		
 		ViewerApp va = new ViewerApp(world);
 		va.update();
@@ -62,10 +58,12 @@ public class GLVertexArrayExample {
 		Viewer viewer = va.getCurrentViewer();
 		viewer.getSceneRoot().getAppearance().setAttribute(BACKGROUND_COLOR, Color.black);
 		viewer.getSceneRoot().getAppearance().setAttribute(BACKGROUND_COLORS,Appearance.INHERITED);
+		// add an InfoOverlay to read off the frame rates
 		if (viewer instanceof de.jreality.jogl.Viewer) {
 			InfoOverlay io =InfoOverlay.perfInfoOverlayFor((de.jreality.jogl.Viewer)viewer);
 			io.setVisible(true);
 		}
+		// add a key listener to allow toggling of vertexArrays and also displayLists
 		Component comp = ((Component) va.getCurrentViewer()
 				.getViewingComponent());
 		comp.addKeyListener(new KeyAdapter() {
@@ -74,11 +72,19 @@ public class GLVertexArrayExample {
 						
 					case KeyEvent.VK_H:
 						System.err.println("	1: toggle vertex arrays");
+						System.err.println("	2: toggle display lists");
 						break;
 		
 					case KeyEvent.VK_1:
 						vertexArrays = !vertexArrays;
-						updateAp(vertexArrays);
+						world.setAppearance(vertexArrays ? vertexArrayAp : displayListAp);
+						System.err.println("vertex arrays = "+vertexArrays);
+						break;
+
+					case KeyEvent.VK_2:
+						displayLists = !displayLists;
+						world.getAppearance().setAttribute(CommonAttributes.ANY_DISPLAY_LISTS, displayLists);
+						System.err.println("display lists = "+displayLists);
 						break;
 
 				}
@@ -86,11 +92,6 @@ public class GLVertexArrayExample {
 				}
 			});
 
-	}
-	
-	private static void updateAp(boolean vertexArrays)	{
-		world.setAppearance(vertexArrays ? vertexArrayAp : displayListAp);
-		System.err.println("vertex arrays = "+vertexArrays);
 	}
 
 }
