@@ -223,7 +223,6 @@ public class SceneGraphNode {
 	/**
 	 * Allow thread-unsafe access to all scene graph nodes, to optimize performance
 	 * in case there are no threading issues. Default is true.
-	 * @deprecated
 	 * @param b
 	 */
 	public static void setThreadSafe(boolean b)	{

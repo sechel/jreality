@@ -45,6 +45,16 @@ package de.jreality.scene;
 /**
  * A visitor for traversing the scene graph. All visit methods are implemented
  * as a call to the visit() method with the supertype parameter.
+ * <p>
+ * Note that if you want a visitor which  visits all nodes in a scene graph,
+ * your visitor will have to include something like the following code:
+ * <code><pre>
+  public void visit(SceneGraphComponent c) {
+  	...
+  	c.childrenAccept(this);
+  	...
+  	}
+  	</pre></code>
  * 
  * @author Holger Pietsch
  * 

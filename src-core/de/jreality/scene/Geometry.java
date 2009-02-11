@@ -59,16 +59,12 @@ import de.jreality.scene.event.GeometryListener;
 /**
  * A geometry leaf. Supports arbitrary attributes ({@link #setGeometryAttributes(String, Object)}),
  * and registering instances of {@link de.jreality.scene.event.GeometryListener}.
+ * 
+ * @author Unknown
  */
 public abstract class Geometry extends SceneGraphNode {
 	
   private static final Map<String, Object> EMPTY_GEOMETRY_ATTRIBUTE_MAP=Collections.emptyMap();
-
-//  public enum Category {
-//	  CATEGORY_VERTEX,
-//	  CATEGORY_EDGE,
-//	  CATEGORY_FACE;
-//  };
   
   public static final String CATEGORY_VERTEX = "VERTEX";
   public static final String CATEGORY_EDGE = "EDGE";

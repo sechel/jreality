@@ -48,7 +48,7 @@ package de.jreality.scene;
  * side, attach a reflection in <i>z=0</i> to the ScneGraphComponent containing the clipping plane.
  * planes 
  * 
- * @author timh
+ * @author timh, gunn
  *
  */
 public class ClippingPlane extends Geometry {

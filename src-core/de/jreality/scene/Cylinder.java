@@ -44,7 +44,7 @@ package de.jreality.scene;
  * use transformations to get a scaled cylinder in arbitrary position.
  * <p>
  * TODO: Resolve the fact that backends differ on whether it is a closed or an open cylinder.
- * 
+ * @author Unknown
  */
 public class Cylinder extends Geometry {
 

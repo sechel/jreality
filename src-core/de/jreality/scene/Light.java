@@ -143,7 +143,7 @@ public abstract class Light extends SceneGraphNode {
     }
     
     /**
-     * @return Returns wether the light should be considered as a fake for
+     * @return Returns whether the light should be considered as a fake for
      * ambient light (so sophisticated renderers might ignore it).
      */
     public boolean isAmbientFake() {
@@ -156,7 +156,7 @@ public abstract class Light extends SceneGraphNode {
     }
     
     /**
-     * @param global: setting wether the light should be considered as a fake for
+     * @param global: setting whether the light should be considered as a fake for
      * ambient light (so sophisticated renderers might ignore it).
      */
     public void setAmbientFake(boolean b) {

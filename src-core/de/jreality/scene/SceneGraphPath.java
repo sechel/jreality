@@ -83,11 +83,20 @@ public class SceneGraphPath implements Cloneable {
 
 	public SceneGraphPath() {}
 
+	/**
+	 * A so-called <i>copy constructor</i>.
+	 * @param path
+	 */
 	public SceneGraphPath(SceneGraphPath path) {
 		this();
 		this.path.addAll(path.path);
 	}
 
+	/**
+	 * A constructor which allows a list of <code>SceneGraphComponent</code>'s as initialization information.
+	 * 
+	 * @param nodes
+	 */
 	public SceneGraphPath(SceneGraphComponent ... nodes) {
 		super();
 		for (int i=0; i<nodes.length; ++i)	this.push(nodes[i]);

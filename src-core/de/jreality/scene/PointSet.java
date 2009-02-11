@@ -57,9 +57,11 @@ import de.jreality.scene.data.DataListSet;
  * <li>{@link Attribute#TEXTURE_COORDINATES}
  * <li>{@link Attribute#LABELS}
  * </ul>
- * End users are recommended to use {@link de.jreality.geometry.PointSetFactory}
+ * Accessing instances of this class directly requires use of the class {@link DataList}.  Users who prefer to
+ * avoid this are recommended to use {@link de.jreality.geometry.PointSetFactory}
  * to construct instances of this class.
- * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
+ * <p>
+ * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>, gunn
  *
  */
 public class PointSet extends Geometry //implements GeometryListener
