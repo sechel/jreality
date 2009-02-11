@@ -6,22 +6,17 @@
 package de.jreality.tutorial.light;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.util.List;
-
-import javax.swing.JMenuBar;
 
 import de.jreality.geometry.BezierPatchMesh;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
-import de.jreality.renderman.LightCollector;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.RotateTool;
 import de.jreality.ui.viewerapp.ViewerApp;
