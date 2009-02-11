@@ -1,14 +1,22 @@
 package de.jreality.audio.plugin;
 
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.jreality.audio.Attenuation;
 import de.jreality.audio.SoundPath;
@@ -16,6 +24,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
+import de.jreality.ui.JSliderVR;
 import de.jreality.ui.plugin.View;
 import de.jreality.ui.plugin.image.ImageHook;
 import de.varylab.jrworkspace.plugin.Controller;
@@ -41,7 +50,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	
 	private Appearance rootAppearance;
 	
-	private JTextField speedWidget, gainWidget;
+	private JSliderVR gainWidget, speedWidget;
 	private JComboBox attenuationWidget;
 	
 	public AudioOptions() {
@@ -49,9 +58,36 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		attenuations.put("linear", Attenuation.LINEAR);
 		attenuations.put("exponential", Attenuation.EXPONENTIAL);
 		
-		shrinkPanel.setLayout(new GridLayout(3, 2));
+		shrinkPanel.setLayout(new GridBagLayout());
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
-		attenuationWidget = new JComboBox();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		shrinkPanel.add(new JLabel("Attenuation"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(attenuationWidget = new JComboBox(), gbc);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		shrinkPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(speedWidget = new JSliderVR(0, 1000), gbc);
+		speedWidget.setPreferredSize(new Dimension(20, 50));
+		speedWidget.setMajorTickSpacing(500);
+		speedWidget.setPaintTicks(true);
+		speedWidget.setPaintLabels(true);
+		speedWidget.setPaintTrack(true);
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		shrinkPanel.add(new JLabel("Gain (dB)"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(gainWidget = new JSliderVR(-80, 40, (int) toDecibels(gain)), gbc);
+		gainWidget.setPreferredSize(new Dimension(20, 50));
+		gainWidget.setMajorTickSpacing(40);
+		gainWidget.setPaintTicks(true);
+		gainWidget.setPaintLabels(true);
+		gainWidget.setPaintTrack(true);
+		
 		for(String s: attenuations.keySet()) {
 			attenuationWidget.addItem(s);
 			attenuationLabels.put(attenuations.get(s), s);
@@ -64,33 +100,16 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 			}
 		});
 		
-		shrinkPanel.add(new JLabel("Attenuation"));
-		shrinkPanel.add(attenuationWidget);
-		shrinkPanel.add(new JLabel("Speed of sound"));
-		shrinkPanel.add(speedWidget = new JTextField(Float.toString(speedOfSound), 7));
-		shrinkPanel.add(new JLabel("Gain"));
-		shrinkPanel.add(gainWidget = new JTextField(Float.toString(gain), 7));
-		
-		speedWidget.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				float newSpeed = Float.valueOf(speedWidget.getText()).floatValue();
-				if (newSpeed<0) {
-					updateSpeed();
-				} else {
-					speedOfSound = newSpeed;
-					rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
-				}
+		speedWidget.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				speedOfSound = speedWidget.getValue();
+				rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
 			}
 		});
-		gainWidget.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				float newGain = Float.valueOf(gainWidget.getText()).floatValue();
-				if (newGain<0 || newGain>4) {
-					updateGain();
-				} else {
-					gain = newGain;
-					rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
-				}
+		gainWidget.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				gain = fromDecibels(gainWidget.getValue());
+				rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
 			}
 		});
 	}
@@ -100,11 +119,11 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	}
 	
 	private void updateSpeed() {
-		speedWidget.setText(Float.toString(speedOfSound));
+		speedWidget.setValue((int) speedOfSound);
 	}
 	
 	private void updateGain() {
-		gainWidget.setText(Float.toString(gain));
+		gainWidget.setValue((int) toDecibels(gain));
 	}
 	
 	public void appearanceChanged(AppearanceEvent ev) {
@@ -185,5 +204,13 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
+	}
+	
+	private final double dbq = 10/Math.log(2);
+	private float toDecibels(float q) {
+		return (float) (Math.log(q)*dbq);
+	}
+	private float fromDecibels(float db) {
+		return (float) Math.exp(db/dbq);
 	}
 }
