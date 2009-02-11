@@ -11,6 +11,7 @@ import static de.jreality.shader.CommonAttributes.LINE_SHADER;
 import static de.jreality.shader.CommonAttributes.METRIC;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SPECULAR_EXPONENT;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.CommonAttributes.TUBE_RADIUS;
 import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
 
@@ -19,6 +20,7 @@ import java.awt.Component;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.net.URL;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -26,6 +28,7 @@ import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
@@ -35,11 +38,15 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.GlslProgram;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
+import de.jreality.tutorial.intro.Intro07;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.ViewerApp;
@@ -147,6 +154,25 @@ public class NonEuclideanExample {
 		
 		Appearance ap = world.getAppearance();
 		ap.setAttribute(VERTEX_DRAW, false);
+		// textures work too but for a first demo we leave them out.
+		boolean doTexture = false;
+		if (doTexture)	{
+			Texture2D tex2d = (Texture2D) AttributeEntityUtility
+					.createAttributeEntity(Texture2D.class, POLYGON_SHADER
+							+ "." + TEXTURE_2D, ap, true);
+			URL is = Intro07.class.getResource("gridSmall.jpg");
+			ImageData id = null;
+			try {
+				id = ImageData.load(new Input(is));
+			} catch (IOException ee) {
+				ee.printStackTrace();
+			}
+			tex2d.setImage(id);
+			Matrix foo = new Matrix();
+			MatrixBuilder.euclidean().scale(10, 10, 1).assignTo(foo);
+			tex2d.setTextureMatrix(foo);
+		}
+		
 		// try loading the OpenGL shader for the non-euclidean cases
 		GlslProgram noneuclideanShader = null;
 		try {
@@ -219,7 +245,7 @@ public class NonEuclideanExample {
 	}
 
 	// some variables which depend on the metric -- hence we have three of each
-	double[][] falloffs = {{1,.25,0},{.5, .5,0},{.5, .5, 0}};
+	double[][] falloffs = {{1,.1,0},{.5, .5,0},{.5, .5, 0}};
 	double[][] cameraClips = {{.001,2},{.01, 1000},{.01,-.05}};
 	double distance = .5;
 	double[] unitD = {Math.tanh(distance), distance, Math.tan(distance)};
