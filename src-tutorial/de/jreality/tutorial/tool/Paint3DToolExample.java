@@ -2,7 +2,6 @@ package de.jreality.tutorial.tool;
 
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -10,10 +9,6 @@ import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.jogl.shader.ShadedSphereImage;
-import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
@@ -29,9 +24,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.tutorial.util.SimpleTextureFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
 public class Paint3DToolExample {

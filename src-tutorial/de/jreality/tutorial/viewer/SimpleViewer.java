@@ -6,11 +6,7 @@ import javax.swing.JFrame;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.tools.DraggingTool;
-import de.jreality.tools.RotateTool;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.Secure;
-import de.jreality.util.SystemProperties;
 
 /**
  * A simple class showing how to use a {@link ViewerApp} to get a viewing component 

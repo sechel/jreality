@@ -9,9 +9,7 @@ import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 
 import java.awt.Color;
 
-import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
-import de.jreality.jogl.JOGLSphereHelper;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;

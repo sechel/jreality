@@ -11,7 +11,6 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.ScaleTool;
 import de.jreality.ui.viewerapp.ViewerApp;
-import static de.jreality.shader.CommonAttributes.*;
 
 public class AddToolExample {
 

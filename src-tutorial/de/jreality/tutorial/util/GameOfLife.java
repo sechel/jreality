@@ -3,11 +3,7 @@ package de.jreality.tutorial.util;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.ImageData;
 
 public class GameOfLife {
