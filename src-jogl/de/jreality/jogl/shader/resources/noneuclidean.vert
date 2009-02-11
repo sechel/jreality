@@ -51,8 +51,8 @@ uniform bool useNormals4;
 uniform bool lightingEnabled;
 uniform float Nw;
 // textures are not implemented yet
-//uniform sampler2D texture;
-//uniform int doTexture;
+uniform sampler2D texture;
+uniform bool doTexture;
 
 // the inner product in klein model of hyperbolic space
 float dot4(in vec4 P, in vec4 Q)	{
@@ -112,7 +112,7 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
  //   Compute attenuation
    if (hyperbolic) 
    	attenuation = gl_LightSource[i].constantAttenuation * exp(-gl_LightSource[i].linearAttenuation * d);
-   else attenuation =  gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation*cos(d);
+   else attenuation =  gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation*abs(cos(d));
 
     halfVector = (hyperbolic ? -1.0 : 1.0) * (toLight + eye);
     normalize4(ecPosition4, halfVector); 
@@ -143,7 +143,8 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
     pointLight(0, normal, eye, ecPosition);
 
 	  vec4 diff = matpar.diffuse;
-//	if (doTexture != 0) diff = diff *  texture2D(texture, texcoord.st);
+//	if (doTexture) 
+//		diff = diff *  texture2D(texture, texcoord.st);
     color = //gl_FrontLightModelProduct.sceneColor +
       	Ambient  * matpar.ambient +
       	Diffuse  * diff +
@@ -162,7 +163,7 @@ void main (void)
     normalize4(ecPosition, transformedNormal);
 //    if (transformedNormal.w * transformedNormal.z < 0) 
 //    	transformedNormal = -transformedNormal;
-//    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
+    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
     	transformedNormal = -transformedNormal;
     gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
