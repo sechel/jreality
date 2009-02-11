@@ -121,7 +121,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 //		System.err.println("xsec length = "+crossSection.length);
 		if (templateShader != null)  {
 			polygonShader = DefaultGeometryShader.createFrom(templateShader.getPolygonShader());
-			System.err.println("line shader polygon shader = "+polygonShader.getClass().getName());
 			polygonShader.setFromEffectiveAppearance(eap, name+".polygonShader");
 		}
 		else polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
