@@ -1,0 +1,4 @@
+There is an incompatibility between Java 5 and Java 6 which effects the ant build.  In order
+for the ant build to function correctly, edit the file excludes.txt in this directory and follow the directions there.
+
+--The management
