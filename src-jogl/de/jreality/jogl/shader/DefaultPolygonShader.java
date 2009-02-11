@@ -188,6 +188,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			Texture2DLoaderJOGL.render(gl, joglLightMap);
 		    texUnit++;
 		    texunitcoords++;
+		    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
+		    	glslProgram.setUniform("texture", texUnit);
 	    }
 	    if (joglTexture2D != null) {
 		    Geometry curgeom = jr.renderingState.currentGeometry;
@@ -204,9 +206,15 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				Texture2DLoaderJOGL.render(gl, joglTexture2D);
 			    texUnit++;
 			    texunitcoords++;		
-			    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
+			    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null) {
 			    	glslProgram.setUniform("texture", texUnit);
+//			    	System.err.println("Setting texture to "+texUnit);
+			    }
+		    } 
+		    if (glslProgram != null && glslProgram.getSource().getUniformParameter("doTexture") != null) {
+		    	glslProgram.setUniform("doTexture", geometryHasTextureCoordinates);
 		    }
+
 	    }
 
 	    if (joglCubeMap != null)  {
@@ -215,14 +223,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			refMapUnit = texUnit;
 			Texture2DLoaderJOGL.render(jr, joglCubeMap);
 			texUnit++;
-		} //else if (useGLSL)
-//			glslShader.reflectionTextureUnit = -1;    	
+		} 	
     
 	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs); 
     if (useGLSL && glslProgram != null)		{
-    	//glslShader.render(jrs);
     	GlslLoader.render(glslProgram, jr);
     }
     jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];

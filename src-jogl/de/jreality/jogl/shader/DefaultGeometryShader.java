@@ -185,7 +185,7 @@ public class DefaultGeometryShader  implements Shader {
 	        else if(ps instanceof de.jreality.shader.DefaultPolygonShader)
 	        	ret = new DefaultPolygonShader((de.jreality.shader.DefaultPolygonShader)ps);
 	        else ret = new DefaultPolygonShader();
-//	        System.err.println("ret = "+ret.getClass().getName());
+	        System.err.println("ret = "+ret.getClass().getName());
 	        return ret;
 	    }
 	    public static LineShader createFrom(de.jreality.shader.LineShader ps) {

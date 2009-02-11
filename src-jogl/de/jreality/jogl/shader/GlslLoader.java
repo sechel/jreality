@@ -64,6 +64,7 @@ public class GlslLoader {
   }
   
   public static void render(GlslProgram prog, GL gl) {
+//	  System.err.println("in glslLoader render()");
     ProgramContext context = getContext(gl, prog);
     context.linkProgram(gl);
     context.activateProgram(gl);

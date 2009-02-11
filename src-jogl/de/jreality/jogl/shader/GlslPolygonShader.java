@@ -40,6 +40,10 @@
 
 package de.jreality.jogl.shader;
 
+import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -97,12 +101,11 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	Texture2D texture1, texture0;
 	
 	CubeMap environmentMap;
-	private VertexShader vertexShader;
+	private VertexShader vertexShader = new DefaultVertexShader();
 	private boolean smoothShading;
 	private int frontBack=DefaultPolygonShader.FRONT_AND_BACK;
 	private boolean useVertexArrays = true,
 		doNormals4 = false;
-//	RenderingHintsShader rhsShader=new RenderingHintsShader();
 	
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
@@ -116,25 +119,24 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			program = new GlslProgram(app, eap2, name);
 		} else program = null;
 		// TODO remove duplicate names after steffen has refactored the texture and reflection map stuff
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap)) {
-			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, CommonAttributes.TEXTURE_2D), eap);
-		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit0"), eap)) {
-			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit0"), eap);
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D), eap)) {
+			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D), eap);
 		} else texture0 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap)) {
 			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap);
-		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit1"), eap)) {
-			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "textureUnit1"), eap);
+		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
+			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D_1), eap);
 		} else texture1 = null;
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap)) {
-			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "reflectionMap"), eap);
-		} else if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "textureUnit2"), eap)) {
-			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, "textureUnit2"), eap);
-		} else environmentMap = null;
-		vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
-//		rhsShader.setFromEffectiveAppearance(eap, "");
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)) {
+			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap);
+		}  else environmentMap = null;
+		//vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
+		vertexShader.setFromEffectiveAppearance(eap, name);
+    	System.err.println("glslpolygonshader: set from eap "+program);
+    	needsChecked = true;
+    	geometryHasTextureCoordinates = false;
 	}
-
+	boolean needsChecked = true, geometryHasTextureCoordinates, doTexture = false;
 	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
@@ -145,11 +147,31 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jrs);
 	   
+		doTexture = false;
 		if (texture0 != null) {
-			gl.glActiveTexture(GL.GL_TEXTURE0);
-			Texture2DLoaderJOGL.render(jr.globalGL, texture0);
-			gl.glEnable(GL.GL_TEXTURE_2D);
+		    Geometry curgeom = jr.renderingState.currentGeometry;
+		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
+		    	if (curgeom != null && (curgeom instanceof IndexedFaceSet) &&
+		    		((IndexedFaceSet) curgeom).getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
+		    			geometryHasTextureCoordinates = true; 
+		    			needsChecked = false;
+		    	}
+		    if (geometryHasTextureCoordinates) {
+				gl.glActiveTexture(GL.GL_TEXTURE0);
+				Texture2DLoaderJOGL.render(jr.globalGL, texture0);
+				gl.glEnable(GL.GL_TEXTURE_2D);
+			    if (program != null && program.getSource().getUniformParameter("texture") != null) {
+					doTexture = true;
+			    	program.setUniform("texture",GL.GL_TEXTURE0);
+			    	System.err.println("Setting texture to "+GL.GL_TEXTURE0);
+			    }		    	
+		    }
 		}
+	    if (program != null && program.getSource().getUniformParameter("doTexture") != null)  {
+	    	program.setUniform("doTexture", doTexture);
+	    	System.err.println("Setting do texture = "+doTexture);
+	    }
+	    	
 		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
 			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
@@ -322,6 +344,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				int vertexLength, 
 				boolean smooth,
 				boolean doNormals4) {
+		System.err.println("rendering with vertex arrays");
 		boolean faceN = normalBind == PER_FACE;
 		
 		boolean faceC = colorBind == PER_FACE;
