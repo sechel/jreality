@@ -60,6 +60,9 @@ import de.jreality.scene.data.DoubleArrayArray;
  * The domain of the immersion is a rectangle in (u,v) space specified by the four methods {@link #setUMin(double)}, {@link #setUMax(double)}, etc.
  * The number of samples in each direction is specified using the methods inherited from {@link QuadMeshFactory}: {@link QuadMeshFactory#setULineCount(int)}, etc.
  * <p>
+ *  For an example, see
+ * <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Parametrized_Surfaces> this tutorial</a>.
+ * <p>
  * @author gunn
  *
  */

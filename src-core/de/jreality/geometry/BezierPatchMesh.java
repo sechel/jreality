@@ -12,7 +12,7 @@ import de.jreality.scene.IndexedFaceSet;
  * underlying Bezier curves can be arbitrary degree, and must not be the same.  For example,
  * it is possible to have quadratic curves in the u parameter direction and cubics in the
  * v direction.  
- * 
+ * <p>
  * Instances are immutable.  The only available constructor (see {@link #BezierPatchMesh(int, int, double[][][])}
  * specifies the two degrees (u and v respectively) and an array of control points. Each row
  * of control points specifies one u-curve; each column specifies a v-curve. The control points
@@ -21,12 +21,13 @@ import de.jreality.scene.IndexedFaceSet;
  * control points in the u-direction must be 1 more than a multiple of the u-degree; and similarly 
  * for v.   The simplest case is a single patch; for a cubic Bezier, this is a 4x4 array of
  * control points.
- * 
+ * <p>
  * Currently the only operations supported on the mesh is binary refinement: {@link #refineU()},
  * {@link #refineV()}, and {@link #refine()}.  
- * 
+ * <p>
  * TODO: add a tessellate method which creates an nxn QuadMesh from each set of control points
  * in the mesh.
+ * <p>
  * TODO: implement adaptive refinement.  This will require a new data structure probably a quad-tree
  * to store the differently-refined levels of the original patch mesh.
  * @author Charles Gunn

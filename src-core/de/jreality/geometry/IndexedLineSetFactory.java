@@ -66,12 +66,14 @@ import de.jreality.scene.data.DataListSet;
  * <li>{@link #setEdgeAttribute(Attribute, double[][])}</li>
  * </ul>
  * <p>
- * <p>
  * You can also request the factory to automatically generate edge labels (which are strings displayed 
  * as 3D text at the midpoint of the edges) using the method {@link #setGenerateEdgeLabels(boolean)}. This 
  * will generate labels showing the index of the edge within the edge array. (Probably only works correctly
  * when all edges consist of two points).
- * 
+ * <p>
+ *  For an example, see
+ * <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Use_an_indexed_line_set_factory> this tutorial</a>.
+ * <p>
  * @author gunn
  *
  */

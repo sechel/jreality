@@ -106,58 +106,9 @@ import de.jreality.util.CopyVisitor;
  *      and will be set in faceColors,EdgeColors and VertexColors</li>
  * </ul>
  * 
- * excample:
- * <code><b><pre>
-   import java.awt.Color;
-	import java.util.LinkedList;
-	import java.util.List;
-	import de.jreality.math.MatrixBuilder;
-	import de.jreality.scene.Appearance;
-	import de.jreality.scene.IndexedFaceSet;
-	import de.jreality.scene.SceneGraphComponent;
-	import de.jreality.scene.data.Attribute;
-	import de.jreality.shader.CommonAttributes;
-	import de.jreality.ui.viewerapp.ViewerApp;
- 
- // a little Scene (two boxes and a bangle, transfomation, appearance)
-   		IndexedFaceSet box= Primitives.box(2, .5, .5, false);
-		IndexedFaceSet box2= Primitives.box(2, .6, 0.4, true);
-		IndexedFaceSet zyl= Primitives.cylinder(20,1,0,.5,5);
-		SceneGraphComponent root= new SceneGraphComponent();
-		SceneGraphComponent childNode1= new SceneGraphComponent();
-		MatrixBuilder.euclidean().translate(0,0,1).assignTo(childNode1);
-		SceneGraphComponent childNode2= new SceneGraphComponent();
-		Appearance app= new Appearance();
-		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, new Color(255,255,0));
-		childNode2.setAppearance(app);
-		root.addChild(childNode1);
-		root.addChild(childNode2);
-		root.setGeometry(box2);
-		childNode1.setGeometry(box);
-		childNode2.setGeometry(zyl);
-	// the Factory:
-		GeometryMergeFactory mergeFact= new GeometryMergeFactory();		
-	// play with the following 3 optional settings (by default they are true)
-		mergeFact.setRespectFaces(true);
-		mergeFact.setRespectEdges(true);
-		mergeFact.setGenerateVertexNormals(true);			
-	// you can set some defaults:
-		List<Attribute> defaultAtts= new LinkedList<Attribute>();
-		List<List<double[]>> defaultAttValue= new LinkedList<List<double[]>>();
-		List<double[]> value= new LinkedList<double[]>();
-		defaultAtts.add(Attribute.COLORS);
-		defaultAttValue.add(value);
-		value.add(new double[]{0,1,0,1});// remember: only 4d colors
-		mergeFact.setDefaultFaceAttributes(defaultAtts,defaultAttValue );
-	// merge a list of geometrys:
-		//IndexedFaceSet[] list= new IndexedFaceSet[]{box2,zyl};
-		//IndexedFaceSet result=mergeFact.mergeIndexedFaceSets(list);
-	// or  a complete tree:
-		IndexedFaceSet result=mergeFact.mergeGeometrySets(root);
-	// take a look :
-		vApp.display(result);
-</pre></b></code>
- * 
+ * For an example of this factory, see  
+ * <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Use_a_geometry_merge_factory> this tutorial</a>.
+ *
  * TODO Problems:
  * 	ifs and ils together
  * <p>
@@ -166,8 +117,10 @@ import de.jreality.util.CopyVisitor;
  * TODO: merge FaceSets and linesets seperate to avoid "holes" in the AttributeList 
  *       and gather in the end 
  *  <p>
+ *  TODO: refactor to conform to the jReality factory pattern (use update() to regenerate current state).
+ *  
  * @author gonska    
- * 
+ * @see RemoveDuplicateInfo if you wish also to combine duplicated vertex, edge, or face data.
  */
 
 

@@ -95,6 +95,9 @@ import de.jreality.scene.data.StorageModel;
  * To specify that the geometry should be handled according to non-euclidean metric, use the method {@link #setMetric(int)}. 
  * This has little significance for the point sets, but becomes more important for subclasses such as {@link IndexedFaceSetFactory}.
  * <p>
+ *  For an example, see
+ * <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Use_a_point_set_factory> this tutorial</a>.
+ * <p>
  * See {@link DataList}.
  *
  * @author gunn

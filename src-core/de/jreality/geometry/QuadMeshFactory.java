@@ -76,8 +76,11 @@ import de.jreality.scene.data.DataListSet;
  * the factory provides the instance with an {@link Attribute}, {@link GeometryUtility#QUAD_MESH_SHAPE} whose value is an instance of {@link Dimension}
  * specifying the (u,v) dimensions of the mesh -- in case a backend can optimize its handling of the geometry.
  * <p>
+ *  For an example, see
+ * <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Use_a_quad_mesh_factory> this tutorial</a>.
+ * <p>
  * @author gunn
- *
+ * @see QuadMeshFactory
  */
 public class QuadMeshFactory extends AbstractQuadMeshFactory {
 
