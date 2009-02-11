@@ -16,11 +16,9 @@ import java.io.IOException;
 import de.jreality.geometry.SliceBoxFactory;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.TwoSidePolygonShader;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.PickUtility;
 import de.jreality.util.SceneGraphUtility;
 
 

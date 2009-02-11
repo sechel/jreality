@@ -40,13 +40,13 @@
 
 package de.jreality.tutorial.geom;
 
-import de.jreality.geometry.IndexedFaceSetFactory;
+import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
+
 import java.awt.Color;
-import de.jreality.scene.SceneGraphComponent;
+
+import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
-import static de.jreality.shader.CommonAttributes.*;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 

@@ -2,18 +2,11 @@ package de.jreality.tutorial.geom;
 
 import java.awt.Color;
 
-import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.QuadMeshFactory;
-import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
-import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
-import de.jreality.tutorial.util.SimpleTextureFactory;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 

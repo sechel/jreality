@@ -40,8 +40,8 @@
 
 package de.jreality.tutorial.geom;
 
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.geometry.IndexedLineSetUtility;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 

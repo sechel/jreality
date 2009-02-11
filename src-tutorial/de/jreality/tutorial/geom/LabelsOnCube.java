@@ -42,8 +42,6 @@ package de.jreality.tutorial.geom;
 
 import java.awt.Color;
 
-import de.jreality.geometry.GeometryUtility;
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
@@ -57,7 +55,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.SystemProperties;
 
 /**
  * This example shows how to attach labels to the vertices, edges, and faces of an indexed face set.
