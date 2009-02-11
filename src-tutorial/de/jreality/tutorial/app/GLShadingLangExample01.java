@@ -1,8 +1,5 @@
 package de.jreality.tutorial.app;
 
-import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
-
-
 import java.io.IOException;
 
 import de.jreality.geometry.SphereUtility;

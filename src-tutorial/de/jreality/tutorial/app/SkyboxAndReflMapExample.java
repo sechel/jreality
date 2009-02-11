@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
-import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.TextureUtility;

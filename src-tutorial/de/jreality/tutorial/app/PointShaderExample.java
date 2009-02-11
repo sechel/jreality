@@ -4,19 +4,16 @@ import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.POINT_SPRITE;
 
 import java.awt.Color;
-import java.io.IOException;
 
 import javax.swing.SwingConstants;
 
 import de.jreality.backends.label.LabelUtility;
-import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -24,7 +21,6 @@ import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;

@@ -15,7 +15,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
-import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.GlslPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;

@@ -4,9 +4,7 @@ import java.io.IOException;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;

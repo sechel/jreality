@@ -1,7 +1,10 @@
 package de.jreality.tutorial.app;
 
+import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
+
 import java.awt.Color;
-import java.io.IOException;
 
 import javax.swing.SwingConstants;
 
@@ -13,7 +16,6 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
@@ -23,7 +25,6 @@ import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
-import static de.jreality.shader.CommonAttributes.*;
 
 /**
  * Features shown:
