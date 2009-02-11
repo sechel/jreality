@@ -518,7 +518,7 @@
 	  	<copy file="${lib}/sunflow.jar" todir="release/tmp/lib" />
 	  	<copy file="${lib}/janino.jar" todir="release/tmp/lib" />
 	  	<copy file="${lib}/colorpicker.jar" todir="release/tmp/lib" />
-	  	<copy file="${lib}/JRWorkspacePluginSDK.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/jRWorkspacePluginSDK.jar" todir="release/tmp/lib" />
 	  	<copy todir="release/tmp/lib">
 	  		<fileset dir="3rd-party" />
 	  	</copy>
