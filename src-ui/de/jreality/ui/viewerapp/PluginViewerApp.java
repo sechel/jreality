@@ -102,8 +102,9 @@ public class PluginViewerApp {
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
 		
-		displayOptions = new DisplayOptions();
-		controller.registerPlugin(displayOptions);
+		setCreateMenu(true);
+		setAttachBeanShell(true);
+		setAttachNavigator(true);
 	}
 
 	public void addAccessory(final Component c) {
@@ -214,19 +215,30 @@ public class PluginViewerApp {
 	}
 
 	public void setAttachBeanShell(boolean b) {
-		shell = new Shell();
-		controller.registerPlugin(shell);		
+		if (b)	{
+			shell = new Shell();
+			controller.registerPlugin(shell);					
+		}
 	}
 
 	public void setAttachNavigator(boolean b) {
-		inspector = new Inspector();
-		controller.registerPlugin(inspector);	
+		if (b)	{
+			inspector = new Inspector();
+			controller.registerPlugin(inspector);				
+		}
 	}
 
 	public void setBackgroundColor(Color... colors) {
 
 	}
 
+	public void setDisplayOptions(boolean b)	{
+		if (b) {
+			displayOptions = new DisplayOptions();
+			controller.registerPlugin(displayOptions);
+						
+		}
+	}
 	public void setCreateMenu(boolean b) {
 		if (b) {
 			viewMenuBar = new ViewMenuBar();
@@ -246,6 +258,11 @@ public class PluginViewerApp {
 	@Deprecated
 	public void update() {
 		
+	}
+
+	public static void display(SceneGraphNode sceneGraphNode) {
+		if (sceneGraphNode == null) sceneGraphNode = new SceneGraphComponent("null");
+		new PluginViewerApp(sceneGraphNode).display();
 	}
 	
 	
