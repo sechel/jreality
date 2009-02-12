@@ -191,6 +191,7 @@
     <fileset dir="lib">
       <include name="smrj.jar"/>
       <include name="jogl.jar"/>
+      <include name="jRWorkspacePluginSDK.jar"/>    	
      </fileset>
     <fileset dir="dist">
       <include name="jReality-io.jar"/>

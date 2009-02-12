@@ -2,9 +2,9 @@ package de.jreality.audio.plugin;
 
 import de.jreality.audio.util.AudioLauncher;
 import de.jreality.scene.Viewer;
-import de.jreality.ui.plugin.CameraStand;
-import de.jreality.ui.plugin.View;
-import de.jreality.ui.plugin.image.ImageHook;
+import de.jreality.ui.plugin.view.CameraStand;
+import de.jreality.ui.plugin.view.View;
+import de.jreality.ui.plugin.view.image.ImageHook;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;

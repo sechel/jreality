@@ -35,7 +35,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.ui.plugin.image.ImageHook;
+import de.jreality.ui.plugin.view.image.ImageHook;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.util.Input;
 import de.jreality.util.Secure;

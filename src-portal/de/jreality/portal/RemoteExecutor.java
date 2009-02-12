@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 
 import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.ui.plugin.View;
+import de.jreality.ui.plugin.view.View;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class RemoteExecutor {

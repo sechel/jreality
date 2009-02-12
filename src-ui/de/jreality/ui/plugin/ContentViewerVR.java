@@ -11,17 +11,19 @@ import de.jreality.ui.plugin.view.CameraStand;
 import de.jreality.ui.plugin.view.ContentAppearance;
 import de.jreality.ui.plugin.view.ContentLoader;
 import de.jreality.ui.plugin.view.ContentTools;
-import de.jreality.ui.plugin.view.DisplayOptions;
 import de.jreality.ui.plugin.view.Inspector;
 import de.jreality.ui.plugin.view.Lights;
 import de.jreality.ui.plugin.view.Shell;
 import de.jreality.ui.plugin.view.View;
 import de.jreality.ui.plugin.view.ViewMenuBar;
 import de.jreality.ui.plugin.view.ViewPreferences;
+import de.jreality.ui.plugin.vr.Avatar;
+import de.jreality.ui.plugin.vr.Sky;
+import de.jreality.ui.plugin.vr.Terrain;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
-public class ContentViewer {
+public class ContentViewerVR {
 	private SimpleController controller;
 	private ViewMenuBar viewMenuBar;
 	private View view;
@@ -33,11 +35,23 @@ public class ContentViewer {
 	private Inspector inspector;
 	private Shell shell;
 	private ContentAppearance contentAppearance;
+	private Sky sky;
 	private ContentTools contentTools;
-	private DisplayOptions displayOptions;
 	
-	public ContentViewer() {
+	private Avatar avatar;
+	private Terrain terrain;
+	
+//	private HeadUpDisplay headUpDisplay;
+
+//	private Audio audio;
+//	private ContentSound contentSound;
+	
+	public ContentViewerVR(boolean withAudio) {
 		controller = new SimpleController();
+		
+		viewMenuBar = new ViewMenuBar();
+		viewMenuBar.addMenuSeparator(ContentViewerVR.class, 19.0, "File");
+		viewMenuBar.addMenuItem(ContentViewerVR.class, 20.0, new ExitAction(), "File");
 		
 		view = new View();
 		controller.registerPlugin(view);
@@ -52,8 +66,8 @@ public class ContentViewer {
 		controller.registerPlugin(background);
 		
 		viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuSeparator(ContentViewer.class, 19.0, "File");
-		viewMenuBar.addMenuItem(ContentViewer.class, 20.0, new ExitAction(), "File");
+		viewMenuBar.addMenuSeparator(ContentViewerVR.class, 19.0, "File");
+		viewMenuBar.addMenuItem(ContentViewerVR.class, 20.0, new ExitAction(), "File");
 		controller.registerPlugin(viewMenuBar);
 		
 		alignedContent = new AlignedContent();
@@ -71,11 +85,28 @@ public class ContentViewer {
 		contentAppearance = new ContentAppearance();
 		controller.registerPlugin(contentAppearance);
 		
+		sky = new Sky();
+		controller.registerPlugin(sky);
+
+			avatar = new Avatar();
+			avatar.setShowPanel(false);
+			controller.registerPlugin(avatar);
+		
+			terrain = new Terrain();
+			controller.registerPlugin(terrain);
+		
+//		if (withAudio) {
+//			audio = new Audio();
+//			controller.registerPlugin(audio);
+//			contentSound = new ContentSound();
+//			controller.registerPlugin(contentSound);
+//		}
+		
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
 		
-		displayOptions = new DisplayOptions();
-		controller.registerPlugin(displayOptions);
+//		headUpDisplay = new HeadUpDisplay();
+//		controller.registerPlugin(headUpDisplay);
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -130,14 +161,26 @@ public class ContentViewer {
 		return contentAppearance;
 	}
 
+	public Sky getSky() {
+		return sky;
+	}
+
 	public ContentTools getContentTools() {
 		return contentTools;
 	}
 
-	public DisplayOptions getDisplayPanel() {
-		return displayOptions;
+	public Avatar getAvatar() {
+		return avatar;
 	}
 
+	public Terrain getTerrain() {
+		return terrain;
+	}
+//
+//	public Audio getAudio() {
+//		return audio;
+//	}
+	
 	private static class ExitAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 
@@ -151,8 +194,25 @@ public class ContentViewer {
 	}
 	
 	public static void main(String[] args) {
-		ContentViewer contentViewer = new ContentViewer();
+		ContentViewerVR contentViewer = new ContentViewerVR(true);
 		contentViewer.registerPlugin(new ContentLoader());
 		contentViewer.startup();
 	}
+
+	public static View remoteMain(String[] args) {
+		ContentViewerVR contentViewer = new ContentViewerVR(true);
+		contentViewer.registerPlugin(new ContentLoader());
+		contentViewer.startup();
+		return contentViewer.view;
+	}
+	
+	
+//	public ContentSound getContentSound() {
+//		return contentSound;
+//	}
+
+//	public HeadUpDisplay getHeadUpDisplay() {
+//		return headUpDisplay;
+//	}
+
 }
