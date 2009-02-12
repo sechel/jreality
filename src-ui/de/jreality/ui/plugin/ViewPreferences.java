@@ -76,7 +76,6 @@ public class ViewPreferences extends Plugin implements
 		return info;
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		if (fullscreenItem == s) {
@@ -102,7 +101,6 @@ public class ViewPreferences extends Plugin implements
 		super.storeStates(c);
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void restoreStates(Controller c) throws Exception {
 		threadSafeChecker.setSelected(c.getProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe()));

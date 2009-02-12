@@ -203,5 +203,14 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		SwingUtilities.updateComponentTreeUI(appearanceInspector);
 	}
 
+	@Override
+	public Class<?> getHelpHandle() {
+		return getClass();
+	}
+	
+	@Override
+	public String getHelpDocument() {
+		return "default.html";
+	}
 }
 
