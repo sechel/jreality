@@ -77,9 +77,14 @@ public class ToolSystemConfiguration {
   public static ToolSystemConfiguration loadDefaultConfiguration() {
     try {
       final URL toolconfig = ToolSystemConfiguration.class.getResource("toolconfig.xml");
-      if (toolconfig == null)
-    	  throw new RuntimeException("Resource \"toolconfig.xml\" not found.\n Expected in "+ToolSystemConfiguration.class.getPackage().toString()
-		  +".\n This is often caused by Eclipse when Preferences->Java->Building->Filtered Resources includes \"*.xml\"." );
+      if (toolconfig == null) {
+    	  String text="Resource \"toolconfig.xml\" not found.\n Expected in "+ToolSystemConfiguration.class.getPackage().toString()
+		  +".\n This is often caused by Eclipse when Preferences->Java->Building->Filtered Resources includes \"*.xml\".";    	  
+    	  // The message is also printed to stderr, because the message of the RuntimeException may be suppressed, 
+    	  // e.g. by de.jreality.util.Secure.doPrivileged()
+    	  System.err.println(text);
+    	  throw new RuntimeException(text);
+      }
       return loadConfiguration(Input.getInput(toolconfig));
     } catch (IOException e) {
       throw new Error();
