@@ -132,7 +132,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		}  else environmentMap = null;
 		//vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
 		vertexShader.setFromEffectiveAppearance(eap, name);
-    	System.err.println("glslpolygonshader: set from eap "+program);
+//    	System.err.println("glslpolygonshader: set from eap "+program);
     	needsChecked = true;
     	geometryHasTextureCoordinates = false;
 	}
