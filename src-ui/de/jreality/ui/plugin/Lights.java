@@ -13,8 +13,8 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class Lights extends Plugin {
 
-	private static final double DEFAULT_SUN_LIGHT_INTENSITY = 1;
-	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .2;
+	private static final double DEFAULT_SUN_LIGHT_INTENSITY = .75;
+	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .25;
 
 	private SceneGraphComponent lights;
 	private DirectionalLight sunLight;
