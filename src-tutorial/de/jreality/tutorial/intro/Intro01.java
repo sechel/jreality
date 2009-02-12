@@ -1,6 +1,7 @@
 package de.jreality.tutorial.intro;
 
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.ui.viewerapp.PluginViewerApp;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
@@ -16,7 +17,9 @@ public class Intro01 {
 
 
 	public static void main(String[] args)	{
-				ViewerApp va = ViewerApp.display((SceneGraphNode) null);
+		ViewerApp.display(null);
+
+//		PluginViewerApp.display(null);
 	}
 
 

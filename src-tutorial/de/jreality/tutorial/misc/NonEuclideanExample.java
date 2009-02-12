@@ -194,7 +194,7 @@ public class NonEuclideanExample {
 		lightNode.getAppearance().setAttribute(LIGHTING_ENABLED, false);
 		lightNode.addChild(Primitives.sphere(.05, new double[]{0,0,0}, Pn.EUCLIDEAN));
 		pointLight = new PointLight();
-		pointLight.setIntensity(.9);
+		pointLight.setIntensity(1);
 		pointLight.setColor(new Color(250, 250, 250));
 		lightNode.setLight(pointLight);
 		world.addChild(lightNode);
@@ -245,7 +245,7 @@ public class NonEuclideanExample {
 	}
 
 	// some variables which depend on the metric -- hence we have three of each
-	double[][] falloffs = {{1,.1,0},{.5, .5,0},{.5, .5, 0}};
+	double[][] falloffs =   {{1,.3,0},{.5,.5,0},{.5, .5, 0}};
 	double[][] cameraClips = {{.001,2},{.01, 1000},{.01,-.05}};
 	double distance = .5;
 	double[] unitD = {Math.tanh(distance), distance, Math.tan(distance)};

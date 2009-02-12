@@ -18,7 +18,7 @@ import de.jreality.ui.viewerapp.ViewerApp;
 	   basf.setShowArrows(true);
 	   basf.setArrowScale(.1);
 	   basf.setArrowSlope(3);
-	   basf.setArrowPosition(1);
+	   basf.setArrowPosition(.6);
 	   basf.update();
 	   SceneGraphComponent tubedIcosa = basf.getSceneGraphComponent();
 	   ViewerApp.display(tubedIcosa);
