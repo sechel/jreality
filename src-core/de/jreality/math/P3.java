@@ -170,7 +170,8 @@ public class P3 {
 	 * @param point
 	 * @param metric
 	 * @return
-	 */public static double[] extractOrientationMatrix(double[] dst, double[] src, double[] point, int metric)	{
+	 */
+	public static double[] extractOrientationMatrix(double[] dst, double[] src, double[] point, int metric)	{
 		if (dst == null) dst = new double[16];
 
 		double[] image = Rn.matrixTimesVector(null, src, point);
@@ -789,15 +790,15 @@ public class P3 {
 			System.arraycopy(m, 0, dst, 0, 16);
 			return dst;
 		}
-		double[] diagnosis = Rn.subtract(null, Q_LIST[metric+1], 
-				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[metric+1], m )));
-		double nn = 1.0;
-		if (diagnosis[0] != 0) nn = 1.0/diagnosis[0];
-		Rn.times(diagnosis, nn, diagnosis);
+		double lastentry = m[15];
+		double[] diagnosis = getTransformedAbsolute(m, metric);
+//		double nn = 1.0;
+//		if (diagnosis[0] != 0) nn = 1.0/diagnosis[0];
+//		Rn.times(diagnosis, nn, diagnosis);
 //		if (Rn.maxNorm(diagnosis) < tolerance)		{
 //			return null;
 //		}
-		boolean mydebug = true;
+		boolean mydebug = false;
 		if (mydebug)	{
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"m =");
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(m));
@@ -834,7 +835,14 @@ public class P3 {
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,"Revised is");
 			LoggingSystem.getLogger(P3.class).log(Level.FINER,Rn.matrixToString(diagnosis));			
 		}
+		if ( dst[15] * lastentry < 0) Rn.times(dst, -1, dst);
 		return dst;
+	}
+
+	public static double[] getTransformedAbsolute(double[] m, int metric) {
+		double[] diagnosis = Rn.subtract(null, Q_LIST[metric+1], 
+				Rn.times(null, Rn.transpose(null, m), Rn.times(null, Q_LIST[metric+1], m )));
+		return diagnosis;
 	}
 	
 	 public static boolean isometryIsUnstable(double[] matrix, int metric)	{
