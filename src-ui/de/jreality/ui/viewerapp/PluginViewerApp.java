@@ -107,7 +107,7 @@ public class PluginViewerApp {
 		setAttachNavigator(true);
 	}
 
-	public void addAccessory(final Component c) {
+	public void addAccessory(final Component c, final String title) {
 		ShrinkPanelPlugin p = new ShrinkPanelPlugin() {
 			
 			{
@@ -122,15 +122,10 @@ public class PluginViewerApp {
 
 			@Override
 			public PluginInfo getPluginInfo() {
-				return new PluginInfo(c.getName());
+				return new PluginInfo(title);
 			}
 		};
 		controller.registerPlugin(p);
-	}
-
-	public void addAccessory(Component c, String title) {
-		c.setName(title);
-		addAccessory(c);
 	}
 
 	public void addAccessory(Component c, String title, boolean scrolling) {
