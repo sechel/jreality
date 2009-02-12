@@ -58,46 +58,52 @@ import de.jreality.util.CameraUtility;
  */
 public class JOGLRenderingState {
 
+	public static boolean useOldTransparency = false;
+	
+	public JOGLRenderer renderer;
+	public Geometry currentGeometry = null;
+
 	public boolean smoothShading = true;
 	public boolean lighting = true;
 	public boolean backFaceCullingEnabled = false;
 	public boolean zbufferEnabled = true;
 	public boolean flipped = false;
 	public boolean transparencyEnabled = false;
-	public float[] diffuseColor = new float[4];
-	public int activeTexture;
-	public int frontBack = GL.GL_FRONT_AND_BACK;
-	public double levelOfDetail;
-	public double depthFudgeFactor;
-	public int numLights = 0;
-	protected int[] sphereDisplayLists = null;
-	protected int[] cylinderDisplayLists = null;
-	public JOGLRenderer renderer;
-	public int currentMetric = Pn.EUCLIDEAN;
-	public boolean currentPickMode = false;
-	public Geometry currentGeometry = null;
-	public double currentAlpha = 1.0;
-	public int currentClippingPlane = 0;
-	public int currentEye = CameraUtility.MIDDLE_EYE;
-	public boolean useDisplayLists=true;
-	public boolean clearColorBuffer=true;
-	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT;
-	public int colorMask = 0xf;
-	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
+	public boolean fogEnabled;
 	public boolean localLightModel = false;
 	public boolean separateSpecularColor = false;
 	public boolean ignoreAlpha0 = true;
 	public boolean renderGeometryOnly = false;
 	public boolean insideDisplayList = false;
 	public boolean componentDisplayLists = false;
-	public static boolean useOldTransparency = false;
-	public double[] cameraToWorld = Rn.identityMatrix(4);
-	public double[] worldToCamera = Rn.identityMatrix(4);
-
+	public boolean currentPickMode = false;
+	public boolean useDisplayLists=true;
+	public boolean clearColorBuffer=true;
+	
+	public int activeTexture;
+	public int frontBack = GL.GL_FRONT_AND_BACK;
+	public int numLights = 0;
+	public int currentClippingPlane = 0;
+	public int currentEye = CameraUtility.MIDDLE_EYE;
+	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT;
+	public int colorMask = 0xf;
+	public int currentMetric = Pn.EUCLIDEAN;
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
+	protected int[] sphereDisplayLists = null;
+	protected int[] cylinderDisplayLists = null;
+	
 	public double pointSize = 1.0,
 		lineWidth = 1.0;
+	public double levelOfDetail;
+	public double depthFudgeFactor;
+	public double currentAlpha = 1.0;
+	public double[] cameraToWorld = Rn.identityMatrix(4);
+	public double[] worldToCamera = Rn.identityMatrix(4);
+	
+	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
+	public float[] diffuseColor = new float[4];
+
 	
 	
 	public JOGLRenderingState(JOGLRenderer jr) {

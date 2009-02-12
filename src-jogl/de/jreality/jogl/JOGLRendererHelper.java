@@ -214,6 +214,7 @@ public class JOGLRendererHelper {
 		boolean doFog = CommonAttributes.FOG_ENABLED_DEFAULT;
 		if (bgo instanceof Boolean)
 			doFog = ((Boolean) bgo).booleanValue();
+		jr.renderingState.fogEnabled = doFog;
 		if (doFog) {
 			gl.glEnable(GL.GL_FOG);
 			bgo = topAp.getAttribute(CommonAttributes.FOG_COLOR);
