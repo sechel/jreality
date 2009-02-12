@@ -48,11 +48,12 @@ vec4 texcoord;
 attribute vec4 normals4;
 uniform bool hyperbolic;
 uniform bool useNormals4;
-uniform bool lightingEnabled;
+uniform bool lightingEnabled, fogEnabled;
 uniform float Nw;
 // textures are not implemented yet
 uniform sampler2D texture;
 uniform bool doTexture;
+uniform int numLights;
 
 // the inner product in klein model of hyperbolic space
 float dot4(in vec4 P, in vec4 Q)	{
@@ -104,7 +105,6 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
 
    // Compute distance between surface and light position
    d = distance4(gl_LightSource[i].position, ecPosition4);
-   
    toLight = gl_LightSource[i].position - ecPosition4;
     // Normalize the vector from surface to light position
    normalize4(ecPosition4, toLight );
@@ -112,7 +112,7 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
  //   Compute attenuation
    if (hyperbolic) 
    	attenuation = gl_LightSource[i].constantAttenuation * exp(-gl_LightSource[i].linearAttenuation * d);
-   else attenuation =  gl_LightSource[i].constantAttenuation + gl_LightSource[i].linearAttenuation*abs(cos(d));
+   else attenuation =  gl_LightSource[i].constantAttenuation+(1.0-gl_LightSource[i].linearAttenuation)*abs(cos(d));
 
     halfVector = (hyperbolic ? -1.0 : 1.0) * (toLight + eye);
     normalize4(ecPosition4, halfVector); 
@@ -137,19 +137,33 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 {
     vec4 color;
     vec4 eye = vec4(0.0, 0.0, 0.0, 1.0);
+    int i;
+    float fog, d2eye;
+    if (fogEnabled)	{
+      d2eye = distance4(eye, ecPosition); 
+//    d2eye = 1.0;
+    fog = exp2(-d2eye * gl_Fog.density);
+    fog = clamp(fog, 0.0, 1.0);
+    }   
     normalize4(ecPosition, eye);
     // Clear the light intensity accumulators
-    Ambient  = Diffuse = Specular = vec4 (0.0);
-    pointLight(0, normal, eye, ecPosition);
+    if (lightingEnabled)	{
+        Ambient  = Diffuse = Specular = vec4 (0.0);
+        for ( i = 0; i<numLights; ++i)	{
+    	    pointLight(i, normal, eye, ecPosition);
+        }
+   		color = gl_FrontLightModelProduct.sceneColor +
+      	    Ambient  * matpar.ambient +
+      	    Diffuse  * matpar.diffuse +
+      	    Specular * matpar.specular;
+    } else 
+   		color = gl_FrontLightModelProduct.sceneColor +
+      	   matpar.ambient +
+      	   matpar.diffuse;
+    
 
-	  vec4 diff = matpar.diffuse;
-//	if (doTexture) 
-//		diff = diff *  texture2D(texture, texcoord.st);
-    color = //gl_FrontLightModelProduct.sceneColor +
-      	Ambient  * matpar.ambient +
-      	Diffuse  * diff +
-      	Specular * matpar.specular;
     color = clamp( color, 0.0, 1.0 );
+    if (fogEnabled) color = mix( (gl_Fog.color), color, fog);
     color.a = 1.0;
    return color;
 }
@@ -163,10 +177,11 @@ void main (void)
     normalize4(ecPosition, transformedNormal);
 //    if (transformedNormal.w * transformedNormal.z < 0) 
 //    	transformedNormal = -transformedNormal;
+// set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
-    	transformedNormal = -transformedNormal;
-    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
+//    	transformedNormal = -transformedNormal;
+//    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
 //     ftexgen(transformedNormal, ecPosition);
      gl_Position = ftransform();
