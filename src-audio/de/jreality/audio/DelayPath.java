@@ -97,11 +97,11 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 	
-		if (frameCount<0) {
+		if (frameCount==0 && currentFrame==null) {
 			reset();
-			return false;
+			return false;  // nothing left to render
 		} else {
-			return true;
+			return true;   // still rendering...
 		}
 	}
 
@@ -149,10 +149,14 @@ public class DelayPath implements SoundPath {
 
 	private void advanceFrame() {
 		relativeTime -= currentLength;
+		
 		currentFrame = sourceFrames.remove();
 		currentLength = frameLengths.remove();
 		sourcePositions.remove();
-		frameCount--;
+		
+		if (currentFrame!=null) {
+			frameCount--;
+		}
 	}
 	
 	private Matrix auxiliaryMatrix = new Matrix();

@@ -53,7 +53,7 @@ public final class JackHub implements JJackAudioProcessor {
 					disposedSources=true;
 				}
 			} catch (Exception e) {
-				// silent failures aren't nice, but we can't risk zombifying the jack client
+				e.printStackTrace();
 			}
 		}
 		if (disposedSources) {
@@ -63,7 +63,11 @@ public final class JackHub implements JJackAudioProcessor {
 			}
 		}
 		if (sink!=null) {
-			sink.process(ev);
+			try {
+				sink.process(ev);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
