@@ -16,9 +16,9 @@
 	<classpathentry kind="src" path="src-soft"/>
 	<classpathentry kind="src" path="src-soft-new"/>
 	<classpathentry kind="src" path="src-sunflow"/>
-	<classpathentry kind="src" path="src-swing"/>
+	<classpathentry excluding="de/jreality/swing/FakeFramePeer5.java|de/jreality/swing/FakeToolKit5.java" kind="src" path="src-swing"/>
 	<classpathentry kind="src" path="src-tool"/>
-	<classpathentry kind="src" path="src-tutorial"/>
+	<classpathentry excluding="de/jreality/tutorial/audio/Example.java" kind="src" path="src-tutorial"/>
 	<classpathentry kind="src" path="src-ui"/>
 	<classpathentry kind="src" path="src-vr"/>
 	<classpathentry kind="src" path="test"/>
@@ -28,8 +28,9 @@
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
 	<classpathentry kind="src" path="src-jinput"/>
-	<classpathentry excluding="de/jreality/audio/jack/" kind="src" path="src-audio"/>
+	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/" kind="src" path="src-audio"/>
 	<classpathentry excluding="de/jreality/audio/jack/" kind="src" path="test-audio"/>
+	<classpathentry kind="src" path="src-plugin"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/antlr.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
