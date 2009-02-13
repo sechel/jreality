@@ -11,7 +11,6 @@ import javax.swing.JFrame;
 
 import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.ui.plugin.view.View;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 public class RemoteExecutor {
@@ -38,10 +37,12 @@ public class RemoteExecutor {
 		if (va instanceof ViewerApp) {
 			viewingComponent = ((ViewerApp) va).getViewingComponent();
 			toolSystem = ((ViewerApp) va).getToolSystem();
-		} else if (va instanceof View) {
-			viewingComponent = ((View) va).getViewer().getViewingComponent();
-			toolSystem = ((View) va).getToolSystem();
-		} else {
+		} 
+//		else if (va instanceof View) {
+//			viewingComponent = ((View) va).getViewer().getViewingComponent();
+//			toolSystem = ((View) va).getToolSystem();
+//		} 
+		else {
 			throw new IllegalArgumentException("insufficient return value of remoteMain of "+clazz);
 		}
 		
