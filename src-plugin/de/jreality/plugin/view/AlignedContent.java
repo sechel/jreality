@@ -13,7 +13,11 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.ui.viewerapp.Selection;
+import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphUtility;
 import de.jtem.beans.ChangeEventMulticaster;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
@@ -34,6 +38,7 @@ public class AlignedContent extends Plugin {
 	private Rectangle3D bounds;
 	private transient ChangeListener changeListener;
 
+	private SceneGraphPath pathToContent;
 
 	public static interface ContentDelegate {
 
@@ -190,6 +195,14 @@ public class AlignedContent extends Plugin {
 		path.push(appearanceComponent);
 		path.push(transformationComponent);
 		view.setEmptyPickPath(path);
+		SelectionManagerInterface smi = SelectionManager.selectionManagerForViewer(view.getViewer());
+		pathToContent = path.popNew();
+		smi.setSelection(new Selection(pathToContent));
+		System.err.println("Setting Selection to  "+smi.getSelection().getSGPath());
+	}
+
+	public SceneGraphPath getPathToContent() {
+		return pathToContent;
 	}
 
 	@Override
