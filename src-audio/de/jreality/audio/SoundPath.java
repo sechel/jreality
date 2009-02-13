@@ -37,7 +37,7 @@ public interface SoundPath {
 	 * @param frameSize
 	 * @param curPos
 	 * @param micInvMatrix
-	 * @return true if this method wants to be called again for the next frame, even if the source is inactive
+	 * @return true if the sound path is still holding samples to be rendered, e.g., due to propagation delays or reverberation
 	 */
 	boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
 }
