@@ -123,7 +123,6 @@ public class SelectionManager implements SelectionManagerInterface {
 //			sm.setDefaultSelection( new Selection( ((ToolSystemViewer)viewer).getEmptyPickPath() ) );
 //			sm.setSelection(sm.getDefaultSelection());
 //		}
-		
 		return sm;
 	}
 	
@@ -272,5 +271,6 @@ public class SelectionManager implements SelectionManagerInterface {
 	public void setSelectionPath(SceneGraphPath selection) {
 		setSelection(new Selection(selection));
 	}
+
 
 }
