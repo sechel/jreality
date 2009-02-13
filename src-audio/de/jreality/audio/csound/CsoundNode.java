@@ -6,7 +6,7 @@ import csnd.CppSound;
 import csnd.Csound;
 import csnd.CsoundFile;
 import csnd.CsoundMYFLTArray;
-import csnd.SWIGTYPE_p_float;
+import csnd.SWIGTYPE_p_double;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.RingBuffer;
 import de.jreality.util.Input;
@@ -22,7 +22,7 @@ public class CsoundNode extends AudioSource {
 	private CppSound csnd = new CppSound();
 	private CsoundFile csf = csnd.getCsoundFile();
 	private CsoundMYFLTArray auxBuffer;
-	private SWIGTYPE_p_float csOutBuffer;
+	private SWIGTYPE_p_double csOutBuffer;
 	private float cumulativeBuffer[];
 	private int ksmps;
 	private int nchnls;
@@ -50,7 +50,7 @@ public class CsoundNode extends AudioSource {
 		nchnls = csnd.GetNchnls();
 		bufSize = ksmps*nchnls;
 		sampleRate = (int) csnd.GetSr();
-		scale = csnd.Get0dBFS();
+		scale = (float) csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
 		cumulativeBuffer = new float[ksmps];
 		csOutBuffer = csnd.GetSpout();
