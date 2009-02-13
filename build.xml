@@ -5,6 +5,7 @@
   
   <!-- the following should belong to core... -->
   <property name="core" location="src-core" />
+  <property name="audio" location="src-audio" />
   <property name="tools" location="src-tool" />
   <property name="io" location="src-io" />
   <property name="backends-share" location="src-backends-share" />
@@ -26,6 +27,8 @@
   <property name="examples" location="src-examples" />
   <property name="swing" location="src-swing" />
 	
+  <property name="plugin" location="src-plugin" />	
+	
   <!-- these folders will be created -->
   <property name="build" location="build" />
   <property name="javadoc" location="docs/api" />
@@ -41,6 +44,12 @@
   </path>
 
   <path id="tools.classpath">
+    <fileset dir="dist">
+      <include name="jReality-core.jar"/>
+    </fileset>
+  </path>
+	
+  <path id="audio.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
     </fileset>
@@ -100,8 +109,6 @@
         <include name="jtem-beans.jar"/>
         <include name="jterm.jar"/>
         <include name="bsh.jar"/>
-        <include name="colorpicker.jar"/>
-        <include name="jRWorkspacePluginSDK.jar"/>
     </fileset>
   </path>
 
@@ -191,7 +198,6 @@
     <fileset dir="lib">
       <include name="smrj.jar"/>
       <include name="jogl.jar"/>
-      <include name="jRWorkspacePluginSDK.jar"/>    	
      </fileset>
     <fileset dir="dist">
       <include name="jReality-io.jar"/>
@@ -202,6 +208,29 @@
       <include name="jReality-tools.jar"/>
      </fileset>
   </path>
+	
+  <path id="plugin.classpath">
+    <path refid="backend.classpath"/>
+    <fileset dir="lib">
+      <include name="smrj.jar"/>
+      <include name="jogl.jar"/>
+      <include name="colorpicker.jar"/>
+      <include name="jtem-beans.jar"/>
+      <include name="jRWorkspacePluginSDK.jar"/>
+     </fileset>
+    <fileset dir="dist">
+      <include name="jReality-io.jar"/>
+      <include name="jReality-ui.jar"/>
+      <include name="jReality-jogl.jar"/>
+      <include name="jReality-soft.jar"/>
+      <include name="jReality-proxies.jar"/>
+      <include name="jReality-tools.jar"/>
+	  <include name="jReality-portal.jar"/>
+   	  <include name="jReality-audio.jar"/>
+      <include name="jReality-swing.jar"/>	
+     </fileset>
+  </path>
+	
 
   <target name="init">
     <!-- Create the build directory structure used by compile -->
@@ -236,6 +265,14 @@
     </copy>
     <jar jarfile="${dist}/jReality-tools.jar" basedir="${build}/tools" />
   </target>
+	
+ <target name="audio" depends="core" description="compile the src-audio">
+    <mkdir dir="${build}/audio" />
+  	<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${audio}" destdir="${build}/audio" debug="true">
+      <classpath refid="audio.classpath"/>
+    </javac>
+    <jar jarfile="${dist}/jReality-audio.jar" basedir="${build}/audio" />
+  </target>	
 
   <target name="backends-share" depends="core" description="compile the backends-share">
     <mkdir dir="${build}/backends-share" />
@@ -393,6 +430,19 @@
     <jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
   	<!--jar jarfile="${dist}/jReality-portal-native-linux.jar" basedir="native" /-->
   </target>
+	
+  <target name="plugin" depends="audio,ui,jogl,soft,proxies,portal,swing" description="build the jrworkspace plugins">
+    <mkdir dir="${build}/plugin" />
+  	<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${plugin}" destdir="${build}/plugin" debug="true">
+      <classpath refid="plugin.classpath"/>
+    </javac>
+  	<copy todir="${build}/plugin">
+      <fileset dir="${plugin}">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+    <jar jarfile="${dist}/jReality-plugin.jar" basedir="${build}/plugin" />
+  </target>
 
   <target name="javadoc" description="generate javadoc in docs/api">
       <mkdir dir="${javadoc}" />
@@ -418,7 +468,7 @@
     </javadoc>
   </target>
 	
-  <target name="dist" depends="core,io,jogl,soft,renderman,portal,gpgpu,examples,sunflow" description="generate the distribution">
+  <target name="dist" depends="core,audio,io,jogl,soft,renderman,portal,gpgpu,examples,sunflow,plugin" description="generate the distribution">
   </target>
 
   <target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
