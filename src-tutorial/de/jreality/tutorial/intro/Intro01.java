@@ -17,9 +17,9 @@ public class Intro01 {
 
 
 	public static void main(String[] args)	{
-		ViewerApp.display(null);
+//		ViewerApp.display(null);
 
-//		PluginViewerApp.display(null);
+		PluginViewerApp.display(null);
 	}
 
 

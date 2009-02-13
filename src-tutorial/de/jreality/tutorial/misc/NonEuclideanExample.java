@@ -108,7 +108,7 @@ public class NonEuclideanExample {
 	    flytool.setGain(.1);
 		cameraNode.addTool(flytool);
 		SceneGraphComponent root = SceneGraphUtility.createFullSceneGraphComponent("root");
-		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(100, 120, 80));
+		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,20, 40));
 	    root.addChildren(cameraNode, world);
 	    root.addTool(new ClickWheelCameraZoomTool());
 	    
@@ -179,14 +179,12 @@ public class NonEuclideanExample {
 			noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		// this doesn't work yet
-		ap.setAttribute("useVertexArrays", false);
-		
-		noneuclideanShader.setUniform("Nw", 0.00001);
+		}		
+//		noneuclideanShader.setUniform("Nw", 0.00001);
 		noneuclideanShader.setUniform("useNormals4", false);
 		ap.setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR,new Color(250, 250, 0));
 		ap.setAttribute(LINE_SHADER+"."+POLYGON_SHADER+"."+DIFFUSE_COLOR,new Color(250, 0, 250));
+		ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR,new Color(150,150,150));
 		ap.setAttribute(SPECULAR_EXPONENT, 50.0);
 		ap.setAttribute(TUBE_RADIUS, .003);
 		// add a light node which gets placed above the disk (see update() below)
