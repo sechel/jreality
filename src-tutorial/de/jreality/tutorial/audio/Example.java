@@ -6,19 +6,19 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import de.jreality.audio.csound.CsoundNode;
-import de.jreality.audio.plugin.AudioLauncher;
-import de.jreality.audio.plugin.AudioOptions;
+import de.jreality.plugin.audio.AudioLauncher;
+import de.jreality.plugin.audio.AudioOptions;
+import de.jreality.plugin.view.CameraStand;
+import de.jreality.plugin.view.Inspector;
+import de.jreality.plugin.view.Lights;
+import de.jreality.plugin.view.View;
+import de.jreality.plugin.view.ViewMenuBar;
+import de.jreality.plugin.vr.Avatar;
 import de.jreality.reader.Readers;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
-import de.jreality.ui.plugin.CameraStand;
-import de.jreality.ui.plugin.Inspector;
-import de.jreality.ui.plugin.Lights;
-import de.jreality.ui.plugin.View;
-import de.jreality.ui.plugin.ViewMenuBar;
 import de.jreality.util.Input;
-import de.jreality.vr.plugin.Avatar;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 /**
