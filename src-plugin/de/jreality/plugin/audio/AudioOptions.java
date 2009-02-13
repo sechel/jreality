@@ -2,19 +2,13 @@ package de.jreality.plugin.audio;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -27,6 +21,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.ui.JSliderVR;
+import de.jreality.ui.MinSizeGridBagLayout;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
@@ -58,7 +53,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		attenuations.put("linear", Attenuation.LINEAR);
 		attenuations.put("exponential", Attenuation.EXPONENTIAL);
 		
-		shrinkPanel.setLayout(new GridBagLayout());
+		shrinkPanel.setLayout(new MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		
