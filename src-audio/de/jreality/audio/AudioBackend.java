@@ -8,6 +8,7 @@ import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.AudioSource.State;
 import de.jreality.scene.event.AudioEvent;
 import de.jreality.scene.event.AudioListener;
 import de.jreality.scene.proxy.tree.EntityFactory;
@@ -63,30 +64,42 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		enc.finishFrame();
 	}
 	
-	private class AudioTreeNode extends SceneTreeNode {
+	private class AudioTreeNode extends SceneTreeNode implements AudioListener {
 
 		private SoundPath soundPath;
 		private Matrix curPos = new Matrix();
 		private SceneGraphPath path;
+		
+		private boolean nodeActive = false;
+		private boolean pathActive = false;
 
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
 //			soundPath = new InstantaneousPath(new AudioReader(audio), sampleRate);
 			soundPath = new DelayPath(new AudioReader(audio), sampleRate);
+			
+			audio.addAudioListener(this);
+			audioChanged(null);
 		}
 		
 		void processFrame(SoundEncoder enc, int frameSize) {
-			if (path==null) {
-				path = toPath();
+			if (nodeActive || pathActive) {
+				if (path==null) {
+					path = toPath();
+				}
+				path.getMatrix(curPos.getArray());
+
+				// TODO: use a SceneGraphPathObserver to create a new EffectiveAppearance
+				// only when appearances were added/removed along the path.
+				// TODO: For this we need to extend SceneGraphPathObserver.
+				soundPath.setProperties(EffectiveAppearance.create(path));
+				pathActive = soundPath.processFrame(enc, frameSize, curPos, micInvMatrix);
 			}
-			path.getMatrix(curPos.getArray());
-			
-			// TODO: use a SceneGraphPathObserver to create a new EffectiveAppearance
-			// only when appearances were added/removed along the path.
-			// TODO: For this we need to extend SceneGraphPathObserver.
-			soundPath.setProperties(EffectiveAppearance.create(path));
-			soundPath.processFrame(enc, frameSize, curPos, micInvMatrix);
+		}
+
+		public void audioChanged(AudioEvent ev) {
+			nodeActive = ((AudioSource) getNode()).getState() == State.RUNNING;
 		}
 	}
 	

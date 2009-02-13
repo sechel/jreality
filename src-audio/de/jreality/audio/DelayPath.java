@@ -28,6 +28,7 @@ public class DelayPath implements SoundPath {
 	private float gamma;
 	
 	private Queue<float[]> sourceFrames = new LinkedList<float[]>();
+	private Queue<Integer> frameLengths = new LinkedList<Integer>();
 	private Queue<Matrix> sourcePositions = new LinkedList<Matrix>();
 	private Matrix currentMicPosition;
 	
@@ -35,8 +36,11 @@ public class DelayPath implements SoundPath {
 	private float xTarget, yTarget, zTarget;
 	private float xCurrent, yCurrent, zCurrent;
 	
-	private int relativeTime = 0;
 	private float[] currentFrame = null;
+	private int currentLength = 0;
+	private int relativeTime = 0;
+	private int frameCount = 0;
+	
 	
 	public DelayPath(SampleReader reader, int sampleRate) {
 		if (sampleRate<=0) {
@@ -67,59 +71,88 @@ public class DelayPath implements SoundPath {
 		gamma = (speedOfSound>0f) ? sampleRate/speedOfSound : 0f; // samples per distance
 	}
 	
-	public int processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
-		float[] newFrame = new float[frameSize];
-		int nRead = reader.read(newFrame, 0, frameSize);
-		sourceFrames.add(newFrame);
+	private float[] newFrame = null;
+	
+	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
+		if (newFrame==null || newFrame.length<frameSize) {
+			newFrame = new float[frameSize];
+		}
+		if (reader.read(newFrame, 0, frameSize)>0) {
+			sourceFrames.add(newFrame);
+			newFrame = null;
+			frameCount++;
+		} else {
+			sourceFrames.add(null);
+		}
+		frameLengths.add(frameSize);
 		
 		sourcePositions.add(new Matrix(sourcePos));
 		currentMicPosition = invMicPos;
 		
 		updateTarget();
 		
-		if (currentFrame!=null) {
-			for(int j = 0; j<frameSize; j++) {		
-				enc.encodeSample(nextSample(), j, xCurrent, yCurrent, zCurrent);
-				
-				xCurrent = xFilter.nextValue(xTarget);
-				yCurrent = yFilter.nextValue(yTarget);
-				zCurrent = zFilter.nextValue(zTarget);
-			}
-		} else { // first frame, need to initialize fields
-			currentFrame = sourceFrames.remove();
-			sourcePositions.remove();
-			
-			xCurrent = xFilter.initialize(xTarget);
-			yCurrent = yFilter.initialize(yTarget);
-			zCurrent = zFilter.initialize(zTarget);
+		if (currentLength>0) {
+			encodeFrame(enc, frameSize);
+		} else {
+			initFields();
 		}
 	
-		return nRead;
+		if (frameCount<0) {
+			reset();
+			return false;
+		} else {
+			return true;
+		}
 	}
 
-	private float nextSample() {
-		float dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
-		float time;
-		while ((time = relativeTime-gamma*dist+0.5f)>=currentFrame.length) {
-			relativeTime -= currentFrame.length;
-			currentFrame = sourceFrames.remove();
-			sourcePositions.remove();
-			updateTarget();
-		}
-		relativeTime++;
+	private void initFields() {
+		advanceFrame();
 		
-		if (time>=0f) {
-			int index = (int) time;
-			float fractionalTime = time-index;
+		xCurrent = xFilter.initialize(xTarget);
+		yCurrent = yFilter.initialize(yTarget);
+		zCurrent = zFilter.initialize(zTarget);
+	}
 
-			float v0 = currentFrame[index++];
-			float v1 = (index<currentFrame.length) ? currentFrame[index] : sourceFrames.element()[0];
-			float v = v0+fractionalTime*(v1-v0);
+	private void encodeFrame(SoundEncoder enc, int frameSize) {
+		for(int j=0; j<frameSize; j++) {
+			float dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
+			float time;
+			while ((time = relativeTime-gamma*dist+0.5f)>=currentLength) {
+				advanceFrame();
+				updateTarget();
+			}
 
-			return attenuation.attenuate(v*gain, dist);
-		} else {
-			return 0f;
+			if (currentFrame!=null && time>=0f) {
+				int index = (int) time;
+				float fractionalTime = time-index;
+
+				float v0 = currentFrame[index++];
+				float v1;
+				if (index<currentLength) {
+					v1 = currentFrame[index];
+				} else {
+					float[] nextFrame = sourceFrames.peek();
+					v1 = (nextFrame!=null) ? nextFrame[0] : 0;
+				}
+				float v = v0+fractionalTime*(v1-v0);
+
+				enc.encodeSample(attenuation.attenuate(v*gain, dist), j, xCurrent, yCurrent, zCurrent);
+			}
+			
+			xCurrent = xFilter.nextValue(xTarget);
+			yCurrent = yFilter.nextValue(yTarget);
+			zCurrent = zFilter.nextValue(zTarget);
+
+			relativeTime++;
 		}
+	}
+
+	private void advanceFrame() {
+		relativeTime -= currentLength;
+		currentFrame = sourceFrames.remove();
+		currentLength = frameLengths.remove();
+		sourcePositions.remove();
+		frameCount--;
 	}
 	
 	private Matrix auxiliaryMatrix = new Matrix();
@@ -132,5 +165,15 @@ public class DelayPath implements SoundPath {
 		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
 		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
 		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
+	}
+
+	private void reset() {
+		sourceFrames.clear();
+		frameLengths.clear();
+		sourcePositions.clear();
+		currentFrame = null;
+		currentLength = 0;
+		relativeTime = 0;
+		frameCount = 0;
 	}
 }

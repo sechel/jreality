@@ -30,5 +30,14 @@ public interface SoundPath {
 	public static final Attenuation DEFAULT_ATTENUATION = Attenuation.LINEAR;
 	
 	void setProperties(EffectiveAppearance eapp);
-	int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
+	
+	/**
+	 * 
+	 * @param enc
+	 * @param frameSize
+	 * @param curPos
+	 * @param micInvMatrix
+	 * @return true if this method wants to be called again for the next frame, even if the source is inactive
+	 */
+	boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix);
 }

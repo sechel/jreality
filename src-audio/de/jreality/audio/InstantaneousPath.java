@@ -26,14 +26,15 @@ public class InstantaneousPath implements SoundPath {
 		this.reader = ConvertingReader.createReader(reader, sampleRate);
 	}
 	
-	public int processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
+	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
 		if (samples==null || samples.length<frameSize) {
 			samples = new float[frameSize];
 		}
 		
 		int nRead = reader.read(samples, 0, frameSize);
 		if (nRead==0) {
-			return 0;
+			firstFrame = true;
+			return false;
 		}
 		
 		curPos.multiplyOnLeft(micInvMatrix);
@@ -62,7 +63,7 @@ public class InstantaneousPath implements SoundPath {
 			z0 += dz;
 		}
 
-		return nRead;
+		return true;
 	}	
 
 	public void setProperties(EffectiveAppearance eapp) {
