@@ -11,14 +11,18 @@ import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
+import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
+import de.jreality.plugin.view.InfoOverlayPlugin;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
+import de.jreality.plugin.view.ViewerKeyListener;
+import de.jreality.plugin.view.ZoomTool;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -46,7 +50,10 @@ public class PluginViewerApp {
 	private ContentAppearance contentAppearance;
 	private ContentTools contentTools;
 	private DisplayOptions displayOptions;
-	
+	private ContentLoader contentLoader;
+	private ZoomTool zoomTool;
+	private InfoOverlayPlugin infoOverlay;
+	private ViewerKeyListener viewerKeyListener;
 
 	private static class ExitAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
@@ -88,7 +95,6 @@ public class PluginViewerApp {
 		background = new Background();
 		controller.registerPlugin(background);
 		
-		
 		alignedContent = new AlignedContent();
 		alignedContent.setContent(root);
 		controller.registerPlugin(alignedContent);
@@ -102,6 +108,19 @@ public class PluginViewerApp {
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
 		
+		contentLoader = new ContentLoader();
+		controller.registerPlugin(contentLoader);
+		
+		zoomTool = new ZoomTool();
+		controller.registerPlugin(zoomTool);
+		
+		infoOverlay = new InfoOverlayPlugin();
+		controller.registerPlugin(infoOverlay);
+		
+		viewerKeyListener = new ViewerKeyListener();
+		controller.registerPlugin(viewerKeyListener);
+		
+		// set defaults
 		setCreateMenu(true);
 		setAttachBeanShell(true);
 		setAttachNavigator(true);
@@ -243,6 +262,9 @@ public class PluginViewerApp {
 		}
 	}
 
+	public void setInfoOverlay(boolean b)	{
+		infoOverlay.getInfoOverlay().setVisible(b);
+	}
 
 	@Deprecated
 	public void setFirstAccessory(Component c) {
