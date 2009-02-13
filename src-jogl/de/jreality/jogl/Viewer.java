@@ -72,6 +72,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.StereoViewer;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
@@ -79,7 +80,7 @@ import de.jreality.util.SceneGraphUtility;
  * @author Charles Gunn
  *
  */
-public class Viewer implements de.jreality.scene.Viewer, GLEventListener, Runnable {
+public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventListener, Runnable {
 	protected SceneGraphComponent sceneRoot;
 	SceneGraphComponent auxiliaryRoot;
 	SceneGraphPath cameraPath;

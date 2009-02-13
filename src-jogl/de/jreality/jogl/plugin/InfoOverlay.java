@@ -2,7 +2,7 @@
  * Created on Jun 18, 2004
  *
  */
-package de.jreality.jogl;
+package de.jreality.jogl.plugin;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
