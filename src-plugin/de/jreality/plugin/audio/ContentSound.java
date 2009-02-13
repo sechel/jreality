@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -155,11 +156,11 @@ public class ContentSound extends ShrinkPanelPlugin {
 	
 	protected AudioSource createDefaultAudioSource() {
 		CachedAudioInputStreamSource h = null;
-		String humName = "churchbell_loop";
+		InputStream defaultSoundIn = getClass().getResourceAsStream("zoom.wav");
 		try {
 			h = new CachedAudioInputStreamSource(
 					"hum",
-					Input.getInput("sound/"+humName+".wav"),
+					Input.getInput("Zoom", defaultSoundIn),
 					true
 			);
 			h.start();

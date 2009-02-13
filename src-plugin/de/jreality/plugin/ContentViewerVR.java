@@ -20,6 +20,7 @@ import de.jreality.plugin.vr.Avatar;
 import de.jreality.plugin.vr.Sky;
 import de.jreality.plugin.vr.Terrain;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
@@ -199,11 +200,11 @@ public class ContentViewerVR {
 		contentViewer.startup();
 	}
 
-	public static View remoteMain(String[] args) {
+	public static Viewer remoteMain(String[] args) {
 		ContentViewerVR contentViewer = new ContentViewerVR(true);
 		contentViewer.registerPlugin(new ContentLoader());
 		contentViewer.startup();
-		return contentViewer.view;
+		return contentViewer.view.getViewer().getCurrentViewer();
 	}
 	
 	
