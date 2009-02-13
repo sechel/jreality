@@ -29,6 +29,7 @@ import de.jreality.scene.StereoViewer;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.viewerapp.SelectionCycler;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.CameraUtility;
@@ -49,6 +50,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	HelpOverlay helpOverlay;
 	InfoOverlay infoOverlay;
 	SceneGraphPath selection = null;
+	SelectionCycler selectionCycler;
 	
 	public ViewerKeyListener(Viewer v, HelpOverlay ho, InfoOverlay io) {
 		viewer = v;
@@ -61,6 +63,8 @@ public class ViewerKeyListener extends KeyAdapter {
 		}
 		sm = SelectionManager.selectionManagerForViewer(v);
 		selection = sm.getSelection().getSGPath();
+		selectionCycler = new SelectionCycler(sm);
+		
 //		if (sm instanceof SelectionManager) 
 //			ism = (SelectionManager) sm;
 		if (jViewer != null) {
@@ -79,7 +83,6 @@ public class ViewerKeyListener extends KeyAdapter {
 			// numeric keys are reserved for applications
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Increase alpha (1-transparency)");
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.SHIFT_DOWN_MASK), "Decrease alpha");
-			//helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_A,0), "Toggle antialiasing");
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B,0), "Toggle backplane display");
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B,InputEvent.SHIFT_DOWN_MASK), "Toggle selection bound display");
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_C,0), "Set polygon diffuse color in selected appearance");
@@ -170,18 +173,12 @@ public class ViewerKeyListener extends KeyAdapter {
 					
 				case KeyEvent.VK_D:		// toggle use of display lists
 					if (e.isShiftDown()) break;
-//					boolean useD = viewer.getRenderer().isUseDisplayLists();
-//					viewer.getRenderer().setUseDisplayLists(!useD);
 					toggleValue(viewer, CommonAttributes.ANY_DISPLAY_LISTS, viewer.getSceneRoot().getAppearance());
 					viewer.renderAsync();
-//					JOGLConfiguration.theLog.log(Level.INFO,"Using display lists: "+viewer.getRenderer().isUseDisplayLists());
 					break;
 
 				case KeyEvent.VK_E:		
 					if (!e.isShiftDown()) 	{
-//						if (encompassToggle)	
-//							CameraUtility.encompass2(viewer);
-//						else					
 						CameraUtility.encompass(viewer);
 						encompassToggle = !encompassToggle;
 					}
@@ -228,7 +225,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_K:		
 					if (e.isShiftDown()) break;
-//					if (ism != null) ism.cycleSelectionPaths();
+					selectionCycler.cycleSelectionPaths();
 					viewer.renderAsync();
 					break;
 
@@ -249,11 +246,9 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_N:	
-//					if (ism != null)	{
-//						if (e.isShiftDown()) ism.removeSelection(sm.getSelection().getSGPath());
-//						else ism.addSelection(sm.getSelection().getSGPath());
-//						viewer.renderAsync();
-//					}
+						if (e.isShiftDown()) selectionCycler.removeSelection(sm.getSelection().getSGPath());
+						else selectionCycler.addSelection(sm.getSelection().getSGPath());
+						viewer.renderAsync();
 					break;
 
 				case KeyEvent.VK_O:		
@@ -269,7 +264,6 @@ public class ViewerKeyListener extends KeyAdapter {
 					break;
 
 				case KeyEvent.VK_Q:		
-					//((GLCanvas) viewer.getViewingComponent()).setNoAutoRedrawMode(false);
 					if (e.isShiftDown()){
 						int metric = SceneGraphUtility.getMetric(viewer.getCameraPath());		
 						Transformation tt =  CameraUtility.getCameraNode(viewer).getTransformation();
@@ -280,9 +274,8 @@ public class ViewerKeyListener extends KeyAdapter {
 					viewer.renderAsync();
 					break;
 
-				case KeyEvent.VK_R:		// activate translation tool
+				case KeyEvent.VK_R:		// activate rotation tool
 					if (e.isShiftDown()) toggleValue("useGLSL");
-//					else if (tm != null) tm.activateTool(ToolManager.ROTATION_TOOL);
 					break;
 				
 				case KeyEvent.VK_S:		//smooth shading
@@ -323,7 +316,7 @@ public class ViewerKeyListener extends KeyAdapter {
 					else toggleValue(CommonAttributes.TRANSPARENCY_ENABLED);
 					break;
 					
-				case KeyEvent.VK_Y:		// activate translation tool
+				case KeyEvent.VK_Y:		// activate tool
 //					if (e.isShiftDown()) {	
 //						if (tm != null) tm.activateTool(ToolManager.CAMERA_STEREO_TOOL);
 //					} else
@@ -348,20 +341,6 @@ public class ViewerKeyListener extends KeyAdapter {
 					System.exit(0);
 					break;
 
-				//case KeyEvent.VK_BACK_QUOTE:
-				case KeyEvent.VK_COMMA:
-					Frame frame = Frame.getFrames()[0];
-					fullScreenToggle = !fullScreenToggle;
-					if (e.isShiftDown()) {
-						handleFullScreen(fullScreenToggle, frame, (Component) viewer.getViewingComponent());
-						
-					}	else {
-						frame.dispose();
-						frame.setUndecorated(fullScreenToggle);
-						frame.setVisible(true);
-						frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(fullScreenToggle ? frame : null);						
-					}
-			        break;
 			}
 		}
 
@@ -506,7 +485,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	private Appearance getSelectedAppearance()	{
 //		System.err.println("Selection is  "+sm.getSelection().getSGPath());
 //		return SelectionManager.findDeepestAppearance(sm.getSelection().getSGPath());
-		return SelectionManager.findDeepestAppearance(selection);
+		return SceneGraphUtility.findDeepestAppearance(selection);
 	}
 
 	public static void setDefaultCorners(Color[] defaultCorners) {

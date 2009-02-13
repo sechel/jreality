@@ -118,7 +118,7 @@ public class JOGLRendererHelper {
 		//System.err.println("clearbufferbits = "+jr.openGLState.clearBufferBits);
 		//System.err.println("colormask = "+jr.openGLState.colorMask);
 		// first set the color mask for the clear
-		LoggingSystem.getLogger(JOGLRendererHelper.class).finest("JOGLRRH cbb = "+ openGLState.clearBufferBits);
+		//LoggingSystem.getLogger(JOGLRendererHelper.class).finest("JOGLRRH cbb = "+ openGLState.clearBufferBits);
 		// set color mask for the clear
 		if ((openGLState.clearBufferBits & GL.GL_COLOR_BUFFER_BIT) != 0) {
 			gl.glColorMask(true, true, true, true);

@@ -162,7 +162,7 @@ public class GlslLoader {
       params[param.isMatrix() ? 3 : 2] = value;
       params[param.isMatrix() ? 4 : 3] = new Integer(0);
       Statement s = new Statement(gl, rep, params);
-      System.out.println("will call: "+s);
+   //   System.out.println("will call: "+s);
       try {
         s.execute();
         //printInfoLog(param.toString(), progID.intValue(), gl);
