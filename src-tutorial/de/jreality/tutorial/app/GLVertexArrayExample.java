@@ -9,7 +9,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 import de.jreality.geometry.SphereUtility;
-import de.jreality.jogl.InfoOverlay;
+import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
