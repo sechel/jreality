@@ -417,4 +417,28 @@ public class SceneGraphUtility {
 	        return flat;
 		}
 
+	/**
+	 * A convenience method to find the deepest occurance of an {@link Appearance} in an
+	 * instance of SceneGraphPath.
+	 * @param theSelection
+	 * @return
+	 */
+	public static Appearance findDeepestAppearance(SceneGraphPath theSelection) {
+		Appearance selectedAppearance = null;
+		for (Iterator lit = theSelection.reverseIterator(); lit.hasNext();) {
+			Object selt = lit.next();
+			if (selt != null) {
+				if (selt instanceof Appearance)
+					selectedAppearance = (Appearance) selt;
+				else if (selt instanceof SceneGraphComponent) {
+					selectedAppearance = ((SceneGraphComponent) selt)
+							.getAppearance();
+				}
+				if (selectedAppearance != null)
+					break;
+			}
+	 }
+	 return selectedAppearance;
+	}
+
  }
