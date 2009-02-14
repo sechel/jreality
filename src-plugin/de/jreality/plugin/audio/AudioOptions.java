@@ -76,9 +76,9 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		gbc.gridy = 2;
 		shrinkPanel.add(new JLabel("Gain (dB)"), gbc);
 		gbc.gridx = 1;
-		shrinkPanel.add(gainWidget = new JSliderVR(-80, 40, (int) toDecibels(gain)), gbc);
+		shrinkPanel.add(gainWidget = new JSliderVR(-60, 30, (int) toDecibels(gain)), gbc);
 		gainWidget.setPreferredSize(new Dimension(20, 50));
-		gainWidget.setMajorTickSpacing(40);
+		gainWidget.setMajorTickSpacing(30);
 		gainWidget.setPaintTicks(true);
 		gainWidget.setPaintLabels(true);
 		gainWidget.setPaintTrack(true);
@@ -201,7 +201,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		super.uninstall(c);
 	}
 	
-	private final double dbq = 10/Math.log(2);
+	private final double dbq = 20/Math.log(10);
 	private float toDecibels(float q) {
 		return (float) (Math.log(q)*dbq);
 	}
