@@ -117,7 +117,7 @@ public class DelayPath implements SoundPath {
 		for(int j=0; j<frameSize; j++) {
 			float dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
 			float time;
-			while ((time = relativeTime-gamma*dist+0.5f)>=currentLength) {
+			while ((time = relativeTime+j-gamma*dist+0.5f)>=currentLength) {
 				advanceFrame();
 				updateTarget();
 			}
@@ -142,9 +142,8 @@ public class DelayPath implements SoundPath {
 			xCurrent = xFilter.nextValue(xTarget);
 			yCurrent = yFilter.nextValue(yTarget);
 			zCurrent = zFilter.nextValue(zTarget);
-
-			relativeTime++;
 		}
+		relativeTime += frameSize;
 	}
 
 	private void advanceFrame() {
