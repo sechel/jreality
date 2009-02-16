@@ -74,9 +74,10 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		if (contentComponent.getAppearance() == null) {
 			contentComponent.setAppearance(new Appearance());
 		}
-		worldSize = content.getWorldSize()/20.0;
-		Rectangle3D bounds = content.getBounds();
-		worldSize = bounds.getMaxExtent();
+// try to adapt this to work with arbitrary scaling factors
+//		worldSize = content.getWorldSize()/20.0;
+//		Rectangle3D bounds = content.getBounds();
+//		worldSize = bounds.getMaxExtent();
 		appearanceInspector.setAppearance(contentComponent.getAppearance());
 		appearanceInspector.setScaledAppearance(scalingComponent.getAppearance());
 		content.addChangeListener(this);
@@ -95,11 +96,11 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 	public void restoreDefaults() {
 		appearanceInspector.setShowPoints(DEFAULT_SHOW_POINTS);
 		appearanceInspector.setPointsReflecting(DEFAULT_POINTS_REFLECTING);
-		appearanceInspector.setPointRadius(DEFAULT_POINT_RADIUS/worldSize);
+		appearanceInspector.setPointRadius(DEFAULT_POINT_RADIUS);
 		appearanceInspector.setPointColor(DEFAULT_POINT_COLOR);
 		appearanceInspector.setShowLines(DEFAULT_SHOW_LINES);
 		appearanceInspector.setLinesReflecting(DEFAULT_LINES_REFLECTING);
-		appearanceInspector.setTubeRadius(DEFAULT_TUBE_RADIUS/worldSize);
+		appearanceInspector.setTubeRadius(DEFAULT_TUBE_RADIUS);
 		appearanceInspector.setLineColor(DEFAULT_LINE_COLOR);
 		appearanceInspector.setShowFaces(DEFAULT_SHOW_FACES);
 		appearanceInspector.setFacesReflecting(DEFAULT_FACES_REFLECTING);
