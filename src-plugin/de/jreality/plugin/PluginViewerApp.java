@@ -274,8 +274,8 @@ public class PluginViewerApp {
 	public void setCreateMenu(boolean b) {
 		if (b) {
 			viewMenuBar = new ViewMenuBar();
-			viewMenuBar.addMenuSeparator(ContentViewer.class, 19.0, "File");
-			viewMenuBar.addMenuItem(ContentViewer.class, 20.0, new ExitAction(), "File");
+			viewMenuBar.addMenuSeparator(PluginViewerApp.class, 19.0, "File");
+			viewMenuBar.addMenuItem(PluginViewerApp.class, 20.0, new ExitAction(), "File");
 			controller.registerPlugin(viewMenuBar);
 		}
 	}
