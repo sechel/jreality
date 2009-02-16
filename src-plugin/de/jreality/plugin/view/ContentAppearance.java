@@ -12,6 +12,7 @@ import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.AppearanceInspector;
+import de.jreality.util.Rectangle3D;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
@@ -61,7 +62,7 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		setInitialPosition(SHRINKER_RIGHT);
 		restoreDefaults();
 	}
-
+	double worldSize = 1.0;
 	public void install(View sceneView, AlignedContent content) {
 		this.alignedContent = content;
 		
@@ -73,6 +74,9 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		if (contentComponent.getAppearance() == null) {
 			contentComponent.setAppearance(new Appearance());
 		}
+		worldSize = content.getWorldSize()/20.0;
+		Rectangle3D bounds = content.getBounds();
+		worldSize = bounds.getMaxExtent();
 		appearanceInspector.setAppearance(contentComponent.getAppearance());
 		appearanceInspector.setScaledAppearance(scalingComponent.getAppearance());
 		content.addChangeListener(this);
@@ -91,11 +95,11 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 	public void restoreDefaults() {
 		appearanceInspector.setShowPoints(DEFAULT_SHOW_POINTS);
 		appearanceInspector.setPointsReflecting(DEFAULT_POINTS_REFLECTING);
-		appearanceInspector.setPointRadius(DEFAULT_POINT_RADIUS);
+		appearanceInspector.setPointRadius(DEFAULT_POINT_RADIUS/worldSize);
 		appearanceInspector.setPointColor(DEFAULT_POINT_COLOR);
 		appearanceInspector.setShowLines(DEFAULT_SHOW_LINES);
 		appearanceInspector.setLinesReflecting(DEFAULT_LINES_REFLECTING);
-		appearanceInspector.setTubeRadius(DEFAULT_TUBE_RADIUS);
+		appearanceInspector.setTubeRadius(DEFAULT_TUBE_RADIUS/worldSize);
 		appearanceInspector.setLineColor(DEFAULT_LINE_COLOR);
 		appearanceInspector.setShowFaces(DEFAULT_SHOW_FACES);
 		appearanceInspector.setFacesReflecting(DEFAULT_FACES_REFLECTING);

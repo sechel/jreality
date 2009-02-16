@@ -11,17 +11,18 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class Lights extends Plugin {
+public class Lights extends Plugin  {
+
+	protected SceneGraphComponent lights;
+	private View view;
+	private SceneGraphComponent sceneRoot;
+	private SceneGraphComponent lightParent = null;
 
 	private static final double DEFAULT_SUN_LIGHT_INTENSITY = .75;
 	private static final double DEFAULT_SKY_LIGHT_INTENSITY = .25;
 
-	private SceneGraphComponent lights;
 	private DirectionalLight sunLight;
 	private DirectionalLight skyLight;
-	private View view;
-	private SceneGraphComponent sceneRoot;
-
 	public Lights() {
 		lights = new SceneGraphComponent("lights");
 
@@ -44,30 +45,6 @@ public class Lights extends Plugin {
 		lights.addChild(sky);
 	}
 
-	public void install(View v) {
-
-		this.view = v;
-		sceneRoot = view.getSceneRoot();
-		view.addChangeListener(new ChangeListener() {
-
-			public void stateChanged(ChangeEvent e) {
-				if (e.getSource() == view) {
-					if (view.getSceneRoot() != sceneRoot) {
-						sceneRoot.removeChild(lights);
-						sceneRoot = view.getSceneRoot();
-						sceneRoot.addChild(lights);
-					}
-				}
-			}
-		});
-
-		sceneRoot.addChild(lights);
-	}
-
-	public SceneGraphComponent getLightComponent() {
-		return lights;
-	}
-
 	public double getSkyLightIntensity() {
 		return skyLight.getIntensity();
 	}
@@ -84,10 +61,58 @@ public class Lights extends Plugin {
 		return sunLight.getIntensity();
 	}
 
+	public void install(View v) {
+
+		this.view = v;
+		sceneRoot = view.getSceneRoot();
+		if (lightParent == null) lightParent = sceneRoot;
+		view.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				if (e.getSource() == view) {
+					if (sceneRoot != lightParent) return;
+					if (view.getSceneRoot() != sceneRoot) {
+						sceneRoot.removeChild(lights);
+						sceneRoot = view.getSceneRoot();
+						sceneRoot.addChild(lights);
+					}
+				}
+			}
+		});
+
+		lightParent.addChild(getLightComponent());
+		System.err.println("install adding lights to "+lightParent.getName());
+	}
+
+	public SceneGraphComponent getLightComponent() {
+		return lights;
+	}
+
+	public void setLights(SceneGraphComponent lights) {
+		if (this.lights != null && this.lightParent.isDirectAncestor(this.lights))
+			this.lightParent.removeChild(this.lights);
+		this.lights = lights;
+		this.lightParent.addChild(this.lights);
+		System.err.println("stlights adding lights to "+this.lightParent.getName());
+	}
+
+	public void setLightParent(SceneGraphComponent lightParent) {
+		if (lightParent == this.lightParent) return;
+		if (this.lightParent != null && 
+				lights != null && 
+				this.lightParent.isDirectAncestor(lights)) 
+			this.lightParent.removeChild(lights);
+		this.lightParent = lightParent;
+		if (lights != null) {
+			this.lightParent.addChild(lights);
+			System.err.println("setlp adding lights to "+lightParent.getName());
+		}
+	}
+
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
-		info.name = "Lights";
+		info.name = "AbstractLights";
 		info.vendorName = "Ulrich Pinkall";
 		info.icon = ImageHook.getIcon("sonne.png");
 		return info;
@@ -101,7 +126,7 @@ public class Lights extends Plugin {
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		view.getSceneRoot().removeChild(lights);
+		lightParent.removeChild(lights);
 	}
 
 }
