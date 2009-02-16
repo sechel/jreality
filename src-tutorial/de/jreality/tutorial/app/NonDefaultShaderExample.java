@@ -26,6 +26,7 @@ public class NonDefaultShaderExample {
 		dgs.setShowPoints(false);
 		// A non-default shader has to be set using the following method call
 		TwoSidePolygonShader tsps = (TwoSidePolygonShader) dgs.createPolygonShader("twoSide");
+		// We use another non-default shader for the front surface of the two-sided shader
 		ImplodePolygonShader dps = (ImplodePolygonShader) tsps.createFront("implode");
 		DefaultPolygonShader dps2 = (DefaultPolygonShader) tsps.createBack("default");
 		// but the attributes can be set directly using the Appearance.setAttribute() method
