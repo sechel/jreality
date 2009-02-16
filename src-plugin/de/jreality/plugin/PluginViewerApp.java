@@ -21,7 +21,7 @@ import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
-import de.jreality.plugin.view.ViewerKeyListener;
+import de.jreality.plugin.view.ViewerKeyListenerPlugin;
 import de.jreality.plugin.view.ZoomTool;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
@@ -53,7 +53,8 @@ public class PluginViewerApp {
 	private ContentLoader contentLoader;
 	private ZoomTool zoomTool;
 	private InfoOverlayPlugin infoOverlay;
-	private ViewerKeyListener viewerKeyListener;
+	private ViewerKeyListenerPlugin viewerKeyListener;
+	private SceneGraphComponent root;
 
 	private static class ExitAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
@@ -75,14 +76,15 @@ public class PluginViewerApp {
 				throw new IllegalArgumentException(
 						"Only Geometry or SceneGraphComponent allowed!");
 			}
-		}
-		SceneGraphComponent root = null;
-		if (contentNode instanceof SceneGraphComponent) {
-			root = (SceneGraphComponent)contentNode;
-		} else {
-			root = new SceneGraphComponent();
-			root.setGeometry((Geometry)contentNode);
-		}
+			root = null;
+			if (contentNode instanceof SceneGraphComponent) {
+				root = (SceneGraphComponent)contentNode;
+			} else {
+				root = new SceneGraphComponent();
+				root.setGeometry((Geometry)contentNode);
+			}
+		} else root = new SceneGraphComponent("empty root");
+		
 		view = new View();
 		controller.registerPlugin(view);
 		
@@ -117,13 +119,17 @@ public class PluginViewerApp {
 		infoOverlay = new InfoOverlayPlugin();
 		controller.registerPlugin(infoOverlay);
 		
-		viewerKeyListener = new ViewerKeyListener();
+		viewerKeyListener = new ViewerKeyListenerPlugin();
 		controller.registerPlugin(viewerKeyListener);
 		
 		// set defaults
 		setCreateMenu(true);
 		setAttachBeanShell(true);
 		setAttachNavigator(true);
+	}
+
+	public SimpleController getController() {
+		return controller;
 	}
 
 	public void addAccessory(final Component c, final String title) {
@@ -197,6 +203,18 @@ public class PluginViewerApp {
 
 	public Component getViewingComponent() {
 		return view.getViewer().getViewingComponent();
+	}
+
+	public Lights getLights() {
+		return lights;
+	}
+
+	public AlignedContent getAlignedContent() {
+		return alignedContent;
+	}
+
+	public ViewerKeyListenerPlugin getViewerKeyListener() {
+		return viewerKeyListener;
 	}
 
 	public boolean isAttachBeanShell() {
@@ -280,6 +298,20 @@ public class PluginViewerApp {
 	public static void display(SceneGraphNode sceneGraphNode) {
 		if (sceneGraphNode == null) sceneGraphNode = new SceneGraphComponent("null");
 		new PluginViewerApp(sceneGraphNode).display();
+	}
+
+	/**
+	 * @deprecated
+	 * @param b
+	 */
+	public void setExternalBeanShell(boolean b) {
+	}
+
+	/**
+	 * @deprecated
+	 * @param b
+	 */
+	public void setExternalNavigator(boolean b) {
 	}
 	
 	
