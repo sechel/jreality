@@ -138,7 +138,7 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
     vec4 color;
     vec4 eye = vec4(0.0, 0.0, 0.0, 1.0);
     int i;
-    float fog = 0, d2eye=0;
+    float fog = 0.0, d2eye=0.0;
     if (fogEnabled)	{
       d2eye = distance4(eye, ecPosition); 
 //    d2eye = 1.0;
