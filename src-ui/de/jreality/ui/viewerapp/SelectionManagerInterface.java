@@ -2,7 +2,7 @@ package de.jreality.ui.viewerapp;
 
 import de.jreality.scene.SceneGraphPath;
 
-public interface SelectionManagerInterface {
+public interface SelectionManagerInterface  {
 
 	public abstract Selection getDefaultSelection();
 
@@ -41,5 +41,14 @@ public interface SelectionManagerInterface {
 	public abstract boolean isRenderSelection();
 
 	public abstract void setRenderSelection(boolean renderSelection);
+
+	// cycling functionality
+	public abstract void addSelection(SceneGraphPath p);
+
+	public abstract void removeSelection(SceneGraphPath p);
+
+	public abstract void clearSelections();
+
+	public abstract void cycleSelectionPaths();
 
 }
