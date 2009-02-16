@@ -234,6 +234,10 @@ public class Rectangle3D {
 		return (double[]) extent.clone();
 	}
 
+	 public double getMaxExtent()	{
+		 double max = Math.max( Math.max(extent[0], extent[1]), extent[2]);
+		 return max;
+	 }
 	/**
 	 * Project this box onto its first two dimensions
 	 * @param rec
