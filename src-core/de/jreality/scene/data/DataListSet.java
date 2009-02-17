@@ -53,8 +53,8 @@ import java.util.Set;
  */
 public class DataListSet implements Serializable {
   private int dataSize;
-  protected Map attr2attrDataList=new HashMap();
-  protected transient Set keySet=Collections.unmodifiableSet(attr2attrDataList.keySet());
+  protected Map<Attribute, DataList> attr2attrDataList=new HashMap<Attribute, DataList>();
+  protected transient Set<Attribute> keySet=Collections.unmodifiableSet(attr2attrDataList.keySet());
   /**
    * 
    */
@@ -134,7 +134,7 @@ public class DataListSet implements Serializable {
     return attr2attrDataList.size();
   }
 
-  public Set storedAttributes() {
+  public Set<Attribute> storedAttributes() {
     return keySet;
   }
 
