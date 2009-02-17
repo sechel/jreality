@@ -121,6 +121,7 @@ public class DraggingTool extends AbstractTool {
 		  MatrixBuilder.init(null, metric).translate(evolution.getColumn(3)).assignTo(evolution);
     
       (moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getMatrix(local2world.getArray());
+      if (Rn.isNan(local2world.getArray())) return;
       
       comp.getTransformation().getMatrix(result.getArray());
       
