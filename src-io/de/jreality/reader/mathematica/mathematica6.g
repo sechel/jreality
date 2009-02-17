@@ -1,5 +1,5 @@
 //**************************************************
-// * Mathematica Parser
+// * Mathematica6 Parser
 // */
 
 
@@ -62,7 +62,7 @@ options {
 	private SceneGraphComponent root = new SceneGraphComponent();	
 	private SceneGraphComponent current = root;		// aktuell zu erweiternder Knoten 
 	private MState initialState=new MState();
-	private Logger log = LoggingSystem.getLogger(MathematicaParser.class);
+	private Logger log = LoggingSystem.getLogger(Mathematica6Parser.class);
 	private Appearance startApp =new Appearance();
 
 // -------------------------------- default Lights ----------------------------
@@ -74,8 +74,8 @@ options {
 * konstructs a parser who can translate a
 * mathematica-file to the corresponding SceneGraph
 * @param    see superclass
-* example: MathematicaParser p=
-*	    new MathematicaParser(new MathematicaLexer(
+* example: Mathematica6Parser p=
+*	    new Mathematica6Parser(new Mathematica6Lexer(
 *	     new FileReader(new File("file.m"))));
 */
 }
