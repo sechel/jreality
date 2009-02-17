@@ -395,6 +395,8 @@ pointBlock [MState state]
  System.out.println("pointBlock");
  List<double[]> points= new LinkedList<double[]>(); 
  double[] v = new double[3];
+ ArrayList<Color> colList= new ArrayList<Color>();
+ ArrayList<double[]> normList= new ArrayList<double[]>();
  }
 	:"Point"
 	   OPEN_BRACKET
@@ -403,7 +405,7 @@ pointBlock [MState state]
 	   		 (COLON v=vektor {points.add(v);})*
 	   		 CLOSE_BRACE
 	   		)
-	   (COLON waste)*	   		
+	   (COLON gcOptInside[colList,normList])*	   		
 	   CLOSE_BRACKET 
 	{
 		PointSetFactory psf = new PointSetFactory();
@@ -415,10 +417,13 @@ pointBlock [MState state]
 		}
 		psf.setVertexCount(coords.length);
 		psf.setVertexCoordinates(coords);
-	  	psf.update();
+		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
 		geo.setAppearance(state.getPointSetApp(true));
-		geo.setGeometry(psf.getPointSet());
+		PointSet p=psf.getPointSet();
+		state.assignColorList(p,colList);	
+		state.assignNormalList(p,normList);		
+		geo.setGeometry(p);
 		geo.setName("Points");
 		current.addChild(geo);
 	}
@@ -431,11 +436,13 @@ indexedPointSet [MState state]
 // eine Abfolge von Punkten wird zu einer PointSet
  int[] points= null; 
  Integer n;
+ ArrayList<Color> colList= new ArrayList<Color>();
+ ArrayList<double[]> normList= new ArrayList<double[]>();
  }
 	:"Point" OPEN_BRACKET
 			( n=indexVektor {points= new int[]{n};}
 			 |points=vertexIndexList )
-	   (COLON waste)*
+	   (COLON gcOptInside[colList,normList])*	   		
 	   CLOSE_BRACKET
 	 {
 		PointSetFactory psf = new PointSetFactory();
@@ -445,7 +452,10 @@ indexedPointSet [MState state]
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
 		geo.setAppearance(state.getPointSetApp(true));
-		geo.setGeometry(psf.getPointSet());
+		PointSet p=psf.getPointSet();
+		state.assignColorList(p,colList);	
+		state.assignNormalList(p,normList);		
+		geo.setGeometry(p);
 		geo.setName("indexedPoints");
 		current.addChild(geo);
 	 }
@@ -458,6 +468,8 @@ lineBlock [MState state]
  List<double[][]> lines=new LinkedList<double[][]>();
  double[][] line=null;
  int numVerts=0;
+ ArrayList<Color> colList= new ArrayList<Color>();
+ ArrayList<double[]> normList= new ArrayList<double[]>();
 }
 	 :("Line"|"Tube")
 	  OPEN_BRACKET
@@ -466,7 +478,7 @@ lineBlock [MState state]
 		    (COLON line=vertexList    	{lines.add(line);numVerts+=line.length;})*
 		    CLOSE_BRACE
 		 )
-		 (COLON waste)*
+	   (COLON gcOptInside[colList,normList])*	   		
 	 CLOSE_BRACKET 
 	{
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
@@ -490,6 +502,8 @@ lineBlock [MState state]
 		SceneGraphComponent geo=new SceneGraphComponent();
 		geo.setAppearance(state.getLineSetApp(true));
 		IndexedLineSet ils=lineset.getIndexedLineSet();
+		state.assignColorList(ils,colList);	
+		state.assignNormalList(ils,normList);		
 		geo.setGeometry(ils);
 		geo.setName("Lines");
 		current.addChild(geo);
@@ -501,6 +515,8 @@ indexedLineSet [MState state]
  System.out.println("indexedLineSet");
  List<int[]> indis=new LinkedList<int[]>();
  int[] line= null;
+ ArrayList<Color> colList= new ArrayList<Color>();
+ ArrayList<double[]> normList= new ArrayList<double[]>();
 }
 	: ("Line"|"Tube")
 	OPEN_BRACKET
@@ -510,7 +526,7 @@ indexedLineSet [MState state]
 		  ( COLON line=vertexIndexList { indis.add(line); } )*
 		  CLOSE_BRACE
 		)
-		(COLON waste)*
+	   (COLON gcOptInside[colList,normList])*	   		
 	CLOSE_BRACKET
 	{
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
@@ -526,6 +542,8 @@ indexedLineSet [MState state]
 		SceneGraphComponent geo=new SceneGraphComponent();
 		geo.setAppearance(state.getLineSetApp(true));
 		IndexedLineSet ils=lineset.getIndexedLineSet();
+		state.assignColorList(ils,colList);	
+		state.assignNormalList(ils,normList);		
 		geo.setGeometry(ils);
 		geo.setName("indexedLines");
 		current.addChild(geo); 
@@ -554,6 +572,8 @@ polygonBlock [MState state]
  int count=0;						// zaehlt die Punkte mit
  boolean colorFlag=false;
  boolean colorNeeded =false;
+ ArrayList<Color> colList= new ArrayList<Color>();
+ ArrayList<double[]> normList= new ArrayList<double[]>();
 }
 	:"Polygon"
 	 OPEN_BRACKET
@@ -571,7 +591,7 @@ polygonBlock [MState state]
 			givenIndexList.add(givenIndexedPoly);
 			colors.add(state.getFaceColor());
 		}
-	 (COLON waste)*
+	   (COLON gcOptInside[colList,normList])*	   		
 	 CLOSE_BRACKET 
 	 ( COLON
 	   (
@@ -650,6 +670,8 @@ polygonBlock [MState state]
 		geo.setAppearance(state2.getFaceApp(!colorNeeded));
 		current.addChild(geo);
 		geo.setName("Faces");
+		state.assignColorList(ifs,colList);	
+		state.assignNormalList(ifs,normList);		
 		geo.setGeometry(ifs);
 		state.faces.add(ifs);
 	}
@@ -660,6 +682,8 @@ indexedFaceSet [MState state]
  System.out.println("indexedFaceSet");
  List<int[]> indis=new LinkedList<int[]>();
  int[] face=null;
+ ArrayList<Color> colList= new ArrayList<Color>();
+ ArrayList<double[]> normList= new ArrayList<double[]>();
 }
 	:"Polygon"
 	 OPEN_BRACKET
@@ -669,7 +693,7 @@ indexedFaceSet [MState state]
 		 	( COLON face=vertexIndexList { indis.add(face); } )*
 		 	CLOSE_BRACE
 		)
-	 (COLON waste)*
+	   (COLON gcOptInside[colList,normList])*	   		
 	 CLOSE_BRACKET
 	{
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
@@ -689,6 +713,8 @@ indexedFaceSet [MState state]
 		geo.setAppearance(state.getFaceApp(true));
 		current.addChild(geo);
 		geo.setName("indexedFaces");
+		state.assignColorList(ifs,colList);	
+		state.assignNormalList(ifs,normList);		
 		geo.setGeometry(ifs);
 		state.faces.add(ifs);
 	}
@@ -1006,9 +1032,9 @@ faceFormContent [MState state]
 private
 gcOpt [MState state]
 {
- ArrayList<Color> colList= new ArrayList<Color>();
  double[] n=null;
  Color c=null;
+ ArrayList<Color> colList= new ArrayList<Color>();
  ArrayList<double[]> normList= new ArrayList<double[]>();
  System.out.println("gcOpt");
 }
@@ -1034,6 +1060,36 @@ gcOpt [MState state]
 			 ( COLON n=vektor	{normList.add(n);} ) *
 			 CLOSE_BRACE
 				{  state.assignNormalList(normList);	}
+			)
+	;
+
+private
+gcOptInside [ArrayList<Color> colList,ArrayList<double[]> normList]
+{
+ double[] n=null;
+ Color c=null;
+ System.out.println("gcOptInside");
+}
+	: "ContentSelectable" MINUS LARGER	egal
+	| "VertexColors" 
+			MINUS LARGER
+			( 
+			 "None"
+			|
+			  OPEN_BRACE
+			  c=vertexColor	{colList.add(c);} 
+			  ( COLON c=vertexColor	{colList.add(c);} ) *
+			  CLOSE_BRACE
+			)
+	| "VertexNormals"
+			MINUS LARGER
+			( 
+			 "None"
+			|
+			 OPEN_BRACE
+			 n=vektor {normList.add(n);} 
+			 ( COLON n=vektor	{normList.add(n);} ) *
+			 CLOSE_BRACE
 			)
 	;
 

@@ -10,6 +10,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
@@ -205,6 +206,7 @@ public class MState {
 		for (IndexedFaceSet f : faces ) {
 			int n= f.getNumPoints();
 			if(n>cols.size()) continue;
+			if(f.getVertexAttributes(Attribute.COLORS)!=null)continue;
 			double[][] cData=new double[n][];
 			for (int i = 0; i < n; i++) 
 				cData[i]=MHelper.getRgbaColor(cols.get(i));
@@ -215,6 +217,7 @@ public class MState {
 		for (IndexedFaceSet f : faces ) {
 			int n= f.getNumPoints();
 			if(n>norms.size()) continue;
+			if(f.getVertexAttributes(Attribute.NORMALS)!=null)continue;
 			double[][] nData=new double[n][];
 			for (int i = 0; i < n; i++){
 				nData[i]=new double[norms.get(i).length]; 
@@ -223,6 +226,25 @@ public class MState {
 			}
 			f.setVertexAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(nData));
 		}
+	}
+	public void assignColorList(PointSet p,ArrayList< Color> cols){
+		int n= p.getNumPoints();
+		if(n>cols.size()) return;
+		double[][] cData=new double[n][];
+		for (int i = 0; i < n; i++) 
+			cData[i]=MHelper.getRgbaColor(cols.get(i));
+		p.setVertexAttributes(Attribute.COLORS,new DoubleArrayArray.Array(cData));
+	}
+	public void assignNormalList(PointSet p,ArrayList< double[]> norms){
+		int n= p.getNumPoints();
+		if(n>norms.size()) return;
+		double[][] nData=new double[n][];
+		for (int i = 0; i < n; i++){
+			nData[i]=new double[norms.get(i).length]; 
+			for (int j = 0; j < nData[i].length; j++) 
+				nData[i][j]=norms.get(i)[j];
+		}
+		p.setVertexAttributes(Attribute.NORMALS,new DoubleArrayArray.Array(nData));
 	}
 
 }
