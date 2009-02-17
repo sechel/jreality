@@ -84,9 +84,10 @@ public class MState {
 	}
 	public Appearance getFaceApp(boolean colorNeeded){
 		Appearance app= new Appearance();
-		app.setAttribute(CommonAttributes.EDGE_DRAW, edgeDraw);
-		app.setAttribute(CommonAttributes.FACE_DRAW, faceDraw);
-		app.setAttribute(CommonAttributes.VERTEX_DRAW, true);
+		if(!edgeDraw)
+			app.setAttribute(CommonAttributes.EDGE_DRAW, false);
+		if(!faceDraw)
+			app.setAttribute(CommonAttributes.FACE_DRAW, false);
 		// face Color
 		if(faceColor!=null&&colorNeeded){ 
 			app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, faceColor);
