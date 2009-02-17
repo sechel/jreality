@@ -224,7 +224,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_K:		
 					if (e.isShiftDown()) break;
-					sm.cycleSelectionPaths();
+					sm.cycleSelection();
 					viewer.renderAsync();
 					break;
 
