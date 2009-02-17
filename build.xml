@@ -298,6 +298,9 @@
 	  <antlr target="${io}/de/jreality/reader/vrml/vrml-v2.0.g">
 	    <classpath refid="io.classpath"/>
 	  </antlr>
+	  <antlr target="${io}/de/jreality/reader/mathematica/mathematica6.g">
+	    <classpath refid="io.classpath"/>
+	  </antlr>
 	  <antlr target="${io}/de/jreality/reader/mathematica/mathematica.g">
 	    <classpath refid="io.classpath"/>
 	  </antlr>
