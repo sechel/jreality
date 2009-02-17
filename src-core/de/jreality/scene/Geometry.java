@@ -147,8 +147,7 @@ public abstract class Geometry extends SceneGraphNode {
   
   final void setAttrImpl(DataListSet target, DataListSet data, boolean replace) {
     if(replace) target.reset(data.getListLength());
-    for(Iterator i=data.storedAttributes().iterator(); i.hasNext(); ) {
-      Attribute a=(Attribute)i.next();
+    for(Attribute a : data.storedAttributes() ) {
       setAttrImpl(target, a, data.getList(a), false);
     }
   }
