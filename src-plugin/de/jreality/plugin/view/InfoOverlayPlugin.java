@@ -1,12 +1,8 @@
 package de.jreality.plugin.view;
 
-import java.awt.Component;
-
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.plugin.view.image.ImageHook;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
-import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.util.LoggingSystem;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
@@ -47,7 +43,7 @@ public class InfoOverlayPlugin extends Plugin {
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		SceneGraphComponent root = sceneView.getSceneRoot();
+//		SceneGraphComponent root = sceneView.getSceneRoot();
 		infoOverlay.setVisible(false);
 	}
 	

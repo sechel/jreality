@@ -17,7 +17,6 @@ import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.Rectangle3D;
-import de.jreality.util.SceneGraphUtility;
 import de.jtem.beans.ChangeEventMulticaster;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
