@@ -140,7 +140,15 @@ public class RotateTool extends AbstractTool {
   private double animTimeMax=750;
   private boolean updateCenter;
   public void perform(ToolContext tc) {
-    Matrix object2avatar = objToAvatar(tc);
+    Matrix object2avatar = new Matrix((moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
+    if (Rn.isNan(object2avatar.getArray())) {
+    	return;
+    }
+	try {
+	    object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, metric));
+	} catch (Exception e)	{
+	    MatrixBuilder.euclidean().assignTo(object2avatar);	// set identity matrix
+	}
     evolution.assignFrom(tc.getTransformationMatrix(evolutionSlot));
     evolution.conjugateBy(object2avatar);
     if (!fixOrigin && updateCenter){ 
@@ -156,26 +164,6 @@ public class RotateTool extends AbstractTool {
     result.multiplyOnRight(evolution);
     if (!fixOrigin) result.multiplyOnRight(center.getInverse());
     comp.getTransformation().setMatrix(result.getArray());
-  }
-
-  /**
-   * @return
-   */
-  private Matrix objToAvatar(ToolContext tc) {
-    Matrix object2avatar = new Matrix((moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
-    // TODO: see if we can't remove head dependency from Rotate device
-//    Matrix tmp = new Matrix(tc.getTransformationMatrix(camPath));
-//    Matrix avatarTrans = new Matrix();
-//    MatrixBuilder.init(null, metric).translate(tmp.getColumn(3)).assignTo(avatarTrans);
-//    avatarTrans.setColumn(3, tmp.getColumn(3));
-//    object2avatar.multiplyOnLeft(avatarTrans);
-    //object2avatar = object2avatar.getRotation();
-    try {
-    	object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, metric));
-    } catch (Exception e)	{
-    	MatrixBuilder.euclidean().assignTo(object2avatar);
-    }
-    return object2avatar;
   }
 
   public void deactivate(ToolContext tc) {
