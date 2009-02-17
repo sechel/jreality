@@ -244,7 +244,7 @@ graphGroupGC [MState state]
 private
 objectG3D [MState state]
 {
- System.out.println("object");
+// System.out.println("object");
 }
 	:	graphGroupG3D[state]
 	|	cuboid [state]					// Wuerfel 
@@ -262,7 +262,7 @@ objectG3D [MState state]
 private
 objectGC [MState state]
 {
- System.out.println("object");
+// System.out.println("object");
 }
 	:	graphGroupGC[state]
 	|	cuboid [state]					// Wuerfel 
@@ -1104,7 +1104,6 @@ exponent_thing returns[int e]
 	
 private 
 waste // ueberliset alles bis zum Klammerende auch mit Unterklammern
-{System.out.println("waste");}
 	:   (~(	LPAREN | RPAREN | OPEN_BRACE | OPEN_BRACKET | CLOSE_BRACE | CLOSE_BRACKET))*
 		(   OPEN_BRACE	 	waste		CLOSE_BRACE		waste
 		 |	OPEN_BRACKET 	waste		CLOSE_BRACKET	waste
