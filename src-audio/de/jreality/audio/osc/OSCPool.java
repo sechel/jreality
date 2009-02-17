@@ -16,7 +16,7 @@ import de.sciss.net.OSCServer;
  * Pretty straightforward, except that users of this class should not call stop() on any of the clients/servers received from
  * this class; just rely on the garbage collector to clean things up if necessary.
  * 
- * Depends on the NetUtil OSC library (http://www.sciss.de/netutil/).
+ * Depends on the NetUtil OSC library {@link http://www.sciss.de/netutil/}.
  * 
  * @author brinkman
  *
