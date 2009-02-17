@@ -403,6 +403,7 @@ pointBlock [MState state]
 	   		 (COLON v=vektor {points.add(v);})*
 	   		 CLOSE_BRACE
 	   		)
+	   (COLON waste)*	   		
 	   CLOSE_BRACKET 
 	{
 		PointSetFactory psf = new PointSetFactory();
@@ -434,6 +435,7 @@ indexedPointSet [MState state]
 	:"Point" OPEN_BRACKET
 			( n=indexVektor {points= new int[]{n};}
 			 |points=vertexIndexList )
+	   (COLON waste)*
 	   CLOSE_BRACKET
 	 {
 		PointSetFactory psf = new PointSetFactory();
@@ -464,7 +466,7 @@ lineBlock [MState state]
 		    (COLON line=vertexList    	{lines.add(line);numVerts+=line.length;})*
 		    CLOSE_BRACE
 		 )
-		 (COLON waste)?
+		 (COLON waste)*
 	 CLOSE_BRACKET 
 	{
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
@@ -508,7 +510,7 @@ indexedLineSet [MState state]
 		  ( COLON line=vertexIndexList { indis.add(line); } )*
 		  CLOSE_BRACE
 		)
-		(COLON waste)?
+		(COLON waste)*
 	CLOSE_BRACKET
 	{
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
@@ -569,6 +571,7 @@ polygonBlock [MState state]
 			givenIndexList.add(givenIndexedPoly);
 			colors.add(state.getFaceColor());
 		}
+	 (COLON waste)*
 	 CLOSE_BRACKET 
 	 ( COLON
 	   (
@@ -666,6 +669,7 @@ indexedFaceSet [MState state]
 		 	( COLON face=vertexIndexList { indis.add(face); } )*
 		 	CLOSE_BRACE
 		)
+	 (COLON waste)*
 	 CLOSE_BRACKET
 	{
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
@@ -1003,31 +1007,34 @@ private
 gcOpt [MState state]
 {
  ArrayList<Color> colList= new ArrayList<Color>();
- 
  double[] n=null;
  Color c=null;
  ArrayList<double[]> normList= new ArrayList<double[]>();
- 
+ System.out.println("gcOpt");
 }
 	: "ContentSelectable" MINUS LARGER	egal
 	| "VertexColors" 
 			MINUS LARGER
-			OPEN_BRACE
-				( c=vertexColor	{colList.add(c);} )
-				( COLON c=vertexColor	{colList.add(c);} ) *
-			CLOSE_BRACE
-			{
-			  state.assignColorList(colList);
-			}
+			( 
+			 "None"
+			|
+			  OPEN_BRACE
+			  c=vertexColor	{colList.add(c);} 
+			  ( COLON c=vertexColor	{colList.add(c);} ) *
+			  CLOSE_BRACE
+				{	  state.assignColorList(colList);	}
+			)
 	| "VertexNormals"
 			MINUS LARGER
-			OPEN_BRACE
-				( n=vektor {normList.add(n);} )
-				( COLON n=vektor	{normList.add(n);} ) *
-			CLOSE_BRACE
-			{
-			  state.assignNormalList(normList);
-			}
+			( 
+			 "None"
+			|
+			 OPEN_BRACE
+			 n=vektor {normList.add(n);} 
+			 ( COLON n=vektor	{normList.add(n);} ) *
+			 CLOSE_BRACE
+				{  state.assignNormalList(normList);	}
+			)
 	;
 
 private 
@@ -1038,8 +1045,7 @@ vertexColor returns[Color c]
  c=null;
 }
 	:c=color[s]
-	|OPEN_BRACE n=vektor CLOSE_BRACE
-		{ c=MHelper.colorToRgba(n);}
+	|n=vektor { c=MHelper.colorToRgba(n);}
 	
 	;
 
@@ -1098,6 +1104,7 @@ exponent_thing returns[int e]
 	
 private 
 waste // ueberliset alles bis zum Klammerende auch mit Unterklammern
+{System.out.println("waste");}
 	:   (~(	LPAREN | RPAREN | OPEN_BRACE | OPEN_BRACKET | CLOSE_BRACE | CLOSE_BRACKET))*
 		(   OPEN_BRACE	 	waste		CLOSE_BRACE		waste
 		 |	OPEN_BRACKET 	waste		CLOSE_BRACKET	waste
