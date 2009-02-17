@@ -31,7 +31,6 @@ import de.jreality.scene.StereoViewer;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.SelectionCycler;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.CameraUtility;
