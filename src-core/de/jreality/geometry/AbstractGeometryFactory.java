@@ -16,6 +16,12 @@ import de.jreality.scene.data.DataList;
  * <p>
  * And provides most general get method with {@link #getGeometry()}.
  * <p>
+ * This class writes itself into the associated {@link Geometry} using the call:
+ * <code><pre>
+ * geometry.setGeometryAttributes(GeometryUtility.FACTORY, this);
+ * </code></pre>
+ * so that later users of <i>geometry</i> can access the factory and use it for editing, etc.
+ * <p>
  * For an introduction to how the factories work, see {@link PointSetFactory}.
  * 
  * @author gunn
