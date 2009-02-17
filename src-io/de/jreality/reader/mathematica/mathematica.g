@@ -481,7 +481,6 @@ pointBlock [Appearance app] returns [Appearance app2]
 		geo.setGeometry(psf.getPointSet());
 		geo.setName("Points");
 		current.addChild(geo);
-		MathematicaHelper.simplifyColor(app2);
 	}
 	;  
 
@@ -579,7 +578,6 @@ lineBlock [Appearance app] returns[Appearance app2]
 		geo.setGeometry(ils);
 		geo.setName("Lines");
 		current.addChild(geo);
-		MathematicaHelper.simplifyColor(app2);
 	}
 	;  
 

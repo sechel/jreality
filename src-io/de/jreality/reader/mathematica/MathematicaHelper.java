@@ -68,10 +68,6 @@ public class MathematicaHelper {
 		// kopiert eine Farbe um doppelt-Verzeigerung zu vermeiden
 		return new Color(c.getRed(),c.getGreen(),c.getBlue()) ;
 	}
-	static void simplifyColor(Appearance app){
-		//takes out the point-, polygon and line- colors if they are at defaultColors
-		// kommt spaeter ist nicht so wichtig
-	}	
 	static double[] getRGBColor(Color c){
 	// retuns a array that represents a color (needed for color-Arrays as double[][])
 		double[] fl= new double[3];
@@ -126,6 +122,7 @@ public class MathematicaHelper {
 		MatrixBuilder.euclidean().translate(0,-1,-1).assignTo(light6Node);
 		return lightNode; 
 	} 
+	
 	static IndexedFaceSet makeCylinder(double[] start, double[] end, double radius){
 		GeometryMergeFactory gem= new GeometryMergeFactory();
 		SceneGraphComponent sgc= new SceneGraphComponent();
