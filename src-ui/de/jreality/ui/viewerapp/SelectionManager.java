@@ -48,6 +48,7 @@ import java.util.WeakHashMap;
 
 import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.reader.vrml.DefUseData;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -113,17 +114,16 @@ public class SelectionManager implements SelectionManagerInterface {
 		
 		if (sm == null) {  //create new SelectionManager
 			String selectionManager = Secure.getProperty(SystemProperties.SELECTION_MANAGER, SystemProperties.SELECTION_MANAGER_DEFAULT);		
-			try { sm = (SelectionManagerInterface) Class.forName(selectionManager).newInstance();	} 
+			try { 
+				sm = (SelectionManagerInterface) Class.forName(selectionManager).newInstance();	
+				sm.setDefaultSelection(new Selection(new SceneGraphPath(v.getSceneRoot())));
+				} 
 			catch (Exception e) {	e.printStackTrace(); } 
 		}
 		
 		//add mapping for viewer depending viewers
 		for (Viewer vw : viewers) globalTable.put(vw, sm);
 		
-//		if (viewer instanceof ToolSystemViewer) {  //used by ViewerApp
-//			sm.setDefaultSelection( new Selection( ((ToolSystemViewer)viewer).getEmptyPickPath() ) );
-//			sm.setSelection(sm.getDefaultSelection());
-//		}
 		return sm;
 	}
 	
@@ -134,15 +134,12 @@ public class SelectionManager implements SelectionManagerInterface {
 	
 	
 	public SelectionManager(Selection defaultSelection) {
-//		if (defaultSelection == null)
-//			throw new IllegalArgumentException("Default selection is null!");
 
 		listeners = new Vector<SelectionListener>();
 
 		//set default selection and select it
 		if (defaultSelection!=null) {
 			setDefaultSelection(defaultSelection);
-			setSelection(null);
 		}
 	}
 
@@ -153,12 +150,13 @@ public class SelectionManager implements SelectionManagerInterface {
 
 
 	public void setDefaultSelection(Selection defaultSelection) {
-		this.defaultSelection = defaultSelection;
+		this.defaultSelection = new Selection(defaultSelection);
+		if (selection == null) selection = defaultSelection;
 	}
 
 
 	public Selection getSelection() {
-		return selection;
+		return (selection == null ? defaultSelection : selection);
 	}
 
 
@@ -170,9 +168,14 @@ public class SelectionManager implements SelectionManagerInterface {
 		if (this.selection!=null && this.selection.equals(selection)) return;  //already selected
 
 		if (selection == null)  //nothing selected
-			this.selection = defaultSelection;
-		else this.selection = selection;
+			this.selection = new Selection(defaultSelection);
+		else this.selection = new Selection(selection);
 
+		// a convenience  to help selection tools cycle through a fixed selection path
+		if (!cycling) {
+			previousFullSelection = new SceneGraphPath( this.selection.sgPath);
+			truncatedSelection = null;
+		}
 		selectionChanged();
 	}
 
@@ -199,45 +202,43 @@ public class SelectionManager implements SelectionManagerInterface {
 
 		if (renderSelection) {
 			updateBoundingBox();
-			selectionKit.setVisible(true);
 		}
 	}
 
 
 	private void updateBoundingBox() {
 
+		if (selection.getLastComponent() == selectionKit) 
+			return;  //bounding box selected
 		if (selectionKit == null) {
 			//set up representation of selection in scene graph
 			selectionKit = new SceneGraphComponent("boundingBox");
 			selectionKit.setOwner(this);
-			Appearance app = new Appearance("app");
-			app.setAttribute(CommonAttributes.EDGE_DRAW,true);
-			app.setAttribute(CommonAttributes.FACE_DRAW,false);
-			app.setAttribute(CommonAttributes.VERTEX_DRAW,false);
-			app.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,true);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_FACTOR, 1.0);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE_PATTERN, 0x6666);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 2.0);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
-			app.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
-			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
-			selectionKit.setAppearance(app);
+			boundingboxApp.setAttribute(CommonAttributes.EDGE_DRAW,true);
+			boundingboxApp.setAttribute(CommonAttributes.FACE_DRAW,false);
+			boundingboxApp.setAttribute(CommonAttributes.VERTEX_DRAW,false);
+			boundingboxApp.setAttribute(CommonAttributes.LIGHTING_ENABLED,false);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,true);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_FACTOR, 1.0);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE_PATTERN, 0x6666);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_WIDTH, 2.0);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBES_DRAW, false);
+			boundingboxApp.setAttribute(CommonAttributes.LEVEL_OF_DETAIL,0.0);
+			boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+			selectionKit.setAppearance(boundingboxApp);
 		}
-
-		if (selection.getLastComponent() == selectionKit) 
-			return;  //bounding box selected
+		System.err.println("Updating bb");
 
 		Rectangle3D bbox = BoundingBoxUtility.calculateChildrenBoundingBox( selection.getLastComponent() ); 
 
-		IndexedFaceSet box = null;
-		box = IndexedFaceSetUtility.representAsSceneGraph(box, bbox);
-		box.setGeometryAttributes(CommonAttributes.PICKABLE, false);
+		IndexedFaceSet box = IndexedFaceSetUtility.representAsSceneGraph(null, bbox);
+		selectionKit.setPickable(false);
 
 		selectionKit.setGeometry(box);
 		if (selectionKitOwner!=null) selectionKitOwner.removeChild(selectionKit);
 		selectionKitOwner = selection.getLastComponent();
+		boundingboxApp.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.LINE_STIPPLE,selectionKitOwner.getTransformation() == null);
 		selectionKitOwner.addChild(selectionKit);
 	}
 
@@ -270,13 +271,32 @@ public class SelectionManager implements SelectionManagerInterface {
 
 
 	public void setSelectionPath(SceneGraphPath selection) {
-		setSelection(new Selection(selection));
+		if (selection == null || selection.getLength() == 0)
+			setSelection(defaultSelection);
+		else setSelection(new Selection(selection));
+	}
+
+	SceneGraphPath truncatedSelection = null, previousFullSelection;
+	boolean cycling;
+	public void cycleSelectionPaths()	{
+		if (truncatedSelection == null || truncatedSelection.getLength()<=2) {
+			truncatedSelection = new SceneGraphPath(previousFullSelection);
+			LoggingSystem.getLogger(this).info("reached end");
+		}
+		else truncatedSelection = truncatedSelection.popNew();
+		LoggingSystem.getLogger(this).info("truncated selection is "+truncatedSelection);
+		// use of cycling here probably makes this un-thread-safe but it's also very unlikely ...
+		cycling = true;
+		setSelectionPath(truncatedSelection);
+		cycling = false;
 	}
 
 	
 	// add functionality to create a list of selections and to cycle through them
 	private SceneGraphPath currentCycleSelection;
 	private Vector<SceneGraphPath> selectionList = new Vector<SceneGraphPath>();
+	private Appearance boundingboxApp  = new Appearance("app");
+;
 	
 	public void addSelection(SceneGraphPath p)	{
 		Iterator iter = selectionList.iterator();
@@ -294,7 +314,7 @@ public class SelectionManager implements SelectionManagerInterface {
 			SceneGraphPath sgp = (SceneGraphPath) iter.next();
 			if (sgp.isEqual(p)) {
 				if (currentCycleSelection != null && 
-						currentCycleSelection.equals(sgp)) cycleSelectionPaths();
+						currentCycleSelection.equals(sgp)) cycleSelection();
 				selectionList.remove(sgp);
 				LoggingSystem.getLogger(this).info("Removing path "+p.toString());
 				return;
@@ -306,7 +326,7 @@ public class SelectionManager implements SelectionManagerInterface {
 		selectionList.clear();
 	}
 		
-	public void cycleSelectionPaths()	{
+	public void cycleSelection()	{
 		int target = 0;
 		if (selectionList == null || selectionList.size() == 0)		return;
 		if (currentCycleSelection != null) {

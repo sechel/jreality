@@ -49,6 +49,7 @@ public interface SelectionManagerInterface  {
 
 	public abstract void clearSelections();
 
-	public abstract void cycleSelectionPaths();
+	public abstract void cycleSelection();
 
+	public abstract void cycleSelectionPaths();
 }
