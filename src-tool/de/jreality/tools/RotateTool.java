@@ -163,6 +163,7 @@ public class RotateTool extends AbstractTool {
     if (!fixOrigin) result.multiplyOnRight(center);
     result.multiplyOnRight(evolution);
     if (!fixOrigin) result.multiplyOnRight(center.getInverse());
+    if (Rn.isNan(result.getArray())) return;
     comp.getTransformation().setMatrix(result.getArray());
   }
 

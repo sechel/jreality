@@ -135,6 +135,7 @@ public class DraggingTool extends AbstractTool {
      evolution.conjugateBy(local2world.getInverse());
      if (metric != Pn.EUCLIDEAN) P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, metric);
      result.multiplyOnRight(evolution);
+     if (Rn.isNan(result.getArray())) return;
       comp.getTransformation().setMatrix(result.getArray());
     }
 
