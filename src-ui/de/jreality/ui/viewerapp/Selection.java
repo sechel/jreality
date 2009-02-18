@@ -57,11 +57,11 @@ import de.jreality.scene.tool.Tool;
  * Represents selections in a displayed scene. A selection is a list of objects representing a directed path 
  * from a scene graph's root down to some node in the scene graph or arbitrary objects which are somehow linked to 
  * nodes of the scene graph (e.g. tools or attribute entities visible in the scene graph's tree view).
- * 
+ * <p>
  * In particular, every selection starts with a {@link SceneGraphPath}.
  * Adding an object which is not an instance of SceneGraphNode to the selection's path defines the end of the contained
  * SceneGraphPath, i.e any objects added subsequently are not treated as part of the SceneGraphPath.
- * 
+ * <p>
  * Selections can be constructed from an existing SceneGraphPaths by using {@link Selection#Selection(SceneGraphPath)}
  * and truncated to a SceneGraphPath using {@link Selection#getSGPath()}.
  * 

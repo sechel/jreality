@@ -64,7 +64,7 @@ import de.jreality.util.SystemProperties;
 /**
  * Manages selections within a jReality scene.
  * 
- * @author msommer
+ * @author msommer, Charles Gunn
  */
 public class SelectionManager implements SelectionManagerInterface {
 
@@ -278,7 +278,7 @@ public class SelectionManager implements SelectionManagerInterface {
 
 	SceneGraphPath truncatedSelection = null, previousFullSelection;
 	boolean cycling;
-	public void cycleSelectionPaths()	{
+	public void cycleSelectionPath()	{
 		if (truncatedSelection == null || truncatedSelection.getLength()<=2) {
 			truncatedSelection = new SceneGraphPath(previousFullSelection);
 			LoggingSystem.getLogger(this).info("reached end");
