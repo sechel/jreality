@@ -37,21 +37,13 @@ public class OSCPool {
 	public static OSCClient getTCPClient(InetSocketAddress addr) throws IOException {
 		return getClient(addr, tcpClients, OSCChannel.TCP);
 	}
-
+	
 	public static OSCServer getUDPServer(int port) throws IOException {
-		return getUDPServer(port, false);
+		return getServer(port, udpServers, OSCChannel.UDP);
 	}
-
-	public static OSCServer getUDPServer(int port, boolean loopback) throws IOException {
-		return getServer(port, udpServers, OSCChannel.UDP, loopback);
-	}
-
+	
 	public static OSCServer getTCPServer(int port) throws IOException {
-		return getTCPServer(port, false);
-	}
-
-	public static OSCServer getTCPServer(int port, boolean loopback) throws IOException {
-		return getServer(port, tcpServers, OSCChannel.TCP, loopback);
+		return getServer(port, tcpServers, OSCChannel.TCP);
 	}
 
 	
@@ -70,12 +62,12 @@ public class OSCPool {
 		}
 	}
 	
-	private static OSCServer getServer(int port, Map<Integer, WeakReference<OSCServer>> servers, String protocol, boolean loopback) throws IOException {
+	private static OSCServer getServer(int port, Map<Integer, WeakReference<OSCServer>> servers, String protocol) throws IOException {
 		synchronized (servers) {
 			WeakReference<OSCServer> ref = servers.get(port);
 			OSCServer server = (ref != null) ? ref.get() : null;
 			if (server == null) {
-				server = OSCServer.newUsing(protocol, port, loopback);
+				server = OSCServer.newUsing(protocol, port);
 				server.start();
 
 				servers.put(port, new WeakReference<OSCServer>(server));
