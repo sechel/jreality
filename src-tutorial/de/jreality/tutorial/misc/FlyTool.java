@@ -90,7 +90,7 @@ public class FlyTool extends AbstractTool {
   int metric = Pn.EUCLIDEAN;
   boolean readFromAp = true;
   EffectiveAppearance eap;
-  boolean doFastAndDirty = false, shiftIsRotate = true;
+  boolean  shiftIsRotate = true;
   
   public void perform(ToolContext tc) {
 		if (tc.getSource() == forwardBackwardSlot) {
@@ -108,9 +108,6 @@ public class FlyTool extends AbstractTool {
 				flying = false;
 				removeCurrentSlot(timerSlot);
 				tc.getViewer().getSceneRoot().setPickable( true);
-				if (doFastAndDirty)
-					tc.getViewer().getSceneRoot().getAppearance().setAttribute(
-							CommonAttributes.FAST_AND_DIRTY, false);
 				return;
 			} else {
 				flying = true;
@@ -118,9 +115,6 @@ public class FlyTool extends AbstractTool {
 				velocity = velocity * velocity * velocity;
 				addCurrentSlot(timerSlot);
 				tc.getViewer().getSceneRoot().setPickable(false);
-				if (doFastAndDirty)
-					tc.getViewer().getSceneRoot().getAppearance().setAttribute(
-							CommonAttributes.FAST_AND_DIRTY, true);
 			}
 		}
 	if (!flying) return;
@@ -183,22 +177,6 @@ private void moveShipInDirection(int direction) {
 	  	this.gain = gain;
 	}
 
-	public boolean isDoFastAndDirty() {
-		return doFastAndDirty;
-	}
-	
-	public void setDoFastAndDirty(boolean doFastAndDirty) {
-		this.doFastAndDirty = doFastAndDirty;
-	}
-	
-	public Matrix getLastStep() {
-		return lastStep;
-	}
-
-	public double[] getLastDirection()	{
-		return olddir;
-	}
-	
 	public void setMetric(int sig)	{
 		if (sig < -1) { readFromAp = true; return; }	// to turn on reading from appearance again
 		metric = sig;

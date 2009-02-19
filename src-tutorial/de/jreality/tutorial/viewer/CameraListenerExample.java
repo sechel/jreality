@@ -10,7 +10,6 @@ import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import java.awt.Color;
 
 import de.jreality.geometry.SphereUtility;
-import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -111,7 +110,7 @@ import de.jreality.util.SceneGraphUtility;
 		// the net transformation object to normalized device coordinates is the 
 		// product of the three matrices above.
 		double[] s2ndc = Rn.times(null, Rn.times(null, c2ndc, w2c), s2w);
-		double size = P3.getNDCExtent(s2ndc);
+		double size = CameraUtility.getNDCExtent(s2ndc);
 		// lowest resolution (0) corresponds to an ndc extent of exp(-4) ~= .02
 		// each doubling of this extent moves up to the next tessellation, so
 		// approximate screen size of triangles remains roughly constant.
