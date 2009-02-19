@@ -1472,6 +1472,17 @@ public class IndexedFaceSetUtility {
 		return false;
 	}
 
+	/**
+	 * Generates an instance of {@link IndexedLineSet} which contains one line segment for each face normal of the
+	 * input <i>ifs</i>.  This IndexedLineSet is then stuffed into a {@link SceneGraphComponent} whose appearance
+	 * is set with tube drawing <b>disabled</b>, which is then returned.  If normals are not provided in <i>ifs</i>,
+	 * the metric (see {@link Pn}) <i>metric</i> is respected
+	 * in the calculation of the normals.
+	 * @param ifs
+	 * @param scale
+	 * @param metric
+	 * @return
+	 */
 	public static SceneGraphComponent displayFaceNormals(IndexedFaceSet ifs, double scale, int metric)	{
     	SceneGraphComponent sgc = new SceneGraphComponent("displayFaceNormals()");
     	System.err.println("display face normals metric = "+metric);
