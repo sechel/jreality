@@ -5,8 +5,8 @@ import javax.swing.JMenu;
 import de.jreality.plugin.view.image.ImageHook;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.aggregators.MenuAggregator;
 import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
-import de.varylab.jrworkspace.plugin.menuaggregator.MenuAggregator;
 
 public class ViewMenuBar extends MenuAggregator {
 
@@ -24,7 +24,7 @@ public class ViewMenuBar extends MenuAggregator {
 	@Override
 	public void install(Controller c) throws Exception {
 		viewerPlugin = c.getPlugin(View.class);
-		removeMenuAll(getClass());
+		removeAll(getClass());
 		
 		// File menu
 		JMenu fileMenu =  new JMenu("File");

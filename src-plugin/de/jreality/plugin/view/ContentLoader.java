@@ -132,7 +132,7 @@ public class ContentLoader extends Plugin implements UIFlavor {
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		viewerMenuAggregator.removeMenuAll(getClass()); 
+		viewerMenuAggregator.removeAll(getClass()); 
 	}
 	
 	@Override

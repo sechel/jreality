@@ -126,7 +126,7 @@ public class ViewPreferences extends Plugin implements
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		sceneViewMenu.removeMenuAll(getClass());
+		sceneViewMenu.removeAll(getClass());
 	}
 
 	public Icon getMainIcon() {

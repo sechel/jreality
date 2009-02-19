@@ -139,7 +139,7 @@ public class Background extends Plugin {
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
-		viewerMenuAggregator.removeMenuAll(getClass());
+		viewerMenuAggregator.removeAll(getClass());
 	}
 	
 	@Override
