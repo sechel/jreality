@@ -187,6 +187,7 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 		PluginInfo info = new PluginInfo();
 		info.name = "Head-Up Display";
 		info.icon = ImageHook.getIcon("toolsblau.png");
+		info.vendorName = "Stefan Sechelmann";
 		return info;
 	}
 
