@@ -66,6 +66,7 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -84,7 +85,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	boolean tubeDraw = false,
 		lineLighting = false,
 		opaqueTubes = false,
-		vertexColors = false;
+		vertexColors = false,
+		radiiWorldCoords = false;
 	Color diffuseColor = java.awt.Color.BLACK;
 	double[][] crossSection, defaultCrossSection = TubeUtility.octagonalCrossSection;
 
@@ -109,6 +111,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 //		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
 		lineLighting = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_LIGHTING_ENABLED), false);
 		vertexColors = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.VERTEX_COLORS_ENABLED), false);
+		radiiWorldCoords = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.RADII_WORLD_COORDINATES), false);
 		lineStipple = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_STIPPLE), lineStipple);
 		lineWidth = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 		lineFactor = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.LINE_FACTOR),lineFactor);
@@ -123,8 +126,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			polygonShader = DefaultGeometryShader.createFrom(templateShader.getPolygonShader());
 			polygonShader.setFromEffectiveAppearance(eap, name+".polygonShader");
 		}
-		else polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
-		//LoggingSystem.getLogger(this).info("Line shader is smooth: "+smoothShading);
+		else  //polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
+			throw new IllegalStateException("Not from a template!");
 	}
 
 	public void preRender(JOGLRenderingState jrs)	{
@@ -211,15 +214,21 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	public int proxyGeometryFor(JOGLRenderingState jrs)	{
 		final Geometry original = jrs.currentGeometry;
 		final JOGLRenderer jr = jrs.renderer;
-		final int sig = jrs.currentMetric;
 		final boolean useDisplayLists = jrs.useDisplayLists;
+		double factor = 1.0;
+		if (radiiWorldCoords)	{
+			double[] o2w = jr.currentPath.getMatrix(null);
+			factor = CameraUtility.getScalingFactor(o2w, jr.renderingState.currentMetric);
+			factor = 1.0/factor;
+			System.err.println("Factor is "+factor);
+		}
+		final double radiusFactor = factor;
 //		if ( !(original instanceof IndexedLineSet)) return -1;
 		if (tubeDraw && original instanceof IndexedLineSet)	{
 	        final int[] dlist = new int[1];
 	        Scene.executeReader(original, new Runnable() {
 	        	public void run() {
-	    			dlist[0] = createTubesOnEdgesAsDL((IndexedLineSet) original, tubeRadius, 1.0, jr, sig, false, useDisplayLists);
-				    //JOGLConfiguration.theLog.log(Level.FINE,"Creating tubes with radius "+tubeRadius);
+	    			dlist[0] = createTubesOnEdgesAsDL((IndexedLineSet) original,radiusFactor*tubeRadius, jr, false, useDisplayLists);
 	        	}
 	        });
 			return dlist[0];
@@ -229,12 +238,14 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	
 	int[] tubeDL = null;
 	boolean testQMS = true;
-	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  double alpha, JOGLRenderer jr, int sig, boolean pickMode, boolean useDisplayLists)	{
+	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  JOGLRenderer jr,  boolean pickMode, boolean useDisplayLists)	{
 		GL gl = jr.globalGL;
 		double[] p1 = new double[4],
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
 		double[][] oneCurve = null;
+		final int sig = jr.renderingState.currentMetric;
+		
 //		if (jr.renderingState.levelOfDetail == 0.0) crossSection = TubeUtility.diamondCrossSection;
 		DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 		DataList radiidl = ils.getEdgeAttributes(Attribute.RELATIVE_RADII);
@@ -249,7 +260,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			tubeDL[sig+1] = gl.glGenLists(1);
 			//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.globalGL);
 			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
-			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], jr.renderingState.smoothShading , alpha );
+			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], jr.renderingState.smoothShading ,  jr.renderingState.diffuseColor[3] );
 			gl.glEndList();	
 		}
 		faceCount = 0;
@@ -329,7 +340,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null)	{
-					JOGLRendererHelper.drawFaces(jr, tube, jr.renderingState.smoothShading, alpha);			
+					JOGLRendererHelper.drawFaces(jr, tube, jr.renderingState.smoothShading,  jr.renderingState.diffuseColor[3]);			
 					faceCount += tube.getNumFaces();
 				}
 			}
