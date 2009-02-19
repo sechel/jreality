@@ -52,6 +52,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -470,5 +471,46 @@ public class CameraUtility {
 				return Preferences.userNodeForPackage(Camera.class);
 			}
 		});
+	}
+
+	// columns of m4 are the elements of the standard xyz axes in homogeneous coordinates 
+	private static double[] standardFrame = Rn.transpose(null, new double[]{
+		1,0,0,1,
+		0,1,0,1,
+		0,0,1,1,
+		0,0,0,1});
+	/**
+	 * @param o2ndc	object to normalized device coordinate transformation
+	 * @return
+	 */
+	public static double getNDCExtent(double[] o2ndc) {
+		double[][] images = new double[4][4];
+		// we can't just use the columns of o2ndc since there's no easy way to
+		// dehomogenize them (they are generally points at infinity)
+		Matrix imageFrame = new Matrix(Rn.times(null, o2ndc, standardFrame));
+		for (int i = 0; i<4; ++i)	{
+			images[i] = imageFrame.getColumn(i);
+			images[i] = Pn.dehomogenize(null, images[i]);
+		}
+		double d = 0.0;
+		// find the maximum xy extent in ndc coordinates of the three unit vectors
+		// in object space
+		for (int i = 0; i<3; ++i)	 {
+			// now we subtract off the "origin" to get a vector
+			double[] tmp = Rn.subtract(null, images[3], images[i]);
+			double t = Math.sqrt(Rn.innerProduct(tmp,tmp,2));
+			if (t > d) d = t;
+		}
+		return d;
+	}
+	
+	public static double getScalingFactor(double[] o2w, int metric)	{
+		double factor = 0.0;
+		Quaternion q1 = new Quaternion(), q2 = new Quaternion();
+		double[] tv = new double[4], sv = new double[4];
+		boolean[] flipped = new boolean[1];
+		P3.factorMatrix(o2w,tv, q1, q2, sv, flipped, metric);
+		factor = (sv[0]+sv[1]+sv[2])/3.0;
+		return factor;
 	}
 }
