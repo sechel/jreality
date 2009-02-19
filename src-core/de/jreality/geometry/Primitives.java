@@ -448,14 +448,14 @@ public class Primitives {
 			double melta = (zmin) + (j/(res-1.0))*(zmax-zmin);
 			for (int i = 0 ;i<rn; ++i)	{
 				angle = i*delta;
-				verts[(i*res+j)][0]  = r*Math.cos(angle);
-				verts[(i*res+j)][1]  = R*Math.sin(angle);
-				verts[(i*res+j)][2] = melta;
+				verts[(j*rn+i)][0]  = r*Math.cos(angle);
+				verts[(j*rn+i)][1]  = R*Math.sin(angle);
+				verts[(j*rn+i)][2] = melta;
 			}					
 		}
 		QuadMeshFactory qmf = new QuadMeshFactory();
-		qmf.setULineCount(res);
-		qmf.setVLineCount(rn);
+		qmf.setULineCount(rn);
+		qmf.setVLineCount(res);
 		qmf.setClosedInUDirection(Math.abs(Math.PI*2-thetamax) < 10E-8);
 		qmf.setVertexCoordinates(verts);
 		qmf.setGenerateEdgesFromFaces(true);
