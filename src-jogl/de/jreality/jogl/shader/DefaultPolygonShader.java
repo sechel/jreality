@@ -40,13 +40,22 @@
 
 package de.jreality.jogl.shader;
 
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
+import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
+import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
+
 import java.awt.Color;
+import java.io.IOException;
 
 import javax.media.opengl.GL;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
@@ -61,6 +70,7 @@ import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -76,8 +86,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	boolean		smoothShading = true;		// interpolate shaded values between vertices
 	Texture2D texture2D;
 	JOGLTexture2D joglTexture2D;
-	Texture2D lightMap;
-	JOGLTexture2D joglLightMap;
+	Texture2D texture2D_1;
+	JOGLTexture2D joglTexture2D_1;
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
 	int frontBack = FRONT_AND_BACK;
@@ -90,11 +100,20 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	transient boolean needsChecked = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
+	// try loading the OpenGL shader for the non-euclidean cases
+	static GlslProgram noneuclideanShader = null;
+	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
 	static {
 		Appearance ap = new Appearance();
 		EffectiveAppearance eap = EffectiveAppearance.create();
 		eap.create(ap);
 		defaultShader.setFromEffectiveAppearance(eap, "");
+		try {
+			noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
+		noneuclideanShader.setUniform("useNormals4", false);					
 	}
 	
 	public DefaultPolygonShader()	{
@@ -108,28 +127,25 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	static int count = 0;
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap,name);
-		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
+		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,SMOOTH_SHADING), SMOOTH_SHADING_DEFAULT);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
-	    joglLightMap = null;
+	    joglTexture2D_1 = null;
 	    reflectionMap = null;
 	    joglTexture2D = null;
 	    joglCubeMap = null;
 	    hasTextures = false;
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
-//				if (false && templateShader != null) texture2D = templateShader.createTexture2d();
-//				else 
-				texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
-//		    	LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D), eap)) {
+			texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
 			joglTexture2D = new JOGLTexture2D(texture2D);
 			hasTextures = true;
 		}
-	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
-	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
+	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)){
+	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name, REFLECTION_MAP));		    	
 	    	joglCubeMap = new JOGLCubeMap(reflectionMap);
 	    }
-	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap)) {
-	    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);		    	
-	    	joglLightMap = new JOGLTexture2D(lightMap);
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
+	    	texture2D_1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap);		    	
+	    	joglTexture2D_1 = new JOGLTexture2D(texture2D_1);
 	    	hasTextures = true;
 	    }
       
@@ -139,7 +155,21 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				Appearance app = new Appearance();
 				EffectiveAppearance eap2 = eap.create(app);
 				glslProgram = new GlslProgram(app, eap2, name);
-			} else glslProgram = null;
+			} else {
+//				if (noneuclideanShader == null) {
+//					try {
+//						Appearance ap = new Appearance();
+//						noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}		
+//					noneuclideanShader.setUniform("useNormals4", false);					
+//				}
+
+				glslProgram = noneuclideanShader;
+				glslProgram.setUniform("Nw", (double) 1.0);
+				glslProgram.setUniform("useNormals4", false);
+			}
 			glslShader.setFromEffectiveAppearance(eap, name);
 	    }
 	    
@@ -174,10 +204,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     	hasTextures = false;
 		if (hasTextures) gl.glPushAttrib(GL.GL_TEXTURE_BIT);
 		texUnit = GL.GL_TEXTURE0; 
-	    if (joglLightMap != null) {
+	    if (joglTexture2D_1 != null) {
 		    gl.glActiveTexture(texUnit);
 		    gl.glEnable(GL.GL_TEXTURE_2D);
-			Texture2DLoaderJOGL.render(gl, joglLightMap);
+			Texture2DLoaderJOGL.render(gl, joglTexture2D_1);
 		    texUnit++;
 		    texunitcoords++;
 		    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
@@ -203,9 +233,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //			    	System.err.println("Setting texture to "+texUnit);
 			    }
 		    } 
-		    if (glslProgram != null && glslProgram.getSource().getUniformParameter("doTexture") != null) {
-		    	glslProgram.setUniform("doTexture", geometryHasTextureCoordinates);
-		    }
 
 	    }
 
@@ -220,12 +247,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	jr.renderingState.texUnitCount = texunitcoords; 
     vertexShader.setFrontBack(frontBack);
 	vertexShader.render(jrs); 
+    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
     if (useGLSL && glslProgram != null)		{
 		if (glslProgram.getSource().getUniformParameter("lightingEnabled") != null) {
 			glslProgram.setUniform("lightingEnabled", jrs.lighting);
 		}
 		if (glslProgram.getSource().getUniformParameter("transparency") != null) {
-			glslProgram.setUniform("transparency", jrs.transparencyEnabled ? vertexShader.getDiffuseColorAsFloat()[3] : 0f);
+			glslProgram.setUniform("transparency", jrs.transparencyEnabled ? jrs.currentAlpha : 0f);
 		}
 		if (glslProgram.getSource().getUniformParameter("numLights") != null) {
 			glslProgram.setUniform("numLights", jrs.numLights);
@@ -233,9 +261,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (glslProgram.getSource().getUniformParameter("fogEnabled") != null) {
 			glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
 		}
+		if (glslProgram.getSource().getUniformParameter("hyperbolic") != null) {
+			glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
+		}
    	GlslLoader.render(glslProgram, jr);
     }
-    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
 }
 	
 	public void postRender(JOGLRenderingState jrs)	{
@@ -297,7 +327,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					if (useDisplayLists)	{
 						if (dList == -1)	{
 							dList = jr.globalGL.glGenLists(1);
-							LoggingSystem.getLogger(this).fine(" PolygonShader: is "+this+" Allocating new dlist "+dList+" for gl "+jr.globalGL);
+//							LoggingSystem.getLogger(this).fine(" PolygonShader: is "+this+" Allocating new dlist "+dList+" for gl "+jr.globalGL);
 							jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
 							jr.globalGL.glEndList();	
