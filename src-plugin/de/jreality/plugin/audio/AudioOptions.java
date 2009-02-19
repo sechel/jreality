@@ -14,8 +14,8 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.audio.Attenuation;
 import de.jreality.audio.SoundPath;
+import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
-import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.event.AppearanceEvent;
@@ -152,7 +152,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		PluginInfo info = new PluginInfo();
 		info.name = "Audio Options";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("radioactive.png");
+		info.icon = ImageHook.getIcon("Volume-Normal-Red-48x48.png");
 		return info;
 	}
 

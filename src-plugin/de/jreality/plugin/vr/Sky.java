@@ -288,7 +288,7 @@ public class Sky extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Sky";
 		info.vendorName = "Ulrich Pinkall";
-		info.icon = ImageHook.getIcon("radioactive1.png");
+		info.icon = ImageHook.getIcon("Airport-Blue-48x48.png");
 		return info; 
 	}
 

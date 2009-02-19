@@ -147,7 +147,7 @@ public class CameraStand extends Plugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Camera";
 		info.vendorName = "Ulrich Pinkall";
-		info.icon = ImageHook.getIcon("cameraklein.png");
+		info.icon = ImageHook.getIcon("Camera-2-48x48.png");
 		return info;
 	}
 

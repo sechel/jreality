@@ -18,9 +18,9 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
+import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.View;
-import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
@@ -87,7 +87,7 @@ public class ContentSound extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Content Sound";
 		info.vendorName = "Ulrich Pinkall"; 
-		info.icon = ImageHook.getIcon("radioactive1.png");
+		info.icon = ImageHook.getIcon("Volume-Normal-Red-48x48.png");
 		return info;
 	}
 	

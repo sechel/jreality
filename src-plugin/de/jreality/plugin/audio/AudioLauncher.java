@@ -10,8 +10,8 @@ import javax.swing.JComboBox;
 
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.audio.javasound.VbapSurroundRenderer;
+import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
-import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Viewer;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -108,7 +108,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Audio Launcher";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("radioactive1.png");
+		info.icon = ImageHook.getIcon("Volume-Normal-48x48.png");
 		return info;
 	}
 
