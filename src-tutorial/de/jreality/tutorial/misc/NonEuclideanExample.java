@@ -89,7 +89,6 @@ public class NonEuclideanExample {
 	private PointLight pointLight;
 	private SceneGraphComponent lightNode;
 	private SceneGraphComponent wireframeSphere;
-	String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
 	Viewer viewer;
 	
 	public static void main(String[] args)	{
@@ -173,15 +172,6 @@ public class NonEuclideanExample {
 			tex2d.setTextureMatrix(foo);
 		}
 		
-		// try loading the OpenGL shader for the non-euclidean cases
-		GlslProgram noneuclideanShader = null;
-		try {
-			noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-//		noneuclideanShader.setUniform("Nw", 0.00001);
-		noneuclideanShader.setUniform("useNormals4", false);
 		ap.setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR,new Color(250, 250, 0));
 		ap.setAttribute(LINE_SHADER+"."+POLYGON_SHADER+"."+DIFFUSE_COLOR,new Color(250, 0, 250));
 		ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR,new Color(150,150,150));
@@ -262,6 +252,7 @@ public class NonEuclideanExample {
 		CameraUtility.getCamera(viewer).setFar(cameraClips[metric+1][1]);
 		for (int i = 0; i<3; ++i) sigs[i].setVisible(false);
 		sigs[metric+1].setVisible(true);
+		// this is all we have to do to tell the backend to use the non-euclidean vertex shader
 		world.getAppearance().setAttribute("useGLSL", metric != Pn.EUCLIDEAN);
 		pointLight.setFalloff(falloffs[metric+1]);
 		MatrixBuilder.init(null, metric).rotateX(-Math.PI/3).assignTo(world);
