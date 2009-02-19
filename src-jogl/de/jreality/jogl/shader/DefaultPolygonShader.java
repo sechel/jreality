@@ -108,12 +108,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		EffectiveAppearance eap = EffectiveAppearance.create();
 		eap.create(ap);
 		defaultShader.setFromEffectiveAppearance(eap, "");
-		try {
-			noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
-		noneuclideanShader.setUniform("useNormals4", false);					
 	}
 	
 	public DefaultPolygonShader()	{
@@ -156,23 +150,22 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				EffectiveAppearance eap2 = eap.create(app);
 				glslProgram = new GlslProgram(app, eap2, name);
 			} else {
-//				if (noneuclideanShader == null) {
-//					try {
-//						Appearance ap = new Appearance();
-//						noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}		
-//					noneuclideanShader.setUniform("useNormals4", false);					
-//				}
+				if (noneuclideanShader == null) {
+					try {
+						Appearance ap = new Appearance();
+						noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}		
+					noneuclideanShader.setUniform("useNormals4", false);					
+				}
 
 				glslProgram = noneuclideanShader;
-				glslProgram.setUniform("Nw", (double) 1.0);
+//				glslProgram.setUniform("Nw", (double) 1.0);
 				glslProgram.setUniform("useNormals4", false);
 			}
 			glslShader.setFromEffectiveAppearance(eap, name);
 	    }
-	    
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
 		needsChecked = true;

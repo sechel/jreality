@@ -79,6 +79,8 @@ public class JOGLRenderingState {
 	public boolean currentPickMode = false;
 	public boolean useDisplayLists=true;
 	public boolean clearColorBuffer=true;
+	public boolean useVertexColors=false;		// for line shaders a question
+	public boolean normals4d = false;
 	
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;

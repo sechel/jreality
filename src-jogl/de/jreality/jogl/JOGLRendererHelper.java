@@ -239,9 +239,16 @@ public class JOGLRendererHelper {
 
 	private static DataList vLast = null, vcLast = null, vnLast = null;
 
+	@Deprecated
 	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {
-    GL gl = jr.globalGL;
-    JOGLRenderingState openGLState = jr.renderingState;
+		jr.renderingState.currentAlpha = alpha;
+		drawVertices(jr, sg);
+	}
+	
+	public static void drawVertices(JOGLRenderer jr, PointSet sg) {
+		double alpha = jr.renderingState.currentAlpha;
+		GL gl = jr.globalGL;
+		JOGLRenderingState openGLState = jr.renderingState;
 //		if (sg.getNumPoints() == 0)
 //			return;
 		// gl.glPointSize((float)
@@ -297,18 +304,17 @@ public class JOGLRendererHelper {
 		gl.glEnd();
 	}
 
-	// static Texture2D tex2d=(Texture2D)
-	// AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a,
-	// true);
-	// This is upside down since openGl textures are upside down.
-	private static IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[] { 0, 1,
-			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
-
-
-	/**
-	 * @param sg
-	 */
+	@Deprecated	
 	public static void drawLines(JOGLRenderer jr, IndexedLineSet sg, boolean interpolateVertexColors, double alpha) {
+		jr.renderingState.currentAlpha = alpha;
+		jr.renderingState.useVertexColors = interpolateVertexColors;
+		drawLines(jr, sg);
+	}
+	
+	public static void drawLines(JOGLRenderer jr, IndexedLineSet sg) {
+		double alpha = jr.renderingState.currentAlpha;
+		boolean interpolateVertexColors = jr.renderingState.useVertexColors;
+		
 		if (sg.getNumEdges() == 0)
 			return;
 
@@ -385,7 +391,16 @@ public class JOGLRendererHelper {
 		}
 	}
 
+	@Deprecated
 	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha) {
+		jr.renderingState.smoothShading=smooth;
+		jr.renderingState.currentAlpha = alpha;
+		drawFaces(jr, sg);
+	}
+
+	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg) {
+		boolean smooth = jr.renderingState.smoothShading;
+		double alpha = jr.renderingState.currentAlpha;
 		if (sg.getNumFaces() == 0)
 			return;
 		GL gl = jr.globalGL;
@@ -447,22 +462,22 @@ public class JOGLRendererHelper {
 			maxFU = maxU - 1;
 			maxFV = maxV - 1;
 			// Done with GeometryAttributes?
-			qmatt = sg.getGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE);
-			if (qmatt != null && qmatt instanceof Rectangle2D) {
-				theDomain = (Rectangle2D) qmatt;
-				isRegularDomainQuadMesh = true;
-			}
+//			qmatt = sg.getGeometryAttributes(GeometryUtility.HEIGHT_FIELD_SHAPE);
+//			if (qmatt != null && qmatt instanceof Rectangle2D) {
+//				theDomain = (Rectangle2D) qmatt;
+//				isRegularDomainQuadMesh = true;
+//			}
 		}
 
 		numF = sg.getNumFaces();
-		if (false && isQuadMesh) {
+		if ( isQuadMesh) {
 			double[] pt = new double[3];
 			// this loops through the "rows" of the mesh (v is constant on each
 			// row)
 			for (int i = 0; i < maxFV; ++i) {
 				gl.glBegin(GL.GL_QUAD_STRIP);
 				// each iteration of this loop draws one quad strip consisting
-				// of 2 * (maxFU + 1) vertices
+				// of 2 * maxU vertices
 				for (int j = 0; j <= maxFU; ++j) {
 					int u = j % maxU;
 					// draw two points: one on "this" row, the other directly
@@ -472,7 +487,7 @@ public class JOGLRendererHelper {
 						int fnn = (i * maxFU + j % maxFU + incr * maxFU) % numF;
 						int v = (i + incr) % maxV;
 						if (normalBind == PER_FACE) {
-							if (incr == 0 && j != maxFU) {
+							if (incr == 0 ) { //&& j != maxFU) {
 								da = faceNormals.item(fnn).toDoubleArray();
 								gl.glNormal3d(da.getValueAt(0), da
 										.getValueAt(1), da.getValueAt(2));
@@ -604,8 +619,11 @@ public class JOGLRendererHelper {
 		}
 	}
 
+	private static IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[] { 0, 1,
+			0, 1, 1, 0, 1, 0, 0, 0, 0, 0 });
+
 	private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility
-	.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+		.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
 	static {
 		tex2d.setRepeatS(Texture2D.GL_CLAMP);
 		tex2d.setRepeatT(Texture2D.GL_CLAMP);
@@ -678,13 +696,6 @@ public class JOGLRendererHelper {
 		gl.glEnable(GL.GL_TEXTURE_2D);
 		jr.renderingState.texUnitCount = 1;
 		double[] bbm = new double[16];
-		// float[] glc2o = new float[16];
-		// double[] dglc2o = new double[16];
-		// gl.glGetFloatv(GL.GL_TRANSPOSE_MODELVIEW_MATRIX, glc2o);
-		// for (int i = 0; i<16; ++i) dglc2o[i]=glc2o[i];
-		// System.err.println("glc2o
-		// is"+Rn.matrixToString(Rn.inverse(dglc2o,dglc2o)));
-//		System.err.println("Sig is "+jr.renderingState.currentSignature);
 		for (int i = 0, n = labels.length; i < n; i++) {
 			ImageData img = labels[i];
 			tex2d.setImage(img);

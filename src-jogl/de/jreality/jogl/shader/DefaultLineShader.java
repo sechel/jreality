@@ -136,7 +136,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
-
+		
 		gl.glLineWidth((float) lineWidth);
 		jrs.lineWidth = lineWidth;
 		if (lineStipple) {
@@ -260,7 +260,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			tubeDL[sig+1] = gl.glGenLists(1);
 			//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.globalGL);
 			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
-			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1], jr.renderingState.smoothShading ,  jr.renderingState.diffuseColor[3] );
+			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1] );
 			gl.glEndList();	
 		}
 		faceCount = 0;
