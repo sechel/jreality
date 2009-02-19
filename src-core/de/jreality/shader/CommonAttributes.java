@@ -77,7 +77,7 @@ import de.jreality.scene.Appearance;
 	public static final String ONE_TEXTURE2D_PER_IMAGE = "oneTexture2DPerImage";	// allows optimizing performance if true; default: false
 	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
 	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
-	public final static String USE_OLD_TRANSPARENCY = "useOldTransparency";		// use the alpha channels of shader colors
+	public final static String USE_OLD_TRANSPARENCY = "useOldTransparency";		// use the alpha channels of shader colors: pre-2006
 	
     // rendering hints that can appear anywhere in the scene graph
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
@@ -87,13 +87,13 @@ import de.jreality.scene.Appearance;
 	public final static String Z_BUFFER_ENABLED = 		"zBufferEnabled";
 	public final static String LEVEL_OF_DETAIL = 			"levelOfDetail";
 	public final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
-	public final static String FAST_AND_DIRTY = "fastAndDirty";
-	public final static boolean FAST_AND_DIRTY_DEFAULT = false;
 	public final static String OPAQUE_TUBES_AND_SPHERES = "opaqueTubesAndSpheres";
 	public final static boolean OPAQUE_TUBES_AND_SPHERES_DEFAULT = false;
 	public final static String CENTER_ON_BOUNDING_BOX = "centerOnBoundingBox";
 	public static final String BACKEND_RETAIN_GEOMETRY = "rendermanRetainGeometry"; // a hint to backends to write one copy of geometry and re-use it
 	public final static String LOCAL_LIGHT_MODEL = "localLightModel";
+	public final static String RADII_WORLD_COORDINATES = "radiiWorldCoordinates";
+	public final static boolean RADII_WORLD_COORDINATES_DEFAULT  = false;
 	// these hints are heavily OpenGL specific
 	public final static String DEPTH_FUDGE_FACTOR = 		"depthFudgeFactor";
 	public final static String IGNORE_ALPHA0	=			"ignoreAlpha0";	// reject pixel writes for pixels with alpha == 0
