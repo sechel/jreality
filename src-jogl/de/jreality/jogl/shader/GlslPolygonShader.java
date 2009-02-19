@@ -113,7 +113,6 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
 		useVertexArrays = eap.getAttribute(ShaderUtility.nameSpace(name,"useVertexArrays"), true);
 		if (GlslProgram.hasGlslProgram(eap, name)) {
-			// dummy to write glsl values like "lightingEnabled"
 			Appearance app = new Appearance();
 			EffectiveAppearance eap2 = eap.create(app);
 			program = new GlslProgram(app, eap2, name);
@@ -122,9 +121,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D), eap)) {
 			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D), eap);
 		} else texture0 = null;
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap)) {
-			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, "normalMap"), eap);
-		} else if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
 			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D_1), eap);
 		} else texture1 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)) {
@@ -193,6 +190,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (program.getSource().getAttribute("normals4") != null)	{
 				doNormals4 = true;
 			} else doNormals4 = false;
+			System.err.println("normals4 = "+doNormals4);
 			GlslLoader.render(program, jr);
 		}
 		Geometry g = jrs.currentGeometry;
@@ -344,7 +342,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				int vertexLength, 
 				boolean smooth,
 				boolean doNormals4) {
-		System.err.println("rendering with vertex arrays");
+//		System.err.println("rendering with vertex arrays");
 		boolean faceN = normalBind == PER_FACE;
 		
 		boolean faceC = colorBind == PER_FACE;
