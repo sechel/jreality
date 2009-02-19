@@ -20,19 +20,30 @@ import de.jreality.util.SystemProperties;
 /**
  * This is an alternative class for use in conjunction with special sorts of
  * scene graphs with many identical children, as one finds in discrete groups.
- * 
+ * <p>
+ * Rather than traversing the many identical children, the transformations of
+ * all the children are provided in an array via a <i>backdoor</i> mechanism.  Furthermore,
+ * a separate boolean array of the same length is provided which directs whether
+ * the corresponding matrix is visible.  
+ * <p>
+ * A second main challenge is to
+ * generate display lists that include the whole scene graph under the special
+ * scene graph component which is the "root" of the discrete group.  
+ * <p>
+ *  If you are sensitive to highly optimized code, shield your eyes!  
+ *  <p>
  * To activate use, run java with "-DdiscreteGroup.copycat=true" set
  * @author Charles Gunn
  *
  */
 public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 
-	boolean displayListDirty = true;
-	boolean isCopyCat = false,
+	boolean displayListDirty = true,
+		isCopyCat = false,
 		isTopCat = false,
 		isCameraRepn = false,
-		visibilityChanged = false;
-	boolean insideDL = false;
+		visibilityChanged = false,
+		insideDL = false;
 	double[][] matrices = null;
 	boolean[] accepted;
 	SceneGraphPath w2camrepn = null;

@@ -46,8 +46,8 @@ import java.util.logging.Level;
 import javax.media.opengl.GL;
 
 import de.jreality.geometry.SphereUtility;
-import de.jreality.math.P3;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -138,7 +138,7 @@ public class JOGLSphereHelper extends SphereUtility {
 
 	static double[] lodLevels = {.02,.08,.16,.32,.64};
 	public static int getResolutionLevel(double[] o2ndc, double lod) {
-		double d = lod * P3.getNDCExtent(o2ndc);
+		double d = lod * CameraUtility.getNDCExtent(o2ndc);
 		//JOGLConfiguration.theLog.log(Level.FINE,"Distance is "+d);
 		int i = 0;
 		for ( i = 0; i<5; ++i)	{

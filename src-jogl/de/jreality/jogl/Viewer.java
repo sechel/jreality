@@ -213,22 +213,14 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
     return component;
   }
   
-  /* (non-Javadoc)
-	 * @see de.jreality.scene.Viewer#initializeFrom(de.jreality.scene.Viewer)
-	 */
+  	public Dimension getViewingComponentSize() {
+	    return ((Component) getViewingComponent()).getSize();
+	  }
+
 	public void initializeFrom(de.jreality.scene.Viewer v) {
 		initializeFrom(v.getSceneRoot(), v.getCameraPath());
 	}
-	
-	public int getMetric() {
-		return metric;
-	}
-	public void setMetric(int metric) {
-		this.metric = metric;
-		SceneGraphUtility.setMetric(sceneRoot, metric);
 		
-	}
-	
 /*********** Non-standard set/get ******************/
 	
 		public void setStereoType(int type)	{
@@ -240,13 +232,6 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		public int getStereoType()	{
 			return renderer.getStereoType();
 		}
-
-//		public boolean isFlipped() {
-//			return renderer.isFlipped();
-//		}
-//		public void setFlipped(boolean isFlipped) {
-//			renderer.setFlipped(isFlipped);
-//		}
 
 		public JOGLRenderer getRenderer() {
 			return renderer;
@@ -433,17 +418,12 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
-//			if (JOGLConfiguration.portalUsage) 
-				canvas.display();
+			canvas.display();
 //			JOGLConfiguration.theLog.log(Level.INFO,"rendering "+renderer.frameCount);
-				if (listeners!=null) broadcastChange();
+			if (listeners!=null) broadcastChange();
 			renderLock.notifyAll();
 		}
 		if (debug) JOGLConfiguration.theLog.log(Level.INFO,"Render: calling display");
-//		if (!JOGLConfiguration.portalUsage) {
-//			canvas.display();
-//			if (listeners!=null) broadcastChange();
-//		}
 	}
 
 	public void setAutoSwapMode(boolean autoSwap) {
@@ -468,10 +448,6 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 				e.printStackTrace();
 			}
 	}
-
-  public Dimension getViewingComponentSize() {
-    return ((Component) getViewingComponent()).getSize();
-  }
 
   public boolean canRenderAsync() {
     return true;

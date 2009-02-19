@@ -111,7 +111,7 @@ public class JOGLRenderer  implements AppearanceListener {
     protected int stackCounter = 0;
     public Stack<RenderingHintsInfo> rhStack = new Stack<RenderingHintsInfo>();
 
-	SceneGraphPath currentPath = new SceneGraphPath();
+	public SceneGraphPath currentPath = new SceneGraphPath();
 
 	protected SceneGraphComponent theRoot, auxiliaryRoot;
 	protected JOGLPeerComponent thePeerRoot = null;

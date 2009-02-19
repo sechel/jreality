@@ -86,8 +86,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	int texUnit = 0, refMapUnit = 0;
 	GlslPolygonShader glslShader = new GlslPolygonShader();
 	GlslProgram glslProgram;
-	transient boolean inheritGLSL = false;
-	transient boolean fastAndDirty = false;
 	transient boolean geometryHasTextureCoordinates = false, hasTextures = false;
 	transient boolean needsChecked = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
@@ -111,45 +109,39 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);	
-		fastAndDirty = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.FAST_AND_DIRTY), fastAndDirty);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
 	    joglLightMap = null;
 	    reflectionMap = null;
 	    joglTexture2D = null;
 	    joglCubeMap = null;
 	    hasTextures = false;
-	    if (!fastAndDirty) {
-			if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap)) {
 //				if (false && templateShader != null) texture2D = templateShader.createTexture2d();
 //				else 
-					texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
+				texture2D = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D), eap);			
 //		    	LoggingSystem.getLogger(this).fine("Got texture 2d for eap "+((Appearance) eap.getAppearanceHierarchy().get(0)).getName());
-				joglTexture2D = new JOGLTexture2D(texture2D);
-				hasTextures = true;
-			}
-		    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
-		    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
-		    	joglCubeMap = new JOGLCubeMap(reflectionMap);
-		    }
-		    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap)) {
-		    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);		    	
-		    	joglLightMap = new JOGLTexture2D(lightMap);
-		    	hasTextures = true;
-		    }
+			joglTexture2D = new JOGLTexture2D(texture2D);
+			hasTextures = true;
+		}
+	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name,"reflectionMap"), eap)){
+	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name,"reflectionMap"));		    	
+	    	joglCubeMap = new JOGLCubeMap(reflectionMap);
+	    }
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap)) {
+	    	lightMap = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,"lightMap"), eap);		    	
+	    	joglLightMap = new JOGLTexture2D(lightMap);
+	    	hasTextures = true;
 	    }
       
-		inheritGLSL= eap.getAttribute(ShaderUtility.nameSpace(name,"inheritGLSL"), false);	
-	    if (!inheritGLSL)		{
-		    if (useGLSL)		{
-				if (GlslProgram.hasGlslProgram(eap, name)) {
-					// dummy to write glsl values like "lightingEnabled"
-					Appearance app = new Appearance();
-					EffectiveAppearance eap2 = eap.create(app);
-					glslProgram = new GlslProgram(app, eap2, name);
-				} else glslProgram = null;
-				glslShader.setFromEffectiveAppearance(eap, name);
-		    }
-	    }  else useGLSL = false;
+	    if (useGLSL)		{
+			if (GlslProgram.hasGlslProgram(eap, name)) {
+				// dummy to write glsl values like "lightingEnabled"
+				Appearance app = new Appearance();
+				EffectiveAppearance eap2 = eap.create(app);
+				glslProgram = new GlslProgram(app, eap2, name);
+			} else glslProgram = null;
+			glslShader.setFromEffectiveAppearance(eap, name);
+	    }
 	    
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
