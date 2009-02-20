@@ -304,6 +304,7 @@ public class NonEuclideanExample {
 		});
 		psf.update();
 		IndexedFaceSet ifs = psf.getIndexedFaceSet();
+		ifs.setName("disk"+(metric+1));
 		return ifs;
 	}
 	
