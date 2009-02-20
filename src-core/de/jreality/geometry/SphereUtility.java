@@ -145,7 +145,8 @@ public class SphereUtility {
 
 	 * @param i
 	 * @return
-	 */public static SceneGraphComponent tessellatedCubeSphere(int i)	{
+	 */
+	public static SceneGraphComponent tessellatedCubeSphere(int i)	{
 		/*
 		 * TODO add a flag to allow a non-shared copy of the geometry
 		 */

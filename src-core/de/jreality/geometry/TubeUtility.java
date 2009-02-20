@@ -170,7 +170,7 @@ public class TubeUtility {
 			for (int k = 0; k<3; ++k)	{
 				canonicalTranslation[k] = P3.makeTranslationMatrix(null, translation, metrics[k]);
 				QuadMeshFactory qmf = new QuadMeshFactory();//metrics[k], n, 2, true, false);
-				qmf.setMetric(metrics[k]);
+				qmf.setMetric(Pn.EUCLIDEAN); //metrics[k]);
 				qmf.setULineCount(n);
 				qmf.setVLineCount(2);
 				qmf.setClosedInUDirection(true);
@@ -182,6 +182,7 @@ public class TubeUtility {
 				qmf.setGenerateTextureCoordinates(true);
 				qmf.update();
 				urTube[k] = qmf.getIndexedFaceSet();
+				urTube[k].setName("urTube"+k);
 				if (k == 1) urTube[k].setGeometryAttributes(CommonAttributes.RMAN_PROXY_COMMAND,"Cylinder 1.0 -.5 .5 360");
 			}
 		}

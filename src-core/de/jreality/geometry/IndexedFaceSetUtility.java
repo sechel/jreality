@@ -1536,9 +1536,20 @@ public class IndexedFaceSetUtility {
     	sgc.setGeometry(ilsf.getIndexedLineSet());
     	return sgc;
     }
+
 	public static void calculateAndSetFaceNormals(IndexedFaceSet ifs)   {
+		Object sigO = ifs.getGeometryAttributes(GeometryUtility.METRIC);
+		int sig = Pn.EUCLIDEAN;
+		if (sigO != null && sigO instanceof Integer)	{
+			sig = ((Integer) sigO).intValue();
+			LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINER,"Calculating normals with metric "+sig);
+		}
+		IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs,sig);
+	}
+	public static void calculateAndSetFaceNormals(IndexedFaceSet ifs, int metric)   {
 		if (ifs.getNumFaces() == 0) return;
-	    double[][] fn = IndexedFaceSetUtility.calculateFaceNormals(ifs);
+	    double[][] fn = calculateFaceNormals(ifs, metric);
+	    ifs.setFaceAttributes(Attribute.NORMALS,null);
 	    ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(fn[0].length).createReadOnly(fn));
 	}
 
@@ -1608,6 +1619,7 @@ public class IndexedFaceSetUtility {
 				// TODO find non-degenerate set of 3 vertices here also
 				double[] osculatingPlane = P3.planeFromPoints(null, verts[indices[i][0]], verts[indices[i][1]], verts[indices[i][2]]);
 				double[] normal = Pn.polarizePlane(null, osculatingPlane,metric);	
+				// TODO figure out why this seems to work
 				Pn.setToLength(normal, normal, -1.0, metric);
 				for (int j = 0; j<3; ++j)	{
 					double[] point = (verts[indices[i][j]].length == 3) ? Pn.homogenize(null, verts[indices[i][j]]) : verts[indices[i][j]];
