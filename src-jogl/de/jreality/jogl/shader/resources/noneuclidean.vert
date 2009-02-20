@@ -52,7 +52,7 @@ uniform bool lightingEnabled, fogEnabled;
 uniform float Nw;
 // textures are not implemented yet
 uniform sampler2D texture;
-uniform bool doTexture;
+uniform bool twoSided;
 uniform int numLights;
 
 // the inner product in klein model of hyperbolic space
@@ -83,12 +83,14 @@ void projectToTangent(in vec4 P, inout vec4 T) {
 // find the representative of the given point with length +/- 1
 void normalize4(inout vec4 P)	{
     P = (1.0/length4(P))*P;
+//    if (P.w < 0.0) P = -P;
  }
  
 // adjust T to be a unit tangent vector to the point P
 void normalize4(in vec4 P, inout vec4 T)	{
-		projectToTangent(P,T);
-	  normalize4(T);
+	projectToTangent(P,T);
+	normalize4(T);
+//	if (P.w * T.w < 0.0) T = -T;
 }
 
 // calculate the lighting incident on a position with given normal vector and 
@@ -105,7 +107,7 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
 
    // Compute distance between surface and light position
    d = distance4(gl_LightSource[i].position, ecPosition4);
-   toLight = gl_LightSource[i].position - ecPosition4;
+   toLight = gl_LightSource[i].position;
     // Normalize the vector from surface to light position
    normalize4(ecPosition4, toLight );
 
@@ -114,8 +116,9 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
    	attenuation = gl_LightSource[i].constantAttenuation * exp(-gl_LightSource[i].linearAttenuation * d);
    else attenuation =  gl_LightSource[i].constantAttenuation+(1.0-gl_LightSource[i].linearAttenuation)*abs(cos(d));
 
-    halfVector = (hyperbolic ? -1.0 : 1.0) * (toLight + eye);
-    normalize4(ecPosition4, halfVector); 
+    halfVector = (toLight + eye);
+    if (hyperbolic) halfVector = -halfVector;
+   normalize4(ecPosition4, halfVector); 
    nDotVP = max(0.0, dot4(normal, toLight));
    nDotHV = max(0.0, dot4(normal, halfVector));
 
@@ -170,17 +173,20 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 
 void main (void)
 {
-	  vec4 n4 = (useNormals4) ? normals4 : vec4(gl_Normal, Nw);
+	bool normals4d = false;
+	if  (gl_Fog.start > 0.0) normals4d = true;
+	  vec4 n4 = (normals4d) ? gl_MultiTexCoord3 : vec4(gl_Normal, Nw);
     vec4  transformedNormal = gl_ModelViewMatrix * n4; // vec4(gl_Normal, Nw); //
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
-//    if (transformedNormal.w * transformedNormal.z < 0) 
+//    if (transformedNormal.w * transformedNormal.z < 0.0) 
+//    if (transformedNormal.w < 0.0) 
 //    	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
-//    	transformedNormal = -transformedNormal;
+//    transformedNormal = -transformedNormal;
 //    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
 //     ftexgen(transformedNormal, ecPosition);
