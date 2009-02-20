@@ -136,6 +136,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)){
 	    	reflectionMap = TextureUtility.readReflectionMap(eap, ShaderUtility.nameSpace(name, REFLECTION_MAP));		    	
 	    	joglCubeMap = new JOGLCubeMap(reflectionMap);
+	    	hasTextures = true;
 	    }
 	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
 	    	texture2D_1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap);		    	
@@ -157,12 +158,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 					} catch (IOException e) {
 						e.printStackTrace();
 					}		
-					noneuclideanShader.setUniform("useNormals4", false);					
 				}
 
 				glslProgram = noneuclideanShader;
 //				glslProgram.setUniform("Nw", (double) 1.0);
-				glslProgram.setUniform("useNormals4", false);
 			}
 			glslShader.setFromEffectiveAppearance(eap, name);
 	    }
@@ -194,7 +193,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		else		gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
-    	hasTextures = false;
+//    	hasTextures = false;
 		if (hasTextures) gl.glPushAttrib(GL.GL_TEXTURE_BIT);
 		texUnit = GL.GL_TEXTURE0; 
 	    if (joglTexture2D_1 != null) {
@@ -257,7 +256,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (glslProgram.getSource().getUniformParameter("hyperbolic") != null) {
 			glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
 		}
-   	GlslLoader.render(glslProgram, jr);
+		if (glslProgram.getSource().getUniformParameter("useNormals4") != null) {
+			glslProgram.setUniform("useNormals4", jrs.normals4d);
+		}
+		
+  	GlslLoader.render(glslProgram, jr);
     }
 }
 	
@@ -322,13 +325,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 							dList = jr.globalGL.glGenLists(1);
 //							LoggingSystem.getLogger(this).fine(" PolygonShader: is "+this+" Allocating new dlist "+dList+" for gl "+jr.globalGL);
 							jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
-							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
+							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);
 							jr.globalGL.glEndList();	
 							displayListsDirty = false;
 						}
 						jr.globalGL.glCallList(dList);
 					} else
-						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);			
+						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);			
 				}	
 			}
 		}
@@ -346,7 +349,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			jr.globalGL.glCallList(dlist);
 		}
 		else if ( g instanceof IndexedFaceSet)	{
-      JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, jrs.diffuseColor[3]);			
+      JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);			
 		}
 
     }
