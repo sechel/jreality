@@ -300,7 +300,6 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			double[] o2w = jr.currentPath.getMatrix(null);
 			radiiFactor = CameraUtility.getScalingFactor(o2w, jr.renderingState.currentMetric);
 			radiiFactor = 1.0/radiiFactor;
-			System.err.println("Factor is "+radiiFactor);
 		}
 
 		//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
