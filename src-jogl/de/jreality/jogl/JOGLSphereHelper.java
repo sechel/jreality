@@ -65,7 +65,7 @@ public class JOGLSphereHelper extends SphereUtility {
 //			JOGLConfiguration.theLog.log(Level.WARNING,"Already have sphere display lists for this renderer "+jr);
 //		}
 		GL gl = jr.globalGL;
-		int n = SphereUtility.tessellatedIcosahedra.length;
+		int n = SphereUtility.tessellatedCubes.length;
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
 		//else 
