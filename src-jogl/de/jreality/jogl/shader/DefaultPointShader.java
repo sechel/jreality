@@ -53,6 +53,7 @@ import static de.jreality.shader.CommonAttributes.POINT_SIZE;
 import static de.jreality.shader.CommonAttributes.POINT_SIZE_DEFAULT;
 import static de.jreality.shader.CommonAttributes.POINT_SPRITE;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.RADII_WORLD_COORDINATES;
 import static de.jreality.shader.CommonAttributes.SPECULAR_COLOR;
 import static de.jreality.shader.CommonAttributes.SPECULAR_COLOR_DEFAULT;
 import static de.jreality.shader.CommonAttributes.SPECULAR_EXPONENT;
@@ -82,9 +83,11 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 
 public class DefaultPointShader  extends AbstractPrimitiveShader implements PointShader {
@@ -96,7 +99,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
 	float[] specularColorAsFloat = {0f,1f,1f,1f};		// for texturing point sprite to simulate sphere
-	boolean sphereDraw = false, lighting = true, opaqueSpheres = true;
+	boolean sphereDraw = false, lighting = true, opaqueSpheres = true, radiiWorldCoords = false;
 	boolean attenuatePointSize = true;
 	PolygonShader polygonShader = null;
 	Appearance a=new Appearance();
@@ -126,6 +129,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,POINT_SIZE), POINT_SIZE_DEFAULT);
 		attenuatePointSize = eap.getAttribute(ShaderUtility.nameSpace(name,ATTENUATE_POINT_SIZE), ATTENUATE_POINT_SIZE_DEFAULT);
 		pointRadius = eap.getAttribute(ShaderUtility.nameSpace(name,POINT_RADIUS),POINT_RADIUS_DEFAULT);
+		radiiWorldCoords = eap.getAttribute(ShaderUtility.nameSpace(name,RADII_WORLD_COORDINATES), false);
 		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,DIFFUSE_COLOR), POINT_DIFFUSE_COLOR_DEFAULT);	
 		double t = eap.getAttribute(ShaderUtility.nameSpace(name,TRANSPARENCY), TRANSPARENCY_DEFAULT );
 		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, t, JOGLRenderingState.useOldTransparency);
@@ -291,6 +295,14 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		DataList radii = ps.getVertexAttributes(Attribute.RELATIVE_RADII);
 		DoubleArray da = null, ra = null;
 		if (radii != null) ra = radii.toDoubleArray();
+		double radiiFactor = 1.0;
+		if (radiiWorldCoords)	{
+			double[] o2w = jr.currentPath.getMatrix(null);
+			radiiFactor = CameraUtility.getScalingFactor(o2w, jr.renderingState.currentMetric);
+			radiiFactor = 1.0/radiiFactor;
+			System.err.println("Factor is "+radiiFactor);
+		}
+
 		//JOGLConfiguration.theLog.log(Level.INFO,"VC is "+vertexColors);
 		int colorLength = 0;
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
@@ -306,7 +318,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		}
 		double[] mat = Rn.identityMatrix(4);
 		double[] scale = Rn.identityMatrix(4);
-		scale[0] = scale[5] = scale[10] = pointRadius;
+		scale[0] = scale[5] = scale[10] = radiiFactor*pointRadius;
 		int length = n; //vind == null ? n : vind.getLength();
 		for (int i = 0; i< length; ++i)	{
 			if (vind != null && vind.getValueAt(i) == 0) continue;
