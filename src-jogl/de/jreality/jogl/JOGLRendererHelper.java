@@ -77,11 +77,8 @@ import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.SceneGraphUtility;
 
-/**
- * @author gunn
- * 
- */
 public class JOGLRendererHelper {
 
 	public final static int PER_PART = 1;
@@ -407,9 +404,9 @@ public class JOGLRendererHelper {
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
-		vertexNormals = GlslPolygonShader.correctNormals(vertexNormals);
+//		vertexNormals = GlslPolygonShader.correctNormals(vertexNormals);
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
-		faceNormals = GlslPolygonShader.correctNormals(faceNormals);
+//		faceNormals = GlslPolygonShader.correctNormals(faceNormals);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
 		DataList texCoords = sg
@@ -441,12 +438,19 @@ public class JOGLRendererHelper {
 				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
+		int nFiber = 3;
 		if (vertexNormals != null && smooth) {
 			normalBind = PER_VERTEX;
+			nFiber = GeometryUtility.getVectorLength(vertexNormals);
 		} else if (faceNormals != null) {
 			normalBind = PER_FACE;
+			nFiber = GeometryUtility.getVectorLength(faceNormals);
 		} else
 			normalBind = PER_PART;
+//		System.err.println("Geom = "+sg.getName()+" normal length = "+nFiber);
+		jr.renderingState.normals4d = (nFiber == 4);
+		// HACK!!! make sure the vertex shader knows whether the normals are 4d or 3d
+		gl.glFogf(GL.GL_FOG_START,  nFiber == 4 ? 0.01f : 0f);
 		DoubleArray da = null;
 		boolean isQuadMesh = false;
 		boolean isRegularDomainQuadMesh = false;
@@ -489,13 +493,21 @@ public class JOGLRendererHelper {
 						if (normalBind == PER_FACE) {
 							if (incr == 0 ) { //&& j != maxFU) {
 								da = faceNormals.item(fnn).toDoubleArray();
-								gl.glNormal3d(da.getValueAt(0), da
-										.getValueAt(1), da.getValueAt(2));
+								if (nFiber == 3)
+									gl.glNormal3d(da.getValueAt(0), da.getValueAt(1),
+										da.getValueAt(2));
+								else 
+									gl.glMultiTexCoord4d(GL.GL_TEXTURE0+3,da.getValueAt(0), da.getValueAt(1),
+											da.getValueAt(2), da.getValueAt(3));
 							}
 						} else if (normalBind == PER_VERTEX) {
 							da = vertexNormals.item(vnn).toDoubleArray();
-							gl.glNormal3d(da.getValueAt(0), da.getValueAt(1),
+							if (nFiber == 3)
+								gl.glNormal3d(da.getValueAt(0), da.getValueAt(1),
 									da.getValueAt(2));
+							else 
+								gl.glMultiTexCoord4d(GL.GL_TEXTURE0+3,da.getValueAt(0), da.getValueAt(1),
+										da.getValueAt(2), da.getValueAt(3));
 						}
 						if (colorBind == PER_FACE) {
 							if (incr == 0) {
