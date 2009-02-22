@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
@@ -207,7 +208,10 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 				continue;
 			}
 			JCheckBoxMenuItem b = new JCheckBoxMenuItem(sp.toString());
-			b.setIcon(sp.getPluginInfo().icon);
+			if (sp.getPluginInfo().icon != null) {
+				Icon icon = ImageHook.scaleIcon(sp.getPluginInfo().icon, 16, 16);
+				b.setIcon(icon);
+			}
 			String command = sp.getClass().getName();
 			b.setActionCommand(command);
 			commandMap.put(command, sp);
