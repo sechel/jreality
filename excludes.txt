@@ -16,3 +16,4 @@
 **/SwtExample.java
 **/CsoundNode.java
 **/jack/**
+**/osc/**
