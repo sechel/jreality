@@ -2,9 +2,8 @@ package de.jreality.audio.jack;
 
 import java.lang.ref.WeakReference;
 import java.nio.FloatBuffer;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackAudioProcessor;
@@ -26,40 +25,32 @@ public final class JackHub implements JJackAudioProcessor {
 	
 	private static final JackHub hub = new JackHub();
 	
-	private List<WeakReference<JackSource>> sources = new LinkedList<WeakReference<JackSource>>();
-	private JackSink sink = null;
-	private int sampleRate = 0;
+	private static List<WeakReference<JackSource>> sources = new CopyOnWriteArrayList<WeakReference<JackSource>>();
+	private static JackSink sink = null;
+	private static int sampleRate = 0;
 
-	private static int highestInPort = -1;
-	private static int highestOutPort = -1;
+	private static int highestInPort;
+	private static int highestOutPort;
+	
 	
 	private JackHub() {
 		// do nothing
 	}
 
-	protected void finalize() throws JJackException {
+	protected void finalize() throws Throwable {
 		removeClient();
 	}
 	
 	public void process(JJackAudioEvent ev) {;
 		FloatBuffer inputs[] = ev.getInputs();
-		boolean disposedSources=false;
-		for(WeakReference<JackSource> ref: sources) {
+		for(WeakReference<JackSource> ref : sources) {
 			try {
 				JackSource source = ref.get();
 				if (source != null) {
 					source.process(inputs);
-				} else {
-					disposedSources=true;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-		}
-		if (disposedSources) {
-			for (Iterator<WeakReference<JackSource>> iter = sources.iterator(); iter.hasNext(); ) {
-				WeakReference<JackSource> ref = iter.next();
-				if (ref.get() == null) iter.remove();
 			}
 		}
 		if (sink!=null) {
@@ -71,57 +62,57 @@ public final class JackHub implements JJackAudioProcessor {
 		}
 	}
 
-	public static synchronized int getSampleRate() {
-		return hub.sampleRate;   // return value of 0 indicates that jack client hasn't been initialized yet
+	public static int getSampleRate() {
+		return sampleRate;   // return value of 0 indicates that jack client hasn't been initialized yet
 	}
 
-	public static synchronized boolean addSource(JackSource source) {
-		if (hub.sampleRate!=0) {
+	public static boolean addSource(JackSource source) {
+		if (sampleRate!=0) {
 			if (source.highestPort()<=highestInPort) {
-				source.init(hub.sampleRate);
+				source.init(sampleRate);
 			} else {
 				throw new IllegalStateException("highest port out of range (can't add input ports after initialization)");
 			}
 		}
-		return hub.sources.add(new WeakReference<JackSource>(source));
+		return sources.add(new WeakReference<JackSource>(source));
 	}
 	
-	public static synchronized boolean removeSource(JackSource source) {
-		for (Iterator<WeakReference<JackSource>> iter = hub.sources.iterator(); iter.hasNext(); ) {
-			WeakReference<JackSource> src = iter.next();
-			if (src.get() == source) {
-				iter.remove();
-				return true;
+	public static boolean removeSource(JackSource source) {
+		for(WeakReference<JackSource> ref : sources) {
+			if (ref.get()==source) {
+				return sources.remove(ref); // okay because we're using CopyOnWriteArrayList
 			}
 		}
 		return false;
 	}
 	
-	public static synchronized void setSink(JackSink sink) {
-		if (hub.sampleRate!=0) {
+	public static void setSink(JackSink sink) {
+		if (sampleRate!=0 && sink!=null) {
 			if (sink.highestPort()<=highestOutPort) {
-				sink.init(hub.sampleRate);
+				sink.init(sampleRate);
 			} else {
 				throw new IllegalStateException("highest port out of range (can't add output ports after initialization)");
 			}
 		}
-		hub.sink = sink;
+		JackHub.sink = sink;
 	}
 	
 	public static synchronized void initializeClient(String name) throws JJackException {
-		if (hub.sampleRate!=0) {
+		if (sampleRate!=0) {
 			throw new IllegalStateException("jack client is already initialized");
 		}
 		
-		for(WeakReference<JackSource> ref : hub.sources) {
+		highestInPort = -1;
+		for(WeakReference<JackSource> ref : sources) {
 			JackSource source = ref.get();
-			if (source == null) continue;
-			int n = source.highestPort();
-			if (n>highestInPort) {
-				highestInPort = n;
+			if (source!=null) {
+				int n = source.highestPort();
+				if (n>highestInPort) {
+					highestInPort = n;
+				}
 			}
 		}
-		highestOutPort = (hub.sink!=null) ? hub.sink.highestPort() : -1;
+		highestOutPort = (sink!=null) ? sink.highestPort() : -1;
 		
 		// first we need to set system properties
 		System.setProperty("jjack.ports.in", Integer.toString(highestInPort+1));
@@ -129,18 +120,19 @@ public final class JackHub implements JJackAudioProcessor {
 		System.setProperty("jjack.client.name", name);
 		
 		// then we can initialize JJackSystem
-		hub.sampleRate = JJackSystem.getSampleRate();
-		if (hub.sampleRate==0) {
+		sampleRate = JJackSystem.getSampleRate();
+		if (sampleRate==0) {
 			throw new JJackException("Jack unavailable");
 		}
 		
-		for(WeakReference<JackSource> ref : hub.sources) {
+		for(WeakReference<JackSource> ref : sources) {
 			JackSource source = ref.get();
-			if (source == null) continue;
-			source.init(hub.sampleRate);
+			if (source!=null) {
+				source.init(sampleRate);
+			}
 		}
-		if (hub.sink!=null) {
-			hub.sink.init(hub.sampleRate);
+		if (sink!=null) {
+			sink.init(sampleRate);
 		}
 		
 		JJackSystem.setProcessor(hub);

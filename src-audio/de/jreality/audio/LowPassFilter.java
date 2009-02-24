@@ -8,11 +8,17 @@ package de.jreality.audio;
  * @author brinkman
  *
  */
-class LowPassFilter {
+class LowPassFilter implements DistanceCue {
+	
 	private float sampleRate;
 	private float cutOff;
 	private float alpha;
 	private float value = 0f;
+	
+	
+	public LowPassFilter(float sampleRate) {
+		this(sampleRate, 22000);
+	}
 	
 	public LowPassFilter(float sampleRate, float cutOff) {
 		this.sampleRate = sampleRate;
@@ -37,5 +43,14 @@ class LowPassFilter {
 	public float nextValue(float v) {
 		value += alpha*(v-value);
 		return value;
+	}
+
+	public float nextValue(float v, float r) {
+		setCutOff(22000/(1+r));
+		return nextValue(v);
+	}
+
+	public void reset() {
+		initialize(0);
 	}
 }

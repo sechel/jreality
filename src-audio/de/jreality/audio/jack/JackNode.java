@@ -22,6 +22,15 @@ public class JackNode extends AudioSource implements JackSource {
 		JackHub.addSource(this);
 	}
 	
+	@Override
+	protected void finalize() throws Throwable {
+		try {
+			JackHub.removeSource(this);
+		} finally {
+			super.finalize();
+		}
+	}
+
 	protected void reset() {
 		// do nothing
 	}

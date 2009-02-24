@@ -1,7 +1,7 @@
 package de.jreality.audio;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.AudioSource;
@@ -29,7 +29,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 	private int sampleRate;
 	private SceneGraphPath microphonePath;
 	private Matrix micInvMatrix = new Matrix();
-	private List<AudioTreeNode> audioSources = new ArrayList<AudioTreeNode>();
+	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
 	
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
@@ -54,16 +54,14 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 	
 	public void processFrame(SoundEncoder enc, int framesize) {
 		microphonePath.getInverseMatrix(micInvMatrix.getArray());
-		
+
 		enc.startFrame(framesize);
-		synchronized (audioSources) {
-			for (AudioTreeNode node : audioSources) {
-				node.processFrame(enc, framesize);
-			}
+		for (AudioTreeNode node : audioSources) {
+			node.processFrame(enc, framesize);
 		}
 		enc.finishFrame();
 	}
-	
+
 	private class AudioTreeNode extends SceneTreeNode implements AudioListener {
 
 		private SoundPath soundPath;
@@ -112,19 +110,15 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		public void audioChanged(AudioEvent ev) {
 			//System.out.println("AudioSourceEntity.audioChanged() "+ev+" src="+ev.getSourceNode());
 		}
-		
+
 		protected void addTreeNode(SceneTreeNode tn) {
 			super.addTreeNode(tn);
-			synchronized (audioSources) {
-				audioSources.add((AudioTreeNode) tn);				
-			}
+			audioSources.add((AudioTreeNode) tn);
 		}
-		
+
 		protected void removeTreeNode(SceneTreeNode tn) {
 			super.removeTreeNode(tn);
-			synchronized (audioSources) {
-				audioSources.remove((AudioTreeNode) tn);
-			}
+			audioSources.remove((AudioTreeNode) tn);
 		}
 	}
 }
