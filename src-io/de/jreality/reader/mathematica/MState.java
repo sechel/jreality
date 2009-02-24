@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -145,6 +146,7 @@ public class MState {
 	}
 
 	public SceneGraphComponent makeCylinder(double[] anfg,double[] ende,double radius) {
+		double[] pos=Rn.linearCombination(null, .5, anfg, .5, ende);
 		double scale=Rn.euclideanDistance(ende, anfg)/2;
 		double[] dir=Rn.normalize(null, Rn.subtract(null, ende, anfg));
 		SceneGraphComponent geo= new SceneGraphComponent();
@@ -152,8 +154,10 @@ public class MState {
 		geo.setName("closed Cylinder");
 		if(geo.getTransformation()==null)
 			geo.setTransformation(new Transformation());
-		MatrixBuilder.euclidean().rotateFromTo(new double[]{0,0,1}, dir).
-		getMatrix().multiplyOnLeft(geo.getTransformation().getMatrix());
+		double[] m=MatrixBuilder.euclidean().
+		  translate(pos).
+		  rotateFromTo(new double[]{0,0,1}, dir).getArray();
+		geo.getTransformation().multiplyOnLeft(m);
 		geo.setAppearance(getPrimitiveApp());
 		return geo;
 	}

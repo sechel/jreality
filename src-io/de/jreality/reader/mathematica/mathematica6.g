@@ -127,7 +127,7 @@ graphics3D
 			MState state2=initialState.copy();
 		}		 
 	(
-		OPEN_BRACE objectListG3D[state2] CLOSE_BRACE // hier kein neuer Knoten noetig
+		OPEN_BRACE objectListG3D[state2] CLOSE_BRACE (COLON waste)?
 		| objectListG3D[state2]
 	)?
 	CLOSE_BRACKET 
@@ -302,11 +302,16 @@ sphere[MState state]
  System.out.println("sphere");
  double[] center=new double []{0,0,0}; 
  double radius=1;
+ int n=0;
 }
 	:"Sphere"
 	 OPEN_BRACKET 
-			(center=vektor
-				( COLON	radius=doublething )?
+			(
+			 center=vektor	
+			  ( COLON	radius=doublething )?
+			 |n=indexVektor 
+			  { center=state.getCoords(n); } 
+			  ( COLON	radius=doublething )?
 			)?
 	 CLOSE_BRACKET 
 			{ current.addChild(state.makeSphere(center,radius));	}
@@ -320,13 +325,20 @@ cylinder [MState state]
  double[] anfg=new double []{0,0,-1}; 
  double[] ende=new double []{0,0,1}; 
  double radius=1;
+ int n=0;
 }
 	:"Cylinder"
 	 OPEN_BRACKET 
 			(OPEN_BRACE
-			 anfg=vektor
+			 (anfg=vektor
+			  |n=indexVektor 
+			  { anfg=state.getCoords(n); } 
+			 )
 			 COLON 
-			 ende=vektor
+			 (ende=vektor
+			  |n=indexVektor 
+			  { ende=state.getCoords(n); } 
+			 )
 			 CLOSE_BRACE
 			 ( COLON radius=doublething )?
 			)?
@@ -344,11 +356,16 @@ String expr="";
 double[] coords=new double[]{0,0,0};
 double[] offset=new double[]{0,0};
 double[] dir=new double[]{1,0};
+int n=0;
 }
 // ein Stueck Text im Raum 
 	:"Text"		OPEN_BRACKET 
 					s:STRING 
-					(COLON coords=vektor
+					(
+					 COLON 
+					   ( coords=vektor
+					   |n=indexVektor { coords=state.getCoords(n); } 
+					   )
 					(COLON offset=vektordata2D
 					(COLON dir=vektordata2D
 					)?)?)?
@@ -982,26 +999,27 @@ Color col;}
 	| strange
 	;
 
-
 private 
 edgeForm [MState state]
 {state.edgeDraw=false;}
 	:"EdgeForm"
 		OPEN_BRACKET
-		( edgeFormContent[state] {state.edgeDraw=true;}
-		 |OPEN_BRACE 			{state.edgeDraw=true;}
-		 	( edgeFormContent[state]
-		 	  ( COLON edgeFormContent[state] )*
-			)?
-		  CLOSE_BRACE
-		)?
+		( edgeFormContent[state]
+	   		( COLON edgeFormContent[state] )*
+	   		{state.edgeDraw=true;}
+	 	)?
 		CLOSE_BRACKET
 	;
 	
 private 
 edgeFormContent [MState state]
-{Color col; double thi=0;}	
+{Color col;}	
 	:col=color[state]{state.edgeColor=col;}
+	|OPEN_BRACE
+	 ( edgeFormContent[state]
+	   ( COLON edgeFormContent[state] )*
+	 )?
+	CLOSE_BRACE
 	|strange
 	;
 
@@ -1010,23 +1028,24 @@ faceForm [MState state]
 {state.faceDraw=false;}
 	:"FaceForm"
 		OPEN_BRACKET
-		( faceFormContent[state] {state.faceDraw=true;}
-		 |OPEN_BRACE 			{state.faceDraw=true;}
-		 	( faceFormContent[state]
-		 	  ( COLON faceFormContent[state] )*
-			)?
-		  CLOSE_BRACE
-		)?
+		( faceFormContent[state]
+	   		( COLON faceFormContent[state] )*
+	   		{state.faceDraw=true;}
+		 )?
 		CLOSE_BRACKET
 	;
 	
 private 
 faceFormContent [MState state]
-{Color col; double thi=0;}	
+{Color col;}	
 	:col=color[state]{state.faceColor=col;}
+	|OPEN_BRACE
+	 ( faceFormContent[state]
+	   ( COLON faceFormContent[state] )*
+	 )?
+	CLOSE_BRACE
 	|strange
 	;
-
 	
 // ----------------------------------------------- Optionen GraphicsComplex ------------------------------------------
 private
@@ -1102,7 +1121,6 @@ vertexColor returns[Color c]
 }
 	:c=color[s]
 	|n=vektor { c=MHelper.colorToRgba(n);}
-	
 	;
 
 // -------------------------------------------------- Kleinkram -------------------------------------------
@@ -1195,7 +1213,7 @@ strange // ueberliest alle bekannten objekte die nicht implementiert sind
 	   "RenderAll"|"RotationAction"|"SphericalRegion"|"Shading"|"Spec"|
 	   "Specularity"|"StatusArea"|"Style"|"Ticks"|"TicksStyle"|"Tooltip"|
 	   "TextStyle"|"Thickness"|"ViewPoint"|"ViewAngle"|"ViewCenter"|
-	   "ViewVertical"|"ViewMatrix"|"ViewRange"|"ViewVector"|"ViewVertical")
+	   "ViewVertical"|"ViewMatrix"|"ViewRange"|"ViewVector"|"ViewVertical"|"None")
 	 egal
 	;
 	
