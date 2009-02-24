@@ -40,6 +40,7 @@ import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.util.Input;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 @SuppressWarnings("serial")
 public class TextureInspector extends JPanel {
@@ -91,7 +92,7 @@ public class TextureInspector extends JPanel {
 
 	
 	public TextureInspector() {
-		setLayout(new MinSizeGridBagLayout());
+		setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor = GridBagConstraints.WEST;
 		c.insets = new Insets(2, 2, 2, 2);

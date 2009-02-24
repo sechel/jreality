@@ -21,11 +21,11 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.ui.JSliderVR;
-import de.jreality.ui.MinSizeGridBagLayout;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 /**
  * 
@@ -53,7 +53,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		distanceCues.put("linear", DistanceCue.LINEAR);
 		distanceCues.put("exponential", DistanceCue.EXPONENTIAL);
 		
-		shrinkPanel.setLayout(new MinSizeGridBagLayout());
+		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		

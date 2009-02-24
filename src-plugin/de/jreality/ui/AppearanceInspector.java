@@ -30,6 +30,7 @@ import com.bric.swing.ColorPicker;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Scene;
 import de.jreality.shader.CommonAttributes;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 @SuppressWarnings("serial")
 public class AppearanceInspector extends JPanel implements ActionListener, ChangeListener {
@@ -159,7 +160,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	
 	
 	private void makePanel() {
-		mainPanel.setLayout(new MinSizeGridBagLayout());
+		mainPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		c.fill = BOTH;
 		c.insets = insets;
 		c.weighty = 0.0;
