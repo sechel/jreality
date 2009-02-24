@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.audio.Attenuation;
+import de.jreality.audio.DistanceCue;
 import de.jreality.audio.SoundPath;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
@@ -36,22 +36,22 @@ import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
  */
 public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListener {
 
-	private Attenuation attenuation = SoundPath.DEFAULT_ATTENUATION;
+	private DistanceCue distanceCue = SoundPath.DEFAULT_DISTANCE_CUE;
 	private float speedOfSound = SoundPath.DEFAULT_SPEED_OF_SOUND;
 	private float gain = SoundPath.DEFAULT_GAIN;
 	
-	private Map<String, Attenuation> attenuations = new HashMap<String, Attenuation>();
-	private Map<Attenuation, String> attenuationLabels = new HashMap<Attenuation, String>();
+	private Map<String, DistanceCue> distanceCues = new HashMap<String, DistanceCue>();
+	private Map<DistanceCue, String> distanceCueLabels = new HashMap<DistanceCue, String>();
 	
 	private Appearance rootAppearance;
 	
 	private JSliderVR gainWidget, speedWidget;
-	private JComboBox attenuationWidget;
+	private JComboBox distanceCueWidget;
 	
 	public AudioOptions() {
-		attenuations.put("constant", Attenuation.CONSTANT);
-		attenuations.put("linear", Attenuation.LINEAR);
-		attenuations.put("exponential", Attenuation.EXPONENTIAL);
+		distanceCues.put("constant", DistanceCue.CONSTANT);
+		distanceCues.put("linear", DistanceCue.LINEAR);
+		distanceCues.put("exponential", DistanceCue.EXPONENTIAL);
 		
 		shrinkPanel.setLayout(new MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -59,9 +59,9 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		shrinkPanel.add(new JLabel("Attenuation"), gbc);
+		shrinkPanel.add(new JLabel("Distance cue"), gbc);
 		gbc.gridx = 1;
-		shrinkPanel.add(attenuationWidget = new JComboBox(), gbc);
+		shrinkPanel.add(distanceCueWidget = new JComboBox(), gbc);
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		shrinkPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
@@ -83,15 +83,15 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		gainWidget.setPaintLabels(true);
 		gainWidget.setPaintTrack(true);
 		
-		for(String s: attenuations.keySet()) {
-			attenuationWidget.addItem(s);
-			attenuationLabels.put(attenuations.get(s), s);
+		for(String s: distanceCues.keySet()) {
+			distanceCueWidget.addItem(s);
+			distanceCueLabels.put(distanceCues.get(s), s);
 		}
 		
-		attenuationWidget.addActionListener(new ActionListener() {
+		distanceCueWidget.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				attenuation = attenuations.get(attenuationWidget.getSelectedItem());
-				rootAppearance.setAttribute(SoundPath.VOLUME_ATTENUATION_KEY, attenuation);
+				distanceCue = distanceCues.get(distanceCueWidget.getSelectedItem());
+				rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, distanceCue);
 			}
 		});
 		
@@ -109,8 +109,8 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		});
 	}
 
-	private void updateAttenuation() {
-		attenuationWidget.setSelectedItem(attenuationLabels.get(attenuation));
+	private void updateDistanceCue() {
+		distanceCueWidget.setSelectedItem(distanceCueLabels.get(distanceCue));
 	}
 	
 	private void updateSpeed() {
@@ -124,7 +124,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	public void appearanceChanged(AppearanceEvent ev) {
 		Appearance appearance = (Appearance) ev.getSourceNode();
 		
-		Attenuation newAttenuation = (Attenuation) appearance.getAttribute(SoundPath.VOLUME_ATTENUATION_KEY);
+		DistanceCue newDistanceCue = (DistanceCue) appearance.getAttribute(SoundPath.DISTANCE_CUE_KEY);
 		float newSpeedOfSound = ((Float) appearance.getAttribute(SoundPath.SPEED_OF_SOUND_KEY)).floatValue();
 		float newGain = ((Float) appearance.getAttribute(SoundPath.VOLUME_GAIN_KEY)).floatValue();
 		
@@ -136,9 +136,9 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 			speedOfSound = newSpeedOfSound;
 			updateSpeed();
 		}
-		if (attenuation!=newAttenuation) {
-			attenuation = newAttenuation;
-			updateAttenuation();
+		if (distanceCue!=newDistanceCue) {
+			distanceCue = newDistanceCue;
+			updateDistanceCue();
 		}
 	}
 
@@ -166,11 +166,11 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 			root.setAppearance(rootAppearance = new Appearance());
 		}
 		
-		rootAppearance.setAttribute(SoundPath.VOLUME_ATTENUATION_KEY, attenuation);
+		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, distanceCue);
 		rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
 		rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
 		
-		updateAttenuation();
+		updateDistanceCue();
 		updateSpeed();
 		updateGain();
 		
@@ -181,8 +181,8 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
 		
-		String label = c.getProperty(getClass(), SoundPath.VOLUME_ATTENUATION_KEY, "linear");
-		attenuation = attenuations.get(label);
+		String label = c.getProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, "linear");
+		distanceCue = distanceCues.get(label);
 		speedOfSound = c.getProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, SoundPath.DEFAULT_SPEED_OF_SOUND);
 		gain = c.getProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, SoundPath.DEFAULT_GAIN);
 	}
@@ -191,7 +191,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		
-		c.storeProperty(getClass(), SoundPath.VOLUME_ATTENUATION_KEY, attenuationLabels.get(attenuation));
+		c.storeProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, distanceCueLabels.get(distanceCue));
 		c.storeProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
 		c.storeProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, gain);
 	}

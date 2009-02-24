@@ -11,7 +11,7 @@ import de.jreality.shader.EffectiveAppearance;
  * EffectiveAppearance.
  * 
  * Sound paths are responsible for most of the audio processing, including
- * resampling, interpolation, attenuation, distance cues, etc.
+ * resampling, interpolation, distance cues, etc.
  * 
  * Convention: Specifying a speed of sound of zero or less means infinite speed
  * of sound, i.e., instantaneous propagation.
@@ -23,11 +23,11 @@ public interface SoundPath {
 	
 	public static final String SPEED_OF_SOUND_KEY = "speedOfSound";
 	public static final String VOLUME_GAIN_KEY = "volumeGain";
-	public static final String VOLUME_ATTENUATION_KEY = "volumeAttenuation";
+	public static final String DISTANCE_CUE_KEY = "distanceCue";
 	
 	public static final float DEFAULT_GAIN = 1f;
 	public static final float DEFAULT_SPEED_OF_SOUND = 332f;
-	public static final Attenuation DEFAULT_ATTENUATION = Attenuation.LINEAR;
+	public static final DistanceCue DEFAULT_DISTANCE_CUE = DistanceCue.LINEAR;
 	
 	void setProperties(EffectiveAppearance eapp);
 	

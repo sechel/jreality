@@ -30,7 +30,7 @@ class LowPassFilter {
 	}
 
 	public float initialize(float v) {
-		this.value = v;
+		value = v;
 		return v;
 	}
 	

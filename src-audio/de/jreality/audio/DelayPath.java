@@ -20,7 +20,7 @@ public class DelayPath implements SoundPath {
 	
 	private float gain = DEFAULT_GAIN;
 	private float speedOfSound = DEFAULT_SPEED_OF_SOUND;
-	private Attenuation attenuation = DEFAULT_ATTENUATION;
+	private DistanceCue distanceCue = DEFAULT_DISTANCE_CUE;
 	private static final float UPDATE_CUTOFF = 6f; // play with this parameter if audio gets choppy
 	
 	private SampleReader reader;
@@ -38,9 +38,11 @@ public class DelayPath implements SoundPath {
 	
 	private float[] currentFrame = null;
 	private int currentLength = 0;
+	private int currentIndex = 0;
+	private float previousValue = 0f, currentValue = 0f;
 	private int relativeTime = 0;
 	private int frameCount = 0;
-	
+
 	
 	public DelayPath(SampleReader reader, int sampleRate) {
 		if (sampleRate<=0) {
@@ -62,7 +64,7 @@ public class DelayPath implements SoundPath {
 	public void setProperties(EffectiveAppearance eapp) {
 		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
 		speedOfSound = eapp.getAttribute(SPEED_OF_SOUND_KEY, DEFAULT_SPEED_OF_SOUND);
-		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION, Attenuation.class);
+		distanceCue = (DistanceCue) eapp.getAttribute(DISTANCE_CUE_KEY, DEFAULT_DISTANCE_CUE, DistanceCue.class);
 		
 		updateParameters();
 	}
@@ -112,43 +114,37 @@ public class DelayPath implements SoundPath {
 		yCurrent = yFilter.initialize(yTarget);
 		zCurrent = zFilter.initialize(zTarget);
 	}
-
+	
 	private void encodeFrame(SoundEncoder enc, int frameSize) {
 		for(int j=0; j<frameSize; j++) {
-			float dist = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
-			float time;
-			while ((time = relativeTime+j-gamma*dist+0.5f)>=currentLength) {
-				advanceFrame();
-				updateTarget();
-			}
-
-			if (currentFrame!=null && time>=0f) {
-				int index = (int) time;
-				float fractionalTime = time-index;
-
-				float v0 = currentFrame[index++];
-				float v1;
-				if (index<currentLength) {
-					v1 = currentFrame[index];
-				} else {
-					float[] nextFrame = sourceFrames.peek();
-					v1 = (nextFrame!=null) ? nextFrame[0] : 0;
-				}
-				float v = v0+fractionalTime*(v1-v0);
-
-				enc.encodeSample(attenuation.attenuate(v*gain, dist), j, xCurrent, yCurrent, zCurrent);
-			}
+			float distance = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
+			float time = (relativeTime++)-gamma*distance;
+			int targetIndex = (int) time;
+			float fractionalTime = time-targetIndex;
 			
+			for(; targetIndex>=currentIndex; currentIndex++) {
+				if (currentIndex>=currentLength) {
+					relativeTime -= currentLength;
+					currentIndex -= currentLength;
+					targetIndex -= currentLength;
+					advanceFrame();
+					updateTarget();
+				}
+				previousValue = currentValue;
+				float nextSample = (currentFrame!=null) ? currentFrame[currentIndex] : 0f;
+				currentValue = distanceCue.nextValue(nextSample, distance);
+			}
+
+			float v = previousValue+fractionalTime*(currentValue-previousValue);
+			enc.encodeSample(v*gain, j, xCurrent, yCurrent, zCurrent);
+
 			xCurrent = xFilter.nextValue(xTarget);
 			yCurrent = yFilter.nextValue(yTarget);
 			zCurrent = zFilter.nextValue(zTarget);
 		}
-		relativeTime += frameSize;
 	}
 
 	private void advanceFrame() {
-		relativeTime -= currentLength;
-		
 		currentFrame = sourceFrames.remove();
 		currentLength = frameLengths.remove();
 		sourcePositions.remove();
@@ -176,7 +172,11 @@ public class DelayPath implements SoundPath {
 		sourcePositions.clear();
 		currentFrame = null;
 		currentLength = 0;
+		currentIndex = 0;
 		relativeTime = 0;
 		frameCount = 0;
+		previousValue = 0;
+		currentValue = 0f;
+		distanceCue.reset();
 	}
 }

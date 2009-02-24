@@ -14,7 +14,7 @@ import de.jreality.shader.EffectiveAppearance;
 public class InstantaneousPath implements SoundPath {
 
 	private float gain = DEFAULT_GAIN;
-	private Attenuation attenuation = DEFAULT_ATTENUATION;
+	private DistanceCue distanceCue = DEFAULT_DISTANCE_CUE;
 	
 	private SampleReader reader;
 	private float samples[];
@@ -55,7 +55,7 @@ public class InstantaneousPath implements SoundPath {
 		
 		for (int i=0; i<nRead; i++) {
 			float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
-			float v = attenuation.attenuate(samples[i]*gain, r);
+			float v = distanceCue.nextValue(samples[i]*gain, r);
 			enc.encodeSample(v, i, x0, y0, z0);
 			
 			x0 += dx;
@@ -68,6 +68,6 @@ public class InstantaneousPath implements SoundPath {
 
 	public void setProperties(EffectiveAppearance eapp) {
 		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
-		attenuation = (Attenuation) eapp.getAttribute(VOLUME_ATTENUATION_KEY, DEFAULT_ATTENUATION, Attenuation.class);
+		distanceCue = (DistanceCue) eapp.getAttribute(DISTANCE_CUE_KEY, DEFAULT_DISTANCE_CUE, DistanceCue.class);
 	}
 }
