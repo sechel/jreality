@@ -412,8 +412,6 @@ pointBlock [MState state]
  System.out.println("pointBlock");
  List<double[]> points= new LinkedList<double[]>(); 
  double[] v = new double[3];
- ArrayList<Color> colList= new ArrayList<Color>();
- ArrayList<double[]> normList= new ArrayList<double[]>();
  }
 	:"Point"
 	   OPEN_BRACKET
@@ -422,7 +420,7 @@ pointBlock [MState state]
 	   		 (COLON v=vektor {points.add(v);})*
 	   		 CLOSE_BRACE
 	   		)
-	   (COLON gcOptInside[colList,normList])*	   		
+	   (COLON waste)?
 	   CLOSE_BRACKET 
 	{
 		PointSetFactory psf = new PointSetFactory();
@@ -436,10 +434,8 @@ pointBlock [MState state]
 		psf.setVertexCoordinates(coords);
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
-		geo.setAppearance(state.getPointSetApp(true));
+		geo.setAppearance(state.getPointSetApp());
 		PointSet p=psf.getPointSet();
-		state.assignColorList(p,colList);	
-		state.assignNormalList(p,normList);		
 		geo.setGeometry(p);
 		geo.setName("Points");
 		current.addChild(geo);
@@ -468,7 +464,7 @@ indexedPointSet [MState state]
 		psf.setVertexCoordinates(coords);
 		psf.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
-		geo.setAppearance(state.getPointSetApp(true));
+		geo.setAppearance(state.getPointSetApp());
 		PointSet p=psf.getPointSet();
 		state.assignColorList(p,colList);	
 		state.assignNormalList(p,normList);		
@@ -485,8 +481,6 @@ lineBlock [MState state]
  List<double[][]> lines=new LinkedList<double[][]>();
  double[][] line=null;
  int numVerts=0;
- ArrayList<Color> colList= new ArrayList<Color>();
- ArrayList<double[]> normList= new ArrayList<double[]>();
 }
 	 :("Line"|"Tube")
 	  OPEN_BRACKET
@@ -495,7 +489,7 @@ lineBlock [MState state]
 		    (COLON line=vertexList    	{lines.add(line);numVerts+=line.length;})*
 		    CLOSE_BRACE
 		 )
-	   (COLON gcOptInside[colList,normList])*	   		
+	   (COLON waste)?	   		
 	 CLOSE_BRACKET 
 	{
 		IndexedLineSetFactory lineset=new IndexedLineSetFactory();
@@ -517,10 +511,8 @@ lineBlock [MState state]
 		lineset.setEdgeIndices(indices);
 		lineset.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
-		geo.setAppearance(state.getLineSetApp(true));
+		geo.setAppearance(state.getLineSetApp());
 		IndexedLineSet ils=lineset.getIndexedLineSet();
-		state.assignColorList(ils,colList);	
-		state.assignNormalList(ils,normList);		
 		geo.setGeometry(ils);
 		geo.setName("Lines");
 		current.addChild(geo);
@@ -557,7 +549,7 @@ indexedLineSet [MState state]
 		lineset.setEdgeIndices(indices);
 		lineset.update();
 		SceneGraphComponent geo=new SceneGraphComponent();
-		geo.setAppearance(state.getLineSetApp(true));
+		geo.setAppearance(state.getLineSetApp());
 		IndexedLineSet ils=lineset.getIndexedLineSet();
 		state.assignColorList(ils,colList);	
 		state.assignNormalList(ils,normList);		
@@ -571,124 +563,45 @@ private
 polygonBlock [MState state]
 {
  System.out.println("polygonBlock");
-// liest eine Abfolge von Polygonen 
-// schmeist doppelte Punkte durch umindizierung raus
-// Farben wie pointBlock und lineBlock
- List<double[]> coordinates= new LinkedList<double[]>();
  MState state2=state.copy(); 
-
- boolean useGivenIndis=true;
- List<int[]> givenIndexList=new LinkedList<int[]>();
- List<int[]> ownIndexList=new LinkedList<int[]>();
- int[] givenIndexedPoly=null;
- int[] ownIndexedPoly;
- double[][] coordsPoly;
- 
- List<Color> colors= new LinkedList<Color>();
- Color c=null;
- int count=0;						// zaehlt die Punkte mit
- boolean colorFlag=false;
- boolean colorNeeded =false;
- ArrayList<Color> colList= new ArrayList<Color>();
- ArrayList<double[]> normList= new ArrayList<double[]>();
+ List<double[][]> faceList= new LinkedList<double[][]>();
+ double[][] face;
+ int numVerts=0;
 }
 	:"Polygon"
 	 OPEN_BRACKET
-   		 ( ( coordsPoly=vertexList {useGivenIndis= false;} )
-   		  |( givenIndexedPoly=vertexIndexList { coordsPoly=state.getIndexCoords(givenIndexedPoly);})
-   		 )
-		{
-			ownIndexedPoly=new int[coordsPoly.length];
-			for(int i=0;i<coordsPoly.length;i++){
-				coordinates.add(coordsPoly[i]);  	// Punkte zu einer Liste machen
-				ownIndexedPoly[i]=i+count;			// indizirung merken					
-			}
-			count+=coordsPoly.length;
-			ownIndexList.add(ownIndexedPoly);
-			givenIndexList.add(givenIndexedPoly);
-			colors.add(state.getFaceColor());
-		}
-	   (COLON gcOptInside[colList,normList])*	   		
+   		(face=vertexList 				{ faceList.add(face);numVerts+=face.length;}
+		 | 	OPEN_BRACE	face=vertexList { faceList.add(face);numVerts+=face.length;}
+		 	( COLON face=vertexList 	{ faceList.add(face);numVerts+=face.length;} )*
+		 	CLOSE_BRACE
+		)
+	   (COLON waste)?	   		
 	 CLOSE_BRACKET 
-	 ( COLON
-	   (
-	    c=color[state] {colorFlag=true;}
-		| strange
-		| edgeForm[state]
-		| faceForm[state]
-	  	|"Polygon"
-	     OPEN_BRACKET
-	   		 ( ( coordsPoly=vertexList {useGivenIndis= false;} )
-	   		  |( givenIndexedPoly=vertexIndexList { coordsPoly=state.getIndexCoords(givenIndexedPoly);})
-	   		 )
-			{
-				if (colorFlag) colorNeeded= true;
-				ownIndexedPoly=new int[coordsPoly.length];
-				for(int i=0;i<coordsPoly.length;i++){
-					coordinates.add(coordsPoly[i]);  	// Punkte zu einer Liste machen
-					ownIndexedPoly[i]=i+count;			// indizirung merken					
-				}
-				count+=coordsPoly.length;
-				ownIndexList.add(ownIndexedPoly);
-				givenIndexList.add(givenIndexedPoly);
-				colors.add(state.getFaceColor());
-			}
-	    CLOSE_BRACKET
-	   )
-	)*
 	{
 		IndexedFaceSetFactory faceSet = new IndexedFaceSetFactory();
-		double [][] coords=null;
-		int[][] indices= new int[ownIndexList.size()][];
-		if(useGivenIndis){
-			coords= state.coords;
-			int i=0;
-			for(int[] d: givenIndexList){
-				indices[i]=d;
-				i++;
-			}
-		}
-		else{
-			coords= new double[coordinates.size()][];
-			int i=0;
-			for(double[] d: coordinates ){
-				coords[i]= d;
-				i++;
-			}
-			i=0;
-			for(int[] d: ownIndexList){
-				indices[i]=d;
-				i++;
+		double [][] coords=coords= new double[numVerts][];
+		int[][] indices= new int[faceList.size()][];
+		int laufNum=0;
+		for(int i=0;i<faceList.size();i++){
+			face=faceList.get(i);
+			indices[i]=new int[face.length];
+			for(int j=0; j<face.length;j++){
+				indices[i][j]=laufNum;
+				coords[laufNum]=face[j];
+				laufNum++;
 			}
 		}
 		faceSet.setVertexCount(coords.length);
 		faceSet.setVertexCoordinates(coords);
-		if (colorNeeded){ 			// brauchen wir eine Farbliste?
-			double [][] colorData = new double[indices.length][];
-			int i=0;
-			for(Color d : colors){
-				colorData[i]=MHelper.getRgbaColor(d);
-				i++;
-			}	
-			faceSet.setEdgeColors(colorData);
-		}
-		faceSet.setVertexCount(coords.length);
 		faceSet.setFaceCount(indices.length);
 		faceSet.setFaceIndices(indices);
-		faceSet.setVertexCoordinates(coords);
 		faceSet.setGenerateFaceNormals(true);
-		faceSet.update();
-		IndexedFaceSet ifs= faceSet.getIndexedFaceSet();
-		if(!useGivenIndis){
-			ifs=(IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(ifs,Attribute.COLORS);
-		}
-		IndexedFaceSetUtility.assignSmoothVertexNormals(ifs,-1);
+		faceSet.update();		
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
-		geo.setAppearance(state2.getFaceApp(!colorNeeded));
+		geo.setAppearance(state2.getFaceApp());
+		IndexedFaceSet ifs= faceSet.getIndexedFaceSet();
 		current.addChild(geo);
 		geo.setName("Faces");
-		state.assignColorList(ifs,colList);	
-		state.assignNormalList(ifs,normList);		
 		geo.setGeometry(ifs);
 		state.faces.add(ifs);
 	}
@@ -725,9 +638,8 @@ indexedFaceSet [MState state]
 		faceSet.setGenerateFaceNormals(true);
 		faceSet.update();
 		IndexedFaceSet ifs= faceSet.getIndexedFaceSet();
-		IndexedFaceSetUtility.assignSmoothVertexNormals(ifs,-1);
 		SceneGraphComponent geo=new SceneGraphComponent();	// Komponenten erstellen und einhaengen
-		geo.setAppearance(state.getFaceApp(true));
+		geo.setAppearance(state.getFaceApp());
 		current.addChild(geo);
 		geo.setName("indexedFaces");
 		state.assignColorList(ifs,colList);	
@@ -801,12 +713,17 @@ c= new Color(0,255,0);}
 					}
 		|"RGBColor" OPEN_BRACKET  // Red-Green-Blue
 					{double r,g,b,a; r=b=g=0; a=1;}
-					(OPEN_BRACE)?
-					r=doublething 
-					COLON g=doublething 
-					COLON b=doublething
-					(CLOSE_BRACE)?
-				CLOSE_BRACKET 
+					( OPEN_BRACE
+					  r=doublething 
+					  COLON g=doublething 
+					  COLON b=doublething
+					  CLOSE_BRACE
+					|
+					  r=doublething 
+					  COLON g=doublething 
+					  COLON b=doublething
+					)
+					CLOSE_BRACKET 
 					{
 					 c=MHelper.rgbaToRgba(r,g,b,a);
 					 state.setColor(c);
@@ -862,7 +779,7 @@ c= new Color(0,255,0);}
 					state.setColor(c);
 					}
 		| c=directiveComplex[state]
-		| faceColor[state]		
+		| c=faceColor[state]	
 		;
 		
 private 

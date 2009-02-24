@@ -36,10 +36,10 @@ public class MHelper {
 	static double[] getRgbaColor(Color c){
 		// retuns a array that represents a color (needed for color-Arrays as double[][])
 			double[] col= new double[4];
-			col[0]=c.getRed()/255.0;
-			col[1]=c.getGreen()/255.0;
-			col[2]=c.getBlue()/255.0;
-			col[3]=c.getAlpha()/255.0;
+			col[0]=c.getRed()/256.0;
+			col[1]=c.getGreen()/256.0;
+			col[2]=c.getBlue()/256.0;
+			col[3]=c.getAlpha()/256.0;
 			return col ;
 		}
 		

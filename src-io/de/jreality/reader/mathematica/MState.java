@@ -59,21 +59,21 @@ public class MState {
 		snew.faceDraw= faceDraw;
 		return snew;
 	} 
-	public Appearance getPointSetApp(boolean colorNeeded){
+	public Appearance getPointSetApp(){
 		Appearance app= new Appearance();
 		// Point Color 
-		if(color!=null&&colorNeeded){  
+		if(color!=null){  
 			app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-color.getAlpha()/256.));
 		}
 		return app;
 	}
-	public Appearance getLineSetApp(boolean colorNeeded){
+	public Appearance getLineSetApp(){
 		Appearance app= new Appearance();
 		app.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		// Line Color
-		if(color!=null&&colorNeeded){  
+		if(color!=null){  
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-color.getAlpha()/256.));
@@ -83,34 +83,34 @@ public class MState {
 		}
 		return app;
 	}
-	public Appearance getFaceApp(boolean colorNeeded){
+	public Appearance getFaceApp(){
 		Appearance app= new Appearance();
 		if(!edgeDraw)
 			app.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		if(!faceDraw)
 			app.setAttribute(CommonAttributes.FACE_DRAW, false);
 		// face Color
-		if(faceColor!=null&&colorNeeded){ 
+		if(faceColor!=null){ 
 			app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, faceColor);
 			app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-faceColor.getAlpha()/256.));
 		}
-		else if(color!=null&&colorNeeded){  
+		else if(color!=null){  
 			app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-color.getAlpha()/256.));
 		}
 		// edge Color
-		if(edgeColor!=null&&colorNeeded){ 
+		if(edgeColor!=null){ 
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, edgeColor);
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, edgeColor);
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-edgeColor.getAlpha()/256.));
 		}
-		else if(color!=null&&colorNeeded){  
+		else if(color!=null){  
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-color.getAlpha()/256.));
 		}
 		// Point Color 
-		if(color!=null&&colorNeeded){  
+		if(color!=null){  
 			app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 			app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.TRANSPARENCY, (1.-color.getAlpha()/256.));
