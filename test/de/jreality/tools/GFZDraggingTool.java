@@ -45,7 +45,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.tool.ToolContext;
 
 /**
- * For testing Schönebeck data.
+ * For testing SchÃ¶nebeck data.
  * Only drags in local x and y direction.
  * 
  * @author msommer
