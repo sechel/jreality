@@ -69,7 +69,7 @@ import de.jreality.shader.EffectiveAppearance;
  *
  */
 public class SceneGraphPathObserver implements AppearanceListener, TransformationListener, SceneGraphComponentListener {
-
+	
 	SceneGraphPath currentPath;
 	private TransformationListener transformationListener;
 	private AppearanceListener appearanceListener;
@@ -184,11 +184,15 @@ public class SceneGraphPathObserver implements AppearanceListener, Transformatio
 		}
 	}
 
+	/**
+	 * Notifies listeners with a dummy event, i.e., assumes that listeners won't rely on event object
+	 * for information.  There's gotta be a better way...
+	 *
+	 */
 	protected void fireAppearanceChanged() {
 		final AppearanceListener l = appearanceListener;
 		if (l != null) {
-			EffectiveAppearance eapp = EffectiveAppearance.create(currentPath);
-			l.appearanceChanged(new AppearanceEvent(new Appearance(), eapp)); // dummy source, not happy with that...
+			l.appearanceChanged(new AppearanceEvent(new Appearance(), null, null));
 		}
 	}
 	

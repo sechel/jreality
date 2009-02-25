@@ -91,7 +91,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			if (nodeActive || pathActive) {
 				if (path==null) {
 					path = toPath();
-					soundPath.setProperties(EffectiveAppearance.create(path));
+					appearanceChanged(null);
 					observer.setPath(path);
 				}
 				path.getMatrix(curPos.getArray());
@@ -104,7 +104,9 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		}
 
 		public void appearanceChanged(AppearanceEvent ev) {
-			soundPath.setProperties(ev.getEffectiveAppearance());
+			if (path!=null) {
+				soundPath.setProperties(EffectiveAppearance.create(path));
+			}
 		}
 	}
 	
