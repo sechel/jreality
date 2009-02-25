@@ -41,26 +41,37 @@
 package de.jreality.scene.event;
 
 import de.jreality.scene.Appearance;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * @author Charles Gunn
  *
  */
 public class AppearanceEvent extends SceneEvent {
-  
+
 	String key;
-  Object old;
-    
-  public AppearanceEvent(Appearance source, String key, Object old) {
-    super(source);
-    this.key = key;
-    this.old=old;    
-  }
-    
+	Object old;
+	EffectiveAppearance eapp;
+
+	public AppearanceEvent(Appearance source, String key, Object old) {
+		super(source);
+		this.key = key;
+		this.old = old;    
+	}
+
+	public AppearanceEvent(Appearance source, EffectiveAppearance eapp) {
+		super(source);
+		this.eapp = eapp;
+	}
+	
 	public String getKey()	{
 		return key;
 	}
-    public Object getOldValue() {
-      return old;
-    }
+	public Object getOldValue() {
+		return old;
+	}
+	
+	public EffectiveAppearance getEffectiveAppearance() {
+		return eapp;
+	}
 }

@@ -8,7 +8,10 @@ import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.AudioSource.State;
+import de.jreality.scene.event.AppearanceEvent;
+import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.AudioEvent;
 import de.jreality.scene.event.AudioListener;
 import de.jreality.scene.proxy.tree.EntityFactory;
@@ -62,11 +65,12 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		enc.finishFrame();
 	}
 
-	private class AudioTreeNode extends SceneTreeNode implements AudioListener {
+	private class AudioTreeNode extends SceneTreeNode implements AudioListener, AppearanceListener {
 
 		private SoundPath soundPath;
 		private Matrix curPos = new Matrix();
 		private SceneGraphPath path;
+		private SceneGraphPathObserver observer = new SceneGraphPathObserver();
 		
 		private boolean nodeActive = false;
 		private boolean pathActive = false;
@@ -78,6 +82,8 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			soundPath = new DelayPath(new AudioReader(audio), sampleRate);
 			
 			audio.addAudioListener(this);
+			observer.addAppearanceListener(this);
+			
 			audioChanged(null);
 		}
 		
@@ -85,19 +91,20 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			if (nodeActive || pathActive) {
 				if (path==null) {
 					path = toPath();
+					soundPath.setProperties(EffectiveAppearance.create(path));
+					observer.setPath(path);
 				}
 				path.getMatrix(curPos.getArray());
-
-				// TODO: use a SceneGraphPathObserver to create a new EffectiveAppearance
-				// only when appearances were added/removed along the path.
-				// TODO: For this we need to extend SceneGraphPathObserver.
-				soundPath.setProperties(EffectiveAppearance.create(path));
 				pathActive = soundPath.processFrame(enc, frameSize, curPos, micInvMatrix);
 			}
 		}
 
 		public void audioChanged(AudioEvent ev) {
 			nodeActive = ((AudioSource) getNode()).getState() == State.RUNNING;
+		}
+
+		public void appearanceChanged(AppearanceEvent ev) {
+			soundPath.setProperties(ev.getEffectiveAppearance());
 		}
 	}
 	
