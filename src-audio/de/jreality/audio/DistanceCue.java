@@ -9,27 +9,30 @@ package de.jreality.audio;
  */
 public interface DistanceCue {
 
-	public static final DistanceCue CONSTANT = new DistanceCue() {
+	public static abstract class Attenuation implements DistanceCue {
+		public void setSampleRate(float sr) {}
+		public void reset() {}
+	}
+	
+	public static final DistanceCue CONSTANT = new Attenuation() {
 		public float nextValue(float v, float r) {
 			return v;
 		}
-		public void reset() {}
 	};
 	
-	public static final DistanceCue LINEAR = new DistanceCue() {
+	public static final DistanceCue LINEAR = new Attenuation() {
 		public float nextValue(float v, float r) {
 			return v/Math.max(r, 1);
 		}
-		public void reset() {}
 	};
 	
-	public static final DistanceCue EXPONENTIAL = new DistanceCue() {
+	public static final DistanceCue EXPONENTIAL = new Attenuation() {
 		public float nextValue(float v, float r) {
 			return v/(float) Math.exp(r);
-		}	
-		public void reset() {}
+		}
 	};
 	
-	void reset();
+	void setSampleRate(float sr);
 	float nextValue(float v, float r);
+	void reset();
 }

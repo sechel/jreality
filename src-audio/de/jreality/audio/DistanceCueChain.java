@@ -23,6 +23,12 @@ public class DistanceCueChain implements DistanceCue {
 		// do nothing
 	}
 
+	public void setSampleRate(float sr) {
+		for(DistanceCue cue: cues) {
+			cue.setSampleRate(sr);
+		}
+	}
+	
 	public float nextValue(float v, float r) {
 		for(DistanceCue cue: cues) {
 			v = cue.nextValue(v, r);

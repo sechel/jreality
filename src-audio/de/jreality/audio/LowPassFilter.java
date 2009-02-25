@@ -12,17 +12,24 @@ class LowPassFilter implements DistanceCue {
 	
 	private float sampleRate;
 	private float cutOff;
-	private float alpha;
+	private float alpha = 1f;
 	private float value = 0f;
 	
+	public LowPassFilter() {
+		// do nothing
+	}
 	
 	public LowPassFilter(float sampleRate) {
-		this(sampleRate, 22000);
+		setSampleRate(sampleRate);
 	}
 	
 	public LowPassFilter(float sampleRate, float cutOff) {
-		this.sampleRate = sampleRate;
+		setSampleRate(sampleRate);
 		setCutOff(cutOff);
+	}
+	
+	public void setSampleRate(float sampleRate) {
+		this.sampleRate = sampleRate;
 	}
 	
 	public void setCutOff(float cutOff) {
