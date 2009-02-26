@@ -8,7 +8,7 @@ package de.jreality.audio;
  * @author brinkman
  *
  */
-class LowPassFilter implements DistanceCue {
+public class LowPassFilter implements DistanceCue {
 	
 	private float sampleRate;
 	private float cutOff;

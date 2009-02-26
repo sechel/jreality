@@ -15,6 +15,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.audio.DistanceCue;
+import de.jreality.audio.LowPassFilter;
 import de.jreality.audio.SoundPath;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
@@ -54,6 +55,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		distanceCues.put("constant", DistanceCue.CONSTANT.class);
 		distanceCues.put("linear", DistanceCue.LINEAR.class);
 		distanceCues.put("exponential", DistanceCue.EXPONENTIAL.class);
+		distanceCues.put("low pass", LowPassFilter.class);
 		
 		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
