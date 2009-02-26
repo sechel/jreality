@@ -1,6 +1,7 @@
 package de.jreality.audio;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 import de.jreality.math.Matrix;
@@ -39,7 +40,7 @@ public class DelayPath implements SoundPath {
 	private float[] currentFrame = null;
 	private int currentLength = 0;
 	private int currentIndex = 0;
-	private float previousValue = 0f, currentValue = 0f;
+	private float previousSample = 0f, currentSample = 0f;
 	private int relativeTime = 0;
 	private int frameCount = 0;
 
@@ -61,12 +62,26 @@ public class DelayPath implements SoundPath {
 		updateParameters();
 	}
 
-	public void setProperties(EffectiveAppearance eapp) {
+	private List<Class<? extends DistanceCue>> oldChain = null;
+	
+	public synchronized void setProperties(EffectiveAppearance eapp) {
 		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
 		speedOfSound = eapp.getAttribute(SPEED_OF_SOUND_KEY, DEFAULT_SPEED_OF_SOUND);
-		distanceCue = (DistanceCue) eapp.getAttribute(DISTANCE_CUE_KEY, DEFAULT_DISTANCE_CUE, DistanceCue.class);
-		
 		updateParameters();
+		
+		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(DISTANCE_CUE_KEY, null, List.class);
+		if (newChain!=oldChain) {
+			try {
+				oldChain = newChain;
+				DistanceCue c = DistanceCueChain.create(newChain);
+				c.setSampleRate(sampleRate);
+				distanceCue = c;
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private void updateParameters() {
@@ -130,12 +145,12 @@ public class DelayPath implements SoundPath {
 					advanceFrame();
 					updateTarget();
 				}
-				previousValue = currentValue;
-				float nextSample = (currentFrame!=null) ? currentFrame[currentIndex] : 0f;
-				currentValue = distanceCue.nextValue(nextSample, distance);
+				previousSample = currentSample;
+				float newSample = (currentFrame!=null) ? currentFrame[currentIndex] : 0f;
+				currentSample = distanceCue.nextValue(newSample, distance);
 			}
 
-			float v = previousValue+fractionalTime*(currentValue-previousValue);
+			float v = previousSample+fractionalTime*(currentSample-previousSample);
 			enc.encodeSample(v*gain, j, xCurrent, yCurrent, zCurrent);
 
 			xCurrent = xFilter.nextValue(xTarget);
@@ -175,8 +190,8 @@ public class DelayPath implements SoundPath {
 		currentIndex = 0;
 		relativeTime = 0;
 		frameCount = 0;
-		previousValue = 0;
-		currentValue = 0f;
+		previousSample = 0;
+		currentSample = 0f;
 		distanceCue.reset();
 	}
 }

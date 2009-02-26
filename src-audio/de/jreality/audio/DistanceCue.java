@@ -14,23 +14,25 @@ public interface DistanceCue {
 		public void reset() {}
 	}
 	
-	public static final DistanceCue CONSTANT = new Attenuation() {
+	public static final class CONSTANT extends Attenuation {
 		public float nextValue(float v, float r) {
 			return v;
 		}
 	};
 	
-	public static final DistanceCue LINEAR = new Attenuation() {
+	public static final class LINEAR extends Attenuation {
 		public float nextValue(float v, float r) {
 			return v/Math.max(r, 1);
 		}
 	};
 	
-	public static final DistanceCue EXPONENTIAL = new Attenuation() {
+	public static final class EXPONENTIAL extends Attenuation {
 		public float nextValue(float v, float r) {
 			return v/(float) Math.exp(r);
 		}
 	};
+	
+	public static final DistanceCue DEFAULT_CUE = new CONSTANT();
 	
 	void setSampleRate(float sr);
 	float nextValue(float v, float r);

@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import java.util.List;
+
 import de.jreality.math.Matrix;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -16,6 +18,7 @@ public class InstantaneousPath implements SoundPath {
 	private float gain = DEFAULT_GAIN;
 	private DistanceCue distanceCue = DEFAULT_DISTANCE_CUE;
 	
+	private int sampleRate;
 	private SampleReader reader;
 	private float samples[];
 	
@@ -23,6 +26,7 @@ public class InstantaneousPath implements SoundPath {
 	private boolean firstFrame = true;
 
 	public InstantaneousPath(SampleReader reader, int sampleRate) {
+		this.sampleRate = sampleRate;
 		this.reader = ConvertingReader.createReader(reader, sampleRate);
 	}
 	
@@ -68,6 +72,15 @@ public class InstantaneousPath implements SoundPath {
 
 	public void setProperties(EffectiveAppearance eapp) {
 		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
-		distanceCue = (DistanceCue) eapp.getAttribute(DISTANCE_CUE_KEY, DEFAULT_DISTANCE_CUE, DistanceCue.class);
+		List<Class<? extends DistanceCue>> cueChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(DISTANCE_CUE_KEY, null, List.class);
+		try {
+			DistanceCue c = DistanceCueChain.create(cueChain);
+			c.setSampleRate(sampleRate);
+			distanceCue = c;
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 }

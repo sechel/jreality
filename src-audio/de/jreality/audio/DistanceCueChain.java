@@ -1,28 +1,39 @@
 package de.jreality.audio;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 
  * An implementation of DistanceCue that holds a chain of distance cues, e.g., low-pass filtering and
  * attenuation, that are applied successively.  The chain [f_1, f_2, ..., f_n](v, r) evaluates to
- * fn(... f_2(f_1(v, r), r) ..., r); an empty chain acts as the identity.
- * 
- * Adding and removing cues is thread-safe.
+ * fn(... f_2(f_1(v, r), r) ..., r).
  * 
  * @author brinkman
  *
  */
-public class DistanceCueChain implements DistanceCue {
+public final class DistanceCueChain implements DistanceCue {
 
-	private List<DistanceCue> cues = new CopyOnWriteArrayList<DistanceCue>(); // avoid sync when iterating over list...
+	private final List<DistanceCue> cues = new ArrayList<DistanceCue>();
 	
-	
-	public DistanceCueChain() {
+	private DistanceCueChain() {
 		// do nothing
 	}
 
+	public static DistanceCue create(List<Class<? extends DistanceCue>> list) throws InstantiationException, IllegalAccessException {
+		if (list==null || list.isEmpty()) {
+			return DistanceCue.DEFAULT_CUE;
+		} else if (list.size()==1) {
+			return list.get(0).newInstance();
+		} else {
+			DistanceCueChain chain = new DistanceCueChain();
+			for(Class<? extends DistanceCue> clazz: list) {
+				chain.add(clazz.newInstance());
+			}
+			return chain;
+		}
+	}
+	
 	public void setSampleRate(float sr) {
 		for(DistanceCue cue: cues) {
 			cue.setSampleRate(sr);
@@ -42,11 +53,7 @@ public class DistanceCueChain implements DistanceCue {
 		}
 	}
 	
-	public boolean addCue(DistanceCue cue) {
+	private boolean add(DistanceCue cue) {
 		return cues.add(cue);
-	}
-	
-	public boolean removeCue(DistanceCue cue) {
-		return cues.remove(cue);
 	}
 }

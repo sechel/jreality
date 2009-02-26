@@ -27,7 +27,7 @@ public interface SoundPath {
 	
 	public static final float DEFAULT_GAIN = 1f;
 	public static final float DEFAULT_SPEED_OF_SOUND = 332f;
-	public static final DistanceCue DEFAULT_DISTANCE_CUE = DistanceCue.LINEAR;
+	public static DistanceCue DEFAULT_DISTANCE_CUE = DistanceCue.DEFAULT_CUE;
 	
 	void setProperties(EffectiveAppearance eapp);
 	
