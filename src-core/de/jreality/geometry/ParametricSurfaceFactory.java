@@ -40,22 +40,13 @@
 
 package de.jreality.geometry;
 
-import java.awt.Dimension;
-
 import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArrayArray;
 
 /**
- * This factory specializes the {@link QuadMeshFactory} further, replacing the explicit definition of the vertex coordinates with a
- * functional definition.  To be precise, the constructor for this factory requires an instance of {@link Immersion}.
- * <p>
- * This instance defines a map from the plane to n-space using these methods:
- * <ul>
- * <li>{@link Immersion#getDimensionOfAmbientSpace()}</li>The dimension of the target space.
- * <li>{@link Immersion#isImmutable()}</li> If <code>true</code>, ... it's immutable!
- * <li>{@link Immersion#evaluate(double, double, double[], int)}</li> The first two arguments specify (u,v) position, the third is a vector of length n for filling, and
- * the final argument for the purposes of this class is always 0.
- * </ul>
+ * This factory specializes the {@link QuadMeshFactory} further, replacing the explicit definition of the 
+ * vertex coordinates with a functional definition.  The constructor for this factory 
+ * requires a class that implements {@link Immersion}. To implement this interface for a map
+ * of two variables into three space extend the abstract class {@link DefaultImmersion}. 
  * <p>
  * The domain of the immersion is a rectangle in (u,v) space specified by the four methods {@link #setUMin(double)}, {@link #setUMax(double)}, etc.
  * The number of samples in each direction is specified using the methods inherited from {@link QuadMeshFactory}: {@link QuadMeshFactory#setULineCount(int)}, etc.
@@ -108,15 +99,32 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 		});
 	}
 	
+	/**
+	 * Represents a map of two variables into n--dimensional space. 
+	 * 
+	 */
 	public interface Immersion {
-		/** Is it immutable? (not sure what this implies!) */
+		/** Mutable immersions are always recalculated when the <code>update</code> method is called; 
+		 * immutable immersions are only recalculated when the parameter domain changes.*/
 		public boolean isImmutable();
 		/** The dimension of the target space. */
 		public int getDimensionOfAmbientSpace();
-		/** The first two arguments specify (u,v) position, 
-		 * the third is a vector of length n for filling, and
-		 * the final argument gives an offset to use if you are  
-		 * an optimizing heiny and squashing all xyz results into a huge vector.*/		
+		/** The implementation of the  formula. If in mathematical notation 
+		 * (f1(u,v), ..., fn(u,v)) is your R<sup>n</sup> valued map, where n is the dimension of 
+		 * the ambient space. Then your implementation of <code>evaluate</code> should read
+		 * 
+		 *  <code><pre>
+		 * 		xyz[3*index]=f1(u,v);
+		 * 		xyz[3*index+1]=f2(u,v);
+		 * 		   ...
+		 *		xyz[3*index+n-1]=fn(u,v);
+		 *  </pre></code>
+		 *	 
+		 * @param u coordinate of the requested value
+		 * @param v coordinate of the requested value
+		 * @param xyz an array to put the result of the evaluation into
+		 * @param index at which to put the result into <code>xyz</code>. 
+		 */
 		public void evaluate(double u, double v, double[] xyz, int index);
 	}
 
@@ -264,9 +272,11 @@ public class ParametricSurfaceFactory extends AbstractQuadMeshFactory {
 	}
 
   /**
-   * An immersion in 3-space. override the abstract
-   * method evaluate and assign the protected variables
-   * x, y, and z there depending on the given u, v values.
+   * An abstract implementation of the interface <code>Immersion</code> for
+   * a map of two variables into 3-space. Override the abstract
+   * method <code>evaluate</code> and assign the protected variables
+   * <code>x</code>, <code>y</code>, and <code>z</code> there depending on 
+   * the given <code>u</code>, <code>v</code> values.
    * 
    */
 	public abstract static class DefaultImmersion implements Immersion {
