@@ -20,7 +20,7 @@ import de.jreality.scene.data.IntArrayArray;
  * <p>
  * The first step is that a copy of the surface is created by moving the original vertices 
  * along the vertex normal direction until they are a distance <i>thickness</i> from the original vertices.
- * For convenience, call the origina surface the bottom surface and this new surface the top surface.
+ * For convenience, call the original surface the bottom surface and this new surface the top surface.
  * <p>
  * The second step is to find all edges which only appear once in the combinatorics of the indexed face set.
  * These edges are assumed to be boundary edges; to each such edge a new quadrilateral is created which joins
