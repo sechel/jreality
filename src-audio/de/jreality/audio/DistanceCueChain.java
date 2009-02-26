@@ -5,8 +5,8 @@ import java.util.List;
 
 /**
  * 
- * An implementation of DistanceCue that holds a chain of distance cues, e.g., low-pass filtering and
- * attenuation, that are applied successively.  The chain [f_1, f_2, ..., f_n](v, r) evaluates to
+ * An implementation of DistanceCue that holds a chain of distance cues that are applied successively,
+ * e.g., low-pass filtering and attenuation, .  The chain [f_1, f_2, ..., f_n](v, r) evaluates to
  * fn(... f_2(f_1(v, r), r) ..., r).
  * 
  * @author brinkman
