@@ -162,6 +162,9 @@ public class DefaultPolygonShader extends PolygonShader {
                 v[Polygon.SX] += vertexData[Polygon.SX];
                 v[Polygon.SY] += vertexData[Polygon.SY];
                 v[Polygon.SZ] += vertexData[Polygon.SZ];
+                v[Polygon.WX] += vertexData[Polygon.WX];
+                v[Polygon.WY] += vertexData[Polygon.WY];
+                v[Polygon.WZ] += vertexData[Polygon.WZ];
                 v[Polygon.R] += vertexData[Polygon.R];
                 v[Polygon.G] += vertexData[Polygon.G];
                 v[Polygon.B] += vertexData[Polygon.B];
@@ -170,6 +173,8 @@ public class DefaultPolygonShader extends PolygonShader {
             v[Polygon.SX] /=n;
             v[Polygon.SY] /=n;
             v[Polygon.SZ] /=n;
+            v[Polygon.SW] =1;
+            v[Polygon.WW] =1;
             v[Polygon.R ] /=n;
             v[Polygon.G ] /=n;
             v[Polygon.B ] /=n;
