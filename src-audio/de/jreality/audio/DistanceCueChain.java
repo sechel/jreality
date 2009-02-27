@@ -16,6 +16,7 @@ public final class DistanceCueChain implements DistanceCue {
 
 	private final List<DistanceCue> cues = new ArrayList<DistanceCue>();
 	
+	
 	private DistanceCueChain() {
 		// do nothing
 	}
@@ -51,6 +52,15 @@ public final class DistanceCueChain implements DistanceCue {
 		for(DistanceCue cue: cues) {
 			cue.reset();
 		}
+	}
+	
+	public boolean hasMore() {
+		for(DistanceCue cue: cues) {
+			if (cue.hasMore()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private boolean add(DistanceCue cue) {

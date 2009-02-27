@@ -114,7 +114,7 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 	
-		if (frameCount==0 && currentFrame==null) {
+		if (frameCount==0 && currentFrame==null && !distanceCue.hasMore()) {
 			reset();
 			return false;  // nothing left to render
 		} else {

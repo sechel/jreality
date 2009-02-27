@@ -11,6 +11,7 @@ public interface DistanceCue {
 
 	public static abstract class Attenuation implements DistanceCue {
 		public void setSampleRate(float sr) {}
+		public boolean hasMore() { return false; }
 		public void reset() {}
 	}
 	
@@ -34,7 +35,21 @@ public interface DistanceCue {
 	
 	public static final DistanceCue DEFAULT_CUE = new CONSTANT();
 	
+	
 	void setSampleRate(float sr);
+	
+	/**
+	 * @return true if there will be audible output in the future, even if all future inputs are zero
+	 */
+	boolean hasMore();
+	
+	/**
+	 * Computes the next value, based on the new sample v and the distance r
+	 * @param v sample
+	 * @param r distance from observer when sample is heard
+	 * @return updated value based on v and r
+	 */
 	float nextValue(float v, float r);
+	
 	void reset();
 }
