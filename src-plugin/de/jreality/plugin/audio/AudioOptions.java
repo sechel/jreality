@@ -2,17 +2,18 @@ package de.jreality.plugin.audio;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import de.jreality.audio.DistanceCue;
 import de.jreality.audio.LowPassFilter;
@@ -39,24 +40,19 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
  */
 public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListener {
 
-	private Class<? extends DistanceCue> distanceCue = DistanceCue.DEFAULT_CUE.getClass();
+	private int[] selection = new int[0];
 	private float speedOfSound = SoundPath.DEFAULT_SPEED_OF_SOUND;
 	private float gain = SoundPath.DEFAULT_GAIN;
 	
-	private Map<String, Class<? extends DistanceCue>> distanceCues = new HashMap<String, Class<? extends DistanceCue>>();
-	private Map<Class<? extends DistanceCue>, String> distanceCueLabels = new HashMap<Class<? extends DistanceCue>, String>();
+	private String[] cueLabels = {"constant", "low pass", "linear", "exponential"};
+	private Class[] cueTypes = {DistanceCue.CONSTANT.class, LowPassFilter.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class};
 	
 	private Appearance rootAppearance;
 	
 	private JSliderVR gainWidget, speedWidget;
-	private JComboBox distanceCueWidget;
+	private JList distanceCueWidget;
 	
 	public AudioOptions() {
-		distanceCues.put("constant", DistanceCue.CONSTANT.class);
-		distanceCues.put("linear", DistanceCue.LINEAR.class);
-		distanceCues.put("exponential", DistanceCue.EXPONENTIAL.class);
-		distanceCues.put("low pass", LowPassFilter.class);
-		
 		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -65,7 +61,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		gbc.gridy = 0;
 		shrinkPanel.add(new JLabel("Distance cue"), gbc);
 		gbc.gridx = 1;
-		shrinkPanel.add(distanceCueWidget = new JComboBox(), gbc);
+		shrinkPanel.add(distanceCueWidget = new JList(cueLabels), gbc);
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		shrinkPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
@@ -87,16 +83,13 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		gainWidget.setPaintLabels(true);
 		gainWidget.setPaintTrack(true);
 		
-		for(String s: distanceCues.keySet()) {
-			distanceCueWidget.addItem(s);
-			distanceCueLabels.put(distanceCues.get(s), s);
-		}
-		
-		distanceCueWidget.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				distanceCue = distanceCues.get(distanceCueWidget.getSelectedItem());
+		distanceCueWidget.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				selection = distanceCueWidget.getSelectedIndices();
 				List<Class<? extends DistanceCue>> list = new ArrayList<Class<? extends DistanceCue>>();
-				list.add(distanceCue);
+				for(int i: selection) {
+					list.add((Class<? extends DistanceCue>) cueTypes[i]);
+				}
 				rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, list);
 			}
 		});
@@ -116,7 +109,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	}
 
 	private void updateDistanceCue() {
-		distanceCueWidget.setSelectedItem(distanceCueLabels.get(distanceCue));
+		distanceCueWidget.setSelectedIndices(selection);
 	}
 	
 	private void updateSpeed() {
@@ -130,8 +123,8 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	public void appearanceChanged(AppearanceEvent ev) {
 		Appearance appearance = (Appearance) ev.getSourceNode();
 		
-		List<Class<? extends DistanceCue>> list = (List<Class<? extends DistanceCue>>) appearance.getAttribute(SoundPath.DISTANCE_CUE_KEY);
-		Class<? extends DistanceCue> newDistanceCue = (list!=null && !list.isEmpty()) ? list.get(0) : DistanceCue.DEFAULT_CUE.getClass();
+//		List<Class<? extends DistanceCue>> list = (List<Class<? extends DistanceCue>>) appearance.getAttribute(SoundPath.DISTANCE_CUE_KEY);
+//		Class<? extends DistanceCue> newDistanceCue = (list!=null && !list.isEmpty()) ? list.get(0) : DistanceCue.DEFAULT_CUE.getClass();
 		float newSpeedOfSound = ((Float) appearance.getAttribute(SoundPath.SPEED_OF_SOUND_KEY)).floatValue();
 		float newGain = ((Float) appearance.getAttribute(SoundPath.VOLUME_GAIN_KEY)).floatValue();
 		
@@ -143,10 +136,10 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 			speedOfSound = newSpeedOfSound;
 			updateSpeed();
 		}
-		if (distanceCue!=newDistanceCue) {
-			distanceCue = newDistanceCue;
-			updateDistanceCue();
-		}
+//		if (distanceCue!=newDistanceCue) {
+//			distanceCue = newDistanceCue;
+//			updateDistanceCue();
+//		}
 	}
 
 	@Override
@@ -173,7 +166,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 			root.setAppearance(rootAppearance = new Appearance());
 		}
 		
-		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, distanceCue);
+//		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, selection);
 		rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
 		rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
 		
@@ -188,8 +181,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
 		
-		String label = c.getProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, "linear");
-		distanceCue = distanceCues.get(label);
+//		selection = c.getProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, new int[0]);
 		speedOfSound = c.getProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, SoundPath.DEFAULT_SPEED_OF_SOUND);
 		gain = c.getProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, SoundPath.DEFAULT_GAIN);
 	}
@@ -198,7 +190,7 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		
-		c.storeProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, distanceCueLabels.get(distanceCue));
+//		c.storeProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, selection);
 		c.storeProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
 		c.storeProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, gain);
 	}
