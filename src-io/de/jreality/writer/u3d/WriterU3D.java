@@ -1287,6 +1287,7 @@ public class WriterU3D implements SceneWriter {
 	protected void writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
 		int dataSize = (int)Math.ceil(b.getDataSize() / 4.0); // include padding
 		int metaDataSize = (int)Math.ceil(b.getMetaDataSize() / 4.0); // include padding
+/*		
 		int blockLength = (int)(12 + 4 * (dataSize + metaDataSize));
 		if (buffer.capacity() < blockLength) {
 			buffer = ByteBuffer.allocate(blockLength);
@@ -1305,6 +1306,43 @@ public class WriterU3D implements SceneWriter {
 			buffer.putInt((int)b.getMetaData()[i]);
 		buffer.rewind();
 		o.write(buffer);
+*/
+		
+///*	
+	 	ByteBuffer intBuffer = ByteBuffer.allocate(4);
+		intBuffer.order(LITTLE_ENDIAN);
+		intBuffer.position(0);
+		buffer.limit(4);
+		
+		intBuffer.clear();
+		intBuffer.putInt((int)b.getBlockType());
+		intBuffer.rewind();
+		o.write(intBuffer);
+
+		intBuffer.clear();
+		intBuffer.putInt((int)b.getDataSize());
+		intBuffer.rewind();
+		o.write(intBuffer);
+		
+		intBuffer.clear();
+		intBuffer.putInt((int)b.getMetaDataSize());
+		intBuffer.rewind();
+		o.write(intBuffer);
+		
+		for (int i = 0; i < dataSize; i++) {
+			intBuffer.clear();
+			intBuffer.putInt((int)b.getData()[i]);
+			intBuffer.rewind();
+			o.write(intBuffer);
+		}
+		
+		for (int i = 0; i < metaDataSize; i++) {
+			intBuffer.clear();
+			intBuffer.putInt((int)b.getMetaData()[i]);
+			intBuffer.rewind();
+			o.write(intBuffer);	
+		}
+//*/
 	}
 	
 	
