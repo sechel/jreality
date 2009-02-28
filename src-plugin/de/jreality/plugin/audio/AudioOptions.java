@@ -3,13 +3,10 @@ package de.jreality.plugin.audio;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JScrollPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -22,8 +19,6 @@ import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.event.AppearanceEvent;
-import de.jreality.scene.event.AppearanceListener;
 import de.jreality.ui.JSliderVR;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -35,12 +30,14 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
  * 
  * Plugin for setting basic audio parameters such as speed of sound and such
  * 
+ * TODO: Implement AppearanceListener to update widgets in line with appearance changes.
+ * 
  * @author brinkman
  *
  */
-public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListener {
+public class AudioOptions extends ShrinkPanelPlugin {
 
-	private int[] selection = new int[0];
+	private int[] selectedIndices = new int[0];
 	private float speedOfSound = SoundPath.DEFAULT_SPEED_OF_SOUND;
 	private float gain = SoundPath.DEFAULT_GAIN;
 	
@@ -85,61 +82,50 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		
 		distanceCueWidget.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				selection = distanceCueWidget.getSelectedIndices();
-				List<Class<? extends DistanceCue>> list = new ArrayList<Class<? extends DistanceCue>>();
-				for(int i: selection) {
-					list.add((Class<? extends DistanceCue>) cueTypes[i]);
-				}
-				rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, list);
+				selectedIndices = distanceCueWidget.getSelectedIndices();
+				setDistanceCueAttribute();
 			}
 		});
-		
 		speedWidget.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				speedOfSound = speedWidget.getValue();
-				rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
+				setSpeedAttribute();
 			}
 		});
 		gainWidget.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				gain = fromDecibels(gainWidget.getValue());
-				rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
+				setGainAttribute();
 			}
 		});
 	}
 
-	private void updateDistanceCue() {
-		distanceCueWidget.setSelectedIndices(selection);
+	private void setDistanceCueAttribute() {
+		List<Class<? extends DistanceCue>> list = new ArrayList<Class<? extends DistanceCue>>();
+		for(int i: selectedIndices) {
+			list.add((Class<? extends DistanceCue>) cueTypes[i]);
+		}
+		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, list);
+	}
+
+	private void setSpeedAttribute() {
+		rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
+	}
+
+	private void setGainAttribute() {
+		rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
 	}
 	
-	private void updateSpeed() {
+	private void updateCueWidget() {
+		distanceCueWidget.setSelectedIndices(selectedIndices);
+	}
+	
+	private void updateSpeedWidget() {
 		speedWidget.setValue((int) speedOfSound);
 	}
 	
-	private void updateGain() {
+	private void updateGainWidget() {
 		gainWidget.setValue((int) toDecibels(gain));
-	}
-	
-	public void appearanceChanged(AppearanceEvent ev) {
-		Appearance appearance = (Appearance) ev.getSourceNode();
-		
-//		List<Class<? extends DistanceCue>> list = (List<Class<? extends DistanceCue>>) appearance.getAttribute(SoundPath.DISTANCE_CUE_KEY);
-//		Class<? extends DistanceCue> newDistanceCue = (list!=null && !list.isEmpty()) ? list.get(0) : DistanceCue.DEFAULT_CUE.getClass();
-		float newSpeedOfSound = ((Float) appearance.getAttribute(SoundPath.SPEED_OF_SOUND_KEY)).floatValue();
-		float newGain = ((Float) appearance.getAttribute(SoundPath.VOLUME_GAIN_KEY)).floatValue();
-		
-		if (gain!=newGain) {
-			gain = newGain;
-			updateGain();
-		}
-		if (speedOfSound!=newSpeedOfSound) {
-			speedOfSound = newSpeedOfSound;
-			updateSpeed();
-		}
-//		if (distanceCue!=newDistanceCue) {
-//			distanceCue = newDistanceCue;
-//			updateDistanceCue();
-//		}
 	}
 
 	@Override
@@ -165,32 +151,30 @@ public class AudioOptions extends ShrinkPanelPlugin implements AppearanceListene
 		if (rootAppearance==null) {
 			root.setAppearance(rootAppearance = new Appearance());
 		}
-		
-//		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, selection);
-		rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
-		rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
-		
-		updateDistanceCue();
-		updateSpeed();
-		updateGain();
-		
-		rootAppearance.addAppearanceListener(this);
+	
+		updateCueWidget();
+		updateSpeedWidget();
+		updateGainWidget();
 	}
 
 	@Override
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
 		
-//		selection = c.getProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, new int[0]);
-		speedOfSound = c.getProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, SoundPath.DEFAULT_SPEED_OF_SOUND);
-		gain = c.getProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, SoundPath.DEFAULT_GAIN);
+		try {
+			selectedIndices = c.getProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, new int[0]);
+			speedOfSound = c.getProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, SoundPath.DEFAULT_SPEED_OF_SOUND);
+			gain = c.getProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, SoundPath.DEFAULT_GAIN);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		
-//		c.storeProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, selection);
+		c.storeProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, selectedIndices);
 		c.storeProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
 		c.storeProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, gain);
 	}
