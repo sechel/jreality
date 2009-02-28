@@ -3,6 +3,7 @@ package de.jreality.plugin.audio;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -105,7 +106,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		for(int i: selectedIndices) {
 			list.add((Class<? extends DistanceCue>) cueTypes[i]);
 		}
-		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, list);
+		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, Collections.unmodifiableList(list));
 	}
 
 	private void setSpeedAttribute() {
