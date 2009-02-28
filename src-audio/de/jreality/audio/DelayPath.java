@@ -70,7 +70,7 @@ public class DelayPath implements SoundPath {
 		updateParameters();
 		
 		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(DISTANCE_CUE_KEY, null, List.class);
-		if (newChain!=oldChain) {
+		if (!newChain.equals(oldChain)) {
 			try {
 				oldChain = newChain;
 				DistanceCue c = DistanceCueChain.create(newChain);
