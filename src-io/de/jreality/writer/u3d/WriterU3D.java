@@ -1287,7 +1287,7 @@ public class WriterU3D implements SceneWriter {
 	protected void writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
 		int dataSize = (int)Math.ceil(b.getDataSize() / 4.0); // include padding
 		int metaDataSize = (int)Math.ceil(b.getMetaDataSize() / 4.0); // include padding
-/*		
+///*		
 		int blockLength = (int)(12 + 4 * (dataSize + metaDataSize));
 		if (buffer.capacity() < blockLength) {
 			buffer = ByteBuffer.allocate(blockLength);
@@ -1306,9 +1306,9 @@ public class WriterU3D implements SceneWriter {
 			buffer.putInt((int)b.getMetaData()[i]);
 		buffer.rewind();
 		o.write(buffer);
-*/
+//*/
 		
-///*	
+/*	
 	 	ByteBuffer intBuffer = ByteBuffer.allocate(4);
 		intBuffer.order(LITTLE_ENDIAN);
 		intBuffer.position(0);
@@ -1342,7 +1342,7 @@ public class WriterU3D implements SceneWriter {
 			intBuffer.rewind();
 			o.write(intBuffer);	
 		}
-//*/
+*/
 	}
 	
 	
