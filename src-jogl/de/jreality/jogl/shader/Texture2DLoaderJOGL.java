@@ -287,13 +287,17 @@ public class Texture2DLoaderJOGL {
 	        	else {
 	        		System.err.println("Building mipmaps");
 	                GLU glu = new GLU();
-	                glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
-	              		  GL.GL_COMPRESSED_RGBA, 
-	              		  width,
-	              		  height,
-	              		  srcPixelFormat, 
-	              		  GL.GL_UNSIGNED_BYTE, 
-	              		  ByteBuffer.wrap(data));
+	                try {
+	                	glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
+	                			GL.GL_COMPRESSED_RGBA, 
+	                			width,
+	                			height,
+	                			srcPixelFormat, 
+	                			GL.GL_UNSIGNED_BYTE, 
+	                			ByteBuffer.wrap(data));
+	                } catch (Exception e) {
+	                	e.printStackTrace();
+	                }
 	        	}
 	        } else {
 	          gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
