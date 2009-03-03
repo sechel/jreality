@@ -147,11 +147,11 @@ public class DelayPath implements SoundPath {
 				}
 				previousSample = currentSample;
 				float newSample = (currentFrame!=null) ? currentFrame[currentIndex] : 0f;
-				currentSample = distanceCue.nextValue(newSample, distance);
+				currentSample = distanceCue.nextValue(newSample*gain, distance);
 			}
 
 			float v = previousSample+fractionalTime*(currentSample-previousSample);
-			enc.encodeSample(v*gain, j, xCurrent, yCurrent, zCurrent);
+			enc.encodeSample(v, j, xCurrent, yCurrent, zCurrent);
 
 			xCurrent = xFilter.nextValue(xTarget);
 			yCurrent = yFilter.nextValue(yTarget);
