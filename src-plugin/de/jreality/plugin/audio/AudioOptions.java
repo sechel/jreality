@@ -13,6 +13,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.DistanceCue;
 import de.jreality.audio.LowPassFilter;
 import de.jreality.audio.SoundPath;
@@ -39,8 +40,8 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 public class AudioOptions extends ShrinkPanelPlugin {
 
 	private int[] selectedIndices = new int[0];
-	private float speedOfSound = SoundPath.DEFAULT_SPEED_OF_SOUND;
-	private float gain = SoundPath.DEFAULT_GAIN;
+	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
+	private float gain = AudioAttributes.DEFAULT_GAIN;
 	
 	private String[] cueLabels = {"constant", "low pass", "linear", "exponential"};
 	private Class[] cueTypes = {DistanceCue.CONSTANT.class, LowPassFilter.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class};
@@ -106,15 +107,15 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		for(int i: selectedIndices) {
 			list.add((Class<? extends DistanceCue>) cueTypes[i]);
 		}
-		rootAppearance.setAttribute(SoundPath.DISTANCE_CUE_KEY, Collections.unmodifiableList(list));
+		rootAppearance.setAttribute(AudioAttributes.DISTANCE_CUE_KEY, Collections.unmodifiableList(list));
 	}
 
 	private void setSpeedAttribute() {
-		rootAppearance.setAttribute(SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
+		rootAppearance.setAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
 	}
 
 	private void setGainAttribute() {
-		rootAppearance.setAttribute(SoundPath.VOLUME_GAIN_KEY, gain);
+		rootAppearance.setAttribute(AudioAttributes.VOLUME_GAIN_KEY, gain);
 	}
 	
 	private void updateCueWidget() {
@@ -163,9 +164,9 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		super.restoreStates(c);
 		
 		try {
-			selectedIndices = c.getProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, new int[0]);
-			speedOfSound = c.getProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, SoundPath.DEFAULT_SPEED_OF_SOUND);
-			gain = c.getProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, SoundPath.DEFAULT_GAIN);
+			selectedIndices = c.getProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, new int[0]);
+			speedOfSound = c.getProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
+			gain = c.getProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -175,9 +176,9 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		
-		c.storeProperty(getClass(), SoundPath.DISTANCE_CUE_KEY, selectedIndices);
-		c.storeProperty(getClass(), SoundPath.SPEED_OF_SOUND_KEY, speedOfSound);
-		c.storeProperty(getClass(), SoundPath.VOLUME_GAIN_KEY, gain);
+		c.storeProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, selectedIndices);
+		c.storeProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
+		c.storeProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, gain);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package de.jreality.audio;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -27,13 +28,15 @@ import de.jreality.shader.EffectiveAppearance;
  * and provides an audio processing callback.
  *
  */
-public class AudioBackend extends UpToDateSceneProxyBuilder {
-
+public class AudioBackend extends UpToDateSceneProxyBuilder implements AppearanceListener {
+	
 	private int sampleRate;
 	private SceneGraphPath microphonePath;
 	private Matrix micInvMatrix = new Matrix();
+	private float[] directionlessBuffer = null;
+	private SampleProcessor directionlessProcessor = null;
 	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
-	
+
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
 		this.microphonePath = microphonePath;
@@ -53,14 +56,35 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			}
 		});
 		super.createProxyTree();
+
+		// TODO: set directionlessProcessor from root appearance
 	}
 	
-	public void processFrame(SoundEncoder enc, int framesize) {
+	public void appearanceChanged(AppearanceEvent ev) {
+		// TODO: update directionlessProcessor from root appearance
+	}
+
+	public void processFrame(SoundEncoder enc, int frameSize) {
+		if (directionlessProcessor!=null) {
+			if (directionlessBuffer==null || directionlessBuffer.length<frameSize) {
+				directionlessBuffer = new float[frameSize];
+			} else {
+				Arrays.fill(directionlessBuffer, 0);
+			}
+		}
+		
 		microphonePath.getInverseMatrix(micInvMatrix.getArray());
 
-		enc.startFrame(framesize);
+		enc.startFrame(frameSize);
 		for (AudioTreeNode node : audioSources) {
-			node.processFrame(enc, framesize);
+			node.processFrame(enc, frameSize, directionlessBuffer);
+		}
+		if (directionlessProcessor!=null) {
+			directionlessProcessor.write(directionlessBuffer, 0, frameSize);
+			directionlessProcessor.read(directionlessBuffer, 0, frameSize);
+			for(int i=0; i<frameSize; i++) {
+				enc.encodeSample(directionlessBuffer[i], i);
+			}
 		}
 		enc.finishFrame();
 	}
@@ -71,23 +95,22 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 		private Matrix curPos = new Matrix();
 		private SceneGraphPath path;
 		private SceneGraphPathObserver observer = new SceneGraphPathObserver();
-		
+
 		private boolean nodeActive = false;
 		private boolean pathActive = false;
 
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
-//			soundPath = new InstantaneousPath(new AudioReader(audio), sampleRate);
 			soundPath = new DelayPath(new AudioReader(audio), sampleRate);
-			
+
 			audio.addAudioListener(this);
 			observer.addAppearanceListener(this);
-			
+
 			audioChanged(null);
 		}
-		
-		void processFrame(SoundEncoder enc, int frameSize) {
+
+		void processFrame(SoundEncoder enc, int frameSize, float[] directionlessBuffer) {
 			if (nodeActive || pathActive) {
 				if (path==null) {
 					path = toPath();
@@ -95,7 +118,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 					observer.setPath(path);
 				}
 				path.getMatrix(curPos.getArray());
-				pathActive = soundPath.processFrame(enc, frameSize, curPos, micInvMatrix);
+				pathActive = soundPath.processFrame(enc, frameSize, curPos, micInvMatrix, directionlessBuffer);
 			}
 		}
 
@@ -109,7 +132,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder {
 			}
 		}
 	}
-	
+
 	private class AudioSourceEntity extends SceneGraphNodeEntity implements AudioListener {
 
 		protected AudioSourceEntity(SceneGraphNode node) {

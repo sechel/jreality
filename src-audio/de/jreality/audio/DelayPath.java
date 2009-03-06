@@ -19,9 +19,9 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class DelayPath implements SoundPath {
 	
-	private float gain = DEFAULT_GAIN;
-	private float speedOfSound = DEFAULT_SPEED_OF_SOUND;
-	private DistanceCue distanceCue = DEFAULT_DISTANCE_CUE;
+	private float gain = AudioAttributes.DEFAULT_GAIN;
+	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
+	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DISTANCE_CUE;
 	private static final float UPDATE_CUTOFF = 6f; // play with this parameter if audio gets choppy
 	
 	private SampleReader reader;
@@ -65,11 +65,11 @@ public class DelayPath implements SoundPath {
 	private List<Class<? extends DistanceCue>> oldChain = null;
 	
 	public synchronized void setProperties(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
-		speedOfSound = eapp.getAttribute(SPEED_OF_SOUND_KEY, DEFAULT_SPEED_OF_SOUND);
+		gain = eapp.getAttribute(AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
+		speedOfSound = eapp.getAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 		updateParameters();
 		
-		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(DISTANCE_CUE_KEY, null, List.class);
+		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(AudioAttributes.DISTANCE_CUE_KEY, null, List.class);
 		if (!newChain.equals(oldChain)) {
 			try {
 				oldChain = newChain;
@@ -90,7 +90,7 @@ public class DelayPath implements SoundPath {
 	
 	private float[] newFrame = null;
 	
-	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos) {
+	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos, float[] directionlessBuffer) {
 		if (newFrame==null || newFrame.length<frameSize) {
 			newFrame = new float[frameSize];
 		}
@@ -109,7 +109,7 @@ public class DelayPath implements SoundPath {
 		updateTarget();
 		
 		if (currentLength>0) {
-			encodeFrame(enc, frameSize);
+			encodeFrame(enc, frameSize, directionlessBuffer);
 		} else {
 			initFields();
 		}
@@ -130,7 +130,7 @@ public class DelayPath implements SoundPath {
 		zCurrent = zFilter.initialize(zTarget);
 	}
 	
-	private void encodeFrame(SoundEncoder enc, int frameSize) {
+	private void encodeFrame(SoundEncoder enc, int frameSize, float[] directionlessBuffer) {
 		for(int j=0; j<frameSize; j++) {
 			float distance = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
 			float time = (relativeTime++)-gamma*distance;
@@ -152,6 +152,8 @@ public class DelayPath implements SoundPath {
 
 			float v = previousSample+fractionalTime*(currentSample-previousSample);
 			enc.encodeSample(v, j, xCurrent, yCurrent, zCurrent);
+			
+			// TODO: handle directionless samples if directionlessBuffer is not null
 
 			xCurrent = xFilter.nextValue(xTarget);
 			yCurrent = yFilter.nextValue(yTarget);

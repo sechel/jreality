@@ -15,8 +15,8 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class InstantaneousPath implements SoundPath {
 
-	private float gain = DEFAULT_GAIN;
-	private DistanceCue distanceCue = DEFAULT_DISTANCE_CUE;
+	private float gain = AudioAttributes.DEFAULT_GAIN;
+	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DISTANCE_CUE;
 	
 	private int sampleRate;
 	private SampleReader reader;
@@ -30,7 +30,7 @@ public class InstantaneousPath implements SoundPath {
 		this.reader = ConvertingReader.createReader(reader, sampleRate);
 	}
 	
-	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix) {
+	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix, float[] directionlessBuffer) {
 		if (samples==null || samples.length<frameSize) {
 			samples = new float[frameSize];
 		}
@@ -71,8 +71,8 @@ public class InstantaneousPath implements SoundPath {
 	}	
 
 	public void setProperties(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute(VOLUME_GAIN_KEY, DEFAULT_GAIN);
-		List<Class<? extends DistanceCue>> cueChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(DISTANCE_CUE_KEY, null, List.class);
+		gain = eapp.getAttribute(AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
+		List<Class<? extends DistanceCue>> cueChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(AudioAttributes.DISTANCE_CUE_KEY, null, List.class);
 		try {
 			DistanceCue c = DistanceCueChain.create(cueChain);
 			c.setSampleRate(sampleRate);
