@@ -8,5 +8,5 @@ public interface AudioAttributes {
 	
 	public static final float DEFAULT_GAIN = 1f;
 	public static final float DEFAULT_SPEED_OF_SOUND = 332f;
-	public static DistanceCue DEFAULT_DISTANCE_CUE = DistanceCue.DEFAULT_CUE;
+	public static final DistanceCue DEFAULT_DISTANCE_CUE = DistanceCue.DEFAULT_CUE;
 }
