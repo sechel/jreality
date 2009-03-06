@@ -99,7 +99,10 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 	}
 
 	public void encodeSample(float v, int idx) {
-		// TODO: figure out how to encode directionless sound in VBAP
+		// !!! TODO: this _might_ be correct:
+		for (int j=0; j<channels; j++) {
+			buf[idx*channels+channelIDs[j]] += speakerDistances[j]*v;
+		}
 	}
 	
 	private boolean solve(float[] g, float[] m, float x, float y) {
