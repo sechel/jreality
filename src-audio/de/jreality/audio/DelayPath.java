@@ -216,5 +216,6 @@ public class DelayPath implements SoundPath {
 		previousSample = 0;
 		currentSample = 0f;
 		directedDistanceCue.reset();
+		generalDistanceCue.reset();
 	}
 }
