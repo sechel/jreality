@@ -16,7 +16,7 @@ import de.jreality.shader.EffectiveAppearance;
 public class InstantaneousPath implements SoundPath {
 
 	private float gain = AudioAttributes.DEFAULT_GAIN;
-	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DISTANCE_CUE;
+	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DIRECTED_CUE;
 	
 	private int sampleRate;
 	private SampleReader reader;
