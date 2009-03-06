@@ -78,8 +78,8 @@ public class JassWrapper implements SampleProcessor {
 		processor.addSource(source);
 	}
 
-	public void processInput(float[] buf, int frameSize) {
-		inBuf.write(buf, 0, frameSize);
+	public void write(float[] buf, int initialIndex, int samples) {
+		inBuf.write(buf, initialIndex, samples);
 	}
 
 	public void clear() {
@@ -119,7 +119,7 @@ public class JassWrapper implements SampleProcessor {
 		float[] inBuf = new float[] {0, 0, 0, 0, 1, 1, 1, 1};
 		float[] outBuf = new float[8];
 		while (true) {
-			jw.processInput(inBuf, 8);
+			jw.write(inBuf, 0, 8);
 			jw.read(outBuf, 0, 8);
 			System.out.println(Arrays.toString(outBuf));
 			try {
