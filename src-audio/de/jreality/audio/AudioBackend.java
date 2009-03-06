@@ -69,7 +69,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 			if (directionlessBuffer==null || directionlessBuffer.length<frameSize) {
 				directionlessBuffer = new float[frameSize];
 			} else {
-				Arrays.fill(directionlessBuffer, 0);
+				Arrays.fill(directionlessBuffer, 0, frameSize, 0f);
 			}
 		}
 		
