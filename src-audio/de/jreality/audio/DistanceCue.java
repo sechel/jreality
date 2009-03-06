@@ -33,8 +33,6 @@ public interface DistanceCue {
 		}
 	};
 	
-	public static final DistanceCue DEFAULT_CUE = new CONSTANT();
-	
 	
 	void setSampleRate(float sr);
 	

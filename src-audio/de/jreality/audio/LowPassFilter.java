@@ -12,7 +12,7 @@ public class LowPassFilter implements DistanceCue {
 	
 	private static final float threshold = 1e-16f; // dynamic range between hearing threshold and instant perforation of eardrum
 	private float sampleRate;
-	private float cutOff;
+	private float cutOff = 0f;
 	private float alpha = 1f;
 	private float value = 0f;
 	

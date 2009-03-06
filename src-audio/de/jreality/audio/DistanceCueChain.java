@@ -23,7 +23,7 @@ public final class DistanceCueChain implements DistanceCue {
 
 	public static DistanceCue create(List<Class<? extends DistanceCue>> list) throws InstantiationException, IllegalAccessException {
 		if (list==null || list.isEmpty()) {
-			return DistanceCue.DEFAULT_CUE;
+			return new DistanceCue.CONSTANT();
 		} else if (list.size()==1) {
 			return list.get(0).newInstance();
 		} else {
