@@ -1,4 +1,4 @@
-package de.jreality.audio;
+package de.jreality.scene.data;
 
 /**
  * Sample reader interface.  Sample readers are intended to be chained, e.g., going from an AudioSource to

@@ -2,6 +2,7 @@ package de.jreality.scene;
 
 
 import de.jreality.scene.data.RingBuffer;
+import de.jreality.scene.data.SampleReader;
 import de.jreality.scene.event.AudioEvent;
 import de.jreality.scene.event.AudioEventMulticaster;
 import de.jreality.scene.event.AudioListener;
@@ -34,11 +35,25 @@ public abstract class AudioSource extends SceneGraphNode {
 	}	
  
 	public int getSampleRate() {
-		return sampleRate;  // need sync?
+		return sampleRate;
 	}
 	
-	public RingBuffer.Reader createReader() {
-		return ringBuffer.createReader();
+	public SampleReader createReader() {
+		return new SampleReader() {
+			private RingBuffer.Reader reader = ringBuffer.createReader();
+			
+			public void clear() {
+				reader.clear();
+			}
+
+			public int getSampleRate() {
+				return AudioSource.this.getSampleRate();
+			}
+
+			public int read(float[] buffer, int initialIndex, int nSamples) {
+				return readSamples(reader, buffer, initialIndex, nSamples);
+			}
+		};
 	}
 	
 	public State getState() {
@@ -71,8 +86,7 @@ public abstract class AudioSource extends SceneGraphNode {
 		}
 	}
     
-	public int readSamples(RingBuffer.Reader reader, float buffer[], int initialIndex, int nSamples) {
-		if (!reader.checkBuffer(ringBuffer)) throw new IllegalArgumentException("reader does not match ringbuffer!");
+	protected int readSamples(RingBuffer.Reader reader, float buffer[], int initialIndex, int nSamples) {
 		startReader();
 		try {
 			if (state != State.RUNNING) {

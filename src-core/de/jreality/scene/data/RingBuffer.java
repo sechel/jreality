@@ -49,10 +49,6 @@ public class RingBuffer {
 			}
 			return n;
 		}
-		
-		public boolean checkBuffer(RingBuffer buf) {
-			return RingBuffer.this == buf;
-		}
 	}
 	
 	public RingBuffer(int size) {

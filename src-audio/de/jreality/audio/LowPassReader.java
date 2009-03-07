@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import de.jreality.scene.data.SampleReader;
+
 /**
  * 
  * Simple reader with a low-pass filter, mostly as a proof of concept.

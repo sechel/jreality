@@ -11,11 +11,9 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.Mixer.Info;
 import javax.swing.JFrame;
 
-import de.jreality.audio.AudioReader;
-import de.jreality.audio.SampleReader;
-import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.audio.javasound.JavaSoundUtility;
 import de.jreality.scene.AudioSource;
+import de.jreality.scene.data.SampleReader;
 import de.jtem.beans.InspectorPanel;
 
 public class Test51 {
@@ -99,7 +97,7 @@ public class Test51 {
 		
 		float[] fbuf = new float[1024];
 		
-		SampleReader sr = ConvertingReader.createReader(new AudioReader(src), 44100);
+		SampleReader sr = ConvertingReader.createReader(src.createReader(), 44100);
 		
 		while (true) {
 			sr.read(fbuf, 0, 1024);

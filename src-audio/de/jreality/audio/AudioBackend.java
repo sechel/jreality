@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.jreality.math.Matrix;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -32,11 +33,13 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	
 	private int sampleRate;
 	private SceneGraphPath microphonePath;
-	private Matrix micInvMatrix = new Matrix();
+	private Matrix inverseMicrophoneMatrix = new Matrix();
 	private float[] directionlessBuffer = null;
 	private SampleProcessor directionlessProcessor = null;
 	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
-
+	private SceneGraphPathObserver rootAppearanceObserver = new SceneGraphPathObserver();
+	private SceneGraphPath rootAppearancePath = new SceneGraphPath();
+	
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
 		this.microphonePath = microphonePath;
@@ -57,11 +60,21 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		});
 		super.createProxyTree();
 
-		// TODO: set directionlessProcessor from root appearance
+		Appearance rootApp = root.getAppearance();
+		if (rootApp==null) {
+			root.setAppearance(rootApp = new Appearance());
+		}
+		rootAppearancePath.push(root);
+		rootAppearancePath.push(rootApp);
+		rootAppearanceObserver.setPath(rootAppearancePath);
+		
+		appearanceChanged(null);
+		rootAppearanceObserver.addAppearanceListener(this);
 	}
 	
 	public void appearanceChanged(AppearanceEvent ev) {
-		// TODO: update directionlessProcessor from root appearance
+		EffectiveAppearance eapp = EffectiveAppearance.create(rootAppearancePath);
+		// TODO: read directionlessProcessor from Appearance
 	}
 
 	public void processFrame(SoundEncoder enc, int frameSize) {
@@ -73,17 +86,25 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 			}
 		}
 		
-		microphonePath.getInverseMatrix(micInvMatrix.getArray());
+		microphonePath.getInverseMatrix(inverseMicrophoneMatrix.getArray());
 
 		enc.startFrame(frameSize);
 		for (AudioTreeNode node : audioSources) {
-			node.processFrame(enc, frameSize, directionlessBuffer);
+			try {
+				node.processFrame(enc, frameSize, directionlessBuffer);
+			} catch (Exception e) { // keep rendering even if individual sources fail
+				e.printStackTrace();
+			}
 		}
 		if (directionlessProcessor!=null) {
-			directionlessProcessor.write(directionlessBuffer, 0, frameSize);
-			directionlessProcessor.read(directionlessBuffer, 0, frameSize);
-			for(int i=0; i<frameSize; i++) {
-				enc.encodeSample(directionlessBuffer[i], i);
+			try {
+				directionlessProcessor.write(directionlessBuffer, 0, frameSize);
+				directionlessProcessor.read(directionlessBuffer, 0, frameSize);
+				for(int i=0; i<frameSize; i++) {
+					enc.encodeSample(directionlessBuffer[i], i);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		enc.finishFrame();
@@ -102,7 +123,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
-			soundPath = new DelayPath(new AudioReader(audio), sampleRate);
+			soundPath = new DelayPath(audio.createReader(), sampleRate);
 
 			audio.addAudioListener(this);
 			observer.addAppearanceListener(this);
@@ -118,7 +139,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 					observer.setPath(path);
 				}
 				path.getMatrix(curPos.getArray());
-				pathActive = soundPath.processFrame(enc, frameSize, curPos, micInvMatrix, directionlessBuffer);
+				pathActive = soundPath.processFrame(enc, frameSize, curPos, inverseMicrophoneMatrix, directionlessBuffer);
 			}
 		}
 

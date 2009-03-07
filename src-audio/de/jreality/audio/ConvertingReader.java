@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import de.jreality.scene.data.SampleReader;
+
 /**
  * A simple sample rate converter, to be used as a transparent plugin between AudioSource and audio renderer.
  * 

@@ -1,7 +1,6 @@
 package de.jreality.audio;
 
 public interface AudioAttributes {
-	public static final String DIRECTIONLESS_PROCESSOR_KEY = "directionlessProcessor";
 	public static final String SPEED_OF_SOUND_KEY = "speedOfSound";
 	public static final String VOLUME_GAIN_KEY = "volumeGain";
 	public static final String DIRECTIONLESS_GAIN_KEY = "directionlessVolumeGain";

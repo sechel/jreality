@@ -88,7 +88,7 @@ public class JackTest {
 		Input input = Input.getInput("data/nasa.mp3");
 		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
 			@Override
-			public int readSamples(Reader reader, float[] buffer,
+			protected int readSamples(Reader reader, float[] buffer,
 					int initialIndex, int samples) {
 				// TODO Auto-generated method stub
 				int ret = super.readSamples(reader, buffer, initialIndex, samples);

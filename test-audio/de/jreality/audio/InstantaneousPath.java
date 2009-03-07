@@ -3,6 +3,7 @@ package de.jreality.audio;
 import java.util.List;
 
 import de.jreality.math.Matrix;
+import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
 /**

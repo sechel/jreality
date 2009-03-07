@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Queue;
 
 import de.jreality.math.Matrix;
+import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -110,7 +111,7 @@ public class DelayPath implements SoundPath {
 
 	private float[] newFrame = null;
 
-	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix invMicPos, float[] directionlessBuffer) {
+	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix inverseMicMatrix, float[] directionlessBuffer) {
 		if (newFrame==null || newFrame.length<frameSize) {
 			newFrame = new float[frameSize];
 		}
@@ -124,7 +125,7 @@ public class DelayPath implements SoundPath {
 		frameLengths.add(frameSize);
 
 		sourcePositions.add(new Matrix(sourcePos));
-		currentMicPosition = invMicPos;
+		currentMicPosition = inverseMicMatrix;
 
 		updateTarget();
 
@@ -134,7 +135,7 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 
-		if (frameCount==0 && currentFrame==null && !directedDistanceCue.hasMore()) {
+		if (frameCount==0 && currentFrame==null && !directedDistanceCue.hasMore() && !generalDistanceCue.hasMore()) {
 			reset();
 			return false;  // nothing left to render
 		} else {

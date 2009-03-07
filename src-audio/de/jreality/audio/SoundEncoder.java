@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import de.jreality.scene.data.SampleReader;
+
 /**
  * 
  * Sound encoder interface; implementations of this interface are the very last step in the audio
