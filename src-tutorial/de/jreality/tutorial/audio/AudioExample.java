@@ -77,7 +77,6 @@ public class AudioExample {
 		
 		Input wavFile = Input.getInput("sound/zarathustra.wav");
 		final AudioSource source = new CachedAudioInputStreamSource("zarathustra", wavFile, true);
-		source.start();
 		
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);

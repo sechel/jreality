@@ -99,8 +99,8 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		if (directionlessProcessor!=null) {
 			try {
 				directionlessProcessor.write(directionlessBuffer, 0, frameSize);
-				directionlessProcessor.read(directionlessBuffer, 0, frameSize);
-				for(int i=0; i<frameSize; i++) {
+				int nRead = directionlessProcessor.read(directionlessBuffer, 0, frameSize);
+				for(int i=0; i<nRead; i++) {
 					enc.encodeSample(directionlessBuffer[i], i);
 				}
 			} catch (Exception e) {

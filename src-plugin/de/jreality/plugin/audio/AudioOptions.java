@@ -2,10 +2,13 @@ package de.jreality.plugin.audio;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.event.ChangeEvent;
@@ -50,6 +53,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	
 	private JSliderVR gainWidget, speedWidget;
 	private JList distanceCueWidget;
+	private JCheckBox reverbWidget;
 	
 	public AudioOptions() {
 		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
@@ -81,6 +85,12 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		gainWidget.setPaintTicks(true);
 		gainWidget.setPaintLabels(true);
 		gainWidget.setPaintTrack(true);
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		shrinkPanel.add(new JLabel("Reverb"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(reverbWidget = new JCheckBox("active"), gbc);
+		
 		
 		distanceCueWidget.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -98,6 +108,12 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			public void stateChanged(ChangeEvent e) {
 				gain = fromDecibels(gainWidget.getValue());
 				setGainAttribute();
+			}
+		});
+		reverbWidget.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO properly implement reverb properties in appearance
+				System.out.println("reverb active: "+reverbWidget.isSelected());
 			}
 		});
 	}
