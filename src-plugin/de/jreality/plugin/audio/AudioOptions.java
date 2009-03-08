@@ -17,6 +17,8 @@ import javax.swing.event.ListSelectionListener;
 import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.DistanceCue;
 import de.jreality.audio.LowPassFilter;
+import de.jreality.audio.SampleProcessor;
+import de.jreality.audio.jass.JassReverb;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
 import de.jreality.scene.Appearance;
@@ -42,6 +44,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private int[] selectedIndices = new int[0];
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
 	private float gain = AudioAttributes.DEFAULT_GAIN;
+	private float reverbGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private boolean reverbActive = false;
 	
 	private String[] cueLabels = {"constant", "low pass", "linear", "exponential"};
@@ -49,7 +52,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	
 	private Appearance rootAppearance;
 	
-	private JSliderVR gainWidget, speedWidget;
+	private JSliderVR gainWidget, speedWidget, reverbGainWidget;
 	private JList distanceCueWidget;
 	private JCheckBox reverbWidget;
 	
@@ -88,7 +91,16 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		shrinkPanel.add(new JLabel("Reverb"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(reverbWidget = new JCheckBox("active"), gbc);
-		
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		shrinkPanel.add(new JLabel("Reverb gain (dB)"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(reverbGainWidget = new JSliderVR(-60, 30, (int) toDecibels(reverbGain)), gbc);
+		reverbGainWidget.setPreferredSize(new Dimension(20, 50));
+		reverbGainWidget.setMajorTickSpacing(30);
+		reverbGainWidget.setPaintTicks(true);
+		reverbGainWidget.setPaintLabels(true);
+		reverbGainWidget.setPaintTrack(true);
 		
 		distanceCueWidget.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
@@ -111,7 +123,13 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		reverbWidget.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				reverbActive = reverbWidget.isSelected();
-				setReverbAttribute();	
+				setReverbAttribute();
+			}
+		});
+		reverbGainWidget.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				reverbGain = fromDecibels(reverbGainWidget.getValue());
+				setReverbGainAttribute();
 			}
 		});
 	}
@@ -133,7 +151,11 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	}
 	
 	private void setReverbAttribute() {
-		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive);
+		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive ? JassReverb.class : SampleProcessor.class);
+	}
+	
+	private void setReverbGainAttribute() {
+		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_GAIN_KEY, reverbGain);
 	}
 	
 	private void updateCueWidget() {
@@ -152,6 +174,10 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		reverbWidget.setSelected(reverbActive);
 	}
 
+	private void updateReverbGainWidget() {
+		reverbGainWidget.setValue((int) toDecibels(reverbGain));
+	}
+	
 	@Override
 	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
 		return View.class;
@@ -180,6 +206,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		updateSpeedWidget();
 		updateGainWidget();
 		updateReverbWidget();
+		updateReverbGainWidget();
 	}
 
 	@Override
@@ -191,6 +218,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			speedOfSound = c.getProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 			gain = c.getProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
 			reverbActive = c.getProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, false);
+			reverbGain = c.getProperty(getClass(), AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -204,6 +232,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		c.storeProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
 		c.storeProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, gain);
 		c.storeProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive);
+		c.storeProperty(getClass(), AudioAttributes.DIRECTIONLESS_GAIN_KEY, reverbGain);
 	}
 
 	@Override

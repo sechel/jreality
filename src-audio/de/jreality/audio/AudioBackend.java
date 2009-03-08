@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import de.jreality.audio.jass.JassReverb;
 import de.jreality.math.Matrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.AudioSource;
@@ -31,7 +30,7 @@ import de.jreality.shader.EffectiveAppearance;
  *
  */
 public class AudioBackend extends UpToDateSceneProxyBuilder implements AppearanceListener {
-	
+
 	private int sampleRate;
 	private SceneGraphPath microphonePath;
 	private Matrix inverseMicrophoneMatrix = new Matrix();
@@ -40,7 +39,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
 	private SceneGraphPathObserver rootAppearanceObserver = new SceneGraphPathObserver();
 	private SceneGraphPath rootAppearancePath = new SceneGraphPath();
-	
+
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
 		this.microphonePath = microphonePath;
@@ -68,19 +67,24 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		rootAppearancePath.push(root);
 		rootAppearancePath.push(rootApp);
 		rootAppearanceObserver.setPath(rootAppearancePath);
-		
+
 		appearanceChanged(null);
 		rootAppearanceObserver.addAppearanceListener(this);
 	}
-	
+
 	public synchronized void appearanceChanged(AppearanceEvent ev) {
 		EffectiveAppearance eapp = EffectiveAppearance.create(rootAppearancePath);
-		boolean flag = eapp.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, false);
-		if (flag && directionlessProcessor==null) {
-			directionlessProcessor = new JassReverb(); // TODO: implement more flexible mechanism for setting reverb
-			directionlessProcessor.setSampleRate(sampleRate);
-		} else if (!flag && directionlessProcessor!=null) {
+		Class<? extends SampleProcessor> clazz = (Class<? extends SampleProcessor>) eapp.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, SampleProcessor.class);
+		if (clazz==SampleProcessor.class) {
 			directionlessProcessor = null;
+		} else if (directionlessProcessor==null || directionlessProcessor.getClass()!=clazz) {
+			try {
+				directionlessProcessor = clazz.newInstance();
+				directionlessProcessor.setSampleRate(sampleRate);
+			} catch (Exception e) {
+				directionlessProcessor = null;
+				e.printStackTrace();
+			}
 		}
 		if (directionlessProcessor!=null) {
 			directionlessProcessor.setProperties(eapp);
@@ -95,7 +99,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 				Arrays.fill(directionlessBuffer, 0, frameSize, 0f);
 			}
 		}
-		
+
 		microphonePath.getInverseMatrix(inverseMicrophoneMatrix.getArray());
 
 		enc.startFrame(frameSize);
