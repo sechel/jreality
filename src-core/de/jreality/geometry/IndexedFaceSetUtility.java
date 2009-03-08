@@ -40,6 +40,11 @@
 
 package de.jreality.geometry;
 
+import static de.jreality.shader.CommonAttributes.EDGE_DRAW;
+import static de.jreality.shader.CommonAttributes.FACE_DRAW;
+import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
+import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1487,10 +1492,10 @@ public class IndexedFaceSetUtility {
     	SceneGraphComponent sgc = new SceneGraphComponent("displayFaceNormals()");
     	System.err.println("display face normals metric = "+metric);
     	Appearance ap  = new Appearance();
-    	ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
-       	ap.setAttribute("lineShader."+CommonAttributes.TUBES_DRAW, false);
-    	ap.setAttribute(CommonAttributes.FACE_DRAW, false);
-    	ap.setAttribute(CommonAttributes.VERTEX_DRAW, false);
+    	ap.setAttribute(EDGE_DRAW, true);
+       	ap.setAttribute("lineShader."+TUBES_DRAW, false);
+    	ap.setAttribute(FACE_DRAW, false);
+    	ap.setAttribute(VERTEX_DRAW, false);
     	sgc.setAppearance(ap);
     	int[][] faces = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
    
