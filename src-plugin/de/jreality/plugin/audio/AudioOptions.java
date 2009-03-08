@@ -2,8 +2,6 @@ package de.jreality.plugin.audio;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +17,6 @@ import javax.swing.event.ListSelectionListener;
 import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.DistanceCue;
 import de.jreality.audio.LowPassFilter;
-import de.jreality.audio.SoundPath;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
 import de.jreality.scene.Appearance;
@@ -45,6 +42,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private int[] selectedIndices = new int[0];
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
 	private float gain = AudioAttributes.DEFAULT_GAIN;
+	private boolean reverbActive = false;
 	
 	private String[] cueLabels = {"constant", "low pass", "linear", "exponential"};
 	private Class[] cueTypes = {DistanceCue.CONSTANT.class, LowPassFilter.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class};
@@ -110,10 +108,10 @@ public class AudioOptions extends ShrinkPanelPlugin {
 				setGainAttribute();
 			}
 		});
-		reverbWidget.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// TODO properly implement reverb properties in appearance
-				System.out.println("reverb active: "+reverbWidget.isSelected());
+		reverbWidget.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				reverbActive = reverbWidget.isSelected();
+				setReverbAttribute();	
 			}
 		});
 	}
@@ -134,6 +132,10 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		rootAppearance.setAttribute(AudioAttributes.VOLUME_GAIN_KEY, gain);
 	}
 	
+	private void setReverbAttribute() {
+		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive);
+	}
+	
 	private void updateCueWidget() {
 		distanceCueWidget.setSelectedIndices(selectedIndices);
 	}
@@ -144,6 +146,10 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	
 	private void updateGainWidget() {
 		gainWidget.setValue((int) toDecibels(gain));
+	}
+	
+	private void updateReverbWidget() {
+		reverbWidget.setSelected(reverbActive);
 	}
 
 	@Override
@@ -173,6 +179,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		updateCueWidget();
 		updateSpeedWidget();
 		updateGainWidget();
+		updateReverbWidget();
 	}
 
 	@Override
@@ -183,6 +190,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			selectedIndices = c.getProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, new int[0]);
 			speedOfSound = c.getProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 			gain = c.getProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
+			reverbActive = c.getProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -195,6 +203,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		c.storeProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, selectedIndices);
 		c.storeProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
 		c.storeProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, gain);
+		c.storeProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive);
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import de.jreality.audio.jass.JassReverb;
 import de.jreality.math.Matrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.AudioSource;
@@ -72,12 +73,21 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		rootAppearanceObserver.addAppearanceListener(this);
 	}
 	
-	public void appearanceChanged(AppearanceEvent ev) {
+	public synchronized void appearanceChanged(AppearanceEvent ev) {
 		EffectiveAppearance eapp = EffectiveAppearance.create(rootAppearancePath);
-		// TODO: read directionlessProcessor from Appearance
+		boolean flag = eapp.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, false);
+		if (flag && directionlessProcessor==null) {
+			directionlessProcessor = new JassReverb(); // TODO: implement more flexible mechanism for setting reverb
+			directionlessProcessor.setSampleRate(sampleRate);
+		} else if (!flag && directionlessProcessor!=null) {
+			directionlessProcessor = null;
+		}
+		if (directionlessProcessor!=null) {
+			directionlessProcessor.setProperties(eapp);
+		}
 	}
 
-	public void processFrame(SoundEncoder enc, int frameSize) {
+	public synchronized void processFrame(SoundEncoder enc, int frameSize) {
 		if (directionlessProcessor!=null) {
 			if (directionlessBuffer==null || directionlessBuffer.length<frameSize) {
 				directionlessBuffer = new float[frameSize];
@@ -161,7 +171,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		}
 
 		public void audioChanged(AudioEvent ev) {
-			//System.out.println("AudioSourceEntity.audioChanged() "+ev+" src="+ev.getSourceNode());
+			// do nothing for the time being...
 		}
 
 		protected void addTreeNode(SceneTreeNode tn) {
