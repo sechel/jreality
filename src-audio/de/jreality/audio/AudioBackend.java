@@ -40,6 +40,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private SceneGraphPathObserver rootAppearanceObserver = new SceneGraphPathObserver();
 	private SceneGraphPath rootAppearancePath = new SceneGraphPath();
 
+	
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
 		super(root);
 		this.microphonePath = microphonePath;

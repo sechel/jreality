@@ -7,6 +7,14 @@ import de.jreality.scene.data.RingBuffer;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
+/**
+ * 
+ * Slightly hackish integration of CombReverb from Jass into jReality; mostly intended as a
+ * proof of concept right now...
+ * 
+ * @author brinkman
+ *
+ */
 public class JassReverb implements SampleProcessor {
 
 	private RingBuffer ringBuffer;
