@@ -1,7 +1,6 @@
 package de.jreality.scene;
 
 
-import de.jreality.scene.data.RingBuffer;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.scene.event.AudioEvent;
 import de.jreality.scene.event.AudioEventMulticaster;
@@ -9,11 +8,10 @@ import de.jreality.scene.event.AudioListener;
 
 /**
  * The core of audio for jReality.  The basic idea is that a scene graph component can have an audio source
- * attached to it.  An audio source writes a mono signal into a ring buffer upon request, and audio renderers
- * request readers for the ring buffer, one for each occurrence of the source in the scene graph.  An audio
- * source keeps track of time in terms of the number of samples requested so far.  Readers can read samples
- * concurrently, and sample requests are queued and managed so that an audio source only writes as many samples
- * as the fastest renderer requests.
+ * attached to it.  Audio renderers request mono sample readers from audio sources, one for each occurrence of
+ * the source in the scene graph.  An audio source keeps track of time in terms of the number of samples requested
+ * so far.  Readers can read samples concurrently, and sample requests are queued and managed so that an audio
+ * source only writes as many samples as the fastest renderer requests.
  * 
  * Samples are floats in the range from -1 to 1.
  * 
@@ -27,44 +25,28 @@ public abstract class AudioSource extends SceneGraphNode {
 
 	public enum State {RUNNING, STOPPED, PAUSED}
 	protected State state = State.STOPPED;
-	protected RingBuffer ringBuffer = null;
-	protected int sampleRate = 0;
 
 	public AudioSource(String name) {
 		super(name);
-	}	
- 
-	public int getSampleRate() {
-		return sampleRate;
 	}
 	
-	public SampleReader createReader() {
-		return new SampleReader() {
-			private RingBuffer.Reader reader = ringBuffer.createReader();
-			
-			public void clear() {
-				reader.clear();
-			}
+	/**
+	 * 
+	 * The return value must be a new sample reader for each call; readers must be able to
+	 * operate in parallel.
+	 * 
+	 * @return a new sample reader for this source
+	 */
+	public abstract SampleReader createReader();
+	
+	// reset audio engine; no sync necessary, only to be called from stop method
+	protected void reset() {
+		// default: do nothing
+	}
 
-			public int getSampleRate() {
-				return AudioSource.this.getSampleRate();
-			}
 
-			public int read(float[] buffer, int initialIndex, int nSamples) {
-				return readSamples(reader, buffer, initialIndex, nSamples);
-			}
-		};
-	}
-	
-	public State getState() {
-		startReader();
-		try {
-			return state;
-		} finally {
-			finishReader();
-		}
-	}
-	
+// *************************************** transport functions *****************************************
+
 	/**
 	 * set the state of the node.
 	 *       
@@ -85,36 +67,10 @@ public abstract class AudioSource extends SceneGraphNode {
 			break;
 		}
 	}
-    
-	protected int readSamples(RingBuffer.Reader reader, float buffer[], int initialIndex, int nSamples) {
-		startReader();
-		try {
-			if (state != State.RUNNING) {
-				return 0;
-			}
-			synchronized(this) {
-				int needed = nSamples-reader.valuesLeft();
-				if (needed>0) {
-					writeSamples(needed);
-				}
-			}
-			return reader.read(buffer, initialIndex, nSamples);
-		} finally {
-			writingFinished();
-			finishReader();
-		}
+	
+	public State getState() {
+		return state;
 	}
-
-	// reset audio engine; no sync necessary, only to be called from stop method
-	protected void reset() {
-		// default: do nothing
-	}
-
-	// write _at least_ n samples to ringBuffer if available, no sync necessary
-	protected abstract void writeSamples(int n);
-
-
-// *************************************** transport functions *****************************************
 	
 	public void start() {
 		startWriter();

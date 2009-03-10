@@ -1,7 +1,5 @@
 package de.jreality.audio;
 
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
 
 /**
  * 
@@ -10,7 +8,7 @@ import de.jreality.scene.data.RingBuffer;
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *
  */
-public class SampleBufferAudioSource extends AudioSource {
+public class SampleBufferAudioSource extends RingBufferSource {
 
 	protected float[] samples;
 	protected int nSamples;

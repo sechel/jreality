@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.net.URL;
 
 import de.jreality.audio.SynthSource;
+import de.jreality.audio.RingBuffer.Reader;
 import de.jreality.audio.csound.CsoundNode;
 import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
@@ -13,7 +14,6 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
-import de.jreality.scene.data.RingBuffer.Reader;
 import de.jreality.tools.ActionTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.ui.viewerapp.ViewerApp;

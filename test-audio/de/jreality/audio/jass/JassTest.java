@@ -6,7 +6,7 @@ import jass.patches.CombReverb;
 
 import java.util.Arrays;
 
-import de.jreality.scene.data.RingBuffer;
+import de.jreality.audio.RingBuffer;
 import de.jreality.scene.data.SampleReader;
 
 public class JassTest {

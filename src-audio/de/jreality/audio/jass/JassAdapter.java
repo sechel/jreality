@@ -2,7 +2,7 @@ package de.jreality.audio.jass;
 
 import java.util.Arrays;
 
-import de.jreality.scene.data.RingBuffer;
+import de.jreality.audio.RingBuffer;
 
 import jass.engine.BufferNotAvailableException;
 import jass.engine.Source;

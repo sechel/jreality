@@ -7,8 +7,8 @@ import csnd.Csound;
 import csnd.CsoundFile;
 import csnd.CsoundMYFLTArray;
 import csnd.SWIGTYPE_p_double;
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
+import de.jreality.audio.RingBuffer;
+import de.jreality.audio.RingBufferSource;
 import de.jreality.util.Input;
 
 /**
@@ -17,7 +17,7 @@ import de.jreality.util.Input;
  * @author brinkman
  *
  */
-public class CsoundNode extends AudioSource {
+public class CsoundNode extends RingBufferSource {
 
 	private CppSound csnd = new CppSound();
 	private CsoundFile csf = csnd.getCsoundFile();

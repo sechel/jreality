@@ -1,14 +1,12 @@
 package de.jreality.audio;
 
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
 
 /**
  * 
  * Basic node for audio synthesis
  * 
  */
-public abstract class SynthSource extends AudioSource {
+public abstract class SynthSource extends RingBufferSource {
 
 	protected long index = 0; // can keep on ticking for about 15 million years at a sample rate of 192kHz; should be good enough for most practical purposes
 	

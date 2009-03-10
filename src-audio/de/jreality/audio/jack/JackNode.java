@@ -2,8 +2,8 @@ package de.jreality.audio.jack;
 
 import java.nio.FloatBuffer;
 
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
+import de.jreality.audio.RingBuffer;
+import de.jreality.audio.RingBufferSource;
 
 /**
  * An audio source that reads from Jack inputs.  Combined with MIDI or OSC tools, this class should serve
@@ -12,7 +12,7 @@ import de.jreality.scene.data.RingBuffer;
  * @author brinkman
  *
  */
-public class JackNode extends AudioSource implements JackSource {
+public class JackNode extends RingBufferSource implements JackSource {
 
 	private int port;
 	

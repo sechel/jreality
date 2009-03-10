@@ -9,15 +9,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
+import de.jreality.audio.RingBuffer;
+import de.jreality.audio.RingBufferSource;
 
 /**
  * 
  * A simple wrapper class that allows for Jass patches to be used in an audio source.
  * 
  */
-public class JassSource extends AudioSource implements Sink {
+public class JassSource extends RingBufferSource implements Sink {
 
 	protected long time=0;
 	private List<Source> sourceContainer=new CopyOnWriteArrayList<Source>();

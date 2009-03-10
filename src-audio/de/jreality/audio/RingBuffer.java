@@ -1,4 +1,4 @@
-package de.jreality.scene.data;
+package de.jreality.audio;
 
 import java.nio.FloatBuffer;
 

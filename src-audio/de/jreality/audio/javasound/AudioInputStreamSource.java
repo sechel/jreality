@@ -9,20 +9,20 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.sound.sampled.AudioFormat.Encoding;
 
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
+import de.jreality.audio.RingBuffer;
+import de.jreality.audio.RingBufferSource;
 import de.jreality.util.Input;
 
 /**
  * 
- * An AudioSource getting data from a JavaSound AudioInputStream. The loop-functionality
+ * A RingBufferSource getting data from a JavaSound AudioInputStream. The loop-functionality
  * depends on the URL which allows to open the ressource when it was played; better use
  * ChachedAudioInputStreamSource for sound loops (when samples are not too long...).
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *
  */
-public class AudioInputStreamSource extends AudioSource {
+public class AudioInputStreamSource extends RingBufferSource {
 	
 	AudioInputStream audioStream;
 	AudioFormat format;

@@ -2,8 +2,8 @@ package de.jreality.audio.jass;
 
 import jass.engine.SinkIsFullException;
 import jass.patches.CombReverb;
+import de.jreality.audio.RingBuffer;
 import de.jreality.audio.SampleProcessor;
-import de.jreality.scene.data.RingBuffer;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 

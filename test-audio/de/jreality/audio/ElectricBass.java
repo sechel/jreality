@@ -24,10 +24,8 @@ package de.jreality.audio;
 
 import java.text.NumberFormat;
 
-import de.jreality.scene.AudioSource;
-import de.jreality.scene.data.RingBuffer;
 
-public class ElectricBass extends AudioSource {
+public class ElectricBass extends RingBufferSource {
 
     public ElectricBass(String name) {
         super(name);
