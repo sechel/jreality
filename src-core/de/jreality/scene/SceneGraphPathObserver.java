@@ -51,7 +51,6 @@ import de.jreality.scene.event.SceneGraphComponentListener;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationEventMulticaster;
 import de.jreality.scene.event.TransformationListener;
-import de.jreality.shader.EffectiveAppearance;
 
 
 /**
