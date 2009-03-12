@@ -41,9 +41,9 @@ public final class DistanceCueChain implements DistanceCue {
 		}
 	}
 	
-	public float nextValue(float v, float r) {
+	public float nextValue(float v, float r, float xMic, float yMic, float zMic) {
 		for(DistanceCue cue: cues) {
-			v = cue.nextValue(v, r);
+			v = cue.nextValue(v, r, xMic, yMic, zMic);
 		}
 		return v;
 	}

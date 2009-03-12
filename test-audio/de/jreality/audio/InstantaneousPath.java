@@ -47,6 +47,12 @@ public class InstantaneousPath implements SoundPath {
 		float y1 = (float) curPos.getEntry(1, 3);
 		float z1 = (float) curPos.getEntry(2, 3);
 		
+		curPos.invert();
+		float xm = (float) curPos.getEntry(0, 3);
+		float ym = (float) curPos.getEntry(1, 3);
+		float zm = (float) curPos.getEntry(2, 3);
+		
+		
 		if (firstFrame) {
 			x0 = x1;
 			y0 = y1;
@@ -60,7 +66,7 @@ public class InstantaneousPath implements SoundPath {
 		
 		for (int i=0; i<nRead; i++) {
 			float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
-			float v = distanceCue.nextValue(samples[i]*gain, r);
+			float v = distanceCue.nextValue(samples[i]*gain, r, xm, ym, zm);
 			enc.encodeSample(v, i, x0, y0, z0);
 			
 			x0 += dx;

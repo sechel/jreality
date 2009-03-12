@@ -39,6 +39,7 @@ public class DelayPath implements SoundPath {
 	private LowPassFilter xFilter, yFilter, zFilter; // TODO: consider better interpolation
 	private float xTarget, yTarget, zTarget;
 	private float xCurrent, yCurrent, zCurrent;
+	private float xMic, yMic, zMic;
 
 	private float[] currentFrame = null;
 	private int currentLength = 0;
@@ -168,11 +169,11 @@ public class DelayPath implements SoundPath {
 				}
 				previousSample = currentSample;
 				float newSample = (currentFrame!=null) ? currentFrame[currentIndex] : 0f;
-				currentSample = generalDistanceCue.nextValue(newSample*gain, distance);
+				currentSample = generalDistanceCue.nextValue(newSample*gain, distance, xMic, yMic, zMic);
 			}
 
 			float v = previousSample+fractionalTime*(currentSample-previousSample);
-			enc.encodeSample(directedDistanceCue.nextValue(v, distance), j, xCurrent, yCurrent, zCurrent);
+			enc.encodeSample(directedDistanceCue.nextValue(v, distance, xMic, yMic, zMic), j, xCurrent, yCurrent, zCurrent);
 			if (directionlessBuffer!=null) {
 				directionlessBuffer[j] += v*directionlessGain;
 			}
@@ -199,10 +200,15 @@ public class DelayPath implements SoundPath {
 		auxiliaryMatrix.assignFrom(sourcePositions.element());
 		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
 
-		// TODO: Adjust the next three lines to generalize to curved geometries
+		// TODO: Adjust the rest of this method to generalize to curved geometries
 		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
 		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
 		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
+		
+		auxiliaryMatrix.invert();
+		xMic = (float) auxiliaryMatrix.getEntry(0, 3);
+		yMic = (float) auxiliaryMatrix.getEntry(1, 3);
+		zMic = (float) auxiliaryMatrix.getEntry(2, 3);
 	}
 
 	private void reset() {

@@ -8,7 +8,7 @@ package de.jreality.audio;
  * @author brinkman
  *
  */
-public class LowPassFilter implements DistanceCue {
+public class LowPassFilter {
 	
 	private static final float threshold = 1e-16f; // dynamic range between hearing threshold and instant perforation of eardrum
 	private float sampleRate;
@@ -53,16 +53,7 @@ public class LowPassFilter implements DistanceCue {
 		return value;
 	}
 
-	public float nextValue(float v, float r) {
-		setCutOff(44000/(1+r));
-		return nextValue(v);
-	}
-
 	public boolean hasMore() {
 		return Math.abs(value)>threshold;
-	}
-	
-	public void reset() {
-		initialize(0);
 	}
 }
