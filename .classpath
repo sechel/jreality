@@ -16,7 +16,7 @@
 	<classpathentry kind="src" path="src-soft"/>
 	<classpathentry kind="src" path="src-soft-new"/>
 	<classpathentry kind="src" path="src-sunflow"/>
-	<classpathentry excluding="de/jreality/swing/FakeFramePeer5.java|de/jreality/swing/FakeToolKit5.java" kind="src" path="src-swing"/>
+	<classpathentry excluding="de/jreality/swing/FakeFramePeer6.java|de/jreality/swing/FakeToolKit6.java" kind="src" path="src-swing"/>
 	<classpathentry kind="src" path="src-tool"/>
 	<classpathentry excluding="de/jreality/tutorial/audio/Example.java|de/jreality/tutorial/misc/JLinkExample.java" kind="src" path="src-tutorial"/>
 	<classpathentry kind="src" path="src-ui"/>
