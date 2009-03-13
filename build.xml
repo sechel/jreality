@@ -490,6 +490,7 @@
 	      <fileset dir="${build}/renderman" />
 	      <fileset dir="${build}/sunflow" />
 	      <fileset dir="${build}/jogl" />
+	  	  <fileset dir="${build}/plugin" />
 	    	
 	      <fileset dir="${build}/proxies" />
 	  	  <fileset dir="${build}/portal" />
@@ -521,6 +522,7 @@
 	        <fileset dir="${renderman}" />
 	        <fileset dir="${sunflow}" />
 	        <fileset dir="${jogl}" />
+	        <fileset dir="${plugin}" />
 
 	  		<fileset dir="${proxies}" />
 	  	    <fileset dir="${portal}" />
