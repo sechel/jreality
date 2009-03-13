@@ -12,6 +12,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphPathObserver;
 import de.jreality.scene.AudioSource.State;
+import de.jreality.scene.data.SampleReader;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.AudioEvent;
@@ -35,6 +36,8 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private SceneGraphPath microphonePath;
 	private Matrix inverseMicrophoneMatrix = new Matrix();
 	private float[] directionlessBuffer = null;
+	private SampleReader directionlessReader;
+	private RingBuffer ringBuffer;
 	private SampleProcessor directionlessProcessor = null;
 	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
 	private SceneGraphPathObserver rootAppearanceObserver = new SceneGraphPathObserver();
@@ -45,6 +48,9 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		super(root);
 		this.microphonePath = microphonePath;
 		this.sampleRate = sampleRate;
+		ringBuffer = new RingBuffer(sampleRate);
+		directionlessReader = ringBuffer.createSampleReader(sampleRate);
+		
 		setEntityFactory(new EntityFactory() {
 			{
 				setUpdateAudioSource(true);
@@ -80,8 +86,9 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 			directionlessProcessor = null;
 		} else if (directionlessProcessor==null || directionlessProcessor.getClass()!=clazz) {
 			try {
+				directionlessReader.clear();
 				directionlessProcessor = clazz.newInstance();
-				directionlessProcessor.setSampleRate(sampleRate);
+				directionlessProcessor.initialize(directionlessReader);
 			} catch (Exception e) {
 				directionlessProcessor = null;
 				e.printStackTrace();
@@ -113,7 +120,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		}
 		if (directionlessProcessor!=null) {
 			try {
-				directionlessProcessor.write(directionlessBuffer, 0, frameSize);
+				ringBuffer.write(directionlessBuffer, 0, frameSize);
 				int nRead = directionlessProcessor.read(directionlessBuffer, 0, frameSize);
 				for(int i=0; i<nRead; i++) {
 					enc.encodeSample(directionlessBuffer[i], i);

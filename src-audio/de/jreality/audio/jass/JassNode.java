@@ -17,7 +17,7 @@ import de.jreality.audio.RingBufferSource;
  * A simple wrapper class that allows for Jass patches to be used in an audio source.
  * 
  */
-public class JassSource extends RingBufferSource implements Sink {
+public class JassNode extends RingBufferSource implements Sink {
 
 	protected long time=0;
 	private List<Source> sourceContainer=new CopyOnWriteArrayList<Source>();
@@ -25,7 +25,7 @@ public class JassSource extends RingBufferSource implements Sink {
 	private float[] buffer;
 
 	
-	public JassSource(String name, int sampleRate, int bufferSize) {
+	public JassNode(String name, int sampleRate, int bufferSize) {
 		super(name);
 		this.sampleRate = sampleRate;
 		this.bufferSize=bufferSize;

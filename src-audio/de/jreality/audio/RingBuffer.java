@@ -2,6 +2,8 @@ package de.jreality.audio;
 
 import java.nio.FloatBuffer;
 
+import de.jreality.scene.data.SampleReader;
+
 /**
  * Ring buffer for audio sources.  Each ring buffer has one writer, the audio source that owns it, and any
  * number of readers that can access the buffer concurrently.
@@ -63,6 +65,21 @@ public class RingBuffer {
 	
 	public Reader createReader() {
 		return new Reader();
+	}
+	
+	public SampleReader createSampleReader(final int sampleRate) {
+		return new SampleReader() {
+			private Reader reader = createReader();
+			public void clear() {
+				reader.clear();
+			}
+			public int getSampleRate() {
+				return sampleRate;
+			}
+			public int read(float[] buffer, int initialIndex, int samples) {
+				return reader.read(buffer, initialIndex, samples);
+			}
+		};
 	}
 	
 	public void write(float source[], int initialIndex, int nSamples) {

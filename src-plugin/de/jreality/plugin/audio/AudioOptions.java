@@ -16,7 +16,7 @@ import javax.swing.event.ListSelectionListener;
 
 import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.DistanceCue;
-import de.jreality.audio.RoomReverb;
+import de.jreality.audio.ReverbReader;
 import de.jreality.audio.SampleProcessor;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
@@ -167,7 +167,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	}
 	
 	private void setReverbAttribute() {
-		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive ? RoomReverb.class : SampleProcessor.class);
+		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbActive ? ReverbReader.class : SampleProcessor.class);
 	}
 	
 	private void setReverbGainAttribute() {

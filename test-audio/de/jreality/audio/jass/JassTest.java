@@ -11,12 +11,12 @@ import de.jreality.scene.data.SampleReader;
 
 public class JassTest {
 	public static void main(String[] args) throws SinkIsFullException {
-		int srate = 44100;
+		final int srate = 44100;
 		int bufSize = 48;
-		RingBuffer rb = new RingBuffer(srate);
-		JassAdapter ja = new JassAdapter(rb, bufSize);
+		final RingBuffer rb = new RingBuffer(srate);
+		JassSampleReaderSource ja = new JassSampleReaderSource(rb.createSampleReader(srate), bufSize);
 		InOut reverb = new CombReverb(bufSize, srate, 3);
-		JassSource js = new JassSource("foo", srate, bufSize);
+		JassNode js = new JassNode("foo", srate, bufSize);
 		SampleReader reader = js.createReader();
 		reverb.addSource(ja);
 		js.addSource(reverb);
