@@ -300,7 +300,6 @@ public class NonEuclideanExample {
 				xyz[1] = Math.sin(u) * p[0];
 				xyz[2] = 0.0;
 				xyz[3] = p[3];
-				System.err.println("xyzw="+Rn.toString(Pn.dehomogenize(null,xyz)));
 			}
 			
 		});
