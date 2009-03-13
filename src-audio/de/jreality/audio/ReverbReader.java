@@ -20,7 +20,6 @@ public class ReverbReader implements SampleProcessor {
 	private float[][] delayLines = new float[6][];
 	private int[] lineIndex = new int[6];
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
-	private static final float Q0 = (float) Math.log(0.001);
 	private SampleReader reader;
 
 	
@@ -36,11 +35,9 @@ public class ReverbReader implements SampleProcessor {
 		this.reader = reader;
 		int sampleRate = reader.getSampleRate();
 		for(int i = 0; i<6; i++) {
-			delayLines[i] = new float[(int) (sampleRate*delays[i]+0.5)];
+			delayLines[i] = new float[(int) (sampleRate*delays[i]*2+0.5)];
 		}
 		setReverbTime(reverbTime);
-		coeffs[4] = (float) Math.exp(Q0*delays[4]/0.005);
-		coeffs[5] = (float) Math.exp(Q0*delays[5]/0.0017);
 	}
 
 	public void setProperties(EffectiveAppearance app) {
@@ -52,10 +49,13 @@ public class ReverbReader implements SampleProcessor {
 
 	public void setReverbTime(float reverbTime) {
 		this.reverbTime = reverbTime;
-		float q = Q0/reverbTime;
+		float q0 = (float) Math.log(0.001);
+		float q = q0/reverbTime;
 		for(int i = 0; i < 4; i++) {
 			coeffs[i] = (float) Math.exp(q*delays[i]);
 		}
+		coeffs[4] = (float) Math.exp(q0*delays[4]/0.005);
+		coeffs[5] = (float) Math.exp(q0*delays[5]/0.0017);
 	}
 
 	public float getReverbTime() {
