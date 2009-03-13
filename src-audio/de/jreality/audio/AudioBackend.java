@@ -135,7 +135,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private class AudioTreeNode extends SceneTreeNode implements AudioListener, AppearanceListener {
 
 		private SoundPath soundPath;
-		private Matrix curPos = new Matrix();
+		private Matrix currentPosition = new Matrix();
 		private SceneGraphPath path;
 		private SceneGraphPathObserver observer = new SceneGraphPathObserver();
 
@@ -153,15 +153,15 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 			audioChanged(null);
 		}
 
-		void processFrame(SoundEncoder enc, int frameSize, float[] directionlessBuffer) {
+		void processFrame(SoundEncoder encoder, int frameSize, float[] directionlessBuffer) {
 			if (nodeActive || pathActive) {
 				if (path==null) {
 					path = toPath();
 					appearanceChanged(null);
 					observer.setPath(path);
 				}
-				path.getMatrix(curPos.getArray());
-				pathActive = soundPath.processFrame(enc, frameSize, curPos, inverseMicrophoneMatrix, directionlessBuffer);
+				path.getMatrix(currentPosition.getArray());
+				pathActive = soundPath.processFrame(encoder, frameSize, currentPosition, inverseMicrophoneMatrix, directionlessBuffer);
 			}
 		}
 
