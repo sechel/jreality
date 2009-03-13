@@ -76,10 +76,6 @@ import de.jreality.scene.StereoViewer;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
-/**
- * @author Charles Gunn
- *
- */
 public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventListener, Runnable {
 	protected SceneGraphComponent sceneRoot;
 	SceneGraphComponent auxiliaryRoot;
@@ -104,8 +100,6 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 	}
 
 	public Viewer(SceneGraphPath camPath, SceneGraphComponent root) {
-//		renderer = new JOGLRenderer(this); 
-//		renderer.setStereoType(stereoType);
 		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);	
 	}
@@ -139,10 +133,6 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 	}
 
 	public void renderAsync() {
-//		if (isLinux)	{
-//		    canvas.setIgnoreRepaint(false);
-//			canvas.setNoAutoRedrawMode(false);			
-//		}
 	    synchronized (renderLock) {
 				if (!pendingUpdate) {
 					if (debug)
