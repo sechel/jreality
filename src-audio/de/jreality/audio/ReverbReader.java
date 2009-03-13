@@ -81,6 +81,7 @@ public class ReverbReader implements SampleProcessor {
 			float acc = 0;
 			float v = buf[i];
 
+			// four comb filters
 			for(int j = 0; j < 4; j++) {
 				float w = currentFilterValue(j);
 				acc += w;
@@ -88,17 +89,18 @@ public class ReverbReader implements SampleProcessor {
 				advanceFilterIndex(j);
 			}
 			        
+			// all-pass filter
 			float y1 = currentFilterValue(4);
-			float z = coeffs[4]*y1 + acc;
+			float z = coeffs[4]*y1 + acc;      // feedback
 			setFilterValue(4, z);
 			advanceFilterIndex(4);
-			y1 -= coeffs[4] * z;
+			y1 -= coeffs[4] * z;               // feedforward
 			
+			// another all-pass filter
 			float y2 = currentFilterValue(5);
 			z = coeffs[5]*y2 + y1;
 			setFilterValue(5, coeffs[5]*y2 + y1);
 			advanceFilterIndex(5);
-
 			buf[i] = y2 - coeffs[5]*z;
 		}
 		return nRead;
