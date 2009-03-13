@@ -71,7 +71,7 @@ public abstract class AbstractTool implements Tool {
     return Collections.unmodifiableList(currentSlots);
   }
   
-  protected void addCurrentSlot(InputSlot slot) {
+  public void addCurrentSlot(InputSlot slot) {
     addCurrentSlot(slot, null);
   }
   
@@ -85,7 +85,7 @@ public abstract class AbstractTool implements Tool {
     descriptions.put(slot, description != null ? description : "<no description>");
   }
   
-  protected void removeCurrentSlot(InputSlot slot) {
+  public void removeCurrentSlot(InputSlot slot) {
     currentSlots.remove(slot);
   }
   public void activate(ToolContext tc) {
