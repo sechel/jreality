@@ -481,7 +481,8 @@
 	  	<mkdir dir="release" />
 	    <jar jarfile="release/jReality.jar">
 	      <fileset dir="${build}/core" />
-	      <fileset dir="${build}/tools" />
+		  <fileset dir="${build}/tools" />
+		  <fileset dir="${build}/audio" />
 	      <fileset dir="${build}/backends-share" />
 	      <fileset dir="${build}/io" />
 	      <fileset dir="${build}/ui" />
@@ -512,6 +513,7 @@
 	  	<mkdir dir="release/tmp/src" />
 	  	<copy todir="release/tmp/src">
 	        <fileset dir="${core}" />
+	        <fileset dir="${audio}" />
 	        <fileset dir="${tools}" />
 	        <fileset dir="${backends-share}" />
 	        <fileset dir="${io}" />
