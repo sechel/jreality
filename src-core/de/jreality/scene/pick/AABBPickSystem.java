@@ -160,8 +160,8 @@ public class AABBPickSystem implements PickSystem {
         	}
         	if (ap == null) return;
             Object foo = ap.getAttribute(CommonAttributes.VERTEX_DRAW, Boolean.class);
-            if (foo != Appearance.INHERITED) drawVertices = (Boolean) foo;
-            if (drawVertices)	{
+            if (foo != Appearance.INHERITED) { hasNewPickInfo = true; pickPoints=drawVertices = (Boolean) foo;}
+           if (drawVertices)	{
             	foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
                 if (foo != Appearance.INHERITED) { hasNewPickInfo = true; pickPoints = (Boolean) foo; }
              }
@@ -177,7 +177,7 @@ public class AABBPickSystem implements PickSystem {
             	foo = ap.getAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
                 if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pickFaces = (Boolean) foo; }
            }
-          foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Double.class);
+           foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, Double.class);
           if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pointRadius = (Double) foo;}
           else {
               foo = ap.getAttribute(CommonAttributes.POINT_RADIUS, Double.class);
@@ -204,12 +204,13 @@ public class AABBPickSystem implements PickSystem {
       if (!c.isVisible() || !c.isPickable()) return;
       PickInfo pickInfo = null;
       if (c.getAppearance()!=null) {
+          // following is actually deprecated and can be removed any time now
           Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
           if (foo instanceof Boolean && ((Boolean)foo).booleanValue() == false) {
         	  return;
           }
          pickInfo = new PickInfo(currentPI, c.getAppearance());
-         if (pickInfo.hasNewPickInfo) appStack.push(currentPI = pickInfo);
+        if (pickInfo.hasNewPickInfo) appStack.push(currentPI = pickInfo);
        }
 //      System.err.println("visiting "+c.getName());
       if (c.getTransformation() != null)	{
