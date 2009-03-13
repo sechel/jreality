@@ -31,6 +31,7 @@ import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
@@ -233,7 +234,7 @@ public class NonEuclideanExample {
 	}
 
 	// some variables which depend on the metric -- hence we have three of each
-	double[][] falloffs =   {{1,.3,0},{.5,.5,0},{.5, .5, 0}};
+	double[][] falloffs =   {{1.5,.25,0},{.5,.5,0},{.5, .5, 0}};
 	double[][] cameraClips = {{.001,2},{.01, 1000},{.01,-.05}};
 	double distance = .5;
 	double[] unitD = {Math.tanh(distance), distance, Math.tan(distance)};
@@ -282,7 +283,7 @@ public class NonEuclideanExample {
 	    psf.setGenerateEdgesFromFaces(true);
 	    psf.setGenerateVertexNormals(true);
 		psf.setImmersion( new Immersion()		{
-			double[] scales = {1.5,1,Math.PI/4};
+			double[] scales = {2.5,1,Math.PI/4};
 			double[] foo = {1,0,0,0};
 			public boolean isImmutable() {
 				return false;
@@ -299,6 +300,7 @@ public class NonEuclideanExample {
 				xyz[1] = Math.sin(u) * p[0];
 				xyz[2] = 0.0;
 				xyz[3] = p[3];
+				System.err.println("xyzw="+Rn.toString(Pn.dehomogenize(null,xyz)));
 			}
 			
 		});
