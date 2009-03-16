@@ -48,10 +48,14 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AmbisonicsPlanar2ndOrd
 	}
 	
 	public static void launch(Viewer viewer, String label) throws JJackException {
+		launch(viewer, label, "");
+	}
+	
+	public static void launch(Viewer viewer, String label, String target) throws JJackException {
 		JackAmbisonicsPlanar2ndOrderRenderer renderer = new JackAmbisonicsPlanar2ndOrderRenderer();
 		renderer.setRootAndMicrophonePath(viewer.getSceneRoot(), viewer.getCameraPath());
 
 		JackHub.setSink(renderer);
-		JackHub.initializeClient(label);
+		JackHub.initializeClient(label, target);
 	}
 }

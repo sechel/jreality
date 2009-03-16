@@ -97,7 +97,15 @@ public final class JackHub implements JJackAudioProcessor {
 		JackHub.sink = sink;
 	}
 	
-	public static synchronized void initializeClient(String name) throws JJackException {
+	public static void initializeClient(String name) throws JJackException {
+		initializeClient(name, "", "");
+	}
+	
+	public static void initializeClient(String name, String sinkClient) throws JJackException {
+		initializeClient(name, sinkClient, "");
+	}
+	
+	public static synchronized void initializeClient(String name, String sinkClient, String sourceClient) throws JJackException {
 		if (sampleRate!=0) {
 			throw new IllegalStateException("jack client is already initialized");
 		}
@@ -117,6 +125,8 @@ public final class JackHub implements JJackAudioProcessor {
 		// first we need to set system properties
 		System.setProperty("jjack.ports.in", Integer.toString(highestInPort+1));
 		System.setProperty("jjack.ports.out", Integer.toString(highestOutPort+1));
+		System.setProperty("jjack.ports.in.target", sourceClient);
+		System.setProperty("jjack.ports.out.target", sinkClient);
 		System.setProperty("jjack.client.name", name);
 		
 		// then we can initialize JJackSystem

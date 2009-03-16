@@ -7,6 +7,9 @@ import java.beans.Statement;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.audio.javasound.VbapSurroundRenderer;
@@ -22,6 +25,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 
 	private JComboBox renderers;
 	private JButton launchButton;
+	private JTextField targetField;
 	
 	private Viewer viewer;
 	
@@ -31,10 +35,11 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 	private static final String VBAP = "Java VBAP";
 	
 	private static final String RENDERKEY = "audioRenderer";
+	private static final String JACKTARGETKEY = "jackTarget";
 	
 	
 	public AudioLauncher() {
-		shrinkPanel.setLayout(new GridLayout(2, 1));
+		shrinkPanel.setLayout(new GridLayout(3, 1));
 		
 		renderers = new JComboBox();
 		renderers.addItem(JACK1);
@@ -42,6 +47,12 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		renderers.addItem(STEREO);
 		renderers.addItem(VBAP);
 		shrinkPanel.add(renderers);
+		
+		JPanel panel = new JPanel();
+		panel.add(new JLabel("Jack target port"));
+		targetField = new JTextField();
+		panel.add(targetField);
+		shrinkPanel.add(panel);
 		
 		launchButton = new JButton("Launch");
 		launchButton.addActionListener(new ActionListener() {
@@ -57,10 +68,10 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		try {
 			if (type.equals(JACK1)) {
 				new Statement(Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer"),
-								"launch", new Object[]{viewer, "jR Ambisonics"}).execute();
+								"launch", new Object[]{viewer, "jR Ambisonics", targetField.getText()}).execute();
 			} else if (type.equals(JACK2)) {
 				new Statement(Class.forName("de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer"),
-						"launch", new Object[]{viewer, "jR Planar Ambisonics"}).execute();
+						"launch", new Object[]{viewer, "jR Planar Ambisonics", targetField.getText()}).execute();
 			} else if (type.equals(STEREO)) {
 				JavaAmbisonicsStereoDecoder.launch(viewer, "jR Stereo");
 			} else if (type.equals(VBAP)) {
@@ -68,6 +79,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 			}
 			launchButton.setEnabled(false);
 			renderers.setEnabled(false);
+			targetField.setEnabled(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -84,6 +96,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		super.restoreStates(c);
 		
 		renderers.setSelectedItem(c.getProperty(getClass(), RENDERKEY, JACK1));
+		targetField.setText(c.getProperty(getClass(), JACKTARGETKEY, ""));
 	}
 
 	@Override
@@ -91,6 +104,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		super.storeStates(c);
 		
 		c.storeProperty(getClass(), RENDERKEY, renderers.getSelectedItem());
+		c.storeProperty(getClass(), JACKTARGETKEY, targetField.getText());
 	}
 
 	@Override
