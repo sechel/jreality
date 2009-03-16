@@ -86,8 +86,8 @@ import de.jreality.util.LoggingSystem;
 public class ImageData implements Serializable {
 
   private transient byte[] handOutArray;
-  private transient Image img;
-  private byte[] byteArray;
+  private transient Image img, origImg;
+  private byte[] byteArray, origByteArray;
   private int width;
   private int height;
 
@@ -178,6 +178,22 @@ public class ImageData implements Serializable {
     return bi;//new ROImage(bi);
   }
 
+  private Image createOrigImage() {
+	    BufferedImage bi = new BufferedImage(width, height,
+	        BufferedImage.TYPE_INT_ARGB);
+	    WritableRaster raster = bi.getRaster();
+	    int[] pix = new int[4];
+	    for (int y = 0, ptr = 0; y < height; y++)
+	      for (int x = 0; x < width; x++, ptr += 4) {
+	        pix[3] = byteArray[ptr + 3];
+	        pix[0] = byteArray[ptr];
+	        pix[1] = byteArray[ptr + 1];
+	        pix[2] = byteArray[ptr + 2];
+	        raster.setPixel(x, y, pix);
+	      }
+	    return bi;//new ROImage(bi);
+	  }
+
   private void readBytes(Image theImage, double[] channelArithmeticMatrix) {
     if (byteArray == null) {
       int[] pixelsI = new int[width * height];
@@ -228,6 +244,10 @@ public class ImageData implements Serializable {
     if (handOutArray == null) handOutArray=(byte[]) byteArray.clone();
     else System.arraycopy(byteArray, 0, handOutArray, 0, byteArray.length);
     return handOutArray;
+  }
+  
+  public Image getOriginalImage()	{
+	  return origImg == null ? origImg = createOrigImage() : origImg;
   }
 
   /**
