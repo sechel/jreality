@@ -13,7 +13,7 @@ import de.jreality.shader.EffectiveAppearance;
  * @author brinkman
  *
  */
-public class ReverbReader implements SampleProcessor {
+public class SchroederReverb implements SampleProcessor {
 
 	private static final float[] delays = {0.0297f, 0.0371f, 0.0411f, 0.0437f, 0.09683f, 0.03292f};
 	private float[] coeffs = new float[6];
@@ -23,11 +23,11 @@ public class ReverbReader implements SampleProcessor {
 	private SampleReader reader;
 
 	
-	public ReverbReader(SampleReader reader) {
+	public SchroederReverb(SampleReader reader) {
 		initialize(reader);
 	}
 	
-	public ReverbReader() {
+	public SchroederReverb() {
 		// do nothing
 	}
 	
@@ -41,7 +41,7 @@ public class ReverbReader implements SampleProcessor {
 	}
 
 	public void setProperties(EffectiveAppearance app) {
-		float reverbTime = app.getAttribute(AudioAttributes.REVERB_TIME, AudioAttributes.DEFAULT_REVERB_TIME);
+		float reverbTime = app.getAttribute(AudioAttributes.REVERB_TIME_KEY, AudioAttributes.DEFAULT_REVERB_TIME);
 		if (reverbTime!=getReverbTime()) {
 			setReverbTime(reverbTime);
 		}
