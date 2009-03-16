@@ -190,7 +190,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (program.getSource().getAttribute("normals4") != null)	{
 				doNormals4 = true;
 			} else doNormals4 = false;
-			System.err.println("normals4 = "+doNormals4);
+//			System.err.println("normals4 = "+doNormals4);
 			GlslLoader.render(program, jr);
 		}
 		Geometry g = jrs.currentGeometry;
