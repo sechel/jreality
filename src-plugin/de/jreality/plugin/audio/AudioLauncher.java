@@ -1,5 +1,6 @@
 package de.jreality.plugin.audio;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,7 +51,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		
 		JPanel panel = new JPanel();
 		panel.add(new JLabel("Jack target port"));
-		targetField = new JTextField();
+		targetField = new JTextField(8);
 		panel.add(targetField);
 		shrinkPanel.add(panel);
 		
