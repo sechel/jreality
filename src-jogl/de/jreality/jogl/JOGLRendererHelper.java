@@ -56,6 +56,7 @@ import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.GlslPolygonShader;
+import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -409,10 +410,24 @@ public class JOGLRendererHelper {
 //		faceNormals = GlslPolygonShader.correctNormals(faceNormals);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
-		DataList texCoords = sg
-				.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 		DataList lightMapCoords = sg.getVertexAttributes(Attribute
 				.attributeForName("lightmap coordinates"));
+		Texture2D[] textures = (Texture2D[]) sg.getGeometryAttributes("textureUnits");
+		JOGLTexture2D[] jtextures = null;
+		if (textures != null) {
+			jtextures = new JOGLTexture2D[textures.length];
+			for (int i = 0; i<textures.length; ++i) {
+				jtextures[i] = new JOGLTexture2D(textures[i]);
+			}
+//			System.err.println("blend = "+jtextures[0].getBlendColor().getAlpha());
+		}
+		
+		DataList textureUnitsDL = sg.getFaceAttributes(Attribute.attributeForName("textureUnits"));
+		int[] textureUnits = null;
+		if (textures != null && textureUnitsDL != null) textureUnits = textureUnitsDL.toIntArray(null);
+		int textureCount = (textureUnits != null) ? 1 : jr.renderingState.texUnitCount;
+		
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		// JOGLConfiguration.theLog.log(Level.INFO,"alpha value is "+alpha);
@@ -473,6 +488,12 @@ public class JOGLRendererHelper {
 //			}
 		}
 
+//		if (textureUnitsDL!= null)
+//			for (int i = GL.GL_TEXTURE0; i < jr.renderingState.texUnitCount; ++i) {
+//				gl.glActiveTexture(i);
+//				gl.glDisable(GL.GL_TEXTURE_2D);
+//			}
+//
 		numF = sg.getNumFaces();
 		if ( isQuadMesh) {
 			double[] pt = new double[3];
@@ -564,7 +585,6 @@ public class JOGLRendererHelper {
 				gl.glEnd();
 			}
 		} else	{
-			// signal a geometry
 			for (int i = 0; i < sg.getNumFaces(); ++i) {
 				if (colorBind == PER_FACE) {
 					da = faceColors.item(i).toDoubleArray();
@@ -583,8 +603,15 @@ public class JOGLRendererHelper {
 				}
 				IntArray tf = sg.getFaceAttributes(Attribute.INDICES).item(i)
 						.toIntArray();
-				gl.glBegin(GL.GL_POLYGON);
 				final int nf = tf.getLength();
+				if (textures != null)	{
+					
+					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
+			      	gl.glEnable(GL.GL_TEXTURE_2D);
+					Texture2DLoaderJOGL.render(gl, jtextures[i]);
+
+				}
+				gl.glBegin(GL.GL_POLYGON);
 				for (int j = 0; j < nf; ++j) {
 					int k = tf.getValueAt(j);
 					if (normalBind == PER_VERTEX) {
@@ -602,14 +629,16 @@ public class JOGLRendererHelper {
 									.getValueAt(2), alpha * da.getValueAt(3));
 						}
 					}
-					for (int nn = 0; nn<jr.renderingState.texUnitCount; ++nn)	{
-						int texunit = GL.GL_TEXTURE0+nn;
+					for (int nn = 0; nn<textureCount; ++nn)	{
+//						if (nn != textureUnits[i]) continue;
+						int texunit = GL.GL_TEXTURE0+((textureUnitsDL != null) ? textureUnits[i] : nn);
 						if (nn == 0 && lightMapCoords != null) {
 							da = lightMapCoords.item(k).toDoubleArray();
 						}
 						else if (texCoords != null) {
 							da = texCoords.item(k).toDoubleArray();
 						}
+
 						if (da.size() == 2) {
 							gl.glMultiTexCoord2d(texunit, da.getValueAt(0), da.getValueAt(1));
 						} else if (da.size() == 3) {
@@ -625,8 +654,20 @@ public class JOGLRendererHelper {
 					else if (vertexLength == 4)
 						gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da
 								.getValueAt(2), da.getValueAt(3));
+//					if (textureUnitsDL != null)			{
+//						gl.glActiveTexture(textureUnits[i]);
+//						System.err.println("disabling "+textureUnits[i]);
+//						gl.glDisable(GL.GL_TEXTURE_2D);
+//					}
+
 				}
 				gl.glEnd();
+				if (textures != null)	{
+					
+					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
+			      	gl.glDisable(GL.GL_TEXTURE_2D);
+
+				}
 			}
 		}
 	}
