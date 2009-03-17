@@ -118,7 +118,8 @@ public interface Texture2D extends AttributeEntity {
   public static final int GL_REPEAT = 0x2901;
   public static final int GL_CLAMP = 0x2900;
   public static final int GL_CLAMP_TO_EDGE = 0x812F;
-  
+  public static final int GL_TEXTURE0 = 0x84C0;
+ 
   // default values
   public static final double SSCALE_DEFAULT=1;
   public static final double TSCALE_DEFAULT=1;
@@ -154,25 +155,16 @@ public interface Texture2D extends AttributeEntity {
   public static final String EXTERNAL_SOURCE_DEFAULT=null;
   
   /**
-   * @return Returns the repeatS.
+   * Use {@link #setTextureMatrix(Matrix)} instead
+   * @return
    */
+  @Deprecated	
   public abstract Integer getRepeatS();
-
-  /**
-   * @param repeatS
-   *          The repeatS to set.
-   */
+  @Deprecated	
   public abstract void setRepeatS(Integer repeatS);
-
-  /**
-   * @return Returns the repeatT.
-   */
+  @Deprecated	
   public abstract Integer getRepeatT();
-
-  /**
-   * @param repeatT
-   *          The repeatT to set.
-   */
+  @Deprecated	
   public abstract void setRepeatT(Integer repeatT);
 
   public abstract Integer getMagFilter();
