@@ -47,13 +47,10 @@ public class Example {
 		c.registerPlugin(new AudioOptions());
 
 		// create visual content
-		SceneGraphComponent content = Readers.read(
-				Input.getInput("jrs/schwarz.jrs"));
+		SceneGraphComponent content = Readers.read(Input.getInput("jrs/schwarz.jrs"));
 
 		// create audio content
-		final AudioSource source = new CsoundNode(
-				"csound node", Input.getInput(
-						Example.class.getResource("trapped.csd")));
+		final AudioSource source = new CsoundNode("csound node", Input.getInput(Example.class.getResource("trapped.csd")));
 		source.start();
 		content.setAudioSource(source);
 
