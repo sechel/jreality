@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
-//import de.jreality.audio.csound.CsoundNode;
+import de.jreality.audio.csound.CsoundNode;
 import de.jreality.plugin.audio.AudioLauncher;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.view.CameraStand;
@@ -51,26 +51,26 @@ public class Example {
 				Input.getInput("jrs/schwarz.jrs"));
 
 		// create audio content
-//		final AudioSource source = new CsoundNode(
-//				"csound node", Input.getInput(
-//						Example.class.getResource("trapped.csd")));
-//		source.start();
-//		content.setAudioSource(source);
+		final AudioSource source = new CsoundNode(
+				"csound node", Input.getInput(
+						Example.class.getResource("trapped.csd")));
+		source.start();
+		content.setAudioSource(source);
 
 		// create simple tool for pausing/starting audio
-//		ActionTool tool = 
-//			new ActionTool("PanelActivation");
-//		tool.addActionListener(new ActionListener() {
-//			public void actionPerformed(
-//					ActionEvent e) {
-//				if (source.getState() ==
-//					AudioSource.State.RUNNING)
-//					source.pause();
-//				else
-//					source.start();
-//			}
-//		});
-//		content.addTool(tool);
+		ActionTool tool = 
+			new ActionTool("PanelActivation");
+		tool.addActionListener(new ActionListener() {
+			public void actionPerformed(
+					ActionEvent e) {
+				if (source.getState() ==
+					AudioSource.State.RUNNING)
+					source.pause();
+				else
+					source.start();
+			}
+		});
+		content.addTool(tool);
 
 		// attach content to scene
 		SceneGraphComponent parent = 
