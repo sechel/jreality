@@ -794,8 +794,10 @@ public class JOGLRenderer  implements AppearanceListener {
 		numTiles = Math.max(imageWidth/512, imageHeight/512);
 		if (numTiles == 0) numTiles = 1;
 //		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
-		tileSizeX = imageWidth/numTiles;
-		tileSizeY = imageHeight/numTiles;
+		tileSizeX = (imageWidth/numTiles);
+		tileSizeY = (imageHeight/numTiles);
+		tileSizeX = 4 * (((int) tileSizeX)/4);
+		tileSizeY = 4 * (((int) tileSizeY)/4);
 		imageWidth = (tileSizeX) * numTiles;
 		imageHeight = (tileSizeY) * numTiles;
 		System.err.println("Tile size x = "+tileSizeX);
@@ -804,7 +806,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
 		caps.setAlphaBits(8);
-		if (offscreenPBuffer == null) offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
+//		if (offscreenPBuffer == null) 
+			offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
 				canvas.getContext());

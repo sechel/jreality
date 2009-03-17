@@ -157,11 +157,11 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				gl.glActiveTexture(GL.GL_TEXTURE0);
 				Texture2DLoaderJOGL.render(jr.globalGL, texture0);
 				gl.glEnable(GL.GL_TEXTURE_2D);
-			    if (program != null && program.getSource().getUniformParameter("texture") != null) {
-					doTexture = true;
-			    	program.setUniform("texture",GL.GL_TEXTURE0);
-			    	System.err.println("Setting texture to "+GL.GL_TEXTURE0);
-			    }		    	
+//			    if (program != null && program.getSource().getUniformParameter("texture") != null) {
+//					doTexture = true;
+//			    	program.setUniform("texture",GL.GL_TEXTURE0);
+//			    	System.err.println("Setting texture to "+GL.GL_TEXTURE0);
+//			    }		    	
 		    }
 		}
 	    if (program != null && program.getSource().getUniformParameter("doTexture") != null)  {

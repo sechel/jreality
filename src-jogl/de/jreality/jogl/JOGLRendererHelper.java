@@ -605,11 +605,9 @@ public class JOGLRendererHelper {
 						.toIntArray();
 				final int nf = tf.getLength();
 				if (textures != null)	{
-					
 					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, jtextures[i]);
-
 				}
 				gl.glBegin(GL.GL_POLYGON);
 				for (int j = 0; j < nf; ++j) {
@@ -654,19 +652,11 @@ public class JOGLRendererHelper {
 					else if (vertexLength == 4)
 						gl.glVertex4d(da.getValueAt(0), da.getValueAt(1), da
 								.getValueAt(2), da.getValueAt(3));
-//					if (textureUnitsDL != null)			{
-//						gl.glActiveTexture(textureUnits[i]);
-//						System.err.println("disabling "+textureUnits[i]);
-//						gl.glDisable(GL.GL_TEXTURE_2D);
-//					}
-
 				}
 				gl.glEnd();
-				if (textures != null)	{
-					
+				if (textures != null)	{	
 					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
 			      	gl.glDisable(GL.GL_TEXTURE_2D);
-
 				}
 			}
 		}

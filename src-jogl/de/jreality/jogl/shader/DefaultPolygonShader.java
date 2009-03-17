@@ -84,10 +84,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public static final int BACK = GL.GL_BACK;
 	
 	boolean		smoothShading = true;		// interpolate shaded values between vertices
-	Texture2D texture2D;
-	JOGLTexture2D joglTexture2D;
-	Texture2D texture2D_1;
-	JOGLTexture2D joglTexture2D_1;
+	Texture2D texture2D,  texture2D_1, texture2D_2;
+	JOGLTexture2D joglTexture2D, joglTexture2D_1, joglTexture2D_2;
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
 	int frontBack = FRONT_AND_BACK;
@@ -123,9 +121,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,SMOOTH_SHADING), SMOOTH_SHADING_DEFAULT);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
-	    joglTexture2D_1 = null;
-	    reflectionMap = null;
-	    joglTexture2D = null;
+	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = null;
 	    joglCubeMap = null;
 	    hasTextures = false;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D), eap)) {
@@ -144,12 +140,18 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    	hasTextures = true;
 	    }
       
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D_2), eap)) {
+	    	texture2D_2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap);		    	
+	    	joglTexture2D_2 = new JOGLTexture2D(texture2D_2);
+	    	hasTextures = true;
+	    }
+      
 	    if (useGLSL)		{
 			if (GlslProgram.hasGlslProgram(eap, name)) {
 				// dummy to write glsl values like "lightingEnabled"
 				Appearance app = new Appearance();
-				EffectiveAppearance eap2 = eap.create(app);
-				glslProgram = new GlslProgram(app, eap2, name);
+//				EffectiveAppearance eap2 = eap.create(app);
+				glslProgram = new GlslProgram(app, eap, name);
 			} else {
 				if (noneuclideanShader == null) {
 					try {
@@ -194,18 +196,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
 //    	hasTextures = false;
-		if (hasTextures) gl.glPushAttrib(GL.GL_TEXTURE_BIT);
-		texUnit = GL.GL_TEXTURE0; 
-	    if (joglTexture2D_1 != null) {
-		    gl.glActiveTexture(texUnit);
-		    gl.glEnable(GL.GL_TEXTURE_2D);
-			Texture2DLoaderJOGL.render(gl, joglTexture2D_1);
-		    texUnit++;
-		    texunitcoords++;
-		    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
-		    	glslProgram.setUniform("texture", texUnit);
-	    }
-	    if (joglTexture2D != null) {
+		if (hasTextures) {
+			gl.glPushAttrib(GL.GL_TEXTURE_BIT);
+			texUnit = GL.GL_TEXTURE0; 
 		    Geometry curgeom = jr.renderingState.currentGeometry;
 		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
 		    	if (curgeom != null && (curgeom instanceof IndexedFaceSet) &&
@@ -214,19 +207,33 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    			needsChecked = false;
 		    	}
 		    if (geometryHasTextureCoordinates) {
-		    	gl.glActiveTexture(texUnit);
-		      	gl.glEnable(GL.GL_TEXTURE_2D);
-		 //     	System.err.println("rendering texture height "+joglTexture2D.getImage().getHeight());
-				Texture2DLoaderJOGL.render(gl, joglTexture2D);
-			    texUnit++;
-			    texunitcoords++;		
-			    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null) {
-			    	glslProgram.setUniform("texture", texUnit);
-//			    	System.err.println("Setting texture to "+texUnit);
-			    }
-		    } 
 
-	    }
+			    if (joglTexture2D != null) {
+			    	gl.glActiveTexture(texUnit);
+			      	gl.glEnable(GL.GL_TEXTURE_2D);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D);
+				    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
+				    	glslProgram.setUniform("texture", texUnit);
+				    texUnit++;
+				    texunitcoords++;		
+			    }
+			    if (joglTexture2D_1 != null) {
+				    gl.glActiveTexture(texUnit);
+				    gl.glEnable(GL.GL_TEXTURE_2D);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_1);
+				    texUnit++;
+				    texunitcoords++;
+			    }
+			    if (joglTexture2D_2 != null) {
+			    	gl.glActiveTexture(texUnit);
+			      	gl.glEnable(GL.GL_TEXTURE_2D);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_2);
+				    texUnit++;
+				    texunitcoords++;		
+			    }
+//			    System.err.println("Found textures "+(texunitcoords));
+		    }
+		}
 
 	    if (joglCubeMap != null)  {
 	      	gl.glActiveTexture(texUnit);
