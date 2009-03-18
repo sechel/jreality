@@ -484,6 +484,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	private Appearance getSelectedAppearance()	{
 //		System.err.println("Selection is  "+sm.getSelection().getSGPath());
 //		return SelectionManager.findDeepestAppearance(sm.getSelection().getSGPath());
+		selection = SelectionManager.selectionManagerForViewer(viewer).getSelectionPath();
 		return SceneGraphUtility.findDeepestAppearance(selection);
 	}
 
