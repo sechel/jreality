@@ -15,6 +15,7 @@ import javax.swing.event.ListSelectionListener;
 
 import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.DistanceCue;
+import de.jreality.audio.EarlyReflections;
 import de.jreality.audio.FDNReverb;
 import de.jreality.audio.SampleProcessor;
 import de.jreality.audio.SchroederReverb;
@@ -47,8 +48,8 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
 	private int reverbType = 0;
 
-	private String[] cueLabels = {"constant", "conical", "low pass", "linear", "exponential"};
-	private Class[] cueTypes = {DistanceCue.CONSTANT.class, DistanceCue.CONICAL.class, DistanceCue.LOWPASS.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class};
+	private String[] cueLabels = {"constant", "conical", "low pass", "linear", "exponential", "reflections"};
+	private Class[] cueTypes = {DistanceCue.CONSTANT.class, DistanceCue.CONICAL.class, DistanceCue.LOWPASS.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class, EarlyReflections.class};
 
 	private String[] reverbLabels = {"none", "Schroeder", "FDN"};
 	private Class[] reverbTypes = {SampleProcessor.class, SchroederReverb.class, FDNReverb.class};

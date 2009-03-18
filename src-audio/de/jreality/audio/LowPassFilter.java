@@ -10,7 +10,6 @@ package de.jreality.audio;
  */
 public class LowPassFilter {
 	
-	private static final float threshold = 1e-16f; // dynamic range between hearing threshold and instant perforation of eardrum
 	private float sampleRate;
 	private float cutOff = 0f;
 	private float alpha = 1f;
@@ -54,6 +53,6 @@ public class LowPassFilter {
 	}
 
 	public boolean hasMore() {
-		return Math.abs(value)>threshold;
+		return Math.abs(value)>AudioAttributes.HEARING_THRESHOLD;
 	}
 }

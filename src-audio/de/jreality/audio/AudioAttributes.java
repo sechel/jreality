@@ -19,4 +19,6 @@ public interface AudioAttributes {
 	public static final DistanceCue DEFAULT_DIRECTED_CUE = new DistanceCue.CONSTANT();
 	public static final float DEFAULT_UPDATE_CUTOFF = 6f; // play with this parameter if audio gets choppy
 	public static final FDNParameters DEFAULT_FDN_PARAMETERS = FDNParameters.BUNNY_PARAMETERS;
+	
+	public static final float HEARING_THRESHOLD = 1e-16f; // dynamic range between hearing threshold and instant perforation of eardrum
 }
