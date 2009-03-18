@@ -25,6 +25,7 @@ public class ShadedSphereImage {
 			int[] ch) {
 		int I = 0, II = 0;
 		if (lightDirection == null) lightDirection = defaultLightDirection;
+		else lightDirection = Rn.normalize(null, lightDirection);
 		if (diffuseColor == null) diffuseColor = defaultDiffuseColor;
 		if (specularColor == null) specularColor = defaultSpecularColor;
 		if (ch == null) ch = defaultChannels;

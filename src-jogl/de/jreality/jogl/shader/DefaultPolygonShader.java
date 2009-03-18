@@ -92,15 +92,16 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public VertexShader vertexShader = new DefaultVertexShader();
 	boolean useGLSL = false;
 	int texUnit = 0, refMapUnit = 0;
-	GlslPolygonShader glslShader = new GlslPolygonShader();
+//	GlslPolygonShader glslShader = new GlslPolygonShader();
 	GlslProgram glslProgram;
 	transient boolean geometryHasTextureCoordinates = false, hasTextures = false;
-	transient boolean needsChecked = true;
+	transient boolean firstTime = true;
 	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	// try loading the OpenGL shader for the non-euclidean cases
 	static GlslProgram noneuclideanShader = null;
 	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
+	JOGLRenderingState theJRS;
 	static {
 		Appearance ap = new Appearance();
 		EffectiveAppearance eap = EffectiveAppearance.create();
@@ -165,11 +166,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				glslProgram = noneuclideanShader;
 //				glslProgram.setUniform("Nw", (double) 1.0);
 			}
-			glslShader.setFromEffectiveAppearance(eap, name);
+//			glslShader.setFromEffectiveAppearance(eap, name);
 	    }
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
-		needsChecked = true;
+		firstTime = true;
  	}
 
 	public Color getDiffuseColor() {
@@ -200,11 +201,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			gl.glPushAttrib(GL.GL_TEXTURE_BIT);
 			texUnit = GL.GL_TEXTURE0; 
 		    Geometry curgeom = jr.renderingState.currentGeometry;
-		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
+		    if (firstTime)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
 		    	if (curgeom != null && (curgeom instanceof IndexedFaceSet) &&
 		    		((IndexedFaceSet) curgeom).getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
 		    			geometryHasTextureCoordinates = true; 
-		    			needsChecked = false;
+		    			firstTime = false;
 		    	}
 		    if (geometryHasTextureCoordinates) {
 
@@ -243,32 +244,35 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			texUnit++;
 		} 	
     
-	jr.renderingState.texUnitCount = texunitcoords; 
-    vertexShader.setFrontBack(frontBack);
-	vertexShader.render(jrs); 
-    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
-    if (useGLSL && glslProgram != null)		{
-		if (glslProgram.getSource().getUniformParameter("lightingEnabled") != null) {
-			glslProgram.setUniform("lightingEnabled", jrs.lighting);
-		}
-		if (glslProgram.getSource().getUniformParameter("transparency") != null) {
-			glslProgram.setUniform("transparency", jrs.transparencyEnabled ? jrs.currentAlpha : 0f);
-		}
-		if (glslProgram.getSource().getUniformParameter("numLights") != null) {
-			glslProgram.setUniform("numLights", jrs.numLights);
-		}
-		if (glslProgram.getSource().getUniformParameter("fogEnabled") != null) {
-			glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
-		}
-		if (glslProgram.getSource().getUniformParameter("hyperbolic") != null) {
-			glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
-		}
-		if (glslProgram.getSource().getUniformParameter("useNormals4") != null) {
-			glslProgram.setUniform("useNormals4", jrs.normals4d);
-		}
-		
-  	GlslLoader.render(glslProgram, jr);
-    }
+		jr.renderingState.texUnitCount = texunitcoords; 
+	    vertexShader.setFrontBack(frontBack);
+		vertexShader.render(jrs); 
+	    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
+	    if (useGLSL && glslProgram != null)		{
+	    	if (firstTime)	{
+	    		if (glslProgram.getSource().getUniformParameter("lightingEnabled") != null) {
+	    			glslProgram.setUniform("lightingEnabled", jrs.lighting);
+	    		}
+	    		if (glslProgram.getSource().getUniformParameter("transparency") != null) {
+	    			glslProgram.setUniform("transparency", jrs.transparencyEnabled ? jrs.currentAlpha : 0f);
+	    		}
+	    		if (glslProgram.getSource().getUniformParameter("numLights") != null) {
+	    			glslProgram.setUniform("numLights", jrs.numLights);
+	    		}
+	    		if (glslProgram.getSource().getUniformParameter("fogEnabled") != null) {
+	    			glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
+	    		}
+	    		if (glslProgram.getSource().getUniformParameter("hyperbolic") != null) {
+	    			glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
+	    		}
+	    		if (glslProgram.getSource().getUniformParameter("useNormals4") != null) {
+	    			glslProgram.setUniform("useNormals4", jrs.normals4d);
+	    		}   		
+	    	}
+			
+			GlslLoader.render(glslProgram, jr);
+	    }
+	    firstTime = false;
 }
 	
 	public void postRender(JOGLRenderingState jrs)	{

@@ -86,9 +86,9 @@ public class JOGLRendererHelper {
 	public final static int PER_FACE = 2;
 	public final static int PER_VERTEX = 4;
 	public final static int PER_EDGE = 8;
-	static float val = 1f;
-	static float[][] unitsquare = { { val, val }, { -val, val }, { -val, -val },
-			{ val, -val } };
+	static float val = 1f, zval = 1f;
+	static float[][] unitsquare = { { val, val, zval }, { -val, val, zval }, { -val, -val, zval },
+			{ val, -val, zval } };
 
 	private JOGLRendererHelper() {}
 
@@ -165,15 +165,22 @@ public class JOGLRendererHelper {
 				xl = nxl; xr = nxr; yb = nyb; yt = nyt;
 			}
 			double[][] texcoords = { { xl, yb }, { xr, yb }, { xr, yt }, { xl, yt } };
+			float[][] cornersf = new float[4][];
 			if (!hasTexture)	{
 				bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
 				if (bgo != null && bgo instanceof Color[]) {
-					hasColors = true;
-				}				
+					Color[] backgroundCorners = (Color[]) bgo;
+					for (int i = 0; i<4; ++i)	{
+						cornersf[i] = backgroundCorners[i].getRGBComponents(null);
+					}
+				}	 else {
+					for (int i = 0; i<4; ++i) 
+						cornersf[i] = backgroundColor;
+				}
+				hasColors = true;
 			}
 			if (hasTexture || hasColors) {
 				// bgo = (Object) corners;
-				float[][] cornersf = new float[4][];
 				if (hasTexture)	{
 					gl.glPushAttrib(GL.GL_TEXTURE_BIT);
 					gl.glActiveTexture(GL.GL_TEXTURE0);
@@ -181,7 +188,7 @@ public class JOGLRendererHelper {
 					Texture2DLoaderJOGL.render(gl, tex);
 				}
 //				gl.glPushAttrib(GL.GL_ENABLE_BIT);
-				gl.glDisable(GL.GL_DEPTH_TEST);
+//				gl.glDisable(GL.GL_DEPTH_TEST);
 				gl.glDisable(GL.GL_LIGHTING);
 				gl.glShadeModel(GL.GL_SMOOTH);
 				gl.glBegin(GL.GL_POLYGON);
@@ -191,10 +198,9 @@ public class JOGLRendererHelper {
 						gl.glColor3f(1f, 1f, 1f);
 						gl.glTexCoord2dv(texcoords[q], 0);
 					} else {
-						cornersf[q] = ((Color[]) bgo)[q].getComponents(null);
-						gl.glColor3fv(cornersf[q],0);
+						gl.glColor4fv(cornersf[q],0);
 					}
-					gl.glVertex2fv(unitsquare[q],0);
+					gl.glVertex3fv(unitsquare[q],0);
 				}
 				gl.glEnd();
 				// TODO push/pop this correctly (now may overwrite previous values)
@@ -233,9 +239,9 @@ public class JOGLRendererHelper {
 	}
 
 
-	private static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
+//	private static ByteBuffer vBuffer, vcBuffer, vnBuffer, fcBuffer, fnBuffer, tcBuffer;
 
-	private static DataList vLast = null, vcLast = null, vnLast = null;
+//	private static DataList vLast = null, vcLast = null, vnLast = null;
 
 	@Deprecated
 	public static void drawVertices(JOGLRenderer jr, PointSet sg, double alpha) {

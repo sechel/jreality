@@ -545,6 +545,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
 								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+//								GL.GL_RGB, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
 					}
 				}
 				
@@ -783,7 +784,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		ImageUtility.writeBufferedImage(file, img);
 	}
 
-	BufferedImage img;
+	BufferedImage offscreenImage;
 	boolean preMultiplied = false;		// not sure about this!
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLCanvas canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
@@ -796,8 +797,8 @@ public class JOGLRenderer  implements AppearanceListener {
 //		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
 		tileSizeX = (imageWidth/numTiles);
 		tileSizeY = (imageHeight/numTiles);
-		tileSizeX = 4 * (((int) tileSizeX)/4);
-		tileSizeY = 4 * (((int) tileSizeY)/4);
+//		tileSizeX = 4 * (((int) tileSizeX)/4);
+//		tileSizeY = 4 * (((int) tileSizeY)/4);
 		imageWidth = (tileSizeX) * numTiles;
 		imageHeight = (tileSizeY) * numTiles;
 		System.err.println("Tile size x = "+tileSizeX);
@@ -806,22 +807,22 @@ public class JOGLRenderer  implements AppearanceListener {
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
 		caps.setAlphaBits(8);
-//		if (offscreenPBuffer == null) 
-			offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
+		offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
 				canvas.getContext());
 //		offscreenBuffer = null;
 //		imageWidth = numTiles*tileSizeX;
 //		imageHeight = numTiles*tileSizeY;
-		img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR);
-		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) img.getRaster().getDataBuffer()).getData());
+		offscreenImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR); //TYPE_3BYTE_BGR); //
+		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) offscreenImage.getRaster().getDataBuffer()).getData());
 		offscreenMode = true;
 		lightListDirty = true;
 		canvas.display();
 		// why I can't just use img is a mystery to me ... go figure
 		// I seem to be just copying the data directly from one image to the other.
-		BufferedImage bi = ImageUtility.rearrangeChannels(img);
+		BufferedImage bi = ImageUtility.rearrangeChannels(offscreenImage);
+//		BufferedImage bi = offscreenImage;
 		ImageUtil.flipImageVertically(bi);
 		// a magic incantation to get the alpha channel to show up correctly
 		bi.coerceData(true);
