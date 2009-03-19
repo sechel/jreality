@@ -15,7 +15,7 @@ public class FDNReverb implements SampleProcessor {
 	private SampleReader reader;
 	private FDNParameters parameters;
 	private float[][] delayLines;
-	private int[] delayIndices;
+	private int[] lineIndices;
 	private float[] outBuffer, inBuffer;
 	
 	public FDNReverb() {
@@ -47,7 +47,7 @@ public class FDNReverb implements SampleProcessor {
 		int sr = reader.getSampleRate();
 		
 		parameters = params;
-		delayIndices = new int[n];
+		lineIndices = new int[n];
 		delayLines = new float[n][];
 		inBuffer = new float[n];
 		outBuffer = new float[n];
@@ -83,15 +83,16 @@ public class FDNReverb implements SampleProcessor {
 		return nRead;
 	}
 
-	private float getValue(int i) {
-		return delayLines[i][delayIndices[i]];
+	private float getValue(int j) {
+		return delayLines[j][lineIndices[j]];
 	}
 	
-	private float setValue(int i, float v) {
-		return delayLines[i][delayIndices[i]] = v;
+	private float setValue(int j, float v) {
+		return delayLines[j][lineIndices[j]] = v;
 	}
 	
-	private void advanceIndex(int i) {
-		delayIndices[i] = (delayIndices[i]+1) % delayLines[i].length;
+	private void advanceIndex(int j) {
+		int i = lineIndices[j]+1;
+		lineIndices[j] = (i<delayLines[j].length) ? i : i-delayLines[j].length;
 	}
 }

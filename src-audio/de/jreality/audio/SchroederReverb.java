@@ -18,7 +18,7 @@ public class SchroederReverb implements SampleProcessor {
 	private static final float[] delays = {0.0297f, 0.0371f, 0.0411f, 0.0437f, 0.09683f, 0.03292f};
 	private float[] coeffs = new float[6];
 	private float[][] delayLines = new float[6][];
-	private int[] lineIndex = new int[6];
+	private int[] lineIndices = new int[6];
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
 	private SampleReader reader;
 
@@ -107,14 +107,15 @@ public class SchroederReverb implements SampleProcessor {
 	}
 
 	private void advanceFilterIndex(int j) {
-		lineIndex[j] = (lineIndex[j]+1) % delayLines[j].length;
+		int i = lineIndices[j]+1;
+		lineIndices[j] = (i<delayLines[j].length) ? i : i-delayLines[j].length;
 	}
 
 	private float currentFilterValue(int j) {
-		return delayLines[j][lineIndex[j]];
+		return delayLines[j][lineIndices[j]];
 	}
 
 	private float setFilterValue(int j, float v) {
-		return delayLines[j][lineIndex[j]] = v;
+		return delayLines[j][lineIndices[j]] = v;
 	}
 }

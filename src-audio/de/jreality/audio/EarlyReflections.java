@@ -30,7 +30,9 @@ public class EarlyReflections implements DistanceCue {
 			u += delayLine[(index+offsets[i]) % maxDelay]*gains[i];
 		}
 		delayLine[index++] = v;
-		index %= maxDelay;
+		if (index>=maxDelay) {
+			index -= maxDelay;
+		}
 		if (v>AudioAttributes.HEARING_THRESHOLD) {
 			samplesLeft = maxDelay;
 		} else if (samplesLeft>0){
