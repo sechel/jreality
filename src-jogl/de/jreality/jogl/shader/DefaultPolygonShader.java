@@ -210,23 +210,23 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    if (geometryHasTextureCoordinates) {
 
 			    if (joglTexture2D != null) {
-			    	gl.glActiveTexture(texUnit);
+			    	gl.glActiveTexture(GL.GL_TEXTURE0);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, joglTexture2D);
-				    if (glslProgram != null && glslProgram.getSource().getUniformParameter("texture") != null)
-				    	glslProgram.setUniform("texture", texUnit);
+//					System.err.println("rendered texture 0");
 				    texUnit++;
 				    texunitcoords++;		
 			    }
 			    if (joglTexture2D_1 != null) {
-				    gl.glActiveTexture(texUnit);
+				    gl.glActiveTexture(GL.GL_TEXTURE0+1);
 				    gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, joglTexture2D_1);
+//					System.err.println("rendered texture 1");
 				    texUnit++;
 				    texunitcoords++;
 			    }
 			    if (joglTexture2D_2 != null) {
-			    	gl.glActiveTexture(texUnit);
+			    	gl.glActiveTexture(GL.GL_TEXTURE0+2);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, joglTexture2D_2);
 				    texUnit++;
@@ -280,10 +280,22 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		GL gl = jrs.renderer.globalGL;
 		if (useGLSL)
 			GlslLoader.postRender(glslProgram, gl);
-		for (int i = GL.GL_TEXTURE0; i < texUnit; ++i) {
-			gl.glActiveTexture(i);
-			gl.glDisable(GL.GL_TEXTURE_2D);
+//		for (int i = GL.GL_TEXTURE0; i <  GL.GL_TEXTURE0+3; ++i) {
+		if (hasTextures)	{
+		    if (joglTexture2D != null) {
+				gl.glActiveTexture(GL.GL_TEXTURE0);
+				gl.glDisable(GL.GL_TEXTURE_2D);
+		    }
+		    if (joglTexture2D_1 != null) {
+				gl.glActiveTexture(GL.GL_TEXTURE0+1);
+				gl.glDisable(GL.GL_TEXTURE_2D);
+		    }
+		    if (joglTexture2D_2 != null) {
+				gl.glActiveTexture(GL.GL_TEXTURE0+2);
+				gl.glDisable(GL.GL_TEXTURE_2D);
+		    }			
 		}
+//		}
 		if (joglCubeMap != null) {
 			gl.glActiveTexture(refMapUnit);
 			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);

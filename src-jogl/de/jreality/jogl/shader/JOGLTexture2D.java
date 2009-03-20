@@ -8,6 +8,9 @@ import de.jreality.shader.Texture2D;
 
 /**
  * This class is essentially a cache for the Texture2D used in the constructor.
+ * 
+ * WARNING: the set methods are not supported.  Call update() to read out ALL values of the
+ * associated Texture2D into the JOGLTexture2D.
  * @author Charles Gunn
  *
  */
@@ -176,128 +179,79 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public void setApplyMode(Integer applyMode) {
-		// TODO Auto-generated method stub
-		
+		this.applyMode = applyMode;
 	}
 
 	public void setBlendColor(Color blendColor) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setCombineMode(Integer combineMode) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setCombineModeAlpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setCombineModeColor(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setExternalSource(String b) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setImage(ImageData image) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setMagFilter(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setMinFilter(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setOperand0Alpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setOperand0Color(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setOperand1Alpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setOperand1Color(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setOperand2Alpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setOperand2Color(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setRepeatS(Integer repeatS) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setRepeatT(Integer repeatT) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setSource0Alpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setSource0Color(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setSource1Alpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setSource1Color(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setSource2Alpha(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setSource2Color(Integer i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setTextureMatrix(Matrix matrix) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void setAnimated(Boolean b) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public Boolean getMipmapMode() {
