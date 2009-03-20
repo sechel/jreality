@@ -335,14 +335,19 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 	  }
 
-	  static Matrix[] cubeMapMatrices = new Matrix[6];
+	  public static Matrix[] cubeMapMatrices = new Matrix[6], textureMapMatrices = new Matrix[6];
 	  static {
-		  for (int i = 0; i<6; i++) cubeMapMatrices[i] = new Matrix();
+		  for (int i = 0; i<6; i++) {
+			  cubeMapMatrices[i] = new Matrix();
+			  textureMapMatrices[i] = new Matrix();
+		  }
 		  MatrixBuilder.euclidean().rotateY(-Math.PI/2).assignTo(cubeMapMatrices[0]);	// right
 		  MatrixBuilder.euclidean().rotateY(Math.PI/2).assignTo(cubeMapMatrices[1]);	// left
 		  MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(cubeMapMatrices[2]);	// up
 		  MatrixBuilder.euclidean().rotateX(-Math.PI/2).assignTo(cubeMapMatrices[3]);	// down
 		  MatrixBuilder.euclidean().rotateY(Math.PI).assignTo(cubeMapMatrices[5]);		// back ... front (Id)
+//		  MatrixBuilder.euclidean().rotateZ(-Math.PI/2).assignTo(textureMapMatrices[2]);	// up
+//		  MatrixBuilder.euclidean().rotateZ(Math.PI/2).assignTo(textureMapMatrices[3]);	// down
 	  }
 	  public BufferedImage[] renderCubeMap(int size)	{
 		  BufferedImage[] cmp = new BufferedImage[6];

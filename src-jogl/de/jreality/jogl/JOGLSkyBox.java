@@ -87,8 +87,6 @@ class JOGLSkyBox {
   static void render(GL gl, double[] w2c, CubeMap cm, Camera cam)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
     tex.setBlendColor(cm.getBlendColor());
-//	gl.glDepthMask(false);
-//	gl.glDepthFunc(GL.GL_NEVER);
 	gl.glPushAttrib(GL.GL_ENABLE_BIT);
 	gl.glDisable(GL.GL_BLEND);
 	gl.glDisable(GL.GL_DEPTH_TEST);
@@ -99,13 +97,13 @@ class JOGLSkyBox {
 //	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, white);
     gl.glColor4fv( white, 0);
     gl.glPushMatrix();
-	    
+	   
     gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN), 0);
     double scale = (cam.getNear() + cam.getFar())/2;
     gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
 	for (int i = 0; i<6; ++i)	{
 		tex.setImage(imgs[i]);
-	    Texture2DLoaderJOGL.render(gl, tex);
+	    Texture2DLoaderJOGL.render(gl, jogltex);
 		gl.glBegin(GL.GL_POLYGON);
 		for (int j = 0; j<4; ++j)	{
 			gl.glTexCoord2dv(texCoords[j],0);
@@ -115,8 +113,6 @@ class JOGLSkyBox {
 	}
     gl.glPopMatrix();
 	gl.glPopAttrib();
-//	gl.glDepthMask(true);
-//	gl.glDepthFunc(GL.GL_LESS);	
 }
 	
 }
