@@ -154,17 +154,9 @@ public interface Texture2D extends AttributeEntity {
   public static final Color BLEND_COLOR_DEFAULT=Color.WHITE;
   public static final String EXTERNAL_SOURCE_DEFAULT=null;
   
-  /**
-   * Use {@link #setTextureMatrix(Matrix)} instead
-   * @return
-   */
-  @Deprecated	
   public abstract Integer getRepeatS();
-  @Deprecated	
   public abstract void setRepeatS(Integer repeatS);
-  @Deprecated	
   public abstract Integer getRepeatT();
-  @Deprecated	
   public abstract void setRepeatT(Integer repeatT);
 
   public abstract Integer getMagFilter();

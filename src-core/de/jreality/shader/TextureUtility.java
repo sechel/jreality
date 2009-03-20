@@ -40,6 +40,11 @@
 
 package de.jreality.shader;
 
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_2;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_3;
+
 import java.awt.Color;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -80,13 +85,23 @@ public class TextureUtility {
 	 * @return a proxy implementation of Texture2D
 	 */
 	public static Texture2D createTexture(Appearance app, String shader, ImageData img, boolean readDefaults) {
-		String key = (shader == null || shader.equals("")) ? "texture2d" : shader+".texture2d";
+		return createTexture(app, shader, 0, img, readDefaults);
+	}
+
+	private static String[] texture2dNames = {TEXTURE_2D, TEXTURE_2D_1, TEXTURE_2D_2, TEXTURE_2D_3};
+	public static Texture2D createTexture(Appearance app, String shader, int i, ImageData img, boolean readDefaults) {
+		String key = (shader == null || shader.equals("")) ? texture2dNames[i] : shader+"."+texture2dNames[i];
 		return createTextureImpl(app, key, img, readDefaults);
+
 	}
 	public static Texture2D createTexture(Appearance app, String shader, ImageData img) {
-		return createTexture(app, shader, img, true);
+		return createTexture(app, shader, 0, img, true);
 	}
-	/**
+
+	public static Texture2D createTexture(Appearance app, String shader, int i, ImageData img) {
+		return createTexture(app, shader, i, img, true);
+	}
+/**
 	 * method to create a reflectionMap for the given image (as ImageData).
 	 * 
 	 * @param app the appearance where to create the Texture2D 
