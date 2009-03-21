@@ -2,6 +2,7 @@ package de.jreality.plugin.audio;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,37 +42,37 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
  */
 public class AudioOptions extends ShrinkPanelPlugin {
 
-	private int[] selectedIndices = new int[0];
+	private int[] selectedCues = new int[0];
+	private int[] selectedProcs = new int[0];
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float reverbGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
 	private int reverbType = 0;
 
-	private String[] cueLabels = {"constant", "conical", "low pass", "linear", "exponential", "reflections"};
-	private Class[] cueTypes = {DistanceCue.CONSTANT.class, DistanceCue.CONICAL.class, DistanceCue.LOWPASS.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class, EarlyReflections.class};
+	private String[] procLabels = {"none", "reflections"};
+	private Class[] procTypes = {null, EarlyReflections.class};
+	
+	private String[] cueLabels = {"none", "conical", "low pass", "linear", "exponential"};
+	private Class[] cueTypes = {null, DistanceCue.CONICAL.class, DistanceCue.LOWPASS.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class};
 
 	private String[] reverbLabels = {"none", "Schroeder", "FDN"};
-	private Class[] reverbTypes = {SampleProcessor.class, SchroederReverb.class, FDNReverb.class};
+	private Class[] reverbTypes = {null, SchroederReverb.class, FDNReverb.class};
 
 	private Appearance rootAppearance;
 
 	private JSliderVR gainWidget, speedWidget, reverbGainWidget, reverbTimeWidget;
-	private JList distanceCueWidget;
-	private JList reverbWidget;
+	private JList procWidget, distanceCueWidget, reverbWidget;
 
 	public AudioOptions() {
 		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 
+		int rowCount = 0;
+		
 		gbc.gridx = 0;
-		gbc.gridy = 0;
-		shrinkPanel.add(new JLabel("Distance cue"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(distanceCueWidget = new JList(cueLabels), gbc);
-		gbc.gridx = 0;
-		gbc.gridy = 1;
+		gbc.gridy = rowCount++;
 		shrinkPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(speedWidget = new JSliderVR(0, 1000), gbc);
@@ -80,8 +81,9 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		speedWidget.setPaintTicks(true);
 		speedWidget.setPaintLabels(true);
 		speedWidget.setPaintTrack(true);
+		
 		gbc.gridx = 0;
-		gbc.gridy = 2;
+		gbc.gridy = rowCount++;
 		shrinkPanel.add(new JLabel("Gain (dB)"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(gainWidget = new JSliderVR(-60, 30, (int) toDecibels(gain)), gbc);
@@ -90,13 +92,29 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		gainWidget.setPaintTicks(true);
 		gainWidget.setPaintLabels(true);
 		gainWidget.setPaintTrack(true);
+
+		gbc.insets = new Insets(0, 0, 4, 0);
 		gbc.gridx = 0;
-		gbc.gridy = 3;
+		gbc.gridy = rowCount++;
+		shrinkPanel.add(new JLabel("Preprocessor"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(procWidget = new JList(procLabels), gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = rowCount++;
+		shrinkPanel.add(new JLabel("Distance cue"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(distanceCueWidget = new JList(cueLabels), gbc);
+
+		gbc.insets = new Insets(0, 0, 0, 0);
+		gbc.gridx = 0;
+		gbc.gridy = rowCount++;
 		shrinkPanel.add(new JLabel("Reverb"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(reverbWidget = new JList(reverbLabels), gbc);
+		
 		gbc.gridx = 0;
-		gbc.gridy = 4;
+		gbc.gridy = rowCount++;
 		shrinkPanel.add(new JLabel("Reverb time (.1 sec)"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(reverbTimeWidget = new JSliderVR(0, 50, (int) reverbTime*10), gbc);
@@ -105,8 +123,9 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		reverbTimeWidget.setPaintTicks(true);
 		reverbTimeWidget.setPaintLabels(true);
 		reverbTimeWidget.setPaintTrack(true);
+		
 		gbc.gridx = 0;
-		gbc.gridy = 5;
+		gbc.gridy = rowCount++;
 		shrinkPanel.add(new JLabel("Reverb gain (dB)"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(reverbGainWidget = new JSliderVR(-60, 30, (int) toDecibels(reverbGain)), gbc);
@@ -116,9 +135,15 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		reverbGainWidget.setPaintLabels(true);
 		reverbGainWidget.setPaintTrack(true);
 
+		procWidget.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				selectedProcs = procWidget.getSelectedIndices();
+				setProcessorAttribute();
+			}
+		});
 		distanceCueWidget.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				selectedIndices = distanceCueWidget.getSelectedIndices();
+				selectedCues = distanceCueWidget.getSelectedIndices();
 				setDistanceCueAttribute();
 			}
 		});
@@ -157,10 +182,24 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		});
 	}
 
+	private void setProcessorAttribute() {
+		List<Class<? extends SampleProcessor>> list = new ArrayList<Class<? extends SampleProcessor>>();
+		for(int i: selectedProcs) {
+			Class<? extends SampleProcessor> clazz = procTypes[i];
+			if (clazz!=null) {
+				list.add(clazz);
+			}
+		}
+		rootAppearance.setAttribute(AudioAttributes.PREPROCESSOR_KEY, Collections.unmodifiableList(list));
+	}
+	
 	private void setDistanceCueAttribute() {
 		List<Class<? extends DistanceCue>> list = new ArrayList<Class<? extends DistanceCue>>();
-		for(int i: selectedIndices) {
-			list.add((Class<? extends DistanceCue>) cueTypes[i]);
+		for(int i: selectedCues) {
+			Class<? extends DistanceCue> clazz = cueTypes[i];
+			if (clazz!=null) {
+				list.add(clazz);
+			}
 		}
 		rootAppearance.setAttribute(AudioAttributes.DISTANCE_CUE_KEY, Collections.unmodifiableList(list));
 	}
@@ -174,7 +213,12 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	}
 
 	private void setReverbAttribute() {
-		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbTypes[reverbType]);
+		List<Class<? extends SampleProcessor>> list = new ArrayList<Class<? extends SampleProcessor>>();
+		Class<? extends SampleProcessor> clazz = reverbTypes[reverbType];
+		if (clazz!=null) {
+			list.add(clazz);
+		}
+		rootAppearance.setAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, Collections.unmodifiableList(list));
 	}
 
 	private void setReverbGainAttribute() {
@@ -185,8 +229,12 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		rootAppearance.setAttribute(AudioAttributes.REVERB_TIME_KEY, reverbTime);
 	}
 
+	private void updateProcWidget() {
+		procWidget.setSelectedIndices(selectedProcs);
+	}
+
 	private void updateCueWidget() {
-		distanceCueWidget.setSelectedIndices(selectedIndices);
+		distanceCueWidget.setSelectedIndices(selectedCues);
 	}
 
 	private void updateSpeedWidget() {
@@ -233,6 +281,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			root.setAppearance(rootAppearance = new Appearance());
 		}
 
+		updateProcWidget();
 		updateCueWidget();
 		updateSpeedWidget();
 		updateGainWidget();
@@ -246,7 +295,8 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		super.restoreStates(c);
 
 		try {
-			selectedIndices = c.getProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, new int[0]);
+			selectedProcs = c.getProperty(getClass(), AudioAttributes.PREPROCESSOR_KEY, new int[0]);
+			selectedCues = c.getProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, new int[0]);
 			speedOfSound = c.getProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 			gain = c.getProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
 			reverbType = c.getProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, 0);
@@ -261,7 +311,8 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 
-		c.storeProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, selectedIndices);
+		c.storeProperty(getClass(), AudioAttributes.PREPROCESSOR_KEY, selectedProcs);
+		c.storeProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, selectedCues);
 		c.storeProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
 		c.storeProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, gain);
 		c.storeProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbType);

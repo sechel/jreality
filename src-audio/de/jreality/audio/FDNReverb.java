@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import java.util.Arrays;
+
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
@@ -59,6 +61,9 @@ public class FDNReverb implements SampleProcessor {
 
 	public void clear() {
 		reader.clear();
+		for(float[] line: delayLines) {
+			Arrays.fill(line, 0);
+		}
 	}
 
 	public int getSampleRate() {

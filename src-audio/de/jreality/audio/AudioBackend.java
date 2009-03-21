@@ -78,24 +78,28 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		appearanceChanged(null);
 		rootAppearanceObserver.addAppearanceListener(this);
 	}
-
+	
+	List<Class<? extends SampleProcessor>> dirlessChain = null;
+	
 	public synchronized void appearanceChanged(AppearanceEvent ev) {
-		EffectiveAppearance eapp = EffectiveAppearance.create(rootAppearancePath);
-		Class<? extends SampleProcessor> clazz = (Class<? extends SampleProcessor>) eapp.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, SampleProcessor.class);
-		if (clazz==SampleProcessor.class) {
+		EffectiveAppearance app = EffectiveAppearance.create(rootAppearancePath);
+		
+		List<Class<? extends SampleProcessor>> newDirlessChain = (List<Class<? extends SampleProcessor>>) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, List.class);
+		if (newDirlessChain==null || newDirlessChain.isEmpty()) {
 			directionlessProcessor = null;
-		} else if (directionlessProcessor==null || directionlessProcessor.getClass()!=clazz) {
+		} else if (!newDirlessChain.equals(dirlessChain)) {
+			dirlessChain = newDirlessChain;
 			try {
 				directionlessReader.clear();
-				directionlessProcessor = clazz.newInstance();
+				directionlessProcessor = ProcessorChain.create(newDirlessChain);
 				directionlessProcessor.initialize(directionlessReader);
 			} catch (Exception e) {
-				directionlessProcessor = null;
 				e.printStackTrace();
 			}
 		}
+		
 		if (directionlessProcessor!=null) {
-			directionlessProcessor.setProperties(eapp);
+			directionlessProcessor.setProperties(app);
 		}
 	}
 

@@ -23,11 +23,12 @@ public class DelayPath implements SoundPath {
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float directionlessGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
-	private DistanceCue generalDistanceCue = AudioAttributes.DEFAULT_GENERAL_CUE;
-	private DistanceCue directedDistanceCue = AudioAttributes.DEFAULT_DIRECTED_CUE;
+	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DISTANCE_CUE;
+	private DistanceCue directionlessCue = AudioAttributes.DEFAULT_DIRECTIONLESS_CUE;
+	private SampleProcessor preProcessor = new SampleProcessor.NullProcessor();
 	private float updateCutoff = AudioAttributes.DEFAULT_UPDATE_CUTOFF;
 
-	private SampleReader reader;
+	private SampleReader rawReader;
 	private int sampleRate;
 	private float gamma;
 
@@ -56,7 +57,8 @@ public class DelayPath implements SoundPath {
 		if (reader==null) {
 			throw new IllegalArgumentException("reader cannot be null");
 		}
-		this.reader = ConvertingReader.createReader(reader, sampleRate);
+		this.rawReader = ConvertingReader.createReader(reader, sampleRate);
+		preProcessor.initialize(this.rawReader);
 		this.sampleRate = sampleRate;
 
 		xFilter = new LowPassFilter(sampleRate);
@@ -66,33 +68,50 @@ public class DelayPath implements SoundPath {
 		updateParameters();
 	}
 
-	private List<Class<? extends DistanceCue>> directedChain = null, generalChain = null;
+	private List<Class<? extends DistanceCue>> directedChain = null, directionlessChain = null;
+	private List<Class<? extends SampleProcessor>> preProcChain = null;
 
-	public synchronized void setProperties(EffectiveAppearance eapp) {
-		gain = eapp.getAttribute(AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
-		directionlessGain = eapp.getAttribute(AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
-		speedOfSound = eapp.getAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
-		updateCutoff = eapp.getAttribute(AudioAttributes.UPDATE_CUTOFF_KEY, AudioAttributes.DEFAULT_UPDATE_CUTOFF);
+	public synchronized void setProperties(EffectiveAppearance app) {
+		gain = app.getAttribute(AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
+		directionlessGain = app.getAttribute(AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
+		speedOfSound = app.getAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
+		updateCutoff = app.getAttribute(AudioAttributes.UPDATE_CUTOFF_KEY, AudioAttributes.DEFAULT_UPDATE_CUTOFF);
 		updateParameters();
 
-		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(AudioAttributes.DISTANCE_CUE_KEY, null, List.class);
+		List<Class<? extends SampleProcessor>> newPreProcChain = (List<Class<? extends SampleProcessor>>) app.getAttribute(AudioAttributes.PREPROCESSOR_KEY, null, List.class);
+		if (newPreProcChain==null || !newPreProcChain.equals(preProcChain)) {
+			preProcChain = newPreProcChain;
+			try {
+				preProcessor = ProcessorChain.create(newPreProcChain);
+				preProcessor.initialize(rawReader);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) app.getAttribute(AudioAttributes.DISTANCE_CUE_KEY, null, List.class);
 		if (newChain==null || !newChain.equals(directedChain)) {
 			directedChain = newChain;
 			try {
-				directedDistanceCue = evaluateChain(newChain);
+				distanceCue = evaluateChain(newChain);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		newChain = (List<Class<? extends DistanceCue>>) eapp.getAttribute(AudioAttributes.DIRECTIONLESS_CUE_KEY, null, List.class);
-		if (newChain==null || !newChain.equals(generalChain)) {
-			generalChain = newChain;
+		
+		List<Class<? extends DistanceCue>> newDirlessChain = (List<Class<? extends DistanceCue>>) app.getAttribute(AudioAttributes.DIRECTIONLESS_CUE_KEY, null, List.class);
+		if (newDirlessChain==null || !newDirlessChain.equals(directionlessChain)) {
+			directionlessChain = newDirlessChain;
 			try {
-				generalDistanceCue = evaluateChain(newChain);
+				directionlessCue = evaluateChain(newDirlessChain);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		
+		preProcessor.setProperties(app);
+		distanceCue.setProperties(app);
+		directionlessCue.setProperties(app);
 	}
 
 	private DistanceCue evaluateChain(List<Class<? extends DistanceCue>> chain) throws InstantiationException, IllegalAccessException {
@@ -116,7 +135,7 @@ public class DelayPath implements SoundPath {
 		if (newFrame==null || newFrame.length<frameSize) {
 			newFrame = new float[frameSize];
 		}
-		if (reader.read(newFrame, 0, frameSize)>0) {
+		if (preProcessor.read(newFrame, 0, frameSize)>0) {
 			sourceFrames.add(newFrame);
 			newFrame = null;
 			frameCount++;
@@ -136,7 +155,7 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 
-		if (frameCount==0 && currentFrame==null && !directedDistanceCue.hasMore() && !generalDistanceCue.hasMore()) {
+		if (frameCount==0 && currentFrame==null && !distanceCue.hasMore()) {
 			reset();
 			return false;  // nothing left to render
 		} else {
@@ -168,12 +187,12 @@ public class DelayPath implements SoundPath {
 					updateTarget();
 				}
 				previousSample = currentSample;
-				float newSample = (currentFrame!=null) ? currentFrame[currentIndex] : 0f;
-				currentSample = generalDistanceCue.nextValue(newSample*gain, distance, xMic, yMic, zMic);
+				float newSample = (currentFrame!=null) ? currentFrame[currentIndex]*gain : 0f;
+				currentSample = directionlessCue.nextValue(newSample, distance, xMic, yMic, zMic);
 			}
 
 			float v = previousSample+fractionalTime*(currentSample-previousSample);
-			enc.encodeSample(directedDistanceCue.nextValue(v, distance, xMic, yMic, zMic), j, xCurrent, yCurrent, zCurrent);
+			enc.encodeSample(distanceCue.nextValue(v, distance, xMic, yMic, zMic), j, xCurrent, yCurrent, zCurrent);
 			if (directionlessBuffer!=null) {
 				directionlessBuffer[j] += v*directionlessGain;
 			}
@@ -222,7 +241,8 @@ public class DelayPath implements SoundPath {
 		frameCount = 0;
 		previousSample = 0;
 		currentSample = 0f;
-		directedDistanceCue.reset();
-		generalDistanceCue.reset();
+		preProcessor.clear();
+		distanceCue.reset();
+		directionlessCue.reset();
 	}
 }

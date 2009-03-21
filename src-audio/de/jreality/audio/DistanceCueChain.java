@@ -3,6 +3,8 @@ package de.jreality.audio;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.jreality.shader.EffectiveAppearance;
+
 /**
  * 
  * An implementation of DistanceCue that holds a chain of distance cues that are applied successively,
@@ -29,7 +31,7 @@ public final class DistanceCueChain implements DistanceCue {
 		} else {
 			DistanceCueChain chain = new DistanceCueChain();
 			for(Class<? extends DistanceCue> clazz: list) {
-				chain.add(clazz.newInstance());
+				chain.cues.add(clazz.newInstance());
 			}
 			return chain;
 		}
@@ -62,8 +64,10 @@ public final class DistanceCueChain implements DistanceCue {
 		}
 		return false;
 	}
-	
-	private boolean add(DistanceCue cue) {
-		return cues.add(cue);
+
+	public void setProperties(EffectiveAppearance app) {
+		for(DistanceCue cue: cues) {
+			cue.setProperties(app);
+		}
 	}
 }

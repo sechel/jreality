@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import de.jreality.shader.EffectiveAppearance;
+
 /**
  * Simple interface for encapsulating various distance cues, such as volume attenuation,
  * low-pass filtering, reverberation, etc.  To be used as an appearance property, with
@@ -13,6 +15,7 @@ public interface DistanceCue {
 	public static abstract class Attenuation implements DistanceCue {
 		public void setSampleRate(float sr) {}
 		public boolean hasMore() { return false; }
+		public void setProperties(EffectiveAppearance app) {}
 		public void reset() {}
 	}
 	
@@ -42,12 +45,16 @@ public interface DistanceCue {
 	}
 	
 	public static final class LOWPASS extends LowPassFilter implements DistanceCue {
+		private float freq = AudioAttributes.DEFAULT_DISTANCE_LOWPASS_FREQ;
 		public float nextValue(float v, float r, float x, float y, float z) {
-			setCutOff(44000/(1+r));
+			setCutOff(freq/(1+r));
 			return nextValue(v);
 		}
 		public void reset() {
 			initialize(0);
+		}
+		public void setProperties(EffectiveAppearance app) {
+			freq = app.getAttribute(AudioAttributes.DISTANCE_LOWPASS_KEY, AudioAttributes.DEFAULT_DISTANCE_LOWPASS_FREQ);
 		}
 	};
 	
@@ -74,6 +81,8 @@ public interface DistanceCue {
 	 * @return updated value based on v and r
 	 */
 	float nextValue(float v, float r, float xMic, float yMic, float zMic);
+	
+	void setProperties(EffectiveAppearance app);
 	
 	void reset();
 }

@@ -41,29 +41,30 @@ public class JackTest {
 		DraggingTool dragtool = new DraggingTool();
 
 		
-		Input wavWaterdrops = Input.getInput("data/waterdrop.wav");
-		final AudioSource s1 = new CachedAudioInputStreamSource("wavnode", wavWaterdrops, true);
-		SceneGraphComponent cmp1 = new SceneGraphComponent();
-		cmp1.setGeometry(new Sphere());
-		MatrixBuilder.euclidean().translate(-4, 0, 0).assignTo(cmp1);
-		cmp.addChild(cmp1);
-		cmp1.setAudioSource(s1);
-		ActionTool at1 = new ActionTool("PanelActivation");
-		at1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (s1.getState() == AudioSource.State.RUNNING) s1.pause();
-				else s1.start();
-			}
-		});
-		cmp1.addTool(at1);
-		cmp1.addTool(dragtool);
-		s1.start();
+//		Input wavWaterdrops = Input.getInput("data/waterdrop.wav");
+//		final AudioSource s1 = new CachedAudioInputStreamSource("wavnode", wavWaterdrops, true);
+//		SceneGraphComponent cmp1 = new SceneGraphComponent();
+//		cmp1.setGeometry(new Sphere());
+//		MatrixBuilder.euclidean().translate(-4, 0, 0).assignTo(cmp1);
+//		cmp.addChild(cmp1);
+//		cmp1.setAudioSource(s1);
+//		ActionTool at1 = new ActionTool("PanelActivation");
+//		at1.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				if (s1.getState() == AudioSource.State.RUNNING) s1.pause();
+//				else s1.start();
+//			}
+//		});
+//		cmp1.addTool(at1);
+//		cmp1.addTool(dragtool);
+//		s1.start();
 
 		
 		SceneGraphComponent cmp2 = new SceneGraphComponent();
 		cmp.addChild(cmp2);
 //		final AudioSource s2 = new JackNode("jack_input", 0);
-		final AudioSource s2 = new SineSource("sine", 44100, 440);
+//		final AudioSource s2 = new SineSource("sine", 44100, 440);
+		final AudioSource s2 = new CsoundNode("csnode", Input.getInput("sound/trapped.csd"));
 		cmp2.setGeometry(Primitives.icosahedron());
 		MatrixBuilder.euclidean().translate(0, 0, 0).assignTo(cmp2);
 		cmp2.setAudioSource(s2);
@@ -85,35 +86,35 @@ public class JackTest {
 		// works with mp3spi from javazoom in classpath:
 //		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
 //		Input input = Input.getInput(url); 
-		Input input = Input.getInput("data/nasa.mp3");
-		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
-			@Override
-			protected int readSamples(Reader reader, float[] buffer,
-					int initialIndex, int samples) {
-				// TODO Auto-generated method stub
-				int ret = super.readSamples(reader, buffer, initialIndex, samples);
-				for (int i=0; i<buffer.length; i++) {
-					buffer[i]*=0.3f;
-				}
-				return ret;
-			}
-		};
+//		Input input = Input.getInput("data/nasa.mp3");
+//		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
+//			@Override
+//			protected int readSamples(Reader reader, float[] buffer,
+//					int initialIndex, int samples) {
+//				// TODO Auto-generated method stub
+//				int ret = super.readSamples(reader, buffer, initialIndex, samples);
+//				for (int i=0; i<buffer.length; i++) {
+//					buffer[i]*=0.3f;
+//				}
+//				return ret;
+//			}
+//		};
 			
-		//final AudioSource s3 = new CsoundNode("csnode", Input.getInput("data/trapped.csd"));
-		
-		cmp3.setGeometry(Primitives.cube());
-		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
-		cmp3.setAudioSource(s3);
-		ActionTool at3 = new ActionTool("PanelActivation");
-		at3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (s3.getState() == AudioSource.State.RUNNING) s3.pause();
-				else s3.start();
-			}
-		});
-		cmp3.addTool(at3);
-		cmp3.addTool(dragtool);
-		s3.start();
+//		final AudioSource s3 = new CsoundNode("csnode", Input.getInput("data/trapped.csd"));
+//		
+//		cmp3.setGeometry(Primitives.cube());
+//		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
+//		cmp3.setAudioSource(s3);
+//		ActionTool at3 = new ActionTool("PanelActivation");
+//		at3.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				if (s3.getState() == AudioSource.State.RUNNING) s3.pause();
+//				else s3.start();
+//			}
+//		});
+//		cmp3.addTool(at3);
+//		cmp3.addTool(dragtool);
+//		s3.start();
 
 		
 		ViewerVR vr = ViewerVR.createDefaultViewerVR(null);
@@ -123,6 +124,6 @@ public class JackTest {
 
 		vr.setContent(cmp);
 
-		JackAmbisonicsRenderer.launch(va.getCurrentViewer(), "jR Ambisonics");
+		JackAmbisonicsRenderer.launch(va.getCurrentViewer(), "jR Ambisonics", "StereoDecoder");
 	}
 }

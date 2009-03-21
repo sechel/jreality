@@ -42,7 +42,7 @@ public class AudioLauncher {
 				// ignore this, just use java sound.
 			}
 			if (jackrenderer != null) try {
-				new Statement(jackrenderer, "launch", new Object[]{v, "jR Ambisonics"}).execute();
+				new Statement(jackrenderer, "launch", new Object[]{v, "jR Ambisonics", "StereoDecoder"}).execute();
 				System.out.println("Jack launch OK.");
 				return true;
 			} catch (Exception e) {

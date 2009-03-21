@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import de.jreality.audio.csound.CsoundNode;
+import de.jreality.geometry.Primitives;
 import de.jreality.plugin.audio.AudioLauncher;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.view.CameraStand;
@@ -14,7 +15,6 @@ import de.jreality.plugin.view.Lights;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.vr.Avatar;
-import de.jreality.reader.Readers;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
@@ -28,7 +28,7 @@ import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
  * @author brinkman
  *
  */
-public class Example {
+public class MinimalExample {
 	public static void main(String[] args) 
 	throws IOException {
 		SimpleController c = 
@@ -47,10 +47,11 @@ public class Example {
 		c.registerPlugin(new AudioOptions());
 
 		// create visual content
-		SceneGraphComponent content = Readers.read(Input.getInput("jrs/schwarz.jrs"));
-
+		SceneGraphComponent content = new SceneGraphComponent("content");
+		content.setGeometry(Primitives.sphere(20));
+		
 		// create audio content
-		final AudioSource source = new CsoundNode("csound node", Input.getInput(Example.class.getResource("trapped.csd")));
+		final AudioSource source = new CsoundNode("csound node", Input.getInput(MinimalExample.class.getResource("trapped.csd")));
 		source.start();
 		content.setAudioSource(source);
 
