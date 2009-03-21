@@ -1,6 +1,7 @@
 package de.jreality.audio;
 
 import de.jreality.scene.data.SampleReader;
+import de.jreality.shader.EffectiveAppearance;
 
 /**
  * 
@@ -9,14 +10,22 @@ import de.jreality.scene.data.SampleReader;
  * @author brinkman
  *
  */
-public class LowPassReader implements SampleReader {
+public class LowPassProcessor implements SampleProcessor {
 
 	private SampleReader reader;
 	private LowPassFilter lpf;
 	
-	public LowPassReader(SampleReader reader, float cutOff) {
+	public LowPassProcessor() {
+		// do nothing
+	}
+	
+	public LowPassProcessor(SampleReader reader) {
+		initialize(reader);
+	}
+
+	public void initialize(SampleReader reader) {
 		this.reader = reader;
-		lpf = new LowPassFilter(reader.getSampleRate(), cutOff);
+		lpf = new LowPassFilter(reader.getSampleRate());
 	}
 	
 	public int getSampleRate() {
@@ -44,5 +53,10 @@ public class LowPassReader implements SampleReader {
 		}
 		
 		return nRead;
+	}
+
+	public void setProperties(EffectiveAppearance app) {
+		// TODO: implement properly...
+		lpf.setCutOff(1000);
 	}
 }

@@ -18,6 +18,7 @@ import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.DistanceCue;
 import de.jreality.audio.EarlyReflections;
 import de.jreality.audio.FDNReverb;
+import de.jreality.audio.LowPassProcessor;
 import de.jreality.audio.SampleProcessor;
 import de.jreality.audio.SchroederReverb;
 import de.jreality.plugin.audio.image.ImageHook;
