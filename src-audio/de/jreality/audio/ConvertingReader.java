@@ -5,9 +5,6 @@ import de.jreality.scene.data.SampleReader;
 /**
  * A simple sample rate converter, to be used as a transparent plugin between AudioSource and audio renderer.
  * 
- * TODO: Implement something better than linear interpolation; the current version is only a proof of concept
- * and introduces too much noise.
- * 
  * @author brinkman
  *
  */
@@ -20,8 +17,11 @@ public class ConvertingReader implements SampleReader {
 	private final int targetRate, sourceRate, sampleRate;
 	private final float ratio;
 	private int targetIndex = 0;
+	private int sourceIndex = 0;
 	private int samplesRead = 0;
-	private boolean firstSample = false;
+	
+	private Interpolation interpolation = new Interpolation.Cubic();
+	
 	
 	public static SampleReader createReader(SampleReader reader, int targetRate) {
 		return (reader.getSampleRate()==targetRate) ? reader : new ConvertingReader(reader, targetRate);
@@ -35,7 +35,7 @@ public class ConvertingReader implements SampleReader {
 		this.sourceRate = sourceRate/q;
 		this.targetRate = targetRate/q;
 		ratio = ((float) sourceRate)/((float) targetRate);
-		inBuf = new float[this.sourceRate+1];
+		inBuf = new float[this.sourceRate];
 	}
 	
 	public int getSampleRate() {
@@ -45,37 +45,33 @@ public class ConvertingReader implements SampleReader {
 	public void clear() {
 		reader.clear();
 		targetIndex = 0;
+		sourceIndex = 0;
 		samplesRead = 0;
-		firstSample = false;
 	}
 
 	public int read(float[] buffer, int initialIndex, int nSamples) {
-		if (!firstSample) {
-			if (reader.read(inBuf, 0, 1)==0) {
+		if (samplesRead<sourceRate) {
+			samplesRead += reader.read(inBuf, samplesRead, sourceRate-samplesRead);
+			if (samplesRead<sourceRate) {
 				return 0;
 			}
-			firstSample = true;
-		}
-		if (samplesRead<sourceRate) {
-			samplesRead += reader.read(inBuf, 1+samplesRead, sourceRate-samplesRead);
 		}
 		
 		int i;
 		for(i = 0; i<nSamples; i++) {
 			if (targetIndex == targetRate) {
-				inBuf[0] = inBuf[sourceRate];
-				samplesRead = reader.read(inBuf, 1, sourceRate);
-				targetIndex = 0;
+				targetIndex = sourceIndex = 0;
+				samplesRead = reader.read(inBuf, 0, sourceRate);
+				if (samplesRead<sourceRate) {
+					break;
+				}
 			}
 
-			int j = (targetIndex*sourceRate)/targetRate;
-			if (j>=samplesRead) {
-				break;
+			int j = (++targetIndex*sourceRate)/targetRate;
+			while (sourceIndex<j) {
+				interpolation.put(inBuf[sourceIndex++]);
 			}
-			float t = targetIndex*ratio-j;
-			float xj = inBuf[j];
-			buffer[initialIndex+i] = xj+t*(inBuf[j+1]-xj);
-			targetIndex++;
+			buffer[initialIndex+i] = interpolation.get(targetIndex*ratio-j);
 		}
 		return i;
 	}

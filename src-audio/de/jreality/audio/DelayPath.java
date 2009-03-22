@@ -45,9 +45,10 @@ public class DelayPath implements SoundPath {
 	private float[] currentFrame = null;
 	private int currentLength = 0;
 	private int currentIndex = 0;
-	private float previousSample = 0f, currentSample = 0f;
 	private int relativeTime = 0;
 	private int frameCount = 0;
+	
+	private Interpolation interpolation = new Interpolation.Cubic();
 
 
 	public DelayPath(SampleReader reader, int sampleRate) {
@@ -155,7 +156,7 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 
-		if (frameCount==0 && currentFrame==null && !distanceCue.hasMore()) {
+		if (frameCount==0 && currentFrame==null && !distanceCue.hasMore() && !directionlessCue.hasMore()) {
 			reset();
 			return false;  // nothing left to render
 		} else {
@@ -186,12 +187,11 @@ public class DelayPath implements SoundPath {
 					advanceFrame();
 					updateTarget();
 				}
-				previousSample = currentSample;
 				float newSample = (currentFrame!=null) ? currentFrame[currentIndex]*gain : 0f;
-				currentSample = directionlessCue.nextValue(newSample, distance, xMic, yMic, zMic);
+				interpolation.put(directionlessCue.nextValue(newSample, distance, xMic, yMic, zMic));
 			}
 
-			float v = previousSample+fractionalTime*(currentSample-previousSample);
+			float v = interpolation.get(fractionalTime);
 			enc.encodeSample(distanceCue.nextValue(v, distance, xMic, yMic, zMic), j, xCurrent, yCurrent, zCurrent);
 			if (directionlessBuffer!=null) {
 				directionlessBuffer[j] += v*directionlessGain;
@@ -239,8 +239,7 @@ public class DelayPath implements SoundPath {
 		currentIndex = 0;
 		relativeTime = 0;
 		frameCount = 0;
-		previousSample = 0;
-		currentSample = 0f;
+		interpolation.reset();
 		preProcessor.clear();
 		distanceCue.reset();
 		directionlessCue.reset();
