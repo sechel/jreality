@@ -87,6 +87,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		List<Class<? extends SampleProcessor>> newDirlessChain = (List<Class<? extends SampleProcessor>>) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, List.class);
 		if (newDirlessChain==null || newDirlessChain.isEmpty()) {
 			directionlessProcessor = null;
+			dirlessChain = null;
 		} else if (!newDirlessChain.equals(dirlessChain)) {
 			dirlessChain = newDirlessChain;
 			try {
@@ -149,7 +150,8 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
-			soundPath = new DelayPath(audio.createReader(), sampleRate);
+			soundPath = new DelayPath();
+			soundPath.initialize(ConvertingReader.createReader(audio.createReader(), sampleRate));
 
 			audio.addAudioListener(this);
 			observer.addAppearanceListener(this);

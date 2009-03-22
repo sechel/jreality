@@ -1,6 +1,7 @@
 package de.jreality.audio;
 
 import de.jreality.math.Matrix;
+import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
@@ -20,6 +21,8 @@ import de.jreality.shader.EffectiveAppearance;
  *
  */
 public interface SoundPath {
+	
+	void initialize(SampleReader reader);
 	
 	void setProperties(EffectiveAppearance eapp);
 	

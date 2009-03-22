@@ -28,7 +28,7 @@ public class DelayPath implements SoundPath {
 	private SampleProcessor preProcessor = new SampleProcessor.NullProcessor();
 	private float updateCutoff = AudioAttributes.DEFAULT_UPDATE_CUTOFF;
 
-	private SampleReader rawReader;
+	private SampleReader reader;
 	private int sampleRate;
 	private float gamma;
 
@@ -50,17 +50,11 @@ public class DelayPath implements SoundPath {
 	
 	private Interpolation interpolation = new Interpolation.Cubic();
 
-
-	public DelayPath(SampleReader reader, int sampleRate) {
-		if (sampleRate<=0) {
-			throw new IllegalArgumentException("sample rate must be positive");
-		}
-		if (reader==null) {
-			throw new IllegalArgumentException("reader cannot be null");
-		}
-		this.rawReader = ConvertingReader.createReader(reader, sampleRate);
-		preProcessor.initialize(this.rawReader);
-		this.sampleRate = sampleRate;
+	
+	public void initialize(SampleReader reader) {
+		this.reader = reader;
+		sampleRate = reader.getSampleRate();
+		preProcessor.initialize(reader);
 
 		xFilter = new LowPassFilter(sampleRate);
 		yFilter = new LowPassFilter(sampleRate);
@@ -84,7 +78,7 @@ public class DelayPath implements SoundPath {
 			preProcChain = newPreProcChain;
 			try {
 				preProcessor = ProcessorChain.create(newPreProcChain);
-				preProcessor.initialize(rawReader);
+				preProcessor.initialize(reader);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

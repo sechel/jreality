@@ -9,7 +9,7 @@ import de.jreality.shader.EffectiveAppearance;
 public class ProcessorChain implements SampleProcessor {
 	
 	private List<SampleProcessor> procs = new ArrayList<SampleProcessor>();
-	private SampleProcessor last;
+	private SampleReader last;
 	
 	private ProcessorChain() {
 		// do nothing
@@ -23,8 +23,7 @@ public class ProcessorChain implements SampleProcessor {
 		} else {
 			ProcessorChain chain = new ProcessorChain();
 			for(Class<? extends SampleProcessor> clazz: list) {
-				chain.last = clazz.newInstance();
-				chain.procs.add(chain.last);
+				chain.procs.add(clazz.newInstance());
 			}
 			return chain;
 		}
@@ -35,6 +34,7 @@ public class ProcessorChain implements SampleProcessor {
 			proc.initialize(reader);
 			reader = proc;
 		}
+		last = reader;
 	}
 
 	public void setProperties(EffectiveAppearance app) {

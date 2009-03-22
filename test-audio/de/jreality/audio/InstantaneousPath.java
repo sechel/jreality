@@ -26,9 +26,9 @@ public class InstantaneousPath implements SoundPath {
 	private float x0, y0, z0;
 	private boolean firstFrame = true;
 
-	public InstantaneousPath(SampleReader reader, int sampleRate) {
-		this.sampleRate = sampleRate;
-		this.reader = ConvertingReader.createReader(reader, sampleRate);
+	public void initialize(SampleReader reader) {
+		sampleRate = reader.getSampleRate();
+		this.reader = reader;
 	}
 	
 	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix, float[] directionlessBuffer) {

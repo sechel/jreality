@@ -3,8 +3,13 @@ package de.jreality.audio;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
-public interface SampleProcessor extends SampleReader {
 
+public interface SampleProcessor extends SampleReader {
+	
+	public void initialize(SampleReader reader);
+	public void setProperties(EffectiveAppearance app);
+
+	
 	public class NullProcessor implements SampleProcessor {
 		private SampleReader reader;
 		public NullProcessor() {
@@ -29,7 +34,4 @@ public interface SampleProcessor extends SampleReader {
 			return reader.read(buffer, initialIndex, samples);
 		}
 	}
-	
-	public void initialize(SampleReader reader);
-	public void setProperties(EffectiveAppearance app);
 }
