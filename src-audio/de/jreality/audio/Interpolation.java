@@ -2,7 +2,8 @@ package de.jreality.audio;
 
 /**
  * Simple interface for defining interpolations of equally spaced samples; comes with implementations
- * for sample-and-hold (i.e., no interpolation) as well as linear and cubic (4-point) interpolation.
+ * for sample-and-hold (i.e., no interpolation) as well as linear, cosine, and cubic (4-point)
+ * interpolation.
  * 
  * @author brinkman
  *
@@ -52,6 +53,22 @@ public interface Interpolation {
 		}
 	}
 
+	public final class Cosine implements Interpolation {
+		private float v, dv;
+
+		public float get(float t) {
+			float s = (float) (1-Math.cos(t*Math.PI))/2;
+			return v+s*dv;
+		}
+		public void put(float v) {
+			this.v += dv;
+			dv = v - this.v;
+		}
+		public void reset() {
+			v = dv = 0;
+		}
+	}
+	
 	public final class Cubic implements Interpolation {
 		private float v0, v1, v2, v3, a0, a1, a2, a3;
 		private boolean dirty;
