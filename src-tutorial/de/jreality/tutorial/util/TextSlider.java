@@ -369,13 +369,16 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			double f = val/scaler;
 			double a = Math.pow(getMin(), 1.0-f);
 			double b = Math.pow(getMax(), f);
-			double ret = a*b; 
+			// have to correct some round-off errors due to integer conversion + log distortions
+			int iret = (int) (a*b+.5);
+			double ret = (double) iret;
 			return ret;
 		}
 
 		@Override
 		String getFormattedValue(java.lang.Double n) {
-			return String.format("%8d",(int)(n+.5));
+			System.err.println("integerlog format = "+n);
+			return String.format("%8d",((int)(n+.001)));
 		}
 				
 	}
