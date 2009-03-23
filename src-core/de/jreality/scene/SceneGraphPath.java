@@ -226,6 +226,10 @@ public class SceneGraphPath implements Cloneable {
 		path.clear();
 	}
 
+	public SceneGraphNode get(int n)	{
+		return path.get(n);
+	}
+	
 	public void replace(SceneGraphNode old, SceneGraphNode nnew) {
 		int index = path.indexOf(old);
 		if (index == -1) 
