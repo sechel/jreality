@@ -103,7 +103,7 @@ class JOGLSkyBox {
     gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
 	for (int i = 0; i<6; ++i)	{
 		tex.setImage(imgs[i]);
-	    Texture2DLoaderJOGL.render(gl, jogltex);
+	    Texture2DLoaderJOGL.render(gl, tex);
 		gl.glBegin(GL.GL_POLYGON);
 		for (int j = 0; j<4; ++j)	{
 			gl.glTexCoord2dv(texCoords[j],0);
