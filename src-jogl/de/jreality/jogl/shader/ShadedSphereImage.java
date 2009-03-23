@@ -12,7 +12,7 @@ import de.jreality.shader.ImageData;
 public class ShadedSphereImage {
 	static byte[] sphereTex;
 	static double[][] sphereVertices;
-	static final double[] defaultLightDirection = {1,1,1};
+	static final double[] defaultLightDirection = {0,0,1};
 	static final Color defaultDiffuseColor = Color.red;
 	static final Color defaultSpecularColor = Color.white;
 	static int[] defaultChannels = {0,1,2,3};
