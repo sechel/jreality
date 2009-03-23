@@ -516,6 +516,7 @@ public class Pn {
 	 
 	public static boolean isValidCoordinate(double[] transVec, int dim, int metric) {
 		boolean ret = true;
+		if (transVec.length < dim) return false;
 		if (metric == Pn.EUCLIDEAN && transVec.length == (dim+1) && transVec[dim] == 0.0) {
 			ret = false;
 		}
@@ -782,8 +783,9 @@ public class Pn {
 	}
 
 	/**
-	 * Polarize the input point <i>p</i> with respect to the quadradic form associated to
-	 *  <i>metric</i>.
+	 * Polarize the input element <i>p</i> with respect to the quadradic form associated to
+	 *  <i>metric</i>.  Note: in the euclidean case, use {@link #polarizePlane(double[], double[], int)} or
+	 *  {@link #polarizePlane(double[], double[], int)}.  
 	 * @param polar
 	 * @param p
 	 * @param metric
