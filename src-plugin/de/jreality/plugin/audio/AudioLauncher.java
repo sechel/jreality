@@ -4,6 +4,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -26,7 +28,8 @@ import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 public class AudioLauncher extends ShrinkPanelPlugin {
 
-	private JComboBox renderers;
+	private JComboBox renderWidget;
+	private JComboBox interpolationWidget;
 	private JButton launchButton;
 	private JTextField targetField;
 	
@@ -37,21 +40,39 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 	private static final String STEREO = "Java Stereo";
 	private static final String VBAP = "Java VBAP";
 	
+	private static final String SAMPLEHOLD = "No interpolation";
+	private static final String LINEAR = "Linear interpolation";
+	private static final String COSINE = "Cosine interpolation";
+	private static final String CUBIC = "Cubic interpolation";
+	
 	private static final String RENDERKEY = "audioRenderer";
 	private static final String JACKTARGETKEY = "jackTarget";
+	private static final String INTERPOLATIONKEY = "interpolation";
 	
-	private Interpolation.Factory interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
-	private SoundPath.Factory soundPathFactory = AudioAttributes.DEFAULT_SOUNDPATH_FACTORY;
+	private Map<String, Interpolation.Factory> interpolations = new HashMap<String, Interpolation.Factory>();
+	
 	
 	public AudioLauncher() {
-		shrinkPanel.setLayout(new GridLayout(3, 1));
+		shrinkPanel.setLayout(new GridLayout(4, 1));
 		
-		renderers = new JComboBox();
-		renderers.addItem(JACK1);
-		renderers.addItem(JACK2);
-		renderers.addItem(STEREO);
-		renderers.addItem(VBAP);
-		shrinkPanel.add(renderers);
+		renderWidget = new JComboBox();
+		renderWidget.addItem(JACK1);
+		renderWidget.addItem(JACK2);
+		renderWidget.addItem(STEREO);
+		renderWidget.addItem(VBAP);
+		shrinkPanel.add(renderWidget);
+		
+		interpolationWidget = new JComboBox();
+		interpolationWidget.addItem(SAMPLEHOLD);
+		interpolationWidget.addItem(LINEAR);
+		interpolationWidget.addItem(COSINE);
+		interpolationWidget.addItem(CUBIC);
+		shrinkPanel.add(interpolationWidget);
+		
+		interpolations.put(SAMPLEHOLD, Interpolation.SampleHold.FACTORY);
+		interpolations.put(LINEAR, Interpolation.Linear.FACTORY);
+		interpolations.put(COSINE, Interpolation.Cosine.FACTORY);
+		interpolations.put(CUBIC, Interpolation.Cubic.FACTORY);
 		
 		JPanel panel = new JPanel();
 		panel.add(new JLabel("Jack target port"));
@@ -69,7 +90,11 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 	}
 	
 	private void launchAudio() {
-		String type = (String) renderers.getSelectedItem();
+		SoundPath.Factory soundPathFactory = AudioAttributes.DEFAULT_SOUNDPATH_FACTORY;
+		String inter = (String) interpolationWidget.getSelectedItem();
+		Interpolation.Factory interpolationFactory = interpolations.get(inter);
+		
+		String type = (String) renderWidget.getSelectedItem();
 		try {
 			if (type.equals(JACK1)) {
 				new Statement(Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer"),
@@ -83,7 +108,8 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 				VbapSurroundRenderer.launch(viewer, "jR VBAP", interpolationFactory, soundPathFactory);
 			}
 			launchButton.setEnabled(false);
-			renderers.setEnabled(false);
+			renderWidget.setEnabled(false);
+			interpolationWidget.setEnabled(false);
 			targetField.setEnabled(false);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -100,7 +126,8 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
 		
-		renderers.setSelectedItem(c.getProperty(getClass(), RENDERKEY, JACK1));
+		renderWidget.setSelectedItem(c.getProperty(getClass(), RENDERKEY, JACK1));
+		interpolationWidget.setSelectedItem(c.getProperty(getClass(), INTERPOLATIONKEY, CUBIC));
 		targetField.setText(c.getProperty(getClass(), JACKTARGETKEY, ""));
 	}
 
@@ -108,7 +135,8 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		
-		c.storeProperty(getClass(), RENDERKEY, renderers.getSelectedItem());
+		c.storeProperty(getClass(), RENDERKEY, renderWidget.getSelectedItem());
+		c.storeProperty(getClass(), INTERPOLATIONKEY, interpolationWidget.getSelectedItem());
 		c.storeProperty(getClass(), JACKTARGETKEY, targetField.getText());
 	}
 
