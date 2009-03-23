@@ -8,6 +8,8 @@ import java.io.IOException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.AbstractAction;
 
+import de.jreality.audio.AudioAttributes;
+import de.jreality.audio.Interpolation;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
@@ -97,7 +99,7 @@ public class AudioExample {
 		audioComponent.addTool(new DraggingTool());
 	
 		SceneGraphComponent contentRoot = controller.getPlugin(AlignedContent.class).getScalingComponent();
-		contentRoot.addChild(audioComponent);
+		contentRoot.addChild(audioComponent);	
 	}
 
 	public void startup() {

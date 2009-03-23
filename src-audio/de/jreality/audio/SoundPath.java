@@ -22,7 +22,7 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public interface SoundPath {
 	
-	void initialize(SampleReader reader);
+	void initialize(SampleReader reader, Interpolation.Factory factory);
 	
 	void setProperties(EffectiveAppearance eapp);
 	
@@ -36,4 +36,8 @@ public interface SoundPath {
 	 * @return true if the sound path is still holding samples to be rendered, e.g., due to propagation delays
 	 */
 	boolean processFrame(SoundEncoder enc, int frameSize, Matrix curPos, Matrix micInvMatrix, float[] directionlessBuffer);
+
+	public interface Factory {
+		SoundPath newSoundPath();
+	}
 }

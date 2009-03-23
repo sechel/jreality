@@ -20,14 +20,14 @@ public class ConvertingReader implements SampleReader {
 	private int sourceIndex = 0;
 	private int samplesRead = 0;
 	
-	private Interpolation interpolation = new Interpolation.Cubic();
+	private Interpolation interpolation;
 	
 	
-	public static SampleReader createReader(SampleReader reader, int targetRate) {
-		return (reader.getSampleRate()==targetRate) ? reader : new ConvertingReader(reader, targetRate);
+	public static SampleReader createReader(SampleReader reader, int targetRate, Interpolation.Factory factory) {
+		return (reader.getSampleRate()==targetRate) ? reader : new ConvertingReader(reader, targetRate, factory);
 	}
 	
-	private ConvertingReader(SampleReader reader, int targetRate) {
+	private ConvertingReader(SampleReader reader, int targetRate, Interpolation.Factory factory) {
 		int sourceRate = reader.getSampleRate();
 		int q = gcd(targetRate, sourceRate);
 		this.reader = reader;
@@ -36,6 +36,7 @@ public class ConvertingReader implements SampleReader {
 		this.targetRate = targetRate/q;
 		ratio = ((float) sourceRate)/((float) targetRate);
 		inBuf = new float[this.sourceRate];
+		interpolation = factory.newInterpolation();
 	}
 	
 	public int getSampleRate() {

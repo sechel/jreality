@@ -4,6 +4,9 @@ import java.beans.Statement;
 
 import javax.sound.sampled.LineUnavailableException;
 
+import de.jreality.audio.AudioAttributes;
+import de.jreality.audio.Interpolation;
+import de.jreality.audio.SoundPath;
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.audio.javasound.JavaSoundUtility;
 import de.jreality.audio.javasound.VbapSurroundRenderer;
@@ -19,7 +22,8 @@ public class AudioLauncher {
 	public static boolean TRY_JACK=true;
 	public static boolean PLANAR=false;
 	public static boolean TRY_5_1=false;
-
+	public static Interpolation.Factory interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
+	public static SoundPath.Factory soundPathFactory = AudioAttributes.DEFAULT_SOUNDPATH_FACTORY;
 
 	private AudioLauncher() {}
 	
@@ -42,7 +46,7 @@ public class AudioLauncher {
 				// ignore this, just use java sound.
 			}
 			if (jackrenderer != null) try {
-				new Statement(jackrenderer, "launch", new Object[]{v, "jR Ambisonics", "StereoDecoder"}).execute();
+				new Statement(jackrenderer, "launch", new Object[]{v, "jR Ambisonics", "StereoDecoder", interpolationFactory, soundPathFactory}).execute();
 				System.out.println("Jack launch OK.");
 				return true;
 			} catch (Exception e) {
@@ -52,10 +56,10 @@ public class AudioLauncher {
 		try {
 			if (TRY_5_1 && JavaSoundUtility.supportsChannels(5)) {
 				System.out.println("Launching 5.1 backend...");
-				VbapSurroundRenderer.launch(v, "jR VBAP");
+				VbapSurroundRenderer.launch(v, "jR VBAP", interpolationFactory, soundPathFactory);
 			} else {
 				System.out.println("Launching stereo backend...");
-				JavaAmbisonicsStereoDecoder.launch(v, "jR Stereo");
+				JavaAmbisonicsStereoDecoder.launch(v, "jR Stereo", interpolationFactory, soundPathFactory);
 			}
 			return true;
 		} catch (LineUnavailableException e) {

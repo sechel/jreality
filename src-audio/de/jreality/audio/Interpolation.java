@@ -23,8 +23,16 @@ public interface Interpolation {
 	
 	void reset();
 	
+	public interface Factory {
+		Interpolation newInterpolation();
+	}
 	
 	public final class SampleHold implements Interpolation {
+		public static final Factory FACTORY = new Factory () {
+			public Interpolation newInterpolation() {
+				return new SampleHold();
+			}
+		};
 		private float v;
 
 		public float get(float t) {
@@ -39,6 +47,11 @@ public interface Interpolation {
 	}
 
 	public final class Linear implements Interpolation {
+		public static final Factory FACTORY = new Factory () {
+			public Interpolation newInterpolation() {
+				return new Linear();
+			}
+		};
 		private float v, dv;
 		
 		public float get(float t) {
@@ -54,6 +67,11 @@ public interface Interpolation {
 	}
 
 	public final class Cosine implements Interpolation {
+		public static final Factory FACTORY = new Factory () {
+			public Interpolation newInterpolation() {
+				return new Cosine();
+			}
+		};
 		private float v, dv;
 
 		public float get(float t) {
@@ -70,6 +88,11 @@ public interface Interpolation {
 	}
 	
 	public final class Cubic implements Interpolation {
+		public static final Factory FACTORY = new Factory () {
+			public Interpolation newInterpolation() {
+				return new Cubic();
+			}
+		};
 		private float v0, v1, v2, v3, a0, a1, a2, a3;
 		private boolean dirty;
 

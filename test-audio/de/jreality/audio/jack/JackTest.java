@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
+import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.SynthSource;
 import de.jreality.audio.RingBuffer.Reader;
 import de.jreality.audio.csound.CsoundNode;
@@ -124,6 +125,6 @@ public class JackTest {
 
 		vr.setContent(cmp);
 
-		JackAmbisonicsRenderer.launch(va.getCurrentViewer(), "jR Ambisonics", "StereoDecoder");
+		JackAmbisonicsRenderer.launch(va.getCurrentViewer(), "jR Ambisonics", "StereoDecoder", AudioAttributes.DEFAULT_INTERPOLATION_FACTORY, AudioAttributes.DEFAULT_SOUNDPATH_FACTORY);
 	}
 }

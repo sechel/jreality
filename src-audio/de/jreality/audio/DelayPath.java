@@ -20,6 +20,11 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public class DelayPath implements SoundPath {
 
+	public static final Factory FACTORY = new Factory() {
+		public SoundPath newSoundPath() {
+			return new DelayPath();
+		}
+	};
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float directionlessGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
@@ -48,13 +53,14 @@ public class DelayPath implements SoundPath {
 	private int relativeTime = 0;
 	private int frameCount = 0;
 	
-	private Interpolation interpolation = new Interpolation.Cubic();
+	private Interpolation interpolation;
 
 	
-	public void initialize(SampleReader reader) {
+	public void initialize(SampleReader reader, Interpolation.Factory factory) {
 		this.reader = reader;
 		sampleRate = reader.getSampleRate();
 		preProcessor.initialize(reader);
+		interpolation = factory.newInterpolation();
 
 		xFilter = new LowPassFilter(sampleRate);
 		yFilter = new LowPassFilter(sampleRate);

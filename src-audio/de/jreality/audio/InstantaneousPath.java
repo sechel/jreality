@@ -7,15 +7,19 @@ import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
 /**
- * @deprecated
- * 
- * Minimal implementation that treats sound as instantaneous, now largely obsolete
+ * Minimal implementation that treats sound as instantaneous, now largely obsolete; doesn't care about
+ * appearances except for gain and distance cues
  *
  * TODO: handle curved geometries
  * 
  */
 public class InstantaneousPath implements SoundPath {
 
+	public static final Factory FACTORY = new Factory() {
+		public SoundPath newSoundPath() {
+			return new InstantaneousPath();
+		}
+	};
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DISTANCE_CUE;
 	
@@ -26,7 +30,7 @@ public class InstantaneousPath implements SoundPath {
 	private float x0, y0, z0;
 	private boolean firstFrame = true;
 
-	public void initialize(SampleReader reader) {
+	public void initialize(SampleReader reader, Interpolation.Factory factory) {
 		sampleRate = reader.getSampleRate();
 		this.reader = reader;
 	}

@@ -97,7 +97,7 @@ public class Test51 {
 		
 		float[] fbuf = new float[1024];
 		
-		SampleReader sr = ConvertingReader.createReader(src.createReader(), 44100);
+		SampleReader sr = ConvertingReader.createReader(src.createReader(), 44100, AudioAttributes.DEFAULT_INTERPOLATION_FACTORY);
 		
 		while (true) {
 			sr.read(fbuf, 0, 1024);

@@ -5,6 +5,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 import de.jreality.audio.AudioBackend;
+import de.jreality.audio.Interpolation;
+import de.jreality.audio.SoundPath;
 import de.jreality.audio.VbapSoundEncoder;
 import de.jreality.audio.util.Limiter;
 import de.jreality.scene.Viewer;
@@ -47,7 +49,7 @@ public class VbapSurroundRenderer {
 		fbuffer_lookAhead = tmpF;
 	}
 	
-	public static void launch(Viewer viewer, String label) throws LineUnavailableException {
+	public static void launch(Viewer viewer, String label, Interpolation.Factory iFactory, SoundPath.Factory spFactory) throws LineUnavailableException {
 		double[][] speakers = new double[][]{
 				{0.5, 0},
 				{0.5, 0.5},
@@ -59,7 +61,7 @@ public class VbapSurroundRenderer {
 		final int frameSize = 512;
 		
 		final VbapSurroundRenderer dec = new VbapSurroundRenderer(frameSize);
-		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), JavaSoundUtility.getSampleRate());
+		final AudioBackend backend = new AudioBackend(viewer.getSceneRoot(), viewer.getCameraPath(), JavaSoundUtility.getSampleRate(), iFactory, spFactory);
 		final VbapSoundEncoder enc = new VbapSoundEncoder(speakers.length, speakers, channelIDs) {
 			public void finishFrame() {
 				dec.render(buf);

@@ -42,14 +42,29 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
 	private SceneGraphPathObserver rootAppearanceObserver = new SceneGraphPathObserver();
 	private SceneGraphPath rootAppearancePath = new SceneGraphPath();
+	private Interpolation.Factory interpolationFactory;
+	private SoundPath.Factory soundPathFactory;
 
 	
-	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate) {
+	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate, Interpolation.Factory interpolationFactory, SoundPath.Factory soundPathFactory) {
 		super(root);
 		this.microphonePath = microphonePath;
 		this.sampleRate = sampleRate;
+		this.interpolationFactory = interpolationFactory;
+		this.soundPathFactory = soundPathFactory;
 		ringBuffer = new RingBuffer(sampleRate);
 		directionlessReader = ringBuffer.createSampleReader(sampleRate);
+		
+		Appearance rootApp = root.getAppearance();
+		if (rootApp==null) {
+			root.setAppearance(rootApp = new Appearance());
+		}
+		rootAppearancePath.push(root);
+		rootAppearancePath.push(rootApp);
+		rootAppearanceObserver.setPath(rootAppearancePath);
+
+		appearanceChanged(null);
+		rootAppearanceObserver.addAppearanceListener(this);
 		
 		setEntityFactory(new EntityFactory() {
 			{
@@ -66,17 +81,6 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 			}
 		});
 		super.createProxyTree();
-
-		Appearance rootApp = root.getAppearance();
-		if (rootApp==null) {
-			root.setAppearance(rootApp = new Appearance());
-		}
-		rootAppearancePath.push(root);
-		rootAppearancePath.push(rootApp);
-		rootAppearanceObserver.setPath(rootAppearancePath);
-
-		appearanceChanged(null);
-		rootAppearanceObserver.addAppearanceListener(this);
 	}
 	
 	List<Class<? extends SampleProcessor>> dirlessChain = null;
@@ -139,7 +143,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 
 	private class AudioTreeNode extends SceneTreeNode implements AudioListener, AppearanceListener {
 
-		private SoundPath soundPath;
+		private SoundPath soundPath = soundPathFactory.newSoundPath();
 		private Matrix currentPosition = new Matrix();
 		private SceneGraphPath path;
 		private SceneGraphPathObserver observer = new SceneGraphPathObserver();
@@ -150,8 +154,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		protected AudioTreeNode(AudioSource audio) {
 			super(audio);
 
-			soundPath = new DelayPath();
-			soundPath.initialize(ConvertingReader.createReader(audio.createReader(), sampleRate));
+			soundPath.initialize(ConvertingReader.createReader(audio.createReader(), sampleRate, interpolationFactory), interpolationFactory);
 
 			audio.addAudioListener(this);
 			observer.addAppearanceListener(this);

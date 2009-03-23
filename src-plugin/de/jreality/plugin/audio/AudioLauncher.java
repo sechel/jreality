@@ -11,6 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import de.jreality.audio.AudioAttributes;
+import de.jreality.audio.Interpolation;
+import de.jreality.audio.SoundPath;
 import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
 import de.jreality.audio.javasound.VbapSurroundRenderer;
 import de.jreality.plugin.audio.image.ImageHook;
@@ -37,6 +40,8 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 	private static final String RENDERKEY = "audioRenderer";
 	private static final String JACKTARGETKEY = "jackTarget";
 	
+	private Interpolation.Factory interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
+	private SoundPath.Factory soundPathFactory = AudioAttributes.DEFAULT_SOUNDPATH_FACTORY;
 	
 	public AudioLauncher() {
 		shrinkPanel.setLayout(new GridLayout(3, 1));
@@ -68,14 +73,14 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		try {
 			if (type.equals(JACK1)) {
 				new Statement(Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer"),
-								"launch", new Object[]{viewer, "jR Ambisonics", targetField.getText()}).execute();
+								"launch", new Object[]{viewer, "jR Ambisonics", targetField.getText(), interpolationFactory, soundPathFactory}).execute();
 			} else if (type.equals(JACK2)) {
 				new Statement(Class.forName("de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer"),
-						"launch", new Object[]{viewer, "jR Planar Ambisonics", targetField.getText()}).execute();
+						"launch", new Object[]{viewer, "jR Planar Ambisonics", targetField.getText(), interpolationFactory, soundPathFactory}).execute();
 			} else if (type.equals(STEREO)) {
-				JavaAmbisonicsStereoDecoder.launch(viewer, "jR Stereo");
+				JavaAmbisonicsStereoDecoder.launch(viewer, "jR Stereo", interpolationFactory, soundPathFactory);
 			} else if (type.equals(VBAP)) {
-				VbapSurroundRenderer.launch(viewer, "jR VBAP");
+				VbapSurroundRenderer.launch(viewer, "jR VBAP", interpolationFactory, soundPathFactory);
 			}
 			launchButton.setEnabled(false);
 			renderers.setEnabled(false);
