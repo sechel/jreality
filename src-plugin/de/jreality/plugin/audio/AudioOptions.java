@@ -104,7 +104,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		
 		gbc.gridx = 0;
 		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Pitch shift (10c)"), gbc);
+		shrinkPanel.add(new JLabel("Pitch shift (10 cents)"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(pitchShiftWidget = new JSliderVR(-120, 120, (int) (toCents(pitchShift)/10)), gbc);
 		pitchShiftWidget.setPreferredSize(new Dimension(20, 50));
