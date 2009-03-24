@@ -95,10 +95,17 @@ public class Hit implements PickResult {
     return index;
   }
 
+  private String nameForType(int pickType)	{
+	  if (pickType == PickResult.PICK_TYPE_FACE) return "face";
+	  if (pickType == PickResult.PICK_TYPE_LINE) return "edge";
+	  if (pickType == PickResult.PICK_TYPE_POINT) return "point";
+	  return "object"; 
+  }
   public String toString() {
     StringBuffer sb = new StringBuffer();
     sb.append("AABB-Pick: ");
     sb.append(" dist=").append(dist);
+    sb.append(" type=").append(nameForType(pickType));
     sb.append(" index=").append(index);
     sb.append(" tc=").append(Arrays.toString(getTextureCoordinates()));
     sb.append(" world=").append(Arrays.toString(pointWorld));
