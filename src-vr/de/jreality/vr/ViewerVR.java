@@ -1123,7 +1123,7 @@ public class ViewerVR {
 		boolean beanshell = false;
 		boolean external = true;
 		SceneGraphComponent cmp = null;
-		File prefsFile=null;
+		Input prefsFile=null;
 
 		if (args.length != 0) {  //params given
 			LinkedList<String> params = new LinkedList<String>();
@@ -1145,8 +1145,14 @@ public class ViewerVR {
 			
 			if (params.size() != 0) cmp = new SceneGraphComponent();
 			for (String file : params) {
+				// work-around to handle different ways that webstart parses arguments to application
+				// (on mac // becomes /, so URL specification is difficult
+				if (file.startsWith("\"")) 
+					file = file.substring(1, file.length()-1);
 				try {
-					if (file.toLowerCase().endsWith(".xml")) prefsFile = new File(file);
+					if (file.toLowerCase().endsWith(".xml")) {
+						prefsFile = Input.getInput(file);
+					}
 					else cmp.addChild(Readers.read(Input.getInput(file)));
 				} catch (IOException e) {
 					System.out.println(e.getMessage());
@@ -1173,7 +1179,7 @@ public class ViewerVR {
 		ViewerApp vApp = vr.initialize();
 		if (prefsFile != null)
 			try {
-				vr.importPreferences(prefsFile);
+				vr.importPreferences(prefsFile.getInputStream());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
