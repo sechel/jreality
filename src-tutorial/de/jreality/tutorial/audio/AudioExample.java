@@ -4,15 +4,15 @@ package de.jreality.tutorial.audio;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.AbstractAction;
 
-import de.jreality.audio.AudioAttributes;
-import de.jreality.audio.Interpolation;
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioLauncher;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.view.AlignedContent;
@@ -77,8 +77,9 @@ public class AudioExample {
 		controller.registerPlugin(new AudioOptions());
 		controller.registerPlugin(new AudioLauncher());
 		
-		Input wavFile = Input.getInput("sound/zarathustra.wav");
-		final AudioSource source = new CachedAudioInputStreamSource("zarathustra", wavFile, true);
+		InputStream testSoundIn = Audio.class.getResourceAsStream("zoom.wav");
+		Input wavFile = Input.getInput("Zoom", testSoundIn);
+		final AudioSource source = new CachedAudioInputStreamSource("zoom", wavFile, true);
 		
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
