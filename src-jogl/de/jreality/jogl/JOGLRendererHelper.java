@@ -738,7 +738,8 @@ public class JOGLRendererHelper {
 		gl.glEnable(GL.GL_BLEND);
 		gl.glDisable(GL.GL_LIGHTING);
 		gl.glDepthMask(true);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+//		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glColor3d(1, 1, 1);
 		double[] c2o = jr.getContext().getCameraToObject();
 		gl.glActiveTexture(GL.GL_TEXTURE0);

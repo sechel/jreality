@@ -82,6 +82,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 	SceneGraphPath cameraPath;
 	SceneGraphComponent cameraNode;
 	public GLCanvas canvas;
+	protected GLAutoDrawable drawable;
 	protected JOGLRenderer renderer;
 	int metric;
 	boolean isFlipped = false;
@@ -93,7 +94,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 	public static final int 	HARDWARE_BUFFER_STEREO = 4;
 	public static final int 	STEREO_TYPES = 5;
 	int stereoType = 		CROSS_EYED_STEREO;	
-	private boolean debug = false;
+	protected boolean debug = false;
 
 	public Viewer() {
 		this(null, null);
@@ -104,6 +105,9 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		initializeFrom(root, camPath);	
 	}
 
+	public GLAutoDrawable getDrawable()	{
+		return drawable;
+	}
 	public SceneGraphComponent getSceneRoot() {
 		return sceneRoot;
 	}
@@ -157,8 +161,8 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
       component.setLayout(new java.awt.BorderLayout());
       component.setMaximumSize(new java.awt.Dimension(32768,32768));
       component.setMinimumSize(new java.awt.Dimension(10,10));
-      component.add("Center", canvas);
-      canvas.addKeyListener(new KeyListener() {
+      component.add("Center", (Component) drawable);
+      ((Component) drawable).addKeyListener(new KeyListener() {
         public void keyPressed(KeyEvent e) {
           component.dispatchEvent(e);
         }
@@ -169,7 +173,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
           component.dispatchEvent(e);
         }
       });
-      canvas.addMouseListener(new MouseListener() {
+      ((Component) drawable).addMouseListener(new MouseListener() {
         public void mouseClicked(MouseEvent e) {
           component.dispatchEvent(e);
         }
@@ -186,7 +190,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
           component.dispatchEvent(e);
         }
       });
-      canvas.addMouseMotionListener(new MouseMotionListener() {
+      ((Component) drawable).addMouseMotionListener(new MouseMotionListener() {
         public void mouseDragged(MouseEvent e) {
           component.dispatchEvent(e);
         }
@@ -194,7 +198,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
           component.dispatchEvent(e);
         }
       });
-      canvas.addMouseWheelListener(new MouseWheelListener() {
+      ((Component) drawable).addMouseWheelListener(new MouseWheelListener() {
         public void mouseWheelMoved(MouseWheelEvent e) {
           component.dispatchEvent(e);
         }
@@ -298,7 +302,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		    }
 		  }
 
-	  private void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
+	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities();
@@ -314,16 +318,17 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		} else {
 			canvas = new GLCanvas(caps);
 		}
+		drawable = canvas;
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
- 		canvas.addGLEventListener(this);
+ 		drawable.addGLEventListener(this);
  		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
 //		canvas.requestFocus();
-		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = canvas.getContext();
+		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = drawable.getContext();
 	}
 
 	  public BufferedImage renderOffscreen(int w, int h) {
 		  if (renderer != null) {
-			  return renderer.renderOffscreen(w, h, canvas);
+			  return renderer.renderOffscreen(w, h, drawable);
 		  } else {
 			  JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 			  return null;
@@ -331,7 +336,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 	  }
 	  
 	  public void renderOffscreen(int w, int h, File file)	{
-		  if (renderer != null) renderer.renderOffscreen(w,h,file, canvas);
+		  if (renderer != null) renderer.renderOffscreen(w,h,file, drawable);
 		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 	  }
 
@@ -391,7 +396,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
 		renderer.reshape(arg0, arg1, arg2, arg3, arg4);
   }
-	private final Object renderLock=new Object();
+	protected final Object renderLock=new Object();
 	boolean autoSwapBuffers=true;
 	
 	public boolean isRendering() {
@@ -413,7 +418,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 			throw new IllegalStateException();
 		synchronized (renderLock) {
 			pendingUpdate = false;
-			canvas.display();
+			drawable.display();
 //			JOGLConfiguration.theLog.log(Level.INFO,"rendering "+renderer.frameCount);
 			if (listeners!=null) broadcastChange();
 			renderLock.notifyAll();
@@ -423,17 +428,17 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 
 	public void setAutoSwapMode(boolean autoSwap) {
 		autoSwapBuffers=autoSwap;
-		canvas.setAutoSwapBufferMode(autoSwap);
+		drawable.setAutoSwapBufferMode(autoSwap);
 	}
 	
     final Runnable bufferSwapper = new Runnable() {
         public void run() {
-            canvas.swapBuffers();
+            drawable.swapBuffers();
         }
     };
                 
 	public void swapBuffers() {
-		if(EventQueue.isDispatchThread()) canvas.swapBuffers();
+		if(EventQueue.isDispatchThread()) drawable.swapBuffers();
 		else
 			try {
 				EventQueue.invokeAndWait(bufferSwapper);

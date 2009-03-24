@@ -779,14 +779,14 @@ public class JOGLRenderer  implements AppearanceListener {
 	protected int tileSizeX=1024, tileSizeY=768,numTiles=4;
 	protected long beginRenderTime;
 	
-	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLCanvas canvas) {
+	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLAutoDrawable canvas) {
 		BufferedImage img = renderOffscreen(imageWidth, imageHeight, canvas);
 		ImageUtility.writeBufferedImage(file, img);
 	}
 
 	BufferedImage offscreenImage;
 	boolean preMultiplied = false;		// not sure about this!
-	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLCanvas canvas) {
+	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
 			return null;
@@ -794,11 +794,8 @@ public class JOGLRenderer  implements AppearanceListener {
 		lightsChanged = true;
 		numTiles = Math.max(imageWidth/512, imageHeight/512);
 		if (numTiles == 0) numTiles = 1;
-//		if (imageWidth % 1024 != 0 ||  imageHeight % 1024 != 0) numTiles ++;
 		tileSizeX = (imageWidth/numTiles);
 		tileSizeY = (imageHeight/numTiles);
-//		tileSizeX = 4 * (((int) tileSizeX)/4);
-//		tileSizeY = 4 * (((int) tileSizeY)/4);
 		imageWidth = (tileSizeX) * numTiles;
 		imageHeight = (tileSizeY) * numTiles;
 		System.err.println("Tile size x = "+tileSizeX);
@@ -811,9 +808,6 @@ public class JOGLRenderer  implements AppearanceListener {
 				caps, null,
 				tileSizeX, tileSizeY,
 				canvas.getContext());
-//		offscreenBuffer = null;
-//		imageWidth = numTiles*tileSizeX;
-//		imageHeight = numTiles*tileSizeY;
 		offscreenImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR); //TYPE_3BYTE_BGR); //
 		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) offscreenImage.getRaster().getDataBuffer()).getData());
 		offscreenMode = true;
@@ -822,7 +816,6 @@ public class JOGLRenderer  implements AppearanceListener {
 		// why I can't just use img is a mystery to me ... go figure
 		// I seem to be just copying the data directly from one image to the other.
 		BufferedImage bi = ImageUtility.rearrangeChannels(offscreenImage);
-//		BufferedImage bi = offscreenImage;
 		ImageUtil.flipImageVertically(bi);
 		// a magic incantation to get the alpha channel to show up correctly
 		bi.coerceData(true);
