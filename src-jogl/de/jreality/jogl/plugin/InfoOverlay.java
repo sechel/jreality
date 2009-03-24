@@ -52,7 +52,7 @@ public class InfoOverlay implements GLEventListener {
 	 */
 	public InfoOverlay(Viewer v) {
 		viewer = v;
-			((GLAutoDrawable) v.canvas).addGLEventListener(this);
+		viewer.getDrawable().addGLEventListener(this);
 	}
 
 	public boolean isVisible() {
