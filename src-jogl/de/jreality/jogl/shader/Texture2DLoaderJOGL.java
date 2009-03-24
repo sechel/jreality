@@ -91,9 +91,9 @@ public class Texture2DLoaderJOGL {
 	private static IdentityHashMap<WeakReference<ImageData>, Integer> refToID = new IdentityHashMap<WeakReference<ImageData>, Integer>();
 	private static IdentityHashMap<WeakReference<ImageData>, GL> refToGL = new IdentityHashMap<WeakReference<ImageData>, GL>();
 	private static IdentityHashMap<WeakReference<ImageData>, Dimension> refToDim = new IdentityHashMap<WeakReference<ImageData>, Dimension>();
-  
+    
 	private static final boolean REPLACE_TEXTURES = true;
-  
+	private static WeakHashMap<GL, List<Integer>> fboTextures = new WeakHashMap<GL, List<Integer>>();
   
 	private Texture2DLoaderJOGL() {
 	}
@@ -104,7 +104,15 @@ public class Texture2DLoaderJOGL {
 	   gl.glGenTextures(1, tmp, 0);
 	   return tmp[0]; 
 	} 
-       
+     
+	private static List<Integer> getFBOTexturesForGL(GL gl)	{
+		List<Integer> list = fboTextures.get(gl);
+		if (list == null)	{
+			list = new Vector<Integer>();
+			fboTextures.put(gl, list);
+		}
+		return list;
+	}
 	private static WeakHashMap<ImageData, Integer> getTextureTableForGL(GL gl)	{
       WeakHashMap<ImageData, Integer> ht = lookupTextures.get(gl);
   		if (ht == null)	{
@@ -153,6 +161,8 @@ public class Texture2DLoaderJOGL {
     	if (texid != null) {
     		first = false;
     	} else {
+ //   		List<Integer> fbotextures = getFBOTexturesForGL(gl);
+    		
     		Dimension dim = new Dimension(width, height);
     		{ // delete garbage collected textures or reuse if possible
     			for (Object ref=refQueue.poll(); ref != null; ref=refQueue.poll()) {

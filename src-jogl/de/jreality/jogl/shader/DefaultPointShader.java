@@ -239,7 +239,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				} else {
 					gl.glEnable (GL.GL_BLEND);
 					gl.glDepthMask(jrs.zbufferEnabled);
-					gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);								
+//					gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);								
+					gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 				}
 				changedTransp = true;					
 			}
@@ -262,7 +263,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			if (jrs.transparencyEnabled) {
 				gl.glEnable (GL.GL_BLEND);
 				gl.glDepthMask(jrs.zbufferEnabled);
-				gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);			
+				//gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);			
+				gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
 			} else {
 				gl.glDepthMask(true);
 				gl.glDisable(GL.GL_BLEND);						
