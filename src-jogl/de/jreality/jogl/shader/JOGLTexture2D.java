@@ -183,11 +183,12 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public void setBlendColor(Color blendColor) {
+		this.blendColor = blendColor;
 	}
 
 	public void setCombineMode(Integer combineMode) {
 	}
-
+	// TODO: finish implementing the set() methods
 	public void setCombineModeAlpha(Integer i) {
 	}
 
@@ -198,6 +199,7 @@ public class JOGLTexture2D implements Texture2D {
 	}
 
 	public void setImage(ImageData image) {
+		this.image = image;
 	}
 
 	public void setMagFilter(Integer i) {
