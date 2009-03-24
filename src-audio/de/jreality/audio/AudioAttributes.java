@@ -12,6 +12,7 @@ public interface AudioAttributes {
 	public static final String UPDATE_CUTOFF_KEY = "updateCutoff";
 	public static final String FDN_PARAMETER_KEY = "fdnParameters";
 	public static final String DISTANCE_LOWPASS_KEY = "distanceLowPassKey";
+	public static final String PITCH_SHIFT_KEY = "pitchShiftKey";
 	
 	public static final float DEFAULT_REVERB_TIME = 1.5f;
 	public static final float DEFAULT_GAIN = 1f;
@@ -24,6 +25,7 @@ public interface AudioAttributes {
 	public static final float DEFAULT_DISTANCE_LOWPASS_FREQ = 44000;
 	public static final Interpolation.Factory DEFAULT_INTERPOLATION_FACTORY = Interpolation.Cubic.FACTORY;
 	public static final SoundPath.Factory DEFAULT_SOUNDPATH_FACTORY = DelayPath.FACTORY;
+	public static final float DEFAULT_PITCH_SHIFT = 1f;
 	
 	public static final float HEARING_THRESHOLD = 1e-16f; // dynamic range between hearing threshold and instant perforation of eardrum
 }

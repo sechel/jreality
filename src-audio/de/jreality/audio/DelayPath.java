@@ -83,8 +83,9 @@ public class DelayPath implements SoundPath {
 		if (newPreProcChain==null || !newPreProcChain.equals(preProcChain)) {
 			preProcChain = newPreProcChain;
 			try {
-				preProcessor = ProcessorChain.create(newPreProcChain);
-				preProcessor.initialize(reader);
+				SampleProcessor proc = ProcessorChain.create(newPreProcChain);
+				proc.initialize(reader);
+				preProcessor = proc;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

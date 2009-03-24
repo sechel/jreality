@@ -20,6 +20,7 @@ import de.jreality.audio.EarlyReflections;
 import de.jreality.audio.FDNReverb;
 import de.jreality.audio.SampleProcessor;
 import de.jreality.audio.SchroederReverb;
+import de.jreality.audio.ShiftProcessor;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.jreality.plugin.view.View;
 import de.jreality.scene.Appearance;
@@ -48,10 +49,11 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float reverbGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
+	private float pitchShift = 1;
 	private int reverbType = 0;
 
-	private String[] procLabels = {"none", "reflections"};
-	private Class[] procTypes = {null, EarlyReflections.class};
+	private String[] procLabels = {"none", "reflections", "pitch shift"};
+	private Class[] procTypes = {null, EarlyReflections.class, ShiftProcessor.class};
 	
 	private String[] cueLabels = {"none", "conical", "low pass", "linear", "exponential"};
 	private Class[] cueTypes = {null, DistanceCue.CONICAL.class, DistanceCue.LOWPASS.class, DistanceCue.LINEAR.class, DistanceCue.EXPONENTIAL.class};
@@ -61,7 +63,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 	private Appearance rootAppearance;
 
-	private JSliderVR gainWidget, speedWidget, reverbGainWidget, reverbTimeWidget;
+	private JSliderVR gainWidget, speedWidget, reverbGainWidget, reverbTimeWidget, pitchShiftWidget;
 	private JList procWidget, distanceCueWidget, reverbWidget;
 
 	public AudioOptions() {
@@ -99,6 +101,17 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		shrinkPanel.add(new JLabel("Preprocessor"), gbc);
 		gbc.gridx = 1;
 		shrinkPanel.add(procWidget = new JList(procLabels), gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy = rowCount++;
+		shrinkPanel.add(new JLabel("Pitch shift (10c)"), gbc);
+		gbc.gridx = 1;
+		shrinkPanel.add(pitchShiftWidget = new JSliderVR(-120, 120, (int) (toCents(pitchShift)/10)), gbc);
+		pitchShiftWidget.setPreferredSize(new Dimension(20, 50));
+		pitchShiftWidget.setMajorTickSpacing(120);
+		pitchShiftWidget.setPaintTicks(true);
+		pitchShiftWidget.setPaintLabels(true);
+		pitchShiftWidget.setPaintTrack(true);
 		
 		gbc.gridx = 0;
 		gbc.gridy = rowCount++;
@@ -145,6 +158,12 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			public void valueChanged(ListSelectionEvent e) {
 				selectedCues = distanceCueWidget.getSelectedIndices();
 				setDistanceCueAttribute();
+			}
+		});
+		pitchShiftWidget.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				pitchShift = fromCents(pitchShiftWidget.getValue()*10);
+				setPitchAttribute();
 			}
 		});
 		speedWidget.addChangeListener(new ChangeListener() {
@@ -208,6 +227,10 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		rootAppearance.setAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
 	}
 
+	private void setPitchAttribute() {
+		rootAppearance.setAttribute(AudioAttributes.PITCH_SHIFT_KEY, pitchShift);
+	}
+	
 	private void setGainAttribute() {
 		rootAppearance.setAttribute(AudioAttributes.VOLUME_GAIN_KEY, gain);
 	}
@@ -237,6 +260,9 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		distanceCueWidget.setSelectedIndices(selectedCues);
 	}
 
+	private void updatePitchWidget() {
+		pitchShiftWidget.setValue((int) (toCents(pitchShift)/10));
+	}
 	private void updateSpeedWidget() {
 		speedWidget.setValue((int) speedOfSound);
 	}
@@ -283,6 +309,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 		updateProcWidget();
 		updateCueWidget();
+		updatePitchWidget();
 		updateSpeedWidget();
 		updateGainWidget();
 		updateReverbWidget();
@@ -298,6 +325,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			selectedProcs = c.getProperty(getClass(), AudioAttributes.PREPROCESSOR_KEY, new int[0]);
 			selectedCues = c.getProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, new int[0]);
 			speedOfSound = c.getProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
+			pitchShift = c.getProperty(getClass(), AudioAttributes.PITCH_SHIFT_KEY, AudioAttributes.DEFAULT_PITCH_SHIFT);
 			gain = c.getProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
 			reverbType = c.getProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, 0);
 			reverbGain = c.getProperty(getClass(), AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
@@ -314,6 +342,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		c.storeProperty(getClass(), AudioAttributes.PREPROCESSOR_KEY, selectedProcs);
 		c.storeProperty(getClass(), AudioAttributes.DISTANCE_CUE_KEY, selectedCues);
 		c.storeProperty(getClass(), AudioAttributes.SPEED_OF_SOUND_KEY, speedOfSound);
+		c.storeProperty(getClass(), AudioAttributes.PITCH_SHIFT_KEY, pitchShift);
 		c.storeProperty(getClass(), AudioAttributes.VOLUME_GAIN_KEY, gain);
 		c.storeProperty(getClass(), AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, reverbType);
 		c.storeProperty(getClass(), AudioAttributes.DIRECTIONLESS_GAIN_KEY, reverbGain);
@@ -325,11 +354,19 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		super.uninstall(c);
 	}
 
-	private final double dbq = 20/Math.log(10);
+	private static final double dbq = 20/Math.log(10);
 	private float toDecibels(float q) {
 		return (float) (Math.log(q)*dbq);
 	}
 	private float fromDecibels(float db) {
 		return (float) Math.exp(db/dbq);
+	}
+	
+	private static final double cpq = 1200/Math.log(2);
+	private float toCents(float q) {
+		return (float) (Math.log(q)*cpq);
+	}
+	private float fromCents(float c) {
+		return (float) Math.exp(c/cpq);
 	}
 }
