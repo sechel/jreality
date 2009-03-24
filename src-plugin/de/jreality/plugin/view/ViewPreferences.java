@@ -78,11 +78,13 @@ public class ViewPreferences extends Plugin implements
 	
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
+		boolean fs = fullscreenItem.isSelected();
 		if (fullscreenItem == s) {
-			sceneViewPlugin.setHidePanels(fullscreenItem.isSelected());
-			frontendListener.setShowMenuBar(!fullscreenItem.isSelected());
-			frontendListener.setShowStatusBar(!fullscreenItem.isSelected());
-			frontendListener.setFullscreen(fullscreenItem.isSelected());
+			sceneViewPlugin.setHidePanels(fs);
+			frontendListener.setShowMenuBar(!fs);
+			frontendListener.setShowToolBar(!fs);
+			frontendListener.setShowStatusBar(!fs);
+			frontendListener.setFullscreen(fs);
 			frontendListener.updateFrontendUI();
 		} else if (threadSafeChecker == s) {
 			System.out.println("ThreadSafe is " + threadSafeChecker.isSelected());
