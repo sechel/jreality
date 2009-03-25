@@ -46,6 +46,7 @@ public class GLShadingLangExample03 {
 		dps.setDiffuseColor(Color.white);
 //		ap.setAttribute("useVertexArrays", false);
 		ap.setAttribute("useGLSL", true);
+		ap.setAttribute("transparencyEnabled", true);
 		GlslProgram brickProg = null;		
 		world.setGeometry(SphereUtility.sphericalPatch(0, 0, 90, 90, 30, 30, 1)); 
 		MatrixBuilder.euclidean().rotateY(-Math.PI/2).assignTo(world);
@@ -55,25 +56,19 @@ public class GLShadingLangExample03 {
 		   imageRGBAdata[x*4] = (byte) (x>>1); 
 		   imageRGBAdata[x*4+1] = (byte) x; 
 		   imageRGBAdata[x*4+2] = (byte) x; 
-		   imageRGBAdata[x*4+3] = ~0; 
+		   imageRGBAdata[x*4+3] = (byte) x; 
 		} 
 		       
 		ImageData id = new de.jreality.shader.ImageData(imageRGBAdata, 256, 1); 
 		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, 0, id);
 		// rotate this texture by 90 degrees
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(4).rotateZ(Math.PI/2).getMatrix());
+		tex.setApplyMode(Texture2D.GL_DECAL);
 
 		Texture2D gradTexture = (Texture2D) TextureUtility.createTexture(ap, POLYGON_SHADER, 1, id); 
 		gradTexture.setTextureMatrix(MatrixBuilder.euclidean().scale(3).getMatrix());
-		try {
-			brickProg = new GlslProgram(ap, "polygonShader",   
-					null,
-					Input.getInput("de/jreality/jogl/shader/resources/sampler.frag")
-			    );
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-// sampler.frag:
+		gradTexture.setApplyMode(Texture2D.GL_COMBINE);
+		// sampler.frag:
 //		uniform sampler2D  sampler;
 //		uniform sampler2D sampler2;
 //		void main(void)
@@ -82,8 +77,16 @@ public class GLShadingLangExample03 {
 //		    vec4 currentSample2 = texture2D(sampler2,gl_TexCoord[1].st); 
 //		    gl_FragColor = currentSample*currentSample2 * gl_Color; 
 //		}
-		brickProg.setUniform("sampler",0);
-		brickProg.setUniform("sampler2",1);		
+//		try {
+//			brickProg = new GlslProgram(ap, "polygonShader",   
+//					null,
+//					Input.getInput("de/jreality/jogl/shader/resources/sampler.frag")
+//			    );
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		brickProg.setUniform("sampler",0);
+//		brickProg.setUniform("sampler2",1);		
 		ViewerApp va = ViewerApp.display(world);
 		CameraUtility.encompass(va.getCurrentViewer());
 	}
