@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
@@ -267,7 +268,7 @@ public class LabelUtility {
 	  // HACK: the previous implementation failed for strings without descent...
 	  // I got cut-off in the vertical dir, so i added a border of width 2
 	  int height = (int) f.getLineMetrics(s,frc).getHeight();//new TextLayout("fg", f, frc).getBounds().getBounds().height;
-    int width = r.width+4;
+    int width = (r.width+4);
     
     BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 	  Graphics2D g = (Graphics2D) img.getGraphics();
@@ -276,6 +277,7 @@ public class LabelUtility {
 	  g.setColor(foreground);
 	  g.setFont(f);
 //	  LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
+	  g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
 	  final float border = height - tl.getDescent();
 
