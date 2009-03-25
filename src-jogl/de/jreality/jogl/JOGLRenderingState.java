@@ -40,16 +40,11 @@
 
 package de.jreality.jogl;
 
-import java.util.WeakHashMap;
-
 import javax.media.opengl.GL;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
-import de.jreality.shader.ImageData;
-import de.jreality.shader.RenderingHintsShader;
-import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
 
 /**

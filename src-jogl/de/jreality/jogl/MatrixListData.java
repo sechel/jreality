@@ -2,7 +2,6 @@ package de.jreality.jogl;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.SceneGraphComponent;
 
 public class MatrixListData extends Geometry {
 	public MatrixListData(String name) {

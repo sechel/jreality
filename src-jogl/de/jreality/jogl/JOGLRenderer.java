@@ -40,6 +40,14 @@
 
 package de.jreality.jogl;
 
+import static de.jreality.shader.CommonAttributes.BACKGROUND_COLORS;
+import static de.jreality.shader.CommonAttributes.CLEAR_COLOR_BUFFER;
+import static de.jreality.shader.CommonAttributes.FORCE_RESIDENT_TEXTURES;
+import static de.jreality.shader.CommonAttributes.ONE_TEXTURE2D_PER_IMAGE;
+import static de.jreality.shader.CommonAttributes.RENDER_S3;
+import static de.jreality.shader.CommonAttributes.SKY_BOX;
+import static de.jreality.shader.CommonAttributes.USE_OLD_TRANSPARENCY;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -47,11 +55,9 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
@@ -63,22 +69,18 @@ import java.util.logging.Logger;
 import javax.media.opengl.DebugGL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLPbuffer;
 
-import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.ImageUtil;
 
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
-import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -86,20 +88,17 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.pick.Graphics3D;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.CopyVisitor;
 import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
-import static de.jreality.shader.CommonAttributes.*;
 
 public class JOGLRenderer  implements AppearanceListener {
 

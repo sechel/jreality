@@ -44,7 +44,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.geom.Rectangle2D;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -55,7 +54,6 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.GlslPolygonShader;
 import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Rn;
@@ -77,8 +75,6 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.LoggingSystem;
-import de.jreality.util.SceneGraphUtility;
 
 public class JOGLRendererHelper {
 

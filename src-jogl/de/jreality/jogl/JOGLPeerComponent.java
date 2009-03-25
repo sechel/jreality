@@ -9,7 +9,6 @@ import java.util.logging.Level;
 
 import javax.media.opengl.GL;
 
-import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.jogl.shader.DefaultGeometryShader;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.math.Matrix;

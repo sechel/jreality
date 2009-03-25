@@ -3,19 +3,12 @@ package de.jreality.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLException;
 
-import sun.awt.PeerEvent;
-
-import de.jreality.jogl.pick.JOGLPickAction;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.SceneGraphComponentEvent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.SystemProperties;
 
 /**
  * This is an alternative class for use in conjunction with special sorts of

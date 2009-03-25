@@ -40,22 +40,21 @@
 
 package de.jreality.jogl;
 
-import java.awt.EventQueue;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 
-import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.DefaultGLCapabilitiesChooser;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCapabilitiesChooser;
+import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLJPanel;
+import javax.media.opengl.GLPbuffer;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
 public class GLJPanelViewer extends Viewer {
 	GLJPanel panel;
+	GLPbuffer sharedPBuffer;
 	
 	public GLJPanelViewer() {
 		this(null, null);
@@ -66,12 +65,7 @@ public class GLJPanelViewer extends Viewer {
 		initializeFrom(root, camPath);	
 	}
 
-  
-//  @Override
-//  public Object getViewingComponent() {
-//	  return panel;
-//    }
-  		
+    		
 	  @Override
 	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
@@ -80,22 +74,31 @@ public class GLJPanelViewer extends Viewer {
 		caps.setAlphaBits(8);
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
+		GLCapabilitiesChooser chooser = new MultisampleChooser();
 		if (JOGLConfiguration.multiSample)	{
-			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
 			caps.setStereo(JOGLConfiguration.quadBufferedStereo);
-			panel = new GLJPanel(caps); //GLCanvas(caps, chooser, firstOne,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
 		} else {
-			panel = new GLJPanel(caps);
+			chooser = new DefaultGLCapabilitiesChooser();
 		}
+		if (JOGLConfiguration.sharedContexts && firstOne == null) 
+			setupSharedContext(caps, chooser);
+		panel = new GLJPanel(caps, chooser, firstOne);
 		drawable = panel;
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
         drawable.addGLEventListener(this);
  		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
 //		canvas.requestFocus();
-//		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = panel.getContext();
 	}
+
+	  // have to use a pbuffer to start with since panel has no context until
+	  // it's visible.
+	  private void setupSharedContext(GLCapabilities caps, GLCapabilitiesChooser chooser) {
+		if (sharedPBuffer == null)
+			sharedPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(caps, chooser, 1,1, null);
+		firstOne = sharedPBuffer.getContext();
+	  }
 
 
 	

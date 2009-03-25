@@ -5,12 +5,9 @@
 package de.jreality.jogl;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.shader.DefaultGeometryShader;
-import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.RenderingHintsShader;
 import de.jreality.math.Pn;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Cylinder;
@@ -22,7 +19,6 @@ import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.event.GeometryEvent;
 import de.jreality.scene.event.GeometryListener;
-import de.jreality.util.LoggingSystem;
 
 public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	public Geometry originalGeometry;

@@ -5,14 +5,11 @@
 package de.jreality.jogl;
 
 import java.lang.reflect.InvocationTargetException;
-import java.security.AccessControlException;
-import java.util.logging.Level;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.Secure;
 
 public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 	SceneGraphComponent myRoot;

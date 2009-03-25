@@ -48,7 +48,6 @@ import javax.media.opengl.GL;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
