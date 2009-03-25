@@ -109,7 +109,7 @@ public class InfoOverlay implements GLEventListener {
 		try {
 			glu.gluOrtho2D(0, viewPort[2], viewPort[3], 0);			
 		} catch (GLException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return;
 		}
 
