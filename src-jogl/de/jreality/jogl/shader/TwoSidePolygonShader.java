@@ -46,9 +46,7 @@ import java.util.logging.Level;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
 import de.jreality.util.LoggingSystem;
 
 /**

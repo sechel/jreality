@@ -2,10 +2,8 @@ package de.jreality.jogl.shader;
 
 import java.awt.Color;
 
-import de.jreality.math.Matrix;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.Texture2D;
 
 /**
  * This class is essentially a cache for the Texture2D used in the constructor.

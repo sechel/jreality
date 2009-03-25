@@ -47,9 +47,7 @@ import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.RenderingHintsShader;
-import de.jreality.shader.ShaderUtility;
 
 /**
  * @author Charles Gunn

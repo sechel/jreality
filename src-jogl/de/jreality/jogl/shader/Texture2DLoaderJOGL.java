@@ -66,8 +66,6 @@ import java.util.WeakHashMap;
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.util.texture.Texture;
-
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.math.Rn;
 import de.jreality.shader.CubeMap;

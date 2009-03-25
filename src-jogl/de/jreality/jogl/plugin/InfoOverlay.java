@@ -14,6 +14,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
+
 import com.sun.opengl.util.GLUT;
 
 import de.jreality.jogl.Viewer;

@@ -59,7 +59,6 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.JOGLSphereHelper;
-import de.jreality.jogl.pick.JOGLPickAction;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -83,7 +82,6 @@ import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.LoggingSystem;
 
 /**
  * it is assumed that the shader source code stayes FIXED!
