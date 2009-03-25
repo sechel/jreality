@@ -90,7 +90,6 @@ public class SceneViewPluginTest {
 		viewerMenu.addMenuSeparator(SceneViewPluginTest.class, 19.0, "File");
 		viewerMenu.addMenuItem(SceneViewPluginTest.class, 20.0, new ExitAction(), "File");
 		
-		// look and feel switch
 		c.startup();
 	}
 }
