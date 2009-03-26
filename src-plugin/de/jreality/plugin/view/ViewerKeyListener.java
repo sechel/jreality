@@ -131,7 +131,7 @@ public class ViewerKeyListener extends KeyAdapter {
 			helpOverlay.registerKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Quit");
 			//if ((viewer.getViewingComponent() instanceof GLCanvas))			
 		}
-		if (jViewer != null) jViewer.canvas.addGLEventListener(helpOverlay);
+		if (jViewer != null) jViewer.getDrawable().addGLEventListener(helpOverlay);
 	}
 
 	Container c = null;
