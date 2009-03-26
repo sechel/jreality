@@ -212,11 +212,10 @@ public class View extends SideContainerPerspective {
 
 		setScene(root, null, emptyPickPath, null);
 
-		// set preferred size
-		viewerSwitch.getViewingComponent().setPreferredSize(new Dimension(600,600));
-
 		getContentPanel().setLayout(new GridLayout());
 		getContentPanel().add(viewerSwitch.getViewingComponent());
+		getContentPanel().setPreferredSize(new Dimension(600,600));
+		getContentPanel().setMinimumSize(new Dimension(300, 200));
 	}
 
 	public ViewerSwitch getViewer()	{
