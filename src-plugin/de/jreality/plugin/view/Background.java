@@ -1,5 +1,9 @@
 package de.jreality.plugin.view;
 
+import static de.jreality.scene.Appearance.INHERITED;
+import static de.jreality.shader.CommonAttributes.BACKGROUND_COLOR;
+import static de.jreality.shader.CommonAttributes.BACKGROUND_COLORS;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
@@ -83,8 +87,8 @@ public class Background extends Plugin {
 				if (equal) colors = new Color[]{ colors[0] };
 			}
 
-			app.setAttribute("backgroundColor", (colors.length==1)? colors[0] : Appearance.INHERITED);
-			app.setAttribute("backgroundColors", (colors.length==4)? colors : Appearance.INHERITED); 
+			app.setAttribute(BACKGROUND_COLOR, (colors.length==1)? colors[0] : INHERITED);
+			app.setAttribute(BACKGROUND_COLORS, (colors.length==4)? colors : INHERITED); 
 		}
 	}
 
@@ -99,7 +103,6 @@ public class Background extends Plugin {
 
 			public void actionPerformed(ActionEvent e) {
 				setColor(name);
-
 			}
 
 		};
@@ -126,7 +129,7 @@ public class Background extends Plugin {
 
 	@Override
 	public void install(Controller c) throws Exception {
-		install(view);
+		install(c.getPlugin(View.class));
 		viewerMenuAggregator = c.getPlugin(ViewMenuBar.class);
 		viewerMenuAggregator.addMenuItem(
 				getClass(),

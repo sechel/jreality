@@ -352,7 +352,10 @@ public class ViewerKeyListener extends KeyAdapter {
 	boolean firstTime = true, showColors = false;
 	private void toggleBackPlane() {
 	  		Appearance rootAp = viewer.getSceneRoot().getAppearance();
-	  		if (rootAp == null)	 viewer.getSceneRoot().setAppearance(new Appearance());
+	  		if (rootAp == null) {
+	  			rootAp = new Appearance();
+	  			viewer.getSceneRoot().setAppearance(rootAp);
+	  		}
 	  		if (firstTime)	{
 				Object bp = rootAp.getAttribute(CommonAttributes.BACKGROUND_COLORS);
 				if (bp != null && bp instanceof Color[])	{
