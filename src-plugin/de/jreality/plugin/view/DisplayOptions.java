@@ -100,6 +100,7 @@ public class DisplayOptions extends ShrinkPanelPlugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
+		c.getPlugin(CameraStand.class);
 		view = c.getPlugin(View.class);
 		setPick(pickBox.isSelected());
 		loadPreferences();

@@ -147,7 +147,12 @@ public class PluginViewerApp {
 
 			@Override
 			public PluginInfo getPluginInfo() {
-				return new PluginInfo(title);
+				if (title == null) {
+					return new PluginInfo("No Title");
+				} else {
+					return new PluginInfo(title);
+				}
+				
 			}
 		};
 		controller.registerPlugin(p);

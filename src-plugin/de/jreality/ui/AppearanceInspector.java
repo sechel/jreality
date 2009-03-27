@@ -576,6 +576,8 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 					CommonAttributes.POINT_SIZE,
 					getPointRadius() * 64
 			);
+			appearance.setAttribute(CommonAttributes.LINE_SHADER + "." + 
+					CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
 		}
 		if (scaledAppearance != null) {
 			scaledAppearance.setAttribute(

@@ -1,6 +1,7 @@
 package de.jreality.plugin;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import javax.swing.AbstractAction;
 
@@ -11,12 +12,15 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
+import de.jreality.plugin.view.InfoOverlayPlugin;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
+import de.jreality.plugin.view.ViewerKeyListenerPlugin;
+import de.jreality.plugin.view.ZoomTool;
 import de.jreality.scene.SceneGraphComponent;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
@@ -37,7 +41,7 @@ public class ContentViewer {
 	private DisplayOptions displayOptions;
 	
 	public ContentViewer() {
-		controller = new SimpleController();
+		controller = new SimpleController(new File("ContentViewer.jrw"));
 		
 		view = new View();
 		controller.registerPlugin(view);
@@ -76,6 +80,7 @@ public class ContentViewer {
 		
 		displayOptions = new DisplayOptions();
 		controller.registerPlugin(displayOptions);
+		
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -153,6 +158,9 @@ public class ContentViewer {
 	public static void main(String[] args) {
 		ContentViewer contentViewer = new ContentViewer();
 		contentViewer.registerPlugin(new ContentLoader());
+		contentViewer.registerPlugin(new ZoomTool());
+		contentViewer.registerPlugin(new ViewerKeyListenerPlugin());
+		contentViewer.registerPlugin(new InfoOverlayPlugin());
 		contentViewer.startup();
 	}
 }

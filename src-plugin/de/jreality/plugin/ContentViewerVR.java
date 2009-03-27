@@ -1,9 +1,12 @@
 package de.jreality.plugin;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import javax.swing.AbstractAction;
 
+import de.jreality.plugin.audio.Audio;
+import de.jreality.plugin.audio.ContentSound;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
@@ -17,6 +20,7 @@ import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
 import de.jreality.plugin.vr.Avatar;
+import de.jreality.plugin.vr.HeadUpDisplay;
 import de.jreality.plugin.vr.Sky;
 import de.jreality.plugin.vr.Terrain;
 import de.jreality.scene.SceneGraphComponent;
@@ -42,13 +46,13 @@ public class ContentViewerVR {
 	private Avatar avatar;
 	private Terrain terrain;
 	
-//	private HeadUpDisplay headUpDisplay;
+	private HeadUpDisplay headUpDisplay;
 
-//	private Audio audio;
-//	private ContentSound contentSound;
+	private Audio audio;
+	private ContentSound contentSound;
 	
 	public ContentViewerVR(boolean withAudio) {
-		controller = new SimpleController();
+		controller = new SimpleController(new File("ContentViewerVR.jrw"));
 		
 		viewMenuBar = new ViewMenuBar();
 		viewMenuBar.addMenuSeparator(ContentViewerVR.class, 19.0, "File");
@@ -89,25 +93,25 @@ public class ContentViewerVR {
 		sky = new Sky();
 		controller.registerPlugin(sky);
 
-			avatar = new Avatar();
-			avatar.setShowPanel(false);
-			controller.registerPlugin(avatar);
+		avatar = new Avatar();
+		avatar.setShowPanel(false);
+		controller.registerPlugin(avatar);
+	
+		terrain = new Terrain();
+		controller.registerPlugin(terrain);
 		
-			terrain = new Terrain();
-			controller.registerPlugin(terrain);
-		
-//		if (withAudio) {
-//			audio = new Audio();
-//			controller.registerPlugin(audio);
-//			contentSound = new ContentSound();
-//			controller.registerPlugin(contentSound);
-//		}
+		if (withAudio) {
+			audio = new Audio();
+			controller.registerPlugin(audio);
+			contentSound = new ContentSound();
+			controller.registerPlugin(contentSound);
+		}
 		
 		contentTools = new ContentTools();
 		controller.registerPlugin(contentTools);
 		
-//		headUpDisplay = new HeadUpDisplay();
-//		controller.registerPlugin(headUpDisplay);
+		headUpDisplay = new HeadUpDisplay();
+		controller.registerPlugin(headUpDisplay);
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -177,10 +181,18 @@ public class ContentViewerVR {
 	public Terrain getTerrain() {
 		return terrain;
 	}
-//
-//	public Audio getAudio() {
-//		return audio;
-//	}
+
+	public Audio getAudio() {
+		return audio;
+	}
+	
+	public ContentSound getContentSound() {
+		return contentSound;
+	}
+
+	public HeadUpDisplay getHeadUpDisplay() {
+		return headUpDisplay;
+	}
 	
 	private static class ExitAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
@@ -194,6 +206,8 @@ public class ContentViewerVR {
 		}
 	}
 	
+	
+	
 	public static void main(String[] args) {
 		ContentViewerVR contentViewer = new ContentViewerVR(true);
 		contentViewer.registerPlugin(new ContentLoader());
@@ -206,14 +220,5 @@ public class ContentViewerVR {
 		contentViewer.startup();
 		return contentViewer.view.getViewer().getCurrentViewer();
 	}
-	
-	
-//	public ContentSound getContentSound() {
-//		return contentSound;
-//	}
-
-//	public HeadUpDisplay getHeadUpDisplay() {
-//		return headUpDisplay;
-//	}
 
 }
