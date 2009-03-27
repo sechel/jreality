@@ -65,7 +65,8 @@ import de.jreality.scene.data.IntArrayArray;
  * <p>
  * @author Charles Gunn
  *
- */public class ThickenedSurfaceFactory {
+ */
+ public class ThickenedSurfaceFactory {
 	IndexedFaceSet theSurface;
 	IndexedFaceSet thickSurface;
 	double thickness;
@@ -238,6 +239,7 @@ import de.jreality.scene.data.IntArrayArray;
 	 * @return
 	 */
 	public IndexedFaceSet getThickenedSurface()	{
+		if (thickSurfaceIFSF == null) thickSurfaceIFSF = new IndexedFaceSetFactory();
 		return thickSurface;
 	}
 	
