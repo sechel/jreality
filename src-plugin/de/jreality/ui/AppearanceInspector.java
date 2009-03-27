@@ -892,16 +892,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	@Override
 	public void updateUI() {
 		super.updateUI();
-		if (textureInspector != null) {
+		if (isShowing()) {
 			SwingUtilities.updateComponentTreeUI(texturePanel);
-		}
-		if (lineColorPanel != null) {
 			SwingUtilities.updateComponentTreeUI(lineColorPanel);
-		}
-		if (faceColorPanel != null) {
 			SwingUtilities.updateComponentTreeUI(faceColorPanel);
-		}
-		if (pointColorPanel != null) {
 			SwingUtilities.updateComponentTreeUI(pointColorPanel);
 		}
 	}
