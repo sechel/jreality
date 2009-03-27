@@ -372,13 +372,13 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		linesReflecting.setEnabled(isShowLines() && isTubes());
 		linesReflectionSlider.setEnabled(isShowLines() && isLinesReflecting() && isTubes());
 		tubes.setEnabled(isShowLines());
-		tubeRadiusSlider.setEnabled(isShowLines() && isTubes());
+		tubeRadiusSlider.setEnabled(isShowLines());
 		
 		pointColorButton.setEnabled(isShowPoints());
 		pointsReflecting.setEnabled(isShowPoints() && isSpheres());
 		pointsReflectionSlider.setEnabled(isShowPoints() && isPointsReflecting() && isSpheres());
 		spheres.setEnabled(isShowPoints());
-		sphereRadiusSlider.setEnabled(isShowPoints() && isSpheres());
+		sphereRadiusSlider.setEnabled(isShowPoints());
 		
 		faceColorButton.setEnabled(isShowFaces());
 		facesReflecting.setEnabled(isShowFaces());
@@ -675,6 +675,11 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		double r = Math.exp(Math.log(logarithmicRange) * getTubeRadius())
 		/ logarithmicRange * maximalRadius;
 		if (appearance != null) {
+			appearance.setAttribute(
+					CommonAttributes.LINE_SHADER + "."	+
+					CommonAttributes.LINE_WIDTH,
+					getTubeRadius() * 10
+			);
 			appearance.setAttribute(
 					CommonAttributes.LINE_SHADER + "."	+
 					CommonAttributes.TUBE_RADIUS,
