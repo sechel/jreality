@@ -342,7 +342,7 @@ public class Terrain extends ShrinkPanelPlugin {
 
 	public void setVisible(boolean b) {
 		visibleCheckBox.setSelected(b);
-		
+		updateVisible();
 	}
 	
 	private void updateVisible() {
