@@ -221,7 +221,7 @@ public class AlignedContent extends Plugin {
 		SelectionManagerInterface smi = SelectionManager.selectionManagerForViewer(view.getViewer());
 		pathToContent = path.popNew();
 		smi.setSelection(new Selection(pathToContent));
-		System.err.println("Setting Selection to  "+smi.getSelection().getSGPath());
+//		System.err.println("Setting Selection to  "+smi.getSelection().getSGPath());
 	}
 
 	public SceneGraphPath getPathToContent() {

@@ -53,6 +53,8 @@ public class ViewPreferences extends Plugin implements
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
 	private SceneGraphComponent
 		storedContent = null;
+	private boolean
+		windowedHidePanels = false;
 	
 	public ViewPreferences() {
 		fullscreenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
@@ -92,12 +94,18 @@ public class ViewPreferences extends Plugin implements
 		Object s = e.getSource();
 		boolean fs = fullscreenItem.isSelected();
 		if (fullscreenItem == s) {
-			view.setHidePanels(fs);
+			if (fs) {
+				windowedHidePanels = view.isHidePanels();
+				view.setHidePanels(true);
+			} else {
+				view.setHidePanels(windowedHidePanels);
+			}
 			frontendListener.setShowMenuBar(!fs);
 			frontendListener.setShowToolBar(!fs);
 			frontendListener.setShowStatusBar(!fs);
 			frontendListener.setFullscreen(fs);
 			frontendListener.updateFrontendUI();
+			view.getViewer().getViewingComponent().requestFocusInWindow();
 		} else if (threadSafeChecker == s) {
 			System.out.println("ThreadSafe is " + threadSafeChecker.isSelected());
 			SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());

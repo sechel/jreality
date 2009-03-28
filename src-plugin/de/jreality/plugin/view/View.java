@@ -40,6 +40,8 @@ package de.jreality.plugin.view;
  *
  */
 
+import static javax.swing.Action.SMALL_ICON;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -51,6 +53,7 @@ import java.security.PrivilegedAction;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JMenu;
@@ -242,15 +245,14 @@ public class View extends SideContainerPerspective {
 			for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
 				final int index = i;
 				final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
-						new javax.swing.AbstractAction(viewerNames[index]) {
-							private static final long serialVersionUID = 1L;
-
-							public void actionPerformed(ActionEvent e) {
-								viewerSwitch.selectViewer(index);
-								viewerSwitch.getCurrentViewer().renderAsync();
-								if (exportImageAction!=null) exportImageAction.setEnabled(exportImageAction.isEnabled());
-							}
-						});
+				new AbstractAction(viewerNames[index]) {
+					private static final long serialVersionUID = 1L;
+					public void actionPerformed(ActionEvent e) {
+						viewerSwitch.selectViewer(index);
+						viewerSwitch.getCurrentViewer().renderAsync();
+						if (exportImageAction!=null) exportImageAction.setEnabled(exportImageAction.isEnabled());
+					}
+				});
 				item.setSelected(index==0);
 				item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
 				bgr.add(item);
@@ -261,6 +263,7 @@ public class View extends SideContainerPerspective {
 					viewerSwitch,
 					viewerSwitch.getViewingComponent()
 			);
+			exportImageAction.putValue(SMALL_ICON, ImageHook.getIcon("picture_save.png"));
 			menu.add(exportImageAction);
 		}
 		return menu;

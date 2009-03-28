@@ -70,7 +70,8 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.HORIZONTAL;
-
+		gbc.weightx = 1.0;
+		
 		int rowCount = 0;
 		
 		gbc.gridx = 0;
@@ -293,7 +294,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Audio Options";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("Volume-Normal-Red-48x48.png");
+		info.icon = ImageHook.getIcon("sound_add.png");
 		return info;
 	}
 

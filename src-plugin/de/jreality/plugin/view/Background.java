@@ -35,25 +35,26 @@ public class Background extends Plugin {
 	private HashMap<String, ButtonModel> nameToButton = new  HashMap<String, ButtonModel>();
 	private HashMap<String, Color[]> nameToColors = new  HashMap<String, Color[]>();
 	
-	private ViewMenuBar viewerMenuAggregator;
+	private ViewMenuBar viewerMenu;
 
 	public Background() {
 
-		menu = new JMenu("Set background color");
+		menu = new JMenu("Background");
+		menu.setIcon(ImageHook.getIcon("color_swatch.png"));
 		buttonGroup = new ButtonGroup();
 
 		addChoice(
-				"default",
+				"Default",
 				new Color[] {
 						new Color(225, 225, 225), new Color(225, 225, 225),
 						new Color(255, 225, 180), new Color(255, 225, 180)
 				}
 		);
-		addChoice("white", Color.white);
-		addChoice("gray", new Color(225, 225, 225));
-		addChoice("black", Color.black);
+		addChoice("White", Color.white);
+		addChoice("Gray", new Color(225, 225, 225));
+		addChoice("Black", Color.black);
 
-		setColor("default");
+		setColor("Default");
 	}
 
 	public String getColor() {
@@ -130,8 +131,8 @@ public class Background extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		install(c.getPlugin(View.class));
-		viewerMenuAggregator = c.getPlugin(ViewMenuBar.class);
-		viewerMenuAggregator.addMenuItem(
+		viewerMenu = c.getPlugin(ViewMenuBar.class);
+		viewerMenu.addMenuItem(
 				getClass(),
 				10.0,
 				getMenu(),
@@ -142,7 +143,7 @@ public class Background extends Plugin {
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
-		viewerMenuAggregator.removeAll(getClass());
+		viewerMenu.removeAll(getClass());
 	}
 	
 	@Override

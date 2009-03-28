@@ -54,7 +54,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	
 	public ViewerKeyListener(Viewer v, HelpOverlay ho, InfoOverlay io) {
 		viewer = v;
-		System.err.println("viewer is "+viewer.getClass().getName());
+//		System.err.println("viewer is "+viewer.getClass().getName());
 		if (viewer instanceof de.jreality.jogl.Viewer) {
 			jViewer = (de.jreality.jogl.Viewer) viewer;
 		}

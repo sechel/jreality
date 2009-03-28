@@ -155,7 +155,7 @@ public class AudioLauncher extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Audio Launcher";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("Volume-Normal-48x48.png");
+		info.icon = ImageHook.getIcon("sound.png");
 		return info;
 	}
 

@@ -81,7 +81,7 @@ public class Lights extends Plugin  {
 		});
 
 		lightParent.addChild(getLightComponent());
-		System.err.println("install adding lights to "+lightParent.getName());
+//		System.err.println("install adding lights to "+lightParent.getName());
 	}
 
 	public SceneGraphComponent getLightComponent() {
@@ -93,7 +93,7 @@ public class Lights extends Plugin  {
 			this.lightParent.removeChild(this.lights);
 		this.lights = lights;
 		this.lightParent.addChild(this.lights);
-		System.err.println("stlights adding lights to "+this.lightParent.getName());
+//		System.err.println("stlights adding lights to "+this.lightParent.getName());
 	}
 
 	public void setLightParent(SceneGraphComponent lightParent) {
@@ -105,7 +105,7 @@ public class Lights extends Plugin  {
 		this.lightParent = lightParent;
 		if (lights != null) {
 			this.lightParent.addChild(lights);
-			System.err.println("setlp adding lights to "+lightParent.getName());
+//			System.err.println("setlp adding lights to "+lightParent.getName());
 		}
 	}
 

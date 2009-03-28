@@ -41,7 +41,7 @@ public class Avatar extends ShrinkPanelPlugin {
 	public Avatar() {
 		panel = new Box(BoxLayout.X_AXIS);
 		panel.add(Box.createHorizontalStrut(5));
-		JLabel gainLabel = new JLabel("speed");
+		JLabel gainLabel = new JLabel("Speed");
 		panel.add(gainLabel);
 		speedSlider = new JSliderVR(0, 3000, (int) (100 * DEFAULT_SPEED));
 		speedSlider.setPreferredSize(new Dimension(200,26));

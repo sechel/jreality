@@ -13,12 +13,14 @@ import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
+import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
+import de.jreality.plugin.view.ZoomTool;
 import de.jreality.plugin.vr.Avatar;
 import de.jreality.plugin.vr.HeadUpDisplay;
 import de.jreality.plugin.vr.Sky;
@@ -112,6 +114,9 @@ public class ContentViewerVR {
 		
 		headUpDisplay = new HeadUpDisplay();
 		controller.registerPlugin(headUpDisplay);
+		
+		controller.registerPlugin(new DisplayOptions());
+		controller.registerPlugin(new ZoomTool());
 	}
 
 	public void registerPlugin(Plugin plugin) {

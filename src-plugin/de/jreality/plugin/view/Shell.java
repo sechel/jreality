@@ -122,7 +122,7 @@ public class Shell extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "BeanShell";
 		info.vendorName = "Stefan Sechelmann";
-		info.icon = ImageHook.getIcon("zahnradgrau.png");
+		info.icon = ImageHook.getIcon("application_osx_terminal.png");
 		return info;
 	}
 	

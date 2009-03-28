@@ -382,6 +382,8 @@ public class Terrain extends ShrinkPanelPlugin {
 		updateFaceReflection();
 		updateTransparencyEnabled();
 		updateTransparency();
+		
+		alignedContent.contentChanged();
 	}
 	
 	@Override
@@ -422,7 +424,11 @@ public class Terrain extends ShrinkPanelPlugin {
 
 		
 		public void alignContent(boolean fire) {
-			bounds = calculateBoundingBox(alignedContent.getContent());
+			try {
+				bounds = calculateBoundingBox(alignedContent.getContent());
+			} catch (Exception e) {
+				return;
+			}
 			removeZeroExtends(bounds);
 			double[] e = bounds.getExtent();
 			double[] center = bounds.getCenter();
@@ -485,7 +491,7 @@ public class Terrain extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Terrain";
 		info.vendorName = "Ulrich Pinkall";
-		info.icon = ImageHook.getIcon("radioactive1.png");
+		info.icon = ImageHook.getIcon("world.png");
 		return info; 
 	}
 	

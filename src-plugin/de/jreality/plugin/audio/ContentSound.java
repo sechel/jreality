@@ -87,7 +87,7 @@ public class ContentSound extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Content Sound";
 		info.vendorName = "Ulrich Pinkall"; 
-		info.icon = ImageHook.getIcon("Volume-Normal-Red-48x48.png");
+		info.icon = ImageHook.getIcon("sound.png");
 		return info;
 	}
 	

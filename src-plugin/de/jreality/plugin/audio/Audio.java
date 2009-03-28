@@ -16,7 +16,7 @@ public class Audio extends Plugin {
 			PluginInfo info = new PluginInfo();
 			info.name = "Audio";
 			info.vendorName = "Ulrich Pinkall"; 
-			info.icon = ImageHook.getIcon("Volume-Normal-48x48.png");
+			info.icon = ImageHook.getIcon("sound.png");
 			return info;
 		}
 

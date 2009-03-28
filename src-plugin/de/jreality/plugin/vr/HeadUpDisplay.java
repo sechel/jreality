@@ -17,10 +17,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Icon;
-import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 import de.jreality.plugin.view.CameraStand;
@@ -33,12 +33,13 @@ import de.jreality.swing.jrwindows.JRWindowManager;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.PluginNameComparator;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
+import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
-public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
+public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 
 	private Controller
 		c = null;
@@ -60,8 +61,8 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 		panelConstraints = new GridBagConstraints(),
 		masterConstraints = new GridBagConstraints();
 	
-	private JCheckBox
-		masterPanelChecker = new JCheckBox("Show Master Panel", true);
+	private JToggleButton
+		showMasterPanelToggle = new JToggleButton(ImageHook.getIcon("layout_add.png"), true);
 	
 	public HeadUpDisplay() {
 		panelConstraints.fill = GridBagConstraints.BOTH;
@@ -76,15 +77,16 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 		masterConstraints.weightx = 1.0;
 		masterConstraints.gridwidth = GridBagConstraints.REMAINDER;
 		
-		shrinkPanel.add(masterPanelChecker);
-		masterPanelChecker.addActionListener(new ActionListener() {
+		showMasterPanelToggle.setToolTipText("In-Scene Master Panel");
+		showMasterPanelToggle.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (mainPanel != null) {
 					SwingUtilities.updateComponentTreeUI(getMainFrame());
-					getMainFrame().setVisible(masterPanelChecker.isSelected());
+					getMainFrame().setVisible(showMasterPanelToggle.isSelected());
 				}
 			}
 		});
+		addTool(getClass(), 0.0, showMasterPanelToggle);
 	}
 	
 	
@@ -132,13 +134,13 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
-		c.storeProperty(getClass(), "showMasterPanel", masterPanelChecker.isSelected());
+		c.storeProperty(getClass(), "showMasterPanel", showMasterPanelToggle.isSelected());
 	}
 
 	@Override
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
-		masterPanelChecker.setSelected(c.getProperty(getClass(), "showMasterPanel", masterPanelChecker.isSelected()));
+		showMasterPanelToggle.setSelected(c.getProperty(getClass(), "showMasterPanel", showMasterPanelToggle.isSelected()));
 	}
 	
 	
@@ -187,7 +189,7 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
 		info.name = "Head-Up Display";
-		info.icon = ImageHook.getIcon("toolsblau.png");
+		info.icon = ImageHook.getIcon("layout_add.png");
 		info.vendorName = "Stefan Sechelmann";
 		return info;
 	}
@@ -204,9 +206,6 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 		content.removeAll();
 		commandMap.clear();
 		for (final ShrinkPanelPlugin sp : sList) {
-			if (this == sp) {
-				continue;
-			}
 			JCheckBoxMenuItem b = new JCheckBoxMenuItem(sp.toString());
 			if (sp.getPluginInfo().icon != null) {
 				Icon icon = ImageHook.scaleIcon(sp.getPluginInfo().icon, 16, 16);
@@ -218,8 +217,8 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 			b.addActionListener(this);
 			content.add(b, masterConstraints);
 		}
-		frame.setSize(150, 300);
-		if (masterPanelChecker.isSelected()) {
+		frame.setSize(180, 300);
+		if (showMasterPanelToggle.isSelected()) {
 			frame.setVisible(true);
 		}
 	}
@@ -294,24 +293,13 @@ public class HeadUpDisplay extends ShrinkPanelPlugin implements ActionListener {
 	}
 	
 	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
+	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}
-
-	@Override
-	public void mainUIChanged(String uiClass) {
-		super.mainUIChanged(uiClass);
-		SwingUtilities.updateComponentTreeUI(getMainFrame());
-	}
 	
 	@Override
-	public String getHelpDocument() {
-		return "HeadUpDisplay.html";
-	}
-	
-	@Override
-	public Class<?> getHelpHandle() {
-		return getClass();
+	public double getToolBarPriority() {
+		return 3.0;
 	}
 	
 }
