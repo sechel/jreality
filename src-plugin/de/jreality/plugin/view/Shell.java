@@ -1,6 +1,5 @@
 package de.jreality.plugin.view;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.beans.Expression;
@@ -107,7 +106,6 @@ public class Shell extends ShrinkPanelPlugin {
 		shrinkPanel.getContentPanel().setBorder(BorderFactory.createEtchedBorder());
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.add(shell);
-		shrinkPanel.setHeaderColor(new Color(0.5f, 0.3f, 0.4f));
 	}
 
 
