@@ -1,12 +1,11 @@
 package de.jreality.plugin.view;
 
 import java.awt.Component;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JToggleButton;
 
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Camera;
@@ -16,8 +15,8 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.GuiUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
+import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 /**
  * 
@@ -26,31 +25,36 @@ import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
  * @author brinkman
  *
  */
-public class DisplayOptions extends ShrinkPanelPlugin {
+public class DisplayOptions extends ToolBarAggregator {
 
-	private JCheckBox pickBox;
-	private JButton loadButton;
-	private JButton saveButton;
+	private JToggleButton 
+		pickBox = new JToggleButton(ImageHook.getIcon("mouse.png"));
+	private JButton 
+		loadButton = new JButton(ImageHook.getIcon("film_go.png")),
+		saveButton = new JButton(ImageHook.getIcon("film_save.png"));
 	
 	private View view;
 	private PickShowTool pickShowTool = new PickShowTool();
 	
 	public DisplayOptions() {
-		shrinkPanel.setLayout(new GridLayout(3, 1));
-		shrinkPanel.add(loadButton = new JButton("Load camera preferences"));
-		shrinkPanel.add(saveButton = new JButton("Save camera preferences"));
-		shrinkPanel.add(pickBox = new JCheckBox("Show pick in scene"));
+		addTool(getClass(), 1, loadButton);
+		addTool(getClass(), 2, saveButton);
+		addSeparator(getClass(), 3);
+		addTool(getClass(), 4, pickBox);
 		
+		loadButton.setToolTipText("Load Camera");
 		loadButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				loadPreferences();
 			}
 		});
+		saveButton.setToolTipText("Save Camera");
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				savePreferences();
 			}
 		});
+		pickBox.setToolTipText("Show Pick");
 		pickBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setPick(pickBox.isSelected());
@@ -82,11 +86,6 @@ public class DisplayOptions extends ShrinkPanelPlugin {
 	private void loadPreferences() {
 		CameraUtility.loadPreferences((Camera) view.getCameraPath().getLastElement());
 		view.getViewer().renderAsync();
-	}
-
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
 	}
 
 	@Override
@@ -122,5 +121,15 @@ public class DisplayOptions extends ShrinkPanelPlugin {
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		c.storeProperty(getClass(), "showPick", pickBox.isSelected());
+	}
+	
+	@Override
+	public double getToolBarPriority() {
+		return 1.0;
+	}
+	
+	@Override
+	public Class<? extends PerspectiveFlavor> getPerspective() {
+		return View.class;
 	}
 }

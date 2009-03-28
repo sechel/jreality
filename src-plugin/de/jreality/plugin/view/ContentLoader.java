@@ -52,7 +52,7 @@ public class ContentLoader extends Plugin implements UIFlavor {
 		chooser.setAccessory(checkBoxPanel);
 		chooser.setMultiSelectionEnabled(false);
 
-		Action action = new AbstractAction("Load Content") {
+		Action action = new AbstractAction("Load Content", ImageHook.getIcon("folder_brick.png")) {
 
 			public void actionPerformed(ActionEvent e) {
 				loadFile();

@@ -22,7 +22,8 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 public class Export extends Plugin {
 	
 	private ViewMenuBar viewMenuBar;
-	private JMenu exportMenu;
+	private JMenu 
+		exportMenu = new JMenu("Export");
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -39,7 +40,7 @@ public class Export extends Plugin {
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		ViewerSwitch viewer = c.getPlugin(View.class).getViewer();
 		Component parent = viewer.getViewingComponent();
-		exportMenu = new JMenu("Export");
+		exportMenu.setIcon(ImageHook.getIcon("disk.png"));
 		exportMenu.add(new JMenuItem(new ExportRIB("RIB", viewer, parent)));
 		exportMenu.add(new JMenuItem(new ExportSVG("SVG", viewer, parent)));
 		exportMenu.add(new JMenuItem(new ExportPS("PS", viewer, parent)));

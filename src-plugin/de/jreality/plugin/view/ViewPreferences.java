@@ -45,7 +45,7 @@ public class ViewPreferences extends Plugin implements
 	private FrontendListener 
 		frontendListener = null;
 	private JCheckBoxMenuItem  
-		fullscreenItem = new JCheckBoxMenuItem("Fullscreen");
+		fullscreenItem = new JCheckBoxMenuItem("Fullscreen", ImageHook.getIcon("arrow_out.png"));
 	private JCheckBox
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe()),
 		saveSceneContent = new JCheckBox("Save Scene Content");

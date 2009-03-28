@@ -12,6 +12,7 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
+import de.jreality.plugin.view.Export;
 import de.jreality.plugin.view.InfoOverlayPlugin;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
@@ -157,6 +158,7 @@ public class ContentViewer {
 	
 	public static void main(String[] args) {
 		ContentViewer contentViewer = new ContentViewer();
+		contentViewer.registerPlugin(new Export());
 		contentViewer.registerPlugin(new ContentLoader());
 		contentViewer.registerPlugin(new ZoomTool());
 		contentViewer.registerPlugin(new ViewerKeyListenerPlugin());

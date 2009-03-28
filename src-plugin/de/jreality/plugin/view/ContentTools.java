@@ -1,16 +1,6 @@
 package de.jreality.plugin.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -24,10 +14,10 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
+import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
-public class ContentTools extends ShrinkPanelPlugin {
+public class ContentTools extends ToolBarAggregator {
 
 	private static final boolean DEFAULT_PICK_FACES = true;
 	private static final boolean DEFAULT_PICK_EDGES = true;
@@ -36,14 +26,15 @@ public class ContentTools extends ShrinkPanelPlugin {
 	private RotateTool rotateTool;
 	private DraggingTool draggingTool;
 	private AxisTranslationTool snapDragTool;
-	private JPanel panel;
-	private JCheckBox rotate;
-	private JCheckBox drag;
-	private JCheckBox snapToGrid;
-	private JCheckBox pickFaces;
-	private JCheckBox pickEdges;
-	private JCheckBox pickVertices;
-	private AlignedContent alignedContent;
+	private JToggleButton 
+		rotate = new JToggleButton(ImageHook.getIcon("arrow_rotate_clockwise.png")),
+		drag = new JToggleButton(ImageHook.getIcon("arrow_out.png")),
+		snapToGrid = new JToggleButton(ImageHook.getIcon("brick.png")),
+		pickFaces = new JToggleButton(ImageHook.getIcon("shape_square.png")),
+		pickEdges = new JToggleButton(ImageHook.getIcon("shape_edges.png")),
+		pickVertices = new JToggleButton(ImageHook.getIcon("shape_handles.png"));
+	private AlignedContent 
+		alignedContent = null;;
 
 	public ContentTools() {
 		rotateTool = new RotateTool();
@@ -65,7 +56,7 @@ public class ContentTools extends ShrinkPanelPlugin {
 		setPickFaces(DEFAULT_PICK_FACES);
 		setPickVertices(DEFAULT_PICK_VERTICES);
 
-		setInitialPosition(SHRINKER_RIGHT);
+//		setInitialPosition(SHRINKER_RIGHT);
 	}
 
 	public void install(AlignedContent alignedContent) {
@@ -75,10 +66,6 @@ public class ContentTools extends ShrinkPanelPlugin {
 		setPickEdges(isPickEdges());
 		setPickFaces(isPickFaces());
 		setPickVertices(isPickVertices());
-	}
-
-	public JPanel getPanel() {
-		return panel;
 	}
 
 	public void setSnapToGrid(boolean b) {
@@ -184,82 +171,61 @@ public class ContentTools extends ShrinkPanelPlugin {
 	}
 
 	private void makePanel() {
-		panel = new JPanel(new BorderLayout());
-		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		Box toolBox = new Box(BoxLayout.Y_AXIS);
-		Box toolButtonBox = new Box(BoxLayout.X_AXIS);
-		toolButtonBox.setBorder(new EmptyBorder(5, 0, 5, 5));
-		rotate = new JCheckBox("rotate");
+		rotate.setToolTipText("Rotate Tool");
 		rotate.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setRotationEnabled(rotate.isSelected());
 			}
 		});
-		toolButtonBox.add(rotate);
-		drag = new JCheckBox("drag");
+;		drag.setToolTipText("Drag Tool");
 		drag.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setDragEnabled(drag.isSelected());
 			}
 		});
-		toolButtonBox.add(drag);
-		toolButtonBox.add(Box.createHorizontalGlue());
-		snapToGrid = new JCheckBox("snap");
+		snapToGrid.setToolTipText("Snap to Grid");
 		snapToGrid.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setSnapToGrid(snapToGrid.isSelected());
 			}
 		});
-		toolButtonBox.add(snapToGrid);
-		toolButtonBox.add(Box.createHorizontalGlue());
-		toolBox.add(toolButtonBox);
 
-
-		Box pickButtonBox = new Box(BoxLayout.X_AXIS);
-		pickButtonBox.setBorder(new EmptyBorder(5, 5, 5, 5));
-		pickButtonBox.add(new JLabel("pick: "));
-		pickFaces = new JCheckBox("faces");
+		pickFaces.setToolTipText("Pick Faces");
 		pickFaces.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickFaces(pickFaces.isSelected());
 			}
 		});
-		pickButtonBox.add(pickFaces);
 
-		pickEdges = new JCheckBox("edges");
+		pickEdges.setToolTipText("Pick Edges");
 		pickEdges.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickEdges(pickEdges.isSelected());
 			}
 		});
-		pickButtonBox.add(pickEdges);
 
-		pickVertices = new JCheckBox("vertices");
+		pickVertices.setToolTipText("Pick Vertices");
 		pickVertices.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickVertices(pickVertices.isSelected());
 			}
 		});
-		pickButtonBox.add(pickVertices);
-		pickButtonBox.add(Box.createHorizontalGlue());
-
-		toolBox.add(pickButtonBox);
-
-		panel.add(BorderLayout.CENTER, toolBox);
+		
+		addTool(getClass(), 1, rotate);
+		addTool(getClass(), 2, drag);
+		addSeparator(getClass(), 3);
+		addTool(getClass(), 4, snapToGrid);
+		addSeparator(getClass(), 5);
+		addTool(getClass(), 6, pickFaces);
+		addTool(getClass(), 7, pickEdges);
+		addTool(getClass(), 8, pickVertices);
 	}
 
 	@Override
 	public void install(Controller c) throws Exception {
-
 		alignedContent = c.getPlugin(AlignedContent.class);
 		install(alignedContent);
-
-		panel.setPreferredSize(new Dimension(10, 80));
-		panel.setMinimumSize(new Dimension(10, 80));
-
-		shrinkPanel.setLayout(new GridLayout());
-		shrinkPanel.add(panel);
-		shrinkPanel.setHeaderColor(new Color(0.5f, 0.5f, 0.2f));
+//		shrinkPanel.setHeaderColor(new Color(0.5f, 0.5f, 0.2f));
 		super.install(c);
 	}
 
@@ -268,19 +234,18 @@ public class ContentTools extends ShrinkPanelPlugin {
 		setToolEnabled(draggingTool, false);
 		setToolEnabled(rotateTool, false);
 		setToolEnabled(snapDragTool, false);
-		shrinkPanel.removeAll();
 		super.uninstall(c);
 	}
 
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
-	}
+//	@Override
+//	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
+//		return View.class;
+//	}
 
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
-		info.name = "Content Tools";
+		info.name = "Tools";
 		info.vendorName = "Ulrich Pinkall";
 		info.icon = ImageHook.getIcon("toolsblau.png");
 		return info; 
@@ -307,15 +272,15 @@ public class ContentTools extends ShrinkPanelPlugin {
 		c.storeProperty(getClass(), "pickFaces", isPickFaces());
 		super.storeStates(c);
 	}
-
+	
 	@Override
-	public String getHelpDocument() {
-		return "ContentTools.html";
+	public double getToolBarPriority() {
+		return 0.0;
 	}
 	
 	@Override
-	public Class<?> getHelpHandle() {
-		return getClass();
+	public Class<? extends PerspectiveFlavor> getPerspective() {
+		return View.class;
 	}
 	
 }
