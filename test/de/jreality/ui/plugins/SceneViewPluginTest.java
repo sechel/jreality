@@ -84,7 +84,6 @@ public class SceneViewPluginTest {
 		c.registerPlugin(new Export());
 		
 		ContentTools contentToolsPlugin = new ContentTools();
-		contentToolsPlugin.setShowPanel(false);
 		c.registerPlugin(contentToolsPlugin);
 		
 		viewerMenu.addMenuSeparator(SceneViewPluginTest.class, 19.0, "File");
