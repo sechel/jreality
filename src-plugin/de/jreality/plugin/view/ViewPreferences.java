@@ -6,6 +6,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.StringWriter;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -16,7 +19,10 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.reader.ReaderJRS;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.writer.WriterJRS;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -27,11 +33,13 @@ public class ViewPreferences extends Plugin implements
 		PreferencesFlavor, FrontendFlavor, ActionListener {
 
 	private View 
-		sceneViewPlugin = null;
+		view = null;
 	private ViewMenuBar 
-		sceneViewMenu = null;
+		viewMenuBar = null;
 	private ContentAppearance 
 		contentAppearance = null;
+	private AlignedContent
+		content = null;
 	private JPanel 
 		mainPage = new JPanel();
 	private FrontendListener 
@@ -39,9 +47,12 @@ public class ViewPreferences extends Plugin implements
 	private JCheckBoxMenuItem  
 		fullscreenItem = new JCheckBoxMenuItem("Fullscreen");
 	private JCheckBox
-		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
+		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe()),
+		saveSceneContent = new JCheckBox("Save Scene Content");
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
+	private SceneGraphComponent
+		storedContent = null;
 	
 	public ViewPreferences() {
 		fullscreenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
@@ -61,6 +72,7 @@ public class ViewPreferences extends Plugin implements
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		mainPage.add(colorChooserModeCombo, c);
 		colorChooserModeCombo.setSelectedIndex(1);
+		mainPage.add(saveSceneContent, c);
 		
 		threadSafeChecker.addActionListener(this);
 		fullscreenItem.addActionListener(this);
@@ -80,7 +92,7 @@ public class ViewPreferences extends Plugin implements
 		Object s = e.getSource();
 		boolean fs = fullscreenItem.isSelected();
 		if (fullscreenItem == s) {
-			sceneViewPlugin.setHidePanels(fs);
+			view.setHidePanels(fs);
 			frontendListener.setShowMenuBar(!fs);
 			frontendListener.setShowToolBar(!fs);
 			frontendListener.setShowStatusBar(!fs);
@@ -100,6 +112,24 @@ public class ViewPreferences extends Plugin implements
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe());
 		c.storeProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex());
+		c.storeProperty(getClass(), "saveSceneContent", saveSceneContent.isSelected());
+		try {
+			if (saveSceneContent.isSelected()) {
+				SceneGraphComponent cgc = content.getContent();
+				if (cgc == null) {
+					cgc = new SceneGraphComponent();
+				}
+				StringWriter sw = new StringWriter();
+				WriterJRS writerJRS = new WriterJRS();
+				writerJRS.write(cgc, sw);
+				String sceneString = sw.getBuffer().toString();
+				c.storeProperty(getClass(), "sceneContent", sceneString);
+			} else {
+				c.deleteProperty(getClass(), "sceneContent");
+			}
+		} catch (Exception e) {
+			System.out.println("Cannot store scene to properties: " + e.getMessage());
+		}
 		super.storeStates(c);
 	}
 	
@@ -108,6 +138,21 @@ public class ViewPreferences extends Plugin implements
 		threadSafeChecker.setSelected(c.getProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe()));
 		SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());
 		colorChooserModeCombo.setSelectedIndex(c.getProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex()));
+		saveSceneContent.setSelected(c.getProperty(getClass(), "saveSceneContent", saveSceneContent.isSelected()));
+		try {
+			if (saveSceneContent.isSelected()) {
+				String sceneString  = c.getProperty(getClass(), "sceneContent", null);
+				File tmpSceneFile = File.createTempFile("storedScene", "jrs");
+				FileWriter fw = new FileWriter(tmpSceneFile);
+				fw.append(sceneString);
+				fw.close();
+				ReaderJRS readerJRS = new ReaderJRS();
+				storedContent = readerJRS.read(tmpSceneFile);
+				tmpSceneFile.delete();
+			}
+		} catch (Exception e) {
+			System.out.println("Cannot restore scene from properties: " + e.getMessage());
+		}
 		super.restoreStates(c);
 	}
 	
@@ -115,20 +160,23 @@ public class ViewPreferences extends Plugin implements
 		this.frontendListener = l;
 	}
 	
-	
 	@Override
 	public void install(Controller c) throws Exception {
-		sceneViewPlugin = c.getPlugin(View.class);
+		view = c.getPlugin(View.class);
 		contentAppearance = c.getPlugin(ContentAppearance.class);
 		int activeMode = colorChooserModeCombo.getSelectedIndex();
 		contentAppearance.getPanel().setColorPickerMode(activeMode);
-		sceneViewMenu = c.getPlugin(ViewMenuBar.class);
-		sceneViewMenu.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
+		viewMenuBar = c.getPlugin(ViewMenuBar.class);
+		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
+		content = c.getPlugin(AlignedContent.class);
+		if (storedContent != null) {
+			content.setContent(storedContent);
+		}
 	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		sceneViewMenu.removeAll(getClass());
+		viewMenuBar.removeAll(getClass());
 	}
 
 	public Icon getMainIcon() {

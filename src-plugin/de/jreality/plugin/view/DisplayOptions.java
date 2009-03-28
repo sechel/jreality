@@ -81,6 +81,7 @@ public class DisplayOptions extends ShrinkPanelPlugin {
 
 	private void loadPreferences() {
 		CameraUtility.loadPreferences((Camera) view.getCameraPath().getLastElement());
+		view.getViewer().renderAsync();
 	}
 
 	@Override
