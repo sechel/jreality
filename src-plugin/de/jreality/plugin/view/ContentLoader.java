@@ -6,12 +6,10 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -30,44 +28,55 @@ import de.varylab.jrworkspace.plugin.flavor.UIFlavor;
 
 public class ContentLoader extends Plugin implements UIFlavor {
 
-	private AlignedContent alignedContent;
-
-	private final JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
-	private final JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
-	private JMenuItem menuItem;
-	private JFileChooser chooser;
-	private Component parent;
-
-	@SuppressWarnings("serial")
+	private AlignedContent 
+		alignedContent = null;
+	private ViewMenuBar 
+		viewerMenuAggregator = null;
+	private ViewToolBar
+		viewToolBar = null;
+	private final JCheckBox 
+		smoothNormalsCheckBox = new JCheckBox("smooth normals"),
+		removeAppsCheckBox = new JCheckBox("ignore appearances");
+	private JFileChooser 
+		chooser = FileLoaderDialog.createFileChooser();
+	private ContentLoadAction
+		contentLoadAction = new ContentLoadAction();
+	private Component 
+		parent = null;
 
 	public ContentLoader() {
 		Box checkBoxPanel = new Box(BoxLayout.Y_AXIS);
-		JCheckBox smoothNormalsCheckBox = new JCheckBox("smooth normals");
-		JCheckBox removeAppsCheckBox = new JCheckBox("ignore appearances");
+		JCheckBox smoothNormalsCheckBox = new JCheckBox("Smooth Normals");
+		JCheckBox removeAppsCheckBox = new JCheckBox("Ignore Appearances");
 
 		checkBoxPanel.add(smoothNormalsCheckBox);
 		checkBoxPanel.add(removeAppsCheckBox);
 
-		chooser = FileLoaderDialog.createFileChooser();
 		chooser.setAccessory(checkBoxPanel);
 		chooser.setMultiSelectionEnabled(false);
-
-		Action action = new AbstractAction("Load Content", ImageHook.getIcon("folder_brick.png")) {
-
-			public void actionPerformed(ActionEvent e) {
-				loadFile();
-			}
-		};
-		menuItem = new JMenuItem(action);
 	}
+	
+	private class ContentLoadAction extends AbstractAction {
+
+		private static final long 
+			serialVersionUID = 1L;
+
+		public ContentLoadAction() {
+			putValue(NAME, "Load Content");
+			putValue(SMALL_ICON, ImageHook.getIcon("folder_brick.png"));
+			putValue(SHORT_DESCRIPTION, "Load Content");
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			loadFile();
+		}
+		
+	}
+	
 
 	public void install(View sceneView, AlignedContent alignedContent) {
 		parent = sceneView.getViewer().getViewingComponent();
 		this.alignedContent = alignedContent;
-	}
-
-	public JMenuItem getMenuItem() {
-		return menuItem;
 	}
 
 	private void loadFile() {
@@ -104,7 +113,6 @@ public class ContentLoader extends Plugin implements UIFlavor {
 		}
 	}
 
-	private ViewMenuBar viewerMenuAggregator;
 
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -127,7 +135,9 @@ public class ContentLoader extends Plugin implements UIFlavor {
 		);
 
 		viewerMenuAggregator = c.getPlugin(ViewMenuBar.class);
-		viewerMenuAggregator.addMenuItem(getClass(), 0.0, menuItem, "File");
+		viewerMenuAggregator.addMenuItem(getClass(), 0.0, contentLoadAction, "File");
+		viewToolBar = c.getPlugin(ViewToolBar.class);
+		viewToolBar.addAction(getClass(), 0.0, contentLoadAction);
 	}
 
 	@Override

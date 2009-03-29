@@ -5,6 +5,7 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 
+import de.jreality.plugin.view.AdvancedAppearance;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
@@ -20,6 +21,7 @@ import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
+import de.jreality.plugin.view.ViewToolBar;
 import de.jreality.plugin.view.ViewerKeyListenerPlugin;
 import de.jreality.plugin.view.ZoomTool;
 import de.jreality.scene.SceneGraphComponent;
@@ -82,6 +84,7 @@ public class ContentViewer {
 		displayOptions = new DisplayOptions();
 		controller.registerPlugin(displayOptions);
 		
+		controller.registerPlugin(new ViewToolBar());
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -163,6 +166,7 @@ public class ContentViewer {
 		contentViewer.registerPlugin(new ZoomTool());
 		contentViewer.registerPlugin(new ViewerKeyListenerPlugin());
 		contentViewer.registerPlugin(new InfoOverlayPlugin());
+		contentViewer.registerPlugin(new AdvancedAppearance());
 		contentViewer.startup();
 	}
 }

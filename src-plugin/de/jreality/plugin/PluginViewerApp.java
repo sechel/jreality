@@ -21,6 +21,7 @@ import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
+import de.jreality.plugin.view.ViewToolBar;
 import de.jreality.plugin.view.ViewerKeyListenerPlugin;
 import de.jreality.plugin.view.ZoomTool;
 import de.jreality.scene.Geometry;
@@ -121,6 +122,8 @@ public class PluginViewerApp {
 		
 		viewerKeyListener = new ViewerKeyListenerPlugin();
 		controller.registerPlugin(viewerKeyListener);
+		
+		controller.registerPlugin(new ViewToolBar());
 		
 		// set defaults
 		setCreateMenu(true);
