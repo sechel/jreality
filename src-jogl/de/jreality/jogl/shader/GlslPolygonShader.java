@@ -474,7 +474,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 							texBuffer.put(tmpTex);
 						}
 						if (inlineTan) {
-							da = t.getValueAt(faceN ? i : i1);
+							da = t.getValueAt(faceT ? i : i1);
 							da.toDoubleArray(tmpTan);
 							tanBuffer.put(tmpTan);
 							if (!faceT) {
