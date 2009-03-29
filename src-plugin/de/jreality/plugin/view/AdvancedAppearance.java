@@ -1,5 +1,6 @@
 package de.jreality.plugin.view;
 
+import static de.jreality.scene.data.Attribute.attributeForName;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 
 import java.awt.event.ActionEvent;
@@ -8,7 +9,12 @@ import java.io.InputStream;
 
 import javax.swing.JButton;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.Attribute;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ImageData;
@@ -26,6 +32,8 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 		content = null;
 	private JButton
 		activateButton = new JButton("Activate Shader");
+	private Attribute
+		tangentsAttribute = attributeForName("TANGENTS");
 	
 	public AdvancedAppearance() {
 		setInitialPosition(SHRINKER_RIGHT);
@@ -35,6 +43,7 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		assignTangents(content.getContent());
 		Appearance app = content.getAppearanceComponent().getAppearance();
 		try {
 			makeNormalMap(app);
@@ -62,6 +71,23 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 		Input normalIn = Input.getInput("normal map", nIn);
 		ImageData data = ImageData.load(normalIn);
 		TextureUtility.createTexture(app, POLYGON_SHADER, 1, data);
+	}
+	
+	
+	private void assignTangents(SceneGraphComponent content) {
+		Geometry g = content.getGeometry();
+		if (g instanceof IndexedFaceSet) {
+			IndexedFaceSet ifs = (IndexedFaceSet)g;
+			if (ifs.getVertexAttributes(tangentsAttribute) == null) {
+				System.out.println("calculating tangent space for geometry " + ifs);
+				IndexedFaceSetUtility.assignVertexTangents(ifs);				
+			} else {
+				System.out.println("found tangent space for geometry " + ifs);
+			}
+		}
+		for (SceneGraphComponent child : content.getChildComponents()) {
+			assignTangents(child);
+		}
 	}
 	
 	
