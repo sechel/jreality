@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -71,6 +72,10 @@ public class ContentLoader extends Plugin implements UIFlavor {
 			loadFile();
 		}
 		
+	}
+	
+	public Action getAction() {
+		return contentLoadAction;
 	}
 	
 
