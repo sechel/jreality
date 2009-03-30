@@ -11,6 +11,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
@@ -78,7 +79,8 @@ public class SelectionExample {
 				private SceneGraphComponent selectedComponent;
 
 				public void deactivate(ToolContext tc) {
-					if (tc.getCurrentPick() == null) return;
+					PickResult currentPick = tc.getCurrentPick();
+					if (currentPick == null) return;
 					selection = tc.getRootToLocal();
 					if (tc.getSource().equals(InputSlot.getDevice("SecondarySelection"))) {
 						// on shift down, restore matrices to original state

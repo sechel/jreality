@@ -54,6 +54,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
@@ -109,13 +110,15 @@ public static void main(String[] args) throws IOException {
     	}
     	
 		public void activate(ToolContext tc) {
-			origTexCoords = tc.getCurrentPick().getTextureCoordinates();
+			PickResult currentPick = tc.getCurrentPick();
+			origTexCoords = currentPick.getTextureCoordinates();
 			origTexMatrix = tex.getTextureMatrix();
 		}
 
 		public void perform(ToolContext tc) {
-			if (tc.getCurrentPick() == null) return;
-			double[] texCoords = tc.getCurrentPick().getTextureCoordinates();
+			PickResult currentPick = tc.getCurrentPick();
+			if (currentPick == null) return;
+			double[] texCoords = currentPick.getTextureCoordinates();
 			if (texCoords == null || texCoords.length < 2) return;
 			System.err.println("tc = "+Rn.toString(texCoords));
 			double[] diff = Rn.subtract(null, origTexCoords, texCoords);

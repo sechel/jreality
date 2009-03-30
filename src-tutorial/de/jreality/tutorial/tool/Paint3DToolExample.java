@@ -14,6 +14,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
@@ -85,8 +86,9 @@ public class Paint3DToolExample {
 			}
 
 			public void perform(ToolContext tc) {
-				if (tc.getCurrentPick() == null) return;
-				double[] texCoords = tc.getCurrentPick().getTextureCoordinates();
+				PickResult currentPick = tc.getCurrentPick();
+				if (currentPick == null) return;
+				double[] texCoords = currentPick.getTextureCoordinates();
 				// that the following can happen is ... odd
 				if (texCoords == null  || texCoords.length < 2) return;
 				int ix = (int) (texCoords[0] * imageSize);
