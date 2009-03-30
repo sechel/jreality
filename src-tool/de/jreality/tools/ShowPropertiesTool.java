@@ -97,16 +97,17 @@ public class ShowPropertiesTool extends AbstractTool {
     	
     	evalPointer();
     	
-    	geometryMatched=(!(tc.getCurrentPick() == null));
+    	PickResult currentPick = tc.getCurrentPick();
+		geometryMatched=(!(currentPick == null));
     	if(geometryMatched){
-        	geo=tc.getCurrentPick().getPickPath().getLastComponent().getGeometry();
-        	pickIndex=tc.getCurrentPick().getIndex();
-        	obj2WorldTrans = new Matrix(tc.getCurrentPick().getPickPath().getMatrix(null));
+        	geo=currentPick.getPickPath().getLastComponent().getGeometry();
+        	pickIndex=currentPick.getIndex();
+        	obj2WorldTrans = new Matrix(currentPick.getPickPath().getMatrix(null));
         	
-        	if((tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT)) evalPoint(tc);
-        	if((tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE)) evalEdge(tc);
-        	if((tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE)) evalFace(tc);
-        	if((tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_OBJECT)) evalObject(tc);
+        	if((currentPick.getPickType() == PickResult.PICK_TYPE_POINT)) evalPoint(tc);
+        	if((currentPick.getPickType() == PickResult.PICK_TYPE_LINE)) evalEdge(tc);
+        	if((currentPick.getPickType() == PickResult.PICK_TYPE_FACE)) evalFace(tc);
+        	if((currentPick.getPickType() == PickResult.PICK_TYPE_OBJECT)) evalObject(tc);
     	}
     	print();
     }
@@ -141,7 +142,8 @@ public class ShowPropertiesTool extends AbstractTool {
     }    	
     
     private void evalPoint(ToolContext tc){  
-    	if(tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT){
+    	PickResult currentPick = tc.getCurrentPick();
+		if(currentPick.getPickType() == PickResult.PICK_TYPE_POINT){
         	pickedPointOC=((PointSet)geo).getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(pickIndex).toDoubleArray(null);
             pickedPointWC=obj2WorldTrans.multiplyVector(pickedPointOC);
             	
@@ -161,7 +163,7 @@ public class ShowPropertiesTool extends AbstractTool {
         	    log[2].addLine("pickedPointNormalWC",pickedPointNormalWC);        			
         	}
         }else{
-        	pickedPointOC=tc.getCurrentPick().getObjectCoordinates();
+        	pickedPointOC=currentPick.getObjectCoordinates();
             pickedPointWC=obj2WorldTrans.multiplyVector(pickedPointOC);  
             	
             log[2].addLine("pickedPointObjCoords",pickedPointOC);
@@ -171,7 +173,8 @@ public class ShowPropertiesTool extends AbstractTool {
     }
     private void evalEdge(ToolContext tc){
     	evalPoint(tc);
-    	if(!(tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE)) return;
+    	PickResult currentPick = tc.getCurrentPick();
+		if(!(currentPick.getPickType() == PickResult.PICK_TYPE_LINE)) return;
     	if(((IndexedLineSet)geo).getEdgeAttributes(Attribute.INDICES)!=null){
     		pickedEdgeVertexInds=((IndexedLineSet)geo).getEdgeAttributes(Attribute.INDICES).toIntArrayArray().getValueAt(pickIndex).toIntArray(null);
     		pickedEdgeVerts=new double[pickedEdgeVertexInds.length][];
@@ -189,8 +192,9 @@ public class ShowPropertiesTool extends AbstractTool {
     }
     private void evalFace(ToolContext tc){
     	evalPoint(tc);
-		if(tc.getCurrentPick().getTextureCoordinates()!=null){
-			pickedPointTexC=tc.getCurrentPick().getTextureCoordinates();
+		PickResult currentPick = tc.getCurrentPick();
+		if(currentPick.getTextureCoordinates()!=null){
+			pickedPointTexC=currentPick.getTextureCoordinates();
 			log[2].addLine("pickedPointTexC",pickedPointTexC);
 		}
     	if(((IndexedFaceSet)geo).getFaceAttributes(Attribute.INDICES)!=null){

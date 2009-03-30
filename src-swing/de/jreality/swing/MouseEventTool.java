@@ -101,8 +101,9 @@ class MouseEventTool extends AbstractTool {
   int doubleClickDelay=400;
   
   public void activate(ToolContext e) {
-    try {
-      current = (Geometry) e.getCurrentPick().getPickPath().getLastElement();
+    PickResult currentPick = e.getCurrentPick();
+	try {
+      current = (Geometry) currentPick.getPickPath().getLastElement();
     } catch (Exception ex) {
       // TODO:
     }
@@ -118,15 +119,16 @@ class MouseEventTool extends AbstractTool {
     	lastActivationTime = t;
     	doubleClick=false;
     }
-    Point newPoint = generatePoint(e.getCurrentPick());
+    Point newPoint = generatePoint(currentPick);
     oldPoint = newPoint;
     dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED, currentButton);
   }
 
   public void perform(ToolContext e) {
     try {
-      if (e.getCurrentPick() != null && current == (Geometry) e.getCurrentPick().getPickPath().getLastElement()) {
-        Point newPoint = generatePoint(e.getCurrentPick());
+      PickResult currentPick = e.getCurrentPick();
+	if (currentPick != null && current == (Geometry) currentPick.getPickPath().getLastElement()) {
+        Point newPoint = generatePoint(currentPick);
         dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED, currentButton);
       }
     } catch (Exception ex) {
@@ -136,8 +138,9 @@ class MouseEventTool extends AbstractTool {
 
   public void deactivate(ToolContext e) {
     // TODO: maybe adapt click count to "real" AWT behavior - also in perform()
-    boolean sameGeom = (e.getCurrentPick() != null && current == (Geometry) e.getCurrentPick().getPickPath().getLastElement());
-    Point newPoint = sameGeom ? generatePoint(e.getCurrentPick()) : null;
+    PickResult currentPick = e.getCurrentPick();
+	boolean sameGeom = (currentPick != null && current == (Geometry) currentPick.getPickPath().getLastElement());
+    Point newPoint = sameGeom ? generatePoint(currentPick) : null;
     dispatchMouseEvent(sameGeom ? newPoint : oldPoint, MouseEvent.MOUSE_RELEASED, currentButton);
     if(oldPoint.equals(newPoint)) {
       dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED, currentButton);

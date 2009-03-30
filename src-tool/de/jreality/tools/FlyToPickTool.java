@@ -7,6 +7,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
@@ -90,9 +91,10 @@ public class FlyToPickTool  extends AbstractTool {
 		avaNode = avaPath.getLastComponent();
 		camPath=tc.getViewer().getCameraPath();
 		AnimatorTool.getInstance(tc).deschedule(avaNode);
-		if ( tc.getCurrentPick()!=null){
+		PickResult currentPick = tc.getCurrentPick();
+		if ( currentPick!=null){
 			fromW4P=Rn.matrixTimesVector(null, camPath.getMatrix(null), new double[]{0,0,0,1});
-			toW4P=tc.getCurrentPick().getWorldCoordinates();
+			toW4P=currentPick.getWorldCoordinates();
 			// remember mousePos:
 			double[] temp=tc.getTransformationMatrix(mouseAimer).toDoubleArray(null);
 			mousePosFirst=new double[]{temp[3],temp[7]};

@@ -50,6 +50,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
@@ -92,7 +93,8 @@ public class RotateTool extends AbstractTool {
     if (comp.getTransformation() == null)
       comp.setTransformation(new Transformation());
     if (!fixOrigin){
-    	if(rotateOnPick && tc.getCurrentPick()!=null)
+    	PickResult currentPick = tc.getCurrentPick();
+		if(rotateOnPick && currentPick!=null)
     		center=getRotationPoint(tc);
     	else
     		center = getCenter(comp);
@@ -112,8 +114,9 @@ public class RotateTool extends AbstractTool {
 	    return centerTranslation;
   }
   private Matrix getRotationPoint(ToolContext tc){
-	  double[] obj=tc.getCurrentPick().getObjectCoordinates();
-	  double[] pickMatr = tc.getCurrentPick().getPickPath().getMatrix(null);
+	  PickResult currentPick = tc.getCurrentPick();
+	double[] obj=currentPick.getObjectCoordinates();
+	  double[] pickMatr = currentPick.getPickPath().getMatrix(null);
 	  SceneGraphPath compPath=(moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent());
 	  double[] compMatrInv=compPath.getInverseMatrix(null);
 	  double[] matr=Rn.times(null, compMatrInv,pickMatr);
@@ -152,7 +155,8 @@ public class RotateTool extends AbstractTool {
     evolution.assignFrom(tc.getTransformationMatrix(evolutionSlot));
     evolution.conjugateBy(object2avatar);
     if (!fixOrigin && updateCenter){ 
-    	if(rotateOnPick && tc.getCurrentPick()!=null)
+    	PickResult currentPick = tc.getCurrentPick();
+		if(rotateOnPick && currentPick!=null)
     		center=getRotationPoint(tc);
     	else
     	center = getCenter(comp);

@@ -65,35 +65,36 @@ public class DragEventTool extends AbstractTool {
     root2cam.setColumn(3,new double[]{0,0,0,1});  
     distDir[0]=Rn.normalize(null,root2cam.multiplyVector(dir2ScaleZDrag[0]));
     distDir[1]=Rn.normalize(null,root2cam.multiplyVector(dir2ScaleZDrag[1]));
-    if (tc.getCurrentPick() == null ){
+    PickResult currentPick = tc.getCurrentPick();
+	if (currentPick == null ){
 //    	throw new IllegalStateException("null pick");
 		tc.reject();
 		active=false;
 		return;
 	}
-    if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_OBJECT) {
+    if (currentPick.getPickType() == PickResult.PICK_TYPE_OBJECT) {
         if (primitiveDragListener == null) {
           active=false;
           tc.reject();
           return;
         }
   	    pickType=PickResult.PICK_TYPE_OBJECT;
-  	    geom = (Geometry) tc.getCurrentPick().getPickPath().getLastElement();
-  	  double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
+  	    geom = (Geometry) currentPick.getPickPath().getLastElement();
+  	  double[] pickPointTemp=currentPick.getObjectCoordinates();
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
       MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint); 	            
 	  firePrimitiveDragStart(new double[]{0,0,0,1});        
 
-    } else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_POINT) {
+    } else if (currentPick.getPickType() == PickResult.PICK_TYPE_POINT) {
       if (pointDragListener == null) {
         active=false;
         tc.reject();
         return;
       }
 	    pickType=PickResult.PICK_TYPE_POINT;
-	    pointSet = (PointSet) tc.getCurrentPick().getPickPath().getLastElement();
-	    index=tc.getCurrentPick().getIndex();  
+	    pointSet = (PointSet) currentPick.getPickPath().getLastElement();
+	    index=currentPick.getIndex();  
       double[] pickPointTemp = pointSet.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().getValueAt(index).toDoubleArray(null);
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
@@ -104,16 +105,16 @@ public class DragEventTool extends AbstractTool {
       //MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint).times(m);  
       //
 	    firePointDragStart(pickPoint);        
-	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_LINE) {	            
+	  }else if (currentPick.getPickType() == PickResult.PICK_TYPE_LINE) {	            
 	    if (lineDragListener == null) {
 	      active=false;
         tc.reject();
         return;
       }
 	    pickType=PickResult.PICK_TYPE_LINE;
-	    lineSet = (IndexedLineSet) tc.getCurrentPick().getPickPath().getLastElement();
-	    index=tc.getCurrentPick().getIndex();	            
-	    double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
+	    lineSet = (IndexedLineSet) currentPick.getPickPath().getLastElement();
+	    index=currentPick.getIndex();	            
+	    double[] pickPointTemp=currentPick.getObjectCoordinates();
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
       MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);	            
@@ -123,16 +124,16 @@ public class DragEventTool extends AbstractTool {
       //MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint).times(m);  
       //
 	    fireLineDragStart(new double[]{0,0,0,1},pickPoint);        
-	  }else if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
+	  }else if (currentPick.getPickType() == PickResult.PICK_TYPE_FACE) {
       if (faceDragListener == null) {
         active=false;
         tc.reject();
         return;
       }
       pickType=PickResult.PICK_TYPE_FACE;
-	    faceSet = (IndexedFaceSet) tc.getCurrentPick().getPickPath().getLastElement();
-	    index=tc.getCurrentPick().getIndex();
-	    double[] pickPointTemp=tc.getCurrentPick().getObjectCoordinates();
+	    faceSet = (IndexedFaceSet) currentPick.getPickPath().getLastElement();
+	    index=currentPick.getIndex();
+	    double[] pickPointTemp=currentPick.getObjectCoordinates();
       if(pickPointTemp.length==3) Pn.homogenize(pickPoint,pickPointTemp);
       else Pn.dehomogenize(pickPoint,pickPointTemp);
       MatrixBuilder.euclidean(pointerToPoint).translate(pickPoint);

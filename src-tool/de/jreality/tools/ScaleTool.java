@@ -6,6 +6,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.ToolContext;
 
 /**
@@ -69,7 +70,8 @@ public class ScaleTool extends DragEventTool {
 	
 	public void activate(ToolContext tc){
     active=true;
-		pickPoint=tc.getCurrentPick().getObjectCoordinates();
+		PickResult currentPick = tc.getCurrentPick();
+		pickPoint=currentPick.getObjectCoordinates();
 		super.activate(tc);
         
     pickedSGC=tc.getRootToLocal().getLastComponent();

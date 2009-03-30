@@ -621,9 +621,10 @@ public class JRWindow {
 
 		public void perform(ToolContext tc){
 			if(!isSmall){
-				if(tc.getCurrentPick()!=null){
-					if(tc.getCurrentPick().getPickPath().getLastComponent()==borderSgc){
-						if(tc.getCurrentPick().getPickType()==PickResult.PICK_TYPE_POINT){
+				PickResult currentPick = tc.getCurrentPick();
+				if(currentPick!=null){
+					if(currentPick.getPickPath().getLastComponent()==borderSgc){
+						if(currentPick.getPickType()==PickResult.PICK_TYPE_POINT){
 							popUpDragVertices(true);
 						}else if(!vertexDragged) popUpDragVertices(false);
 					}else if(!vertexDragged) popUpDragVertices(false);
