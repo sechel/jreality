@@ -1,5 +1,6 @@
 package de.jreality.audio;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -137,7 +138,11 @@ public class DelayPath implements SoundPath {
 		if (newFrame==null || newFrame.length<frameSize) {
 			newFrame = new float[frameSize];
 		}
-		if (preProcessor.read(newFrame, 0, frameSize)>0) {
+		int nRead = preProcessor.read(newFrame, 0, frameSize);
+		if (nRead>0) {
+			if (nRead<frameSize) {
+				Arrays.fill(newFrame, nRead, frameSize, 0);
+			}
 			sourceFrames.add(newFrame);
 			newFrame = null;
 			frameCount++;
@@ -157,7 +162,7 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 
-		if (frameCount==0 && currentFrame==null && !distanceCue.hasMore() && !directionlessCue.hasMore()) {
+		if (frameCount<=0 && currentFrame==null && !distanceCue.hasMore() && !directionlessCue.hasMore()) {
 			reset();
 			return false;  // nothing left to render
 		} else {
