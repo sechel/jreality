@@ -136,6 +136,7 @@ public class ToolSystem implements ToolEventReceiver {
 	private ToolUpdateProxy updater;
 	private ToolEventQueue eventQueue;
 	ToolSystemConfiguration config;
+	private PickResult pickResult;
 	private static InputSlot pointerSlot = InputSlot.getDevice("PointerTransformation");
 
 	protected boolean executing;
@@ -199,8 +200,11 @@ public class ToolSystem implements ToolEventReceiver {
 		}
 
 		public PickResult getCurrentPick() {
-			performPick();
-			return pickResults.isEmpty() ? null : (PickResult) pickResults.get(0);
+			if (pickResult == null) {
+				performPick();
+				pickResult = pickResults.isEmpty() ? null : (PickResult) pickResults.get(0);				
+			}
+			return pickResult;
 		}
 
 		private void setCurrentTool(Tool currentTool) {
@@ -368,12 +372,13 @@ public class ToolSystem implements ToolEventReceiver {
 
 		SceneGraphPath pickPath = null;
 
-		for (Iterator iter = triggerQueue.iterator(); iter.hasNext();) {
-			ToolEvent event = (ToolEvent) iter.next();
+		for (ToolEvent event : triggerQueue) { //Iterator iter = triggerQueue.iterator(); iter.hasNext();) {
+//			ToolEvent event = (ToolEvent) iter.next();
 			toolContext.event = event;
 			InputSlot slot = event.getInputSlot();
 			toolContext.sourceSlot = slot;
-
+			pickResult = null;
+			
 			AxisState axis = deviceManager.getAxisState(slot);
 
 			boolean noTrigger = true;
@@ -399,9 +404,9 @@ public class ToolSystem implements ToolEventReceiver {
 						Collection<Tool> selection = toolManager.selectToolsForPath(pickPath, level--, candidatesForPick);
 						if (selection.isEmpty()) continue;
 						LoggingSystem.getLogger(this).finer("selected pick tools:" + selection);
-						for (Tool tool : selection)
+						for (Tool tool : selection)   {
 							registerActivePathForTool(pickPath, tool);
-
+						}
 						candidates.addAll(selection);
 						// now all Tools in the candidates list need to be
 						// processed=activated
