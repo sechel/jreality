@@ -961,7 +961,10 @@ public class IndexedFaceSetUtility {
   				double[] w1 = texCoords.getValueAt(i1).toDoubleArray(null);
   				double[] w2 = texCoords.getValueAt(i2).toDoubleArray(null);
   				double[] w3 = texCoords.getValueAt(i3).toDoubleArray(null);
-  				
+  		//TODO: Why do I have to do this? Stefan
+  		  w1[1] *= -1;
+  		  w2[1] *= -1;
+  		  w3[1] *= -1;
           double x1 = v2[0] - v1[0];
           double x2 = v3[0] - v1[0];
           double y1 = v2[1] - v1[1];
@@ -996,9 +999,9 @@ public class IndexedFaceSetUtility {
 
         // Gram-Schmidt orthogonalize
         double l=Rn.innerProduct(n, t);
-        ret[a][0]=l*(t[0]-n[0]);
-        ret[a][1]=l*(t[1]-n[1]);
-        ret[a][2]=l*(t[2]-n[2]);
+        ret[a][0] = t[0] - l * n[0];
+        ret[a][1] = t[1] - l * n[1];
+        ret[a][2] = t[2] - l * n[2];
         
         Rn.normalize(ret[a], ret[a]);
           
