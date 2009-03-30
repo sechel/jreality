@@ -10,11 +10,14 @@ import java.io.InputStream;
 import javax.swing.JButton;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ImageData;
@@ -26,14 +29,18 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListener {
+public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListener, TransformationListener {
 
 	private AlignedContent
 		content = null;
+	private CameraStand 	
+		cameraStand = null;
 	private JButton
 		activateButton = new JButton("Activate Shader");
 	private Attribute
 		tangentsAttribute = attributeForName("TANGENTS");
+	private GlslProgram 
+		program = null;
 	
 	public AdvancedAppearance() {
 		setInitialPosition(SHRINKER_RIGHT);
@@ -53,24 +60,37 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 		DefaultGeometryShader dgs = (DefaultGeometryShader)ShaderUtility.createDefaultGeometryShader(app, true);
 		dgs.createPolygonShader("glsl");
 		try {
-			
-			InputStream vIn = getClass().getResourceAsStream("data/vertexProgramTest.glsl");
-			InputStream fIn = getClass().getResourceAsStream("data/fragmentProgramTest.glsl");
+//			InputStream vIn = getClass().getResourceAsStream("data/vertexProgramTest.glsl");
+//			InputStream fIn = getClass().getResourceAsStream("data/fragmentProgramTest.glsl");
+			InputStream vIn = getClass().getResourceAsStream("data/normalMappingV.glsl");
+			InputStream fIn = getClass().getResourceAsStream("data/normalMappingF.glsl");
 			Input vertexIn = Input.getInput("vertex shader", vIn);
 			Input fragmentIn = Input.getInput("fragment shader", fIn);
-			GlslProgram p = new GlslProgram(app, POLYGON_SHADER, vertexIn, fragmentIn);
-			p.setUniform("diffuseMap", 0);
-			p.setUniform("normalMap", 1);
+			program = new GlslProgram(app, POLYGON_SHADER, vertexIn, fragmentIn);
+			program.setUniform("diffuseMap", 0);
+			program.setUniform("normalMap", 1);
+			program.setUniform("envMap", 2);
+//			transformationMatrixChanged(null);
 		} catch (Exception ex) {
 			System.out.println("Cannot load shader: " + ex.getMessage());
 		}
+		
 	}
 	
 	private void makeNormalMap(Appearance app) throws Exception {
-		InputStream nIn = getClass().getResourceAsStream("data/normalMapTest.jpg");
+		InputStream nIn = getClass().getResourceAsStream("data/nvidia_normal.png");
 		Input normalIn = Input.getInput("normal map", nIn);
 		ImageData data = ImageData.load(normalIn);
 		TextureUtility.createTexture(app, POLYGON_SHADER, 1, data);
+	}
+	
+	@Override
+	public void transformationMatrixChanged(TransformationEvent ev) {
+		if (program != null) {
+			double[] camMatrix = cameraStand.getCameraPath().getMatrix(null);
+			FactoredMatrix fm = new FactoredMatrix(camMatrix);
+			program.setUniform("eyePos", fm.getTranslation());
+		}
 	}
 	
 	
@@ -95,6 +115,8 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		content = c.getPlugin(AlignedContent.class);
+		cameraStand = c.getPlugin(CameraStand.class);
+//		cameraStand.getCameraBase().getTransformation().addTransformationListener(this);
 	}
 	
 	
