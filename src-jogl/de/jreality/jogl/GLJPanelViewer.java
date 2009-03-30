@@ -40,6 +40,9 @@
 
 package de.jreality.jogl;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.logging.Level;
 
 import javax.media.opengl.DefaultGLCapabilitiesChooser;
@@ -55,6 +58,7 @@ import de.jreality.util.SceneGraphUtility;
 public class GLJPanelViewer extends Viewer {
 	GLJPanel panel;
 	GLPbuffer sharedPBuffer;
+	boolean opaque = false;
 	
 	public GLJPanelViewer() {
 		this(null, null);
@@ -63,9 +67,23 @@ public class GLJPanelViewer extends Viewer {
 	public GLJPanelViewer(SceneGraphPath camPath, SceneGraphComponent root) {
 		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);	
+		panel.setOpaque(opaque);
 	}
 
-    		
+	// override these methods as subclass to draw beneath (above) the jReality scene
+	public void paintBefore(Graphics g)	{
+//		getSceneRoot().getAppearance().setAttribute("backgroundColor", new Color(0,255,0,128));
+//		Graphics2D g2 = (Graphics2D) g;
+//		g2.setColor(Color.blue);
+//		g2.fillRect(0, 50, 50, 50);		
+	}
+	
+	public void paintAfter(Graphics g)	{
+//		Graphics2D g2 = (Graphics2D) g;
+//		g2.setColor(Color.pink);
+//		g2.fillRect(0, 0, 50, 50);
+	}
+	
 	  @Override
 	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
@@ -84,12 +102,21 @@ public class GLJPanelViewer extends Viewer {
 		}
 		if (JOGLConfiguration.sharedContexts && firstOne == null) 
 			setupSharedContext(caps, chooser);
-		panel = new GLJPanel(caps, chooser, firstOne);
+		panel = new GLJPanel(caps, chooser, firstOne) {
+
+			@Override
+			protected void paintComponent(Graphics arg0) {
+				paintBefore(arg0);
+				super.paintComponent(arg0);
+				paintAfter(arg0);
+			}
+			
+		};
 		drawable = panel;
         JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
         drawable.addGLEventListener(this);
  		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
-//		canvas.requestFocus();
+// 		panel.updateUI();
 	}
 
 	  // have to use a pbuffer to start with since panel has no context until
@@ -100,6 +127,13 @@ public class GLJPanelViewer extends Viewer {
 		firstOne = sharedPBuffer.getContext();
 	  }
 
+	public boolean isOpaque() {
+		return opaque;
+	}
 
+	public void setOpaque(boolean opaque) {
+		this.opaque = opaque;
+		panel.setOpaque(opaque);
+	}
 	
 }

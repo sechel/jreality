@@ -51,7 +51,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
 public class Viewer extends AbstractViewer {
-	public GLCanvas canvas;
+	protected GLCanvas canvas;
 
 	public Viewer() {
 		this(null, null);
