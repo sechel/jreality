@@ -1,9 +1,3 @@
-// Dies bestimmt die Intensität (oder Höhe) der Bumpmap
-const float bumpDepth = 0.04;
-
-// Der Wert von pi lässt sich mit eingebauten Funktionen bestimmen
-const float pi = 2.0 * asin(1.0);
-
 // Licht-Richtung, Dämpfung und Richtung des Betrachters
 // werden als interpolierte Werte vom Vertex Shader übergeben
 varying vec3  lightDirection[3];
