@@ -128,7 +128,6 @@ public class DisplayOptions extends ToolBarAggregator {
 		return 1.0;
 	}
 	
-	@Override
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}

@@ -278,7 +278,6 @@ public class ContentTools extends ToolBarAggregator {
 		return 0.0;
 	}
 	
-	@Override
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}

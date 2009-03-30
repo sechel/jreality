@@ -48,7 +48,6 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 		activateButton.addActionListener(this);
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		assignTangents(content.getContent());
 		Appearance app = content.getAppearanceComponent().getAppearance();
@@ -84,7 +83,6 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 		TextureUtility.createTexture(app, POLYGON_SHADER, 1, data);
 	}
 	
-	@Override
 	public void transformationMatrixChanged(TransformationEvent ev) {
 		if (program != null) {
 			double[] camMatrix = cameraStand.getCameraPath().getMatrix(null);

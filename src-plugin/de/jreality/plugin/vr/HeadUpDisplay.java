@@ -292,7 +292,6 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 		
 	}
 	
-	@Override
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}
