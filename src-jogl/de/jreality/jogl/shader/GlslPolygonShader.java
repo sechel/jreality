@@ -535,15 +535,19 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				gl.glColorPointer(colorLength, GL.GL_DOUBLE, 0, colorBuffer);
 			}
 			if (texCoords != null) {
+				gl.glClientActiveTexture(GL.GL_TEXTURE0);
 				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
 				texBuffer.rewind();
 				gl.glTexCoordPointer(texLength, GL.GL_DOUBLE, 0, texBuffer);
 			}
-			int TANGENT_ID=9;
+//			int TANGENT_ID=9;
 			if (tanCoords != null) {
 				tanBuffer.rewind();
-				gl.glVertexAttribPointer(TANGENT_ID, 4, GL.GL_DOUBLE, true, 0, tanBuffer);
-				gl.glEnableVertexAttribArray(TANGENT_ID);
+//				gl.glVertexAttribPointer(TANGENT_ID, 4, GL.GL_DOUBLE, true, 0, tanBuffer);
+//				gl.glEnableVertexAttribArray(TANGENT_ID);
+				gl.glClientActiveTexture(GL.GL_TEXTURE1);
+				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+				gl.glTexCoordPointer(4, GL.GL_DOUBLE, 0, tanBuffer);
 			}
 			if (inlineI) {
 				indexBuffer.rewind();
@@ -554,13 +558,16 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
 			if (!doNormals4) gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
 			if (texCoords != null) {
+				gl.glClientActiveTexture(GL.GL_TEXTURE0);
 				gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
 			}
 			if (hasColors) {
 				gl.glDisableClientState(GL.GL_COLOR_ARRAY);
 			}
 			if (tanCoords != null) {
-				gl.glDisableVertexAttribArray(TANGENT_ID);
+				gl.glClientActiveTexture(GL.GL_TEXTURE1);
+				gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+//				gl.glDisableVertexAttribArray(TANGENT_ID);
 			}
 
 		} else {
