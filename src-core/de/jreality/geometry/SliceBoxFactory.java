@@ -151,13 +151,14 @@ import de.jreality.util.SceneGraphUtility;
 		@Override
 		public void activate(ToolContext tc) {
 			super.activate(tc);
-			if (tc.getCurrentPick() != null && tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
+			PickResult currentPick = tc.getCurrentPick();
+			if (currentPick != null && currentPick.getPickType() == PickResult.PICK_TYPE_FACE) {
 				dragging = true;
-				whichFace = tc.getCurrentPick().getIndex();
+				whichFace = currentPick.getIndex();
 				index0 = whichFace % 3;
 				index1 = (index0+1)%3;
 				index2 = (index0+2)%3;
-				originalCoords = tc.getCurrentPick().getObjectCoordinates().clone();
+				originalCoords = currentPick.getObjectCoordinates().clone();
 				if (index0 == oldIndex0)	{
 					originalMat = clipPlane1SGC.getTransformation().getMatrix();
 					sameFace = true;
@@ -180,9 +181,10 @@ import de.jreality.util.SceneGraphUtility;
 
 		@Override
 		public void perform(ToolContext tc) {
-			if (!dragging || originalCoords == null || tc.getCurrentPick() == null) return;
-			if (tc.getCurrentPick().getPickType() == PickResult.PICK_TYPE_FACE) {
-				double[] newCoords = tc.getCurrentPick().getObjectCoordinates();
+			PickResult currentPick = tc.getCurrentPick();
+			if (!dragging || originalCoords == null || currentPick == null) return;
+			if (currentPick.getPickType() == PickResult.PICK_TYPE_FACE) {
+				double[] newCoords = currentPick.getObjectCoordinates();
 				double[] dd = Rn.subtract(null, originalCoords, newCoords);
 				int direction = oldDirection;
 				if (firstTime)	{
