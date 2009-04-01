@@ -67,7 +67,8 @@ public class SceneGraphComponentBeanInfo extends SimpleBeanInfo {
     pd = new PropertyDescriptor[]{
         pdCCC,
         pd("visible", "Visible", "Flag to tell whether the node is visible"),
-    };
+        pd("pickable", "Pickible", "Flag to tell whether the node is pickable"),
+   };
   }
   
   
