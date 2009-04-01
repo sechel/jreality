@@ -26,6 +26,7 @@ import de.sciss.net.OSCServer;
  */
 public class WiiMoteOSC implements RawDevice, OSCListener {
 
+	private static final String BATTERY = "/wii/batterylevel";
 	private static final String ORIENTATION = "/wii/orientation";
 	private static final String POINTER = "pointer";
 	private static final String EVOLUTION = "evolution";
@@ -92,6 +93,9 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 				float pitch = (arg instanceof Float) ? (Float) arg : (Integer) arg;
 				orientationEvent(roll, pitch);
 			}
+		} else if (BATTERY.equals(name)) {
+			float level = (Float) msg.getArg(0);
+			System.err.println("WiiMote battery level: "+level);
 		} else {
 			InputSlot slot = buttonSlots.get(name);
 			if (slot!=null) {
@@ -183,4 +187,4 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 /nunchuk/button/c , i
 /nunchuk/acc , fff
 /nunchuk/orientation , ff
- */
+*/
