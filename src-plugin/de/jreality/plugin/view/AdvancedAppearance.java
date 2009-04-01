@@ -49,6 +49,9 @@ public class AdvancedAppearance extends ShrinkPanelPlugin implements ActionListe
 	}
 	
 	public void actionPerformed(ActionEvent e) {
+		if (content.getContent() == null) {
+			return;
+		}
 		assignTangents(content.getContent());
 		Appearance app = content.getAppearanceComponent().getAppearance();
 		try {

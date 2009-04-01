@@ -28,7 +28,9 @@ public class ViewerKeyListenerPlugin extends Plugin {
 		sceneView = c.getPlugin(View.class);
 		viewComp = sceneView.getViewer().getViewingComponent();
 		InfoOverlayPlugin iop = c.getPlugin(InfoOverlayPlugin.class);
-		iop.getInfoOverlay().setVisible(false);
+		if (iop.getInfoOverlay() != null) {
+			iop.getInfoOverlay().setVisible(false);
+		}
 		Viewer viewer = sceneView.getViewer().getCurrentViewer();
 		vkl = new ViewerKeyListener(viewer, null, iop == null ? null : iop.getInfoOverlay());
 		viewComp.addKeyListener(vkl);

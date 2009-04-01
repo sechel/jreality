@@ -11,7 +11,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 public class InfoOverlayPlugin extends Plugin {
 	
 	private View sceneView;
-	private de.jreality.jogl.plugin.InfoOverlay infoOverlay;
+	private InfoOverlay infoOverlay;
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -37,7 +37,7 @@ public class InfoOverlayPlugin extends Plugin {
 			LoggingSystem.getLogger(this).warning("No Jogl Viewer in viewer switch!");
 			return;
 		}
-		infoOverlay = de.jreality.jogl.plugin.InfoOverlay.perfInfoOverlayFor(joglViewer);
+		infoOverlay = InfoOverlay.perfInfoOverlayFor(joglViewer);
 		infoOverlay.setVisible(true);
 	}
 
