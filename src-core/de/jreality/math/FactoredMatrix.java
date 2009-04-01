@@ -190,6 +190,13 @@ public class FactoredMatrix extends Matrix {
 		if (factorHasChanged) update();
 		return super.getArray();
 	}
+	
+	public void assignFrom(FactoredMatrix fm)	{
+		super.assignFrom(fm);
+		metric = fm.getMetric();
+		matrixHasChanged = true;
+		update();
+	}
     /**
      * 
      * @return <code>true</code> if the matrix has negative determinant.
@@ -300,8 +307,8 @@ public class FactoredMatrix extends Matrix {
      * @param tz
      */
     public void setTranslation(double tx, double ty, double tz) {
-        if (metric != Pn.EUCLIDEAN)
-            throw new IllegalStateException("Transform: setTranslation: Invalid metric");
+//        if (metric != Pn.EUCLIDEAN)
+//            throw new IllegalStateException("Transform: setTranslation: Invalid metric");
         translationVector[0] = tx;
         translationVector[1] = ty;
         translationVector[2] = tz;
@@ -551,5 +558,13 @@ public class FactoredMatrix extends Matrix {
       Quaternion.quaternionToRotationMatrix(m.getArray(), getRotationQuaternion());
       return m;
     }
+
+	@Override
+	public String toString() {
+		String rot = "rotation + "+Rn.toString(getRotationAxis())+" "+getRotationAngle()/(Math.PI);
+		String trans = "translation + "+Rn.toString(getTranslation());
+		String stretch = "scale + "+Rn.toString(getStretch());
+		return "metric="+metric+"\n"+rot+"\n"+trans+"\n"+stretch+"\n";
+	}
 
 }
