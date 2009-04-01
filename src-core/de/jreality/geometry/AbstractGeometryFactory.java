@@ -85,10 +85,17 @@ public class AbstractGeometryFactory {
 		this.metric.setObject( new Integer( metric) );
 	}
 
-	
+	/**
+	 * Subclasses should add here all computations necessary for update.  
+	 * This method is called by {@link #update()} before {@link #updateImpl()}.
+	 * The actual update of the scene graph should happen in {@link #updateImpl()}.
+	 */
 	void recompute() {
 	}
 
+	/**
+	 * This method is the API method for updating the geometry factory. 
+	 */
 	public void update() {
 		update.counter++;
 		recompute();
@@ -104,6 +111,13 @@ public class AbstractGeometryFactory {
 		
 	}
 
+	/**
+	 * Subclasses should add here all updates that affect the scene graph.
+	 * This method is called
+	 * by {@link #update()} after {@link #recompute()}.  
+	 * It is called through {@link Scene#executeWriter()}
+	 * so that the scene graph of the geometry is already locked.    
+	 */
 	void updateImpl() {
 		GeometryUtility.setMetric( geometry, getMetric());	
 	}

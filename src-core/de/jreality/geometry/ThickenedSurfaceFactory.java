@@ -165,7 +165,7 @@ import de.jreality.scene.data.IntArrayArray;
 	}
 
 	/**
-	 * This parameter is an additional parameter conrolling the size of the hole.  It basically
+	 * This parameter is an additional parameter controlling the size of the hole.  It basically
 	 * is used as a scale factor on the y-coordinate of the profile curve; larger values make the hole smaller,
 	 * while smaller ones make the whole bigger.  Negative values are discouraged.  Default: 1.0
 	 * @param holeFactor
