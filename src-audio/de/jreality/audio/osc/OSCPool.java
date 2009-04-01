@@ -3,11 +3,14 @@ package de.jreality.audio.osc;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
 import de.sciss.net.OSCChannel;
 import de.sciss.net.OSCClient;
+import de.sciss.net.OSCListener;
+import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCServer;
 
 /**
@@ -73,6 +76,21 @@ public class OSCPool {
 				servers.put(port, new WeakReference<OSCServer>(server));
 			}
 			return server;
+		}
+	}
+	
+	public static void main(String args[]) throws IOException, InterruptedException {
+		OSCServer osc = OSCPool.getUDPServer(5600);
+		osc.addOSCListener(new OSCListener() {
+			public void messageReceived(OSCMessage msg, SocketAddress sender, long time) {
+				System.err.println(msg.getName()+" from "+sender);
+				for(int i=0; i<msg.getArgCount(); i++) {
+					System.err.println("  * "+msg.getArg(i));
+				}
+			}
+		});
+		while (true) {
+			Thread.sleep(1000);
 		}
 	}
 }
