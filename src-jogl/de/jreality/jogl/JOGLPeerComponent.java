@@ -173,11 +173,9 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 	protected void renderChildren() {
 //		theLog.finest("Processing sgc, clipToCamera is "+goBetween.originalComponent.getName()+" "+clipToCamera);
-		int n = childCount; //children.size();
 //		System.err.println("JOGLPC: child count = "+n);
 		childlock.readLock();
-		for (int i = 0; i<n; ++i)	{	
-			JOGLPeerComponent child = children.get(i);					
+		for (JOGLPeerComponent child : children)	{	
 			child.render();
 		}
 		childlock.readUnlock();
