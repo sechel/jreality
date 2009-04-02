@@ -19,7 +19,7 @@ import de.sciss.net.OSCServer;
 
 
 /**
- * Receives WiiMote events via OSC, intended to work with DarwiinRemoteOSC
+ * Receives WiiMote events via OSC, intended to work with DarwiinRemoteOSC (http://mac.softpedia.com/get/Utilities/darwiinremoteOSC.shtml)
  * 
  * @author brinkman
  *
