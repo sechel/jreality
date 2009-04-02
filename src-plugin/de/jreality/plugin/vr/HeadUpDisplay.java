@@ -62,7 +62,7 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 		masterConstraints = new GridBagConstraints();
 	
 	private JToggleButton
-		showMasterPanelToggle = new JToggleButton(ImageHook.getIcon("layout_add.png"), true);
+		showMasterPanelToggle = new JToggleButton(ImageHook.getIcon("layout_add.png"), false);
 	
 	public HeadUpDisplay() {
 		panelConstraints.fill = GridBagConstraints.BOTH;
