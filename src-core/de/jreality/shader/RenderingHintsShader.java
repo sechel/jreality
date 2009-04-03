@@ -40,6 +40,7 @@
 
 package de.jreality.shader;
 
+import de.jreality.math.Pn;
 import de.jreality.scene.data.AttributeEntity;
 
 public interface RenderingHintsShader extends AttributeEntity {
@@ -47,6 +48,7 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  static final Class DEFAULT_ENTITY=RenderingHintsShader.class;
 	  Object CREATE_DEFAULT=new Object();
 	  
+	  final static int METRIC_DEFAULT = Pn.EUCLIDEAN;			// do lighting or not
 	  final static boolean LIGHTING_ENABLED_DEFAULT = true;			// do lighting or not
       final static boolean TRANSPARENCY_ENABLED_DEFAULT = false;        // do transparency or not
       final static boolean ADDITIVE_BLENDING_ENABLED_DEFAULT = false;        // do transparency or not
@@ -60,6 +62,9 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean FLIP_NORMALS_DEFAULT = false;	
 	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
 	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
+	  
+	  Integer getMetric();
+	  void setMetric(Integer m);
 	  
 	  Boolean getLightingEnabled();
 	  void setLightingEnabled(Boolean b);
