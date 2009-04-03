@@ -474,7 +474,12 @@ public class View extends SideContainerPerspective {
 			renderTrigger.removeSceneGraphComponent(viewerSwitch.getSceneRoot());
 			renderTrigger.removeViewer(viewerSwitch);
 		}
-		if (toolSystem != null) toolSystem.dispose();
+		if (toolSystem != null) {
+			toolSystem.dispose();
+		}
+		if (viewerSwitch != null) {
+			viewerSwitch.dispose();
+		}
 	}
 
 	public Icon getIcon() {
