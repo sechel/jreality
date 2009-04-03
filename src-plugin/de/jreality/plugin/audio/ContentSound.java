@@ -140,15 +140,15 @@ public class ContentSound extends ShrinkPanelPlugin {
 	
 	private void updateLoop() {
 		String loop = getLoop();
-		if (loop == "default") {
+		if (loop.equals("default")) {
 			hum.setAudioSource(defaultAudioSource);
 			loadButton.setEnabled(false);
-		}
-		if (loop == "custom") {
+		} else
+		if (loop.equals("custom")) {
 			hum.setAudioSource(customAudioSource);
 			loadButton.setEnabled(true);
-		}
-		if (loop == "none") {
+		} else
+		if (loop.equals("none")) {
 			hum.setAudioSource(null);
 			loadButton.setEnabled(false);
 		}
