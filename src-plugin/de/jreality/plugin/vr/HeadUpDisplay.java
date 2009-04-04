@@ -207,9 +207,12 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 		commandMap.clear();
 		for (final ShrinkPanelPlugin sp : sList) {
 			JCheckBoxMenuItem b = new JCheckBoxMenuItem(sp.toString());
+			b.setBackground(new JPanel().getBackground());
 			if (sp.getPluginInfo().icon != null) {
 				Icon icon = ImageHook.scaleIcon(sp.getPluginInfo().icon, 16, 16);
 				b.setIcon(icon);
+			} else {
+				b.setIcon(ShrinkPanelPlugin.getDefaultIcon());
 			}
 			String command = sp.getClass().getName();
 			b.setActionCommand(command);
