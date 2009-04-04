@@ -52,7 +52,12 @@
   <path id="audio.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
+      <include name="jReality-tools.jar"/>    	
     </fileset>
+    <fileset dir="lib">
+        <include name="jass.jar"/>
+        <include name="NetUtil.jar"/>
+    </fileset>  	
   </path>
 
   <path id="swing.classpath">
