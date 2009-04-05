@@ -85,7 +85,8 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	
 	List<Class<? extends SampleProcessor>> dirlessChain = null;
 	
-	public synchronized void appearanceChanged(AppearanceEvent ev) {
+	// consider synchronization when modifying the following method; the current version is fine without synchronization
+	public void appearanceChanged(AppearanceEvent ev) {
 		EffectiveAppearance app = EffectiveAppearance.create(rootAppearancePath);
 		
 		List<Class<? extends SampleProcessor>> newDirlessChain = (List<Class<? extends SampleProcessor>>) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, List.class);
@@ -95,9 +96,9 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		} else if (!newDirlessChain.equals(dirlessChain)) {
 			dirlessChain = newDirlessChain;
 			try {
-				directionlessReader.clear();
-				directionlessProcessor = ProcessorChain.create(newDirlessChain);
-				directionlessProcessor.initialize(directionlessReader);
+				SampleProcessor proc = ProcessorChain.create(newDirlessChain);
+				proc.initialize(directionlessReader);
+				directionlessProcessor = proc;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -108,13 +109,16 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		}
 	}
 
-	public synchronized void processFrame(SoundEncoder enc, int frameSize) {
+	public void processFrame(SoundEncoder enc, int frameSize) {
+		SampleProcessor directionlessProcessor = this.directionlessProcessor;  // copy for thread safety
 		if (directionlessProcessor!=null) {
 			if (directionlessBuffer==null || directionlessBuffer.length<frameSize) {
 				directionlessBuffer = new float[frameSize];
 			} else {
 				Arrays.fill(directionlessBuffer, 0, frameSize, 0f);
 			}
+		} else {
+			directionlessBuffer = null;
 		}
 
 		microphonePath.getInverseMatrix(inverseMicrophoneMatrix.getArray());

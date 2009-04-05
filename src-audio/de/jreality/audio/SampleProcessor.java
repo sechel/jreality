@@ -3,7 +3,7 @@ package de.jreality.audio;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
-
+// TODO: properly document thread safety issues; setProperties and read may need sync
 public interface SampleProcessor extends SampleReader {
 	
 	public void initialize(SampleReader reader);
