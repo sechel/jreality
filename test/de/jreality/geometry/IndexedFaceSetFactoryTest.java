@@ -41,20 +41,25 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
 
 import junit.framework.TestCase;
+import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.pick.AABBTree;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
+import de.jreality.tools.ActionTool;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.CameraUtility;
+import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 
 public class IndexedFaceSetFactoryTest extends TestCase {
@@ -84,6 +89,62 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 
 		};
 
+	static double [] unwrapVertices  = new double[] {
+
+		 0,  0,  0, //0
+		 1,  0,  0, //1
+		 1,  1,  0, //2
+		 0,  1,  0, //3
+
+		 0,  0,  1, //4
+		 1,  0,  1, //5
+		 1,  1,  1, //6
+		 0,  1,  1, //7
+		 
+		 1,  1,  0, //8 -> 2
+		 1,  1,  1, //9 -> 6
+		 
+		 0,  1,  0, //10 -> 3
+		 0,  1,  1, //11 -> 7
+		 
+		 0,  1,  0, //12 -> 3
+		 0,  1,  1, //13 -> 7	 
+
+		};
+
+	static int [][] unwrapIndices = new int [][] {
+		// first two have different orientation from the other 4
+		{ 0, 1, 2, 3 }, 
+		{ 7, 6, 5, 4 }, 
+		{ 0, 1, 5, 4 }, 
+		{ 1, 8, 9, 5 }, //{ 1, 2, 6, 5 }, 
+		{ 8, 10, 11, 9 }, //{ 2, 3, 7, 6 }, 
+		{ 12, 0, 4, 13 }, //{ 3, 0, 4, 7 }, 
+	
+	};
+	
+	static double [][] unwrapTextureCoordinates = new double[][] {
+		
+		{ .25, .5},
+		{ .5, .5},
+		{ .5, .75},
+		{ .25, .75},
+
+		{ .25, .25 },
+		{ .5, .25 },
+		{ .5, .0 },
+		{ .25, .0 },
+		
+		{ .75, .5 },
+		{ .75, .25 },
+		
+		{ 1., .5 },
+		{ 1., .25 },
+
+		{ 0., .5 },
+		{ 0., .25 },
+	};
+	
 	static double [] vertices2  = new double[] {
 
 		 0,  0,  0,
@@ -108,6 +169,9 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		{ 3, 0, 4, 7 }, 
 
 	};
+
+
+
 
 	static int [][] indices2 = new int [][] {
 
@@ -180,6 +244,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		//factory.debug = true;
 		
 		factory.setVertexCount( vertices.length );
+		assertTrue(factory.getVertexCount()== vertices.length);
 		factory.setVertexCoordinates( vertices );	
 		
 		factory.setFaceCount( indices.length );
@@ -391,7 +456,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
          ifsf.setGenerateFaceNormals(true);
          ifsf.setGenerateVertexNormals(false);
          System.out.println(ifs.getEdgeAttributes());
-         //       uebernehmen der Face Atribute:
+         //       uebernehmen der Face Attribute:
          ifsf.setFaceCount(6);
          ifsf.setVertexCount(8);
 //       ifsf.setLineCount(12);
@@ -407,28 +472,171 @@ public class IndexedFaceSetFactoryTest extends TestCase {
          ifsf.setGenerateFaceNormals(true);
          ifsf.update();
  }
+	 
+	 public void testUnwrapFaceIndices() {
+			factory.setVertexCount( unwrapVertices.length/3);
+			factory.setVertexCoordinates( unwrapVertices );
+			factory.setFaceCount( indices.length );
+			factory.setFaceIndices( indices );
+			factory.setVertexTextureCoordinates( unwrapTextureCoordinates );
+			factory.setGenerateAABBTree( true );
+			factory.setGenerateEdgeLabels(true);
+			factory.setGenerateEdgesFromFaces( true );
+			factory.setGenerateFaceLabels(true);
+			factory.setGenerateFaceNormals(true);
+			factory.setGenerateVertexLabels(true);
+			factory.setGenerateVertexNormals( true );
+			factory.update();
+			
+			IndexedFaceSet ifs=factory.getIndexedFaceSet();
+			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
+			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
+			assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
+			AABBTree aabbTree=(AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE);
+			String[] edgeLabels = ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
+			int[] edgeIndices = ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
+			String[] faceLabels = ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null);
+			double[] faceNormals = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null);
+			String[] vertexLabels = ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null);
+			double[][] vertexNormals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+			
+			factory.setUnwrapFaceIndices(unwrapIndices);
+			factory.update();
+			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
+			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), unwrapIndices));
+			assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
+			assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
+			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
+			assertTrue(Arrays.equals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null),edgeIndices));
+			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null),faceLabels));
+			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null),faceNormals));
+			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null), vertexLabels));
+			double[][] unwrapNormals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+			assertFalse(Arrays.deepEquals(unwrapNormals, vertexNormals));
+			int[] trans=new int[] {0,1,2,3,4,5,6,7,2,6,3,7,3,7};
+			for (int i=0; i<14; i++ )
+				assertTrue(Arrays.equals(unwrapNormals[i], vertexNormals[trans[i]]));
+			
+			
+			factory.setUnwrapFaceIndices((int[])null);
+			factory.update();
+			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
+			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
+			assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
+			assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
+			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
+			assertTrue(Arrays.equals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null),edgeIndices));
+			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null),faceLabels));
+			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null),faceNormals));
+			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null), vertexLabels));
+			double[][] normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+			assertTrue(Arrays.deepEquals(normals, vertexNormals));
+	 }
 
 	public static void main( String [] arg ) {
 
-		IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
-
-
-		factory.setVertexCount( 8 );
-		factory.setFaceCount( 6 );	
-		factory.setVertexCoordinates( vertices );
-		factory.setFaceIndices( indices );
-		factory.setGenerateFaceNormals( true );
-		factory.setGenerateVertexNormals( true );
-		factory.setGenerateEdgesFromFaces( true );
-		factory.setGenerateVertexLabels(true);
-		//factory.setEdgeIndices( new int[][] {{0,1}} );
-		factory.setVertexRelativeRadii( new double [] { 1, 2, 3, 4, 1, 2, 3, 4 } );
+		IndexedFaceSetFactory factory2 = new IndexedFaceSetFactory();
+		factory2.setVertexCount( 8 );
+		factory2.setFaceCount( 6 );	
+		factory2.setVertexCoordinates( vertices );
+		factory2.setFaceIndices( indices );
+		factory2.setGenerateFaceNormals( true );
+		factory2.setGenerateVertexNormals( false );
+		factory2.setGenerateEdgesFromFaces( true );
+		factory2.setGenerateVertexLabels(true);
+		factory2.setVertexRelativeRadii( new double [] { 1, 2, 3, 4, 1, 2, 3, 4 } );
+		factory2.setFaceColors( new Color[] {Color.RED, Color.GREEN, Color.RED, Color.GREEN, Color.RED, Color.GREEN })  ;
+		factory2.update();
+		ViewerApp.display(factory2.getIndexedFaceSet());
 		
-		factory.setFaceColors( new Color[] {Color.RED, Color.GREEN, Color.RED, Color.GREEN, Color.RED, Color.GREEN })  ;
-		factory.update();
-		ViewerApp.display(factory.getIndexedFaceSet());
-		factory.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
-		factory.update();
-		ViewerApp.display(factory.getIndexedFaceSet());
-	}
+
+		
+		IndexedFaceSetFactory factory3 = new IndexedFaceSetFactory();
+		factory3.setVertexCount( 8 );
+		factory3.setFaceCount( 6 );	
+		factory3.setVertexCoordinates( vertices );
+		factory3.setFaceIndices( indices );
+		factory3.setGenerateFaceNormals( true );
+		factory3.setGenerateVertexNormals( false );
+		factory3.setGenerateEdgesFromFaces( true );
+		factory3.setGenerateVertexLabels(true);
+		//factory3.setEdgeIndices( new int[][] {{0,1}} );
+		factory3.setVertexRelativeRadii( new double [] { 1, 2, 3, 4, 1, 2, 3, 4 } );		
+		factory3.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
+		factory3.update();
+		ViewerApp.display(factory3.getIndexedFaceSet());
+		
+		
+		final IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+		
+		ifsf.setVertexCount( 14 );
+		ifsf.setVertexCoordinates( unwrapVertices );
+		ifsf.setVertexAttribute(Attribute.TEXTURE_COORDINATES, unwrapTextureCoordinates);
+		
+		ifsf.setFaceCount( 6 );	
+		ifsf.setFaceIndices( indices );
+
+		ifsf.setGenerateVertexNormals( true );
+		ifsf.setGenerateEdgesFromFaces( true );
+		/* The texture labels indicate that edges are doubled only in mode 2 below*/
+		ifsf.setGenerateEdgeLabels(true);
+		/* Crude documentation */ 
+		ifsf.setVertexLabels(new String[]{"","","","","","    Klick with middle mouse","","","","","","","",""});
+		ifsf.update();
+		
+		SceneGraphComponent sgc = new SceneGraphComponent("scene");
+		
+		/* An action tool that cycles through 3 modes when the cube 
+		 * is clicked with the middle mouse button 
+		 * mode0: the texture cube with texture jumps, because no unwrapped indices are set
+		 * mode1: the nicely textured unwrapped cube
+		 * mode3: also nicely textured unwrapped cube, but now edges are doubled 
+		 * and broken vertex normals
+		 */
+		ActionTool tool = new ActionTool("PrimaryMenu");
+		tool.addActionListener(new ActionListener(){
+			int mode=0;
+			public void actionPerformed(ActionEvent e) {
+				mode = (mode +1) % 3;
+				if (mode==0) {
+					ifsf.setFaceIndices( indices ); 
+					ifsf.setUnwrapFaceIndices((int[][]) null); 
+					ifsf.setVertexLabels(new String[]{"","","","","","    NO unwrapped face indices","","","","","","","",""});
+				}
+				if (mode==1) {
+					ifsf.setFaceIndices( indices ); 
+					ifsf.setUnwrapFaceIndices( unwrapIndices ); 
+					ifsf.setVertexLabels(new String[]{"","","","","","    wrapped and UNWRAPPED face indices","","","","","","","",""});
+					}
+				if (mode==2) {
+					ifsf.setFaceIndices( unwrapIndices ); 
+					ifsf.setUnwrapFaceIndices( (int[][]) null ); 
+					ifsf.setVertexLabels(new String[]{"","","","","","    DOUBLED edges and BROKEN vertex normals, unwrapped indices","","","","","","","",""});
+					}
+				ifsf.update();
+			}
+		});
+		sgc.addTool(tool);
+		sgc.setGeometry(ifsf.getIndexedFaceSet());
+		
+		/* Add a texture */
+		sgc.setAppearance(new Appearance());
+		Texture2D tex;
+		try{
+			tex=TextureUtility.createTexture(
+				sgc.getAppearance(),       
+				"polygonShader", 
+				ImageData.load(Input.getInput("de/jreality/geometry/black_cross.png")),
+				false);
+			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(12).getMatrix());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		/* scale the cube, to get the lables smaller */
+		MatrixBuilder.euclidean().scale(4).assignTo(sgc);
+
+		ViewerApp va = ViewerApp.display(sgc);
+		CameraUtility.encompass(va.getCurrentViewer());
+	};
 }
