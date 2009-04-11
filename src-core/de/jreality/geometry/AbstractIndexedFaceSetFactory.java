@@ -37,8 +37,8 @@
  *
  */
 
-
 package de.jreality.geometry;
+
 import java.awt.Color;
 
 import de.jreality.geometry.OoNode.UpdateMethod;
@@ -52,23 +52,23 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
-import de.jreality.scene.pick.AABBPickSystem;
 import de.jreality.scene.pick.AABBTree;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.util.PickUtility;
 
+/** 
+ * This class implements the functionality of the API class {@link IndexedFaceSetFactory}. 
+ * Should only be accessed via IndexedFaceSetFactory.  
+ */
 class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
+	/** The IndexedFaceSet to be generated. Reference will not change any more.**/
 	final IndexedFaceSet ifs;
 	
+	/** List of geometry attributes specific to faces. 
+	 **/
 	GeometryAttributeListSet face = new GeometryAttributeListSet( this, Geometry.CATEGORY_FACE );
 	
-	OoNode faceCount = node( "faceCount", Integer.class, 0 );
-	OoNode aabbTree  = node( "aabbTree", AABBTree.class, null );
-	
-	boolean generateAABBTree = false;
-	
-	
+	/* Standard generated attributes and their ingredients*/
 	AttributeGenerator vertexCoordinates = attributeGeneratorNode( vertex, double[][].class, Attribute.COORDINATES);
 	AttributeGenerator vertexNormals     = attributeGeneratorNode( vertex, double[][].class, Attribute.NORMALS );
 	
@@ -77,7 +77,15 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	AttributeGenerator faceIndices       = attributeGeneratorNode( face, int[][].class,      Attribute.INDICES );
 	AttributeGenerator faceLabels        = attributeGeneratorNode( face, String[].class,     Attribute.LABELS );
 	AttributeGenerator faceNormals       = attributeGeneratorNode( face, double[][].class,   Attribute.NORMALS );
-
+	
+	/* Ingredients that affect the geometry attributes in a non standard way, or have non standard */
+	OoNode faceCount = node( "faceCount", Integer.class, 0 );
+	OoNode aabbTree  = node( "aabbTree", AABBTree.class, null );
+	boolean generateAABBTree = false;
+	OoNode unwrapFaceIndices = node( "unwrapFaceIndices", int[][].class, null);
+	OoNode actualVertexOfUnwrapVertex = node ( "actualVertexOfUnwrapVertex", int[].class, null);
+	
+	/* constructors */
 	AbstractIndexedFaceSetFactory( IndexedFaceSet ifs, int metric, boolean generateEdgesFromFaces, boolean generateVertexNormals, boolean generateFaceNormals ) {
 		super( ifs, metric );	
 
@@ -108,6 +116,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		this( Pn.EUCLIDEAN );
 	}
 	
+	/* Getters and setters. */
 	protected int nof(){
 		return (Integer)faceCount.getObject();
 	}
@@ -128,7 +137,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	protected void setFaceAttribute(Attribute attr, double [] data ) {
 		if( data != null && (nof() == 0 && data.length != 0 || data.length % nof() != 0) )
 			throw new IllegalArgumentException( "array has wrong length" );
-		setEdgeAttribute( attr, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nof() ) );
+		setFaceAttribute( attr, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nof() ) );
 	}
 	
 	protected void setFaceAttribute(Attribute attr,  double [][] data ) {
@@ -139,23 +148,47 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	protected void setFaceAttributes(DataListSet dls ) {
 		face.setAttributes(dls);
 	}
-	
-	protected void setFaceIndices( DataList data ) {
-		setFaceAttribute( Attribute.INDICES, data );
+
+	protected void setFaceIndices(DataList data) {
+		setFaceAttribute(Attribute.INDICES, data);
+	}
+
+	protected void setFaceIndices(int[][] data) {
+		setFaceAttribute(Attribute.INDICES, new IntArrayArray.Array(data));
+	}
+
+	protected void setFaceIndices(int[] data, int pointCountPerFace) {
+		if (data != null && data.length != pointCountPerFace * nof())
+			throw new IllegalArgumentException("array has wrong length");
+		setFaceAttribute(Attribute.INDICES, data == null ? null
+				: new IntArrayArray.Inlined(data, pointCountPerFace));
+	}
+
+	protected void setFaceIndices(int[] data) {
+		setFaceIndices(data, 3);
 	}
 	
-	protected void setFaceIndices( int[][] data ) {
-		setFaceAttribute( Attribute.INDICES, new IntArrayArray.Array( data ) );
+	protected void setUnwrapFaceIndices(DataList data) {
+		if (data!=null && data.size()!=nof())
+			throw new IllegalArgumentException("Data list of face indices for unwrapes faces has wrong length.");
+		setUnwrapFaceIndices(data==null?null:data.toIntArrayArray(null));
 	}
-	
-	protected void setFaceIndices( int[] data, int pointCountPerFace ) {
-		if( data != null && data.length != pointCountPerFace * nof() )
-			throw new IllegalArgumentException( "array has wrong length" );
-		setFaceAttribute( Attribute.INDICES, data==null ? null : new IntArrayArray.Inlined( data, pointCountPerFace ) );
+
+	protected void setUnwrapFaceIndices(int[][] data) {
+		if (data!=null && data.length!=nof())
+			throw new IllegalArgumentException("Array of face indices for unwraped faces has wrong length.");
+		unwrapFaceIndices.setObject(data);
 	}
-	
-	protected void setFaceIndices( int[] data ) {
-		setFaceIndices( data, 3 );
+
+	protected void setUnwrapFaceIndices(int[] data, int pointCountPerFace) {
+		if (data != null && data.length != pointCountPerFace * nof())
+			throw new IllegalArgumentException("Array of indices for unwraped faces has wrong length.s");
+		setUnwrapFaceIndices(data == null ? null
+				: new IntArrayArray.Inlined(data, pointCountPerFace));
+	}
+
+	protected void setUnwrapFaceIndices(int[] data) {
+		setUnwrapFaceIndices(data, 3);
 	}
 	
 	protected void setFaceNormals( DataList data ) {
@@ -183,22 +216,21 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	}
 	
 	protected void setFaceColors( Color [] colors ) {
-    double[] data = new double[colors.length*4];
-    float[] col = new float[4];
-    for (int i = 0; i < colors.length; i++) {
-      colors[i].getRGBComponents(col);
-      data[4*i  ] = col[0];
-      data[4*i+1] = col[1];
-      data[4*i+2] = col[2];
-      data[4*i+3] = col[3];
-    }
-    setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, 4 ) );
+		double[] data = new double[colors.length*4];
+		float[] col = new float[4];
+		for (int i = 0; i < colors.length; i++) {
+			colors[i].getRGBComponents(col);
+			data[4*i  ] = col[0];
+			data[4*i+1] = col[1];
+			data[4*i+2] = col[2];
+			data[4*i+3] = col[3];
+		}
+		setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Inlined( data, 4 ) );
 	}
 	
 	protected void setFaceColors( double [][] data ) {
 		setFaceAttribute( Attribute.COLORS, new DoubleArrayArray.Array( data ) );
 	}
-
 
 	protected void setFaceLabels( DataList data ) {
 		setVertexAttribute( Attribute.LABELS, data );
@@ -210,170 +242,21 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		setFaceAttribute( Attribute.LABELS, data==null ? null : new StringArray(data));
 	}
 	
-	{
-		faceLabels.addIngr(faceCount);
-		faceLabels.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
-						return indexString(nof());
-					}					
-				}
-		);
-	}
-
-	{
-		aabbTree.addIngr(vertexCoordinates);
-		aabbTree.addIngr(faceIndices);
-		aabbTree.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
-						return isGenerateAABBTree() ? AABBTree.construct((double[][])vertexCoordinates.getObject(), (int[][]) faceIndices.getObject()): null;
-					}					
-				});
-	}
-
-	{
-		edgeIndices.addIngr( faceIndices );
-		if( isGenerateEdgesFromFaces() )
-			edgeIndices.addDeps( edgeCount );
-		edgeIndices.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
-						return generateEdgeIndices();		
-					}					
-				}
-		);
-				
-	}
-	{
-		edgeCount.setUpdateMethod( new UpdateMethod() {
-
-			public Object update(Object object) {
-				int count;
-				if(edgeIndices.isGenerate())
-					count = ((int[][])edgeIndices.getObject()).length;
-				else 
-					count = edge.DLS.containsAttribute(Attribute.INDICES) ? edge.DLS.getListLength() : 0;
-				
-				return new Integer(count);	
-			}
-			
-		});
-	}
-
-	/* overwrite in subclass. */
-	int [][] generateEdgeIndices() {
-		int [][] fi = (int[][])faceIndices.getObject();
-		if( fi==null)
-			return null;
-		return IndexedFaceSetUtility.edgesFromFaces( fi ).toIntArrayArray(null);
-	}
-	
-	{
-		faceNormals.addIngr(metric);
-		faceNormals.addIngr(faceIndices);
-		faceNormals.addIngr(vertexCoordinates);
-		faceNormals.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
-						return generateFaceNormals( (double[][])object);		
-					}					
-				}
-		);
-	}
-	
-
-	
-	/* overwrite in subclass. */
-	double [][] generateFaceNormals( double [][] faceNormals ) {
-		int    [][] fi = (int   [][])faceIndices.      getObject();
-		double [][] vc = (double[][])vertexCoordinates.getObject();
-
-		if( fi==null || vc==null )
-			return null;
-		
-		log( "compute", Attribute.NORMALS, "face");
-	
-		return IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
-		
-	}
-	
-	{
-		vertexNormals.addIngr(metric);
-		vertexNormals.addIngr(faceNormals);
-		
-		vertexNormals.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
-						return generateVertexNormals( (double[][])object);		
-					}					
-				}
-		);
-	}
-	
-	/* overwrite in subclass. */
-	double [][] generateVertexNormals( double [][] vertexNormals ) {
-		int    [][] fi = (int   [][])faceIndices.      getObject();
-		double [][] vc = (double[][])vertexCoordinates.getObject();
-		double [][] fn = (double[][])faceNormals.      getObject();
-		
-		if( fi==null || vc==null  )
-			return null;
-		
-		if( fn==null ) { 
-			fn = IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
-		}
-		
-		return IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getMetric() );
-		
-	}
-	
-	void recompute() {		
-			
-		super.recompute();
-			
-		aabbTree.update();
-		
-		faceLabels.update();
-		edgeIndices.update();
-		faceNormals.update();
-		vertexNormals.update();
-		
-	}
-
-	protected void updateImpl() {
-	 		
-		super.updateImpl();
-		
-		if( ifs.getNumFaces() != getFaceCount() )
-			ifs.setNumFaces( getFaceCount() );
-		
-		updateGeometryAttributeCathegory( face );
-		
-		if( nodeWasUpdated(aabbTree))
-			ifs.setGeometryAttributes(PickUtility.AABB_TREE, aabbTree.getObject());
-		
-		edgeIndices.updateArray();
-		faceLabels.updateArray();
-		faceNormals.updateArray();
-		vertexNormals.updateArray();
-	}
-
 	public IndexedFaceSet getIndexedFaceSet() {
 		return ifs;
 	}
 	
 	public boolean isGenerateEdgesFromFaces() {
-		edgeIndices.outdate();
+		// edgeIndices.outdate(); Why should this be here? 
 		return edgeIndices.isGenerate();
 	}
 
 	public void setGenerateEdgesFromFaces(boolean generateEdgesFromFaces) {
 		if( generateEdgesFromFaces && edge.hasEntries() )
 			throw new UnsupportedOperationException( 
-					"you cannot generate edges form faces " +
+					"You cannot generate edges form faces " +
 					"while edge attributes are set." +
-					"use clearEdgeAttributes() before");
+					"Set them to null before.");
 			
 		edgeIndices.setGenerate(generateEdgesFromFaces);
 		
@@ -423,4 +306,254 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		
 		//TODO:
 	}
+    	
+    /* IMPLEMENTATIONS OF GENERATED ATTRIBUTES according to the following dependency tree:
+     * 
+     *  faceCount      metric   vertexCoordinates    faceIndices      unwrapFaceIndices
+     *     |               |\        /  ____\________/  /   \                 |
+     *  faceLables         | \      /  /     \         /     \     actualVertexOfUnwrapVertex
+     *                     |  faceNormals     aabbTree     edgeIndices   
+     *                     |     /                            |
+     *                     |    /               edgeCount (see AbstractIndexedLineSet)
+     *                     |   /
+     *               vertexNormals
+     * 
+     */
+	
+	/* actualVertexOfUnwrapVertex
+	 * generate the translation table between actual vertices and unwrap vertices 
+	 * from faceIndices and unwrapFaceIndices
+	 */
+	{
+		actualVertexOfUnwrapVertex.addIngr(unwrapFaceIndices);
+		actualVertexOfUnwrapVertex.addIngr(faceIndices);
+		actualVertexOfUnwrapVertex.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {
+						if (unwrapFaceIndices.getObject()==null) 
+							return null;
+	
+						int[][] fi = (int[][]) faceIndices.getObject();
+						int[][] unwrapFI = (int[][]) unwrapFaceIndices.getObject();
+						int[] actualVOUV = (int[]) object;
+	
+						//get number of unwrap vertices
+						int nv=nov();
+						
+						//update translation table between actual and unwrap vertex indices
+						if (actualVOUV==null || actualVOUV.length != nv)
+							actualVOUV = new int[nv];
+						for (int f=0; f<nof(); f++) 
+							for (int v=0; v<fi[f].length; v++) 
+								actualVOUV[unwrapFI[f][v]]=fi[f][v];
+						
+						return actualVOUV;
+					}					
+				}
+		);
+	}
+
+	
+	/* faceLabels
+	 * The faces are labeled by their indices.
+	 */
+	{
+		faceLabels.addIngr(faceCount);
+		faceLabels.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return indexString(nof());
+					}					
+				}
+		);
+	}
+
+	/* aabbTree
+	 * generate aabbTree according to AABBTree.construct()
+	 */
+	{
+		aabbTree.addIngr(vertexCoordinates);
+		aabbTree.addIngr(faceIndices);
+		aabbTree.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return isGenerateAABBTree() ? AABBTree.construct((double[][])vertexCoordinates.getObject(), (int[][]) faceIndices.getObject()): null;
+					}					
+				});
+	}
+
+	/* EdgeIndices
+	 * generate EdgeIndices according to IndexedFaceSetUtility.edgesFromFaces()
+	 */
+	{
+		edgeIndices.addIngr( faceIndices );
+		if( isGenerateEdgesFromFaces() )
+			edgeIndices.addDeps( edgeCount );
+		edgeIndices.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateEdgeIndices();		
+					}					
+				}
+		);
+				
+	}
+	/* overwrite in subclass. */
+	int [][] generateEdgeIndices() {
+		int [][] fi = (int[][])faceIndices.getObject();
+		if( fi==null)
+			return null;
+		return IndexedFaceSetUtility.edgesFromFaces( fi ).toIntArrayArray(null);
+	}
+	
+	/* edgeCount
+	 * update edgeCount (see AbstractIndexedLineSet). 
+	 */
+	{
+		edgeCount.setUpdateMethod( new UpdateMethod() {
+			public Object update(Object object) {
+				int count;
+				if(edgeIndices.isGenerate())
+					count = ((int[][])edgeIndices.getObject()).length;
+				else // Never happens? (see setGenerateEdgesFromFaces() )
+					count = edge.DLS.containsAttribute(Attribute.INDICES) ? edge.DLS.getListLength() : 0;
+				return new Integer(count);	
+			}			
+		});
+	}
+
+    /* faceNormals
+     * generate faceNormals according to IndexedFaceSetUtility.calculateFaceNormals()
+     */
+	{
+		faceNormals.addIngr(metric);
+		faceNormals.addIngr(faceIndices);
+		faceNormals.addIngr(vertexCoordinates);
+		faceNormals.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateFaceNormals( (double[][])object);		
+					}					
+				}
+		);
+	}	
+	/* overwrite in subclass. */
+	double [][] generateFaceNormals( double [][] faceNormals ) {
+		int    [][] fi = (int   [][])faceIndices.      getObject();
+		double [][] vc = (double[][])vertexCoordinates.getObject();
+
+		if( fi==null || vc==null )
+			return null;
+		
+		log( "compute", Attribute.NORMALS, "face");
+	
+		return IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
+		
+	}
+	
+    /* vertexNormals
+     * generate vertexNormals according to IndexedFaceSetUtility.calculateVertexNormals()
+     */
+	{
+		vertexNormals.addIngr(metric);
+		vertexNormals.addIngr(faceNormals);
+		
+		vertexNormals.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateVertexNormals( (double[][])object);		
+					}					
+				}
+		);
+	}
+	/* overwrite in subclass. */
+	double [][] generateVertexNormals( double [][] vertexNormals ) {
+		int    [][] fi = (int   [][])faceIndices.      getObject();
+		double [][] vc = (double[][])vertexCoordinates.getObject();
+		double [][] fn = (double[][])faceNormals.      getObject();
+		
+		if( fi==null || vc==null  )
+			return null;
+		
+		if( fn==null ) { 
+			fn = IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
+		}
+		
+		return IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getMetric() );
+	}
+
+	
+	void recompute() {		
+			
+		super.recompute();
+			
+		aabbTree.update();
+		
+		actualVertexOfUnwrapVertex.update();
+		
+		faceLabels.update();
+		edgeIndices.update();
+		faceNormals.update();
+		if (unwrapFaceIndices.getObject()==null  && nodeWasUpdated(unwrapFaceIndices)) 
+				//unwrapFaceIndices where just set to null, 
+				//so the usual vertexNormals have to be restored
+				vertexNormals.outdate();		
+		vertexNormals.update();
+	}
+
+	protected void updateImpl() {
+	 		
+		super.updateImpl();
+		
+		if( ifs.getNumFaces() != getFaceCount() )
+			ifs.setNumFaces( getFaceCount() );
+		
+		updateGeometryAttributeCathegory( face );
+		
+		if( nodeWasUpdated(aabbTree))
+			ifs.setGeometryAttributes(PickUtility.AABB_TREE, aabbTree.getObject());
+		
+		/*face indices */
+		if (unwrapFaceIndices.getObject()!=null)			
+			ifs.setFaceAttributes(
+					Attribute.INDICES, 
+					StorageModel.INT_ARRAY_ARRAY.createReadOnly( (int[][]) unwrapFaceIndices.getObject())
+					);
+		else if (nodeWasUpdated(unwrapFaceIndices)) // unwrapFaceIndices was set to null since last update, so 
+			//faceIndices have to be restored, even if they have not been updated. If faceIndices where updated
+			//they where already set/restored by "updateGeometryAttributeCathegory( face )" above. 
+			ifs.setFaceAttributes(
+					Attribute.INDICES, 
+					StorageModel.INT_ARRAY_ARRAY.createReadOnly( (int[][]) faceIndices.getObject())
+					);
+			
+		
+		edgeIndices.updateArray();
+		faceLabels.updateArray();
+		faceNormals.updateArray();
+		
+		/* vertex normals */
+		if (unwrapFaceIndices.getObject()==null  || !vertexNormals.isGenerate()) {
+			//in both cases the usual updateArray is able to decide what has to be done
+			vertexNormals.updateArray();
+		}
+		else //unwrapFaceIndices present AND vertexNormals are generated  
+			if (nodeWasUpdated(actualVertexOfUnwrapVertex) || nodeWasUpdated(vertexNormals)) {
+				//
+			double[][] vn=(double[][]) vertexNormals.getObject();
+			int[] translation=(int[]) actualVertexOfUnwrapVertex.getObject();
+			double[][] unwrappedVN = new double[nov()][vn[0].length]; 
+			
+			for (int i=0; i<unwrappedVN.length; i++)
+				System.arraycopy(vn[translation[i]], 0, unwrappedVN[i], 0, vn[translation[i]].length);
+			
+			ifs.setVertexAttributes(
+					Attribute.NORMALS, 
+					StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly( unwrappedVN ) 
+					);
+		}
+			
+				
+	}
+
 }
