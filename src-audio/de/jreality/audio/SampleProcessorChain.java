@@ -1,31 +1,26 @@
 package de.jreality.audio;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
-public class ProcessorChain implements SampleProcessor {
+public class SampleProcessorChain implements SampleProcessor {
 	
-	private List<SampleProcessor> procs = new ArrayList<SampleProcessor>();
+	private List<SampleProcessor> procs;
 	private SampleReader last;
 	
-	private ProcessorChain() {
-		// do nothing
+	private SampleProcessorChain(List<SampleProcessor> procs) {
+		this.procs = procs;
 	}
 	
-	public static SampleProcessor create(List<Class<? extends SampleProcessor>> list) throws InstantiationException, IllegalAccessException {
+	public static SampleProcessor create(List<SampleProcessor> list) {
 		if (list==null || list.isEmpty()) {
 			return new NullProcessor();
 		} else if (list.size()==1) {
-			return list.get(0).newInstance();
+			return list.get(0);
 		} else {
-			ProcessorChain chain = new ProcessorChain();
-			for(Class<? extends SampleProcessor> clazz: list) {
-				chain.procs.add(clazz.newInstance());
-			}
-			return chain;
+			return new SampleProcessorChain(list);
 		}
 	}
 	
@@ -53,5 +48,13 @@ public class ProcessorChain implements SampleProcessor {
 
 	public int read(float[] buffer, int initialIndex, int samples) {
 		return last.read(buffer, initialIndex, samples);
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder("SampleProcessorChain:\n");
+		for(SampleProcessor proc: procs) {
+			sb.append("   "+proc+"\n");
+		}
+		return sb.toString();
 	}
 }

@@ -26,6 +26,8 @@
   	<mapping device="WiiMoteOSC" src="/wii/button/home" target="PrimaryMenu"/>
   	<mapping device="WiiMoteOSC" src="/wii/button/plus" target="JumpActivation"/>
   	<mapping device="WiiMoteOSC" src="/wii/button/minus" target="GravityToggle"/>
+  	<mapping device="WiiMoteOSC" src="/wii/button/one" target="pageUp"/>
+  	<mapping device="WiiMoteOSC" src="/wii/button/two" target="pageDown"/>
   	<mapping device="WiiMoteOSC" src="pointer" target="PointerNDC"/>
   	<mapping device="WiiMoteOSC" src="evolution" target="PointerNDCevolution"/>
   -->
@@ -236,6 +238,12 @@
       <inputslot>right</inputslot>
       <inputslot>left</inputslot>
       <outputslot>LeftRightAxis</outputslot>
+    </virtualdevice>
+    
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMergedAxis">
+      <inputslot>pageDown</inputslot>
+      <inputslot>pageUp</inputslot>
+      <outputslot>UpDownAxis</outputslot>
     </virtualdevice>
     
     <!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualReverseAxis">

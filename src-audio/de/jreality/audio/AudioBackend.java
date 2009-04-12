@@ -38,14 +38,15 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private float[] directionlessBuffer = null;
 	private SampleReader directionlessReader;
 	private RingBuffer ringBuffer;
-	private SampleProcessor directionlessProcessor = null;
 	private List<AudioTreeNode> audioSources = new CopyOnWriteArrayList<AudioTreeNode>(); // don't want to sync traversal
 	private SceneGraphPathObserver rootAppearanceObserver = new SceneGraphPathObserver();
 	private SceneGraphPath rootAppearancePath = new SceneGraphPath();
 	private Interpolation.Factory interpolationFactory;
 	private SoundPath.Factory soundPathFactory;
+	private SampleProcessorFactory dirlessFactory = null;
+	private SampleProcessor directionlessProcessor = null;
 
-	
+
 	public AudioBackend(SceneGraphComponent root, SceneGraphPath microphonePath, int sampleRate, Interpolation.Factory interpolationFactory, SoundPath.Factory soundPathFactory) {
 		super(root);
 		this.microphonePath = microphonePath;
@@ -54,7 +55,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		this.soundPathFactory = soundPathFactory;
 		ringBuffer = new RingBuffer(sampleRate);
 		directionlessReader = ringBuffer.createSampleReader(sampleRate);
-		
+
 		Appearance rootApp = root.getAppearance();
 		if (rootApp==null) {
 			root.setAppearance(rootApp = new Appearance());
@@ -65,7 +66,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 
 		appearanceChanged(null);
 		rootAppearanceObserver.addAppearanceListener(this);
-		
+
 		setEntityFactory(new EntityFactory() {
 			{
 				setUpdateAudioSource(true);
@@ -82,30 +83,26 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		});
 		super.createProxyTree();
 	}
-	
-	List<Class<? extends SampleProcessor>> dirlessChain = null;
-	
+
 	// consider synchronization when modifying the following method; the current version is fine without synchronization
 	public void appearanceChanged(AppearanceEvent ev) {
 		EffectiveAppearance app = EffectiveAppearance.create(rootAppearancePath);
-		
-		List<Class<? extends SampleProcessor>> newDirlessChain = (List<Class<? extends SampleProcessor>>) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, List.class);
-		if (newDirlessChain==null || newDirlessChain.isEmpty()) {
-			directionlessProcessor = null;
-			dirlessChain = null;
-		} else if (!newDirlessChain.equals(dirlessChain)) {
-			dirlessChain = newDirlessChain;
-			try {
-				SampleProcessor proc = ProcessorChain.create(newDirlessChain);
+
+		SampleProcessorFactory newDirlessFactory = (SampleProcessorFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, SampleProcessorFactory.class);
+		if (dirlessFactory!=newDirlessFactory) {
+			dirlessFactory = newDirlessFactory;
+			if (dirlessFactory!=null) {
+				SampleProcessor proc = dirlessFactory.getInstance();
 				proc.initialize(directionlessReader);
 				directionlessProcessor = proc;
-			} catch (Exception e) {
-				e.printStackTrace();
+			} else {
+				directionlessProcessor = null;
 			}
 		}
-		
-		if (directionlessProcessor!=null) {
-			directionlessProcessor.setProperties(app);
+
+		SampleProcessor proc = directionlessProcessor;
+		if (proc!=null) {
+			proc.setProperties(app);
 		}
 	}
 

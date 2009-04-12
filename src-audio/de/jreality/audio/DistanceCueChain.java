@@ -1,6 +1,5 @@
 package de.jreality.audio;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.jreality.shader.EffectiveAppearance;
@@ -16,23 +15,20 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public final class DistanceCueChain implements DistanceCue {
 
-	private final List<DistanceCue> cues = new ArrayList<DistanceCue>();
+	private List<DistanceCue> cues;
 	
 	
-	private DistanceCueChain() {
-		// do nothing
+	private DistanceCueChain(List<DistanceCue> cues) {
+		this.cues = cues;
 	}
 
-	public static DistanceCue create(List<Class<? extends DistanceCue>> list) throws InstantiationException, IllegalAccessException {
+	public static DistanceCue create(List<DistanceCue> list)  {
 		if (list==null || list.isEmpty()) {
 			return new DistanceCue.CONSTANT();
 		} else if (list.size()==1) {
-			return list.get(0).newInstance();
+			return list.get(0);
 		} else {
-			DistanceCueChain chain = new DistanceCueChain();
-			for(Class<? extends DistanceCue> clazz: list) {
-				chain.cues.add(clazz.newInstance());
-			}
+			DistanceCueChain chain = new DistanceCueChain(list);
 			return chain;
 		}
 	}
@@ -69,5 +65,13 @@ public final class DistanceCueChain implements DistanceCue {
 		for(DistanceCue cue: cues) {
 			cue.setProperties(app);
 		}
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder("DistanceCueChain:\n");
+		for(DistanceCue cue: cues) {
+			sb.append("   "+cue+"\n");
+		}
+		return sb.toString();
 	}
 }

@@ -18,14 +18,24 @@ public interface AudioAttributes {
 	public static final float DEFAULT_GAIN = 1f;
 	public static final float DEFAULT_DIRECTIONLESS_GAIN = 0.1f;
 	public static final float DEFAULT_SPEED_OF_SOUND = 332f;
-	public static final DistanceCue DEFAULT_DISTANCE_CUE = new DistanceCue.CONSTANT();
-	public static final DistanceCue DEFAULT_DIRECTIONLESS_CUE = new DistanceCue.CONSTANT();
 	public static final float DEFAULT_UPDATE_CUTOFF = 6f; // play with this parameter if audio gets choppy
 	public static final FDNParameters DEFAULT_FDN_PARAMETERS = FDNParameters.BUNNY_PARAMETERS;
 	public static final float DEFAULT_DISTANCE_LOWPASS_FREQ = 44000;
+	public static final float DEFAULT_PITCH_SHIFT = 1f;
 	public static final Interpolation.Factory DEFAULT_INTERPOLATION_FACTORY = Interpolation.Cubic.FACTORY;
 	public static final SoundPath.Factory DEFAULT_SOUNDPATH_FACTORY = DelayPath.FACTORY;
-	public static final float DEFAULT_PITCH_SHIFT = 1f;
+	
+	public static final DistanceCueFactory DEFAULT_DISTANCE_CUE_FACTORY = new DistanceCueFactory() {
+		private final DistanceCue cue = new DistanceCue.CONSTANT();
+		public DistanceCue getInstance() {
+			return cue;
+		}
+	};
+	public static final SampleProcessorFactory DEFAULT_PROCESSOR_FACTORY = new SampleProcessorFactory() {
+		public SampleProcessor getInstance() {
+			return new SampleProcessor.NullProcessor();
+		}
+	};
 	
 	public static final float HEARING_THRESHOLD = 1e-16f; // dynamic range between hearing threshold and instant perforation of eardrum
 }

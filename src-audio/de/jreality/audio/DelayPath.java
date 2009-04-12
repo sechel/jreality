@@ -2,7 +2,6 @@ package de.jreality.audio;
 
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 import de.jreality.math.Matrix;
@@ -26,12 +25,18 @@ public class DelayPath implements SoundPath {
 			return new DelayPath();
 		}
 	};
+	
+	private DistanceCueFactory directedFactory = AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY;
+	private DistanceCueFactory directionlessFactory = AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY;
+	private SampleProcessorFactory preProcFactory = AudioAttributes.DEFAULT_PROCESSOR_FACTORY;
+
+	private DistanceCue distanceCue = directedFactory.getInstance();
+	private DistanceCue directionlessCue = directionlessFactory.getInstance();
+	private SampleProcessor preProcessor = preProcFactory.getInstance();
+	
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float directionlessGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
-	private DistanceCue distanceCue = AudioAttributes.DEFAULT_DISTANCE_CUE;
-	private DistanceCue directionlessCue = AudioAttributes.DEFAULT_DIRECTIONLESS_CUE;
-	private SampleProcessor preProcessor = new SampleProcessor.NullProcessor();
 	private float updateCutoff = AudioAttributes.DEFAULT_UPDATE_CUTOFF;
 
 	private SampleReader reader;
@@ -60,6 +65,8 @@ public class DelayPath implements SoundPath {
 	public void initialize(SampleReader reader, Interpolation.Factory factory) {
 		this.reader = reader;
 		sampleRate = reader.getSampleRate();
+		distanceCue.setSampleRate(sampleRate);
+		directionlessCue.setSampleRate(sampleRate);
 		preProcessor.initialize(reader);
 		interpolation = factory.newInterpolation();
 
@@ -70,57 +77,44 @@ public class DelayPath implements SoundPath {
 		updateParameters();
 	}
 
-	private List<Class<? extends DistanceCue>> directedChain = null, directionlessChain = null;
-	private List<Class<? extends SampleProcessor>> preProcChain = null;
-
-	public synchronized void setProperties(EffectiveAppearance app) {
+	// consider synchronization when changing this method...
+	public void setProperties(EffectiveAppearance app) {
 		gain = app.getAttribute(AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
 		directionlessGain = app.getAttribute(AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
 		speedOfSound = app.getAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 		updateCutoff = app.getAttribute(AudioAttributes.UPDATE_CUTOFF_KEY, AudioAttributes.DEFAULT_UPDATE_CUTOFF);
 		updateParameters();
 
-		List<Class<? extends SampleProcessor>> newPreProcChain = (List<Class<? extends SampleProcessor>>) app.getAttribute(AudioAttributes.PREPROCESSOR_KEY, null, List.class);
-		if (newPreProcChain==null || !newPreProcChain.equals(preProcChain)) {
-			preProcChain = newPreProcChain;
-			try {
-				SampleProcessor proc = ProcessorChain.create(newPreProcChain);
-				proc.initialize(reader);
-				preProcessor = proc;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		SampleProcessorFactory spf = (SampleProcessorFactory) app.getAttribute(AudioAttributes.PREPROCESSOR_KEY,
+				AudioAttributes.DEFAULT_PROCESSOR_FACTORY, SampleProcessorFactory.class);
+		if (spf!=preProcFactory) {
+			preProcFactory = spf;
+			SampleProcessor proc = spf.getInstance();
+			proc.initialize(reader);
+			preProcessor = proc;
 		}
 		
-		List<Class<? extends DistanceCue>> newChain = (List<Class<? extends DistanceCue>>) app.getAttribute(AudioAttributes.DISTANCE_CUE_KEY, null, List.class);
-		if (newChain==null || !newChain.equals(directedChain)) {
-			directedChain = newChain;
-			try {
-				distanceCue = evaluateChain(newChain);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		DistanceCueFactory dcf = (DistanceCueFactory) app.getAttribute(AudioAttributes.DISTANCE_CUE_KEY,
+				AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY, DistanceCueFactory.class);
+		if (dcf!=directedFactory) {
+			directedFactory = dcf;
+			DistanceCue dc = dcf.getInstance();
+			dc.setSampleRate(sampleRate);
+			distanceCue = dc;
 		}
 		
-		List<Class<? extends DistanceCue>> newDirlessChain = (List<Class<? extends DistanceCue>>) app.getAttribute(AudioAttributes.DIRECTIONLESS_CUE_KEY, null, List.class);
-		if (newDirlessChain==null || !newDirlessChain.equals(directionlessChain)) {
-			directionlessChain = newDirlessChain;
-			try {
-				directionlessCue = evaluateChain(newDirlessChain);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		dcf = (DistanceCueFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_CUE_KEY,
+				AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY, DistanceCueFactory.class);
+		if (dcf!=directionlessFactory) {
+			directionlessFactory = dcf;
+			DistanceCue dc = dcf.getInstance();
+			dc.setSampleRate(sampleRate);
+			directionlessCue = dc;
 		}
 		
 		preProcessor.setProperties(app);
 		distanceCue.setProperties(app);
 		directionlessCue.setProperties(app);
-	}
-
-	private DistanceCue evaluateChain(List<Class<? extends DistanceCue>> chain) throws InstantiationException, IllegalAccessException {
-		DistanceCue c = DistanceCueChain.create(chain);
-		c.setSampleRate(sampleRate);
-		return c;
 	}
 
 	private void updateParameters() {
