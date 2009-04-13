@@ -23,24 +23,31 @@ public interface DistanceCue {
 		public float nextValue(float v, float r, float x, float y, float z) {
 			return v;
 		}
-	};
+	}
 	
 	public static final class LINEAR extends Attenuation {
 		public float nextValue(float v, float r, float x, float y, float z) {
 			return v/Math.max(r, 1);
 		}
-	};
+	}
 	
 	public static final class EXPONENTIAL extends Attenuation {
 		public float nextValue(float v, float r, float x, float y, float z) {
 			return v/(float) Math.exp(r);
 		}
-	};
+	}
 	
 	public static final class CONICAL extends Attenuation {
 		public float nextValue(float v, float r, float xMic, float yMic, float zMic) {
 			float rMic = xMic*xMic+yMic*yMic+zMic*zMic;
 			return (zMic>0) ? v*zMic*zMic/rMic : 0;
+		}
+	}
+	
+	public static final class CARDIOID extends Attenuation {
+		public float nextValue(float v, float r, float xMic, float yMic, float zMic) {
+			float rMic = (float) Math.sqrt(xMic*xMic+yMic*yMic+zMic*zMic);
+			return 0.5f*v*(1+zMic/rMic);  // v*(1+cos t)/2
 		}
 	}
 	
@@ -56,7 +63,7 @@ public interface DistanceCue {
 		public void setProperties(EffectiveAppearance app) {
 			freq = app.getAttribute(AudioAttributes.DISTANCE_LOWPASS_KEY, AudioAttributes.DEFAULT_DISTANCE_LOWPASS_FREQ);
 		}
-	};
+	}
 	
 	
 	void setSampleRate(float sr);

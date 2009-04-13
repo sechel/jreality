@@ -59,23 +59,26 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		public SampleProcessor getInstance() {
 			List<SampleProcessor> list = new ArrayList<SampleProcessor>(2);
 			for(int i: selectedProcs) {
-				if      (i==1) list.add(new EarlyReflections());
-				else if (i==2) list.add(new ShiftProcessor());
+				int cnt = 1;
+				if      (i==cnt++) list.add(new EarlyReflections());
+				else if (i==cnt++) list.add(new ShiftProcessor());
 			}
 			return SampleProcessorChain.create(list);
 		}
 	};
 
 	private int[] selectedCues = new int[0];
-	private final String[] cueLabels = {"none", "conical", "low pass", "linear", "exponential"};
+	private final String[] cueLabels = {"none", "conical", "cardioid", "low pass", "linear", "exponential"};
 	private class DirectedCueFactory implements DistanceCueFactory {
 		public DistanceCue getInstance() {
 			List<DistanceCue> list = new ArrayList<DistanceCue>(4);
 			for(int i: selectedCues) {
-				if      (i==1) list.add(new DistanceCue.CONICAL());
-				else if (i==2) list.add(new DistanceCue.LOWPASS());
-				else if (i==3) list.add(new DistanceCue.LINEAR());
-				else if (i==4) list.add(new DistanceCue.EXPONENTIAL());
+				int cnt = 1;
+				if      (i==cnt++) list.add(new DistanceCue.CONICAL());
+				else if (i==cnt++) list.add(new DistanceCue.CARDIOID());
+				else if (i==cnt++) list.add(new DistanceCue.LOWPASS());
+				else if (i==cnt++) list.add(new DistanceCue.LINEAR());
+				else if (i==cnt++) list.add(new DistanceCue.EXPONENTIAL());
 			}
 			return DistanceCueChain.create(list);
 		}
@@ -85,8 +88,9 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private final String[] reverbLabels = {"none", "Schroeder", "FDN"};
 	private class ReverbFactory implements SampleProcessorFactory {
 		public SampleProcessor getInstance() {
-			if      (reverbType==1) return new SchroederReverb();
-			else if (reverbType==2) return new FDNReverb();
+			int cnt = 1;
+			if      (reverbType==cnt++) return new SchroederReverb();
+			else if (reverbType==cnt++) return new FDNReverb();
 			else                    return new SampleProcessor.NullProcessor();
 		}
 	};
