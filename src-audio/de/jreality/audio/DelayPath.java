@@ -1,7 +1,12 @@
 package de.jreality.audio;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import de.jreality.math.Matrix;
@@ -25,7 +30,7 @@ public class DelayPath implements SoundPath {
 			return new DelayPath();
 		}
 	};
-	
+
 	private DistanceCueFactory directedFactory = AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY;
 	private DistanceCueFactory directionlessFactory = AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY;
 	private SampleProcessorFactory preProcFactory = AudioAttributes.DEFAULT_PROCESSOR_FACTORY;
@@ -33,7 +38,7 @@ public class DelayPath implements SoundPath {
 	private DistanceCue distanceCue = directedFactory.getInstance();
 	private DistanceCue directionlessCue = directionlessFactory.getInstance();
 	private SampleProcessor preProcessor = preProcFactory.getInstance();
-	
+
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float directionlessGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
@@ -58,10 +63,10 @@ public class DelayPath implements SoundPath {
 	private int currentIndex = 0;
 	private int relativeTime = 0;
 	private int frameCount = 0;
-	
+
 	private Interpolation interpolation;
 
-	
+
 	public void initialize(SampleReader reader, Interpolation.Factory factory) {
 		this.reader = reader;
 		sampleRate = reader.getSampleRate();
@@ -93,7 +98,7 @@ public class DelayPath implements SoundPath {
 			proc.initialize(reader);
 			preProcessor = proc;
 		}
-		
+
 		DistanceCueFactory dcf = (DistanceCueFactory) app.getAttribute(AudioAttributes.DISTANCE_CUE_KEY,
 				AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY, DistanceCueFactory.class);
 		if (dcf!=directedFactory) {
@@ -102,7 +107,7 @@ public class DelayPath implements SoundPath {
 			dc.setSampleRate(sampleRate);
 			distanceCue = dc;
 		}
-		
+
 		dcf = (DistanceCueFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_CUE_KEY,
 				AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY, DistanceCueFactory.class);
 		if (dcf!=directionlessFactory) {
@@ -111,7 +116,7 @@ public class DelayPath implements SoundPath {
 			dc.setSampleRate(sampleRate);
 			directionlessCue = dc;
 		}
-		
+
 		preProcessor.setProperties(app);
 		distanceCue.setProperties(app);
 		directionlessCue.setProperties(app);
@@ -126,21 +131,17 @@ public class DelayPath implements SoundPath {
 		}
 	}
 
-	private float[] newFrame = null;
-
 	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix inverseMicMatrix, float[] directionlessBuffer) {
-		if (newFrame==null || newFrame.length<frameSize) {
-			newFrame = new float[frameSize];
-		}
+		float[] newFrame = getFrame(frameSize);
 		int nRead = preProcessor.read(newFrame, 0, frameSize);
 		if (nRead>0) {
 			if (nRead<frameSize) {
 				Arrays.fill(newFrame, nRead, frameSize, 0);
 			}
 			sourceFrames.add(newFrame);
-			newFrame = null;
 			frameCount++;
 		} else {
+			reuseFrame(newFrame);
 			sourceFrames.add(null);
 		}
 		frameLengths.add(frameSize);
@@ -204,6 +205,10 @@ public class DelayPath implements SoundPath {
 	}
 
 	private void advanceFrame() {
+		if (currentFrame!=null) {
+			reuseFrame(currentFrame);
+		}
+		
 		currentFrame = sourceFrames.remove();
 		currentLength = frameLengths.remove();
 		sourcePositions.remove();
@@ -211,6 +216,35 @@ public class DelayPath implements SoundPath {
 		if (currentFrame!=null) {
 			frameCount--;
 		}
+	}
+
+	private static final Map<Integer, Queue<WeakReference<float[]>>> framePool = new HashMap<Integer, Queue<WeakReference<float[]>>>();
+
+	private static void reuseFrame(float[] frame) {
+		int size = frame.length;
+		synchronized(framePool) {
+			Queue<WeakReference<float[]>> queue = framePool.get(size);
+			if (queue==null) {
+				queue = new LinkedList<WeakReference<float[]>>();
+				framePool.put(size, queue);
+			}
+			queue.add(new WeakReference<float[]>(frame));
+		}
+	}
+
+	private static float[] getFrame(int size) {
+		synchronized (framePool) {
+			Queue<WeakReference<float[]>> queue = framePool.get(size);
+			if (queue!=null) {
+				while (!queue.isEmpty()) {
+					float[] frame = queue.remove().get();
+					if (frame!=null) {
+						return frame;
+					}
+				}
+			}
+		}
+		return new float[size];
 	}
 
 	private Matrix auxiliaryMatrix = new Matrix();
@@ -223,7 +257,7 @@ public class DelayPath implements SoundPath {
 		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
 		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
 		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
-		
+
 		auxiliaryMatrix.invert();
 		xMic = (float) auxiliaryMatrix.getEntry(0, 3);
 		yMic = (float) auxiliaryMatrix.getEntry(1, 3);
