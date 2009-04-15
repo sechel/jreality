@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src-backends-share"/>
 	<classpathentry kind="src" path="src-core">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jreality/jni/win32"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jreality/jni/linux64"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry excluding="de/jreality/examples/SwtExample.java" kind="src" path="src-examples"/>
