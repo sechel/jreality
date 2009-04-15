@@ -23,14 +23,14 @@
 	<classpathentry kind="src" path="src-vr"/>
 	<classpathentry kind="src" path="src-plugin"/>
 	<classpathentry kind="src" path="src-jinput"/>
-	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/" kind="src" path="src-audio"/>
+	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/|de/jreality/audio/osc/" kind="src" path="src-audio"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="test-backends-share"/>
 	<classpathentry kind="src" path="test-io"/>
 	<classpathentry kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
-	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/" kind="src" path="test-audio"/>
+	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/antlr.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
@@ -45,8 +45,6 @@
 	<classpathentry kind="lib" path="lib/iText-2.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
 	<classpathentry kind="lib" path="lib/jRWorkspacePluginSDK.jar"/>
-	<classpathentry kind="lib" path="lib/jass.jar"/>
-	<classpathentry kind="lib" path="lib/NetUtil.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry kind="lib" path="lib/jtem-beans.jar"/>
 	<classpathentry kind="output" path="bin"/>
