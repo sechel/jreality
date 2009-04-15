@@ -13,6 +13,7 @@ public interface AudioAttributes {
 	public static final String FDN_PARAMETER_KEY = "fdnParameters";
 	public static final String DISTANCE_LOWPASS_KEY = "distanceLowPassKey";
 	public static final String PITCH_SHIFT_KEY = "pitchShiftKey";
+	public static final String EARSHOT_KEY = "earshotKey";
 	
 	public static final float DEFAULT_REVERB_TIME = 1.5f;
 	public static final float DEFAULT_GAIN = 1f;
@@ -24,6 +25,7 @@ public interface AudioAttributes {
 	public static final float DEFAULT_PITCH_SHIFT = 1f;
 	public static final Interpolation.Factory DEFAULT_INTERPOLATION_FACTORY = Interpolation.Cubic.FACTORY;
 	public static final SoundPath.Factory DEFAULT_SOUNDPATH_FACTORY = DelayPath.FACTORY;
+	public static final int DEFAULT_EARSHOT = 96000; // measured in samples; zero or less means infinite; default 2sec @ 48000kHz
 	
 	public static final DistanceCueFactory DEFAULT_DISTANCE_CUE_FACTORY = new DistanceCueFactory() {
 		private final DistanceCue cue = new DistanceCue.CONSTANT();

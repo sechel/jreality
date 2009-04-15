@@ -1,11 +1,9 @@
 package de.jreality.audio;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -43,6 +41,9 @@ public class DelayPath implements SoundPath {
 	private float directionlessGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
 	private float updateCutoff = AudioAttributes.DEFAULT_UPDATE_CUTOFF;
+	private int earshot = AudioAttributes.DEFAULT_EARSHOT;
+	private boolean withinEarshot = true;
+	private int samplesOutOfEarshot = 0;
 
 	private SampleReader reader;
 	private int sampleRate;
@@ -51,9 +52,9 @@ public class DelayPath implements SoundPath {
 	private Queue<float[]> sourceFrames = new LinkedList<float[]>();
 	private Queue<Integer> frameLengths = new LinkedList<Integer>();
 	private Queue<Matrix> sourcePositions = new LinkedList<Matrix>();
-	private Matrix currentMicPosition;
+	private Matrix currentMicPosition, currentSourcePosition;
 
-	private LowPassFilter xFilter, yFilter, zFilter; // TODO: consider better interpolation
+	private LowPassFilter xFilter, yFilter, zFilter;
 	private float xTarget, yTarget, zTarget;
 	private float xCurrent, yCurrent, zCurrent;
 	private float xMic, yMic, zMic;
@@ -88,6 +89,7 @@ public class DelayPath implements SoundPath {
 		directionlessGain = app.getAttribute(AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
 		speedOfSound = app.getAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 		updateCutoff = app.getAttribute(AudioAttributes.UPDATE_CUTOFF_KEY, AudioAttributes.DEFAULT_UPDATE_CUTOFF);
+		earshot = app.getAttribute(AudioAttributes.EARSHOT_KEY, AudioAttributes.DEFAULT_EARSHOT);
 		updateParameters();
 
 		SampleProcessorFactory spf = (SampleProcessorFactory) app.getAttribute(AudioAttributes.PREPROCESSOR_KEY,
@@ -130,25 +132,11 @@ public class DelayPath implements SoundPath {
 			zFilter.setCutOff(updateCutoff);
 		}
 	}
-
-	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePos, Matrix inverseMicMatrix, float[] directionlessBuffer) {
-		float[] newFrame = getFrame(frameSize);
-		int nRead = preProcessor.read(newFrame, 0, frameSize);
-		if (nRead>0) {
-			if (nRead<frameSize) {
-				Arrays.fill(newFrame, nRead, frameSize, 0);
-			}
-			sourceFrames.add(newFrame);
-			frameCount++;
-		} else {
-			reuseFrame(newFrame);
-			sourceFrames.add(null);
-		}
-		frameLengths.add(frameSize);
-
-		sourcePositions.add(new Matrix(sourcePos));
+	
+	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePosition, Matrix inverseMicMatrix, float[] directionlessBuffer) {
 		currentMicPosition = inverseMicMatrix;
-
+		currentSourcePosition = sourcePosition;
+		boolean sourceActive = evaluateSourceFrame(frameSize);
 		updateTarget();
 
 		if (currentLength>0) {
@@ -157,14 +145,51 @@ public class DelayPath implements SoundPath {
 			initFields();
 		}
 
-		if (frameCount<=0 && currentFrame==null && !distanceCue.hasMore() && !directionlessCue.hasMore()) {
+		if (sourceActive || frameCount>0 || currentFrame!=null || distanceCue.hasMore() || directionlessCue.hasMore()) {
+			return true;   // still rendering...
+		} else {
 			reset();
 			return false;  // nothing left to render
-		} else {
-			return true;   // still rendering...
 		}
 	}
 
+	private boolean evaluateSourceFrame(int frameSize) {
+		float[] newFrame = getBuffer(frameSize);
+		int nRead = preProcessor.read(newFrame, 0, frameSize);
+		if (withinEarshot) { // within earshot: render audio normally
+			if (nRead>0) {
+				frameCount++;
+				if (nRead<frameSize) {
+					Arrays.fill(newFrame, nRead, frameSize, 0);
+				}
+				queueFrame(frameSize, newFrame);
+			} else {
+				reuseBuffer(newFrame);
+				queueFrame(frameSize, null);
+			}
+			withinEarshot = (earshot<=0 || relativeTime<earshot+4*frameSize);
+		} else { // out of earshot: render null frames
+			reuseBuffer(newFrame);
+			samplesOutOfEarshot += frameSize;
+			withinEarshot = (relativeTime<earshot);
+			if (withinEarshot || 2*samplesOutOfEarshot/frameSize>relativeTime/earshot) {
+				queueNullFrame();
+			}
+		}
+		return nRead>0;
+	}
+
+	private void queueNullFrame() {
+		queueFrame(samplesOutOfEarshot, null);
+		samplesOutOfEarshot = 0;
+	}
+
+	private void queueFrame(int size, float[] frame) {
+		frameLengths.add(size);
+		sourceFrames.add(frame);
+		sourcePositions.add(new Matrix(currentSourcePosition));
+	}
+	
 	private void initFields() {
 		advanceFrame();
 
@@ -206,7 +231,7 @@ public class DelayPath implements SoundPath {
 
 	private void advanceFrame() {
 		if (currentFrame!=null) {
-			reuseFrame(currentFrame);
+			reuseBuffer(currentFrame);
 		}
 		
 		currentFrame = sourceFrames.remove();
@@ -218,38 +243,12 @@ public class DelayPath implements SoundPath {
 		}
 	}
 
-	private static final Map<Integer, Queue<WeakReference<float[]>>> framePool = new HashMap<Integer, Queue<WeakReference<float[]>>>();
-
-	private static void reuseFrame(float[] frame) {
-		int size = frame.length;
-		synchronized(framePool) {
-			Queue<WeakReference<float[]>> queue = framePool.get(size);
-			if (queue==null) {
-				queue = new LinkedList<WeakReference<float[]>>();
-				framePool.put(size, queue);
-			}
-			queue.add(new WeakReference<float[]>(frame));
-		}
-	}
-
-	private static float[] getFrame(int size) {
-		synchronized (framePool) {
-			Queue<WeakReference<float[]>> queue = framePool.get(size);
-			if (queue!=null) {
-				while (!queue.isEmpty()) {
-					float[] frame = queue.remove().get();
-					if (frame!=null) {
-						return frame;
-					}
-				}
-			}
-		}
-		return new float[size];
-	}
-
 	private Matrix auxiliaryMatrix = new Matrix();
 
 	private void updateTarget() {
+		if (sourcePositions.isEmpty()) { // only possible upon blisteringly fast return within earshot
+			queueNullFrame();
+		}
 		auxiliaryMatrix.assignFrom(sourcePositions.element());
 		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
 
@@ -273,9 +272,40 @@ public class DelayPath implements SoundPath {
 		currentIndex = 0;
 		relativeTime = 0;
 		frameCount = 0;
+		withinEarshot = true;
+		samplesOutOfEarshot = 0;
 		interpolation.reset();
 		preProcessor.clear();
 		distanceCue.reset();
 		directionlessCue.reset();
+	}
+
+	private static final Map<Integer, Queue<WeakReference<float[]>>> framePool = new HashMap<Integer, Queue<WeakReference<float[]>>>();
+
+	private static void reuseBuffer(float[] frame) {
+		int size = frame.length;
+		synchronized(framePool) {
+			Queue<WeakReference<float[]>> queue = framePool.get(size);
+			if (queue==null) {
+				queue = new LinkedList<WeakReference<float[]>>();
+				framePool.put(size, queue);
+			}
+			queue.add(new WeakReference<float[]>(frame));
+		}
+	}
+
+	private static float[] getBuffer(int size) {
+		synchronized (framePool) {
+			Queue<WeakReference<float[]>> queue = framePool.get(size);
+			if (queue!=null) {
+				while (!queue.isEmpty()) {
+					float[] frame = queue.remove().get();
+					if (frame!=null) {
+						return frame;
+					}
+				}
+			}
+		}
+		return new float[size];
 	}
 }
