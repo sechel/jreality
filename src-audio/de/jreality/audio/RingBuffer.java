@@ -13,8 +13,8 @@ import de.jreality.scene.data.SampleReader;
  */
 public class RingBuffer {
 
-	private float buffer[];
-	private int size;
+	private final float buffer[];
+	private final int size;
 	private int writePointer;
 	
 	public class Reader {
@@ -69,7 +69,7 @@ public class RingBuffer {
 	
 	public SampleReader createSampleReader(final int sampleRate) {
 		return new SampleReader() {
-			private Reader reader = createReader();
+			private final Reader reader = createReader();
 			public void clear() {
 				reader.clear();
 			}

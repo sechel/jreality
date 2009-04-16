@@ -43,7 +43,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	private SceneGraphPath rootAppearancePath = new SceneGraphPath();
 	private Interpolation.Factory interpolationFactory;
 	private SoundPath.Factory soundPathFactory;
-	private SampleProcessorFactory dirlessFactory = null;
+	private SampleProcessorFactory directionlessFactory = null;
 	private SampleProcessor directionlessProcessor = null;
 
 
@@ -88,11 +88,11 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 	public void appearanceChanged(AppearanceEvent ev) {
 		EffectiveAppearance app = EffectiveAppearance.create(rootAppearancePath);
 
-		SampleProcessorFactory newDirlessFactory = (SampleProcessorFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, SampleProcessorFactory.class);
-		if (dirlessFactory!=newDirlessFactory) {
-			dirlessFactory = newDirlessFactory;
-			if (dirlessFactory!=null) {
-				SampleProcessor proc = dirlessFactory.getInstance();
+		SampleProcessorFactory newDirectionlessFactory = (SampleProcessorFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, SampleProcessorFactory.class);
+		if (directionlessFactory!=newDirectionlessFactory) {
+			directionlessFactory = newDirectionlessFactory;
+			if (directionlessFactory!=null) {
+				SampleProcessor proc = directionlessFactory.getInstance();
 				proc.initialize(directionlessReader);
 				directionlessProcessor = proc;
 			} else {

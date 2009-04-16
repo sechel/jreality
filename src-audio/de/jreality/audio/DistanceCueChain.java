@@ -15,7 +15,7 @@ import de.jreality.shader.EffectiveAppearance;
  */
 public final class DistanceCueChain implements DistanceCue {
 
-	private List<DistanceCue> cues;
+	private final List<DistanceCue> cues;
 	
 	
 	private DistanceCueChain(List<DistanceCue> cues) {

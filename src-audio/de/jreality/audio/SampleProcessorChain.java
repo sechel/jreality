@@ -7,7 +7,7 @@ import de.jreality.shader.EffectiveAppearance;
 
 public class SampleProcessorChain implements SampleProcessor {
 	
-	private List<SampleProcessor> procs;
+	private final List<SampleProcessor> procs;
 	private SampleReader last;
 	
 	private SampleProcessorChain(List<SampleProcessor> procs) {

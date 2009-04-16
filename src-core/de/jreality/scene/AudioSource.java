@@ -50,7 +50,7 @@ public abstract class AudioSource extends SceneGraphNode {
 	/**
 	 * set the state of the node.
 	 *       
-	 * @param state set the state of the audio source
+	 * @param state  the new state of the audio source
 	 */
 	public void setState(State state) {
 		switch (state) {

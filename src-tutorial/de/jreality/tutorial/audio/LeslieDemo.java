@@ -143,13 +143,13 @@ public class LeslieDemo {
 		final float r = 0.15f;
 		SceneGraphComponent hub = new SceneGraphComponent("LeslieHub");
 		
-		int n = 2;
+		int nHorns = 2;
 		Geometry cone = Primitives.cone(20, -r);
-		for(int i=0; i<n; i++) {
+		for(int i=0; i<nHorns; i++) {
 			SceneGraphComponent horn = new SceneGraphComponent("horn"+i);
 			horn.setGeometry(cone);
 			horn.setAudioSource(source);
-			MatrixBuilder.euclidean().rotate(2*i*Math.PI/n, 0, 1, 0).translate(0, 0, r).assignTo(horn);
+			MatrixBuilder.euclidean().rotate(2*i*Math.PI/nHorns, 0, 1, 0).translate(0, 0, r).assignTo(horn);
 			hub.addChild(horn);
 		}
 		MatrixBuilder.euclidean().translate(0, 2, 0).assignTo(hub);

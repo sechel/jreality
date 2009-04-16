@@ -44,16 +44,13 @@ public abstract class RingBufferSource extends AudioSource {
  
 	public SampleReader createReader() {
 		return new SampleReader() {
-			private RingBuffer.Reader reader = ringBuffer.createReader();
-			
+			private final RingBuffer.Reader reader = ringBuffer.createReader();
 			public void clear() {
 				reader.clear();
 			}
-
 			public int getSampleRate() {
 				return sampleRate;
 			}
-
 			public int read(float[] buffer, int initialIndex, int nSamples) {
 				return readSamples(reader, buffer, initialIndex, nSamples);
 			}
