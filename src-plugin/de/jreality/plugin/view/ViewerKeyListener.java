@@ -136,6 +136,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 	Container c = null;
     boolean encompassToggle = true;
+	@Override
 	public void keyPressed(KeyEvent e)	{
 			//System.err.println("handling keyboard event");
 			if (e.isControlDown()) return;

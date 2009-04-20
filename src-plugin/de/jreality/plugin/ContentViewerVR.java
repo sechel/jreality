@@ -17,6 +17,7 @@ import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
+import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
@@ -120,6 +121,7 @@ public class ContentViewerVR {
 		controller.registerPlugin(new DisplayOptions());
 		controller.registerPlugin(new ZoomTool());
 		controller.registerPlugin(new ViewToolBar());
+		controller.registerPlugin(new ManagedContent());
 	}
 
 	public void registerPlugin(Plugin plugin) {
