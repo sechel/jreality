@@ -83,10 +83,10 @@ final public class Quaternion implements Cloneable, Serializable {
 	}
 	
 	public String toString()	{
-		return "re: "+Double.toString(re)+
-		"i: "+Double.toString(x)+
-		"j: "+Double.toString(y)+
-		"k: "+Double.toString(z);
+		return "re: "+String.format("%8.6f\t",re)+
+		"i: "+String.format("%8.6f\t",x)+
+		"j: "+String.format("%8.6f\t",y)+
+		"k: "+String.format("%8.6f",z);
 	}
 		
 	public static double[] asDouble(double[] dst, Quaternion q)	{
@@ -286,6 +286,20 @@ final public class Quaternion implements Cloneable, Serializable {
 		return makeRotationQuaternionAngle(q, 2*Math.acos(cos), axis);
 	}
 	
+	private static double[] convert44To33(double[] d) {
+		double[] d33 = new double[9];
+		d33[0] = d[0];
+		d33[1] = d[1];
+		d33[2] = d[2];
+		d33[3] = d[4];
+		d33[4] = d[5];
+		d33[5] = d[6];
+		d33[6] = d[8];
+		d33[7] = d[9];
+		d33[8] = d[10];
+		return d33;
+	}
+
 	/**
 	 * Convert the 3x3 rotation matrix <i>mat</i> into a quaternion.
 	 * @param q
@@ -295,15 +309,24 @@ final public class Quaternion implements Cloneable, Serializable {
 	public static Quaternion rotationMatrixToQuaternion(Quaternion q, double[] mat)		{
 		// assert dim checks
 		int n = Rn.mysqrt(mat.length);
+//		double[] mat = null;
+//		if (n == 4)	{
+//			mat = convert44To33(mmm);
+//		} else if (n == 3)
+//			mat = mmm;
+//		else 
+//			throw new IllegalArgumentException("Invalid matrix");
+		
 		double d = Rn.determinant(mat);
 		double[] m = null;
+		// HACK!
 		if (d < 0)	{
 			double[] mtmp = new double[9];
 			Rn.times(mtmp, -1.0, mat);
 			m = mtmp;
 		} else
 			m = mat;
-			
+		if (q == null) q = new Quaternion();
 		q.x = Math.sqrt(1 - m[2*n+2] - m[n+1] + m[0])/2;
 		if ( q.x > .001 ) {
 			q.y = (m[1] + m[n]) / (4 * q.x);
@@ -327,9 +350,39 @@ final public class Quaternion implements Cloneable, Serializable {
 			}
 		}
 		normalize(q, q);
-		// normalize the quaternion to have positive real part
-		return q;
+		// try new method (from Blaschke) and compare
+		Quaternion r[] = {
+				new Quaternion(0, m[0], m[n], m[2*n]),
+				new Quaternion(0, m[1], m[n+1], m[2*n+1]),
+				new Quaternion(0, m[2], m[n+2], m[2*n+2])
+		};
+//		System.err.println("rot = "+Rn.matrixToString(m));
+		Quaternion ret = null;
+		for (int i = 0; i<3; ++i)	{
+			int index0 = i, index1 = (i+1)%3, index2 = (i+2)%3;
+			// e2r3-e3r2-e1-r1
+			ret = subtract(null, 
+				subtract(null, 
+					times(null, eq[index1], r[index2]),
+					times(null, eq[index2], r[index1])),
+				add(null, eq[index0], r[index0]));
+			ret = conjugate(ret, ret);
+//			System.err.println("ret = "+ret.toString());
+			if (lengthSquared(ret) > .001) break;
+		}
+		normalize(ret, ret);
+//		if (!equals(ret, q, 10E-8)  && !equals(ret, negate(null, q), 10E-8)) {
+//			System.err.println("ret = "+ret.toString());
+//			System.err.println("q = "+q.toString());
+//			throw new IllegalStateException("not equal");			
+//		}
+		return ret;
 	}
+	static Quaternion eq[] = {
+		new Quaternion(0,1,0,0),
+		new Quaternion(0,0,1,0),
+		new Quaternion(0,0,0,1)
+	};
 	
 	/**
 	 * Convert the quaternion <i>qt</i> into a 3x3 rotation matrix.
