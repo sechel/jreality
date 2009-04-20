@@ -1,4 +1,10 @@
 There is an incompatibility between Java 5 and Java 6 which effects the ant build.  In order
 for the ant build to function correctly, edit the file excludes.txt in this directory and follow the directions there.
 
+If you wish to use the JOGL backend, the jReality release includes the necessary native libraries in the 
+folder jni -- select the subfolder based on your environment, and add to your JAVA_LIBRARY_PATH.  If using
+eclipse and the .project file included with the jReality release, 
+    1) inspect the 'Properties' of src-core  folder in the Package Exploreer (right-mouse context menu)
+    2) make sure that the native library location attached to the src-core folder points to the right subfolder of jni.
+
 --The management
