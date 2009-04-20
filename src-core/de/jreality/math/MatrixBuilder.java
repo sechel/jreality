@@ -289,6 +289,12 @@ public final class MatrixBuilder {
     return this;
   }
   
+  public MatrixBuilder translate(double[] from, double[] to) {
+	    P3.makeTranslationMatrix(tmp, from, to, metric);
+	    matrix.multiplyOnRight(tmp);
+	    return this;
+	  }
+	  
   /**
    * 
    * @param dx
