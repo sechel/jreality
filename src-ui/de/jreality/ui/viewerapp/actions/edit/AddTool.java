@@ -56,6 +56,7 @@ import javax.swing.ListSelectionModel;
 
 import de.jreality.scene.tool.Tool;
 import de.jreality.tools.AirplaneTool;
+import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.tools.DampedDraggingTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
@@ -133,9 +134,13 @@ public class AddTool extends AbstractSelectionListenerAction {
     
     List<String> tools = new LinkedList<String>();
     
+    tools.add(AirplaneTool.class.getName());
+    tools.add(ClickWheelCameraZoomTool.class.getName());
+    tools.add(DampedDraggingTool.class.getName());
     tools.add(DraggingTool.class.getName());
     tools.add(EncompassTool.class.getName());
     tools.add(FlyTool.class.getName());
+    tools.add(FlyToPickTool.class.getName());
     tools.add(HeadTransformationTool.class.getName());
     tools.add(LookAtTool.class.getName());
     tools.add(PickShowTool.class.getName());
@@ -147,9 +152,6 @@ public class AddTool extends AbstractSelectionListenerAction {
     tools.add(ShipScaleTool.class.getName());
     tools.add(ShowPropertiesTool.class.getName());
     tools.add(TranslateTool.class.getName());
-    tools.add(FlyToPickTool.class.getName());
-    tools.add(DampedDraggingTool.class.getName());
-    tools.add(AirplaneTool.class.getName());
 
     try {  //different source folder
       tools.add(Class.forName("de.jreality.tools.PortalHeadMoveTool").getName());
