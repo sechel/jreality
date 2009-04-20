@@ -194,10 +194,15 @@ public class ManagedContent extends Plugin {
 		return new PluginInfo("Managed Content", "Stefan Sechelmann");
 	}
 
+	
+	public void install(AlignedContent content) {
+		alignedContent = content;
+	}
+	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		alignedContent = c.getPlugin(AlignedContent.class);
+		install(c.getPlugin(AlignedContent.class));
 	}
 	
 	public boolean addContentListener(ContentListener l) {
