@@ -1627,7 +1627,12 @@ final public class Rn {
 		return dst;
 	}
 
-
+	/**
+	 * Calculate a permutation matrix which sends e(i) to e(perm[i])
+	 * @param dst
+	 * @param perm
+	 * @return
+	 */
 	public static double[] permutationMatrix(double[] dst, int[] perm) {
 		int n = perm.length;
 		if (dst == null) dst = new double[n*n];
