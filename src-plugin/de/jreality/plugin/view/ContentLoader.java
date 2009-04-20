@@ -29,8 +29,8 @@ import de.varylab.jrworkspace.plugin.flavor.UIFlavor;
 
 public class ContentLoader extends Plugin implements UIFlavor {
 
-	private AlignedContent 
-		alignedContent = null;
+	private ManagedContent
+		managedContent = null;
 	private ViewMenuBar 
 		viewerMenuAggregator = null;
 	private ViewToolBar
@@ -79,9 +79,9 @@ public class ContentLoader extends Plugin implements UIFlavor {
 	}
 	
 
-	public void install(View sceneView, AlignedContent alignedContent) {
+	public void install(View sceneView, ManagedContent managedContent) {
 		parent = sceneView.getViewer().getViewingComponent();
-		this.alignedContent = alignedContent;
+		this.managedContent = managedContent;
 	}
 
 	private void loadFile() {
@@ -109,7 +109,8 @@ public class ContentLoader extends Plugin implements UIFlavor {
 					}
 				});
 				tempRoot.removeChild(read);
-				alignedContent.setContent(read);
+				managedContent.setContent(getClass(), read);
+				managedContent.alignContent();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -130,15 +131,12 @@ public class ContentLoader extends Plugin implements UIFlavor {
 
 	@Override
 	public void install(Controller c) throws Exception {
-
 		View viewPlugin = c.getPlugin(View.class);
-		AlignedContent contentPlugin = c.getPlugin(AlignedContent.class);
-
+		ManagedContent contentPlugin = c.getPlugin(ManagedContent.class);
 		install(
 				viewPlugin,
 				contentPlugin
 		);
-
 		viewerMenuAggregator = c.getPlugin(ViewMenuBar.class);
 		viewerMenuAggregator.addMenuItem(getClass(), 0.0, contentLoadAction, "File");
 		viewToolBar = c.getPlugin(ViewToolBar.class);
