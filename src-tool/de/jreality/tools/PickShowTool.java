@@ -45,6 +45,7 @@ import java.awt.Color;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -113,6 +114,7 @@ private void init() {
     }
     // TODO non-euclideanize this
     double[] worldCoordinates = pr.getWorldCoordinates();
+    if (!Pn.isValidCoordinate(worldCoordinates, 3, Pn.EUCLIDEAN)) return;
     double[] cp = new Matrix(tc.getViewer().getCameraPath().getMatrix(null)).getColumn(3);
     double scale=Rn.euclideanDistance(cp, worldCoordinates);
     MatrixBuilder.euclidean().translate(worldCoordinates).assignTo(c);
