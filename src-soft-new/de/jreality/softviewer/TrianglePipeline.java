@@ -293,10 +293,10 @@ public class TrianglePipeline {
                 // System.out.println("d "+d);
                 int res = PolygonUtility.clipToHalfspace(polygon,
                         AbstractPolygon.WX, cp.getNormal(), -1, d, tmpPolygon);
-                if (res == -1) { // clipped out
+                if (res == PolygonUtility.CLIPPED_OUT) { // clipped out
                     return true;
                 }
-                if (res == 0) {// clipToHalfspace returned the clipped poly in
+                if (res == PolygonUtility.CLIPPED_PARTIAL) {// clipToHalfspace returned the clipped poly in
                     // tmpPolygon
                     tmpPolygon.setShadingFrom(polygon);
                     

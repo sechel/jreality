@@ -51,11 +51,11 @@ import java.util.Vector;
 public class PolygonUtility {
     private static final boolean DEBUG = false;
 
-    private static final int CLIPPED_OUT = -1;
+    public static final int CLIPPED_OUT = -1;
 
-    private static final int CLIPPED_PARTIAL = 1;
+    public static final int CLIPPED_PARTIAL = 1;
 
-    private static final int CLIPPED_IN = 0;
+    public static final int CLIPPED_IN = 0;
 
     /**
      * 
