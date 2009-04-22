@@ -481,7 +481,51 @@
 
   <target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
   </target>
-
+	
+	<target name="release-plugin" depends="dist">
+		<property name="view" value="de/jreality/plugin/view"/>
+		<property name="audio" value="de/jreality/plugin/audio"/>
+		<property name="share" value="de/jreality/ui"/>
+		<property name="vr" value="de/jreality/plugin/vr"/>
+		<property name="experimental" value="
+			${view}/AdvancedAppearance**,
+			${view}/InfoOverlay**,
+			${view}/ViewerKey**
+		" />
+		<property name="folder" value="release/plugin"/>
+		<mkdir dir="${folder}"/>
+		<jar destfile="${folder}/jReality-plugin-view.jar">
+			<fileset dir="${build}/plugin" 
+				includes="${view}/**"
+				excludes="${experimental}"
+			/>
+		</jar>
+		<jar destfile="${folder}/jReality-plugin-experimental.jar">
+			<fileset dir="${build}/plugin" 
+				includes="${experimental}"
+			/>
+		</jar>
+		<jar destfile="${folder}/jReality-plugin-audio.jar">
+			<fileset dir="${build}/plugin"
+				includes="${audio}/**"
+				excludes="${experimental}"
+			/>
+		</jar>
+		<jar destfile="${folder}/jReality-plugin-share.jar">
+			<fileset dir="${build}/plugin"
+				includes="${share}/**"
+				excludes="${experimental}"
+			/>
+		</jar>		
+		<jar destfile="${folder}/jReality-plugin-vr.jar">
+			<fileset dir="${build}/plugin"
+				includes="${vr}/**"
+				excludes="${experimental}"
+			/>
+		</jar>		
+	</target>
+	
+	
 	  <target name="release-jar" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
 	  	<mkdir dir="release" />
 	    <jar jarfile="release/jReality.jar">
