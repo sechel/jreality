@@ -154,6 +154,19 @@ public class ManagedContent extends Plugin {
 	 */
 	public void addTool(Class<?> context, Tool tool) {
 		SceneGraphComponent contextRoot = getContextRoot(context);
+		contextRoot.addTool(tool);
+		fireToolAdded(context, tool);
+	}
+	
+	
+	/**
+	 * Adds a tool to the given context root if it is not already 
+	 * a child of the context root
+	 * @param context
+	 * @param tool
+	 */
+	public void addToolUnique(Class<?> context, Tool tool) {
+		SceneGraphComponent contextRoot = getContextRoot(context);
 		if (!contextRoot.getTools().contains(tool)) {
 			contextRoot.addTool(tool);
 			fireToolAdded(context, tool);
