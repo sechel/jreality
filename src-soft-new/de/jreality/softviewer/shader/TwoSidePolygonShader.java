@@ -88,7 +88,7 @@ public class TwoSidePolygonShader extends PolygonShader {
         
         d1 = Rn.crossProduct(null,d1,d2);
         
-		boolean faceforward = (px * d1[0] + py * d1[1] + pz * d1[2]) <= 0 ;
+		boolean faceforward = (px * d1[0] + py * d1[1] + pz * d1[2]) >= 0 ;
         if(faceforward){
             front.shadePolygon(p,environment,vertexColors);
         } else {
