@@ -132,6 +132,14 @@ public class JOGLSphereHelper extends SphereUtility {
 			throw new IllegalStateException("No such gl context");
 		}
 		// probably don't need to actually delete them since the context 
+	   sphereDListsTable.clear(); 
+	   for(int i = 0; i < tessellatedCubes.length; i++){ 
+	      tessellatedCubes[i].setGeometry(null); 
+	      tessellatedCubes[i] = null; 
+	   } 
+	   for(int i = 0; i < cubePanels.length; i++){ 
+	      cubePanels[i] = null; 
+	   }	
 	}
 
 

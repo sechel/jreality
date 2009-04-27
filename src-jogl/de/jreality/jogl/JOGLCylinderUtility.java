@@ -142,6 +142,10 @@ public class JOGLCylinderUtility  {
 			throw new IllegalStateException("No such gl context");
 		}
 		// probably don't need to actually delete them since the context 
+		cylinderDListsTable.clear(); 
+		for(int i = 0; i < cylinderList.length; i++){ 
+		  cylinderList[i] = null; 
+		} 
 	}
 
 
