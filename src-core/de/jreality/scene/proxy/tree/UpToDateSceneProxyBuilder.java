@@ -207,6 +207,10 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
 				SceneGraphNodeEntity entity = (SceneGraphNodeEntity) nodeEntityMap.get(n);
 				disposeEntity(entity, false);
 			};
+			public void visit(SceneGraphComponent c) {
+				visit((SceneGraphNode) c);
+				c.childrenAccept(this);
+			}
 		};
 		root.accept(disposeVisitor);
 	}
