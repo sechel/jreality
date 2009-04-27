@@ -40,6 +40,7 @@
 /* This is a non-euclidean polygon shader.
  * It does not have all the features of the standard DefaultPolygonShader.
  * In particular, it does not have texture support yet.
+ * Author:  Charles Gunn
  */
 vec4 Ambient;
 vec4 Diffuse;
@@ -47,12 +48,14 @@ vec4 Specular;
 vec4 texcoord;
 attribute vec4 normals4;
 uniform bool hyperbolic;
-uniform bool useNormals4;
-uniform bool lightingEnabled, fogEnabled;
+uniform bool 	useNormals4;
+uniform bool 	lightingEnabled; 
+uniform bool 	fogEnabled;
+uniform bool 	transparencyEnabled;
+uniform bool 	twoSided;
 uniform float Nw;
-// textures are not implemented yet
+uniform float	transparency;
 uniform sampler2D texture;
-uniform bool twoSided;
 uniform int numLights;
 
 // the inner product in klein model of hyperbolic space
@@ -167,16 +170,17 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 
     color = clamp( color, 0.0, 1.0 );
     if (fogEnabled) color = mix( (gl_Fog.color), color, fog);
-    color.a = 1.0;
+    if (color.a != 0.0 && !transparencyEnabled) color.a = 1.0;
    return color;
 }
 
 void main (void)
 {
 	bool normals4d = false;
+	// various ugly hacks used here to ship over the normals
 	if  (gl_Fog.start > 0.0) normals4d = true;
-	  vec4 n4 = (normals4d) ? gl_MultiTexCoord3 : vec4(gl_Normal, Nw);
-    vec4  transformedNormal = gl_ModelViewMatrix * n4; // vec4(gl_Normal, Nw); //
+	vec4 n4 = (normals4d) ? gl_MultiTexCoord3 : vec4(gl_Normal, Nw);
+    vec4  transformedNormal = gl_ModelViewMatrix * n4; 
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
