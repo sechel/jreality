@@ -49,6 +49,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.Map.Entry;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
@@ -89,13 +90,14 @@ public class ToolSystem implements ToolEventReceiver {
 	 * @return
 	 */
     public static ToolSystem toolSystemForViewer(Viewer v)	{
-		
-		ToolSystem sm = (ToolSystem) globalTable.get(v);
-		if (sm != null) return sm;
-		LoggingSystem.getLogger(ToolSystem.class).warning("Viewer has no tool system, allocating default");
-		sm = new ToolSystem(v, null, null);
-		globalTable.put(v,sm);
-		return sm;
+		synchronized (globalTable) {
+			ToolSystem sm = (ToolSystem) globalTable.get(v);
+			if (sm != null) return sm;
+			LoggingSystem.getLogger(ToolSystem.class).warning("Viewer has no tool system, allocating default");
+			sm = new ToolSystem(v, null, null);
+			globalTable.put(v,sm);
+			return sm;
+		}
 	}
 	
 	/**
@@ -104,16 +106,27 @@ public class ToolSystem implements ToolEventReceiver {
 	 * @return
 	 */
 	 public static ToolSystem getToolSystemForViewer(Viewer v)	{
-		
-		ToolSystem sm = (ToolSystem) globalTable.get(v);
-		return sm;
+		 synchronized (globalTable) {
+			 ToolSystem sm = (ToolSystem) globalTable.get(v);
+			 return sm;
+		 }
 	}
 	
 	public static void setToolSystemForViewer(Viewer v, ToolSystem ts)	{
-		
-		ToolSystem sm = (ToolSystem) globalTable.get(v);
-		if (sm != null) throw new IllegalStateException("Viewer already has tool system "+sm);
-		globalTable.put(v,ts);
+		synchronized (globalTable) {
+			ToolSystem sm = (ToolSystem) globalTable.get(v);
+			if (sm != null) throw new IllegalStateException("Viewer already has tool system "+sm);
+			globalTable.put(v,ts);
+		}
+	}
+	
+	private static void unsetToolSystem(ToolSystem ts) {
+		synchronized (globalTable) {
+			for (Iterator<Entry<Viewer, ToolSystem>> it = globalTable.entrySet().iterator(); it.hasNext(); ) {
+				Entry<Viewer, ToolSystem> e = it.next();
+				if (e.getValue() == ts) it.remove();
+			}
+		}
 	}
 	
 	private RenderTrigger renderTrigger;
@@ -141,6 +154,8 @@ public class ToolSystem implements ToolEventReceiver {
 
 	protected boolean executing;
 
+	private final Object KEY=new Object();
+	
 	private class ToolContextImpl implements ToolContext {
 
 		InputSlot sourceSlot;
@@ -236,7 +251,7 @@ public class ToolSystem implements ToolEventReceiver {
 		}
 
 		public Object getKey() {
-			return ToolSystem.this;
+			return KEY;
 		}
 	};
 
@@ -294,7 +309,7 @@ public class ToolSystem implements ToolEventReceiver {
 		// register animator
 		SceneGraphPath rootPath = new SceneGraphPath();
 		rootPath.push(viewer.getSceneRoot());
-		addTool(AnimatorTool.getInstanceImpl(this), rootPath);
+		addTool(AnimatorTool.getInstanceImpl(KEY), rootPath);
 		if (emptyPickPath.getLength() == 0) {
 			emptyPickPath.push(viewer.getSceneRoot());
 		}
@@ -593,6 +608,7 @@ public class ToolSystem implements ToolEventReceiver {
 		eventQueue.dispose();
 		deviceManager.dispose();
 		updater.dispose();
+		unsetToolSystem(this); // remove from the viewer->tool-system table
 	}
 
 	final List<Pair> toolsChanging = new LinkedList<Pair>();

@@ -8,7 +8,7 @@
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJinputJoystick"/-->
     
- 	<rawdevice id="WiiMoteOSC" type="de.jreality.audio.osc.WiiMoteOSC"/>
+ 	<!--rawdevice id="WiiMoteOSC" type="de.jreality.audio.osc.WiiMoteOSC"/-->
  	
   </rawdevices>
 
