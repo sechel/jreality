@@ -29,9 +29,16 @@ public class ConvertingReader implements SampleReader {
 	
 	private ConvertingReader(SampleReader reader, int targetRate, Interpolation.Factory factory) {
 		int sourceRate = reader.getSampleRate();
-		int q = gcd(targetRate, sourceRate);
-		this.reader = reader;
 		this.sampleRate = targetRate;
+		if (targetRate<sourceRate) {
+			LowPassProcessor lpf = new LowPassProcessor(reader); // TODO: consider better lowpass filter here
+			lpf.setCutOff(targetRate/2);
+			this.reader = lpf;
+		} else {
+			this.reader = reader;
+		}
+	
+		int q = gcd(targetRate, sourceRate);
 		this.sourceRate = sourceRate/q;
 		this.targetRate = targetRate/q;
 		ratio = ((float) sourceRate)/((float) targetRate);
