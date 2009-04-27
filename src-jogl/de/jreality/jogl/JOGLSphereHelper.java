@@ -55,14 +55,14 @@ import de.jreality.util.CameraUtility;
  */
 public class JOGLSphereHelper extends SphereUtility {
 
-	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
+	// we read this value once -- it needs to stay the same throughout execution
+	static boolean sharedDisplayLists;
 	static WeakHashMap sphereDListsTable = new WeakHashMap();
 	static int[] globalSharedSphereDisplayLists = null;
 	public static void setupSphereDLists(JOGLRenderer jr)	{
-		int[] dlists = null; //getSphereDLists(jr);
-//		if (dlists != null)	{
-//			JOGLConfiguration.theLog.log(Level.WARNING,"Already have sphere display lists for this renderer "+jr);
-//		}
+		// we read this once -- had better be set to correct value when we do so!
+		sharedDisplayLists = JOGLConfiguration.sharedContexts;
+		int[] dlists = null; 
 		GL gl = jr.globalGL;
 		int n = SphereUtility.tessellatedCubes.length;
 		dlists = null;
@@ -75,7 +75,6 @@ public class JOGLSphereHelper extends SphereUtility {
 			dlists[i] = gl.glGenLists(1);
 //			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
-			//gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet qms = SphereUtility.cubePanels[i];
 			for (int j = 0; j<SphereUtility.cubeSyms.length; ++j)	{
 				gl.glPushMatrix();
@@ -123,23 +122,10 @@ public class JOGLSphereHelper extends SphereUtility {
 		return dlists;
 	}
 
-	/**
-	 * @param globalGL
-	 */
 	public static void disposeSphereDLists(JOGLRenderer jr) {
-		int[] dlists = getSphereDLists(jr);
-		if (dlists == null)	{
-			throw new IllegalStateException("No such gl context");
-		}
-		// probably don't need to actually delete them since the context 
-	   sphereDListsTable.clear(); 
-	   for(int i = 0; i < tessellatedCubes.length; i++){ 
-	      tessellatedCubes[i].setGeometry(null); 
-	      tessellatedCubes[i] = null; 
-	   } 
-	   for(int i = 0; i < cubePanels.length; i++){ 
-	      cubePanels[i] = null; 
-	   }	
+			if (!sharedDisplayLists)	
+			   sphereDListsTable.remove(jr);
+	  
 	}
 
 
