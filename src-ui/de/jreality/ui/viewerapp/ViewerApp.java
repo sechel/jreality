@@ -1080,18 +1080,20 @@ public class ViewerApp {
 		sceneRoot.getAppearance().setAttribute("backgroundColors", (colors.length==4)? colors : Appearance.INHERITED); 
 	}
 
-
 	public void dispose() {
 		if (autoRender) {
 			renderTrigger.removeSceneGraphComponent(sceneRoot);
 			renderTrigger.removeViewer(viewerSwitch);
 		}
-//		if (viewer != null) viewer.dispose();
+		viewerSwitch.dispose();
 		if (toolSystem != null) toolSystem.dispose();
 
+		SelectionManager.disposeForViewer(viewerSwitch);
+		
 		frame.dispose();
 		if (externalNavigatorFrame!=null) externalNavigatorFrame.dispose();
 		if (externalBeanShellFrame!=null) externalBeanShellFrame.dispose();
+
 	}
 
 }

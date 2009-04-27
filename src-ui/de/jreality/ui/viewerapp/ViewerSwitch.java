@@ -264,6 +264,7 @@ public class ViewerSwitch implements Viewer {
   }
   
   public void dispose() {
+    if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component) unregisterComponent((Component) currentViewer.getViewingComponent());
     for (int i = 0; i < viewers.length; i++) {
       Statement stm = new Statement(viewers[i], "dispose", null);
       try {

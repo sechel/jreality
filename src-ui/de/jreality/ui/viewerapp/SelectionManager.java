@@ -45,6 +45,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import java.util.Map.Entry;
 
 import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -81,9 +82,9 @@ public class SelectionManager implements SelectionManagerInterface {
 	static WeakHashMap<Viewer, SelectionManagerInterface> globalTable = new WeakHashMap<Viewer, SelectionManagerInterface>();
 	
 	public static SelectionManagerInterface selectionManagerForViewer(Viewer viewer)	{
-		SelectionManagerInterface sm = null;
-		if (globalTable.get(viewer)!=null) 
-			sm = globalTable.get(viewer);
+		SelectionManagerInterface sm = globalTable.get(viewer);
+		
+		WeakHashMap<Viewer, SelectionManagerInterface> gt = globalTable;
 		
 		if (sm != null)	{
 			LoggingSystem.getLogger(SelectionManager.class).fine("Selection manager is "+sm);
@@ -127,6 +128,14 @@ public class SelectionManager implements SelectionManagerInterface {
 		return sm;
 	}
 	
+	public static void disposeForViewer(Viewer viewer) {
+		if (viewer instanceof ViewerSwitch) {
+			for (Viewer v : ((ViewerSwitch)viewer).getViewers()) {
+				disposeForViewer(v);
+			}	
+		}
+		globalTable.remove(viewer);
+	}
 	
 	public SelectionManager() {
 		this(null);
