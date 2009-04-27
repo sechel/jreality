@@ -249,25 +249,17 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		vertexShader.render(jrs); 
 	    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
 	    if (useGLSL && glslProgram != null)		{
-	    	if (firstTime)	{
-	    		if (glslProgram.getSource().getUniformParameter("lightingEnabled") != null) {
-	    			glslProgram.setUniform("lightingEnabled", jrs.lighting);
-	    		}
-	    		if (glslProgram.getSource().getUniformParameter("transparency") != null) {
-	    			glslProgram.setUniform("transparency", jrs.transparencyEnabled ? jrs.currentAlpha : 0f);
-	    		}
-	    		if (glslProgram.getSource().getUniformParameter("numLights") != null) {
-	    			glslProgram.setUniform("numLights", jrs.numLights);
-	    		}
-	    		if (glslProgram.getSource().getUniformParameter("fogEnabled") != null) {
-	    			glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
-	    		}
-	    		if (glslProgram.getSource().getUniformParameter("hyperbolic") != null) {
-	    			glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
-	    		}
-	    		if (glslProgram.getSource().getUniformParameter("useNormals4") != null) {
-	    			glslProgram.setUniform("useNormals4", jrs.normals4d);
-	    		}   		
+	    	if (glslProgram == noneuclideanShader)	{
+	    		// HACK this is a shoddy attempt to pass over parts of OpenGL state to a hypothetical GLSL shader
+	    		// should be done by the specific shader instead, since only it knows which uniform variables
+	    		// it has
+	    		glslProgram.setUniform("lightingEnabled", jrs.lighting);
+	    		glslProgram.setUniform("transparencyEnabled", jrs.transparencyEnabled);
+	    		glslProgram.setUniform("transparency", (float) (1.0f - jrs.currentAlpha));
+	    		glslProgram.setUniform("numLights", jrs.numLights);
+	    		glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
+	    		glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
+	    		glslProgram.setUniform("useNormals4", jrs.normals4d);
 	    	}
 			
 			GlslLoader.render(glslProgram, jr);
