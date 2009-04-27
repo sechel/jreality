@@ -57,6 +57,8 @@ import de.jreality.util.CameraUtility;
  * A tool that sets the head matrix from the head tracker.
  * 
  * @author Steffen Weissman
+ * 
+ * Extended for non-euclidean metrics by Charles Gunn.
  *
  **/
 public class RemotePortalHeadMoveTool extends AbstractTool {
