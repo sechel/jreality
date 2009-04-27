@@ -48,6 +48,7 @@ import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -156,22 +157,18 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     return null;
   }
 
-  public void setComponent(final Component component) {
-    this.component = component;
-    component.addMouseListener(this);
-    component.addMouseMotionListener(this);
-    component.addMouseWheelListener(this);
-    component.addComponentListener(new ComponentAdapter() {
-    	public void componentResized(ComponentEvent e) {
-    		if (isCenter()) {
-    			setCenter(false);
-          queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
-          queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
-    		}
-    		requestFocus();
-    	}
-    });
-    component.addKeyListener(new KeyListener() {
+  private ComponentListener componentListener = new ComponentAdapter() {
+	  public void componentResized(ComponentEvent e) {
+		  if (isCenter()) {
+			  setCenter(false);
+			  queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.PRESSED, null));
+			  queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), InputSlot.getDevice("LookSwitch"), AxisState.ORIGIN, null));
+		  }
+		  requestFocus();
+	  }
+  };
+  
+  private KeyListener keyListener = new KeyListener() {
       public void keyTyped(KeyEvent e) {
       }
       public void keyPressed(KeyEvent e) {
@@ -187,7 +184,15 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
       }
       public void keyReleased(KeyEvent e) {
       }
-    });
+    };
+    
+  public void setComponent(final Component component) {
+    this.component = component;
+    component.addMouseListener(this);
+    component.addMouseMotionListener(this);
+    component.addMouseWheelListener(this);
+    component.addComponentListener(componentListener);
+    component.addKeyListener(keyListener);
   }
 
   public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
@@ -207,6 +212,8 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     component.removeMouseListener(this);
     component.removeMouseMotionListener(this);
     component.removeMouseWheelListener(this);
+    component.removeComponentListener(componentListener);
+    component.removeKeyListener(keyListener);
   }
 
   public void initialize(Viewer viewer) {
