@@ -84,8 +84,6 @@ public class SelectionManager implements SelectionManagerInterface {
 	public static SelectionManagerInterface selectionManagerForViewer(Viewer viewer)	{
 		SelectionManagerInterface sm = globalTable.get(viewer);
 		
-		WeakHashMap<Viewer, SelectionManagerInterface> gt = globalTable;
-		
 		if (sm != null)	{
 			LoggingSystem.getLogger(SelectionManager.class).fine("Selection manager is "+sm);
 			return sm;
