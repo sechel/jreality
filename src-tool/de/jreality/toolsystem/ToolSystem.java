@@ -293,10 +293,6 @@ public class ToolSystem implements ToolEventReceiver {
 	    emptyPickPath.push(viewer.getSceneRoot());
 	}
 
-	Thread getThread() {
-		return eventQueue.getThread();
-	}
-
 	private boolean initialized;
 	public void initializeSceneTools() {
 		if (initialized) {
@@ -320,6 +316,7 @@ public class ToolSystem implements ToolEventReceiver {
 	}
 
 	public void processToolEvent(ToolEvent event) {
+		if (isDisposed()) return;
 		synchronized (mutex) {
 			executing=true;
 		}
@@ -464,6 +461,8 @@ public class ToolSystem implements ToolEventReceiver {
 
 	private SceneGraphPath avatarPath;
 
+	private boolean disposed;
+
 	private void performPick() {
 		if (pickSystem == null) {
 			pickResults = Collections.emptyList();
@@ -604,7 +603,12 @@ public class ToolSystem implements ToolEventReceiver {
 		return avatarPath != null ? avatarPath : viewer.getCameraPath();
 	}
 
-	public void dispose() {
+	private synchronized boolean isDisposed() {
+		return disposed;
+	}
+	
+	public synchronized void dispose() {
+		disposed=true;
 		eventQueue.dispose();
 		deviceManager.dispose();
 		updater.dispose();

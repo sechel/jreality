@@ -68,8 +68,8 @@ public class ToolEventQueue {
                 synchronized(mutex) {
                     while (queue.isEmpty()) {
                         try {
-                            mutex.wait();
-                            if (!running) return;
+                        	if (running) mutex.wait();
+                            else return;
                         } catch (InterruptedException e) {
                             throw new Error();
                         }
@@ -135,8 +135,8 @@ public class ToolEventQueue {
     }
     
     public void dispose() {
-        running = false;
         synchronized (mutex) {
+	        running = false;
             mutex.notifyAll();
         }
         synchronized (mutex) {
