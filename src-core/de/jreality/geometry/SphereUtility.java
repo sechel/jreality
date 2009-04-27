@@ -84,6 +84,22 @@ public class SphereUtility {
 	protected static Transformation[] cubeSyms = null;
 	protected static IndexedFaceSet[] cubePanels = new IndexedFaceSet[numberOfTessellatedCubes];
 	
+	// this method can be safely called at any time; it removes the precomputed geometry and SGC's,
+	// subsequent calls will reproduce them as needed
+	public void dispose()	{
+		   for(int i = 0; i < tessellatedIcosahedra.length; i++){ 
+			      tessellatedIcosahedra[i] = null; 
+			   } 
+
+		   for(int i = 0; i < tessellatedCubes.length; i++){ 
+			      tessellatedCubes[i].setGeometry(null); 
+			      tessellatedCubes[i] = null; 
+			   } 
+			   for(int i = 0; i < cubePanels.length; i++){ 
+			      cubePanels[i] = null; 
+			   }	
+
+	}
 	public static IndexedFaceSet tessellatedIcosahedronSphere(int i)	{
 		return tessellatedIcosahedronSphere(i, false);
 	}
