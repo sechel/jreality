@@ -86,7 +86,7 @@ public class SphereUtility {
 	
 	// this method can be safely called at any time; it removes the precomputed geometry and SGC's,
 	// subsequent calls will reproduce them as needed
-	public void dispose()	{
+	public static void dispose()	{
 		   for(int i = 0; i < tessellatedIcosahedra.length; i++){ 
 			      tessellatedIcosahedra[i] = null; 
 			   } 
