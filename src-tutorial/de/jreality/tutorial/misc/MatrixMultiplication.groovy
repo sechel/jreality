@@ -109,10 +109,10 @@ def maxSize = 5
 def maxRand = 5
 def valueModifier = -5
 
-def aWidth = randomGen.nextInt(maxSize) + 1
-def aHeight = randomGen.nextInt(maxSize) + 1
+def aWidth = 3 //randomGen.nextInt(maxSize) + 1
+def aHeight = 2 //randomGen.nextInt(maxSize) + 1
 
-def bWidth = randomGen.nextInt(maxSize) + 1
+def bWidth = 4 //randomGen.nextInt(maxSize) + 1
 def bHeight = aWidth
 
 def a = []
@@ -224,7 +224,6 @@ a.each { row ->
         aElementSgc.setGeometry(shape);
         aElementSgc.getAppearance().setAttribute(DIFFUSE_COLOR, Color.BLUE)
            
-        MatrixBuilder.euclidean().translate((ax-1), -1 * (ay-1), 0).assignTo(aElementSgc);
 
         def aValueSgc = SceneGraphUtility.createFullSceneGraphComponent("A Value")
         
@@ -243,6 +242,8 @@ a.each { row ->
         ts.setOffset(0.0, 0.0, 0.0)
         
         MatrixBuilder.euclidean().translate((ax - 1 + 0.5), -1 * (ay - 1 - 0.5), 0.25).assignTo(aValueSgc);
+        MatrixBuilder.euclidean().translate((ax-1), -1 * (ay-1), 0).assignTo(aElementSgc);
+        //MatrixBuilder.euclidean().translate(-1 * (ay - 1 - 0.5), (ax - 1 + 0.5), 0.25).assignTo(aValueSgc);
         
         aRowSgc.addChild(aElementSgc)
         aRowSgc.addChild(aValueSgc)
@@ -250,6 +251,7 @@ a.each { row ->
     
     aSgc.addChild(aRowSgc)
 }
+    //MatrixBuilder.euclidean().translate(aHeight-1, -aWidth+1, 0).rotateZ(Math.PI/2).assignTo(aSgc);
 
 by = 0
 b.each { row ->

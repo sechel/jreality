@@ -1,6 +1,9 @@
 #!/bin/csh
-setenv LIB ${HOME}/Software/workspace/lib
-setenv CLASSPATH ${LIB}/jReality.jar:${LIB}:${LIB}/jogl.jar:${LIB}/bsh.jar:${LIB}/antlr.jar:${LIB}/janino.jar:${LIB}/jtem-beans.jar:${LIB}/jterm.jar:${LIB}/sunflow.jar
+setenv JAVA_HOME /home/gunn/jdk1.6.0_12_x64/
+setenv LIB /home/gunn/workspace/lib
+setenv CLASSPATH ${LIB}/jReality.jar:${LIB}/jogl.jar:${LIB}/bsh.jar:${LIB}/antlr-2.7.6.jar:${LIB}/janino.jar:${LIB}/jtem-beans.jar:${LIB}/jterm.jar:${LIB}/sunflow.jar
 #uncomment this to activate JOGL native libraries, wherever they are
-#setenv JAVA_LIBRARY_PATH ${HOME}/Library/Java/Extensions/JOGL-1.1.1
+setenv JAVA_LIBRARY_PATH /home/gunn/workspace/jreality/jni/linux64/
+setenv LD_LIBRARY_PATH /home/gunn/workspace/jreality/jni/linux64/
+echo $JAVA_HOME
 groovy $1
