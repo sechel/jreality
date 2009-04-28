@@ -41,6 +41,7 @@
 package de.jreality.scene.proxy.tree;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -179,8 +180,7 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
 		LoggingSystem.getLogger(this).log(loglevel, 
 				"disposing entity+listener for removed child {0}", new Object[]{entity.getNode().getName()});
 		nodeEntityMap.remove(entity.getNode());
-		if (entity.getNode() instanceof SceneGraphComponent)
-			((SceneGraphComponent)entity.getNode()).removeSceneGraphComponentListener(this);
+		entity.getNode().accept(detatchListeners);
 		entityFactory.disposeEntity(entity);
 	}
 
@@ -203,13 +203,19 @@ public class UpToDateSceneProxyBuilder extends SceneProxyTreeBuilder implements 
 
 	public void dispose() {
 		SceneGraphVisitor disposeVisitor = new SceneGraphVisitor() {
+			final HashSet<SceneGraphNode> encountered=new HashSet<SceneGraphNode>();
 			public void visit(SceneGraphNode n) {
-				SceneGraphNodeEntity entity = (SceneGraphNodeEntity) nodeEntityMap.get(n);
-				disposeEntity(entity, false);
+				if (encountered.add(n)) dispose(n);
 			};
 			public void visit(SceneGraphComponent c) {
-				visit((SceneGraphNode) c);
-				c.childrenAccept(this);
+				if (encountered.add(c)) {
+					dispose(c);
+					c.childrenAccept(this);
+				}
+			}
+			private void dispose(SceneGraphNode n) {
+				SceneGraphNodeEntity entity = (SceneGraphNodeEntity) nodeEntityMap.get(n);
+				disposeEntity(entity, false);
 			}
 		};
 		root.accept(disposeVisitor);
