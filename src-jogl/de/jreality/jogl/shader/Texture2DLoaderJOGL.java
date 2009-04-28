@@ -129,12 +129,13 @@ public class Texture2DLoaderJOGL {
   		return ht;
   }
 
-    public static void markAnimatedTexturesDirty(GL gl) {
+    public static void postRender(GL gl) {
     	if (animatedTextures.get(gl) == null)	{
     		animatedTextures.put(gl, new Vector<ImageData>());
     		return;
     	}
     	animatedTextures.get(gl).clear();
+    	lastRendered = null;
     }
     /******************* new Textures *******************/
     public static void render(GL gl, Texture2D tex) {
