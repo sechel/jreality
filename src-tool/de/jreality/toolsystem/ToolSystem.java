@@ -618,6 +618,7 @@ public class ToolSystem implements ToolEventReceiver {
 		deviceManager.dispose();
 		eventQueue.dispose();
 		updater.dispose();
+		AnimatorTool.disposeInstance(KEY);
 		unsetToolSystem(this); // remove from the viewer->tool-system table
 	}
 
@@ -721,11 +722,6 @@ public class ToolSystem implements ToolEventReceiver {
 
     public RenderTrigger getRenderTrigger() {
         return renderTrigger;
-    }
-    
-    @Override
-    protected void finalize() throws Throwable {
-    	System.out.println("ToolSystem.finalize()");
     }
 
 }

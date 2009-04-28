@@ -40,9 +40,9 @@
 
 package de.jreality.tools;
 
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.WeakHashMap;
 
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
@@ -58,67 +58,81 @@ import de.jreality.scene.tool.ToolContext;
  */
 public class AnimatorTool extends AbstractTool {
 
-  private static InputSlot timer = InputSlot.getDevice("SystemTime");
+	private static InputSlot timer = InputSlot.getDevice("SystemTime");
 
-  private static WeakHashMap instances=new WeakHashMap();
-  
-  public static AnimatorTool getInstance(ToolContext context) {
-	  return getInstanceImpl((Object) context.getKey());
-  }
-  
-  /**
-   * WARNING: do not use this unless you write a tool system!!
-   */
-  public static AnimatorTool getInstanceImpl(Object key) {
-    //if (!thread.getName().equals("jReality ToolSystem EventQueue"))
-    //    throw new RuntimeException("no tool system event thread!");
-    AnimatorTool instance = (AnimatorTool) instances.get(key);
-    if (instance == null) {
-      instance = new AnimatorTool();
-      instances.put(key, instance);
-    }
-    return instance;
-  }
-  
-  private TimerQueue timerQueue;
-  
-  private IdentityHashMap animators = new IdentityHashMap();
-  private final Object mutex = new Object();
+	private static HashMap<Object, AnimatorTool> instances=new HashMap<Object, AnimatorTool>();
 
-  private double totalTime;
-  
-  private AnimatorTool() {
-    addCurrentSlot(timer, "Triggers the animator tasks.");
-    timerQueue = new TimerQueue(this);
-  }
+	public static AnimatorTool getInstance(ToolContext context) {
+		return getInstanceImpl((Object) context.getKey());
+	}
 
-  public void perform(ToolContext tc) {
-    synchronized (mutex) {
-    	int dt = tc.getAxisState(timer).intValue();
-    	totalTime+=dt;
-      for (Iterator i = animators.values().iterator(); i.hasNext(); ) {
-        AnimatorTask task = (AnimatorTask)i.next();
-        if (!task.run(totalTime, dt)) {
-          i.remove();
-        }
-      }
-    }
-  }
+	/**
+	 * WARNING: do not use this unless you write a tool system!!
+	 */
+	public static AnimatorTool getInstanceImpl(Object key) {
+		//if (!thread.getName().equals("jReality ToolSystem EventQueue"))
+		//    throw new RuntimeException("no tool system event thread!");
+		AnimatorTool instance = (AnimatorTool) instances.get(key);
+		if (instance == null) {
+			instance = new AnimatorTool();
+			instances.put(key, instance);
+		}
+		return instance;
+	}
 
-  public void schedule(Object key, AnimatorTask task) {
-    synchronized (mutex) {
-      animators.put(key, task);
-    }
-  }
-  
-  public void deschedule(Object key) {
-    synchronized (mutex) {
-      animators.remove(key);
-    }
-  }
-  
-  public TimerQueue getTimerQueue() {
-	  return timerQueue;
-  }
+	/**
+	 * WARNING: do not use this unless you write a tool system!!
+	 */
+	public static void disposeInstance(Object key) {
+		AnimatorTool at = instances.remove(key);
+		at.dispose();
+	}
+
+	private TimerQueue timerQueue;
+
+	private IdentityHashMap<Object, AnimatorTask> animators = new IdentityHashMap<Object, AnimatorTask>();
+	private final Object mutex = new Object();
+
+	private double totalTime;
+
+	private AnimatorTool() {
+		addCurrentSlot(timer, "Triggers the animator tasks.");
+		timerQueue = new TimerQueue(this);
+	}
+
+	public void perform(ToolContext tc) {
+		synchronized (mutex) {
+			int dt = tc.getAxisState(timer).intValue();
+			totalTime+=dt;
+			for (Iterator<AnimatorTask> i = animators.values().iterator(); i.hasNext(); ) {
+				AnimatorTask task = i.next();
+				if (!task.run(totalTime, dt)) {
+					i.remove();
+				}
+			}
+		}
+	}
+
+	public void schedule(Object key, AnimatorTask task) {
+		synchronized (mutex) {
+			animators.put(key, task);
+		}
+	}
+
+	public void deschedule(Object key) {
+		synchronized (mutex) {
+			animators.remove(key);
+		}
+	}
+
+	public TimerQueue getTimerQueue() {
+		return timerQueue;
+	}
+
+	public void dispose() {
+		synchronized (mutex) {
+			animators.clear();
+		}
+	}
 
 }
