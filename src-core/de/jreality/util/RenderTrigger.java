@@ -42,24 +42,8 @@ package de.jreality.util;
 
 import java.awt.EventQueue;
 
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Geometry;
-import de.jreality.scene.Light;
-import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphVisitor;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.Viewer;
-import de.jreality.scene.event.AppearanceEvent;
-import de.jreality.scene.event.AppearanceListener;
-import de.jreality.scene.event.GeometryEvent;
-import de.jreality.scene.event.GeometryListener;
-import de.jreality.scene.event.LightEvent;
-import de.jreality.scene.event.LightListener;
-import de.jreality.scene.event.SceneGraphComponentEvent;
-import de.jreality.scene.event.SceneGraphComponentListener;
-import de.jreality.scene.event.TransformationEvent;
-import de.jreality.scene.event.TransformationListener;
+import de.jreality.scene.*;
+import de.jreality.scene.event.*;
 
 /**
  * RenderTrigger is a class for managing render requests for a scene (or parts of it)
@@ -74,7 +58,7 @@ import de.jreality.scene.event.TransformationListener;
  * TODO: fix problems maybe use Proxy (remove/add doesn't work how it should)
  */
 public class RenderTrigger implements SceneGraphComponentListener,
-  TransformationListener, AppearanceListener, GeometryListener, LightListener {
+  TransformationListener, AppearanceListener, GeometryListener, LightListener, CameraListener {
 
   private boolean collect;
   private boolean async=true;
@@ -116,6 +100,9 @@ public class RenderTrigger implements SceneGraphComponentListener,
             public void visit(Light l) {
               l.addLightListener(RenderTrigger.this);
             }
+            public void visit(Camera c) {
+                c.addCameraListener(RenderTrigger.this);
+              }
         };
         n.accept(v);
     }
@@ -137,6 +124,9 @@ public class RenderTrigger implements SceneGraphComponentListener,
             public void visit(Light l) {
                 l.removeLightListener(RenderTrigger.this);
             }
+            public void visit(Camera c) {
+                c.removeCameraListener(RenderTrigger.this);
+              }
         };
         n.accept(v);
     }
@@ -269,6 +259,11 @@ public class RenderTrigger implements SceneGraphComponentListener,
         needsRender=false;
         fireRender();
       }
+    }
+
+    public void cameraChanged(CameraEvent ev) {
+        fireRender();
+        fireRender();
     }
 
 }
