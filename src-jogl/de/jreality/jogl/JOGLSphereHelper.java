@@ -47,7 +47,9 @@ import javax.media.opengl.GL;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author gunn
@@ -57,7 +59,7 @@ public class JOGLSphereHelper extends SphereUtility {
 
 	// we read this value once -- it needs to stay the same throughout execution
 	static boolean sharedDisplayLists;
-	static WeakHashMap sphereDListsTable = new WeakHashMap();
+	static WeakHashMap<GL, int[]> sphereDListsTable = new WeakHashMap<GL, int[]>();
 	static int[] globalSharedSphereDisplayLists = null;
 	public static void setupSphereDLists(JOGLRenderer jr)	{
 		// we read this once -- had better be set to correct value when we do so!
@@ -66,19 +68,17 @@ public class JOGLSphereHelper extends SphereUtility {
 		GL gl = jr.globalGL;
 		int n = SphereUtility.tessellatedCubes.length;
 		dlists = null;
-		//if (!sharedDisplayLists)	dlists = (int[] ) sphereDListsTable.get(gl);
-		//else 
 		dlists = new int[n];
 //		JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
 		for (int i = 0; i<n; ++i)	{
-			tessellatedCubeSphere(i);
+			SceneGraphComponent tcs = tessellatedCubeSphere(i, false);
 			dlists[i] = gl.glGenLists(1);
 //			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
 			gl.glNewList(dlists[i], GL.GL_COMPILE);
-			IndexedFaceSet qms = SphereUtility.cubePanels[i];
-			for (int j = 0; j<SphereUtility.cubeSyms.length; ++j)	{
+			IndexedFaceSet qms = (IndexedFaceSet) tcs.getChildComponent(0).getGeometry();
+			for (int j = 0; j<tcs.getChildComponentCount(); ++j)	{
 				gl.glPushMatrix();
-				gl.glMultTransposeMatrixd(SphereUtility.cubeSyms[j].getMatrix(),0);
+				gl.glMultTransposeMatrixd(tcs.getChildComponent(j).getTransformation().getMatrix(),0);
 				JOGLRendererHelper.drawFaces(jr,qms,true, 1.0);
 				gl.glPopMatrix();
 			}				

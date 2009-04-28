@@ -5,6 +5,7 @@
 package de.jreality.jogl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 
@@ -40,18 +41,21 @@ public class GoBetween extends JOGLPeerNode implements
 	Lock peersLock = new Lock();
 	boolean singlePeer = false;
 
+	protected static WeakHashMap<JOGLRenderer, HashMap> tableForJR = new WeakHashMap<JOGLRenderer, HashMap>();
+	
 	static Class<? extends GoBetween> gbClass = GoBetween.class;
 	public static void setGoBetweenClass(Class<? extends GoBetween> c)	{
 		gbClass = c; 
 	}
-	protected static WeakHashMap<JOGLRenderer, WeakHashMap> rendererTable = 
-		new WeakHashMap<JOGLRenderer, WeakHashMap>();
+	// we have to keep track of all the peers associated to each renderer separately
+	protected static WeakHashMap<JOGLRenderer, HashMap<SceneGraphComponent, GoBetween>> rendererTable = 
+		new WeakHashMap<JOGLRenderer, HashMap<SceneGraphComponent, GoBetween>>();
 	
 	public   static GoBetween goBetweenFor(JOGLRenderer jr, SceneGraphComponent sgc, boolean singlePeer)	{
 		if (sgc == null) return null;
-		WeakHashMap<SceneGraphComponent, GoBetween> gbt = rendererTable.get(jr);
+		HashMap<SceneGraphComponent, GoBetween> gbt = rendererTable.get(jr);
 		if (gbt == null) {
-			gbt = new WeakHashMap<SceneGraphComponent, GoBetween>();
+			gbt = new HashMap<SceneGraphComponent, GoBetween>();
 			rendererTable.put(jr,gbt);
 		}
 		GoBetween gb = gbt.get(sgc);
@@ -68,9 +72,8 @@ public class GoBetween extends JOGLPeerNode implements
 		return gb;
 //		System.err.println("Already have gb for "+sgc.getName());
 	}
-
+	// need this standard constructor for the above method
 	protected GoBetween()	{
-		super();
 	}
 	protected GoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean inheritSinglePeer)	{
 		super();
@@ -82,7 +85,7 @@ public class GoBetween extends JOGLPeerNode implements
 		originalComponent = sgc;
 //		System.err.println("Initializing peer for "+originalComponent.getName());
 		if (originalComponent.getGeometry() != null)  {
-			peerGeometry = jr.getJOGLPeerGeometryFor(originalComponent.getGeometry());
+			peerGeometry = jr.geometryGB.getJOGLPeerGeometryFor(originalComponent.getGeometry());
 			peerGeometry.refCount++;
 			originalComponent.getGeometry().addGeometryListener(this);
 //			System.err.println("Adding geom listener for "+originalComponent.getGeometry().getName());
@@ -144,7 +147,9 @@ public class GoBetween extends JOGLPeerNode implements
 
 		if (peers.size() == 0)	{
 			theLog.log(Level.FINE,"GoBetween for "+originalComponent.getName()+" has no peers left");
-			jr.goBetweenTable.remove(originalComponent);
+			HashMap<SceneGraphComponent, GoBetween> gbt = rendererTable.get(jr);
+
+			gbt.remove(originalComponent);
 			dispose();
 		}
 	}
@@ -209,12 +214,12 @@ public class GoBetween extends JOGLPeerNode implements
 			if (peerGeometry != null)	{
 				((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
 				peerGeometry.dispose();
-				jr.geometryRemoved = true;
+				jr.geometryGB.geometryRemoved = true;
 				theLog.log(Level.WARNING, "Adding geometry while old one still valid");
 				peerGeometry=null;
 			}
 			if (originalComponent.getGeometry() != null)  {
-				peerGeometry = jr.getJOGLPeerGeometryFor(originalComponent.getGeometry());
+				peerGeometry = jr.geometryGB.getJOGLPeerGeometryFor(originalComponent.getGeometry());
 				originalComponent.getGeometry().addGeometryListener(this);
 				peerGeometry.refCount++;
 			} 
@@ -242,7 +247,7 @@ public class GoBetween extends JOGLPeerNode implements
 				((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
 				peerGeometry.dispose();		// really decreases reference count
 				peerGeometry = null;
-				jr.geometryRemoved = true;
+				jr.geometryGB.geometryRemoved = true;
 			}
 //			return;
 		}
@@ -268,12 +273,12 @@ public class GoBetween extends JOGLPeerNode implements
 			if (peerGeometry != null) {
 				((Geometry) ev.getOldChildElement()).removeGeometryListener(this);						
 				peerGeometry.dispose();
-				jr.geometryRemoved=true;
+				jr.geometryGB.geometryRemoved=true;
 				peerGeometry = null;
 			}
 			if (originalComponent.getGeometry() != null)  {
 				originalComponent.getGeometry().addGeometryListener(this);
-				peerGeometry = jr.getJOGLPeerGeometryFor(originalComponent.getGeometry());
+				peerGeometry = jr.geometryGB.getJOGLPeerGeometryFor(originalComponent.getGeometry());
 				peerGeometry.refCount++;
 			} 
 		}

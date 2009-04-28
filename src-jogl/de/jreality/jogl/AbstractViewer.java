@@ -310,7 +310,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 
 	  public BufferedImage renderOffscreen(int w, int h) {
 		  if (renderer != null) {
-			  return renderer.renderOffscreen(w, h, drawable);
+			  return renderer.offscreenRenderer.renderOffscreen(w, h, drawable);
 		  } else {
 			  JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 			  return null;
@@ -318,7 +318,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	  }
 	  
 	  public void renderOffscreen(int w, int h, File file)	{
-		  if (renderer != null) renderer.renderOffscreen(w,h,file, drawable);
+		  if (renderer != null) renderer.offscreenRenderer.renderOffscreen(w,h,file, drawable);
 		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 	  }
 

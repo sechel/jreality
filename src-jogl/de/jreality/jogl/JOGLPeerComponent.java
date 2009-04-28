@@ -4,7 +4,9 @@
  */
 package de.jreality.jogl;
 
+import java.util.HashMap;
 import java.util.Vector;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
@@ -15,10 +17,12 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.Lock;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.SceneGraphComponentEvent;
@@ -72,6 +76,12 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
 	public static int count = 0;
 	static boolean debug = false;
+
+	HashMap<SceneGraphComponent, GoBetween> goBetweenTable = 
+		new HashMap<SceneGraphComponent, GoBetween>();
+
+
+
 	// need an empty constructor in order to allow 
 	public JOGLPeerComponent()	{
 		super();
@@ -85,6 +95,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	public void init(SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
 		init(null, sgp, p, jr);
 	}
+
 	public void init(GoBetween gb, SceneGraphPath sgp, JOGLPeerComponent p, JOGLRenderer jr) {
 		this.jr = jr;
 		if (sgp == null || !(sgp.getLastElement() instanceof SceneGraphComponent))  {
@@ -390,7 +401,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	
 	public void childAdded(SceneGraphComponentEvent ev) {
 		if (debug) theLog.finer("JOGLPeerComponent: Container Child added to: "+name);
-		//theLog.log(Level.FINE,"Event is: "+ev.toString());
 		switch (ev.getChildType() )	{
 		case SceneGraphComponentEvent.CHILD_TYPE_GEOMETRY:
 			renderRunnableDirty = true;
@@ -398,12 +408,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 		case SceneGraphComponentEvent.CHILD_TYPE_COMPONENT:
 			SceneGraphComponent sgc = (SceneGraphComponent) ev.getNewChildElement();
-			JOGLPeerComponent pc = jr.constructPeerForSceneGraphComponent(sgc, this);
+			JOGLPeerComponent pc = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(sgc, this, jr);
 			childlock.writeLock();
-			//theLog.log(Level.FINE,"Before adding child count is "+children.size());
 			children.add(pc);						
 			childlock.writeUnlock();
-			//theLog.log(Level.FINE,"After adding child count is "+children.size());
 			setIndexOfChildren();
 			jr.lightListDirty = true;
 			break;

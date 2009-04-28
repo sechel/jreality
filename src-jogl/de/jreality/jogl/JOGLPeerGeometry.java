@@ -32,6 +32,8 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	boolean forceRender = false;
 	boolean displayListsDirty =  true,
 		localClippingPlane = false;
+
+	
 	public JOGLPeerGeometry(Geometry g, JOGLRenderer jr)	{
 		super(jr);
 		originalGeometry = g;
@@ -65,7 +67,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (refCount == 0)	{
 			theLog.log(Level.FINER,"Geometry is no longer referenced");
 			originalGeometry.removeGeometryListener(this);
-			jr.geometries.remove(originalGeometry);
+			jr.geometryGB.geometries.remove(originalGeometry);
 		}
 	}
 

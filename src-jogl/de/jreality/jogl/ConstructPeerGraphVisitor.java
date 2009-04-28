@@ -43,6 +43,14 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 		this.jr = pv.jr;
 	}
 
+	static protected JOGLPeerComponent constructPeerForSceneGraphComponent(
+			final SceneGraphComponent sgc, final JOGLPeerComponent p, JOGLRenderer jr) {
+		if (sgc == null) return null;
+		ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p, jr);
+		final JOGLPeerComponent peer = (JOGLPeerComponent) constructPeer.visit();
+		return peer;
+	}
+
 	public void visit(SceneGraphComponent c) {
 		// check the appearance to see if single peer is indicated
 		boolean oldSinglePeer = singlePeer;

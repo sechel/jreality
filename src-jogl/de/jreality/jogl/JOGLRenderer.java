@@ -48,10 +48,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
@@ -63,12 +61,8 @@ import java.util.logging.Logger;
 import javax.media.opengl.DebugGL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLPbuffer;
-
-import com.sun.opengl.util.ImageUtil;
 
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
@@ -104,6 +98,7 @@ public class JOGLRenderer   {
 	transient protected JOGLTopLevelAppearance topAp;
 	transient protected JOGLOffscreenRenderer offscreenRenderer;
 	transient protected JOGLPerformanceMeter perfMeter;
+	transient protected GeometryGoBetween geometryGB;
 
 	transient protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
 	transient protected int whichEye = CameraUtility.MIDDLE_EYE;
@@ -117,7 +112,6 @@ public class JOGLRenderer   {
 		stackDepth;
 	transient protected Stack<RenderingHintsInfo> rhStack = new Stack<RenderingHintsInfo>();
 
-	transient protected boolean texResident = true;
 	transient protected int numberTries = 0;		// how many times we have tried to make textures resident
 	// miscellaneous fields and methods
 	transient protected int clearColorBits;
@@ -127,12 +121,13 @@ public class JOGLRenderer   {
 	transient protected static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
 	private javax.swing.Timer followTimer;
 
-	transient boolean geometryRemoved = false, 
+	transient protected boolean 
 		lightListDirty = true, 
 		lightsChanged = true, 
 		clippingPlanesDirty = true,
 		disposed = false,
-		frontBanana = false;
+		frontBanana = false,
+		texResident = true;
 	protected Viewer theViewer;
 	Camera theCamera;
 
@@ -143,26 +138,23 @@ public class JOGLRenderer   {
 	}
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
-		followTimer = new javax.swing.Timer(1000, new ActionListener()	{
-			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
-		followTimer.start();
 		//TODO figure out I do this here
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
 		offscreenRenderer = new JOGLOffscreenRenderer(this);
 		perfMeter = new JOGLPerformanceMeter(this);
+		geometryGB = new GeometryGoBetween(this);
 	}
 
 	public void dispose() {
 		disposed = true;
 		lightHelper.disposeLights();
-		followTimer.setRepeats(false);
-		followTimer.stop();
 		setSceneRoot(null);
 		setAuxiliaryRoot(null);
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		if (topAp != null) topAp.dispose();
 		LoggingSystem.getLogger(this).info("gobetween table has "+GoBetween.rendererTable.get(this).size());
-		LoggingSystem.getLogger(this).info("geom table has "+geometries.size());
+		LoggingSystem.getLogger(this).info("geom table has "+geometryGB.geometries.size());
+		geometryGB.dispose();
 	}
 
 	public int getStereoType() {
@@ -202,20 +194,22 @@ public class JOGLRenderer   {
 		this.auxiliaryRoot = auxiliaryRoot;
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.dispose();
 		if (auxiliaryRoot != null) {
-			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
+			thePeerAuxilliaryRoot = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(
+					auxiliaryRoot, null, this);
 		}
 	}
 	public void render() {
 // 		following optimization has been abandoned for now
 //		System.err.println("in render "+frameCount);
 		if (disposed) return;
-		Texture2DLoaderJOGL.markAnimatedTexturesDirty(globalGL);
+		Texture2DLoaderJOGL.postRender(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
-			thePeerRoot = constructPeerForSceneGraphComponent(theRoot, null); 
+			thePeerRoot = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(theRoot, null, this); 
 		}
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
-			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
+			thePeerAuxilliaryRoot = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(
+					auxiliaryRoot, null, this);
 
 		renderingState.context  = new Graphics3D(theViewer.getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
@@ -355,6 +349,18 @@ public class JOGLRenderer   {
 		currentViewport[3] = ry;
 	}
 
+	public Graphics3D getContext() {
+		return renderingState.context;
+	}
+
+	public int[] getCurrentViewport()	{
+		return currentViewport;
+	}
+
+	public double getAspectRatio() {
+		return ((double) currentViewport[2])/currentViewport[3];
+	}
+
 	/*
 	 * Here are the methods from the GLListener interface
 	 */
@@ -383,10 +389,10 @@ public class JOGLRenderer   {
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
-//		if (theRoot != null) extractGlobalParameters();
-		// traverse tree and delete all display lists
-		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
-		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
+		if (thePeerRoot != null) 
+			thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
+		if (thePeerAuxilliaryRoot != null) 
+			thePeerAuxilliaryRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 	}
 	
 	public void displayChanged(GLAutoDrawable arg0, boolean arg1, boolean arg2) {
@@ -602,101 +608,8 @@ public class JOGLRenderer   {
 		whichEye=CameraUtility.LEFT_EYE;
 	}
 
-
-	//	static {
-//		try {
-//			String foo = Secure.getProperty("jreality.jogl.goBetweenClass");  //TODO: move to de.jreality.util.SystemProperties
-//			if (foo != null)
-//				try {
-//					gbClass = (Class<? extends GoBetween>) Class.forName(foo);
-//				} catch (ClassNotFoundException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//		} catch (AccessControlException e) {
-//			e.printStackTrace();
-//		} catch(SecurityException se)	{
-//			LoggingSystem.getLogger(JOGLRenderer.class).warning("Security exception in setting configuration options");
-//		}	
-//	}
-	WeakHashMap<SceneGraphComponent, GoBetween> goBetweenTable = new WeakHashMap<SceneGraphComponent, GoBetween>();
-	/**
-	 * @deprecated
-	 */
-	public   GoBetween goBetweenFor(SceneGraphComponent sgc, boolean singlePeer)	{
-		return GoBetween.goBetweenFor(this, sgc, singlePeer);
-	}
-
-	int geomDiff = 0;
-	WeakHashMap<Geometry, JOGLPeerGeometry> geometries = new WeakHashMap<Geometry, JOGLPeerGeometry>();
-	protected void updateGeometryHashtable() {
-		if (!geometryRemoved) return;
-		final WeakHashMap<Geometry, JOGLPeerGeometry> newG = new WeakHashMap<Geometry, JOGLPeerGeometry>();
-		SceneGraphVisitor cleanup = new SceneGraphVisitor()	{
-			public void visit(SceneGraphComponent c) {
-				if (c.getGeometry() != null) {
-					Geometry wawa = c.getGeometry();
-					JOGLPeerGeometry peer = geometries.get(wawa);
-					newG.put(wawa, peer);
-				}
-				c.childrenAccept(this);
-			}
-		};
-		cleanup.visit(theRoot);
-		geometryRemoved = false;
-		//TODO dispose of the peer geomtry nodes which are no longer in the graph
-		if (geometries.size() - newG.size() != geomDiff)	{
-			JOGLConfiguration.theLog.log(Level.WARNING,"Old, new hash size: "+geometries.size()+" "+newG.size());
-			geomDiff = geometries.size() - newG.size() ;
-		}
-		return;
-	}
-	public  JOGLPeerGeometry getJOGLPeerGeometryFor(Geometry g)	{
-		JOGLPeerGeometry pg;
-		synchronized(geometries)	{
-			pg = (JOGLPeerGeometry) geometries.get(g);
-			if (pg != null) return pg;
-			pg = new JOGLPeerGeometry(g, this);
-			geometries.put(g, pg);			
-		}
-		return pg;
-	}
-
-	protected JOGLPeerComponent constructPeerForSceneGraphComponent(final SceneGraphComponent sgc, final JOGLPeerComponent p) {
-		if (sgc == null) return null;
-		final JOGLPeerComponent[] peer = new JOGLPeerComponent[1];
-		ConstructPeerGraphVisitor constructPeer = new ConstructPeerGraphVisitor( sgc, p, this);
-		peer[0] = (JOGLPeerComponent) constructPeer.visit();
-		return peer[0];
-	}
-
-
-	public Graphics3D getContext() {
-		return renderingState.context;
-	}
-
-	public int[] getCurrentViewport()	{
-		return currentViewport;
-	}
-
-	public double getAspectRatio() {
-		return ((double) currentViewport[2])/currentViewport[3];
-	}
-
-	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLAutoDrawable canvas) {
-		BufferedImage img = offscreenRenderer.renderOffscreen(imageWidth, imageHeight, canvas);
-		ImageUtility.writeBufferedImage(file, img);
-	}
-
-	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
-		return offscreenRenderer.renderOffscreen(imageWidth, imageHeight, canvas);
-	}
-
 	public PickPoint[] performPick(double[] pickPointNDC) {
 		throw new IllegalArgumentException("Picking has been removed from JOGL renderer");
 	}
-
-
-
 
 }

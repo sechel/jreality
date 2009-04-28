@@ -17,7 +17,6 @@ import de.jreality.scene.event.TransformationEvent;
 public class MatrixListGoBetween extends GoBetween {
 
 	public MatrixListGoBetween()	{
-		super();
 	}
 	
 	protected MatrixListGoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean b) {
