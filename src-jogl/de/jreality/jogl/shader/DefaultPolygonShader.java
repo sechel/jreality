@@ -145,7 +145,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			if (GlslProgram.hasGlslProgram(eap, name)) {
 				// dummy to write glsl values like "lightingEnabled"
 				Appearance app = new Appearance();
-//				EffectiveAppearance eap2 = eap.create(app);
 				glslProgram = new GlslProgram(app, eap, name);
 			} else {
 				if (noneuclideanShader == null) {
@@ -158,9 +157,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				}
 
 				glslProgram = noneuclideanShader;
-//				glslProgram.setUniform("Nw", (double) 1.0);
 			}
-//			glslShader.setFromEffectiveAppearance(eap, name);
 	    }
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
@@ -168,7 +165,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
  	}
 
 	public Color getDiffuseColor() {
-		return vertexShader.getDiffuseColor(); //diffuseColor;
+		return vertexShader.getDiffuseColor(); 
 	}
 
 	public float[] getDiffuseColorAsFloat() {
@@ -207,7 +204,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			    	gl.glActiveTexture(GL.GL_TEXTURE0);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, joglTexture2D);
-//					System.err.println("rendered texture 0");
 				    texUnit++;
 				    texunitcoords++;		
 			    }
@@ -215,7 +211,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				    gl.glActiveTexture(GL.GL_TEXTURE0+1);
 				    gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, joglTexture2D_1);
-//					System.err.println("rendered texture 1");
 				    texUnit++;
 				    texunitcoords++;
 			    }
@@ -226,7 +221,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				    texUnit++;
 				    texunitcoords++;		
 			    }
-//			    System.err.println("Found textures "+(texunitcoords));
 		    }
 		}
 
