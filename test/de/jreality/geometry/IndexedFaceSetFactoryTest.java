@@ -639,4 +639,10 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		ViewerApp va = ViewerApp.display(sgc);
 		CameraUtility.encompass(va.getCurrentViewer());
 	};
+	
+	public void testZeroFaceCount() throws Exception {
+		factory.setVertexCount(vertices.length/3);
+		factory.setVertexCoordinates(vertices);
+		factory.update();
+	}
 }
