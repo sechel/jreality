@@ -298,7 +298,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (radii != null) ra = radii.toDoubleArray();
 		double radiiFactor = 1.0;
 		if (radiiWorldCoords)	{
-			double[] o2w = jr.currentPath.getMatrix(null);
+			double[] o2w = jr.renderingState.currentPath.getMatrix(null);
 			radiiFactor = CameraUtility.getScalingFactor(o2w, jr.renderingState.currentMetric);
 			radiiFactor = 1.0/radiiFactor;
 		}

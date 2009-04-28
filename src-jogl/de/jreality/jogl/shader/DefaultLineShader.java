@@ -219,7 +219,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		final boolean useDisplayLists = jrs.useDisplayLists;
 		double factor = 1.0;
 		if (radiiWorldCoords)	{
-			double[] o2w = jr.currentPath.getMatrix(null);
+			double[] o2w = jr.renderingState.currentPath.getMatrix(null);
 			factor = CameraUtility.getScalingFactor(o2w, jr.renderingState.currentMetric);
 			factor = 1.0/factor;
 		}
