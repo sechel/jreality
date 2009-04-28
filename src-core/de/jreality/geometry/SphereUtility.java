@@ -163,30 +163,40 @@ public class SphereUtility {
 	 * @return
 	 */
 	public static SceneGraphComponent tessellatedCubeSphere(int i)	{
+		return tessellatedCubeSphere(i, false);
+	}
+	public static SceneGraphComponent tessellatedCubeSphere(int i, boolean sharedInstance)	{
 		/*
 		 * TODO add a flag to allow a non-shared copy of the geometry
 		 */
-		if (i<0 || i >= numberOfTessellatedCubes) {
-			LoggingSystem.getLogger(SphereUtility.class).warning("Invalid index");
-			if (i<0) i = 0; 
-			else i = numberOfTessellatedCubes-1;
+		if (sharedInstance) {
+			if (i<0 || i >= numberOfTessellatedCubes) {
+				LoggingSystem.getLogger(SphereUtility.class).warning("Invalid index");
+				if (i<0) i = 0; 
+				else i = numberOfTessellatedCubes-1;
+			}
 		}
 		if (cubeSyms == null)	{
 			cubeSyms = new Transformation[2];
 			cubeSyms[0] = new Transformation();
 			cubeSyms[1] = new Transformation( new double[] {-1,0,0,0,  0,0,1,0,  0,1,0,0, 0,0,0,1});
 		}
-		if (tessellatedCubes[i] == null)	{
-			cubePanels[i] = oneHalfSphere(2*i+2);//uvPanel(0.0, 0.0,270.0, 90.0, 6*i+4, 2*i+2, 1.0);
-			tessellatedCubes[i] = new SceneGraphComponent();
-			for (int j = 0; j<2; ++j)	{
-				SceneGraphComponent sgc = new SceneGraphComponent();
-				sgc.setTransformation(cubeSyms[j]);
-				sgc.setGeometry(cubePanels[i]);
-				tessellatedCubes[i].addChild(sgc);
-			}
+		if (sharedInstance && tessellatedCubes[i] != null)	{
+			return tessellatedCubes[i];
 		}
-		return tessellatedCubes[i];
+		IndexedFaceSet hemisphere = oneHalfSphere(2*i+2);//uvPanel(0.0, 0.0,270.0, 90.0, 6*i+4, 2*i+2, 1.0);
+		SceneGraphComponent parent = new SceneGraphComponent();
+		for (int j = 0; j<2; ++j)	{
+			SceneGraphComponent sgc = new SceneGraphComponent();
+			sgc.setTransformation(cubeSyms[j]);
+			sgc.setGeometry(hemisphere);
+			parent.addChild(sgc);
+		}
+		if (sharedInstance)	{
+			cubePanels[i] = hemisphere;//uvPanel(0.0, 0.0,270.0, 90.0, 6*i+4, 2*i+2, 1.0);
+			tessellatedCubes[i] = parent;	
+		}
+		return parent;
 	}
 	
 	/**
