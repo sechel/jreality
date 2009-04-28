@@ -121,6 +121,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		for (int i = n-1; i>=0; --i)	{
 			JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 			child.dispose();
+			children.remove(i);
 		}	
 		goBetween.removeJOGLPeer(this);
 	}

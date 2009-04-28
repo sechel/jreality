@@ -154,7 +154,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
-		javax.swing.Timer followTimer = new javax.swing.Timer(1000, new ActionListener()	{
+		followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
@@ -785,6 +785,7 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	BufferedImage offscreenImage;
 	boolean preMultiplied = false;		// not sure about this!
+	private javax.swing.Timer followTimer;
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
@@ -823,6 +824,20 @@ public class JOGLRenderer  implements AppearanceListener {
 
 	public PickPoint[] performPick(double[] pickPointNDC) {
 		throw new IllegalArgumentException("Picking has been removed from JOGL renderer");
+	}
+
+
+	public void dispose() {
+		lightHelper.disposeLights();
+		if (theRoot != null) {
+			Appearance ap = theRoot.getAppearance();
+			if (ap != null) ap.removeAppearanceListener(this);
+		}
+		if (thePeerRoot != null) thePeerRoot.dispose();
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.dispose();
+		followTimer.setRepeats(false);
+		followTimer.stop();
+		followTimer=null;
 	}
 
 }

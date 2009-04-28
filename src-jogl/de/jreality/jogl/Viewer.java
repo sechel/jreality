@@ -41,11 +41,13 @@
 package de.jreality.jogl;
 
 import java.awt.GraphicsEnvironment;
+import java.lang.ref.WeakReference;
 import java.util.logging.Level;
 
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCapabilitiesChooser;
+import javax.media.opengl.GLContext;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -69,12 +71,13 @@ public class Viewer extends AbstractViewer {
 		caps.setAlphaBits(8);
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
+		GLContext sharedContext = firstOne.get();
 		if (JOGLConfiguration.multiSample)	{
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
 			caps.setStereo(JOGLConfiguration.quadBufferedStereo);
-			canvas = new GLCanvas(caps, chooser, firstOne,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
+			canvas = new GLCanvas(caps, chooser, sharedContext,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
 		} else {
 			canvas = new GLCanvas(caps);
 		}
@@ -83,8 +86,16 @@ public class Viewer extends AbstractViewer {
  		drawable.addGLEventListener(this);
  		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
 //		canvas.requestFocus();
-		if (JOGLConfiguration.sharedContexts && firstOne == null) firstOne = drawable.getContext();
+		if (JOGLConfiguration.sharedContexts && sharedContext == null) {
+			firstOne = new WeakReference<GLContext>(drawable.getContext());
+		}
 	}
 
+	public void dispose() {
+		super.dispose();
+		if (drawable != null) drawable.removeGLEventListener(this);
+		drawable = null;
+		canvas=null;
+	}
 	
 }

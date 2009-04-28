@@ -43,11 +43,13 @@ package de.jreality.jogl;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.lang.ref.WeakReference;
 import java.util.logging.Level;
 
 import javax.media.opengl.DefaultGLCapabilitiesChooser;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCapabilitiesChooser;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
@@ -93,6 +95,9 @@ public class GLJPanelViewer extends Viewer {
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
 		GLCapabilitiesChooser chooser = new MultisampleChooser();
+		
+		GLContext sharedContext = firstOne.get();
+		
 		if (JOGLConfiguration.multiSample)	{
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
@@ -100,9 +105,9 @@ public class GLJPanelViewer extends Viewer {
 		} else {
 			chooser = new DefaultGLCapabilitiesChooser();
 		}
-		if (JOGLConfiguration.sharedContexts && firstOne == null) 
+		if (JOGLConfiguration.sharedContexts && sharedContext == null) 
 			setupSharedContext(caps, chooser);
-		panel = new GLJPanel(caps, chooser, firstOne) {
+		panel = new GLJPanel(caps, chooser, sharedContext) {
 
 			@Override
 			protected void paintComponent(Graphics arg0) {
@@ -124,7 +129,7 @@ public class GLJPanelViewer extends Viewer {
 	  private void setupSharedContext(GLCapabilities caps, GLCapabilitiesChooser chooser) {
 		if (sharedPBuffer == null)
 			sharedPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(caps, chooser, 1,1, null);
-		firstOne = sharedPBuffer.getContext();
+		firstOne = new WeakReference<GLContext>(sharedPBuffer.getContext());
 	  }
 
 	public boolean isOpaque() {

@@ -52,6 +52,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EventObject;
 import java.util.Vector;
@@ -82,7 +83,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	protected JOGLRenderer renderer;
 	int metric;
 	boolean isFlipped = false;
-	static GLContext firstOne = null;		// for now, all display lists shared with this one
+	static WeakReference<GLContext> firstOne = new WeakReference<GLContext>(null);		// for now, all display lists shared with this one
 	public static final int 	CROSS_EYED_STEREO = 0;
 	public static final int 	RED_BLUE_STEREO = 1;
 	public static final int 	RED_GREEN_STEREO = 2;
@@ -150,16 +151,8 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	}
 
 	private JPanel component;
-  
-  public Object getViewingComponent() {
-    // this is to avoid layout problems when returning the plain glcanvas
-    if (component == null) {
-      component=new javax.swing.JPanel();
-      component.setLayout(new java.awt.BorderLayout());
-      component.setMaximumSize(new java.awt.Dimension(32768,32768));
-      component.setMinimumSize(new java.awt.Dimension(10,10));
-      component.add("Center", (Component) drawable);
-      ((Component) drawable).addKeyListener(new KeyListener() {
+
+	KeyListener keyListener = new KeyListener() {
         public void keyPressed(KeyEvent e) {
           component.dispatchEvent(e);
         }
@@ -169,8 +162,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
         public void keyTyped(KeyEvent e) {
           component.dispatchEvent(e);
         }
-      });
-      ((Component) drawable).addMouseListener(new MouseListener() {
+      };      MouseListener mouseListener = new MouseListener() {
         public void mouseClicked(MouseEvent e) {
           component.dispatchEvent(e);
         }
@@ -186,20 +178,34 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
         public void mouseReleased(MouseEvent e) {
           component.dispatchEvent(e);
         }
-      });
-      ((Component) drawable).addMouseMotionListener(new MouseMotionListener() {
+      };
+    MouseWheelListener mouseWheelListener = new MouseWheelListener() {
+        public void mouseWheelMoved(MouseWheelEvent e) {
+          component.dispatchEvent(e);
+        }
+      };
+
+      MouseMotionListener mouseMotionListener = new MouseMotionListener() {
         public void mouseDragged(MouseEvent e) {
           component.dispatchEvent(e);
         }
         public void mouseMoved(MouseEvent e) {
           component.dispatchEvent(e);
         }
-      });
-      ((Component) drawable).addMouseWheelListener(new MouseWheelListener() {
-        public void mouseWheelMoved(MouseWheelEvent e) {
-          component.dispatchEvent(e);
-        }
-      });
+      };
+
+  public Object getViewingComponent() {
+    // this is to avoid layout problems when returning the plain glcanvas
+    if (component == null) {
+      component=new javax.swing.JPanel();
+      component.setLayout(new java.awt.BorderLayout());
+      component.setMaximumSize(new java.awt.Dimension(32768,32768));
+      component.setMinimumSize(new java.awt.Dimension(10,10));
+      component.add("Center", (Component) drawable);
+	((Component) drawable).addKeyListener(keyListener);
+	((Component) drawable).addMouseListener(mouseListener);
+	((Component) drawable).addMouseMotionListener(mouseMotionListener);
+	((Component) drawable).addMouseWheelListener(mouseWheelListener);
     }
     return component;
   }
@@ -438,4 +444,20 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
       }
   }
 	
+  public void dispose() {
+	  cameraPath.clear();
+	  cameraNode=null;
+	  if (component != null) {
+			((Component) drawable).removeKeyListener(keyListener);
+			((Component) drawable).removeMouseListener(mouseListener);
+			((Component) drawable).removeMouseMotionListener(mouseMotionListener);
+			((Component) drawable).removeMouseWheelListener(mouseWheelListener);
+			component.removeAll();
+			component=null;
+	  }
+	  setSceneRoot(null);
+	  setAuxiliaryRoot(null);
+	  if (renderer != null) renderer.dispose();
+	  renderer = null;
+  }
 }
