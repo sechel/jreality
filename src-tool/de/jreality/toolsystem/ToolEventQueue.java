@@ -118,6 +118,7 @@ public class ToolEventQueue {
      */
     private boolean placeEvent(ToolEvent event) {
       synchronized(mutex) {
+    	  if (!running) return false;
         // we replace the last possible event
         for (ListIterator i = queue.listIterator(queue.size()); i.hasPrevious(); ) {
             ToolEvent e = (ToolEvent) i.previous();
@@ -138,8 +139,6 @@ public class ToolEventQueue {
         synchronized (mutex) {
 	        running = false;
             mutex.notifyAll();
-        }
-        synchronized (mutex) {
             queue.clear();
         }
     }

@@ -316,8 +316,8 @@ public class ToolSystem implements ToolEventReceiver {
 	}
 
 	public void processToolEvent(ToolEvent event) {
-		if (isDisposed()) return;
 		synchronized (mutex) {
+			if (disposed) return;
 			executing=true;
 		}
 		compQueue.add(event);
@@ -603,14 +603,19 @@ public class ToolSystem implements ToolEventReceiver {
 		return avatarPath != null ? avatarPath : viewer.getCameraPath();
 	}
 
-	private synchronized boolean isDisposed() {
-		return disposed;
-	}
-	
 	public synchronized void dispose() {
-		disposed=true;
-		eventQueue.dispose();
+		synchronized (mutex) {
+			disposed=true;
+			while (executing)
+				try {
+					mutex.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
 		deviceManager.dispose();
+		eventQueue.dispose();
 		updater.dispose();
 		unsetToolSystem(this); // remove from the viewer->tool-system table
 	}
@@ -630,6 +635,7 @@ public class ToolSystem implements ToolEventReceiver {
 
 	void addTool(Tool tool, SceneGraphPath path) {
 		synchronized (mutex) {
+			if (disposed) return;
 			if (executing)
 				toolsChanging.add(new Pair(tool, path, true));
 			else addToolImpl(tool, path);
@@ -638,6 +644,7 @@ public class ToolSystem implements ToolEventReceiver {
 
 	void removeTool(Tool tool, SceneGraphPath path) {
 		synchronized (mutex) {
+			if (disposed) return;
 			if (executing)
 				toolsChanging.add(new Pair(tool, path, false));
 			else removeToolImpl(tool, path);
@@ -713,6 +720,11 @@ public class ToolSystem implements ToolEventReceiver {
 
     public RenderTrigger getRenderTrigger() {
         return renderTrigger;
+    }
+    
+    @Override
+    protected void finalize() throws Throwable {
+    	System.out.println("ToolSystem.finalize()");
     }
 
 }
