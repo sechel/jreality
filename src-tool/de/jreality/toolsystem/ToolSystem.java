@@ -608,7 +608,7 @@ public class ToolSystem implements ToolEventReceiver {
 			disposed=true;
 			while (executing)
 				try {
-					mutex.wait();
+					mutex.wait(1);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
