@@ -154,6 +154,9 @@ public class CameraUtility {
 	 * @param setStereoParameters
 	 */
 	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters)	{
+		encompass(viewer, sgc, setStereoParameters, Pn.EUCLIDEAN);
+	}
+	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters, int metric)	{
 		Rectangle3D worldBox = BoundingBoxUtility.calculateBoundingBox(sgc);//. bbv.getBoundingBox();
 		if (worldBox == null || worldBox.isEmpty())	{
 			LoggingSystem.getLogger(CameraUtility.class).log(Level.WARNING,"encompass: empty bounding box");
@@ -185,7 +188,7 @@ public class CameraUtility {
 		double[] tofrom = {0,0,focus}; 
 		double[] from = Rn.add(null, to, tofrom);
 		if (debug) LoggingSystem.getLogger(CameraUtility.class).log(Level.FINER,"translate: "+Rn.toString(from));
-		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, Pn.EUCLIDEAN);
+		double[] newCamToWorld = P3.makeTranslationMatrix(null, from, metric);
 		double[] newWorldToCam = Rn.inverse(null, newCamToWorld);
 		getCameraNode(viewer).getTransformation().setMatrix(newCamToWorld); //Translation(from);			
 		double[] centerWorld = Rn.matrixTimesVector(null, newWorldToCam, worldBox.getCenter() );
