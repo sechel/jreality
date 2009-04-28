@@ -640,10 +640,10 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		CameraUtility.encompass(va.getCurrentViewer());
 	};
 	
-	public void testZeroFaceCount() throws Exception {
+	public void testFaceIndicesUnset() throws Exception {
 		factory.setVertexCount(vertices.length/3);
 		factory.setVertexCoordinates(vertices);
-		//factory.setFaceCount(3);
+		factory.setFaceCount(0);
 		factory.update();
 	}
 	
