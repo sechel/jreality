@@ -44,7 +44,11 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
@@ -71,8 +75,8 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
   private ViewerAppMenu menu;
   private Component viewer;
   
-  private static HashMap <ViewerApp, ToggleViewerFullScreen> sharedInstances = new HashMap <ViewerApp, ToggleViewerFullScreen>();
-  
+
+  private static List<WeakReference<ToggleViewerFullScreen>> sharedInstances = new LinkedList<WeakReference<ToggleViewerFullScreen>>();
   
   private ToggleViewerFullScreen(String name, ViewerApp viewerApp) {
     super(name);
@@ -99,10 +103,18 @@ public class ToggleViewerFullScreen extends AbstractJrAction {
     if (viewerApp == null) 
       throw new UnsupportedOperationException("ViewerApp not allowed to be null!");
     
-    ToggleViewerFullScreen sharedInstance = sharedInstances.get(viewerApp);
+    ToggleViewerFullScreen sharedInstance = null;
+    
+    for (Iterator<WeakReference<ToggleViewerFullScreen>> it = sharedInstances.iterator(); it.hasNext(); ) {
+    	WeakReference<ToggleViewerFullScreen> ref = it.next();
+    	ToggleViewerFullScreen obj = ref.get();
+    	if (obj == null) it.remove();
+    	else if (obj.viewerApp == viewerApp) sharedInstance = obj;
+    }
+    
     if (sharedInstance == null) {
       sharedInstance = new ToggleViewerFullScreen(name, viewerApp);
-      sharedInstances.put(viewerApp, sharedInstance);
+      sharedInstances.add(new WeakReference<ToggleViewerFullScreen>(sharedInstance));
     }
      
     sharedInstance.setName(name);

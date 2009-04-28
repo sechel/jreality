@@ -42,7 +42,11 @@ package de.jreality.ui.viewerapp.actions.view;
 
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
@@ -59,7 +63,7 @@ public class Maximize extends AbstractJrAction {
   private boolean isFullscreen = false;
   private Frame frame;
 
-  private static HashMap <Frame, Maximize> sharedInstances = new HashMap <Frame, Maximize>();
+  private static List<WeakReference<Maximize>> sharedInstances = new LinkedList<WeakReference<Maximize>>();
   
   
   private Maximize(String name, Frame frame) {
@@ -83,10 +87,19 @@ public class Maximize extends AbstractJrAction {
     if (frame == null) 
       throw new UnsupportedOperationException("Frame not allowed to be null!");
     
-    Maximize sharedInstance = sharedInstances.get(frame);
+    Maximize sharedInstance = null;
+    
+    for (Iterator<WeakReference<Maximize>> it = sharedInstances.iterator(); it.hasNext(); ) {
+    	WeakReference<Maximize> ref = it.next();
+    	Maximize obj = ref.get();
+    	if (obj == null) it.remove();
+    	else if (obj.frame == frame) sharedInstance = obj;
+    }
+    
+
     if (sharedInstance == null) {
       sharedInstance = new Maximize(name, frame);
-      sharedInstances.put(frame, sharedInstance);
+      sharedInstances.add(new WeakReference<Maximize>(sharedInstance));
     }
      
     sharedInstance.setName(name);

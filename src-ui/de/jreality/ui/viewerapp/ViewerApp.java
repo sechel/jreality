@@ -1090,6 +1090,10 @@ public class ViewerApp {
 
 		SelectionManager.disposeForViewer(viewerSwitch);
 		
+		if (menu != null) menu.dispose();
+		
+		frame.getContentPane().removeAll();
+		
 		frame.dispose();
 		if (externalNavigatorFrame!=null) externalNavigatorFrame.dispose();
 		if (externalBeanShellFrame!=null) externalBeanShellFrame.dispose();

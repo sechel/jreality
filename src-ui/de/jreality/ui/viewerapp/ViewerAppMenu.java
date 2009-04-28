@@ -738,4 +738,8 @@ private JMenu createFileMenu() {
 		showMenu.put(menuName, show);
 	}
 
+	void dispose() {
+		menuBar.removeAll();
+	}
+	
 }
