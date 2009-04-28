@@ -309,14 +309,15 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
     	
     /* IMPLEMENTATIONS OF GENERATED ATTRIBUTES according to the following dependency tree:
      * 
-     *  faceCount      metric   vertexCoordinates    faceIndices      unwrapFaceIndices
-     *     |               |\        /  ____\________/  /   \                 |
-     *  faceLables         | \      /  /     \         /     \     actualVertexOfUnwrapVertex
-     *                     |  faceNormals     aabbTree     edgeIndices   
-     *                     |     /                            |
-     *                     |    /               edgeCount (see AbstractIndexedLineSet)
-     *                     |   /
-     *               vertexNormals
+     *  faceCount                metric   vertexCoordinates    faceIndices    
+     *     |                        |\        /  ____\________/  /   \        
+     *  faceLables                  | \      /  /     \         /     \ 
+     *                              |  faceNormals     aabbTree     edgeIndices   
+     *  unwrapFaceIndices           |     /                            |
+     *        |                     |    /               edgeCount (see AbstractIndexedLineSet)
+     * actualVertexOfUnwrapVertex   |   /
+     *                          \   |  /
+     *                         vertexNormals
      * 
      */
 	
@@ -330,29 +331,36 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		actualVertexOfUnwrapVertex.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {
-						if (unwrapFaceIndices.getObject()==null) 
-							return null;
-	
 						int[][] fi = (int[][]) faceIndices.getObject();
 						int[][] unwrapFI = (int[][]) unwrapFaceIndices.getObject();
 						int[] actualVOUV = (int[]) object;
-	
+
 						//get number of unwrap vertices
 						int nv=nov();
 						
-						//update translation table between actual and unwrap vertex indices
-						if (actualVOUV==null || actualVOUV.length != nv)
-							actualVOUV = new int[nv];
-						for (int f=0; f<nof(); f++) 
-							for (int v=0; v<fi[f].length; v++) 
-								actualVOUV[unwrapFI[f][v]]=fi[f][v];
+						actualVOUV = determineActualVertexOfUnwrapVertex(fi,
+								unwrapFI, actualVOUV, nv);
 						
 						return actualVOUV;
-					}					
+					}
+
 				}
 		);
 	}
 
+	// determine translation table between actual and unwrap vertex indices
+	int[] determineActualVertexOfUnwrapVertex(int[][] fi, int[][] unwrapFI, int[] actualVOUV, int nv) {
+
+		if (fi == null || unwrapFI == null)
+			return null;
+		
+		if (actualVOUV==null || actualVOUV.length != nv)
+			actualVOUV = new int[nv];
+		for (int f=0; f<nof(); f++) 
+			for (int v=0; v<fi[f].length; v++) 
+				actualVOUV[unwrapFI[f][v]]=fi[f][v];
+		return actualVOUV;
+	}					
 	
 	/* faceLabels
 	 * The faces are labeled by their indices.
@@ -429,6 +437,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		faceNormals.addIngr(metric);
 		faceNormals.addIngr(faceIndices);
 		faceNormals.addIngr(vertexCoordinates);
+		faceNormals.addIngr(actualVertexOfUnwrapVertex);
 		faceNormals.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {					
@@ -479,7 +488,18 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			fn = IndexedFaceSetUtility.calculateFaceNormals( fi, vc, getMetric() );
 		}
 		
-		return IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getMetric() );
+		vertexNormals=IndexedFaceSetUtility.calculateVertexNormals( fi, vc, fn, getMetric() );
+		
+		/* add vertex normals to corresponding unwrap vertices */
+		int[] translation=(int[]) actualVertexOfUnwrapVertex.getObject();
+		if ( translation != null ) {
+			for (int i=0; i<vertexNormals.length; i++)
+				if (i!=translation[i])
+					System.arraycopy(vertexNormals[translation[i]], 0, vertexNormals[i], 0, vertexNormals[translation[i]].length);
+		}
+
+		return vertexNormals;
+
 	}
 
 	
@@ -494,10 +514,12 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		faceLabels.update();
 		edgeIndices.update();
 		faceNormals.update();
+		
 		if (unwrapFaceIndices.getObject()==null  && nodeWasUpdated(unwrapFaceIndices)) 
 				//unwrapFaceIndices where just set to null, 
 				//so the usual vertexNormals have to be restored
 				vertexNormals.outdate();		
+		
 		vertexNormals.update();
 	}
 
@@ -514,12 +536,14 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			ifs.setGeometryAttributes(PickUtility.AABB_TREE, aabbTree.getObject());
 		
 		/*face indices */
-		if (unwrapFaceIndices.getObject()!=null)			
+		if (unwrapFaceIndices.getObject()!=null)
+			// overwrite face indices with unwrap face indices 
 			ifs.setFaceAttributes(
 					Attribute.INDICES, 
 					StorageModel.INT_ARRAY_ARRAY.createReadOnly( (int[][]) unwrapFaceIndices.getObject())
 					);
-		else if (nodeWasUpdated(unwrapFaceIndices)) // unwrapFaceIndices was set to null since last update, so 
+		else if (faceIndices.getObject()!=null && nodeWasUpdated(unwrapFaceIndices)) 
+			//unwrapFaceIndices was set to null since last update, so 
 			//faceIndices have to be restored, even if they have not been updated. If faceIndices where updated
 			//they where already set/restored by "updateGeometryAttributeCathegory( face )" above. 
 			ifs.setFaceAttributes(
@@ -529,31 +553,11 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 			
 		
 		edgeIndices.updateArray();
+
 		faceLabels.updateArray();
 		faceNormals.updateArray();
-		
-		/* vertex normals */
-		if (unwrapFaceIndices.getObject()==null  || !vertexNormals.isGenerate()) {
-			//in both cases the usual updateArray is able to decide what has to be done
-			vertexNormals.updateArray();
-		}
-		else //unwrapFaceIndices present AND vertexNormals are generated  
-			if (nodeWasUpdated(actualVertexOfUnwrapVertex) || nodeWasUpdated(vertexNormals)) {
-				//
-			double[][] vn=(double[][]) vertexNormals.getObject();
-			int[] translation=(int[]) actualVertexOfUnwrapVertex.getObject();
-			double[][] unwrappedVN = new double[nov()][vn[0].length]; 
-			
-			for (int i=0; i<unwrappedVN.length; i++)
-				System.arraycopy(vn[translation[i]], 0, unwrappedVN[i], 0, vn[translation[i]].length);
-			
-			ifs.setVertexAttributes(
-					Attribute.NORMALS, 
-					StorageModel.DOUBLE_ARRAY_ARRAY.createReadOnly( unwrappedVN ) 
-					);
-		}
-			
-				
+
+		vertexNormals.updateArray();
 	}
 
 }

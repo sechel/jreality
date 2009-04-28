@@ -643,7 +643,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	public void testZeroFaceCount() throws Exception {
 		factory.setVertexCount(vertices.length/3);
 		factory.setVertexCoordinates(vertices);
-		factory.setFaceCount(0);
+		//factory.setFaceCount(3);
 		factory.update();
 	}
 	
