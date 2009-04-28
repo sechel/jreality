@@ -603,7 +603,7 @@ public class ToolSystem implements ToolEventReceiver {
 		return avatarPath != null ? avatarPath : viewer.getCameraPath();
 	}
 
-	public synchronized void dispose() {
+	public void dispose() {
 		synchronized (mutex) {
 			disposed=true;
 			while (executing)
@@ -614,6 +614,7 @@ public class ToolSystem implements ToolEventReceiver {
 					e.printStackTrace();
 				}
 		}
+		System.out.println("event queue shut down done...");
 		deviceManager.dispose();
 		eventQueue.dispose();
 		updater.dispose();

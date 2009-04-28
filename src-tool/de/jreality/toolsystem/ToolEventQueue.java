@@ -64,20 +64,24 @@ public class ToolEventQueue {
     private Runnable eventThread = new Runnable() {
     	public void run() {
             ToolEvent event;
-            while (true) {
+            boolean isRunning;
+            loop: while (true) {
                 synchronized(mutex) {
                     while (queue.isEmpty()) {
                         try {
                         	if (running) mutex.wait();
-                            else return;
+                            else break loop;
                         } catch (InterruptedException e) {
                             throw new Error();
                         }
                     }
                     event = (ToolEvent) queue.removeFirst();
+                    isRunning = running;
                 }
-                receiver.processToolEvent(event);
+                if (isRunning) receiver.processToolEvent(event);
+                else break;
             }
+            System.out.println("TEQ shut down.");
         }    
     };
     
@@ -118,7 +122,7 @@ public class ToolEventQueue {
      */
     private boolean placeEvent(ToolEvent event) {
       synchronized(mutex) {
-    	  if (!running) return false;
+    	if (!running) return false;
         // we replace the last possible event
         for (ListIterator i = queue.listIterator(queue.size()); i.hasPrevious(); ) {
             ToolEvent e = (ToolEvent) i.previous();
