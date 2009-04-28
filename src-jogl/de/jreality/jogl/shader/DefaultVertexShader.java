@@ -66,13 +66,6 @@ public class DefaultVertexShader implements VertexShader {
 	public double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
 	public float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
 	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
-	public static DefaultVertexShader defaultShader = new DefaultVertexShader();
-	static {
-		Appearance ap = new Appearance();
-		EffectiveAppearance eap = EffectiveAppearance.create();
-		eap.create(ap);
-		defaultShader.setFromEffectiveAppearance(eap, "");
-	}
 	
 	public DefaultVertexShader() {
 		super();

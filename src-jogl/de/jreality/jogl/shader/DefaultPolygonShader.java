@@ -96,18 +96,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	GlslProgram glslProgram;
 	transient boolean geometryHasTextureCoordinates = false, hasTextures = false;
 	transient boolean firstTime = true;
-	public static DefaultPolygonShader defaultShader = new DefaultPolygonShader();
+	
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	// try loading the OpenGL shader for the non-euclidean cases
 	static GlslProgram noneuclideanShader = null;
 	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
 	JOGLRenderingState theJRS;
-	static {
-		Appearance ap = new Appearance();
-		EffectiveAppearance eap = EffectiveAppearance.create();
-		eap.create(ap);
-		defaultShader.setFromEffectiveAppearance(eap, "");
-	}
 	
 	public DefaultPolygonShader()	{
 		
