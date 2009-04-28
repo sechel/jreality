@@ -45,6 +45,8 @@ import javax.media.opengl.GL;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.pick.Graphics3D;
 import de.jreality.util.CameraUtility;
 
 /**
@@ -87,6 +89,7 @@ public class JOGLRenderingState {
 	public int currentMetric = Pn.EUCLIDEAN;
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
+	public int stereoType = Viewer.CROSS_EYED_STEREO;
 	protected int[] sphereDisplayLists = null;
 	protected int[] cylinderDisplayLists = null;
 	
@@ -101,7 +104,8 @@ public class JOGLRenderingState {
 	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
 	public float[] diffuseColor = new float[4];
 
-	
+	public SceneGraphPath currentPath = new SceneGraphPath();
+	public Graphics3D context;
 	
 	public JOGLRenderingState(JOGLRenderer jr) {
 		super();

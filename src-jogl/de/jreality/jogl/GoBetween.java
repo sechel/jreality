@@ -44,7 +44,7 @@ public class GoBetween extends JOGLPeerNode implements
 	public static void setGoBetweenClass(Class<? extends GoBetween> c)	{
 		gbClass = c; 
 	}
-	static WeakHashMap<JOGLRenderer, WeakHashMap> rendererTable = 
+	protected static WeakHashMap<JOGLRenderer, WeakHashMap> rendererTable = 
 		new WeakHashMap<JOGLRenderer, WeakHashMap>();
 	
 	public   static GoBetween goBetweenFor(JOGLRenderer jr, SceneGraphComponent sgc, boolean singlePeer)	{

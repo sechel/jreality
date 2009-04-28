@@ -149,10 +149,11 @@ public class JOGLRendererHelper {
 				xr = 1.0 - xl;
 			}
 			if (jr.offscreenMode)	{
-				double xmin = ((double)jr.whichTile[0])/jr.numTiles;
-				double xmax = ((double)jr.whichTile[0]+1)/jr.numTiles;
-				double ymin = ((double)jr.whichTile[1])/jr.numTiles;
-				double ymax = ((double)jr.whichTile[1]+1)/jr.numTiles;
+				int numTiles = jr.offscreenRenderer.getNumTiles();
+				double xmin = ((double)jr.whichTile[0])/numTiles;
+				double xmax = ((double)jr.whichTile[0]+1)/numTiles;
+				double ymin = ((double)jr.whichTile[1])/numTiles;
+				double ymax = ((double)jr.whichTile[1]+1)/numTiles;
 				double nxl, nxr, nyb, nyt;
 				nxr = xr + xmin*(xl-xr);
 				nxl = xr + xmax*(xl-xr);

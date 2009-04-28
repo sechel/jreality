@@ -100,7 +100,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				theDropBox.newVisibleList = false;
 				displayListDirty = true;
 //				System.err.println("Got visible list");
-			} else if (jr.beginRenderTime - lastDisplayListCreationTime > theDropBox.delay)	{
+			} else if (jr.perfMeter.beginRenderTime - lastDisplayListCreationTime > theDropBox.delay)	{
 				displayListDirty = true;
 			}
 			jr.renderingState.componentDisplayLists = theDropBox.componentDisplayLists;
@@ -126,7 +126,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 					jr.globalGL.glNewList(displayList, GL.GL_COMPILE);
 					insideDL = jr.renderingState.insideDisplayList = true;
 //					System.err.println("dlist elapsed time: "+(jr.beginRenderTime-lastDisplayListCreationTime));
-					lastDisplayListCreationTime = jr.beginRenderTime;
+					lastDisplayListCreationTime = jr.perfMeter.beginRenderTime;
 					//					theLog.fine("Turning on dlist for "+goBetween.getOriginalComponent().getName());
 				}	
 			}
@@ -211,9 +211,9 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	protected void pushTransformation(double[] m) {
 		if (w2camrepn != null )	{
 			// recalculate the matrix if we haven't yet done it this frame
-			if (framecount != jr.frameCount) {
+			if (framecount != jr.perfMeter.frameCount) {
 				w2camrepn.getInverseMatrix(world2CameraRepn);
-				framecount = jr.frameCount;
+				framecount = jr.perfMeter.frameCount;
 				Rn.times(camera2CameraRepn,world2CameraRepn,  jr.renderingState.cameraToWorld);
 				Rn.times(camera2CameraRepn, camera2CameraRepn , CameraUtility.inverseCameraOrientation.getArray());
 				isReflection = Rn.determinant(camera2CameraRepn) < 0;

@@ -41,12 +41,6 @@
 package de.jreality.jogl;
 
 import static de.jreality.shader.CommonAttributes.BACKGROUND_COLORS;
-import static de.jreality.shader.CommonAttributes.CLEAR_COLOR_BUFFER;
-import static de.jreality.shader.CommonAttributes.FORCE_RESIDENT_TEXTURES;
-import static de.jreality.shader.CommonAttributes.ONE_TEXTURE2D_PER_IMAGE;
-import static de.jreality.shader.CommonAttributes.RENDER_S3;
-import static de.jreality.shader.CommonAttributes.SKY_BOX;
-import static de.jreality.shader.CommonAttributes.USE_OLD_TRANSPARENCY;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -89,63 +83,58 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.scene.event.AppearanceEvent;
-import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.pick.Graphics3D;
-import de.jreality.shader.CubeMap;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.CopyVisitor;
 import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
 
-public class JOGLRenderer  implements AppearanceListener {
-
-	private final  Logger theLog = LoggingSystem.getLogger(this);
-	private static boolean collectFrameRate = true;
-	protected final static int MAX_STACK_DEPTH = 28;
-	protected int stackDepth;
-    protected Matrix[] matrixStack = new Matrix[128];
-    protected int stackCounter = 0;
-    public Stack<RenderingHintsInfo> rhStack = new Stack<RenderingHintsInfo>();
-
-	public SceneGraphPath currentPath = new SceneGraphPath();
-
-	protected SceneGraphComponent theRoot, auxiliaryRoot;
-	protected JOGLPeerComponent thePeerRoot = null;
-	protected JOGLPeerComponent thePeerAuxilliaryRoot = null;
-	public JOGLRenderingState renderingState;
-	protected JOGLLightHelper lightHelper;
-
-	protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
-	protected int whichEye = CameraUtility.MIDDLE_EYE;
-	protected int[] currentViewport = new int[4];
-	protected Graphics3D context;
-	protected CubeMap skyboxCubemap;
+public class JOGLRenderer   {
 
 	public GL globalGL;
+	protected SceneGraphComponent theRoot, auxiliaryRoot;
 
-	protected boolean texResident = true;
-	protected int numberTries = 0;		// how many times we have tried to make textures resident
-	protected boolean forceResidentTextures = true;
-	protected boolean oneTexture2DPerImage = true;
+	// peer objects 
+	transient protected JOGLPeerComponent thePeerRoot = null,
+		thePeerAuxilliaryRoot = null;
+	// helper objects
+	transient public JOGLRenderingState renderingState;
+	transient protected JOGLLightHelper lightHelper;
+	transient protected JOGLTopLevelAppearance topAp;
+	transient protected JOGLOffscreenRenderer offscreenRenderer;
+	transient protected JOGLPerformanceMeter perfMeter;
 
+	transient protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
+	transient protected int whichEye = CameraUtility.MIDDLE_EYE;
+	transient protected int[] currentViewport = new int[4];
+
+	transient private final  Logger theLog = LoggingSystem.getLogger(this);
+	// software matrix stack
+	transient protected final static int MAX_STACK_DEPTH = 28;	// hardware supported
+	transient protected Matrix[] matrixStack = new Matrix[128];
+	transient protected int stackCounter,
+		stackDepth;
+	transient protected Stack<RenderingHintsInfo> rhStack = new Stack<RenderingHintsInfo>();
+
+	transient protected boolean texResident = true;
+	transient protected int numberTries = 0;		// how many times we have tried to make textures resident
+	// miscellaneous fields and methods
+	transient protected int clearColorBits;
 	// pick-related stuff
-	public boolean offscreenMode = false;
+	transient protected boolean offscreenMode = false;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
-	protected boolean renderSpherical = false,
-		frontBanana = true;
-	public static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
-	protected double framerate;
-	protected int nodeCount = 0;
+	transient protected static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
+	private javax.swing.Timer followTimer;
 
-	boolean geometryRemoved = false, lightListDirty = true, lightsChanged = true, clippingPlanesDirty = true;
+	transient boolean geometryRemoved = false, 
+		lightListDirty = true, 
+		lightsChanged = true, 
+		clippingPlanesDirty = true,
+		disposed = false,
+		frontBanana = false;
 	protected Viewer theViewer;
 	Camera theCamera;
-
-	protected int stereoType;
-	protected boolean flipped;
 
 	static {
 		MatrixBuilder.euclidean().translate(0,0,-.5).scale(1,1,.5).assignTo(frontZBuffer);
@@ -157,30 +146,31 @@ public class JOGLRenderer  implements AppearanceListener {
 		followTimer = new javax.swing.Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
 		followTimer.start();
+		//TODO figure out I do this here
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
-		// have to make sure JOGLConfiguration is initialized before we do anything else
-		JOGLConfiguration.getLogger(); 
+		offscreenRenderer = new JOGLOffscreenRenderer(this);
+		perfMeter = new JOGLPerformanceMeter(this);
 	}
 
-
-	public void setTextureResident(boolean b) {
-		texResident=b;
+	public void dispose() {
+		disposed = true;
+		lightHelper.disposeLights();
+		followTimer.setRepeats(false);
+		followTimer.stop();
+		setSceneRoot(null);
+		setAuxiliaryRoot(null);
+		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
+		if (topAp != null) topAp.dispose();
+		LoggingSystem.getLogger(this).info("gobetween table has "+GoBetween.rendererTable.get(this).size());
+		LoggingSystem.getLogger(this).info("geom table has "+geometries.size());
 	}
 
 	public int getStereoType() {
-		return stereoType;
+		return renderingState.stereoType;
 	}
 
 	public void setStereoType(int stereoType) {
-		this.stereoType = stereoType;
-	}
-
-	public boolean isFlipped() {
-		return flipped;
-	}
-
-	public void setFlipped(boolean flipped) {
-		this.flipped = flipped;
+		renderingState.stereoType = stereoType;
 	}
 
 	public Viewer getViewer() {
@@ -188,51 +178,21 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	private void setSceneRoot(SceneGraphComponent sgc) {
-		if (theRoot != null) {
-			Appearance ap = theRoot.getAppearance();
-			if (ap != null) ap.removeAppearanceListener(this);
+		if (topAp != null) {
+			topAp.dispose();
 		}
 		theRoot = sgc;
-		if (theRoot.getAppearance() != null) theRoot.getAppearance().addAppearanceListener(this);
-		if (thePeerRoot != null) thePeerRoot.dispose();
-		thePeerRoot = null;
-		// some top-level appearance attributes determine how we render; 
-		// TODO set up a separate mechanism for controlling these top-level attributes
+		if (theRoot != null && theRoot.getAppearance() != null)  {
+			topAp = new JOGLTopLevelAppearance(theRoot.getAppearance());
+
+		}
+		if (thePeerRoot != null) {
+			thePeerRoot.dispose();
+			thePeerRoot = null;
+		}
+		else return;
 
 		theLog.fine("setSceneRoot");
-		extractGlobalParameters();
-	}
-
-	public void appearanceChanged(AppearanceEvent ev) {
-		theLog.fine("top appearance changed");
-		extractGlobalParameters();
-	}
-
-	public void extractGlobalParameters()	{
-		Appearance ap = theRoot.getAppearance();
-		if (ap == null) return;
-//		theLog.finer("In extractGlobalParameters");
-		Object obj = ap.getAttribute(RENDER_S3, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) frontBanana = renderSpherical = ((Boolean) obj).booleanValue();
-		obj = ap.getAttribute(FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-		obj = ap.getAttribute(ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
-//		theLog.fine("one texture per image: "+oneTexture2DPerImage);
-		obj = ap.getAttribute(CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) {
-			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
-//			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
-		}
-		obj = ap.getAttribute(USE_OLD_TRANSPARENCY, Boolean.class);		
-		// a bit ugly: we make this a static variable so shaders can access it easily
-		if (obj instanceof Boolean) JOGLRenderingState.useOldTransparency = ((Boolean)obj).booleanValue();
-//		theLog.fine("forceResTex = "+forceResidentTextures);
-//		theLog.info("component display lists = "+renderingState.componentDisplayLists);
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,SKY_BOX, ap)) {
-			skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
-				SKY_BOX, ap, true);
-		} else skyboxCubemap = null;
 	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {
@@ -240,14 +200,15 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 	public void setAuxiliaryRoot(SceneGraphComponent auxiliaryRoot) {
 		this.auxiliaryRoot = auxiliaryRoot;
+		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.dispose();
 		if (auxiliaryRoot != null) {
-			if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.dispose();
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
 		}
 	}
 	public void render() {
 // 		following optimization has been abandoned for now
 //		System.err.println("in render "+frameCount);
+		if (disposed) return;
 		Texture2DLoaderJOGL.markAnimatedTexturesDirty(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
@@ -256,7 +217,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		if (auxiliaryRoot != null && thePeerAuxilliaryRoot == null)
 			thePeerAuxilliaryRoot = constructPeerForSceneGraphComponent(auxiliaryRoot, null);
 
-		context  = new Graphics3D(theViewer.getCameraPath(), currentPath, CameraUtility.getAspectRatio(theViewer));
+		renderingState.context  = new Graphics3D(theViewer.getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
@@ -264,11 +225,11 @@ public class JOGLRenderer  implements AppearanceListener {
 
 		frontBanana = true;
 		renderOnePass();
-		if (renderSpherical)	{
+		if (topAp.isRenderSpherical())	{
 			frontBanana = false;
 			renderOnePass();
 		}
-		if (forceResidentTextures) forceResidentTextures();
+		if (topAp.isForceResidentTextures()) forceResidentTextures();
 
 		lightListDirty = false;
 	}
@@ -279,7 +240,7 @@ public class JOGLRenderer  implements AppearanceListener {
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
-		if (renderSpherical)	
+		if (topAp.isRenderSpherical())	
 		{
 			globalGL.glMultTransposeMatrixd(frontBanana ? frontZBuffer : backZBuffer, 0);
 //			System.err.println("c2ndc = "+Rn.matrixToString(
@@ -294,15 +255,14 @@ public class JOGLRenderer  implements AppearanceListener {
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
 
-//		if (renderSpherical && !frontBanana) {  
-//			globalGL.glMultTransposeMatrixd(P3.p3involution, 0);	
-//			globalGL.glPushMatrix(); 
-//		}
-		renderingState.cameraToWorld = context.getCameraToWorld();
+		renderingState.cameraToWorld = renderingState.context.getCameraToWorld();
 		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
 		globalGL.glMultTransposeMatrixd(renderingState.worldToCamera, 0);
-		if (skyboxCubemap != null) 
-			JOGLSkyBox.render(globalGL, renderingState.worldToCamera, skyboxCubemap, CameraUtility.getCamera(theViewer));
+		if (topAp.getSkyboxCubemap() != null) 
+			JOGLSkyBox.render(globalGL, 
+					renderingState.worldToCamera, 
+					topAp.getSkyboxCubemap(), 
+					CameraUtility.getCamera(theViewer));
 
 		processLights();
 
@@ -315,12 +275,11 @@ public class JOGLRenderer  implements AppearanceListener {
 //		System.err.println("JOGLR: flipped = "+renderingState.flipped);
 		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
-		nodeCount = renderingState.polygonCount = 0;			// for profiling info
 		texResident=true;
-		currentPath.clear();
+		renderingState.currentPath.clear();
 		thePeerRoot.render();		
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
-		if (renderSpherical && !frontBanana) globalGL.glPopMatrix();
+		if (topAp.isRenderSpherical() && !frontBanana) globalGL.glPopMatrix();
 		globalGL.glLoadIdentity();
 	}
 
@@ -376,35 +335,18 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 
-	int frameCount = 0;
-	long[] history = new long[20];
-	long[] clockTime = new long[20];
-
-	public void setSize(int w, int h)	{
-		width = w; height = h;
-	}
 	public double getFramerate()	{
-		long totalTime = 0;
-		for (int i = 0; i<20; ++i)	totalTime += history[i];
-		framerate = 20*1000.0 / totalTime;
-		return framerate;
+		return perfMeter.getFramerate();
 	}
 
 	public double getClockrate()	{
-		int j = frameCount % 20;
-		int k = (frameCount +1) % 20;
-		long totalTime = clockTime[j] - clockTime[k];
-		double clockrate = 20*1000.0 / totalTime;
-		return clockrate;
-
+		return perfMeter.getClockrate();
 	}
 
 	public int getPolygonCount()	{
 		return renderingState.polygonCount;
 	}
 	
-	private static  int bufsize =16384;
-
 	protected void myglViewport(int lx, int ly, int rx, int ry)	{
 		globalGL.glViewport(lx, ly, rx, ry);
 		currentViewport[0] = lx;
@@ -413,6 +355,9 @@ public class JOGLRenderer  implements AppearanceListener {
 		currentViewport[3] = ry;
 	}
 
+	/*
+	 * Here are the methods from the GLListener interface
+	 */
 	public void init(GLAutoDrawable drawable) {
 		if (JOGLConfiguration.debugGL) {
 			drawable.setGL(new DebugGL(drawable.getGL()));
@@ -426,6 +371,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	public void init(GL gl) {
+		System.err.println("initing gl");
 		globalGL = gl;
 	
 		renderingState = new JOGLRenderingState(this);
@@ -437,12 +383,22 @@ public class JOGLRenderer  implements AppearanceListener {
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
-		if (theRoot != null) extractGlobalParameters();
+//		if (theRoot != null) extractGlobalParameters();
 		// traverse tree and delete all display lists
 		if (thePeerRoot != null) thePeerRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.propagateGeometryChanged(JOGLPeerComponent.ALL_GEOMETRY_CHANGED);
 	}
 	
+	public void displayChanged(GLAutoDrawable arg0, boolean arg1, boolean arg2) {
+	}
+
+	public void reshape(GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
+		globalGL = arg0.getGL();
+		width = arg3-arg1;
+		height = arg4-arg2;
+		myglViewport(0,0, width, height);
+	}
+
 	public void display(GLAutoDrawable drawable) {
 		if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
 			theLog.info("display called w/o scene root or camera path");
@@ -450,42 +406,44 @@ public class JOGLRenderer  implements AppearanceListener {
 		display(drawable.getGL());
 	}
 	protected int[] whichTile = new int[2];
+	
 	public void display(GL gl) {
 		globalGL=gl;
+		perfMeter.beginFrame();
 		renderingState.initializeGLState();
-		renderingState.currentEye = CameraUtility.MIDDLE_EYE;
-		beginRenderTime = 0;
-		if (collectFrameRate) beginRenderTime = System.currentTimeMillis();
+		renderingState.currentEye = CameraUtility.MIDDLE_EYE;		
 		clearColorBits = (renderingState.clearColorBuffer ? GL.GL_COLOR_BUFFER_BIT : 0);
-//		theLog.fine("JOGLRR ccb = "+clearColorBits);
 		try {
 			theCamera = CameraUtility.getCamera(theViewer);
 		} catch (IllegalStateException ise) {
 			return;
 		}
 		if (offscreenMode) {
-			if (theCamera.isStereo() && getStereoType() != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
+			if (theCamera.isStereo() && renderingState.stereoType != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
 				theLog.warning("Invalid stereo mode: Can only save cross-eyed stereo offscreen");
 				offscreenMode = false;
 				return;
 			}
-			GLContext context = offscreenPBuffer.getContext();
+			GLContext context = offscreenRenderer.getOffscreenPBuffer().getContext();
 			if (context.makeCurrent() == GLContext.CONTEXT_NOT_CURRENT) {
 				JOGLConfiguration.getLogger().log(Level.WARNING,"Error making pbuffer's context current");
 				offscreenMode = false;
 				return;
 			}
-			globalGL = offscreenPBuffer.getGL();
+			globalGL = offscreenRenderer.getOffscreenPBuffer().getGL();
 			if (true || !JOGLConfiguration.sharedContexts)  forceNewDisplayLists();
 			renderingState.initializeGLState();
-			CopyVisitor copier = new CopyVisitor();
-			copier.visit(theCamera);
-			
 			// we need another camera to avoid alerting the listeners when
 			// we change the camera while doing the offscreen render
+			CopyVisitor copier = new CopyVisitor();
+			copier.visit(theCamera);			
 			Camera offscreenCamera = theCamera = (Camera) copier.getCopy();
+			
 			Color[] bg=null;
 			float[][] bgColors=null;
+			int tileSizeX = offscreenRenderer.getTileSizeX(),
+			tileSizeY = offscreenRenderer.getTileSizeY(),
+			numTiles = offscreenRenderer.getNumTiles();
 			if (numTiles > 1) {
 				if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
 					bg = (Color[]) theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class);
@@ -528,10 +486,10 @@ public class JOGLRenderer  implements AppearanceListener {
 						
 						if (bgColors != null) {
 							Color[] currentBg = new Color[4];
-							currentBg[1]=interpolateBG(bgColors, i+1, j);
-							currentBg[2]=interpolateBG(bgColors, i, j);
-							currentBg[3]=interpolateBG(bgColors, i, j+1);
-							currentBg[0]=interpolateBG(bgColors, i+1, j+1);
+							currentBg[1]=interpolateBG(bgColors, i+1, j, numTiles);
+							currentBg[2]=interpolateBG(bgColors, i, j, numTiles);
+							currentBg[3]=interpolateBG(bgColors, i, j+1, numTiles);
+							currentBg[0]=interpolateBG(bgColors, i+1, j+1, numTiles);
 							theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, currentBg);
 						}
 						
@@ -543,7 +501,7 @@ public class JOGLRenderer  implements AppearanceListener {
 						globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
 
 						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
-								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenRenderer.getOffscreenBuffer());
 //								GL.GL_RGB, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
 					}
 				}
@@ -573,15 +531,10 @@ public class JOGLRenderer  implements AppearanceListener {
 			render();			
 		}
 
-		if (collectFrameRate)	{
-			++frameCount;
-			int j = (frameCount % 20);
-			clockTime[j] = beginRenderTime;
-			history[j]  =  System.currentTimeMillis() - beginRenderTime;
-		}
+		perfMeter.endFrame();
 	}
 
-	private Color interpolateBG(float[][] bgColors, int i, int j) {
+	private Color interpolateBG(float[][] bgColors, int i, int j, int numTiles) {
 		float[] col = new float[bgColors[0].length];
 		float alpha = ((float)j)/numTiles;
 		float beta = 1-((float)i)/numTiles;
@@ -594,7 +547,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	protected void setupRightEye(int width, int height) {
-		int which = getStereoType();
+		int which = renderingState.stereoType;
 		switch(which)	{
 		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
@@ -624,7 +577,7 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 	protected void setupLeftEye(int width, int height) {
-		int which = getStereoType();
+		int which = renderingState.stereoType;
 		switch(which)	{
 		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
 			int w = width/2;
@@ -647,15 +600,6 @@ public class JOGLRenderer  implements AppearanceListener {
 			break;
 		}
 		whichEye=CameraUtility.LEFT_EYE;
-	}
-
-	public void displayChanged(GLAutoDrawable arg0, boolean arg1, boolean arg2) {
-	}
-
-	public void reshape(GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
-		width = arg3-arg1;
-		height = arg4-arg2;
-		myglViewport(0,0, width, height);
 	}
 
 
@@ -726,45 +670,9 @@ public class JOGLRenderer  implements AppearanceListener {
 		return peer[0];
 	}
 
-//	public WeakHashMap<Geometry, Integer> 
-//		pointDisplayLists = new WeakHashMap<Geometry, Integer>(),
-//		lineDisplayLists = new WeakHashMap<Geometry, Integer>(),
-//		polygonDisplayLists = new WeakHashMap<Geometry, Integer>(),
-//		pointProxyDisplayLists = new WeakHashMap<Geometry, Integer>(),
-//		lineProxyDisplayLists = new WeakHashMap<Geometry, Integer>(),
-//		polygonProxyDisplayLists = new WeakHashMap<Geometry, Integer>();
-//	
-//	public WeakHashMap[] maps = {pointDisplayLists,
-//			lineDisplayLists,
-//			polygonDisplayLists,
-//			pointProxyDisplayLists,
-//			lineProxyDisplayLists,
-//			polygonProxyDisplayLists
-//	};
-//	
-//	public void removeGeometryDisplayLists(Geometry g)	{
-//		for (WeakHashMap<Geometry, Integer> whm : maps)	{
-//			Integer dlist = whm.get(g);
-//			if (dlist != null) {
-//				globalGL.glDeleteLists(dlist.intValue(), 0);
-//				whm.remove(g);
-//			}			
-//		}
-//	}
-//	
-//	public void clearGeometryDisplayLists()	{
-//		for (WeakHashMap<Geometry, Integer> whm : maps)	{
-//			whm.clear();
-//		}
-//		
-//	}
-	// miscellaneous fields and methods
-	protected int clearColorBits;
-	private GLPbuffer offscreenPBuffer;
-	private Buffer offscreenBuffer;
 
 	public Graphics3D getContext() {
-		return context;
+		return renderingState.context;
 	}
 
 	public int[] getCurrentViewport()	{
@@ -775,51 +683,13 @@ public class JOGLRenderer  implements AppearanceListener {
 		return ((double) currentViewport[2])/currentViewport[3];
 	}
 
-	protected int tileSizeX=1024, tileSizeY=768,numTiles=4;
-	protected long beginRenderTime;
-	
 	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLAutoDrawable canvas) {
-		BufferedImage img = renderOffscreen(imageWidth, imageHeight, canvas);
+		BufferedImage img = offscreenRenderer.renderOffscreen(imageWidth, imageHeight, canvas);
 		ImageUtility.writeBufferedImage(file, img);
 	}
 
-	BufferedImage offscreenImage;
-	boolean preMultiplied = false;		// not sure about this!
-	private javax.swing.Timer followTimer;
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
-		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
-			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
-			return null;
-		}
-		lightsChanged = true;
-		numTiles = Math.max(imageWidth/512, imageHeight/512);
-		if (numTiles == 0) numTiles = 1;
-		tileSizeX = (imageWidth/numTiles);
-		tileSizeY = (imageHeight/numTiles);
-		imageWidth = (tileSizeX) * numTiles;
-		imageHeight = (tileSizeY) * numTiles;
-		System.err.println("Tile size x = "+tileSizeX);
-		System.err.println("Tile sizey = "+tileSizeY);
-		System.err.println("Image size = "+imageWidth+":"+imageHeight);
-		GLCapabilities caps = new GLCapabilities();
-		caps.setDoubleBuffered(false);
-		caps.setAlphaBits(8);
-		offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
-				caps, null,
-				tileSizeX, tileSizeY,
-				canvas.getContext());
-		offscreenImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR); //TYPE_3BYTE_BGR); //
-		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) offscreenImage.getRaster().getDataBuffer()).getData());
-		offscreenMode = true;
-		lightListDirty = true;
-		canvas.display();
-		// why I can't just use img is a mystery to me ... go figure
-		// I seem to be just copying the data directly from one image to the other.
-		BufferedImage bi = ImageUtility.rearrangeChannels(offscreenImage);
-		ImageUtil.flipImageVertically(bi);
-		// a magic incantation to get the alpha channel to show up correctly
-		bi.coerceData(true);
-		return bi;
+		return offscreenRenderer.renderOffscreen(imageWidth, imageHeight, canvas);
 	}
 
 	public PickPoint[] performPick(double[] pickPointNDC) {
@@ -827,17 +697,6 @@ public class JOGLRenderer  implements AppearanceListener {
 	}
 
 
-	public void dispose() {
-		lightHelper.disposeLights();
-		if (theRoot != null) {
-			Appearance ap = theRoot.getAppearance();
-			if (ap != null) ap.removeAppearanceListener(this);
-		}
-		if (thePeerRoot != null) thePeerRoot.dispose();
-		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.dispose();
-		followTimer.setRepeats(false);
-		followTimer.stop();
-		followTimer=null;
-	}
+
 
 }

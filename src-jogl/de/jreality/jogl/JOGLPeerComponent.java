@@ -121,8 +121,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		for (int i = n-1; i>=0; --i)	{
 			JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
 			child.dispose();
-			children.remove(i);
 		}	
+		children.clear();
 		goBetween.removeJOGLPeer(this);
 	}
 
@@ -138,7 +138,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	boolean mustPop = false, oldFlipped;
 	private void preRender() {
 		if (renderRunnableDirty) updateRenderRunnable();
-		jr.currentPath.push(goBetween.originalComponent);
+		jr.renderingState.currentPath.push(goBetween.originalComponent);
 		if (debug) theLog.finest("prerender: "+name);
 		if (useTformCaching)	{
 			if (cachedTform != null && !isIdentity)  {
@@ -198,7 +198,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			jr.renderingState.flipped = oldFlipped;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 		}
-		jr.currentPath.pop();
+		jr.renderingState.currentPath.pop();
 	}
 
 	protected void pushTransformation(double[] m) {
@@ -210,7 +210,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //			System.err.println("o2c: "+Rn.matrixToString(jr.context.getObjectToCamera()));
 			int stackCounter = jr.stackDepth - JOGLRenderer.MAX_STACK_DEPTH;
 			if (stackCounter == 0)	{
-				jr.matrixStack[0] = new Matrix(jr.context.getObjectToCamera());	
+				jr.matrixStack[0] = new Matrix(jr.renderingState.context.getObjectToCamera());	
 			} else {
 				if (stackCounter >= jr.matrixStack.length)	{
 				Matrix[] newstack = new Matrix[jr.matrixStack.length*2];

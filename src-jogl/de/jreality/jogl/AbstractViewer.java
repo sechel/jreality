@@ -81,6 +81,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	SceneGraphComponent cameraNode;
 	protected GLAutoDrawable drawable;
 	protected JOGLRenderer renderer;
+	protected boolean disposed = false;
 	int metric;
 	boolean isFlipped = false;
 	static WeakReference<GLContext> firstOne = new WeakReference<GLContext>(null);		// for now, all display lists shared with this one
@@ -90,7 +91,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	public static final int 	RED_CYAN_STEREO =  3;
 	public static final int 	HARDWARE_BUFFER_STEREO = 4;
 	public static final int 	STEREO_TYPES = 5;
-	int stereoType = 		CROSS_EYED_STEREO;	
+	protected int stereoType = 		CROSS_EYED_STEREO;	
 	protected boolean debug = false;
 	public AbstractViewer() {
 		this(null, null);
@@ -135,6 +136,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	}
 
 	public void renderAsync() {
+		if (disposed) return;
 	    synchronized (renderLock) {
 				if (!pendingUpdate) {
 					if (debug)
@@ -201,6 +203,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
       component.setLayout(new java.awt.BorderLayout());
       component.setMaximumSize(new java.awt.Dimension(32768,32768));
       component.setMinimumSize(new java.awt.Dimension(10,10));
+      if (drawable == null) return component;
       component.add("Center", (Component) drawable);
 	((Component) drawable).addKeyListener(keyListener);
 	((Component) drawable).addMouseListener(mouseListener);
@@ -217,7 +220,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	public void initializeFrom(de.jreality.scene.Viewer v) {
 		initializeFrom(v.getSceneRoot(), v.getCameraPath());
 	}
-		
+	
 /*********** Non-standard set/get ******************/
 	
 		public void setStereoType(int type)	{
@@ -367,8 +370,8 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 		JOGLConfiguration.theLog.log(Level.INFO,"JOGL Context initialization, creating new renderer");
 		
 		renderer = new JOGLRenderer(this);
-		renderer.setStereoType(stereoType);
 		renderer.init(arg0);  
+		renderer.setStereoType(stereoType);
 	}
 
 	public void reshape(
@@ -433,6 +436,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
   }
 
   public void render() {
+		if (disposed) return;
     if (EventQueue.isDispatchThread()) run();
     else
       try {
@@ -445,6 +449,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
   }
 	
   public void dispose() {
+	  disposed = true;
 	  cameraPath.clear();
 	  cameraNode=null;
 	  if (component != null) {
@@ -457,6 +462,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	  }
 	  setSceneRoot(null);
 	  setAuxiliaryRoot(null);
+	  if (listeners != null) listeners.clear();
 	  if (renderer != null) renderer.dispose();
 	  renderer = null;
   }

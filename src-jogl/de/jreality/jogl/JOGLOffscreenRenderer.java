@@ -1,0 +1,95 @@
+package de.jreality.jogl;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.util.logging.Level;
+
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLPbuffer;
+
+import com.sun.opengl.util.ImageUtil;
+
+import de.jreality.util.ImageUtility;
+
+public class JOGLOffscreenRenderer {
+
+	transient private GLPbuffer offscreenPBuffer;
+	transient private Buffer offscreenBuffer;
+
+	transient private int tileSizeX=1024, tileSizeY=768,numTiles=4;
+	private JOGLRenderer jr;
+	
+	public JOGLOffscreenRenderer(JOGLRenderer jr)	{
+		this.jr = jr;
+	}
+	
+	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLAutoDrawable canvas) {
+		BufferedImage img = renderOffscreen(imageWidth, imageHeight, canvas);
+		ImageUtility.writeBufferedImage(file, img);
+	}
+
+	BufferedImage offscreenImage;
+	boolean preMultiplied = false;		// not sure about this!
+	private javax.swing.Timer followTimer;
+	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
+		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
+			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
+			return null;
+		}
+		jr.lightsChanged = true;
+		numTiles = Math.max(imageWidth/512, imageHeight/512);
+		if (numTiles == 0) numTiles = 1;
+		tileSizeX = (imageWidth/numTiles);
+		tileSizeY = (imageHeight/numTiles);
+		imageWidth = (tileSizeX) * numTiles;
+		imageHeight = (tileSizeY) * numTiles;
+		System.err.println("Tile size x = "+tileSizeX);
+		System.err.println("Tile sizey = "+tileSizeY);
+		System.err.println("Image size = "+imageWidth+":"+imageHeight);
+		GLCapabilities caps = new GLCapabilities();
+		caps.setDoubleBuffered(false);
+		caps.setAlphaBits(8);
+		offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
+				caps, null,
+				tileSizeX, tileSizeY,
+				canvas.getContext());
+		offscreenImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR); //TYPE_3BYTE_BGR); //
+		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) offscreenImage.getRaster().getDataBuffer()).getData());
+		jr.offscreenMode = true;
+		jr.lightListDirty = true;
+		canvas.display();
+		// why I can't just use img is a mystery to me ... go figure
+		// I seem to be just copying the data directly from one image to the other.
+		BufferedImage bi = ImageUtility.rearrangeChannels(offscreenImage);
+		ImageUtil.flipImageVertically(bi);
+		// a magic incantation to get the alpha channel to show up correctly
+		bi.coerceData(true);
+		return bi;
+	}
+
+	public GLPbuffer getOffscreenPBuffer() {
+		return offscreenPBuffer;
+	}
+
+	public Buffer getOffscreenBuffer() {
+		return offscreenBuffer;
+	}
+
+	public int getNumTiles() {
+		return numTiles;
+	}
+
+	public int getTileSizeX() {
+		return tileSizeX;
+	}
+
+	public int getTileSizeY() {
+		return tileSizeY;
+	}
+
+}
