@@ -153,6 +153,15 @@ final public class Quaternion implements Cloneable, Serializable {
 		return (equals(a,b,tol) || equals(times(tmp,-1.0,a),b,tol));
 	}
 
+	public static Quaternion exp(Quaternion dst, double t, Quaternion src)	{
+		if (dst == null) dst = new Quaternion();
+		dst.re = Math.cos(t);
+		double s = Math.sin(t);
+		dst.x = s*src.x;
+		dst.y = s*src.y;
+		dst.z = s*src.z;
+		return dst;
+	}
 	public static Quaternion add(Quaternion dst, Quaternion a, Quaternion b)	{
 		if (dst == null) dst = new Quaternion();
 		if (a == null || b == null) {
