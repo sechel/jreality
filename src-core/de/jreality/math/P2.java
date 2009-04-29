@@ -84,21 +84,21 @@ final public class P2 {
 	 * @param dst
 	 * @param p1
 	 * @param p2
-	 * @param metricnature
+	 * @param metric
 	 * @return
 	 */
-	public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int metricnature)	{
+	public static double[] perpendicularBisector(double[] dst, double[] p1, double[]p2, int metric)	{
 		if (p1.length != 3 || p2.length != 3)	{
 			throw new IllegalArgumentException("Input points must be homogeneous vectors");
 		}
-		if (metricnature == Pn.EUCLIDEAN) return perpendicularBisector(dst, p1, p2);
+		if (metric == Pn.EUCLIDEAN) return perpendicularBisector(dst, p1, p2);
 		if (dst == null) dst = new double[3];
 		double[] midpoint = new double[3];
-		Pn.linearInterpolation(midpoint,p1,p2, .5, metricnature);
+		Pn.linearInterpolation(midpoint,p1,p2, .5, metric);
 		double[] line = lineFromPoints(null, p1, p2);
-		double[] polarM = Pn.polarize(null, midpoint, metricnature);
+		double[] polarM = Pn.polarize(null, midpoint, metric);
 		double[] pb = pointFromLines(null, polarM, line);
-		Pn.polarize(dst, pb, metricnature);
+		Pn.polarize(dst, pb, metric);
 		if (Rn.innerProduct(dst,p1) < 0)	Rn.times(dst, -1.0, dst);
 		return dst;
 	}
