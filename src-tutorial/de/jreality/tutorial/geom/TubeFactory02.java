@@ -18,6 +18,7 @@ import javax.swing.border.EmptyBorder;
 import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.jogl.Viewer;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -70,7 +71,7 @@ public class TubeFactory02 {
 		dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
 		dps.setSmoothShading(isSmooth);
 		updateGeometry();
-		ViewerApp va = new ViewerApp(torussgc); // ViewerApp.display(torussgc);
+		final ViewerApp va = new ViewerApp(torussgc); // ViewerApp.display(torussgc);
 		va.setAttachNavigator(true);
 		va.setExternalNavigator(false);
 		Component insp = getInspector();
@@ -99,7 +100,11 @@ public class TubeFactory02 {
 						drawEdges = !drawEdges;
 						dgs.setShowLines(drawEdges);
 						break;		
-				}
+
+					case KeyEvent.VK_3:
+						((Viewer) va.getCurrentViewer()).dispose();
+						break;		
+}
 		
 				}
 			});
