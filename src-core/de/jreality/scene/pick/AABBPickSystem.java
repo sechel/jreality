@@ -87,6 +87,7 @@ public class AABBPickSystem implements PickSystem {
   private Comparator<Hit> cmp = new Hit.HitComparator();
   private double[] from;
   private double[] to;
+  private double radiusFactor = 1;		// in case we have to adjust radii by radii in world coordinates bit
   private int metric;
   
   public void setSceneRoot(SceneGraphComponent root) {
@@ -142,6 +143,7 @@ public class AABBPickSystem implements PickSystem {
         private boolean pickPoints=true, drawVertices = true;
         private boolean pickEdges=true, drawEdges = true;
         private boolean pickFaces=true, drawFaces = true;
+        private boolean radiiWorldCoords = false;
         private boolean hasNewPickInfo = false;
         private double tubeRadius=CommonAttributes.TUBE_RADIUS_DEFAULT;
         private double pointRadius=CommonAttributes.POINT_RADIUS_DEFAULT;
@@ -191,6 +193,10 @@ public class AABBPickSystem implements PickSystem {
           }
           foo = ap.getAttribute(CommonAttributes.METRIC, Integer.class);
           if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; metric = (Integer) foo; }
+          
+          foo = ap.getAttribute(CommonAttributes.RADII_WORLD_COORDINATES, Boolean.class);
+          if (foo != Appearance.INHERITED)  { hasNewPickInfo = true;  radiiWorldCoords = (Boolean) foo; }
+          
          }
         public String toString()	{
         	return "Pick vef = "+pickPoints+" "+pickEdges+" "+pickFaces+" "+pointRadius+" "+tubeRadius;
@@ -203,6 +209,13 @@ public class AABBPickSystem implements PickSystem {
     public void visit(SceneGraphComponent c) {
       if (!c.isVisible() || !c.isPickable()) return;
       PickInfo pickInfo = null;
+      if (c.getTransformation() != null)	{
+    	  if (matrixStack[stackCounter+1] == null) matrixStack[stackCounter+1] = new Matrix();
+    	  Rn.times(matrixStack[stackCounter+1].getArray(), matrixStack[stackCounter].getArray(), c.getTransformation().getMatrix());
+    	  stackCounter++;
+    	  m = matrixStack[stackCounter];
+    	  mInv = m.getInverse();
+       }
       if (c.getAppearance()!=null) {
           // following is actually deprecated and can be removed any time now
           Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
@@ -211,27 +224,25 @@ public class AABBPickSystem implements PickSystem {
           }
          pickInfo = new PickInfo(currentPI, c.getAppearance());
         if (pickInfo.hasNewPickInfo) appStack.push(currentPI = pickInfo);
-       }
+        if (pickInfo.radiiWorldCoords)	{
+ 			double[] o2w = path.getMatrix(null);
+			radiusFactor = CameraUtility.getScalingFactor(o2w, pickInfo.metric);
+			radiusFactor = 1.0/radiusFactor;
+      }
+      }
 //      System.err.println("visiting "+c.getName());
-      if (c.getTransformation() != null)	{
-    	  if (matrixStack[stackCounter+1] == null) matrixStack[stackCounter+1] = new Matrix();
-    	  Rn.times(matrixStack[stackCounter+1].getArray(), matrixStack[stackCounter].getArray(), c.getTransformation().getMatrix());
-    	  stackCounter++;
-    	  m = matrixStack[stackCounter];
-    	  mInv = m.getInverse();
-       }
       path.push(c);
       c.childrenAccept(this);
       path.pop();
+      if (c.getAppearance()!=null && pickInfo.hasNewPickInfo) {
+         appStack.pop();
+         currentPI = appStack.elementAt(appStack.size()-1);
+      }
       if (c.getTransformation() != null) 	{
     	  stackCounter--;
     	  m = matrixStack[stackCounter];
     	  mInv = m.getInverse();
      }
-      if (c.getAppearance()!=null && pickInfo.hasNewPickInfo) {
-         appStack.pop();
-         currentPI = appStack.elementAt(appStack.size()-1);
-      }
     }
     
     
@@ -306,7 +317,7 @@ public class AABBPickSystem implements PickSystem {
       localHits.clear();
 
  //     System.err.println("Picking indexed line set "+ils.getName());
-       BruteForcePicking.intersectEdges(ils, metric, path, m, mInv, from, to, currentPI.tubeRadius, localHits);
+       BruteForcePicking.intersectEdges(ils, metric, path, m, mInv, from, to, currentPI.tubeRadius*radiusFactor, localHits);
        extractHits(localHits);
     }
 
@@ -316,7 +327,7 @@ public class AABBPickSystem implements PickSystem {
 
       localHits.clear();
 
-      BruteForcePicking.intersectPoints(ps, metric, path, m, mInv, from, to, currentPI.pointRadius, localHits);
+      BruteForcePicking.intersectPoints(ps, metric, path, m, mInv, from, to, currentPI.pointRadius*radiusFactor, localHits);
       extractHits(localHits);        
     }
 
