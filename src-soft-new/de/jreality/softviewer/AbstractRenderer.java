@@ -96,8 +96,9 @@ public abstract class AbstractRenderer {
           rasterizer.setWindow(0, width, 0, height);
           rasterizer.setSize(width, height);
           
-          pipeline.getPerspective().setWidth(width);
-          pipeline.getPerspective().setHeight(height);
+          //moved the following two behind the setting of perspective/orthographic:
+          //pipeline.getPerspective().setWidth(width);
+          //pipeline.getPerspective().setHeight(height);
     //    }
         Appearance a = root == null ? null : root.getAppearance();
           Color background;
@@ -149,6 +150,7 @@ public abstract class AbstractRenderer {
                 pp.setFieldOfViewDeg(camera.getFieldOfView());
                 pp.setNear(camera.getNear());
                 pp.setFar(camera.getFar());
+                //pipeline.setPerspective(pp);
             } else {
                 OrthographicProjection pp = null;
                 if(! (p instanceof OrthographicProjection)) {
@@ -160,7 +162,10 @@ public abstract class AbstractRenderer {
                 pp.setFieldOfViewDeg(1);
                 pp.setNear(camera.getNear());
                 pp.setFar(camera.getFar());
+                //pipeline.setPerspective(pp);
             }
+            pipeline.getPerspective().setWidth(width);
+            pipeline.getPerspective().setHeight(height);
           DefaultMatrixSupport.getSharedInstance().restoreDefault(cameraWorld, true);
           //cameraPath.applyEffectiveTransformation(cameraWorld);
           cameraWorld.setMatrix(cameraPath.getMatrix(null));
