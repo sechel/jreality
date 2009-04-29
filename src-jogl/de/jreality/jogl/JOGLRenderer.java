@@ -118,7 +118,7 @@ public class JOGLRenderer   {
 	// pick-related stuff
 	transient protected boolean offscreenMode = false;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
-	transient protected static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
+	transient public static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
 	private javax.swing.Timer followTimer;
 
 	transient protected boolean 
