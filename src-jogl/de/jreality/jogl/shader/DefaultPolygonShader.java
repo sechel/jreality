@@ -95,7 +95,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 //	GlslPolygonShader glslShader = new GlslPolygonShader();
 	GlslProgram glslProgram;
 	transient boolean geometryHasTextureCoordinates = false, hasTextures = false;
-	transient boolean firstTime = true;
+	transient boolean firstTime = true,
+		noneuclideanInitialized = false;
 	
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	// try loading the OpenGL shader for the non-euclidean cases
@@ -155,8 +156,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 						e.printStackTrace();
 					}		
 				}
-
 				glslProgram = noneuclideanShader;
+				noneuclideanInitialized = false;
 			}
 	    }
 		vertexShader.setFromEffectiveAppearance(eap, name);
@@ -196,7 +197,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    	if (curgeom != null && (curgeom instanceof IndexedFaceSet) &&
 		    		((IndexedFaceSet) curgeom).getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
 		    			geometryHasTextureCoordinates = true; 
-		    			firstTime = false;
 		    	}
 		    if (geometryHasTextureCoordinates) {
 
@@ -237,7 +237,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		vertexShader.render(jrs); 
 	    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
 	    if (useGLSL && glslProgram != null)		{
-	    	if (glslProgram == noneuclideanShader)	{
+	    	if ( glslProgram == noneuclideanShader)	{
+	    		// the only reason we're doing it here is because only now do we know what jrs is
+	    		System.err.println("writing glsl shader");
 	    		// HACK this is a shoddy attempt to pass over parts of OpenGL state to a hypothetical GLSL shader
 	    		// should be done by the specific shader instead, since only it knows which uniform variables
 	    		// it has
@@ -248,6 +250,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    		glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
 	    		glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
 	    		glslProgram.setUniform("useNormals4", jrs.normals4d);
+	    		noneuclideanInitialized = true;
 	    	}
 			
 			GlslLoader.render(glslProgram, jr);
