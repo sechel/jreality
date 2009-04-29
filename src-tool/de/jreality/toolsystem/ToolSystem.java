@@ -724,4 +724,8 @@ public class ToolSystem implements ToolEventReceiver {
         return renderTrigger;
     }
 
+	public Object getKey() {
+		return KEY;
+	}
+
 }

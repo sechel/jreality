@@ -47,6 +47,7 @@ import java.util.Iterator;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
+import de.jreality.toolsystem.ToolSystem;
 
 
 /**
@@ -133,6 +134,10 @@ public class AnimatorTool extends AbstractTool {
 		synchronized (mutex) {
 			animators.clear();
 		}
+	}
+
+	public static AnimatorTool getInstance(ToolSystem ts) {
+		return getInstanceImpl(ts.getKey());
 	}
 
 }

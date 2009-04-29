@@ -81,7 +81,7 @@ public class Timer extends javax.swing.Timer {
 //	}
 //
 	public void attach(ToolSystem ts) {
-		attach(AnimatorTool.getInstanceImpl(ts));
+		attach(AnimatorTool.getInstance(ts));
 	}
 	
 	public void attach(ToolContext tc) {
