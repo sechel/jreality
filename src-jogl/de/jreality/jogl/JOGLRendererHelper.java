@@ -469,6 +469,7 @@ public class JOGLRendererHelper {
 		jr.renderingState.normals4d = (nFiber == 4);
 		// HACK!!! make sure the vertex shader knows whether the normals are 4d or 3d
 		gl.glFogf(GL.GL_FOG_START,  nFiber == 4 ? 0.01f : 0f);
+		System.err.println("Rendering 4d normals for "+sg.getName());
 		DoubleArray da = null;
 		boolean isQuadMesh = false;
 		boolean isRegularDomainQuadMesh = false;
@@ -554,7 +555,7 @@ public class JOGLRendererHelper {
 										alpha * da.getValueAt(3));
 							}
 						}
-						for (int nn = 0; nn<jr.renderingState.texUnitCount; ++nn)	{
+						for (int nn = 0; nn<textureCount; ++nn)	{
 							int texunit = GL.GL_TEXTURE0+nn;
 							if (nn == 0 && lightMapCoords != null) {
 								da = lightMapCoords.item(vnn).toDoubleArray();
@@ -601,12 +602,19 @@ public class JOGLRendererHelper {
 				}
 				if (normalBind == PER_FACE) {
 					da = faceNormals.item(i).toDoubleArray();
-					gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da
-							.getValueAt(2));
+					if (nFiber == 3)
+						gl.glNormal3d(da.getValueAt(0), da.getValueAt(1),
+							da.getValueAt(2));
+					else 
+						gl.glMultiTexCoord4d(GL.GL_TEXTURE0+3,da.getValueAt(0), da.getValueAt(1),
+								da.getValueAt(2), da.getValueAt(3));
+//					gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da
+//							.getValueAt(2));
 				}
 				IntArray tf = sg.getFaceAttributes(Attribute.INDICES).item(i)
 						.toIntArray();
 				final int nf = tf.getLength();
+				// hack to allow texture per face!
 				if (textures != null)	{
 					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
@@ -617,8 +625,14 @@ public class JOGLRendererHelper {
 					int k = tf.getValueAt(j);
 					if (normalBind == PER_VERTEX) {
 						da = vertexNormals.item(k).toDoubleArray();
-						gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da
-								.getValueAt(2));
+						if (nFiber == 3)
+							gl.glNormal3d(da.getValueAt(0), da.getValueAt(1),
+								da.getValueAt(2));
+						else 
+							gl.glMultiTexCoord4d(GL.GL_TEXTURE0+3,da.getValueAt(0), da.getValueAt(1),
+									da.getValueAt(2), da.getValueAt(3));
+//						gl.glNormal3d(da.getValueAt(0), da.getValueAt(1), da
+//								.getValueAt(2));
 					}
 					if (colorBind == PER_VERTEX) {
 						da = vertexColors.item(k).toDoubleArray();
