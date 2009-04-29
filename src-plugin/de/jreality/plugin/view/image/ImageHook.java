@@ -85,7 +85,7 @@ public class ImageHook {
 	
 	
 	public static Image scaleImage(Image image, int width, int height) {
-		return image.getScaledInstance(SCALE_SMOOTH, width, height);
+		return image.getScaledInstance(width, height, SCALE_SMOOTH);
 	}
 	
 }
