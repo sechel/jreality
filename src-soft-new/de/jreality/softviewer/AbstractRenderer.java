@@ -158,10 +158,11 @@ public abstract class AbstractRenderer {
                     pipeline.setPerspective(pp);
                 } else
                     pp = (OrthographicProjection) p;
-                //pp.setFieldOfViewDeg(camera.getFieldOfView());
-                pp.setFieldOfViewDeg(1);
+                pp.setFieldOfViewDeg(camera.getFieldOfView());
+                //pp.setFieldOfViewDeg(1);
                 pp.setNear(camera.getNear());
                 pp.setFar(camera.getFar());
+                pp.setFocus(camera.getFocus());
                 //pipeline.setPerspective(pp);
             }
             pipeline.getPerspective().setWidth(width);

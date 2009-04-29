@@ -58,7 +58,7 @@ public class OrthographicProjection extends CameraProjection {
     private double mh = Math.min(wh,hh);
 	private double nearclip = 3;
 	private double farclip = 50;
-
+	private double focus = 3.;
 	/**
 	 * 
 	 */
@@ -74,9 +74,9 @@ public class OrthographicProjection extends CameraProjection {
 	 */
 	public final void perspective(final double[] v) {
 
-              
-        v[Polygon.SX] = v[Polygon.WX] *( 1.2 );
-        v[Polygon.SY] = v[Polygon.WY] *( 1.2);
+         double d =focalLength/focus;
+        v[Polygon.SX] = v[Polygon.WX] *d;//( 1.2);
+        v[Polygon.SY] = v[Polygon.WY] *d;//( 1.2);
         v[Polygon.SZ] = -((nearclip + farclip)*v[Polygon.WW]+ 2*v[Polygon.WZ] )/(farclip - nearclip );
         v[Polygon.SW] = v[Polygon.WW];
 	}
@@ -173,6 +173,14 @@ public class OrthographicProjection extends CameraProjection {
     public void setFar(double d) {
         farclip =d;
         
+    }
+
+    public double getFocus() {
+        return focus;
+    }
+
+    public void setFocus(double focus) {
+        this.focus = focus;
     }
 
 }
