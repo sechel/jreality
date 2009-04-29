@@ -47,6 +47,9 @@
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
     </fileset>
+    <fileset dir="lib">
+        <include name="jinput.jar"/>
+    </fileset>  	
   </path>
 	
   <path id="audio.classpath">
