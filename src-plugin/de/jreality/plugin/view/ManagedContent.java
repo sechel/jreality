@@ -96,9 +96,9 @@ public class ManagedContent extends Plugin {
 		SceneGraphComponent contextRoot = getContextRoot(context);
 		if (!contextRoot.getChildComponents().contains(c)) {
 			contextRoot.addChild(c);
-			updateContent();
 			fireContentAdded(context, c);
 		}
+		updateContent();
 	}
 	
 	
