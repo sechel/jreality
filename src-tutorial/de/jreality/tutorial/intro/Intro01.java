@@ -17,9 +17,10 @@ public class Intro01 {
 
 
 	public static void main(String[] args)	{
-//		ViewerApp.display(null);
+		if (args.length > 0) 
+			PluginViewerApp.display(null);
+		else ViewerApp.display(null);
 
-		PluginViewerApp.display(null);
 	}
 
 
