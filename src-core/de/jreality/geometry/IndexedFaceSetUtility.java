@@ -1211,6 +1211,7 @@ public class IndexedFaceSetUtility {
      * where f is a function of longitude and lattitude.
      * 
      * NOTE: currently for a pole you need to give 2 points, for phi=0 and phi=2PI.
+     * TODO: move to SphereUtility
      */
   	public static IndexedFaceSet triangulateRectangularPatch(double[][][] levels) {
   		double dTheta = 1./(levels.length-1);
