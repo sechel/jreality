@@ -52,7 +52,7 @@ import de.jreality.util.LoggingSystem;
  * are purely projective, while others relate to the various metric geometries contained 
  * within projective geometry. 
  * <p>
- * The bulk of the methods here fall into two categories:
+ * The bulk of the methods here fall into three categories:
  * <ul>
  * <li>Methods to generate isometries of a particular 3-dimensional metric geometry, 
  * <li>Methods related to perspective transformations in 3D rendering, and </li>
