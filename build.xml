@@ -21,7 +21,7 @@
   <property name="portal" location="src-portal" />
   <property name="proxies" location="src-proxies" />
   <property name="swt" location="src-swt" />
-  <property name="testjogl" location="test-jogl" />
+  <property name="tutorial" location="src-tutorial" />
 
   <property name="vr" location="src-vr" />
   <property name="examples" location="src-examples" />
@@ -239,6 +239,12 @@
      </fileset>
   </path>
 	
+	  <path id="tutorial.classpath">
+	    <fileset dir="release">
+	        <include name="jReality.jar"/>
+	    </fileset>
+	  </path>
+
 
   <target name="init">
     <!-- Create the build directory structure used by compile -->
@@ -455,6 +461,20 @@
     <jar jarfile="${dist}/jReality-plugin.jar" basedir="${build}/plugin" />
   </target>
 
+  <target name="tutorial" depends="dist" description="build tutorial ">
+	    <mkdir dir="${build}/tutorial" />
+	  	<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${tutorial}" destdir="${build}/tutorial" debug="true">
+	      <classpath refid="tutorial.classpath"/>
+	    </javac>
+    <copy todir="${build}/tutorial"> <!-- copy shader progs -->
+        <fileset dir="${tutorial}">
+          <exclude name="**/*.java"/>
+          <exclude name="**/.svn/**"/>
+        </fileset>
+      </copy>
+	    <jar jarfile="${dist}/jReality-tutorial.jar" basedir="${build}/tutorial" />
+  </target>
+		
   <target name="javadoc" description="generate javadoc in docs/api">
       <mkdir dir="${javadoc}" />
     <javadoc destdir="${javadoc}" access="public" author="true" version="true" use="true" windowtitle="jReality API" source="1.5">
@@ -475,6 +495,12 @@
       <fileset dir="${vr}" defaultexcludes="yes">
         <include name="de/jreality/**/*.java" />
       </fileset>
+        <fileset dir="${plugin}" defaultexcludes="yes">
+          <include name="de/jreality/**/*.java" />
+        </fileset>
+        <fileset dir="${tutorial}" defaultexcludes="yes">
+          <include name="de/jreality/**/*.java" />
+        </fileset>
       <link href="http://java.sun.com/j2se/1.5/docs/api/"/>
     </javadoc>
   </target>
