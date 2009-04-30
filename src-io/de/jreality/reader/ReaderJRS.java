@@ -51,6 +51,10 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
+/**
+ * A reader for the jReality proprietary XML format JRS.
+ *
+ */
 public class ReaderJRS extends AbstractReader {
 
   JrScene read;

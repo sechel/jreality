@@ -49,7 +49,11 @@ import java.lang.reflect.InvocationTargetException;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
-
+/**
+ * A reader for VRML1.0 and VRML2.0, based on an ANTRL parser in package de.jreality.reader.vrml}.
+ * @author gunn, gonska
+ *
+ */
 public class ReaderVRML extends AbstractReader {
 
 	public ReaderVRML() {
