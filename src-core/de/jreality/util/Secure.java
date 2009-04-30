@@ -4,6 +4,13 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Level;
 
+/**
+ * A class for managing access to system resources, especially for the case 
+ * when the application is running in a secure environment and must be 
+ * careful how it accesses system properties.
+ * @author gunn
+ *
+ */
 public class Secure {
 	
     public static String getProperty(final String name, final String def) {
