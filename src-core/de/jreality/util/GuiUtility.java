@@ -7,6 +7,11 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
+/**
+ * Static methods for hiding and showing the cursor.
+ * @author weissmann
+ *
+ */
 public class GuiUtility {
 
 	public static void hideCursor(Component frame) {

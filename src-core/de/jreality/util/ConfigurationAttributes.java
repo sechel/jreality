@@ -52,14 +52,14 @@ import java.util.logging.Logger;
 import de.jreality.math.Matrix;
 
 /**
- * @author weissman
- *
  * This class is for managing configuration settings based on java.lang.Properties.
  * The config file used is given as a system property, namely {@link SystemProperties#CONFIG_SETTINGS}.
  * Currently only the de.jreality.portal-Package uses this class
  * 
  * The properties file is given via the system property {@link SystemProperties#CONFIG_SETTINGS},
  * if not it is assumed to be {@link SystemProperties#CONFIG_SETTINGS_DEFAULT} (in the current directory). 
+ *
+ *  @author weissman
  */
 public class ConfigurationAttributes extends Properties {
 

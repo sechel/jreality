@@ -60,7 +60,10 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 
 /**
- * A collection of static methods related to specifying camera transformations of various kinds.
+ * A collection of static methods related to the jReality Camera class.
+ * <p>
+ * Most of the methods involve calculating various transformations related to the
+ * camera and an instance of Viewer.
  * 
  * @author Charles Gunn
  *

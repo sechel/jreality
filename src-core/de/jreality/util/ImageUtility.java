@@ -21,7 +21,11 @@ import javax.imageio.ImageIO;
 
 import de.jreality.shader.ImageData;
 
-
+/**
+ * Static methods for handling various image-related tasks.
+ * @author gunn
+ *
+ */
 public class ImageUtility {
 
 	private ImageUtility() {}
