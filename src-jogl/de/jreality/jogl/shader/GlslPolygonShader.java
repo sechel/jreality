@@ -48,7 +48,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.DebugGL;
@@ -575,7 +575,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		}
 	}
 
-	private static HashMap<IndexedFaceSet, Boolean> upToDateIFS = new HashMap<IndexedFaceSet, Boolean>();
+	private static WeakHashMap<IndexedFaceSet, Boolean> upToDateIFS = new WeakHashMap<IndexedFaceSet, Boolean>();
 
 	private static boolean upToDate(final IndexedFaceSet sg, boolean smooth) {
 		if (upToDateIFS.get(sg) == Boolean.valueOf(smooth)) return true;
