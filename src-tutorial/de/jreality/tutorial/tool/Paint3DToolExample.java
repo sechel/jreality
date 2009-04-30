@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
+import com.sun.corba.se.spi.orbutil.fsm.Input;
+
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.jogl.shader.ShadedSphereImage;
 import de.jreality.math.Rn;
@@ -28,9 +30,22 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
+/**
+ * This tutorial demonstrates how  to write a tool to paint on a 3D surface.  It uses the texture coordinates of the
+ * surface to paint into a texture map associated to the surface.  
+ * <p>
+ * It also shows how a tool can use different activation slots
+ * to lead to different behavior.  In this case, painting by dragging with the left button down paints with a brush which is a shaded blue
+ * sphere on the surface. The same with the shift-key depressed erases what has been drawn, by drawing with a brush that is 
+ * identical to the original texture color.
+ * 
+ * @author gunn
+ *
+ */
 public class Paint3DToolExample {
 
 	static Viewer viewer;
+	static Graphics2D g2D;
 	public static void main(String[] args) throws IOException {
 	  	IndexedFaceSet geom = new CatenoidHelicoid(40);
 		SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("TextureExample");
@@ -44,13 +59,13 @@ public class Paint3DToolExample {
 		// set up the texture image and Graphics2D objects for the tool
 		final int imageSize = 512;
 		BufferedImage bi = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D tmpG2D =  bi.createGraphics();
 		ImageData id = new ImageData(bi);
 		// this is not pretty: the original bi was trashed to get a different byte order.
 		bi = (BufferedImage) id.getImage();
-		final Graphics2D g2D =  bi.createGraphics();
+		g2D =  bi.createGraphics();
 		// make a grey background to start with
-		g2D.setColor(new Color(.5f,.5f,.5f,1f));
+		final Color initialColor = new Color(.5f,.5f,.5f,1f);
+		g2D.setColor(initialColor);
 		g2D.fillRect(0, 0, imageSize, imageSize);
 		
 		// set up the texture object
@@ -73,16 +88,23 @@ public class Paint3DToolExample {
  				brushSize, 
  				true,
  				new int[]{1,0,3,2});
- 		final BufferedImage brush = (BufferedImage) bid.getImage();
+ 		final BufferedImage brush1 = (BufferedImage) bid.getImage();
+		final BufferedImage brush2 = new BufferedImage(brushSize, brushSize, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D tmpG = (Graphics2D) brush2.getGraphics();
+		tmpG.setColor(initialColor);
+		tmpG.fillRect(0, 0, brushSize, brushSize);
 
-	    Tool paintTool = new AbstractTool(InputSlot.getDevice("AllDragActivation")) {
+	    Tool paintTool = new AbstractTool(
+	    		InputSlot.getDevice("PrimaryAction"),
+	    		InputSlot.getDevice("SecondaryAction")) {	// left button and shift left button
 
-			{
-	   		addCurrentSlot(InputSlot.getDevice("PointerTransformation"), "drags the texture");
-	    	}
-	    	
+	    	BufferedImage brush;
 			public void activate(ToolContext tc) {
-				perform(tc);
+		   		addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
+		   		if (tc.getSource()== InputSlot.getDevice("PrimaryAction")) {
+		   			System.err.println("left mouse activate");
+		   			brush = brush1;
+		   		} else brush = brush2;
 			}
 
 			public void perform(ToolContext tc) {
@@ -104,6 +126,11 @@ public class Paint3DToolExample {
 
 			public String getDescription() {
 				return "A tool which paints on a 3D surface";
+			}
+
+			@Override
+			public void deactivate(ToolContext tc) {
+		   		removeCurrentSlot(InputSlot.getDevice("PointerTransformation"));
 			}
 	    	
 	    };
