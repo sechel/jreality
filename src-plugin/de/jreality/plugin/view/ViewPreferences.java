@@ -38,7 +38,7 @@ public class ViewPreferences extends Plugin implements
 		viewMenuBar = null;
 	private ContentAppearance 
 		contentAppearance = null;
-	private AlignedContent
+	private ManagedContent
 		content = null;
 	private JPanel 
 		mainPage = new JPanel();
@@ -48,7 +48,7 @@ public class ViewPreferences extends Plugin implements
 		fullscreenItem = new JCheckBoxMenuItem("Fullscreen", ImageHook.getIcon("arrow_out.png"));
 	private JCheckBox
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe()),
-		saveSceneContent = new JCheckBox("Save Scene Content");
+		saveSceneContent = new JCheckBox("Store Imported Scene Content");
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
 	private SceneGraphComponent
@@ -123,7 +123,7 @@ public class ViewPreferences extends Plugin implements
 		c.storeProperty(getClass(), "saveSceneContent", saveSceneContent.isSelected());
 		try {
 			if (saveSceneContent.isSelected()) {
-				SceneGraphComponent cgc = content.getContent();
+				SceneGraphComponent cgc = content.getContextRoot(ContentLoader.class);
 				if (cgc == null) {
 					cgc = new SceneGraphComponent();
 				}
@@ -176,9 +176,12 @@ public class ViewPreferences extends Plugin implements
 		contentAppearance.getPanel().setColorPickerMode(activeMode);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
-		content = c.getPlugin(AlignedContent.class);
+		content = c.getPlugin(ManagedContent.class);
 		if (storedContent != null) {
-			content.setContent(storedContent);
+			for (SceneGraphComponent cgc : storedContent.getChildComponents()) {
+				content.addContentUnique(ContentLoader.class, cgc);
+			}
+			content.alignContent();
 		}
 	}
 

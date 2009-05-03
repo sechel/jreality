@@ -5,11 +5,11 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 
-import de.jreality.plugin.view.AdvancedAppearance;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
+import de.jreality.plugin.view.ContentGUI;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
@@ -168,7 +168,7 @@ public class ContentViewer {
 		contentViewer.registerPlugin(new ZoomTool());
 		contentViewer.registerPlugin(new ViewerKeyListenerPlugin());
 		contentViewer.registerPlugin(new InfoOverlayPlugin());
-		contentViewer.registerPlugin(new AdvancedAppearance());
+		contentViewer.registerPlugin(new ContentGUI());
 		contentViewer.startup();
 	}
 }

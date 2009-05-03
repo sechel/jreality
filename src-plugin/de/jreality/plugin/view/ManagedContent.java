@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
@@ -199,6 +200,15 @@ public class ManagedContent extends Plugin {
 	 */
 	public void alignContent() {
 		alignedContent.contentChanged();
+	}
+	
+	
+	/**
+	 * Returns all registered contexts
+	 * @return a set of context classes
+	 */
+	protected Set<Class<?>> getContextSet() {
+		return contextMap.keySet();
 	}
 	
 	

@@ -7,11 +7,11 @@ import javax.swing.AbstractAction;
 
 import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.ContentSound;
-import de.jreality.plugin.view.AdvancedAppearance;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
+import de.jreality.plugin.view.ContentGUI;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
@@ -221,7 +221,7 @@ public class ContentViewerVR {
 	public static void main(String[] args) {
 		ContentViewerVR contentViewer = new ContentViewerVR(false);
 		contentViewer.registerPlugin(new ContentLoader());
-		contentViewer.registerPlugin(new AdvancedAppearance());
+		contentViewer.registerPlugin(new ContentGUI());
 		contentViewer.startup();
 	}
 
