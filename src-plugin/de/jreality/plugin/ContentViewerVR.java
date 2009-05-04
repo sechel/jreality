@@ -122,6 +122,8 @@ public class ContentViewerVR {
 		controller.registerPlugin(new ZoomTool());
 		controller.registerPlugin(new ViewToolBar());
 		controller.registerPlugin(new ManagedContent());
+		controller.registerPlugin(new ContentLoader());
+		controller.registerPlugin(new ContentGUI());
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -217,17 +219,13 @@ public class ContentViewerVR {
 	}
 	
 	
-	
 	public static void main(String[] args) {
 		ContentViewerVR contentViewer = new ContentViewerVR(false);
-		contentViewer.registerPlugin(new ContentLoader());
-		contentViewer.registerPlugin(new ContentGUI());
 		contentViewer.startup();
 	}
 
 	public static Viewer remoteMain(String[] args) {
 		ContentViewerVR contentViewer = new ContentViewerVR(true);
-		contentViewer.registerPlugin(new ContentLoader());
 		contentViewer.startup();
 		return contentViewer.view.getViewer().getCurrentViewer();
 	}

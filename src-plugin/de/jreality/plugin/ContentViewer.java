@@ -87,6 +87,10 @@ public class ContentViewer {
 		
 		controller.registerPlugin(new ViewToolBar());
 		controller.registerPlugin(new ManagedContent());
+		controller.registerPlugin(new Export());
+		controller.registerPlugin(new ContentLoader());
+		controller.registerPlugin(new ZoomTool());
+		controller.registerPlugin(new ContentGUI());
 	}
 
 	public void registerPlugin(Plugin plugin) {
@@ -163,12 +167,9 @@ public class ContentViewer {
 	
 	public static void main(String[] args) {
 		ContentViewer contentViewer = new ContentViewer();
-		contentViewer.registerPlugin(new Export());
-		contentViewer.registerPlugin(new ContentLoader());
-		contentViewer.registerPlugin(new ZoomTool());
 		contentViewer.registerPlugin(new ViewerKeyListenerPlugin());
 		contentViewer.registerPlugin(new InfoOverlayPlugin());
-		contentViewer.registerPlugin(new ContentGUI());
 		contentViewer.startup();
 	}
+	
 }
