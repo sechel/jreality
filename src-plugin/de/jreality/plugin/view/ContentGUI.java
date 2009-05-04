@@ -43,7 +43,6 @@ public class ContentGUI extends Plugin implements ActionListener {
 		layerCombo.setPrototypeDisplayValue(LayerComboRenderer.class);
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		 if (e.getSource() == layerCombo) {
 			 if (!(layerCombo.getSelectedItem() instanceof Class<?>)) {
@@ -62,7 +61,6 @@ public class ContentGUI extends Plugin implements ActionListener {
 	
 	private class ContextComparator implements Comparator<Class<?>> {
 		
-		@Override
 		public int compare(Class<?> o1, Class<?> o2) {
 			return o1.getSimpleName().compareTo(o2.getSimpleName());
 		}
