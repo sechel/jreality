@@ -744,6 +744,7 @@ public class JOGLRendererHelper {
 	private static void renderLabels(JOGLRenderer jr, ImageData[] labels,
 			DoubleArrayArray vertices, IntArrayArray indices, double[] offset,
 			int alignment, double scale) {
+		if (labels == null )return;
 		GL gl = jr.globalGL;
 		gl.glPushAttrib(GL.GL_ENABLE_BIT);
 		gl.glEnable(GL.GL_BLEND);
