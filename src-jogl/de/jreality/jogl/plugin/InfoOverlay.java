@@ -17,6 +17,7 @@ import javax.media.opengl.glu.GLU;
 
 import com.sun.opengl.util.GLUT;
 
+import de.jreality.jogl.AbstractViewer;
 import de.jreality.jogl.Viewer;
 
 /**
@@ -34,7 +35,7 @@ public class InfoOverlay implements GLEventListener {
 	}
 	
 	
-	Viewer viewer;
+	AbstractViewer viewer;
 	
 	public int position = UPPER_LEFT;
 	private boolean visible = false;
@@ -51,7 +52,7 @@ public class InfoOverlay implements GLEventListener {
 	/**
 	 * @param v
 	 */
-	public InfoOverlay(Viewer v) {
+	public InfoOverlay(AbstractViewer v) {
 		viewer = v;
 		viewer.getDrawable().addGLEventListener(this);
 	}
