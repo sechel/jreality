@@ -44,8 +44,6 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import javax.swing.JPanel;
-
 import de.jreality.scene.Lock;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -53,62 +51,82 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.scene.proxy.smrj.ClientFactory;
 import de.jreality.scene.proxy.smrj.SMRJMirrorScene;
+import de.jreality.util.Secure;
 import de.smrj.Broadcaster;
 import de.smrj.tcp.TCPBroadcasterNIO;
 import de.smrj.tcp.management.JarServer;
 import de.smrj.tcp.management.Local;
 
 /**
- * @author weissman
+ * The viewer rendering the master scene graph in a distributed environment.
+ * It creates proxies for the remote viewers (instances of HeadTrackedViewer)
+ * and proxies for the local scene graph copies on the clients.
  * 
+ * Can have a local viewer (delegate) to which it delegates all method calls.
+ * 
+ * @author Steffen Weissmann
  */
 public class PortalServerViewer implements Viewer {
 
-  SceneGraphComponent root;
-  SceneGraphComponent auxRoot;
+	SceneGraphComponent root;
+	SceneGraphComponent auxRoot;
 	SceneGraphPath camPath;
-  private int metric;
+
+	Viewer delegate=null;
 
 	RemoteViewer clients;
 
 	SMRJMirrorScene proxyScene;
-  final Lock renderLock = new Lock();
-  
-  public PortalServerViewer() throws IOException {
-    this(de.jreality.jogl.Viewer.class);
-    //this(CylindricalPerspectiveViewer.class);
-  }
-  
-	public PortalServerViewer(Class viewerClass) throws IOException {	
+	final Lock renderLock = new Lock();
+
+	static Viewer createLocalViewer() {
+		String lvn = Secure.getProperty("de.jreality.portal.localViewer", "none");
+		if (lvn.equals("none")) return null;
+		try {
+			return (Viewer) Class.forName(lvn).newInstance();
+		} catch (Exception e) {
+			System.out.println("creating local viewer failed: "+e.getMessage());
+			return null;
+		}
+	}
+	
+	public PortalServerViewer() throws IOException {
+		this(de.jreality.jogl.Viewer.class);
+		//this(CylindricalPerspectiveViewer.class);
+	}
+
+	public PortalServerViewer(Class<? extends Viewer> viewerClass) throws IOException {	
+		delegate = createLocalViewer();
 		int port = 8844;
 		int cpPort = 8845;
 		JarServer js = new JarServer(new ServerSocket(cpPort));
 		Broadcaster bc = new TCPBroadcasterNIO(port, Broadcaster.RESPONSE_TYPE_EXCEPTION);
 		Local.sendStart(port, cpPort, Broadcaster.RESPONSE_TYPE_EXCEPTION, ClientFactory.class);
 		js.waitForDownloads();
-		
-    clients = bc.getRemoteFactory().createRemoteViaStaticMethod(
-        HeadTrackedViewer.class, HeadTrackedViewer.class,
-        "createFullscreen", new Class[]{Class.class}, new Object[]{viewerClass});
-    proxyScene = new SMRJMirrorScene(bc.getRemoteFactory(), renderLock);
-  }
 
-  public SceneGraphComponent getSceneRoot() {
+		clients = bc.getRemoteFactory().createRemoteViaStaticMethod(
+				HeadTrackedViewer.class, HeadTrackedViewer.class,
+				"create", new Class[]{Class.class}, new Object[]{viewerClass});
+		proxyScene = new SMRJMirrorScene(bc.getRemoteFactory(), renderLock);
+	}
+
+	public SceneGraphComponent getSceneRoot() {
 		return root;
 	}
 
 	public void setSceneRoot(SceneGraphComponent r) {
-    if (root != null) {
-      // dispose proxies for old root
-      proxyScene.disposeProxy(root);
-    }
+		if (root != null) {
+			// dispose proxies for old root
+			proxyScene.disposeProxy(root);
+		}
 		root = r;
-    if (root != null) {
-  		RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(root);
-	  	clients.setRemoteSceneRoot(rsgc);
-    } else {
-      clients.setRemoteSceneRoot(null);
-    }
+		if (root != null) {
+			RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(root);
+			clients.setRemoteSceneRoot(rsgc);
+		} else {
+			clients.setRemoteSceneRoot(null);
+		}
+		if (delegate != null) delegate.setSceneRoot(r);
 	}
 
 	public SceneGraphPath getCameraPath() {
@@ -118,66 +136,57 @@ public class PortalServerViewer implements Viewer {
 	public void setCameraPath(SceneGraphPath p) {
 		camPath = p;
 		clients.setRemoteCameraPath(p == null ? null : proxyScene.getProxies(p.toList()));
+		if (delegate != null) delegate.setCameraPath(camPath);
 	}
 
 	public boolean hasViewingComponent() {
+		if (delegate != null) return delegate.hasViewingComponent();
 		return false;
 	}
 
 	public Object getViewingComponent() {
+		if (delegate != null) return delegate.getViewingComponent();
 		return null;
 	}
 
-    public Dimension getViewingComponentSize() {
+	public Dimension getViewingComponentSize() {
+		if (delegate != null) return delegate.getViewingComponentSize();
 		return null;
 	}
-
-	public void initializeFrom(Viewer v) {
-	  setSceneRoot(v.getSceneRoot());
-    setCameraPath(v.getCameraPath());
-    setAuxiliaryRoot(v.getAuxiliaryRoot());
-	}
-
-//	public int getMetric() {
-//		return metric;
-//	}
-
-//	public void setMetric(int sig) {
-//		this.metric = sig;
-////		clients.setMetric(this.metric);
-//	}
 
 	public SceneGraphComponent getAuxiliaryRoot() {
-	  return auxRoot;
+		return auxRoot;
 	}
 
-  public void setAuxiliaryRoot(SceneGraphComponent ar) {
-    this.auxRoot = ar;
-    RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(auxRoot);
-    clients.setRemoteAuxiliaryRoot(rsgc);
-  }
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		this.auxRoot = ar;
+		RemoteSceneGraphComponent rsgc = (RemoteSceneGraphComponent) proxyScene.createProxyScene(auxRoot);
+		clients.setRemoteAuxiliaryRoot(rsgc);
+		if (delegate != null) delegate.setAuxiliaryRoot(ar);
+	}
 
-  public void render() {
-    renderStart();
-    renderEnd();
-  }
-  
-  void renderStart() {
-    renderLock.writeLock();
-    clients.render();
-  }
+	public void render() {
+		renderStart();
+		renderEnd();
+		if (delegate != null) delegate.render();
+	}
 
-  void renderEnd() {
-    clients.waitForRenderFinish();
-    renderLock.writeUnlock();
-  }
+	void renderStart() {
+		renderLock.writeLock();
+		clients.render();
+	}
 
-  public boolean canRenderAsync() {
-    return false;
-  }
+	void renderEnd() {
+		clients.waitForRenderFinish();
+		renderLock.writeUnlock();
+	}
 
-  public void renderAsync() {
-    throw new UnsupportedOperationException();
-  }
-  
+	public boolean canRenderAsync() {
+		return false;
+	}
+
+	public void renderAsync() {
+		throw new UnsupportedOperationException();
+	}
+
 }

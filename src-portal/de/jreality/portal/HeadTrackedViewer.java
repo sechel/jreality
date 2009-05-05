@@ -40,12 +40,8 @@
 
 package de.jreality.portal;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
 import java.beans.Statement;
 import java.util.List;
 
@@ -67,277 +63,279 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.GuiUtility;
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.Secure;
-import de.jreality.util.SystemProperties;
 import de.smrj.ClientFactory;
 
 /**
- * TODO: make configuration better...
  * 
- * @author gollwas
+ * A Viewer for rendering on remote clients of a distributed environment.
+ * It gets set the local copy of the master scene graph, adapts its camera path,
+ * and sets the correct view port before each render call.
+ * 
+ * It is assumed that the camera path has the following structure:
+ * root -\> ... ... -\> VE -\> headComponent -\> camera
+ * 
+ * Conceptually, the VE component represents the coordinate system of the virtual
+ * environment (i.e. CAVE, Portal). This node is navigated in the scene, so we
+ * imagine that the space inside the screens of the VE is navigated in the 3D scene.
+ * Thus, the path to this node should be the avatarPath.
+ * The heasComponent has the euclidean transformation of the head inside the
+ * VE and this transformation is written from directly from the tracking system, on
+ * the master scene graph.
+ * 
+ * This class replaces the head component of its local scene graph copy by the two
+ * components: cameraTranslationNode and cameraOrientationNode.
+ * 
+ * The cameraOrientationNode has the rotation from the VE coordinate
+ * system to the screen, and this transformation is fixed.
+ * 
+ * The cameraTranslationNode has the translation of the head inside the VE, which is set
+ * in each render call (setHeadMatrix, called from render). There, also the correct
+ * viewport and orientationMatrix of the camera is computed and set.
+ * 
+ * 
+ * @author Steffen Weissmann
  *
  */
 public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.ResetCallback {
 
-  Viewer viewer;
-  private ConfigurationAttributes config;
-  private SceneGraphComponent cameraTranslationNode;
-  private SceneGraphComponent cameraOrientationNode;
-  double[] tmpHead = new double[16];
-  private boolean hasSceneRoot;
-  private boolean hasCamPath;
-  private SceneGraphComponent headComponent;
-  SceneGraphPath portalPath;
-  SceneGraphPath cameraPath;
-  
-  Camera cam;
+	Viewer viewer;
+	private SceneGraphComponent cameraTranslationNode;
+	private SceneGraphComponent cameraOrientationNode;
+	double[] tmpHead = new double[16];
+	private boolean hasSceneRoot;
+	private boolean hasCamPath;
+	private SceneGraphComponent headComponent;
+	SceneGraphPath portalPath;
+	SceneGraphPath cameraPath;
 
-  public static HeadTrackedViewer createFullscreen(Class viewerClass) {
-    System.setProperty(SystemProperties.PORTAL_HEADTRACKED_VIEWER, viewerClass.getName());
-    return createFullscreen();
-  }
+	Camera cam;
 
-  private static JFrame frame;
-  private static HeadTrackedViewer hv;
-  
-  public static HeadTrackedViewer createFullscreen() {
-    if (frame == null) {
-    frame = new JFrame("no title");
-    hv = new HeadTrackedViewer();
-    frame.getContentPane().add((Component) hv.getViewingComponent());
-    GuiUtility.hideCursor(frame);
-    frame.dispose();
-    frame.setUndecorated(true);
-    frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-    frame.validate();
-    frame.setVisible(true);
-    }
-    return hv;
-  }
-  
-  public HeadTrackedViewer() {
-    String delegated = Secure.getProperty(SystemProperties.PORTAL_HEADTRACKED_VIEWER, SystemProperties.PORTAL_HEADTRACKED_VIEWER_DEFAULT);
-    try {
-      viewer = (Viewer) Class.forName(delegated).newInstance();
-    } catch (Exception e) {
-    	e.printStackTrace();
-      throw new Error("Viewer creation failed!");
-    }
-//    try {
-//      Statement configStatement = new Statement(viewer, "setAutoSwapMode", new Object[]{Boolean.FALSE});
-//      configStatement.execute();
-//    } catch (Exception e) {
-//      LoggingSystem.getLogger(this).config("viewer cant set auto swap mode");
-//    }
-    init();
-  }
-  
-  public HeadTrackedViewer(Class delegateClass) {
-    try {
-      viewer = (Viewer) delegateClass.newInstance();
-    } catch (Exception e) {
-      throw new Error("Viewer creation failed!");
-    }
-    init();
-  }
-
-  private void init() {
-    config = ConfigurationAttributes.getDefaultConfiguration();
-    cameraTranslationNode = new SceneGraphComponent();
-    cameraTranslationNode.setTransformation(new Transformation());
-
-    cameraTranslationNode.setName("cam Translation");
-    
-    cameraOrientationNode = new SceneGraphComponent();
-    cameraOrientationNode.setName("cam Orientation");
-    // set camera orientation to value from config file...
-    double[] rot = config.getDoubleArray("camera.orientation");
-    MatrixBuilder mb = MatrixBuilder.euclidean();
-    double screenRotation = 0;
-    if (rot != null) {
-    	screenRotation = rot[0] * ((Math.PI * 2.0) / 360.);
-		mb.rotate(screenRotation, new double[] { rot[1], rot[2], rot[3] });
+	public static HeadTrackedViewer create(Class<? extends Viewer> viewerClass) {
+		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
+		return create(config, viewerClass);
 	}
-    mb.assignTo(cameraOrientationNode);
-    cameraTranslationNode.addChild(cameraOrientationNode);
-  }
 
-  public SceneGraphComponent getAuxiliaryRoot() {
-    return viewer.getAuxiliaryRoot();
-  }
+	private static JFrame frame;
+	private static HeadTrackedViewer hv;
 
-  public SceneGraphPath getCameraPath() {
-    return cameraPath;
-  }
+	public static HeadTrackedViewer create(ConfigurationAttributes config, Class<? extends Viewer> viewerClass) {
+		if (frame == null) {
+			frame = new JFrame("no title");
+			hv = new HeadTrackedViewer(config, viewerClass);
+			frame.getContentPane().add((Component) hv.getViewingComponent());
+			GuiUtility.hideCursor(frame);
 
-  public SceneGraphComponent getSceneRoot() {
-    return viewer.getSceneRoot();
-  }
+			if (config.getBool("fullscreen")) {
+				frame.dispose();
+				frame.setUndecorated(true);
+				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
+				frame.validate();
+			} else {
+				int w = config.getInt("screen.width");
+				int h = config.getInt("screen.height");
+				frame.setSize(w, h);
+				frame.setTitle(ConfigurationAttributes.getDefaultConfiguration().getProperty("frametitle"));
+			}
 
-//  public int getMetric() {
-//    return viewer.getMetric();
-//  }
+			frame.setVisible(true);
 
-  public Object getViewingComponent() {
-    return viewer.getViewingComponent();
-  }
+		}
+		return hv;
+	}
 
-  public boolean hasViewingComponent() {
-    return viewer.hasViewingComponent();
-  }
+	public HeadTrackedViewer(ConfigurationAttributes config, Class<? extends Viewer> viewerClass) {
+		try {
+			viewer = viewerClass.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Error("Viewer creation failed!");
+		}
+		init(config);
+	}
 
-  public void render() {
-    if (!hasSceneRoot || !hasCamPath) return;
-    setHeadMatrix(headComponent.getTransformation().getMatrix(tmpHead));
-    viewer.render();
-  }
+	private void init(ConfigurationAttributes config) {
+		cameraTranslationNode = new SceneGraphComponent();
+		cameraTranslationNode.setTransformation(new Transformation());
 
-  public void setAuxiliaryRoot(SceneGraphComponent ar) {
-    viewer.setAuxiliaryRoot(ar);
-  }
+		cameraTranslationNode.setName("cam Translation");
 
-  public void setCameraPath(SceneGraphPath camPath) {
-    cameraPath = new SceneGraphPath(camPath);
-    hasCamPath = !(camPath == null || camPath.getLength() == 0);
-    // empty path => reset fields
-    if (camPath == null || camPath.getLength() == 0) {
-      viewer.setCameraPath(null);
-      headComponent = null;
-      portalPath = null;
-      cam = null;
-      return;
-    }
-    // new camera path => extract headComponent and set artificial camera path
-    cam = (Camera) camPath.getLastElement();
-    // TODO: do these settings on client side...
-    //cam.setStereo(config.getBool("camera.stereo"));
-    //cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
-    cam.setOnAxis(false);
+		cameraOrientationNode = new SceneGraphComponent();
+		cameraOrientationNode.setName("cam Orientation");
+		// set camera orientation to value from config file...
+		double[] rot = config.getDoubleArray("camera.orientation");
+		MatrixBuilder mb = MatrixBuilder.euclidean();
+		double screenRotation = 0;
+		if (rot != null) {
+			screenRotation = rot[0] * ((Math.PI * 2.0) / 360.);
+			mb.rotate(screenRotation, new double[] { rot[1], rot[2], rot[3] });
+		}
+		mb.assignTo(cameraOrientationNode);
+		cameraTranslationNode.addChild(cameraOrientationNode);
+	}
 
-    camPath.pop();
+	public SceneGraphComponent getAuxiliaryRoot() {
+		return viewer.getAuxiliaryRoot();
+	}
 
-    headComponent = camPath.getLastComponent();
-    
-    camPath.pop(); // now this should be the portal path
-    portalPath = new SceneGraphPath(camPath);
-    
-    // add camera position and orientation, add camera there
-    // DONT CHANGE SCENEGRAPH
-//    camPath.getLastComponent().addChild(cameraTranslationNode);
-    cameraOrientationNode.setCamera(cam);
-    if (cam.isOnAxis()) {
-        LoggingSystem.getLogger(CameraUtility.class).info("portal camera is on-axis: changing to off-axis");
-        cam.setOnAxis(false);
-      }
-      
-    if (!cam.isStereo()) {
-        LoggingSystem.getLogger(CameraUtility.class).info("portal camera is not stereo: changing to stereo");
-        cam.setStereo(true);
-      }
-      
-   
-    // build the right camera path
-    camPath.push(cameraTranslationNode);
-    camPath.push(cameraOrientationNode);
-    camPath.push(cam);
-    
-    // set camera path to viewer
-    viewer.setCameraPath(camPath);
-    
-    // hack
-    setHeadMatrix(Rn.identityMatrix(4));
-  }
+	public SceneGraphPath getCameraPath() {
+		return cameraPath;
+	}
 
-  public void setSceneRoot(SceneGraphComponent r) {
-	hasSceneRoot = !(r == null);
-    viewer.setSceneRoot(r);
-  }
+	public SceneGraphComponent getSceneRoot() {
+		return viewer.getSceneRoot();
+	}
 
-//  public void setMetric(int sig) {
-//    viewer.setMetric(sig);
-//  }
-  
-  double[] tmp1 = new double[16];
-  double[] tmp2 = new double[16];
-  FactoredMatrix headMatrix = new FactoredMatrix();
-  FactoredMatrix headTranslation = new FactoredMatrix();
-  FactoredMatrix portalMatrix = new FactoredMatrix();
-  Matrix totalOrientation = new Matrix();
-  Matrix world2cam = new Matrix();
+	public Object getViewingComponent() {
+		return viewer.getViewingComponent();
+	}
 
-  private void setHeadMatrix(double[] head) {
-	  
-	  // this sets the translation in the camera path; and sets the
-	  // orientation matrix for the camera (for detection of eye positions)
-	  // and the cameras viewport.
-	  
-    headMatrix.assignFrom(head);
-    headTranslation.setTranslation(headMatrix.getTranslation());
+	public boolean hasViewingComponent() {
+		return viewer.hasViewingComponent();
+	}
 
-    headTranslation.assignTo(cameraTranslationNode);
+	public void render() {
+		if (!hasSceneRoot || !hasCamPath) return;
+		setHeadMatrix(headComponent.getTransformation().getMatrix(tmpHead));
+		viewer.render();
+	}
 
-    totalOrientation.assignFrom(cameraOrientationNode.getTransformation());
-    totalOrientation.invert();
-    totalOrientation.multiplyOnRight(headMatrix);
-    cam.setOrientationMatrix(totalOrientation.getArray());
-    
-    portalMatrix.assignFrom(portalPath.getMatrix(tmp1));
-    world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
-    
-    double[] portalOriginInCamCoordinates = world2cam.multiplyVector(portalMatrix.getTranslation());
-	Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
-	
-    PortalCoordinateSystem.setPORTALViewport(portalOriginInCamCoordinates, cam);
-    
-  }
+	public void setAuxiliaryRoot(SceneGraphComponent ar) {
+		viewer.setAuxiliaryRoot(ar);
+	}
 
-  Statement waitStatement;
-  public void waitForRenderFinish() {
-    if (waitStatement == null) waitStatement = new Statement(viewer, "waitForRenderFinish", null);
-    try {
-      waitStatement.execute();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+	public void setCameraPath(SceneGraphPath camPath) {
+		cameraPath = new SceneGraphPath(camPath);
+		hasCamPath = !(camPath == null || camPath.getLength() == 0);
+		// empty path => reset fields
+		if (camPath == null || camPath.getLength() == 0) {
+			viewer.setCameraPath(null);
+			headComponent = null;
+			portalPath = null;
+			cam = null;
+			return;
+		}
+		// new camera path => extract headComponent and set artificial camera path
+		cam = (Camera) camPath.getLastElement();
+		// TODO: do these settings on client side...
+		//cam.setStereo(config.getBool("camera.stereo"));
+		//cam.setEyeSeparation(config.getDouble("camera.eyeSeparation"));
+		cam.setOnAxis(false);
 
-  public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
-    setSceneRoot((SceneGraphComponent) r);
-  }
+		camPath.pop();
 
-  public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r) {
-    setAuxiliaryRoot((SceneGraphComponent) r);
-  }
+		headComponent = camPath.getLastComponent();
 
-  public void setRemoteCameraPath(List<SceneGraphNode> list) {
-    setCameraPath(SceneGraphPath.fromList(list));
-  }
+		camPath.pop(); // now this should be the portal path
+		portalPath = new SceneGraphPath(camPath);
 
-  public void resetCalled() {
-	frame.setVisible(false);
-	frame.dispose();
-	frame = null;
-  }
+		// add camera position and orientation, add camera there
+		// DONT CHANGE SCENEGRAPH
+//		camPath.getLastComponent().addChild(cameraTranslationNode);
+		cameraOrientationNode.setCamera(cam);
+		if (cam.isOnAxis()) {
+			LoggingSystem.getLogger(CameraUtility.class).info("portal camera is on-axis: changing to off-axis");
+			cam.setOnAxis(false);
+		}
 
-  public Dimension getViewingComponentSize() {
-    return viewer.getViewingComponentSize();
-  }
+		if (!cam.isStereo()) {
+			LoggingSystem.getLogger(CameraUtility.class).info("portal camera is not stereo: changing to stereo");
+			cam.setStereo(true);
+		}
 
-  public boolean canRenderAsync() {
-    return viewer.canRenderAsync();
-  }
 
-  public void renderAsync() {
-    viewer.renderAsync();
-  }
+		// build the right camera path
+		camPath.push(cameraTranslationNode);
+		camPath.push(cameraOrientationNode);
+		camPath.push(cam);
 
-//  Statement swapStatement;
-//  public void swapBuffers() {
-//	    if (swapStatement == null) swapStatement = new Statement(viewer, "swapBuffers", null);
-//	    try {
-//	    	swapStatement.execute();
-//	    } catch (Exception e) {
-//	      e.printStackTrace();
-//	    }
-//  }
+		// set camera path to viewer
+		viewer.setCameraPath(camPath);
+
+		// hack
+		setHeadMatrix(Rn.identityMatrix(4));
+	}
+
+	public void setSceneRoot(SceneGraphComponent r) {
+		hasSceneRoot = !(r == null);
+		viewer.setSceneRoot(r);
+	}
+
+//	public void setMetric(int sig) {
+//	viewer.setMetric(sig);
+//	}
+
+	double[] tmp1 = new double[16];
+	double[] tmp2 = new double[16];
+	FactoredMatrix headMatrix = new FactoredMatrix();
+	FactoredMatrix headTranslation = new FactoredMatrix();
+	FactoredMatrix portalMatrix = new FactoredMatrix();
+	Matrix totalOrientation = new Matrix();
+	Matrix world2cam = new Matrix();
+
+	private void setHeadMatrix(double[] head) {
+
+		// this sets the translation in the camera path; and sets the
+		// orientation matrix for the camera (for detection of eye positions)
+		// and the cameras viewport.
+
+		headMatrix.assignFrom(head);
+		headTranslation.setTranslation(headMatrix.getTranslation());
+
+		headTranslation.assignTo(cameraTranslationNode);
+
+		totalOrientation.assignFrom(cameraOrientationNode.getTransformation());
+		totalOrientation.invert();
+		totalOrientation.multiplyOnRight(headMatrix);
+		cam.setOrientationMatrix(totalOrientation.getArray());
+
+		portalMatrix.assignFrom(portalPath.getMatrix(tmp1));
+		world2cam.assignFrom(viewer.getCameraPath().getInverseMatrix(tmp2));
+
+		double[] portalOriginInCamCoordinates = world2cam.multiplyVector(portalMatrix.getTranslation());
+		Pn.dehomogenize(portalOriginInCamCoordinates, portalOriginInCamCoordinates);
+
+		PortalCoordinateSystem.setPORTALViewport(portalOriginInCamCoordinates, cam);
+
+	}
+
+	Statement waitStatement;
+	public void waitForRenderFinish() {
+		if (waitStatement == null) waitStatement = new Statement(viewer, "waitForRenderFinish", null);
+		try {
+			waitStatement.execute();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setRemoteSceneRoot(RemoteSceneGraphComponent r) {
+		setSceneRoot((SceneGraphComponent) r);
+	}
+
+	public void setRemoteAuxiliaryRoot(RemoteSceneGraphComponent r) {
+		setAuxiliaryRoot((SceneGraphComponent) r);
+	}
+
+	public void setRemoteCameraPath(List<SceneGraphNode> list) {
+		setCameraPath(SceneGraphPath.fromList(list));
+	}
+
+	public void resetCalled() {
+		frame.setVisible(false);
+		frame.dispose();
+		frame = null;
+	}
+
+	public Dimension getViewingComponentSize() {
+		return viewer.getViewingComponentSize();
+	}
+
+	public boolean canRenderAsync() {
+		return viewer.canRenderAsync();
+	}
+
+	public void renderAsync() {
+		viewer.renderAsync();
+	}
+
 }
