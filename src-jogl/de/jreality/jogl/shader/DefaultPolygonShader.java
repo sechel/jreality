@@ -239,7 +239,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (useGLSL && glslProgram != null)		{
 	    	if ( glslProgram == noneuclideanShader)	{
 	    		// the only reason we're doing it here is because only now do we know what jrs is
-	    		System.err.println("writing glsl shader");
+//	    		System.err.println("writing glsl shader");
 	    		// HACK this is a shoddy attempt to pass over parts of OpenGL state to a hypothetical GLSL shader
 	    		// should be done by the specific shader instead, since only it knows which uniform variables
 	    		// it has
