@@ -2,6 +2,7 @@ package de.jreality.plugin;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.InputStream;
 
 import javax.swing.AbstractAction;
 
@@ -56,9 +57,28 @@ public class ContentViewerVR {
 	private Audio audio;
 	private ContentSound contentSound;
 	
+	private boolean useAudio = false;
+	
+	
+	public ContentViewerVR(File propertiesFile, boolean withAudio) {
+		this.useAudio = withAudio;
+		controller = new SimpleController(propertiesFile);
+		initPlugins();
+	}
+	
+	public ContentViewerVR(InputStream propertiesIn, boolean withAudio) {
+		this.useAudio = withAudio;
+		controller = new SimpleController(propertiesIn);
+		initPlugins();
+	}
+	
 	public ContentViewerVR(boolean withAudio) {
+		this.useAudio = withAudio;
 		controller = new SimpleController(new File("ContentViewerVR.jrw"));
-		
+		initPlugins();
+	}
+
+	protected void initPlugins() {
 		viewMenuBar = new ViewMenuBar();
 		viewMenuBar.addMenuSeparator(ContentViewerVR.class, 19.0, "File");
 		viewMenuBar.addMenuItem(ContentViewerVR.class, 20.0, new ExitAction(), "File");
@@ -105,7 +125,7 @@ public class ContentViewerVR {
 		terrain = new Terrain();
 		controller.registerPlugin(terrain);
 		
-		if (withAudio) {
+		if (useAudio) {
 			audio = new Audio();
 			controller.registerPlugin(audio);
 			contentSound = new ContentSound();
@@ -125,7 +145,9 @@ public class ContentViewerVR {
 		controller.registerPlugin(new ContentLoader());
 		controller.registerPlugin(new ManagedContentGUI());
 	}
-
+	
+	
+	
 	public void registerPlugin(Plugin plugin) {
 		controller.registerPlugin(plugin);
 	}

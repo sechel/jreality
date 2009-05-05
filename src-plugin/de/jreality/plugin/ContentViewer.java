@@ -2,6 +2,7 @@ package de.jreality.plugin;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.InputStream;
 
 import javax.swing.AbstractAction;
 
@@ -45,9 +46,23 @@ public class ContentViewer {
 	private ContentTools contentTools;
 	private DisplayOptions displayOptions;
 	
+
+	public ContentViewer(File propertiesFile) {
+		controller = new SimpleController(propertiesFile);
+		initPlugins();
+	}
+	
+	public ContentViewer(InputStream propertiesIn) {
+		controller = new SimpleController(propertiesIn);
+		initPlugins();
+	}
+	
 	public ContentViewer() {
 		controller = new SimpleController(new File("ContentViewer.jrw"));
-		
+		initPlugins();
+	}
+
+	protected void initPlugins() {
 		view = new View();
 		controller.registerPlugin(view);
 		
@@ -94,7 +109,7 @@ public class ContentViewer {
 		controller.registerPlugin(new ManagedContentGUI());
 		controller.registerPlugin(new StatusBar());
 	}
-
+	
 	public void registerPlugin(Plugin plugin) {
 		controller.registerPlugin(plugin);
 	}
