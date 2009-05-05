@@ -86,14 +86,15 @@ public class HeightFieldFactory extends QuadMeshFactory {
 	Rectangle2D theDomain = new Rectangle2D.Double(-1.0, -1.0, 2.0, 2.0);
 	boolean domainHasChanged = true;
 	public HeightFieldFactory() {
-		super();
+		
 	}
 
 
 	/**
 	 * Set the domain for this height field. Default: (xmin, ymin, width, height) = (-1, -1, 2, 2).
 	 * @param r
-	 */public void setRegularDomain(Rectangle2D r)	{
+	 */
+	public void setRegularDomain(Rectangle2D r)	{
 		theDomain=r;
 	}
 	
