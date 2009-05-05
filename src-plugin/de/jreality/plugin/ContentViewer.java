@@ -9,7 +9,7 @@ import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
-import de.jreality.plugin.view.ContentGUI;
+import de.jreality.plugin.view.ManagedContentGUI;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
@@ -19,6 +19,7 @@ import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
 import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.Shell;
+import de.jreality.plugin.view.StatusBar;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
 import de.jreality.plugin.view.ViewPreferences;
@@ -90,7 +91,8 @@ public class ContentViewer {
 		controller.registerPlugin(new Export());
 		controller.registerPlugin(new ContentLoader());
 		controller.registerPlugin(new ZoomTool());
-		controller.registerPlugin(new ContentGUI());
+		controller.registerPlugin(new ManagedContentGUI());
+		controller.registerPlugin(new StatusBar());
 	}
 
 	public void registerPlugin(Plugin plugin) {

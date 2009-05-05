@@ -22,7 +22,7 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class ContentGUI extends Plugin implements ActionListener {
+public class ManagedContentGUI extends Plugin implements ActionListener {
 
 	private ManagedContent
 		managedContent = null;
@@ -36,7 +36,7 @@ public class ContentGUI extends Plugin implements ActionListener {
 		layersIcon = ImageHook.getIcon("layers.png");
 	
 	
-	public ContentGUI() {
+	public ManagedContentGUI() {
 		layerCombo.setRenderer(new LayerComboRenderer());
 		layerCombo.setModel(new LayerModel());
 		layerCombo.addActionListener(this);
@@ -143,7 +143,7 @@ public class ContentGUI extends Plugin implements ActionListener {
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("Content GUI", "Stefan Sechelmann");
+		return new PluginInfo("Managed Content GUI", "Stefan Sechelmann");
 	}
 	
 }

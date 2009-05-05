@@ -11,7 +11,7 @@ import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
-import de.jreality.plugin.view.ContentGUI;
+import de.jreality.plugin.view.ManagedContentGUI;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
@@ -123,7 +123,7 @@ public class ContentViewerVR {
 		controller.registerPlugin(new ViewToolBar());
 		controller.registerPlugin(new ManagedContent());
 		controller.registerPlugin(new ContentLoader());
-		controller.registerPlugin(new ContentGUI());
+		controller.registerPlugin(new ManagedContentGUI());
 	}
 
 	public void registerPlugin(Plugin plugin) {
