@@ -3,6 +3,7 @@ package de.jreality.tutorial.audio;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -39,8 +40,12 @@ import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class AudioExample {
 
-	private SimpleController controller = new SimpleController();
-	
+	private File
+		propertiesFile = new File("AudioExample.jrw");
+	private SimpleController 
+		controller = new SimpleController(propertiesFile);
+	private SceneGraphComponent 
+		audioComponent = new SceneGraphComponent("monolith");
 	
 	public AudioExample() throws IOException, UnsupportedAudioFileException {
 		videoSetup();
@@ -59,7 +64,6 @@ public class AudioExample {
 			}
 		}, "File");
 		
-		controller.registerPlugin(new ManagedContent());  // TODO: This doesn't seem to help?!?
 		controller.registerPlugin(viewMenuBar);
 		controller.registerPlugin(new View());
 		controller.registerPlugin(new ViewPreferences());
@@ -73,6 +77,7 @@ public class AudioExample {
 		controller.registerPlugin(new Terrain());
 		controller.registerPlugin(new Avatar());
 		controller.registerPlugin(new DisplayOptions());
+		controller.registerPlugin(new ManagedContent());
 	}
 
 	private void audioSetup() throws IOException, UnsupportedAudioFileException {
@@ -83,7 +88,6 @@ public class AudioExample {
 		Input wavFile = Input.getInput("Zoom", testSoundIn);
 		final AudioSource source = new CachedAudioInputStreamSource("zoom", wavFile, true);
 		
-		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
 		audioComponent.setGeometry(Primitives.cube());
 		MatrixBuilder.euclidean().translate(0, 5, 0).scale(2, 4.5, .5).assignTo(audioComponent);
@@ -100,16 +104,15 @@ public class AudioExample {
 		});
 		audioComponent.addTool(actionTool);
 		audioComponent.addTool(new DraggingTool());
-	
-		SceneGraphComponent contentRoot = controller.getPlugin(AlignedContent.class).getScalingComponent();
-		contentRoot.addChild(audioComponent);	
 	}
 
 	public void startup() {
 		controller.startup();
+		controller.getPlugin(ManagedContent.class).setContent(getClass(), audioComponent);
 	}
 	
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
 		new AudioExample().startup();
 	}
+	
 }
