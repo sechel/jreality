@@ -3,6 +3,7 @@ package de.jreality.tutorial.audio;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,6 +21,7 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
+import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
@@ -50,6 +52,13 @@ import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
  */
 public class LeslieDemo {
 
+	private File
+		propertiesFile = new File("LeslieDemo.jrw");
+	private SimpleController 
+		controller = new SimpleController(propertiesFile);
+	private SceneGraphComponent 
+		hub = new SceneGraphComponent("LeslieHub");
+	
 	private static class LeslieTask implements AnimatorTask {
 		private SceneGraphComponent comp;
 		private static final double q = 0.0005;
@@ -98,8 +107,6 @@ public class LeslieDemo {
 		}
 	}
 	
-	private SimpleController controller = new SimpleController();
-	
 	
 	public LeslieDemo() throws IOException, UnsupportedAudioFileException {
 		videoSetup();
@@ -131,6 +138,7 @@ public class LeslieDemo {
 		controller.registerPlugin(new Terrain());
 		controller.registerPlugin(new Avatar());
 		controller.registerPlugin(new DisplayOptions());
+		controller.registerPlugin(new ManagedContent());
 	}
 
 	private void audioSetup() throws IOException, UnsupportedAudioFileException {
@@ -141,7 +149,6 @@ public class LeslieDemo {
 		final AudioSource source = new CachedAudioInputStreamSource("hammond", Input.getInput("hammond", is), true);
 		
 		final float r = 0.15f;
-		SceneGraphComponent hub = new SceneGraphComponent("LeslieHub");
 		
 		int nHorns = 2;
 		Geometry cone = Primitives.cone(20, -r);
@@ -168,13 +175,11 @@ public class LeslieDemo {
 			}
 		});
 		hub.addTool(actionTool);
-	
-		SceneGraphComponent contentRoot = controller.getPlugin(AlignedContent.class).getScalingComponent();
-		contentRoot.addChild(hub);
 	}
 
 	public void startup() {
 		controller.startup();
+		controller.getPlugin(ManagedContent.class).setContent(getClass(), hub);
 	}
 	
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
