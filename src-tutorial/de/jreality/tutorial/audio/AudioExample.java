@@ -34,52 +34,21 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.util.Input;
+import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.Plugin;
+import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 
-public class AudioExample {
+public class AudioExample extends Plugin {
 
-	private File
-		propertiesFile = new File("AudioExample.jrw");
-	private SimpleController 
-		controller = new SimpleController(propertiesFile);
-	
-	public AudioExample() throws IOException, UnsupportedAudioFileException {
-		videoSetup();
-		audioSetup();
-	}
-	
-	@SuppressWarnings("serial")
-	private void videoSetup() {
-		ViewMenuBar viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new AbstractAction() {
-			{
-				putValue(AbstractAction.NAME, "Exit");
-			}
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		}, "File");
-		
-		controller.registerPlugin(viewMenuBar);
-		controller.registerPlugin(new View());
-		controller.registerPlugin(new ViewPreferences());
-		controller.registerPlugin(new CameraStand());
-		controller.registerPlugin(new Lights());
-		controller.registerPlugin(new AlignedContent());
-		controller.registerPlugin(new ContentAppearance());
-		controller.registerPlugin(new Inspector());
-		controller.registerPlugin(new Shell());
-		controller.registerPlugin(new Sky());
-		controller.registerPlugin(new Terrain());
-		controller.registerPlugin(new Avatar());
-		controller.registerPlugin(new DisplayOptions());
+	@Override
+	public PluginInfo getPluginInfo() {
+		return new PluginInfo("Audio Example", "Peter Brinkmann");
 	}
 
-	private void audioSetup() throws IOException, UnsupportedAudioFileException {
-		controller.registerPlugin(new AudioOptions());
-		controller.registerPlugin(new AudioLauncher());
-		
+	@Override
+	public void install(Controller c) throws Exception {
 		InputStream testSoundIn = Audio.class.getResourceAsStream("zoom.wav");
 		Input wavFile = Input.getInput("Zoom", testSoundIn);
 		final AudioSource source = new CachedAudioInputStreamSource("zoom", wavFile, true);
@@ -100,15 +69,40 @@ public class AudioExample {
 		});
 		audioComponent.addTool(actionTool);
 		audioComponent.addTool(new DraggingTool());
-		controller.getPlugin(AlignedContent.class).setContent(audioComponent);
+		c.getPlugin(AlignedContent.class).setContent(audioComponent);
 	}
 
-	public void startup() {
-		controller.startup();
-	}
 	
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
-		new AudioExample().startup();
+		File propertiesFile = new File("AudioExample.jrw");
+		SimpleController controller = new SimpleController(propertiesFile);
+		ViewMenuBar viewMenuBar = new ViewMenuBar();
+		viewMenuBar.addMenuItem(AudioExample.class, 20.0, new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			{
+				putValue(AbstractAction.NAME, "Exit");
+			}
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		}, "File");
+		controller.registerPlugin(viewMenuBar);
+		controller.registerPlugin(new View());
+		controller.registerPlugin(new ViewPreferences());
+		controller.registerPlugin(new CameraStand());
+		controller.registerPlugin(new Lights());
+		controller.registerPlugin(new AlignedContent());
+		controller.registerPlugin(new ContentAppearance());
+		controller.registerPlugin(new Inspector());
+		controller.registerPlugin(new Shell());
+		controller.registerPlugin(new Sky());
+		controller.registerPlugin(new Terrain());
+		controller.registerPlugin(new Avatar());
+		controller.registerPlugin(new DisplayOptions());
+		controller.registerPlugin(new AudioOptions());
+		controller.registerPlugin(new AudioLauncher());
+		controller.registerPlugin(new AudioExample());
+		controller.startup();
 	}
 	
 }
