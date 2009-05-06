@@ -6,9 +6,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.StringWriter;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -19,10 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 import de.jreality.plugin.view.image.ImageHook;
-import de.jreality.reader.ReaderJRS;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.writer.WriterJRS;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -38,8 +32,6 @@ public class ViewPreferences extends Plugin implements
 		viewMenuBar = null;
 	private ContentAppearance 
 		contentAppearance = null;
-	private ManagedContent
-		content = null;
 	private JPanel 
 		mainPage = new JPanel();
 	private FrontendListener 
@@ -47,12 +39,9 @@ public class ViewPreferences extends Plugin implements
 	private JCheckBoxMenuItem  
 		fullscreenItem = new JCheckBoxMenuItem("Fullscreen", ImageHook.getIcon("arrow_out.png"));
 	private JCheckBox
-		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe()),
-		saveSceneContent = new JCheckBox("Store Imported Scene Content");
+		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
-	private SceneGraphComponent
-		storedContent = null;
 	private boolean
 		windowedHidePanels = false;
 	
@@ -74,7 +63,6 @@ public class ViewPreferences extends Plugin implements
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		mainPage.add(colorChooserModeCombo, c);
 		colorChooserModeCombo.setSelectedIndex(1);
-		mainPage.add(saveSceneContent, c);
 		
 		threadSafeChecker.addActionListener(this);
 		fullscreenItem.addActionListener(this);
@@ -120,24 +108,6 @@ public class ViewPreferences extends Plugin implements
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe());
 		c.storeProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex());
-		c.storeProperty(getClass(), "saveSceneContent", saveSceneContent.isSelected());
-		try {
-			if (saveSceneContent.isSelected()) {
-				SceneGraphComponent cgc = content.getContextRoot(ContentLoader.class);
-				if (cgc == null) {
-					cgc = new SceneGraphComponent();
-				}
-				StringWriter sw = new StringWriter();
-				WriterJRS writerJRS = new WriterJRS();
-				writerJRS.write(cgc, sw);
-				String sceneString = sw.getBuffer().toString();
-				c.storeProperty(getClass(), "sceneContent", sceneString);
-			} else {
-				c.deleteProperty(getClass(), "sceneContent");
-			}
-		} catch (Exception e) {
-			System.out.println("Cannot store scene to properties: " + e.getMessage());
-		}
 		super.storeStates(c);
 	}
 	
@@ -146,21 +116,6 @@ public class ViewPreferences extends Plugin implements
 		threadSafeChecker.setSelected(c.getProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe()));
 		SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());
 		colorChooserModeCombo.setSelectedIndex(c.getProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex()));
-		saveSceneContent.setSelected(c.getProperty(getClass(), "saveSceneContent", saveSceneContent.isSelected()));
-		try {
-			if (saveSceneContent.isSelected()) {
-				String sceneString  = c.getProperty(getClass(), "sceneContent", null);
-				File tmpSceneFile = File.createTempFile("storedScene", "jrs");
-				FileWriter fw = new FileWriter(tmpSceneFile);
-				fw.append(sceneString);
-				fw.close();
-				ReaderJRS readerJRS = new ReaderJRS();
-				storedContent = readerJRS.read(tmpSceneFile);
-				tmpSceneFile.delete();
-			}
-		} catch (Exception e) {
-			System.out.println("Cannot restore scene from properties: " + e.getMessage());
-		}
 		super.restoreStates(c);
 	}
 	
@@ -176,13 +131,6 @@ public class ViewPreferences extends Plugin implements
 		contentAppearance.getPanel().setColorPickerMode(activeMode);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
-		content = c.getPlugin(ManagedContent.class);
-		if (storedContent != null) {
-			for (SceneGraphComponent cgc : storedContent.getChildComponents()) {
-				content.addContentUnique(ContentLoader.class, cgc);
-			}
-			content.alignContent();
-		}
 	}
 
 	@Override
