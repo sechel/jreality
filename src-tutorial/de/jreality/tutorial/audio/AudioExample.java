@@ -21,6 +21,7 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
+import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
@@ -58,6 +59,7 @@ public class AudioExample {
 			}
 		}, "File");
 		
+		controller.registerPlugin(new ManagedContent());  // TODO: This doesn't seem to help?!?
 		controller.registerPlugin(viewMenuBar);
 		controller.registerPlugin(new View());
 		controller.registerPlugin(new ViewPreferences());
