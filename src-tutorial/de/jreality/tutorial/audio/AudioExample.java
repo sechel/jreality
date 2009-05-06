@@ -22,7 +22,6 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
-import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
@@ -44,8 +43,6 @@ public class AudioExample {
 		propertiesFile = new File("AudioExample.jrw");
 	private SimpleController 
 		controller = new SimpleController(propertiesFile);
-	private SceneGraphComponent 
-		audioComponent = new SceneGraphComponent("monolith");
 	
 	public AudioExample() throws IOException, UnsupportedAudioFileException {
 		videoSetup();
@@ -77,7 +74,6 @@ public class AudioExample {
 		controller.registerPlugin(new Terrain());
 		controller.registerPlugin(new Avatar());
 		controller.registerPlugin(new DisplayOptions());
-		controller.registerPlugin(new ManagedContent());
 	}
 
 	private void audioSetup() throws IOException, UnsupportedAudioFileException {
@@ -87,7 +83,7 @@ public class AudioExample {
 		InputStream testSoundIn = Audio.class.getResourceAsStream("zoom.wav");
 		Input wavFile = Input.getInput("Zoom", testSoundIn);
 		final AudioSource source = new CachedAudioInputStreamSource("zoom", wavFile, true);
-		
+		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
 		audioComponent.setGeometry(Primitives.cube());
 		MatrixBuilder.euclidean().translate(0, 5, 0).scale(2, 4.5, .5).assignTo(audioComponent);
@@ -104,11 +100,11 @@ public class AudioExample {
 		});
 		audioComponent.addTool(actionTool);
 		audioComponent.addTool(new DraggingTool());
+		controller.getPlugin(AlignedContent.class).setContent(audioComponent);
 	}
 
 	public void startup() {
 		controller.startup();
-		controller.getPlugin(ManagedContent.class).setContent(getClass(), audioComponent);
 	}
 	
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {

@@ -21,7 +21,6 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
-import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
@@ -56,8 +55,6 @@ public class LeslieDemo {
 		propertiesFile = new File("LeslieDemo.jrw");
 	private SimpleController 
 		controller = new SimpleController(propertiesFile);
-	private SceneGraphComponent 
-		hub = new SceneGraphComponent("LeslieHub");
 	
 	private static class LeslieTask implements AnimatorTask {
 		private SceneGraphComponent comp;
@@ -138,7 +135,6 @@ public class LeslieDemo {
 		controller.registerPlugin(new Terrain());
 		controller.registerPlugin(new Avatar());
 		controller.registerPlugin(new DisplayOptions());
-		controller.registerPlugin(new ManagedContent());
 	}
 
 	private void audioSetup() throws IOException, UnsupportedAudioFileException {
@@ -149,7 +145,7 @@ public class LeslieDemo {
 		final AudioSource source = new CachedAudioInputStreamSource("hammond", Input.getInput("hammond", is), true);
 		
 		final float r = 0.15f;
-		
+		SceneGraphComponent hub = new SceneGraphComponent("LeslieHub");
 		int nHorns = 2;
 		Geometry cone = Primitives.cone(20, -r);
 		for(int i=0; i<nHorns; i++) {
@@ -175,11 +171,11 @@ public class LeslieDemo {
 			}
 		});
 		hub.addTool(actionTool);
+		controller.getPlugin(AlignedContent.class).setContent(hub);
 	}
 
 	public void startup() {
 		controller.startup();
-		controller.getPlugin(ManagedContent.class).setContent(getClass(), hub);
 	}
 	
 	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
