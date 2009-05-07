@@ -3,31 +3,12 @@ package de.jreality.tutorial.audio;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-
-import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.swing.AbstractAction;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.plugin.audio.AudioLauncher;
-import de.jreality.plugin.audio.AudioOptions;
-import de.jreality.plugin.view.AlignedContent;
-import de.jreality.plugin.view.CameraStand;
-import de.jreality.plugin.view.ContentAppearance;
-import de.jreality.plugin.view.DisplayOptions;
-import de.jreality.plugin.view.Inspector;
-import de.jreality.plugin.view.Lights;
-import de.jreality.plugin.view.Shell;
-import de.jreality.plugin.view.View;
-import de.jreality.plugin.view.ViewMenuBar;
-import de.jreality.plugin.view.ViewPreferences;
-import de.jreality.plugin.vr.Avatar;
-import de.jreality.plugin.vr.Sky;
-import de.jreality.plugin.vr.Terrain;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
@@ -40,7 +21,6 @@ import de.jreality.tools.AnimatorTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.util.Input;
-import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 
 /**
@@ -51,10 +31,6 @@ import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
  */
 public class LeslieDemo {
 
-	private File
-		propertiesFile = new File("LeslieDemo.jrw");
-	private SimpleController 
-		controller = new SimpleController(propertiesFile);
 	
 	private static class LeslieTask implements AnimatorTask {
 		private SceneGraphComponent comp;
@@ -104,44 +80,8 @@ public class LeslieDemo {
 		}
 	}
 	
-	
-	public LeslieDemo() throws IOException, UnsupportedAudioFileException {
-		videoSetup();
-		audioSetup();
-	}
-	
-	@SuppressWarnings("serial")
-	private void videoSetup() {
-		ViewMenuBar viewMenuBar = new ViewMenuBar();
-		viewMenuBar.addMenuItem(LeslieDemo.class, 20.0, new AbstractAction() {
-			{
-				putValue(AbstractAction.NAME, "Exit");
-			}
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		}, "File");
-		
-		controller.registerPlugin(viewMenuBar);
-		controller.registerPlugin(new View());
-		controller.registerPlugin(new ViewPreferences());
-		controller.registerPlugin(new CameraStand());
-		controller.registerPlugin(new Lights());
-		controller.registerPlugin(new AlignedContent());
-		controller.registerPlugin(new ContentAppearance());
-		controller.registerPlugin(new Inspector());
-		controller.registerPlugin(new Shell());
-		controller.registerPlugin(new Sky());
-		controller.registerPlugin(new Terrain());
-		controller.registerPlugin(new Avatar());
-		controller.registerPlugin(new DisplayOptions());
-	}
-
-	private void audioSetup() throws IOException, UnsupportedAudioFileException {
-		controller.registerPlugin(new AudioOptions());
-		controller.registerPlugin(new AudioLauncher());
-		
-		InputStream is = getClass().getResourceAsStream("hammond.wav");
+	private static SceneGraphComponent getHubComponent() throws Exception {
+		InputStream is = LeslieDemo.class.getResourceAsStream("hammond.wav");
 		final AudioSource source = new CachedAudioInputStreamSource("hammond", Input.getInput("hammond", is), true);
 		
 		final float r = 0.15f;
@@ -171,14 +111,15 @@ public class LeslieDemo {
 			}
 		});
 		hub.addTool(actionTool);
-		controller.getPlugin(AlignedContent.class).setContent(hub);
+		return hub;
 	}
 
-	public void startup() {
-		controller.startup();
+	
+	public static void main(String[] args) throws Exception {
+		JRViewer v = JRViewer.createViewerVRWithAudio();
+		v.setPropertiesFile("LeslieDemo.jrw");
+		v.setContent(getHubComponent());
+		v.startup();
 	}
 	
-	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
-		new LeslieDemo().startup();
-	}
 }
