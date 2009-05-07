@@ -32,17 +32,15 @@ public class GLJPanelViewerExample {
 		ViewerApp va = new ViewerApp(world);
 		va.getViewer().getSceneRoot().getAppearance().setAttribute("backgroundColor", new Color(0,255,0,128));
 		final GLJPanelViewer glpv = (GLJPanelViewer) va.getCurrentViewer();
-		glpv.addRenderListener(new de.jreality.jogl.AbstractViewer.RenderListener() {
+		glpv.addRenderListener(new GLJPanelViewer.GLJPanelListener() {
 
-			public void postRender(EventObject e) {
-				Graphics2D g2 = glpv.getG2d();
+			public void postRender(Graphics2D g2) {
 				if (g2 == null) return;
 				g2.setColor(Color.pink);
 				g2.fillRect(0, 0, 50, 50);
 			}
 
-			public void preRender(EventObject e) {
-				Graphics2D g2 = glpv.getG2d();
+			public void preRender(Graphics2D g2) {
 				if (g2 == null) return;
 				g2.setColor(Color.blue);
 				g2.fillRect(0, 50, 50, 50);		
