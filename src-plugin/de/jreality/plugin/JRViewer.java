@@ -1,12 +1,15 @@
 package de.jreality.plugin;
 
-import java.util.HashSet;
+import java.io.File;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import javax.swing.JComponent;
 
+import de.jreality.plugin.audio.AudioLauncher;
+import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
@@ -50,26 +53,46 @@ public class JRViewer {
 	
 	
 	protected JRViewer() {
-		c.registerPlugin(new AccessoryPlugin());
-		c.registerPlugin(new ViewerContentPlugin());
+		c.registerPlugin(new JRViewerAccessoryInjection());
+		c.registerPlugin(new JRViewerContentInjection());
 	}
 	
 	
+	/**
+	 * Adds a plug-in to this JTViewer's registered plug-ins. The
+	 * viewer application is then assembled on startup by these plug-ins.
+	 * @param p
+	 */
 	public void registerPlugin(Plugin p) {
 		c.registerPlugin(p);
 	}
 	
 	
+	/**
+	 * Registered a set of plug-ins at once
+	 * @param pSet a set of plug-ins
+	 */
 	public void registerPlugins(Set<Plugin> pSet) {
 		for (Plugin p : pSet) {
 			registerPlugin(p);
 		}
 	}
 	
+	/**
+	 * Adds a ShrinkPanel to the left slot of the viewer
+	 * that has the given JComponent as content. This ShrinkPanel
+	 * however will not store it's position in a properties file
+	 * @param c the component to display
+	 */
 	public void addAccessory(JComponent c) {
 		accessories.add(c);
 	}
 	
+	/**
+	 * Sets a content node. The content node will be added to the
+	 * scene graph on startup
+	 * @param node
+	 */
 	public void setContent(SceneGraphNode node) {
 		if (node != null) {
 			if (!(node instanceof Geometry) && !(node instanceof SceneGraphComponent)) {
@@ -80,84 +103,188 @@ public class JRViewer {
 	}
 	
 	
+	/**
+	 * Sets the properties File of this JRViewer's controller
+	 * @param filename a file name
+	 */
+	public void setPropertiesFile(String filename) {
+		File f = new File(filename);
+		setPropertiesFile(f);
+	}
+	
+	/**
+	 * Sets the properties File of this JRViewer's controller
+	 * @param filename a file name
+	 */
+	public void setPropertiesFile(File file) {
+		c.setPropertiesFile(file);
+	}
+	
+	/**
+	 * Sets the properties InputStream of this JRViewer's controller
+	 * @param in An InputStream
+	 */
+	public void setPropertiesInputStream(InputStream in) {
+		c.setPropertiesInputStream(in);
+	}
+	
+	/**
+	 * Returns the controller of this JRViewer which is a SimpleController
+	 * @return the SimpleController
+	 */
+	public SimpleController getController() {
+		return c;
+	}
+	
+	
+	/**
+	 * Starts this JRViewer's controller and installs all registered 
+	 * plug-ins. Not registered but dependent plug-ins will be added
+	 * automatically.
+	 */
 	public void startup() {
 		c.startup();
 	}
 	
-	
-	public static JRViewer display(SceneGraphNode node) {
+	/**
+	 * Creates a viewer plug-in set and invokes startup. The given
+	 * content node will be added to the scene graph.
+	 * @param node
+	 */
+	public static void display(SceneGraphNode node) {
 		JRViewer v = JRViewer.createViewer();
 		v.setContent(node);
 		v.startup();
-		return v;
+	}
+	
+	/**
+	 * Creates a viewer plug-in set and invokes startup. The given
+	 * content node will be added to the scene graph.
+	 * @param node
+	 */
+	public static void displayWithAudio(SceneGraphNode node) {
+		JRViewer v = JRViewer.createViewerWithAudio();
+		v.setContent(node);
+		v.startup();
+	}
+	
+	/**
+	 * Creates a VR-viewer plug-in set and invokes startup. The given
+	 * content node will be added to the scene graph.
+	 * @param node
+	 */
+	public static void displayVR(SceneGraphNode node) {
+		JRViewer v = JRViewer.createViewerVR();
+		v.setContent(node);
+		v.startup();
+	}
+	
+	/**
+	 * Creates a VR-viewer plug-in set and invokes startup. The given
+	 * content node will be added to the scene graph.
+	 * @param node
+	 */
+	public static void displayVRWithAudio(SceneGraphNode node) {
+		JRViewer v = JRViewer.createViewerVRWithAudio();
+		v.setContent(node);
+		v.startup();
 	}
 	
 	
-	public static JRViewer createViewer() {
+	/**
+	 * Creates a JRViewer and registers only the View class
+	 * @return the viewer instance
+	 */
+	public static JRViewer createEmptyViewer() {
 		JRViewer v = new JRViewer();
-		Set<Plugin> pSet = new HashSet<Plugin>();
-		pSet.add(new View());
-		pSet.add(new CameraStand());
-		pSet.add(new Lights());
-		pSet.add(new Background());
-		pSet.add(new ViewMenuBar());
-		pSet.add(new AlignedContent());
-		pSet.add(new ViewPreferences());
-		pSet.add(new Inspector());
-		pSet.add(new Shell());
-		pSet.add(new ContentAppearance());
-		pSet.add(new ContentTools());
-		pSet.add(new DisplayOptions());
-		pSet.add(new ViewToolBar());
-		pSet.add(new Export());
-		pSet.add(new ContentLoader());
-		pSet.add(new ZoomTool());
-		pSet.add(new StatusBar());
-		pSet.add(new ManagedContent());
-		pSet.add(new ManagedContentGUI());
-		v.registerPlugins(pSet);
+		v.registerPlugin(new View());
+		return v;
+	}
+	
+	/**
+	 * Creates a JRViewer with the recommended viewer plug-in set.
+	 * @return A configured JRViewer instance
+	 */
+	public static JRViewer createViewer() {
+		JRViewer v = createEmptyViewer();
+		v.registerPlugin(new CameraStand());
+		v.registerPlugin(new Lights());
+		v.registerPlugin(new Background());
+		v.registerPlugin(new ViewMenuBar());
+		v.registerPlugin(new AlignedContent());
+		v.registerPlugin(new ViewPreferences());
+		v.registerPlugin(new Inspector());
+		v.registerPlugin(new Shell());
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentTools());
+		v.registerPlugin(new DisplayOptions());
+		v.registerPlugin(new ViewToolBar());
+		v.registerPlugin(new Export());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ZoomTool());
+		v.registerPlugin(new StatusBar());
+		v.registerPlugin(new ManagedContent());
+		v.registerPlugin(new ManagedContentGUI());
 		return v;
 	}
 
-	
-	
-	public static JRViewer createViewerVR() {
-		JRViewer v = new JRViewer();
-		Set<Plugin> pSet = new HashSet<Plugin>();
-		pSet.add(new View());
-		pSet.add(new CameraStand());
-		pSet.add(new Lights());
-		pSet.add(new Background());
-		pSet.add(new ViewMenuBar());
-		pSet.add(new AlignedContent());
-		pSet.add(new ViewPreferences());
-		pSet.add(new Inspector());
-		pSet.add(new Shell());
-		pSet.add(new ContentAppearance());
-		pSet.add(new DisplayOptions());
-		pSet.add(new ViewToolBar());
-		pSet.add(new Export());
-		pSet.add(new ContentLoader());
-		pSet.add(new ZoomTool());
-		pSet.add(new StatusBar());
-		pSet.add(new ManagedContent());
-		pSet.add(new ManagedContentGUI());
-		pSet.add(new Avatar());
-		pSet.add(new HeadUpDisplay());
-		pSet.add(new Sky());
-		pSet.add(new Terrain());
-		v.registerPlugins(pSet);
+	/**
+	 * Creates a JRViewer with the recommended viewer plug-in set.
+	 * In addition to the viewer plug-ins audio plug-ins are registered. 
+	 * @return A configured JRViewer instance
+	 */
+	public static JRViewer createViewerWithAudio() {
+		JRViewer v = createViewer();
+		v.registerPlugin(new AudioOptions());
+		v.registerPlugin(new AudioLauncher());
 		return v;
 	}
 	
 	
-	
-	public static void main(String[] args) {
-		JRViewer.createViewer().startup();
+	/**
+	 * Creates a JRViewer with the recommended VR-viewer plug-in set.
+	 * @return A configured JRViewer instance
+	 */
+	public static JRViewer createViewerVR() {
+		JRViewer v = createEmptyViewer();
+		v.registerPlugin(new CameraStand());
+		v.registerPlugin(new Lights());
+		v.registerPlugin(new Background());
+		v.registerPlugin(new ViewMenuBar());
+		v.registerPlugin(new AlignedContent());
+		v.registerPlugin(new ViewPreferences());
+		v.registerPlugin(new Inspector());
+		v.registerPlugin(new Shell());
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new DisplayOptions());
+		v.registerPlugin(new ViewToolBar());
+		v.registerPlugin(new Export());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ZoomTool());
+		v.registerPlugin(new StatusBar());
+		v.registerPlugin(new ManagedContent());
+		v.registerPlugin(new ManagedContentGUI());
+		v.registerPlugin(new Avatar());
+		v.registerPlugin(new HeadUpDisplay());
+		v.registerPlugin(new Sky());
+		v.registerPlugin(new Terrain());
+		return v;
 	}
 	
 	
-	private class AccessoryPlugin extends Plugin {
+	/**
+	 * Creates a JRViewer with the recommended VR-viewer plug-in set.
+	 * @return A configured JRViewer instance
+	 */
+	public static JRViewer createViewerVRWithAudio() {
+		JRViewer v = createViewerVR();
+		v.registerPlugin(new AudioOptions());
+		v.registerPlugin(new AudioLauncher());
+		return v;
+	}
+	
+	
+	private class JRViewerAccessoryInjection extends Plugin {
 
 		@Override
 		public PluginInfo getPluginInfo() {
@@ -184,7 +311,7 @@ public class JRViewer {
 	}
 	
 	
-	private class ViewerContentPlugin extends Plugin {
+	private class JRViewerContentInjection extends Plugin {
 
 		@Override
 		public PluginInfo getPluginInfo() {
@@ -210,5 +337,13 @@ public class JRViewer {
 		
 	}
 	
+	
+	/**
+	 * Starts the default plug-in viewer
+	 * @param args no arguments are read
+	 */
+	public static void main(String[] args) {
+		JRViewer.createViewerVRWithAudio().startup();
+	}
 
 }

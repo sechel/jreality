@@ -36,7 +36,9 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.View;
+import de.jreality.plugin.view.ViewPreferences;
 import de.jreality.plugin.view.AlignedContent.ContentDelegate;
+import de.jreality.plugin.view.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.vr.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
@@ -53,7 +55,7 @@ import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
-public class Terrain extends ShrinkPanelPlugin implements ActionListener, ChangeListener {
+public class Terrain extends ShrinkPanelPlugin implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
 
 	// maximal value of texture scale
 	private static final double 
@@ -74,6 +76,8 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		alignedContent = null;
 	private TerrainContentDelegate 
 		contentDelegate = null;
+	private ViewPreferences
+		viewPreferences = null;
 	
 	// scene graph
 	private SceneGraphComponent 
@@ -245,10 +249,11 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 	}
 	
 	
-	public void setColorPickerMode(int mode) {
-		faceColorChooser.setMode(mode);
+	@Override
+	public void colorPickerModeChanged(int mode) {
+		faceColorChooser.setMode(mode);		
 	}
-	
+
 	
 	public TextureInspector getTextureInspector() {
 		return textureInspector;
@@ -410,6 +415,10 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.add(panel);
 		
+		viewPreferences = c.getPlugin(ViewPreferences.class);
+		viewPreferences.addColorPickerChangedListener(this);
+		faceColorChooser.getColorPanel().setMode(viewPreferences.getColorPickerMode());
+		
 		super.install(c);
 		
 		textureInspector.setAppearance(appearance);
@@ -426,6 +435,7 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 	public void uninstall(Controller c) throws Exception {
 		alignedContent.setContentDelegate(null);
 		view.getSceneRoot().removeChild(terrain);
+		viewPreferences.removeColorPickerChangedListener(this);
 		super.uninstall(c);
 	}
 	

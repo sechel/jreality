@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.plugin.view.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -17,7 +18,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListener {
+public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListener, ColorPickerModeChangedListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = false;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;
@@ -41,8 +42,12 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 	public static final String DEFAULT_TEXTURE = "none";
 	public static final double DEFAULT_TEXTURE_SCALE = .5;
 
-	private AlignedContent alignedContent;
-	private AppearanceInspector appearanceInspector;
+	private AlignedContent 
+		alignedContent = null;
+	private ViewPreferences
+		viewPreferences = null;
+	private AppearanceInspector 
+		appearanceInspector = null;
 	
 	private HashMap<String, String> 
 		textures = new HashMap<String, String>();
@@ -92,6 +97,11 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		}
 	}
 
+	@Override
+	public void colorPickerModeChanged(int mode) {
+		getPanel().setColorPickerMode(mode);
+	}
+	
 	public void restoreDefaults() {
 		appearanceInspector.setShowPoints(DEFAULT_SHOW_POINTS);
 		appearanceInspector.setPointsReflecting(DEFAULT_POINTS_REFLECTING);
@@ -172,20 +182,23 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 
 	@Override
 	public void install(Controller c) throws Exception {
+		super.install(c);
 		View sceneView = c.getPlugin(View.class);
 		alignedContent = c.getPlugin(AlignedContent.class);
 		install(sceneView, alignedContent);
-
+		viewPreferences = c.getPlugin(ViewPreferences.class);
+		viewPreferences.addColorPickerChangedListener(this);
+		getPanel().setColorPickerMode(viewPreferences.getColorPickerMode());
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.add(appearanceInspector); 
-		super.install(c);
 	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
 		shrinkPanel.removeAll();
 		alignedContent.removeChangeListener(this);
-		super.uninstall(c);
+		viewPreferences.removeColorPickerChangedListener(this);
 	}
 
 	@Override

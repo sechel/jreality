@@ -5,49 +5,40 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.SceneGraphNode;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.FrontendFlavor;
 import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
-public class ViewPreferences extends Plugin implements
-		PreferencesFlavor, FrontendFlavor, ActionListener {
+public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener {
 
-	private View 
-		view = null;
-	private ViewMenuBar 
-		viewMenuBar = null;
-	private ContentAppearance 
-		contentAppearance = null;
 	private JPanel 
 		mainPage = new JPanel();
-	private FrontendListener 
-		frontendListener = null;
-	private JCheckBoxMenuItem  
-		fullscreenItem = new JCheckBoxMenuItem("Fullscreen", ImageHook.getIcon("arrow_out.png"));
 	private JCheckBox
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
-	private boolean
-		windowedHidePanels = false;
+	private List<ColorPickerModeChangedListener>
+		colorModeListeners = new LinkedList<ColorPickerModeChangedListener>();
+	
+	public static interface ColorPickerModeChangedListener {
+		
+		public void colorPickerModeChanged(int mode);
+		
+	}
 	
 	public ViewPreferences() {
-		fullscreenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
-	
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
 		c.insets = new Insets(2,2,2,2);
@@ -65,7 +56,6 @@ public class ViewPreferences extends Plugin implements
 		colorChooserModeCombo.setSelectedIndex(1);
 		
 		threadSafeChecker.addActionListener(this);
-		fullscreenItem.addActionListener(this);
 		colorChooserModeCombo.addActionListener(this);
 	}
 	
@@ -80,30 +70,21 @@ public class ViewPreferences extends Plugin implements
 	
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
-		boolean fs = fullscreenItem.isSelected();
-		if (fullscreenItem == s) {
-			if (fs) {
-				windowedHidePanels = view.isHidePanels();
-				view.setHidePanels(true);
-			} else {
-				view.setHidePanels(windowedHidePanels);
-			}
-			frontendListener.setShowMenuBar(!fs);
-			frontendListener.setShowToolBar(!fs);
-			frontendListener.setShowStatusBar(!fs);
-			frontendListener.setFullscreen(fs);
-			frontendListener.updateFrontendUI();
-			view.getViewer().getViewingComponent().requestFocusInWindow();
-		} else if (threadSafeChecker == s) {
+		if (threadSafeChecker == s) {
 			System.out.println("ThreadSafe is " + threadSafeChecker.isSelected());
 			SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());
 		} else if (colorChooserModeCombo == s) {
-			if (contentAppearance != null) {
-				contentAppearance.getPanel().setColorPickerMode(colorChooserModeCombo.getSelectedIndex());
-			}
+			fireColorModeChanged(colorChooserModeCombo.getSelectedIndex());
 		}
 	}
 
+	protected void fireColorModeChanged(int mode) {
+		for (ColorPickerModeChangedListener l : colorModeListeners) {
+			l.colorPickerModeChanged(mode);
+		}
+	}
+	
+	
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe());
@@ -119,24 +100,6 @@ public class ViewPreferences extends Plugin implements
 		super.restoreStates(c);
 	}
 	
-	public void setFrontendListener(FrontendListener l) {
-		this.frontendListener = l;
-	}
-	
-	@Override
-	public void install(Controller c) throws Exception {
-		view = c.getPlugin(View.class);
-		contentAppearance = c.getPlugin(ContentAppearance.class);
-		int activeMode = colorChooserModeCombo.getSelectedIndex();
-		contentAppearance.getPanel().setColorPickerMode(activeMode);
-		viewMenuBar = c.getPlugin(ViewMenuBar.class);
-		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
-	}
-
-	@Override
-	public void uninstall(Controller c) throws Exception {
-		viewMenuBar.removeAll(getClass());
-	}
 
 	public Icon getMainIcon() {
 		return null;
@@ -165,5 +128,18 @@ public class ViewPreferences extends Plugin implements
 	public String getSubPageName(int i) {
 		return null;
 	}
+	
+	public int getColorPickerMode() {
+		return colorChooserModeCombo.getSelectedIndex();
+	}
+	
+	public boolean addColorPickerChangedListener(ColorPickerModeChangedListener l) {
+		return colorModeListeners.add(l);
+	}
+	
+	public boolean removeColorPickerChangedListener(ColorPickerModeChangedListener l) {
+		return colorModeListeners.remove(l);
+	}
+	
 
 }

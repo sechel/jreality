@@ -3,9 +3,12 @@ package de.jreality.plugin.view;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Camera;
@@ -16,6 +19,7 @@ import de.jreality.util.GuiUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
+import de.varylab.jrworkspace.plugin.flavor.FrontendFlavor;
 import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 /**
@@ -25,16 +29,26 @@ import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
  * @author brinkman
  *
  */
-public class DisplayOptions extends ToolBarAggregator {
+public class DisplayOptions extends ToolBarAggregator implements ActionListener, FrontendFlavor {
 
 	private JToggleButton 
 		pickBox = new JToggleButton(ImageHook.getIcon("mouse.png"));
 	private JButton 
 		loadButton = new JButton(ImageHook.getIcon("film_go.png")),
 		saveButton = new JButton(ImageHook.getIcon("film_save.png"));
+	private JCheckBoxMenuItem  
+		fullscreenItem = new JCheckBoxMenuItem("Fullscreen", ImageHook.getIcon("arrow_out.png"));
+	private boolean 
+		windowedHidePanelsTmp = false;
+	private FrontendListener
+		frontendListener = null;
 	
-	private View view;
-	private PickShowTool pickShowTool = new PickShowTool();
+	private View 
+		view = null;
+	private ViewMenuBar
+		viewMenuBar = null;
+	private PickShowTool 
+		pickShowTool = new PickShowTool();
 	
 	public DisplayOptions() {
 		addTool(getClass(), 1, loadButton);
@@ -60,7 +74,29 @@ public class DisplayOptions extends ToolBarAggregator {
 				setPick(pickBox.isSelected());
 			}
 		});
+		fullscreenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
+		fullscreenItem.addActionListener(this);
 	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (fullscreenItem == e.getSource()) {
+			boolean fs = fullscreenItem.isSelected();
+			if (fs) {
+				windowedHidePanelsTmp = view.isHidePanels();
+				view.setHidePanels(true);
+			} else {
+				view.setHidePanels(windowedHidePanelsTmp);
+			}
+			frontendListener.setShowMenuBar(!fs);
+			frontendListener.setShowToolBar(!fs);
+			frontendListener.setShowStatusBar(!fs);
+			frontendListener.setFullscreen(fs);
+			frontendListener.updateFrontendUI();
+			view.getViewer().getViewingComponent().requestFocusInWindow();
+		}
+	}
+	
 	
 	private void setPick(boolean showPick) {
 		Component frame = view.getViewer().getViewingComponent();
@@ -102,6 +138,8 @@ public class DisplayOptions extends ToolBarAggregator {
 		super.install(c);
 		c.getPlugin(CameraStand.class);
 		view = c.getPlugin(View.class);
+		viewMenuBar = c.getPlugin(ViewMenuBar.class);
+		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
 		setPick(pickBox.isSelected());
 		loadPreferences();
 	}
@@ -109,6 +147,7 @@ public class DisplayOptions extends ToolBarAggregator {
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
+		viewMenuBar.removeAll(getClass());
 	}
 
 	@Override
@@ -131,4 +170,10 @@ public class DisplayOptions extends ToolBarAggregator {
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}
+	
+	@Override
+	public void setFrontendListener(FrontendListener l) {
+		frontendListener = l;
+	}
+	
 }
