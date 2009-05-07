@@ -44,17 +44,11 @@ import static de.jreality.shader.CommonAttributes.BACKGROUND_COLORS;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,15 +66,12 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.Graphics3D;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.CopyVisitor;
-import de.jreality.util.ImageUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
 
