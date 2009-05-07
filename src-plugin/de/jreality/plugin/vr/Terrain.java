@@ -19,7 +19,6 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -51,76 +50,81 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
-public class Terrain extends ShrinkPanelPlugin {
+public class Terrain extends ShrinkPanelPlugin implements ActionListener, ChangeListener {
 
 	// maximal value of texture scale
-	private static final double MAXIMAL_TEXTURE_SCALE = 1;
-
+	private static final double 
+		MAXIMAL_TEXTURE_SCALE = 1;
 	// ratio of maximal value and minimal value of texture scale
-	private static final double LOGARITHMIC_RANGE = 200;
+	private static final double 
+		LOGARITHMIC_RANGE = 200;
+	// default texture scale
+	private static double 
+		DEFAULT_TEXTURE_SCALE = .1;
 
-	private SceneGraphComponent terrain;
-	private Appearance appearance;
+	// Plug-ins
+	private View 
+		view = null;
+	private CameraStand 
+		cameraStand = null;
+	private AlignedContent 
+		alignedContent = null;
+	private TerrainContentDelegate 
+		contentDelegate = null;
+	
+	// scene graph
+	private SceneGraphComponent 
+		terrain = new SceneGraphComponent("Terrain"),
+		plane = new SceneGraphComponent("Terrain Plane");
+	private Appearance 
+		appearance = new Appearance("Terrain Appearance");
+
+	// swing layout
 	private JPanel 
 		panel = new JPanel(),
 		colorPanel = new JPanel();
+	private JButton 
+		closeButton = new JButton("<-- Back"),
+		faceColorButton = new JButton("Color...");
+	private JCheckBox 
+		facesReflecting = new JCheckBox("Reflection"),
+		reflectScene = new JCheckBox("Reflect Scene Content"),
+		transparency = new JCheckBox("Transp."),
+		visibleCheckBox = new JCheckBox("Visible");
+	private JSliderVR 
+		faceReflectionSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
+		transparencySlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 1);
+	private ColorPicker 
+		faceColorChooser = new ColorPicker(false, false);
+	private TextureInspector 
+		textureInspector = new TextureInspector();
+	private ShrinkPanel 
+		textureShrinker = new ShrinkPanel("Terrain Texture");
 
-	private SceneGraphComponent plane;
-
-	private JCheckBox facesReflecting;
-	private JSliderVR faceReflectionSlider;
-	private JCheckBox transparency;
-	private JSliderVR transparencySlider;
-	private JCheckBox visibleCheckBox;
-	private ColorPicker faceColorChooser;
-	private HashMap<String, String> textures;
-	private TextureInspector textureInspector;
-
-	private static double DEFAULT_TEXTURE_SCALE = .1;
+	private HashMap<String, String> 
+		textures = new HashMap<String, String>();
 	
-	private View view;
-	private CameraStand cameraStand;
-	private AlignedContent alignedContent;
-
-	private TerrainContentDelegate contentDelegate;
-
 
 	public Terrain() {
-		terrain = new SceneGraphComponent("terrain");
-		appearance = new Appearance("terrain appearance");
 		appearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		appearance.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		terrain.setAppearance(appearance);
 
-		plane = new SceneGraphComponent("plane");
 		MatrixBuilder.euclidean().rotateX(Math.PI/2).assignTo(plane);
 		plane.setGeometry(bigMesh(50, 50, 2000));
 		plane.getGeometry().setGeometryAttributes("infinite plane", Boolean.TRUE);
 		PickUtility.assignFaceAABBTrees(plane);
 		terrain.addChild(plane);
 
-		textures = new HashMap<String, String>();
 		textures.put("2 Grid", "textures/grid.jpeg");
 		textures.put("3 Black Grid", "textures/gridBlack.jpg");
 		textures.put("4 Tiles", "textures/recycfloor1_clean2.png");
 		textures.put("5 Rust","textures/outfactory3.png");
 		textures.put("1 None", null);
 
-		// color chooser
-		JButton closeButton = new JButton("<-- Back");
-		closeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				switchTo(panel);
-			}
-		});
-		faceColorChooser = new ColorPicker(false, false);
-		faceColorChooser.getColorPanel().addChangeListener( new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				updateFaceColor();
-			}
-		});
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(2, 2, 2, 2);
 		c.fill = BOTH;
@@ -134,45 +138,30 @@ public class Terrain extends ShrinkPanelPlugin {
 		c.fill = VERTICAL;
 		colorPanel.add(closeButton, c);
 		
-		
 		// panel
 		panel.setLayout(new MinSizeGridBagLayout());
 		c.fill = BOTH;
 
-		visibleCheckBox = new JCheckBox("Visible");
 		visibleCheckBox.setSelected(true);
-		visibleCheckBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				updateVisible();
-			}
-		});
+		c.weightx = 0.0;
+		c.gridwidth = RELATIVE;
+		panel.add(visibleCheckBox, c);
 		c.weightx = 1.0;
 		c.gridwidth = REMAINDER;
-		panel.add(visibleCheckBox, c);
+		panel.add(faceColorButton, c);
 		
-		textureInspector = new TextureInspector();
-		textureInspector.setBorder(BorderFactory.createTitledBorder("Texture"));
 		textureInspector.setMaximalTextureScale(MAXIMAL_TEXTURE_SCALE);
 		textureInspector.setLogarithmicRange(LOGARITHMIC_RANGE);
 		textureInspector.setTextureScale(DEFAULT_TEXTURE_SCALE );
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.gridwidth = REMAINDER;
-		panel.add(textureInspector, c);
+		textureShrinker.setHeaderColor(new Color(0.8f, 0.8f, 0.5f));
+		textureShrinker.setShrinked(true);
+		textureShrinker.setLayout(new GridLayout());
+		textureShrinker.add(textureInspector);
+		panel.add(textureShrinker, c);
 		
-		facesReflecting = new JCheckBox("Reflection");
-		facesReflecting.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				updateFacesReflecting();
-			}
-		});
-
-		faceReflectionSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
-		faceReflectionSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				updateFaceReflection();
-			}
-		});
 		c.weightx = 0.0;
 		c.weighty = 0.0;
 		c.gridwidth = RELATIVE;
@@ -181,18 +170,12 @@ public class Terrain extends ShrinkPanelPlugin {
 		c.gridwidth = REMAINDER;
 		panel.add(faceReflectionSlider, c);
 		
-		transparency = new JCheckBox("Transp.");
-		transparency.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				updateTransparencyEnabled();
-			}
-		});
-		transparencySlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 1);
-		transparencySlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				updateTransparency();
-			}
-		});
+		c.weightx = 1.0;
+		c.gridwidth = REMAINDER;	
+		panel.add(reflectScene, c);
+		reflectScene.setEnabled(false);
+		reflectScene.setToolTipText("Coming soon...");
+		
 		c.weightx = 0.0;
 		c.gridwidth = RELATIVE;
 		panel.add(transparency, c);
@@ -200,16 +183,6 @@ public class Terrain extends ShrinkPanelPlugin {
 		c.gridwidth = REMAINDER;
 		panel.add(transparencySlider, c);
 
-		JButton faceColorButton = new JButton("Color...");
-		faceColorButton.setMargin(new Insets(0,5,0,5));
-		faceColorButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				switchTo(colorPanel);
-			}
-		});
-		c.weightx = 1.0;
-		c.gridwidth = REMAINDER;
-		panel.add(faceColorButton, c);
 
 		// set defaults
 		textureInspector.setTexture("Black Grid");
@@ -220,6 +193,55 @@ public class Terrain extends ShrinkPanelPlugin {
 		setFaceReflection(.5);
 		setTransparencyEnabled(false);
 		setTransparency(.5);
+		
+		closeButton.addActionListener(this);
+		visibleCheckBox.addActionListener(this);
+		facesReflecting.addActionListener(this);
+		transparency.addActionListener(this);
+		faceColorButton.addActionListener(this);
+		reflectScene.addActionListener(this);
+		faceReflectionSlider.addChangeListener(this);
+		transparencySlider.addChangeListener(this);
+		faceColorChooser.getColorPanel().addChangeListener(this);
+	}
+	
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Object s = e.getSource();
+		if (closeButton == s) {
+			switchTo(panel);
+		} else
+		if (visibleCheckBox == s) {
+			updateVisible();
+		} else 
+		if (facesReflecting == s) {
+			updateFacesReflecting();
+		} else 
+		if (transparency == s) {
+			updateTransparencyEnabled();
+		} else 
+		if (faceColorButton == s) {
+			switchTo(colorPanel);
+		} else
+		if (reflectScene == s) {
+			updateReflectSceneContent();
+		}
+	}
+	
+	
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		Object s = e.getSource();
+		if (faceReflectionSlider == s) {
+			updateFaceReflection();
+		} else 
+		if (transparencySlider == s) {
+			updateTransparency();
+		} else 
+		if (faceColorChooser.getColorPanel() == s) {
+			updateFaceColor();
+		}
 	}
 	
 	
@@ -244,6 +266,11 @@ public class Terrain extends ShrinkPanelPlugin {
 		facesReflecting.setSelected(b);
 	}
 	
+	public void setReflectSceneContent(boolean b) {
+		reflectScene.setSelected(b);
+	}
+	
+	
 	private void updateFacesReflecting() {
 		if (isFacesReflecting()) {
 			updateFaceReflection();
@@ -263,6 +290,11 @@ public class Terrain extends ShrinkPanelPlugin {
 		faceReflectionSlider.setValue((int)(100*d));
 	}
 
+	public boolean isReflectSceneContent() {
+		return reflectScene.isSelected();
+	}
+	
+	
 	private void updateFaceReflection() {
 		if (isFacesReflecting()) {
 			appearance.setAttribute(
@@ -323,6 +355,10 @@ public class Terrain extends ShrinkPanelPlugin {
 					isTransparencyEnabled()
 			);
 		}
+	}
+	
+	private void updateReflectSceneContent() {
+		
 	}
 
 	private void switchTo(JComponent content) {
@@ -502,6 +538,7 @@ public class Terrain extends ShrinkPanelPlugin {
 		setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", isTransparencyEnabled()));
 		setFacesReflecting(c.getProperty(getClass(), "facesReflecting", isFacesReflecting()));
 		setFaceReflection(c.getProperty(getClass(), "faceReflection", getFaceReflection()));
+		setReflectSceneContent(c.getProperty(getClass(), "reflectSceneContent", isReflectSceneContent()));
 		textureInspector.setTextures(c.getProperty(getClass(), "textures", textures));
 		textureInspector.setTexture(c.getProperty(getClass(), "texture", textureInspector.getTexture()));
 		textureInspector.setTextureScale(c.getProperty(getClass(), "textureScale", textureInspector.getTextureScale()));
@@ -520,6 +557,7 @@ public class Terrain extends ShrinkPanelPlugin {
 		c.storeProperty(getClass(), "transparencyEnabled", isTransparencyEnabled());
 		c.storeProperty(getClass(), "facesReflecting", isFacesReflecting());
 		c.storeProperty(getClass(), "faceReflection", getFaceReflection());
+		c.storeProperty(getClass(), "reflectSceneContent", isReflectSceneContent());
 		c.storeProperty(getClass(), "visible", isVisible());
 		super.storeStates(c);
 	}

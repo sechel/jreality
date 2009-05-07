@@ -1,10 +1,11 @@
 package de.jreality.ui;
 
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.JFileChooser.FILES_ONLY;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -99,8 +100,9 @@ public class TextureInspector extends JPanel {
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.weightx = 1.0;
 		
-		texPanel.setLayout(new GridLayout(0, 3, 2, 2));
-		texScroller.setMinimumSize(new Dimension(100, 200));
+		texPanel.setLayout(new FlowLayout(LEFT));
+		texPanel.setPreferredSize(new Dimension(1, 300)); 
+		texScroller.setMinimumSize(new Dimension(100, 150));
 		texScroller.setViewportBorder(null);
 		c.weighty = 1.0;
 		c.weightx = 1.0;
@@ -149,7 +151,7 @@ public class TextureInspector extends JPanel {
 	
 	public void addTexture(String name, String resource) {
 		TextureJButton texButton = new TextureJButton(resource);
-		texButton.setPreferredSize(new Dimension(50, 50));
+		texButton.setPreferredSize(new Dimension(60, 60));
 		texButton.setActionCommand(name);
 		texButton.setToolTipText(resource);
 		textureNameToButton.put(name, texButton.getModel());
