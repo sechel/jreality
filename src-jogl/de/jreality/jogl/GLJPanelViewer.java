@@ -44,6 +44,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.lang.ref.WeakReference;
+import java.util.EventObject;
+import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.media.opengl.DefaultGLCapabilitiesChooser;
@@ -54,6 +56,7 @@ import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
 
+import de.jreality.jogl.AbstractViewer.RenderListener;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
@@ -61,7 +64,8 @@ public class GLJPanelViewer extends Viewer {
 	GLJPanel panel;
 	GLPbuffer sharedPBuffer;
 	boolean opaque = false;
-	
+	transient boolean preRender = true;
+	transient Graphics2D g2d;
 	public GLJPanelViewer() {
 		this(null, null);
 	}
@@ -74,13 +78,18 @@ public class GLJPanelViewer extends Viewer {
 
 	// override these methods as subclass to draw beneath (above) the jReality scene
 	public void paintBefore(Graphics g)	{
+		preRender = true;
+		g2d = (Graphics2D) g;
+		broadcastChange();
 //		getSceneRoot().getAppearance().setAttribute("backgroundColor", new Color(0,255,0,128));
-//		Graphics2D g2 = (Graphics2D) g;
 //		g2.setColor(Color.blue);
 //		g2.fillRect(0, 50, 50, 50);		
 	}
 	
 	public void paintAfter(Graphics g)	{
+		preRender = false;
+		g2d = (Graphics2D) g;
+		broadcastChange();
 //		Graphics2D g2 = (Graphics2D) g;
 //		g2.setColor(Color.pink);
 //		g2.fillRect(0, 0, 50, 50);
@@ -140,5 +149,39 @@ public class GLJPanelViewer extends Viewer {
 		this.opaque = opaque;
 		panel.setOpaque(opaque);
 	}
+	
+	Vector<GLJPanelListener> panelListeners;
+	
+	public interface GLJPanelListener extends java.util.EventListener	{
+		public void preRender(Graphics2D g2);
+		public void postRender(Graphics2D g2);
+	}
+
+	public void addRenderListener(GLJPanelListener l)	{
+		if (panelListeners == null)	panelListeners = new Vector<GLJPanelListener>();
+		if (panelListeners.contains(l)) return;
+		panelListeners.add(l);
+		//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: Adding geometry listener"+l+"to this:"+this);
+	}
+	
+	public void removeRenderListener(GLJPanelListener l)	{
+		if (panelListeners == null)	return;
+		panelListeners.remove(l);
+	}
+
+	public void broadcastChange()	{
+		if (panelListeners == null) return;
+		//SyJOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
+		if (!panelListeners.isEmpty())	{
+			EventObject e = new EventObject(this);
+			//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
+			for (int i = 0; i<panelListeners.size(); ++i)	{
+				GLJPanelListener l = (GLJPanelListener) panelListeners.get(i);
+				if (preRender) l.preRender(g2d);
+				else l.postRender(g2d);
+			}
+		}
+	}
+
 	
 }
