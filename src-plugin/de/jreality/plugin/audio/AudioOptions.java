@@ -2,12 +2,15 @@ package de.jreality.plugin.audio;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -101,89 +104,16 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private JList procWidget, distanceCueWidget, reverbWidget;
 
 	public AudioOptions() {
-		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbc.weightx = 1.0;
-
-		int rowCount = 0;
-
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(speedWidget = new JSliderVR(0, 1000), gbc);
-		speedWidget.setPreferredSize(new Dimension(20, 50));
-		speedWidget.setMajorTickSpacing(500);
-		speedWidget.setPaintTicks(true);
-		speedWidget.setPaintLabels(true);
-		speedWidget.setPaintTrack(true);
-
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Gain (dB)"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(gainWidget = new JSliderVR(-60, 30, (int) toDecibels(gain)), gbc);
-		gainWidget.setPreferredSize(new Dimension(20, 50));
-		gainWidget.setMajorTickSpacing(30);
-		gainWidget.setPaintTicks(true);
-		gainWidget.setPaintLabels(true);
-		gainWidget.setPaintTrack(true);
-
-		gbc.insets = new Insets(0, 0, 4, 0);
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Preprocessor"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(procWidget = new JList(procLabels), gbc);
-
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Pitch shift (10 cents)"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(pitchShiftWidget = new JSliderVR(-120, 120, (int) (toCents(pitchShift)/10)), gbc);
-		pitchShiftWidget.setPreferredSize(new Dimension(20, 50));
-		pitchShiftWidget.setMajorTickSpacing(120);
-		pitchShiftWidget.setPaintTicks(true);
-		pitchShiftWidget.setPaintLabels(true);
-		pitchShiftWidget.setPaintTrack(true);
-
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Distance cue"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(distanceCueWidget = new JList(cueLabels), gbc);
-
-		gbc.insets = new Insets(0, 0, 0, 0);
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Reverb"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(reverbWidget = new JList(reverbLabels), gbc);
+		speedWidget = new JSliderVR(0, 1000);
+		gainWidget = new JSliderVR(-60, 30, (int) toDecibels(gain));
+		pitchShiftWidget = new JSliderVR(-120, 120, (int) (toCents(pitchShift)/10));
+		procWidget = new JList(procLabels);
+		distanceCueWidget = new JList(cueLabels);
+		reverbWidget = new JList(reverbLabels);
 		reverbWidget.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Reverb time (.1 sec)"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(reverbTimeWidget = new JSliderVR(0, 50, (int) reverbTime*10), gbc);
-		reverbTimeWidget.setPreferredSize(new Dimension(20, 50));
-		reverbTimeWidget.setMajorTickSpacing(20);
-		reverbTimeWidget.setPaintTicks(true);
-		reverbTimeWidget.setPaintLabels(true);
-		reverbTimeWidget.setPaintTrack(true);
-
-		gbc.gridx = 0;
-		gbc.gridy = rowCount++;
-		shrinkPanel.add(new JLabel("Reverb gain (dB)"), gbc);
-		gbc.gridx = 1;
-		shrinkPanel.add(reverbGainWidget = new JSliderVR(-60, 30, (int) toDecibels(reverbGain)), gbc);
-		reverbGainWidget.setPreferredSize(new Dimension(20, 50));
-		reverbGainWidget.setMajorTickSpacing(30);
-		reverbGainWidget.setPaintTicks(true);
-		reverbGainWidget.setPaintLabels(true);
-		reverbGainWidget.setPaintTrack(true);
-
+		reverbTimeWidget = new JSliderVR(0, 50, (int) reverbTime*10);
+		reverbGainWidget = new JSliderVR(-60, 30, (int) toDecibels(reverbGain));
+		
 		procWidget.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				selectedProcs = procWidget.getSelectedIndices();
@@ -235,6 +165,73 @@ public class AudioOptions extends ShrinkPanelPlugin {
 				setReverbTimeAttribute();
 			}
 		});
+		
+		JPanel generalPanel = new JPanel();
+		JPanel preprocPanel = new JPanel();
+		JPanel distCuePanel = new JPanel();
+		JPanel reverbPanel = new JPanel();
+		
+		generalPanel.setLayout(new GridBagLayout());
+		generalPanel.setBorder(BorderFactory.createTitledBorder("General"));
+		preprocPanel.setLayout(new GridBagLayout());
+		preprocPanel.setBorder(BorderFactory.createTitledBorder("Preprocessor"));
+		distCuePanel.setLayout(new GridBagLayout());
+		distCuePanel.setBorder(BorderFactory.createTitledBorder("Distance cues"));
+		reverbPanel.setLayout(new GridBagLayout());
+		reverbPanel.setBorder(BorderFactory.createTitledBorder("Reverb"));
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.insets = new Insets(2, 2, 2, 2);
+		gbc.weighty = 0;
+
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		generalPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
+		gbc.weightx = 1;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		generalPanel.add(speedWidget, gbc);
+
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		generalPanel.add(new JLabel("Gain (dB)"), gbc);
+		gbc.weightx = 1;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		generalPanel.add(gainWidget, gbc);
+
+		preprocPanel.add(procWidget, gbc);
+
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		preprocPanel.add(new JLabel("Pitch shift (10 cents)"), gbc);
+		gbc.weightx = 1;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		preprocPanel.add(pitchShiftWidget, gbc);
+
+		distCuePanel.add(distanceCueWidget, gbc);
+
+		reverbPanel.add(reverbWidget, gbc);
+
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		reverbPanel.add(new JLabel("Time (.1 sec)"), gbc);
+		gbc.weightx = 1;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		reverbPanel.add(reverbTimeWidget, gbc);
+
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		reverbPanel.add(new JLabel("Gain (dB)"), gbc);
+		gbc.weightx = 1;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		reverbPanel.add(reverbGainWidget, gbc);
+		
+		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
+		gbc.insets = new Insets(0, 0, 0, 0);
+		shrinkPanel.add(generalPanel, gbc);
+		shrinkPanel.add(preprocPanel, gbc);
+		shrinkPanel.add(distCuePanel, gbc);
+		shrinkPanel.add(reverbPanel, gbc);
 	}
 
 	private void setProcessorAttribute() {
