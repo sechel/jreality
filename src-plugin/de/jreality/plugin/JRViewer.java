@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.JComponent;
+import javax.swing.JRootPane;
 
 import de.jreality.plugin.audio.AudioLauncher;
 import de.jreality.plugin.audio.AudioOptions;
@@ -144,6 +145,18 @@ public class JRViewer {
 	 */
 	public void startup() {
 		c.startup();
+	}
+	
+	/**
+	 * Starts this JRViewer's controller and installs all registered 
+	 * plug-ins. Not registered but dependent plug-ins will be added
+	 * automatically.
+	 * This method does not open the main window. Instead it returns the 
+	 * root pane.
+	 * @return
+	 */
+	public JRootPane startupLocal() {
+		return c.startupLocal();
 	}
 	
 	/**
