@@ -60,7 +60,7 @@ public class Audio extends Plugin implements ChangeListener {
 	private void updateAudioRenderer() throws Exception {
 		if (renderer != null) {
 			try {
-				renderer.unlaunch();
+				renderer.shutdown();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -127,7 +127,7 @@ public class Audio extends Plugin implements ChangeListener {
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		if (renderer != null) renderer.unlaunch();
+		if (renderer != null) renderer.shutdown();
 	}
 
 	public void stateChanged(ChangeEvent e) {

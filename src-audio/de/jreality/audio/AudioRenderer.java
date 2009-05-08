@@ -10,6 +10,6 @@ public interface AudioRenderer {
 	void setInterpolationFactory(Interpolation.Factory interpolationFactory);
 	void setSoundPathFactory(SoundPath.Factory soundPathFactory);
 	void launch() throws Exception;
-	void unlaunch() throws Exception;
+	void shutdown() throws Exception;
 	
 }

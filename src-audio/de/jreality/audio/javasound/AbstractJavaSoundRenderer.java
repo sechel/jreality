@@ -61,7 +61,7 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		soundThread.start();
 	}
 
-	public synchronized void unlaunch() {
+	public synchronized void shutdown() {
 		setRunning(false);
 		while (isRunning()) {
 			try {

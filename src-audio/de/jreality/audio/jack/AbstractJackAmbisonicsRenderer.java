@@ -37,7 +37,7 @@ public abstract class AbstractJackAmbisonicsRenderer extends AbstractAudioRender
 		JackHub.initializeClient(label, target);
 	}
 
-	public void unlaunch() throws JJackException {
+	public void shutdown() throws JJackException {
 		backend.dispose();
 		JackHub.removeClient();
 		JackHub.setSink(null);
