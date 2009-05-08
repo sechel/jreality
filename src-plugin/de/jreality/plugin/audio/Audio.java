@@ -1,10 +1,11 @@
 package de.jreality.plugin.audio;
 
+import java.lang.reflect.Method;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.audio.AudioRenderer;
-import de.jreality.audio.jack.AbstractJackAmbisonicsRenderer;
 import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
 import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.audio.javasound.VbapRenderer;
@@ -113,10 +114,11 @@ public class Audio extends Plugin implements ChangeListener {
 			javaSoundRenderer.setFrameSize(prefs.getJavaSoundFrameSize());
 		}
 
-		if (renderer instanceof AbstractJackAmbisonicsRenderer) {
-			AbstractJackAmbisonicsRenderer jackSoundRenderer = (AbstractJackAmbisonicsRenderer) renderer;
-			jackSoundRenderer.setLabel(prefs.getJackLabel());
-			jackSoundRenderer.setTarget(prefs.getJackTarget());
+		if (renderer.getClass().getName().contains("jack")) {
+			Method setLabelMethod = renderer.getClass().getMethod("setLabel", String.class);
+			Method setTargetMethod = renderer.getClass().getMethod("setTarget", String.class);
+			setLabelMethod.invoke(renderer, prefs.getJackLabel());
+			setTargetMethod.invoke(renderer, prefs.getJackTarget());
 		}
 		
 		renderer.launch();
