@@ -47,6 +47,8 @@ public class JRViewer {
 
 	private SimpleController
 		c = new SimpleController();
+	private View
+		view = new View();
 	private List<JComponent>
 		accessories = new LinkedList<JComponent>();
 	private SceneGraphNode
@@ -54,6 +56,7 @@ public class JRViewer {
 	
 	
 	protected JRViewer() {
+		c.registerPlugin(view);
 		c.registerPlugin(new JRViewerAccessoryInjection());
 		c.registerPlugin(new JRViewerContentInjection());
 	}
@@ -137,6 +140,14 @@ public class JRViewer {
 		return c;
 	}
 	
+	/**
+	 * Returns the View that is registered with this JRViewer's controller
+	 * @return The View of this JRViewer
+	 */
+	public View getView() {
+		return view;
+	}
+	
 	
 	/**
 	 * Starts this JRViewer's controller and installs all registered 
@@ -209,9 +220,7 @@ public class JRViewer {
 	 * @return the viewer instance
 	 */
 	public static JRViewer createEmptyViewer() {
-		JRViewer v = new JRViewer();
-		v.registerPlugin(new View());
-		return v;
+		return new JRViewer();
 	}
 	
 	/**
