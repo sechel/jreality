@@ -51,7 +51,7 @@ public class JRViewer {
 	
 	protected JRViewer() {
 		c.registerPlugin(view);
-		c.registerPlugin(new JRViewerContentInjection());
+		c.registerPlugin(new ContentInjectionPlugin());
 	}
 	
 	
@@ -290,7 +290,7 @@ public class JRViewer {
 	}
 	
 	
-	private class JRViewerContentInjection extends Plugin {
+	private class ContentInjectionPlugin extends Plugin {
 
 		@Override
 		public PluginInfo getPluginInfo() {
@@ -311,7 +311,7 @@ public class JRViewer {
 				root = (SceneGraphComponent)content;
 			}
 			ManagedContent mc = c.getPlugin(ManagedContent.class);
-			mc.setContent(getClass(), root);
+			mc.setContent(JRViewer.class, root);
 		}
 		
 	}
