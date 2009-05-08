@@ -15,7 +15,7 @@ public class ViewerTest {
 		
 		ShrinkPanel sp = new ShrinkPanel("Test Shrinker");
 		sp.add(new JButton("Hello!"));
-		v.getView().getLowerSlot().addShrinkPanel(sp);
+		v.getView().getLeftSlot().addShrinkPanel(sp);
 	}
 
 }
