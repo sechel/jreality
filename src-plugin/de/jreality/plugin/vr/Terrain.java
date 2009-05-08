@@ -209,8 +209,6 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		faceColorChooser.getColorPanel().addChangeListener(this);
 	}
 	
-	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		if (closeButton == s) {
@@ -233,8 +231,6 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		}
 	}
 	
-	
-	@Override
 	public void stateChanged(ChangeEvent e) {
 		Object s = e.getSource();
 		if (faceReflectionSlider == s) {
@@ -248,8 +244,6 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		}
 	}
 	
-	
-	@Override
 	public void colorPickerModeChanged(int mode) {
 		faceColorChooser.setMode(mode);		
 	}

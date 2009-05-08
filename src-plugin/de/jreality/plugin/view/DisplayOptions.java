@@ -78,7 +78,6 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 		fullscreenItem.addActionListener(this);
 	}
 	
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (fullscreenItem == e.getSource()) {
 			boolean fs = fullscreenItem.isSelected();
@@ -171,7 +170,6 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 		return View.class;
 	}
 	
-	@Override
 	public void setFrontendListener(FrontendListener l) {
 		frontendListener = l;
 	}

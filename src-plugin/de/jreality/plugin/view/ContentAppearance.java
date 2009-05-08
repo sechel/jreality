@@ -97,7 +97,6 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ChangeListen
 		}
 	}
 
-	@Override
 	public void colorPickerModeChanged(int mode) {
 		getPanel().setColorPickerMode(mode);
 	}
