@@ -1,6 +1,8 @@
 package de.jreality.audio.javasound;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -12,6 +14,7 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.Mixer.Info;
+import javax.swing.JOptionPane;
 
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.SoundEncoder;
@@ -23,7 +26,7 @@ public class JavaSoundUtility {
 	public static int BITS_PER_SAMPLE = 16;
 	private static Mixer CURRENT_MIXER;
 	
-	private static int sampleRate = 22050;
+	private static int sampleRate = 44100;
 	
 
 	private JavaSoundUtility() {}
@@ -48,8 +51,13 @@ public class JavaSoundUtility {
 			CURRENT_MIXER.close();
 			CURRENT_MIXER = null;
 		}
+
+		DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
 		
 		Info[] mixerInfos = AudioSystem.getMixerInfo();
+		List<Mixer> possibleMixers = new LinkedList<Mixer>();
+		List<SourceDataLine> mixerLines = new LinkedList<SourceDataLine>();
+		
 		for (Info info : mixerInfos) {
 			System.out.println("Checking mixer "+info);
 			Mixer mixer = AudioSystem.getMixer(info);
@@ -60,21 +68,43 @@ public class JavaSoundUtility {
 				continue;
 			}
 	
-			DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, audioFormat);
 			if (!mixer.isLineSupported(dataLineInfo)) {
 				mixer.close();
 				continue;
 			}
-	
+				
 			try {
 				SourceDataLine ret = (SourceDataLine) mixer.getLine(dataLineInfo);
-				CURRENT_MIXER=mixer;
-				return ret;
+				possibleMixers.add(mixer);
+				mixerLines.add(ret);
 			} catch (LineUnavailableException e) {
 				continue;
 			}
 		}
-		return null;
+		
+		if (possibleMixers.isEmpty()) return null;
+		if (possibleMixers.size() == 1) {
+			return mixerLines.get(0);
+		}
+		
+		Info[] possibleInfos = new Info[possibleMixers.size()];
+		for (int i=0; i<possibleMixers.size(); i++) {
+			possibleInfos[i]=possibleMixers.get(i).getMixerInfo();
+		}
+		
+		Info selectedInfo = (Info) JOptionPane.showInputDialog(null, "Select audio device", "JavaSound", JOptionPane.OK_OPTION, null, possibleInfos, null);
+		
+		int idx;
+		for (idx=0; idx<possibleInfos.length; idx++) {
+			if (possibleInfos[idx]==selectedInfo) break;
+		}
+		
+		SourceDataLine selectedLine=mixerLines.get(idx);
+		possibleMixers.remove(idx);
+
+		for (Mixer m : possibleMixers) m.close();
+		
+		return selectedLine;
 	}
 
 	public static AudioFormat outputFormat(int channels) {

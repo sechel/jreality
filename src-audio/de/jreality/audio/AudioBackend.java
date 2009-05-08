@@ -1,8 +1,11 @@
 package de.jreality.audio;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.Appearance;
@@ -149,6 +152,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		private SceneGraphPath path;
 		private SceneGraphPathObserver observer = new SceneGraphPathObserver();
 
+		// TODO: move this flag+Listener stuff to AudioSourceEntity...
 		private boolean nodeActive = false;
 		private boolean pathActive = false;
 
@@ -184,6 +188,11 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 				soundPath.setProperties(EffectiveAppearance.create(path));
 			}
 		}
+
+		public void dispose() {
+			observer.removeAppearanceListener(this);
+			observer.setPath(null);
+		}
 	}
 
 	private class AudioSourceEntity extends SceneGraphNodeEntity implements AudioListener {
@@ -204,6 +213,17 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		protected void removeTreeNode(SceneTreeNode tn) {
 			super.removeTreeNode(tn);
 			audioSources.remove((AudioTreeNode) tn);
+		}
+		
+		@Override
+		protected void dispose() {
+			for (SceneTreeNode tn : getTreeNodes()) {
+				if (tn instanceof AudioTreeNode) {
+					AudioTreeNode atn = (AudioTreeNode) tn;
+					atn.dispose();
+				}
+			}
+			super.dispose();
 		}
 	}
 }
