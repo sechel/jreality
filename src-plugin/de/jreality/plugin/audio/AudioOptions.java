@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
+import javax.swing.JRadioButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -55,22 +57,25 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
 	private float pitchShift = 1;
 
+	private JSliderVR gainWidget, speedWidget, reverbGainWidget, reverbTimeWidget, pitchShiftWidget;
+	private JRadioButton noReverbButton, schroederReverbButton, fdnReverbButton;
+	private JCheckBox reflectionBox, shiftBox;
+	private JCheckBox conicalBox, cardioidBox, lowpassBox, linearBox, exponentialBox;
+
 	private int[] selectedProcs = new int[0];
-	private final String[] procLabels = {"none", "reflections", "pitch shift"};
 	private class PreProcessorFactory implements SampleProcessorFactory {
 		public SampleProcessor getInstance() {
 			List<SampleProcessor> list = new ArrayList<SampleProcessor>(2);
-			for(int i: selectedProcs) {
+			for(int n: selectedProcs) {
 				int cnt = 1;
-				if      (i==cnt++) list.add(new EarlyReflections());
-				else if (i==cnt++) list.add(new ShiftProcessor());
+				if      (n==cnt++) list.add(new EarlyReflections());
+				else if (n==cnt++) list.add(new ShiftProcessor());
 			}
 			return SampleProcessorChain.create(list);
 		}
 	};
 
 	private int[] selectedCues = new int[0];
-	private final String[] cueLabels = {"none", "conical", "cardioid", "low pass", "linear", "exponential"};
 	private class DirectedCueFactory implements DistanceCueFactory {
 		public DistanceCue getInstance() {
 			List<DistanceCue> list = new ArrayList<DistanceCue>(4);
@@ -87,7 +92,6 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	};
 
 	private int reverbType = 0;
-	private final String[] reverbLabels = {"none", "Schroeder", "FDN"};
 	private class ReverbFactory implements SampleProcessorFactory {
 		public SampleProcessor getInstance() {
 			int cnt = 1;
@@ -99,32 +103,74 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 	private Appearance rootAppearance;
 
-	private JSliderVR gainWidget, speedWidget, reverbGainWidget, reverbTimeWidget, pitchShiftWidget;
-	private JList procWidget, distanceCueWidget, reverbWidget;
-
 	public AudioOptions() {
 		speedWidget = new JSliderVR(0, 1000);
 		gainWidget = new JSliderVR(-60, 30, (int) toDecibels(gain));
 		pitchShiftWidget = new JSliderVR(-120, 120, (int) (toCents(pitchShift)/10));
-		procWidget = new JList(procLabels);
-		distanceCueWidget = new JList(cueLabels);
-		reverbWidget = new JList(reverbLabels);
-		reverbWidget.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		reflectionBox = new JCheckBox("Early reflections");
+		shiftBox = new JCheckBox("Pitch shift");
+		conicalBox = new JCheckBox("Conical");
+		cardioidBox = new JCheckBox("Cardioid");
+		lowpassBox = new JCheckBox("Lowpass");
+		linearBox = new JCheckBox("Linear");
+		exponentialBox = new JCheckBox("Exponential");
+		noReverbButton = new JRadioButton("None");
+		schroederReverbButton = new JRadioButton("Schroeder");
+		fdnReverbButton = new JRadioButton("FDN");
 		reverbTimeWidget = new JSliderVR(0, 50, (int) reverbTime*10);
 		reverbGainWidget = new JSliderVR(-60, 30, (int) toDecibels(reverbGain));
-		
-		procWidget.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				selectedProcs = procWidget.getSelectedIndices();
-				setProcessorAttribute();
+
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(noReverbButton);
+		bg.add(schroederReverbButton);
+		bg.add(fdnReverbButton);
+		noReverbButton.setSelected(true);
+
+		ChangeListener cl = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int rt = 0;
+				if (schroederReverbButton.isSelected()) rt = 1;
+				else if (fdnReverbButton.isSelected())  rt = 2;
+				if (rt!=reverbType) {
+					reverbType = rt;
+					setReverbAttribute();
+				}
 			}
-		});
-		distanceCueWidget.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				selectedCues = distanceCueWidget.getSelectedIndices();
+		};
+		noReverbButton.addChangeListener(cl);
+		schroederReverbButton.addChangeListener(cl);
+		fdnReverbButton.addChangeListener(cl);
+		
+		cl = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int[] sel = new int[] {0, 0, 0, 0, 0};
+				if (conicalBox.isSelected()) sel[0] = 1;
+				if (cardioidBox.isSelected()) sel[1] = 2;
+				if (lowpassBox.isSelected()) sel[2] = 3;
+				if (linearBox.isSelected()) sel[3] = 4;
+				if (exponentialBox.isSelected()) sel[4] = 5;
+				selectedCues = sel;
 				setDistanceCueAttribute();
 			}
-		});
+		};
+		conicalBox.addChangeListener(cl);
+		cardioidBox.addChangeListener(cl);
+		lowpassBox.addChangeListener(cl);
+		linearBox.addChangeListener(cl);
+		exponentialBox.addChangeListener(cl);
+		
+		cl = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				int[] sel = new int[] {0, 0};
+				if (reflectionBox.isSelected()) sel[0] = 1;
+				if (shiftBox.isSelected())      sel[1] = 2;
+				selectedProcs = sel;
+				setProcessorAttribute();
+			}
+		};
+		reflectionBox.addChangeListener(cl);
+		shiftBox.addChangeListener(cl);
+		
 		pitchShiftWidget.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				pitchShift = fromCents(pitchShiftWidget.getValue()*10);
@@ -143,15 +189,6 @@ public class AudioOptions extends ShrinkPanelPlugin {
 				setGainAttribute();
 			}
 		});
-		reverbWidget.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				reverbType = reverbWidget.getSelectedIndex();
-				if (reverbType<0) {
-					reverbType = 0;
-				}
-				setReverbAttribute();
-			}
-		});
 		reverbGainWidget.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				reverbGain = fromDecibels(reverbGainWidget.getValue());
@@ -164,21 +201,21 @@ public class AudioOptions extends ShrinkPanelPlugin {
 				setReverbTimeAttribute();
 			}
 		});
-		
+
 		JPanel generalPanel = new JPanel();
 		JPanel preprocPanel = new JPanel();
 		JPanel distCuePanel = new JPanel();
 		JPanel reverbPanel = new JPanel();
-		
+
 		generalPanel.setLayout(new GridBagLayout());
 		generalPanel.setBorder(BorderFactory.createTitledBorder("General"));
 		preprocPanel.setLayout(new GridBagLayout());
 		preprocPanel.setBorder(BorderFactory.createTitledBorder("Preprocessor"));
 		distCuePanel.setLayout(new GridBagLayout());
-		distCuePanel.setBorder(BorderFactory.createTitledBorder("Distance cues"));
+		distCuePanel.setBorder(BorderFactory.createTitledBorder("Distance and direction cues"));
 		reverbPanel.setLayout(new GridBagLayout());
 		reverbPanel.setBorder(BorderFactory.createTitledBorder("Reverb"));
-		
+
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.insets = new Insets(2, 2, 2, 2);
@@ -198,22 +235,39 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		generalPanel.add(gainWidget, gbc);
 
-		preprocPanel.add(procWidget, gbc);
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		preprocPanel.add(shiftBox, gbc);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		preprocPanel.add(reflectionBox, gbc);
 
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
-		preprocPanel.add(new JLabel("Pitch shift (10 cents)"), gbc);
+		preprocPanel.add(new JLabel("Shift (10 cents)"), gbc);
 		gbc.weightx = 1;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		preprocPanel.add(pitchShiftWidget, gbc);
 
-		distCuePanel.add(distanceCueWidget, gbc);
-
-		reverbPanel.add(reverbWidget, gbc);
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		distCuePanel.add(linearBox, gbc);
+		distCuePanel.add(exponentialBox, gbc);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		distCuePanel.add(lowpassBox, gbc);
+		gbc.gridwidth = 1;
+		distCuePanel.add(conicalBox, gbc);
+		distCuePanel.add(cardioidBox, gbc);
 
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
-		reverbPanel.add(new JLabel("Time (.1 sec)"), gbc);
+		reverbPanel.add(noReverbButton, gbc);
+		reverbPanel.add(schroederReverbButton, gbc);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		reverbPanel.add(fdnReverbButton, gbc);
+
+		gbc.weightx = 0;
+		gbc.gridwidth = 1;
+		reverbPanel.add(new JLabel("Time (0.1s)"), gbc);
 		gbc.weightx = 1;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		reverbPanel.add(reverbTimeWidget, gbc);
@@ -224,7 +278,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		gbc.weightx = 1;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		reverbPanel.add(reverbGainWidget, gbc);
-		
+
 		shrinkPanel.setLayout(new ShrinkPanel.MinSizeGridBagLayout());
 		gbc.insets = new Insets(0, 0, 0, 0);
 		shrinkPanel.add(generalPanel, gbc);
@@ -265,12 +319,30 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		rootAppearance.setAttribute(AudioAttributes.REVERB_TIME_KEY, reverbTime);
 	}
 
-	private void updateProcWidget() {
-		procWidget.setSelectedIndices(selectedProcs);
+	private void updateProcWidgets() {
+		boolean refl = false, shift = false;
+		for(int i: selectedProcs) {
+			refl = refl || i==1;
+			shift = shift || i==2;
+		}
+		reflectionBox.setSelected(refl);
+		shiftBox.setSelected(shift);
 	}
 
-	private void updateCueWidget() {
-		distanceCueWidget.setSelectedIndices(selectedCues);
+	private void updateCueWidgets() {
+		boolean conical = false, cardioid = false, lowpass = false, lin = false, exp = false;
+		for(int i: selectedCues) {
+			conical = conical || (i==1);
+			cardioid = cardioid || (i==2);
+			lowpass = lowpass || (i==3);
+			lin = lin || (i==4);
+			exp = exp || (i==5);
+		}
+		conicalBox.setSelected(conical);
+		cardioidBox.setSelected(cardioid);
+		lowpassBox.setSelected(lowpass);
+		linearBox.setSelected(lin);
+		exponentialBox.setSelected(exp);
 	}
 
 	private void updatePitchWidget() {
@@ -284,8 +356,15 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		gainWidget.setValue((int) toDecibels(gain));
 	}
 
-	private void updateReverbWidget() {
-		reverbWidget.setSelectedIndex(reverbType);
+	private void updateReverbWidgets() {
+		int cnt = 0;
+		if (reverbType==cnt++) {
+			noReverbButton.setSelected(true);
+		} else if (reverbType==cnt++) {
+			schroederReverbButton.setSelected(true);
+		} else if (reverbType==cnt++) {
+			fdnReverbButton.setSelected(true);
+		}
 	}
 
 	private void updateReverbGainWidget() {
@@ -320,12 +399,12 @@ public class AudioOptions extends ShrinkPanelPlugin {
 			root.setAppearance(rootAppearance = new Appearance());
 		}
 
-		updateProcWidget();
-		updateCueWidget();
+		updateProcWidgets();
+		updateCueWidgets();
 		updatePitchWidget();
 		updateSpeedWidget();
 		updateGainWidget();
-		updateReverbWidget();
+		updateReverbWidgets();
 		updateReverbGainWidget();
 		updateReverbTimeWidget();
 	}

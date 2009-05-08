@@ -19,7 +19,6 @@ import de.jreality.util.Input;
 
 public class AudioExample {
 
-	
 	public static SceneGraphComponent getAudioComponent() throws Exception {
 		InputStream testSoundIn = Audio.class.getResourceAsStream("zoom.wav");
 		Input wavFile = Input.getInput("Zoom", testSoundIn);
