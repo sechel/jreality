@@ -285,6 +285,8 @@ public class SceneTreeNode {
 	 * disposes the whole tree from this node on
 	 * works recursively. also disposes the entity
 	 * if it is impty
+	 * 
+	 * @param disposedEntities a list where to put in all empty entities
 	 */
 	protected void dispose(ArrayList<SceneGraphNodeEntity> disposedEntities) {
 		for (SceneTreeNode node : getChildren())
