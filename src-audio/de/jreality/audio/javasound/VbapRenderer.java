@@ -1,8 +1,6 @@
 package de.jreality.audio.javasound;
 
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 
 import de.jreality.audio.SoundEncoder;
 import de.jreality.audio.VbapSoundEncoder;

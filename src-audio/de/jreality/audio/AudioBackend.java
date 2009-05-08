@@ -1,11 +1,8 @@
 package de.jreality.audio;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import de.jreality.math.Matrix;
 import de.jreality.scene.Appearance;

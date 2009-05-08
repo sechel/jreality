@@ -72,7 +72,7 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 			}
 		}
 		soundThread=null;
-		super.unlaunch();
+		backend.dispose();
 		outputLine.close();
 	}
 

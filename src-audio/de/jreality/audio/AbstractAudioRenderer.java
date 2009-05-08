@@ -30,8 +30,4 @@ public abstract class AbstractAudioRenderer implements AudioRenderer {
 		this.soundPathFactory=soundPathFactory;
 	}
 	
-	public void unlaunch() {
-		backend.dispose();
-	}
-	
 }

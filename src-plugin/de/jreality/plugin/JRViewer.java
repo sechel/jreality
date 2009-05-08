@@ -6,7 +6,7 @@ import java.util.Set;
 
 import javax.swing.JRootPane;
 
-import de.jreality.plugin.audio.AudioLauncher;
+import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
@@ -242,7 +242,7 @@ public class JRViewer {
 	public static JRViewer createViewerWithAudio() {
 		JRViewer v = createViewer();
 		v.registerPlugin(new AudioOptions());
-		v.registerPlugin(new AudioLauncher());
+		v.registerPlugin(new Audio());
 		return v;
 	}
 	
@@ -285,7 +285,7 @@ public class JRViewer {
 	public static JRViewer createViewerVRWithAudio() {
 		JRViewer v = createViewerVR();
 		v.registerPlugin(new AudioOptions());
-		v.registerPlugin(new AudioLauncher());
+		v.registerPlugin(new Audio());
 		return v;
 	}
 	
@@ -315,8 +315,7 @@ public class JRViewer {
 		}
 		
 	}
-	
-	
+
 	/**
 	 * Starts the default plug-in viewer
 	 * @param args no arguments are read
