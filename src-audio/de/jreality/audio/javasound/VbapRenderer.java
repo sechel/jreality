@@ -25,18 +25,6 @@ public class VbapRenderer extends AbstractJavaSoundRenderer {
 	int[] channelIDs = new int[]{4,0,2,3,1};
 
 	@Override
-	protected SourceDataLine createSourceDataLine() throws LineUnavailableException {		
-		AudioFormat audioFormat = JavaSoundUtility.outputFormat(speakers.length);
-		SourceDataLine stereoOut = JavaSoundUtility.createSourceDataLine(audioFormat);
-		System.out.println("vbap out buffer size = "+stereoOut.getBufferSize());
-		stereoOut.open(audioFormat, bufferLength);
-		System.out.println("vbap bufferSize="+stereoOut.getBufferSize());
-		stereoOut.start();
-		
-		return stereoOut;
-	}
-	
-	@Override
 	protected SoundEncoder createSoundEncoder() {
 		return new VbapSoundEncoder(speakers.length, speakers, channelIDs) {
 			public void finishFrame() {
@@ -47,7 +35,8 @@ public class VbapRenderer extends AbstractJavaSoundRenderer {
 	
 	@Override
 	public void launch() throws LineUnavailableException {
-		setSourceDataLine(createSourceDataLine());
+		channels = speakers.length;
+		openSourceDataLine();
 
 		System.out.println("framesize="+frameSize);
 		

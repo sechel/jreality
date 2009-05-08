@@ -29,14 +29,18 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 	 * computes buffer length
 	 * 
 	 * @param sdl
+	 * @throws LineUnavailableException 
 	 */
-	protected void setSourceDataLine(SourceDataLine sdl) {
-		outputLine=sdl;
-		AudioFormat af = outputLine.getFormat();
+	protected void openSourceDataLine() throws LineUnavailableException {
+		AudioFormat af = JavaSoundUtility.outputFormat(channels);
+		outputLine = JavaSoundUtility.createSourceDataLine(af);
 		sampleRate = (int) af.getSampleRate();
-		channels=af.getChannels();
 		int bytesPerSample = (af.getSampleSizeInBits()+7)/8;
-		bufferLength = frameSize * bytesPerSample * channels; // 2 channels, 2 bytes per sample
+		bufferLength = frameSize * bytesPerSample * channels;
+		System.out.println("stereo out buffer size = "+outputLine.getBufferSize());
+		outputLine.open(af, bufferLength);
+		System.out.println("stereoOut bufferSize="+outputLine.getBufferSize());
+		outputLine.start();
 	}
 	
 	public void launch() throws LineUnavailableException {
@@ -46,8 +50,6 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		backend=new AudioBackend(root, microphonePath, sampleRate, interpolationFactory, soundPathFactory);
 		startRenderThread();
 	}
-
-	protected abstract SourceDataLine createSourceDataLine() throws LineUnavailableException;
 
 	protected abstract SoundEncoder createSoundEncoder();
 

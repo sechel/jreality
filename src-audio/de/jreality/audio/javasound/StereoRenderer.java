@@ -1,10 +1,6 @@
 package de.jreality.audio.javasound;
 
-import java.awt.image.BufferStrategy;
-
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 
 import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.SoundEncoder;
@@ -21,18 +17,6 @@ public class StereoRenderer extends AbstractJavaSoundRenderer {
 	private static final float Y_SCALE = 0.5f;
 	
 	@Override
-	protected SourceDataLine createSourceDataLine() throws LineUnavailableException {		
-		AudioFormat audioFormat = JavaSoundUtility.outputFormat(2);
-		SourceDataLine stereoOut = JavaSoundUtility.createSourceDataLine(audioFormat);
-		System.out.println("stereo out buffer size = "+stereoOut.getBufferSize());
-		stereoOut.open(audioFormat, bufferLength);
-		System.out.println("stereoOut bufferSize="+stereoOut.getBufferSize());
-		stereoOut.start();
-		
-		return stereoOut;
-	}
-	
-	@Override
 	protected SoundEncoder createSoundEncoder() {
 		return new AmbisonicsSoundEncoder() {
 			public void finishFrame() {
@@ -43,7 +27,8 @@ public class StereoRenderer extends AbstractJavaSoundRenderer {
 	
 	@Override
 	public void launch() throws LineUnavailableException {
-		setSourceDataLine(createSourceDataLine());
+		channels=2;
+		openSourceDataLine();
 
 		System.out.println("framesize="+frameSize);
 		
