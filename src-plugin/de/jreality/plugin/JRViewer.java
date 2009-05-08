@@ -2,11 +2,8 @@ package de.jreality.plugin;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-import javax.swing.JComponent;
 import javax.swing.JRootPane;
 
 import de.jreality.plugin.audio.AudioLauncher;
@@ -40,7 +37,6 @@ import de.jreality.scene.SceneGraphNode;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
@@ -49,15 +45,12 @@ public class JRViewer {
 		c = new SimpleController();
 	private View
 		view = new View();
-	private List<JComponent>
-		accessories = new LinkedList<JComponent>();
 	private SceneGraphNode
 		content = null;
 	
 	
 	protected JRViewer() {
 		c.registerPlugin(view);
-		c.registerPlugin(new JRViewerAccessoryInjection());
 		c.registerPlugin(new JRViewerContentInjection());
 	}
 	
@@ -82,15 +75,6 @@ public class JRViewer {
 		}
 	}
 	
-	/**
-	 * Adds a ShrinkPanel to the left slot of the viewer
-	 * that has the given JComponent as content. This ShrinkPanel
-	 * however will not store it's position in a properties file
-	 * @param c the component to display
-	 */
-	public void addAccessory(JComponent c) {
-		accessories.add(c);
-	}
 	
 	/**
 	 * Sets a content node. The content node will be added to the
@@ -303,33 +287,6 @@ public class JRViewer {
 		v.registerPlugin(new AudioOptions());
 		v.registerPlugin(new AudioLauncher());
 		return v;
-	}
-	
-	
-	private class JRViewerAccessoryInjection extends Plugin {
-
-		@Override
-		public PluginInfo getPluginInfo() {
-			return new PluginInfo("Accessory Plugin", "jReality Group");
-		}
-		
-		
-		@Override
-		public void install(Controller c) throws Exception {
-			super.install(c);
-			View v = c.getPlugin(View.class);
-			int i = 0;
-			for (JComponent comp : accessories) {
-				String name = "Accessory " + i++;
-				if (comp.getName() != null) {
-					name = comp.getName();
-				}
-				ShrinkPanel sp = new ShrinkPanel(name);
-				sp.add(comp);
-				v.getLeftSlot().addShrinkPanel(sp);
-			}
-		}
-		
 	}
 	
 	
