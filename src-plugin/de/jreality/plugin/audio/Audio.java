@@ -79,7 +79,7 @@ public class Audio extends Plugin implements ChangeListener {
 		case jackAmbisonicsFO:
 			try {
 					renderer = (AudioRenderer) Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer").newInstance();
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -87,7 +87,7 @@ public class Audio extends Plugin implements ChangeListener {
 		case jackAmbisonicsPSO:
 			try {
 					renderer = (AudioRenderer) Class.forName("de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer").newInstance();
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -95,7 +95,7 @@ public class Audio extends Plugin implements ChangeListener {
 		case jackAmbisonicsSO:
 			try {
 					renderer = (AudioRenderer) Class.forName("de.jreality.audio.jack.??").newInstance();
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
