@@ -24,12 +24,10 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 import de.jreality.plugin.view.CameraStand;
+import de.jreality.plugin.view.SceneWindowManager;
 import de.jreality.plugin.view.View;
-import de.jreality.plugin.view.View.RunningEnvironment;
 import de.jreality.plugin.vr.image.ImageHook;
-import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.swing.jrwindows.JRWindow;
-import de.jreality.swing.jrwindows.JRWindowManager;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.PluginNameComparator;
@@ -37,14 +35,13 @@ import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
 import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
 public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 
 	private Controller
 		c = null;
-	private View
-		view = null;
+	private SceneWindowManager
+		sceneWindowManager = null;
 	private UpdateTimer
 		timer = null;
 	private Set<ShrinkPanelPlugin>
@@ -53,8 +50,6 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 		pluginWindowMap = new HashMap<ShrinkPanelPlugin, JRWindow>();
 	private Map<String, ShrinkPanelPlugin>
 		commandMap = new HashMap<String, ShrinkPanelPlugin>();
-	private JRWindowManager
-		manager = null;
 	private JRWindow
 		mainPanel = null;
 	private GridBagConstraints
@@ -98,7 +93,7 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 		
 		JRWindow sceneWindow = pluginWindowMap.get(plugin);
 		if (sceneWindow == null) {
-			sceneWindow = manager.createFrame();
+			sceneWindow = sceneWindowManager.getWindowManager().createFrame();
 			pluginWindowMap.put(plugin, sceneWindow);
 		}
 		JFrame frame = sceneWindow.getFrame();
@@ -119,7 +114,7 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 			if (size.height == 0 || size.width == 0) {
 				LayoutManager layout = content.getLayout();
 				size = layout.minimumLayoutSize(content);
-				int width = ((ShrinkSlotVertical)view.getLeftSlot()).getPreferredWidth();
+				int width = 200;//((ShrinkSlotVertical)view.getLeftSlot()).getPreferredWidth();
 				Dimension pref = layout.preferredLayoutSize(content);
 				if (pref.height > size.height) {
 					size.height = pref.height;
@@ -149,17 +144,7 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 		super.install(c);
 		this.c = c;
 		c.getPlugin(CameraStand.class);
-		view = c.getPlugin(View.class);
-		
-		if (view.getRunningEnvironment() == RunningEnvironment.PORTAL || view.getRunningEnvironment() == RunningEnvironment.PORTAL_REMOTE) {
-			manager = new JRWindowManager(view.getAvatarPath().getLastComponent());
-			manager.setPosition(new double[]{0, PortalCoordinateSystem.convertMeters(1.24), PortalCoordinateSystem.convertMeters(-1.24)});
-		} else {
-			manager = new JRWindowManager(view.getCameraPath().getLastComponent());
-			manager.setPosition(new double[]{0, 0, -2});
-		}
-		manager.setWindowsInScene(true);
-
+		sceneWindowManager = c.getPlugin(SceneWindowManager.class);
 		timer = new UpdateTimer();
 		timer.start();
 	}
@@ -179,7 +164,7 @@ public class HeadUpDisplay extends ToolBarAggregator implements ActionListener {
 	
 	public JFrame getMainFrame() {
 		if (mainPanel == null) {
-			mainPanel = manager.createFrame();
+			mainPanel = sceneWindowManager.getWindowManager().createFrame();
 		}
 		return mainPanel.getFrame();
 	}
