@@ -150,5 +150,6 @@ public final class JackHub implements JJackAudioProcessor {
 	
 	public static void removeClient() throws JJackException {
 		JJackSystem.shutdown();
+		sampleRate=0;
 	}
 }
