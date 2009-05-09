@@ -3,6 +3,7 @@ package de.jreality.toolsystem.raw;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -11,10 +12,13 @@ import javax.swing.JRadioButton;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.portal.PortalCoordinateSystem;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.toolsystem.ToolEvent;
 
 public class DevicePortalTrackd extends DeviceTrackd {
+	
+	private int headSensorID=1;
 	
 	public DevicePortalTrackd() {
 		JFrame f = new JFrame("Head tracking:");
@@ -43,11 +47,11 @@ public class DevicePortalTrackd extends DeviceTrackd {
 	
 	@SuppressWarnings("serial")
 	protected void fixHead() {
-		disableSensor(1);
+		disableSensor(headSensorID);
 	}
 
 	protected void freeHead() {
-		enableSensor(1);
+		enableSensor(headSensorID);
 	}
 
 	@Override
@@ -62,7 +66,18 @@ public class DevicePortalTrackd extends DeviceTrackd {
 		m.setEntry(1, 3, y*0.254+0.25);
 		m.setEntry(2, 3, z*0.254);
 		
-}
+	}
+	
+	@Override
+	public void initialize(Viewer viewer, Map<String, Object> config) {
+		super.initialize(viewer, config);
+		if (config.containsKey("head_sensor")) {
+			Object hid = config.get("head_sensor");
+			if (hid instanceof Integer) {
+				headSensorID = (Integer) hid;
+			}
+		}
+	}
 	
 	@Override
 	public String getName() {
