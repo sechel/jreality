@@ -9,6 +9,9 @@
       <prop name="controller_shmkey">
         <int>4127</int>
       </prop>
+      <prop name="head_sensor">
+      	<int>1</int>
+      </prop>
     </rawdevice>
     <rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/>
     <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/-->
