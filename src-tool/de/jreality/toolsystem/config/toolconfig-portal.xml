@@ -2,7 +2,14 @@
 
   <rawdevices>
     <!--rawdevice id="Motionstar" type="de.jreality.toolsystem.raw.DeviceMotionstar"/-->
-    <rawdevice id="Trackd" type="de.jreality.toolsystem.raw.DevicePortalTrackd"/>
+    <rawdevice id="Trackd" type="de.jreality.toolsystem.raw.DevicePortalTrackd">
+      <prop name="tracker_shmkey">
+        <int>4126</int>
+      </prop>
+      <prop name="controller_shmkey">
+        <int>4127</int>
+      </prop>
+    </rawdevice>
     <rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/>
     <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/-->
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>

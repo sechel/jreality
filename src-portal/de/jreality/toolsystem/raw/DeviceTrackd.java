@@ -4,6 +4,7 @@ package de.jreality.toolsystem.raw;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import de.jreality.devicedriver.TrackdJNI;
@@ -13,6 +14,7 @@ import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
+import de.jreality.util.LoggingSystem;
 
 /**
  * 
@@ -48,9 +50,16 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 		return "Trackd driver";
 	}
 
-	public void initialize(Viewer viewer) {
+	public void initialize(Viewer viewer, Map<String, Object> config) {
         try {
-            trackd = new TrackdJNI(4126, 4127);
+        	int tracker_shmkey=4126;
+        	int controller_shmkey=4127;
+        	if (config.containsKey("tracker_shmkey")) tracker_shmkey = (Integer) config.get("tracker_shmkey");
+        	else LoggingSystem.getLogger(this).warning("using default tracker shm key");
+        	if (config.containsKey("controller_shmkey")) controller_shmkey = (Integer) config.get("controller_shmkey");
+        	else LoggingSystem.getLogger(this).warning("using controller tracker shm key");
+        	
+        	trackd = new TrackdJNI(tracker_shmkey, controller_shmkey);
             System.out.println("Trackd: sensors="+trackd.getNumSensors()+" buttons="+trackd.getNumButtons()+" valuators="+trackd.getNumValuators());
         } catch (IOException e) {
             e.printStackTrace();

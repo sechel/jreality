@@ -161,7 +161,7 @@ public class DeviceManager {
     for (RawDeviceConfig rdc : config.getRawConfigs()) {
       try {
         RawDevice rd = rdc.createDevice();
-        rd.initialize(viewer);
+        rd.initialize(viewer, rdc.getConfiguration());
         rd.setEventQueue(eventQueue);
         rawDevices.put(rdc.getDeviceID(), rd);
         if (rd instanceof PollingDevice) Poller.getSharedInstance().addPollingDevice((PollingDevice) rd);

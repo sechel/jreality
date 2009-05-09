@@ -40,6 +40,8 @@
 
 package de.jreality.toolsystem.raw;
 
+import java.util.Map;
+
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
@@ -97,7 +99,7 @@ public class DeviceSystemTimer implements RawDevice, PollingDevice {
     public void dispose() {
     }
 
-    public void initialize(Viewer viewer) {
+    public void initialize(Viewer viewer, Map<String, Object> config) {
     }
 
     public String getName() {

@@ -10,11 +10,9 @@ import javax.swing.JRadioButton;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.toolsystem.ToolEvent;
-import de.jreality.util.Secure;
 
 public class DevicePortalTrackd extends DeviceTrackd {
 	

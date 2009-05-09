@@ -42,6 +42,7 @@ package de.jreality.toolsystem.config;
 
 import java.beans.DefaultPersistenceDelegate;
 import java.beans.PersistenceDelegate;
+import java.util.Map;
 import java.util.logging.Level;
 
 import de.jreality.toolsystem.raw.RawDevice;
@@ -58,15 +59,17 @@ import de.jreality.util.LoggingSystem;
 public class RawDeviceConfig {
 
   public static final PersistenceDelegate DELEGATE = new DefaultPersistenceDelegate(
-      new String[]{"rawDevice", "deviceID"}
+      new String[]{"rawDevice", "deviceID", "config"}
   );
   
   private final String deviceID;
   private final String rawDevice;
+  private final Map<String, Object> config;
   
-  public RawDeviceConfig(String type, String deviceID) {
+  public RawDeviceConfig(String type, String deviceID, Map<String, Object> config) {
     this.deviceID=deviceID;
     this.rawDevice = type;
+    this.config = config;
   }
   
   public String getRawDevice() {
@@ -75,6 +78,10 @@ public class RawDeviceConfig {
   
   public String getDeviceID() {
     return deviceID;
+  }
+  
+  public Map<String, Object> getConfiguration() {
+	  return config;
   }
   
   public String toString() {

@@ -57,6 +57,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
@@ -216,7 +217,7 @@ public class DeviceMouse extends AbstractDeviceMouse implements RawDevice, Mouse
     component.removeKeyListener(keyListener);
   }
 
-  public void initialize(Viewer viewer) {
+  public void initialize(Viewer viewer, Map<String, Object> config) {
     if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
     setComponent((Component) viewer.getViewingComponent());
   }

@@ -40,6 +40,8 @@
 
 package de.jreality.toolsystem.raw;
 
+import java.util.Map;
+
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.ToolEvent;
@@ -52,7 +54,7 @@ import de.jreality.toolsystem.ToolEventQueue;
 public interface RawDevice {
 
     public void setEventQueue(ToolEventQueue queue);
-    public void initialize(Viewer viewer);
+    public void initialize(Viewer viewer, Map<String, Object> config);
     /**
      * 
      * @param rawDeviceName

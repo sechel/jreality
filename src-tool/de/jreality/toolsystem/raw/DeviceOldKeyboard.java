@@ -46,6 +46,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.logging.Level;
 
 import de.jreality.scene.Viewer;
@@ -80,7 +81,7 @@ public class DeviceOldKeyboard implements RawDevice, KeyListener {
     private ToolEventQueue queue;
     private Component component;
     
-    public void initialize(Viewer viewer) {
+    public void initialize(Viewer viewer, Map<String, Object> config) {
       if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
       this.component = (Component) viewer.getViewingComponent();
       component.addKeyListener(this);

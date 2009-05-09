@@ -115,7 +115,7 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
     public void dispose() {
     }
 
-    public void initialize(Viewer viewer) {
+    public void initialize(Viewer viewer, Map<String, Object> config) {
     }
 
     public String getName() {

@@ -18,6 +18,14 @@ See de.jreality.scene.tool.config.ToolSystemConfiguration
           <object class="de.jreality.toolsystem.config.RawDeviceConfig">
             <string><xsl:value-of select="@type"/></string>
             <string><xsl:value-of select="@id"/></string>
+            <object class="java.util.HashMap">
+              <xsl:for-each select="prop">
+	              <void method="put">
+	                <string><xsl:value-of select="@name"/></string>
+	                <xsl:copy-of select="./*"/>
+                </void>
+              </xsl:for-each>
+            </object>
           </object>
         </void>
         </xsl:for-each>

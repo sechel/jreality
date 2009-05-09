@@ -51,6 +51,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.AxisState;
@@ -96,7 +97,7 @@ public class DeviceKeyboard implements RawDevice, KeyListener, AWTEventListener,
 
 	private LinkedList<KeyEvent> myQueue = new LinkedList<KeyEvent>();
 
-	public void initialize(Viewer viewer) {
+	public void initialize(Viewer viewer, Map<String, Object> config) {
 		if (!viewer.hasViewingComponent() || !(viewer.getViewingComponent() instanceof Component) ) throw new UnsupportedOperationException("need AWT component");
 		this.component = (Component) viewer.getViewingComponent();
 		try {

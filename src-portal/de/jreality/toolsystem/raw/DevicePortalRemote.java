@@ -1,5 +1,7 @@
 package de.jreality.toolsystem.raw;
 
+import java.util.Map;
+
 import de.jreality.math.Matrix;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
@@ -17,7 +19,7 @@ public class DevicePortalRemote implements RawDevice {
 		return "Remote";
 	}
 
-	public void initialize(Viewer viewer) {
+	public void initialize(Viewer viewer, Map<String, Object> config) {
 	}
 
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
