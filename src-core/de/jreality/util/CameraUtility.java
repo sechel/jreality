@@ -76,7 +76,7 @@ public class CameraUtility {
 	  public static  Matrix inverseCameraOrientation = new Matrix();
 	  static {
 		  try {
-			  String foo = System.getProperty(SystemProperties.ENVIRONMENT);
+			  String foo = Secure.getProperty(SystemProperties.ENVIRONMENT);
 			  if (foo != null && foo.indexOf("portal") != -1) {
 				  ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 				  double[] rot = config.getDoubleArray("camera.orientation");

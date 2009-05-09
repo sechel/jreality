@@ -84,7 +84,7 @@ public class PortalServerViewer implements Viewer {
 		if (lvn.equals("none")) return null;
 		try {
 			return (Viewer) Class.forName(lvn).newInstance();
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			System.out.println("creating local viewer failed: "+e.getMessage());
 			return null;
 		}

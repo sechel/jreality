@@ -56,6 +56,7 @@ import java.util.logging.Level;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.Secure;
 import de.jreality.util.SimpleURLPolicy;
 import de.jreality.util.SystemProperties;
 
@@ -92,7 +93,7 @@ public class ReaderBSH implements SceneReader {
   
   static {
     try {
-      URL bshURL = new URL(System.getProperty(SystemProperties.BSH_JAR, "file:///net/MathVis/Oorange/oorange1.9/lib/bsh-1.3b2.jar"));
+      URL bshURL = new URL(Secure.getProperty(SystemProperties.BSH_JAR, "file:///net/MathVis/Oorange/oorange1.9/lib/bsh-1.3b2.jar"));
       bshLoader = new URLClassLoader(new URL[]{bshURL}, Thread.currentThread().getContextClassLoader());
       LinkedList<Permission> pc = new LinkedList<Permission>();
 //      pc.add(new java.lang.RuntimePermission("getClassLoader"));
