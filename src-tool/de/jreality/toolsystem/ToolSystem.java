@@ -297,7 +297,7 @@ public class ToolSystem implements ToolEventReceiver {
 		
 		void mouseOverToolAdded() {
 			if (useCount == 0) {
-				System.out.println("Enabling mouse over support");
+				//System.out.println("Enabling mouse over support");
 				addToolImpl(this, rootPath);
 			}
 			useCount++;
@@ -306,7 +306,7 @@ public class ToolSystem implements ToolEventReceiver {
 		void mouseOverToolRemoved() {
 			useCount--;
 			if (useCount == 0) {
-				System.out.println("Disabling mouse over support");
+				//System.out.println("Disabling mouse over support");
 				removeToolImpl(this, rootPath);
 			}
 		}
