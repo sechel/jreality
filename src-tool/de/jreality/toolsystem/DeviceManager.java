@@ -440,7 +440,7 @@ private long systemTime;
 		this.systemTime=timeStamp;
 	}
 	
-	private long getSystemTime() {
+	long getSystemTime() {
 		return systemTime;
 	}
 

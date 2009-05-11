@@ -52,6 +52,7 @@ import java.util.WeakHashMap;
 import java.util.Map.Entry;
 
 import de.jreality.math.Rn;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
@@ -198,9 +199,8 @@ public class ToolSystem implements ToolEventReceiver {
 		public SceneGraphPath getRootToToolComponent() {
 			if (rootToToolComponent == null) {
 				LinkedList<SceneGraphNode> list = new LinkedList<SceneGraphNode>();
-				Iterator i = rootToLocal.reverseIterator();
-				for (; i.hasNext();) {
-					SceneGraphNode cp = (SceneGraphNode) i.next();
+				for (Iterator<SceneGraphNode> i = rootToLocal.reverseIterator(); i.hasNext(); ) {
+					SceneGraphNode cp = i.next();
 					if (!(cp instanceof SceneGraphComponent))
 						continue;
 					if (((SceneGraphComponent) cp).getTools().contains(currentTool)) {
@@ -240,14 +240,6 @@ public class ToolSystem implements ToolEventReceiver {
 
 		public PickSystem getPickSystem() {
 			return ToolSystem.this.getPickSystem();
-		}
-
-		/**
-		 * @deprecated why is this method here?
-		 */
-		public Iterator getSelection() {
-			// TODO Auto-generated method stub
-			return null;
 		}
 
 		public Object getKey() {
@@ -293,7 +285,115 @@ public class ToolSystem implements ToolEventReceiver {
 	    emptyPickPath.push(viewer.getSceneRoot());
 	}
 
+	private class MouseOverSupport implements Tool {
+
+		List<InputSlot> activation = Collections.emptyList(); //Collections.singletonList(InputSlot.getDevice("EnablePointerHit"));
+		List<InputSlot> pointer = Collections.singletonList(InputSlot.getDevice("PointerTransformation"));
+		InputSlot trigger = InputSlot.getDevice("PointerHit");
+		
+		
+		SceneGraphPath rootPath;
+		int useCount=0;
+		
+		void mouseOverToolAdded() {
+			if (useCount == 0) {
+				System.out.println("Enabling mouse over support");
+				addToolImpl(this, rootPath);
+			}
+			useCount++;
+		}
+		
+		void mouseOverToolRemoved() {
+			useCount--;
+			if (useCount == 0) {
+				System.out.println("Disabling mouse over support");
+				removeToolImpl(this, rootPath);
+			}
+		}
+		
+		public MouseOverSupport(SceneGraphPath root) {
+			rootPath=new SceneGraphPath(root);
+		}
+		
+		public void activate(ToolContext tc) {
+		}
+
+		public void deactivate(ToolContext tc) {
+		}
+
+		public List<InputSlot> getActivationSlots() {
+			return activation;
+		}
+
+		public List<InputSlot> getCurrentSlots() {
+			return pointer;
+		}
+
+		public String getDescription(InputSlot slot) {
+			return "foo";
+		}
+
+		public String getDescription() {
+			return "dummy tool to enable mouse over";
+		}
+		
+		boolean hasHit=false;
+		SceneGraphPath lastPath=null;
+		int ignoreCnt=12;
+		public void perform(ToolContext tc) {
+			if (ignoreCnt > 0) {
+				ignoreCnt--;
+				return;
+			}
+			SceneGraphPath newP = null;
+			boolean hits = false;
+			PickResult p = tc.getCurrentPick();
+			if (p!=null && p.getPickPath() != null && p.getPickPath().getLastElement() instanceof Geometry) {
+				newP = new SceneGraphPath(p.getPickPath());
+				hits = true;
+			}
+			if (!hits) {
+				if (!hasHit) {
+					// nothing to do...
+				} else {
+					hasHit = false;
+					lastPath = null;
+					fireNoMoreHit();
+				}
+			} else {
+				if (hasHit) {
+					if (lastPath.isEqual(newP)) {
+						// same hit, nothing to do
+					}
+					else {
+						lastPath = newP;
+						// fire hit lost
+						fireNoMoreHit();
+						// then fire hit again
+						fireHit();
+					}
+				} else {
+					lastPath = newP;
+					hasHit = true;
+					fireHit();
+				}
+					
+			}
+		}
+
+		private void fireNoMoreHit() {
+			eventQueue.addEvent(new ToolEvent(this, deviceManager.getSystemTime(), trigger, AxisState.ORIGIN));
+		}
+
+		private void fireHit() {
+			eventQueue.addEvent(new ToolEvent(this, deviceManager.getSystemTime(), trigger, AxisState.PRESSED));
+		}
+		
+	}
+	
 	private boolean initialized;
+
+	private MouseOverSupport mouseOverSupport;
 	public void initializeSceneTools() {
 		if (initialized) {
 			LoggingSystem.getLogger(this).warning("already initialized!");
@@ -306,6 +406,7 @@ public class ToolSystem implements ToolEventReceiver {
 		SceneGraphPath rootPath = new SceneGraphPath();
 		rootPath.push(viewer.getSceneRoot());
 		addTool(AnimatorTool.getInstanceImpl(KEY), rootPath);
+		mouseOverSupport = new MouseOverSupport(rootPath);
 		if (emptyPickPath.getLength() == 0) {
 			emptyPickPath.push(viewer.getSceneRoot());
 		}
@@ -450,7 +551,10 @@ public class ToolSystem implements ToolEventReceiver {
 	}
 
 	private void registerActivePathForTool(SceneGraphPath pickPath, Tool tool) {
-		toolToPath.put(tool, Collections.singletonList(pickPath));
+		List<SceneGraphPath> ap = Collections.singletonList(
+				pickPath.getLastElement() instanceof Geometry ? pickPath.popNew() : pickPath
+						);
+		toolToPath.put(tool, ap);
 	}
 
 	private double[] pointerTrafo = new double[16];
@@ -508,17 +612,16 @@ public class ToolSystem implements ToolEventReceiver {
 	 * @param toolSet
 	 * @return false if the current level of tools rejected the context...
 	 */
-	private void activateToolSet(Set toolSet) {
-		for (Iterator iter = toolSet.iterator(); iter.hasNext();) {
-			Tool tool = (Tool) iter.next();
+	private void activateToolSet(Set<Tool> toolSet) {
+		for (Iterator<Tool> iter = toolSet.iterator(); iter.hasNext();) {
+			Tool tool = iter.next();
 			toolContext.setCurrentTool(tool);
 			toolContext.event.device=slotManager.resolveSlotForTool(tool, toolContext.sourceSlot);
 			if (toolContext.event.device == null) {
 				LoggingSystem.getLogger(this).warning("activate: resolving "+toolContext.sourceSlot+" failed: "+tool.getClass().getName());
 			}
-			List paths = getActivePathsForTool(tool);
-			for (Iterator it2 = paths.iterator(); it2.hasNext(); ) {
-				toolContext.setRootToLocal((SceneGraphPath) it2.next());
+			for (SceneGraphPath path : getActivePathsForTool(tool)) {
+				toolContext.setRootToLocal(path);
 				tool.activate(toolContext);
 				if (toolContext.isRejected()) {
 					iter.remove();
@@ -533,22 +636,21 @@ public class ToolSystem implements ToolEventReceiver {
 	 * 
 	 * @param toolSet
 	 */
-	private void processToolSet(Set toolSet) {
-		for (Iterator iter = toolSet.iterator(); iter.hasNext();) {
-			Tool tool = (Tool) iter.next();
+	private void processToolSet(Set<Tool> toolSet) {
+		for (Tool tool : toolSet) {
 			toolContext.setCurrentTool(tool);
 			toolContext.event.device=slotManager.resolveSlotForTool(tool, toolContext.sourceSlot);
-			List paths = getActivePathsForTool(tool);
-			for (Iterator it2=paths.iterator(); it2.hasNext(); ) {
-				toolContext.setRootToLocal((SceneGraphPath) it2.next());
+			for (SceneGraphPath path : getActivePathsForTool(tool)) {
+				toolContext.setRootToLocal(path);
 				tool.perform(toolContext);
 			}
 		}
 	}
 
-	private List getActivePathsForTool(Tool tool) {
-		List l = (List) toolToPath.get(tool);
-		return l == null ? Collections.EMPTY_LIST : l;
+	private List<SceneGraphPath> getActivePathsForTool(Tool tool) {
+		List<SceneGraphPath> l = toolToPath.get(tool);
+		if (l == null) return Collections.emptyList();
+		return l;
 	}
 
 	/**
@@ -556,17 +658,15 @@ public class ToolSystem implements ToolEventReceiver {
 	 * 
 	 * @param toolSet
 	 */
-	private void deactivateToolSet(Set toolSet) {
-		for (Iterator iter = toolSet.iterator(); iter.hasNext();) {
-			Tool tool = (Tool) iter.next();
+	private void deactivateToolSet(Set<Tool> toolSet) {
+		for (Tool tool : toolSet) {
 			toolContext.setCurrentTool(tool);
 			toolContext.event.device=slotManager.resolveSlotForTool(tool, toolContext.sourceSlot);
 			if (toolContext.event.device == null) {
 				LoggingSystem.getLogger(this).warning("deavtivate: resolving "+toolContext.sourceSlot+" failed: "+tool.getClass().getName());
 			}
-			List paths = getActivePathsForTool(tool);
-			for (Iterator it2=paths.iterator(); it2.hasNext(); ) {
-				toolContext.setRootToLocal((SceneGraphPath) it2.next());
+			for (SceneGraphPath path : getActivePathsForTool(tool)) {
+				toolContext.setRootToLocal(path);
 				tool.deactivate(toolContext);
 			}
 		}
@@ -672,8 +772,12 @@ public class ToolSystem implements ToolEventReceiver {
 				System.out.println("try adding to sigleton: "+tool);
 			}
 		}
-		if (first)
+		if (first) {
 			slotManager.registerTool(tool);
+			if (tool.getActivationSlots().contains(InputSlot.POINTER_HIT)) {
+				mouseOverSupport.mouseOverToolAdded();
+			}
+		}
 		LoggingSystem.getLogger(this).info(
 				"first=" + first + " tool=" + tool + "   path=" + path);
 	}
@@ -684,9 +788,9 @@ public class ToolSystem implements ToolEventReceiver {
 	 * @param path
 	 */
 	void removeToolImpl(Tool tool, SceneGraphPath path) {
+		System.out.println("ToolSystem.removeToolImpl()");
 		boolean last = toolManager.removeTool(tool, path);
-		for (Iterator i = getActivePathsForTool(tool).iterator(); i.hasNext(); ) {
-			SceneGraphPath activePath = (SceneGraphPath) i.next();
+		for (SceneGraphPath activePath : getActivePathsForTool(tool)) {
 			if (path.isEqual(activePath)) {
 				ToolEvent te = new ToolEvent(this, -1, InputSlot.getDevice("remove"), null,	null);
 				toolContext.setCurrentTool(tool);
@@ -696,8 +800,12 @@ public class ToolSystem implements ToolEventReceiver {
 				toolToPath.remove(tool);
 			}
 		}
-		if (last)
+		if (last) {
 			slotManager.unregisterTool(tool);
+			if (tool.getActivationSlots().contains(InputSlot.POINTER_HIT)) {
+				mouseOverSupport.mouseOverToolRemoved();
+			}
+		}
 		LoggingSystem.getLogger(this).info(
 				"last=" + last + " tool=" + tool + " path=" + path);
 	}
