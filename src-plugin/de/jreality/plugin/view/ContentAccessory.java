@@ -8,6 +8,9 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -20,7 +23,7 @@ import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
-public abstract class ContentAccessory extends ShrinkPanelPlugin implements ActionListener {
+public abstract class ContentAccessory extends ShrinkPanelPlugin implements ActionListener, ComponentListener {
 
 	private SceneWindowManager
 		sceneWindowManager = null;
@@ -34,9 +37,17 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 		panelConstraints = new GridBagConstraints();
 	private View view;
 	
-	public abstract SceneGraphComponent getTriggerComponent();
+	private final SceneGraphComponent 
+		triggerCmp;
+	
+	private boolean windowInScene=false;
+	
+	public SceneGraphComponent getTriggerComponent() {
+		return triggerCmp;
+	}
 
-	public ContentAccessory() {
+	public ContentAccessory(SceneGraphComponent trigger) {
+		triggerCmp=trigger;
 		panelConstraints.fill = GridBagConstraints.BOTH;
 		panelConstraints.insets = new Insets(0,5,5,5);
 		panelConstraints.weighty = 1.0;
@@ -45,37 +56,11 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		JPanel content = shrinkPanel.getContentPanel();
-		JFrame frame = jrWindow.getFrame();
-		Container frameContent = frame.getContentPane();
 		shrinkPanel.setShrinked(false);
 		if (inscene) {
-			if (frame.isShowing()) {
-				frameContent.remove(content);
-				frame.setVisible(false);
-				setShowPanel(true);
-				shrinkPanel.setContentPanel(content);
-			} else {
-				setShowPanel(false);
-				content.doLayout();
-				frameContent.remove(content);
-				frameContent.setLayout(new GridLayout());
-				frameContent.add(content);
-				
-				Dimension size = content.getSize();
-				if (size.height == 0 || size.width == 0) {
-					LayoutManager layout = content.getLayout();
-					size = layout.minimumLayoutSize(content);
-					int width = ((ShrinkSlotVertical)view.getLeftSlot()).getPreferredWidth();
-					Dimension pref = layout.preferredLayoutSize(content);
-					if (pref.height > size.height) {
-						size.height = pref.height;
-					}
-					size.width = width;
-				}
-				frame.setSize(size);
-				frame.setVisible(true);
-			}
+			windowInScene = !windowInScene;
+			if (!windowInScene) moveOutOfScene();
+			else moveInScene();
 		} else {
 			if (shrinkPanel.isFloating()) {
 				shrinkPanel.setFloating(false);
@@ -86,22 +71,74 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 			}
 		}
 	}
+
+	void moveInScene() {
+		JPanel content = shrinkPanel.getContentPanel();
+		JFrame frame = jrWindow.getFrame();
+		Container frameContent = frame.getContentPane();
+		setShowPanel(false);
+		content.doLayout();
+		frameContent.remove(content);
+		frameContent.setLayout(new GridLayout());
+		frameContent.add(content);
+		
+		Dimension size = content.getSize();
+		if (size.height == 0 || size.width == 0) {
+			LayoutManager layout = content.getLayout();
+			size = layout.minimumLayoutSize(content);
+			int width = ((ShrinkSlotVertical)view.getLeftSlot()).getPreferredWidth();
+			Dimension pref = layout.preferredLayoutSize(content);
+			if (pref.height > size.height) {
+				size.height = pref.height;
+			}
+			size.width = width;
+		}
+		frame.setSize(size);
+		frame.setVisible(true);
+	}
+	
+	void moveOutOfScene() {
+		JPanel content = shrinkPanel.getContentPanel();
+		JFrame frame = jrWindow.getFrame();
+		Container frameContent = frame.getContentPane();
+		frameContent.remove(content);
+		frame.setVisible(false);
+		setShowPanel(true);
+		shrinkPanel.setContentPanel(content);
+	}
+	
+	public void componentHidden(ComponentEvent e) {
+		if (windowInScene) {
+			actionPerformed(new ActionEvent(ContentAccessory.this, 0, "hidden"));
+		}
+	}
+
+	public void componentShown(ComponentEvent e) {
+	}
+	
+	public void componentMoved(ComponentEvent e) {
+	}
+	public void componentResized(ComponentEvent e) {
+	}
 	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		sceneWindowManager = c.getPlugin(SceneWindowManager.class);
 		view = c.getPlugin(View.class);
+		sceneWindowManager.getWindowManager().setWindowsInScene(true);
 		jrWindow = sceneWindowManager.getWindowManager().createFrame();
 		JFrame frame = jrWindow.getFrame();
+		frame.addComponentListener(this);
 		frame.setLayout(new GridLayout());
 		actionTool.addActionListener(this);
-		getTriggerComponent().addTool(actionTool);
+		if (getTriggerComponent() != null) getTriggerComponent().addTool(actionTool);
 	}
+	
 	
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		getTriggerComponent().removeTool(actionTool);
+		if (getTriggerComponent() != null) getTriggerComponent().removeTool(actionTool);
 	}
 	
 	@Override

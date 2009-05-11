@@ -22,6 +22,8 @@ public class SceneWindowManager extends Plugin {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		View view = c.getPlugin(View.class);
+		// require camera path:
+		c.getPlugin(CameraStand.class);
 		if (view.getRunningEnvironment() == RunningEnvironment.PORTAL || view.getRunningEnvironment() == RunningEnvironment.PORTAL_REMOTE) {
 			manager = new JRWindowManager(view.getAvatarPath().getLastComponent());
 			manager.setPosition(new double[]{0, PortalCoordinateSystem.convertMeters(1.24), PortalCoordinateSystem.convertMeters(-1.24)});
