@@ -165,7 +165,7 @@ public class SceneGraphPath implements Cloneable {
 		};
 	}
 
-	public Iterator reverseIterator() {
+	public Iterator<SceneGraphNode> reverseIterator() {
 		return reverseIterator(path.size());
 	}
 
