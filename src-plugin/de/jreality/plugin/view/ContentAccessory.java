@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -23,8 +22,8 @@ import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
-public abstract class ContentAccessory extends ShrinkPanelPlugin implements ActionListener, ComponentListener {
-
+public abstract class ContentAccessory extends ShrinkPanelPlugin {
+	
 	private SceneWindowManager
 		sceneWindowManager = null;
 	private ActionTool 
@@ -37,17 +36,40 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 		panelConstraints = new GridBagConstraints();
 	private View view;
 	
-	private final SceneGraphComponent 
-		triggerCmp;
-	
 	private boolean windowInScene=false;
 	
-	public SceneGraphComponent getTriggerComponent() {
-		return triggerCmp;
-	}
+	public abstract SceneGraphComponent getTriggerComponent();
 
-	public ContentAccessory(SceneGraphComponent trigger) {
-		triggerCmp=trigger;
+	private class ListenerSupport extends ComponentAdapter implements ActionListener {
+
+		public void componentHidden(ComponentEvent e) {
+			if (windowInScene) {
+				actionPerformed(new ActionEvent(ContentAccessory.this, 0, "hidden"));
+			}
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			shrinkPanel.setShrinked(false);
+			if (inscene) {
+				windowInScene = !windowInScene;
+				if (!windowInScene) moveOutOfScene();
+				else moveInScene();
+			} else {
+				if (shrinkPanel.isFloating()) {
+					shrinkPanel.setFloating(false);
+					shrinkPanel.getParentSlot().addShrinkPanel(shrinkPanel);
+				} else {
+					shrinkPanel.setFloating(true);
+					shrinkPanel.getParentSlot().removeShrinkPanel(shrinkPanel);
+				}
+			}
+		}
+
+	};
+	
+	private ListenerSupport listeners = new ListenerSupport();
+	
+	public ContentAccessory() {
 		panelConstraints.fill = GridBagConstraints.BOTH;
 		panelConstraints.insets = new Insets(0,5,5,5);
 		panelConstraints.weighty = 1.0;
@@ -55,23 +77,6 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 		panelConstraints.gridwidth = GridBagConstraints.REMAINDER;
 	}
 	
-	public void actionPerformed(ActionEvent e) {
-		shrinkPanel.setShrinked(false);
-		if (inscene) {
-			windowInScene = !windowInScene;
-			if (!windowInScene) moveOutOfScene();
-			else moveInScene();
-		} else {
-			if (shrinkPanel.isFloating()) {
-				shrinkPanel.setFloating(false);
-				shrinkPanel.getParentSlot().addShrinkPanel(shrinkPanel);
-			} else {
-				shrinkPanel.setFloating(true);
-				shrinkPanel.getParentSlot().removeShrinkPanel(shrinkPanel);
-			}
-		}
-	}
-
 	void moveInScene() {
 		JPanel content = shrinkPanel.getContentPanel();
 		JFrame frame = jrWindow.getFrame();
@@ -107,20 +112,6 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 		shrinkPanel.setContentPanel(content);
 	}
 	
-	public void componentHidden(ComponentEvent e) {
-		if (windowInScene) {
-			actionPerformed(new ActionEvent(ContentAccessory.this, 0, "hidden"));
-		}
-	}
-
-	public void componentShown(ComponentEvent e) {
-	}
-	
-	public void componentMoved(ComponentEvent e) {
-	}
-	public void componentResized(ComponentEvent e) {
-	}
-	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
@@ -129,9 +120,9 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 		sceneWindowManager.getWindowManager().setWindowsInScene(true);
 		jrWindow = sceneWindowManager.getWindowManager().createFrame();
 		JFrame frame = jrWindow.getFrame();
-		frame.addComponentListener(this);
+		frame.addComponentListener(listeners);
 		frame.setLayout(new GridLayout());
-		actionTool.addActionListener(this);
+		actionTool.addActionListener(listeners);
 		if (getTriggerComponent() != null) getTriggerComponent().addTool(actionTool);
 	}
 	
@@ -139,6 +130,8 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin implements Acti
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		if (getTriggerComponent() != null) getTriggerComponent().removeTool(actionTool);
+		jrWindow.getFrame().removeComponentListener(listeners);
+		actionTool.removeActionListener(listeners);
 	}
 	
 	@Override

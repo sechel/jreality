@@ -35,6 +35,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.CameraStand;
+import de.jreality.plugin.view.ContentAccessory;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewPreferences;
 import de.jreality.plugin.view.AlignedContent.ContentDelegate;
@@ -51,11 +52,10 @@ import de.jreality.util.Rectangle3D;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
-public class Terrain extends ShrinkPanelPlugin implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
+public class Terrain extends ContentAccessory implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
 
 	// maximal value of texture scale
 	private static final double 
@@ -394,6 +394,8 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 
 	@Override
 	public void install(Controller c) throws Exception {
+
+		super.install(c);
 		
 		// scene
 		view = c.getPlugin(View.class);
@@ -421,7 +423,6 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		viewPreferences.addColorPickerChangedListener(this);
 		faceColorChooser.getColorPanel().setMode(viewPreferences.getColorPickerMode());
 		
-		super.install(c);
 		
 		textureInspector.setAppearance(appearance);
 		updateFaceColor();
@@ -636,6 +637,12 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 	@Override
 	public Class<?> getHelpHandle() {
 		return getClass();
+	}
+
+	@Override
+	public SceneGraphComponent getTriggerComponent() {
+		System.out.println("Terrain.getTriggerComponent(): "+terrain);
+		return terrain;
 	}
 	
 	
