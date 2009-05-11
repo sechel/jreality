@@ -38,6 +38,10 @@ import de.jreality.scene.SceneGraphNode;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.lnfswitch.LookAndFeelSwitch;
+import de.varylab.jrworkspace.plugin.lnfswitch.plugin.CrossPlatformLnF;
+import de.varylab.jrworkspace.plugin.lnfswitch.plugin.NimbusLnF;
+import de.varylab.jrworkspace.plugin.lnfswitch.plugin.SystemLookAndFeel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
@@ -53,7 +57,6 @@ public class JRViewer {
 	
 	
 	protected JRViewer() {
-		c.setManageLookAndFeel(false);
 		c.registerPlugin(view);
 		c.registerPlugin(new ContentInjectionPlugin());
 		lastViewer = new WeakReference<JRViewer>(this);
@@ -245,6 +248,10 @@ public class JRViewer {
 		v.registerPlugin(new StatusBar());
 		v.registerPlugin(new ManagedContent());
 		v.registerPlugin(new ManagedContentGUI());
+		v.registerPlugin(new LookAndFeelSwitch());
+		v.registerPlugin(new CrossPlatformLnF());
+		v.registerPlugin(new SystemLookAndFeel());
+		v.registerPlugin(new NimbusLnF());
 		return v;
 	}
 
@@ -288,6 +295,10 @@ public class JRViewer {
 		v.registerPlugin(new HeadUpDisplay());
 		v.registerPlugin(new Sky());
 		v.registerPlugin(new Terrain());
+		v.registerPlugin(new LookAndFeelSwitch());
+		v.registerPlugin(new CrossPlatformLnF());
+		v.registerPlugin(new SystemLookAndFeel());
+		v.registerPlugin(new NimbusLnF());
 		return v;
 	}
 	
@@ -335,7 +346,9 @@ public class JRViewer {
 	 * @param args no arguments are read
 	 */
 	public static void main(String[] args) {
-		JRViewer.createViewerVRWithAudio().startup();
+		JRViewer v = JRViewer.createViewerVRWithAudio();
+		v.setPropertiesFile("JRViewerDefault.jrw");
+		v.startup();
 	}
 
 }

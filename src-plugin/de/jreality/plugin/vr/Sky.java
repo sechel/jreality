@@ -42,11 +42,11 @@ public class Sky extends ShrinkPanelPlugin {
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 
 	private static String[][] defaultSkyBoxes = {
-//		{"Grey","textures/grey/grey_", sideNames, ".jpg",},
+		{"Grey","textures/grey/grey_", sideNames, ".jpg",},
 		{"Snow","textures/jms_hc/jms_hc_", sideNames, ".png",},
 		{"Grace Cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg",},
 		{"Desert","textures/desert/desert_", sideNames, ".jpg",},
-//		{"Desert H3","textures/h3desert/h3desert_", sideNames, ".jpg",},
+		{"Desert H3","textures/h3desert/h3desert_", sideNames, ".jpg",},
 		{"Emerald","textures/emerald/emerald_", sideNames, ".jpg",},
 		{"Custom", null},
 		{"None", null}
@@ -106,7 +106,8 @@ public class Sky extends ShrinkPanelPlugin {
 		environment = name;
 		ButtonModel model = envToButton.get(environment);
 		if (model == null) {
-			throw new IllegalArgumentException("unknown environment "+environment);
+			environment = "None";
+			model = envToButton.get(environment);
 		}
 		buttonGroup.setSelected(model, true);
 		if (view != null) {

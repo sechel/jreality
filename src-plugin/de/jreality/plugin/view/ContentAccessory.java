@@ -42,6 +42,7 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin {
 
 	private class ListenerSupport extends ComponentAdapter implements ActionListener {
 
+		@Override
 		public void componentHidden(ComponentEvent e) {
 			if (windowInScene) {
 				actionPerformed(new ActionEvent(ContentAccessory.this, 0, "hidden"));

@@ -43,7 +43,6 @@ public class MirrorAppearance extends Appearance implements Runnable {
 	}
 	
 	public void run() {
-		System.out.println("MirrorAppearance.run()");
 		Graphics2D g = (Graphics2D)image.createGraphics();
 		g.setBackground(Color.WHITE);
 		g.clearRect(0, 0, resolution, resolution);

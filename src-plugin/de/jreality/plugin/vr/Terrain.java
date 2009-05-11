@@ -371,6 +371,8 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 	private void switchTo(JComponent content) {
 		shrinkPanel.removeAll();
 		shrinkPanel.add(content);
+		shrinkPanel.getContentPanel().revalidate();
+		shrinkPanel.getContentPanel().repaint();
 		shrinkPanel.revalidate();
 		shrinkPanel.repaint();
 	}
@@ -641,7 +643,6 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 
 	@Override
 	public SceneGraphComponent getTriggerComponent() {
-		System.out.println("Terrain.getTriggerComponent(): "+terrain);
 		return terrain;
 	}
 	
