@@ -42,12 +42,14 @@ public class Sky extends ShrinkPanelPlugin {
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 
 	private static String[][] defaultSkyBoxes = {
-		{"snow","textures/jms_hc/jms_hc_", sideNames, ".png",},
-		{"grace cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg",},
-		{"desert","textures/desert/desert_", sideNames, ".jpg",},
-		{"emerald","textures/emerald/emerald_", sideNames, ".jpg",},
-		{"custom", null},
-		{"none", null}
+//		{"Grey","textures/grey/grey_", sideNames, ".jpg",},
+		{"Snow","textures/jms_hc/jms_hc_", sideNames, ".png",},
+		{"Grace Cross", "textures/grace_cross/grace_cross_", sideNames, ".jpg",},
+		{"Desert","textures/desert/desert_", sideNames, ".jpg",},
+//		{"Desert H3","textures/h3desert/h3desert_", sideNames, ".jpg",},
+		{"Emerald","textures/emerald/emerald_", sideNames, ".jpg",},
+		{"Custom", null},
+		{"None", null}
 	};
 	
 	private View view;
@@ -68,7 +70,7 @@ public class Sky extends ShrinkPanelPlugin {
 	private JFileChooser fileChooser;
 	private int selectionIndex;
 
-	private String environment = "none";
+	private String environment = "None";
 
 	public Sky() {
 		this(defaultSkyBoxes);

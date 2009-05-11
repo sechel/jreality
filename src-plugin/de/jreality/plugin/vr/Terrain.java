@@ -85,7 +85,9 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		plane = new SceneGraphComponent("Terrain Plane");
 	private Appearance 
 		appearance = new Appearance("Terrain Appearance");
-
+	private MirrorAppearance
+		mirrorAppearance = new MirrorAppearance();
+	
 	// swing layout
 	private JPanel 
 		panel = new JPanel(),
@@ -177,7 +179,7 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 		c.weightx = 1.0;
 		c.gridwidth = REMAINDER;	
 		panel.add(reflectScene, c);
-		reflectScene.setEnabled(false);
+//		reflectScene.setEnabled(false);
 		reflectScene.setToolTipText("Coming soon...");
 		
 		c.weightx = 0.0;
@@ -357,7 +359,13 @@ public class Terrain extends ShrinkPanelPlugin implements ActionListener, Change
 	}
 	
 	private void updateReflectSceneContent() {
-		
+		boolean reflect = reflectScene.isSelected();
+		if (reflect) {
+			terrain.setAppearance(mirrorAppearance);
+			
+		} else {
+			terrain.setAppearance(appearance);
+		}
 	}
 
 	private void switchTo(JComponent content) {
