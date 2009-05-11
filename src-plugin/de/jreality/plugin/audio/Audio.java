@@ -23,13 +23,12 @@ public class Audio extends Plugin implements ChangeListener {
 		javaSound,
 		javaSoundVBAP,
 		jackAmbisonicsFO,
-		jackAmbisonicsSO,
 		jackAmbisonicsPSO;
 	}
 	
 	private AudioPreferences 
 		prefs = null;
-	private View 
+	private View
 		view = null;
 	private AudioRenderer 
 		renderer = null;
@@ -92,14 +91,6 @@ public class Audio extends Plugin implements ChangeListener {
 					e.printStackTrace();
 				}
 			break;
-		case jackAmbisonicsSO:
-			try {
-					renderer = (AudioRenderer) Class.forName("de.jreality.audio.jack.??").newInstance();
-				} catch (Throwable e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			break;
 		default:
 			break;
 		}
@@ -122,7 +113,6 @@ public class Audio extends Plugin implements ChangeListener {
 		}
 		
 		renderer.launch();
-
 	}
 
 	@Override
@@ -138,5 +128,4 @@ public class Audio extends Plugin implements ChangeListener {
 			e1.printStackTrace();
 		}
 	}
-
 }

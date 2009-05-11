@@ -12,6 +12,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -47,8 +48,8 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaSoundChecker = new JRadioButton("Java Sound Stereo"),
 		javaSoundVBAPChecker = new JRadioButton("Java Sound Surround (VBAP)"),
 		jackAmbisonicsFOChecker = new JRadioButton("Jack Ambisonics First Order"),
-		jackAmbisonicsSOChecker = new JRadioButton("Jack Ambisonics Second Order"),
 		jackAmbisonicsPSOChecker = new JRadioButton("Jack Ambisonics Planar Second Order");
+	private JButton applyButton = new JButton("Apply");
 	
 	private BackendType
 		backendType = BackendType.noSound;
@@ -68,7 +69,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		backendPanel.add(javaSoundVBAPChecker);
 		backendPanel.add(jackAmbisonicsFOChecker);
 		backendPanel.add(jackAmbisonicsPSOChecker);
-		backendPanel.add(jackAmbisonicsSOChecker);
 		
 		c1.anchor = GridBagConstraints.WEST;
 		c1.weightx = 0.0;
@@ -97,6 +97,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		mainPage.add(jackOptions, c2);
 		
 		mainPage.add(new JPanel(), c2);
+		mainPage.add(applyButton, c2);
 		
 		ButtonGroup bg = new ButtonGroup();
 		bg.add(noSoundChecker);
@@ -104,17 +105,13 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		bg.add(javaSoundVBAPChecker);
 		bg.add(jackAmbisonicsFOChecker);
 		bg.add(jackAmbisonicsPSOChecker);
-		bg.add(jackAmbisonicsSOChecker);
 		
 		noSoundChecker.addActionListener(this);
 		javaSoundChecker.addActionListener(this);
 		javaSoundVBAPChecker.addActionListener(this);
 		jackAmbisonicsFOChecker.addActionListener(this);
-		jackAmbisonicsSOChecker.addActionListener(this);
 		jackAmbisonicsPSOChecker.addActionListener(this);
-		jackLabelField.addActionListener(this);
-		jackTargetField.addActionListener(this);
-		frameSizeSpinner.addChangeListener(this);
+		applyButton.addActionListener(this);
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -134,16 +131,14 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		if (jackAmbisonicsPSOChecker == s) {
 			backendType = BackendType.jackAmbisonicsPSO;
 		}
-		if (jackAmbisonicsSOChecker == s) {
-			backendType = BackendType.jackAmbisonicsSO;
+		if (applyButton == s) {
+			fireChanged();
 		}
-		fireChanged();
 	}
 	
 	public void stateChanged(ChangeEvent e) {
 		fireChanged();
 	}
-	
 	
 	protected void fireChanged() {
 		ChangeEvent ce = new ChangeEvent(this);
@@ -153,7 +148,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 			}	
 		}
 	}
-	
 	
 	public BackendType getBackendType() {
 		return backendType;
@@ -246,9 +240,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 			break;
 		case jackAmbisonicsPSO:
 			jackAmbisonicsPSOChecker.setSelected(true);
-			break;
-		case jackAmbisonicsSO:
-			jackAmbisonicsSOChecker.setSelected(true);
 			break;
 		}
 		frameSizeModel.setValue(c.getProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue()));

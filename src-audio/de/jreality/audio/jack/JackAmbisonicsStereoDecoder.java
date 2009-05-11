@@ -26,10 +26,10 @@ public class JackAmbisonicsStereoDecoder {
 	}
 	
 	public static void main(String args[]) throws InterruptedException {
-		System.setProperty("jjack.ports.in", "4");
-		System.setProperty("jjack.ports.out", "2");
-		System.setProperty("jjack.client.name", "StereoDecoder");
-		System.setProperty("jjack.ports.out.autoconnect", "true");
+		JJackSystem.setPortsIn(4);
+		JJackSystem.setPortsOut(2);
+		JJackSystem.setClientName("StereoDecoder");
+		JJackSystem.setPortsOutputAutoconnect(true);
 		
 		JJackSystem.setProcessor(new JJackAudioProcessor() {
 			public void process(JJackAudioEvent ev) {
@@ -49,6 +49,8 @@ public class JackAmbisonicsStereoDecoder {
 			}
 		});
 		
-		while (true) Thread.sleep(100);
+		while (true) {
+			Thread.sleep(100);
+		}
 	}
 }

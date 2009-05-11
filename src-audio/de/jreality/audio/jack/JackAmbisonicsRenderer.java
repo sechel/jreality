@@ -18,7 +18,7 @@ import de.jreality.scene.Viewer;
  * @author brinkman
  *
  */
-public class JackAmbisonicsRenderer extends AbstractJackAmbisonicsRenderer {
+public class JackAmbisonicsRenderer extends AbstractJackRenderer {
 
 	public JackAmbisonicsRenderer() {
 		encoder = new AmbisonicsSoundEncoder() {

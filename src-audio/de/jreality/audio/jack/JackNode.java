@@ -2,6 +2,7 @@ package de.jreality.audio.jack;
 
 import java.nio.FloatBuffer;
 
+import de.gulden.framework.jjack.JJackException;
 import de.jreality.audio.RingBuffer;
 import de.jreality.audio.RingBufferSource;
 
@@ -16,8 +17,10 @@ public class JackNode extends RingBufferSource implements JackSource {
 
 	private int port;
 	
-	public JackNode(String name, int port) {
+	public JackNode(String name, int port) throws JJackException {
 		super(name);
+		sampleRate = JackHub.getSampleRate();
+		ringBuffer = new RingBuffer(sampleRate);
 		this.port = port;
 		JackHub.addSource(this);
 	}
@@ -41,11 +44,6 @@ public class JackNode extends RingBufferSource implements JackSource {
 
 	public int highestPort() {
 		return port;
-	}
-
-	public void init(int sampleRate) {
-		ringBuffer = new RingBuffer(sampleRate);
-		this.sampleRate = sampleRate;
 	}
 
 	public void process(FloatBuffer[] sources) {

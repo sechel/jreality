@@ -7,7 +7,7 @@ import de.jreality.audio.AmbisonicsPlanar2ndOrderSoundEncoder;
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  */
-public class JackAmbisonicsPlanar2ndOrderRenderer extends AbstractJackAmbisonicsRenderer {
+public class JackAmbisonicsPlanar2ndOrderRenderer extends AbstractJackRenderer {
 
 	public JackAmbisonicsPlanar2ndOrderRenderer() {
 		encoder=new AmbisonicsPlanar2ndOrderSoundEncoder() {

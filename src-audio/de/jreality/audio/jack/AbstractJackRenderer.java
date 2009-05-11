@@ -6,7 +6,7 @@ import de.jreality.audio.AbstractAudioRenderer;
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.SoundEncoder;
 
-public abstract class AbstractJackAmbisonicsRenderer extends AbstractAudioRenderer implements JackSink {
+public abstract class AbstractJackRenderer extends AbstractAudioRenderer implements JackSink {
 
 	protected JJackAudioEvent currentJJackEvent;
 	private String label = "jreality_jack_renderer";
@@ -14,10 +14,6 @@ public abstract class AbstractJackAmbisonicsRenderer extends AbstractAudioRender
 	protected SoundEncoder encoder;
 
 	public abstract int highestPort();
-	
-	public void init(int sampleRate) {
-		backend=new AudioBackend(root, microphonePath, sampleRate, interpolationFactory, soundPathFactory);
-	}
 
 	public void process(JJackAudioEvent ev) {
 		currentJJackEvent = ev;
@@ -33,14 +29,16 @@ public abstract class AbstractJackAmbisonicsRenderer extends AbstractAudioRender
 	}
 
 	public void launch() throws JJackException {
+		backend=new AudioBackend(root, microphonePath, JackHub.getSampleRate(), interpolationFactory, soundPathFactory);
+		JackHub.setClientName(label);
+		JackHub.setTargetName(target);
 		JackHub.setSink(this);
-		JackHub.initializeClient(label, target);
+		JackHub.initializeClient();
 	}
 
 	public void shutdown() throws JJackException {
+		JackHub.closeClient();
 		backend.dispose();
-		JackHub.removeClient();
-		JackHub.setSink(null);
 	}
 
 }
