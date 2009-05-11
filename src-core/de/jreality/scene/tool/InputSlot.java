@@ -53,6 +53,8 @@ public class InputSlot implements Serializable
     private static final Map<String, InputSlot> name2device = new HashMap<String,InputSlot>();
     
 	public static final InputSlot POINTER_HIT = InputSlot.getDevice("PointerHit");
+	public static final InputSlot POINTER_TRANSFORMATION = InputSlot.getDevice("PointerTransformation");
+	public static final InputSlot SYSTEM_TIME = InputSlot.getDevice("SystemTime");
     
 	private final String name;
     private InputSlot(String name)
