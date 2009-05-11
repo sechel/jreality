@@ -788,7 +788,6 @@ public class ToolSystem implements ToolEventReceiver {
 	 * @param path
 	 */
 	void removeToolImpl(Tool tool, SceneGraphPath path) {
-		System.out.println("ToolSystem.removeToolImpl()");
 		boolean last = toolManager.removeTool(tool, path);
 		for (SceneGraphPath activePath : getActivePathsForTool(tool)) {
 			if (path.isEqual(activePath)) {
