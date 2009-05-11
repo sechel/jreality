@@ -51,7 +51,10 @@ import java.util.Map;
 public class InputSlot implements Serializable
 {
     private static final Map<String, InputSlot> name2device = new HashMap<String,InputSlot>();
-    private final String name;
+    
+	public static final InputSlot POINTER_HIT = InputSlot.getDevice("PointerHit");
+    
+	private final String name;
     private InputSlot(String name)
     {
         this.name=name;
