@@ -54,7 +54,14 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 
 	public void initialize(Viewer viewer, Map<String, Object> config) {
 		try {
-			osc = OSCPool.getUDPServer(5600); // by default, DarwiinRemote sends events to port 5600
+			int port = 5600; // by default, DarwiinRemote sends events to port 5600
+			if (config.containsKey("port"))  {
+				Object co = config.get("port");
+				if (co instanceof Integer) {
+					port = (Integer) co;
+				}
+			}
+			osc = OSCPool.getUDPServer(port);
 			osc.addOSCListener(this);
 		} catch (IOException e) {
 			e.printStackTrace();
