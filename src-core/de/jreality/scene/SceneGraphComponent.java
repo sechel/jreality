@@ -190,17 +190,18 @@ public class SceneGraphComponent extends SceneGraphNode {
     }
   }
 
-  public void removeChild(SceneGraphComponent sgc) {
+  public boolean removeChild(SceneGraphComponent sgc) {
   	checkReadOnly();
     startWriter();
 	  int index=children.indexOf(sgc);
  	  if(index == -1) {
  	    finishWriter();
-      throw new IllegalStateException("sgc not a child of this node");
+ 	    return false;
     }
   	children.remove(index);
   	fireSceneGraphElementRemoved(sgc, SceneGraphComponentEvent.CHILD_TYPE_COMPONENT, index);
     finishWriter();
+    return true;
   }
 
   public void setAppearance(Appearance newApp) {
@@ -481,16 +482,17 @@ public class SceneGraphComponent extends SceneGraphNode {
     finishWriter();
   }
 
-  public void removeTool(Tool tool) {
+  public boolean removeTool(Tool tool) {
     startWriter();
     int toolIndex= tools.indexOf(tool);
     if(toolIndex == -1) {
       finishWriter();
-      throw new IllegalStateException("not a tool of this node");
+      return false;
     }
     tools.remove(toolIndex);
     fireToolRemoved(tool);
     finishWriter();
+    return true;
   }
   
   private void fireToolAdded(Tool tool) {
