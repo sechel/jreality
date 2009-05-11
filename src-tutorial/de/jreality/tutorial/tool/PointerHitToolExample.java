@@ -29,7 +29,6 @@ public class PointerHitToolExample {
 		}
 		@Override
 		public void deactivate(ToolContext tc) {
-			System.out.println("MouseOverTool.deactivate()");
 			SceneGraphComponent cmp = tc.getRootToLocal().getLastComponent();
 			cmp.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Appearance.INHERITED);
 		}
@@ -39,8 +38,7 @@ public class PointerHitToolExample {
 		SceneGraphComponent root = new SceneGraphComponent();
 
 		SceneGraphComponent cmp = new SceneGraphComponent();
-		//IndexedFaceSet geom = Primitives.icosahedron();
-		IndexedFaceSet geom = Primitives.cube();
+		IndexedFaceSet geom = Primitives.icosahedron();
 		cmp.setGeometry(geom);
 		cmp.setAppearance(new Appearance());
 		cmp.addTool(new MouseOverTool(Color.magenta));
