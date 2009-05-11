@@ -2,6 +2,7 @@ package de.jreality.plugin;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Set;
 
 import javax.swing.JRootPane;
@@ -47,11 +48,24 @@ public class JRViewer {
 		view = new View();
 	private SceneGraphNode
 		content = null;
+	private static WeakReference<JRViewer>
+		lastViewer = new WeakReference<JRViewer>(null);
 	
 	
 	protected JRViewer() {
+		c.setManageLookAndFeel(false);
 		c.registerPlugin(view);
 		c.registerPlugin(new ContentInjectionPlugin());
+		lastViewer = new WeakReference<JRViewer>(this);
+	}
+	
+
+	/**
+	 * Returns the last created instance of JRViewer
+	 * @return a JRViewer or null
+	 */
+	public static JRViewer getLastJRViewer() {
+		return lastViewer.get();
 	}
 	
 	
