@@ -19,7 +19,7 @@ public class PointerHitToolExample {
 		
 		Color hcl;
 		public MouseOverTool(Color highLightColor) {
-			super(InputSlot.getDevice("PointerHit"));
+			super(InputSlot.POINTER_HIT);
 			hcl=highLightColor;
 		}
 		@Override
