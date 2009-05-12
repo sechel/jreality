@@ -100,6 +100,7 @@ public class Paint3DToolExample {
 
 	    	BufferedImage brush;
 			public void activate(ToolContext tc) {
+				// express interest in mouse moves (so perform() gets called)
 		   		addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
 		   		if (tc.getSource()== InputSlot.getDevice("PrimaryAction")) {
 		   			System.err.println("left mouse activate");
