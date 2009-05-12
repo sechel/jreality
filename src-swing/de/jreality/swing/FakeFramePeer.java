@@ -91,6 +91,7 @@ class FakeFramePeer {
             vi=new FakeVolatileImage(bi);
             backBuffer = new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
         }
+        frame.fireComponentResized();
     }
 
     public Dimension getMinimumSize() {

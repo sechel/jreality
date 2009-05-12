@@ -42,10 +42,13 @@ package de.jreality.swing;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 
@@ -172,4 +175,13 @@ public class JFakeFrame extends JFrame {
       this.mute = mute;
       fire();
     }
+    
+    
+    protected synchronized void fireComponentResized() {
+    	ComponentEvent ce = new ComponentEvent(this, 0);
+    	for (ComponentListener l : getComponentListeners()) {
+    		l.componentResized(ce);
+    	}
+    }
+    
 }
