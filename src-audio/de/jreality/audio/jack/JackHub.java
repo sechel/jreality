@@ -23,7 +23,6 @@ public final class JackHub implements JJackAudioProcessor {
 	private static final JackHub hub = new JackHub();
 
 	private static List<WeakReference<JackSource>> sources = new CopyOnWriteArrayList<WeakReference<JackSource>>();
-	private static JackSink sink = null;
 	private static int sampleRate = 0;
 
 	private static int highestInPort = -1;
@@ -108,18 +107,6 @@ public final class JackHub implements JJackAudioProcessor {
 		}
 		return false;
 	}
-
-	public static void setSink(JackSink sink) {
-		if (sink!=null && sink.highestPort()>highestOutPort) {
-			if (initialized) {
-				throw new IllegalStateException("can't register new output ports after initialization");
-			} else {
-				highestOutPort = sink.highestPort();
-				JJackSystem.setPortsOut(highestOutPort+1);
-			}
-		}
-		JackHub.sink = sink;
-	}
 	
 	public static synchronized void initializeClient() throws JJackException {
 		JJackSystem.setProcessor(hub);
@@ -138,13 +125,6 @@ public final class JackHub implements JJackAudioProcessor {
 				if (source != null) {
 					source.process(inputs);
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		if (sink!=null) {
-			try {
-				sink.process(ev);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

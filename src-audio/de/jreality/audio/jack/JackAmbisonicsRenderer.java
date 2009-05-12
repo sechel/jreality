@@ -1,6 +1,7 @@
 package de.jreality.audio.jack;
 
 import de.gulden.framework.jjack.JJackException;
+import de.gulden.framework.jjack.JJackNativeClient;
 import de.jreality.audio.AmbisonicsSoundEncoder;
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.Interpolation;
@@ -30,9 +31,11 @@ public class JackAmbisonicsRenderer extends AbstractJackRenderer {
 			}
 		};
 	}
-	
-	public int highestPort() {
-		return 3;
+
+	@Override
+	protected void launchNativeClient() throws JJackException {
+		nativeClient = new JJackNativeClient(label, 0, 4, this);
+		nativeClient.start(null, target);
 	}
 
 	/**

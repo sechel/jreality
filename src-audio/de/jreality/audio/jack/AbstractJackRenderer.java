@@ -1,19 +1,20 @@
 package de.jreality.audio.jack;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
+import de.gulden.framework.jjack.JJackAudioProcessor;
 import de.gulden.framework.jjack.JJackException;
+import de.gulden.framework.jjack.JJackNativeClient;
 import de.jreality.audio.AbstractAudioRenderer;
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.SoundEncoder;
 
-public abstract class AbstractJackRenderer extends AbstractAudioRenderer implements JackSink {
+public abstract class AbstractJackRenderer extends AbstractAudioRenderer implements JJackAudioProcessor {
 
 	protected JJackAudioEvent currentJJackEvent;
-	private String label = "jreality_jack_renderer";
-	private String target = "";
+	protected String label = "jreality_jack_renderer";
+	protected String target = "";
 	protected SoundEncoder encoder;
-
-	public abstract int highestPort();
+	protected JJackNativeClient nativeClient = null;
 
 	public void process(JJackAudioEvent ev) {
 		currentJJackEvent = ev;
@@ -29,16 +30,21 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 	}
 
 	public void launch() throws JJackException {
+		if (nativeClient!=null) {
+			shutdown();
+		}
 		backend=new AudioBackend(root, microphonePath, JackHub.getSampleRate(), interpolationFactory, soundPathFactory);
-		JackHub.setClientName(label);
-		JackHub.setTargetName(target);
-		JackHub.setSink(this);
-		JackHub.initializeClient();
+		launchNativeClient();
 	}
+	
+	protected abstract void launchNativeClient() throws JJackException;
 
-	public void shutdown() throws JJackException {
-		JackHub.closeClient();
-		backend.dispose();
+	public void shutdown() {
+		if (nativeClient!=null) {
+			nativeClient.close();
+			backend.dispose();
+			nativeClient = null;
+		}
 	}
 
 }

@@ -1,5 +1,7 @@
  package de.jreality.audio.jack;
 
+import de.gulden.framework.jjack.JJackException;
+import de.gulden.framework.jjack.JJackNativeClient;
 import de.jreality.audio.AmbisonicsPlanar2ndOrderSoundEncoder;
 
 /**
@@ -20,9 +22,10 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AbstractJackRenderer {
 			}
 		};
 	}
-	
-	public int highestPort() {
-		return 4;
+
+	@Override
+	protected void launchNativeClient() throws JJackException {
+		nativeClient = new JJackNativeClient(label, 0, 5, this);
+		nativeClient.start(null, target);
 	}
-	
 }
