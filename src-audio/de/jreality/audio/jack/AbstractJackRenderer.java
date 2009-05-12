@@ -11,7 +11,7 @@ import de.jreality.audio.SoundEncoder;
 public abstract class AbstractJackRenderer extends AbstractAudioRenderer implements JJackAudioProcessor {
 
 	protected JJackAudioEvent currentJJackEvent;
-	protected String label = "jreality_jack_renderer";
+	protected String label = "jreality_renderer";
 	protected String target = "";
 	protected SoundEncoder encoder;
 	protected JJackNativeClient nativeClient = null;
@@ -33,7 +33,7 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 		if (nativeClient!=null) {
 			shutdown();
 		}
-		backend=new AudioBackend(root, microphonePath, JackHub.getSampleRate(), interpolationFactory, soundPathFactory);
+		backend=new AudioBackend(root, microphonePath, JJackNativeClient.getSampleRate(), interpolationFactory, soundPathFactory);
 		launchNativeClient();
 	}
 	
