@@ -273,32 +273,11 @@ public class JRViewer {
 	 * @return A configured JRViewer instance
 	 */
 	public static JRViewer createViewerVR() {
-		JRViewer v = createEmptyViewer();
-		v.registerPlugin(new CameraStand());
-		v.registerPlugin(new Lights());
-		v.registerPlugin(new Background());
-		v.registerPlugin(new ViewMenuBar());
-		v.registerPlugin(new AlignedContent());
-		v.registerPlugin(new ViewPreferences());
-		v.registerPlugin(new Inspector());
-		v.registerPlugin(new Shell());
-		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new DisplayOptions());
-		v.registerPlugin(new ViewToolBar());
-		v.registerPlugin(new Export());
-		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new ZoomTool());
-		v.registerPlugin(new StatusBar());
-		v.registerPlugin(new ManagedContent());
-		v.registerPlugin(new ManagedContentGUI());
+		JRViewer v = createViewer();
 		v.registerPlugin(new Avatar());
 		v.registerPlugin(new HeadUpDisplay());
 		v.registerPlugin(new Sky());
 		v.registerPlugin(new Terrain());
-		v.registerPlugin(new LookAndFeelSwitch());
-		v.registerPlugin(new CrossPlatformLnF());
-		v.registerPlugin(new SystemLookAndFeel());
-		v.registerPlugin(new NimbusLnF());
 		return v;
 	}
 	
