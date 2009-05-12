@@ -4,7 +4,8 @@ import java.nio.FloatBuffer;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackAudioProcessor;
-import de.gulden.framework.jjack.JJackSystem;
+import de.gulden.framework.jjack.JJackException;
+import de.gulden.framework.jjack.JJackNativeClient;
 
 /**
  * An Ambisonics stereo decoder for Jack, mostly for testing on desktop systems; reads an Ambisonics
@@ -25,13 +26,8 @@ public class JackAmbisonicsStereoDecoder {
 		// not to be instantiated; needs to run in its own JVM
 	}
 	
-	public static void main(String args[]) throws InterruptedException {
-		JJackSystem.setPortsIn(4);
-		JJackSystem.setPortsOut(2);
-		JJackSystem.setClientName("StereoDecoder");
-		JJackSystem.setPortsOutputAutoconnect(true);
-		
-		JJackSystem.setProcessor(new JJackAudioProcessor() {
+	public static void main(String args[]) throws InterruptedException, JJackException {
+		JJackNativeClient client = new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
 			public void process(JJackAudioEvent ev) {
 				FloatBuffer bw = ev.getInput(0);
 				FloatBuffer by = ev.getInput(2);
@@ -48,7 +44,7 @@ public class JackAmbisonicsStereoDecoder {
 				}
 			}
 		});
-		
+		client.start(null, "");
 		while (true) {
 			Thread.sleep(100);
 		}
