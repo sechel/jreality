@@ -10,9 +10,8 @@ import de.gulden.framework.jjack.JJackNativeClient;
 /**
  * An Ambisonics stereo decoder for Jack, mostly for testing on desktop systems; reads an Ambisonics
  * B-signal and writes a stereo signal.  In a production environment, one should use a serious decoder
- * such as Fons Adriaensen's AmbDec.  For mathematical background, see http://www.muse.demon.co.uk/ref/speakers.html.
- * 
- * Note that this decoder has to run in its own JVM due to limitations of the JJack bindings.
+ * such as Fons Adriaensen's AmbDec.  For mathematical background, see
+ * http://www.muse.demon.co.uk/ref/speakers.html.
  * 
  * @author brinkman
  *
@@ -23,11 +22,11 @@ public class JackAmbisonicsStereoDecoder {
 	private static final float yScale = 0.5f;
 	
 	private JackAmbisonicsStereoDecoder() {
-		// not to be instantiated; needs to run in its own JVM
+		// not to be instantiated
 	}
 	
 	public static void main(String args[]) throws InterruptedException, JJackException {
-		JJackNativeClient client = new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
+		new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
 			public void process(JJackAudioEvent ev) {
 				FloatBuffer bw = ev.getInput(0);
 				FloatBuffer by = ev.getInput(2);
@@ -43,8 +42,8 @@ public class JackAmbisonicsStereoDecoder {
 					right.put(w-y);
 				}
 			}
-		});
-		client.start(null, "");
+		}).start(null, "");
+		
 		while (true) {
 			Thread.sleep(100);
 		}
