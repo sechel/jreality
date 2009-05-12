@@ -47,4 +47,9 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 		}
 	}
 
+	@Override
+	protected void finalize() throws Throwable {
+		shutdown();
+		super.finalize();
+	}
 }
