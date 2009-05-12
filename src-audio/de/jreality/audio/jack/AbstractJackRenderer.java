@@ -36,7 +36,7 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 		backend=new AudioBackend(root, microphonePath, JJackNativeClient.getSampleRate(), interpolationFactory, soundPathFactory);
 		launchNativeClient();
 	}
-	
+
 	protected abstract void launchNativeClient() throws JJackException;
 
 	public void shutdown() {
@@ -49,7 +49,10 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 
 	@Override
 	protected void finalize() throws Throwable {
-		shutdown();
-		super.finalize();
+		try {
+			shutdown();
+		} finally {
+			super.finalize();
+		}
 	}
 }
