@@ -17,12 +17,13 @@ public class GeometryGoBetween {
 	JOGLRenderer jr;
 	Timer followTimer;
 	boolean geometryRemoved = false;
+	boolean checkMemoryLeak = false;
 	
 	protected GeometryGoBetween(JOGLRenderer jr)	{
 		this.jr = jr;
 		followTimer = new Timer(1000, new ActionListener()	{
 			public void actionPerformed(ActionEvent e) {updateGeometryHashtable(); } } );
-		followTimer.start();
+		if (checkMemoryLeak) followTimer.start();
 	}
 	
 	public void dispose()	{

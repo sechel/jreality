@@ -54,7 +54,10 @@ public class JOGLOffscreenRenderer {
 		GLCapabilities caps = new GLCapabilities();
 		caps.setDoubleBuffered(false);
 		caps.setAlphaBits(8);
-		offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
+		if (offscreenPBuffer == null ||
+				offscreenPBuffer.getWidth() != tileSizeX ||
+				offscreenPBuffer.getHeight() != tileSizeY )
+			offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
 				caps, null,
 				tileSizeX, tileSizeY,
 				canvas.getContext());
@@ -69,6 +72,7 @@ public class JOGLOffscreenRenderer {
 		ImageUtil.flipImageVertically(bi);
 		// a magic incantation to get the alpha channel to show up correctly
 		bi.coerceData(true);
+//		offscreenPBuffer.destroy();
 		return bi;
 	}
 
