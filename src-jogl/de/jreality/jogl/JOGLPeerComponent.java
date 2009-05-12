@@ -128,9 +128,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	public void dispose()	{
 
-		int n = childCount; //children.size();
-		for (int i = n-1; i>=0; --i)	{
-			JOGLPeerComponent child = (JOGLPeerComponent) children.get(i);
+		for (JOGLPeerComponent child : children) {
 			child.dispose();
 		}	
 		children.clear();
