@@ -4,8 +4,6 @@ import java.nio.FloatBuffer;
 
 import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackException;
-import de.gulden.framework.jjack.JJackNativeClient;
-import de.jreality.audio.RingBuffer;
 
 
 public class JackNode extends AbstractJackNode {
@@ -14,8 +12,6 @@ public class JackNode extends AbstractJackNode {
 
 	public JackNode(String name, String clientName, int port) throws JJackException {
 		super(name, clientName);
-		sampleRate = JJackNativeClient.getSampleRate();
-		ringBuffer = new RingBuffer(sampleRate);
 		this.port = port;
 	}
 
