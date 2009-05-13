@@ -2,55 +2,34 @@ package de.jreality.audio.jack;
 
 import java.nio.FloatBuffer;
 
+import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackException;
+import de.gulden.framework.jjack.JJackNativeClient;
 import de.jreality.audio.RingBuffer;
-import de.jreality.audio.RingBufferSource;
 
-/**
- * An audio source that reads from Jack inputs.  Combined with MIDI or OSC tools, this class should serve
- * as universal glue between jReality and Jack-enabled audio software.
- * 
- * @author brinkman
- *
- */
-public class JackNode extends RingBufferSource implements JackSource {
 
-	private int port;
-	
+public class JackNode extends AbstractJackNode {
+
+	private int port = 0;
+
 	public JackNode(String name, int port) throws JJackException {
 		super(name);
-		sampleRate = JackHub.getSampleRate();
+		sampleRate = JJackNativeClient.getSampleRate();
 		ringBuffer = new RingBuffer(sampleRate);
 		this.port = port;
-		JackHub.addSource(this);
-	}
-	
-	@Override
-	protected void finalize() throws Throwable {
-		try {
-			JackHub.removeSource(this);
-		} finally {
-			super.finalize();
-		}
 	}
 
-	protected void reset() {
-		// do nothing
-	}
-
-	protected void writeSamples(int n) {
-		// do nothing; samples are written in process callback
-	}
-
-	public int highestPort() {
-		return port;
-	}
-
-	public void process(FloatBuffer[] sources) {
+	public void process(JJackAudioEvent e) {
 		if (getState() == State.RUNNING) { // in case jack client gets zombified, remember that getState() is synchronized...
-			FloatBuffer buffer = sources[port];
-			buffer.rewind();
-			ringBuffer.write(buffer);
+			try {
+				FloatBuffer buffer = e.getInput(port);
+				buffer.rewind();
+				ringBuffer.write(buffer);
+			} catch(Exception ex) {
+				ex.printStackTrace();
+				System.err.println("removing node from list of processors");
+				detachFromAllClients();
+			}
 		}
 	}
 }

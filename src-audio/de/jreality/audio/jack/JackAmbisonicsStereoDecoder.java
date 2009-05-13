@@ -26,7 +26,7 @@ public class JackAmbisonicsStereoDecoder {
 	}
 	
 	public static void main(String args[]) throws InterruptedException, JJackException {
-		new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
+		JJackNativeClient client = new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
 			public void process(JJackAudioEvent ev) {
 				FloatBuffer bw = ev.getInput(0);
 				FloatBuffer by = ev.getInput(2);
@@ -42,7 +42,8 @@ public class JackAmbisonicsStereoDecoder {
 					right.put(w-y);
 				}
 			}
-		}).start(null, "");
+		});
+		client.start(null, "");
 		
 		while (true) {
 			Thread.sleep(100);

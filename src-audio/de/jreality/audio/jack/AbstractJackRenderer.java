@@ -34,6 +34,7 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 			shutdown();
 		}
 		backend=new AudioBackend(root, microphonePath, JJackNativeClient.getSampleRate(), interpolationFactory, soundPathFactory);
+		JackClient.launch();
 		launchNativeClient();
 	}
 
@@ -44,7 +45,9 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 			nativeClient.close();
 			backend.dispose();
 			nativeClient = null;
+			backend = null;
 		}
+		JackClient.shutdown();
 	}
 
 	@Override
