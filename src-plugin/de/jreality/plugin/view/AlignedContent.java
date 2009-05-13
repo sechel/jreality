@@ -10,6 +10,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
@@ -109,6 +110,12 @@ public class AlignedContent extends Plugin {
 			this.content = content;
 			contentChanged();
 		}
+	}
+	
+	public void setContent(Geometry g) {
+		SceneGraphComponent cgc = new SceneGraphComponent("Geometry Content");
+		cgc.setGeometry(g);
+		setContent(cgc);
 	}
 
 	public Rectangle3D getBounds() {

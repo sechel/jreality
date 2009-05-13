@@ -70,6 +70,7 @@ public class Shell extends ShrinkPanelPlugin {
 		View sceneViewPlugin = c.getPlugin(View.class);
 		View sceneView = sceneViewPlugin;
 		Viewer viewer = sceneView.getViewer();
+		AlignedContent content = c.getPlugin(AlignedContent.class);
 		SelectionManagerInterface selectionManager =
 			SelectionManager.selectionManagerForViewer(viewer);
 		ToolSystem toolSystem = ToolSystem.getToolSystemForViewer(viewer);
@@ -93,9 +94,10 @@ public class Shell extends ShrinkPanelPlugin {
 		try {
 			Object bshEval = new Expression(beanShell, "getBshEval", null).getValue();
 			Object interpreter = new Expression(bshEval, "getInterpreter", null).getValue();
-			new Statement(interpreter, "set", new Object[]{"_viewer", viewer}).execute();
-			new Statement(interpreter, "set", new Object[]{"_toolSystem", toolSystem}).execute();
+			new Statement(interpreter, "set", new Object[]{"_v", viewer}).execute();
+			new Statement(interpreter, "set", new Object[]{"_t", toolSystem}).execute();
 			new Statement(interpreter, "set", new Object[]{"_c", c}).execute();
+			new Statement(interpreter, "set", new Object[]{"_co", content}).execute();
 		} 
 		catch (Exception e) { e.printStackTrace(); }
 
