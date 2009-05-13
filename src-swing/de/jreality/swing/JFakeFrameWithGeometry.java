@@ -3,7 +3,6 @@ package de.jreality.swing;
 import java.awt.Color;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
-import java.util.Arrays;
 
 import javax.swing.JRootPane;
 
@@ -16,7 +15,7 @@ import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 
 public class JFakeFrameWithGeometry extends JFakeFrame {
-
+	 
 	SceneGraphComponent windowComponent;
 	IndexedFaceSetFactory quadFactory;
 	
@@ -45,6 +44,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		
     	setUndecorated(true);
         getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
+        
 
         Tool leftMouseButtonTool = new PlanarMouseEventTool(drag0, 0, this);
         Tool centerMouseButtonTool = new PlanarMouseEventTool(drag1, 1, this);
@@ -55,7 +55,8 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		  appearance.setAttribute(CommonAttributes.VERTEX_DRAW, false);
 		  appearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		  appearance.setAttribute(CommonAttributes.TUBES_DRAW, false);
-
+		  appearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+		  
         quadFactory = new IndexedFaceSetFactory();
 		quadFactory.setVertexCount(4);
 		quadFactory.setFaceCount(1);
@@ -69,23 +70,26 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		//windowComponent.addTool(tool);
 		windowComponent.setAppearance(getAppearance());
 		windowComponent.setGeometry(quadFactory.getGeometry());
+		
+		setBounds(getBounds());
+		
 	}
 
 	@Override
 	public void setBounds(int x, int y, int w, int h) {
 		super.setBounds(x, y, w, h);
-		MatrixBuilder.euclidean().translate(x,y,0).assignTo(windowComponent);
-//		double[][] loc = new double[][]{{x,y,0},{x+w,y,0},{x+w,y+h,0},{x,y+h,0}};
-		double[][] loc = new double[][]{{0,0,0},{w,0,0},{w,h,0},{0,h,0}};
-		System.out.println(Arrays.deepToString(loc));
-		quadFactory.setVertexCoordinates(loc);
-		quadFactory.update();
+		if (windowComponent != null) {
+			MatrixBuilder.euclidean().translate(x,y,0).assignTo(windowComponent);
+			double[][] loc = new double[][]{{0,0,0},{w,0,0},{w,h,0},{0,h,0}};
+			quadFactory.setVertexCoordinates(loc);
+			quadFactory.update();
+		}
 	}
 	
 	@Override
 	public void setVisible(boolean b) {
 		super.setVisible(b);
-		windowComponent.setVisible(b);
+		if (windowComponent != null) windowComponent.setVisible(b);
 	}
 
 	public SceneGraphComponent getSceneGraphComponent() {
