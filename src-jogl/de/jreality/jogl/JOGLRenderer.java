@@ -110,7 +110,6 @@ public class JOGLRenderer   {
 	transient protected boolean offscreenMode = false;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
 	transient public static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
-	private javax.swing.Timer followTimer;
 
 	transient protected boolean 
 		lightListDirty = true, 
@@ -130,10 +129,10 @@ public class JOGLRenderer   {
 	public JOGLRenderer(Viewer viewer) {
 		theViewer=viewer;
 		//TODO figure out I do this here
-		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
 		offscreenRenderer = new JOGLOffscreenRenderer(this);
 		perfMeter = new JOGLPerformanceMeter(this);
 		geometryGB = new GeometryGoBetween(this);
+		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
 	}
 
 	public void dispose() {
