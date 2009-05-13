@@ -17,7 +17,7 @@ public class ScenePanelTest {
 		final SceneGraphComponent cmp = new SceneGraphComponent();
 		cmp.setGeometry(Primitives.sharedIcosahedron);
 		
-		ContentAccessory sp = new ContentAccessory(cmp) {
+		ContentAccessory sp = new ContentAccessory() {
 			{
 				shrinkPanel.setLayout(new GridLayout(3,2));
 				shrinkPanel.add(new JButton("fooawsdasdfs"));
@@ -30,6 +30,10 @@ public class ScenePanelTest {
 			@Override
 			public PluginInfo getPluginInfo() {
 				return new PluginInfo("foo", "bar");
+			}
+			@Override
+			public SceneGraphComponent getTriggerComponent() {
+				return cmp;
 			}
 		};
 		
