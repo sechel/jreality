@@ -13,10 +13,6 @@ import de.jreality.tools.FaceDragListener;
 
 public class PlanarMouseEventTool extends DragEventTool implements FaceDragListener {
 
-	private static InputSlot drag0 = InputSlot.getDevice("PanelAction");
-	private static InputSlot drag2 = InputSlot.getDevice("PanelSelection");
-	private static InputSlot drag1 = InputSlot.getDevice("PanelMenu");
-
 	private Point oldPoint;
 	private Component comp;
 
@@ -24,16 +20,17 @@ public class PlanarMouseEventTool extends DragEventTool implements FaceDragListe
 	long lastActivationTime;
 	private Point newPoint;
 
-	public PlanarMouseEventTool(Component c, boolean dispatchLater) {
-		super(drag0, drag1, drag2);
+	public PlanarMouseEventTool(InputSlot drag, int buttonID, Component c, boolean dispatchLater) {
+		super(drag);
+		currentButton=buttonID;
 		this.comp = c;
 		this.dispatchLater = dispatchLater;
 		addCurrentSlot(InputSlot.getDevice("PointerTransformation"), "moves the mouse pointer");
 		super.addFaceDragListener(this);
 	}
 
-	public PlanarMouseEventTool(Component c) {
-		this(c,true);
+	public PlanarMouseEventTool(InputSlot drag, int buttonID, Component c) {
+		this(drag, buttonID, c, true);
 	}
 
 	public void faceDragEnd(FaceDragEvent e) {
@@ -46,12 +43,8 @@ public class PlanarMouseEventTool extends DragEventTool implements FaceDragListe
 	}
 
 	public void faceDragStart(FaceDragEvent e) {
-		int lastButton=currentButton;
-		if (e.getSource() == drag0) currentButton=0;
-		if (e.getSource() == drag1) currentButton=1;
-		if (e.getSource() == drag2) currentButton=2;
 		long t = System.currentTimeMillis();
-		if (lastButton == currentButton && t-lastActivationTime<=doubleClickDelay) {
+		if (t-lastActivationTime<=doubleClickDelay) {
 			doubleClick=true;
 			lastActivationTime=0;
 		} else {

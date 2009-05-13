@@ -11,13 +11,14 @@ import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 
 public class JFakeFrameWithGeometry extends JFakeFrame {
 
 	SceneGraphComponent windowComponent;
 	IndexedFaceSetFactory quadFactory;
-	private PlanarMouseEventTool myTool;
 	
 	
 	public JFakeFrameWithGeometry() {
@@ -36,13 +37,18 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		super(title);
 	}
 	
+	 private static InputSlot drag0 = InputSlot.getDevice("PanelAction");
+	  private static InputSlot drag2 = InputSlot.getDevice("PanelSelection");
+	  private static InputSlot drag1 = InputSlot.getDevice("PanelMenu");
+
 	protected void init() {
 		
     	setUndecorated(true);
         getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
 
-        myTool = new PlanarMouseEventTool(this);
-		tool = new MouseEventTool(this);
+        Tool leftMouseButtonTool = new PlanarMouseEventTool(drag0, 0, this);
+        Tool centerMouseButtonTool = new PlanarMouseEventTool(drag1, 1, this);
+        Tool rightMouseButtonTool = new PlanarMouseEventTool(drag2, 2, this);
 		
 		  appearance = new Appearance();
 		  appearance.setAttribute(CommonAttributes.DIFFUSE_COLOR,Color.WHITE);
@@ -57,7 +63,9 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		quadFactory.setFaceIndices(new int[][]{{0,1,2,3}});
 		quadFactory.setVertexTextureCoordinates(new double[][]{{0,0},{1,0},{1,1},{0,1}});
 		windowComponent = new SceneGraphComponent();
-		windowComponent.addTool(myTool);
+		windowComponent.addTool(leftMouseButtonTool);
+		windowComponent.addTool(centerMouseButtonTool);
+		windowComponent.addTool(rightMouseButtonTool);
 		//windowComponent.addTool(tool);
 		windowComponent.setAppearance(getAppearance());
 		windowComponent.setGeometry(quadFactory.getGeometry());
