@@ -40,6 +40,8 @@
 
 package de.jreality.scene.tool;
 
+import java.util.List;
+
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
@@ -77,6 +79,7 @@ public interface ToolContext
     SceneGraphPath getRootToToolComponent();
     
     PickResult getCurrentPick();
+    List<PickResult> getCurrentPicks();
     
     public SceneGraphPath getAvatarPath();
     
