@@ -18,8 +18,7 @@ public class TestJack {
 	public static SceneGraphComponent getAudioComponent() throws Exception {
 		final String cn = "test_input";
 		JackClient.registerClient(cn, 1, 0, "", null);
-		final JackNode source = new JackNode("foo", 0);
-		source.attachToClient(cn);
+		final JackNode source = new JackNode("foo", cn, 0);
 		
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
