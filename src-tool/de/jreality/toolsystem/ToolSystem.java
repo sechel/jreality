@@ -222,6 +222,13 @@ public class ToolSystem implements ToolEventReceiver {
 			return pickResult;
 		}
 
+		public List<PickResult> getCurrentPicks() {
+			if (pickResults == null) {
+				performPick();
+			}
+			return pickResults;
+		}
+
 		private void setCurrentTool(Tool currentTool) {
 			this.currentTool = currentTool;
 		}
@@ -490,6 +497,7 @@ public class ToolSystem implements ToolEventReceiver {
 			toolContext.event = event;
 			InputSlot slot = event.getInputSlot();
 			toolContext.sourceSlot = slot;
+			pickResults = null;
 			pickResult = null;
 			
 			AxisState axis = deviceManager.getAxisState(slot);
