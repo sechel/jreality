@@ -15,28 +15,24 @@ import de.jreality.audio.RingBufferSource;
  */
 public abstract class AbstractJackNode extends RingBufferSource implements JJackAudioProcessor {
 
-	public AbstractJackNode(String name) throws JJackException {
+	String clientName;
+	
+	public AbstractJackNode(String name, String clientName) throws JJackException {
 		super(name);
 		sampleRate = JJackNativeClient.getSampleRate();
 		ringBuffer = new RingBuffer(sampleRate);
-	}
-
-	public void attachToClient(String clientName) {
+		this.clientName = clientName;
 		JackClient.addProcessor(clientName, this);
 	}
 
-	public void detachFromClient(String clientName) {
+	public void detachFromClient() {
 		JackClient.removeProcessor(clientName, this);
-	}
-
-	public void detachFromAllClients() {
-		JackClient.removeProcessor(this);
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
 		try {
-			detachFromAllClients();
+			detachFromClient();
 		} finally {
 			super.finalize();
 		}

@@ -12,8 +12,8 @@ public class JackNode extends AbstractJackNode {
 
 	private int port = 0;
 
-	public JackNode(String name, int port) throws JJackException {
-		super(name);
+	public JackNode(String name, String clientName, int port) throws JJackException {
+		super(name, clientName);
 		sampleRate = JJackNativeClient.getSampleRate();
 		ringBuffer = new RingBuffer(sampleRate);
 		this.port = port;
@@ -28,7 +28,7 @@ public class JackNode extends AbstractJackNode {
 			} catch(Exception ex) {
 				ex.printStackTrace();
 				System.err.println("removing node from list of processors");
-				detachFromAllClients();
+				detachFromClient();
 			}
 		}
 	}
