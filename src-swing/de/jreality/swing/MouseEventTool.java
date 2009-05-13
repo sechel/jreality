@@ -172,7 +172,7 @@ class MouseEventTool extends AbstractTool {
 //	  int yAbs = newPoint.y+comp.getLocation().y;
     final MouseEvent newEvent = new MouseEvent(comp,
         (int) type, System.currentTimeMillis(), /*InputEvent.BUTTON1_DOWN_MASK*/ 1 << (10+button), newPoint.x,
-        newPoint.y, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);
+        newPoint.y, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button); // TODO: is this what we want?
     dispatchEvent(newEvent);
   }
 
