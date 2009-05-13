@@ -9,7 +9,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
@@ -85,13 +84,14 @@ class FakeFramePeer {
 
     public void setBounds(int x, int y, int width, int height) {
       if (DUMP) System.out.println("JFakeFrame set Bounds "+x+" "+y+" "+width+" "+height);
+      boolean resized = (width!=bounds.width || height!=bounds.height);
         bounds.setBounds(x, y, width, height);
         if(bi.getWidth()!=width || bi.getHeight()!= height) {
             bi =new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
             vi=new FakeVolatileImage(bi);
             backBuffer = new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
         }
-        frame.fireComponentResized();
+        if (resized) frame.fireComponentResized();
     }
 
     public Dimension getMinimumSize() {
@@ -149,7 +149,7 @@ class FakeFramePeer {
 
     public Point getLocationOnScreen() {
     	if (DUMP) System.out.println("FakeFramePeer.getLocationOnScreen()");
-        return new Point(0,0);
+        return new Point(frame.getBounds().x, frame.getBounds().y);
     }
 
     public Toolkit getToolkit() {

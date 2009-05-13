@@ -1,0 +1,112 @@
+package de.jreality.swing;
+
+import java.awt.AWTEvent;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+
+import de.jreality.scene.tool.InputSlot;
+import de.jreality.tools.DragEventTool;
+import de.jreality.tools.FaceDragEvent;
+import de.jreality.tools.FaceDragListener;
+
+public class PlanarMouseEventTool extends DragEventTool implements FaceDragListener {
+
+	private static InputSlot drag0 = InputSlot.getDevice("PanelAction");
+	private static InputSlot drag2 = InputSlot.getDevice("PanelSelection");
+	private static InputSlot drag1 = InputSlot.getDevice("PanelMenu");
+
+	private Point oldPoint;
+	private Component comp;
+
+	private boolean dispatchLater = false;
+	long lastActivationTime;
+	private Point newPoint;
+
+	public PlanarMouseEventTool(Component c, boolean dispatchLater) {
+		super(drag0, drag1, drag2);
+		this.comp = c;
+		this.dispatchLater = dispatchLater;
+		addCurrentSlot(InputSlot.getDevice("PointerTransformation"), "moves the mouse pointer");
+		super.addFaceDragListener(this);
+	}
+
+	public PlanarMouseEventTool(Component c) {
+		this(c,true);
+	}
+
+	public void faceDragEnd(FaceDragEvent e) {
+		dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED, currentButton);
+		System.out.println("oldPoint="+oldPoint+" newPoint="+newPoint);
+		if(oldPoint.equals(newPoint)) {
+			System.out.println("clicked");
+			dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED, currentButton);
+		}
+	}
+
+	public void faceDragStart(FaceDragEvent e) {
+		int lastButton=currentButton;
+		if (e.getSource() == drag0) currentButton=0;
+		if (e.getSource() == drag1) currentButton=1;
+		if (e.getSource() == drag2) currentButton=2;
+		long t = System.currentTimeMillis();
+		if (lastButton == currentButton && t-lastActivationTime<=doubleClickDelay) {
+			doubleClick=true;
+			lastActivationTime=0;
+		} else {
+			lastActivationTime = t;
+			doubleClick=false;
+		}
+		newPoint = generatePoint(e);
+		oldPoint = newPoint;
+		System.out.println("old point="+oldPoint);
+		dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED, currentButton);
+	}
+
+	public void faceDragged(FaceDragEvent e) {
+		newPoint = generatePoint(e);
+		dispatchMouseEvent(newPoint, MouseEvent.MOUSE_DRAGGED, currentButton);
+
+	}
+
+	int currentButton=0;
+	boolean doubleClick;
+	int doubleClickDelay=400;
+
+	private Point generatePoint(FaceDragEvent e) {
+		double[] pos = e.getPosition();
+		return new Point((int)pos[0], (int)pos[1]);
+	}    
+
+	/**
+	 * 
+	 * @param newPoint
+	 * @param type
+	 * @param button 0, 1 or 2
+	 */
+	void dispatchMouseEvent(Point newPoint, int type, int button) {
+		int xAbs = newPoint.x+comp.getLocation().x;
+		int yAbs = newPoint.y+comp.getLocation().y;
+		final MouseEvent newEvent = new MouseEvent(comp,
+				(int) type, System.currentTimeMillis(), /*InputEvent.BUTTON1_DOWN_MASK*/ 1 << (10+button), newPoint.x,
+				newPoint.y, xAbs, yAbs, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);
+		dispatchEvent(newEvent);
+	}
+
+	/**
+	 * this method is safe as it executes in the DispatchThread.
+	 * @param e
+	 */
+	public void dispatchEvent(final AWTEvent e) {
+		if (dispatchLater) {
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					comp.dispatchEvent(e);
+				}
+			});
+		} else {
+			comp.dispatchEvent(e);
+		}
+	}
+}

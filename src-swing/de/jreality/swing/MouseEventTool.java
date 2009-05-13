@@ -44,11 +44,7 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Point;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
 import de.jreality.scene.Geometry;
 import de.jreality.scene.pick.PickResult;
@@ -60,7 +56,7 @@ import de.jreality.scene.tool.ToolContext;
  * A tool to use with the JRJComponent. It transforms tool events 
  * into Java awt MouseEvents and sends them to the component given a
  * creation time for dispatching. The mouse coordinates are derived form 
- * the texture coordinates of the geometriy this tool is attached to.
+ * the texture coordinates of the geometry this tool is attached to.
  * 
  * TODO: add support for different mouse buttons and keyboard events.
  * TODO: add support for texture transformation
@@ -172,9 +168,11 @@ class MouseEventTool extends AbstractTool {
    * @param button 0, 1 or 2
    */
   void dispatchMouseEvent(Point newPoint, int type, int button) {
+	  int xAbs = newPoint.x+comp.getLocation().x;
+	  int yAbs = newPoint.y+comp.getLocation().y;
     final MouseEvent newEvent = new MouseEvent(comp,
         (int) type, System.currentTimeMillis(), /*InputEvent.BUTTON1_DOWN_MASK*/ 1 << (10+button), newPoint.x,
-        newPoint.y, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);
+        newPoint.y, xAbs, yAbs, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);
     dispatchEvent(newEvent);
   }
 

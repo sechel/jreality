@@ -42,7 +42,6 @@ package de.jreality.swing;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
@@ -50,10 +49,8 @@ import java.awt.Toolkit;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
-import java.util.HashSet;
 
 import javax.swing.JFrame;
-import javax.swing.RepaintManager;
 
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
@@ -65,8 +62,6 @@ public class JFakeFrame extends JFrame {
     private static final long serialVersionUID = 3258688793266958393L;
     MouseEventTool tool;
     BufferedImage bufferedImage;
-    RepaintManager oldRM;
-    HashSet comps = new HashSet();
     private Graphics2D graphics;
 
     Component current = null;
@@ -81,9 +76,23 @@ public class JFakeFrame extends JFrame {
         init();
     }
     
-    private void init() {
-        
+    public JFakeFrame(GraphicsConfiguration gc) {
+        super(gc);
+        init();
+    }
 
+    public JFakeFrame(String title) throws HeadlessException {
+        super(title);
+        init();
+    }
+
+    public JFakeFrame(String title, GraphicsConfiguration gc) {
+        super(title, gc);
+        init();
+    }
+
+    protected void init() {
+        
         tool = new MouseEventTool(this);
               
               appearance = new Appearance();
@@ -111,7 +120,7 @@ public class JFakeFrame extends JFrame {
         if(peer != null) {
             bufferedImage = peer.getRootImage();
             graphics = bufferedImage.createGraphics();
-            tool.setSize(getWidth(),getHeight());
+            if (tool != null) tool.setSize(getWidth(),getHeight());
             if(graphics != null) {
                 graphics.setColor(getBackground());
                 graphics.fillRect(0, 0, getWidth(),getHeight());
@@ -137,21 +146,6 @@ public class JFakeFrame extends JFrame {
         return appearance;
     }
     
-    public JFakeFrame(GraphicsConfiguration gc) {
-        super(gc);
-        init();
-    }
-
-    public JFakeFrame(String title) throws HeadlessException {
-        super(title);
-        init();
-    }
-
-    public JFakeFrame(String title, GraphicsConfiguration gc) {
-        super(title, gc);
-        init();
-    }
-
     public Toolkit getToolkit() {
         return FakeToolKit.getDefaultToolkit();
     }
