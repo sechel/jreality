@@ -79,11 +79,11 @@ public class PlanarMouseEventTool extends DragEventTool implements FaceDragListe
 	 * @param button 0, 1 or 2
 	 */
 	void dispatchMouseEvent(Point newPoint, int type, int button) {
-		int xAbs = newPoint.x+comp.getLocation().x;
-		int yAbs = newPoint.y+comp.getLocation().y;
+//		int xAbs = newPoint.x+comp.getLocation().x;
+//		int yAbs = newPoint.y+comp.getLocation().y;
 		final MouseEvent newEvent = new MouseEvent(comp,
 				(int) type, System.currentTimeMillis(), /*InputEvent.BUTTON1_DOWN_MASK*/ 1 << (10+button), newPoint.x,
-				newPoint.y, xAbs, yAbs, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);
+				newPoint.y, doubleClick ? 2 : 1, false, MouseEvent.BUTTON1+button);  // TODO: is this what we want?
 		dispatchEvent(newEvent);
 	}
 
