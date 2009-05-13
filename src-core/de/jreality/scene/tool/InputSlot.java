@@ -55,6 +55,14 @@ public class InputSlot implements Serializable
 	public static final InputSlot POINTER_HIT = InputSlot.getDevice("PointerHit");
 	public static final InputSlot POINTER_TRANSFORMATION = InputSlot.getDevice("PointerTransformation");
 	public static final InputSlot SYSTEM_TIME = InputSlot.getDevice("SystemTime");
+    // built-in button slots: only first three are guaranteed to exist
+	public static final InputSlot LEFT_BUTTON = InputSlot.getDevice("PrimaryAction");
+	public static final InputSlot MIDDLE_BUTTON = InputSlot.getDevice("PrimaryMenu");
+	public static final InputSlot RIGHT_BUTTON = InputSlot.getDevice("PrimarySelection");
+    // WARNING: following slots are NOT guaranteed to exist: for sure on desktop w/ shift modifier
+	public static final InputSlot SHIFT_LEFT_BUTTON = InputSlot.getDevice("SecondaryAction");
+	public static final InputSlot SHIFT_MIDDLE_BUTTON = InputSlot.getDevice("SecondaryMenu");
+	public static final InputSlot SHIFT_RIGHT_BUTTON = InputSlot.getDevice("SecondarySelection");
     
 	private final String name;
     private InputSlot(String name)
