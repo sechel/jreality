@@ -31,6 +31,12 @@ public class DragEventTool extends AbstractTool {
 		addCurrentSlot(pointerSlot, "triggers drag events");
     addCurrentSlot(alongZPointerSlot);
 	}
+
+	public DragEventTool(InputSlot... activationSlots) {
+		super(activationSlots);
+		addCurrentSlot(pointerSlot, "triggers drag events");
+	    addCurrentSlot(alongZPointerSlot);
+	}
 	
 	public DragEventTool(){
 		  this("AllDragActivation");      
@@ -195,6 +201,8 @@ public class DragEventTool extends AbstractTool {
 		  if (!active) return;   
 	      if (pickType == PickResult.PICK_TYPE_OBJECT) firePrimitiveDragEnd(pickPoint);
 	      else if (pickType == PickResult.PICK_TYPE_POINT) firePointDragEnd(pickPoint);
+	      
+	      // TODO: this needs to be fixed:
 	      else if (pickType == PickResult.PICK_TYPE_LINE) fireLineDragEnd(new double[]{0,0,0,1}, new double[]{0,0,0,1});
 	      else if (pickType == PickResult.PICK_TYPE_FACE) fireFaceDragEnd(new double[]{0,0,0,1}, new double[]{0,0,0,1});
 	      index=-1;
