@@ -250,11 +250,11 @@ public class JRViewer {
 	
 	
 	/**
-	 * Creates a JRViewer and registers only the View class
+	 * Creates a JRViewer and registers only the View class, without a default scene
 	 * @return the viewer instance
 	 */
-	public static JRViewer createEmptyViewer(boolean loadDefaultScene) {
-		return new JRViewer(loadDefaultScene);
+	public static JRViewer createEmptyViewer() {
+		return new JRViewer(false);
 	}
 	
 	/**
