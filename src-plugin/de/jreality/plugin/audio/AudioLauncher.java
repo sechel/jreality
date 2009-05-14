@@ -26,6 +26,9 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
+/**
+ * @deprecated use AudioPreferences instead
+ */
 public class AudioLauncher extends ShrinkPanelPlugin {
 
 	private JComboBox renderWidget;

@@ -23,6 +23,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.plugin.audio.Audio.BackendType;
+import de.jreality.plugin.audio.Audio.InterpolationType;
 import de.jreality.plugin.audio.image.ImageHook;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
@@ -33,6 +34,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	
 	private JPanel
 		mainPage = new JPanel(),
+		interpolationPanel = new JPanel(),
 		backendPanel = new JPanel(),
 		javaOptions = new JPanel(),
 		jackOptions = new JPanel();
@@ -50,11 +52,17 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaSoundChecker = new JRadioButton("Java Sound Stereo"),
 		javaSoundVBAPChecker = new JRadioButton("Java Sound Surround (VBAP)"),
 		jackAmbisonicsFOChecker = new JRadioButton("Jack Ambisonics First Order"),
-		jackAmbisonicsPSOChecker = new JRadioButton("Jack Ambisonics Planar Second Order");
+		jackAmbisonicsPSOChecker = new JRadioButton("Jack Ambisonics Planar Second Order"),
+		sampleHoldChecker = new JRadioButton("None"),
+		linearChecker = new JRadioButton("Linear"),
+		cosineChecker = new JRadioButton("Cosine"),
+		cubicChecker = new JRadioButton("Cubic");
 	private JButton applyButton = new JButton("Apply");
 	
 	private BackendType
 		backendType = BackendType.noSound;
+	private InterpolationType
+		interpolationType = InterpolationType.cubicInterpolation;
 	private List<ChangeListener>
 		changeListenerList = new LinkedList<ChangeListener>();
 	
@@ -100,6 +108,14 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		jackOptions.add(retriesSpinner, c2);
 		mainPage.add(jackOptions, c2);
 		
+		interpolationPanel.setBorder(BorderFactory.createTitledBorder("Interpolation"));
+		interpolationPanel.setLayout(new GridLayout(1, 4));
+		interpolationPanel.add(sampleHoldChecker);
+		interpolationPanel.add(linearChecker);
+		interpolationPanel.add(cosineChecker);
+		interpolationPanel.add(cubicChecker);
+		mainPage.add(interpolationPanel, c2);
+		
 		mainPage.add(new JPanel(), c2);
 		mainPage.add(applyButton, c2);
 		
@@ -110,11 +126,21 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		bg.add(jackAmbisonicsFOChecker);
 		bg.add(jackAmbisonicsPSOChecker);
 		
+		bg = new ButtonGroup();
+		bg.add(sampleHoldChecker);
+		bg.add(linearChecker);
+		bg.add(cosineChecker);
+		bg.add(cubicChecker);
+		
 		noSoundChecker.addActionListener(this);
 		javaSoundChecker.addActionListener(this);
 		javaSoundVBAPChecker.addActionListener(this);
 		jackAmbisonicsFOChecker.addActionListener(this);
 		jackAmbisonicsPSOChecker.addActionListener(this);
+		sampleHoldChecker.addActionListener(this);
+		linearChecker.addActionListener(this);
+		cosineChecker.addActionListener(this);
+		cubicChecker.addActionListener(this);
 		applyButton.addActionListener(this);
 	}
 	
@@ -134,6 +160,18 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		}
 		if (jackAmbisonicsPSOChecker == s) {
 			backendType = BackendType.jackAmbisonicsPSO;
+		}
+		if (sampleHoldChecker == s) {
+			interpolationType = InterpolationType.noInterpolation;
+		}
+		if (linearChecker == s) {
+			interpolationType = InterpolationType.linearInterpolation;
+		}
+		if (cosineChecker == s) {
+			interpolationType = InterpolationType.cosineInterpolation;
+		}
+		if (cubicChecker == s) {
+			interpolationType = InterpolationType.cubicInterpolation;
 		}
 		if (applyButton == s) {
 			fireChanged();
@@ -155,6 +193,10 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	
 	public BackendType getBackendType() {
 		return backendType;
+	}
+	
+	public InterpolationType getInterpolationType() {
+		return interpolationType;
 	}
 	
 	public String getJackLabel() {
@@ -223,12 +265,12 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
 		c.storeProperty(getClass(), "backendType", backendType);
+		c.storeProperty(getClass(), "interpolationType", interpolationType);
 		c.storeProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue());
 		c.storeProperty(getClass(), "jackLabel", jackLabelField.getText());
 		c.storeProperty(getClass(), "jackTarget", jackTargetField.getText());
 		c.storeProperty(getClass(), "retries", retriesModel.getNumber().intValue());
 	}
-	
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
@@ -251,11 +293,24 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 			jackAmbisonicsPSOChecker.setSelected(true);
 			break;
 		}
+		interpolationType = c.getProperty(getClass(), "interpolationType", interpolationType);
+		switch (interpolationType) {
+		case noInterpolation:
+			sampleHoldChecker.setSelected(true);
+			break;
+		case linearInterpolation:
+			linearChecker.setSelected(true);
+			break;
+		case cosineInterpolation:
+			cosineChecker.setSelected(true);
+			break;
+		case cubicInterpolation:
+			cubicChecker.setSelected(true);
+			break;
+		}
 		frameSizeModel.setValue(c.getProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue()));
 		jackLabelField.setText(c.getProperty(getClass(), "jackLabel", jackLabelField.getText()));
 		jackTargetField.setText(c.getProperty(getClass(), "jackTarget", jackTargetField.getText()));
 		retriesModel.setValue(c.getProperty(getClass(), "retries", retriesModel.getNumber().intValue()));
 	}
-	
-	
 }

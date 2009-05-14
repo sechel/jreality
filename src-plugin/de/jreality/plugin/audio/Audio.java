@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.AudioRenderer;
+import de.jreality.audio.Interpolation;
 import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
 import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.audio.javasound.VbapRenderer;
@@ -26,12 +28,21 @@ public class Audio extends Plugin implements ChangeListener {
 		jackAmbisonicsPSO;
 	}
 	
+	public static enum InterpolationType {
+		noInterpolation,
+		linearInterpolation,
+		cosineInterpolation,
+		cubicInterpolation;
+	}
+	
 	private AudioPreferences 
 		prefs = null;
 	private View
 		view = null;
 	private AudioRenderer 
 		renderer = null;
+	private Interpolation.Factory
+		interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -94,11 +105,26 @@ public class Audio extends Plugin implements ChangeListener {
 		default:
 			break;
 		}
+		switch (prefs.getInterpolationType()) {
+		case noInterpolation:
+			interpolationFactory = Interpolation.SampleHold.FACTORY;
+			break;
+		case linearInterpolation:
+			interpolationFactory = Interpolation.Linear.FACTORY;
+			break;
+		case cosineInterpolation:
+			interpolationFactory = Interpolation.Cosine.FACTORY;
+			break;
+		case cubicInterpolation:
+			interpolationFactory = Interpolation.Cubic.FACTORY;
+			break;
+		}
 		
 		if (renderer == null) return;
 		
 		renderer.setMicrophonePath(view.getCameraPath());
 		renderer.setSceneRoot(view.getSceneRoot());
+		renderer.setInterpolationFactory(interpolationFactory);
 		
 		if (renderer instanceof AbstractJavaSoundRenderer) {
 			AbstractJavaSoundRenderer javaSoundRenderer = (AbstractJavaSoundRenderer) renderer;
