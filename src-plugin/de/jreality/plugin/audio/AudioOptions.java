@@ -220,7 +220,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
-		generalPanel.add(new JLabel("Speed of sound (m/s)"), gbc);
+		generalPanel.add(new JLabel("<html>Speed&nbsp;of sound&nbsp;(m/s)</html>"), gbc);
 		gbc.weightx = 1;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		generalPanel.add(speedWidget, gbc);
@@ -240,7 +240,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
-		preprocPanel.add(new JLabel("Shift (10 cents)"), gbc);
+		preprocPanel.add(new JLabel("<html>Pitch&nbsp;shift (10&nbsp;cents)</html>"), gbc);
 		gbc.weightx = 1;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		preprocPanel.add(pitchShiftWidget, gbc);
