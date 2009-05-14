@@ -37,7 +37,7 @@ import java.awt.peer.ContainerPeer;
  *
  */
 class FakeFramePeer {
-    private static final boolean DUMP = true;
+    private static final boolean DUMP = false;
 	private BufferedImage bi;
     private VolatileImage vi;
     private JFakeFrame frame;
