@@ -8,7 +8,7 @@ import de.jreality.audio.util.Limiter;
 
 public class StereoRenderer extends AbstractJavaSoundRenderer {
 
-	private static final boolean LIMIT = false;
+	private static final boolean LIMIT = true;
 	byte[] buffer;
 	float[] fbuffer;
 	float[] fbuffer_lookAhead;
