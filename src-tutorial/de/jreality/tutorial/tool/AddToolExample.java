@@ -3,6 +3,8 @@ package de.jreality.tutorial.tool;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.shader.DefaultPolygonShader;
+import de.jreality.plugin.PluginViewerApp;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
@@ -22,13 +24,19 @@ public class AddToolExample {
 		ScaleTool tool= new ScaleTool();
 		cmp.addTool(tool);		
 		cmp.setGeometry(Primitives.icosahedron());
-	    ViewerApp.display(cmp);
+	    PluginViewerApp.display(cmp);
 	}
 	private static void setupAppearance(Appearance ap) {
 		DefaultGeometryShader dgs;
+		DefaultPolygonShader dps;
 		DefaultLineShader dls;
 		DefaultPointShader dpts;
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+		dgs.setShowFaces(true);
+		dgs.setShowLines(true);
+		dgs.setShowPoints(true);
+		dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+		dps.setDiffuseColor(Color.blue);
 		dls = (DefaultLineShader) dgs.createLineShader("default");
 		dls.setDiffuseColor(Color.yellow);
 		dls.setTubeRadius(.03);

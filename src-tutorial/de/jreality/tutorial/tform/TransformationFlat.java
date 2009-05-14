@@ -66,6 +66,9 @@ public class TransformationFlat {
 		RenderingHintsShader rhs;
 		DefaultPolygonShader dps;
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+		dgs.setShowFaces(true);
+		dgs.setShowLines(true);
+		dgs.setShowPoints(true);
 		dls = (DefaultLineShader) dgs.createLineShader("default");
 		dls.setDiffuseColor(Color.yellow);
 		dls.setTubeRadius(.03);

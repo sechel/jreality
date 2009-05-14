@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.tutorial.misc;
+package de.jreality.tutorial.util;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

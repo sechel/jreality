@@ -66,25 +66,27 @@ public class TransformationHierarchy {
 	    ViewerApp.display(world);
 	}
 
-	private static void setupAppearance(Appearance ap) {
-		DefaultGeometryShader dgs;
-		DefaultLineShader dls;
-		DefaultPointShader dpts;
-		RenderingHintsShader rhs;
-		DefaultPolygonShader dps;
-		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
-		dls = (DefaultLineShader) dgs.createLineShader("default");
-		dls.setDiffuseColor(Color.yellow);
-		dls.setTubeRadius(.03);
-		dpts = (DefaultPointShader) dgs.createPointShader("default");
-		dpts.setDiffuseColor(Color.red);
-		dpts.setPointRadius(.05);
-		dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
-		dps.setSmoothShading(false);
-		dps.setTransparency(.5);
-		rhs = ShaderUtility.createDefaultRenderingHintsShader(ap, true);
-		rhs.setTransparencyEnabled(true);
-		rhs.setOpaqueTubesAndSpheres(true);
-	}
-
+		private static void setupAppearance(Appearance ap) {
+			DefaultGeometryShader dgs;
+			DefaultLineShader dls;
+			DefaultPointShader dpts;
+			RenderingHintsShader rhs;
+			DefaultPolygonShader dps;
+			dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+			dgs.setShowFaces(true);
+			dgs.setShowLines(true);
+			dgs.setShowPoints(true);
+			dls = (DefaultLineShader) dgs.createLineShader("default");
+			dls.setDiffuseColor(Color.yellow);
+			dls.setTubeRadius(.03);
+			dpts = (DefaultPointShader) dgs.createPointShader("default");
+			dpts.setDiffuseColor(Color.red);
+			dpts.setPointRadius(.05);
+			dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+			dps.setSmoothShading(false);
+			dps.setTransparency(.5);
+			rhs = ShaderUtility.createDefaultRenderingHintsShader(ap, true);
+			rhs.setTransparencyEnabled(true);
+			rhs.setOpaqueTubesAndSpheres(true);
+		}
 }

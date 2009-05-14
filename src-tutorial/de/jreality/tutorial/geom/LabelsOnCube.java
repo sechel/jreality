@@ -93,7 +93,10 @@ public static void main(String[] args) {
     cmp.setGeometry(ifs);
     
     DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(a, false);
-    DefaultTextShader pts = (DefaultTextShader) ((DefaultPointShader)dgs.getPointShader()).getTextShader();
+	dgs.setShowFaces(true);
+	dgs.setShowLines(true);
+	dgs.setShowPoints(true);
+   DefaultTextShader pts = (DefaultTextShader) ((DefaultPointShader)dgs.getPointShader()).getTextShader();
     DefaultTextShader ets = (DefaultTextShader) ((DefaultLineShader)dgs.getLineShader()).getTextShader();
     DefaultTextShader fts = (DefaultTextShader) ((DefaultPolygonShader)dgs.getPolygonShader()).getTextShader();
     

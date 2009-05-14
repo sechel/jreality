@@ -45,6 +45,9 @@ public class Intro04 {
 		dodecSGC.addTool(new PickShowTool());
 		Appearance ap = dodecSGC.getAppearance();
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+		dgs.setShowFaces(true);
+		dgs.setShowLines(true);
+		dgs.setShowPoints(true);
 		dls = (DefaultLineShader) dgs.createLineShader("default");
 		dls.setDiffuseColor(Color.yellow);
 		dls.setTubeRadius(.05);

@@ -15,6 +15,7 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.FaceDragEvent;
@@ -115,9 +116,15 @@ public class DragEventTool02 {
 	
 	private static void setupAppearance(Appearance ap) {
 		DefaultGeometryShader dgs;
+		DefaultPolygonShader dps;
 		DefaultLineShader dls;
 		DefaultPointShader dpts;
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
+		dgs.setShowFaces(true);
+		dgs.setShowLines(true);
+		dgs.setShowPoints(true);
+		dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
+		dps.setDiffuseColor(Color.blue);
 		dls = (DefaultLineShader) dgs.createLineShader("default");
 		dls.setDiffuseColor(Color.yellow);
 		dls.setTubeRadius(.03);

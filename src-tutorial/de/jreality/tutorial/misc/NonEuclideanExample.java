@@ -46,6 +46,7 @@ import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tutorial.intro.Intro07;
+import de.jreality.tutorial.util.FlyTool;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.ViewerApp;
