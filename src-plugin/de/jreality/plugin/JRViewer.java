@@ -36,6 +36,7 @@ import de.jreality.plugin.vr.Terrain;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphVisitor;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -50,9 +51,10 @@ public class JRViewer {
 	private SimpleController
 		c = new SimpleController();
 	private View
-		view = new View();
+		view;
 	private SceneGraphNode
 		content = null;
+	private boolean defaultScene;
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
 	
@@ -62,7 +64,9 @@ public class JRViewer {
 	}
 	
 	
-	protected JRViewer() {
+	protected JRViewer(boolean loadDefaultScene) {
+		defaultScene = loadDefaultScene;
+		view = new View(loadDefaultScene);
 		c.registerPlugin(view);
 		c.registerPlugin(new ContentInjectionPlugin());
 		lastViewer = new WeakReference<JRViewer>(this);
@@ -223,6 +227,17 @@ public class JRViewer {
 	}
 	
 	/**
+	 * Creates a ViewerApp-like plug-in set and invokes startup. The given
+	 * content node will be added to the scene graph.
+	 * @param node
+	 */
+	public static void displayViewerApp(SceneGraphNode node) {
+		JRViewer v = JRViewer.createViewerApp();
+		v.setContent(node);
+		v.startup();
+	}
+	
+	/**
 	 * Creates a VR-viewer plug-in set and invokes startup. The given
 	 * content node will be added to the scene graph.
 	 * @param node
@@ -238,8 +253,8 @@ public class JRViewer {
 	 * Creates a JRViewer and registers only the View class
 	 * @return the viewer instance
 	 */
-	public static JRViewer createEmptyViewer() {
-		return new JRViewer();
+	public static JRViewer createEmptyViewer(boolean loadDefaultScene) {
+		return new JRViewer(loadDefaultScene);
 	}
 	
 	/**
@@ -247,7 +262,7 @@ public class JRViewer {
 	 * @return A configured JRViewer instance
 	 */
 	public static JRViewer createViewer() {
-		JRViewer v = createEmptyViewer();
+		JRViewer v = new JRViewer(false);
 		v.registerPlugin(new CameraStand());
 		v.registerPlugin(new Lights());
 		v.registerPlugin(new Background());
@@ -311,6 +326,19 @@ public class JRViewer {
 		return v;
 	}
 	
+	/**
+	 * first attempt to rebuild a viewerapp replacement
+	 * 
+	 * @return A configured JRViewer instance
+	 */
+	public static JRViewer createViewerApp() {
+		JRViewer v = new JRViewer(true);
+		v.registerPlugin(new ViewMenuBar());
+		v.registerPlugin(new Inspector());
+		v.registerPlugin(new Shell());
+		return v;
+	}	
+	
 	
 	private class ContentInjectionPlugin extends Plugin {
 
@@ -325,15 +353,28 @@ public class JRViewer {
 			if (content == null) {
 				return;
 			}
-			SceneGraphComponent root = null;
-			if (content instanceof Geometry) {
-				root = new SceneGraphComponent("JRViewer Content");
-				root.setGeometry((Geometry)content);
+			if (!defaultScene) {
+				SceneGraphComponent root = null;
+				if (content instanceof Geometry) {
+					root = new SceneGraphComponent("JRViewer Content");
+					root.setGeometry((Geometry)content);
+				} else {
+					root = (SceneGraphComponent)content;
+				}
+				ManagedContent mc = c.getPlugin(ManagedContent.class);
+				mc.setContent(JRViewer.class, root);
 			} else {
-				root = (SceneGraphComponent)content;
+				content.accept(new SceneGraphVisitor() {
+					@Override
+					public void visit(Geometry g) {
+						view.getEmptyPickPath().getLastComponent().setGeometry(g);
+					}
+					@Override
+					public void visit(SceneGraphComponent c) {
+						view.getEmptyPickPath().getLastComponent().addChild(c);
+					}
+				});
 			}
-			ManagedContent mc = c.getPlugin(ManagedContent.class);
-			mc.setContent(JRViewer.class, root);
 		}
 		
 	}

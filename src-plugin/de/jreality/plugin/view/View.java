@@ -62,6 +62,8 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.io.JrScene;
+import de.jreality.io.JrSceneFactory;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -112,6 +114,10 @@ public class View extends SideContainerPerspective {
 	};
 
 	public View() {
+		this(false);
+	}
+	
+	public View(boolean loadDefaultScene) {
 
 		// determine running environment
 		String environment = Secure.getProperty(SystemProperties.ENVIRONMENT, SystemProperties.ENVIRONMENT_DEFAULT);
@@ -204,23 +210,42 @@ public class View extends SideContainerPerspective {
 			renderTrigger.addViewer(viewerSwitch);
 		}
 
-		SceneGraphComponent root = new SceneGraphComponent("root");
-		Appearance rootAppearance = new Appearance("root appearance");
-		//rootAppearance.setAttribute(CommonAttributes.ANY_DISPLAY_LISTS, false);
-		ShaderUtility.createRootAppearance(rootAppearance);
-		root.setAppearance(rootAppearance);
-
-		SceneGraphPath emptyPickPath = new SceneGraphPath();
-		emptyPickPath.push(root);
-
-		setScene(root, null, emptyPickPath, null);
-
+		if (loadDefaultScene) {
+			JrScene scene = null;
+			RunningEnvironment env = getRunningEnvironment();
+			switch (env) {
+			case DESKTOP:
+				scene = JrSceneFactory.getDefaultDesktopScene();
+				break;
+			case PORTAL:
+				scene = JrSceneFactory.getDefaultPortalScene();
+				break;
+			case PORTAL_REMOTE:
+				scene = JrSceneFactory.getDefaultPortalRemoteScene();
+				break;
+			}
+			setScene(scene.getSceneRoot(), scene.getPath("cameraPath"), scene.getPath("emptyPickPath"), scene.getPath("avatarPath"));
+		} else {
+			SceneGraphComponent root = new SceneGraphComponent("root");
+			Appearance rootAppearance = new Appearance("root appearance");
+			//rootAppearance.setAttribute(CommonAttributes.ANY_DISPLAY_LISTS, false);
+			ShaderUtility.createRootAppearance(rootAppearance);
+			root.setAppearance(rootAppearance);
+	
+			SceneGraphPath emptyPickPath = new SceneGraphPath();
+			emptyPickPath.push(root);
+	
+			setScene(root, null, emptyPickPath, null);
+		}
 		getContentPanel().setLayout(new GridLayout());
 		getContentPanel().add(viewerSwitch.getViewingComponent());
 		getContentPanel().setPreferredSize(new Dimension(600,600));
 		getContentPanel().setMinimumSize(new Dimension(300, 200));
+		
 	}
-
+	
+	
+	
 	public ViewerSwitch getViewer()	{
 		return viewerSwitch;
 	}
@@ -267,10 +292,6 @@ public class View extends SideContainerPerspective {
 			menu.add(exportImageAction);
 		}
 		return menu;
-	}
-
-	public void setScene(SceneGraphComponent root, SceneGraphPath cameraPath) {
-		setScene(root, cameraPath, null, null);
 	}
 
 	public void setScene(
