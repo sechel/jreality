@@ -247,13 +247,15 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
-		distCuePanel.add(linearBox, gbc);
-		distCuePanel.add(exponentialBox, gbc);
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		distCuePanel.add(lowpassBox, gbc);
-		gbc.gridwidth = 1;
 		distCuePanel.add(conicalBox, gbc);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		distCuePanel.add(cardioidBox, gbc);
+		gbc.gridwidth = 1;
+		distCuePanel.add(linearBox, gbc);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		distCuePanel.add(exponentialBox, gbc);
+		gbc.gridwidth = 1;
+		distCuePanel.add(lowpassBox, gbc);
 
 		gbc.weightx = 0;
 		gbc.gridwidth = 1;
