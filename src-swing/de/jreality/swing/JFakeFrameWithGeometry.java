@@ -41,6 +41,9 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	 private static InputSlot drag0 = InputSlot.getDevice("PanelAction");
 	  private static InputSlot drag2 = InputSlot.getDevice("PanelSelection");
 	  private static InputSlot drag1 = InputSlot.getDevice("PanelMenu");
+	private int desktopWidth=800;
+	private int desktopHeight=600;
+	private SceneGraphComponent windowRoot;
 
 	protected void init() {
 		
@@ -59,6 +62,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		  appearance.setAttribute(CommonAttributes.EDGE_DRAW, false);
 		  appearance.setAttribute(CommonAttributes.TUBES_DRAW, false);
 		  appearance.setAttribute(CommonAttributes.LIGHTING_ENABLED, false);
+		  appearance.setAttribute("polygonShader.reflectionMap:blendColor", new Color(255,255,255,65));
 		  
         quadFactory = new IndexedFaceSetFactory();
 		quadFactory.setVertexCount(4);
@@ -67,6 +71,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		quadFactory.setFaceIndices(new int[][]{{0,1,2,3}});
 		quadFactory.setVertexTextureCoordinates(new double[][]{{0,0},{1,0},{1,1},{0,1}});
 		windowComponent = new SceneGraphComponent();
+		windowComponent.setVisible(false);
 		windowComponent.addTool(leftMouseButtonTool);
 		windowComponent.addTool(centerMouseButtonTool);
 		windowComponent.addTool(rightMouseButtonTool);
@@ -102,18 +107,23 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	
 	@Override
 	public synchronized void setExtendedState(int state) {
-		super.setExtendedState(state);
-		if (state == MAXIMIZED_BOTH) {
-			setBounds(0, 0, 800, 600);
+		if ((state & ICONIFIED) != 0) {
+			System.out.println("iconified not (yet) supported...");
+			return;
 		}
-//		if (state == MAXIMIZED_HORIZ) {
-//			Rectangle obds = getBounds();
-//			setBounds(0, obds.y, 800, obds.width);
-//		}
-//		if (state == MAXIMIZED_VERT) {
-//			Rectangle obds = getBounds();
-//			setBounds(obds.x, 0, obds.height, 600);
-//		}
+		super.setExtendedState(state);
+		if ((state & MAXIMIZED_BOTH) != 0) {
+			setBounds(0, 0, desktopWidth, desktopHeight);
+		} else {
+			if ((state & MAXIMIZED_HORIZ) != 0) {
+				Rectangle obds = getBounds();
+				setBounds(0, obds.y, 800, obds.width);
+			}
+			if ((state & MAXIMIZED_VERT) != 0) {
+				Rectangle obds = getBounds();
+				setBounds(obds.x, 0, obds.height, 600);
+			}
+		}
 		if (state == NORMAL) {
 			setBounds(normalBounds);
 		}
@@ -121,4 +131,30 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		validate();
 	}
 	
+	public int getDesktopWidth() {
+		return desktopWidth;
+	}
+
+	public void setDesktopWidth(int desktopWidth) {
+		this.desktopWidth = desktopWidth;
+	}
+
+	public int getDesktopHeight() {
+		return desktopHeight;
+	}
+
+	public void setDesktopHeight(int desktopHeight) {
+		this.desktopHeight = desktopHeight;
+	}
+
+	public void setDesktopComponent(SceneGraphComponent windowRoot) {
+		this.windowRoot = windowRoot;
+		windowRoot.addChild(getSceneGraphComponent());
+	}
+
+	@Override
+	public void dispose() {
+		windowRoot.removeChild(getSceneGraphComponent());
+		super.dispose();
+	}
 }
