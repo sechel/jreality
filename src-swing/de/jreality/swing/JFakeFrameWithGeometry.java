@@ -3,6 +3,7 @@ package de.jreality.swing;
 import java.awt.Color;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
+import java.awt.Rectangle;
 
 import javax.swing.JRootPane;
 
@@ -19,7 +20,8 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	SceneGraphComponent windowComponent;
 	IndexedFaceSetFactory quadFactory;
 	
-	
+	Rectangle normalBounds;
+
 	public JFakeFrameWithGeometry() {
 		super();
 	}
@@ -44,7 +46,8 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		
     	setUndecorated(true);
         getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
-        
+
+        normalBounds=new Rectangle();
 
         Tool leftMouseButtonTool = new PlanarMouseEventTool(drag0, 0, this);
         Tool centerMouseButtonTool = new PlanarMouseEventTool(drag1, 1, this);
@@ -79,6 +82,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	public void setBounds(int x, int y, int w, int h) {
 		super.setBounds(x, y, w, h);
 		if (windowComponent != null) {
+			if (getExtendedState() == NORMAL) normalBounds.setBounds(x,y,w,h);
 			MatrixBuilder.euclidean().translate(x,y,0).assignTo(windowComponent);
 			double[][] loc = new double[][]{{0,0,0},{w,0,0},{w,h,0},{0,h,0}};
 			quadFactory.setVertexCoordinates(loc);
@@ -94,6 +98,27 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 
 	public SceneGraphComponent getSceneGraphComponent() {
 		return windowComponent;
+	}
+	
+	@Override
+	public synchronized void setExtendedState(int state) {
+		super.setExtendedState(state);
+		if (state == MAXIMIZED_BOTH) {
+			setBounds(0, 0, 800, 600);
+		}
+//		if (state == MAXIMIZED_HORIZ) {
+//			Rectangle obds = getBounds();
+//			setBounds(0, obds.y, 800, obds.width);
+//		}
+//		if (state == MAXIMIZED_VERT) {
+//			Rectangle obds = getBounds();
+//			setBounds(obds.x, 0, obds.height, 600);
+//		}
+		if (state == NORMAL) {
+			setBounds(normalBounds);
+		}
+		invalidate();
+		validate();
 	}
 	
 }

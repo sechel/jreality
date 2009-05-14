@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsConfiguration;
 import java.awt.Image;
@@ -36,7 +37,7 @@ import java.awt.peer.ContainerPeer;
  *
  */
 class FakeFramePeer {
-    private static final boolean DUMP = false;
+    private static final boolean DUMP = true;
 	private BufferedImage bi;
     private VolatileImage vi;
     private JFakeFrame frame;
@@ -44,6 +45,8 @@ class FakeFramePeer {
     Rectangle bounds;
 	private Image backBuffer;
     
+	int state=Frame.NORMAL;
+	
     FakeFramePeer(JFakeFrame f) {
         frame = f;
         Dimension d = f.getSize();
@@ -85,13 +88,15 @@ class FakeFramePeer {
     public void setBounds(int x, int y, int width, int height) {
       if (DUMP) System.out.println("JFakeFrame set Bounds "+x+" "+y+" "+width+" "+height);
       boolean resized = (width!=bounds.width || height!=bounds.height);
-        bounds.setBounds(x, y, width, height);
-        if(bi.getWidth()!=width || bi.getHeight()!= height) {
+      boolean moved = (x!=bounds.x || y!=bounds.y);
+      if(resized) {
             bi =new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
             vi=new FakeVolatileImage(bi);
             backBuffer = new BufferedImage(Math.max(1, width), Math.max(1, height),BufferedImage.TYPE_INT_ARGB);
         }
-        if (resized) frame.fireComponentResized();
+      if (resized || moved) {
+    	  bounds.setBounds(x, y, width, height);
+      }
     }
 
     public Dimension getMinimumSize() {
@@ -148,8 +153,9 @@ class FakeFramePeer {
     }
 
     public Point getLocationOnScreen() {
-    	if (DUMP) System.out.println("FakeFramePeer.getLocationOnScreen()");
-        return new Point(frame.getBounds().x, frame.getBounds().y);
+        Point ret = new Point(bounds.x, bounds.y);
+        if (DUMP) System.out.println("FakeFramePeer.getLocationOnScreen(): "+ret);
+        return ret;
     }
 
     public Toolkit getToolkit() {
@@ -204,8 +210,7 @@ class FakeFramePeer {
     }
     
 	public int getState() {
-		// TODO Auto-generated method stub
-		return 0;
+		return state;
 	}
 
 	public void setBoundsPrivate(int x, int y, int width, int height) {
@@ -234,8 +239,7 @@ class FakeFramePeer {
 	}
 
 	public void setState(int state) {
-		// TODO Auto-generated method stub
-		
+		this.state=state;
 	}
 
 	public void setTitle(String title) {
