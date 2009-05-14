@@ -100,6 +100,18 @@ public class JRViewer {
 	
 	
 	/**
+	 * Returns a previously registered plug in instance
+	 * @param <T>
+	 * @param clazz the class of the plug-in
+	 * @return a plug-in instance or null if no such plug-in
+	 * was registered
+	 */
+	public <T extends Plugin> T getPlugin(Class<T> clazz) {
+		return c.getPlugin(clazz);
+	}
+	
+	
+	/**
 	 * Sets a content node. The content node will be added to the
 	 * scene graph on startup
 	 * @param node
