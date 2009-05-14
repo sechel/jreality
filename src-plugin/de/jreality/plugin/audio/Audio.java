@@ -108,8 +108,10 @@ public class Audio extends Plugin implements ChangeListener {
 		if (renderer.getClass().getName().contains("jack")) {
 			Method setLabelMethod = renderer.getClass().getMethod("setLabel", String.class);
 			Method setTargetMethod = renderer.getClass().getMethod("setTarget", String.class);
+			Method setRetriesMethod = renderer.getClass().getMethod("setRetries", int.class);
 			setLabelMethod.invoke(renderer, prefs.getJackLabel());
 			setTargetMethod.invoke(renderer, prefs.getJackTarget());
+			setRetriesMethod.invoke(renderer, prefs.getJackRetries());
 		}
 		
 		renderer.launch();

@@ -37,9 +37,11 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaOptions = new JPanel(),
 		jackOptions = new JPanel();
 	private SpinnerNumberModel
-		frameSizeModel = new SpinnerNumberModel(512, 0, 4096, 1);
+		frameSizeModel = new SpinnerNumberModel(512, 0, 4096, 1),
+		retriesModel = new SpinnerNumberModel(5, 0, 20, 1);
 	private JSpinner
-		frameSizeSpinner = new JSpinner(frameSizeModel);
+		frameSizeSpinner = new JSpinner(frameSizeModel),
+		retriesSpinner = new JSpinner(retriesModel);
 	private JTextField
 		jackLabelField = new JTextField("jreality_jack"),
 		jackTargetField = new JTextField("");
@@ -94,6 +96,8 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		jackOptions.add(jackLabelField, c2);
 		jackOptions.add(new JLabel("Target"), c1);
 		jackOptions.add(jackTargetField, c2);
+		jackOptions.add(new JLabel("Retries after zombification"), c1);
+		jackOptions.add(retriesSpinner, c2);
 		mainPage.add(jackOptions, c2);
 		
 		mainPage.add(new JPanel(), c2);
@@ -161,6 +165,10 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		return jackTargetField.getText();
 	}
 	
+	public int getJackRetries() {
+		return retriesModel.getNumber().intValue();
+	}
+	
 	public int getJavaSoundFrameSize() {
 		return frameSizeModel.getNumber().intValue();
 	}
@@ -218,6 +226,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		c.storeProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue());
 		c.storeProperty(getClass(), "jackLabel", jackLabelField.getText());
 		c.storeProperty(getClass(), "jackTarget", jackTargetField.getText());
+		c.storeProperty(getClass(), "retries", retriesModel.getNumber().intValue());
 	}
 	
 	
@@ -245,6 +254,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		frameSizeModel.setValue(c.getProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue()));
 		jackLabelField.setText(c.getProperty(getClass(), "jackLabel", jackLabelField.getText()));
 		jackTargetField.setText(c.getProperty(getClass(), "jackTarget", jackTargetField.getText()));
+		retriesModel.setValue(c.getProperty(getClass(), "retries", retriesModel.getNumber().intValue()));
 	}
 	
 	

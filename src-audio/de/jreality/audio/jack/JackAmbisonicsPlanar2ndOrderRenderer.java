@@ -24,8 +24,7 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AbstractJackRenderer {
 	}
 
 	@Override
-	protected void launchNativeClient() throws JJackException {
+	protected void createNativeClient() throws JJackException {
 		nativeClient = new JJackNativeClient(label, 0, 5, this);
-		nativeClient.start(null, target);
 	}
 }

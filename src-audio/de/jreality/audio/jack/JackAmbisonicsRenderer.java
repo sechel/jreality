@@ -33,9 +33,8 @@ public class JackAmbisonicsRenderer extends AbstractJackRenderer {
 	}
 
 	@Override
-	protected void launchNativeClient() throws JJackException {
+	protected void createNativeClient() throws JJackException {
 		nativeClient = new JJackNativeClient(label, 0, 4, this);
-		nativeClient.start(null, target);
 	}
 
 	/**
