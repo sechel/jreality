@@ -23,6 +23,9 @@ import javax.swing.JRadioButton;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
+import de.jreality.plugin.view.AlignedContent;
+import de.jreality.plugin.view.ContentAccessory;
+import de.jreality.plugin.view.EmptyPickAccessory;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.vr.image.ImageHook;
 import de.jreality.scene.Appearance;
@@ -37,7 +40,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class Sky extends ShrinkPanelPlugin {
+public class Sky extends EmptyPickAccessory {
 
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 

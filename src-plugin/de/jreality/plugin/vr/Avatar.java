@@ -11,7 +11,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.CameraStand;
+import de.jreality.plugin.view.ContentAccessory;
+import de.jreality.plugin.view.EmptyPickAccessory;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.View.RunningEnvironment;
 import de.jreality.plugin.vr.image.ImageHook;
@@ -26,7 +29,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class Avatar extends ShrinkPanelPlugin {
+public class Avatar extends EmptyPickAccessory {
 
 	public static final double DEFAULT_SPEED = 4;
 
@@ -111,6 +114,7 @@ public class Avatar extends ShrinkPanelPlugin {
 				c.getPlugin(View.class),
 				c.getPlugin(CameraStand.class)
 		);
+		super.install(c);
 
 		// layout shrink panel
 		panel.setPreferredSize(new Dimension(10, 30));
@@ -118,7 +122,6 @@ public class Avatar extends ShrinkPanelPlugin {
 
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.add(panel); 
-		super.install(c);
 	}
 
 	@Override

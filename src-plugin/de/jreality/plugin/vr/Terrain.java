@@ -398,6 +398,7 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 	public void install(Controller c) throws Exception {
 
 		super.install(c);
+		setTriggerComponent(getSceneGraphComponent());
 		
 		// scene
 		view = c.getPlugin(View.class);
@@ -641,10 +642,4 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 		return getClass();
 	}
 
-	@Override
-	public SceneGraphComponent getTriggerComponent() {
-		return terrain;
-	}
-	
-	
 }
