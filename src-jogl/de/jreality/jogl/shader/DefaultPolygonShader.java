@@ -40,6 +40,7 @@
 
 package de.jreality.jogl.shader;
 
+import static de.jreality.shader.CommonAttributes.ONE_TEXTURE2D_PER_IMAGE;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
@@ -88,14 +89,15 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	JOGLTexture2D joglTexture2D, joglTexture2D_1, joglTexture2D_2;
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
-	int frontBack = FRONT_AND_BACK;
-	public VertexShader vertexShader = new DefaultVertexShader();
-	boolean useGLSL = false;
+	public DefaultVertexShader vertexShader = new DefaultVertexShader();
+	boolean useGLSL = false,
+		oneTexturePerImage = false;
 	int texUnit = 0, refMapUnit = 0;
 //	GlslPolygonShader glslShader = new GlslPolygonShader();
 	GlslProgram glslProgram;
-	transient boolean geometryHasTextureCoordinates = false, hasTextures = false;
-	transient boolean firstTime = true,
+	transient boolean geometryHasTextureCoordinates = false, 
+		hasTextures = false,
+		firstTime = true,
 		noneuclideanInitialized = false;
 	
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
@@ -117,6 +119,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,SMOOTH_SHADING), SMOOTH_SHADING_DEFAULT);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
+		oneTexturePerImage = eap.getAttribute(ShaderUtility.nameSpace(name,ONE_TEXTURE2D_PER_IMAGE), true);	
 	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = null;
 	    joglCubeMap = null;
 	    hasTextures = false;
@@ -164,22 +167,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		geometryHasTextureCoordinates = false;
 		firstTime = true;
  	}
-
-	public Color getDiffuseColor() {
-		return vertexShader.getDiffuseColor(); 
-	}
-
-	public float[] getDiffuseColorAsFloat() {
-		return vertexShader.getDiffuseColorAsFloat();
-	}
-
-	
-	public int getFrontBack() {
-		return frontBack;
-	}
-	public void setFrontBack(int frontBack) {
-		this.frontBack = frontBack;
-	}
 	
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
@@ -203,21 +190,21 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			    if (joglTexture2D != null) {
 			    	gl.glActiveTexture(GL.GL_TEXTURE0);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, joglTexture2D);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D, oneTexturePerImage);
 				    texUnit++;
 				    texunitcoords++;		
 			    }
 			    if (joglTexture2D_1 != null) {
 				    gl.glActiveTexture(GL.GL_TEXTURE0+1);
 				    gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, joglTexture2D_1);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_1, oneTexturePerImage);
 				    texUnit++;
 				    texunitcoords++;
 			    }
 			    if (joglTexture2D_2 != null) {
 			    	gl.glActiveTexture(GL.GL_TEXTURE0+2);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, joglTexture2D_2);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_2, oneTexturePerImage);
 				    texUnit++;
 				    texunitcoords++;		
 			    }
@@ -233,9 +220,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		} 	
     
 		jr.renderingState.texUnitCount = texunitcoords; 
-	    vertexShader.setFrontBack(frontBack);
+//	    vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jrs); 
-	    jrs.currentAlpha = vertexShader.getDiffuseColorAsFloat()[3];
+	    jrs.currentAlpha =jrs.diffuseColor[3];
 	    if (useGLSL && glslProgram != null)		{
 	    	if ( glslProgram == noneuclideanShader)	{
 	    		// the only reason we're doing it here is because only now do we know what jrs is

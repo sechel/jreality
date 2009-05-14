@@ -46,5 +46,4 @@ package de.jreality.jogl.shader;
  *
  */
 public interface PolygonShader extends PrimitiveShader {
-	public void setFrontBack(int f);
 }

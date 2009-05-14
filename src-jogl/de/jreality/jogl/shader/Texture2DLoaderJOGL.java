@@ -139,11 +139,11 @@ public class Texture2DLoaderJOGL {
     }
     /******************* new Textures *******************/
     public static void render(GL gl, Texture2D tex) {
-      render(gl, tex, tex.getMipmapMode());
+      render(gl, tex, true);
     }
     static Texture2D lastRendered = null;
     static boolean haveAutoMipmapGeneration, haveCheckedAutoMipmapGeneration;
-    public static void render(GL gl, Texture2D tex, boolean mipmapped) {
+    public static void render(GL gl, Texture2D tex, boolean oneTexturePerImage) {
 //    	System.err.println("rendering texture length "+tex.getImage().getByteArray().length);
  
       	ImageData image = tex.getImage();
@@ -245,7 +245,7 @@ public class Texture2DLoaderJOGL {
 	    	}
 	    }
 	    
-    if (first || lastRendered  == null  || image != lastRendered.getImage()) {
+    if (first ||  !oneTexturePerImage || lastRendered  == null  || image != lastRendered.getImage()) {
 //    	System.err.println("rerendering texture id:" + texid);
 	    	// calls to glTexParameter get saved and restored by "bind()" so should be handled separately
 	    lastRendered = tex;
@@ -283,6 +283,7 @@ public class Texture2DLoaderJOGL {
 	    // what's loaded
 	    if (first || replace) {
 	    	byte[] data = image.getByteArray();
+	    	boolean mipmapped = tex.getMipmapMode();
 	        if (mipmapped) {
 	        	if (haveAutoMipmapGeneration) {
 	                gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());

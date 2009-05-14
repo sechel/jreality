@@ -765,7 +765,7 @@ public class JOGLRendererHelper {
 					img.getHeight() * scale, offset, alignment, c2o,
 					LabelUtility.positionFor(i, vertices, indices),
 					jr.renderingState.currentMetric); //)Pn.EUCLIDEAN);
-			Texture2DLoaderJOGL.render(gl, tex2d, true);
+			Texture2DLoaderJOGL.render(gl, tex2d);
 			gl.glPushMatrix();
 			gl.glMultTransposeMatrixd(bbm, 0);
 			drawFaces(jr, bb, true, 1.0);

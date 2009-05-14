@@ -88,7 +88,7 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		GL gl = jr.globalGL;
 		JOGLConfiguration.theLog.log(Level.FINE,this+"Providing proxy geometry "+implodeFactor);
 		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
-		double alpha = vertexShader == null ? 1.0 : vertexShader.getDiffuseColorAsFloat()[3];
+		double alpha = vertexShader == null ? 1.0 : jrs.diffuseColor[3];
 		if (useDisplayLists) {
 			dListProxy = gl.glGenLists(1);
 			gl.glNewList(dListProxy, GL.GL_COMPILE);

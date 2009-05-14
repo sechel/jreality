@@ -43,6 +43,8 @@ package de.jreality.jogl.shader;
 
 import java.util.logging.Level;
 
+import javax.media.opengl.GL;
+
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Geometry;
@@ -65,16 +67,23 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 
 	public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader tsps)	{
 		front = DefaultGeometryShader.createFrom(tsps.getFront());
-	    front.setFrontBack(DefaultPolygonShader.FRONT);
+//	    front.setFrontBack(DefaultPolygonShader.FRONT);
 		back = DefaultGeometryShader.createFrom(tsps.getFront());
-	    back.setFrontBack(DefaultPolygonShader.BACK);
+//	    back.setFrontBack(DefaultPolygonShader.BACK);
 	}
 	public void render(JOGLRenderingState jrs) {
 		Geometry g = jrs.currentGeometry;
 		jrs.currentGeometry = null;
-		if (back != null) back.render(jrs);
+		if (back != null) {
+			jrs.frontBack = GL.GL_BACK;
+			back.render(jrs);
+		}
 		jrs.currentGeometry = g;
-		if (front != null) front.render(jrs);
+		if (front != null) {
+			jrs.frontBack = GL.GL_FRONT;
+			front.render(jrs);
+		}
+		jrs.frontBack = GL.GL_FRONT_AND_BACK;
 	}
 	
 	public void postRender(JOGLRenderingState jrs) {
@@ -91,10 +100,6 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 //	      back.setFrontBack(DefaultPolygonShader.BACK);
 		front.setFromEffectiveAppearance(eap, shaderName+".front");
 		back.setFromEffectiveAppearance(eap, shaderName+".back");
-	}
-
-	public void setFrontBack(int f) {
-		// TODO figure out how to set up interface to avoid this absurd method
 	}
 
 	public boolean providesProxyGeometry() {
@@ -117,5 +122,6 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 		if (front != null) front.flushCachedState(jr);
 		if (back != null) back.flushCachedState(jr);
 	}
+
 
 }

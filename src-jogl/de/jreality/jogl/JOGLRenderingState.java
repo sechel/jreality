@@ -42,6 +42,8 @@ package de.jreality.jogl;
 
 import javax.media.opengl.GL;
 
+import de.jreality.jogl.shader.DefaultPolygonShader;
+import de.jreality.jogl.shader.TwoSidePolygonShader;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
@@ -78,7 +80,7 @@ public class JOGLRenderingState {
 	public boolean clearColorBuffer=true;
 	public boolean useVertexColors=false;		// for line shaders a question
 	public boolean normals4d = false;
-	
+
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
 	public int numLights = 0;

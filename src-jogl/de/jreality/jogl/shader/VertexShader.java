@@ -47,7 +47,7 @@ import java.awt.Color;
  *
  */
 public interface VertexShader extends Shader {
-	public void setFrontBack(int f);
-	public Color getDiffuseColor();
-	public float[] getDiffuseColorAsFloat();
+	// this is an empty interface: but shader writers should make sure
+	// to set the field JOGLRenderingState.diffuseColor  since it is used
+	// when rendering the geometry AFTER the vertex shader is rendered
 }

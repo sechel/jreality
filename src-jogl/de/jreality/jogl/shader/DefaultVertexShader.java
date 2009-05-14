@@ -57,15 +57,20 @@ import de.jreality.shader.ShaderUtility;
  * @author gunn
  *
  */
-public class DefaultVertexShader implements VertexShader {
-	// TODO add the diffuse color here also, and transparency
-	// the polygon shader if queried, consults this shader for these values
-	public Color	ambientColor,
-			diffuseColor,
-			specularColor;		
-	public double 	specularExponent, ambientCoefficient, diffuseCoefficient, specularCoefficient, transparency;	
-	public float[] specularColorAsFloat, ambientColorAsFloat, diffuseColorAsFloat;
-	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+public class DefaultVertexShader {
+	public Color	
+		ambientColor,
+		diffuseColor,
+		specularColor;		
+	public double 	specularExponent, 
+		ambientCoefficient, 
+		diffuseCoefficient, 
+		specularCoefficient, 
+		transparency;	
+	public float[] 
+	    specularColorAsFloat, 
+	    ambientColorAsFloat, 
+	    diffuseColorAsFloat;
 	
 	public DefaultVertexShader() {
 		super();
@@ -93,61 +98,10 @@ public class DefaultVertexShader implements VertexShader {
 		}
 	}
 
-	/**
-	 * @return
-	 */
-	public Color getAmbientColor() {
-		return ambientColor;
-	}
-
-	public Color getDiffuseColor() {
-		return diffuseColor;
-	}
-
-	/**
-	 * @return
-	 */
-	public Color getSpecularColor() {
-		return specularColor;
-	}
-	/**
-	 * @return
-	 */
-	public float[] getAmbientColorAsFloat() {
-		return ambientColorAsFloat;
-	}
-
-	public float[] getDiffuseColorAsFloat() {
-		return diffuseColorAsFloat;
-	}
-
-	/**
-	 * @return
-	 */
-	public float[] getSpecularColorAsFloat() {
-		return specularColorAsFloat;
-	}
-
-
-	/**
-	 * @return
-	 */
-	public double getSpecularExponent() {
-		return specularExponent;
-	}
-
-	
-	public int getFrontBack() {
-		return frontBack;
-	}
-	public void setFrontBack(int frontBack) {
-		this.frontBack = frontBack;
-	}
-	
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
-
+		int frontBack = jrs.frontBack;
 //		if (jr.openGLState.frontBack != frontBack)	{
 			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
 //			jr.openGLState.frontBack = frontBack;
@@ -167,14 +121,4 @@ public class DefaultVertexShader implements VertexShader {
 	public void postRender(JOGLRenderingState jrs) {
 	}
 
-	public void setGlsl( GlslProgram glProgram)	{
-		glProgram.setUniform("shininess",specularExponent);
-		glProgram.setUniform("ambientColor", ambientColorAsFloat);
-		glProgram.setUniform("ambientCoefficient", 1.0);
-		glProgram.setUniform("diffuseColor", diffuseColorAsFloat);
-		glProgram.setUniform("diffuseCoefficient", 1.0);
-		glProgram.setUniform("specularColor", specularColorAsFloat);
-		glProgram.setUniform("specularCoefficient", 1.0);
-
-	}
 }

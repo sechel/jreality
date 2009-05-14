@@ -99,7 +99,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	Texture2D texture1, texture0;
 	
 	CubeMap environmentMap;
-	private VertexShader vertexShader = new DefaultVertexShader();
+	private DefaultVertexShader vertexShader = new DefaultVertexShader();
 	private boolean smoothShading;
 	private int frontBack=DefaultPolygonShader.FRONT_AND_BACK;
 	private boolean useVertexArrays = true,
@@ -139,7 +139,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		else gl.glShadeModel(GL.GL_FLAT);
 		jrs.smoothShading = smoothShading;
 
-		vertexShader.setFrontBack(frontBack);
+//		vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jrs);
 	   
 		doTexture = false;
@@ -183,7 +183,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				System.err.println("setting lighting to "+jrs.lighting);
 			}
 			if (program.getSource().getUniformParameter("transparency") != null) {
-				program.setUniform("transparency", jrs.transparencyEnabled ? vertexShader.getDiffuseColorAsFloat()[3] : 0f);
+				program.setUniform("transparency", jrs.transparencyEnabled ? jrs.diffuseColor[3] : 0f);
 			}
 			if (program.getSource().getAttribute("normals4") != null)	{
 				doNormals4 = true;
@@ -206,13 +206,13 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			}
 			else if ( g instanceof IndexedFaceSet)	{
 				if (useVertexArrays) 
-					drawFaces(jr, (IndexedFaceSet) g, smoothShading, vertexShader.getDiffuseColorAsFloat()[3], doNormals4);
+					drawFaces(jr, (IndexedFaceSet) g, smoothShading, jrs.diffuseColor[3], doNormals4);
 				else {	// use display lists to render
 					if ( !upToDate((IndexedFaceSet) g, smoothShading) || dList == -1)	{
 						if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
 						dList = jr.globalGL.glGenLists(1);
 						jr.globalGL.glNewList(dList, GL.GL_COMPILE); 
-						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g, jrs.smoothShading, vertexShader.getDiffuseColorAsFloat()[3]);
+						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);
 						jr.globalGL.glEndList();	
 					}
 					jr.globalGL.glCallList(dList);
