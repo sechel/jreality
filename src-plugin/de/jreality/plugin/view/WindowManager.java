@@ -1,40 +1,16 @@
 package de.jreality.plugin.view;
 
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.GraphicsConfiguration;
-import java.awt.HeadlessException;
-import java.awt.Rectangle;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JSlider;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import bsh.This;
-
-//import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-//import com.shfarr.ui.plaf.fh.FhLookAndFeel;
-//import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
-
-//import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
-//import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.swing.JFakeFrameWithGeometry;
-import de.jreality.ui.JSliderVR;
-//import de.muntjak.tinylookandfeel.TinyLookAndFeel;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
 public class WindowManager extends Plugin {
 
@@ -92,30 +68,4 @@ public class WindowManager extends Plugin {
 		return showDesktopBorder;
 	}
 
-	public static void main(String[] args) throws Exception {
-		//UIManager.setLookAndFeel(new TinyLookAndFeel());
-		//JFrame.setDefaultLookAndFeelDecorated(true);
-		//JFrame.setDefaultLookAndFeelDecorated(true);
-		JRViewer v = JRViewer.createViewer();
-		v.getController().setManageLookAndFeel(false);
-		v.registerPlugin(new WindowManager());
-		v.startup();
-		
-		JFrame f = v.getController().getPlugin(WindowManager.class).createFrame("Hello scene window");
-		
-		f.setLocation(100,500);
-		f.getContentPane().setLayout(new FlowLayout());
-		f.getContentPane().add(new JButton("foo 1"));
-		f.getContentPane().add(new JButton("foo 2"));
-		f.getContentPane().add(new JButton("foo 3"));
-		f.getContentPane().add(new JButton("foo 4"));
-		f.getContentPane().add(new JButton("foo 5"));
-		f.getContentPane().add(new JSliderVR());
-		f.pack();
-		
-		f.setVisible(true);
-		
-		SideContainerPerspective scp;
-
-	}
 }
