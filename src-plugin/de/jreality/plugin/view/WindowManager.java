@@ -14,12 +14,12 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import bsh.This;
 
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-import com.shfarr.ui.plaf.fh.FhLookAndFeel;
-import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
+//import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+//import com.shfarr.ui.plaf.fh.FhLookAndFeel;
+//import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 
-import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
-import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
+//import de.javasoft.plaf.synthetica.SyntheticaLookAndFeel;
+//import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
@@ -30,7 +30,7 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.swing.JFakeFrameWithGeometry;
 import de.jreality.ui.JSliderVR;
-import de.muntjak.tinylookandfeel.TinyLookAndFeel;
+//import de.muntjak.tinylookandfeel.TinyLookAndFeel;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
