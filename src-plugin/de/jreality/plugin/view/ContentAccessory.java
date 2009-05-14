@@ -69,24 +69,41 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin {
 	}
 
 	protected void toggle() {
-		if (!windowInScene) {
-			JPanel content = shrinkPanel.getContentPanel();
-			shrinkPanel.setVisible(false);
-			internalShrinkPanel.setContentPanel(content);
-			internalShrinkPanel.setVisible(true);
-			sceneSlot.setVisible(true);
-		} else {
-			JPanel content = internalShrinkPanel.getContentPanel();
-			internalShrinkPanel.setVisible(false);
-			shrinkPanel.setContentPanel(content);
-			shrinkPanel.setVisible(true);
-			sceneSlot.closeFrameIfEmpty();
- 		}
-		windowInScene = !windowInScene;
+		if (windowInScene) moveOutOfScene();
+		else moveIntoScene();
+	}
+	
+	void moveIntoScene() {
+		if (windowInScene) return;
+		windowInScene = true;
+		// move content to scene slot
+		JPanel content = shrinkPanel.getContentPanel();
+		internalShrinkPanel.setContentPanel(content);
+		// hide outer panel
+		shrinkPanel.setVisible(false);
+		// show internal panel
+		internalShrinkPanel.setVisible(true);
+		// force display of scene slot
+		sceneSlot.setVisible(true);
+	}
+	
+	void moveOutOfScene() {
+		if (!windowInScene) return;
+		windowInScene = false;
+		// move content to non-scene slot	
+		JPanel content = internalShrinkPanel.getContentPanel();
+		shrinkPanel.setContentPanel(content);
+		// hide inner panel
+		internalShrinkPanel.setVisible(false);
+		// show external panel
+		shrinkPanel.setVisible(true);
+		// close internal frame if empty
+		sceneSlot.closeFrameIfEmpty();
+		
 	}
 	
 	void sceneFrameClosed() {
-		if (windowInScene) toggle();
+		moveOutOfScene();
 	}
 	
 	

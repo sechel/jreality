@@ -1,6 +1,10 @@
 package de.jreality.plugin.view;
 
+import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,6 +12,7 @@ import de.jreality.swing.JFakeFrameWithGeometry;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
@@ -45,6 +50,13 @@ public class SceneShrinkSlot extends Plugin {
 		slotFrame.setLayout(new GridLayout());
 		slotFrame.add(slot);
 		slotFrame.setBounds(slotFrame.getDesktopWidth()/2, slotFrame.getDesktopHeight()/2, 250, 350);
+		
+		slotFrame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				for (ContentAccessory ca : accessories) ca.sceneFrameClosed();
+			}
+		});
 	}
 	
 	ShrinkSlotVertical getShrinkSlot() {
@@ -67,7 +79,6 @@ public class SceneShrinkSlot extends Plugin {
 		}
 		if (!vis) {
 			setVisible(false);
-			//for (ContentAccessory a : accessories) a.sceneFrameClosed();
 		}
 	}
 
