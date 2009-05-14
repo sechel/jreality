@@ -35,9 +35,7 @@ public class PlanarMouseEventTool extends DragEventTool implements FaceDragListe
 
 	public void faceDragEnd(FaceDragEvent e) {
 		dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED, currentButton);
-		System.out.println("oldPoint="+oldPoint+" newPoint="+newPoint);
 		if(oldPoint.equals(newPoint)) {
-			System.out.println("clicked");
 			dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED, currentButton);
 		}
 	}
@@ -53,7 +51,6 @@ public class PlanarMouseEventTool extends DragEventTool implements FaceDragListe
 		}
 		newPoint = generatePoint(e);
 		oldPoint = newPoint;
-		System.out.println("old point="+oldPoint);
 		dispatchMouseEvent(newPoint, MouseEvent.MOUSE_PRESSED, currentButton);
 	}
 
