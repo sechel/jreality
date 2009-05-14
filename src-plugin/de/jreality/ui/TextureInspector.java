@@ -57,7 +57,7 @@ public class TextureInspector extends JPanel {
 	// ratio of maximal value and minimal value of texture scale
 	private double 
 		logarithmicRange = 400;
-
+	
 	private JButton 
 		textureLoadButton = new JButton("Load...", ImageHook.getIcon("folder.png")),
 		removeButton = new JButton(ImageHook.getIcon("remove.png"));
@@ -87,10 +87,18 @@ public class TextureInspector extends JPanel {
 			updateTexture();
 		}
 	};
+
+	private int 
+		texButtonSize = 60;
 	
 	private GridBagConstraints 
 		c = new GridBagConstraints();
 
+	
+	public TextureInspector(int btnSize) {
+		this();
+		this.texButtonSize = btnSize;
+	}
 	
 	public TextureInspector() {
 		setLayout(new ShrinkPanel.MinSizeGridBagLayout());
@@ -151,7 +159,7 @@ public class TextureInspector extends JPanel {
 	
 	public void addTexture(String name, String resource) {
 		TextureJButton texButton = new TextureJButton(resource);
-		texButton.setPreferredSize(new Dimension(60, 60));
+		texButton.setPreferredSize(new Dimension(texButtonSize, texButtonSize));
 		texButton.setActionCommand(name);
 		texButton.setToolTipText(resource);
 		textureNameToButton.put(name, texButton.getModel());

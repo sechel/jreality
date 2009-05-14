@@ -49,7 +49,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	
 	private JPanel
 		mainPanel = new JPanel(),
-		texturePanel = new JPanel(),
 		lineColorPanel = new JPanel(),
 		pointColorPanel = new JPanel(),
 		faceColorPanel = new JPanel();
@@ -80,8 +79,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		tubes = new JCheckBox ("Tubes"),
 		spheres = new JCheckBox("Spheres");
 	private JButton 
-		textureButton = new JButton("Texture..."),
-		closeButton = new JButton("<-- Back"),
 		closeLineColorsButton = new JButton("<-- Back"),
 		closePointColorsButton = new JButton("<-- Back"),
 		closeFaceColorsButton = new JButton("<-- Back");
@@ -89,7 +86,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		appearance = new Appearance(),
 		scaledAppearance = new Appearance();
 	private TextureInspector 
-		textureInspector = new TextureInspector();
+		textureInspector = new TextureInspector(54);
+	private ShrinkPanel
+		texturePanel = new ShrinkPanel("Texture");
 	private GridBagConstraints
 		c = new GridBagConstraints();
 	private Insets
@@ -98,7 +97,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	
 	public AppearanceInspector() {
 		setLayout(new GridLayout());
-		makeTexturePanel();
 		makePanel();
 		add(mainPanel);
 		
@@ -132,30 +130,12 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		transparencySlider.addChangeListener(this);
 		transparency.addActionListener(this);
 		facesFlat.addActionListener(this);
-		closeButton.addActionListener(this);
-		textureButton.addActionListener(this);
 		
 		showFaces.setSelected(true);
 		
 		lineColorChooser.setMode(0);
 		pointColorChooser.setMode(0);
 		faceColorChooser.setMode(0);
-	}
-	
-	
-	private void makeTexturePanel() {
-		c.fill = BOTH;
-		c.insets = insets;
-		c.gridwidth = REMAINDER;
-		c.anchor = WEST;
-		c.weightx = 1.0;
-		c.weighty = 1.0;
-		texturePanel.setLayout(new GridBagLayout());
-		texturePanel.add(textureInspector, c);
-		c.fill = HORIZONTAL;
-		c.weightx = 0.0;
-		c.weighty = 0.0;
-		texturePanel.add(closeButton, c);
 	}
 	
 	
@@ -238,7 +218,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	
 
 		facesPanel.add(facesFlat, c);
-		facesPanel.add(textureButton, c);
+		facesPanel.add(texturePanel, c);
+		texturePanel.setShrinked(true);
+		texturePanel.setLayout(new GridLayout());
+		texturePanel.add(textureInspector);
 		
 		c.fill = BOTH;
 		c.gridwidth = REMAINDER;
@@ -303,8 +286,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 			updateShowFaces();
 		} else if (facesReflecting == s) {
 			updateFacesReflecting();
-		} else if (textureButton == s) {
-			switchTo(texturePanel);
 		} else if (facesFlat == s) {
 			updateFacesFlat();
 		} else if (transparency == s) {
@@ -385,7 +366,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		facesReflectionSlider.setEnabled(isShowFaces() && isFacesReflecting());
 		transparency.setEnabled(isShowFaces());
 		transparencySlider.setEnabled(isShowFaces() && isTransparencyEnabled());
-		textureButton.setEnabled(isShowFaces());
 		facesFlat.setEnabled(isShowFaces());
 	}
 	

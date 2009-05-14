@@ -85,10 +85,11 @@ public class Shell extends ShrinkPanelPlugin {
 		beanShell.eval("import de.jreality.shader.*;");
 		beanShell.eval("import de.jreality.tools.*;");
 		beanShell.eval("import de.jreality.util.*;");
-		beanShell.eval("import de.jreality.ui.plugin.Shell.H;");
-		beanShell.eval("import de.jreality.ui.plugin.*");
-		beanShell.eval("import de.jreality.vr.plugin.*");
-		beanShell.eval("import de.jreality.audio.plugin.*");
+		beanShell.eval("import de.jreality.plugin.view.Shell.H;");
+		beanShell.eval("import de.jreality.plugin.*");
+		beanShell.eval("import de.jreality.plugin.audio.*");
+		beanShell.eval("import de.jreality.plugin.view.*");
+		beanShell.eval("import de.jreality.plugin.vr.*");
 
 		//set some objects to be accessible from within the beanShell
 		try {

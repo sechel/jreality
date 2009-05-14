@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Set;
 
+import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 
 import de.jreality.plugin.audio.Audio;
@@ -54,6 +55,11 @@ public class JRViewer {
 		content = null;
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
+	
+	
+	static {
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+	}
 	
 	
 	protected JRViewer() {
@@ -325,9 +331,7 @@ public class JRViewer {
 	 * @param args no arguments are read
 	 */
 	public static void main(String[] args) {
-		JRViewer v = JRViewer.createViewerVRWithAudio();
-		v.setPropertiesFile("JRViewerDefault.jrw");
-		v.startup();
+		JRViewer.createViewerVRWithAudio().startup();
 	}
 
 }
