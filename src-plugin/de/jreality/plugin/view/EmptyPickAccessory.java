@@ -5,7 +5,6 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.scene.SceneGraphPath;
 import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
 public abstract class EmptyPickAccessory extends ContentAccessory {
 
@@ -18,13 +17,7 @@ public abstract class EmptyPickAccessory extends ContentAccessory {
 			accessory.updateTrigger();
 		}
 	}
-	
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
+
 	SceneGraphPath currentEmptyPick;
 	private View view;
 	
@@ -38,12 +31,6 @@ public abstract class EmptyPickAccessory extends ContentAccessory {
 
 	private void updateTrigger() {
 		setTriggerComponent(view.getEmptyPickPath().getLastComponent());
-	}
-	
-	@Override
-	public void uninstall(Controller c) throws Exception {
-		// TODO Auto-generated method stub
-		super.uninstall(c);
 	}
 
 }

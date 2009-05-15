@@ -33,6 +33,7 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin {
 		});
 	}
 	
+	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		sceneSlot = c.getPlugin(SceneShrinkSlot.class);
