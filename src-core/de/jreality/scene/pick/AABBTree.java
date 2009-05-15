@@ -195,10 +195,7 @@ public class AABBTree {
         }
     }
 
-    private static Matrix m=new Matrix();
-    private static Matrix mInv=new Matrix();
-
-    /**
+     /**
      * Stores in the given array list all indexes of triangle intersection
      * between this tree and a given ray.
      *
@@ -207,11 +204,19 @@ public class AABBTree {
      * @param hits
      *            The arraylist to hold indexes of this OBBTree's triangle
      *            intersections.
+     * @deprecated
      */
     void intersect(IndexedFaceSet ifs, int metric, SceneGraphPath path, double[] from, double[] to, List<Hit> hits) {
-       path.getMatrix(m.getArray());
-      path.getInverseMatrix(mInv.getArray());
-      
+    	Matrix m=new Matrix();
+    	Matrix mInv=new Matrix();
+
+    	path.getMatrix(m.getArray());
+    	path.getInverseMatrix(mInv.getArray());
+    	intersect(ifs, metric, path, m, mInv, from, to, hits);
+    }
+    
+    void intersect(IndexedFaceSet ifs, int metric, SceneGraphPath path, Matrix m, Matrix mInv, double[] from, double[] to, List<Hit> hits) {
+     
       double[] fromLocal=mInv.multiplyVector(from);
       double[] toLocal=mInv.multiplyVector(to);
       double[] dir = toLocal.length==3 || toLocal[3]==0 ? toLocal : Rn.subtract(null, toLocal, fromLocal);
@@ -220,11 +225,11 @@ public class AABBTree {
         return;
       }
       if (left != null) {
-        left.intersect(ifs, metric, path, from, to, hits);
+        left.intersect(ifs, metric, path,m, mInv, from, to, hits);
       }
   
       if (right != null) {
-        right.intersect(ifs, metric, path, from, to, hits);
+        right.intersect(ifs, metric, path, m, mInv, from, to, hits);
       } else if (left == null) { // left == right == null
         double[] p1=new double[4], p2=new double[4], p3=new double[4], pobj=new double[4];
         p1[3]=p2[3]=p3[3]=1;

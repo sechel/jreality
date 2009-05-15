@@ -304,7 +304,7 @@ public class AABBPickSystem implements PickSystem {
         if (tree == AABBTree.nullTree) {
           BruteForcePicking.intersectPolygons(ifs, metric, path, m, mInv, from, to, localHits);
         } else {
-          tree.intersect(ifs, metric, path, from, to, localHits);
+          tree.intersect(ifs, metric, path, m, mInv, from, to, localHits);
         }
         extractHits(localHits);
     }

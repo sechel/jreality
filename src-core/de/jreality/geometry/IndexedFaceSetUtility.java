@@ -331,6 +331,7 @@ public class IndexedFaceSetUtility {
 
 	public static IndexedFaceSet extractFace(IndexedFaceSet ifs, int which)	{
 		IndexedFaceSet ifs2 = SceneGraphUtility.copy(ifs);
+		ifs2.setName(ifs.getName()+"ExtractFace"+which);
 		int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		int[][] newIndices = new int[1][];
 		newIndices[0] = indices[which];
