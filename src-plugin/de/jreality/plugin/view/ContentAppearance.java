@@ -68,7 +68,7 @@ public class ContentAppearance extends EmptyPickAccessory implements ChangeListe
 		restoreDefaults();
 	}
 	double worldSize = 1.0;
-	private SceneGraphComponent trigger;
+	
 	public void install(View sceneView, AlignedContent content) {
 		this.alignedContent = content;
 		

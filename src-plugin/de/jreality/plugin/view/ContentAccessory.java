@@ -27,7 +27,6 @@ public abstract class ContentAccessory extends ShrinkPanelPlugin {
 	public ContentAccessory() {
 		actionTool.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(ContentAccessory.this.getClass().getName()+".actionPerformed()");
 				toggle();
 			}
 		});

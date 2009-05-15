@@ -1,10 +1,8 @@
 package de.jreality.plugin.view;
 
-import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +10,6 @@ import de.jreality.swing.JFakeFrameWithGeometry;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
@@ -20,6 +17,7 @@ public class SceneShrinkSlot extends Plugin {
 
 	Set<ShrinkPanel> panels = new HashSet<ShrinkPanel>();
 	
+	@SuppressWarnings("serial")
 	ShrinkSlotVertical slot = new ShrinkSlotVertical(250) {
 		@Override
 		protected void addShrinkPanelAt(ShrinkPanel p, int pos) {
@@ -28,7 +26,6 @@ public class SceneShrinkSlot extends Plugin {
 		}
 		@Override
 		public void removeShrinkPanel(ShrinkPanel panel) {
-			// TODO Auto-generated method stub
 			super.removeShrinkPanel(panel);
 			panels.remove(panel);
 		}
@@ -53,7 +50,7 @@ public class SceneShrinkSlot extends Plugin {
 		
 		slotFrame.addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosed(WindowEvent e) {
+			public void windowClosing(WindowEvent e) {
 				for (ContentAccessory ca : accessories) ca.sceneFrameClosed();
 			}
 		});
