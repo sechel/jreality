@@ -48,8 +48,6 @@ public class AlignedContent extends Plugin {
 
 		public void contentChanged();
 
-		public double getScale();
-
 		public Rectangle3D getBounds();
 	}
 
@@ -126,19 +124,6 @@ public class AlignedContent extends Plugin {
 		}
 	}
 
-	public boolean isDoAligned() {
-		return doAligned;
-	}
-
-	public void setDoAligned(boolean doAligned) {
-		this.doAligned = doAligned;
-		if (!doAligned)	{
-			MatrixBuilder.euclidean().assignTo(transformationComponent);
-			MatrixBuilder.euclidean().assignTo(scalingComponent);
-		}
-		else contentChanged();
-	}
-
 	public int getWorldSize() {
 		return worldSize;
 	}
@@ -151,7 +136,6 @@ public class AlignedContent extends Plugin {
 	public void contentChanged() {
 		if (contentDelegate != null) {
 			contentDelegate.contentChanged();
-			contentScale = contentDelegate.getScale();
 		} else {
 			bounds = calculateBoundingBox(content);
 			removeZeroExtends(bounds);
@@ -190,10 +174,6 @@ public class AlignedContent extends Plugin {
 			}
 		}
 		fireStateChanged();
-	}
-
-	public double getContentScale() {
-		return contentScale;
 	}
 
 	public void fireStateChanged() {

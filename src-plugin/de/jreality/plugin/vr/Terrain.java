@@ -449,7 +449,7 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 	public static class TerrainContentDelegate implements ContentDelegate {
 
 		private double verticalOffset = .2;
-		private double scale = 1;
+
 		private AlignedContent alignedContent;
 		private double contentSize = 20;
 		private Rectangle3D bounds;
@@ -462,10 +462,6 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 			this.contentSize = contentSize;
 		}
 
-		public double getScale() {
-			return scale;
-		}
-
 		public void setAlignedContent(AlignedContent alignedContent) {
 			this.alignedContent = alignedContent;
 		}
@@ -474,8 +470,8 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 			alignContent(false);
 		}
 
-		
 		public void alignContent(boolean fire) {
+			double scale = 1;
 			try {
 				bounds = calculateBoundingBox(alignedContent.getContent());
 			} catch (Exception e) {

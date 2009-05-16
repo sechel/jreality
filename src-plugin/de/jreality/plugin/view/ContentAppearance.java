@@ -5,21 +5,18 @@ import java.awt.GridLayout;
 import java.util.HashMap;
 
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import de.jreality.plugin.view.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.view.image.ImageHook;
-import de.jreality.plugin.vr.Terrain;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.AppearanceInspector;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class ContentAppearance extends EmptyPickAccessory implements ChangeListener, ColorPickerModeChangedListener {
+public class ContentAppearance extends EmptyPickAccessory implements ColorPickerModeChangedListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = false;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;
@@ -80,23 +77,11 @@ public class ContentAppearance extends EmptyPickAccessory implements ChangeListe
 		if (contentComponent.getAppearance() == null) {
 			contentComponent.setAppearance(new Appearance());
 		}
-// try to adapt this to work with arbitrary scaling factors
-//		worldSize = content.getWorldSize()/20.0;
-//		Rectangle3D bounds = content.getBounds();
-//		worldSize = bounds.getMaxExtent();
+		contentComponent.getAppearance().setAttribute(
+				CommonAttributes.RADII_WORLD_COORDINATES,
+				true
+		);
 		appearanceInspector.setAppearance(contentComponent.getAppearance());
-		appearanceInspector.setScaledAppearance(scalingComponent.getAppearance());
-		content.addChangeListener(this);
-	}
-
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == alignedContent) {
-
-			double scale = alignedContent.getContentScale();
-			if (scale != appearanceInspector.getObjectScale()) {
-				appearanceInspector.setObjectScale(scale);
-			}
-		}
 	}
 
 	public void colorPickerModeChanged(int mode) {
@@ -198,7 +183,6 @@ public class ContentAppearance extends EmptyPickAccessory implements ChangeListe
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
 		shrinkPanel.removeAll();
-		alignedContent.removeChangeListener(this);
 		viewPreferences.removeColorPickerChangedListener(this);
 	}
 

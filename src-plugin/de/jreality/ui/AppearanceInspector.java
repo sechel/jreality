@@ -82,9 +82,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		closeLineColorsButton = new JButton("<-- Back"),
 		closePointColorsButton = new JButton("<-- Back"),
 		closeFaceColorsButton = new JButton("<-- Back");
-	private Appearance 
-		appearance = new Appearance(),
-		scaledAppearance = new Appearance();
+	private Appearance appearance = new Appearance();
 	private TextureInspector 
 		textureInspector = new TextureInspector(54);
 	private ShrinkPanel
@@ -409,20 +407,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 			}
 		});
 	}
-	
-	public Appearance getScaledAppearance() {
-		return scaledAppearance;
-	}
-
-	public void setScaledAppearance(Appearance scaledAppearance) {
-		this.scaledAppearance = scaledAppearance;
-		Scene.executeWriter(appearance, new Runnable() {
-			public void run() {
-				updateSphereRadius();
-				updateTubeRadius();
-			}
-		});
-	}
 
 	public double getMaximalRadius() {
 		return maximalRadius;
@@ -559,13 +543,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 			appearance.setAttribute(CommonAttributes.LINE_SHADER + "." + 
 					CommonAttributes.DEPTH_FUDGE_FACTOR, 1.0);
 		}
-		if (scaledAppearance != null) {
-			scaledAppearance.setAttribute(
-					CommonAttributes.POINT_SHADER + "." +
-					CommonAttributes.POINT_RADIUS,
-					r / objectScale
-			);
-		}
 	}
 	
 	public Color getPointColor() {
@@ -666,13 +643,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 					CommonAttributes.LINE_SHADER + "."	+
 					CommonAttributes.TUBE_RADIUS,
 					r
-			);
-		}
-		if (scaledAppearance != null) {
-			scaledAppearance.setAttribute(
-					CommonAttributes.LINE_SHADER + "."	+
-					CommonAttributes.TUBE_RADIUS,
-					r / objectScale
 			);
 		}
 	}
