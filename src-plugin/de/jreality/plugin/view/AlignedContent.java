@@ -6,14 +6,11 @@ import static de.jreality.geometry.BoundingBoxUtility.removeZeroExtends;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Transformation;
 import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
@@ -29,58 +26,31 @@ public class AlignedContent extends Plugin {
 	private SceneGraphComponent sceneRoot;
 
 	private SceneGraphComponent appearanceComponent;
-	private SceneGraphComponent transformationComponent;
-	private SceneGraphComponent scalingComponent;
-
 	private SceneGraphComponent content;
-	private double contentScale = 1;
 	private ContentDelegate contentDelegate;
 	private Rectangle3D bounds;
 	private transient ChangeListener changeListener;
 
 	private SceneGraphPath pathToContent;
-	private boolean doAligned = true;
 	private int worldSize;
 	
 	public static interface ContentDelegate {
 
 		public void setAlignedContent(AlignedContent alignedContent);
-
+		
 		public void contentChanged();
 
 		public Rectangle3D getBounds();
 	}
 
-
 	public AlignedContent() {
 
 		appearanceComponent = new SceneGraphComponent("content");
 		appearanceComponent.setAppearance(new Appearance("content appearance"));
-
-		transformationComponent = new SceneGraphComponent("transformation");
-		transformationComponent.setTransformation(
-				new Transformation("content transformation")
-		);
-		appearanceComponent.addChild(transformationComponent);
-
-		scalingComponent = new SceneGraphComponent("scaling");
-		scalingComponent.setTransformation(new Transformation(
-		"scaling transformation")
-		);
-		scalingComponent.setAppearance(new Appearance("scaled appearance"));
-		transformationComponent.addChild(scalingComponent);
 	}
 
 	public SceneGraphComponent getAppearanceComponent() {
 		return appearanceComponent;
-	}
-
-	public SceneGraphComponent getTransformationComponent() {
-		return transformationComponent;
-	}
-
-	public SceneGraphComponent getScalingComponent() {
-		return scalingComponent;
 	}
 
 	public void setContentDelegate(ContentDelegate delegate) {
@@ -98,15 +68,21 @@ public class AlignedContent extends Plugin {
 	}
 
 	public void setContent(final SceneGraphComponent content) {
-		if (this.content != content) {
-			if (this.content != null) {
-				scalingComponent.removeChild(AlignedContent.this.content);
-			}
-			if (content != null) {
-				scalingComponent.addChild(content);
-			}
+		if (contentDelegate != null) {
 			this.content = content;
-			contentChanged();
+			contentDelegate.contentChanged();
+		} else {
+			if (this.content != content) {
+				if (this.content != null) {
+					appearanceComponent.removeChild(AlignedContent.this.content);
+				}
+				if (content != null) {
+					appearanceComponent.addChild(content);
+				}
+				System.out.println("AlignedContent.setContent()");
+				this.content = content;
+				contentChanged();
+			}
 		}
 	}
 	
@@ -139,39 +115,6 @@ public class AlignedContent extends Plugin {
 		} else {
 			bounds = calculateBoundingBox(content);
 			removeZeroExtends(bounds);
-			if (doAligned)	{
-				double[] e = bounds.getExtent();
-				double[] center = bounds.getCenter();
-				double objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
-				worldSize = 20;
-				contentScale = worldSize/objectSize;
-				center[0] *= -contentScale;
-				center[1] *= -contentScale;
-				center[2] *= -contentScale;
-				Matrix matrix = MatrixBuilder.euclidean().scale(
-						contentScale
-				).translate(
-						center
-				).getMatrix();
-				matrix.assignTo(scalingComponent);
-				
-				// translate contentComponent
-				bounds = bounds.transformByMatrix(
-						bounds,
-						matrix.getArray()
-				);
-				center = bounds.getCenter();
-				Matrix m = MatrixBuilder.euclidean().translate(
-						-center[0], 
-						-center[1],
-						-center[2]
-				).getMatrix();
-				m.assignTo(transformationComponent);
-				bounds = bounds.transformByMatrix(
-						bounds,
-						m.getArray()
-				);				
-			}
 		}
 		fireStateChanged();
 	}
@@ -203,12 +146,11 @@ public class AlignedContent extends Plugin {
 	public void install(View view) {
 		sceneRoot = view.getSceneRoot();
 		sceneRoot.addChild(appearanceComponent);
-		SceneGraphPath path = new SceneGraphPath(view.getSceneRoot(), appearanceComponent, transformationComponent);
+		SceneGraphPath path = new SceneGraphPath(view.getSceneRoot(), appearanceComponent);
 		view.setEmptyPickPath(path);
 		SelectionManagerInterface smi = SelectionManager.selectionManagerForViewer(view.getViewer());
 		pathToContent = path.popNew();
 		smi.setSelection(new Selection(pathToContent));
-//		System.err.println("Setting Selection to  "+smi.getSelection().getSGPath());
 	}
 
 	public SceneGraphPath getPathToContent() {

@@ -46,7 +46,7 @@ public class WindowManager extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		updateWindowRootTransformation();
-		c.getPlugin(CameraStand.class);
+		//c.getPlugin(CameraStand.class);
 		c.getPlugin(View.class).getCameraPath().getLastComponent().addChild(windowRoot);
 	}
 

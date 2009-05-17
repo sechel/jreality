@@ -7,18 +7,17 @@ import java.io.InputStream;
 import javax.swing.AbstractAction;
 
 import de.jreality.plugin.audio.Audio;
-import de.jreality.plugin.audio.ContentSound;
 import de.jreality.plugin.view.AlignedContent;
 import de.jreality.plugin.view.Background;
 import de.jreality.plugin.view.CameraStand;
 import de.jreality.plugin.view.ContentAppearance;
-import de.jreality.plugin.view.ManagedContentGUI;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
 import de.jreality.plugin.view.ManagedContent;
+import de.jreality.plugin.view.ManagedContentGUI;
 import de.jreality.plugin.view.Shell;
 import de.jreality.plugin.view.View;
 import de.jreality.plugin.view.ViewMenuBar;
@@ -55,7 +54,6 @@ public class ContentViewerVR {
 	private HeadUpDisplay headUpDisplay;
 
 	private Audio audio;
-	private ContentSound contentSound;
 	
 	private boolean useAudio = false;
 	
@@ -128,8 +126,6 @@ public class ContentViewerVR {
 		if (useAudio) {
 			audio = new Audio();
 			controller.registerPlugin(audio);
-			contentSound = new ContentSound();
-			controller.registerPlugin(contentSound);
 		}
 		
 		contentTools = new ContentTools();
@@ -220,10 +216,6 @@ public class ContentViewerVR {
 		return audio;
 	}
 	
-	public ContentSound getContentSound() {
-		return contentSound;
-	}
-
 	public HeadUpDisplay getHeadUpDisplay() {
 		return headUpDisplay;
 	}

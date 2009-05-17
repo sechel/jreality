@@ -1,12 +1,16 @@
 package de.jreality.plugin.view;
 
+import java.awt.Color;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -23,6 +27,9 @@ public class Lights extends Plugin  {
 
 	private DirectionalLight sunLight;
 	private DirectionalLight skyLight;
+	protected SceneGraphComponent cameraComponent;
+	protected SceneGraphComponent headLight;
+	private PointLight cameraLight;
 	public Lights() {
 		lights = new SceneGraphComponent("lights");
 
@@ -43,6 +50,15 @@ public class Lights extends Plugin  {
 		MatrixBuilder.euclidean().rotateFromTo(new double[] { 0, 0, 1 },
 				new double[] { 0, 1, 0 }).assignTo(sky);
 		lights.addChild(sky);
+		
+		headLight = new SceneGraphComponent("camera light");
+		cameraLight = new PointLight("camera light");
+		cameraLight.setIntensity(.3);
+		cameraLight.setAmbientFake(true);
+		cameraLight.setFalloff(1, 0, 0);
+		cameraLight.setName("camera light");
+		cameraLight.setColor(new Color(255,255,255,255));
+		headLight.setLight(cameraLight);
 	}
 
 	public double getSkyLightIntensity() {
@@ -53,12 +69,20 @@ public class Lights extends Plugin  {
 		skyLight.setIntensity(x);
 	}
 
-	public void setLightIntensity(double intensity) {
+	public void setSunLightIntensity(double intensity) {
 		sunLight.setIntensity(intensity);
 	}
 
-	public double getLightIntensity() {
+	public double getSunLightIntensity() {
 		return sunLight.getIntensity();
+	}
+	
+	public void setCameraLightIntensity(double intensity) {
+		cameraLight.setIntensity(intensity);
+	}
+
+	public double getCameraLightIntensity() {
+		return cameraLight.getIntensity();
 	}
 
 	public void install(View v) {
@@ -75,6 +99,16 @@ public class Lights extends Plugin  {
 						sceneRoot.removeChild(lights);
 						sceneRoot = view.getSceneRoot();
 						sceneRoot.addChild(lights);
+					}
+				}
+				SceneGraphPath cameraPath = view.getCameraPath();
+				if (cameraPath != null) {
+					SceneGraphComponent cameraComponent = cameraPath.getLastComponent();
+					if (Lights.this.cameraComponent != cameraComponent) {
+						if (Lights.this.cameraComponent != null) {
+							Lights.this.cameraComponent.removeChild(headLight);
+						}
+						cameraComponent.addChild(headLight);
 					}
 				}
 			}
@@ -127,6 +161,8 @@ public class Lights extends Plugin  {
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		lightParent.removeChild(lights);
+		if (cameraComponent != null) {
+			Lights.this.cameraComponent.removeChild(headLight);
+		}
 	}
-
 }

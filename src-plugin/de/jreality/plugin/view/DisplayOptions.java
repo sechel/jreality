@@ -135,7 +135,7 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		c.getPlugin(CameraStand.class);
+		//c.getPlugin(CameraStand.class);
 		view = c.getPlugin(View.class);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");

@@ -83,10 +83,10 @@ public class ContentTools extends ToolBarAggregator {
 	public void setPickVertices(boolean b) {
 		pickVertices.setSelected(b);
 		if (alignedContent != null) {
-			Appearance contentAppearance = alignedContent.getTransformationComponent().getAppearance();
+			Appearance contentAppearance = alignedContent.getAppearanceComponent().getAppearance();
 			if (contentAppearance == null) {
 				contentAppearance = new Appearance();
-				alignedContent.getTransformationComponent().setAppearance(contentAppearance);
+				alignedContent.getAppearanceComponent().setAppearance(contentAppearance);
 			}
 			contentAppearance.setAttribute(
 					CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE,
@@ -98,10 +98,10 @@ public class ContentTools extends ToolBarAggregator {
 	public void setPickEdges(boolean b) {
 		pickEdges.setSelected(b);
 		if (alignedContent != null) {
-			Appearance contentAppearance = alignedContent.getTransformationComponent().getAppearance();
+			Appearance contentAppearance = alignedContent.getAppearanceComponent().getAppearance();
 			if (contentAppearance == null) {
 				contentAppearance = new Appearance();
-				alignedContent.getTransformationComponent().setAppearance(contentAppearance);
+				alignedContent.getAppearanceComponent().setAppearance(contentAppearance);
 			}
 			contentAppearance.setAttribute(
 					CommonAttributes.LINE_SHADER+"."+CommonAttributes.PICKABLE,
@@ -113,10 +113,10 @@ public class ContentTools extends ToolBarAggregator {
 	public void setPickFaces(boolean b) {
 		pickFaces.setSelected(b);
 		if (alignedContent != null) {
-			Appearance contentAppearance = alignedContent.getTransformationComponent().getAppearance();
+			Appearance contentAppearance = alignedContent.getAppearanceComponent().getAppearance();
 			if (contentAppearance == null) {
 				contentAppearance = new Appearance();
-				alignedContent.getTransformationComponent().setAppearance(contentAppearance);
+				alignedContent.getAppearanceComponent().setAppearance(contentAppearance);
 			}
 			contentAppearance.setAttribute(
 					CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.PICKABLE,
@@ -149,7 +149,7 @@ public class ContentTools extends ToolBarAggregator {
 	}
 
 	private void setToolEnabled(Tool tool, boolean b) {
-		SceneGraphComponent contentComponent = alignedContent.getTransformationComponent();
+		SceneGraphComponent contentComponent = alignedContent.getAppearanceComponent();
 		if (!b && contentComponent.getTools().contains(tool)) {
 			contentComponent.removeTool(tool);
 		}

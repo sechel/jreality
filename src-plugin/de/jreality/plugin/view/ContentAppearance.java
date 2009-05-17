@@ -68,11 +68,6 @@ public class ContentAppearance extends EmptyPickAccessory implements ColorPicker
 	
 	public void install(View sceneView, AlignedContent content) {
 		this.alignedContent = content;
-		
-		SceneGraphComponent scalingComponent = content.getScalingComponent();
-		if (scalingComponent.getAppearance() == null) {
-			scalingComponent.setAppearance(new Appearance());
-		}
 		SceneGraphComponent contentComponent = content.getAppearanceComponent();
 		if (contentComponent.getAppearance() == null) {
 			contentComponent.setAppearance(new Appearance());

@@ -17,6 +17,7 @@ import de.jreality.plugin.view.ContentAppearance;
 import de.jreality.plugin.view.ContentLoader;
 import de.jreality.plugin.view.ContentTools;
 import de.jreality.plugin.view.DisplayOptions;
+import de.jreality.plugin.view.EncompassCamera;
 import de.jreality.plugin.view.Export;
 import de.jreality.plugin.view.Inspector;
 import de.jreality.plugin.view.Lights;
@@ -257,13 +258,19 @@ public class JRViewer {
 		return new JRViewer(false);
 	}
 	
+	public static JRViewer createViewer() {
+		return createViewer(false);
+	}
+			
 	/**
 	 * Creates a JRViewer with the recommended viewer plug-in set.
 	 * @return A configured JRViewer instance
 	 */
-	public static JRViewer createViewer() {
+	public static JRViewer createViewer(boolean viewerApp) {
 		JRViewer v = new JRViewer(false);
-		v.registerPlugin(new CameraStand());
+		v.registerPlugin(
+				viewerApp ? new EncompassCamera() : new CameraStand()
+		);
 		v.registerPlugin(new Lights());
 		v.registerPlugin(new Background());
 		v.registerPlugin(new ViewMenuBar());
@@ -332,11 +339,12 @@ public class JRViewer {
 	 * @return A configured JRViewer instance
 	 */
 	public static JRViewer createViewerApp() {
-		JRViewer v = new JRViewer(true);
-		v.registerPlugin(new ViewMenuBar());
-		v.registerPlugin(new Inspector());
-		v.registerPlugin(new Shell());
-		return v;
+//		JRViewer v = new JRViewer(true);
+//		v.registerPlugin(new ViewMenuBar());
+//		v.registerPlugin(new Inspector());
+//		v.registerPlugin(new Shell());
+//		return v;
+		return createViewer(true);
 	}	
 	
 	
@@ -384,7 +392,8 @@ public class JRViewer {
 	 * @param args no arguments are read
 	 */
 	public static void main(String[] args) {
-		JRViewer.createViewerVRWithAudio().startup();
+		//JRViewer.createViewerVRWithAudio().startup();
+		JRViewer.createViewer().startup();
 	}
 
 }

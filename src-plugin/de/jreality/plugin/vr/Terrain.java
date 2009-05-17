@@ -30,6 +30,7 @@ import javax.swing.event.ChangeListener;
 
 import com.bric.swing.ColorPicker;
 
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -44,6 +45,7 @@ import de.jreality.plugin.vr.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.JSliderVR;
 import de.jreality.ui.TextureInspector;
@@ -433,8 +435,6 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 		updateFaceReflection();
 		updateTransparencyEnabled();
 		updateTransparency();
-		
-		alignedContent.contentChanged();
 	}
 	
 	@Override
@@ -453,7 +453,24 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 		private AlignedContent alignedContent;
 		private double contentSize = 20;
 		private Rectangle3D bounds;
+		private SceneGraphComponent transformationComponent;
+		private SceneGraphComponent scalingComponent;
 
+		private SceneGraphComponent content;
+
+		TerrainContentDelegate() {
+			transformationComponent = new SceneGraphComponent("transformation");
+			transformationComponent.setTransformation(
+					new Transformation("content transformation")
+			);
+
+			scalingComponent = new SceneGraphComponent("scaling");
+			scalingComponent.setTransformation(new Transformation(
+			"scaling transformation")
+			);
+			transformationComponent.addChild(scalingComponent);
+		}
+		
 		public double getContentSize() {
 			return contentSize;
 		}
@@ -463,10 +480,35 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 		}
 
 		public void setAlignedContent(AlignedContent alignedContent) {
-			this.alignedContent = alignedContent;
+			if (this.alignedContent != alignedContent) {
+				if (this.alignedContent != null) {
+					this.alignedContent.getAppearanceComponent().removeChild(transformationComponent);
+				}
+				if (alignedContent != null) {
+					alignedContent.getAppearanceComponent().addChild(transformationComponent);
+				}
+				this.alignedContent = alignedContent;
+			}
 		}
 
 		public void contentChanged() {
+			System.out.println("TerrainContentDelegate.contentChanged()");
+			SceneGraphComponent newContent = alignedContent.getContent();
+			if (newContent != content) {
+				if (content != null) {
+					System.out.println("removing");
+					scalingComponent.removeChild(content);
+				}
+				if (newContent != null) {
+					bounds = BoundingBoxUtility.calculateBoundingBox(newContent);
+					System.out.println("adding child (terrain)");
+					scalingComponent.addChild(newContent);
+				} else {
+					bounds = null;
+				}
+				alignContent(false);
+				content = newContent;
+			}
 			alignContent(false);
 		}
 
@@ -490,7 +532,7 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 			).translate(
 					center
 			).getMatrix();
-			matrix.assignTo(alignedContent.getScalingComponent());
+			matrix.assignTo(scalingComponent);
 			
 			// translate contentComponent
 			bounds = bounds.transformByMatrix(
@@ -503,7 +545,7 @@ public class Terrain extends ContentAccessory implements ActionListener, ChangeL
 					-bounds.getMinY() + verticalOffset,
 					-center[2]
 			).getMatrix();
-			m.assignTo(alignedContent.getTransformationComponent());
+			m.assignTo(transformationComponent);
 			bounds = bounds.transformByMatrix(
 					bounds,
 					m.getArray()
