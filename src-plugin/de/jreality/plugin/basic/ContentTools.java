@@ -7,7 +7,6 @@ import javax.swing.event.ChangeListener;
 import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.AxisTranslationTool;
@@ -34,7 +33,7 @@ public class ContentTools extends ToolBarAggregator {
 		pickFaces = new JToggleButton(ImageHook.getIcon("shape_square.png")),
 		pickEdges = new JToggleButton(ImageHook.getIcon("shape_edges.png")),
 		pickVertices = new JToggleButton(ImageHook.getIcon("shape_handles.png"));
-	private Content alignedContent = null;;
+	private Content alignedContent = null;
 
 	public ContentTools() {
 		rotateTool = new RotateTool();
@@ -132,13 +131,8 @@ public class ContentTools extends ToolBarAggregator {
 
 	private void setToolEnabled(Tool tool, boolean b) {
 		if (alignedContent != null) {
-			SceneGraphComponent contentComponent = alignedContent.getContentRoot();
-			if (!b && contentComponent.getTools().contains(tool)) {
-				contentComponent.removeTool(tool);
-			}
-			if (b && !contentComponent.getTools().contains(tool)) {
-				contentComponent.addTool(tool);
-			}
+			if (b) alignedContent.addContentTool(tool);
+			else alignedContent.removeContentTool(tool);
 		}
 	}
 

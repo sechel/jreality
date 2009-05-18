@@ -94,6 +94,7 @@ public class View extends SideContainerPerspective {
 	private ToolSystemConfiguration toolSystemConfiguration;
 	private RunningEnvironment runningEnvironment;
 	private String toolConfig;
+	private SceneGraphPath contentPath;
 
 	public enum RunningEnvironment {
 		PORTAL,
@@ -477,4 +478,8 @@ public class View extends SideContainerPerspective {
 		return SelectionManager.selectionManagerForViewer(getViewer());
 	}
 
+	public SceneGraphPath getContentPath() {
+		return contentPath;
+	}
+	
 }

@@ -1,56 +1,124 @@
 package de.jreality.plugin.basic;
 
+import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 
+import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.reader.Readers;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.event.SceneGraphComponentEvent;
-import de.jreality.scene.event.SceneGraphComponentListener;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.data.Attribute;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
-import de.jreality.ui.viewerapp.actions.file.LoadFile;
+import de.jreality.util.Input;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.flavor.UIFlavor;
 
-public class ContentLoader extends Plugin {
+public class ContentLoader extends Plugin implements UIFlavor {
 
+	private Content
+		managedContent = null;
 	private ViewMenuBar 
 		viewerMenuAggregator = null;
+	private ViewToolBar
+		viewToolBar = null;
+	private final JCheckBox 
+		smoothNormalsCheckBox = new JCheckBox("smooth normals"),
+		removeAppsCheckBox = new JCheckBox("ignore appearances");
+	private JFileChooser 
+		chooser = FileLoaderDialog.createFileChooser();
+	private ContentLoadAction
+		contentLoadAction = new ContentLoadAction();
+	private Component 
+		parent = null;
 
-	private LoadFile
-		contentLoadAction;
+	public ContentLoader() {
+		Box checkBoxPanel = new Box(BoxLayout.Y_AXIS);
+		JCheckBox smoothNormalsCheckBox = new JCheckBox("Smooth Normals");
+		JCheckBox removeAppsCheckBox = new JCheckBox("Ignore Appearances");
 
-	Content content;
+		checkBoxPanel.add(smoothNormalsCheckBox);
+		checkBoxPanel.add(removeAppsCheckBox);
+
+		chooser.setAccessory(checkBoxPanel);
+		chooser.setMultiSelectionEnabled(false);
+	}
+	
+	private class ContentLoadAction extends AbstractAction {
+
+		private static final long 
+			serialVersionUID = 1L;
+
+		public ContentLoadAction() {
+			putValue(NAME, "Load Content");
+			putValue(SMALL_ICON, ImageHook.getIcon("folder_brick.png"));
+			putValue(SHORT_DESCRIPTION, "Load Content");
+		}
+		
+		public void actionPerformed(ActionEvent e) {
+			loadFile();
+		}
+		
+	}
 	
 	public Action getAction() {
 		return contentLoadAction;
 	}
 	
-	SceneGraphComponent dummy;
 
-	private View view;
-	
-	private void updateAction() {
-		dummy = new SceneGraphComponent();
-		contentLoadAction = new LoadFile("load file", dummy, view.getViewer());
-		dummy.addSceneGraphComponentListener(new SceneGraphComponentListener() {
-			public void childAdded(SceneGraphComponentEvent ev) {
-				content.setContent(ev.getNewChildElement());
-				updateAction(); 
+	public void install(View sceneView, Content managedContent) {
+		parent = sceneView.getViewer().getViewingComponent();
+		this.managedContent = managedContent;
+	}
+
+	private void loadFile() {
+		File file = null;
+		if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+			file = chooser.getSelectedFile();
+		}
+		if (file != null) {
+			try {
+				SceneGraphComponent read = Readers.read(Input.getInput(file));
+				SceneGraphComponent tempRoot = new SceneGraphComponent();
+				tempRoot.addChild(read);
+				tempRoot.accept(new SceneGraphVisitor() {
+					@Override
+					public void visit(SceneGraphComponent c) {
+						if (removeAppsCheckBox.isSelected() && c.getAppearance() != null) c.setAppearance(null); 
+						c.childrenWriteAccept(this, false, false, false, false, true,
+								true);
+					}
+					@Override
+					public void visit(IndexedFaceSet i) {
+						if (i.getFaceAttributes(Attribute.NORMALS) == null) IndexedFaceSetUtility.calculateAndSetFaceNormals(i);
+						if (i.getVertexAttributes(Attribute.NORMALS) == null) IndexedFaceSetUtility.calculateAndSetVertexNormals(i);
+						if (smoothNormalsCheckBox.isSelected()) IndexedFaceSetUtility.assignSmoothVertexNormals(i, -1);
+					}
+				});
+				tempRoot.removeChild(read);
+				managedContent.setContent(read);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			public void childRemoved(SceneGraphComponentEvent ev) {}
-			public void childReplaced(SceneGraphComponentEvent ev) {}
-			public void visibilityChanged(SceneGraphComponentEvent ev) {}
-		});
+			smoothNormalsCheckBox.setSelected(false);
+			removeAppsCheckBox.setSelected(false);
+		}
 	}
-	
-	public void install(View sceneView) {
-		view = sceneView;
-		updateAction();
-	}
+
 
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -64,17 +132,21 @@ public class ContentLoader extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		View viewPlugin = c.getPlugin(View.class);
-		content = PluginUtility.getPlugin(c, Content.class);
+		Content contentPlugin = PluginUtility.getPlugin(c, Content.class);
 		install(
-				viewPlugin
+				viewPlugin,
+				contentPlugin
 		);
 		viewerMenuAggregator = c.getPlugin(ViewMenuBar.class);
 		viewerMenuAggregator.addMenuItem(getClass(), 0.0, contentLoadAction, "File");
+		viewToolBar = c.getPlugin(ViewToolBar.class);
+		viewToolBar.addAction(getClass(), 0.0, contentLoadAction);
 	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		viewerMenuAggregator.removeAll(getClass()); 
+		viewToolBar.removeAll(getClass());
 	}
 	
 	@Override
@@ -90,19 +162,23 @@ public class ContentLoader extends Plugin {
 	}
 
 	public String getCurrentDirectory() {
-		return FileLoaderDialog.getLastDir().getAbsolutePath();
+		return chooser.getCurrentDirectory().getAbsolutePath();
 	}
 	
  	public void setCurrentDirectory(String directory) {
 		File dir = new File(directory);
 		if (dir.exists() && dir.isDirectory()) {
-			FileLoaderDialog.setLastDir(dir);
+			chooser.setCurrentDirectory(dir);
 		} else {
 			System.out.println(
 					"failed to restore ContentLoader directory "+directory
 			);
 		}
 	}
+ 	
+ 	public void mainUIChanged(String uiClass) {
+ 		SwingUtilities.updateComponentTreeUI(chooser);
+ 	}
  	
 }
 

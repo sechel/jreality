@@ -10,6 +10,7 @@ public class BasicViewer {
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		SimpleController c = new DebugController();
 		c.registerPlugin(new View(true));
+		c.registerPlugin(new DisplayOptions());
 		//c.registerPlugin(new EmptyPickContent());
 		c.registerPlugin(new BoxAlignedContent());
 		c.registerPlugin(new ViewMenuBar());
@@ -17,6 +18,7 @@ public class BasicViewer {
 		c.registerPlugin(new ContentLoader());
 		c.registerPlugin(new ContentTools());
 		c.registerPlugin(new Shell());
+		c.registerPlugin(new ContentAppearance());
 		c.startup();
 	}
 	

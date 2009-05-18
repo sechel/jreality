@@ -9,15 +9,17 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class BoxAlignedContent extends EmptyPickContent {
+public class BoxAlignedContent extends AbstractContent {
 
-	double size = 1;
+	double size = 5;
 		
-	SceneGraphComponent translateComponent=new SceneGraphComponent("translate");
-	SceneGraphComponent scaleComponent=new SceneGraphComponent("scale");
+	SceneGraphComponent alignment=new SceneGraphComponent("alignment");
 	
 	private SceneGraphComponent oldContent;
+
+	private View view;
 	
 	public void setContent(SceneGraphNode content) {
 		SceneGraphComponent cmp;
@@ -26,32 +28,46 @@ public class BoxAlignedContent extends EmptyPickContent {
 			cmp = new SceneGraphComponent("wrapper");
 			SceneGraphUtility.addChildNode(cmp, content);
 		}
+
+		if (oldContent != null) alignment.removeChild(oldContent);
+		oldContent = cmp;
+		alignment.addChild(cmp);
+		
 		Rectangle3D bds = BoundingBoxUtility.calculateBoundingBox(cmp);
 		
 		double[] ext = bds.getExtent();
 		double objectSize = Math.max(Math.max(ext[0], ext[1]), ext[2]);
 		
-		MatrixBuilder.euclidean().scale(size/objectSize).assignTo(scaleComponent);
-		
 		double[] c = bds.getCenter();
-		
-		MatrixBuilder.euclidean().translate(-c[0], -c[1], -c[2]).assignTo(translateComponent);
-		
-		if (oldContent != null) scaleComponent.removeChild(oldContent);
-		oldContent = cmp;
-		scaleComponent.addChild(cmp);
+
+		MatrixBuilder.euclidean().scale(size/objectSize).translate(-c[0], -c[1], -c[2]).assignTo(alignment);
 		
 	}
 
 	@Override
 	public void install(Controller c) throws Exception {
-		super.install(c);
-		scaleComponent.setAppearance(new Appearance());
-		translateComponent.addChild(scaleComponent);
-		view.getEmptyPickPath().getLastComponent().addChild(translateComponent);
-		SceneGraphPath newEPP = view.getEmptyPickPath().pushNew(translateComponent);
-		newEPP.push(scaleComponent);
-		view.setEmptyPickPath(newEPP);
+		view = c.getPlugin(View.class);
+		alignment.setAppearance(new Appearance("content app"));
+		view.getSceneRoot().addChild(alignment);
+		view.setEmptyPickPath(new SceneGraphPath(view.getSceneRoot(), alignment));
+	}
+
+	@Override
+	public PluginInfo getPluginInfo() {
+		return new PluginInfo("aligned content");
+	}
+
+	@Override
+	protected SceneGraphComponent getToolCmp() {
+		return alignment;
+	}
+
+	public void contentChanged() {
+		setContent(oldContent);
+	}
+
+	public Appearance getContentAppearance() {
+		return alignment.getAppearance();
 	}
 	
 }
