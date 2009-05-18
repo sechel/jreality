@@ -41,6 +41,9 @@
 package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
@@ -56,8 +59,7 @@ public class Quit extends AbstractJrAction {
 
   public Quit(String name) {
     super(name);
-    // better use Alt+F4... ;-)
-    //setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
+    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK));
     setShortDescription("Quit");
   }
   
