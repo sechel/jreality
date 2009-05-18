@@ -11,8 +11,7 @@ public class BasicViewer {
 		SimpleController c = new DebugController();
 		c.registerPlugin(new View(true));
 		c.registerPlugin(new DisplayOptions());
-		//c.registerPlugin(new EmptyPickContent());
-		c.registerPlugin(new BoxAlignedContent());
+		c.registerPlugin(new BasicContent());
 		c.registerPlugin(new ViewMenuBar());
 		c.registerPlugin(new Inspector());
 		c.registerPlugin(new ContentLoader());
@@ -21,7 +20,5 @@ public class BasicViewer {
 		c.registerPlugin(new ContentAppearance());
 		c.startup();
 	}
-	
-	
 	
 }
