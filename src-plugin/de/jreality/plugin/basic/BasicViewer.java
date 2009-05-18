@@ -1,6 +1,5 @@
 package de.jreality.plugin.basic;
 
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
@@ -17,6 +16,7 @@ public class BasicViewer {
 		c.registerPlugin(new Inspector());
 		c.registerPlugin(new ContentLoader());
 		c.registerPlugin(new ContentTools());
+		c.registerPlugin(new Shell());
 		c.startup();
 	}
 	
