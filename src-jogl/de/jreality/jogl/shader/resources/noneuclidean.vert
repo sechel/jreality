@@ -144,12 +144,12 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
     vec4 color;
     vec4 eye = vec4(0.0, 0.0, 0.0, 1.0);
     int i;
-    float fog = 0.0, d2eye=0.0;
+    float fog = 0.0, d2eye=0.0, alpha;
     if (fogEnabled)	{
-      d2eye = distance4(eye, ecPosition); 
+      	d2eye = distance4(eye, ecPosition); 
 //    d2eye = 1.0;
-    fog = exp2(-d2eye * gl_Fog.density);
-    fog = clamp(fog, 0.0, 1.0);
+    	fog = exp2(-d2eye * gl_Fog.density);
+    	fog = clamp(fog, 0.0, 1.0);
     }   
     normalize4(ecPosition, eye);
     // Clear the light intensity accumulators
@@ -170,6 +170,7 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 
     color = clamp( color, 0.0, 1.0 );
     if (fogEnabled) color = mix( (gl_Fog.color), color, fog);
+    color.a = 1-transparency;
     if (color.a != 0.0 && !transparencyEnabled) color.a = 1.0;
    return color;
 }

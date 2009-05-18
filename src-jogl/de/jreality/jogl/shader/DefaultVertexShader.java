@@ -110,6 +110,7 @@ public class DefaultVertexShader {
 			if (jr.renderingState.transparencyEnabled || diffuseColorAsFloat[3] == 0.0) gl.glColor4fv( diffuseColorAsFloat,0);
 			else gl.glColor3fv(diffuseColorAsFloat,0);
 			System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
+		    jrs.currentAlpha =jrs.diffuseColor[3];
 //		}
 			//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
 		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat,0);

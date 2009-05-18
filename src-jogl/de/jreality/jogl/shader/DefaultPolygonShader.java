@@ -47,6 +47,7 @@ import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
+import static de.jreality.shader.CommonAttributes.USE_GLSL;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -118,7 +119,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,SMOOTH_SHADING), SMOOTH_SHADING_DEFAULT);	
-		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name,"useGLSL"), false);	
+		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, USE_GLSL), false);	
 		oneTexturePerImage = eap.getAttribute(ShaderUtility.nameSpace(name,ONE_TEXTURE2D_PER_IMAGE), true);	
 	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = null;
 	    joglCubeMap = null;
@@ -163,6 +164,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				noneuclideanInitialized = false;
 			}
 	    }
+	    System.err.println("useglsl = "+useGLSL);
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
 		firstTime = true;
@@ -220,9 +222,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		} 	
     
 		jr.renderingState.texUnitCount = texunitcoords; 
-//	    vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jrs); 
-	    jrs.currentAlpha =jrs.diffuseColor[3];
 	    if (useGLSL && glslProgram != null)		{
 	    	if ( glslProgram == noneuclideanShader)	{
 	    		// the only reason we're doing it here is because only now do we know what jrs is
@@ -232,7 +232,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    		// it has
 	    		glslProgram.setUniform("lightingEnabled", jrs.lighting);
 	    		glslProgram.setUniform("transparencyEnabled", jrs.transparencyEnabled);
-	    		glslProgram.setUniform("transparency", (float) (1.0f - jrs.currentAlpha));
+	    		glslProgram.setUniform("transparency", (float) (1.0f - jrs.diffuseColor[3]));
 	    		glslProgram.setUniform("numLights", jrs.numLights);
 	    		glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
 	    		glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
