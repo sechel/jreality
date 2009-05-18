@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.swing.Action;
 
+import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.event.SceneGraphComponentEvent;
@@ -63,7 +64,7 @@ public class ContentLoader extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		View viewPlugin = c.getPlugin(View.class);
-		content = c.getPlugins(Content.class).get(0);
+		content = PluginUtility.getPlugin(c, Content.class);
 		install(
 				viewPlugin
 		);

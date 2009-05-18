@@ -4,6 +4,7 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -206,7 +207,7 @@ public class ContentTools extends ToolBarAggregator {
 
 	@Override
 	public void install(Controller c) throws Exception {
-		alignedContent = c.getPlugins(Content.class).get(0);
+		alignedContent = PluginUtility.getPlugin(c, Content.class);
 		install(alignedContent);
 //		shrinkPanel.setHeaderColor(new Color(0.5f, 0.5f, 0.2f));
 		super.install(c);

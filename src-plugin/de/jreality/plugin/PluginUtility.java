@@ -14,10 +14,11 @@ public class PluginUtility {
 	 * @return a plug-in instance or null if no such plug-in
 	 * was registered
 	 */
-	public static <T extends Plugin> T getPlugin(Controller c, Class<T> clazz) {
+	@SuppressWarnings("unchecked")
+	public static <T> T getPlugin(Controller c, Class<T> clazz) {
 		List<T> candidates = c.getPlugins(clazz);
 		for (T p : candidates) {
-			c.getPlugin(p.getClass());
+			c.getPlugin((Class<? extends Plugin>) p.getClass());
 			return p;
 		}
 		return null;
