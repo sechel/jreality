@@ -59,6 +59,13 @@ public class FileLoaderDialog {
 	
   static File lastDir = new File(Secure.getProperty(SystemProperties.JREALITY_DATA, "/net/MathVis/data/testData3D"));
   
+  public static void setLastDir(File dir) {
+	  lastDir = dir;
+  }
+  
+  public static File getLastDir() {
+	  return lastDir;
+  }
   
   public static JFileChooser createFileChooser() {
     return createFileChooser(true, FileFilter.createJRealityDataFilter());
