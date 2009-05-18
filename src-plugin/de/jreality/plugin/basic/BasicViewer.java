@@ -1,10 +1,14 @@
 package de.jreality.plugin.basic;
 
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class BasicViewer {
 
 	public static void main(String[] args) {
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		SimpleController c = new DebugController();
 		c.registerPlugin(new View(true));
 		//c.registerPlugin(new EmptyPickContent());
