@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.Timer;
 
+import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.TubeFactory;
@@ -43,7 +44,8 @@ public class CameraPathExample {
 
 	private static List<SceneGraphPath> lightPaths;
 	private static SceneGraphComponent movingLightSGC;
-
+	static boolean frenet = false;
+	private static PolygonalTubeFactory polygonalTubeFactory;
 	public static void main(String[] args) {
 		SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
 		final SceneGraphComponent child1 =  SceneGraphUtility.createFullSceneGraphComponent("knot"),
@@ -51,12 +53,13 @@ public class CameraPathExample {
 		
 		world.addChildren(child1, child2);
 		IndexedLineSet torus1 = Primitives.discreteTorusKnot(1, .4, 2, 3, 1000);
-		PolygonalTubeFactory polygonalTubeFactory = new PolygonalTubeFactory(torus1, 0);
+		polygonalTubeFactory = new PolygonalTubeFactory(torus1, 0);
 		polygonalTubeFactory.setClosed(true);
 		polygonalTubeFactory.setMatchClosedTwist(true);
 		polygonalTubeFactory.setGenerateTextureCoordinates(true);
 		polygonalTubeFactory.setRadius(.1);
 		polygonalTubeFactory.setGenerateEdges(true);
+		polygonalTubeFactory.setFrameFieldType(frenet ? FrameFieldType.FRENET : FrameFieldType.PARALLEL);
 		polygonalTubeFactory.update();
 		
 		IndexedFaceSet torus1Tubes = polygonalTubeFactory.getTube();
@@ -97,11 +100,12 @@ public class CameraPathExample {
 		// torus knot, using the frame field from the tube factory.
 		// the z-direction has to be flipped to agree with the fact that the
 		// jReality camera points in the negative z-direction
-		final Timer movepoint = new Timer(20, new ActionListener() {
+		final Timer movepoint = new Timer(40, new ActionListener() {
 			int count = 0;
 			public void actionPerformed(ActionEvent e) {
 				MatrixBuilder.euclidean(new Matrix(frames[count].frame.clone())).
-					rotateZ(frames[count].phi).scale(1,1,-1).assignTo(child2);
+					rotateZ(Math.PI/2 + (frenet ? 0.0 : frames[count].phi)).
+					scale(1,1,-1).assignTo(child2);
 				count = (count+1)%frames.length;
 			}
 			
@@ -163,6 +167,12 @@ public class CameraPathExample {
 					case KeyEvent.VK_2:
 						if (movepoint.isRunning()) movepoint.stop();
 						else movepoint.start();
+						break;
+					case KeyEvent.VK_3:
+						movepoint.stop();
+						frenet = !frenet;
+						polygonalTubeFactory.setFrameFieldType(frenet ? FrameFieldType.FRENET : FrameFieldType.PARALLEL);
+						polygonalTubeFactory.update();
 						break;
 				}
 		
