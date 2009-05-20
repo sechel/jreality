@@ -43,6 +43,7 @@ package de.jreality.jogl.shader;
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_2;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -96,7 +97,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	private static final int PER_PART = 2;
 	GlslProgram program;
 
-	Texture2D texture1, texture0;
+	Texture2D texture1, texture0, texture2;
 	
 	CubeMap environmentMap;
 	private DefaultVertexShader vertexShader = new DefaultVertexShader();
@@ -121,6 +122,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		} else texture0 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
 			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D_1), eap);
+		} else texture1 = null;
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_2), eap)) {
+			texture2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D_2), eap);
 		} else texture1 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)) {
 			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap);
@@ -172,8 +176,13 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		}
-		if (environmentMap != null) {
+		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE2);
+			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
+			gl.glEnable(GL.GL_TEXTURE_2D);
+		}
+		if (environmentMap != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE3);
 			Texture2DLoaderJOGL.render(jr, environmentMap);
 			gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 		}

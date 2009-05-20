@@ -47,6 +47,7 @@ import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_2;
 import static de.jreality.shader.CommonAttributes.USE_GLSL;
 
 import java.awt.Color;
@@ -140,8 +141,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    	hasTextures = true;
 	    }
       
-	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXTURE_2D_2), eap)) {
-	    	texture2D_2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap);		    	
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_2), eap)) {
+	    	texture2D_2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_2), eap);		    	
 	    	joglTexture2D_2 = new JOGLTexture2D(texture2D_2);
 	    	hasTextures = true;
 	    }
@@ -164,7 +165,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				noneuclideanInitialized = false;
 			}
 	    }
-	    System.err.println("useglsl = "+useGLSL);
+//	    System.err.println("useglsl = "+useGLSL);
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
 		firstTime = true;
