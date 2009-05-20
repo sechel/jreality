@@ -77,16 +77,16 @@ public class GLShadingLangExample03 {
 //		    vec4 currentSample2 = texture2D(sampler2,gl_TexCoord[1].st); 
 //		    gl_FragColor = currentSample*currentSample2 * gl_Color; 
 //		}
-//		try {
-//			brickProg = new GlslProgram(ap, "polygonShader",   
-//					null,
-//					Input.getInput("de/jreality/jogl/shader/resources/sampler.frag")
-//			    );
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		brickProg.setUniform("sampler",0);
-//		brickProg.setUniform("sampler2",1);		
+		try {
+			brickProg = new GlslProgram(ap, "polygonShader",   
+					null,
+					Input.getInput("de/jreality/jogl/shader/resources/sampler.frag")
+			    );
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		brickProg.setUniform("sampler",0);
+		brickProg.setUniform("sampler2",1);		
 		ViewerApp va = ViewerApp.display(world);
 		CameraUtility.encompass(va.getCurrentViewer());
 	}
