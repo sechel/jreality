@@ -168,12 +168,13 @@ public class CameraPathExample {
 						if (movepoint.isRunning()) movepoint.stop();
 						else movepoint.start();
 						break;
-					case KeyEvent.VK_3:
-						movepoint.stop();
-						frenet = !frenet;
-						polygonalTubeFactory.setFrameFieldType(frenet ? FrameFieldType.FRENET : FrameFieldType.PARALLEL);
-						polygonalTubeFactory.update();
-						break;
+//					currently not working
+//					case KeyEvent.VK_3:
+//						movepoint.stop();
+//						frenet = !frenet;
+//						polygonalTubeFactory.setFrameFieldType(frenet ? FrameFieldType.FRENET : FrameFieldType.PARALLEL);
+//						polygonalTubeFactory.update();
+//						break;
 				}
 		
 				}
