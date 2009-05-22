@@ -78,7 +78,11 @@ public class ToolEventQueue {
                     event = (ToolEvent) queue.removeFirst();
                     isRunning = running;
                 }
-                if (isRunning) receiver.processToolEvent(event);
+                if (isRunning) try {
+                	receiver.processToolEvent(event);
+                } catch (Exception e) {
+                	e.printStackTrace();
+                }
                 else break;
             }
             System.out.println("TEQ shut down.");
