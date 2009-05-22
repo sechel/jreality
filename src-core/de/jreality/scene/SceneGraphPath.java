@@ -97,7 +97,7 @@ public class SceneGraphPath implements Cloneable {
 	 * 
 	 * @param nodes
 	 */
-	public SceneGraphPath(SceneGraphComponent ... nodes) {
+	public SceneGraphPath(SceneGraphNode ... nodes) {
 		super();
 		for (int i=0; i<nodes.length; ++i)	this.push(nodes[i]);
 	}
