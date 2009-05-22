@@ -1,4 +1,4 @@
-package de.jreality.plugin.basic;
+package de.jreality.plugin.basic.content;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -15,6 +15,10 @@ import javax.swing.SwingUtilities;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
+import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
@@ -30,8 +34,7 @@ import de.varylab.jrworkspace.plugin.flavor.UIFlavor;
 
 public class ContentLoader extends Plugin implements UIFlavor {
 
-	private Content
-		managedContent = null;
+	private Content content = null;
 	private ViewMenuBar 
 		viewerMenuAggregator = null;
 	private ViewToolBar
@@ -80,9 +83,9 @@ public class ContentLoader extends Plugin implements UIFlavor {
 	}
 	
 
-	public void install(View sceneView, Content managedContent) {
-		parent = sceneView.getViewer().getViewingComponent();
-		this.managedContent = managedContent;
+	public void install(View view, Content content) {
+		parent = view.getViewer().getViewingComponent();
+		this.content = content;
 	}
 
 	private void loadFile() {
@@ -110,7 +113,7 @@ public class ContentLoader extends Plugin implements UIFlavor {
 					}
 				});
 				tempRoot.removeChild(read);
-				managedContent.setContent(read);
+				content.setContent(read);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -132,10 +135,10 @@ public class ContentLoader extends Plugin implements UIFlavor {
 	@Override
 	public void install(Controller c) throws Exception {
 		View viewPlugin = c.getPlugin(View.class);
-		Content contentPlugin = PluginUtility.getPlugin(c, Content.class);
+		Content content = PluginUtility.getPlugin(c, Content.class);
 		install(
 				viewPlugin,
-				contentPlugin
+				content
 		);
 		viewerMenuAggregator = c.getPlugin(ViewMenuBar.class);
 		viewerMenuAggregator.addMenuItem(getClass(), 0.0, contentLoadAction, "File");

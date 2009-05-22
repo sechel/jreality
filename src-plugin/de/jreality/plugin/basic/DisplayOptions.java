@@ -13,7 +13,9 @@ import javax.swing.KeyStroke;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.tools.PickShowTool;
+import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.GuiUtility;
 import de.varylab.jrworkspace.plugin.Controller;
@@ -47,6 +49,9 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 		view = null;
 	private ViewMenuBar
 		viewMenuBar = null;
+	private Scene
+		scene = null;
+	
 	private PickShowTool 
 		pickShowTool = new PickShowTool();
 	
@@ -105,7 +110,7 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 			GuiUtility.showCursor(frame);
 		}
 		
-		SceneGraphComponent root = view.getViewer().getSceneRoot();
+		SceneGraphComponent root = scene.getSceneRoot();
 		if (showPick && !root.getTools().contains(pickShowTool)) {
 			root.addTool(pickShowTool);
 		}
@@ -115,12 +120,18 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 	}
 	
 	private void savePreferences() {
-		CameraUtility.savePreferences((Camera) view.getCameraPath().getLastElement());
+		SceneGraphPath cameraPath = scene.getCameraPath();
+		if (cameraPath != null) {
+			CameraUtility.savePreferences((Camera) cameraPath.getLastElement());
+		}
 	}
 
 	private void loadPreferences() {
-		CameraUtility.loadPreferences((Camera) view.getCameraPath().getLastElement());
-		view.getViewer().renderAsync();
+		SceneGraphPath cameraPath = scene.getCameraPath();
+		if (cameraPath != null) {
+			CameraUtility.loadPreferences((Camera) cameraPath.getLastElement());
+			view.getViewer().renderAsync();
+		}
 	}
 
 	@Override
@@ -136,6 +147,7 @@ public class DisplayOptions extends ToolBarAggregator implements ActionListener,
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		view = c.getPlugin(View.class);
+		scene = c.getPlugin(Scene.class);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		viewMenuBar.addMenuItem(getClass(), 1.0, fullscreenItem, "Viewer");
 		setPick(pickBox.isSelected());

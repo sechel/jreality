@@ -1,22 +1,20 @@
-package de.jreality.plugin.basic;
+package de.jreality.plugin.basic.content;
 
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.HashMap;
 
-import javax.swing.SwingUtilities;
-
-import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.ViewPreferences;
 import de.jreality.plugin.basic.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.AppearanceInspector;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
-public class ContentAppearance extends ShrinkPanelPlugin implements ColorPickerModeChangedListener {
+public class ContentAppearance extends ContentPanel implements ColorPickerModeChangedListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = false;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;
@@ -40,8 +38,6 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ColorPickerM
 	public static final String DEFAULT_TEXTURE = "none";
 	public static final double DEFAULT_TEXTURE_SCALE = .5;
 
-	private Content 
-		alignedContent = null;
 	private ViewPreferences
 		viewPreferences = null;
 	private AppearanceInspector 
@@ -61,18 +57,17 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ColorPickerM
 		textures.put("4 Chain-Link Fence", "textures/chainlinkfence.png");
 		
 		appearanceInspector = new AppearanceInspector();
-		setInitialPosition(SHRINKER_RIGHT);
 		restoreDefaults();
 	}
 	double worldSize = 1.0;
 	
-	public void install(View sceneView, Content content) {
-		this.alignedContent = content;
-		content.getContentAppearance().setAttribute(
+	public void install(Scene scene) {
+		Appearance contentApp = scene.getContentAppearance();
+		contentApp.setAttribute(
 				CommonAttributes.RADII_WORLD_COORDINATES,
 				true
 		);
-		appearanceInspector.setAppearance(content.getContentAppearance());
+		appearanceInspector.setAppearance(contentApp);
 	}
 
 	public void colorPickerModeChanged(int mode) {
@@ -160,9 +155,7 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ColorPickerM
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		View sceneView = c.getPlugin(View.class);
-		alignedContent = PluginUtility.getPlugin(c, Content.class);
-		install(sceneView, alignedContent);
+		install(c.getPlugin(Scene.class));
 		viewPreferences = c.getPlugin(ViewPreferences.class);
 		viewPreferences.addColorPickerChangedListener(this);
 		getPanel().setColorPickerMode(viewPreferences.getColorPickerMode());
@@ -178,32 +171,12 @@ public class ContentAppearance extends ShrinkPanelPlugin implements ColorPickerM
 	}
 
 	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
-	}
-
-	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
 		info.name = "Content Appearance";
 		info.vendorName = "Ulrich Pinkall";
 		info.icon = ImageHook.getIcon("lupeblau.png");
 		return info; 
-	}
-	
-	@Override
-	public void mainUIChanged(String uiClass) {
-		SwingUtilities.updateComponentTreeUI(appearanceInspector);
-	}
-
-	@Override
-	public Class<?> getHelpHandle() {
-		return getClass();
-	}
-	
-	@Override
-	public String getHelpDocument() {
-		return "ContentAppearance.html";
 	}
 
 }

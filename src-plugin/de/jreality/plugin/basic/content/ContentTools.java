@@ -1,10 +1,13 @@
-package de.jreality.plugin.basic;
+package de.jreality.plugin.basic.content;
 
 import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.View;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.tool.Tool;
@@ -33,7 +36,9 @@ public class ContentTools extends ToolBarAggregator {
 		pickFaces = new JToggleButton(ImageHook.getIcon("shape_square.png")),
 		pickEdges = new JToggleButton(ImageHook.getIcon("shape_edges.png")),
 		pickVertices = new JToggleButton(ImageHook.getIcon("shape_handles.png"));
-	private Content alignedContent = null;
+	
+	private Scene scene = null;
+	private Content content = null;
 
 	public ContentTools() {
 		rotateTool = new RotateTool();
@@ -58,8 +63,7 @@ public class ContentTools extends ToolBarAggregator {
 //		setInitialPosition(SHRINKER_RIGHT);
 	}
 
-	public void install(Content alignedContent) {
-		this.alignedContent  = alignedContent;
+	public void install() {
 		setRotationEnabled(isRotationEnabled());
 		setDragEnabled(isDragEnabled());
 		setPickEdges(isPickEdges());
@@ -69,10 +73,8 @@ public class ContentTools extends ToolBarAggregator {
 
 	public void setSnapToGrid(boolean b) {
 		snapToGrid.setSelected(b);
-		if (alignedContent != null) {
-			setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
-			setToolEnabled(snapDragTool, drag.isSelected() && snapToGrid.isSelected());
-		}
+		setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
+		setToolEnabled(snapDragTool, drag.isSelected() && snapToGrid.isSelected());
 	}
 
 	public boolean isSnapToGrid() {
@@ -95,8 +97,8 @@ public class ContentTools extends ToolBarAggregator {
 	}
 
 	private void setPickable(String shader, boolean b) {
-		if (alignedContent != null) {
-			Appearance contentAppearance = alignedContent.getContentAppearance();
+		if (scene != null) {
+			Appearance contentAppearance = scene.getContentAppearance();
 			if (contentAppearance != null) {
 				contentAppearance.setAttribute(
 						shader+"."+CommonAttributes.PICKABLE,
@@ -112,10 +114,8 @@ public class ContentTools extends ToolBarAggregator {
 
 	public void setDragEnabled(boolean b) {
 		drag.setSelected(b);
-		if (alignedContent != null) {
-			setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
-			setToolEnabled(snapDragTool, drag.isSelected() &&  snapToGrid.isSelected());
-		}
+		setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
+		setToolEnabled(snapDragTool, drag.isSelected() &&  snapToGrid.isSelected());
 	}
 
 	public boolean isRotationEnabled() {
@@ -124,15 +124,13 @@ public class ContentTools extends ToolBarAggregator {
 
 	public void setRotationEnabled(boolean b) {
 		rotate.setSelected(b);
-		if (alignedContent != null) {
-			setToolEnabled(rotateTool, b);
-		}
+		setToolEnabled(rotateTool, b);
 	}
 
 	private void setToolEnabled(Tool tool, boolean b) {
-		if (alignedContent != null) {
-			if (b) alignedContent.addContentTool(tool);
-			else alignedContent.removeContentTool(tool);
+		if (content != null) {
+			if (b) content.addContentTool(tool);
+			else content.removeContentTool(tool);
 		}
 	}
 
@@ -201,8 +199,9 @@ public class ContentTools extends ToolBarAggregator {
 
 	@Override
 	public void install(Controller c) throws Exception {
-		alignedContent = PluginUtility.getPlugin(c, Content.class);
-		install(alignedContent);
+		scene = c.getPlugin(Scene.class);
+		content = PluginUtility.getPlugin(c, Content.class);
+		install();
 //		shrinkPanel.setHeaderColor(new Color(0.5f, 0.5f, 0.2f));
 		super.install(c);
 	}
@@ -214,11 +213,6 @@ public class ContentTools extends ToolBarAggregator {
 		setToolEnabled(snapDragTool, false);
 		super.uninstall(c);
 	}
-
-//	@Override
-//	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-//		return View.class;
-//	}
 
 	@Override
 	public PluginInfo getPluginInfo() {
