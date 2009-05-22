@@ -182,9 +182,10 @@ public class SceneGraphNode {
 	 */
 	/* old: Emit an XML representation, subject of further discussions.*/
 	public String toString() {
-		StringBuffer sb= new StringBuffer(200);
-		toStringImpl(sb, new HashSet<SceneGraphNode>());
-		return sb.toString();
+		//StringBuffer sb= new StringBuffer(200);
+		//toStringImpl(sb, new HashSet<SceneGraphNode>());
+		//return sb.toString();
+		return getName() +" ["+ getClass().getName()+"]";
 	}
 
 	private void toStringImpl(StringBuffer sb, HashSet<SceneGraphNode> trace) {

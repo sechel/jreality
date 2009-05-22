@@ -166,8 +166,10 @@ public class JOGLRenderer   {
 		theRoot = sgc;
 		if (theRoot != null && theRoot.getAppearance() != null)  {
 			topAp = new JOGLTopLevelAppearance(theRoot.getAppearance());
-
+		} else {
+			topAp = new JOGLTopLevelAppearance(new Appearance("dummy root appearance"));
 		}
+		
 		if (thePeerRoot != null) {
 			thePeerRoot.dispose();
 			thePeerRoot = null;
@@ -220,6 +222,7 @@ public class JOGLRenderer   {
 
 
 	private void renderOnePass() {
+		if (theCamera == null) return;
 		double aspectRatio = getAspectRatio();
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		globalGL.glMatrixMode(GL.GL_PROJECTION);

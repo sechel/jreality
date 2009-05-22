@@ -21,11 +21,13 @@ public class PosWHitFilter implements HitFilter {
 
 	public void update() {
 		camPath = viewer.getCameraPath();
+		if (camPath == null) return;
     	double[] world2cam = camPath.getInverseMatrix(null);
     	world2ndc = Rn.times(null, CameraUtility.getCameraToNDC(viewer), world2cam);
 	}
 	
 	public boolean accept(double[] from, double[] to, PickResult h) {
+		if (world2ndc == null) return false;
       	double[] ndcCoords = Rn.matrixTimesVector(null, world2ndc, h.getWorldCoordinates());
       	boolean posW = ndcCoords[3] >= 0;
 //      	System.err.println("Pos w = "+posW);

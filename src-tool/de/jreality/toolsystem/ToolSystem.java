@@ -588,7 +588,11 @@ public class ToolSystem implements ToolEventReceiver {
 				-pointerTrafo[10], -pointerTrafo[14] };
 		double[] from = new double[] { pointerTrafo[3], pointerTrafo[7],
 				pointerTrafo[11], pointerTrafo[15] };
-		AABBPickSystem.getFrustumInterval(from, to, viewer);
+		try {
+			AABBPickSystem.getFrustumInterval(from, to, viewer);
+		} catch (IllegalStateException e) {
+			// no camera?
+		}
 		pickResults =  pickSystem.computePick(from, to);
 		if (!SystemProperties.isPortal) {
 			if (hitFilter == null)
@@ -831,7 +835,7 @@ public class ToolSystem implements ToolEventReceiver {
 			this.emptyPickPath = emptyPickPath;
 		} else {
 			this.emptyPickPath = new SceneGraphPath();
-			emptyPickPath.push(viewer.getSceneRoot());
+			this.emptyPickPath.push(viewer.getSceneRoot());
 		}
 	}
 
