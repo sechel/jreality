@@ -41,6 +41,7 @@
 package de.jreality.io;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -48,8 +49,8 @@ import de.jreality.scene.SceneGraphPath;
 public class JrScene {
   
   private SceneGraphComponent sceneRoot;
-  private HashMap scenePaths=new HashMap();
-  private HashMap sceneAttributes=new HashMap();
+  private Map<String, SceneGraphPath> scenePaths=new HashMap<String, SceneGraphPath>();
+  private Map<String, Object> sceneAttributes=new HashMap<String, Object>();
   
   public JrScene() {
   }
@@ -61,12 +62,10 @@ public class JrScene {
   public void addPath(String name, SceneGraphPath path) {
     if (!(path.getFirstElement() == sceneRoot) || !path.isValid())
       throw new IllegalArgumentException("invalid path!");
-//    if (scenePaths == null) scenePaths = new HashMap();
     scenePaths.put(name, path);
   }
   
   public void addAttribute(String name, Object attribute) {
-//    if (sceneAttributes == null) sceneAttributes = new HashMap();
     sceneAttributes.put(name, attribute);
   }
 
@@ -80,10 +79,16 @@ public class JrScene {
 
   
   /**
-   * currently used:
-   *  scene.getPath("cameraPath"), scene.getPath("emptyPickPath"), scene.getPath("avatarPath")
-   * @param name
-   * @return
+   * currently used:</br>
+   * <ul>
+   *  <li>"cameraPath"</li>
+   *  <li>"emptyPickPath"</li>
+   *  <li>"avatarPath"</li>
+   *  <li>"microphonePath" (not yet...)</li>
+   *  <li>"contentPath" (not yet...)</li>
+   * </ul>
+   * @param name the name of the SceneGraphPath
+   * @return the corresponding SceneGraphPath
    */
   public SceneGraphPath getPath(String name) {
     return (SceneGraphPath) scenePaths.get(name);
@@ -93,11 +98,11 @@ public class JrScene {
     return sceneAttributes.get(name);
   }
   
-  public HashMap getScenePaths() {
+  public Map<String, SceneGraphPath> getScenePaths() {
     return scenePaths;
   }
   
-  public HashMap getSceneAttributes() {
+  public Map<String, Object> getSceneAttributes() {
     return sceneAttributes;
   }
 }
