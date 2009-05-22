@@ -58,6 +58,7 @@ public class GlPointLight implements LightSource {
         dest.getDiffuseRadiance().mul(scale);
         dest.getSpecularRadiance().mul(scale);
         dest.traceShadow(state);
+        state.addSample(dest);
     }
 
     public void getPhoton(double randX1, double randY1, double randX2, double randY2, Point3 p, Vector3 dir, Color power) {
