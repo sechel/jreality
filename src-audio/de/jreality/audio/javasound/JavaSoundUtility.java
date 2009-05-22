@@ -82,8 +82,12 @@ public class JavaSoundUtility {
 			}
 		}
 		
-		if (possibleMixers.isEmpty()) return null;
+		if (possibleMixers.isEmpty()) {
+			System.out.println("JavaSoundUtility.createSourceDataLine(): NO MIXER");
+			return null;
+		}
 		if (possibleMixers.size() == 1) {
+			System.out.println("JavaSoundUtility.createSourceDataLine(): ONE MIXER");
 			return mixerLines.get(0);
 		}
 		
