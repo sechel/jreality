@@ -44,6 +44,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	private int desktopWidth=800;
 	private int desktopHeight=600;
 	private SceneGraphComponent windowRoot;
+	private int layer;
 
 	protected void init() {
 		
@@ -88,7 +89,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 		super.setBounds(x, y, w, h);
 		if (windowComponent != null) {
 			if (getExtendedState() == NORMAL) normalBounds.setBounds(x,y,w,h);
-			MatrixBuilder.euclidean().translate(x,y,0).assignTo(windowComponent);
+			MatrixBuilder.euclidean().translate(x,y,-layer).assignTo(windowComponent);
 			double[][] loc = new double[][]{{0,0,0},{w,0,0},{w,h,0},{0,h,0}};
 			quadFactory.setVertexCoordinates(loc);
 			quadFactory.update();
@@ -156,5 +157,15 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	public void dispose() {
 		windowRoot.removeChild(getSceneGraphComponent());
 		super.dispose();
+	}
+	
+	public void setLayer(int layer) {
+		this.layer = layer;
+		if (windowComponent != null) {
+			Rectangle bds = getBounds();
+			double x = bds.x;
+			double y = bds.y;
+			MatrixBuilder.euclidean().translate(x,y,-layer).assignTo(windowComponent);
+		}
 	}
 }
