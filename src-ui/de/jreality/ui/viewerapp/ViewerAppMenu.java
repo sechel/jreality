@@ -354,7 +354,7 @@ private JMenu createFileMenu() {
 		cameraMenu.addSeparator();
 //		cameraMenu.add(new JMenuItem(new TogglePerspective(TOGGLE_PERSPECTIVE, viewerSwitch)));
 		cameraMenu.add(new JMenuItem(new ToggleStereo(TOGGLE_STEREO, viewer)));
-		cameraMenu.add(new JMenuItem(new ToggleShowCursor(TOGGLE_CURSOR, viewerApp)));
+		cameraMenu.add(new JMenuItem(new ToggleShowCursor(TOGGLE_CURSOR, viewer)));
 		cameraMenu.addSeparator();
         cameraMenu.add(new JMenuItem(new LoadCameraPreferences(LOAD_CAMERA_PREFERENCES, viewer)));
         cameraMenu.add(new JMenuItem(new SaveCameraPreferences(SAVE_CAMERA_PREFERENCES, viewer)));

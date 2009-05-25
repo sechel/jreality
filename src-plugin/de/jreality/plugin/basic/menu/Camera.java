@@ -38,7 +38,7 @@ public class Camera extends Plugin {
 		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation("Increase Eye Separation", viewer, false)));
 		cameraMenu.addSeparator();
 		cameraMenu.add(new JMenuItem(new ToggleStereo("Toggle Stereo", viewer)));
-		cameraMenu.add(new JMenuItem(new ToggleShowCursor("Toggle Cursor", viewer, viewingComp)));
+		cameraMenu.add(new JMenuItem(new ToggleShowCursor("Toggle Cursor", viewer)));
 		cameraMenu.addSeparator();
         cameraMenu.add(new JMenuItem(new LoadCameraPreferences("Load Preferences", viewer)));
         cameraMenu.add(new JMenuItem(new SaveCameraPreferences("Save Preferences", viewer)));

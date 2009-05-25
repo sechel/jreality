@@ -48,6 +48,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.GuiUtility;
@@ -61,11 +62,11 @@ import de.jreality.util.GuiUtility;
  */
 public class ToggleShowCursor extends AbstractJrAction {
 
-  private ViewerApp viewerApp;
+  private Viewer viewer;
   
-  public ToggleShowCursor(String name, ViewerApp viewerApp) {
+  public ToggleShowCursor(String name, Viewer viewer) {
     super(name);
-    this.viewerApp = viewerApp;
+    this.viewer = viewer;
     setShortDescription("Toggle show cursor in viewing component");
     setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F9, InputEvent.SHIFT_MASK));
   }
@@ -73,10 +74,12 @@ public class ToggleShowCursor extends AbstractJrAction {
   
   @Override
   public void actionPerformed(ActionEvent e) {
-	  Component frame = viewerApp.getViewingComponent();
-	boolean hide = frame.getCursor().getType() == Cursor.DEFAULT_CURSOR;  
-	  if (hide) GuiUtility.hideCursor(frame);
-	  else GuiUtility.showCursor(frame);
+	  if (viewer.hasViewingComponent() && viewer.getViewingComponent() instanceof Component) {
+		Component viewingCmp = (Component) viewer.getViewingComponent();
+		boolean hide = viewingCmp.getCursor().getType() == Cursor.DEFAULT_CURSOR;  
+		if (hide) GuiUtility.hideCursor(viewingCmp);
+		else GuiUtility.showCursor(viewingCmp);
+	}
  }
   
 }
