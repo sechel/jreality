@@ -1,6 +1,5 @@
 package de.jreality.plugin.basic.content;
 
-import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -8,6 +7,7 @@ import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.menu.Toggle;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.tool.Tool;
@@ -16,11 +16,11 @@ import de.jreality.tools.AxisTranslationTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
 import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
-public class ContentTools extends ToolBarAggregator {
+public class ContentTools extends Plugin {
 
 	private static final boolean DEFAULT_PICK_FACES = true;
 	private static final boolean DEFAULT_PICK_EDGES = true;
@@ -29,18 +29,20 @@ public class ContentTools extends ToolBarAggregator {
 	private RotateTool rotateTool;
 	private DraggingTool draggingTool;
 	private AxisTranslationTool snapDragTool;
-	private JToggleButton 
-		rotate = new JToggleButton(ImageHook.getIcon("arrow_rotate_clockwise.png")),
-		drag = new JToggleButton(ImageHook.getIcon("arrow_out.png")),
-		snapToGrid = new JToggleButton(ImageHook.getIcon("brick.png")),
-		pickFaces = new JToggleButton(ImageHook.getIcon("shape_square.png")),
-		pickEdges = new JToggleButton(ImageHook.getIcon("shape_edges.png")),
-		pickVertices = new JToggleButton(ImageHook.getIcon("shape_handles.png"));
+	
+	private Toggle 
+		rotate = new Toggle("rotate", ImageHook.getIcon("arrow_rotate_clockwise.png")),
+		drag = new Toggle("drag", ImageHook.getIcon("arrow_out.png")),
+		snapToGrid = new Toggle("snap to grid", ImageHook.getIcon("brick.png")),
+		pickFaces = new Toggle("pick faces", ImageHook.getIcon("shape_square.png")),
+		pickEdges = new Toggle("pick edges", ImageHook.getIcon("shape_edges.png")),
+		pickVertices = new Toggle("pick vertices", ImageHook.getIcon("shape_handles.png"));
 	
 	private Scene scene = null;
 	private Content content = null;
-
+	
 	public ContentTools() {
+		
 		rotateTool = new RotateTool();
 		rotateTool.setFixOrigin(false);
 		rotateTool.setMoveChildren(false);
@@ -147,54 +149,46 @@ public class ContentTools extends ToolBarAggregator {
 	}
 
 	private void makePanel() {
-		rotate.setToolTipText("Rotate Tool");
 		rotate.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setRotationEnabled(rotate.isSelected());
 			}
 		});
-;		drag.setToolTipText("Drag Tool");
-		drag.addChangeListener(new ChangeListener() {
+;		drag.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setDragEnabled(drag.isSelected());
 			}
 		});
-		snapToGrid.setToolTipText("Snap to Grid");
 		snapToGrid.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setSnapToGrid(snapToGrid.isSelected());
 			}
 		});
-
-		pickFaces.setToolTipText("Pick Faces");
 		pickFaces.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickFaces(pickFaces.isSelected());
 			}
 		});
 
-		pickEdges.setToolTipText("Pick Edges");
 		pickEdges.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickEdges(pickEdges.isSelected());
 			}
 		});
-
-		pickVertices.setToolTipText("Pick Vertices");
 		pickVertices.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setPickVertices(pickVertices.isSelected());
 			}
 		});
 		
-		addTool(getClass(), 1, rotate);
-		addTool(getClass(), 2, drag);
-		addSeparator(getClass(), 3);
-		addTool(getClass(), 4, snapToGrid);
-		addSeparator(getClass(), 5);
-		addTool(getClass(), 6, pickFaces);
-		addTool(getClass(), 7, pickEdges);
-		addTool(getClass(), 8, pickVertices);
+//		addTool(getClass(), 1, rotate.createToggleButton());
+//		addTool(getClass(), 2, drag.createToggleButton());
+//		addSeparator(getClass(), 3);
+//		addTool(getClass(), 4, snapToGrid.createToggleButton());
+//		addSeparator(getClass(), 5);
+//		addTool(getClass(), 6, pickFaces.createChecker());
+//		addTool(getClass(), 7, pickEdges.createChecker());
+//		addTool(getClass(), 8, pickVertices.createChecker());	
 	}
 
 	@Override
@@ -245,14 +239,34 @@ public class ContentTools extends ToolBarAggregator {
 		super.storeStates(c);
 	}
 	
-	@Override
-	public double getToolBarPriority() {
-		return 0.0;
-	}
-	
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}
+
+	public Toggle getRotateToggle() {
+		return rotate;
+	}
+
+	public Toggle getDragToggle() {
+		return drag;
+	}
+
+	public Toggle getSnapToGridToggle() {
+		return snapToGrid;
+	}
+
+	public Toggle getPickFacesToggle() {
+		return pickFaces;
+	}
+
+	public Toggle getPickEdgesToggle() {
+		return pickEdges;
+	}
+
+	public Toggle getPickVerticesToggle() {
+		return pickVertices;
+	}
+	
 	
 }
 

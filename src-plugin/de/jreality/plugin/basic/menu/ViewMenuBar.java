@@ -1,6 +1,4 @@
-package de.jreality.plugin.basic;
-
-import static javax.swing.Action.SMALL_ICON;
+package de.jreality.plugin.basic.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -11,9 +9,9 @@ import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 
+import de.jreality.plugin.basic.View;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.ui.viewerapp.ViewerSwitch;
-import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -42,7 +40,8 @@ public class ViewMenuBar extends MenuAggregator {
 		JMenu fileMenu =  new JMenu("File");
 		fileMenu.setMnemonic('f');
 		addMenu(getClass(), 0.0, fileMenu);
-		
+	
+		addMenuSeparator(getClass(), 2, "File");
 		addMenuItem(getClass(), 2, new Quit("Exit"), "File");
 		
 		// Viewer menu
@@ -64,12 +63,6 @@ public class ViewMenuBar extends MenuAggregator {
 		final ViewerSwitch viewerSwitch = view.getViewer();
 		String[] viewerNames = viewerSwitch.getViewerNames();
 		ButtonGroup bgr = new ButtonGroup();
-		final ExportImage exportImageAction = new ExportImage(
-					"Export Image",
-					viewerSwitch,
-					viewerSwitch.getViewingComponent()
-			);
-		exportImageAction.putValue(SMALL_ICON, ImageHook.getIcon("picture_save.png"));
 		for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
 			final int index = i;
 			final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
@@ -78,7 +71,6 @@ public class ViewMenuBar extends MenuAggregator {
 				public void actionPerformed(ActionEvent e) {
 					viewerSwitch.selectViewer(index);
 					viewerSwitch.getCurrentViewer().renderAsync();
-					if (exportImageAction!=null) exportImageAction.setEnabled(exportImageAction.isEnabled());
 				}
 			});
 			item.setSelected(index==0);
@@ -86,7 +78,6 @@ public class ViewMenuBar extends MenuAggregator {
 			bgr.add(item);
 			menu.add(item);
 		}
-		menu.add(exportImageAction);
 		
 		return menu;
 	}

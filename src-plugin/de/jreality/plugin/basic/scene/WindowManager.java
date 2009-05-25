@@ -1,5 +1,11 @@
 package de.jreality.plugin.basic.scene;
 
+import java.lang.ref.WeakReference;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.swing.JFrame;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -33,6 +39,8 @@ public class WindowManager extends Plugin implements ChangeListener {
 	private boolean showDesktopBorder=false;
 	SceneGraphComponent desktopBorder=new SceneGraphComponent("desktop bounds");
 	
+	List<WeakReference<JFakeFrameWithGeometry>> frameRefs = new LinkedList<WeakReference<JFakeFrameWithGeometry>>();
+	
 	public WindowManager() {
 		desktopBorder.setAppearance(new Appearance());
 		DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(desktopBorder.getAppearance(), false);
@@ -60,6 +68,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		c.getPlugin(Scene.class).removeChangeListener(this);
+		frameRefs.clear();
 		setParent(null);
 	}
 
@@ -76,12 +85,26 @@ public class WindowManager extends Plugin implements ChangeListener {
 		if (newParent != null) newParent.addChild(windowRoot);
 		parent = newParent;
 	}
-
+	
 	public JFakeFrameWithGeometry createFrame(String title) {
-		JFakeFrameWithGeometry ff = new JFakeFrameWithGeometry(title);
+		JFakeFrameWithGeometry ff = new JFakeFrameWithGeometry(title) {
+			@Override
+			public void toFront() {
+				int curLayer=0;
+				for (Iterator<WeakReference<JFakeFrameWithGeometry>> frames = frameRefs.iterator(); frames.hasNext(); ) {
+					JFakeFrameWithGeometry f = frames.next().get();
+					if (f == null || f == this) frames.remove();
+					else f.setLayer(curLayer++);
+				}
+				frameRefs.add(new WeakReference<JFakeFrameWithGeometry>(this));
+				setLayer(curLayer);
+			}
+		};
 		ff.setDesktopComponent(windowRoot);
 		ff.setDesktopWidth(resX);
 		ff.setDesktopHeight(resY);
+		ff.setLayer(frameRefs.size());
+		frameRefs.add(new WeakReference<JFakeFrameWithGeometry>(ff));
 		return ff;
 	}
 	

@@ -10,12 +10,12 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
 
+import de.jreality.plugin.basic.menu.ViewMenuBar;
 import de.jreality.plugin.view.image.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.tools.PickShowTool;
-import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.GuiUtility;
 import de.varylab.jrworkspace.plugin.Controller;

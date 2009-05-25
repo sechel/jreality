@@ -8,13 +8,10 @@ import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.Tool;
 import de.jreality.shader.ShaderUtility;
 import de.jtem.beans.ChangeEventMulticaster;
-import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
@@ -22,7 +19,7 @@ public class Scene extends Plugin {
 	
 	private ChangeListener changeListener;
 	
-	static JrScene createScene() {
+	static JrScene defaultScene() {
 		//sceneRoot of the JrScene
 		SceneGraphComponent sceneRoot = new SceneGraphComponent("root");
 		sceneRoot.setVisible(true);
@@ -42,7 +39,7 @@ public class Scene extends Plugin {
 		SceneGraphComponent avatar = new SceneGraphComponent("avatar");
 		avatar.setVisible(true);
 		trafoMatrix = Rn.identityMatrix(4);
-		trafoMatrix[11] = 16;
+		//trafoMatrix[11] = 16;
 		trafo = new Transformation("avatar trafo", trafoMatrix);
 		avatar.setTransformation(trafo);
 		sceneRoot.addChild(avatar);
@@ -80,7 +77,7 @@ public class Scene extends Plugin {
 		SceneGraphPath avatarPath = new SceneGraphPath();
 		avatarPath.push(sceneRoot);
 		avatarPath.push(avatar);
-		defaultScene.addPath("avatarPath", avatarPath);
+		//defaultScene.addPath("avatarPath", avatarPath);
 		
 		//emptyPickPath
 		SceneGraphPath emptyPickPath = new SceneGraphPath();
@@ -109,15 +106,13 @@ public class Scene extends Plugin {
 	
 	JrScene theScene;
 
-	private Controller controller;
-	
 	public Scene() {
-		theScene = minimalScene(); //createScene();
+		theScene = defaultScene(); //createScene();
 	}
 	
-	@Override
-	public void install(Controller c) throws Exception {
-		controller = c;
+	public Scene(JrScene jrscene) {
+		if (jrscene != null) theScene = jrscene;
+		else theScene = defaultScene();
 	}
 		
 	@Override
