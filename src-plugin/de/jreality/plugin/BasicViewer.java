@@ -142,6 +142,7 @@ public class BasicViewer {
 		SimpleController c = createSceneAndView(null);
 		addBasicUI(c);
 		addContentSupport(c);
+		addDefaultLights(c);
 		c.registerPlugin(new DirectContent());
 		c.registerPlugin(new Plugin() {
 			@Override

@@ -3,16 +3,15 @@ package de.jreality.tutorial.tool;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.plugin.PluginViewerApp;
+import de.jreality.plugin.BasicViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
+import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.ScaleTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class AddToolExample {
 
@@ -24,7 +23,7 @@ public class AddToolExample {
 		ScaleTool tool= new ScaleTool();
 		cmp.addTool(tool);		
 		cmp.setGeometry(Primitives.icosahedron());
-	    PluginViewerApp.display(cmp);
+	    BasicViewer.display(cmp);
 	}
 	private static void setupAppearance(Appearance ap) {
 		DefaultGeometryShader dgs;
