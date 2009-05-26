@@ -49,7 +49,7 @@ import javax.swing.Icon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.SelectionManager;

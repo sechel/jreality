@@ -11,9 +11,9 @@ import de.jreality.audio.Interpolation;
 import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
 import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.audio.javasound.VbapRenderer;
-import de.jreality.plugin.audio.image.ImageHook;
-import de.jreality.plugin.view.CameraStand;
-import de.jreality.plugin.view.View;
+import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.icon.ImageHook;
+import de.jreality.scene.SceneGraphPath;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -37,28 +37,30 @@ public class Audio extends Plugin implements ChangeListener {
 	
 	private AudioPreferences 
 		prefs = null;
-	private View
-		view = null;
+	private Scene
+		scene = null;
 	private AudioRenderer 
 		renderer = null;
 	private Interpolation.Factory
 		interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
+	
+	private SceneGraphPath lastMicrophonePath;
 	
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
 		info.name = "Audio";
 		info.vendorName = "jReality Group"; 
-		info.icon = ImageHook.getIcon("sound.png");
+		info.icon = ImageHook.getIcon("audio/sound.png");
 		return info;
 	}
 
 	@Override
 	public void install(Controller c) {
-		view = c.getPlugin(View.class);
-		c.getPlugin(CameraStand.class);		
+		scene = c.getPlugin(Scene.class);	
 		prefs = c.getPlugin(AudioPreferences.class);
 		prefs.addChangeListener(this);
+		scene.addChangeListener(this);
 		try {
 			updateAudioRenderer();
 		} catch (Exception e) {
@@ -122,8 +124,11 @@ public class Audio extends Plugin implements ChangeListener {
 		
 		if (renderer == null) return;
 		
-		renderer.setMicrophonePath(view.getCameraPath());
-		renderer.setSceneRoot(view.getSceneRoot());
+		renderer.setSceneRoot(scene.getSceneRoot());
+		SceneGraphPath micPath = scene.getMicrophonePath();
+		renderer.setMicrophonePath(micPath);
+		lastMicrophonePath = new SceneGraphPath(micPath);
+		
 		renderer.setInterpolationFactory(interpolationFactory);
 		
 		if (renderer instanceof AbstractJavaSoundRenderer) {
@@ -150,10 +155,17 @@ public class Audio extends Plugin implements ChangeListener {
 
 	public void stateChanged(ChangeEvent e) {
 		try {
-			updateAudioRenderer();
+			if (e.getSource() instanceof AudioPreferences) updateAudioRenderer();
+			if (e.getSource() instanceof Scene) {
+				SceneGraphPath newMicPath = scene.getMicrophonePath();
+				if (newMicPath == lastMicrophonePath) return;
+				if (lastMicrophonePath != null && lastMicrophonePath.isEqual(newMicPath)) return;
+				updateAudioRenderer();
+			}
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
+	
 }

@@ -7,7 +7,7 @@ import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 public class ViewToolBar extends ToolBarAggregator {
 
 	public ViewToolBar() {
-		
+		System.out.println("ViewToolBar.ViewToolBar()");
 	}
 	
 	@Override
@@ -23,5 +23,4 @@ public class ViewToolBar extends ToolBarAggregator {
 	public double getToolBarPriority() {
 		return -10.0;
 	}
-	
 }

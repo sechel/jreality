@@ -49,7 +49,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.plugin.basic.View.RunningEnvironment;
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 import de.jreality.ui.viewerapp.ViewerSwitch;

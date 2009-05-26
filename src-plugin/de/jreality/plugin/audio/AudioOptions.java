@@ -26,10 +26,10 @@ import de.jreality.audio.SampleProcessorChain;
 import de.jreality.audio.SampleProcessorFactory;
 import de.jreality.audio.SchroederReverb;
 import de.jreality.audio.ShiftProcessor;
-import de.jreality.plugin.audio.image.ImageHook;
-import de.jreality.plugin.view.View;
+import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.JSliderVR;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -384,7 +384,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		PluginInfo info = new PluginInfo();
 		info.name = "Audio Options";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("sound_add.png");
+		info.icon = ImageHook.getIcon("audio/sound_add.png");
 		return info;
 	}
 
@@ -392,11 +392,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 
-		SceneGraphComponent root = c.getPlugin(View.class).getSceneRoot();
-		rootAppearance = root.getAppearance();
-		if (rootAppearance==null) {
-			root.setAppearance(rootAppearance = new Appearance());
-		}
+		rootAppearance = c.getPlugin(Scene.class).getRootAppearance();
 
 		updateProcWidgets();
 		updateCueWidgets();

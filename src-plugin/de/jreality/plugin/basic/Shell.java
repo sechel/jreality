@@ -12,7 +12,7 @@ import java.util.Comparator;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.BeanShell;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;

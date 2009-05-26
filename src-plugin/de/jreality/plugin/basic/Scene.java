@@ -26,6 +26,10 @@ public class Scene extends Plugin {
 		Appearance app = new Appearance("root appearance");
 		ShaderUtility.createRootAppearance(app);
 		sceneRoot.setAppearance(app);
+		
+		// backdrop
+		SceneGraphComponent backdrop = new SceneGraphComponent("backdrop");
+		sceneRoot.addChild(backdrop);
 
 		//content
 		SceneGraphComponent content = new SceneGraphComponent("content");
@@ -77,37 +81,28 @@ public class Scene extends Plugin {
 		SceneGraphPath avatarPath = new SceneGraphPath();
 		avatarPath.push(sceneRoot);
 		avatarPath.push(avatar);
-		//defaultScene.addPath("avatarPath", avatarPath);
+		defaultScene.addPath("avatarPath", avatarPath);
 		
-		//emptyPickPath
+		//emptyPickPath/content
 		SceneGraphPath emptyPickPath = new SceneGraphPath();
 		emptyPickPath.push(sceneRoot);
 		emptyPickPath.push(content);
 		defaultScene.addPath("emptyPickPath", emptyPickPath);
 		defaultScene.addPath("contentPath", emptyPickPath);
 		
+		//backdrop
+		SceneGraphPath backdropPath = new SceneGraphPath();
+		backdropPath.push(sceneRoot);
+		backdropPath.push(backdrop);
+		defaultScene.addPath("backdropPath", backdropPath);
+
 		return defaultScene;
 	}
 
-	private static JrScene minimalScene() {
-		SceneGraphComponent root = new SceneGraphComponent("root");
-		//root.setAppearance(new Appearance("root app"));
-		JrScene ret = new JrScene(root);
-		SceneGraphComponent content = new SceneGraphComponent("content");
-		root.addChild(content);
-		ret.addPath("contentPath", new SceneGraphPath(root, content));
-//		Camera cam = new Camera("minimal cam");
-//		SceneGraphComponent cc = new SceneGraphComponent("cam cmp");
-//		cc.setCamera(cam);
-//		root.addChild(cc);
-//		ret.addPath("cameraPath", new SceneGraphPath(root, cc, cam));
-		return ret;
-	}
-	
 	JrScene theScene;
 
 	public Scene() {
-		theScene = defaultScene(); //createScene();
+		theScene = defaultScene();
 	}
 	
 	public Scene(JrScene jrscene) {
@@ -141,6 +136,11 @@ public class Scene extends Plugin {
 	public SceneGraphPath getContentPath() {
 		return theScene.getPath("contentPath");
 	}
+
+	public SceneGraphPath getBackdropPath() {
+		return theScene.getPath("backdropPath");
+	}
+	
 	
 	public SceneGraphPath getMicrophonePath() {
 		return theScene.getPath("microphonePath");
@@ -158,11 +158,6 @@ public class Scene extends Plugin {
 	
 	public void setEmptyPickPath(SceneGraphPath path) {
 		theScene.addPath("emptyPickPath", path);
-		fireStateChanged();
-	}
-	
-	public void setContentPath(SceneGraphPath path) {
-		theScene.addPath("contentPath", path);
 		fireStateChanged();
 	}
 	
@@ -215,6 +210,10 @@ public class Scene extends Plugin {
 
 	public SceneGraphComponent getEmptyPickComponent() {
 		return getLastComponent(getEmptyPickPath());
+	}
+
+	public SceneGraphComponent getBackdropComponent() {
+		return getLastComponent(getBackdropPath());
 	}
 
 	private SceneGraphComponent getLastComponent(SceneGraphPath path) {

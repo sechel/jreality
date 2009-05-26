@@ -4,7 +4,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.Navigator;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;

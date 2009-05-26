@@ -24,7 +24,7 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.plugin.audio.Audio.BackendType;
 import de.jreality.plugin.audio.Audio.InterpolationType;
-import de.jreality.plugin.audio.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -222,7 +222,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	}
 
 	public Icon getMainIcon() {
-		return ImageHook.getIcon("sound.png");
+		return ImageHook.getIcon("audio/sound.png");
 	}
 
 	public String getMainName() {
