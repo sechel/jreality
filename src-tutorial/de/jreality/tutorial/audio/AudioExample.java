@@ -9,7 +9,7 @@ import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.audio.Audio;
+import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
@@ -20,9 +20,9 @@ import de.jreality.util.Input;
 public class AudioExample {
 
 	public static SceneGraphComponent getAudioComponent() throws Exception {
-		InputStream testSoundIn = Audio.class.getResourceAsStream("zoom.wav");
-		Input wavFile = Input.getInput("Zoom", testSoundIn);
-		final AudioSource source = new CachedAudioInputStreamSource("zoom", wavFile, true);
+		InputStream testSoundIn = AudioExample.class.getResourceAsStream("hammond.wav");
+		Input wavFile = Input.getInput("Hammond", testSoundIn);
+		final AudioSource source = new CachedAudioInputStreamSource("Hammond", wavFile, true);
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
 		audioComponent.setGeometry(Primitives.cube());
@@ -45,9 +45,12 @@ public class AudioExample {
 
 	
 	public static void main(String[] args) throws Exception {
-		JRViewer v = JRViewer.createViewerVRWithAudio();
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addAudioSupport();
+		v.addVRSupport();
 		v.setPropertiesFile("AudioExample.jrw");
-		v.setContent(getAudioComponent());
+		v.setContent(getAudioComponent(), ContentType.TerrainAligned);
 		v.startup();
 	}
 	

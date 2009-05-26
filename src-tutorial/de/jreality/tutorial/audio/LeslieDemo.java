@@ -9,6 +9,7 @@ import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
@@ -116,9 +117,12 @@ public class LeslieDemo {
 
 	
 	public static void main(String[] args) throws Exception {
-		JRViewer v = JRViewer.createViewerVRWithAudio();
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addAudioSupport();
+		v.addVRSupport();
 		v.setPropertiesFile("LeslieDemo.jrw");
-		v.setContent(getHubComponent());
+		v.setContent(getHubComponent(), ContentType.TerrainAligned);
 		v.startup();
 	}
 	
