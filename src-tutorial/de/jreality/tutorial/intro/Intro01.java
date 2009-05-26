@@ -1,6 +1,6 @@
 package de.jreality.tutorial.intro;
 
-import de.jreality.plugin.BasicViewer;
+import de.jreality.plugin.JRViewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
@@ -17,11 +17,9 @@ public class Intro01 {
 
 	public static void main(String[] args)	{
 		if (args.length == 0) 
-			BasicViewer.display(null);
+			JRViewer.display(null);
 		else ViewerApp.display(null);
-
 	}
-
 
 
 }
