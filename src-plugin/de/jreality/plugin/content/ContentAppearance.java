@@ -16,13 +16,13 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class ContentAppearance extends ContentPanel implements ColorPickerModeChangedListener {
 
-	public static final boolean DEFAULT_SHOW_POINTS = false;
+	public static final boolean DEFAULT_SHOW_POINTS = true;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;
-	public static final double DEFAULT_POINT_RADIUS = .6;
+	public static final double DEFAULT_POINT_RADIUS = .2;
 	public static final Color DEFAULT_POINT_COLOR = Color.blue;
-	public static final boolean DEFAULT_SHOW_LINES = false;
+	public static final boolean DEFAULT_SHOW_LINES = true;
 	public static final boolean DEFAULT_LINES_REFLECTING = true;
-	public static final double DEFAULT_TUBE_RADIUS = .5;
+	public static final double DEFAULT_TUBE_RADIUS = .1;
 	public static final Color DEFAULT_LINE_COLOR = Color.red;
 	public static final boolean DEFAULT_SHOW_FACES = true;
 	public static final boolean DEFAULT_FACES_REFLECTING = true;
@@ -58,6 +58,7 @@ public class ContentAppearance extends ContentPanel implements ColorPickerModeCh
 		
 		appearanceInspector = new AppearanceInspector();
 		restoreDefaults();
+		setInitialPosition(SHRINKER_RIGHT);
 	}
 	double worldSize = 1.0;
 	
@@ -177,6 +178,22 @@ public class ContentAppearance extends ContentPanel implements ColorPickerModeCh
 		info.vendorName = "Ulrich Pinkall";
 		info.icon = ImageHook.getIcon("lupeblau.png");
 		return info; 
+	}
+	
+	
+	@Override
+	public String getHelpDocument() {
+		return "ContentAppearance.html";
+	}
+	
+	@Override
+	public String getHelpPath() {
+		return "../help/";
+	}
+	
+	@Override
+	public Class<?> getHelpHandle() {
+		return getClass();
 	}
 
 }

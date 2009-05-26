@@ -185,6 +185,6 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("terrain aligned content");
+		return new PluginInfo("Terrain Aligned Content", "jReality Group");
 	}
 }

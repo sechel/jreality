@@ -522,6 +522,11 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 	}
 	
 	@Override
+	public String getHelpPath() {
+		return "../help/";
+	}
+	
+	@Override
 	public Class<?> getHelpHandle() {
 		return getClass();
 	}

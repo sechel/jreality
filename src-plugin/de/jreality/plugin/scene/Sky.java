@@ -329,6 +329,11 @@ public class Sky extends ShrinkPanelPlugin {
 	}
 	
 	@Override
+	public String getHelpPath() {
+		return "../help/";
+	}
+	
+	@Override
 	public Class<?> getHelpHandle() {
 		return getClass();
 	}

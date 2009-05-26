@@ -49,7 +49,7 @@ public class ContentTools extends Plugin {
 	@SuppressWarnings("serial")
 	public ContentTools() {
 		
-		rotate = new AbstractJrToggleAction("rotate") {
+		rotate = new AbstractJrToggleAction("Rotate") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setRotationEnabled(isSelected());
@@ -57,7 +57,7 @@ public class ContentTools extends Plugin {
 		};
 		rotate.setIcon(ImageHook.getIcon("arrow_rotate_clockwise.png"));
 		
-		drag = new AbstractJrToggleAction("drag") {
+		drag = new AbstractJrToggleAction("Drag") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setDragEnabled(isSelected());
@@ -65,7 +65,7 @@ public class ContentTools extends Plugin {
 		};
 		drag.setIcon(ImageHook.getIcon("arrow_inout.png"));
 		
-		snapToGrid = new AbstractJrToggleAction("snap to grid") {
+		snapToGrid = new AbstractJrToggleAction("Snap to Grid") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setSnapToGrid(isSelected());
@@ -73,7 +73,7 @@ public class ContentTools extends Plugin {
 		};
 		snapToGrid.setIcon(ImageHook.getIcon("brick.png"));
 		
-		pickFaces = new AbstractJrToggleAction("pick faces") {
+		pickFaces = new AbstractJrToggleAction("Pick Faces") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setPickFaces(isSelected());
@@ -81,7 +81,7 @@ public class ContentTools extends Plugin {
 		};
 		pickFaces.setIcon(ImageHook.getIcon("shape_square.png"));
 		
-		pickEdges = new AbstractJrToggleAction("pick edges") {
+		pickEdges = new AbstractJrToggleAction("Pick Edges") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setPickEdges(isSelected());
@@ -89,7 +89,7 @@ public class ContentTools extends Plugin {
 		};
 		pickEdges.setIcon(ImageHook.getIcon("shape_edges.png"));
 		
-		pickVertices = new AbstractJrToggleAction("pick vertices") {
+		pickVertices = new AbstractJrToggleAction("Pick Vertices") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setPickVertices(isSelected());
@@ -97,7 +97,7 @@ public class ContentTools extends Plugin {
 		};
 		pickVertices.setIcon(ImageHook.getIcon("shape_handles.png"));
 		
-		encompass = new AbstractJrToggleAction("encompass") {
+		encompass = new AbstractJrToggleAction("Encompass") {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setEncompassEnabled(isSelected());
@@ -124,11 +124,10 @@ public class ContentTools extends Plugin {
 		setPickEdges(DEFAULT_PICK_EDGES);
 		setPickFaces(DEFAULT_PICK_FACES);
 		setPickVertices(DEFAULT_PICK_VERTICES);
-
-//		setInitialPosition(SHRINKER_RIGHT);
 	}
 
 	public void install() {
+		setEncompassEnabled(isEncompassEnabled());
 		setRotationEnabled(isRotationEnabled());
 		setDragEnabled(isDragEnabled());
 		setPickEdges(isPickEdges());
@@ -211,26 +210,26 @@ public class ContentTools extends Plugin {
 		return pickVertices.isSelected();
 	}
 
-	protected void setEncompassEnabled(boolean b) {
+	
+	public boolean isEncompassEnabled() {
+		return encompass.isSelected();
+	}
+	
+	public void setEncompassEnabled(boolean b) {
 		encompass.setSelected(b);
 		setToolEnabled(encompassTool, b);
 	}
 
 	@Override
 	public void install(Controller c) throws Exception {
+		super.install(c);
 		scene = c.getPlugin(Scene.class);
 		content = PluginUtility.getPlugin(c, Content.class);
 		install();
 		ViewMenuBar viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		installMenu(viewMenuBar);
-
 		ViewToolBar tb = c.getPlugin(ViewToolBar.class);
-		//installToolbox(this);
 		installToolbox(tb);
-//		tb.addToggle(getClass(), getRotateToggle(), "Content", "Tools");
-//		tb.addToggle(getClass(), getPickEdgesToggle(), "Content", "Pick");
-//		shrinkPanel.setHeaderColor(new Color(0.5f, 0.5f, 0.2f));
-		super.install(c);
 	}
 
 	private void installToolbox(ToolBarAggregator viewToolbar) {
@@ -277,6 +276,7 @@ public class ContentTools extends Plugin {
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
+		setEncompassEnabled(c.getProperty(getClass(), "encompassEnabled", isRotationEnabled()));
 		setRotationEnabled(c.getProperty(getClass(), "rotationEnabled", isRotationEnabled()));
 		setDragEnabled(c.getProperty(getClass(), "dragEnabled", isDragEnabled()));
 		setSnapToGrid(c.getProperty(getClass(), "snapTogrid", isSnapToGrid()));
@@ -288,6 +288,7 @@ public class ContentTools extends Plugin {
 
 	@Override
 	public void storeStates(Controller c) throws Exception {
+		c.storeProperty(getClass(), "encompassEnabled", isEncompassEnabled());
 		c.storeProperty(getClass(), "rotationEnabled", isRotationEnabled());
 		c.storeProperty(getClass(), "dragEnabled", isDragEnabled());
 		c.storeProperty(getClass(), "snapTogrid", isSnapToGrid());

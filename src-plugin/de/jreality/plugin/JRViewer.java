@@ -8,23 +8,27 @@ import java.util.Set;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 
+import de.jreality.geometry.Primitives;
+import de.jreality.io.JrScene;
 import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
+import de.jreality.plugin.audio.AudioPreferences;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Inspector;
+import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.Shell;
-import de.jreality.plugin.basic.StatusBar;
+import de.jreality.plugin.basic.ToolSystemPlugin;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
-import de.jreality.plugin.basic.ViewPreferences;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.content.CenteredAndScaledContent;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
-import de.jreality.plugin.experimental.ManagedContent;
-import de.jreality.plugin.experimental.ManagedContentGUI;
+import de.jreality.plugin.content.DirectContent;
+import de.jreality.plugin.content.TerrainAlignedContent;
 import de.jreality.plugin.menu.BackgroundColor;
+import de.jreality.plugin.menu.CameraMenu;
 import de.jreality.plugin.menu.DisplayOptions;
 import de.jreality.plugin.menu.ExportMenu;
 import de.jreality.plugin.scene.Avatar;
@@ -34,25 +38,16 @@ import de.jreality.plugin.scene.Terrain;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.util.CameraUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.lnfswitch.LookAndFeelSwitch;
-import de.varylab.jrworkspace.plugin.lnfswitch.plugin.CrossPlatformLnF;
-import de.varylab.jrworkspace.plugin.lnfswitch.plugin.NimbusLnF;
-import de.varylab.jrworkspace.plugin.lnfswitch.plugin.SystemLookAndFeel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
 
 	private SimpleController
 		c = new SimpleController();
-	private View
-		view = new View();
-	private ContentInjectionPlugin	
-		contentInjectionPlugin = new ContentInjectionPlugin();
-	private SceneGraphNode
-		content = null;
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
 	
@@ -62,9 +57,26 @@ public class JRViewer {
 	}
 	
 	
-	protected JRViewer() {
-		c.registerPlugin(view);
-		c.registerPlugin(contentInjectionPlugin);
+	public static enum ContentType {
+		Direct,
+		CenteredAndScaled,
+		TerrainAligned,
+		Custom
+	}
+	
+	
+	public JRViewer() {
+		c.registerPlugin(new View());
+		c.registerPlugin(new Scene());
+		c.registerPlugin(new ToolSystemPlugin());
+		c.registerPlugin(new Lights());
+		lastViewer = new WeakReference<JRViewer>(this);
+	}
+	
+	public JRViewer(JrScene s) {
+		c.registerPlugin(new View());
+		c.registerPlugin(new Scene(s));
+		c.registerPlugin(new ToolSystemPlugin());
 		lastViewer = new WeakReference<JRViewer>(this);
 	}
 	
@@ -122,7 +134,7 @@ public class JRViewer {
 				throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed in JRViewer.setContent()");
 			}
 		}
-		content = node;
+		c.registerPlugin(new ContentInjectionPlugin(node));
 	}
 	
 	
@@ -159,14 +171,6 @@ public class JRViewer {
 		return c;
 	}
 	
-	/**
-	 * Returns the View that is registered with this JRViewer's controller
-	 * @return The View of this JRViewer
-	 */
-	public View getView() {
-		return view;
-	}
-	
 	
 	/**
 	 * Starts this JRViewer's controller and installs all registered 
@@ -189,131 +193,98 @@ public class JRViewer {
 		return c.startupLocal();
 	}
 	
+	
+	
+	
+	public <T extends Plugin & Content> void registerCustomContent(T contentPlugin) {
+		c.registerPlugin(contentPlugin);
+	}
+	
+	
+	
+	public void addContentSupport(ContentType type) {
+		c.registerPlugin(new ContentLoader());
+		c.registerPlugin(new ContentTools());
+		c.registerPlugin(new ContentAppearance());
+		switch (type) {
+			case Direct:
+				c.registerPlugin(new DirectContent());
+				break;
+			case CenteredAndScaled:
+				c.registerPlugin(new CenteredAndScaledContent());
+				break;
+			case TerrainAligned:
+				c.registerPlugin(new TerrainAlignedContent());
+				break;
+			case Custom:
+				break;
+		}
+	}
+	
+
+	
+	public void addBasicUI() {
+		c.registerPlugin(new Inspector());
+		c.registerPlugin(new Shell());
+		
+		c.registerPlugin(new BackgroundColor());
+		c.registerPlugin(new DisplayOptions());
+		c.registerPlugin(new ViewMenuBar());
+		c.registerPlugin(new ViewToolBar());
+		
+		c.registerPlugin(new ExportMenu());
+		c.registerPlugin(new CameraMenu());
+	}
+
+	
+	
+	public void addVRSupport() {
+		c.registerPlugin(new Avatar());
+		c.registerPlugin(new Terrain());
+		c.registerPlugin(new Sky());
+	}
+	
+	
+	
+	public void addAudioSupport() {
+		c.registerPlugin(new Audio());
+		c.registerPlugin(new AudioOptions());
+		c.registerPlugin(new AudioPreferences());
+	}
+	
+	
+	
 	/**
-	 * Creates a viewer plug-in set and invokes startup. The given
-	 * content node will be added to the scene graph.
+	 * Quick display method with encompass
 	 * @param node
 	 */
 	public static void display(SceneGraphNode node) {
-		JRViewer v = JRViewer.createViewer();
-		v.setContent(node);
-		v.startup();
-	}
-	
-	/**
-	 * Creates a viewer plug-in set and invokes startup. The given
-	 * content node will be added to the scene graph.
-	 * @param node
-	 */
-	public static void displayWithAudio(SceneGraphNode node) {
-		JRViewer v = JRViewer.createViewerWithAudio();
-		v.setContent(node);
-		v.startup();
-	}
-	
-	/**
-	 * Creates a VR-viewer plug-in set and invokes startup. The given
-	 * content node will be added to the scene graph.
-	 * @param node
-	 */
-	public static void displayVR(SceneGraphNode node) {
-		JRViewer v = JRViewer.createViewerVR();
-		v.setContent(node);
-		v.startup();
-	}
-	
-
-	/**
-	 * Creates a VR-viewer plug-in set and invokes startup. The given
-	 * content node will be added to the scene graph.
-	 * @param node
-	 */
-	public static void displayVRWithAudio(SceneGraphNode node) {
-		JRViewer v = JRViewer.createViewerVRWithAudio();
-		v.setContent(node);
-		v.startup();
-	}
-	
-	
-	/**
-	 * Creates a JRViewer and registers only the View class, without a default scene
-	 * @return the viewer instance
-	 */
-	public static JRViewer createEmptyViewer() {
-		return new JRViewer();
-	}
-	
-			
-	/**
-	 * Creates a JRViewer with the recommended viewer plug-in set.
-	 * @return A configured JRViewer instance
-	 */
-	public static JRViewer createViewer() {
 		JRViewer v = new JRViewer();
-		v.registerPlugin(new Lights());
-		v.registerPlugin(new BackgroundColor());
-		v.registerPlugin(new ViewMenuBar());
-		v.registerPlugin(new CenteredAndScaledContent());
-		v.registerPlugin(new ViewPreferences());
-		v.registerPlugin(new Inspector());
-		v.registerPlugin(new Shell());
-		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools());
-		v.registerPlugin(new DisplayOptions());
-		v.registerPlugin(new ViewToolBar());
-		v.registerPlugin(new ContentTools());
-		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new StatusBar());
-		v.registerPlugin(new ExportMenu());
-		v.registerPlugin(new ManagedContent());
-		v.registerPlugin(new ManagedContentGUI());
-		v.registerPlugin(new LookAndFeelSwitch());
-		v.registerPlugin(new CrossPlatformLnF());
-		v.registerPlugin(new SystemLookAndFeel());
-		v.registerPlugin(new NimbusLnF());
-		return v;
-	}
-
-	/**
-	 * Creates a JRViewer with the recommended viewer plug-in set.
-	 * In addition to the viewer plug-ins audio plug-ins are registered. 
-	 * @return A configured JRViewer instance
-	 */
-	public static JRViewer createViewerWithAudio() {
-		JRViewer v = createViewer();
-		v.registerPlugin(new AudioOptions());
-		v.registerPlugin(new Audio());
-		return v;
-	}
-	
-	
-	/**
-	 * Creates a JRViewer with the recommended VR-viewer plug-in set.
-	 * @return A configured JRViewer instance
-	 */
-	public static JRViewer createViewerVR() {
-		JRViewer v = createViewer();
-		v.registerPlugin(new Avatar());
-		v.registerPlugin(new Sky());
-		v.registerPlugin(new Terrain());
-		return v;
-	}
-	
-	
-	/**
-	 * Creates a JRViewer with the recommended VR-viewer plug-in set.
-	 * @return A configured JRViewer instance
-	 */
-	public static JRViewer createViewerVRWithAudio() {
-		JRViewer v = createViewerVR();
-		v.registerPlugin(new AudioOptions());
-		v.registerPlugin(new Audio());
-		return v;
+		v.addContentSupport(ContentType.Direct);
+		v.registerPlugin(new ContentInjectionPlugin(node, true));
+		v.addBasicUI();
+		v.startup();
 	}
 
 	
-	private class ContentInjectionPlugin extends Plugin {
+	private static class ContentInjectionPlugin extends Plugin {
 
+		private SceneGraphNode
+			content = null;
+		private boolean
+			encompass = false;
+		
+		
+		public ContentInjectionPlugin(SceneGraphNode content) {
+			this.content = content; 
+		}
+		
+		
+		public ContentInjectionPlugin(SceneGraphNode content, boolean encompass) {
+			this(content);
+			this.encompass = encompass;
+		}
+		
 		@Override
 		public PluginInfo getPluginInfo() {
 			return new PluginInfo("JRViewer Content Plugin", "jReality Group");
@@ -325,15 +296,12 @@ public class JRViewer {
 			if (content == null) {
 				return;
 			}
-			SceneGraphComponent root = null;
-			if (content instanceof Geometry) {
-				root = new SceneGraphComponent("JRViewer Content");
-				root.setGeometry((Geometry)content);
-			} else {
-				root = (SceneGraphComponent)content;
-			}
 			Content mc = PluginUtility.getPlugin(c, Content.class);
-			mc.setContent(root);
+			mc.setContent(content);
+			if (encompass) {
+				View view = c.getPlugin(View.class);
+				CameraUtility.encompass(view.getViewer());
+			}
 		}
 		
 	}
@@ -343,7 +311,12 @@ public class JRViewer {
 	 * @param args no arguments are read
 	 */
 	public static void main(String[] args) {
-		JRViewer.createViewerVR().startup();
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addVRSupport();
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.setContent(Primitives.icosahedron());
+		v.startup();
 	}
 
 }
