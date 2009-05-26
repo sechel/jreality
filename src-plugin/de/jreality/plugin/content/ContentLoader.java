@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -17,9 +16,9 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
-import de.jreality.plugin.menu.ViewMenuBar;
 import de.jreality.reader.Readers;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -73,6 +72,7 @@ public class ContentLoader extends Plugin implements UIFlavor {
 			setShortDescription("Load Content");
 		}
 		
+		@Override
 		public void actionPerformed(ActionEvent e) {
 			loadFile();
 		}

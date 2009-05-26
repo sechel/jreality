@@ -85,6 +85,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 		parent = newParent;
 	}
 	
+	@SuppressWarnings("serial")
 	public JFakeFrameWithGeometry createFrame(String title) {
 		JFakeFrameWithGeometry ff = new JFakeFrameWithGeometry(title) {
 			@Override

@@ -2,7 +2,8 @@ package de.jreality.plugin.view;
 
 import java.awt.Component;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
@@ -34,9 +35,6 @@ public class ViewerKeyListenerPlugin extends Plugin {
 		Viewer viewer = sceneView.getViewer().getCurrentViewer();
 		vkl = new ViewerKeyListener(viewer, null, iop == null ? null : iop.getInfoOverlay());
 		viewComp.addKeyListener(vkl);
-		AlignedContent ac = c.getPlugin(AlignedContent.class);
-		if (ac != null)	
-			vkl.setSelection(ac.getPathToContent());
 
 	}
 

@@ -3,9 +3,9 @@ package de.jreality.plugin.menu;
 import java.awt.Component;
 
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.SunflowMenu;
 import de.jreality.ui.viewerapp.ViewerSwitch;
@@ -17,6 +17,7 @@ import de.jreality.ui.viewerapp.actions.file.ExportSTL;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
 import de.jreality.ui.viewerapp.actions.file.ExportU3D;
 import de.jreality.ui.viewerapp.actions.file.ExportVRML;
+import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -40,20 +41,25 @@ public class ExportMenu extends Plugin {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
-		ViewerSwitch viewer = c.getPlugin(View.class).getViewer();
+		View view = c.getPlugin(View.class);
+		ViewerSwitch viewer = view.getViewer();
 		Component parent = viewer.getViewingComponent();
 		exportMenu.setIcon(ImageHook.getIcon("disk.png"));
-		exportMenu.add(new JMenuItem(new ExportImage("Image", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportRIB("RIB", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportSVG("SVG", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportPS("PS", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportVRML("VRML", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportSTL("STL", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportU3D("U3D", viewer, parent)));
-		exportMenu.add(new JMenuItem(new ExportPDF("PDF", viewer, parent)));
+		exportMenu.add(new ExportImage("Image", viewer, parent));
+		exportMenu.add(new ExportRIB("RIB", viewer, parent));
+		exportMenu.add(new ExportSVG("SVG", viewer, parent));
+		exportMenu.add(new ExportPS("PS", viewer, parent));
+		exportMenu.add(new ExportVRML("VRML", viewer, parent));
+		exportMenu.add(new ExportSTL("STL", viewer, parent));
+		exportMenu.add(new ExportU3D("U3D", viewer, parent));
+		exportMenu.add(new ExportPDF("PDF", viewer, parent));
 		exportMenu.add(new SunflowMenu(viewer));
-		viewMenuBar.addMenuItem(getClass(), 1, exportMenu, "File");
+		SaveScene saveSceneAction = new SaveScene("Save Scene", viewer, parent);
+		saveSceneAction.setIcon(ImageHook.getIcon("disk.png"));
+		viewMenuBar.addMenuItem(getClass(), 1, saveSceneAction, "File");
+		viewMenuBar.addMenuItem(getClass(), 2, exportMenu, "File");
 	}
+	
 
 	@Override
 	public void uninstall(Controller c) throws Exception {

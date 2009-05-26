@@ -16,7 +16,8 @@ import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.basic.ViewToolBar;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphComponent;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;

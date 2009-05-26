@@ -1,8 +1,9 @@
-package de.jreality.plugin.view;
+package de.jreality.plugin.basic;
 
 import javax.swing.JMenu;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
+import de.jreality.ui.viewerapp.actions.file.Quit;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.aggregators.MenuAggregator;
@@ -16,7 +17,7 @@ public class ViewMenuBar extends MenuAggregator {
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
 		info.name = "Viewer Menu";
-		info.vendorName = "Ulrich Pinkall";
+		info.vendorName = "jReality Group";
 		info.icon = ImageHook.getIcon("menu.png");
 		return info;
 	}
@@ -30,9 +31,12 @@ public class ViewMenuBar extends MenuAggregator {
 		JMenu fileMenu =  new JMenu("File");
 		fileMenu.setMnemonic('f');
 		addMenu(getClass(), 0.0, fileMenu);
+	
+		addMenuSeparator(getClass(), 99, "File");
+		addMenuItem(getClass(), 100, new Quit("Exit"), "File");
 		
 		// Viewer menu
-		JMenu viewerMenu = viewerPlugin.getMenu();
+		JMenu viewerMenu = viewerPlugin.createViewerMenu();
 		viewerMenu.setMnemonic('v');
 		addMenu(getClass(), 1.0, viewerMenu);
 		addMenuSeparator(getClass(), 0.0, "Viewer");
@@ -45,6 +49,7 @@ public class ViewMenuBar extends MenuAggregator {
 		addMenu(getClass(), 1.0, viewerPlugin.getPanelsMenu(), "Side Panels");
 	}
 	
+
 	@Override
 	public void uninstall(Controller c) throws Exception {
 

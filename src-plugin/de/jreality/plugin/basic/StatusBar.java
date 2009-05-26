@@ -1,6 +1,6 @@
-package de.jreality.plugin.view;
+package de.jreality.plugin.basic;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.icon.ImageHook;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.flavor.StatusFlavor;
@@ -19,7 +19,7 @@ public class StatusBar extends Plugin implements StatusFlavor {
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		PluginInfo info = new PluginInfo("Status Bar", "Stefan Sechelmann");
+		PluginInfo info = new PluginInfo("Status Bar", "jReality Group");
 		info.icon = ImageHook.getIcon("textfield.png");
 		return info;
 	}

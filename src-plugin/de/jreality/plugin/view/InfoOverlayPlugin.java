@@ -1,7 +1,8 @@
 package de.jreality.plugin.view;
 
 import de.jreality.jogl.plugin.InfoOverlay;
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;
 import de.jreality.util.LoggingSystem;
 import de.varylab.jrworkspace.plugin.Controller;

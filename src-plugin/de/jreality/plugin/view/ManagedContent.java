@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.basic.Content;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
 import de.varylab.jrworkspace.plugin.Controller;
@@ -40,7 +42,7 @@ public class ManagedContent extends Plugin {
 		public void toolRemoved(Class<?> context, Tool t) { }
 	}
 	
-	private AlignedContent
+	private Content
 		alignedContent = null;
 	private SceneGraphComponent
 		contentRoot = new SceneGraphComponent("Managed Content Root");
@@ -189,9 +191,7 @@ public class ManagedContent extends Plugin {
 	
 	
 	private void updateContent() {
-		if (alignedContent.getContent() != contentRoot) {
-			alignedContent.setContent(contentRoot);
-		}
+		alignedContent.setContent(contentRoot);
 	}
 	
 	
@@ -218,14 +218,10 @@ public class ManagedContent extends Plugin {
 	}
 
 	
-	public void install(AlignedContent content) {
-		alignedContent = content;
-	}
-	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		install(c.getPlugin(AlignedContent.class));
+		alignedContent = PluginUtility.getPlugin(c, Content.class);
 	}
 	
 	public boolean addContentListener(ContentListener l) {

@@ -7,7 +7,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -46,11 +45,11 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 	}
 	
 	private SceneGraphNode content;
-	private Matrix lastMatrix=new Matrix();
+//	private Matrix lastMatrix=new Matrix();
 	
 	final JSliderVR sizeSlider = new JSliderVR(1, 5001);
 	final JSliderVR offsetSlider = new JSliderVR(-250, 5000-250);
-	private JPanel guiPanel;
+//	private JPanel guiPanel;
 
 	public void alignContent() {
 		try {

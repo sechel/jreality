@@ -42,10 +42,17 @@ package de.jreality.plugin.basic;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.ButtonGroup;
 import javax.swing.Icon;
+import javax.swing.JMenu;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -225,6 +232,28 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		return renderTrigger;
 	}
 
-	
+	public JMenu createViewerMenu() {
+		JMenu menu = new JMenu("Viewer");
+		final ViewerSwitch viewerSwitch = getViewer();
+		String[] viewerNames = viewerSwitch.getViewerNames();
+		ButtonGroup bgr = new ButtonGroup();
+		for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
+			final int index = i;
+			final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
+			new AbstractAction(viewerNames[index]) {
+				private static final long serialVersionUID = 1L;
+				public void actionPerformed(ActionEvent e) {
+					viewerSwitch.selectViewer(index);
+					viewerSwitch.getCurrentViewer().renderAsync();
+				}
+			});
+			item.setSelected(index==0);
+			item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1 + index, 0));
+			bgr.add(item);
+			menu.add(item);
+		}
+		
+		return menu;
+	}
 	
 }

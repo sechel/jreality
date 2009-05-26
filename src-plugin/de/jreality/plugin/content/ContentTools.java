@@ -2,16 +2,13 @@ package de.jreality.plugin.content;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import de.jreality.plugin.PluginUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
-import de.jreality.plugin.menu.ViewMenuBar;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.tool.Tool;
 import de.jreality.shader.CommonAttributes;
@@ -49,6 +46,7 @@ public class ContentTools extends Plugin {
 	private Scene scene = null;
 	private Content content = null;
 	
+	@SuppressWarnings("serial")
 	public ContentTools() {
 		
 		rotate = new AbstractJrToggleAction("rotate") {
@@ -65,7 +63,7 @@ public class ContentTools extends Plugin {
 				setDragEnabled(isSelected());
 			}	
 		};
-		drag.setIcon(ImageHook.getIcon("arrow_out.png"));
+		drag.setIcon(ImageHook.getIcon("arrow_inout.png"));
 		
 		snapToGrid = new AbstractJrToggleAction("snap to grid") {
 			@Override
@@ -105,6 +103,7 @@ public class ContentTools extends Plugin {
 				setEncompassEnabled(isSelected());
 			}
 		};
+		encompass.setIcon(ImageHook.getIcon("arrow_out.png"));
 		
 		encompassTool = new EncompassTool();
 		

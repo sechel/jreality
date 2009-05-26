@@ -1,4 +1,4 @@
-package de.jreality.plugin.view;
+package de.jreality.plugin.menu;
 
 import static de.jreality.scene.Appearance.INHERITED;
 import static de.jreality.shader.CommonAttributes.BACKGROUND_COLOR;
@@ -15,7 +15,9 @@ import javax.swing.ButtonModel;
 import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
 
-import de.jreality.plugin.view.image.ImageHook;
+import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.ViewMenuBar;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.ShaderUtility;
@@ -23,13 +25,13 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class Background extends Plugin {
+public class BackgroundColor extends Plugin {
 
 	public static Color[] defaultBackgroundColor = new Color[]{
 		new Color(225, 225, 225), new Color(225, 225, 225),
 		new Color(255, 225, 180), new Color(255, 225, 180), };
 
-	private View view;
+	private Scene scene;
 	private JMenu menu;
 	private ButtonGroup buttonGroup;
 	private HashMap<String, ButtonModel> nameToButton = new  HashMap<String, ButtonModel>();
@@ -37,7 +39,7 @@ public class Background extends Plugin {
 	
 	private ViewMenuBar viewerMenu;
 
-	public Background() {
+	public BackgroundColor() {
 
 		menu = new JMenu("Background");
 		menu.setIcon(ImageHook.getIcon("color_swatch.png"));
@@ -67,12 +69,12 @@ public class Background extends Plugin {
 	 */
 	public void setColor(String name) {
 		nameToButton.get(name).setSelected(true);
-		if (view != null) {
+		if (scene != null) {
 			Color[] colors = nameToColors.get(name);
 			if (colors == null || (colors.length!=1 && colors.length!=4)) {
 				throw new IllegalArgumentException("illegal length of colors[]");
 			}
-			SceneGraphComponent root = view.getSceneRoot();
+			SceneGraphComponent root = scene.getSceneRoot();
 			Appearance app = root.getAppearance();
 			if (app == null) {
 				app = new Appearance("root appearance");
@@ -123,14 +125,14 @@ public class Background extends Plugin {
 		return info;
 	}
 
-	public void install(View view) {
-		this.view = view;
+	public void install(Scene scene) {
+		this.scene = scene;
 		setColor(getColor());
 	}
 
 	@Override
 	public void install(Controller c) throws Exception {
-		install(c.getPlugin(View.class));
+		install(c.getPlugin(Scene.class));
 		viewerMenu = c.getPlugin(ViewMenuBar.class);
 		viewerMenu.addMenuItem(
 				getClass(),

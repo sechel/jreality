@@ -10,34 +10,30 @@ import javax.swing.JRootPane;
 
 import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
-import de.jreality.plugin.view.AlignedContent;
-import de.jreality.plugin.view.Background;
-import de.jreality.plugin.view.CameraStand;
-import de.jreality.plugin.view.ContentAppearance;
-import de.jreality.plugin.view.ContentLoader;
-import de.jreality.plugin.view.ContentTools;
-import de.jreality.plugin.view.DisplayOptions;
-import de.jreality.plugin.view.EncompassCamera;
-import de.jreality.plugin.view.Export;
-import de.jreality.plugin.view.Inspector;
-import de.jreality.plugin.view.Lights;
+import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.Inspector;
+import de.jreality.plugin.basic.Shell;
+import de.jreality.plugin.basic.StatusBar;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
+import de.jreality.plugin.basic.ViewPreferences;
+import de.jreality.plugin.basic.ViewToolBar;
+import de.jreality.plugin.content.CenteredAndScaledContent;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
+import de.jreality.plugin.menu.BackgroundColor;
+import de.jreality.plugin.menu.DisplayOptions;
+import de.jreality.plugin.menu.ExportMenu;
+import de.jreality.plugin.scene.Avatar;
+import de.jreality.plugin.scene.Lights;
+import de.jreality.plugin.scene.Sky;
+import de.jreality.plugin.scene.Terrain;
 import de.jreality.plugin.view.ManagedContent;
 import de.jreality.plugin.view.ManagedContentGUI;
-import de.jreality.plugin.view.Shell;
-import de.jreality.plugin.view.StatusBar;
-import de.jreality.plugin.view.View;
-import de.jreality.plugin.view.ViewMenuBar;
-import de.jreality.plugin.view.ViewPreferences;
-import de.jreality.plugin.view.ViewToolBar;
-import de.jreality.plugin.view.ZoomTool;
-import de.jreality.plugin.vr.Avatar;
-import de.jreality.plugin.vr.HeadUpDisplay;
-import de.jreality.plugin.vr.Sky;
-import de.jreality.plugin.vr.Terrain;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphVisitor;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -52,10 +48,11 @@ public class JRViewer {
 	private SimpleController
 		c = new SimpleController();
 	private View
-		view;
+		view = new View();
+	private ContentInjectionPlugin	
+		contentInjectionPlugin = new ContentInjectionPlugin();
 	private SceneGraphNode
 		content = null;
-	private boolean defaultScene;
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
 	
@@ -65,11 +62,9 @@ public class JRViewer {
 	}
 	
 	
-	protected JRViewer(boolean loadDefaultScene) {
-		defaultScene = loadDefaultScene;
-		view = new View(loadDefaultScene);
+	protected JRViewer() {
 		c.registerPlugin(view);
-		c.registerPlugin(new ContentInjectionPlugin());
+		c.registerPlugin(contentInjectionPlugin);
 		lastViewer = new WeakReference<JRViewer>(this);
 	}
 	
@@ -227,17 +222,7 @@ public class JRViewer {
 		v.startup();
 	}
 	
-	/**
-	 * Creates a ViewerApp-like plug-in set and invokes startup. The given
-	 * content node will be added to the scene graph.
-	 * @param node
-	 */
-	public static void displayViewerApp(SceneGraphNode node) {
-		JRViewer v = JRViewer.createViewerApp();
-		v.setContent(node);
-		v.startup();
-	}
-	
+
 	/**
 	 * Creates a VR-viewer plug-in set and invokes startup. The given
 	 * content node will be added to the scene graph.
@@ -255,26 +240,20 @@ public class JRViewer {
 	 * @return the viewer instance
 	 */
 	public static JRViewer createEmptyViewer() {
-		return new JRViewer(false);
+		return new JRViewer();
 	}
 	
-	public static JRViewer createViewer() {
-		return createViewer(false);
-	}
 			
 	/**
 	 * Creates a JRViewer with the recommended viewer plug-in set.
 	 * @return A configured JRViewer instance
 	 */
-	public static JRViewer createViewer(boolean viewerApp) {
-		JRViewer v = new JRViewer(false);
-		v.registerPlugin(
-				viewerApp ? new EncompassCamera() : new CameraStand()
-		);
+	public static JRViewer createViewer() {
+		JRViewer v = new JRViewer();
 		v.registerPlugin(new Lights());
-		v.registerPlugin(new Background());
+		v.registerPlugin(new BackgroundColor());
 		v.registerPlugin(new ViewMenuBar());
-		v.registerPlugin(new AlignedContent());
+		v.registerPlugin(new CenteredAndScaledContent());
 		v.registerPlugin(new ViewPreferences());
 		v.registerPlugin(new Inspector());
 		v.registerPlugin(new Shell());
@@ -282,10 +261,10 @@ public class JRViewer {
 		v.registerPlugin(new ContentTools());
 		v.registerPlugin(new DisplayOptions());
 		v.registerPlugin(new ViewToolBar());
-		v.registerPlugin(new Export());
+		v.registerPlugin(new ContentTools());
 		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new ZoomTool());
 		v.registerPlugin(new StatusBar());
+		v.registerPlugin(new ExportMenu());
 		v.registerPlugin(new ManagedContent());
 		v.registerPlugin(new ManagedContentGUI());
 		v.registerPlugin(new LookAndFeelSwitch());
@@ -315,7 +294,6 @@ public class JRViewer {
 	public static JRViewer createViewerVR() {
 		JRViewer v = createViewer();
 		v.registerPlugin(new Avatar());
-		v.registerPlugin(new HeadUpDisplay());
 		v.registerPlugin(new Sky());
 		v.registerPlugin(new Terrain());
 		return v;
@@ -332,21 +310,7 @@ public class JRViewer {
 		v.registerPlugin(new Audio());
 		return v;
 	}
-	
-	/**
-	 * first attempt to rebuild a viewerapp replacement
-	 * 
-	 * @return A configured JRViewer instance
-	 */
-	public static JRViewer createViewerApp() {
-//		JRViewer v = new JRViewer(true);
-//		v.registerPlugin(new ViewMenuBar());
-//		v.registerPlugin(new Inspector());
-//		v.registerPlugin(new Shell());
-//		return v;
-		return createViewer(true);
-	}	
-	
+
 	
 	private class ContentInjectionPlugin extends Plugin {
 
@@ -361,28 +325,15 @@ public class JRViewer {
 			if (content == null) {
 				return;
 			}
-			if (!defaultScene) {
-				SceneGraphComponent root = null;
-				if (content instanceof Geometry) {
-					root = new SceneGraphComponent("JRViewer Content");
-					root.setGeometry((Geometry)content);
-				} else {
-					root = (SceneGraphComponent)content;
-				}
-				ManagedContent mc = c.getPlugin(ManagedContent.class);
-				mc.setContent(JRViewer.class, root);
+			SceneGraphComponent root = null;
+			if (content instanceof Geometry) {
+				root = new SceneGraphComponent("JRViewer Content");
+				root.setGeometry((Geometry)content);
 			} else {
-				content.accept(new SceneGraphVisitor() {
-					@Override
-					public void visit(Geometry g) {
-						view.getEmptyPickPath().getLastComponent().setGeometry(g);
-					}
-					@Override
-					public void visit(SceneGraphComponent c) {
-						view.getEmptyPickPath().getLastComponent().addChild(c);
-					}
-				});
+				root = (SceneGraphComponent)content;
 			}
+			Content mc = PluginUtility.getPlugin(c, Content.class);
+			mc.setContent(root);
 		}
 		
 	}
@@ -392,8 +343,7 @@ public class JRViewer {
 	 * @param args no arguments are read
 	 */
 	public static void main(String[] args) {
-		//JRViewer.createViewerVRWithAudio().startup();
-		JRViewer.createViewer().startup();
+		JRViewer.createViewerVR().startup();
 	}
 
 }

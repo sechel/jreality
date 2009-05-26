@@ -5,6 +5,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
+import javax.swing.UIManager;
+
+import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import de.jreality.io.JrScene;
 import de.jreality.plugin.audio.Audio;
@@ -17,19 +20,22 @@ import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.Shell;
 import de.jreality.plugin.basic.ToolSystemPlugin;
 import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
+import de.jreality.plugin.menu.BackgroundColor;
+import de.jreality.plugin.menu.CameraMenu;
 import de.jreality.plugin.menu.DisplayOptions;
 import de.jreality.plugin.menu.ExportMenu;
-import de.jreality.plugin.menu.ViewMenuBar;
 import de.jreality.plugin.scene.Avatar;
 import de.jreality.plugin.scene.Lights;
 import de.jreality.plugin.scene.Sky;
 import de.jreality.plugin.scene.Terrain;
+import de.jreality.plugin.view.ViewerKeyListenerPlugin;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -104,12 +110,13 @@ public class BasicViewer {
 		c.registerPlugin(new Inspector());
 		c.registerPlugin(new Shell());
 		
+		c.registerPlugin(new BackgroundColor());
 		c.registerPlugin(new DisplayOptions());
 		c.registerPlugin(new ViewMenuBar());
 		c.registerPlugin(new ViewToolBar());
 		
 		c.registerPlugin(new ExportMenu());
-		c.registerPlugin(new de.jreality.plugin.menu.CameraMenu());
+		c.registerPlugin(new CameraMenu());
 		
 		return c;
 	}
@@ -165,6 +172,7 @@ public class BasicViewer {
 			addBasicUI(c);
 			c.startup();
 		} else {		
+			UIManager.setLookAndFeel(new NimbusLookAndFeel()	);
 			SimpleController c = createSceneAndView(null);
 			addBasicUI(c);
 			addContentSupport(c);
@@ -172,6 +180,7 @@ public class BasicViewer {
 			//addAudioSupport(c);
 			c.registerPlugin(new Lights());
 			c.registerPlugin(new TerrainAlignedContent());
+			c.registerPlugin(new ViewerKeyListenerPlugin());
 			//c.registerPlugin(new CenteredAndScaledContent());
 			//c.registerPlugin(new DirectContent());
 			c.startup();

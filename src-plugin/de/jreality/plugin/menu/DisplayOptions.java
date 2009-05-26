@@ -8,6 +8,7 @@ import javax.swing.KeyStroke;
 
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphComponent;
