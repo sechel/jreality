@@ -102,6 +102,7 @@ public class CameraMenu extends Plugin {
 		vtb.addTool(getClass(), 5.0, loadAction.createToolboxItem());
 		vtb.addTool(getClass(), 5.1, saveAction.createToolboxItem());
 		vtb.addSeparator(getClass(), 5.2);
+		vtb.addTool(getClass(), 1.25, zoomToolAction.createToolboxItem());
 	}
 	
 	@Override

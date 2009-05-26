@@ -113,7 +113,7 @@ public class CenteredAndScaledContent extends ContentPanel implements Content {
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("box aligned content");
+		return new PluginInfo("Aligned Content", "jReality Group");
 	}
 	
 	@Override
