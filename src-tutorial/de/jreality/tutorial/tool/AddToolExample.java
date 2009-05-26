@@ -3,7 +3,7 @@ package de.jreality.tutorial.tool;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.plugin.BasicViewer;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
@@ -23,7 +23,7 @@ public class AddToolExample {
 		ScaleTool tool= new ScaleTool();
 		cmp.addTool(tool);		
 		cmp.setGeometry(Primitives.icosahedron());
-	    BasicViewer.display(cmp);
+	    JRViewer.display(cmp);
 	}
 	private static void setupAppearance(Appearance ap) {
 		DefaultGeometryShader dgs;
