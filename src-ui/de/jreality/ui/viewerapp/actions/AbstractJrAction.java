@@ -43,6 +43,10 @@ package de.jreality.ui.viewerapp.actions;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
+import javax.swing.AbstractButton;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 
@@ -113,6 +117,24 @@ public abstract class AbstractJrAction extends javax.swing.AbstractAction {
    */
   public void setAcceleratorKey(KeyStroke key) {
     putValue(ACCELERATOR_KEY, key);
+  }
+  
+  public JMenuItem createMenuItem() {
+	  return new JMenuItem(this);
+  }
+  
+  public AbstractButton createToolboxItem() {
+	  JButton ret = new JButton(this);
+	  if (ret.getIcon() != null) {
+			String text = ret.getText();
+			ret.setToolTipText(text);
+			ret.setText(null);
+		}
+	  return ret;
+  }
+  
+  public void setIcon(Icon icon) {
+	  putValue(SMALL_ICON, icon);
   }
   
 }

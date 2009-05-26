@@ -46,10 +46,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.Action;
 import javax.swing.KeyStroke;
 
 import de.jreality.scene.Viewer;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.GuiUtility;
 
@@ -76,7 +76,8 @@ public class ToggleShowCursor extends AbstractJrAction {
   public void actionPerformed(ActionEvent e) {
 	  if (viewer.hasViewingComponent() && viewer.getViewingComponent() instanceof Component) {
 		Component viewingCmp = (Component) viewer.getViewingComponent();
-		boolean hide = viewingCmp.getCursor().getType() == Cursor.DEFAULT_CURSOR;  
+		boolean hide = viewingCmp.getCursor().getType() == Cursor.DEFAULT_CURSOR;
+		putValue(Action.SELECTED_KEY, Boolean.valueOf(hide));
 		if (hide) GuiUtility.hideCursor(viewingCmp);
 		else GuiUtility.showCursor(viewingCmp);
 	}
