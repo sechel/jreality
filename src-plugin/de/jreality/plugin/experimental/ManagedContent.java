@@ -1,4 +1,4 @@
-package de.jreality.plugin.view;
+package de.jreality.plugin.experimental;
 
 import java.util.HashMap;
 import java.util.LinkedList;

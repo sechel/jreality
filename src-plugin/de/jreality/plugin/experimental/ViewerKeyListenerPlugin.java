@@ -1,4 +1,4 @@
-package de.jreality.plugin.view;
+package de.jreality.plugin.experimental;
 
 import java.awt.Component;
 
@@ -12,7 +12,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 public class ViewerKeyListenerPlugin extends Plugin {
 
 	private View sceneView;
-	private de.jreality.plugin.view.ViewerKeyListener vkl = null;
+	private de.jreality.plugin.experimental.ViewerKeyListener vkl = null;
 	private Component viewComp;
 
 	@Override

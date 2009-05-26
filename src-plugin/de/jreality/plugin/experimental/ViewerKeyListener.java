@@ -2,7 +2,7 @@
  * Created on Jun 17, 2004
  *
  */
-package de.jreality.plugin.view;
+package de.jreality.plugin.experimental;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

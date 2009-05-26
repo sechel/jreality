@@ -1,4 +1,4 @@
-package de.jreality.plugin.view;
+package de.jreality.plugin.experimental;
 
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.plugin.basic.View;
