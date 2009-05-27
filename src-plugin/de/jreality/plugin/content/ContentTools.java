@@ -196,8 +196,9 @@ public class ContentTools extends Plugin {
 		if (content != null) {
 			if (b) return content.addContentTool(tool);
 			else content.removeContentTool(tool);
+			return false;
 		}
-		return false;
+		return b;
 	}
 
 	public boolean isPickFaces() {

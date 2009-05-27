@@ -77,12 +77,18 @@ public class CameraMenu extends Plugin {
 
 	
 	private void setZoomEnabled(boolean enable) {
-		scene.getSceneRoot().removeTool(zoomTool);
-		if (enable) {
-			scene.getSceneRoot().addTool(zoomTool);
+		if (scene != null) {
+			scene.getSceneRoot().removeTool(zoomTool);
+			if (enable) {
+				scene.getSceneRoot().addTool(zoomTool);
+			}
 		}
+		zoomToolAction.setSelected(enable);
 	}
 	
+	private boolean isZoomEnabled() {
+		return zoomToolAction.isSelected();
+	}
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -103,12 +109,26 @@ public class CameraMenu extends Plugin {
 		vtb.addTool(getClass(), 5.1, saveAction.createToolboxItem());
 		vtb.addSeparator(getClass(), 5.2);
 		vtb.addTool(getClass(), 1.25, zoomToolAction.createToolboxItem());
+		
+		setZoomEnabled(zoomToolAction.isSelected());
 	}
 	
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		c.getPlugin(ViewMenuBar.class).removeAll(getClass());
 		c.getPlugin(ViewToolBar.class).removeAll(getClass());
+	}
+	
+	@Override
+	public void storeStates(Controller c) throws Exception {
+		super.storeStates(c);
+		c.storeProperty(getClass(), "zoomEnabled", zoomToolAction.isSelected());
+	}
+	
+	@Override
+	public void restoreStates(Controller c) throws Exception {
+		super.restoreStates(c);
+		setZoomEnabled(c.getProperty(getClass(), "zoomEnabled", isZoomEnabled()));
 	}
 
 }
