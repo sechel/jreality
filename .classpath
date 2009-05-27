@@ -23,7 +23,7 @@
 	<classpathentry kind="src" path="src-vr"/>
 	<classpathentry kind="src" path="src-plugin"/>
 	<classpathentry kind="src" path="src-jinput"/>
-	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/|de/jreality/audio/osc/" kind="src" path="src-audio"/>
+	<classpathentry excluding="de/jreality/audio/csound/|de/jreality/audio/jass/|de/jreality/audio/osc/" kind="src" path="src-audio"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="test-backends-share"/>
 	<classpathentry kind="src" path="test-io"/>
@@ -47,6 +47,7 @@
 	<classpathentry kind="lib" path="lib/jRWorkspacePluginSDK.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/vrData.jar"/>
+	<classpathentry kind="lib" path="lib/jjack.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry kind="lib" path="lib/jtem-beans.jar"/>
 	<classpathentry kind="output" path="bin"/>

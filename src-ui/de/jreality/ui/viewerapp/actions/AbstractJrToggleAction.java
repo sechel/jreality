@@ -10,6 +10,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JToggleButton;
 import javax.swing.JToggleButton.ToggleButtonModel;
 
+// this is quite a hack, in java 6 the button model
+// would not be required. Then, the action has a
+// selected state (Action.SELECTED_KEY)
 public abstract class AbstractJrToggleAction extends AbstractJrAction {
 
 	ToggleButtonModel model=new ToggleButtonModel();
