@@ -20,11 +20,11 @@ public abstract class AbstractJrToggleAction extends AbstractJrAction {
 	}
 
 	public void setSelected(boolean value) {
-	  putValue(Action.SELECTED_KEY, value);
+	  putValue("SwingSelectionKey", value);
 	}
 	  
 	public boolean isSelected() {
-	  return Boolean.TRUE.equals(getValue(Action.SELECTED_KEY));
+	  return Boolean.TRUE.equals(getValue("SwingSelectionKey"));
 	}
 
 	@Override
@@ -38,7 +38,8 @@ public abstract class AbstractJrToggleAction extends AbstractJrAction {
 		if (ret.getIcon() != null) {
 			String text = ret.getText();
 			ret.setToolTipText(text);
-			ret.setHideActionText(true);
+			ret.setText(null);
+			//ret.setHideActionText(true); again java 6
 		}
 		return ret;
 	}

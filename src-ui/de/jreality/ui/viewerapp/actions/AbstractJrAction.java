@@ -128,7 +128,8 @@ public abstract class AbstractJrAction extends javax.swing.AbstractAction {
 	  if (ret.getIcon() != null) {
 			String text = ret.getText();
 			ret.setToolTipText(text);
-			ret.setHideActionText(true);
+			ret.setText(null);
+			//ret.setHideActionText(true); this is java 6
 		}
 	  return ret;
   }
