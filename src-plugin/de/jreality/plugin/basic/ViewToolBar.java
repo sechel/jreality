@@ -6,10 +6,6 @@ import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 public class ViewToolBar extends ToolBarAggregator {
 
-	public ViewToolBar() {
-		System.out.println("ViewToolBar.ViewToolBar()");
-	}
-	
 	@Override
 	public PluginInfo getPluginInfo() {
 		return new PluginInfo("View Tool Bar", "Stefan Sechelmann");
