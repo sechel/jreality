@@ -178,8 +178,9 @@ public class ContentTools extends Plugin {
 
 	public void setDragEnabled(boolean b) {
 		drag.setSelected(b);
-		setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
+		boolean success = setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
 		setToolEnabled(snapDragTool, drag.isSelected() &&  snapToGrid.isSelected());
+		drag.setSelected(success);
 	}
 
 	public boolean isRotationEnabled() {
@@ -188,14 +189,15 @@ public class ContentTools extends Plugin {
 
 	public void setRotationEnabled(boolean b) {
 		rotate.setSelected(b);
-		setToolEnabled(rotateTool, b);
+		rotate.setSelected(setToolEnabled(rotateTool, b));
 	}
 
-	private void setToolEnabled(Tool tool, boolean b) {
+	private boolean setToolEnabled(Tool tool, boolean b) {
 		if (content != null) {
-			if (b) content.addContentTool(tool);
+			if (b) return content.addContentTool(tool);
 			else content.removeContentTool(tool);
 		}
+		return false;
 	}
 
 	public boolean isPickFaces() {
