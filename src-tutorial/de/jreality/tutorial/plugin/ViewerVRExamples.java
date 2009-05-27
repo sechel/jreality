@@ -55,9 +55,13 @@ public class ViewerVRExamples extends ShrinkPanelPlugin {
 					try {
 						SceneGraphComponent read = Readers.read(Input
 								.getInput(examples[selectionIndex][1]));
+						
+						// The examples are aligned with z-axis pointing upwards. So we
+						// rotate each example about the x-axis by -90 degrees.
 						MatrixBuilder mb = MatrixBuilder.euclidean().rotateX(-Math.PI/2);
 						if (read.getTransformation() != null) mb.times(read.getTransformation().getMatrix());
 						mb.assignTo(read);
+						
 						getContent().setContent(read);
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -101,7 +105,7 @@ public class ViewerVRExamples extends ShrinkPanelPlugin {
 
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("VR Examples");
+		return new PluginInfo("VR Examples", "jReality Group");
 	}
 
 	public static void main(String[] args) {
