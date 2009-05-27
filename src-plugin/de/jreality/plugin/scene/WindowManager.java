@@ -54,7 +54,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("window manager");
+		return new PluginInfo("Window Manager");
 	}
 	
 	@Override

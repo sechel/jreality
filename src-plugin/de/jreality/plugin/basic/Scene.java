@@ -112,7 +112,7 @@ public class Scene extends Plugin {
 		
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("scene");
+		return new PluginInfo("Scene", "jReality Group");
 	}
 
 	public SceneGraphPath getCameraPath() {

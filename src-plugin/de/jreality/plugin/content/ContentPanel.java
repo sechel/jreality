@@ -4,10 +4,9 @@ import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
-public class ContentPanel extends SceneShrinkPanel {
+public abstract class ContentPanel extends SceneShrinkPanel {
 
 	@Override
 	public void install(Controller c) throws Exception {
@@ -18,11 +17,6 @@ public class ContentPanel extends SceneShrinkPanel {
 	@Override
 	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
 		return View.class;
-	}
-
-	@Override
-	public PluginInfo getPluginInfo() {
-		return new PluginInfo("Content settings");
 	}
 	
 }

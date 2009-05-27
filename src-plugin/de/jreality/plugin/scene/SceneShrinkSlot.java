@@ -37,7 +37,7 @@ public class SceneShrinkSlot extends Plugin {
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("embedded ShrinkSlot");
+		return new PluginInfo("Embedded Shrink Slot", "jReality Group");
 	}
 	
 	@Override
