@@ -57,9 +57,9 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 	private void installTrigger(SceneGraphComponent trigger) {
 		if (trigger == currentTrigger) return;
 		if (currentTrigger != null) currentTrigger.removeTool(actionTool);
-		String n1 = trigger == null ? "null" : trigger.getName();
-		String n2 = currentTrigger == null ? "null" : currentTrigger.getName();
-		System.out.println(SceneShrinkPanel.this.getClass().getName()+" newTrigger="+n1+" oldTrigger="+n2);
+//		String n1 = trigger == null ? "null" : trigger.getName();
+//		String n2 = currentTrigger == null ? "null" : currentTrigger.getName();
+//		System.out.println(SceneShrinkPanel.this.getClass().getName()+" newTrigger="+n1+" oldTrigger="+n2);
 		currentTrigger = trigger;
 		if (trigger != null) trigger.addTool(actionTool);
 	}
