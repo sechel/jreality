@@ -40,6 +40,7 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
+import java.lang.reflect.Array;
 
 import de.jreality.geometry.OoNode.UpdateMethod;
 import de.jreality.math.Pn;
@@ -170,19 +171,19 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	protected void setUnwrapFaceIndices(DataList data) {
 		if (data!=null && data.size()!=nof())
-			throw new IllegalArgumentException("Data list of face indices for unwrapes faces has wrong length.");
+			throw new IllegalArgumentException("Data list of face indices for unwrap faces has wrong length.");
 		setUnwrapFaceIndices(data==null?null:data.toIntArrayArray(null));
 	}
 
 	protected void setUnwrapFaceIndices(int[][] data) {
 		if (data!=null && data.length!=nof())
-			throw new IllegalArgumentException("Array of face indices for unwraped faces has wrong length.");
+			throw new IllegalArgumentException("Array of face indices for unwrap faces has wrong length.");
 		unwrapFaceIndices.setObject(data);
 	}
 
 	protected void setUnwrapFaceIndices(int[] data, int pointCountPerFace) {
 		if (data != null && data.length != pointCountPerFace * nof())
-			throw new IllegalArgumentException("Array of indices for unwraped faces has wrong length.s");
+			throw new IllegalArgumentException("Array of indices for unwrap faces has wrong length.");
 		setUnwrapFaceIndices(data == null ? null
 				: new IntArrayArray.Inlined(data, pointCountPerFace));
 	}
@@ -233,6 +234,10 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	}
 
 	protected void setFaceLabels( DataList data ) {
+		if( data != null && data.size() != nof() )
+			throw new IllegalArgumentException( "array has wrong length" );
+		if( data instanceof StringArray)
+			throw new IllegalArgumentException( "argument is not a de.jreality.scene.data.StringArray" );
 		setVertexAttribute( Attribute.LABELS, data );
 	}
 	
@@ -313,7 +318,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
      *     |                        |\        /  ____\________/  /   \        
      *  faceLables                  | \      /  /     \         /     \ 
      *                              |  faceNormals     aabbTree     edgeIndices   
-     *  unwrapFaceIndices           |     /                            |
+     *  unwrapFaceIndices           |     /                            |?
      *        |                     |    /               edgeCount (see AbstractIndexedLineSet)
      * actualVertexOfUnwrapVertex   |   /
      *                          \   |  /
@@ -331,32 +336,29 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		actualVertexOfUnwrapVertex.setUpdateMethod(
 				new OoNode.UpdateMethod() {
 					public Object update( Object object) {
-						int[][] fi = (int[][]) faceIndices.getObject();
-						int[][] unwrapFI = (int[][]) unwrapFaceIndices.getObject();
-						int[] actualVOUV = (int[]) object;
-
-						//get number of unwrap vertices
-						int nv=nov();
-						
-						actualVOUV = determineActualVertexOfUnwrapVertex(fi,
-								unwrapFI, actualVOUV, nv);
-						
-						return actualVOUV;
+						return determineActualVertexOfUnwrapVertex((int[]) object);
 					}
-
 				}
 		);
 	}
+	
+	int[] determineActualVertexOfUnwrapVertex(int[] actualVOUV) {
+		int[][] fi = (int[][]) faceIndices.getObject();
+		int[][] unwrapFI = (int[][]) unwrapFaceIndices.getObject();
+
+		return determineActualVertexOfUnwrapVertexImpl(fi, unwrapFI,actualVOUV, nov());
+	}
 
 	// determine translation table between actual and unwrap vertex indices
-	int[] determineActualVertexOfUnwrapVertex(int[][] fi, int[][] unwrapFI, int[] actualVOUV, int nv) {
+	static int[] determineActualVertexOfUnwrapVertexImpl(
+			int[][] fi, int[][] unwrapFI, int[] actualVOUV, int nv) {
 
 		if (fi == null || unwrapFI == null)
 			return null;
-		
 		if (actualVOUV==null || actualVOUV.length != nv)
 			actualVOUV = new int[nv];
-		for (int f=0; f<nof(); f++) 
+		
+		for (int f=0; f<fi.length; f++) 
 			for (int v=0; v<fi[f].length; v++) 
 				actualVOUV[unwrapFI[f][v]]=fi[f][v];
 		return actualVOUV;
@@ -493,7 +495,7 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 		/* add vertex normals to corresponding unwrap vertices */
 		int[] translation=(int[]) actualVertexOfUnwrapVertex.getObject();
 		if ( translation != null ) {
-			for (int i=0; i<vertexNormals.length; i++)
+			for (int i=0; i<vertexNormals.length && i<translation.length; i++)
 				if (i!=translation[i])
 					System.arraycopy(vertexNormals[translation[i]], 0, vertexNormals[i], 0, vertexNormals[translation[i]].length);
 		}
@@ -559,5 +561,114 @@ class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 
 		vertexNormals.updateArray();
 	}
+	
+	@SuppressWarnings("unchecked")
+	protected <E> E[] unwrapVertexAttributes(E[] data) {
+		return (E[]) unwrapVertexAttributes(data, data[0].getClass(), 1, this);
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected static <E> E[] unwrapVertexAttributes(E[] data,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (E[]) unwrapVertexAttributes(data, data[0].getClass(), 
+				1, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	protected int[] unwrapVertexAttributes(int[] data, int entriesPerVertex) {
+		return (int[]) unwrapVertexAttributes(data, int.class, entriesPerVertex, this);
+	}
+	
+	protected static int[] unwrapVertexAttributes(int[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (int[]) unwrapVertexAttributes(data, int.class, 
+				entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	protected boolean[] unwrapVertexAttributes(boolean[] data, int entriesPerVertex) {
+		return (boolean[]) unwrapVertexAttributes(data, boolean.class, entriesPerVertex, this);
+	}
+	
+	protected static boolean[] unwrapVertexAttributes(boolean[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (boolean[]) unwrapVertexAttributes(data, boolean.class, 
+				entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	protected long[] unwrapVertexAttributes(long[] data, int entriesPerVertex) {
+		if( data == null )
+			throw new NullPointerException();
+		return (long[]) unwrapVertexAttributes(data, long.class, entriesPerVertex, this);
+	}
+	
+	protected static long[] unwrapVertexAttributes(long[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (long[]) unwrapVertexAttributes(data, long.class, 
+				entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	protected float[] unwrapVertexAttributes(float[] data, int entriesPerVertex) {
+		return (float[]) unwrapVertexAttributes(data, float.class, entriesPerVertex, this);
+	}
+	
+	protected static float[] unwrapVertexAttributes(float[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (float[]) unwrapVertexAttributes(data, float.class, 
+				entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	protected char[] unwrapVertexAttributes(char[] data, int entriesPerVertex) {
+		return (char[]) unwrapVertexAttributes(data, char.class, entriesPerVertex, this);
+	}
+	
+	protected static char[] unwrapVertexAttributes(char[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (char[]) unwrapVertexAttributes(data, char.class, 
+				entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	protected double[] unwrapVertexAttributes(double[] data, int entriesPerVertex) {
+		return (double[]) unwrapVertexAttributes(data, double.class, entriesPerVertex, this);
+	}
+	
+	protected static double[] unwrapVertexAttributes(double[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return (double[]) unwrapVertexAttributes(data, double.class, 
+				entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	private static Object unwrapVertexAttributes(Object data, Class<?> clazz, 
+			int entriesPerVertex, AbstractIndexedFaceSetFactory ifsf) {
+		if (ifsf.faceIndices.getObject()==null || ifsf.unwrapFaceIndices.getObject() == null) 
+			throw new IllegalStateException("set faceIndices and unwrapFaceIndices first, or use the static method instead");
+
+		return unwrapVertexAttributes(
+				data, clazz, 
+				entriesPerVertex,  (int[][]) ifsf.faceIndices.getObject(), 
+				(int[][]) ifsf.unwrapFaceIndices.getObject(), 
+				ifsf.nov());
+	}
+	
+	/* this method is a little complicated, because it is designed to be applicable to 
+	 * arrays of Objects (which would be easy) AND primitives */
+	private static Object unwrapVertexAttributes(Object data, Class<?> clazz, 
+			final int entriesPerVertex, int[][] faceIndices, int[][] unwrapFaceIndices, 
+			final int numberOfUnwrapVertices) {
+		if (data == null || faceIndices == null || unwrapFaceIndices == null) 
+			throw new NullPointerException();
+		if (entriesPerVertex<1)
+			throw new IllegalArgumentException();
+
+		
+		Object unwrapData = Array.newInstance(clazz, numberOfUnwrapVertices*entriesPerVertex);
+		int[] translation = determineActualVertexOfUnwrapVertexImpl(
+				faceIndices, unwrapFaceIndices, null, numberOfUnwrapVertices);
+		
+		for (int i=0; i<numberOfUnwrapVertices; i++) 
+			for (int j=0; j<entriesPerVertex; j++)
+			Array.set(unwrapData,i*entriesPerVertex + j,Array.get(data,translation[i]*entriesPerVertex + j));
+		
+		return unwrapData;
+	}
+	
 
 }

@@ -50,6 +50,7 @@ import de.jreality.scene.data.DataListSet;
 /**
  * This factory classes can be used to create and edit instances of {@link IndexedFaceSet}.  See {@link IndexedLineSetFactory} and
  * {@link PointSetFactory} for functionality inherited from the superclasses.
+ * </p>
  * <h4>Specifying the geometry</h4>
  * <p>
  *  To specify faces, first set the number of faces using {@link #setFaceCount(int)}. The faces themselves
@@ -57,6 +58,7 @@ import de.jreality.scene.data.DataListSet;
  *  indices into the coordinate array of the underlying point set (See {@link PointSetFactory}).
  * <p>
  * <h4>Standard attributes</h4>
+ * <p>
  * There are methods for setting the built-in face attributes normals, colors, and labels.
  * Texture coordinates can have fiber length 2, 3, or 4.  Normals in euclidean case must have fiber length 3; otherwise they should have 
  * length 4. Labels are represented by an array of type <code>String[]</code>, and are displayed at the center of the face.
@@ -103,7 +105,12 @@ import de.jreality.scene.data.DataListSet;
  * and <code>unwrapFaceIndices</code>, and not from the vertex coordinates. There is also a
  * <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/unwrap_a_geometry_using_a_factory>tutorial that explains the use of unwrapping</a>.
  * 
-
+ * <p>Since the vertex count includes the extra vertices for unwrapping, one needs to multiply vertex attributes for the extra vertices. 
+ * More often than not, one needs to copy the attributes to the corresponding vertices. The correspondence may be determined from the 
+ * two sets of face indices. The method <code>unwrapVertexAttributes()</code> does this for you. It has a static version (which needs 
+ * more parameters) and an instance version (which reads the corresponding parameters from the instance). It comes in many versions in
+ * order to be directly applicable to those vertex attributes that are flat arrays of primitives.
+ 
  * @see QuadMeshFactory
  * @see ParametricSurfaceFactory
  * 
@@ -111,7 +118,7 @@ import de.jreality.scene.data.DataListSet;
  *  For an example, see
  *  <a href=http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/Use_an_indexed_face_set_factory> this tutorial</a>
  * 
- * @author gunn
+ * @author gunn, peters
  *
  */
 public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
@@ -351,6 +358,79 @@ public class IndexedFaceSetFactory extends AbstractIndexedFaceSetFactory {
 
 	public void setFaceLabels( String [] data ) {
 		super.setFaceLabels( data );
+	}
+
+	/* unwrap convenience methods */
+	public boolean[] unwrapVertexAttributes(boolean[] data,
+			int entriesPerVertex) {
+		return super.unwrapVertexAttributes(data, entriesPerVertex);
+	}
+
+	public static boolean[] unwrapVertexAttributes(boolean[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	public char[] unwrapVertexAttributes(char[] data, int entriesPerVertex) {
+		return super.unwrapVertexAttributes(data, entriesPerVertex);
+	}
+
+	public static char[] unwrapVertexAttributes(char[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	public double[] unwrapVertexAttributes(double[] data,
+			int entriesPerVertex) {
+		return super.unwrapVertexAttributes(data, entriesPerVertex);
+	}
+
+	public static double[] unwrapVertexAttributes(double[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	public <E> E[] unwrapVertexAttributes(E[] data) {
+		return super.unwrapVertexAttributes(data);
+	}
+
+	public static <E> E[] unwrapVertexAttributes(E[] data, 
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	public float[] unwrapVertexAttributes(float[] data, int entriesPerVertex) {
+		return super.unwrapVertexAttributes(data, entriesPerVertex);
+	}
+
+	public static float[] unwrapVertexAttributes(float[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	public int[] unwrapVertexAttributes(int[] data, int entriesPerVertex) {
+		return super.unwrapVertexAttributes(data, entriesPerVertex);
+	}
+
+	public static int[] unwrapVertexAttributes(int[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
+	}
+
+	public long[] unwrapVertexAttributes(long[] data, int entriesPerVertex) {
+		return super.unwrapVertexAttributes(data, entriesPerVertex);
+	}
+
+	public static long[] unwrapVertexAttributes(long[] data, int entriesPerVertex,
+			int[][] faceIndices, int[][] unwrapFaceIndices, int numberOfUnwrapVertices) {
+		return AbstractIndexedFaceSetFactory.unwrapVertexAttributes(
+				data, entriesPerVertex, faceIndices, unwrapFaceIndices, numberOfUnwrapVertices);
 	}
 
 }

@@ -474,63 +474,83 @@ public class IndexedFaceSetFactoryTest extends TestCase {
  }
 	 
 	 public void testUnwrapFaceIndices() {
-			factory.setVertexCount( unwrapVertices.length/3);
-			factory.setVertexCoordinates( unwrapVertices );
-			factory.setFaceCount( indices.length );
-			factory.setFaceIndices( indices );
-			factory.setVertexTextureCoordinates( unwrapTextureCoordinates );
-			factory.setGenerateAABBTree( true );
-			factory.setGenerateEdgeLabels(true);
-			factory.setGenerateEdgesFromFaces( true );
-			factory.setGenerateFaceLabels(true);
-			factory.setGenerateFaceNormals(true);
-			factory.setGenerateVertexLabels(true);
-			factory.setGenerateVertexNormals( true );
-			factory.update();
-			
-			IndexedFaceSet ifs=factory.getIndexedFaceSet();
-			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
-			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
-			assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
-			AABBTree aabbTree=(AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE);
-			String[] edgeLabels = ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
-			int[] edgeIndices = ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
-			String[] faceLabels = ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null);
-			double[] faceNormals = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null);
-			String[] vertexLabels = ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null);
-			double[][] vertexNormals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-			
-			factory.setUnwrapFaceIndices(unwrapIndices);
-			factory.update();
-			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
-			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), unwrapIndices));
-			assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
-			assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
-			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
-			assertTrue(Arrays.equals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null),edgeIndices));
-			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null),faceLabels));
-			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null),faceNormals));
-			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null), vertexLabels));
-			double[][] unwrapNormals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-			assertFalse(Arrays.deepEquals(unwrapNormals, vertexNormals));
-			int[] trans=new int[] {0,1,2,3,4,5,6,7,2,6,3,7,3,7};
-			for (int i=0; i<14; i++ )
-				assertTrue(Arrays.equals(unwrapNormals[i], vertexNormals[trans[i]]));
-			
-			
-			factory.setUnwrapFaceIndices((int[])null);
-			factory.update();
-			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
-			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
-			assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
-			assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
-			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
-			assertTrue(Arrays.equals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null),edgeIndices));
-			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null),faceLabels));
-			assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null),faceNormals));
-			assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null), vertexLabels));
-			double[][] normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-			assertTrue(Arrays.deepEquals(normals, vertexNormals));
+		 /* initialize without unwrap face indices (but already to much vertices) */
+		 factory.setVertexCount( unwrapVertices.length/3);
+		 factory.setVertexCoordinates( unwrapVertices );
+		 factory.setFaceCount( indices.length );
+		 factory.setFaceIndices( indices );
+		 factory.setVertexTextureCoordinates( unwrapTextureCoordinates );
+		 factory.setGenerateAABBTree( true );
+		 factory.setGenerateEdgeLabels(true);
+		 factory.setGenerateEdgesFromFaces( true );
+		 factory.setGenerateFaceLabels(true);
+		 factory.setGenerateFaceNormals(true);
+		 factory.setGenerateVertexLabels(true);
+		 factory.setGenerateVertexNormals( true );
+		 factory.update();
+
+		 /* check whether attributes(vertex coordinates, face indices, texture coordinates) 
+		  * where set as planed in the indexed face set
+		  * and save the generated attributes for comparison 
+		  */
+		 IndexedFaceSet ifs=factory.getIndexedFaceSet();
+		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
+		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
+		 assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
+		 AABBTree aabbTree=(AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE);
+		 String[] edgeLabels = ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
+		 int[] edgeIndices = ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
+		 String[] faceLabels = ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null);
+		 double[] faceNormals = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null);
+		 String[] vertexLabels = ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null);
+		 double[][] vertexNormals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+
+		 /* introduce unwrap face indices, check whether 
+		  * attributes(vertex coordinates, face indices, texture coordinates) 
+		  * where set as planed in the indexed face set
+		  * and check whether generated attributes are correct again
+		  */
+		 factory.setUnwrapFaceIndices(unwrapIndices);
+		 factory.update();
+		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
+		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), unwrapIndices));
+		 assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
+		 assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
+		 assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
+		 assertTrue(Arrays.equals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null),edgeIndices));
+		 assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null),faceLabels));
+		 assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null),faceNormals));
+		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null), vertexLabels));
+		 double[][] unwrapNormals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+		 assertFalse(Arrays.deepEquals(unwrapNormals, vertexNormals));
+		 int[] trans=new int[] {0,1,2,3,4,5,6,7,2,6,3,7,3,7};
+		 for (int i=0; i<14; i++ )
+			 assertTrue(Arrays.equals(unwrapNormals[i], vertexNormals[trans[i]]));
+
+		 /* check the unwrap vertex attributes methods */
+		 assertTrue(Arrays.equals(factory.unwrapVertexAttributes(vertices,3),unwrapVertices));
+		 assertTrue(Arrays.equals(IndexedFaceSetFactory.unwrapVertexAttributes(vertices,3,indices,unwrapIndices,14),unwrapVertices));
+		 assertTrue(Arrays.equals(factory.unwrapVertexAttributes(
+				 new String[] {"0","1","2","3","4","5","6","7"}),
+				 new String[] {"0","1","2","3","4","5","6","7","2","6","3","7","3","7"}));
+		 assertTrue(Arrays.equals(IndexedFaceSetFactory.unwrapVertexAttributes(
+				 new String[] {"0","1","2","3","4","5","6","7"},indices, unwrapIndices,14),
+				 new String[] {"0","1","2","3","4","5","6","7","2","6","3","7","3","7"}));
+		 
+		 /* check whether a reset of unwrap face indices works */
+		 factory.setUnwrapFaceIndices((int[])null);
+		 factory.update();
+		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
+		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
+		 assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
+		 assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
+		 assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
+		 assertTrue(Arrays.equals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArray(null),edgeIndices));
+		 assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.LABELS).toStringArray(null),faceLabels));
+		 assertTrue(Arrays.equals(ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArray(null),faceNormals));
+		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.LABELS).toStringArray(null), vertexLabels));
+		 double[][] normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+		 assertTrue(Arrays.deepEquals(normals, vertexNormals));
 	 }
 
 	public static void main( String [] arg ) {

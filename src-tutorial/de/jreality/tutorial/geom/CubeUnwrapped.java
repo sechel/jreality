@@ -47,13 +47,6 @@ public class CubeUnwrapped {
 			//The 8 vertices of the cube
 			{0,  0,  0}, {1,  0,  0}, {1,  1,  0}, {0,  1,  0}, //0-3
 			{0,  0,  1}, {1,  0,  1}, {1,  1,  1}, {0,  1,  1}, //4-7
-			//Extra 6 vertices to unwrap the cube
-			{1,  1,  0},//8 -> 2
-			{1,  1,  1}, //9 -> 6
-			{0,  1,  0}, //10 -> 3
-			{0,  1,  1}, //11 -> 7
-			{0,  1,  0}, //12 -> 3
-			{0,  1,  1}, //13 -> 7
 		};
 		//The 6 faces of the "wrapped" cube in space
 		final int [][] indices = new int [][] {
@@ -82,14 +75,19 @@ public class CubeUnwrapped {
 		
 		// set all 14 vertices and their coordinates
 		ifsf.setVertexCount( 14 );
-		ifsf.setVertexCoordinates( vertices );
+		// We need to unwrap the vertex coordinates for the 14 vertices
+		// This is done by unwrapVertexAttributes, which determines the correspondence of vertices
+		// from correspondence in indices and unwrapIndices. For the cube:
+		// 8->2, 9->6, 10->3, 11->7, 12 -> 3, 13 -> 7	 
+
+		ifsf.setVertexCoordinates( IndexedFaceSetFactory.unwrapVertexAttributes(vertices, indices, unwrapIndices, 14));
 		ifsf.setVertexTextureCoordinates(unwrapTextureCoordinates);
 		
 		// The 6 faces of the cube, use the "wrapped" face indices
 		ifsf.setFaceCount( 6 );	
 		ifsf.setFaceIndices( indices );
 
-		// Generation of vertexNormals and edges is according to the normal indices rather than
+		// Generation of vertexNormals and edges is according to the wrapped indices rather than
 		// the unwrapped
 		ifsf.setGenerateVertexNormals( true );
 		ifsf.setGenerateEdgesFromFaces( true );
