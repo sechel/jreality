@@ -77,7 +77,6 @@ public class ToggleShowCursor extends AbstractJrAction {
 	  if (viewer.hasViewingComponent() && viewer.getViewingComponent() instanceof Component) {
 		Component viewingCmp = (Component) viewer.getViewingComponent();
 		boolean hide = viewingCmp.getCursor().getType() == Cursor.DEFAULT_CURSOR;
-		putValue(Action.SELECTED_KEY, Boolean.valueOf(hide));
 		if (hide) GuiUtility.hideCursor(viewingCmp);
 		else GuiUtility.showCursor(viewingCmp);
 	}
