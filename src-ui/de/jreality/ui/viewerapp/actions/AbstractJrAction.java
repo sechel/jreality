@@ -138,4 +138,8 @@ public abstract class AbstractJrAction extends javax.swing.AbstractAction {
 	  putValue(SMALL_ICON, icon);
   }
   
+  public Icon getIcon() {
+	  return (Icon) getValue(SMALL_ICON);
+  }
+  
 }

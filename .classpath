@@ -46,6 +46,7 @@
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
 	<classpathentry kind="lib" path="lib/jRWorkspacePluginSDK.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="lib/vrData.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry kind="lib" path="lib/jtem-beans.jar"/>
 	<classpathentry kind="output" path="bin"/>

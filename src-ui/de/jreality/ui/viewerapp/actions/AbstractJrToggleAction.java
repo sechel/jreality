@@ -1,46 +1,54 @@
 package de.jreality.ui.viewerapp.actions;
 
-import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JToggleButton;
+import javax.swing.JToggleButton.ToggleButtonModel;
 
 public abstract class AbstractJrToggleAction extends AbstractJrAction {
 
-	public AbstractJrToggleAction(String name, Component parentComp) {
-		super(name, parentComp);
-		setSelected(false);
-	}
-
+	ToggleButtonModel model=new ToggleButtonModel();
+	
 	public AbstractJrToggleAction(String name) {
-		this(name, null);
+		super(name);
+		setSelected(false);
+		model.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AbstractJrToggleAction.this.actionPerformed(e);
+			}
+		});
 	}
 
 	public void setSelected(boolean value) {
-	  putValue("SwingSelectionKey", value);
+		model.setSelected(value);
 	}
 	  
 	public boolean isSelected() {
-	  return Boolean.TRUE.equals(getValue("SwingSelectionKey"));
+	  return model.isSelected();
 	}
 
-	@Override
 	public JMenuItem createMenuItem() {
-		return new JCheckBoxMenuItem(this);
+		JCheckBoxMenuItem ret = new JCheckBoxMenuItem();
+		ret.setText((String) getValue(Action.NAME));
+		ret.setIcon(getIcon());
+		ret.setModel(model);
+		return ret;
 	}
 	
-	@Override
 	public AbstractButton createToolboxItem() {
-		JToggleButton ret = new JToggleButton(this);
-		if (ret.getIcon() != null) {
-			String text = ret.getText();
-			ret.setToolTipText(text);
-			ret.setText(null);
-			//ret.setHideActionText(true); again java 6
+		JToggleButton ret = new JToggleButton();
+		if (getIcon() != null) {
+			ret.setIcon(getIcon());
+			ret.setToolTipText((String) getValue(Action.NAME));
+		} else {
+			ret.setText((String) getValue(Action.NAME));
 		}
+		ret.setModel(model);
 		return ret;
 	}
 }
