@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
@@ -42,10 +43,12 @@ public class TestJack {
 
 	
 	public static void main(String[] args) throws Exception {
-		SceneGraphComponent audioComp = getAudioComponent();
-		JRViewer v = JRViewer.createViewerVRWithAudio();
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addAudioSupport();
+		v.addVRSupport();
 		v.setPropertiesFile("TestJack.jrw");
-		v.setContent(audioComp);
+		v.setContent(getAudioComponent(), ContentType.TerrainAligned);
 		v.startup();
 	}
 	

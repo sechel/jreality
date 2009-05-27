@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import de.jreality.audio.csound.CsoundNode;
 import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.reader.Readers;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
@@ -43,9 +44,12 @@ public class MinimalExample {
 		audioComponent.addTool(actionTool);
 		audioComponent.addTool(new DraggingTool());
 
-		JRViewer v = JRViewer.createViewerVRWithAudio();
-		v.setPropertiesFile("MinimalExamle.jrw");
-		v.setContent(audioComponent);
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addAudioSupport();
+		v.addVRSupport();
+		v.setPropertiesFile("MinimalExample.jrw");
+		v.setContent(audioComponent, ContentType.TerrainAligned);
 		v.startup();
 	}
 }
