@@ -262,9 +262,11 @@ public class JRViewer {
 	 */
 	public static void display(SceneGraphNode node) {
 		JRViewer v = new JRViewer();
-		v.addContentSupport(ContentType.Direct);
+		v.registerPlugin(new DirectContent());
+		v.registerPlugin(new ContentTools());
 		v.registerPlugin(new ContentInjectionPlugin(node, true));
 		v.addBasicUI();
+		v.getPlugin(View.class).setHidePanels(true);
 		v.startup();
 	}
 

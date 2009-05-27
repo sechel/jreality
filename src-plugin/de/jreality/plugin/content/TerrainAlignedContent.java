@@ -31,7 +31,7 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 	SceneGraphComponent scalingComponent = new SceneGraphComponent("scaling");
 	
 	private double contentSize=20;
-	private double verticalOffset=10;
+	private double verticalOffset=1;
 
 	private Rectangle3D bounds;
 

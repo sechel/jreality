@@ -78,6 +78,9 @@ public class Avatar extends ShrinkPanelPlugin implements ChangeListener {
 		} else {
 			System.out.println("Avatar.updateComponents(): CAMERA CMP == NULL");
 		}
+		if (avatar != null) {
+			MatrixBuilder.euclidean().translate(0,0,20).assignTo(avatar);
+		}
 	}
 	
 	private void installTools() {
