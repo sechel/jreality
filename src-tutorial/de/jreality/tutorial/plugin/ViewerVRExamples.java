@@ -25,6 +25,13 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
+/**
+ * Example showing how to write a content providing plugin. Requires vrExamples.jar in the classpath, can
+ * be found at www.jreality.de in the Download section.
+ * 
+ * @author weissman
+ *
+ */
 public class ViewerVRExamples extends ShrinkPanelPlugin {
 
 	String[][] examples = new String[][] {
