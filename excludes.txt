@@ -12,10 +12,8 @@
 
 # **/Fake*6.java
 **/Fake*5.java
-**/Jass*.java
 **/JLink*.java
 
 **/SwtExample.java
 **/CsoundNode.java
-**/jack/**
 **/osc/**

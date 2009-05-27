@@ -55,11 +55,11 @@
   <path id="audio.classpath">
     <fileset dir="dist">
       <include name="jReality-core.jar"/>
-      <include name="jReality-tools.jar"/>    	
+      <include name="jReality-tools.jar"/>
     </fileset>
     <fileset dir="lib">
-        <include name="jass.jar"/>
-        <include name="NetUtil.jar"/>
+        <include name="jjack.jar"/>
+        <!--include name="NetUtil.jar"/-->
     </fileset>  	
   </path>
 
@@ -509,51 +509,8 @@
   </target>
 
   <target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
+  	<copy file="${lib}/vrData.jar" todir="release" />
   </target>
-	
-	<target name="release-plugin" depends="dist">
-		<property name="view_plugins" value="de/jreality/plugin/view"/>
-		<property name="audio_plugins" value="de/jreality/plugin/audio"/>
-		<property name="share_plugins" value="de/jreality/ui"/>
-		<property name="vr_plugins" value="de/jreality/plugin/vr"/>
-		<property name="experimental" value="
-			${view_plugins}/AdvancedAppearance**,
-			${view_plugins}/InfoOverlay**,
-			${view_plugins}/ViewerKey**
-		" />
-		<property name="plugin_folder" value="release/plugin"/>
-		<mkdir dir="${plugin_folder}"/>
-		<jar destfile="${plugin_folder}/jReality-plugin-view.jar">
-			<fileset dir="${build}/plugin" 
-				includes="${view_plugins}/**"
-				excludes="${experimental}"
-			/>
-		</jar>
-		<jar destfile="${plugin_folder}/jReality-plugin-audio.jar">
-			<fileset dir="${build}/plugin"
-				includes="${audio_plugins}/**"
-				excludes="${experimental}"
-			/>
-		</jar>
-		<jar destfile="${plugin_folder}/jReality-plugin-experimental.jar">
-			<fileset dir="${build}/plugin" 
-				includes="${experimental}"
-			/>
-		</jar>
-		<jar destfile="${plugin_folder}/jReality-plugin-share.jar">
-			<fileset dir="${build}/plugin"
-				includes="${share_plugins}/**"
-				excludes="${experimental}"
-			/>
-		</jar>		
-		<jar destfile="${plugin_folder}/jReality-plugin-vr.jar">
-			<fileset dir="${build}/plugin"
-				includes="${vr_plugins}/**"
-				excludes="${experimental}"
-			/>
-		</jar>		
-	</target>
-	
 	
 	  <target name="release-jar" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
 	  	<mkdir dir="release" />
@@ -655,6 +612,7 @@
 	  	<copy file="${lib}/janino.jar" todir="release/tmp/lib" />
 	  	<copy file="${lib}/colorpicker.jar" todir="release/tmp/lib" />
 	  	<copy file="${lib}/jRWorkspacePluginSDK.jar" todir="release/tmp/lib" />
+	  	<copy file="${lib}/jjack.jar" todir="release/tmp/lib" />
 	  	<copy todir="release/tmp/lib">
 	  		<fileset dir="3rd-party" />
 	  	</copy>
