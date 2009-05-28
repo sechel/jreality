@@ -121,8 +121,9 @@ public class LeslieDemo {
 		v.addBasicUI();
 		v.addAudioSupport();
 		v.addVRSupport();
+		v.addContentSupport(ContentType.TerrainAligned);
 		v.setPropertiesFile("LeslieDemo.jrw");
-		v.setContent(getHubComponent(), ContentType.TerrainAligned);
+		v.setContent(getHubComponent());
 		v.startup();
 	}
 	

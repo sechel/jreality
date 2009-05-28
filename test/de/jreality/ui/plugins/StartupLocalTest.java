@@ -14,7 +14,8 @@ public class StartupLocalTest {
 	public static void main(String[] args) {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
-		v.setContent(Primitives.sharedIcosahedron, ContentType.CenteredAndScaled);
+		v.addContentSupport(ContentType.CenteredAndScaled);
+		v.setContent(Primitives.sharedIcosahedron);
 		JRootPane p = v.startupLocal();
 		
 		JFrame f = new JFrame();

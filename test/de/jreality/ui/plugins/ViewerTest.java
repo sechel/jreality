@@ -9,7 +9,8 @@ public class ViewerTest {
 	public static void main(String[] args) {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
-		v.setContent(Primitives.coloredCube(), ContentType.CenteredAndScaled);
+		v.addContentSupport(ContentType.CenteredAndScaled);
+		v.setContent(Primitives.coloredCube());
 		v.startup();
 	}
 

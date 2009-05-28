@@ -132,14 +132,13 @@ public class JRViewer {
 	 * scene graph on startup
 	 * @param node
 	 */
-	public void setContent(SceneGraphNode node, ContentType type) {
+	public void setContent(SceneGraphNode node) {
 		if (node == null) {
 			return;
 		}
 		if (!(node instanceof Geometry) && !(node instanceof SceneGraphComponent)) {
 			throw new IllegalArgumentException("Only Geometry or SceneGraphComponent allowed in JRViewer.setContent()");
 		}
-		addContentSupport(type);
 		c.registerPlugin(new ContentInjectionPlugin(node));
 	}
 	
@@ -332,7 +331,7 @@ public class JRViewer {
 		v.addBasicUI();
 		v.addVRSupport();
 		v.addLookAndFeelSupport();
-		v.setContent(Primitives.icosahedron(), ContentType.TerrainAligned);
+		v.setContent(Primitives.icosahedron());
 		v.startup();
 	}
 

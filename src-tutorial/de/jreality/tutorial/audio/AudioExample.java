@@ -50,7 +50,8 @@ public class AudioExample {
 		v.addAudioSupport();
 		v.addVRSupport();
 		v.setPropertiesFile("AudioExample.jrw");
-		v.setContent(getAudioComponent(), ContentType.TerrainAligned);
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.setContent(getAudioComponent());
 		v.startup();
 	}
 	
