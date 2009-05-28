@@ -66,7 +66,6 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 			}
 		};
 		fullscreenToggle.setIcon(ImageHook.getIcon("arrow_out.png"));
-		 
 		fullscreenToggle.setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
 	}
 	
