@@ -2,10 +2,10 @@ package de.jreality.plugin.scene;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -23,11 +23,12 @@ import de.jreality.tools.ShipNavigationTool;
 import de.jreality.tools.ShipNavigationTool.PickDelegate;
 import de.jreality.ui.JSliderVR;
 import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
-public class Avatar extends ShrinkPanelPlugin implements ChangeListener {
+public class Avatar extends Plugin implements ChangeListener {
 
 	public static final double DEFAULT_SPEED = 4;
 
@@ -35,14 +36,23 @@ public class Avatar extends ShrinkPanelPlugin implements ChangeListener {
 	private SceneGraphComponent cameraComponent;
 	private ShipNavigationTool shipNavigationTool;
 	private Tool headTool;
-	private Box panel;
+	private ShrinkPanel panel;
 	private JSliderVR speedSlider;
 
 	public Avatar() {
-		panel = new Box(BoxLayout.X_AXIS);
+		panel = new ShrinkPanel("Avatar");
+		panel.setShrinked(true);
+		panel.setIcon(getPluginInfo().icon);
 		panel.add(Box.createHorizontalStrut(5));
+		panel.setLayout(new MinSizeGridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(2,2,2,2);
+		
 		JLabel gainLabel = new JLabel("Speed");
-		panel.add(gainLabel);
+		c.weightx = 0.0;
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		panel.add(gainLabel, c);
 		speedSlider = new JSliderVR(0, 3000, (int) (100 * DEFAULT_SPEED));
 		speedSlider.setPreferredSize(new Dimension(200,26));
 		speedSlider.addChangeListener(new ChangeListener() {
@@ -50,7 +60,9 @@ public class Avatar extends ShrinkPanelPlugin implements ChangeListener {
 				setNavigationSpeed(getNavigationSpeed());
 			}
 		});
-		panel.add(speedSlider);
+		c.weightx = 1.0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		panel.add(speedSlider, c);
 	}
 
 	private void createTools(RunningEnvironment environment) {
@@ -120,30 +132,21 @@ public class Avatar extends ShrinkPanelPlugin implements ChangeListener {
 		installTools();
 		
 		scene.addChangeListener(this);
+		VRPanel vp = c.getPlugin(VRPanel.class);
+		vp.addComponent(getClass(), panel, 4.0, "VR");
 		
-		// layout shrink panel
-		panel.setPreferredSize(new Dimension(10, 30));
-		panel.setMinimumSize(new Dimension(10, 30));
-
-		shrinkPanel.setLayout(new GridLayout());
-		shrinkPanel.add(panel); 
 	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
 		Scene scene = c.getPlugin(Scene.class);
 		scene.removeChangeListener(this);
-
 		uninstallTools();
-		
-		shrinkPanel.removeAll();
-		super.uninstall(c);
+		VRPanel vp = c.getPlugin(VRPanel.class);
+		vp.removeAll(getClass());
 	}
 
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
-	}
 
 	@Override
 	public PluginInfo getPluginInfo() {

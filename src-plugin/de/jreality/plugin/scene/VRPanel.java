@@ -12,12 +12,13 @@ public class VRPanel extends ShrinkPanelAggregator {
 
 	public VRPanel() {
 		shrinkPanel.setTitle("VR Controls");
+		setInitialPosition(SHRINKER_RIGHT);
 	}
 	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		setTriggerComponent(c.getPlugin(Scene.class).getContentComponent());
+		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 	}
 	
 	@Override
