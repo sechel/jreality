@@ -1,10 +1,8 @@
 package de.jreality.plugin.scene;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +13,7 @@ import java.util.HashMap;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -34,11 +33,12 @@ import de.jreality.util.Input;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
 import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.flavor.HelpFlavor;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
-public class Sky extends ShrinkPanelPlugin {
+public class Sky extends Plugin implements HelpFlavor {
 
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 
@@ -66,7 +66,7 @@ public class Sky extends ShrinkPanelPlugin {
 	private ImageData[] cubeMap;
 	private ImageData[] customCubeMap;
 
-	private JPanel panel;
+	private ShrinkPanel panel;
 	private JButton loadButton;
 
 	private JFileChooser fileChooser;
@@ -87,7 +87,6 @@ public class Sky extends ShrinkPanelPlugin {
 				return null;
 			}
 		});
-		setInitialPosition(SHRINKER_RIGHT);
 	}
 
 	public JPanel getPanel() {
@@ -151,7 +150,10 @@ public class Sky extends ShrinkPanelPlugin {
 	}
 
 	private void makePanel() {
-		panel = new JPanel(new GridBagLayout());
+		panel = new ShrinkPanel("Sky");
+		panel.setIcon(getPluginInfo().icon);
+		panel.setLayout(new GridBagLayout());
+		panel.setShrinked(true);
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.anchor = GridBagConstraints.LINE_START;
 		gbc.insets = new Insets(0,5,0,5);
@@ -255,33 +257,26 @@ public class Sky extends ShrinkPanelPlugin {
 
 	@Override
 	public void install(Controller c) throws Exception {
+		super.install(c);
 		view = c.getPlugin(View.class);
 		scene = c.getPlugin(Scene.class);
 		
 		setShowSky(isShowSky());
 		setEnvironment(getEnvironment());
-		
-		panel.setPreferredSize(new Dimension(10, 120));
-		panel.setMinimumSize(new Dimension(10, 120));
-
-		shrinkPanel.setLayout(new GridLayout());
-		shrinkPanel.add(panel); 
-		super.install(c);
+		VRPanel vp = c.getPlugin(VRPanel.class);
+		vp.addComponent(getClass(), panel, 0.0, "VR");
 	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
 		setCubeMap(null);
 		setShowSky(false);
-		super.uninstall(c);
+		VRPanel vp = c.getPlugin(VRPanel.class);
+		vp.removeAll(getClass());
 	}
 	
 	
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
-	}
-
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
@@ -337,6 +332,24 @@ public class Sky extends ShrinkPanelPlugin {
 	public Class<?> getHelpHandle() {
 		return getClass();
 	}
-	
+
+	@Override
+	public Icon getHelpIcon() {
+		return null;
+	}
+
+	@Override
+	public String getHelpStyleSheet() {
+		return null;
+	}
+
+	@Override
+	public String getHelpTitle() {
+		return "Sky";
+	}
+
+	@Override
+	public void setHelpListener(HelpListener l) {
+	}
 	
 }

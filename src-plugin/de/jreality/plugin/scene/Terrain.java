@@ -22,7 +22,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -31,7 +30,6 @@ import com.bric.swing.ColorPicker;
 import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Scene;
-import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewPreferences;
 import de.jreality.plugin.basic.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.icon.ImageHook;
@@ -43,12 +41,12 @@ import de.jreality.ui.JSliderVR;
 import de.jreality.ui.TextureInspector;
 import de.jreality.util.PickUtility;
 import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
-public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
+public class Terrain extends Plugin implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
 
 	// maximal value of texture scale
 	private static final double 
@@ -74,6 +72,8 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 		mirrorAppearance = new MirrorAppearance();
 	
 	// swing layout
+	private ShrinkPanel
+		shrinkPanel = new ShrinkPanel("Terrain");
 	private JPanel 
 		panel = new JPanel(),
 		colorPanel = new JPanel();
@@ -116,6 +116,10 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 		textures.put("5 Rust","textures/outfactory3.png");
 		textures.put("1 None", null);
 
+		shrinkPanel.setLayout(new GridLayout());
+		shrinkPanel.setIcon(getPluginInfo().icon);
+		shrinkPanel.setShrinked(true);
+		shrinkPanel.add(panel);
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(2, 2, 2, 2);
 		c.fill = BOTH;
@@ -179,7 +183,6 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 		textureInspector.setTexture("Black Grid");
 		textureInspector.setTextureScale(.5);
 		setFaceColor(Color.white);
-		setInitialPosition(SHRINKER_RIGHT);
 		setFacesReflecting(true);
 		setFaceReflection(.5);
 		setTransparencyEnabled(false);
@@ -381,16 +384,11 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 
 	@Override
 	public void install(Controller c) throws Exception {
-
 		super.install(c);
-		setTriggerComponent(getSceneGraphComponent());
 		
 		// scene
 		Scene scene = c.getPlugin(Scene.class);
 		scene.getBackdropComponent().addChild(terrain);
-		
-		shrinkPanel.setLayout(new GridLayout());
-		shrinkPanel.add(panel);
 		
 		viewPreferences = c.getPlugin(ViewPreferences.class);
 		viewPreferences.addColorPickerChangedListener(this);
@@ -403,25 +401,24 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 		updateFaceReflection();
 		updateTransparencyEnabled();
 		updateTransparency();
+		VRPanel vp = c.getPlugin(VRPanel.class);
+		vp.addComponent(getClass(), shrinkPanel, 1.0, "VR");
 	}
 	
 	@Override
 	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
 		Scene scene = c.getPlugin(Scene.class);
 		scene.getBackdropComponent().removeChild(terrain);
 		viewPreferences.removeColorPickerChangedListener(this);
-		super.uninstall(c);
+		VRPanel vp = c.getPlugin(VRPanel.class);
+		vp.removeAll(getClass());
 	}
 	
 	public Appearance getAppearance() {
 		return appearance;
 	}
 	
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
-	}
-
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
@@ -463,18 +460,6 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 	}
 	
 	
-	@Override
-	public void mainUIChanged(String uiClass) {
-		super.mainUIChanged(uiClass);
-		if (textureInspector != null) {
-			SwingUtilities.updateComponentTreeUI(textureInspector);
-		}
-		if (colorPanel != null) {
-			SwingUtilities.updateComponentTreeUI(colorPanel);
-		}
-	}
-	
-	
 	private static IndexedFaceSet bigMesh(int discretization, double cameraHeight, double size) {
 		int n = discretization;
 		QuadMeshFactory factory = new QuadMeshFactory();
@@ -513,22 +498,22 @@ public class Terrain extends SceneShrinkPanel implements ActionListener, ChangeL
 		
 		return factory.getIndexedFaceSet();
 	}
-	
-	
-	
-	@Override
-	public String getHelpDocument() {
-		return "Terrain.html";
-	}
-	
-	@Override
-	public String getHelpPath() {
-		return "../help/";
-	}
-	
-	@Override
-	public Class<?> getHelpHandle() {
-		return getClass();
-	}
+//	
+//	
+//	
+//	@Override
+//	public String getHelpDocument() {
+//		return "Terrain.html";
+//	}
+//	
+//	@Override
+//	public String getHelpPath() {
+//		return "../help/";
+//	}
+//	
+//	@Override
+//	public Class<?> getHelpHandle() {
+//		return getClass();
+//	}
 
 }
