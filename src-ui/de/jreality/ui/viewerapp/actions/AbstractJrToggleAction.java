@@ -8,6 +8,7 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 import javax.swing.JToggleButton.ToggleButtonModel;
 
 // this is quite a hack, in java 6 the button model
@@ -15,6 +16,8 @@ import javax.swing.JToggleButton.ToggleButtonModel;
 // selected state (Action.SELECTED_KEY)
 public abstract class AbstractJrToggleAction extends AbstractJrAction {
 
+	private static final long 
+		serialVersionUID = 1L;
 	ToggleButtonModel model=new ToggleButtonModel();
 	
 	public AbstractJrToggleAction(String name) {
@@ -35,14 +38,17 @@ public abstract class AbstractJrToggleAction extends AbstractJrAction {
 	  return model.isSelected();
 	}
 
+	@Override
 	public JMenuItem createMenuItem() {
 		JCheckBoxMenuItem ret = new JCheckBoxMenuItem();
 		ret.setText((String) getValue(Action.NAME));
 		ret.setIcon(getIcon());
 		ret.setModel(model);
+		ret.setAccelerator((KeyStroke)getValue(ACCELERATOR_KEY));
 		return ret;
 	}
 	
+	@Override
 	public AbstractButton createToolboxItem() {
 		JToggleButton ret = new JToggleButton();
 		if (getIcon() != null) {
