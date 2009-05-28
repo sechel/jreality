@@ -42,6 +42,10 @@ import de.jreality.util.CameraUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.lnfswitch.LookAndFeelSwitch;
+import de.varylab.jrworkspace.plugin.lnfswitch.plugin.CrossPlatformLnF;
+import de.varylab.jrworkspace.plugin.lnfswitch.plugin.NimbusLnF;
+import de.varylab.jrworkspace.plugin.lnfswitch.plugin.SystemLookAndFeel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
@@ -196,9 +200,7 @@ public class JRViewer {
 	}
 	
 	
-	
-	
-	public <T extends Plugin & Content> void registerCustomContent(T contentPlugin) {
+	public void registerCustomContent(Content contentPlugin) {
 		c.registerPlugin(contentPlugin);
 	}
 	
@@ -238,6 +240,13 @@ public class JRViewer {
 		c.registerPlugin(new CameraMenu());
 	}
 
+	
+	public void addLookAndFeelSupport() {
+		c.registerPlugin(new LookAndFeelSwitch());
+		c.registerPlugin(new CrossPlatformLnF());
+		c.registerPlugin(new SystemLookAndFeel());
+		c.registerPlugin(new NimbusLnF());
+	}
 	
 	
 	public void addVRSupport() {
@@ -322,6 +331,7 @@ public class JRViewer {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addVRSupport();
+		v.addLookAndFeelSupport();
 		v.setContent(Primitives.icosahedron(), ContentType.TerrainAligned);
 		v.startup();
 	}

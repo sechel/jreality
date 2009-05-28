@@ -40,6 +40,7 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		sceneSlot.registerAccessory(this);
 		
 		internalShrinkPanel = new ShrinkPanel(shrinkPanel.getName());
+		internalShrinkPanel.setIcon(shrinkPanel.getIcon());
 		internalShrinkPanel.setFloatable(false);
 		
 		sceneSlot.getShrinkSlot().addShrinkPanel(internalShrinkPanel);
