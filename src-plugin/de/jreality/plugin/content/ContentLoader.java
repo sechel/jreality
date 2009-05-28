@@ -136,7 +136,7 @@ public class ContentLoader extends Plugin implements UIFlavor {
 	@Override
 	public void install(Controller c) throws Exception {
 		View viewPlugin = c.getPlugin(View.class);
-		Content content = PluginUtility.getPlugin(c, Content.class);
+		Content content = PluginUtility.getContentPlugin(c);
 		install(
 				viewPlugin,
 				content

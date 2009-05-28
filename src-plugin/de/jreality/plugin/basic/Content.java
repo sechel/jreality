@@ -1,10 +1,14 @@
 package de.jreality.plugin.basic;
 
+import static de.jreality.util.CameraUtility.encompass;
+
 import java.util.LinkedList;
 import java.util.List;
 
+import de.jreality.math.Pn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.tool.Tool;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
@@ -118,6 +122,15 @@ public abstract class Content extends Plugin {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		scene = c.getPlugin(Scene.class);
+	}
+	
+	public void encompassEuclidean() {
+		SceneGraphPath avatarPath = scene.getAvatarPath();
+		SceneGraphPath contentPath = scene.getContentPath();
+		SceneGraphPath cameraPath = scene.getCameraPath();
+		try {
+			encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
+		} catch (Exception e) {}
 	}
 	
 }

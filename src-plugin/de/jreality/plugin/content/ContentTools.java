@@ -227,7 +227,7 @@ public class ContentTools extends Plugin {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		scene = c.getPlugin(Scene.class);
-		content = PluginUtility.getPlugin(c, Content.class);
+		content = PluginUtility.getContentPlugin(c);
 		install();
 		ViewMenuBar viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		installMenu(viewMenuBar);

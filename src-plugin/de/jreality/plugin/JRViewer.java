@@ -309,7 +309,7 @@ public class JRViewer {
 			if (content == null) {
 				return;
 			}
-			Content mc = PluginUtility.getPlugin(c, Content.class);
+			Content mc = PluginUtility.getContentPlugin(c);
 			if (mc == null) {
 				System.err.println("No content plug-in registered");
 				return;

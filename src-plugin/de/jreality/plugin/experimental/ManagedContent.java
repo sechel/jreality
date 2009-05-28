@@ -221,7 +221,7 @@ public class ManagedContent extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		content = PluginUtility.getPlugin(c, Content.class);
+		content = PluginUtility.getContentPlugin(c);
 	}
 	
 	public boolean addContentListener(ContentListener l) {
