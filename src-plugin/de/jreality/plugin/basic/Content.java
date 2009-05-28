@@ -11,6 +11,9 @@ import de.varylab.jrworkspace.plugin.Plugin;
 
 public abstract class Content extends Plugin {
 
+	protected SceneGraphNode
+		content = null;
+	
 	public static enum ChangeEventType {
 		ContentChanged,
 		ContentReset,
@@ -39,18 +42,22 @@ public abstract class Content extends Plugin {
 		
 	}
 	
-	
 	protected Scene
 		scene = null;
 	protected List<ContentChangedListener>
 		listeners = new LinkedList<ContentChangedListener>();
 	
+	public abstract void setContent(SceneGraphNode content);
 	
-	public void setContent(SceneGraphNode content) {
-		ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentReset);
-		cce.node = content;
-		fireContentChanged(cce);
+	protected void setContentNode(SceneGraphNode node) {
+		content = node;
 	}
+	
+	
+	protected SceneGraphNode getContentNode() {
+		return content;
+	}
+	
 	
 	public void resetContent() {
 		fireContentChanged(new ContentChangedEvent(ChangeEventType.ContentReset));

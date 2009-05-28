@@ -38,10 +38,6 @@ public class CenteredAndScaledContent extends Content {
 	private JSliderVR 
 		sizeSlider = new JSliderVR(1, 5001);
 
-	protected SceneGraphNode 
-		content = null;
-
-	
 	public CenteredAndScaledContent() {
 		panel.setBorder(BorderFactory.createTitledBorder("Scaled Content"));
 		panel.setLayout(new GridLayout());
@@ -57,18 +53,15 @@ public class CenteredAndScaledContent extends Content {
 	@Override
 	public void setContent(SceneGraphNode node) {
 		SceneGraphComponent root = getContentRoot();
-		if (root == null) {
-			return;
+		boolean fire = getContentNode() != node;
+		if (getContentNode() != null) {
+			SceneGraphUtility.removeChildNode(root, getContentNode());
 		}
-		if (content != null) {
-			SceneGraphUtility.removeChildNode(root, content);
+		setContentNode(node);
+		if (getContentNode() != null) {
+			SceneGraphUtility.addChildNode(root, getContentNode());
 		}
-		content = node;
-		if (content != null) {
-			SceneGraphUtility.addChildNode(root, node);
-		}
-		
-		if (content != null) {
+		if (getContentNode() != null) {
 			SceneGraphComponent cmp = null;
 			if (node instanceof SceneGraphComponent) {
 				cmp = (SceneGraphComponent) node;
@@ -87,7 +80,11 @@ public class CenteredAndScaledContent extends Content {
 			objectSize = 1.0;
 		}
 		updateMatrix();
-		super.setContent(node);
+		if (fire) {
+			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentChanged);
+			cce.node = node;
+			fireContentChanged(cce);
+		}
 	}
 	
 	private void updateMatrix() {
@@ -139,10 +136,10 @@ public class CenteredAndScaledContent extends Content {
 		MainPanel msp = c.getPlugin(MainPanel.class);
 		msp.removeAll(getClass());
 		SceneGraphComponent root = getContentRoot();
-		if (root == null || content == null) {
+		if (root == null || getContentNode() == null) {
 			return;
 		}
-		SceneGraphUtility.removeChildNode(root, content);
+		SceneGraphUtility.removeChildNode(root, getContentNode());
 	}
 	
 }

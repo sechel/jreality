@@ -10,20 +10,22 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class DirectContent extends Content {
 		
-	protected SceneGraphNode 
-		content = null;
-	
 	@Override
 	public void setContent(SceneGraphNode node) {
 		SceneGraphComponent root = getContentRoot();
-		if (content != null) {
-			SceneGraphUtility.removeChildNode(root, content);
+		boolean fire = getContentNode() != node;
+		if (getContentNode() != null) {
+			SceneGraphUtility.removeChildNode(root, getContentNode());
 		}
-		content = node;
-		if (content != null) { 
-			SceneGraphUtility.addChildNode(root, content);
+		setContent(node);
+		if (getContentNode() != null) { 
+			SceneGraphUtility.addChildNode(root, getContentNode());
 		}
-		super.setContent(node);
+		if (fire) {
+			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentChanged);
+			cce.node = node;
+			fireContentChanged(cce);
+		}
 	}
 
 	

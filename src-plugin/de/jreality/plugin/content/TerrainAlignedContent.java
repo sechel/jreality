@@ -36,7 +36,6 @@ public class TerrainAlignedContent extends Content {
 
 	private Rectangle3D bounds;
 	
-	private SceneGraphNode content;
 //	private Matrix lastMatrix=new Matrix();
 	
 	private JPanel
@@ -135,13 +134,19 @@ public class TerrainAlignedContent extends Content {
 
 	@Override
 	public void setContent(SceneGraphNode node) {
-		if (content != node && content != null) {
-			SceneGraphUtility.removeChildNode(scalingComponent, content);
+		boolean fire = getContentNode() != node;
+		if (getContentNode() != null) {
+			SceneGraphUtility.removeChildNode(scalingComponent, getContentNode());
 		}
-		this.content = node;
-		alignContent();
-		if (node != null) {
-			SceneGraphUtility.addChildNode(scalingComponent, content);
+		setContentNode(node);
+		if (getContentNode() != null) {
+			SceneGraphUtility.addChildNode(scalingComponent, getContentNode());
+			alignContent();
+		}
+		if (fire) {
+			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentChanged);
+			cce.node = node;
+			fireContentChanged(cce);
 		}
 	}
 
