@@ -3,6 +3,7 @@ package de.jreality.plugin;
 import java.util.List;
 
 import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.content.DirectContent;
 import de.varylab.jrworkspace.plugin.Controller;
 
 public class PluginUtility {
@@ -20,7 +21,8 @@ public class PluginUtility {
 			c.getPlugin(p.getClass());
 			return p;
 		}
-		return null;
+		Content fallbackContent = c.getPlugin(DirectContent.class);
+		return fallbackContent;
 	}
 	
 }

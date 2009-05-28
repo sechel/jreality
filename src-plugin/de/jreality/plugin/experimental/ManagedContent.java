@@ -196,14 +196,6 @@ public class ManagedContent extends Plugin {
 	
 	
 	/**
-	 * Invokes the contentChanged method of the aligned content plug-in
-	 */
-	public void alignContent() {
-		content.fireContentChanged();
-	}
-	
-	
-	/**
 	 * Returns all registered contexts
 	 * @return a set of context classes
 	 */

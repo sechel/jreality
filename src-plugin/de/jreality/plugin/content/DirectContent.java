@@ -17,7 +17,7 @@ public class DirectContent extends Content {
 		if (getContentNode() != null) {
 			SceneGraphUtility.removeChildNode(root, getContentNode());
 		}
-		setContent(node);
+		setContentNode(node);
 		if (getContentNode() != null) { 
 			SceneGraphUtility.addChildNode(root, getContentNode());
 		}
