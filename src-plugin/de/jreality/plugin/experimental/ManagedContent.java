@@ -43,7 +43,7 @@ public class ManagedContent extends Plugin {
 	}
 	
 	private Content
-		alignedContent = null;
+		content = null;
 	private SceneGraphComponent
 		contentRoot = new SceneGraphComponent("Managed Content Root");
 	private Map<Class<?>, SceneGraphComponent>
@@ -191,7 +191,7 @@ public class ManagedContent extends Plugin {
 	
 	
 	private void updateContent() {
-		alignedContent.setContent(contentRoot);
+		content.setContent(contentRoot);
 	}
 	
 	
@@ -199,7 +199,7 @@ public class ManagedContent extends Plugin {
 	 * Invokes the contentChanged method of the aligned content plug-in
 	 */
 	public void alignContent() {
-		alignedContent.contentChanged();
+		content.fireContentChanged();
 	}
 	
 	
@@ -221,7 +221,7 @@ public class ManagedContent extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		alignedContent = PluginUtility.getPlugin(c, Content.class);
+		content = PluginUtility.getPlugin(c, Content.class);
 	}
 	
 	public boolean addContentListener(ContentListener l) {

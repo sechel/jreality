@@ -1,9 +1,9 @@
 package de.jreality.plugin.content;
 
-import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -11,60 +11,94 @@ import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Content;
-import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.MainPanel;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.tool.Tool;
 import de.jreality.ui.JSliderVR;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class CenteredAndScaledContent extends ContentPanel implements Content {
+public class CenteredAndScaledContent extends Content {
 
-	private double size = 5;
+	private double 
+		size = 5.0;
 	
 	// things to remember for changing size
-	private double[] center=new double[3];
-	private double objectSize=1;
-	private Matrix lastMatrix=new Matrix();
+	private double[] 
+	    center = new double[3];
+	private double 
+		objectSize = 1.0;
+	private Matrix 
+		lastMatrix = new Matrix();
 	
-	JSliderVR sizeSlider = new JSliderVR(1, 5001);
+	private JPanel
+		panel = new JPanel();
+	private JSliderVR 
+		sizeSlider = new JSliderVR(1, 5001);
 
-	protected SceneGraphComponent contentCmp;
-	protected SceneGraphNode oldContent;
+	protected SceneGraphNode 
+		content = null;
 
-	public void setContent(SceneGraphNode content) {
-		
-		if (oldContent != null) SceneGraphUtility.removeChildNode(contentCmp, oldContent);
-		oldContent = content;
-		if (content != null) SceneGraphUtility.addChildNode(contentCmp, content);
+	
+	public CenteredAndScaledContent() {
+		panel.setBorder(BorderFactory.createTitledBorder("Scaled Content"));
+		panel.setLayout(new GridLayout());
+		panel.add(sizeSlider);
+		sizeSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				setSize(sizeSlider.getValue()/100.);
+			}
+		});
+	}
+	
+	
+	@Override
+	public void setContent(SceneGraphNode node) {
+		SceneGraphComponent root = getContentRoot();
+		if (root == null) {
+			return;
+		}
+		if (content != null) {
+			SceneGraphUtility.removeChildNode(root, content);
+		}
+		content = node;
+		if (content != null) {
+			SceneGraphUtility.addChildNode(root, node);
+		}
 		
 		if (content != null) {
-			SceneGraphComponent cmp;
-			if (content instanceof SceneGraphComponent) cmp = (SceneGraphComponent) content;
-			else {
-				cmp = new SceneGraphComponent("wrapper");
-				SceneGraphUtility.addChildNode(cmp, content);
+			SceneGraphComponent cmp = null;
+			if (node instanceof SceneGraphComponent) {
+				cmp = (SceneGraphComponent) node;
+			} else {
+				cmp = new SceneGraphComponent("Wrapper");
+				SceneGraphUtility.addChildNode(cmp, node);
 			}
-	
 			Rectangle3D bds = BoundingBoxUtility.calculateBoundingBox(cmp);
-			
 			double[] ext = bds.getExtent();
 			objectSize = Math.max(Math.max(ext[0], ext[1]), ext[2]);
 			center = bds.getCenter();
 		} else {
-			center[0]=0; center[1]=0; center[2]=0;
-			objectSize=1;
+			center[0] = 0.0; 
+			center[1] = 0.0; 
+			center[2] = 0.0;
+			objectSize = 1.0;
 		}
 		updateMatrix();
+		super.setContent(node);
 	}
 	
 	private void updateMatrix() {
-		
-		Matrix newMatrix = MatrixBuilder.euclidean().scale(size/objectSize).translate(-center[0], -center[1], -center[2]).getMatrix();
-
+		SceneGraphComponent root = getContentRoot();
+		if (root == null) {
+			return;
+		}
+		MatrixBuilder mb = MatrixBuilder.euclidean();
+		mb.scale(size/objectSize);
+		mb.translate(-center[0], -center[1], -center[2]);
+		Matrix newMatrix = mb.getMatrix();
 		/*
 		Matrix toolModification = new Matrix(lastMatrix);
 		toolModification.invert();
@@ -72,21 +106,7 @@ public class CenteredAndScaledContent extends ContentPanel implements Content {
 		newMatrix.multiplyOnRight(toolModification);
 		 */
 		lastMatrix.assignFrom(newMatrix);
-		
-		if (contentCmp != null) newMatrix.assignTo(contentCmp);
-	}
-
-	public boolean addContentTool(Tool tool) {
-		if (!contentCmp.getTools().contains(tool)) contentCmp.addTool(tool);
-		return true;
-	}
-	
-	public boolean removeContentTool(Tool tool) {
-		return contentCmp.removeTool(tool);
-	}
-
-	public void contentChanged() {
-		setContent(oldContent);
+		newMatrix.assignTo(root);
 	}
 
 	public double getSize() {
@@ -99,18 +119,7 @@ public class CenteredAndScaledContent extends ContentPanel implements Content {
 		updateMatrix();
 	}
 	
-	void createGUI() {		
-		sizeSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				setSize(sizeSlider.getValue()/100.);
-			}
-		});
-		shrinkPanel.setLayout(new GridLayout(1,1));
-		sizeSlider.setMinimumSize(new Dimension(250,35));
-		sizeSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "size"));
-		shrinkPanel.add(sizeSlider);
-	}
-	
+
 	@Override
 	public PluginInfo getPluginInfo() {
 		return new PluginInfo("Centered and Scaled Content", "jReality Group");
@@ -119,13 +128,21 @@ public class CenteredAndScaledContent extends ContentPanel implements Content {
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		contentCmp = c.getPlugin(Scene.class).getContentComponent();
-		createGUI();
+		MainPanel msp = c.getPlugin(MainPanel.class);
+		msp.addComponent(getClass(), panel, 0.0, "Content");
 	}
+	
 	
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		if (oldContent != null) SceneGraphUtility.removeChildNode(contentCmp, oldContent);
 		super.uninstall(c);
+		MainPanel msp = c.getPlugin(MainPanel.class);
+		msp.removeAll(getClass());
+		SceneGraphComponent root = getContentRoot();
+		if (root == null || content == null) {
+			return;
+		}
+		SceneGraphUtility.removeChildNode(root, content);
 	}
+	
 }

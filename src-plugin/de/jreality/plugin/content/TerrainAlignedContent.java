@@ -7,25 +7,26 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.MainPanel;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.tool.Tool;
 import de.jreality.ui.JSliderVR;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class TerrainAlignedContent extends ContentPanel implements Content {
+public class TerrainAlignedContent extends Content {
 
 	SceneGraphComponent transformationComponent;
 	SceneGraphComponent scalingComponent = new SceneGraphComponent("scaling");
@@ -34,23 +35,17 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 	private double verticalOffset=1;
 
 	private Rectangle3D bounds;
-
-	public boolean addContentTool(Tool tool) {
-		if (!scalingComponent.getTools().contains(tool)) scalingComponent.addTool(tool);
-		return true;
-	}
-	
-	public boolean removeContentTool(Tool tool) {
-		return scalingComponent.removeTool(tool);
-	}
 	
 	private SceneGraphNode content;
 //	private Matrix lastMatrix=new Matrix();
 	
+	private JPanel
+		panel = new JPanel();
 	final JSliderVR sizeSlider = new JSliderVR(1, 5001);
 	final JSliderVR offsetSlider = new JSliderVR(-250, 5000-250);
 //	private JPanel guiPanel;
 
+	
 	public void alignContent() {
 		try {
 			bounds = calculateBoundingBox(wrap(content));
@@ -115,10 +110,14 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 		SceneGraphPath newEmptyPick = scene.getContentPath().pushNew(scalingComponent);
 		scene.setEmptyPickPath(newEmptyPick);		
 		createGUI();
+		MainPanel msp = c.getPlugin(MainPanel.class);
+		msp.addComponent(getClass(), panel, 0.0, "Content");
 	}
 	
 	@Override
 	public void uninstall(Controller c) throws Exception {
+		MainPanel msp = c.getPlugin(MainPanel.class);
+		msp.removeAll(getClass());
 		transformationComponent.removeChild(scalingComponent);
 		super.uninstall(c);
 	}
@@ -134,13 +133,16 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 		alignContent();
 	}
 
-	public void setContent(SceneGraphNode newContent) {
-		if (content != newContent) {
-			if (content != null) SceneGraphUtility.removeChildNode(scalingComponent, content);
+	@Override
+	public void setContent(SceneGraphNode node) {
+		if (content != node && content != null) {
+			SceneGraphUtility.removeChildNode(scalingComponent, content);
 		}
-		this.content = newContent;
+		this.content = node;
 		alignContent();
-		if (newContent != null) SceneGraphUtility.addChildNode(scalingComponent, content);
+		if (node != null) {
+			SceneGraphUtility.addChildNode(scalingComponent, content);
+		}
 	}
 
 	public double getContentSize() {
@@ -163,7 +165,8 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 		alignContent();
 	}
 	
-	private void createGUI() {		
+	private void createGUI() {	
+		panel.setBorder(BorderFactory.createTitledBorder("Terrain Content"));
 		sizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setContentSize(sizeSlider.getValue()/100.);
@@ -174,13 +177,13 @@ public class TerrainAlignedContent extends ContentPanel implements Content {
 				setVerticalOffset(offsetSlider.getValue()/100.);
 			}
 		});
-		shrinkPanel.setLayout(new GridLayout(2,1));
+		panel.setLayout(new GridLayout(2,1));
 		sizeSlider.setMinimumSize(new Dimension(250,35));
 		sizeSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "size"));
 		offsetSlider.setMinimumSize(new Dimension(250,35));
 		offsetSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "offset"));
-		shrinkPanel.add(sizeSlider);
-		shrinkPanel.add(offsetSlider);
+		panel.add(sizeSlider);
+		panel.add(offsetSlider);
 	}
 
 	@Override

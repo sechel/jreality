@@ -1,13 +1,116 @@
 package de.jreality.plugin.basic;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.tool.Tool;
+import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.Plugin;
 
-public interface Content {
+public abstract class Content extends Plugin {
+
+	public static enum ChangeEventType {
+		ContentChanged,
+		ContentReset,
+		ToolAdded,
+		ToolRemoved
+	}
 	
-	void setContent(SceneGraphNode content);
-	boolean addContentTool(Tool tool);
-	boolean removeContentTool(Tool tool);
-	void contentChanged();
-
+	public static class ContentChangedEvent {
+		
+		public ContentChangedEvent(ChangeEventType type) {
+			this.type = type;
+		}
+		
+		public ChangeEventType
+			type = ChangeEventType.ContentChanged;
+		public SceneGraphNode
+			node = null;
+		public Tool
+			tool = null;
+		
+	}
+	
+	public static interface ContentChangedListener {
+	
+		public void contentChanged(ContentChangedEvent cce);
+		
+	}
+	
+	
+	protected Scene
+		scene = null;
+	protected List<ContentChangedListener>
+		listeners = new LinkedList<ContentChangedListener>();
+	
+	
+	public void setContent(SceneGraphNode content) {
+		ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentReset);
+		cce.node = content;
+		fireContentChanged(cce);
+	}
+	
+	public void resetContent() {
+		fireContentChanged(new ContentChangedEvent(ChangeEventType.ContentReset));
+	}
+	
+	
+	public SceneGraphComponent getContentRoot() {
+		return scene.getContentComponent();
+	}
+	
+	public boolean addContentTool(Tool tool) {
+		if (getContentRoot().getTools().contains(tool)) {
+			return false;
+		} else {
+			getContentRoot().addTool(tool);
+			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ToolAdded);
+			cce.tool = tool;
+			fireContentChanged(cce);
+			return true;
+		}
+	}
+	
+	public boolean removeContentTool(Tool tool) {
+		boolean removed = getContentRoot().removeTool(tool);
+		if (removed  ) {
+			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ToolRemoved);
+			cce.tool = tool;
+			fireContentChanged(cce);
+		}
+		return removed;
+	}
+	
+	public synchronized void fireContentChanged(ContentChangedEvent cce) {
+		for (ContentChangedListener l : listeners) {
+			l.contentChanged(cce);
+		}
+	}
+	
+	
+	public synchronized void fireContentChanged() {
+		ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentChanged);
+		for (ContentChangedListener l : listeners) {
+			l.contentChanged(cce);
+		}
+	}
+	
+	
+	public synchronized boolean addContentChangedListener(ContentChangedListener l) {
+		return listeners.add(l);
+	}
+	
+	public synchronized boolean removeContentChangedListener(ContentChangedListener l) {
+		return listeners.remove(l);
+	}
+	
+	
+	@Override
+	public void install(Controller c) throws Exception {
+		super.install(c);
+		scene = c.getPlugin(Scene.class);
+	}
+	
 }
