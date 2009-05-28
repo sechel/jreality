@@ -318,37 +318,30 @@ public class Sky extends Plugin implements HelpFlavor {
 	}
 	
 	
-	@Override
 	public String getHelpDocument() {
 		return "Sky.html";
 	}
 	
-	@Override
 	public String getHelpPath() {
 		return "../help/";
 	}
 	
-	@Override
 	public Class<?> getHelpHandle() {
 		return getClass();
 	}
 
-	@Override
 	public Icon getHelpIcon() {
 		return null;
 	}
 
-	@Override
 	public String getHelpStyleSheet() {
 		return null;
 	}
 
-	@Override
 	public String getHelpTitle() {
 		return "Sky";
 	}
 
-	@Override
 	public void setHelpListener(HelpListener l) {
 	}
 	
