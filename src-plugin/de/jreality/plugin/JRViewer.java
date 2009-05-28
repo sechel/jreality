@@ -1,5 +1,7 @@
 package de.jreality.plugin;
 
+import static de.jreality.util.CameraUtility.encompass;
+
 import java.io.File;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -10,6 +12,7 @@ import javax.swing.JRootPane;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
+import de.jreality.math.Pn;
 import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
@@ -38,6 +41,7 @@ import de.jreality.plugin.scene.Terrain;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.CameraUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
@@ -278,6 +282,21 @@ public class JRViewer {
 		v.startup();
 	}
 
+	
+	/**
+	 * Call after startup. Encompasses the view
+	 */
+	public void encompassEuclidean() {
+		Scene scene = getPlugin(Scene.class);
+		SceneGraphPath avatarPath = scene.getAvatarPath();
+		SceneGraphPath contentPath = scene.getContentPath();
+		SceneGraphPath cameraPath = scene.getCameraPath();
+		try {
+			encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
+		} catch (Exception e) {}
+	}
+	
+	
 	
 	private static class ContentInjectionPlugin extends Plugin {
 
