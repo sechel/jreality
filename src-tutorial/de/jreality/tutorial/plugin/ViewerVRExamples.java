@@ -93,7 +93,7 @@ public class ViewerVRExamples extends ShrinkPanelPlugin {
 	
 	@Override
 	public void install(Controller c) throws Exception {
-		content = PluginUtility.getPlugin(c, Content.class);
+		content = PluginUtility.getContentPlugin(c);
 		makePanel();
 		super.install(c);
 	}
