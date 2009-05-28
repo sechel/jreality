@@ -18,6 +18,11 @@ public class PluginUtility {
 	public static Content getContentPlugin(Controller c) {
 		List<Content> candidates = c.getPlugins(Content.class);
 		for (Content p : candidates) {
+			if (c.isActive(p)) {
+				return p;
+			}
+		}
+		for (Content p : candidates) {
 			c.getPlugin(p.getClass());
 			return p;
 		}
