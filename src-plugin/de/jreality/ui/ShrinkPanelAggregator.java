@@ -16,9 +16,9 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import de.jreality.plugin.content.ContentPanel;
+import de.jreality.plugin.scene.SceneShrinkPanel;
 
-public abstract class ShrinkPanelAggregator extends ContentPanel {
+public abstract class ShrinkPanelAggregator extends SceneShrinkPanel {
 
 	protected Map<Class<?>, Set<MainPanelContent>>
 		contentMap = new HashMap<Class<?>, Set<MainPanelContent>>();
@@ -123,7 +123,7 @@ public abstract class ShrinkPanelAggregator extends ContentPanel {
 
 		@Override
 		public int compare(MainPanelContent o1, MainPanelContent o2) {
-			return o1.priority < o2.priority ? 1 : -1;
+			return o1.priority < o2.priority ? -1 : 1;
 		}
 		
 	}
