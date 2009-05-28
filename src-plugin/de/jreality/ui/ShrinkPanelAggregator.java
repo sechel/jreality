@@ -29,7 +29,7 @@ public abstract class ShrinkPanelAggregator extends SceneShrinkPanel {
 		shrinkPanel.setLayout(new GridBagLayout());
 		contraints.fill = GridBagConstraints.HORIZONTAL;
 		contraints.weightx = 1.0;
-		contraints.insets = new Insets(2,0,2,0);
+		contraints.insets = new Insets(1,0,1,0);
 		contraints.gridwidth = GridBagConstraints.REMAINDER;
 	}
 	
@@ -51,7 +51,7 @@ public abstract class ShrinkPanelAggregator extends SceneShrinkPanel {
 	}
 	
 	
-	private Set<MainPanelContent> getContentSet(Class<?> context) {
+	private Set<MainPanelContent> getContextSet(Class<?> context) {
 		if (!contentMap.containsKey(context)) {
 			contentMap.put(context, new HashSet<MainPanelContent>());
 		}
@@ -60,8 +60,8 @@ public abstract class ShrinkPanelAggregator extends SceneShrinkPanel {
 	
 	
 	public void addComponent(Class<?> context, JComponent c, double priority, String section) {
-		Set<MainPanelContent> sectionSet = getContentSet(context);
-		sectionSet.add(new MainPanelContent(c, priority, section));
+		Set<MainPanelContent> cSet = getContextSet(context);
+		cSet.add(new MainPanelContent(c, priority, section));
 		updateLayout();
 	}
 	
