@@ -139,7 +139,7 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 			String href = (String)aSet.getAttribute(Attribute.HREF);
 			try {
 				URI uriRef = new URI(href);
-				if (!checkFileExtension(uriRef)) {
+				if (Readers.findFormat(uriRef.toString()) == null) {
 					continue;
 				}
 				uriRef = siteUrl.resolve(uriRef);
@@ -152,17 +152,6 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 		}
 		contentList.revalidate();
 	}
-	
-	
-	protected boolean checkFileExtension(URI uri) {
-		String name = uri.toString().toLowerCase();
-		boolean r = name.endsWith(".obj");
-		r |= name.endsWith(".3ds");
-		r |= name.endsWith(".jrs");
-		return r;
-	}
-	
-	
 	
 	
 	private class WebModel {
