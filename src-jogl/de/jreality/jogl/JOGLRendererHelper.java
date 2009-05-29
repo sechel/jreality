@@ -40,6 +40,8 @@
 
 package de.jreality.jogl;
 
+import static de.jreality.shader.CommonAttributes.BACKGROUND_TEXTURE2D;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -127,7 +129,7 @@ public class JOGLRendererHelper {
 		if (obj == Appearance.INHERITED)	{
 			boolean hasTexture = false, hasColors = false;
 			double textureAR = 1.0;
-			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
+			bgo = topAp.getAttribute(BACKGROUND_TEXTURE2D);
 			Texture2D tex = null;
 			if (bgo != null && bgo instanceof List) {
 				tex = (Texture2D) ((List)bgo).get(0);
