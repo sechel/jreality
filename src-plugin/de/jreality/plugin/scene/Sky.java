@@ -72,7 +72,7 @@ public class Sky extends Plugin implements HelpFlavor {
 	private JFileChooser fileChooser;
 	private int selectionIndex;
 
-	private String environment = "None";
+	private String environment = "Snow";
 
 	public Sky() {
 		this(defaultSkyBoxes);
@@ -87,6 +87,7 @@ public class Sky extends Plugin implements HelpFlavor {
 				return null;
 			}
 		});
+		showSkyCheckBox.setSelected(true);
 	}
 
 	public JPanel getPanel() {

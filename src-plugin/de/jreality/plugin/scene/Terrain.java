@@ -48,16 +48,20 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGri
 
 public class Terrain extends Plugin implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
 
+	private static final double DEFAULT_TRANSPARENCY = .5;
+	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
+	private static final double DEFAULT_FACE_REFLECTION = .5;
+	private static final Color DEFAULT_TERRAIN_COLOR = Color.white;
+	private static final double DEFAULT_TEXTURE_SCALE = .1;
+	private static final String DEFAULT_TEXTURE = "3 Black Grid";
+
 	// maximal value of texture scale
 	private static final double 
 		MAXIMAL_TEXTURE_SCALE = 1;
 	// ratio of maximal value and minimal value of texture scale
 	private static final double 
 		LOGARITHMIC_RANGE = 200;
-	// default texture scale
-	private static double 
-		DEFAULT_TEXTURE_SCALE = .1;
-
+	
 	// Plug-ins
 	private ViewPreferences
 		viewPreferences = null;
@@ -118,7 +122,8 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.setIcon(getPluginInfo().icon);
-		shrinkPanel.setShrinked(true);
+		boolean DEFAULT_FACES_REFLECTING = true;
+		shrinkPanel.setShrinked(DEFAULT_FACES_REFLECTING);
 		shrinkPanel.add(panel);
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(2, 2, 2, 2);
@@ -137,7 +142,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		panel.setLayout(new MinSizeGridBagLayout());
 		c.fill = BOTH;
 
-		visibleCheckBox.setSelected(true);
+		visibleCheckBox.setSelected(DEFAULT_FACES_REFLECTING);
 		c.weightx = 0.0;
 		c.gridwidth = RELATIVE;
 		panel.add(visibleCheckBox, c);
@@ -152,7 +157,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.weighty = 1.0;
 		c.gridwidth = REMAINDER;
 		textureShrinker.setHeaderColor(new Color(0.8f, 0.8f, 0.5f));
-		textureShrinker.setShrinked(true);
+		textureShrinker.setShrinked(DEFAULT_FACES_REFLECTING);
 		textureShrinker.setLayout(new GridLayout());
 		textureShrinker.add(textureInspector);
 		panel.add(textureShrinker, c);
@@ -177,16 +182,6 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.weightx = 1.0;
 		c.gridwidth = REMAINDER;
 		panel.add(transparencySlider, c);
-
-
-		// set defaults
-		textureInspector.setTexture("Black Grid");
-		textureInspector.setTextureScale(.5);
-		setFaceColor(Color.white);
-		setFacesReflecting(true);
-		setFaceReflection(.5);
-		setTransparencyEnabled(false);
-		setTransparency(.5);
 		
 		closeButton.addActionListener(this);
 		visibleCheckBox.addActionListener(this);
@@ -430,16 +425,16 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
-		setFaceColor(c.getProperty(getClass(), "faceColor", getFaceColor()));
-		setTransparency(c.getProperty(getClass(), "transparency", getTransparency()));
-		setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", isTransparencyEnabled()));
-		setFacesReflecting(c.getProperty(getClass(), "facesReflecting", isFacesReflecting()));
-		setFaceReflection(c.getProperty(getClass(), "faceReflection", getFaceReflection()));
-		setReflectSceneContent(c.getProperty(getClass(), "reflectSceneContent", isReflectSceneContent()));
+		setFaceColor(c.getProperty(getClass(), "faceColor", DEFAULT_TERRAIN_COLOR));
+		setTransparency(c.getProperty(getClass(), "transparency", DEFAULT_TRANSPARENCY));
+		setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
+		setFacesReflecting(c.getProperty(getClass(), "facesReflecting", true));
+		setFaceReflection(c.getProperty(getClass(), "faceReflection", DEFAULT_FACE_REFLECTION));
+		setReflectSceneContent(c.getProperty(getClass(), "reflectSceneContent", false));
 		textureInspector.setTextures(c.getProperty(getClass(), "textures", textures));
-		textureInspector.setTexture(c.getProperty(getClass(), "texture", textureInspector.getTexture()));
-		textureInspector.setTextureScale(c.getProperty(getClass(), "textureScale", textureInspector.getTextureScale()));
-		setVisible(c.getProperty(getClass(), "visible", isVisible()));
+		textureInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
+		textureInspector.setTextureScale(c.getProperty(getClass(), "textureScale",DEFAULT_TEXTURE_SCALE));
+		setVisible(c.getProperty(getClass(), "visible", true));
 		super.restoreStates(c);
 	}
 
@@ -498,22 +493,5 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		
 		return factory.getIndexedFaceSet();
 	}
-//	
-//	
-//	
-//	@Override
-//	public String getHelpDocument() {
-//		return "Terrain.html";
-//	}
-//	
-//	@Override
-//	public String getHelpPath() {
-//		return "../help/";
-//	}
-//	
-//	@Override
-//	public Class<?> getHelpHandle() {
-//		return getClass();
-//	}
 
 }

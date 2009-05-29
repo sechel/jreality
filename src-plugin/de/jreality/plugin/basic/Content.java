@@ -72,8 +72,8 @@ public abstract class Content extends Plugin {
 		return scene.getContentComponent();
 	}
 	
-	public boolean addContentTool(Tool tool) {
-		if (getContentRoot().getTools().contains(tool)) {
+	protected boolean addContentToolImpl(Tool tool) {
+		if (getToolComponent().getTools().contains(tool)) {
 			return false;
 		} else {
 			getContentRoot().addTool(tool);
@@ -84,14 +84,44 @@ public abstract class Content extends Plugin {
 		}
 	}
 	
-	public boolean removeContentTool(Tool tool) {
-		boolean removed = getContentRoot().removeTool(tool);
-		if (removed  ) {
+	protected SceneGraphComponent getToolComponent() {
+		return getContentRoot();
+	}
+
+	protected boolean removeContentToolImpl(Tool tool) {
+		boolean removed = getToolComponent().removeTool(tool);
+		if (removed) {
 			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ToolRemoved);
 			cce.tool = tool;
 			fireContentChanged(cce);
 		}
 		return removed;
+	}
+	
+	
+	/**
+	 * Add a content tool. Each Content implementation may reject adding/removing
+	 * tools, which is signaled by the return value. The return value gives information
+	 * if the tool is part of the Content tools after the method call (not if it was
+	 * added due to this call, in contrast to the Collections API).
+	 * 
+	 * @param tool
+	 * @return false if the Content rejects the given tool, true otherwise.
+	 */
+	public boolean addContentTool(Tool tool) {
+		addContentToolImpl(tool);
+		return true;
+	}
+	
+	/**
+	 * Remove a content tool.
+	 * 
+	 * @param tool
+	 * @return true if the tool was removed, false if it was not set before or if removing is rejected.
+	 */
+	public boolean removeContentTool(Tool tool) {
+		removeContentToolImpl(tool);
+		return true;
 	}
 	
 	public synchronized void fireContentChanged(ContentChangedEvent cce) {

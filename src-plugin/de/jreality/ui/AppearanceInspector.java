@@ -16,6 +16,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -337,7 +338,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	}
 
 	
-	public HashMap<String, String> getTextures() {
+	public Map<String, String> getTextures() {
 		return textureInspector.getTextures();
 	}
 	

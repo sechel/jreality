@@ -179,8 +179,8 @@ public class ContentTools extends Plugin {
 	public void setDragEnabled(boolean b) {
 		drag.setSelected(b);
 		boolean success = setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
-		setToolEnabled(snapDragTool, drag.isSelected() &&  snapToGrid.isSelected());
-		drag.setSelected(success);
+		boolean success2 = setToolEnabled(snapDragTool, drag.isSelected() &&  snapToGrid.isSelected());
+		drag.setSelected(success || success2);
 	}
 
 	public boolean isRotationEnabled() {
@@ -236,28 +236,28 @@ public class ContentTools extends Plugin {
 	}
 
 	private void installToolbox(ToolBarAggregator viewToolbar) {
-		viewToolbar.addTool(getClass(), 1.1, getDragToggle().createToolboxItem());//, "Tools", "Content");
-		viewToolbar.addTool(getClass(), 1.2, getRotateToggle().createToolboxItem());//, "Tools", "Content");
-		viewToolbar.addTool(getClass(), 1.3, getSnapToGridToggle().createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.1, drag.createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.2, rotate.createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.3, snapToGrid.createToolboxItem());//, "Tools", "Content");
 		viewToolbar.addSeparator(getClass(), 1.4);//, "Tools", "Content");
-		viewToolbar.addTool(getClass(), 1.5, getPickFacesToggle().createToolboxItem());//, "Tools", "Content");
-		viewToolbar.addTool(getClass(), 1.6, getPickEdgesToggle().createToolboxItem());//, "Tools", "Content");
-		viewToolbar.addTool(getClass(), 1.7, getPickVerticesToggle().createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.5, pickVertices.createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.6, pickEdges.createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.7, pickFaces.createToolboxItem());//, "Tools", "Content");
 		viewToolbar.addSeparator(getClass(), 1.8);//, "Tools", "Content");
-		viewToolbar.addTool(getClass(), 1.9, getEncompassToggle().createToolboxItem());//, "Tools", "Content");
+		viewToolbar.addTool(getClass(), 1.9, encompass.createToolboxItem());//, "Tools", "Content");
 		viewToolbar.addSeparator(getClass(), 2.0);//, "Tools", "Content");
 	}
 
 	private void installMenu(ViewMenuBar viewMenuBar) {
-		viewMenuBar.addMenuItem(getClass(), 1.1, getDragToggle().createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.2, getRotateToggle().createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.3, getSnapToGridToggle().createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content", "Tools");
 		viewMenuBar.addMenuSeparator(getClass(), 1.4, "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.5, getPickFacesToggle().createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.6, getPickEdgesToggle().createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.7, getPickVerticesToggle().createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.5, pickVertices.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.6, pickEdges.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.7, pickFaces.createMenuItem(), "Content", "Tools");
 		viewMenuBar.addMenuSeparator(getClass(), 1.8, "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.9, getEncompassToggle().createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.9, encompass.createMenuItem(), "Content", "Tools");
 	}
 
 	@Override
@@ -279,7 +279,7 @@ public class ContentTools extends Plugin {
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
-		setEncompassEnabled(c.getProperty(getClass(), "encompassEnabled", isRotationEnabled()));
+		setEncompassEnabled(c.getProperty(getClass(), "encompassEnabled", isEncompassEnabled()));
 		setRotationEnabled(c.getProperty(getClass(), "rotationEnabled", isRotationEnabled()));
 		setDragEnabled(c.getProperty(getClass(), "dragEnabled", isDragEnabled()));
 		setSnapToGrid(c.getProperty(getClass(), "snapTogrid", isSnapToGrid()));
@@ -305,33 +305,5 @@ public class ContentTools extends Plugin {
 		return View.class;
 	}
 
-	public AbstractJrToggleAction getRotateToggle() {
-		return rotate;
-	}
-
-	public AbstractJrToggleAction getDragToggle() {
-		return drag;
-	}
-
-	public AbstractJrToggleAction getSnapToGridToggle() {
-		return snapToGrid;
-	}
-
-	public AbstractJrToggleAction getPickFacesToggle() {
-		return pickFaces;
-	}
-
-	public AbstractJrToggleAction getPickEdgesToggle() {
-		return pickEdges;
-	}
-
-	public AbstractJrToggleAction getPickVerticesToggle() {
-		return pickVertices;
-	}
-	
-	public AbstractJrToggleAction getEncompassToggle() {
-		return encompass;
-	}
-	
 }
 

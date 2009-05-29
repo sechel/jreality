@@ -16,7 +16,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
@@ -65,10 +67,10 @@ public class TextureInspector extends JPanel {
 		textureGroup = new ButtonGroup();
 	private JSliderVR
 		texScaleSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
-	private HashMap<String, String> 
+	private Map<String, String> 
 		textureNameToTexture = new HashMap<String, String>();
-	private HashMap<String, ButtonModel> 
-		textureNameToButton = new HashMap<String, ButtonModel>();
+	private Map<String, AbstractButton> 
+		textureNameToButton = new HashMap<String, AbstractButton>();
 	private JFileChooser 
 		fileChooser = null;
 
@@ -162,7 +164,7 @@ public class TextureInspector extends JPanel {
 		texButton.setPreferredSize(new Dimension(texButtonSize, texButtonSize));
 		texButton.setActionCommand(name);
 		texButton.setToolTipText(resource);
-		textureNameToButton.put(name, texButton.getModel());
+		textureNameToButton.put(name, texButton);
 		texButton.addActionListener(texturesListener);
 		textureGroup.add(texButton);
 		texPanel.add(texButton);
@@ -171,7 +173,7 @@ public class TextureInspector extends JPanel {
 	}
 	
 	
-	public String setTextures(HashMap<String, String> textures) {
+	public String setTextures(Map<String, String> textures) {
 		textureNameToTexture = textures;
 		List<String> keyList = new LinkedList<String>(textureNameToTexture.keySet());
 		Collections.sort(keyList);
@@ -188,7 +190,7 @@ public class TextureInspector extends JPanel {
 	}
 	
 	
-	public HashMap<String, String> getTextures() {
+	public Map<String, String> getTextures() {
 		return textureNameToTexture;
 	}
 	
@@ -219,9 +221,9 @@ public class TextureInspector extends JPanel {
 	}
 	
 	public void setTexture(String name) {
-		ButtonModel bm = textureNameToButton.get(name);
+		AbstractButton bm = textureNameToButton.get(name);
 		if (bm != null) {
-			textureGroup.setSelected(bm ,true);
+			bm.doClick();
 		}
 	}
 	
@@ -302,8 +304,8 @@ public class TextureInspector extends JPanel {
 			textureNameToButton.clear();
 			texPanel.removeAll();
 			String firstTexture = setTextures(textureNameToTexture);
-			ButtonModel bm = textureNameToButton.get(firstTexture);
-			textureGroup.setSelected(bm, true);
+			AbstractButton bm = textureNameToButton.get(firstTexture);
+			bm.doClick();
 			updateTexture();
 		}
 	}
