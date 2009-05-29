@@ -1643,6 +1643,15 @@ final public class Rn {
 		return dst;
 	}
 
+	public static boolean isZero(double[] iline) {
+		return isZero(iline, TOLERANCE);
+	}
+
+	public static boolean isZero(double[] iline, double tol) {
+		for (double d : iline)	if (Math.abs(d) > tol) return false;
+		return true;
+	}
+
 
 
 }
