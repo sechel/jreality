@@ -164,6 +164,13 @@ public class LoadSaveSettings extends Plugin {
 	}
 	
 	@Override
+	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
+		c.getPlugin(ViewMenuBar.class).removeAll(getClass());
+	}
+	
+	
+	@Override
 	public PluginInfo getPluginInfo() {
 		return new PluginInfo("Save and load the current settings", "jreality Group");
 	}

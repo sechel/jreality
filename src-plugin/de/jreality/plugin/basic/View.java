@@ -184,9 +184,10 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
-		info.name = "Viewer";
+		info.name = "View";
 		info.vendorName = "Ulrich Pinkall"; 
 		info.icon = ImageHook.getIcon("hausgruen.png");
+		info.isDynamic = false;
 		return info;
 	}
 

@@ -54,7 +54,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("Window Manager");
+		return new PluginInfo("Window Manager", "jReality Group");
 	}
 	
 	@Override

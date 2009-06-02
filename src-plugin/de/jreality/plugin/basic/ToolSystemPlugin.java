@@ -170,6 +170,7 @@ public class ToolSystemPlugin extends Plugin implements ChangeListener {
 		info.name = "Tool system";
 		info.vendorName = "Steffen Weissmann"; 
 		info.icon = ImageHook.getIcon("hausgruen.png");
+		info.isDynamic = false;
 		return info;
 	}
 
