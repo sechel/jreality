@@ -1,5 +1,8 @@
 package de.jreality.plugin;
 
+import static java.util.Collections.sort;
+
+import java.util.Comparator;
 import java.util.List;
 
 import de.jreality.plugin.basic.Content;
@@ -8,6 +11,9 @@ import de.varylab.jrworkspace.plugin.Controller;
 
 public class PluginUtility {
 
+	public static Class<? extends Content>
+		defaultContentClass = DirectContent.class;
+	
 	/**
 	 * Returns a Content instance if there is one registered
 	 * @param <T>
@@ -17,17 +23,28 @@ public class PluginUtility {
 	 */
 	public static Content getContentPlugin(Controller c) {
 		List<Content> candidates = c.getPlugins(Content.class);
-		for (Content p : candidates) {
-			if (c.isActive(p)) {
-				return p;
-			}
+		if (candidates.size() != 0) {
+			sort(candidates, new ContentPriorityComparator());
+			return c.getPlugin(candidates.get(0).getClass());
+		} else {
+			return c.getPlugin(defaultContentClass);
 		}
-		for (Content p : candidates) {
-			c.getPlugin(p.getClass());
-			return p;
-		}
-		Content fallbackContent = c.getPlugin(DirectContent.class);
-		return fallbackContent;
 	}
 	
+
+	/**
+	 * A descending priority comparator
+	 * @author sechel
+	 *
+	 */
+	protected static class ContentPriorityComparator implements Comparator<Content> {
+
+		@Override
+		public int compare(Content o1, Content o2) {
+			return o1.getContentPriority() < o2.getContentPriority() ? 1 : -1;
+		}
+	
+	}		
+
+
 }

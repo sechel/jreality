@@ -162,5 +162,15 @@ public abstract class Content extends Plugin {
 			encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
 		} catch (Exception e) {}
 	}
+
+	
+	/**
+	 * Returns a priority which is used to determine the 
+	 * active content plug-in when more than one Content is registered
+	 * @return
+	 */
+	public double getContentPriority() {
+		return 0.0;
+	}
 	
 }

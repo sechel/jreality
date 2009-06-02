@@ -142,4 +142,9 @@ public class CenteredAndScaledContent extends Content {
 		SceneGraphUtility.removeChildNode(root, getContentNode());
 	}
 	
+	@Override
+	public double getContentPriority() {
+		return 1.0;
+	}
+	
 }
