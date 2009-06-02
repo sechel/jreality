@@ -350,6 +350,7 @@ public class JRViewer {
 		v.addBasicUI();
 		v.addVRSupport();
 		v.addLookAndFeelSupport();
+		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
 		v.startup();
 	}

@@ -184,9 +184,9 @@ public class TerrainAlignedContent extends Content {
 		});
 		panel.setLayout(new GridLayout(2,1));
 		sizeSlider.setMinimumSize(new Dimension(250,35));
-		sizeSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "size"));
+		sizeSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Size"));
 		offsetSlider.setMinimumSize(new Dimension(250,35));
-		offsetSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "offset"));
+		offsetSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Offset"));
 		panel.add(sizeSlider);
 		panel.add(offsetSlider);
 	}

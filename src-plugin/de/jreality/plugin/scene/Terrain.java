@@ -48,6 +48,8 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGri
 
 public class Terrain extends Plugin implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
 
+	private static final boolean DEFAULT_TERRAIN_VISIBLE = true;
+	private static final boolean DEFAULT_FACES_REFLECTING = true;
 	private static final double DEFAULT_TRANSPARENCY = .5;
 	private static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
 	private static final double DEFAULT_FACE_REFLECTION = .5;
@@ -122,8 +124,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.setIcon(getPluginInfo().icon);
-		boolean DEFAULT_FACES_REFLECTING = true;
-		shrinkPanel.setShrinked(DEFAULT_FACES_REFLECTING);
+		shrinkPanel.setShrinked(true);
 		shrinkPanel.add(panel);
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(2, 2, 2, 2);
@@ -142,7 +143,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		panel.setLayout(new MinSizeGridBagLayout());
 		c.fill = BOTH;
 
-		visibleCheckBox.setSelected(DEFAULT_FACES_REFLECTING);
+		visibleCheckBox.setSelected(DEFAULT_TERRAIN_VISIBLE);
 		c.weightx = 0.0;
 		c.gridwidth = RELATIVE;
 		panel.add(visibleCheckBox, c);
@@ -157,7 +158,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.weighty = 1.0;
 		c.gridwidth = REMAINDER;
 		textureShrinker.setHeaderColor(new Color(0.8f, 0.8f, 0.5f));
-		textureShrinker.setShrinked(DEFAULT_FACES_REFLECTING);
+		textureShrinker.setShrinked(true);
 		textureShrinker.setLayout(new GridLayout());
 		textureShrinker.add(textureInspector);
 		panel.add(textureShrinker, c);
@@ -173,7 +174,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.weightx = 1.0;
 		c.gridwidth = REMAINDER;	
 		panel.add(reflectScene, c);
-//		reflectScene.setEnabled(false);
+		reflectScene.setEnabled(false);
 		reflectScene.setToolTipText("Coming soon...");
 		
 		c.weightx = 0.0;
@@ -428,7 +429,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		setFaceColor(c.getProperty(getClass(), "faceColor", DEFAULT_TERRAIN_COLOR));
 		setTransparency(c.getProperty(getClass(), "transparency", DEFAULT_TRANSPARENCY));
 		setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
-		setFacesReflecting(c.getProperty(getClass(), "facesReflecting", true));
+		setFacesReflecting(c.getProperty(getClass(), "facesReflecting", DEFAULT_FACES_REFLECTING));
 		setFaceReflection(c.getProperty(getClass(), "faceReflection", DEFAULT_FACE_REFLECTION));
 		setReflectSceneContent(c.getProperty(getClass(), "reflectSceneContent", false));
 		textureInspector.setTextures(c.getProperty(getClass(), "textures", textures));
