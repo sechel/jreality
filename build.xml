@@ -517,45 +517,62 @@
 	</target>
 
 	<target name="release-plugin" depends="dist">
-		<property name="view_plugins" value="de/jreality/plugin/view"/>
-		<property name="audio_plugins" value="de/jreality/plugin/audio"/>
-		<property name="share_plugins" value="de/jreality/ui"/>
-		<property name="vr_plugins" value="de/jreality/plugin/vr"/>
-		<property name="experimental" value="
-			${view_plugins}/AdvancedAppearance**,
-			${view_plugins}/InfoOverlay**,
-			${view_plugins}/ViewerKey**
-		" />
+		<property name="basic_folder" value="de/jreality/plugin/basic"/>
+		<property name="content_folder" value="de/jreality/plugin/content"/>
+		<property name="menu_folder" value="de/jreality/plugin/menu"/>
+		<property name="scene_folder" value="de/jreality/plugin/scene"/>
+		<property name="experimental_folder" value="de/jreality/plugin/experimental"/>
+		
+		<property name="vr_plugins" value="
+			${content_folder}/TerrainAligned**,
+			${scene_folder}/Avatar**,
+			${scene_folder}/Sky**, 
+			${scene_folder}/Terrain**, 
+			${scene_folder}/VRPanel**
+		"/>
+		
+		<property name="audio_plugins" value="
+			de/jreality/plugin/audio/**,
+		"/>
+		
+		<property name="shared" value="
+			de/jreality/plugin/help/**, 
+			de/jreality/plugin/icon/**, 
+			de/jreality/ui/**
+		"/>
+		
 		<property name="plugin_folder" value="release/plugin"/>
 		<mkdir dir="${plugin_folder}"/>
+		
 		<jar destfile="${plugin_folder}/jReality-plugin-view.jar">
 			<fileset dir="${build}/plugin" 
-				includes="${view_plugins}/**"
-				excludes="${experimental}"
+				excludes="
+					${audio_plugins},
+					${vr_plugins}, 
+					${experimental_folder}/**, 
+					${shared} 
+			"/>
+		</jar>
+
+		<jar destfile="${plugin_folder}/jReality-plugin-vr.jar">
+			<fileset dir="${build}/plugin" 
+				includes="${vr_plugins}"
+			/>
+		</jar>
+		
+		<jar destfile="${plugin_folder}/jReality-plugin-experimental.jar">
+			<fileset dir="${build}/plugin"
+				includes="${experimental_folder}/**"
 			/>
 		</jar>
 		<jar destfile="${plugin_folder}/jReality-plugin-audio.jar">
 			<fileset dir="${build}/plugin"
-				includes="${audio_plugins}/**"
-				excludes="${experimental}"
+				includes="${audio_plugins}"
 			/>
-		</jar>
-		<jar destfile="${plugin_folder}/jReality-plugin-experimental.jar">
-			<fileset dir="${build}/plugin" 
-				includes="${experimental}"
-			/>
-		</jar>
+		</jar>		
 		<jar destfile="${plugin_folder}/jReality-plugin-share.jar">
 			<fileset dir="${build}/plugin"
-				includes="${share_plugins}/**"
-				excludes="${experimental}"
-			/>
-		</jar>
-		<jar destfile="${plugin_folder}/jReality-plugin-vr.jar">
-			<fileset dir="${build}/plugin"
-				includes="${vr_plugins}/**"
-				excludes="${experimental}"
-			/>
+				includes="${shared}"/>
 		</jar>
 	</target>
 
