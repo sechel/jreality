@@ -249,15 +249,15 @@ public class ContentTools extends Plugin {
 	}
 
 	private void installMenu(ViewMenuBar viewMenuBar) {
-		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuSeparator(getClass(), 1.4, "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.5, pickVertices.createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.6, pickEdges.createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.7, pickFaces.createMenuItem(), "Content", "Tools");
-		viewMenuBar.addMenuSeparator(getClass(), 1.8, "Content", "Tools");
-		viewMenuBar.addMenuItem(getClass(), 1.9, encompass.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content");
+		viewMenuBar.addMenuSeparator(getClass(), 1.4, "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.5, pickVertices.createMenuItem(), "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.6, pickEdges.createMenuItem(), "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.7, pickFaces.createMenuItem(), "Content");
+		viewMenuBar.addMenuSeparator(getClass(), 1.8, "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.9, encompass.createMenuItem(), "Content");
 	}
 
 	@Override
