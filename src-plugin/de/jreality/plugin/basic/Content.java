@@ -16,7 +16,6 @@ public abstract class Content extends Plugin {
 	
 	public static enum ChangeEventType {
 		ContentChanged,
-		ContentReset,
 		ToolAdded,
 		ToolRemoved
 	}
@@ -59,12 +58,7 @@ public abstract class Content extends Plugin {
 	}
 	
 	
-	public void resetContent() {
-		fireContentChanged(new ContentChangedEvent(ChangeEventType.ContentReset));
-	}
-	
-	
-	public SceneGraphComponent getContentRoot() {
+	protected SceneGraphComponent getContentRoot() {
 		return scene.getContentComponent();
 	}
 	
