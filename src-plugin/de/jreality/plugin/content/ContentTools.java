@@ -2,7 +2,7 @@ package de.jreality.plugin.content;
 
 import java.awt.event.ActionEvent;
 
-import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
@@ -227,7 +227,7 @@ public class ContentTools extends Plugin {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		scene = c.getPlugin(Scene.class);
-		content = PluginUtility.getContentPlugin(c);
+		content = JRViewerUtility.getContentPlugin(c);
 		install();
 		ViewMenuBar viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		installMenu(viewMenuBar);

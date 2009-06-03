@@ -13,7 +13,7 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
@@ -136,7 +136,7 @@ public class ContentLoader extends Plugin implements UIFlavor {
 	@Override
 	public void install(Controller c) throws Exception {
 		View viewPlugin = c.getPlugin(View.class);
-		Content content = PluginUtility.getContentPlugin(c);
+		Content content = JRViewerUtility.getContentPlugin(c);
 		install(
 				viewPlugin,
 				content

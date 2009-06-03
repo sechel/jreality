@@ -42,7 +42,6 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.util.CameraUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -327,15 +326,15 @@ public class JRViewer {
 			if (content == null) {
 				return;
 			}
-			Content mc = PluginUtility.getContentPlugin(c);
+			Content mc = JRViewerUtility.getContentPlugin(c);
 			if (mc == null) {
 				System.err.println("No content plug-in registered");
 				return;
 			}
 			mc.setContent(content);
 			if (encompass) {
-				View view = c.getPlugin(View.class);
-				CameraUtility.encompass(view.getViewer());
+				Scene scene = c.getPlugin(Scene.class);
+				JRViewerUtility.encompassEuclidean(scene);
 			}
 		}
 		

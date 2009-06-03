@@ -13,7 +13,7 @@ import javax.swing.JRadioButton;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.View;
@@ -93,7 +93,7 @@ public class ViewerVRExamples extends ShrinkPanelPlugin {
 	
 	@Override
 	public void install(Controller c) throws Exception {
-		content = PluginUtility.getContentPlugin(c);
+		content = JRViewerUtility.getContentPlugin(c);
 		makePanel();
 		super.install(c);
 	}

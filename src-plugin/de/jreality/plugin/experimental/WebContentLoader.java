@@ -26,9 +26,10 @@ import javax.swing.text.html.HTML.Attribute;
 import javax.swing.text.html.HTML.Tag;
 
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
@@ -42,6 +43,8 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 
 	private Content 
 		contentPlugin = null;
+	private Scene
+		scene = null;
 	private JTextField
 		locationField = new JTextField("http://www.sechel.de/models/");
 	private JList
@@ -100,7 +103,7 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 			}
 			contentPlugin.setContent(root);
 			if (encompassChecker.isSelected()) {
-				contentPlugin.encompassEuclidean();
+				JRViewerUtility.encompassEuclidean(scene);
 			}
 			
 		}
@@ -194,7 +197,8 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		contentPlugin = PluginUtility.getContentPlugin(c);
+		contentPlugin = JRViewerUtility.getContentPlugin(c);
+		scene = c.getPlugin(Scene.class);
 		updateContent();
 	}
 	

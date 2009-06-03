@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.jreality.plugin.PluginUtility;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
@@ -213,7 +213,7 @@ public class ManagedContent extends Plugin {
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		content = PluginUtility.getContentPlugin(c);
+		content = JRViewerUtility.getContentPlugin(c);
 	}
 	
 	public boolean addContentListener(ContentListener l) {

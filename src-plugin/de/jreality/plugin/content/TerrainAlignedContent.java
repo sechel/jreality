@@ -196,9 +196,5 @@ public class TerrainAlignedContent extends Content {
 		return new PluginInfo("Terrain Aligned Content", "jReality Group");
 	}
 	
-	@Override
-	public double getContentPriority() {
-		return 2.0;
-	}
 	
 }
