@@ -8,19 +8,22 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.BoundingBoxUtility;
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.MainPanel;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.scene.event.TransformationEvent;
+import de.jreality.scene.event.TransformationListener;
 import de.jreality.ui.JSliderVR;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class CenteredAndScaledContent extends Content {
+public class CenteredAndScaledContent extends Content implements ChangeListener, TransformationListener {
 
 	private double 
 		size = 5.0;
@@ -42,11 +45,21 @@ public class CenteredAndScaledContent extends Content {
 		panel.setBorder(BorderFactory.createTitledBorder("Scaled Content"));
 		panel.setLayout(new GridLayout());
 		panel.add(sizeSlider);
-		sizeSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				setSize(sizeSlider.getValue()/100.);
-			}
-		});
+		sizeSlider.addChangeListener(this);
+	}
+	
+	
+	public synchronized void stateChanged(ChangeEvent e) {
+		size = sizeSlider.getValue() / 100.0;
+		updateMatrix();
+	}
+	
+	public void transformationMatrixChanged(TransformationEvent ev) {
+		FactoredMatrix fm = new FactoredMatrix(ev.getTransformation());
+		double[] stretch = fm.getStretch();
+		sizeSlider.removeChangeListener(this);
+		sizeSlider.setValue((int)(stretch[0] * 100 * objectSize));
+		sizeSlider.addChangeListener(this);
 	}
 	
 	
@@ -110,13 +123,6 @@ public class CenteredAndScaledContent extends Content {
 		return size;
 	}
 
-	public void setSize(double size) {
-		this.size=size;
-		sizeSlider.setValue((int)(size * 100));
-		updateMatrix();
-	}
-	
-
 	@Override
 	public PluginInfo getPluginInfo() {
 		return new PluginInfo("Centered and Scaled Content", "jReality Group");
@@ -127,6 +133,7 @@ public class CenteredAndScaledContent extends Content {
 		super.install(c);
 		MainPanel msp = c.getPlugin(MainPanel.class);
 		msp.addComponent(getClass(), panel, 0.0, "Content");
+		getContentRoot().getTransformation().addTransformationListener(this);
 	}
 	
 	
