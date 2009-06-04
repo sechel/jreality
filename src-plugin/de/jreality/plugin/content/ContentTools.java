@@ -29,6 +29,11 @@ public class ContentTools extends Plugin {
 	private static final boolean DEFAULT_PICK_EDGES = true;
 	private static final boolean DEFAULT_PICK_VERTICES = true;
 
+	private static final boolean DEFAULT_ROTATE_ENABLED = true;
+	private static final boolean DEFAULT_DRAG_ENABLED = true;
+	private static final boolean DEFAULT_ENCOMPASS_ENABLED = true;
+	private static final boolean DEFAULT_SNAP_TO_GRID_ENABLED = false;
+
 	private RotateTool rotateTool;
 	private DraggingTool draggingTool;
 	private AxisTranslationTool snapDragTool;
@@ -119,8 +124,10 @@ public class ContentTools extends Plugin {
 
 		snapDragTool = new AxisTranslationTool();
 
-		setRotationEnabled(true);
-		setDragEnabled(true);
+		setRotationEnabled(DEFAULT_ROTATE_ENABLED);
+		setDragEnabled(DEFAULT_DRAG_ENABLED);
+		setEncompassEnabled(DEFAULT_ENCOMPASS_ENABLED);
+		setSnapToGrid(DEFAULT_SNAP_TO_GRID_ENABLED);
 		setPickEdges(DEFAULT_PICK_EDGES);
 		setPickFaces(DEFAULT_PICK_FACES);
 		setPickVertices(DEFAULT_PICK_VERTICES);
@@ -249,15 +256,15 @@ public class ContentTools extends Plugin {
 	}
 
 	private void installMenu(ViewMenuBar viewMenuBar) {
-		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content");
-		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content");
-		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content");
-		viewMenuBar.addMenuSeparator(getClass(), 1.4, "Content");
-		viewMenuBar.addMenuItem(getClass(), 1.5, pickVertices.createMenuItem(), "Content");
-		viewMenuBar.addMenuItem(getClass(), 1.6, pickEdges.createMenuItem(), "Content");
-		viewMenuBar.addMenuItem(getClass(), 1.7, pickFaces.createMenuItem(), "Content");
-		viewMenuBar.addMenuSeparator(getClass(), 1.8, "Content");
-		viewMenuBar.addMenuItem(getClass(), 1.9, encompass.createMenuItem(), "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content", "Tools");
+		//viewMenuBar.addMenuSeparator(getClass(), 1.4, "Content");
+		viewMenuBar.addMenuItem(getClass(), 1.5, pickVertices.createMenuItem(), "Content", "Picking");
+		viewMenuBar.addMenuItem(getClass(), 1.6, pickEdges.createMenuItem(), "Content", "Picking");
+		viewMenuBar.addMenuItem(getClass(), 1.7, pickFaces.createMenuItem(), "Content", "Picking");
+		viewMenuBar.addMenuSeparator(getClass(), 1.8, "Content", "Tools");
+		viewMenuBar.addMenuItem(getClass(), 1.9, encompass.createMenuItem(), "Content", "Tools");
 	}
 
 	@Override
