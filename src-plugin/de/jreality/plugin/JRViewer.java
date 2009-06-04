@@ -23,6 +23,7 @@ import de.jreality.plugin.basic.Shell;
 import de.jreality.plugin.basic.ToolSystemPlugin;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
+import de.jreality.plugin.basic.ViewPreferences;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.content.CenteredAndScaledContent;
 import de.jreality.plugin.content.ContentAppearance;
@@ -73,6 +74,8 @@ public class JRViewer {
 	
 	
 	public JRViewer() {
+		// disable automatic property saving - should be changed in simple controller.
+		c.setPropertiesFile(null);
 		c.registerPlugin(new View());
 		c.registerPlugin(new Scene());
 		c.registerPlugin(new ToolSystemPlugin());
@@ -81,6 +84,8 @@ public class JRViewer {
 	}
 	
 	public JRViewer(JrScene s) {
+		// disable automatic property saving - should be changed in simple controller.
+		c.setPropertiesFile(null);
 		c.registerPlugin(new View());
 		c.registerPlugin(new Scene(s));
 		c.registerPlugin(new ToolSystemPlugin());
@@ -240,6 +245,8 @@ public class JRViewer {
 		
 		c.registerPlugin(new ExportMenu());
 		c.registerPlugin(new CameraMenu());
+		
+		c.registerPlugin(new ViewPreferences());
 	}
 
 	
@@ -278,8 +285,14 @@ public class JRViewer {
 		if (node != null) v.registerPlugin(new ContentInjectionPlugin(node, true));
 		else v.registerPlugin(new ContentLoader());
 		v.addBasicUI();
-		v.getPlugin(View.class).setHidePanels(true);
+		v.getPlugin(View.class).setShowTop(false);
+		v.getPlugin(View.class).setShowBottom(false);
+		v.getPlugin(View.class).setShowLeft(false);
+		v.getPlugin(View.class).setShowRight(false);
+		v.getPlugin(View.class).setHidePanels(false);
+		
 		v.startup();
+		v.getPlugin(ViewPreferences.class).setToolBarVisible(false);
 	}
 
 	
