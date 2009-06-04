@@ -5,6 +5,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,16 +23,19 @@ import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
-public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener {
+public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener, ComponentListener {
 
 	private JPanel 
 		mainPage = new JPanel();
 	private JCheckBox
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
+	private JCheckBox
+		toolBarChecker = new JCheckBox("Show Tool bar");
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
 	private List<ColorPickerModeChangedListener>
 		colorModeListeners = new LinkedList<ColorPickerModeChangedListener>();
+	private ViewToolBar toolBar;
 	
 	public static interface ColorPickerModeChangedListener {
 		
@@ -47,6 +52,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		mainPage.add(threadSafeChecker, c);
+		mainPage.add(toolBarChecker, c);
 		c.weightx = 0.0;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 		mainPage.add(new JLabel("Color Chooser Mode"), c);
@@ -56,6 +62,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		colorChooserModeCombo.setSelectedIndex(1);
 		
 		threadSafeChecker.addActionListener(this);
+		toolBarChecker.addActionListener(this);
 		colorChooserModeCombo.addActionListener(this);
 	}
 	
@@ -73,11 +80,26 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		if (threadSafeChecker == s) {
 			System.out.println("ThreadSafe is " + threadSafeChecker.isSelected());
 			SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());
-		} else if (colorChooserModeCombo == s) {
+		}
+		if (colorChooserModeCombo == s) {
 			fireColorModeChanged(colorChooserModeCombo.getSelectedIndex());
+		}
+		if (toolBarChecker == s) {
+			setToolBarVisible(toolBarChecker.isSelected());
 		}
 	}
 
+	public void setToolBarVisible(boolean selected) {
+		toolBarChecker.setSelected(selected);
+		if (toolBar != null) {
+			toolBar.getToolBarComponent().setVisible(selected);
+		}
+	}
+
+	public boolean isToolBarVisible() {
+		return toolBarChecker.isSelected();
+	}
+	
 	protected void fireColorModeChanged(int mode) {
 		for (ColorPickerModeChangedListener l : colorModeListeners) {
 			l.colorPickerModeChanged(mode);
@@ -89,6 +111,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe());
 		c.storeProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex());
+		c.storeProperty(getClass(), "toolBarVisible", isToolBarVisible());
 		super.storeStates(c);
 	}
 	
@@ -97,6 +120,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		threadSafeChecker.setSelected(c.getProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe()));
 		SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());
 		colorChooserModeCombo.setSelectedIndex(c.getProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex()));
+		setToolBarVisible(c.getProperty(getClass(), "toolBarVisible", isToolBarVisible()));
 		super.restoreStates(c);
 	}
 	
@@ -141,5 +165,27 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		return colorModeListeners.remove(l);
 	}
 	
+	@Override
+	public void install(Controller c) throws Exception {
+		super.install(c);
+		toolBar = c.getPlugin(ViewToolBar.class);
+		setToolBarVisible(isToolBarVisible());
+		toolBar.getToolBarComponent().addComponentListener(this);
+	}
 
+	@Override
+	public void uninstall(Controller c) throws Exception {
+		super.uninstall(c);
+		toolBar.getToolBarComponent().removeComponentListener(this);
+	}
+	public void componentHidden(ComponentEvent e) {
+		setToolBarVisible(false);
+	}
+	public void componentMoved(ComponentEvent e) {
+	}
+	public void componentResized(ComponentEvent e) {
+	}
+	public void componentShown(ComponentEvent e) {
+		setToolBarVisible(true);
+	}
 }
