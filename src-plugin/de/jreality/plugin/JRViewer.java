@@ -275,7 +275,8 @@ public class JRViewer {
 		JRViewer v = new JRViewer();
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
-		v.registerPlugin(new ContentInjectionPlugin(node, true));
+		if (node != null) v.registerPlugin(new ContentInjectionPlugin(node, true));
+		else v.registerPlugin(new ContentLoader());
 		v.addBasicUI();
 		v.getPlugin(View.class).setHidePanels(true);
 		v.startup();
