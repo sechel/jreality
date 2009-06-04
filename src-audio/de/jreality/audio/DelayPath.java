@@ -136,14 +136,10 @@ public class DelayPath implements SoundPath {
 	public boolean processFrame(SoundEncoder enc, int frameSize, Matrix sourcePosition, Matrix inverseMicMatrix, float[] directionlessBuffer) {
 		currentMicPosition = inverseMicMatrix;
 		currentSourcePosition = sourcePosition;
-		boolean sourceActive = evaluateSourceFrame(frameSize);
 		updateTarget();
-
-		if (currentLength>0) {
-			encodeFrame(enc, frameSize, directionlessBuffer);
-		} else {
-			initFields();
-		}
+		
+		boolean sourceActive = evaluateSourceFrame(frameSize);
+		encodeFrame(enc, frameSize, directionlessBuffer);
 
 		if (sourceActive || frameCount>0 || currentFrame!=null || distanceCue.hasMore() || directionlessCue.hasMore()) {
 			return true;   // still rendering...
@@ -185,17 +181,50 @@ public class DelayPath implements SoundPath {
 	}
 
 	private void queueFrame(int size, float[] frame) {
-		frameLengths.add(size);
-		sourceFrames.add(frame);
 		sourcePositions.add(new Matrix(currentSourcePosition));
-	}
-	
-	private void initFields() {
-		advanceFrame();
+		if (currentLength>0) {
+			frameLengths.add(size);
+			sourceFrames.add(frame);
+		} else {
+			currentLength = size;
+			currentFrame = frame;
 
-		xCurrent = xFilter.initialize(xTarget);
-		yCurrent = yFilter.initialize(yTarget);
-		zCurrent = zFilter.initialize(zTarget);
+			xCurrent = xFilter.initialize(xTarget);
+			yCurrent = yFilter.initialize(yTarget);
+			zCurrent = zFilter.initialize(zTarget);
+		}
+	}
+
+	private Matrix auxiliaryMatrix = new Matrix();
+
+	private void updateTarget() {
+		auxiliaryMatrix.assignFrom(sourcePositions.isEmpty() ? currentSourcePosition : sourcePositions.element());
+		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
+
+		// TODO: Adjust the rest of this method to generalize to curved geometries
+		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
+		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
+		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
+
+		auxiliaryMatrix.invert();
+		xMic = (float) auxiliaryMatrix.getEntry(0, 3);
+		yMic = (float) auxiliaryMatrix.getEntry(1, 3);
+		zMic = (float) auxiliaryMatrix.getEntry(2, 3);
+	}
+
+	private void advanceFrame() {
+		if (currentFrame!=null) {
+			reuseBuffer(currentFrame);
+		}
+		
+		currentFrame = sourceFrames.remove();
+		currentLength = frameLengths.remove();
+		sourcePositions.remove();
+		updateTarget();
+
+		if (currentFrame!=null) {
+			frameCount--;
+		}
 	}
 
 	private void encodeFrame(SoundEncoder enc, int frameSize, float[] directionlessBuffer) {
@@ -211,7 +240,6 @@ public class DelayPath implements SoundPath {
 					currentIndex -= currentLength;
 					targetIndex -= currentLength;
 					advanceFrame();
-					updateTarget();
 				}
 				float newSample = (currentFrame!=null) ? currentFrame[currentIndex]*gain : 0f;
 				interpolation.put(directionlessCue.nextValue(newSample, distance, xMic, yMic, zMic));
@@ -227,40 +255,6 @@ public class DelayPath implements SoundPath {
 			yCurrent = yFilter.nextValue(yTarget);
 			zCurrent = zFilter.nextValue(zTarget);
 		}
-	}
-
-	private void advanceFrame() {
-		if (currentFrame!=null) {
-			reuseBuffer(currentFrame);
-		}
-		
-		currentFrame = sourceFrames.remove();
-		currentLength = frameLengths.remove();
-		sourcePositions.remove();
-
-		if (currentFrame!=null) {
-			frameCount--;
-		}
-	}
-
-	private Matrix auxiliaryMatrix = new Matrix();
-
-	private void updateTarget() {
-		if (sourcePositions.isEmpty()) { // only possible upon blisteringly fast return within earshot
-			queueNullFrame();
-		}
-		auxiliaryMatrix.assignFrom(sourcePositions.element());
-		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
-
-		// TODO: Adjust the rest of this method to generalize to curved geometries
-		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
-		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
-		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
-
-		auxiliaryMatrix.invert();
-		xMic = (float) auxiliaryMatrix.getEntry(0, 3);
-		yMic = (float) auxiliaryMatrix.getEntry(1, 3);
-		zMic = (float) auxiliaryMatrix.getEntry(2, 3);
 	}
 
 	private void reset() {

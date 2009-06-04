@@ -4,12 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
 
-import de.jreality.audio.RingBuffer.Reader;
 import de.jreality.audio.javasound.AudioInputStreamSource;
-import de.jreality.audio.javasound.CachedAudioInputStreamSource;
-import de.jreality.audio.util.AudioLauncher;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
@@ -18,9 +17,7 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.ActionTool;
 import de.jreality.tools.DraggingTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
-import de.jreality.vr.ViewerVR;
 
 /**
  * Basic test to check spatial audio.
@@ -35,12 +32,12 @@ public class TestVR {
 		SceneGraphComponent cmp = new SceneGraphComponent();
 		DraggingTool dragtool = new DraggingTool();
 
-		
-//		Input wavWaterdrops = Input.getInput("/Users/tim/Documents/workspace/jreality/data/Gun1.wav");
-//		final AudioSource s1 = new CachedAudioInputStreamSource("wavnode", wavWaterdrops, true);
-        final ElectricBass s1 = new ElectricBass("Bass");
-        final SceneGraphComponent cmp1 = new SceneGraphComponent();
-		 cmp1.setGeometry(new Sphere());
+
+		//		Input wavWaterdrops = Input.getInput("/Users/tim/Documents/workspace/jreality/data/Gun1.wav");
+		//		final AudioSource s1 = new CachedAudioInputStreamSource("wavnode", wavWaterdrops, true);
+		final ElectricBass s1 = new ElectricBass("Bass");
+		final SceneGraphComponent cmp1 = new SceneGraphComponent();
+		cmp1.setGeometry(new Sphere());
 		MatrixBuilder.euclidean().translate(-4, 0, 0).assignTo(cmp1);
 		cmp.addChild(cmp1);
 		cmp1.setAudioSource(s1);
@@ -48,53 +45,53 @@ public class TestVR {
 		at1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (s1.getState() == AudioSource.State.RUNNING) {
-				    s1.noteOff();
-                    s1.pause();
-                }
+					s1.noteOff();
+					s1.pause();
+				}
 				else {
-                    int pitch = (int)(cmp1.getTransformation().getMatrix()[11]*4) +20;
-                    System.out.println("pitch raw "+pitch);
-                    pitch = Math.min(100,pitch);
-                    pitch = Math.max(pitch,10);
-                    System.out.println("pitch map "+pitch);
-                    s1.noteOn(pitch, 90);
-                    s1.start();
-                }
+					int pitch = (int)(cmp1.getTransformation().getMatrix()[11]*4) +20;
+					System.out.println("pitch raw "+pitch);
+					pitch = Math.min(100,pitch);
+					pitch = Math.max(pitch,10);
+					System.out.println("pitch map "+pitch);
+					s1.noteOn(pitch, 90);
+					s1.start();
+				}
 			}
 		});
-       OnOffTool ata = new OnOffTool() {
-           @Override
-           public void activate(ToolContext tc) {
-               super.activate(tc);
-               //System.out.println("active");
-               int pitch = (int)(cmp1.getTransformation().getMatrix()[11]*3) +20;
-               
-               pitch = Math.min(100,pitch);
-               pitch = Math.max(pitch,10);
-               
-               s1.noteOn(pitch, 90);
-               //s1.start();
-           }
+		OnOffTool ata = new OnOffTool() {
+			@Override
+			public void activate(ToolContext tc) {
+				super.activate(tc);
+				//System.out.println("active");
+				int pitch = (int)(cmp1.getTransformation().getMatrix()[11]*3) +20;
 
-           @Override
-           public void deactivate(ToolContext tc) {
-               super.deactivate(tc);
-               //System.out.println("inactive");
-               if (s1.getState() == AudioSource.State.RUNNING) {
-                    s1.noteOff();
-                   //s1.pause();
-               }
-           }
-       };
-       //cmp1.addTool(at1);
-        cmp1.addTool(ata);
+				pitch = Math.min(100,pitch);
+				pitch = Math.max(pitch,10);
+
+				s1.noteOn(pitch, 90);
+				//s1.start();
+			}
+
+			@Override
+			public void deactivate(ToolContext tc) {
+				super.deactivate(tc);
+				//System.out.println("inactive");
+				if (s1.getState() == AudioSource.State.RUNNING) {
+					s1.noteOff();
+					//s1.pause();
+				}
+			}
+		};
+		//cmp1.addTool(at1);
+		cmp1.addTool(ata);
 		cmp1.addTool(dragtool);
 		s1.start();
 
-		
+
 		SceneGraphComponent cmp2 = new SceneGraphComponent();
 		cmp.addChild(cmp2);
-		
+
 		final SynthSource sin = new SynthSource("wave", 44100) {
 			float amplitude=0.03f;
 			double frequency=440;
@@ -103,7 +100,7 @@ public class TestVR {
 				return amplitude * (float) Math.sin(2*Math.PI*index*frequency/sampleRate);
 			}
 		};
-		
+
 		cmp2.setGeometry(Primitives.icosahedron());
 		MatrixBuilder.euclidean().translate(0, 0, 0).assignTo(cmp2);
 		cmp2.setAudioSource(sin);
@@ -118,59 +115,19 @@ public class TestVR {
 		cmp2.addTool(dragtool);
 		sin.start();
 
-		
-//		SceneGraphComponent cmp3 = new SceneGraphComponent();
-//		cmp.addChild(cmp3);
-//		
-//		// works with mp3spi from javazoom in classpath:
-//		URL url = new URL("http://www.br-online.de/imperia/md/audio/podcast/import/2008_09/2008_09_29_16_33_02_podcastdienasawird50_a.mp3");
-//		Input input = Input.getInput(url); 
-//		final AudioSource s3 = new AudioInputStreamSource("podcast", input, false) {
-//			@Override
-//			public int readSamples(Reader reader, float[] buffer,
-//					int initialIndex, int samples) {
-//				// TODO Auto-generated method stub
-//				int ret = super.readSamples(reader, buffer, initialIndex, samples);
-//				for (int i=0; i<buffer.length; i++) {
-//					buffer[i]*=0.3f;
-//				}
-//				return ret;
-//			}
-//		};
-//			
-//		cmp3.setGeometry(Primitives.cube());
-//		MatrixBuilder.euclidean().translate(4, 0, 0).assignTo(cmp3);
-//		cmp3.setAudioSource(s3);
-//		ActionTool at3 = new ActionTool("PanelActivation");
-//		at3.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				if (s3.getState() == AudioSource.State.RUNNING) s3.pause();
-//				else s3.start();
-//			}
-//		});
-//		cmp3.addTool(at3);
-//		cmp3.addTool(dragtool);
-//		s3.start();
-
-		
-		ViewerVR vr = ViewerVR.createDefaultViewerVR(null);
-		// ViewerApp va = ViewerApp.display(cmp);
-		ViewerApp va = vr.initialize();
-		va.update();
-		va.display();
-
-		vr.setContent(cmp);
-
-		AudioLauncher.launch(va.getCurrentViewer());
-		
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addAudioSupport();
+		v.addVRSupport();
+		v.setPropertiesFile("TestVR.jrw");
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.setContent(cmp);
+		v.startup();
 	}
+	
 	private static abstract class OnOffTool extends AbstractTool {
-     OnOffTool() {
-         super(InputSlot.getDevice("PrimaryAction"));
-     }
-
-   
-     
-     
-    }
+		OnOffTool() {
+			super(InputSlot.getDevice("PrimaryAction"));
+		}
+	}
 }

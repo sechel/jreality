@@ -5,6 +5,8 @@ import java.io.IOException;
 import de.jreality.audio.SynthSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.reader.Readers;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
@@ -61,17 +63,15 @@ public class DopplerDemo {
 	
 	public static void main(String[] args) {
 		DopplerDemo dd = new DopplerDemo();
-		
-		
-		ViewerVR vr = ViewerVR.createDefaultViewerVR(null);
-		vr.setDoAlign(false);
-		vr.setContent(dd.centerCmp);
-		
-		ViewerApp va = vr.initialize();
-		va.update();
-		va.display();
-		
-		de.jreality.audio.util.AudioLauncher.launch(va.getCurrentViewer());
+
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addAudioSupport();
+		v.addVRSupport();
+		v.setPropertiesFile("AudioExample.jrw");
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.setContent(dd.centerCmp);
+		v.startup();
 		
 		dd.asrc.start();
 		
