@@ -1,5 +1,8 @@
 package de.jreality.audio.javasound;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
@@ -10,7 +13,10 @@ import de.jreality.audio.SoundEncoder;
 
 public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer implements Runnable {
 
-	protected SourceDataLine outputLine;
+	private static final boolean WRITE_TO_FILE = false;
+	private static final String AUDIO_FILE_NAME = "jraudio.wav";
+
+	private SourceDataLine outputLine;
 
 	private SoundEncoder encoder;
 
@@ -24,6 +30,8 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 	Thread soundThread=null;
 
 	protected int bufferLength;
+
+	private WavFileWriter wavFile;
 	
 	/**
 	 * computes buffer length
@@ -41,6 +49,16 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		outputLine.open(af, bufferLength);
 		System.out.println("stereoOut bufferSize="+outputLine.getBufferSize());
 		outputLine.start();
+		
+		if (WRITE_TO_FILE) try {
+			System.out.println("try opening wav file...");
+			wavFile = new WavFileWriter(af, new File(AUDIO_FILE_NAME));
+			System.out.println("opened audio.wav");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void launch() throws LineUnavailableException {
@@ -99,4 +117,15 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		return frameSize;
 	}
 
+	protected void writePCM(byte[] buf, int offset, int len) {
+		outputLine.write(buf, offset, len);
+		if (wavFile != null) {
+			try {
+				wavFile.write(buf, offset, len);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 }

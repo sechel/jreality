@@ -1,70 +1,33 @@
 package de.jreality.audio.util;
 
-import java.beans.Statement;
-
 import javax.sound.sampled.LineUnavailableException;
 
-import de.jreality.audio.AudioAttributes;
-import de.jreality.audio.Interpolation;
-import de.jreality.audio.SoundPath;
-import de.jreality.audio.javasound.JavaAmbisonicsStereoDecoder;
-import de.jreality.audio.javasound.JavaSoundUtility;
-import de.jreality.audio.javasound.VbapSurroundRenderer;
+import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.scene.Viewer;
 
 /**
  * 
  * Convenience class for launching audio backends.
- *
+ * 
+ * @deprecated see launch
  */
 public class AudioLauncher {
 
-	public static boolean TRY_JACK=true;
-	public static boolean PLANAR=false;
-	public static boolean TRY_5_1=false;
-	public static Interpolation.Factory interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
-	public static SoundPath.Factory soundPathFactory = AudioAttributes.DEFAULT_SOUNDPATH_FACTORY;
-
 	private AudioLauncher() {}
 	
-
 	/**
-	 * Launches Jack backend if possible, otherwise Java sound backend.
-	 *   
-	 * @param v A viewer that defines the scene root and the microphone path (which is for now the camera path).
-	 * 
-	 * @return flag indicating whether a sound renderer was successfully launched.
+	 * Launches java sound stereo renderer. This is depricated and should be
+	 * replaced by directly launching a sound renderer ur by the audio plugin.
 	 */
-	public static boolean launch(Viewer v) {
-		if (TRY_JACK) {
-			Class<?> jackrenderer = null;
-			try {	
-				String classname = PLANAR ?	"de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer" :
-											"de.jreality.audio.jack.JackAmbisonicsRenderer";
-				jackrenderer = Class.forName(classname);
-			} catch (ClassNotFoundException e1) {
-				// ignore this, just use java sound.
-			}
-			if (jackrenderer != null) try {
-				new Statement(jackrenderer, "launch", new Object[]{v, "jR Ambisonics", "StereoDecoder", interpolationFactory, soundPathFactory}).execute();
-				System.out.println("Jack launch OK.");
-				return true;
-			} catch (Exception e) {
-				System.err.println("Jack launch FAILED (fallback to java sound):");
-			}
-		}
+	public static void launch(Viewer v) {
+		StereoRenderer sr = new StereoRenderer();
+		sr.setSceneRoot(v.getSceneRoot());
+		sr.setMicrophonePath(v.getCameraPath());
 		try {
-			if (TRY_5_1 && JavaSoundUtility.supportsChannels(5)) {
-				System.out.println("Launching 5.1 backend...");
-				VbapSurroundRenderer.launch(v, "jR VBAP", interpolationFactory, soundPathFactory);
-			} else {
-				System.out.println("Launching stereo backend...");
-				JavaAmbisonicsStereoDecoder.launch(v, "jR Stereo", interpolationFactory, soundPathFactory);
-			}
-			return true;
+			sr.launch();
 		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
 	}
 }

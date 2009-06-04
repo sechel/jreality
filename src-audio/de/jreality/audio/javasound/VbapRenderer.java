@@ -51,7 +51,7 @@ public class VbapRenderer extends AbstractJavaSoundRenderer {
 		System.arraycopy(surroundSamples, 0, fbuffer_lookAhead, 0, surroundSamples.length);
 		limiter.limit(fbuffer, fbuffer_lookAhead);
 		JavaSoundUtility.floatToByte(buffer, fbuffer);
-		outputLine.write(buffer, 0, bufferLength);
+		writePCM(buffer, 0, bufferLength);
 		// swap buffers
 		float[] tmpF = fbuffer;
 		fbuffer = fbuffer_lookAhead;

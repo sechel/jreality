@@ -16,6 +16,7 @@ public class StereoRenderer extends AbstractJavaSoundRenderer {
 	private static final float W_SCALE = (float) Math.sqrt(0.5);
 	private static final float Y_SCALE = 0.5f;
 	
+	
 	@Override
 	protected SoundEncoder createSoundEncoder() {
 		return new AmbisonicsSoundEncoder() {
@@ -59,7 +60,7 @@ public class StereoRenderer extends AbstractJavaSoundRenderer {
 		limiter.limit(fbuffer, fbuffer_lookAhead);
 		
 		JavaSoundUtility.floatToByte(buffer, fbuffer);
-		outputLine.write(buffer, 0, bufferLength);
+		writePCM(buffer, 0, bufferLength);
 		
 		swapBuffers();
 	}
@@ -79,7 +80,7 @@ public class StereoRenderer extends AbstractJavaSoundRenderer {
 			fbuffer[2*i+1]=w-y;
 		}
 		JavaSoundUtility.floatToByte(buffer, fbuffer);
-		outputLine.write(buffer, 0, bufferLength);
+		writePCM(buffer, 0, bufferLength);
 	}
 	
 }
