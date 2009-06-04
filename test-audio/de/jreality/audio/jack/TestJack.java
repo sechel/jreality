@@ -48,7 +48,8 @@ public class TestJack {
 		v.addAudioSupport();
 		v.addVRSupport();
 		v.setPropertiesFile("TestJack.jrw");
-		v.setContent(getAudioComponent(), ContentType.TerrainAligned);
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.setContent(getAudioComponent());
 		v.startup();
 	}
 	

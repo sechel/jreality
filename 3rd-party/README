@@ -5,6 +5,12 @@ JOGL
     - needed for the jogl backend (OpenGL rendering)
     - https://jogl.dev.java.net
 
+JJack
+    - Java bindings for JACK, the JACK Audio Connection Kit - LGPL
+    - needed for the JACK audio backend
+    - http://jjack.berlios.de/
+    - WARNING: jReality uses some new features of JJack that are not (yet?) in the official release; please send email to peter.brinkmann@gmail.com for details
+    
 jInput
     - java bindings for various input devices - BSD license
     - needed for Input devices like Joysticks, Gamepads etc.
@@ -15,6 +21,12 @@ SMRJ
     - only for Portal/Cave(TM)-like backend or multiple-screen
       rendering, enables simultanious rendering on multiple clients
     - http://smrj.sf.net
+    
+Csound
+	- java bindings for Csound synthesis package - LGPL
+	- only for Csound audio source
+	- http://www.csounds.com/
+
 
 3rd party libraries we distribute with jReality:
 
@@ -54,3 +66,8 @@ Sunflow
     - java rendering system for photo-realistic image synthesis - MIT License
     - uses janino (http://www.janino.net/) - BSD License
     - http://sunflow.sourceforge.net
+
+NetUtil
+    - java library for sending and receiving messages using the OpenSoundControl (OSC) protocol - LGPL
+    - needed for OSC tools as well as WiiMote device class
+    - http://www.sciss.de/netutil/

@@ -43,13 +43,14 @@ public class MinimalExample {
 		});
 		audioComponent.addTool(actionTool);
 		audioComponent.addTool(new DraggingTool());
-
+		
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addAudioSupport();
 		v.addVRSupport();
 		v.setPropertiesFile("MinimalExample.jrw");
-		v.setContent(audioComponent, ContentType.TerrainAligned);
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.setContent(audioComponent);
 		v.startup();
 	}
 }
