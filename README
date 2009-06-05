@@ -1,10 +1,91 @@
-There is an incompatibility between Java 5 and Java 6 which effects the ant build.  In order
-for the ant build to function correctly, edit the file excludes.txt in this directory and follow the directions there.
+**** JREALITY OVERVIEW ****
 
-If you wish to use the JOGL backend, the jReality release includes the necessary native libraries in the 
-folder jni -- select the subfolder based on your environment, and add to your JAVA_LIBRARY_PATH.  If using
-eclipse and the .project file included with the jReality release, 
-    1) inspect the 'Properties' of src-core  folder in the Package Exploreer (right-mouse context menu)
-    2) make sure that the native library location attached to the src-core folder points to the right subfolder of jni.
+jReality is a pure java library and comes with all necessary 3rd party
+jars included.
 
---The management
+All current jReality contributors use Eclipse as IDE. This folder contains
+all eclipse project information and we suggest to use Eclipse for source
+code browsing and for running the apps/demos/tutorials. 
+
+For compiling the whole project outside of Eclipse, ant is used.
+
+jReality is developed using Sun Java 6, but we maintain compatibility with
+Java 5, since for many macosx machines Java 6 is not available. Other JDKs
+may also work, but we do no testing with other JDKs.
+
+Besides the following instructions we recommend to look into the jReality
+wiki and forum, which can be found at:
+
+* http://www3.math.tu-berlin.de/jreality/wiki
+* http://www3.math.tu-berlin.de/jreality/phpbb
+
+
+
+**** JREALITY BUILD INSTRUCTIONS **** 
+
+In Eclipse, jReality is built automatically. Just make sure that you have
+set up Eclipse to use a decent Sun Java 6 JDK.
+
+* Requirements *
+
+For a complete build from sources you need:
+- a Sun Java 6 JDK (or SDK) (java.sun.com)
+- ant, including optional tasks (ant.apache.org)
+
+* Build instructions *
+
+- Set the JAVA_HOME environment variable to the Sun Java 6 JDK folder,
+  for instance on an ubuntu installation: JAVA_HOME=/usr/lib/jvm/java-6-sun
+- Run the ant build: $> ant
+
+
+
+**** RUNNING JREALITY APPS ****
+
+Eclipse:
+- create a run configuration for the desired class to run.
+
+From command line:
+- set up the class path. Most of the jars in the lib folder are required,
+  as well as most of the jars created by the build file, in the dist folder.
+  The command to set the required classpath in a linux BASH is for instance:
+  
+  $> export CLASSPATH=dist/jReality-audio.jar:dist/jReality-backends-share.jar:dist/jReality-core.jar:dist/jReality-io.jar:dist/jReality-jogl.jar:dist/jReality-plugin.jar:dist/jReality-renderman.jar:dist/jReality-soft.jar:dist/jReality-sunflow.jar:dist/jReality-swing.jar:dist/jReality-tools.jar:dist/jReality-ui.jar:dist/jReality-vr.jar:lib/antlr.jar:lib/bsh.jar:lib/colorpicker.jar:lib/gluegen-rt.jar:lib/iText-2.1.3.jar:lib/janino.jar:lib/jogl.jar:lib/jRWorkspacePluginSDK.jar:lib/jtem-beans.jar:lib/jterm.jar:lib/sunflow.jar:lib/vrData.jar:lib/xpp3.jar:lib/xstream.jar
+
+
+Now you can run one of the examples included in jReality, for instance:
+
+  $> java de.jreality.plugin.JRViewer
+  
+
+Enable OpenGL rendering:
+
+To make use of OpenGL rendering, a native library is required. This library
+depends on the OS and is in a sub-folder of jni. Do the following:
+
+Eclipse:
+- change the native library location for the source folder src-core. Choose
+  the folder under jni matching your platform (default is jni/linux64).
+
+From command line:
+- Look into the folder jni and see if there is a sub folder matching your platform.
+  For instance, for a 64-bit linux system, set the following environment
+  variable (BASH again):
+
+  $> export LD_LIBRARY_PATH=jni/linux64
+
+Now the examples will start up using the faster OpenGL rendering backend. 
+
+
+
+**** JREALITY WITH JAVA 5 ****
+
+jReality also runs with Java 5, the main reason for this is the lack of Java 6 support on MacOSX.
+
+The main issue is a jReality feature that allows AWT frames to be immersed into the 3D scene.
+This is implemented using a customized AWT Toolkit and a customized AWT frame peer. The corresponding
+classes are not part of the java API and are incompatible between the different JDK versions.
+
+To compile jReality with/for Java 5, inspect the file excludes.txt and follow the instructions therein.
+
+ 
