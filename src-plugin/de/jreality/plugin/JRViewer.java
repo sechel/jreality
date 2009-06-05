@@ -43,6 +43,7 @@ import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -66,7 +67,7 @@ public class JRViewer {
 	
 	
 	public static enum ContentType {
-		Direct,
+		Raw,
 		CenteredAndScaled,
 		TerrainAligned,
 		Custom
@@ -216,9 +217,10 @@ public class JRViewer {
 	public void addContentSupport(ContentType type) {
 		c.registerPlugin(new ContentLoader());
 		c.registerPlugin(new ContentTools());
-		c.registerPlugin(new ContentAppearance());
+// users should explicitly add ContentAppearance if they want it.
+//		c.registerPlugin(new ContentAppearance());
 		switch (type) {
-			case Direct:
+			case Raw:
 				c.registerPlugin(new DirectContent());
 				break;
 			case CenteredAndScaled:
@@ -278,7 +280,7 @@ public class JRViewer {
 	 * Quick display method with encompass
 	 * @param node
 	 */
-	public static void display(SceneGraphNode node) {
+	public static Viewer display(SceneGraphNode node) {
 		JRViewer v = new JRViewer();
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
@@ -293,6 +295,7 @@ public class JRViewer {
 		
 		v.startup();
 		v.getPlugin(ViewPreferences.class).setToolBarVisible(false);
+		return v.getPlugin(View.class).getViewer();
 	}
 
 	
