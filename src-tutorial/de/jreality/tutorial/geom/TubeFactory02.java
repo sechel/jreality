@@ -86,8 +86,7 @@ public class TubeFactory02 {
 		v.registerPlugin(new ContentAppearance());
 		v.setContent(torussgc);
 		SimpleController c = v.getController();
-		Component insp = getInspector();
-		Plugin p = createShrinkPanel(insp, "inspector");
+		Plugin p = createShrinkPanel(getInspector(), "inspector");
 		c.registerPlugin(p);
 		v.startup();
 		Viewer viewer =  v.getPlugin(View.class).getViewer();

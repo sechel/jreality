@@ -24,7 +24,6 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.ClickWheelCameraZoomTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 

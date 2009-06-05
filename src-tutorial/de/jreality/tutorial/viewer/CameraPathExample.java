@@ -37,8 +37,6 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 public class CameraPathExample {

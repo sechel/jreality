@@ -10,9 +10,7 @@ import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.reader.Readers;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
-import de.jreality.vr.ViewerVR;
 
 public class DopplerDemo {
 	
