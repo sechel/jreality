@@ -368,6 +368,7 @@ public class JRViewer {
 		v.addLookAndFeelSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
+		v.registerPlugin(new ContentAppearance());
 		v.startup();
 	}
 
