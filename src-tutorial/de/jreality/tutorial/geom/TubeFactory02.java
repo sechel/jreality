@@ -2,6 +2,7 @@ package de.jreality.tutorial.geom;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -18,11 +19,15 @@ import javax.swing.border.EmptyBorder;
 import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.Viewer;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.DefaultGeometryShader;
@@ -30,9 +35,13 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tutorial.gui.InspectorExample;
 import de.jreality.tutorial.util.TextSlider;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
+import de.varylab.jrworkspace.plugin.Plugin;
+import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 /**
  * This example shows how to use {@link PolygonalTubeFactory} to create a tube around a torus knot. 
@@ -71,44 +80,19 @@ public class TubeFactory02 {
 		dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
 		dps.setSmoothShading(isSmooth);
 		updateGeometry();
-		final ViewerApp va = new ViewerApp(torussgc); // ViewerApp.display(torussgc);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.addContentSupport(ContentType.Raw);
+		v.registerPlugin(new ContentAppearance());
+		v.setContent(torussgc);
+		SimpleController c = v.getController();
 		Component insp = getInspector();
-		va.addAccessory(insp);
-		va.setFirstAccessory(insp);
-		va.update();
-		va.display();
-		CameraUtility.encompass(va.getCurrentViewer());
-		Component comp = ((Component) va.getCurrentViewer()
-				.getViewingComponent());
-		comp.addKeyListener(new KeyAdapter() {
- 				public void keyPressed(KeyEvent e)	{ 
-					switch(e.getKeyCode())	{
-						
-					case KeyEvent.VK_H:
-						System.err.println("	1: toggle smooth shading");
-						System.out.println("	2: toggle edge drawing");
-						break;
-		
-					case KeyEvent.VK_1:
-						isSmooth = !isSmooth;
-						dps.setSmoothShading(isSmooth);
-						break;
-
-					case KeyEvent.VK_2:
-						drawEdges = !drawEdges;
-						dgs.setShowLines(drawEdges);
-						break;		
-
-					case KeyEvent.VK_3:
-						((Viewer) va.getCurrentViewer()).dispose();
-						break;		
-}
-		
-				}
-			});
-  
+		Plugin p = createShrinkPanel(insp, "inspector");
+		c.registerPlugin(p);
+		v.startup();
+		Viewer viewer =  v.getPlugin(View.class).getViewer();
+		CameraUtility.encompass(viewer);
+		addKeyListener(viewer);  
   }
 
 	private void updateGeometry() {
@@ -166,6 +150,36 @@ public class TubeFactory02 {
 		System.arraycopy(colors[nPts - 2], 0, colors[nPts - 1], 0, 3);
 		ils.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY
 				.array(3).createReadOnly(colors));
+	}
+
+	private void addKeyListener(Viewer viewer) {
+		Component comp = ((Component) viewer.getViewingComponent());
+		comp.addKeyListener(new KeyAdapter() {
+ 				public void keyPressed(KeyEvent e)	{ 
+					switch(e.getKeyCode())	{
+						
+					case KeyEvent.VK_H:
+						System.err.println("	1: toggle smooth shading");
+						System.out.println("	2: toggle edge drawing");
+						break;
+		
+					case KeyEvent.VK_1:
+						isSmooth = !isSmooth;
+						dps.setSmoothShading(isSmooth);
+						break;
+
+					case KeyEvent.VK_2:
+						drawEdges = !drawEdges;
+						dgs.setShowLines(drawEdges);
+						break;		
+
+					case KeyEvent.VK_3:
+//						((Viewer) va.getCurrentViewer()).dispose();
+						break;		
+}
+		
+				}
+			});
 	}
 
 	private  Component getInspector() {
@@ -229,6 +243,32 @@ public class TubeFactory02 {
 		panel.add(container);
 		panel.add(Box.createVerticalGlue());
 		return panel;
+	}
+
+	public Plugin createShrinkPanel( final Component c, final String title) {
+		ShrinkPanelPlugin p = new ShrinkPanelPlugin() {
+			
+			{
+				GridLayout gl = new GridLayout();
+				gl.setRows(1);
+				setInitialPosition(SHRINKER_RIGHT);
+				shrinkPanel.setName(title);
+				shrinkPanel.setLayout(gl);
+				shrinkPanel.add(c);
+			}
+			
+			@Override
+			public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
+				return View.class;
+			}
+
+			@Override
+			public PluginInfo getPluginInfo() {
+				return new PluginInfo(title);
+			}
+		};
+		return p;
+
 	}
 
 }

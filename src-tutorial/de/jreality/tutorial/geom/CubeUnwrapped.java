@@ -5,14 +5,13 @@ import java.awt.event.ActionListener;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tools.ActionTool;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
 /**
@@ -149,8 +148,7 @@ public class CubeUnwrapped {
 		// scale the cube in order to have relatively smaller labels
 		MatrixBuilder.euclidean().scale(4).assignTo(sgc);
 
-		ViewerApp va = ViewerApp.display(sgc);
-		CameraUtility.encompass(va.getCurrentViewer());
+		JRViewer.display(sgc);
 	}
 
 }

@@ -15,10 +15,10 @@ import java.io.IOException;
 
 import de.jreality.geometry.SliceBoxFactory;
 import de.jreality.geometry.SphereUtility;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.TwoSidePolygonShader;
 import de.jreality.tools.ClickWheelCameraZoomTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 
@@ -33,7 +33,7 @@ public class SliceBoxExample{
 	public static void main(String[] args) throws IOException {
 		SliceBoxExample lcpe = new SliceBoxExample();
 		SceneGraphComponent root = lcpe.makeExample();
-		ViewerApp va = ViewerApp.display(root);
+		JRViewer.display(root);
 	}
 	  
 	  SceneGraphComponent makeExample()	{

@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.jogl.plugin.InfoOverlay;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
@@ -17,8 +18,7 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.GlslPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
+import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.SceneGraphUtility;
 
 public class GLVertexArrayExample {
@@ -50,21 +50,21 @@ public class GLVertexArrayExample {
 		world.setAppearance(vertexArrays ? vertexArrayAp : displayListAp);
 		System.err.println("vertex arrays = "+vertexArrays);
 		
-		ViewerApp va = new ViewerApp(world);
-		va.update();
-		va.display();
-		CameraUtility.encompass(va.getCurrentViewer());	
-		Viewer viewer = va.getCurrentViewer();
+//		ViewerApp va = new ViewerApp(world);
+//		va.update();
+//		va.display();
+		Viewer viewer = JRViewer.display(world);
+//		CameraUtility.encompass(va.getCurrentViewer());	
+//		Viewer viewer = va.getCurrentViewer();
 		viewer.getSceneRoot().getAppearance().setAttribute(BACKGROUND_COLOR, Color.black);
 		viewer.getSceneRoot().getAppearance().setAttribute(BACKGROUND_COLORS,Appearance.INHERITED);
 		// add an InfoOverlay to read off the frame rates
-		if (viewer instanceof de.jreality.jogl.Viewer) {
-			InfoOverlay io =InfoOverlay.perfInfoOverlayFor((de.jreality.jogl.Viewer)viewer);
+		if (viewer instanceof ViewerSwitch && (((ViewerSwitch) viewer).getCurrentViewer()) instanceof de.jreality.jogl.Viewer) {
+			InfoOverlay io =InfoOverlay.perfInfoOverlayFor((de.jreality.jogl.Viewer)(((ViewerSwitch) viewer).getCurrentViewer()));
 			io.setVisible(true);
 		}
 		// add a key listener to allow toggling of vertexArrays and also displayLists
-		Component comp = ((Component) va.getCurrentViewer()
-				.getViewingComponent());
+		Component comp = (Component) viewer.getViewingComponent();
 		comp.addKeyListener(new KeyAdapter() {
  				public void keyPressed(KeyEvent e)	{ 
 					switch(e.getKeyCode())	{

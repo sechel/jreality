@@ -4,15 +4,16 @@ import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.TextureUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -47,9 +48,9 @@ public class SkyboxAndReflMapExample {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		ViewerApp va = ViewerApp.display(worldSGC);
+		Viewer v = JRViewer.display(worldSGC);
 		ImageData[] sides = TextureUtility.getCubeMapImages(rm);
 		// attach a skybox to the scene root
-		TextureUtility.createSkyBox(va.getCurrentViewer().getSceneRoot().getAppearance(), sides);
+		TextureUtility.createSkyBox(v.getSceneRoot().getAppearance(), sides);
 	}
 }

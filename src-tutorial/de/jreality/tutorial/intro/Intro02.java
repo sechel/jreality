@@ -3,10 +3,9 @@ package de.jreality.tutorial.intro;
 import java.io.IOException;
 import java.net.URL;
 
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
 /**
@@ -21,11 +20,7 @@ import de.jreality.util.Input;
 public class Intro02 {
 
 	public static void main(String[] args)	{
-				ViewerApp va = ViewerApp.display(readDodec());
-				va.setAttachNavigator(true);
-				va.setExternalNavigator(false);
-				va.update();
-				CameraUtility.encompass(va.getCurrentViewer());
+		JRViewer.display(readDodec());
 	}
 
 	private static SceneGraphComponent readDodec() {

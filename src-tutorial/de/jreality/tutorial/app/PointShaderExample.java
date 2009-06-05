@@ -10,6 +10,7 @@ import javax.swing.SwingConstants;
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -22,7 +23,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.TextureUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 public class PointShaderExample {
@@ -143,6 +143,6 @@ public static void main(String[] args) {
 		}
 	}
     	
-		ViewerApp.display(world);
+		JRViewer.display(world);
   }
 }

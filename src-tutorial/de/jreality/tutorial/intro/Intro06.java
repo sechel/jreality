@@ -3,13 +3,12 @@ package de.jreality.tutorial.intro;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -31,22 +30,13 @@ public class Intro06 {
 	public static void main(String[] args)	{
 		SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
 		myscene.setGeometry(Primitives.cylinder(50));
-		ViewerApp va = myViewerApp(myscene);
-		va.update();
-		CameraUtility.encompass(va.getViewerSwitch());
 		Appearance ap = myscene.getAppearance();
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
 		dgs.setShowLines(false);
 		dgs.setShowPoints(false);
 		dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
 		dps.setDiffuseColor(Color.white);
-	}
-
-	private static ViewerApp myViewerApp(SceneGraphComponent myscene) {
-		ViewerApp va = ViewerApp.display(myscene);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		return va;
+		JRViewer.display(myscene);
 	}
 
 

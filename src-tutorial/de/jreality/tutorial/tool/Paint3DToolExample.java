@@ -7,11 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import com.sun.corba.se.spi.orbutil.fsm.Input;
-
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.jogl.shader.ShadedSphereImage;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -27,7 +26,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -95,14 +93,14 @@ public class Paint3DToolExample {
 		tmpG.fillRect(0, 0, brushSize, brushSize);
 
 	    Tool paintTool = new AbstractTool(
-	    		InputSlot.getDevice("PrimaryAction"),
-	    		InputSlot.getDevice("SecondaryAction")) {	// left button and shift left button
+	    		InputSlot.LEFT_BUTTON,
+	    		InputSlot.SHIFT_LEFT_BUTTON) {	// left button and shift left button
 
 	    	BufferedImage brush;
 			public void activate(ToolContext tc) {
 				// express interest in mouse moves (so perform() gets called)
 		   		addCurrentSlot(InputSlot.getDevice("PointerTransformation"));
-		   		if (tc.getSource()== InputSlot.getDevice("PrimaryAction")) {
+		   		if (tc.getSource()== InputSlot.LEFT_BUTTON) {
 		   			System.err.println("left mouse activate");
 		   			brush = brush1;
 		   		} else brush = brush2;
@@ -137,11 +135,7 @@ public class Paint3DToolExample {
 	    };
 		sgc.addTool(paintTool);		
 
-	    ViewerApp va = new ViewerApp(sgc);
-	    va.update();
-	    va.display();
-	    viewer = va.getCurrentViewer();
-		viewer.renderAsync();
+		viewer = JRViewer.display(sgc);
 
 	  }
 }

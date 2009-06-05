@@ -3,6 +3,7 @@ package de.jreality.tutorial.tool;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -16,7 +17,6 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class DragEventTool01 {
 
@@ -50,7 +50,7 @@ public class DragEventTool01 {
 		
 		cmp.addTool(t);
 
-		ViewerApp.display(cmp);
+		JRViewer.display(cmp);
 	}
 
 	private static void setupAppearance(Appearance ap) {

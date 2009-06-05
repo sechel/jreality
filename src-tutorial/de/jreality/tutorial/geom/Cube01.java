@@ -41,8 +41,7 @@
 package de.jreality.tutorial.geom;
 
 import de.jreality.geometry.PointSetFactory;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
+import de.jreality.plugin.JRViewer;
 
 public class Cube01 {
   
@@ -56,7 +55,6 @@ public class Cube01 {
     psf.setVertexCount( vertices.length );
     psf.setVertexCoordinates( vertices );
     psf.update();
-    ViewerApp va = ViewerApp.display(psf.getPointSet());
-    CameraUtility.encompass(va.getCurrentViewer());
+    JRViewer.display(psf.getPointSet());
   }
 }

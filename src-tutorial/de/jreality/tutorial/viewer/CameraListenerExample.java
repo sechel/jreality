@@ -11,6 +11,7 @@ import java.awt.Color;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -22,6 +23,7 @@ import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
@@ -64,10 +66,8 @@ import de.jreality.util.SceneGraphUtility;
 		dls.setDiffuseColor(Color.white);
 
 		sphereSGC.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.white);
-		ViewerApp va = new ViewerApp(sphereSGC);
-		viewer = va.getCurrentViewer();
-		va.update();
-		va.display();
+		viewer = JRViewer.display(sphereSGC);
+		viewer.getSceneRoot().addTool(new ClickWheelCameraZoomTool());
 		// set up two scene graph paths, one to the camera and one to the sphere
 		camPath = viewer.getCameraPath();
 		spherePath = SceneGraphUtility.getPathsToNamedNodes(
@@ -90,6 +90,7 @@ import de.jreality.util.SceneGraphUtility;
 			
 		};
 		CameraUtility.getCamera(viewer).addCameraListener(camListener);
+		CameraUtility.encompass(viewer);
 	}
 	
 	/**

@@ -3,11 +3,11 @@ package de.jreality.tutorial.tform;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.tools.RotateTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 public class TransformationListenerExample {
@@ -40,7 +40,7 @@ public class TransformationListenerExample {
 			
 		});
 		
-		ViewerApp.display(world);
+		JRViewer.display(world);
 	}
 
 }

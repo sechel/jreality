@@ -53,7 +53,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.toolsystem.ToolUtility;
 import de.jreality.util.LoggingSystem;

@@ -12,6 +12,7 @@ import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -23,7 +24,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -182,6 +182,6 @@ public class LineShaderExample {
 		}
 	}
     	
-		ViewerApp.display(world);
+		JRViewer.display(world);
   }
 }

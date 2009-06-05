@@ -15,11 +15,10 @@ import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
 
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
 /**
@@ -36,22 +35,20 @@ import de.jreality.util.Input;
 public class Intro03 {
 
 	public static void main(String[] args)	{
-				SceneGraphComponent dodecSGC = readDodec();
-				ViewerApp va = myViewerApp(dodecSGC);
-				va.update();
-				CameraUtility.encompass(va.getViewerSwitch());
-				Appearance ap = dodecSGC.getAppearance();
-				// change the color and size of the tubes and spheres
-				// do so without using shader interfaces
-				ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
-				ap.setAttribute(LINE_SHADER+"."+TUBE_RADIUS, .05);
-				ap.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR, Color.red);
-				ap.setAttribute(POINT_SHADER+"."+POINT_RADIUS, .1);
-				ap.setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, false);
-				// turn on transparency for faces but keep tubes and spheres opaque
-				ap.setAttribute(TRANSPARENCY_ENABLED, true);
-				ap.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
-				ap.setAttribute(POLYGON_SHADER+"."+TRANSPARENCY, .4);
+		SceneGraphComponent dodecSGC = readDodec();
+		Appearance ap = dodecSGC.getAppearance();
+		// change the color and size of the tubes and spheres
+		// do so without using shader interfaces
+		ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
+		ap.setAttribute(LINE_SHADER+"."+TUBE_RADIUS, .05);
+		ap.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR, Color.red);
+		ap.setAttribute(POINT_SHADER+"."+POINT_RADIUS, .1);
+		ap.setAttribute(POLYGON_SHADER+"."+SMOOTH_SHADING, false);
+		// turn on transparency for faces but keep tubes and spheres opaque
+		ap.setAttribute(TRANSPARENCY_ENABLED, true);
+		ap.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
+		ap.setAttribute(POLYGON_SHADER+"."+TRANSPARENCY, .4);
+		JRViewer.display(dodecSGC);
 	}
 
 	private static SceneGraphComponent readDodec() {
@@ -66,13 +63,6 @@ public class Intro03 {
 			e.printStackTrace();
 		}
 		return scp;
-	}
-
-	private static ViewerApp myViewerApp(SceneGraphComponent myscene) {
-		ViewerApp va = ViewerApp.display(myscene);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		return va;
 	}
 
 

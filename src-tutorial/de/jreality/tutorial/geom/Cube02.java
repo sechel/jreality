@@ -41,8 +41,7 @@
 package de.jreality.tutorial.geom;
 
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
+import de.jreality.plugin.JRViewer;
 
 public class Cube02 {
   
@@ -65,7 +64,6 @@ public class Cube02 {
     
     ilsf.update();
     
-    ViewerApp va = ViewerApp.display(ilsf.getIndexedLineSet());
-    CameraUtility.encompass(va.getCurrentViewer());
+    JRViewer.display(ilsf.getIndexedLineSet());
   }
 }

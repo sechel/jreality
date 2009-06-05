@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
 
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -14,8 +15,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.PickShowTool;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
 /**
@@ -39,9 +38,6 @@ public class Intro04 {
 
 	public static void main(String[] args)	{
 		SceneGraphComponent dodecSGC = readDodec();
-		ViewerApp va = myViewerApp(dodecSGC);
-		va.update();
-		CameraUtility.encompass(va.getViewerSwitch());
 		dodecSGC.addTool(new PickShowTool());
 		Appearance ap = dodecSGC.getAppearance();
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
@@ -59,7 +55,8 @@ public class Intro04 {
 		rhs = ShaderUtility.createDefaultRenderingHintsShader(ap, true);
 		rhs.setTransparencyEnabled(true);
 		rhs.setOpaqueTubesAndSpheres(true);
-		dps.setTransparency(.5);			
+		dps.setTransparency(.5);
+		JRViewer.display(dodecSGC);
 	}
 
 	private static SceneGraphComponent readDodec() {
@@ -75,14 +72,5 @@ public class Intro04 {
 		}
 		return scp;
 	}
-
-	private static ViewerApp myViewerApp(SceneGraphComponent myscene) {
-		ViewerApp va = ViewerApp.display(myscene);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		return va;
-	}
-
-
 
 }

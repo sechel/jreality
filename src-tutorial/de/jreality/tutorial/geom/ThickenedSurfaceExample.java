@@ -5,6 +5,7 @@ import java.awt.Color;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.geometry.ThickenedSurfaceFactory;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -14,7 +15,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 public class ThickenedSurfaceExample {
@@ -42,7 +42,7 @@ public class ThickenedSurfaceExample {
 		tsf.update();
 		IndexedFaceSet thickSurface = tsf.getThickenedSurface();
 		world.setGeometry(thickSurface);
-		ViewerApp.display(world);
+		JRViewer.display(world);
 	}
 
 	/**

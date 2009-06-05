@@ -47,6 +47,7 @@ import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -57,7 +58,6 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 
 public class TextureExample {
@@ -92,6 +92,6 @@ public static void main(String[] args) throws IOException {
 		Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
     	
-		ViewerApp.display(sgc);
+		JRViewer.display(sgc);
   }
 }

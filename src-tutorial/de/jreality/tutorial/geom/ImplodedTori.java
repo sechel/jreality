@@ -8,10 +8,10 @@ import java.awt.Color;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -52,7 +52,7 @@ public class ImplodedTori {
 	
 	public static void main(String[] args) {
 		SceneGraphComponent sgc = makeWorld();
-		ViewerApp.display(sgc );
+		JRViewer.display(sgc );
 
 	}
 

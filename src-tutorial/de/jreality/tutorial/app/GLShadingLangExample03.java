@@ -1,17 +1,15 @@
 package de.jreality.tutorial.app;
 
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
-import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
 
 import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.GlslProgram;
@@ -19,10 +17,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.tutorial.util.SimpleTextureFactory;
-import de.jreality.tutorial.util.SimpleTextureFactory.TextureType;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
@@ -87,7 +81,7 @@ public class GLShadingLangExample03 {
 		}
 		brickProg.setUniform("sampler",0);
 		brickProg.setUniform("sampler2",1);		
-		ViewerApp va = ViewerApp.display(world);
-		CameraUtility.encompass(va.getCurrentViewer());
+		JRViewer.display(world);
+//		CameraUtility.encompass(va.getCurrentViewer());
 	}
 }

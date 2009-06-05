@@ -10,7 +10,7 @@ import de.jreality.tutorial.geom.ParametricSurfaceExample;
  * @author Charles Gunn
  *
  */
-public class ViewerVRExample {
+public class VRSupportExample {
 	public static void main(String[] args) {
 		ParametricSurfaceExample pse = new ParametricSurfaceExample();
 		pse.doIt(true);

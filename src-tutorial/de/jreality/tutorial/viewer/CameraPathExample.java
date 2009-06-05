@@ -19,6 +19,7 @@ import de.jreality.geometry.TubeFactory;
 import de.jreality.geometry.TubeUtility;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -112,13 +113,14 @@ public class CameraPathExample {
 		});
 		movepoint.start();
 		
-		final ViewerApp va = new ViewerApp(world); 
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		va.update();
-		va.display();
-		final Viewer viewer = va.getCurrentViewer();
-		CameraUtility.encompass(viewer);
+//		final ViewerApp va = new ViewerApp(world); 
+//		va.setAttachNavigator(true);
+//		va.setExternalNavigator(false);
+//		va.update();
+//		va.display();
+//		final Viewer viewer = va.getCurrentViewer();
+//		CameraUtility.encompass(viewer);
+		final Viewer viewer = JRViewer.display(world);
 		final SceneGraphPath campath = viewer.getCameraPath();
 		Camera camera = new Camera();
 		camera.setNear(.015);
@@ -152,7 +154,7 @@ public class CameraPathExample {
 
 							public void run() {
 								boolean alternative = cp == campath;
-								va.getCurrentViewer().setCameraPath(alternative ? campath2 : campath);
+								viewer.setCameraPath(alternative ? campath2 : campath);
 								axes.setVisible(!alternative);
 								dpls.setAmbientCoefficient(alternative ? .2 : .05);
 								movingLightSGC.setVisible(alternative);

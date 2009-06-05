@@ -1,17 +1,16 @@
 package de.jreality.tutorial.geom;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.util.prefs.InvalidPreferencesFormatException;
 
 import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Secure;
-import de.jreality.vr.ViewerVR;
 
 public class ParametricSurfaceExample {
 	// to use the ParametricSurfaceFactory one needs an instance of immersion
@@ -53,28 +52,37 @@ public class ParametricSurfaceExample {
 		String foo = Secure.getProperty("useViewerVR");
 		if (foo != null && foo.equals("true")) useViewerVR = true;
 		if (useViewerVR)	{
-			ViewerVR vr=ViewerVR.createDefaultViewerVR(null);
-			vr.setContent(sgc);
-			
-			ViewerApp vapp=vr.initialize();
-			try {
-				vr.importPreferences(ParametricSurfaceExample.class
-						.getResourceAsStream("vrprefsParametricExample.xml"));
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InvalidPreferencesFormatException e) {
-				e.printStackTrace();
-			}
-			vr.setAvatarPosition(0, 0, 6);
-			vapp.update();
-			vapp.display();			
+			JRViewer v = new JRViewer();
+			v.addBasicUI();
+			v.addAudioSupport();
+			v.addVRSupport();
+			v.addContentSupport(ContentType.TerrainAligned);
+			v.setPropertiesFile("vrprefsParametricExample.xml");
+			v.registerPlugin(new ContentAppearance());
+			v.setContent(sgc);
+			v.startup();
+//			ViewerVR vr=ViewerVR.createDefaultViewerVR(null);
+//			vr.setContent(sgc);
+//			
+//			ViewerApp vapp=vr.initialize();
+//			try {
+//				vr.importPreferences(ParametricSurfaceExample.class
+//						.getResourceAsStream("vrprefsParametricExample.xml"));
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			} catch (InvalidPreferencesFormatException e) {
+//				e.printStackTrace();
+//			}
+//			vr.setAvatarPosition(0, 0, 6);
+//			vapp.update();
+//			vapp.display();			
 		} else {
-			ViewerApp.display(sgc);		
+			JRViewer.display(sgc);		
 		}
 	}
 	
 	public static void main(String[] args) {
 		ParametricSurfaceExample pse = new ParametricSurfaceExample();
-		pse.doIt(false);
+		pse.doIt(true);
 	}
 }

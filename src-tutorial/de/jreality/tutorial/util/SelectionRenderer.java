@@ -1,7 +1,7 @@
 package de.jreality.tutorial.util;
 
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.BoundingBoxUtility;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
@@ -18,15 +18,14 @@ import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionListener;
-import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 
 /**
- * A class which handles rendering the selection coming from the selection manager (see {@link SelectionManagerInterface})
- * attached to a given {@link Viewer}. In this case, it 
+ * A class which handles rendering the selection coming from a selection manager (see {@link SelectionManagerInterface})
+ * and to be rendered into an instance of {@link Viewer}.
  * @author gunn
  *
  */
@@ -37,8 +36,9 @@ public class SelectionRenderer implements SelectionListener {
 	SceneGraphPathObserver observer;
 	Viewer viewer;
 	boolean visible = false;
-	public SelectionRenderer(Viewer v)	{
-//		selection = s;
+	// we need to know which selection manager we listen to, and which viewer
+	// we draw into
+	public SelectionRenderer(SelectionManagerInterface sm, Viewer v)	{
 		viewer = v;
 		boundKit = SceneGraphUtility.createFullSceneGraphComponent("boundKit");
 		boundAppearance = boundKit.getAppearance();
@@ -55,7 +55,9 @@ public class SelectionRenderer implements SelectionListener {
 		boundAppearance.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
 
 		selectionKit = SceneGraphUtility.createFullSceneGraphComponent("selectionKit");
-		SelectionManagerInterface sm = SelectionManager.selectionManagerForViewer(v);
+//		SelectionManagerInterface sm = SelectionManager.selectionManagerForViewer(v);
+// for reasons unknown, this doesn't work
+//		if (sm.getSelectionPath() != null) setSelectionPath(sm.getSelectionPath());
 		sm.addSelectionListener(this);
 		selectionKit.addChild(boundKit);
 		observer = new SceneGraphPathObserver();

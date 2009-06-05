@@ -43,6 +43,7 @@ package de.jreality.tutorial.geom;
 import java.awt.Color;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -54,7 +55,6 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
  * This example shows how to attach labels to the vertices, edges, and faces of an indexed face set.
@@ -116,7 +116,7 @@ public static void main(String[] args) {
     
     dgs.setShowPoints(true);
     
- 	ViewerApp.display(cmp);
+ 	JRViewer.display(cmp);
 	}
 
 }

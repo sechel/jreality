@@ -3,11 +3,11 @@ package de.jreality.tutorial.geom;
 import java.awt.Color;
 
 import de.jreality.geometry.QuadMeshFactory;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -58,7 +58,7 @@ public class QuadMeshExample {
 		sgc.setGeometry(createSurface(20));
 		Appearance ap = sgc.getAppearance();
 		ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.yellow);
-		ViewerApp.display(sgc );
+		JRViewer.display(sgc );
 
 	}
 

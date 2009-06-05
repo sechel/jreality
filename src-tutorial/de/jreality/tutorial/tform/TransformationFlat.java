@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -16,7 +17,6 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -56,7 +56,7 @@ public class TransformationFlat {
 	    		}
 	    	}
 	    }
-	    ViewerApp.display(world);
+	    JRViewer.display(world);
 	}
 
 	private static void setupAppearance(Appearance ap) {

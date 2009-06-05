@@ -8,6 +8,7 @@ import de.jreality.geometry.SphereUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -17,7 +18,6 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.TwoSidePolygonShader;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.tools.RotateTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 
@@ -57,6 +57,6 @@ public class ClippingPlaneExample{
 		root.addChild(sgc);
 		root.addChild(clipIcon);
 		root.addTool(new ClickWheelCameraZoomTool());
-	    ViewerApp.display(root);
+	    JRViewer.display(root);
 	}
  }

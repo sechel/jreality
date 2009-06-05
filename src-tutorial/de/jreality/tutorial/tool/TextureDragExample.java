@@ -51,6 +51,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -66,7 +67,6 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 
 public class TextureDragExample {
@@ -138,6 +138,6 @@ public static void main(String[] args) throws IOException {
     };
 	sgc.addTool(t);		
 
-    ViewerApp.display(sgc);
+    JRViewer.display(sgc);
   }
 }

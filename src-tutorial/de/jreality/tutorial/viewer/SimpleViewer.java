@@ -5,7 +5,9 @@ import java.awt.Component;
 import javax.swing.JFrame;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
@@ -23,9 +25,9 @@ public class SimpleViewer {
 		// then use the constructor 	
 		// public ViewerApp(SceneGraphComponent root, SceneGraphPath cameraPath, SceneGraphPath emptyPick, SceneGraphPath avatar) {
 
-		ViewerApp va = new ViewerApp(world);
+		Viewer v = JRViewer.display(world);
         JFrame f = new JFrame();
-        f.getContentPane().add((Component) va.getViewingComponent());
+        f.getContentPane().add((Component) v.getViewingComponent());
 
         f.setSize(512, 512);
         f.validate();

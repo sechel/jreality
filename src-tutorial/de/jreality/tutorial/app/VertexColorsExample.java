@@ -1,13 +1,13 @@
 package de.jreality.tutorial.app;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
  * This example shows how to use vertex colors on a point set.
@@ -44,6 +44,6 @@ public class VertexColorsExample {
 				CommonAttributes.SPHERES_DRAW,false);
 		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+
 				CommonAttributes.POINT_SIZE,10.0);
-		ViewerApp.display(sgc);
+		JRViewer.display(sgc);
 	}
 }

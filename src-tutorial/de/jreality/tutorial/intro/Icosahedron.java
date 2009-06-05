@@ -41,7 +41,7 @@
 package de.jreality.tutorial.intro;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.plugin.JRViewer;
 
  
  
@@ -49,6 +49,6 @@ public class Icosahedron {
   
   public static void  main(String[] args) {
 	  
-    ViewerApp.display(Primitives.icosahedron());
+    JRViewer.display(Primitives.icosahedron());
   }
 }

@@ -45,10 +45,9 @@ import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
 import java.awt.Color;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 
 public class Cube05 {
   
@@ -89,7 +88,6 @@ public class Cube05 {
     app.setAttribute(VERTEX_DRAW, false);
     sgc.setAppearance(app);
     
-    ViewerApp va = ViewerApp.display(sgc);
-    CameraUtility.encompass(va.getCurrentViewer());
+    JRViewer.display(sgc);
   }
 }

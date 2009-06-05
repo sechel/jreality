@@ -3,7 +3,6 @@ package de.jreality.tutorial.viewer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.util.EventObject;
 
 import javax.swing.JFrame;
 

@@ -2,9 +2,9 @@ package de.jreality.tutorial.misc;
 
 import java.io.IOException;
 
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 
 public class FileReaderExample {
@@ -17,7 +17,7 @@ public class FileReaderExample {
     //
 	if (args.length > 0) {
 		SceneGraphComponent scp = Readers.read(Input.getInput(args[0]));
-		ViewerApp.display(scp);
+		JRViewer.display(scp);
 	} else {
 		System.out.println("usage: java de.jreality.tutorial.FileReaderExample <3d-data-file>");
 	}

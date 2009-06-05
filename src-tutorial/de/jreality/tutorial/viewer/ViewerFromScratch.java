@@ -76,8 +76,10 @@ import de.jreality.util.RenderTrigger;
  * </ul>
  * This version uses a JOGL viewer.
  *
- */public class SimpleViewer2 {
-  public static void main(String[] args) {
+ */
+public class ViewerFromScratch {
+  
+	public static void main(String[] args) {
     SceneGraphComponent rootNode = new SceneGraphComponent("root");
     SceneGraphComponent cameraNode = new SceneGraphComponent("camera");
     SceneGraphComponent geometryNode = new SceneGraphComponent("geometry");

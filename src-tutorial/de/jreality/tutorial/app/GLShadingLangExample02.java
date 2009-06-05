@@ -4,13 +4,13 @@ import java.io.IOException;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
@@ -71,6 +71,6 @@ public class GLShadingLangExample02 {
 			brickProg.setUniform("LightPosition", lightPosition);			
 			world.addChild(c);
 		}
-		ViewerApp va = ViewerApp.display(world);
+		JRViewer.display(world);
 	}
 }

@@ -31,6 +31,7 @@ import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
@@ -49,7 +50,6 @@ import de.jreality.tutorial.intro.Intro07;
 import de.jreality.tutorial.util.FlyTool;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
@@ -106,25 +106,31 @@ public class NonEuclideanExample {
 	    FlyTool flytool = new FlyTool();
 	    flytool.setGain(.1);
 		cameraNode.addTool(flytool);
-		SceneGraphComponent root = SceneGraphUtility.createFullSceneGraphComponent("root");
+		SceneGraphComponent myroot = SceneGraphUtility.createFullSceneGraphComponent("root");
+		myroot.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,20, 40));
+		myroot.addChildren(cameraNode, world);
+		myroot.addTool(new ClickWheelCameraZoomTool());
+	    
+//		ViewerApp va = new ViewerApp(root, camPath, null, null);
+//		va.setAttachNavigator(true);
+//		va.setExternalNavigator(false);
+//		viewer = va.getCurrentViewer();
+	    viewer = JRViewer.display(myroot);
+	    SceneGraphUtility.removeLights(viewer);
+		world.addChild(lightNode);
+		SceneGraphComponent root = viewer.getSceneRoot();
 		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,20, 40));
-	    root.addChildren(cameraNode, world);
-	    root.addTool(new ClickWheelCameraZoomTool());
-	    
-	    SceneGraphPath camPath = new SceneGraphPath(root, cameraNode);
+		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.INHERITED);
+	    SceneGraphPath camPath = SceneGraphUtility.getPathsBetween(root, cameraNode).get(0);
 	    camPath.push(camera);
-	    
-		ViewerApp va = new ViewerApp(root, camPath, null, null);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		viewer = va.getCurrentViewer();
+	    viewer.setCameraPath(camPath);
 		SelectionManagerInterface sm = SelectionManager.selectionManagerForViewer(viewer);
-		sm.setDefaultSelectionPath(new SceneGraphPath(va.getSceneRoot()));
+		sm.setDefaultSelectionPath(new SceneGraphPath(viewer.getSceneRoot()));
 		sm.setSelection(null);
 //		va.setCreateMenu(false);
-		va.update();
-		va.display();
-		CameraUtility.encompass(viewer);
+//		va.update();
+//		va.display();
+//		CameraUtility.encompass(viewer);
 		update();
 		Component comp = ((Component) viewer.getViewingComponent());
 		comp.addKeyListener(new KeyAdapter() {
@@ -185,7 +191,6 @@ public class NonEuclideanExample {
 		pointLight.setIntensity(1);
 		pointLight.setColor(new Color(250, 250, 250));
 		lightNode.setLight(pointLight);
-		world.addChild(lightNode);
 		world.addTool(new RotateTool());
 		world.addTool(new DraggingTool());
 		

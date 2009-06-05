@@ -3,6 +3,7 @@ package de.jreality.tutorial.app;
 import java.awt.Color;
 
 import de.jreality.geometry.SphereUtility;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
@@ -11,7 +12,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImplodePolygonShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.TwoSidePolygonShader;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 public class NonDefaultShaderExample {
@@ -38,7 +38,7 @@ public class NonDefaultShaderExample {
 		dls.setTubeRadius(.005);
 		dls.setDiffuseColor(Color.red);
 
-		ViewerApp.display(world);
+		JRViewer.display(world);
 	}
 
 }

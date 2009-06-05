@@ -10,6 +10,7 @@ import java.net.URL;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -21,8 +22,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
@@ -49,9 +48,6 @@ public class Intro07 {
 	public static void main(String[] args)	{
 			SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
 			myscene.setGeometry(Primitives.cylinder(50));
-			ViewerApp va = myViewerApp(myscene);
-			va.update();
-			CameraUtility.encompass(va.getViewerSwitch());
 			Appearance ap = myscene.getAppearance();
 			dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
 			dgs.setShowLines(false);
@@ -80,14 +76,10 @@ public class Intro07 {
 			Matrix foo = new Matrix();
 			MatrixBuilder.euclidean().scale(10, 10, 1).assignTo(foo);
 			tex2d.setTextureMatrix(foo);
+			
+			JRViewer.display(myscene);
 	}
 
-	private static ViewerApp myViewerApp(SceneGraphComponent myscene) {
-		ViewerApp va = ViewerApp.display(myscene);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		return va;
-	}
 
 
 

@@ -6,21 +6,18 @@
 package de.jreality.tutorial.light;
 
 import java.awt.Color;
-import java.util.List;
 
 import de.jreality.geometry.BezierPatchMesh;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.RotateTool;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 
@@ -32,7 +29,7 @@ import de.jreality.util.SceneGraphUtility;
 public class SpotLightDemo  {
 
 	static double[][][] square = new double[2][2][3];
-	public static SceneGraphComponent makeWorld() {
+	public static void main(String[] args) {
 	 	SceneGraphComponent lightIcon;
 		SceneGraphComponent spot;
 		SceneGraphComponent theShape;
@@ -64,7 +61,6 @@ public class SpotLightDemo  {
  		sl.setDistribution(10.0);
  		sl.setIntensity(1.0);
   		sl.setFalloff(1, 0, .1);
- 		spot.setLight(sl);
  		MatrixBuilder.euclidean().translate(0,0,2).rotateX(Math.PI).assignTo(spot);
  		lightIcon = SceneGraphUtility.createFullSceneGraphComponent("Light icon");
  		lightIcon.setGeometry(Primitives.cylinder(10));
@@ -79,23 +75,9 @@ public class SpotLightDemo  {
 	   	theWorld.addChild(spot);
 	   	// turn the world so the cylinder is visible and "rotate-able"
 	   	MatrixBuilder.euclidean().rotateY(Math.PI/4).assignTo(theWorld);
-	   	return theWorld;
-	}
-	
-	public static void main(String[] args) {
-		SceneGraphComponent sgc = makeWorld();
-		ViewerApp va = new ViewerApp(sgc); 
+		Viewer viewer = JRViewer.display(theWorld); 
 		// remove the default lights 
-		SceneGraphComponent root = va.getSceneRoot();
-		List<SceneGraphPath> lightpath = SceneGraphUtility.collectLights(root);
-		for (SceneGraphPath sgp : lightpath) {
-			Light light = (Light) sgp.getLastElement();
-			if (light instanceof SpotLight) continue;
-			SceneGraphComponent lightnode = sgp.getLastComponent();
-			lightnode.setLight(null);
-		}
-		va.update();
-		va.display();
-		CameraUtility.encompass(va.getCurrentViewer());
+		SceneGraphUtility.removeLights(viewer);
+ 		spot.setLight(sl);
 	}
   }

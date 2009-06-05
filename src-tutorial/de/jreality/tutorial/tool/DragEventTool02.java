@@ -5,6 +5,7 @@ import java.awt.Color;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -24,7 +25,6 @@ import de.jreality.tools.LineDragEvent;
 import de.jreality.tools.LineDragListener;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class DragEventTool02 {
 
@@ -111,7 +111,7 @@ public class DragEventTool02 {
 		
 		cmp.addTool(t);		
 
-	    ViewerApp.display(cmp);
+	    JRViewer.display(cmp);
 	}
 	
 	private static void setupAppearance(Appearance ap) {

@@ -47,12 +47,11 @@ import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import java.awt.Color;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 
 /**
  * This example builds on {@link Cube05}. It shows how to set the edge list by hand, and
@@ -106,7 +105,6 @@ import de.jreality.util.CameraUtility;
     app.setAttribute(POINT_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
     sgc.setAppearance(app);
     
-    ViewerApp va = ViewerApp.display(sgc);
-    CameraUtility.encompass(va.getCurrentViewer());
+    JRViewer.display(sgc);
   }
 }

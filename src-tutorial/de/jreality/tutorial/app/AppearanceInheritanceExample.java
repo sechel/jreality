@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -18,19 +19,25 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
+import de.jreality.tutorial.viewer.SelectionExample;
 import de.jreality.util.Input;
+import de.jreality.util.SceneGraphUtility;
 
+/**
+ * This shows how to use the constant value {@link Appearance#DEFAULT} to hide any attributes
+ * assigned to an Appearance attribute in the nodes <i>above</i> a given scene graph component in
+ * a jReality scene graph.
+ * @see SelectionExample for another example of the inheritance mechanism.
+ * @author gunn
+ *
+ */
 public class AppearanceInheritanceExample {
 
 	public static void main(String[] args) throws IOException {
 		  	IndexedFaceSet geom = new CatenoidHelicoid(40);
-			SceneGraphComponent sgc = new SceneGraphComponent("AppearanceInheritance");
+			SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("AppearanceInheritance");
 			sgc.setGeometry(geom);
-			Appearance ap = new Appearance();
-			sgc.setAppearance(ap);
-			DefaultGeometryShader dgs = (DefaultGeometryShader) ShaderUtility.createDefaultGeometryShader(ap, true);
+			DefaultGeometryShader dgs = (DefaultGeometryShader) ShaderUtility.createDefaultGeometryShader(sgc.getAppearance(), true);
 			dgs.setShowLines(false);
 			dgs.setShowPoints(false);
 			DefaultPolygonShader dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
@@ -57,9 +64,9 @@ public class AppearanceInheritanceExample {
 			child.setGeometry(geom);
 			MatrixBuilder.euclidean().translate(8,0,0).assignTo(child);
 			child.setAppearance(new Appearance());
+			// force this child NOT to inherit the texture from its parent
 	    	child.getAppearance().setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D, Appearance.DEFAULT);
-			ViewerApp va = ViewerApp.display(sgc);
-			CameraUtility.encompass(va.getCurrentViewer());
+			JRViewer.display(sgc);
 	  }
 
 }

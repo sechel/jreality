@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.Timer;
 
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -19,8 +20,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.tutorial.util.GameOfLife;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 
 /**
  * This example shows an animated 2d texture which maps a <i>live</i> game of life onto a quadrilateral.
@@ -67,14 +66,16 @@ public class AnimatedTextureExample {
  			
  		});
 		
- 		final ViewerApp va = ViewerApp.display(worldSGC);
-		CameraUtility.encompass(va.getCurrentViewer());
+// 		final ViewerApp va = ViewerApp.display(worldSGC);
+//		CameraUtility.encompass(va.getCurrentViewer());
+		JRViewer.display(worldSGC);
+		JRViewer jrviewer = JRViewer.getLastJRViewer();
 		// force regular rendering; each render will invoke the above runnable
 		// to update the texture
  		Timer timer = new Timer(20, new ActionListener()	{
 
 			public void actionPerformed(ActionEvent e) {
-				va.getCurrentViewer().renderAsync();		
+//				jrviewer.getViewer().renderAsync();		
 			}
  			
  		});

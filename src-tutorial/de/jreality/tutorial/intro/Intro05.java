@@ -4,9 +4,11 @@ import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
 
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
@@ -14,7 +16,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.PickShowTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
@@ -40,9 +41,6 @@ public class Intro05 {
 
 	public static void main(String[] args)	{
 		SceneGraphComponent dodecSGC = readDodec();
-		ViewerApp va = myViewerApp(dodecSGC);
-		va.update();
-		CameraUtility.encompass(va.getViewerSwitch());
 		dodecSGC.addTool(new PickShowTool());
 		Appearance ap = dodecSGC.getAppearance();
 		dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
@@ -59,7 +57,10 @@ public class Intro05 {
 		rhs.setOpaqueTubesAndSpheres(true);
 		dps.setTransparency(.5);			
 		dgs.setShowFaces(false);
-		CameraUtility.getCamera(va.getViewerSwitch()).setStereo(true);					
+		Viewer viewer = JRViewer.display(dodecSGC);
+		// this version of encompass() also sets reasonable stereo parameters
+		CameraUtility.encompass(viewer);
+		CameraUtility.getCamera(viewer).setStereo(true);					
 	}
 
 	private static SceneGraphComponent readDodec() {
@@ -75,14 +76,5 @@ public class Intro05 {
 		}
 		return scp;
 	}
-
-	private static ViewerApp myViewerApp(SceneGraphComponent myscene) {
-		ViewerApp va = ViewerApp.display(myscene);
-		va.setAttachNavigator(true);
-		va.setExternalNavigator(false);
-		return va;
-	}
-
-
 
 }

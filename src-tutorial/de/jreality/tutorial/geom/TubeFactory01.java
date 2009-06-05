@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -11,8 +12,6 @@ import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -43,8 +42,7 @@ public class TubeFactory01 {
 		ptf.update();
 		IndexedFaceSet torus1Tubes = ptf.getTube();
 		torussgc.setGeometry(torus1Tubes);
-		ViewerApp va = ViewerApp.display(torussgc);
-		CameraUtility.encompass(va.getCurrentViewer());
+		JRViewer.display(torussgc);
 	}
 
 	

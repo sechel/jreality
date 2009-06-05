@@ -2,8 +2,8 @@ package de.jreality.tutorial.geom;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 /**
  * An example of using the {@link BallAndStickFactory}.
@@ -21,6 +21,6 @@ import de.jreality.ui.viewerapp.ViewerApp;
 	   basf.setArrowPosition(.6);
 	   basf.update();
 	   SceneGraphComponent tubedIcosa = basf.getSceneGraphComponent();
-	   ViewerApp.display(tubedIcosa);
+	   JRViewer.display(tubedIcosa);
 	}
 }

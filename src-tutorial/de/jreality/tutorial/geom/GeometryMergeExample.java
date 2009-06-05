@@ -7,12 +7,12 @@ import java.util.List;
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -65,7 +65,7 @@ public class GeometryMergeExample {
        merged.setGeometry(result);
        MatrixBuilder.euclidean().translate(3,0,0).assignTo(merged);
        world.addChildren(merged, original);
-        ViewerApp.display(world);
+        JRViewer.display(world);
 	}
 
 }
