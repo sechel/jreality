@@ -62,7 +62,9 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
@@ -439,6 +441,16 @@ public class SceneGraphUtility {
 			}
 	 }
 	 return selectedAppearance;
+	}
+
+	public static void removeLights(Viewer viewer) {
+		SceneGraphComponent root = viewer.getSceneRoot();
+		List<SceneGraphPath> lightpath = SceneGraphUtility.collectLights(root);
+		for (SceneGraphPath sgp : lightpath) {
+			Light light = (Light) sgp.getLastElement();
+			SceneGraphComponent lightnode = sgp.getLastComponent();
+			lightnode.setLight(null);
+		}
 	}
 
  }
