@@ -10,6 +10,7 @@ import javax.sound.sampled.SourceDataLine;
 import de.jreality.audio.AbstractAudioRenderer;
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.SoundEncoder;
+import de.jreality.audio.WavFileWriter;
 
 public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer implements Runnable {
 
@@ -52,7 +53,7 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		
 		if (WRITE_TO_FILE) try {
 			System.out.println("try opening wav file...");
-			wavFile = new WavFileWriter(af, new File(AUDIO_FILE_NAME));
+			wavFile = new WavFileWriter(af.getChannels(), sampleRate, af.getSampleSizeInBits(), new File(AUDIO_FILE_NAME));
 			System.out.println("opened audio.wav");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -1,26 +1,31 @@
-package de.jreality.audio.javasound;
+package de.jreality.audio;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import javax.sound.sampled.AudioFormat;
-
 public class WavFileWriter {
 
-    private long dataSize;
     private int channels;
-    private int bps;
+    private int sampleSize;
     private int sampleRate;
     
     private RandomAccessFile os;
-	private boolean closed;
+	private boolean closed = false;
+    private long dataSize = 0;
 
-    public WavFileWriter(AudioFormat format, File outFile) throws IOException {
+	/**
+	 * @param channels   number of channels
+	 * @param sampleRate sample rate
+	 * @param sampleSize sample size in bits
+	 * @param outFile    output file
+	 * @throws IOException
+	 */
+    public WavFileWriter(int channels, int sampleRate, int sampleSize, File outFile) throws IOException {
     	os = new RandomAccessFile(outFile, "rw");
-    	channels = format.getChannels();
-    	bps = format.getSampleSizeInBits();
-    	sampleRate = (int) format.getSampleRate();
+    	this.channels = channels;
+    	this.sampleRate = sampleRate;
+    	this.sampleSize = sampleSize;
     	os.seek(44); // keep the first 44 bits for the file header...
     	
     	// register shutdown hook which writes the file header and
@@ -31,21 +36,20 @@ public class WavFileWriter {
     			try {
 					close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
     		}
     	});
     }
     
-    void writeInt(int arg0) throws IOException {
+    private void writeInt(int arg0) throws IOException {
         os.writeByte(arg0 & 0xff);
         os.writeByte((arg0 >> 8) & 0xff);
         os.writeByte((arg0 >> 16) & 0xff);
         os.writeByte((arg0 >> 24) & 0xff);
     }
     
-    void writeShort(int arg0) throws IOException {
+    private void writeShort(int arg0) throws IOException {
     	os.writeByte(arg0 & 0xff);
     	os.writeByte((arg0 >> 8) & 0xff);
     }
@@ -66,9 +70,9 @@ public class WavFileWriter {
         os.write(new byte[] {0x01, 0x00});
         writeShort(channels);
         writeInt(sampleRate);
-        writeInt(sampleRate * channels * ((bps + 7) / 8));
-        writeShort(channels * ((bps + 7) / 8));
-        writeShort(bps);
+        writeInt(sampleRate * channels * ((sampleSize + 7) / 8));
+        writeShort(channels * ((sampleSize + 7) / 8));
+        writeShort(sampleSize);
         os.write("data".getBytes());
         writeInt((int) dataSize);
 
@@ -76,5 +80,4 @@ public class WavFileWriter {
     	os.close();
     	closed=true;
     }
-    
 }
