@@ -54,6 +54,12 @@ public class WavFileWriter {
     	os.writeByte((arg0 >> 8) & 0xff);
     }
     
+    /**
+     * @param buf    byte buffer containing little-endian PCM data; buffer contains one sample for each channel, followed by the next sample for each channel, etc.
+     * @param offset
+     * @param len
+     * @throws IOException
+     */
     public synchronized void write(byte[] buf, int offset, int len) throws IOException {
     	if (closed) return;
     	os.write(buf, offset, len);
