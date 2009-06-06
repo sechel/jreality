@@ -45,14 +45,14 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		frameSizeSpinner = new JSpinner(frameSizeModel),
 		retriesSpinner = new JSpinner(retriesModel);
 	private JTextField
-		jackLabelField = new JTextField("jreality_jack"),
+		jackLabelField = new JTextField("jReality"),
 		jackTargetField = new JTextField("");
 	private JRadioButton
 		noSoundChecker = new JRadioButton("No Audio", true),
 		javaSoundChecker = new JRadioButton("Java Sound Stereo"),
 		javaSoundVBAPChecker = new JRadioButton("Java Sound Surround (VBAP)"),
-		jackAmbisonicsFOChecker = new JRadioButton("Jack Ambisonics First Order"),
-		jackAmbisonicsPSOChecker = new JRadioButton("Jack Ambisonics Planar Second Order"),
+		jackAmbisonicsFOChecker = new JRadioButton("JACK Ambisonics First Order"),
+		jackAmbisonicsPSOChecker = new JRadioButton("JACK Ambisonics Planar Second Order"),
 		sampleHoldChecker = new JRadioButton("None"),
 		linearChecker = new JRadioButton("Linear"),
 		cosineChecker = new JRadioButton("Cosine"),
@@ -98,9 +98,9 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaOptions.add(frameSizeSpinner, c2);
 		mainPage.add(javaOptions, c2);
 		
-		jackOptions.setBorder(BorderFactory.createTitledBorder("Jack Options"));
+		jackOptions.setBorder(BorderFactory.createTitledBorder("JACK Options"));
 		jackOptions.setLayout(new GridBagLayout());
-		jackOptions.add(new JLabel("Label"), c1);
+		jackOptions.add(new JLabel("Client name"), c1);
 		jackOptions.add(jackLabelField, c2);
 		jackOptions.add(new JLabel("Target"), c1);
 		jackOptions.add(jackTargetField, c2);
