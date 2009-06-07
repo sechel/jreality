@@ -8,6 +8,8 @@ import javax.swing.event.ChangeListener;
 import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.AudioRenderer;
 import de.jreality.audio.Interpolation;
+import de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer;
+import de.jreality.audio.jack.JackAmbisonicsRenderer;
 import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
 import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.audio.javasound.VbapRenderer;
@@ -89,20 +91,10 @@ public class Audio extends Plugin implements ChangeListener {
 			renderer = new VbapRenderer();
 			break;
 		case jackAmbisonicsFO:
-			try {
-					renderer = (AudioRenderer) Class.forName("de.jreality.audio.jack.JackAmbisonicsRenderer").newInstance();
-				} catch (Throwable e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			renderer = new JackAmbisonicsRenderer();
 			break;
 		case jackAmbisonicsPSO:
-			try {
-					renderer = (AudioRenderer) Class.forName("de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer").newInstance();
-				} catch (Throwable e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			renderer = new JackAmbisonicsPlanar2ndOrderRenderer();
 			break;
 		default:
 			break;
