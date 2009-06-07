@@ -9,7 +9,10 @@ JJack
     - Java bindings for JACK, the JACK Audio Connection Kit - LGPL
     - needed for the JACK audio backend
     - http://jjack.berlios.de/
-    - WARNING: jReality uses some new features of JJack that are not (yet?) in the official release; please send email to peter.brinkmann@gmail.com for details
+    - Note: jReality uses some new features of JJack that are not yet in
+      the official release; for the time being, you can get the new
+      version of JJack from the subversion repository, at
+      http://svn.berlios.de/svnroot/repos/jjack/branches/v04-proposal.
     
 jInput
     - java bindings for various input devices - BSD license
