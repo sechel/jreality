@@ -30,7 +30,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	private JCheckBox
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
 	private JCheckBox
-		toolBarChecker = new JCheckBox("Show Tool bar");
+		toolBarChecker = new JCheckBox("Show Tool bar", true);
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
 	private List<ColorPickerModeChangedListener>
