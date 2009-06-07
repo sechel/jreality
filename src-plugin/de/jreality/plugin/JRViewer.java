@@ -74,25 +74,46 @@ public class JRViewer {
 	}
 	
 	
+	/**
+	 * Create a JRViewer with default scene and lights.
+	 */
 	public JRViewer() {
-		// disable automatic property saving - should be changed in simple controller.
-		c.setPropertiesFile(null);
-		c.registerPlugin(new View());
-		c.registerPlugin(new Scene());
-		c.registerPlugin(new ToolSystemPlugin());
-		c.registerPlugin(new Lights());
-		lastViewer = new WeakReference<JRViewer>(this);
+		this(true);
 	}
 	
+	/**
+	 * Create a JRViewer with default scene. Flag indicates
+	 * whether to add the standard lights (plugin Lights) or not.
+	 * @param addLights if true, standard lights are added.
+	 */
+	public JRViewer(boolean addLights) {
+		this(null);
+		if (addLights) c.registerPlugin(new Lights());
+	}
+
+	/**
+	 * create a JRViewer with a custom scene.
+	 * 
+	 * @param s the scene
+	 */
 	public JRViewer(JrScene s) {
 		// disable automatic property saving - should be changed in simple controller.
 		c.setPropertiesFile(null);
-		c.registerPlugin(new View());
+		
+		View v = new View();
+		v.setShowTop(false);
+		v.setShowBottom(false);
+		v.setShowLeft(false);
+		v.setShowRight(false);
+		v.setHidePanels(false);
+		c.registerPlugin(v);
+		
 		c.registerPlugin(new Scene(s));
 		c.registerPlugin(new ToolSystemPlugin());
 		lastViewer = new WeakReference<JRViewer>(this);
 	}
 	
+
 
 	/**
 	 * Returns the last created instance of JRViewer
@@ -215,10 +236,11 @@ public class JRViewer {
 	
 	
 	public void addContentSupport(ContentType type) {
-		c.registerPlugin(new ContentLoader());
-		c.registerPlugin(new ContentTools());
 // users should explicitly add ContentAppearance if they want it.
 //		c.registerPlugin(new ContentAppearance());
+// same for the content loader, since content is usually set
+// by the app developer
+//		c.registerPlugin(new ContentLoader());
 		switch (type) {
 			case Raw:
 				c.registerPlugin(new DirectContent());
@@ -232,6 +254,7 @@ public class JRViewer {
 			case Custom:
 				break;
 		}
+		c.registerPlugin(new ContentTools());
 	}
 	
 
@@ -287,12 +310,6 @@ public class JRViewer {
 		if (node != null) v.registerPlugin(new ContentInjectionPlugin(node, true));
 		else v.registerPlugin(new ContentLoader());
 		v.addBasicUI();
-		v.getPlugin(View.class).setShowTop(false);
-		v.getPlugin(View.class).setShowBottom(false);
-		v.getPlugin(View.class).setShowLeft(false);
-		v.getPlugin(View.class).setShowRight(false);
-		v.getPlugin(View.class).setHidePanels(false);
-		
 		v.startup();
 		v.getPlugin(ViewPreferences.class).setToolBarVisible(false);
 		return v.getPlugin(View.class).getViewer();
@@ -369,6 +386,7 @@ public class JRViewer {
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
 		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
 		v.startup();
 	}
 

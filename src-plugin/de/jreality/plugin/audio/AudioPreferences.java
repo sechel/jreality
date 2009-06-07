@@ -60,7 +60,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	private JButton applyButton = new JButton("Apply");
 	
 	private BackendType
-		backendType = BackendType.noSound;
+		backendType = BackendType.javaSound;
 	private InterpolationType
 		interpolationType = InterpolationType.cubicInterpolation;
 	private List<ChangeListener>
