@@ -49,6 +49,7 @@
 		</fileset>
 		<fileset dir="lib">
 			<include name="jinput.jar"/>
+			<include name="netutil.jar" />
 		</fileset>
 	</path>
 
@@ -59,7 +60,6 @@
 		</fileset>
 		<fileset dir="lib">
 			<include name="jjack.jar"/>
-			<!--include name="NetUtil.jar"/-->
 		</fileset>
 	</path>
 
