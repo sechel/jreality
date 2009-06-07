@@ -1,4 +1,4 @@
-package de.jreality.audio.osc;
+package de.jreality.toolsystem.raw;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -12,7 +12,7 @@ import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
-import de.jreality.toolsystem.raw.RawDevice;
+import de.jreality.toolsystem.util.OSCPool;
 import de.sciss.net.OSCListener;
 import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCServer;

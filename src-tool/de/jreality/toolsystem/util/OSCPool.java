@@ -1,4 +1,4 @@
-package de.jreality.audio.osc;
+package de.jreality.toolsystem.util;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;

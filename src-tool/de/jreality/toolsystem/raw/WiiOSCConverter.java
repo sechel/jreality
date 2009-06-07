@@ -1,4 +1,4 @@
-package de.jreality.audio.osc;
+package de.jreality.toolsystem.raw;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.jreality.toolsystem.util.OSCPool;
 import de.sciss.net.OSCListener;
 import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCServer;
@@ -50,6 +51,7 @@ public class WiiOSCConverter {
 				int id = (Integer) msg.getArg(0);
 				if (id!=0) return;
 				String name = msg.getName();
+				//System.out.println(".messageReceived(): "+name);
 				if (name.startsWith("/wii/keys/")) {
 					String key = name.substring(10);
 					Integer state = (Integer) msg.getArg(1);
