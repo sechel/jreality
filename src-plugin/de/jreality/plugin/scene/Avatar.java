@@ -85,7 +85,11 @@ public class Avatar extends Plugin implements ChangeListener {
 		cameraComponent = scene.getCameraComponent();
 		if (cameraComponent != null) {
 			Camera cam = cameraComponent.getCamera();
-			if (cam != null) cam.setFieldOfView(60);
+			if (cam != null) {
+				cam.setFieldOfView(60);
+				cam.setNear(0.1);
+				cam.setFar(10000);
+			}
 			MatrixBuilder.euclidean().translate(0,1.7,0).assignTo(cameraComponent);
 		} else {
 			System.out.println("Avatar.updateComponents(): CAMERA CMP == NULL");
