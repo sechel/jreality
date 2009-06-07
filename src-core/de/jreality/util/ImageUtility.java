@@ -1,8 +1,13 @@
 package de.jreality.util;
 
+import java.awt.AWTException;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -19,6 +24,7 @@ import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
 
+import de.jreality.scene.Viewer;
 import de.jreality.shader.ImageData;
 
 /**
@@ -134,4 +140,30 @@ public class ImageUtility {
 	         }                      
 		return img;
 	}
+	
+	/**
+	 * Captures a screen shot from the viewer's viewing component. This requires
+	 * a viewer that has an AWT component as viewing component, and it requires
+	 * a AWT Robot, which may not be available when running as a webstart or applet.
+	 * 
+	 * @param v the viewer to capture
+	 * @return the screen capture of the viewer's viewing component, or null
+	 */
+	public static BufferedImage captureScreenshot(Viewer v) {
+		if (v.getViewingComponent() instanceof Component) {
+			Component viewingComponent = (Component) v.getViewingComponent();
+			if (!viewingComponent.isShowing()) return null;
+			Point loc = viewingComponent.getLocationOnScreen();
+			Robot r;
+			try {
+				r = new Robot();
+				return r.createScreenCapture(new Rectangle(loc, viewingComponent.getSize()));
+			} catch (AWTException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
 }
