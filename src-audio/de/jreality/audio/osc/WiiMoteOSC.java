@@ -133,6 +133,7 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private void matrixEvent(double x, double y) {
 		pointerMatrix.setEntry(0, 3, x);
 		pointerMatrix.setEntry(1, 3, y);
@@ -144,6 +145,7 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 		});
 	}
 
+	@SuppressWarnings("serial")
 	private void evolutionEvent(double x, double y) {
 		double dx = Math.pow(x, 3)*.1;  // dynamic response: slow when close to neutral position
 		double dy = Math.pow(y, 3)*.1;

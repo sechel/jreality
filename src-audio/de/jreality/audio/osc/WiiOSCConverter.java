@@ -88,7 +88,7 @@ public class WiiOSCConverter {
 
 
 	public static void main(String[] args) throws InterruptedException, IOException {
-		WiiOSCConverter wiiconv = new WiiOSCConverter();
+		new WiiOSCConverter();
 		while (true) {
 			Thread.sleep(1000);
 		}
