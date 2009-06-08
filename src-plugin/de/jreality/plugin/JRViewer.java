@@ -431,12 +431,10 @@ public class JRViewer {
 	public static void main(String[] args) {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
+		v.addContentUI();
 		v.addVRSupport();
-		v.addAudioSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
-		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentLoader());
 		v.startup();
 	}
 
