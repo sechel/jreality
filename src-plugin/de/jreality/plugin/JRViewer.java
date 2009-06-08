@@ -281,7 +281,10 @@ public class JRViewer {
 	}
 	
 	
-	
+	/**
+	 * Registers one of the predefined content plug-ins
+	 * @param type a content enumeration type
+	 */
 	public void addContentSupport(ContentType type) {
 		switch (type) {
 			case Raw:
@@ -296,11 +299,20 @@ public class JRViewer {
 			case Custom:
 				break;
 		}
-		c.registerPlugin(new ContentTools());
 	}
 	
-
+	/**
+	 * Registers advanced content tools and UI plug-ins
+	 */
+	public void addContentUI() {
+		c.registerPlugin(new ContentTools());
+		c.registerPlugin(new ContentAppearance());
+	}
 	
+	/**
+	 * Basic UI support like scene graph inspector, bean shell,
+	 * background color, export menu, camera settings menu...
+	 */
 	public void addBasicUI() {
 		c.registerPlugin(new Inspector());
 		c.registerPlugin(new Shell());
@@ -314,7 +326,10 @@ public class JRViewer {
 		c.registerPlugin(new CameraMenu());
 	}
 
-	
+	/**
+	 * Swing look and feel support. A preference page
+	 * with look and feel options is added. 
+	 */
 	public void addLookAndFeelSupport() {
 		c.registerPlugin(new LookAndFeelSwitch());
 		c.registerPlugin(new CrossPlatformLnF());
@@ -323,6 +338,10 @@ public class JRViewer {
 	}
 	
 	
+	/**
+	 * Virtual reality support. A sky box and environment map, 
+	 * a terrain and a movable avatar
+	 */
 	public void addVRSupport() {
 		c.registerPlugin(new Avatar());
 		c.registerPlugin(new Terrain());
@@ -330,7 +349,9 @@ public class JRViewer {
 	}
 	
 	
-	
+	/**
+	 * Audio plug-ins. An options panel and audio preferences.
+	 */
 	public void addAudioSupport() {
 		c.registerPlugin(new Audio());
 		c.registerPlugin(new AudioOptions());
