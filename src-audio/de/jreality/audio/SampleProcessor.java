@@ -6,7 +6,16 @@ import de.jreality.shader.EffectiveAppearance;
 // TODO: properly document thread safety issues; setProperties and read may need sync
 public interface SampleProcessor extends SampleReader {
 	
+	/**
+	 * initialize with the reader from which we will draw our input
+	 * @param reader
+	 */
 	public void initialize(SampleReader reader);
+	
+	/**
+	 * read properties from effective appearance
+	 * @param app
+	 */
 	public void setProperties(EffectiveAppearance app);
 
 	
