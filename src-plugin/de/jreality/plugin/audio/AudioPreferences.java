@@ -35,6 +35,8 @@ import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
 public class AudioPreferences extends Plugin implements PreferencesFlavor, ActionListener, ChangeListener {
 	
+	private static final Integer DEFAULT_FRAME_SIZE = 1024;
+	
 	private JPanel
 		mainPage = new JPanel(),
 		interpolationPanel = new JPanel(),
@@ -42,10 +44,10 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaOptions = new JPanel(),
 		jackOptions = new JPanel();
 	private SpinnerNumberModel
-		frameSizeModel = new SpinnerNumberModel(512, 0, 4096, 1),
+		//frameSizeModel = new SpinnerNumberModel(1024, 0, 4096, 1),
 		retriesModel = new SpinnerNumberModel(5, 0, 20, 1);
 	private JSpinner
-		frameSizeSpinner = new JSpinner(frameSizeModel),
+		//frameSizeSpinner = new JSpinner(frameSizeModel),
 		retriesSpinner = new JSpinner(retriesModel);
 	private JTextField
 		jackLabelField = new JTextField("jReality"),
@@ -62,6 +64,8 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		cubicChecker = new JRadioButton("Cubic");
 	private JCheckBox
 		chooseFirstJavaSoundMixer = new JCheckBox("Always Use First Mixer", true);
+	private JComboBox
+		frameSizeCombo = new JComboBox(new Integer[] {128, 256, 512, 1024, 2048, 4096});
 	private JComboBox
 		sampleRateCombo = new JComboBox(new Integer[] {8000, 11025, 16000, 22050, 44100, 48000});
 
@@ -102,9 +106,9 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 
 		javaOptions.setBorder(BorderFactory.createTitledBorder("Java Sound Options"));
 		javaOptions.setLayout(new GridBagLayout());
-		javaOptions.add(new JLabel("Frame Size"), c1);
-		javaOptions.add(frameSizeSpinner, c2);
 		javaOptions.add(chooseFirstJavaSoundMixer, c2);
+		javaOptions.add(new JLabel("Frame Size"), c1);
+		javaOptions.add(frameSizeCombo, c2);
 		javaOptions.add(new JLabel("Sample Rate"), c1);
 		javaOptions.add(sampleRateCombo, c2);
 		mainPage.add(javaOptions, c2);
@@ -231,7 +235,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	}
 	
 	public int getJavaSoundFrameSize() {
-		return frameSizeModel.getNumber().intValue();
+		return (Integer) frameSizeCombo.getSelectedItem();
 	}
 	
 	
@@ -285,7 +289,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		super.storeStates(c);
 		c.storeProperty(getClass(), "backendType", backendType);
 		c.storeProperty(getClass(), "interpolationType", interpolationType);
-		c.storeProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue());
+		c.storeProperty(getClass(), "javaFrameSize", frameSizeCombo.getSelectedItem());
 		c.storeProperty(getClass(), "jackLabel", jackLabelField.getText());
 		c.storeProperty(getClass(), "jackTarget", jackTargetField.getText());
 		c.storeProperty(getClass(), "retries", retriesModel.getNumber().intValue());
@@ -329,7 +333,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 			cubicChecker.setSelected(true);
 			break;
 		}
-		frameSizeModel.setValue(c.getProperty(getClass(), "javaFrameSize", frameSizeModel.getNumber().intValue()));
+		frameSizeCombo.setSelectedItem(c.getProperty(getClass(), "javaFrameSize", DEFAULT_FRAME_SIZE));
 		jackLabelField.setText(c.getProperty(getClass(), "jackLabel", jackLabelField.getText()));
 		jackTargetField.setText(c.getProperty(getClass(), "jackTarget", jackTargetField.getText()));
 		retriesModel.setValue(c.getProperty(getClass(), "retries", retriesModel.getNumber().intValue()));
