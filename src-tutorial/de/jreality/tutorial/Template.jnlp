@@ -4,9 +4,9 @@
       href="CLASSNAME.jnlp">
   <information>
     <title>jReality Tutorial CLASSNAME</title>
-    <vendor>Charles Gunn, TU Berlin, Math Department</vendor>
-    <homepage href="http://www.math.tu-berlin.de/~gunn"/>
-    <description>DESCRIPTION</description>
+    <vendor>jReality Team</vendor>
+    <homepage href="http://www3.math.tu-berlin.de/jreality"/>
+    <description>Automatically generated tutorial WebStart</description>
     <offline-allowed/>
   </information>
   
@@ -27,6 +27,8 @@
       <jar href="../jars/xpp3.jar" download="lazy"/>
       <jar href="../jars/xstream.jar" download="lazy"/>
       <jar href="../jars/colorpicker.jar" download="lazy"/>
+      <jar href="../jars/vrData.jar" download="lazy"/>
+      <jar href="../jars/vrExamples.jar" download="lazy"/>
       <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" />
     </resources>
 

@@ -243,6 +243,10 @@
 		<fileset dir="release">
 			<include name="jReality.jar"/>
 		</fileset>
+        <fileset dir="lib">
+            <include name="jRWorkspacePluginSDK.jar" />
+            <include name="jogl.jar" />
+        </fileset>
 	</path>
 
 
