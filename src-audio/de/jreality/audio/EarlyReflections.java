@@ -19,6 +19,7 @@ public class EarlyReflections implements SampleProcessor {
 	private int[] offsets = new int[nTaps];
 	
 	private float[] delayLine;
+	private long silentCount = 0;
 	private int maxDelay;
 	private int index = 0;
 	
@@ -46,6 +47,7 @@ public class EarlyReflections implements SampleProcessor {
 
 	public void clear() {
 		Arrays.fill(delayLine, 0);
+		silentCount = 0;
 		reader.clear();
 	}
 
@@ -57,6 +59,11 @@ public class EarlyReflections implements SampleProcessor {
 		int nRead = reader.read(buffer, initialIndex, nSamples);
 		for(int i=initialIndex; i<initialIndex+nSamples; i++) {
 			float u = buffer[i];
+			if (Math.abs(u)<AudioAttributes.HEARING_THRESHOLD) {
+				silentCount++;
+			} else {
+				silentCount = 0;
+			}
 			for(int j=0; j<nTaps; j++) {
 				u += delayLine[(index+offsets[j]) % maxDelay]*gains[j];
 			}
@@ -70,6 +77,6 @@ public class EarlyReflections implements SampleProcessor {
 	}
 	
 	public boolean hasMore() {
-		return false;  // TODO: implement properly
+		return silentCount<maxDelay;
 	}
 }
