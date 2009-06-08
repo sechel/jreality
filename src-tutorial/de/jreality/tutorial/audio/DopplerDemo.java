@@ -6,7 +6,16 @@ import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.AudioSource;
 import de.jreality.tutorial.tool.AnimationExample;
 
-
+/**
+ * This demo is based on the AnimationExample from the tools section.
+ * 
+ * Here, we simply add an audio source to the moving component, and
+ * we increase the size of the ellipse to get more speed and more
+ * doppler shift.
+ * 
+ * @author weissman
+ *
+ */
 public class DopplerDemo extends AnimationExample {
 
 	static AudioSource asrc = new SynthSource("sin", 44100) {
