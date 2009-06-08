@@ -8,7 +8,7 @@
     <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJinputJoystick"/-->
     
- 	<rawdevice id="WiiMoteOSC" type="de.jreality.toolsystem.raw.WiiMoteOSC"/>
+ 	<!-- rawdevice id="WiiMoteOSC" type="de.jreality.toolsystem.raw.WiiMoteOSC"/ -->
  	
   </rawdevices>
 
@@ -16,6 +16,7 @@
 
   <!-- map slots of raw devices to InputSlots -->
   
+  <!--
   	<mapping device="WiiMoteOSC" src="/wii/button/up" target="forward"/>
   	<mapping device="WiiMoteOSC" src="/wii/button/down" target="backward"/>
   	<mapping device="WiiMoteOSC" src="/wii/button/left" target="left"/>
@@ -29,7 +30,8 @@
   	<mapping device="WiiMoteOSC" src="/wii/button/two" target="pageDown"/>
   	<mapping device="WiiMoteOSC" src="pointer" target="PointerNDC"/>
   	<mapping device="WiiMoteOSC" src="evolution" target="PointerNDCevolution"/>
-  	
+  -->	
+  
     <mapping device="Keyboard" src="VK_SPACE" target="JumpActivation"/>
     <mapping device="KeyboardSWT" src="32" target="JumpActivation"/>
     
