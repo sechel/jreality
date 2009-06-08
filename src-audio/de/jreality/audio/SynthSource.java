@@ -8,7 +8,7 @@ package de.jreality.audio;
  */
 public abstract class SynthSource extends RingBufferSource {
 
-	protected long index = 0; // can keep on ticking for about 15 million years at a sample rate of 192kHz; should be good enough for most practical purposes
+	protected long index = 0; // keeps on ticking for about 15 million years at a sample rate of 192kHz; should be good enough for most practical purposes
 	
 	private float[] buffer = null;
 	
