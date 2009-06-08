@@ -43,11 +43,13 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 	protected void openSourceDataLine() throws LineUnavailableException {
 		AudioFormat af = JavaSoundUtility.outputFormat(channels);
 		outputLine = JavaSoundUtility.createSourceDataLine(af);
+		System.out.println(outputLine.getFormat());
 		sampleRate = (int) af.getSampleRate();
 		int bytesPerSample = (af.getSampleSizeInBits()+7)/8;
 		bufferLength = frameSize * bytesPerSample * channels;
 		System.out.println("stereo out buffer size = "+outputLine.getBufferSize());
 		outputLine.open(af, bufferLength);
+		bufferLength=outputLine.getBufferSize();
 		System.out.println("stereoOut bufferSize="+outputLine.getBufferSize());
 		outputLine.start();
 		
