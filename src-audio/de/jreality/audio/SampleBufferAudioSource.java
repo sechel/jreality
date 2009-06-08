@@ -11,17 +11,17 @@ package de.jreality.audio;
 public class SampleBufferAudioSource extends RingBufferSource {
 
 	protected float[] samples;
-	protected int nSamples;
 	protected int index;
 	protected boolean loop;
+	int nSamples;
 
 	public SampleBufferAudioSource(String name, float[] sampleBuffer, int sampleRate, boolean loop) {
 		super(name);
 		this.loop = loop;
 		this.sampleRate=sampleRate;
-		this.samples=sampleBuffer;
-		this.nSamples=samples.length;
-		
+		samples=sampleBuffer;
+		nSamples = samples.length;
+
 		ringBuffer = new RingBuffer(sampleRate);
 		reset();
 	}
@@ -31,23 +31,24 @@ public class SampleBufferAudioSource extends RingBufferSource {
 	}
 
 	protected void writeSamples(int nRequested) {
-		if (index+nRequested<samples.length) {
-			ringBuffer.write(samples, index, nRequested);
-			index += nRequested;
-		}
-		else {
-			int n1 = nSamples-index;
-			ringBuffer.write(samples, index, n1);
-			if (loop) {
-				index = nRequested-n1;
-				ringBuffer.write(samples, 0, index);
+		while (nRequested>0) {
+			int n = nSamples-index;
+			if (nRequested<n) {
+				n = nRequested;
 			}
-			else {
-				state = State.STOPPED;  // to let listeners know that we're done
-				reset();
-				hasChanged = true;
+			ringBuffer.write(samples, index, n);
+			index += n;
+			nRequested -= n;
+			if (index>=nSamples) {
+				if (loop) {
+					index -= nSamples;
+				} else {
+					state = State.STOPPED;
+					hasChanged = true;     // let listeners know that we're done
+					reset();
+					break;
+				}
 			}
 		}
 	}
-
 }
