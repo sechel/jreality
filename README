@@ -26,13 +26,13 @@ As a java library jReality should run on all major platforms with
 sufficient Java support. Anyway we give a list of platforms+JDKs which
 we have successfully tested:
 
-  OS                    JDK
---------------------------------------------------------
-  Ubuntu 8.04, amd64            java-6-sun-1.6.0.16
-  Ubuntu 8.04, amd64            java-1.5.0-sun-1.5.0.16
-  Ubuntu Studio 8.04, i386      java-6-sun-1.6.0.16
-  Ubuntu Studio 8.04, i386      java-1.5.0-sun-1.5.0.16
-  Mac OS X 10.5.7, i386         java-1.5.0_16
+OS                            JDK
+------------------------------------------------------
+Ubuntu 8.04, amd64            java-6-sun-1.6.0.16
+Ubuntu 8.04, amd64            java-1.5.0-sun-1.5.0.16
+Ubuntu Studio 8.04, i386      java-6-sun-1.6.0.16
+Ubuntu Studio 8.04, i386      java-1.5.0-sun-1.5.0.16
+Mac OS X 10.5.7, i386         java-1.5.0_16
     
 
 
