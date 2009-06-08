@@ -8,6 +8,7 @@ import javax.swing.event.ChangeListener;
 import de.jreality.audio.AudioAttributes;
 import de.jreality.audio.AudioRenderer;
 import de.jreality.audio.Interpolation;
+import de.jreality.audio.jack.AbstractJackRenderer;
 import de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer;
 import de.jreality.audio.jack.JackAmbisonicsRenderer;
 import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
@@ -126,15 +127,11 @@ public class Audio extends Plugin implements ChangeListener {
 		if (renderer instanceof AbstractJavaSoundRenderer) {
 			AbstractJavaSoundRenderer javaSoundRenderer = (AbstractJavaSoundRenderer) renderer;
 			javaSoundRenderer.setFrameSize(prefs.getJavaSoundFrameSize());
-		}
-
-		if (renderer.getClass().getName().contains("jack")) {
-			Method setLabelMethod = renderer.getClass().getMethod("setLabel", String.class);
-			Method setTargetMethod = renderer.getClass().getMethod("setTarget", String.class);
-			Method setRetriesMethod = renderer.getClass().getMethod("setRetries", int.class);
-			setLabelMethod.invoke(renderer, prefs.getJackLabel());
-			setTargetMethod.invoke(renderer, prefs.getJackTarget());
-			setRetriesMethod.invoke(renderer, prefs.getJackRetries());
+		} else if (renderer instanceof AbstractJackRenderer) {
+			AbstractJackRenderer ajr = (AbstractJackRenderer) renderer;
+			ajr.setLabel(prefs.getJackLabel());
+			ajr.setTarget(prefs.getJackTarget());
+			ajr.setRetries(prefs.getJackRetries());
 		}
 		
 		renderer.launch();
