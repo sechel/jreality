@@ -14,6 +14,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -61,6 +62,9 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		cubicChecker = new JRadioButton("Cubic");
 	private JCheckBox
 		chooseFirstJavaSoundMixer = new JCheckBox("Always Use First Mixer", true);
+	private JComboBox
+		sampleRateCombo = new JComboBox(new Integer[] {8000, 11025, 16000, 22050, 44100, 48000});
+
 	private JButton applyButton = new JButton("Apply");
 	
 	private BackendType
@@ -101,6 +105,8 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaOptions.add(new JLabel("Frame Size"), c1);
 		javaOptions.add(frameSizeSpinner, c2);
 		javaOptions.add(chooseFirstJavaSoundMixer, c2);
+		javaOptions.add(new JLabel("Sample Rate"), c1);
+		javaOptions.add(sampleRateCombo, c2);
 		mainPage.add(javaOptions, c2);
 		
 		jackOptions.setBorder(BorderFactory.createTitledBorder("JACK Options"));
@@ -148,6 +154,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		cubicChecker.addActionListener(this);
 		applyButton.addActionListener(this);
 		chooseFirstJavaSoundMixer.addActionListener(this);
+		sampleRateCombo.addActionListener(this);
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -184,6 +191,9 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		}
 		if (chooseFirstJavaSoundMixer == s) {
 			JavaSoundUtility.chooseFirstMixer = chooseFirstJavaSoundMixer.isSelected();
+		}
+		if (sampleRateCombo == s) {
+			JavaSoundUtility.setSampleRate((Integer) sampleRateCombo.getSelectedItem());
 		}
 	}
 	
@@ -280,6 +290,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		c.storeProperty(getClass(), "jackTarget", jackTargetField.getText());
 		c.storeProperty(getClass(), "retries", retriesModel.getNumber().intValue());
 		c.storeProperty(getClass(), "chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected());
+		c.storeProperty(getClass(), "sampleRate", sampleRateCombo.getSelectedItem());
 	}
 	
 	@Override
@@ -323,5 +334,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		jackTargetField.setText(c.getProperty(getClass(), "jackTarget", jackTargetField.getText()));
 		retriesModel.setValue(c.getProperty(getClass(), "retries", retriesModel.getNumber().intValue()));
 		chooseFirstJavaSoundMixer.setSelected(c.getProperty(getClass(), "chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected()));
+		sampleRateCombo.setSelectedItem(c.getProperty(getClass(), "sampleRate", JavaSoundUtility.getSampleRate()));
 	}
 }
