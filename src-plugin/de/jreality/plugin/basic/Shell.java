@@ -23,6 +23,7 @@ public class Shell extends ShrinkPanelPlugin {
 
 	public Shell() {
 		setInitialPosition(SHRINKER_BOTTOM);
+		shrinkPanel.setShrinked(true);
 	}
 	
 	@Override
