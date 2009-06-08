@@ -17,7 +17,7 @@ import de.jreality.util.Input;
  * @author brinkman
  *
  */
-public class CsoundNode extends RingBufferSource {
+public class CsoundSource extends RingBufferSource {
 
 	private CppSound csnd = new CppSound();
 	private CsoundFile csf = csnd.getCsoundFile();
@@ -29,13 +29,13 @@ public class CsoundNode extends RingBufferSource {
 	private int bufSize;
 	private float scale;
 	
-	public CsoundNode(String name, Input csd) throws IOException {
+	public CsoundSource(String name, Input csd) throws IOException {
 		super(name);
 		csf.setCSD(csd.getContentAsString());
 		initFields();
 	}
 	
-	public CsoundNode(String name, Input orc, Input score) throws IOException {
+	public CsoundSource(String name, Input orc, Input score) throws IOException {
 		super(name);
 		csf.setOrchestra(orc.getContentAsString());
 		csf.setScore(score.getContentAsString());

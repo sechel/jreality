@@ -13,11 +13,11 @@ import de.jreality.audio.RingBufferSource;
  * @author brinkman
  *
  */
-public abstract class AbstractJackNode extends RingBufferSource implements JJackAudioProcessor {
+public abstract class AbstractJackSource extends RingBufferSource implements JJackAudioProcessor {
 
 	String clientName;
 	
-	public AbstractJackNode(String name, String clientName) throws JJackException {
+	public AbstractJackSource(String name, String clientName) throws JJackException {
 		super(name);
 		sampleRate = JJackNativeClient.getSampleRate();
 		ringBuffer = new RingBuffer(sampleRate);

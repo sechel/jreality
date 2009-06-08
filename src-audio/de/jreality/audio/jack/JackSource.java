@@ -6,11 +6,11 @@ import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackException;
 
 
-public class JackNode extends AbstractJackNode {
+public class JackSource extends AbstractJackSource {
 
 	private int port = 0;
 
-	public JackNode(String name, String clientName, int port) throws JJackException {
+	public JackSource(String name, String clientName, int port) throws JJackException {
 		super(name, clientName);
 		this.port = port;
 	}

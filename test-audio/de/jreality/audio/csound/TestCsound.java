@@ -8,7 +8,7 @@ import de.jreality.util.Input;
 
 public class TestCsound {
 	public static void main(String[] args) throws IOException {
-		AudioSource s = new CsoundNode("foo", Input.getInput("sound/trapped.csd"));
+		AudioSource s = new CsoundSource("foo", Input.getInput("sound/trapped.csd"));
 		float[] buf = new float[5000];
 		SampleReader r = s.createReader();
 		s.start();

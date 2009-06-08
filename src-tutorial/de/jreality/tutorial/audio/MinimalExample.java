@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
-import de.jreality.audio.csound.CsoundNode;
+import de.jreality.audio.csound.CsoundSource;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.reader.Readers;
@@ -27,7 +27,7 @@ public class MinimalExample {
 	public static void main(String[] args) throws IOException {
 		SceneGraphComponent audioComponent = Readers.read(Input.getInput("jrs/bear.jrs"));
 		Input input = Input.getInput(MinimalExample.class.getResource("trapped.csd"));
-		final AudioSource source = new CsoundNode("csound node", input);
+		final AudioSource source = new CsoundSource("csound node", input);
 		source.start();
 		audioComponent.setAudioSource(source);
 	

@@ -13,7 +13,7 @@ public class SampleBufferAudioSource extends RingBufferSource {
 	protected float[] samples;
 	protected int index;
 	protected boolean loop;
-	int nSamples;
+	protected int nSamples;
 
 	public SampleBufferAudioSource(String name, float[] sampleBuffer, int sampleRate, boolean loop) {
 		super(name);

@@ -16,8 +16,8 @@ import de.jreality.util.Input;
 /**
  * 
  * A RingBufferSource getting data from a JavaSound AudioInputStream. The loop-functionality
- * depends on the URL which allows to open the ressource when it was played; better use
- * ChachedAudioInputStreamSource for sound loops (when samples are not too long...).
+ * depends on the URL to reopen the resource when returning to the beginning; better use
+ * CachedAudioInputStreamSource for sound loops (assuming that the sample array is not too long).
  * 
  * @author <a href="mailto:weissman@math.tu-berlin.de">Steffen Weissmann</a>
  *
