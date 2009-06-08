@@ -22,6 +22,9 @@ import de.jreality.util.Input;
 
 public class JavaSoundUtility {
 
+	public static boolean
+		chooseFirstMixer = true;
+	
 	public static boolean BIG_ENDIAN = false;
 	public static int BITS_PER_SAMPLE = 16;
 	private static Mixer CURRENT_MIXER;
@@ -96,7 +99,12 @@ public class JavaSoundUtility {
 			possibleInfos[i]=possibleMixers.get(i).getMixerInfo();
 		}
 		
-		Info selectedInfo = (Info) JOptionPane.showInputDialog(null, "Select audio device", "JavaSound", JOptionPane.OK_OPTION, null, possibleInfos, null);
+		Info selectedInfo = null;
+		if (chooseFirstMixer) {
+			selectedInfo = possibleInfos[0];
+		} else {
+			selectedInfo = (Info) JOptionPane.showInputDialog(null, "Select audio device", "JavaSound", JOptionPane.OK_OPTION, null, possibleInfos, null);
+		}
 		
 		int idx;
 		for (idx=0; idx<possibleInfos.length; idx++) {
