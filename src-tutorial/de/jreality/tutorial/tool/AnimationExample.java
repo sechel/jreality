@@ -21,7 +21,7 @@ public class AnimationExample {
 	SceneGraphComponent onEllipseCmp = new SceneGraphComponent("on ellipse");
 
 	// half-axes of the ellipse
-	final double a = 15, b = 7.5;
+	protected double a = 15, b = 7.5;
 	
 	// angular velocity along the ellipse
 	final double omega = 1;
@@ -90,8 +90,12 @@ public class AnimationExample {
 		
 	}
 
-	private SceneGraphComponent getCenterComponent() {
+	protected SceneGraphComponent getCenterComponent() {
 		return centerCmp;
+	}
+	
+	protected SceneGraphComponent getMovingComponent() {
+		return onEllipseCmp;
 	}
 		
 	public static void main(String[] args) {
