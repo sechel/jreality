@@ -408,18 +408,22 @@ public class ToolSystem implements ToolEventReceiver {
 		}
 		initialized=true;
 		toolManager.cleanUp();
-		updater.setSceneRoot(viewer.getSceneRoot());
+		
 		// register animator
 		SceneGraphPath rootPath = new SceneGraphPath();
 		rootPath.push(viewer.getSceneRoot());
 		addTool(AnimatorTool.getInstanceImpl(KEY), rootPath);
+		
+		// enable mouse over support
 		mouseOverSupport = new MouseOverSupport(rootPath);
+		
 		if (emptyPickPath.getLength() == 0) {
 			emptyPickPath.push(viewer.getSceneRoot());
 		}
 		if (pickSystem != null) {
 			pickSystem.setSceneRoot(viewer.getSceneRoot());
 		}
+		updater.setSceneRoot(viewer.getSceneRoot());
 		eventQueue.start();
 	}
 
