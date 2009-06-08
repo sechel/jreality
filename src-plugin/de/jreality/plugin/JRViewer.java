@@ -310,8 +310,8 @@ public class JRViewer {
 		if (node != null) v.registerPlugin(new ContentInjectionPlugin(node, true));
 		else v.registerPlugin(new ContentLoader());
 		v.addBasicUI();
+		v.getPlugin(ViewPreferences.class).setShowToolBar(false);
 		v.startup();
-		v.getPlugin(ViewPreferences.class).setToolBarVisible(false);
 		return v.getPlugin(View.class).getViewer();
 	}
 
@@ -383,6 +383,7 @@ public class JRViewer {
 		v.addBasicUI();
 		v.addVRSupport();
 		v.addLookAndFeelSupport();
+		v.addAudioSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
 		v.registerPlugin(new ContentAppearance());

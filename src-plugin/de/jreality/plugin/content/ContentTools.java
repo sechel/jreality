@@ -2,6 +2,8 @@ package de.jreality.plugin.content;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.JMenu;
+
 import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Scene;
@@ -256,6 +258,7 @@ public class ContentTools extends Plugin {
 	}
 
 	private void installMenu(ViewMenuBar viewMenuBar) {
+		viewMenuBar.addMenu(getClass(), 10.0, new JMenu("Content"));
 		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content", "Tools");
 		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content", "Tools");
 		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content", "Tools");

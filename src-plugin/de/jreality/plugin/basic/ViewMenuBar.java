@@ -42,11 +42,12 @@ public class ViewMenuBar extends MenuAggregator {
 		addMenuSeparator(getClass(), 0.0, "Viewer");
 		
 		// Side panels menu
-		JMenu panelsMenu = viewerPlugin.getContaintersMenu();
-		panelsMenu.setMnemonic('p');
-		addMenu(getClass(), 2.0, panelsMenu);
-		addMenuSeparator(getClass(), 0.0, "Side Panels");
-		addMenu(getClass(), 1.0, viewerPlugin.getPanelsMenu(), "Side Panels");
+		JMenu slotsMenu = viewerPlugin.getContaintersMenu();
+		slotsMenu.setMnemonic('w');
+		slotsMenu.setText("Window");
+		addMenu(getClass(), 100.0, slotsMenu);
+		addMenuSeparator(getClass(), 10.0, "Window");
+		addMenu(getClass(), 10.1, viewerPlugin.getPanelsMenu(), "Window");
 	}
 	
 

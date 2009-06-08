@@ -5,8 +5,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,24 +16,30 @@ import javax.swing.JPanel;
 
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphNode;
+import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.flavor.FrontendFlavor;
 import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
-public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener, ComponentListener {
+public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener, FrontendFlavor {
 
+	private ViewMenuBar
+		viewMenuBar = null;
 	private JPanel 
 		mainPage = new JPanel();
 	private JCheckBox
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
-	private JCheckBox
-		toolBarChecker = new JCheckBox("Show Tool bar", true);
+	private AbstractJrToggleAction
+		showMenubarToggle = null,
+		showToolbarToggle = null;
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
 	private List<ColorPickerModeChangedListener>
 		colorModeListeners = new LinkedList<ColorPickerModeChangedListener>();
-	private ViewToolBar toolBar;
+	private FrontendListener
+		frontendListener = null;
 	
 	public static interface ColorPickerModeChangedListener {
 		
@@ -52,7 +56,6 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		mainPage.add(threadSafeChecker, c);
-		mainPage.add(toolBarChecker, c);
 		c.weightx = 0.0;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 		mainPage.add(new JLabel("Color Chooser Mode"), c);
@@ -62,8 +65,28 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		colorChooserModeCombo.setSelectedIndex(1);
 		
 		threadSafeChecker.addActionListener(this);
-		toolBarChecker.addActionListener(this);
 		colorChooserModeCombo.addActionListener(this);
+		
+		showMenubarToggle = new AbstractJrToggleAction("Show Menu Bar") {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (frontendListener != null) {
+					frontendListener.setShowMenuBar(showMenubarToggle.isSelected());
+				}
+			}
+		};
+		showMenubarToggle.setSelected(true);
+		showToolbarToggle = new AbstractJrToggleAction("Show Tool Bar") {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (frontendListener != null) {
+					frontendListener.setShowToolBar(showToolbarToggle.isSelected());
+				}
+			}
+		};
+		showToolbarToggle.setSelected(true);
 	}
 	
 	@Override
@@ -84,25 +107,27 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		if (colorChooserModeCombo == s) {
 			fireColorModeChanged(colorChooserModeCombo.getSelectedIndex());
 		}
-		if (toolBarChecker == s) {
-			setToolBarVisible(toolBarChecker.isSelected());
-		}
 	}
 
-	public void setToolBarVisible(boolean selected) {
-		toolBarChecker.setSelected(selected);
-		if (toolBar != null) {
-			toolBar.getToolBarComponent().setVisible(selected);
-		}
-	}
-
-	public boolean isToolBarVisible() {
-		return toolBarChecker.isSelected();
-	}
-	
 	protected void fireColorModeChanged(int mode) {
 		for (ColorPickerModeChangedListener l : colorModeListeners) {
 			l.colorPickerModeChanged(mode);
+		}
+	}
+	
+	
+	public void setShowToolBar(boolean show) {
+		showToolbarToggle.setSelected(false);
+		if (frontendListener != null) {
+			frontendListener.setShowToolBar(showToolbarToggle.isSelected());
+		}
+	}
+	
+	
+	public void setShowMenuBar(boolean show) {
+		showMenubarToggle.setSelected(show);
+		if (frontendListener != null) {
+			frontendListener.setShowMenuBar(showMenubarToggle.isSelected());
 		}
 	}
 	
@@ -111,7 +136,8 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe());
 		c.storeProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex());
-		c.storeProperty(getClass(), "toolBarVisible", isToolBarVisible());
+		c.storeProperty(getClass(), "showMenuBar", showMenubarToggle.isSelected());
+		c.storeProperty(getClass(), "showToolBar", showToolbarToggle.isSelected());
 		super.storeStates(c);
 	}
 	
@@ -120,7 +146,8 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		threadSafeChecker.setSelected(c.getProperty(getClass(), "threadSafeSceneGraph", SceneGraphNode.getThreadSafe()));
 		SceneGraphNode.setThreadSafe(threadSafeChecker.isSelected());
 		colorChooserModeCombo.setSelectedIndex(c.getProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex()));
-		setToolBarVisible(c.getProperty(getClass(), "toolBarVisible", isToolBarVisible()));
+		showMenubarToggle.setSelected(c.getProperty(getClass(), "showMenuBar", showMenubarToggle.isSelected()));
+		showToolbarToggle.setSelected(c.getProperty(getClass(), "showToolBar", showToolbarToggle.isSelected()));
 		super.restoreStates(c);
 	}
 	
@@ -168,24 +195,22 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
-		toolBar = c.getPlugin(ViewToolBar.class);
-		setToolBarVisible(isToolBarVisible());
-		toolBar.getToolBarComponent().addComponentListener(this);
+		viewMenuBar = c.getPlugin(ViewMenuBar.class);
+		viewMenuBar.addMenuSeparator(getClass(), 1.0, "Window");
+		viewMenuBar.addMenuItem(getClass(), 1.1, showMenubarToggle.createMenuItem(), "Window");
+		viewMenuBar.addMenuItem(getClass(), 1.2, showToolbarToggle.createMenuItem(), "Window");
+		frontendListener.setShowMenuBar(showMenubarToggle.isSelected());
+		frontendListener.setShowToolBar(showToolbarToggle.isSelected());
 	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
-		toolBar.getToolBarComponent().removeComponentListener(this);
+		viewMenuBar.removeAll(getClass());
 	}
-	public void componentHidden(ComponentEvent e) {
-		setToolBarVisible(false);
+
+	public void setFrontendListener(FrontendListener l) {
+		frontendListener = l;
 	}
-	public void componentMoved(ComponentEvent e) {
-	}
-	public void componentResized(ComponentEvent e) {
-	}
-	public void componentShown(ComponentEvent e) {
-		setToolBarVisible(true);
-	}
+
 }

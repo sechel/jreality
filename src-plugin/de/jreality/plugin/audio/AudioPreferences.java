@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -22,6 +23,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.audio.javasound.JavaSoundUtility;
 import de.jreality.plugin.audio.Audio.BackendType;
 import de.jreality.plugin.audio.Audio.InterpolationType;
 import de.jreality.plugin.icon.ImageHook;
@@ -57,10 +59,12 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		linearChecker = new JRadioButton("Linear"),
 		cosineChecker = new JRadioButton("Cosine"),
 		cubicChecker = new JRadioButton("Cubic");
+	private JCheckBox
+		chooseFirstJavaSoundMixer = new JCheckBox("Always Use First Mixer", true);
 	private JButton applyButton = new JButton("Apply");
 	
 	private BackendType
-		backendType = BackendType.noSound;
+		backendType = BackendType.javaSound;
 	private InterpolationType
 		interpolationType = InterpolationType.cubicInterpolation;
 	private List<ChangeListener>
@@ -96,6 +100,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaOptions.setLayout(new GridBagLayout());
 		javaOptions.add(new JLabel("Frame Size"), c1);
 		javaOptions.add(frameSizeSpinner, c2);
+		javaOptions.add(chooseFirstJavaSoundMixer, c2);
 		mainPage.add(javaOptions, c2);
 		
 		jackOptions.setBorder(BorderFactory.createTitledBorder("JACK Options"));
@@ -142,6 +147,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		cosineChecker.addActionListener(this);
 		cubicChecker.addActionListener(this);
 		applyButton.addActionListener(this);
+		chooseFirstJavaSoundMixer.addActionListener(this);
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -175,6 +181,9 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		}
 		if (applyButton == s) {
 			fireChanged();
+		}
+		if (chooseFirstJavaSoundMixer == s) {
+			JavaSoundUtility.chooseFirstMixer = chooseFirstJavaSoundMixer.isSelected();
 		}
 	}
 	
@@ -270,6 +279,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		c.storeProperty(getClass(), "jackLabel", jackLabelField.getText());
 		c.storeProperty(getClass(), "jackTarget", jackTargetField.getText());
 		c.storeProperty(getClass(), "retries", retriesModel.getNumber().intValue());
+		c.storeProperty(getClass(), "chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected());
 	}
 	
 	@Override
@@ -312,5 +322,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		jackLabelField.setText(c.getProperty(getClass(), "jackLabel", jackLabelField.getText()));
 		jackTargetField.setText(c.getProperty(getClass(), "jackTarget", jackTargetField.getText()));
 		retriesModel.setValue(c.getProperty(getClass(), "retries", retriesModel.getNumber().intValue()));
+		chooseFirstJavaSoundMixer.setSelected(c.getProperty(getClass(), "chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected()));
 	}
 }

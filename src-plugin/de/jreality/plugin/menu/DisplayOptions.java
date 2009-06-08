@@ -107,7 +107,7 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 		PluginInfo info = new PluginInfo();
 		info.name = "Display Options";
 		info.vendorName = "Peter Brinkmann"; 
-		info.icon = ImageHook.getIcon("camera.png");
+		info.icon = ImageHook.getIcon("monitor.png");
 		return info;
 	}
 
