@@ -56,7 +56,6 @@ public class LowPassProcessor implements SampleProcessor {
 	}
 
 	public void setProperties(EffectiveAppearance app) {
-		// TODO: implement properly...
-		lpf.setCutOff(1000);
+		setCutOff(app.getAttribute("lowPassProcessorCutOff", 44000));
 	}
 }
