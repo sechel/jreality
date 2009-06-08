@@ -44,7 +44,7 @@
 	<classpathentry kind="lib" path="lib/bsh.jar"/>
 	<classpathentry kind="lib" path="lib/iText-2.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
-	<classpathentry kind="lib" path="lib/jRWorkspacePluginSDK.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jRWorkspacePluginSDK.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/vrData.jar"/>
 	<classpathentry kind="lib" path="lib/jjack_min.jar"/>
