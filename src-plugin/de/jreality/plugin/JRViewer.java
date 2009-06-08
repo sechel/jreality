@@ -49,10 +49,6 @@ import de.jreality.util.Secure;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.lnfswitch.LookAndFeelSwitch;
-import de.varylab.jrworkspace.plugin.lnfswitch.plugin.CrossPlatformLnF;
-import de.varylab.jrworkspace.plugin.lnfswitch.plugin.NimbusLnF;
-import de.varylab.jrworkspace.plugin.lnfswitch.plugin.SystemLookAndFeel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
@@ -69,6 +65,15 @@ public class JRViewer {
 	
 	static {
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		String lnfClass = UIManager.getSystemLookAndFeelClassName();
+		if (lnfClass.contains("Aqua") || lnfClass.contains("Windows")) {
+			Secure.setProperty("apple.laf.useScreenMenuBar", "true");
+			try {
+				UIManager.setLookAndFeel(lnfClass);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	
@@ -105,17 +110,8 @@ public class JRViewer {
 	 * @param s the scene
 	 */
 	public JRViewer(JrScene s) {
-		String lnfClass = UIManager.getSystemLookAndFeelClassName();
-		if (lnfClass.contains("Aqua")) {
-			c.setManageLookAndFeel(false);
-			Secure.setProperty("apple.laf.useScreenMenuBar", "true");
-			try {
-				UIManager.setLookAndFeel(lnfClass);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 		setShowPanelSlots(false, false, false, false);
+		c.setManageLookAndFeel(false);
 		c.setPropertiesFile(null);
 		c.registerPlugin(view);
 		c.registerPlugin(viewPreferences);
@@ -328,18 +324,7 @@ public class JRViewer {
 		c.registerPlugin(new CameraMenu());
 	}
 
-	/**
-	 * Swing look and feel support. A preference page
-	 * with look and feel options is added. 
-	 */
-	public void addLookAndFeelSupport() {
-		c.registerPlugin(new LookAndFeelSwitch());
-		c.registerPlugin(new CrossPlatformLnF());
-		c.registerPlugin(new SystemLookAndFeel());
-		c.registerPlugin(new NimbusLnF());
-	}
-	
-	
+
 	/**
 	 * Virtual reality support. A sky box and environment map, 
 	 * a terrain and a movable avatar
@@ -447,7 +432,6 @@ public class JRViewer {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addVRSupport();
-		v.addLookAndFeelSupport();
 		v.addAudioSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
