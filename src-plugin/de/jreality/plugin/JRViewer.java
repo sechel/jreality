@@ -302,11 +302,13 @@ public class JRViewer {
 	}
 	
 	/**
-	 * Registers advanced content tools and UI plug-ins
+	 * Registers advanced content tools. Includes an appearance
+	 * inspector, transformation tools, and file loaders
 	 */
 	public void addContentUI() {
 		c.registerPlugin(new ContentTools());
 		c.registerPlugin(new ContentAppearance());
+		c.registerPlugin(new ContentLoader());
 	}
 	
 	/**
