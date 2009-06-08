@@ -312,8 +312,6 @@ public class JRViewer {
 		
 		c.registerPlugin(new ExportMenu());
 		c.registerPlugin(new CameraMenu());
-		
-		c.registerPlugin(new ViewPreferences());
 	}
 
 	
