@@ -19,7 +19,29 @@ import de.sciss.net.OSCServer;
 
 
 /**
- * Receives WiiMote events via OSC, intended to work with DarwiinRemoteOSC (http://mac.softpedia.com/get/Utilities/darwiinremoteOSC.shtml)
+ * Receives WiiMote events via OSC
+ * 
+ * Make sure to uncomment the WiiMoteOSC bits in toolconfig.xml if you want to use this driver.
+ * 
+ * The OSC detour is a bit of a kludge, but unfortunately none of the Java WiiMote libraries were
+ * satisfactory, and the Bluetooth libraries for Java didn't seem to work well with WiiMotes, either.
+ * 
+ * 
+ * Instructions for Mac OS X:
+ *    - Install DarwiinRemoteOSC (http://mac.softpedia.com/get/Utilities/darwiinremoteOSC.shtml).
+ *    - Launch DarwiinRemoteOSC and pair your WiiMote with the computer (i.e., push 1 and 2 on the WiiMote
+ *      at the same time).  After a few seconds, you should see some squiggly lines in the DarwiinRemoteOSC
+ *      window if you shake the WiiMote.
+ * 
+ * Instructions for Linux:
+ *    - Install wiiosc (http://www.nescivi.nl/wiiosc/).
+ *    - Launch wiiosc from the command line, with the following parameters:
+ *         wiiosc 5600 57150 127.0.0.1 auto
+ *      Pair your WiiMote with your computer (i.e., push 1 and 2 on the WiiMote at the same time).  After
+ *      a few seconds, wiiosc should confirm the connection with the WiiMote.
+ *      
+ * Instructions for Windows:
+ *    - Not sure; if you're lucky, you may be able to install wiiosc and use the Linux approach.
  * 
  * @author brinkman
  *
@@ -92,6 +114,9 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 			return;
 		}
 		String name = msg.getName();
+		if (!name.startsWith("/wii/")) {
+			return;
+		}
 		if (ORIENTATION.equals(name)) {
 			if (pointerSlot!=null || evolutionSlot!=null) {
 				Object arg = msg.getArg(0);
@@ -101,14 +126,55 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 				orientationEvent(roll, pitch);
 			}
 		} else if (BATTERY.equals(name)) {
-			float level = (Float) msg.getArg(0);
-			System.err.println("WiiMote battery level: "+level);
+			showBattery((Float) msg.getArg(0));
 		} else {
 			InputSlot slot = buttonSlots.get(name);
 			if (slot!=null) {
 				buttonEvent(slot, (Integer) msg.getArg(0));
+			} else if (!name.equals("/wii/acc")) {
+				handleLinuxEvent(msg);
 			}
 		}
+	}
+
+	private float x, y, z;
+	private static final float RAD2DEG = 180/(float) Math.PI;
+	private Map<String, Integer> buttonStates = new HashMap<String, Integer>();
+
+	private void handleLinuxEvent(OSCMessage msg) {
+		try {
+			int id = (Integer) msg.getArg(0);
+			if (id!=0) return;
+		} catch(Exception e) {
+			return;
+		}
+		String name = msg.getName();
+		if (name.startsWith("/wii/keys/")) {
+			String key = name.substring(10);
+			Integer state = (Integer) msg.getArg(1);
+			if (!state.equals(buttonStates.get(key))) {
+				buttonStates.put(key, state);
+				InputSlot slot = buttonSlots.get("/wii/button/"+key);
+				if (slot!=null) {
+					buttonEvent(slot, state);
+				}
+			}
+		} else if (name.equals("/wii/acc/x")) {
+			x = 10*((Float) msg.getArg(1))-5;
+		} else if (name.equals("/wii/acc/y")) {
+			y = 10*((Float) msg.getArg(1))-5;
+		} else if (name.equals("/wii/acc/z")) {
+			z = 10*((Float) msg.getArg(1))-5;
+			float pitch = (float) Math.atan2(y, z)*RAD2DEG;
+			float roll = (float) Math.atan2(x, z)*RAD2DEG;
+			orientationEvent(roll, pitch);
+		} else if (name.equals("/wii/battery")) {
+			showBattery((Float) msg.getArg(1));
+		}
+	}
+
+	private void showBattery(float level) {
+		System.err.println("WiiMote battery level: "+level);
 	}
 
 	private void buttonEvent(InputSlot slot, int status) {
@@ -196,4 +262,4 @@ public class WiiMoteOSC implements RawDevice, OSCListener {
 /nunchuk/button/c , i
 /nunchuk/acc , fff
 /nunchuk/orientation , ff
-*/
+ */
