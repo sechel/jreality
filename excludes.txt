@@ -15,4 +15,4 @@
 **/JLink*.java
 
 **/SwtExample.java
-**/CsoundNode.java
+**/csound/**
