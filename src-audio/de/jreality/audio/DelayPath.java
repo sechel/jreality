@@ -141,7 +141,8 @@ public class DelayPath implements SoundPath {
 		boolean sourceActive = evaluateSourceFrame(frameSize);
 		encodeFrame(enc, frameSize, directionlessBuffer);
 
-		if (sourceActive || frameCount>0 || currentFrame!=null || distanceCue.hasMore() || directionlessCue.hasMore()) {
+		if (sourceActive || frameCount>0 || currentFrame!=null || 
+				preProcessor.hasMore() || distanceCue.hasMore() || directionlessCue.hasMore()) {
 			return true;   // still rendering...
 		} else {
 			reset();

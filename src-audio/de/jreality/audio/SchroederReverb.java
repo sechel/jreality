@@ -72,6 +72,10 @@ public class SchroederReverb implements SampleProcessor {
 	public int getSampleRate() {
 		return reader.getSampleRate();
 	}
+	
+	public boolean hasMore() {
+		return false;
+	}
 
 	public int read(float[] buf, int initialIndex, int samples) {
 		final int nRead = reader.read(buf, initialIndex, samples);

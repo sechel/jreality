@@ -68,4 +68,8 @@ public class EarlyReflections implements SampleProcessor {
 		}
 		return nRead;
 	}
+	
+	public boolean hasMore() {
+		return false;  // TODO: implement properly
+	}
 }

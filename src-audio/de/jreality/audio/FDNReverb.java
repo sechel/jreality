@@ -69,6 +69,10 @@ public class FDNReverb implements SampleProcessor {
 	public int getSampleRate() {
 		return reader.getSampleRate();
 	}
+	
+	public boolean hasMore() {
+		return false;  // TODO: implement properly
+	}
 
 	public synchronized int read(float[] buffer, int i0, int samples) {
 		int nRead = reader.read(buffer, i0, samples);

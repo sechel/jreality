@@ -45,6 +45,15 @@ public class SampleProcessorChain implements SampleProcessor {
 	public int getSampleRate() {
 		return last.getSampleRate();
 	}
+	
+	public boolean hasMore() {
+		for(SampleProcessor proc: procs) {
+			if (proc.hasMore()) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public int read(float[] buffer, int initialIndex, int samples) {
 		return last.read(buffer, initialIndex, samples);

@@ -18,6 +18,10 @@ public interface SampleProcessor extends SampleReader {
 	 */
 	public void setProperties(EffectiveAppearance app);
 
+	/**
+	 * @return true if we have more nonzero samples to render, even if all future inputs are zero
+	 */
+	public boolean hasMore();
 	
 	public class NullProcessor implements SampleProcessor {
 		private SampleReader reader;
@@ -41,6 +45,9 @@ public interface SampleProcessor extends SampleReader {
 		}
 		public int read(float[] buffer, int initialIndex, int samples) {
 			return reader.read(buffer, initialIndex, samples);
+		}
+		public boolean hasMore() {
+			return false;
 		}
 	}
 }

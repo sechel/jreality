@@ -69,6 +69,10 @@ public class ShiftProcessor implements SampleProcessor {
 	public int getSampleRate() {
 		return sampleRate;
 	}
+	
+	public boolean hasMore() {
+		return false;
+	}
 
 	public int read(float[] buffer, int initialIndex, int samples) {
 		int nRead = readInput(samples);
