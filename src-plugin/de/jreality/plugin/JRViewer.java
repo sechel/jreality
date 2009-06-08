@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
+import javax.swing.UIManager;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
@@ -101,6 +102,15 @@ public class JRViewer {
 	 * @param s the scene
 	 */
 	public JRViewer(JrScene s) {
+		String lnfClass = UIManager.getSystemLookAndFeelClassName();
+		if (lnfClass.contains("Aqua")) {
+			c.setManageLookAndFeel(false);
+			try {
+				UIManager.setLookAndFeel(lnfClass);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		configurePanelSlotsVisibility(false, false, false, false);
 		c.setPropertiesFile(null);
 		c.registerPlugin(view);
