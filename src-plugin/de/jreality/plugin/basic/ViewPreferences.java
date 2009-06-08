@@ -25,6 +25,9 @@ import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
 public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener, FrontendFlavor {
 
+	private static final boolean DEFAULT_SHOW_MENU = true;
+	private static final boolean DEFAULT_SHOW_TOOLBAR = false;
+	
 	private ViewMenuBar
 		viewMenuBar = null;
 	private JPanel 
@@ -76,7 +79,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 				}
 			}
 		};
-		showMenubarToggle.setSelected(true);
+		showMenubarToggle.setSelected(DEFAULT_SHOW_MENU);
 		showToolbarToggle = new AbstractJrToggleAction("Show Tool Bar") {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -86,7 +89,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 				}
 			}
 		};
-		showToolbarToggle.setSelected(true);
+		showToolbarToggle.setSelected(DEFAULT_SHOW_TOOLBAR);
 	}
 	
 	@Override

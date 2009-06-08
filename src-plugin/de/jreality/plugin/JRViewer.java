@@ -101,6 +101,7 @@ public class JRViewer {
 	 * @param s the scene
 	 */
 	public JRViewer(JrScene s) {
+		configurePanelSlotsVisibility(false, false, false, false);
 		c.setPropertiesFile(null);
 		c.registerPlugin(view);
 		c.registerPlugin(new Scene(s));
@@ -225,13 +226,13 @@ public class JRViewer {
 	
 	
 	/**
-	 * Configures the shrink panels slots
+	 * Configures the visibility of the shrink panels slots
 	 * @param left
 	 * @param right
 	 * @param top
 	 * @param bottom
 	 */
-	public void configurePanelSlots(boolean left, boolean right, boolean top, boolean bottom) {
+	public void configurePanelSlotsVisibility(boolean left, boolean right, boolean top, boolean bottom) {
 		view.setShowLeft(left);
 		view.setShowRight(right);
 		view.setShowTop(top);
@@ -319,7 +320,6 @@ public class JRViewer {
 		}
 		v.addBasicUI();
 		v.getPlugin(ViewPreferences.class).setShowToolBar(false);
-		v.configurePanelSlots(false, false, false, false);
 		v.startup();
 		return v.getPlugin(View.class).getViewer();
 	}
