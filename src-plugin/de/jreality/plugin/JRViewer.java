@@ -45,6 +45,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.util.Secure;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -60,6 +61,8 @@ public class JRViewer {
 		c = new SimpleController();
 	private View
 		view = new View();
+	private ViewPreferences
+		viewPreferences = new ViewPreferences();
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
 	
@@ -105,15 +108,17 @@ public class JRViewer {
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua")) {
 			c.setManageLookAndFeel(false);
+			Secure.setProperty("apple.laf.useScreenMenuBar", "true");
 			try {
 				UIManager.setLookAndFeel(lnfClass);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		configurePanelSlotsVisibility(false, false, false, false);
+		setShowPanelSlots(false, false, false, false);
 		c.setPropertiesFile(null);
 		c.registerPlugin(view);
+		c.registerPlugin(viewPreferences);
 		c.registerPlugin(new Scene(s));
 		c.registerPlugin(new ToolSystemPlugin());
 		lastViewer = new WeakReference<JRViewer>(this);
@@ -242,14 +247,35 @@ public class JRViewer {
 	 * @param top
 	 * @param bottom
 	 */
-	public void configurePanelSlotsVisibility(boolean left, boolean right, boolean top, boolean bottom) {
+	public void setShowPanelSlots(boolean left, boolean right, boolean top, boolean bottom) {
 		view.setShowLeft(left);
 		view.setShowRight(right);
 		view.setShowTop(top);
 		view.setShowBottom(bottom);
 	}
 	
+	/**
+	 * Show or hide the menu bar
+	 * @param show
+	 */
+	public void setShowMenuBar(boolean show) {
+		viewPreferences.setShowMenuBar(show);
+	}
 	
+	/**
+	 * Show or hide the tool bar 
+	 * @param show
+	 */
+	public void setShowToolBar(boolean show) {
+		viewPreferences.setShowToolBar(show);
+	}
+	
+	
+	/**
+	 * Registers a custom {@link Content} plug-in which is
+	 * an implementation of the abstract class {@link Content}
+	 * @param contentPlugin a content plug-in
+	 */
 	public void registerCustomContent(Content contentPlugin) {
 		c.registerPlugin(contentPlugin);
 	}
@@ -329,7 +355,6 @@ public class JRViewer {
 			v.registerPlugin(new ContentLoader());
 		}
 		v.addBasicUI();
-		v.getPlugin(ViewPreferences.class).setShowToolBar(false);
 		v.startup();
 		return v.getPlugin(View.class).getViewer();
 	}
