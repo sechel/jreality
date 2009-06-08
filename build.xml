@@ -59,7 +59,7 @@
 			<include name="jReality-tools.jar"/>
 		</fileset>
 		<fileset dir="lib">
-			<include name="jjack.jar"/>
+			<include name="jjack_min.jar"/>
 		</fileset>
 	</path>
 
@@ -676,7 +676,7 @@
 		<copy file="${lib}/janino.jar" todir="release/tmp/lib" />
 		<copy file="${lib}/colorpicker.jar" todir="release/tmp/lib" />
 		<copy file="${lib}/jRWorkspacePluginSDK.jar" todir="release/tmp/lib" />
-		<copy file="${lib}/jjack.jar" todir="release/tmp/lib" />
+		<copy file="${lib}/jjack_min.jar" todir="release/tmp/lib" />
 		<copy todir="release/tmp/lib">
 			<fileset dir="3rd-party" />
 		</copy>

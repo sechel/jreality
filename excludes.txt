@@ -16,4 +16,3 @@
 
 **/SwtExample.java
 **/CsoundNode.java
-**/osc/**
