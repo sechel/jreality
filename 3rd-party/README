@@ -69,6 +69,11 @@ jTerm
     - used as a terminal for the beanshell in the ViewerApp
     - http://www.jtem.de
 
+jRworkspaceSDK
+	- Plug-in SDK - LGPL
+	- used for the JRViewer plug-in system
+	- http://www.sechel.de
+
 Sunflow
     - java rendering system for photo-realistic image synthesis - MIT License
     - uses janino (http://www.janino.net/) - BSD License

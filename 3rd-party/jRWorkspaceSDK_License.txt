@@ -1,0 +1,3 @@
+jRworkspaceSDK.jar from http://www.sechel.de
+can be licensed with the LGPL:
+http://creativecommons.org/licenses/LGPL/2.1/
