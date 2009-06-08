@@ -70,7 +70,7 @@ jTerm
     - http://www.jtem.de
 
 jRworkspaceSDK
-	- Plug-in SDK - LGPL
+	- Plug-in SDK - BSD
 	- used for the JRViewer plug-in system
 	- http://www.sechel.de
 
