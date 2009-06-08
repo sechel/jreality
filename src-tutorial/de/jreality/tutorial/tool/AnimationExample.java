@@ -21,7 +21,7 @@ public class AnimationExample {
 	SceneGraphComponent onEllipseCmp = new SceneGraphComponent("on ellipse");
 
 	// half-axes of the ellipse
-	final double a = 50, b = 10;
+	final double a = 15, b = 7.5;
 	
 	// angular velocity along the ellipse
 	final double omega = 1;
@@ -29,7 +29,7 @@ public class AnimationExample {
 	// the point on the ellipse
 	double[] gamma = new double[3];
 	// the tangent vector at the current ellipse point
-	double[] gammaDot = new double[3];	
+	double[] gammaDot = new double[3];
 	// the tangent vector at t=0
 	double[] gammaDot0 = new double[]{0,0,-1};
 
@@ -81,7 +81,7 @@ public class AnimationExample {
 			// no bear available
 			SceneGraphComponent icoCmp = new SceneGraphComponent();
 			MatrixBuilder.euclidean().translate(0,1.7,0).assignTo(icoCmp);
-			icoCmp.setGeometry(Primitives.icosahedron());
+			icoCmp.setGeometry(Primitives.box(1, 2, 5, true));
 			onEllipseCmp.addChild(icoCmp);
 		}
 		centerCmp.addChild(onEllipseCmp);
