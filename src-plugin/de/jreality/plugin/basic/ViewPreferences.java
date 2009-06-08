@@ -120,7 +120,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	
 	
 	public void setShowToolBar(boolean show) {
-		showToolbarToggle.setSelected(false);
+		showToolbarToggle.setSelected(show);
 		if (frontendListener != null) {
 			frontendListener.setShowToolBar(showToolbarToggle.isSelected());
 		}

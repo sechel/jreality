@@ -430,6 +430,8 @@ public class JRViewer {
 	 */
 	public static void main(String[] args) {
 		JRViewer v = new JRViewer();
+		v.setShowPanelSlots(true, true, true, true);
+		v.setShowToolBar(true);
 		v.addBasicUI();
 		v.addContentUI();
 		v.addVRSupport();
