@@ -77,6 +77,10 @@ public final class AxisState implements Serializable
     {
         return state/(double)Integer.MAX_VALUE;
     }
+    /**
+     * returns true if the double value is 1 or -1.
+     * @return
+     */
     public boolean isPressed() {
     	return state==Integer.MAX_VALUE || state == MINUS_PRESSED;
     }
