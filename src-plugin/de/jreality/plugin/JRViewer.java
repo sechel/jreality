@@ -57,6 +57,8 @@ public class JRViewer {
 
 	private SimpleController
 		c = new SimpleController();
+	private View
+		view = new View();
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
 	
@@ -88,7 +90,9 @@ public class JRViewer {
 	 */
 	public JRViewer(boolean addLights) {
 		this(null);
-		if (addLights) c.registerPlugin(new Lights());
+		if (addLights) {
+			c.registerPlugin(new Lights());
+		}
 	}
 
 	/**
@@ -97,17 +101,8 @@ public class JRViewer {
 	 * @param s the scene
 	 */
 	public JRViewer(JrScene s) {
-		// disable automatic property saving - should be changed in simple controller.
 		c.setPropertiesFile(null);
-		
-		View v = new View();
-		v.setShowTop(false);
-		v.setShowBottom(false);
-		v.setShowLeft(false);
-		v.setShowRight(false);
-		v.setHidePanels(false);
-		c.registerPlugin(v);
-		
+		c.registerPlugin(view);
 		c.registerPlugin(new Scene(s));
 		c.registerPlugin(new ToolSystemPlugin());
 		lastViewer = new WeakReference<JRViewer>(this);
@@ -229,6 +224,21 @@ public class JRViewer {
 	}
 	
 	
+	/**
+	 * Configures the shrink panels slots
+	 * @param left
+	 * @param right
+	 * @param top
+	 * @param bottom
+	 */
+	public void configurePanelSlots(boolean left, boolean right, boolean top, boolean bottom) {
+		view.setShowLeft(left);
+		view.setShowRight(right);
+		view.setShowTop(top);
+		view.setShowBottom(bottom);
+	}
+	
+	
 	public void registerCustomContent(Content contentPlugin) {
 		c.registerPlugin(contentPlugin);
 	}
@@ -236,11 +246,6 @@ public class JRViewer {
 	
 	
 	public void addContentSupport(ContentType type) {
-// users should explicitly add ContentAppearance if they want it.
-//		c.registerPlugin(new ContentAppearance());
-// same for the content loader, since content is usually set
-// by the app developer
-//		c.registerPlugin(new ContentLoader());
 		switch (type) {
 			case Raw:
 				c.registerPlugin(new DirectContent());
@@ -307,10 +312,14 @@ public class JRViewer {
 		JRViewer v = new JRViewer();
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
-		if (node != null) v.registerPlugin(new ContentInjectionPlugin(node, true));
-		else v.registerPlugin(new ContentLoader());
+		if (node != null) {
+			v.registerPlugin(new ContentInjectionPlugin(node, true));
+		} else {
+			v.registerPlugin(new ContentLoader());
+		}
 		v.addBasicUI();
 		v.getPlugin(ViewPreferences.class).setShowToolBar(false);
+		v.configurePanelSlots(false, false, false, false);
 		v.startup();
 		return v.getPlugin(View.class).getViewer();
 	}
