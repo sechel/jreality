@@ -49,8 +49,8 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		bufferLength = frameSize * bytesPerSample * channels;
 		System.out.println("stereo out buffer size = "+outputLine.getBufferSize());
 		outputLine.open(af, bufferLength);
+		System.out.println("stereoOut bufferSize: requested="+bufferLength+" obtained="+outputLine.getBufferSize());
 		bufferLength=outputLine.getBufferSize();
-		System.out.println("stereoOut bufferSize="+outputLine.getBufferSize());
 		outputLine.start();
 		
 		if (WRITE_TO_FILE) try {
