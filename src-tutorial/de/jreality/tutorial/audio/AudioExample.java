@@ -32,7 +32,6 @@ public class AudioExample {
 		v.addBasicUI();
 		v.addAudioSupport();
 		v.addVRSupport();
-		v.setPropertiesFile("AudioExample.jrw");
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(getAudioComponent());
 		v.startup();
