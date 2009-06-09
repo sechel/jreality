@@ -101,28 +101,28 @@ public class ContentAppearance extends ContentPanel implements ColorPickerModeCh
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
-		appearanceInspector.setShowPoints(c.getProperty(getClass(), "showPoints", appearanceInspector.isShowPoints()));
-		appearanceInspector.setPointsReflecting(c.getProperty(getClass(), "pointsReflecting", appearanceInspector.isPointsReflecting()));
-		appearanceInspector.setPointRadius(c.getProperty(getClass(), "pointRadius", appearanceInspector.getPointRadius()));
-		appearanceInspector.setPointColor(c.getProperty(getClass(), "pointColor", appearanceInspector.getPointColor()));
-		appearanceInspector.setShowLines(c.getProperty(getClass(), "showLines", appearanceInspector.isShowLines()));
-		appearanceInspector.setLinesReflecting(c.getProperty(getClass(), "linesReflecting", appearanceInspector.isLinesReflecting()));
-		appearanceInspector.setTubeRadius(c.getProperty(getClass(), "tubeRadius", appearanceInspector.getTubeRadius()));
-		appearanceInspector.setLineColor(c.getProperty(getClass(), "lineColor", appearanceInspector.getLineColor()));
-		appearanceInspector.setShowFaces(c.getProperty(getClass(), "showFaces", appearanceInspector.isShowFaces()));
-		appearanceInspector.setFacesReflecting(c.getProperty(getClass(), "facesReflecting", appearanceInspector.isFacesReflecting()));
-		appearanceInspector.setFaceReflection(c.getProperty(getClass(), "faceReflection", appearanceInspector.getFaceReflection()));
-		appearanceInspector.setLineReflection(c.getProperty(getClass(), "lineReflection", appearanceInspector.getLineReflection()));
-		appearanceInspector.setPointReflection(c.getProperty(getClass(), "pointReflection", appearanceInspector.getPointReflection()));
-		appearanceInspector.setFaceColor(c.getProperty(getClass(), "faceColor", appearanceInspector.getFaceColor()));
-		appearanceInspector.setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", appearanceInspector.isTransparencyEnabled()));
-		appearanceInspector.setTransparency(c.getProperty(getClass(), "transparency", appearanceInspector.getTransparency()));
-		appearanceInspector.setFacesFlat(c.getProperty(getClass(), "facesFlat", appearanceInspector.isFacesFlat()));
-		appearanceInspector.setTubes(c.getProperty(getClass(), "tubes", appearanceInspector.isTubes()));
-		appearanceInspector.setSpheres(c.getProperty(getClass(), "spheres", appearanceInspector.isSpheres()));
+		appearanceInspector.setShowPoints(c.getProperty(getClass(), "showPoints", DEFAULT_SHOW_POINTS));
+		appearanceInspector.setPointsReflecting(c.getProperty(getClass(), "pointsReflecting", DEFAULT_POINTS_REFLECTING));
+		appearanceInspector.setPointRadius(c.getProperty(getClass(), "pointRadius", DEFAULT_POINT_RADIUS));
+		appearanceInspector.setPointColor(c.getProperty(getClass(), "pointColor", DEFAULT_POINT_COLOR));
+		appearanceInspector.setShowLines(c.getProperty(getClass(), "showLines", DEFAULT_SHOW_LINES));
+		appearanceInspector.setLinesReflecting(c.getProperty(getClass(), "linesReflecting", DEFAULT_LINES_REFLECTING));
+		appearanceInspector.setTubeRadius(c.getProperty(getClass(), "tubeRadius", DEFAULT_TUBE_RADIUS));
+		appearanceInspector.setLineColor(c.getProperty(getClass(), "lineColor", DEFAULT_LINE_COLOR));
+		appearanceInspector.setShowFaces(c.getProperty(getClass(), "showFaces", DEFAULT_SHOW_FACES));
+		appearanceInspector.setFacesReflecting(c.getProperty(getClass(), "facesReflecting", DEFAULT_FACES_REFLECTING));
+		appearanceInspector.setFaceReflection(c.getProperty(getClass(), "faceReflection", DEFAULT_FACE_REFLECTION));
+		appearanceInspector.setLineReflection(c.getProperty(getClass(), "lineReflection", DEFAULT_LINE_REFLECTION));
+		appearanceInspector.setPointReflection(c.getProperty(getClass(), "pointReflection", DEFAULT_POINT_REFLECTION));
+		appearanceInspector.setFaceColor(c.getProperty(getClass(), "faceColor", DEFAULT_FACE_COLOR));
+		appearanceInspector.setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
+		appearanceInspector.setTransparency(c.getProperty(getClass(), "transparency", DEFAULT_TRANSPARENCY));
+		appearanceInspector.setFacesFlat(c.getProperty(getClass(), "facesFlat", DEFAULT_FACES_FLAT));
+		appearanceInspector.setTubes(c.getProperty(getClass(), "tubes", DEFAULT_TUBES));
+		appearanceInspector.setSpheres(c.getProperty(getClass(), "spheres", DEFAULT_SPHERES));
 		appearanceInspector.setTextures(c.getProperty(getClass(), "textures", textures));
-		appearanceInspector.setTexture(c.getProperty(getClass(), "texture", appearanceInspector.getTexture()));
-		appearanceInspector.setTextureScale(c.getProperty(getClass(), "textureScale", appearanceInspector.getTextureScale()));
+		appearanceInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
+		appearanceInspector.setTextureScale(c.getProperty(getClass(), "textureScale", DEFAULT_TEXTURE_SCALE));
 		super.restoreStates(c);
 	}
 	

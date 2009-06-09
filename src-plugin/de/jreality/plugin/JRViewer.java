@@ -19,6 +19,7 @@ import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Inspector;
+import de.jreality.plugin.basic.PropertiesMenu;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.Shell;
 import de.jreality.plugin.basic.ToolSystemPlugin;
@@ -322,6 +323,7 @@ public class JRViewer {
 		
 		c.registerPlugin(new ExportMenu());
 		c.registerPlugin(new CameraMenu());
+		c.registerPlugin(new PropertiesMenu());
 	}
 
 
@@ -435,7 +437,6 @@ public class JRViewer {
 		v.addBasicUI();
 		v.addContentUI();
 		v.addVRSupport();
-		v.addAudioSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
 		v.startup();
