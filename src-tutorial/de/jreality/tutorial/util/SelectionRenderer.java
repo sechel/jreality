@@ -18,13 +18,13 @@ import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionListener;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
 
 /**
- * A class which handles rendering the selection coming from a selection manager (see {@link SelectionManagerInterface})
+ * A class which handles rendering the selection coming from a selection manager (see {@link SelectionManager})
  * and to be rendered into an instance of {@link Viewer}.
  * @author gunn
  *
@@ -38,7 +38,7 @@ public class SelectionRenderer implements SelectionListener {
 	boolean visible = false;
 	// we need to know which selection manager we listen to, and which viewer
 	// we draw into
-	public SelectionRenderer(SelectionManagerInterface sm, Viewer v)	{
+	public SelectionRenderer(SelectionManager sm, Viewer v)	{
 		viewer = v;
 		boundKit = SceneGraphUtility.createFullSceneGraphComponent("boundKit");
 		boundAppearance = boundKit.getAppearance();
