@@ -32,5 +32,10 @@ public class VRPanel extends ShrinkPanelAggregator {
 		info.icon = ImageHook.getIcon("controller.png");
 		return info;
 	}
+	
+	@Override
+	public String getHelpTitle() {
+		return "VR Controls";
+	}
 
 }

@@ -91,4 +91,21 @@ public class Inspector extends ShrinkPanelPlugin {
 		}
 	}
 	
+	
+	@Override
+	public String getHelpDocument() {
+		return "Navigator.html";
+	}
+	
+	@Override
+	public String getHelpPath() {
+		return "../help/";
+	}
+	
+	@Override
+	public Class<?> getHelpHandle() {
+		return getClass();
+	}
+	
+	
 }

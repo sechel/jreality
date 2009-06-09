@@ -32,5 +32,9 @@ public class MainPanel extends ShrinkPanelAggregator {
 		return info;
 	}
 	
+	@Override
+	public String getHelpTitle() {
+		return "Main Tools";
+	}
 	
 }

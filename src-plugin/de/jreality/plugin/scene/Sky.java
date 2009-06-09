@@ -13,7 +13,6 @@ import java.util.HashMap;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -35,10 +34,9 @@ import de.jreality.util.SystemProperties;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.HelpFlavor;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
-public class Sky extends Plugin implements HelpFlavor {
+public class Sky extends Plugin {
 
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 
@@ -316,34 +314,6 @@ public class Sky extends Plugin implements HelpFlavor {
 					"failed to restore Sky directory "+directory
 			);
 		}
-	}
-	
-	
-	public String getHelpDocument() {
-		return "Sky.html";
-	}
-	
-	public String getHelpPath() {
-		return "../help/";
-	}
-	
-	public Class<?> getHelpHandle() {
-		return getClass();
-	}
-
-	public Icon getHelpIcon() {
-		return null;
-	}
-
-	public String getHelpStyleSheet() {
-		return null;
-	}
-
-	public String getHelpTitle() {
-		return "Sky";
-	}
-
-	public void setHelpListener(HelpListener l) {
 	}
 	
 }
