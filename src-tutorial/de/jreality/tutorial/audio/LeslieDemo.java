@@ -1,8 +1,6 @@
 package de.jreality.tutorial.audio;
 
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.InputStream;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
@@ -16,7 +14,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
-import de.jreality.tools.ActionTool;
 import de.jreality.tools.AnimatorTask;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.tools.DraggingTool;
@@ -100,18 +97,9 @@ public class LeslieDemo {
 		hub.addTool(new DraggingTool());
 		hub.addTool(new RotateTool());
 		hub.addTool(new LeslieTool());
+
+		source.start();
 		
-		ActionTool actionTool = new ActionTool("PanelActivation");
-		actionTool.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (source.getState() == AudioSource.State.RUNNING) {
-					source.pause();
-				} else {
-					source.start();
-				}
-			}
-		});
-		hub.addTool(actionTool);
 		return hub;
 	}
 

@@ -69,7 +69,7 @@ From command line:
   The commands to set the required classpath in a linux BASH are, for instance:
   
   // the jreality jars:
-  $> export CLASSPATH=dist/jReality-audio.jar:dist/jReality-backends-share.jar:dist/jReality-core.jar:dist/jReality-io.jar:dist/jReality-jogl.jar:dist/jReality-plugin.jar:dist/jReality-renderman.jar:dist/jReality-soft.jar:dist/jReality-sunflow.jar:dist/jReality-swing.jar:dist/jReality-tools.jar:dist/jReality-ui.jar:dist/jReality-vr.jar
+  $> export CLASSPATH=dist/jReality-audio.jar:dist/jReality-backends-share.jar:dist/jReality-core.jar:dist/jReality-io.jar:dist/jReality-jogl.jar:dist/jReality-plugin.jar:dist/jReality-renderman.jar:dist/jReality-soft.jar:dist/jReality-sunflow.jar:dist/jReality-swing.jar:dist/jReality-tools.jar:dist/jReality-ui.jar:dist/jReality-vr.jar:dist/jReality-tutorial.jar
   // the required 3rd-party libraries:
   $> export CLASSPATH=$CLASSPATH:lib/antlr.jar:lib/bsh.jar:lib/colorpicker.jar:lib/gluegen-rt.jar:lib/iText-2.1.3.jar:lib/janino.jar:lib/jogl.jar:lib/jRWorkspacePluginSDK.jar:lib/jtem-beans.jar:lib/jterm.jar:lib/sunflow.jar:lib/xpp3.jar:lib/xstream.jar
   // and a jar containing VR data, in particular textures and skyboxes:
@@ -78,9 +78,8 @@ From command line:
 Now you can run one of the examples included in jReality, for instance:
 
   $> java de.jreality.plugin.JRViewer
-  
 
-Enable OpenGL rendering:
+Now you shouls enable OpenGL rendering:
 
 To make use of OpenGL rendering, a native library is required. This
 library depends on the OS and is in a sub-folder of jni. Do the
@@ -88,8 +87,10 @@ following:
 
 Eclipse:
 - change the native library location for the source folder src-core.
-  Choose the folder under jni matching your platform (default is
-  jni/linux64).
+  Choose the folder under jni matching your platform, the default is
+  jni/linux64. Go to Build path->Source folders and change the native
+  library location of the src-core folder. See the jReality wiki for
+  more detailed information.
 
 From command line:
 - Look into the folder jni and see if there is a sub folder matching
@@ -113,6 +114,33 @@ VISTA BUG:
 For Windows Vista users we suggest to use the runtime option
 -Dsun.java2d.d3d=false
 to avoid graphics errors in the menu bar.
+
+
+**** JReality Examples ****
+
+To get an idea of jreality, please check out the following examples. Usually, the VR Viewer is used, that allows to walk around using WASD (holding down Ctrl increases walking speed), Space to jump and keep right mouse button pressed to enable mouse look.
+
+VR example, showing different example geometries. Use the GUI on the right to
+select different examples and change appearance in the ContentAppearance panel.
+  $> java de.jreality.tutorial.plugin.ViewerVRExamples
+
+Audio examples.
+  $> java de.jreality.tutorial.audio.AudioExample 
+  $> java de.jreality.tutorial.audio.DopplerDemo 
+
+  Let Leslie speaker rotate by typing PgUp or PgDn:
+  $> java de.jreality.tutorial.audio.LeslieDemo
+
+Misc:
+  type 1 to toggle camera paths
+  $> java de.jreality.tutorial.scene.CameraPathExample 
+
+
+To get a plain (VR) viewer for loading 3D files, try:
+  $> java de.jreality.plugin.JRViewer
+or
+  $> java de.jreality.plugin.JRViewer -vr
+  
 
 **** JREALITY WITH JAVA 5 ****
 
