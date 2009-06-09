@@ -204,6 +204,20 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 	
 	
 	@Override
+	public void storeStates(Controller c) throws Exception {
+		super.storeStates(c);
+		c.storeProperty(getClass(), "location", locationField.getText());
+	}
+
+	
+	@Override
+	public void restoreStates(Controller c) throws Exception {
+		super.restoreStates(c);
+		locationField.setText(c.getProperty(getClass(), "location", "http://www.sechel.de/models/"));
+	}
+	
+	
+	@Override
 	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
 		return View.class;
 	}
