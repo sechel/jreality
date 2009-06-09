@@ -1,5 +1,8 @@
 package de.jreality.plugin.audio;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -21,6 +24,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class Audio extends Plugin implements ChangeListener {
 
+	
 	public static enum BackendType {
 		noSound,
 		javaSound,
@@ -46,6 +50,10 @@ public class Audio extends Plugin implements ChangeListener {
 		interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
 	
 	private SceneGraphPath lastMicrophonePath;
+
+	int startupDelay=3500;
+	// timer used to delay audio launching on startup
+	Timer timer = new Timer();
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -71,6 +79,7 @@ public class Audio extends Plugin implements ChangeListener {
 
 
 	private void updateAudioRenderer() throws Exception {
+		
 		if (renderer != null) {
 			try {
 				renderer.shutdown();
@@ -132,7 +141,20 @@ public class Audio extends Plugin implements ChangeListener {
 			ajr.setRetries(prefs.getJackRetries());
 		}
 		
-		renderer.launch();
+		if (timer == null) renderer.launch();
+		else timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					renderer.launch();
+					System.out.println("launching delayed Audio render");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}, startupDelay);
+		timer = null;
 	}
 
 	@Override

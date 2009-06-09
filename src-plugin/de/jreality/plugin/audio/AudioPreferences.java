@@ -36,7 +36,7 @@ import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
-public class AudioPreferences extends Plugin implements PreferencesFlavor, ActionListener, ChangeListener {
+public class AudioPreferences extends Plugin implements PreferencesFlavor, ActionListener {
 	
 	private static final Integer DEFAULT_FRAME_SIZE = 2048;
 	
@@ -200,10 +200,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		if (sampleRateCombo == s) {
 			JavaSoundUtility.setSampleRate((Integer) sampleRateCombo.getSelectedItem());
 		}
-	}
-	
-	public void stateChanged(ChangeEvent e) {
-		fireChanged();
 	}
 	
 	protected void fireChanged() {
