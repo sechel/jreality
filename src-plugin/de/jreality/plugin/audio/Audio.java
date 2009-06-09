@@ -51,8 +51,7 @@ public class Audio extends Plugin implements ChangeListener {
 	
 	private SceneGraphPath lastMicrophonePath;
 
-	int startupDelay=3500;
-	// timer used to delay audio launching on startup
+	int startupDelay=4000;// timer used to delay audio launching on startup
 	Timer timer = new Timer();
 	
 	@Override
