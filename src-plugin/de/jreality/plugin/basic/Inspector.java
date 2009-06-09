@@ -18,6 +18,11 @@ public class Inspector extends ShrinkPanelPlugin {
 	private boolean receiveSelections = true;
 	private boolean propagateSelections = true;
 	
+	public Inspector() {
+		setInitialPosition(SHRINKER_RIGHT);
+	}
+	
+	
 	@Override
 	public void install(Controller c) throws Exception {
 		sceneViewPlugin = c.getPlugin(View.class);

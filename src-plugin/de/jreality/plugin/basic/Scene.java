@@ -4,6 +4,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.io.JrScene;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -82,6 +83,8 @@ public class Scene extends Plugin {
 		avatarPath.push(sceneRoot);
 		avatarPath.push(avatar);
 		defaultScene.addPath("avatarPath", avatarPath);
+		
+		MatrixBuilder.euclidean().translate(0,0,16).assignTo(avatar);
 		
 		//emptyPickPath/content
 		SceneGraphPath emptyPickPath = new SceneGraphPath();

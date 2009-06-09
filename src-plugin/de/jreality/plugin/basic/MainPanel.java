@@ -11,6 +11,7 @@ public class MainPanel extends ShrinkPanelAggregator {
 	public MainPanel() {
 		super();
 		shrinkPanel.setTitle("Main Tools");
+		shrinkPanel.setShrinked(true);
 	}
 	
 	

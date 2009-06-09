@@ -258,11 +258,12 @@ public class ContentTools extends Plugin {
 	}
 
 	private void installMenu(ViewMenuBar viewMenuBar) {
+		JMenu toolsMenu = new JMenu("Tools");
+		
 		viewMenuBar.addMenu(getClass(), 10.0, new JMenu("Content"));
 		viewMenuBar.addMenuItem(getClass(), 1.1, drag.createMenuItem(), "Content", "Tools");
 		viewMenuBar.addMenuItem(getClass(), 1.2, rotate.createMenuItem(), "Content", "Tools");
 		viewMenuBar.addMenuItem(getClass(), 1.3, snapToGrid.createMenuItem(), "Content", "Tools");
-		//viewMenuBar.addMenuSeparator(getClass(), 1.4, "Content");
 		viewMenuBar.addMenuItem(getClass(), 1.5, pickVertices.createMenuItem(), "Content", "Picking");
 		viewMenuBar.addMenuItem(getClass(), 1.6, pickEdges.createMenuItem(), "Content", "Picking");
 		viewMenuBar.addMenuItem(getClass(), 1.7, pickFaces.createMenuItem(), "Content", "Picking");

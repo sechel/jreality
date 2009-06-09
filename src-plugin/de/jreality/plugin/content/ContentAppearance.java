@@ -18,11 +18,11 @@ public class ContentAppearance extends ContentPanel implements ColorPickerModeCh
 
 	public static final boolean DEFAULT_SHOW_POINTS = true;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;
-	public static final double DEFAULT_POINT_RADIUS = .2;
+	public static final double DEFAULT_POINT_RADIUS = .6;
 	public static final Color DEFAULT_POINT_COLOR = Color.blue;
 	public static final boolean DEFAULT_SHOW_LINES = true;
 	public static final boolean DEFAULT_LINES_REFLECTING = true;
-	public static final double DEFAULT_TUBE_RADIUS = .1;
+	public static final double DEFAULT_TUBE_RADIUS = .5;
 	public static final Color DEFAULT_LINE_COLOR = Color.red;
 	public static final boolean DEFAULT_SHOW_FACES = true;
 	public static final boolean DEFAULT_FACES_REFLECTING = true;
@@ -58,7 +58,7 @@ public class ContentAppearance extends ContentPanel implements ColorPickerModeCh
 		
 		appearanceInspector = new AppearanceInspector();
 		restoreDefaults();
-		setInitialPosition(SHRINKER_RIGHT);
+		shrinkPanel.setShrinked(true);
 	}
 	double worldSize = 1.0;
 	

@@ -12,7 +12,6 @@ public class VRPanel extends ShrinkPanelAggregator {
 
 	public VRPanel() {
 		shrinkPanel.setTitle("VR Controls");
-		setInitialPosition(SHRINKER_RIGHT);
 	}
 	
 	@Override

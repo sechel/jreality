@@ -5,13 +5,13 @@ import static de.jreality.util.CameraUtility.encompass;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.UIManager;
 
-import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Pn;
 import de.jreality.plugin.audio.Audio;
@@ -19,7 +19,6 @@ import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Inspector;
-import de.jreality.plugin.basic.PropertiesMenu;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.Shell;
 import de.jreality.plugin.basic.ToolSystemPlugin;
@@ -323,7 +322,6 @@ public class JRViewer {
 		
 		c.registerPlugin(new ExportMenu());
 		c.registerPlugin(new CameraMenu());
-		c.registerPlugin(new PropertiesMenu());
 	}
 
 
@@ -431,14 +429,20 @@ public class JRViewer {
 	 * @param args no arguments are read
 	 */
 	public static void main(String[] args) {
+		Set<String> params = new HashSet<String>();
+		for (String param : args) params.add(param.toLowerCase());
 		JRViewer v = new JRViewer();
-		v.setShowPanelSlots(true, true, true, true);
-		v.setShowToolBar(true);
 		v.addBasicUI();
-		v.addContentUI();
-		v.addVRSupport();
-		v.addContentSupport(ContentType.TerrainAligned);
-		v.setContent(Primitives.icosahedron());
+		if (params.contains("-vr")) {
+			v.addContentUI();
+			v.addVRSupport();
+			v.addContentSupport(ContentType.TerrainAligned);
+			v.setShowPanelSlots(true, false, false, false);
+		} else {
+			v.registerPlugin(new ContentLoader());
+			v.registerPlugin(new ContentTools());
+			v.addContentSupport(ContentType.CenteredAndScaled);
+		}
 		v.startup();
 	}
 
