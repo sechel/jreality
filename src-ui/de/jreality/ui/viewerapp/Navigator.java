@@ -291,13 +291,10 @@ public class Navigator implements SelectionListener {
 			bottom.setBorder(BorderFactory.createEmptyBorder());
 
 			JSplitPane navigator = new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom);
-			navigator.setDividerLocation(350);
-			navigator.setResizeWeight(1.0);
+			navigator.setResizeWeight(0.6);
 			navigator.setContinuousLayout(true);
 			navigator.setOneTouchExpandable(true);
-			navigator.setBorder(BorderFactory.createEmptyBorder());
 
-//			navigator.setPreferredSize(new Dimension(0,0));  //let user set the size
 			this.navigator = new JPanel();
 			this.navigator.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
