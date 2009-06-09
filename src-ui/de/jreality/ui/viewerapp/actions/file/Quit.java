@@ -43,8 +43,6 @@ package de.jreality.ui.viewerapp.actions.file;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -54,12 +52,13 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * @author msommer
  *
  */
+@SuppressWarnings("serial")
 public class Quit extends AbstractJrAction {
 
 
   public Quit(String name) {
     super(name);
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK));
+    setShortCut(KeyEvent.VK_W, 0, true);
     setShortDescription("Quit");
   }
   
