@@ -44,8 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
@@ -55,6 +53,7 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleBeanShell extends AbstractJrAction {
 
 	private ViewerApp viewerApp;
@@ -65,7 +64,7 @@ public class ToggleBeanShell extends AbstractJrAction {
 		this.viewerApp = viewerApp;
 
 		setShortDescription("Toggle bean shell visibility");
-		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		setShortCut(KeyEvent.VK_B, InputEvent.SHIFT_MASK, true);
 	}
 
 

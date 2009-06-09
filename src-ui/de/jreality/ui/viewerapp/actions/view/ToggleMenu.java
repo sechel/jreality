@@ -44,8 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
 import de.jreality.ui.viewerapp.ViewerAppMenu;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
@@ -55,6 +53,7 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleMenu extends AbstractJrAction {
 
   private ViewerAppMenu menu;
@@ -63,7 +62,7 @@ public class ToggleMenu extends AbstractJrAction {
   public ToggleMenu(String name, ViewerAppMenu menu) {
     super(name);
     setShortDescription("Show or hide the menu bar");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortCut(KeyEvent.VK_M, InputEvent.SHIFT_MASK, true);
     
     this.menu = menu;
   }

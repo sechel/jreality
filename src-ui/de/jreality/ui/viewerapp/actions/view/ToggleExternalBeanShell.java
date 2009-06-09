@@ -53,6 +53,7 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleExternalBeanShell extends AbstractJrAction {
 
   private ViewerApp viewerApp;
@@ -63,7 +64,6 @@ public class ToggleExternalBeanShell extends AbstractJrAction {
     this.viewerApp = viewerApp;
     
     setShortDescription("Show bean shell in within ViewerApp or separately");
-//    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   

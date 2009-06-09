@@ -58,6 +58,7 @@ import de.jreality.ui.viewerapp.actions.file.LoadFile;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class LoadFileToNode extends AbstractSelectionListenerAction {
 
   private Viewer viewer;
@@ -67,7 +68,6 @@ public class LoadFileToNode extends AbstractSelectionListenerAction {
     this.viewer = viewer;
 
     setShortDescription("Load one or more files into the selected node");
-//    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   public LoadFileToNode(String name, SelectionManagerInterface sm, Viewer viewer) {

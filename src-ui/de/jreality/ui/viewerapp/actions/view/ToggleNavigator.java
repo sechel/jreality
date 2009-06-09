@@ -68,7 +68,7 @@ public class ToggleNavigator extends AbstractJrAction {
 		this.viewerApp = viewerApp;
 
 		setShortDescription("Toggle navigator visibility");
-		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		setShortCut(KeyEvent.VK_N, InputEvent.SHIFT_MASK, true);
 	}
 
 

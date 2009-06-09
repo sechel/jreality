@@ -41,6 +41,7 @@
 package de.jreality.ui.viewerapp.actions;
 
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractButton;
@@ -55,91 +56,98 @@ import javax.swing.KeyStroke;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public abstract class AbstractJrAction extends javax.swing.AbstractAction {
 
-  protected Component parentComp;
- 
-  
-  /**
-   * Default constructor.
-   * @param name the name of the action
-   */
-  public AbstractJrAction(String name) {
-    this(name, (Component)null);
-  }
 
-  
-  /**
-   * Constructor for actions which need a parent component 
-   * e.g. for displaying dialogs.
-   * @param name the name of the action
-   * @param parentComp the parent component
-   */
-  public AbstractJrAction(String name, Component parentComp) {
-    super(name);
-    this.parentComp = parentComp;
-  }
-  
-    
-//  /**
-//   * Uses the ViewerApp's frame.
-//   * @see AbstractJrAction#AbstractAction(String, Component)
-//   */
-//  public AbstractJrAction(String name, ViewerApp viewerApp) {
-//    this(name, viewerApp.getFrame());
-//  }
-  
-    
-  public abstract void actionPerformed(ActionEvent e);
-  
-  
-  /**
-   * Set the action's name.
-   * @param name the name of this action
-   */
-  public void setName(String name) {
-    putValue(NAME, name);
-  }
-  
-  
-  /**
-   * Set the action's short description.
-   * @param name the short description of this action
-   */
-  public void setShortDescription(String desc) {
-    putValue(SHORT_DESCRIPTION, desc);
-  }
-  
-  
-  /**
-   * Set the accelerator key for this action.
-   * @param key the accelerator keystroke
-   */
-  public void setAcceleratorKey(KeyStroke key) {
-    putValue(ACCELERATOR_KEY, key);
-  }
-  
-  public JMenuItem createMenuItem() {
-	  return new JMenuItem(this);
-  }
-  
-  public AbstractButton createToolboxItem() {
-	  JButton ret = new JButton(this);
-	  if (ret.getIcon() != null) {
+	private static final int CMD_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	
+	protected Component parentComp;
+
+
+	/**
+	 * Default constructor.
+	 * @param name the name of the action
+	 */
+	public AbstractJrAction(String name) {
+		this(name, (Component)null);
+	}
+
+
+	/**
+	 * Constructor for actions which need a parent component 
+	 * e.g. for displaying dialogs.
+	 * @param name the name of the action
+	 * @param parentComp the parent component
+	 */
+	public AbstractJrAction(String name, Component parentComp) {
+		super(name);
+		this.parentComp = parentComp;
+	}
+
+
+	//  /**
+	//   * Uses the ViewerApp's frame.
+	//   * @see AbstractJrAction#AbstractAction(String, Component)
+	//   */
+	//  public AbstractJrAction(String name, ViewerApp viewerApp) {
+	//    this(name, viewerApp.getFrame());
+	//  }
+
+
+	public abstract void actionPerformed(ActionEvent e);
+
+
+	/**
+	 * Set the action's name.
+	 * @param name the name of this action
+	 */
+	public void setName(String name) {
+		putValue(NAME, name);
+	}
+
+
+	/**
+	 * Set the action's short description.
+	 * @param name the short description of this action
+	 */
+	public void setShortDescription(String desc) {
+		putValue(SHORT_DESCRIPTION, desc);
+	}
+
+
+	/**
+	 * Set the accelerator key for this action.
+	 * @param key the accelerator keystroke
+	 */
+	public void setAcceleratorKey(KeyStroke key) {
+		putValue(ACCELERATOR_KEY, key);
+	}
+
+	public JMenuItem createMenuItem() {
+		return new JMenuItem(this);
+	}
+
+	public AbstractButton createToolboxItem() {
+		JButton ret = new JButton(this);
+		if (ret.getIcon() != null) {
 			String text = ret.getText();
 			ret.setToolTipText(text);
 			ret.setText(null);
 			//ret.setHideActionText(true); this is java 6
 		}
-	  return ret;
-  }
-  
-  public void setIcon(Icon icon) {
-	  putValue(SMALL_ICON, icon);
-  }
-  
-  public Icon getIcon() {
-	  return (Icon) getValue(SMALL_ICON);
-  }
-  
+		return ret;
+	}
+
+	public void setIcon(Icon icon) {
+		putValue(SMALL_ICON, icon);
+	}
+
+	public Icon getIcon() {
+		return (Icon) getValue(SMALL_ICON);
+	}
+
+	protected void setShortCut(int key, int mask, boolean cmdKey) {
+		setAcceleratorKey(KeyStroke.getKeyStroke(key, mask | (cmdKey ? CMD_MASK : 0)));
+	}
 }

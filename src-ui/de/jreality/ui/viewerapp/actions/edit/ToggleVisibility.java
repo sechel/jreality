@@ -44,8 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
@@ -57,13 +55,14 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleVisibility extends AbstractSelectionListenerAction {
 
   public ToggleVisibility(String name, SelectionManagerInterface sm) {
     super(name, sm);
 
     setShortDescription("Toggle visibility of selected node");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortCut(KeyEvent.VK_V, InputEvent.SHIFT_MASK, true);
   }
 
   @Override

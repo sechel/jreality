@@ -43,6 +43,7 @@ package de.jreality.vr;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -124,6 +125,8 @@ import de.jreality.util.SystemProperties;
 
 
 public class ViewerVR {
+
+	private static final int CMD_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 	
 	PickShowTool pickShowTool = new PickShowTool();
 
@@ -814,7 +817,7 @@ public class ViewerVR {
 		Action panelPopup = new AbstractAction("Toggle panel") {
 			{
 				putValue(SHORT_DESCRIPTION, "Toggle the ViewerVR panel");
-				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, CMD_MASK | InputEvent.SHIFT_MASK));
 			}
 			public void actionPerformed(ActionEvent e) {
 				sp.getFrame().setVisible(!sp.getFrame().isVisible());
@@ -825,7 +828,7 @@ public class ViewerVR {
 		Action bakeTerrain = new AbstractAction("Bake") {
 			{
 				putValue(SHORT_DESCRIPTION, "Bake terrain lightmap");
-				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_MASK));
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_B, CMD_MASK));
 			}
 			public void actionPerformed(ActionEvent e) {
 				bakeTerrain(vapp.getCurrentViewer());

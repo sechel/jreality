@@ -53,7 +53,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -80,6 +79,7 @@ import de.jreality.util.PickUtility;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class LoadFile extends AbstractJrAction {
 
 
@@ -103,7 +103,7 @@ public class LoadFile extends AbstractJrAction {
     this.viewer = viewer;
     
     setShortDescription("Load one or more files");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortCut(KeyEvent.VK_O, InputEvent.SHIFT_MASK, true);
   }
 
   public LoadFile(String name, SceneGraphComponent parentNode, Viewer viewer) {

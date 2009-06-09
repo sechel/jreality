@@ -45,7 +45,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.beans.Expression;
@@ -60,7 +59,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.KeyStroke;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileFilter;
@@ -75,6 +73,7 @@ import de.jtem.beans.DimensionPanel;
  * 
  * @author pinkall
  */
+@SuppressWarnings("serial")
 public class ExportImage extends AbstractJrAction {
 
 	private ViewerSwitch viewer;
@@ -93,7 +92,7 @@ public class ExportImage extends AbstractJrAction {
 		this.viewer = viewer;
 
 		setShortDescription("Export image file");
-		setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK));
+		setShortCut(KeyEvent.VK_I, 0, true);
 	}
 
 

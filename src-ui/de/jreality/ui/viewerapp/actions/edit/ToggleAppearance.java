@@ -41,11 +41,8 @@
 package de.jreality.ui.viewerapp.actions.edit;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
-
-import javax.swing.KeyStroke;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -62,6 +59,7 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleAppearance extends AbstractSelectionListenerAction {
 
   private String attribute;
@@ -75,17 +73,17 @@ public class ToggleAppearance extends AbstractSelectionListenerAction {
     if (attribute.equals(CommonAttributes.VERTEX_DRAW)) {
       defaultValue = CommonAttributes.VERTEX_DRAW_DEFAULT;
       setShortDescription("Toggle vertex drawing of responsible appearance");
-      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
+      setShortCut(KeyEvent.VK_V, 0, true);
     }
     else if (attribute.equals(CommonAttributes.EDGE_DRAW)) {
       defaultValue = CommonAttributes.EDGE_DRAW_DEFAULT;
       setShortDescription("Toggle edge drawing of responsible appearance");
-      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+      setShortCut(KeyEvent.VK_E, 0, true);
     }
     else if (attribute.equals(CommonAttributes.FACE_DRAW)) {
       defaultValue = CommonAttributes.FACE_DRAW_DEFAULT;
       setShortDescription("Toggle face drawing of responsible appearance");
-      setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
+      setShortCut(KeyEvent.VK_F, 0, true);
     }
   }
 

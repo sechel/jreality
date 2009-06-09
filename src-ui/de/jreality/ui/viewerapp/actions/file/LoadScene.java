@@ -41,12 +41,10 @@
 package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 
 import de.jreality.io.JrScene;
 import de.jreality.reader.ReaderJRS;
@@ -61,6 +59,7 @@ import de.jreality.util.Input;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class LoadScene extends AbstractJrAction {
 
   private ViewerApp viewerApp;
@@ -72,7 +71,7 @@ public class LoadScene extends AbstractJrAction {
     this.viewerApp = v;
     
     setShortDescription("Open saved scene");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+    setShortCut(KeyEvent.VK_O, 0, true);
   }
 
   

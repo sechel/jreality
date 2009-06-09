@@ -41,8 +41,8 @@
 package de.jreality.ui.viewerapp;
 
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.Statement;
 import java.io.File;
@@ -69,6 +69,7 @@ import de.jtem.beans.InspectorPanel;
 @SuppressWarnings("serial")
 public class SunflowMenu extends JMenu {
 
+	private static final int CMD_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 	private static FileFilter[] fileFilters;
 
 	static {
@@ -133,7 +134,7 @@ public class SunflowMenu extends JMenu {
 		};
 		previewAction.putValue(
 				Action.ACCELERATOR_KEY,
-				KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK)
+				KeyStroke.getKeyStroke(KeyEvent.VK_P, CMD_MASK)
 		);
 		add(previewAction);
 

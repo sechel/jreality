@@ -44,8 +44,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
-
 import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
@@ -55,6 +53,7 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleRenderSelection extends AbstractJrAction {
 
 	private SelectionManagerInterface sm;
@@ -65,7 +64,7 @@ public class ToggleRenderSelection extends AbstractJrAction {
     this.sm = sm;
 
     setShortDescription("Show or hide the selection's bounding box");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortCut(KeyEvent.VK_L, InputEvent.SHIFT_MASK, true);
   }
   
  

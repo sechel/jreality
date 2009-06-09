@@ -1,6 +1,7 @@
 package de.jreality.plugin.menu;
 
 import java.awt.Component;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -66,7 +67,7 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 			}
 		};
 		fullscreenToggle.setIcon(ImageHook.getIcon("arrow_out.png"));
-		fullscreenToggle.setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
+		fullscreenToggle.setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 	}
 	
 	public void setFullscreen(boolean fs) {

@@ -53,6 +53,7 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class ToggleExternalNavigator extends AbstractJrAction {
 
   private ViewerApp viewerApp;
@@ -63,7 +64,6 @@ public class ToggleExternalNavigator extends AbstractJrAction {
     this.viewerApp = viewerApp;
     
     setShortDescription("Show navigator in within ViewerApp or separately");
-//    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
   }
 
   

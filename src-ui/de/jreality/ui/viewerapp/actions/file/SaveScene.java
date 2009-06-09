@@ -42,14 +42,12 @@ package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 
 import de.jreality.io.JrScene;
 import de.jreality.scene.Viewer;
@@ -64,6 +62,7 @@ import de.jreality.writer.WriterJRS;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class SaveScene extends AbstractJrAction {
 
   private Viewer viewer;
@@ -77,7 +76,7 @@ public class SaveScene extends AbstractJrAction {
     this.viewer = viewer;
     
     setShortDescription("Save scene as a file");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
+    setShortCut(KeyEvent.VK_S, 0, true);
   }
 
 //  public SaveScene(String name, ViewerApp v) {

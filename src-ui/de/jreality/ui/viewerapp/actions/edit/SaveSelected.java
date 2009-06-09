@@ -49,7 +49,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.swing.JOptionPane;
-import javax.swing.KeyStroke;
 
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -67,6 +66,7 @@ import de.jreality.writer.u3d.WriterU3D;
  * 
  * @author msommer
  */
+@SuppressWarnings("serial")
 public class SaveSelected extends AbstractSelectionListenerAction {
 
 	FileFilter ff = new FileFilter("Supported file formats", "jrs", "u3d");
@@ -75,7 +75,7 @@ public class SaveSelected extends AbstractSelectionListenerAction {
     super(name, sm, parentComp);
     
     setShortDescription("Save selected SceneGraphComponent as a file");
-    setAcceleratorKey(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+    setShortCut(KeyEvent.VK_S, InputEvent.SHIFT_MASK, true);
   }
 
   
