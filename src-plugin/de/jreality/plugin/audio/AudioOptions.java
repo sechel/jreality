@@ -101,6 +101,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 	private Appearance rootAppearance;
 
 	public AudioOptions() {
+		shrinkPanel.setShrinked(true);
 		speedWidget = new JSliderVR(0, 1000);
 		gainWidget = new JSliderVR(-60, 30, (int) toDecibels(gain));
 		pitchShiftWidget = new JSliderVR(-120, 120, (int) (toCents(pitchShift)/10));
