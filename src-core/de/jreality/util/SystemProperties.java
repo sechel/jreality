@@ -174,10 +174,10 @@ public class SystemProperties {
 
 	/**
 	 * Specifies the selection manager to be used.<br>
-	 * Values: instances of {@link de.jreality.ui.viewerapp.SelectionManagerInterface}
+	 * Values: instances of {@link de.jreality.ui.viewerapp.SelectionManager}
 	 */
-	public final static String SELECTION_MANAGER = "de.jreality.ui.viewerapp.SelectionManagerInterface";
-	public final static String SELECTION_MANAGER_DEFAULT = "de.jreality.ui.viewerapp.SelectionManager";
+	public final static String SELECTION_MANAGER = "de.jreality.ui.viewerapp.SelectionManager";
+	public final static String SELECTION_MANAGER_DEFAULT = "de.jreality.ui.viewerapp.SelectionManagerImpl";
 	
 	/**
 	 * Specifies the viewer to be initialized by {@link de.jreality.portal.HeadTrackedViewer#HeadTrackedViewer()}.<br>
