@@ -44,6 +44,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentTools;
  
 public class IcosahedronVR {
   
@@ -53,8 +54,8 @@ public class IcosahedronVR {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentTools());
 		v.setContent(Primitives.icosahedron());
-		v.getController().setShowMenuBar(false);	
 		v.startup();
   }
 }
