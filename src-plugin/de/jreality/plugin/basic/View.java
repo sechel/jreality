@@ -60,7 +60,7 @@ import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
@@ -225,8 +225,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 
 	}
 
-	public SelectionManagerInterface getSelectionManager() {
-		return SelectionManager.selectionManagerForViewer(getViewer());
+	public SelectionManager getSelectionManager() {
+		return SelectionManagerImpl.selectionManagerForViewer(getViewer());
 	}
 
 	RenderTrigger getRenderTrigger() {

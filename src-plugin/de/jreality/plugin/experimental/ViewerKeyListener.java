@@ -32,7 +32,7 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.Viewer;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.SceneGraphUtility;
@@ -45,7 +45,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	Viewer viewer;
 	de.jreality.jogl.Viewer jViewer = null;
 	StereoViewer stereoViewer = null;
-	SelectionManagerInterface sm;
+	SelectionManager sm;
 	boolean motionToggle = false;
 	boolean fullScreenToggle = false;
 	HelpOverlay helpOverlay;
@@ -61,7 +61,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		if (viewer instanceof StereoViewer) {
 			stereoViewer = (StereoViewer) viewer;
 		}
-		sm = SelectionManager.selectionManagerForViewer(v);
+		sm = SelectionManagerImpl.selectionManagerForViewer(v);
 		selection = sm.getSelection().getSGPath();
 		
 //		if (sm instanceof SelectionManager) 
@@ -488,7 +488,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	private Appearance getSelectedAppearance()	{
 //		System.err.println("Selection is  "+sm.getSelection().getSGPath());
 //		return SelectionManager.findDeepestAppearance(sm.getSelection().getSGPath());
-		selection = SelectionManager.selectionManagerForViewer(viewer).getSelectionPath();
+		selection = SelectionManagerImpl.selectionManagerForViewer(viewer).getSelectionPath();
 		return SceneGraphUtility.findDeepestAppearance(selection);
 	}
 
