@@ -12,7 +12,6 @@ public class JRViewerVR {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addVRSupport();
-		v.addLookAndFeelSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
 		v.registerPlugin(new ContentAppearance());
