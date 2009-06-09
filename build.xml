@@ -469,7 +469,7 @@
 		<jar jarfile="${dist}/jReality-plugin.jar" basedir="${build}/plugin" />
 	</target>
 
-	<target name="tutorial" depends="dist" description="build tutorial ">
+	<target name="tutorial" depends="audio,ui,jogl,soft,proxies,portal,swing,plugin" description="build tutorial ">
 		<mkdir dir="${build}/tutorial" />
 		<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${tutorial}" destdir="${build}/tutorial" debug="true">
 			<classpath refid="tutorial.classpath"/>
