@@ -12,8 +12,9 @@
 
 # **/Fake*6.java
 **/Fake*5.java
-**/JLink*.java
 
+
+**/JLink*.java
 **/SwtExample.java
 **/csound/**
 # this uses CSound:

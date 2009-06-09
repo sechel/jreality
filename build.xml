@@ -514,7 +514,7 @@
 		</javadoc>
 	</target>
 
-	<target name="dist" depends="core,audio,io,jogl,soft,renderman,portal,gpgpu,examples,sunflow,plugin" description="generate the distribution">
+	<target name="dist" depends="core,audio,io,jogl,soft,renderman,portal,gpgpu,examples,sunflow,plugin,tutorial" description="generate the distribution">
 	</target>
 
 	<target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
