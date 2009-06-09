@@ -117,6 +117,9 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 
 		@Override
 		public boolean accept(File f) {
+			if (f.isDirectory()) {
+				return true;
+			}
 			String name = f.getName().toLowerCase();
 			return name.endsWith(".xml") || name.endsWith(".jrs");
 		}
@@ -147,7 +150,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		String dir = Secure.getProperty("user.dir", "");
 		fileChooser.setCurrentDirectory(new File(dir));
 		fileChooser.addChoosableFileFilter(new PropertiesFileFilter());
-		fileChooser.setAcceptAllFileFilterUsed(true);
+		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileSelectionMode(FILES_ONLY);
 	}
 	
