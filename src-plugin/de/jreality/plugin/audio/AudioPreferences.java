@@ -360,17 +360,17 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	 * distinguish between preferences and settings...
 	 */
 	
-	protected Preferences getPreferences() {
+	protected Preferences getPreferences(final String nodeName) {
 		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
 			public Preferences run() {
-				return Preferences.userNodeForPackage(getClass()).node(getClass().getName());
+				return Preferences.userNodeForPackage(getClass()).node(nodeName);
 			}
 		});
 	}
 
 	public void storePrefs() throws Exception {
 
-		Preferences prefs = getPreferences();
+		Preferences prefs = getPreferences(getClass().getSimpleName());
 		
 		prefs.put("backendType", backendType.name());
 		prefs.put("interpolationType", interpolationType.name());
@@ -387,7 +387,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	
 	public void restorePrefs() throws Exception {
 
-		Preferences prefs = getPreferences();
+		Preferences prefs = getPreferences(getClass().getSimpleName());
 		
 		backendType = BackendType.valueOf(BackendType.class, prefs.get("backendType", backendType.name()));
 		interpolationType = InterpolationType.valueOf(InterpolationType.class, prefs.get("interpolationType", interpolationType.name()));
