@@ -222,6 +222,7 @@
 		<fileset dir="lib">
 			<include name="smrj.jar"/>
 			<include name="jogl.jar"/>
+			<include name="jjack_min.jar"/>
 			<include name="colorpicker.jar"/>
 			<include name="jtem-beans.jar"/>
 			<include name="jRWorkspacePluginSDK.jar"/>
@@ -240,8 +241,8 @@
 	</path>
 
 	<path id="tutorial.classpath">
-		<fileset dir="release">
-			<include name="jReality.jar"/>
+		<fileset dir="dist">
+			<include name="*.jar"/>
 		</fileset>
         <fileset dir="lib">
             <include name="jRWorkspacePluginSDK.jar" />
