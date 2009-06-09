@@ -49,6 +49,8 @@ import de.jreality.util.Secure;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
@@ -441,7 +443,9 @@ public class JRViewer {
 		} else {
 			v.registerPlugin(new ContentLoader());
 			v.registerPlugin(new ContentTools());
+			v.getPlugin(Inspector.class).setInitialPosition(ShrinkPanelPlugin.SHRINKER_LEFT);
 			v.addContentSupport(ContentType.CenteredAndScaled);
+			v.setShowPanelSlots(true, false, false, false);
 		}
 		v.startup();
 	}
