@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,6 +73,9 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		
 		showMenubarToggle = new AbstractJrToggleAction("Show Menu Bar") {
 			private static final long serialVersionUID = 1L;
+			{
+				setShortCut(KeyEvent.VK_M, KeyEvent.SHIFT_DOWN_MASK, true);
+			}
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (frontendListener != null) {
@@ -82,6 +86,9 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		showMenubarToggle.setSelected(DEFAULT_SHOW_MENU);
 		showToolbarToggle = new AbstractJrToggleAction("Show Tool Bar") {
 			private static final long serialVersionUID = 1L;
+			{
+				setShortCut(KeyEvent.VK_T, KeyEvent.SHIFT_DOWN_MASK, true);
+			}
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (frontendListener != null) {
