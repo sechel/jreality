@@ -35,7 +35,7 @@ import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
 
 public class AudioPreferences extends Plugin implements PreferencesFlavor, ActionListener, ChangeListener {
 	
-	private static final Integer DEFAULT_FRAME_SIZE = 1024;
+	private static final Integer DEFAULT_FRAME_SIZE = 2048;
 	
 	private JPanel
 		mainPage = new JPanel(),
