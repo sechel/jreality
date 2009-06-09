@@ -55,8 +55,6 @@ For a complete build from sources you need:
   $> export JAVA_HOME=/usr/lib/jvm/java-6-sun
 - Run the ant build:
   $> ant
-- Compile also the tutorials, we will need some of them:
-  $> ant tutorial
 
 **** RUNNING JREALITY APPS ****
 
