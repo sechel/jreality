@@ -33,7 +33,7 @@ public class ViewMenuBar extends MenuAggregator {
 		addMenu(getClass(), 0.0, fileMenu);
 	
 		addMenuSeparator(getClass(), 99, "File");
-		addMenuItem(getClass(), 100, new Quit("Exit"), "File");
+		addMenuItem(getClass(), 100, new Quit("Quit"), "File");
 		
 		// Viewer menu
 		JMenu viewerMenu = viewerPlugin.createViewerMenu();
