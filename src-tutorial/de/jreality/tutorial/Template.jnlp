@@ -31,6 +31,7 @@
       <jar href="../jars/jjack_min.jar" download="lazy"/>
       <jar href="../jars/jinput.jar" download="lazy"/>
       <jar href="../jars/vrExamples.jar" download="lazy"/>
+      <jar href="../jars/antlr.jar" download="lazy"/>
       <extension name="jogl" href="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp" />
     </resources>
 
