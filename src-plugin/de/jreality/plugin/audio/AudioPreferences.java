@@ -44,10 +44,8 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		javaOptions = new JPanel(),
 		jackOptions = new JPanel();
 	private SpinnerNumberModel
-		//frameSizeModel = new SpinnerNumberModel(1024, 0, 4096, 1),
 		retriesModel = new SpinnerNumberModel(5, 0, 20, 1);
 	private JSpinner
-		//frameSizeSpinner = new JSpinner(frameSizeModel),
 		retriesSpinner = new JSpinner(retriesModel);
 	private JTextField
 		jackLabelField = new JTextField("jReality"),
