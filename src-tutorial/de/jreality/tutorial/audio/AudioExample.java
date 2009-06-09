@@ -20,9 +20,9 @@ import de.jreality.util.Input;
 public class AudioExample {
 
 	public static SceneGraphComponent getAudioComponent() throws Exception {
-		InputStream testSoundIn = AudioExample.class.getResourceAsStream("hammond.wav");
-		Input wavFile = Input.getInput("Hammond", testSoundIn);
-		final AudioSource source = new CachedAudioInputStreamSource("Hammond", wavFile, true);
+		InputStream testSoundIn = AudioExample.class.getResourceAsStream("waterdrop.wav");
+		Input wavFile = Input.getInput("Drops", testSoundIn);
+		final AudioSource source = new CachedAudioInputStreamSource("Waterdrop", wavFile, true);
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
 		audioComponent.setGeometry(Primitives.cube());
