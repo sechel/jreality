@@ -146,7 +146,6 @@ public class Audio extends Plugin implements ChangeListener {
 			public void run() {
 				try {
 					renderer.launch();
-					System.out.println("launching delayed Audio render");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
