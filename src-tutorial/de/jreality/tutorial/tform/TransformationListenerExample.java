@@ -15,12 +15,14 @@ public class TransformationListenerExample {
 	public static void main(String[] args) {
 		SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
 		final SceneGraphComponent child1 =  SceneGraphUtility.createFullSceneGraphComponent("child1"),
-			child2 = SceneGraphUtility.createFullSceneGraphComponent("child2");
+			child2 = SceneGraphUtility.createFullSceneGraphComponent("child2"),
+			child21 = SceneGraphUtility.createFullSceneGraphComponent("child21");
 		world.addChildren(child1, child2);
+		child2.addChild(child21);
 		MatrixBuilder.euclidean().translate(-1.5, 0, 0).assignTo(world);
 		
 		child1.setGeometry(Primitives.coloredCube());
-		child2.setGeometry(Primitives.coloredCube());
+		child21.setGeometry(Primitives.coloredCube());
 		final Matrix translate = new Matrix(MatrixBuilder.euclidean().translate(3, 0, 0).getArray());
 		translate.assignTo(child2);
 		
@@ -34,8 +36,7 @@ public class TransformationListenerExample {
 			public void transformationMatrixChanged(TransformationEvent ev) {
 				Matrix childMatrix = new Matrix(child1.getTransformation().getMatrix());
 				childMatrix.invert();
-				childMatrix.multiplyOnLeft(translate);
-				childMatrix.assignTo(child2);
+				childMatrix.assignTo(child21);
 			}
 			
 		});
