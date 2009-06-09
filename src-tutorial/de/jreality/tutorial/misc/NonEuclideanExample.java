@@ -48,8 +48,8 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tutorial.intro.Intro07;
 import de.jreality.tutorial.util.FlyTool;
+import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
@@ -124,7 +124,7 @@ public class NonEuclideanExample {
 	    SceneGraphPath camPath = SceneGraphUtility.getPathsBetween(root, cameraNode).get(0);
 	    camPath.push(camera);
 	    viewer.setCameraPath(camPath);
-		SelectionManagerInterface sm = SelectionManager.selectionManagerForViewer(viewer);
+		SelectionManager sm = SelectionManagerImpl.selectionManagerForViewer(viewer);
 		sm.setDefaultSelectionPath(new SceneGraphPath(viewer.getSceneRoot()));
 		sm.setSelection(null);
 //		va.setCreateMenu(false);
