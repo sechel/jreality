@@ -26,8 +26,8 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.tutorial.util.SelectionRenderer;
 import de.jreality.ui.viewerapp.Selection;
+import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.ui.viewerapp.SelectionManager;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.SceneGraphUtility;
@@ -40,7 +40,7 @@ public class SelectionExample {
 	 }
 	 
 	SceneGraphPath selection = null, lastSelection;
-	SelectionManagerInterface selectionManager = null;
+	SelectionManager selectionManager = null;
 	SelectionRenderer selectionRenderer;
 	
 	SceneGraphComponent world;
@@ -136,7 +136,7 @@ public class SelectionExample {
 			// now setup the selection process
 			Viewer vs = v.getPlugin(View.class).getViewer();
 			CameraUtility.encompass(vs);
-		    selectionManager = SelectionManager.selectionManagerForViewer(vs);
+		    selectionManager = SelectionManagerImpl.selectionManagerForViewer(vs);
 		    // a utility class which handles highlighting the selected component
 			selectionRenderer = new SelectionRenderer(selectionManager, vs);
 			selectionRenderer.setVisible(true);
