@@ -1,6 +1,9 @@
 package de.jreality.plugin.basic;
 
+import java.awt.Component;
+
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.actions.file.Quit;
@@ -41,13 +44,18 @@ public class ViewMenuBar extends MenuAggregator {
 		addMenu(getClass(), 1.0, viewerMenu);
 		addMenuSeparator(getClass(), 0.0, "Viewer");
 		
-		// Side panels menu
+		// window menu
+		JMenu windowMenu = new JMenu("Window");
+		windowMenu.setMnemonic('w');
+		addMenu(getClass(), 100.0, windowMenu);
+		addMenuItem(getClass(), 1.0, viewerPlugin.getPanelsMenu(), "Window");
+		addMenuSeparator(getClass(), 1.5, "Window");
 		JMenu slotsMenu = viewerPlugin.getContaintersMenu();
-		slotsMenu.setMnemonic('w');
-		slotsMenu.setText("Window");
-		addMenu(getClass(), 100.0, slotsMenu);
-		addMenuSeparator(getClass(), 10.0, "Window");
-		addMenu(getClass(), 10.1, viewerPlugin.getPanelsMenu(), "Window");
+		double priority = 20.0;
+		addMenuSeparator(getClass(), 19.5, "Window");
+		for (Component item : slotsMenu.getMenuComponents()) {
+			addMenuItem(getClass(), priority++, (JMenuItem)item, "Window");
+		}
 	}
 	
 

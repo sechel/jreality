@@ -206,9 +206,8 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
-		viewMenuBar.addMenuSeparator(getClass(), 1.0, "Window");
-		viewMenuBar.addMenuItem(getClass(), 1.1, showMenubarToggle.createMenuItem(), "Window");
-		viewMenuBar.addMenuItem(getClass(), 1.2, showToolbarToggle.createMenuItem(), "Window");
+		viewMenuBar.addMenuItem(getClass(), 10.1, showMenubarToggle.createMenuItem(), "Window");
+		viewMenuBar.addMenuItem(getClass(), 10.2, showToolbarToggle.createMenuItem(), "Window");
 		frontendListener.setShowMenuBar(showMenubarToggle.isSelected());
 		frontendListener.setShowToolBar(showToolbarToggle.isSelected());
 	}
