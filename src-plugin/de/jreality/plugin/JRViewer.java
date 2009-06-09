@@ -435,6 +435,7 @@ public class JRViewer {
 		v.addBasicUI();
 		v.addContentUI();
 		v.addVRSupport();
+		v.addAudioSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.setContent(Primitives.icosahedron());
 		v.startup();

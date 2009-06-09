@@ -200,15 +200,6 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		if (sampleRateCombo == s) {
 			JavaSoundUtility.setSampleRate((Integer) sampleRateCombo.getSelectedItem());
 		}
-		
-		// TODO: this is a hack! without a file, the controller makes no
-		// call to storeStates on shutdown.
-		try {
-			storePrefs();
-		} catch (Exception ex) {
-			System.out.println("storePrefs failed: ");
-			ex.printStackTrace();
-		}
 	}
 	
 	public void stateChanged(ChangeEvent e) {
@@ -297,81 +288,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		super.storeStates(c);
-		c.storeProperty(getClass(), "backendType", backendType);
-		c.storeProperty(getClass(), "interpolationType", interpolationType);
-		c.storeProperty(getClass(), "javaFrameSize", frameSizeCombo.getSelectedItem());
-		c.storeProperty(getClass(), "jackLabel", jackLabelField.getText());
-		c.storeProperty(getClass(), "jackTarget", jackTargetField.getText());
-		c.storeProperty(getClass(), "retries", retriesModel.getNumber().intValue());
-		c.storeProperty(getClass(), "chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected());
-		c.storeProperty(getClass(), "sampleRate", sampleRateCombo.getSelectedItem());
-	}
-	
-	@Override
-	public void restoreStates(Controller c) throws Exception {
-		super.restoreStates(c);
-		// TODO: HACK:
-		restorePrefs();
-		if (true) return;
-		backendType = c.getProperty(getClass(), "backendType", backendType);
-		switch (backendType) {
-		case noSound:
-			noSoundChecker.setSelected(true);
-			break;
-		case javaSound:
-			javaSoundChecker.setSelected(true);
-			break;
-		case javaSoundVBAP:
-			javaSoundVBAPChecker.setSelected(true);
-			break;
-		case jackAmbisonicsFO:	
-			jackAmbisonicsFOChecker.setSelected(true);
-			break;
-		case jackAmbisonicsPSO:
-			jackAmbisonicsPSOChecker.setSelected(true);
-			break;
-		}
-		interpolationType = c.getProperty(getClass(), "interpolationType", interpolationType);
-		switch (interpolationType) {
-		case noInterpolation:
-			sampleHoldChecker.setSelected(true);
-			break;
-		case linearInterpolation:
-			linearChecker.setSelected(true);
-			break;
-		case cosineInterpolation:
-			cosineChecker.setSelected(true);
-			break;
-		case cubicInterpolation:
-			cubicChecker.setSelected(true);
-			break;
-		}
-		frameSizeCombo.setSelectedItem(c.getProperty(getClass(), "javaFrameSize", DEFAULT_FRAME_SIZE));
-		jackLabelField.setText(c.getProperty(getClass(), "jackLabel", jackLabelField.getText()));
-		jackTargetField.setText(c.getProperty(getClass(), "jackTarget", jackTargetField.getText()));
-		retriesModel.setValue(c.getProperty(getClass(), "retries", retriesModel.getNumber().intValue()));
-		chooseFirstJavaSoundMixer.setSelected(c.getProperty(getClass(), "chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected()));
-		sampleRateCombo.setSelectedItem(c.getProperty(getClass(), "sampleRate", JavaSoundUtility.getSampleRate()));
-	}
-
-	/************** PREFERENCES **************/
-	
-	/* for now, this is a HACK, but we will adapt plugin api to
-	 * distinguish between preferences and settings...
-	 */
-	
-	protected Preferences getPreferences(final String nodeName) {
-		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
-			public Preferences run() {
-				return Preferences.userNodeForPackage(getClass()).node(nodeName);
-			}
-		});
-	}
-
-	public void storePrefs() throws Exception {
-
 		Preferences prefs = getPreferences(getClass().getSimpleName());
-		
 		prefs.put("backendType", backendType.name());
 		prefs.put("interpolationType", interpolationType.name());
 		prefs.putInt("javaFrameSize", (Integer) frameSizeCombo.getSelectedItem());
@@ -380,15 +297,13 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		prefs.putInt("retries", retriesModel.getNumber().intValue());
 		prefs.putBoolean("chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected());
 		prefs.putInt("sampleRate", (Integer) sampleRateCombo.getSelectedItem());
-		
 		prefs.flush();
 	}
-
 	
-	public void restorePrefs() throws Exception {
-
+	@Override
+	public void restoreStates(Controller c) throws Exception {
+		super.restoreStates(c);
 		Preferences prefs = getPreferences(getClass().getSimpleName());
-		
 		backendType = BackendType.valueOf(BackendType.class, prefs.get("backendType", backendType.name()));
 		interpolationType = InterpolationType.valueOf(InterpolationType.class, prefs.get("interpolationType", interpolationType.name()));
 		
@@ -430,6 +345,15 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		retriesModel.setValue(prefs.getInt("retries", retriesModel.getNumber().intValue()));
 		chooseFirstJavaSoundMixer.setSelected(prefs.getBoolean("chooseFirstJavaSoundMixer", chooseFirstJavaSoundMixer.isSelected()));
 		sampleRateCombo.setSelectedItem(prefs.getInt("sampleRate", JavaSoundUtility.getSampleRate()));
-
 	}
+
+	
+	protected Preferences getPreferences(final String nodeName) {
+		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
+			public Preferences run() {
+				return Preferences.userNodeForPackage(getClass()).node(nodeName);
+			}
+		});
+	}
+
 }

@@ -1,7 +1,5 @@
 package de.jreality.plugin.audio;
 
-import java.lang.reflect.Method;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
