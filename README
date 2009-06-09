@@ -51,10 +51,12 @@ For a complete build from sources you need:
 * Build instructions *
 
 - Set the JAVA_HOME environment variable to the Sun Java 6 JDK folder,
-  for instance on an ubuntu installation: JAVA_HOME=/usr/lib/jvm/java-6-sun
-- Run the ant build: $> ant
-
-
+  for instance on an ubuntu installation:
+  $> export JAVA_HOME=/usr/lib/jvm/java-6-sun
+- Run the ant build:
+  $> ant
+- Compile also the tutorials, we will need some of them:
+  $> ant tutorial
 
 **** RUNNING JREALITY APPS ****
 
