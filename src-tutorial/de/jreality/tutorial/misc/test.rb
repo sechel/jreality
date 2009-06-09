@@ -14,7 +14,8 @@ import 'java.awt.Color'
 
 import 'de.jreality.geometry.Primitives' 
 import 'de.jreality.reader.Readers' 
-import 'de.jreality.ui.viewerapp.ViewerApp' 
+import 'de.jreality.plugin.JRViewer' 
+import 'de.jreality.scene.Viewer' 
 import 'de.jreality.scene.data.AttributeEntityUtility' 
 
 class MainWindow 
@@ -27,11 +28,6 @@ def initialize
 # Scene, Viewerapp setting 
   myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene") 
   myscene.setGeometry(Primitives.cylinder(20)) 
-  va = ViewerApp.display(myscene) 
-  va.setAttachNavigator(true) 
-  va.setExternalNavigator(false) 
-  va.update 
-  CameraUtility.encompass(va.getViewerSwitch) 
   ap = myscene.getAppearance 
 # Geometry setting 
   dgs = ShaderUtility.createDefaultGeometryShader(ap, true) 
@@ -47,6 +43,7 @@ def initialize
   matrix = Matrix.new 
   MatrixBuilder.euclidean.scale(10.0, 5.0, 1.0).assignTo(matrix) 
   tex2d.setTextureMatrix(matrix) 
+  v = JRViewer.display(myscene)
 end 
 end 
 MainWindow.new 

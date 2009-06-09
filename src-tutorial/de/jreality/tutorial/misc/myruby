@@ -7,4 +7,5 @@ setenv CLASSPATH ${LIB}/jReality.jar:${JRLIB}/jogl.jar:${JRLIB}/bsh.jar:${JRLIB}
 setenv JAVA_LIBRARY_PATH /home/gunn/workspace/jreality/jni/linux64/
 setenv LD_LIBRARY_PATH /home/gunn/workspace/jreality/jni/linux64/
 echo $JAVA_LIBRARY_PATH
-groovy $1
+setenv JRUBY /homes/geometer/gunn/Software/jruby-1.1.6/bin/jruby
+${JRUBY} $1

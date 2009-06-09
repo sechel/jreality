@@ -7,15 +7,13 @@
 # A jReality ViewerApp window should appear with a red icosahedron in it.
 if __name__=='__main__':
     import de.jreality.scene
+    import de.jreality.plugin
     import java.awt
     sgc = de.jreality.scene.SceneGraphComponent("test")
     sgc.setGeometry(de.jreality.geometry.Primitives.icosahedron())
     ap = de.jreality.scene.Appearance()
     ap.setAttribute("polygonShader.diffuseColor", java.awt.Color.RED)
     sgc.setAppearance(ap)
-    va = de.jreality.ui.viewerapp.ViewerApp(sgc)
-    va.update()
-    va.display()
-    de.jreality.util.CameraUtility.encompass(va.getViewer())
+    de.jreality.plugin.JRViewer.display(sgc)
 
 

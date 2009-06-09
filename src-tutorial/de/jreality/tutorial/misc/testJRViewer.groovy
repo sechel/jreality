@@ -2,14 +2,11 @@
 import de.jreality.geometry.*
 import de.jreality.scene.*
 import de.jreality.util.*
-import de.jreality.ui.viewerapp.*
+import de.jreality.plugin.*
 
     sgc = new SceneGraphComponent("test")
     sgc.setGeometry(Primitives.icosahedron())
     ap = new Appearance()
     ap.setAttribute("polygonShader.diffuseColor", java.awt.Color.RED)
     sgc.setAppearance(ap)
-    va = new ViewerApp(sgc)
-    va.update()
-    va.display()
-    CameraUtility.encompass(va.getViewer())
+    Viewer v = JRViewer.display(sgc)
