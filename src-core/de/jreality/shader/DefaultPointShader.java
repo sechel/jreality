@@ -60,6 +60,9 @@ import java.awt.Color;
 	public abstract Color getDiffuseColor();
 	public abstract void setDiffuseColor(Color c);
   
+  void setRadiiWorldCoordinates(Boolean b);
+  Boolean getRadiiWorldCoordinates();
+
   Boolean getSpheresDraw();
   void setSpheresDraw(Boolean value);
   

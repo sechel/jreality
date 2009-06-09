@@ -95,6 +95,8 @@ import de.jreality.geometry.TubeUtility;
 	 public static final double[][] CROSS_SECTION_DEFAULT = TubeUtility.octagonalCrossSection;
 	 public static final boolean LIGHTING_ENABLED_DEFAULT = false;
 	 
+	 public static final boolean RADII_WORLD_COORDINATES = CommonAttributes.RADII_WORLD_COORDINATES_DEFAULT;
+	 
 	 // general attributes
 	 public abstract Color getDiffuseColor();
 	 public abstract void setDiffuseColor(Color c);
@@ -108,6 +110,9 @@ import de.jreality.geometry.TubeUtility;
 	 public abstract void setTubeStyle(FrameFieldType i);
 	 public abstract double[][] getCrossSection();
 	 public abstract void setCrossSection(double[][] crossSection);
+	 
+	 void setRadiiWorldCoordinates(Boolean b);
+	 Boolean getRadiiWorldCoordinates();
 	 
 	 // non-tube style related attributes
 	 public abstract Double getLineWidth();

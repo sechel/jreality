@@ -115,6 +115,7 @@ import de.jreality.sunflow.core.camera.OrthogonalLens;
 import de.jreality.sunflow.core.camera.TiledPinholeLens;
 import de.jreality.sunflow.core.light.GlPointLight;
 import de.jreality.sunflow.core.primitive.SkyBox;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.Rectangle3D;
 
 
@@ -307,6 +308,10 @@ public class SunflowRenderer extends SunflowAPI {
 				}
 				for (int i=0; i<lines.getLength(); i++) {
 					double radius = radii != null ? radii.getValueAt(i) : r;
+					if (ls.getRadiiWorldCoordinates()) {
+						// TODO: make sunfow non-euclidean...
+						radius /= CameraUtility.getScalingFactor(currentMatrix.getArray(), Pn.EUCLIDEAN);
+					}
 					if (lineColors) {
 						Appearance app = new Appearance("fake app");
 						EffectiveAppearance ea = eapp.create(app);
@@ -377,6 +382,11 @@ public class SunflowRenderer extends SunflowAPI {
 					applyShader(dps, false);
 				}
 				for (int i=0; i<pts.getLength(); i++) {
+					double radius = radii != null ? radii.getValueAt(i) : r;
+					if (ps.getRadiiWorldCoordinates()) {
+						// TODO: make sunfow non-euclidean...
+						radius /= CameraUtility.getScalingFactor(currentMatrix.getArray(), Pn.EUCLIDEAN);
+					}
 					if (vertexColors) {
 						Appearance app = new Appearance("fake app");
 						EffectiveAppearance ea = eapp.create(app);
@@ -396,7 +406,7 @@ public class SunflowRenderer extends SunflowAPI {
 								pts.getValueAt(i, 0)/w,
 								pts.getValueAt(i, 1)/w,
 								pts.getValueAt(i, 2)/w
-						).scale(radii != null ? radii.getValueAt(i) : r).getMatrix());
+						).scale(radius).getMatrix());
 						parameter("transform", m);
 						if (bakingPath == null) {
 							parameter("shaders", "default-shader" + appCount);
