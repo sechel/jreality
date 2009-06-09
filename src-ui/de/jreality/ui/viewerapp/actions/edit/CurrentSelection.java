@@ -43,7 +43,7 @@ package de.jreality.ui.viewerapp.actions.edit;
 import java.awt.event.ActionEvent;
 
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -55,7 +55,7 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 public class CurrentSelection extends AbstractSelectionListenerAction {
 
   
-  public CurrentSelection(String name, SelectionManagerInterface sm) {
+  public CurrentSelection(String name, SelectionManager sm) {
     
     super(name, sm);
     setEnabled(false);

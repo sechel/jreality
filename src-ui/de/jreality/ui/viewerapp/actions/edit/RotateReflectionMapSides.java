@@ -50,7 +50,7 @@ import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -63,7 +63,7 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
  */
 public class RotateReflectionMapSides extends AbstractSelectionListenerAction {
 
-  public RotateReflectionMapSides(String name, SelectionManagerInterface sm, Component frame) {
+  public RotateReflectionMapSides(String name, SelectionManager sm, Component frame) {
     
     super(name, sm, frame);
     setShortDescription("Rotate reflection map sides to match its top and bottom");

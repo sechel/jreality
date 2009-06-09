@@ -47,7 +47,7 @@ import javax.swing.JOptionPane;
 
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 
 
@@ -59,7 +59,7 @@ import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
  */
 public class Rename extends AbstractSelectionListenerAction {
 
-	public Rename(String name, SelectionManagerInterface sm, Component parentComp) {
+	public Rename(String name, SelectionManager sm, Component parentComp) {
 		super(name, sm, parentComp);
 
 		setShortDescription("Rename selected node");

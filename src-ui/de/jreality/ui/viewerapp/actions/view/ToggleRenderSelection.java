@@ -44,7 +44,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
@@ -56,10 +56,10 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 @SuppressWarnings("serial")
 public class ToggleRenderSelection extends AbstractJrAction {
 
-	private SelectionManagerInterface sm;
+	private SelectionManager sm;
 	
   
-  public ToggleRenderSelection(String name, SelectionManagerInterface sm) {
+  public ToggleRenderSelection(String name, SelectionManager sm) {
     super(name);
     this.sm = sm;
 

@@ -45,7 +45,7 @@ import java.awt.Component;
 import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionEvent;
 import de.jreality.ui.viewerapp.SelectionListener;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 
 
 /**
@@ -58,7 +58,7 @@ import de.jreality.ui.viewerapp.SelectionManagerInterface;
  */
 public abstract class AbstractSelectionListenerAction extends AbstractJrAction implements SelectionListener {
 
-	private SelectionManagerInterface selectionManager;
+	private SelectionManager selectionManager;
 	private Selection selection;
 
 
@@ -68,7 +68,7 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
 	 * @param sm the underlying selection manager
 	 * @throws IllegalArgumentException if sm is <code>null</code>
 	 */
-	public AbstractSelectionListenerAction(String name, SelectionManagerInterface sm) {
+	public AbstractSelectionListenerAction(String name, SelectionManager sm) {
 		this(name, sm, null);
 	}
 
@@ -81,7 +81,7 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
 	 * @param parentComp the parent component
 	 * @throws IllegalArgumentException if sm is <code>null</code>
 	 */
-	public AbstractSelectionListenerAction(String name, SelectionManagerInterface sm, Component parentComp) {
+	public AbstractSelectionListenerAction(String name, SelectionManager sm, Component parentComp) {
 		super(name, parentComp);
 
 		if (sm == null)
@@ -134,7 +134,7 @@ public abstract class AbstractSelectionListenerAction extends AbstractJrAction i
 	 * Get the underlying selection manager.
 	 * @return the selection manager
 	 */
-	public SelectionManagerInterface getSelectionManager() {
+	public SelectionManager getSelectionManager() {
 		return selectionManager;
 	}
 

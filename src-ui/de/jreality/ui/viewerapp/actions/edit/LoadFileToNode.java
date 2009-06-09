@@ -47,7 +47,7 @@ import javax.swing.AbstractAction;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionManagerInterface;
+import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.actions.AbstractSelectionListenerAction;
 import de.jreality.ui.viewerapp.actions.file.LoadFile;
 
@@ -63,22 +63,22 @@ public class LoadFileToNode extends AbstractSelectionListenerAction {
 
   private Viewer viewer;
   
-  public LoadFileToNode(String name, SelectionManagerInterface sm, Viewer viewer, Component parentComp) {
+  public LoadFileToNode(String name, SelectionManager sm, Viewer viewer, Component parentComp) {
     super(name, sm, parentComp);
     this.viewer = viewer;
 
     setShortDescription("Load one or more files into the selected node");
   }
 
-  public LoadFileToNode(String name, SelectionManagerInterface sm, Viewer viewer) {
+  public LoadFileToNode(String name, SelectionManager sm, Viewer viewer) {
 	  this(name, sm, viewer, null);
   }
   
-  public LoadFileToNode(String name, SelectionManagerInterface sm, Component parentComp) {
+  public LoadFileToNode(String name, SelectionManager sm, Component parentComp) {
 	  this(name, sm, null, parentComp);
   }
   
-  public LoadFileToNode(String name, SelectionManagerInterface sm) {
+  public LoadFileToNode(String name, SelectionManager sm) {
 	  this(name, sm, null, null);
   }
   
