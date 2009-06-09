@@ -57,18 +57,18 @@ import de.jreality.util.LoggingSystem;
 public class SelectionTool extends AbstractTool {
 
 	final static InputSlot activationSlot = InputSlot.getDevice("SelectionActivation");
-	private SelectionManagerInterface sm;
+	private SelectionManager sm;
 	private Selection selection;
 
 
-	public SelectionTool(SelectionManagerInterface sm) {
+	public SelectionTool(SelectionManager sm) {
 		addCurrentSlot(activationSlot);
 		this.sm = sm;
 //		LoggingSystem.getLogger(SelectionTool.class).setLevel(Level.INFO);
 	}
 
 	public SelectionTool() {
-		this((SelectionManagerInterface) null);
+		this((SelectionManager) null);
 	}
 
 	public SelectionTool(ViewerApp v) {

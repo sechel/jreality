@@ -135,13 +135,14 @@ public class ViewerApp {
 	private RenderTrigger renderTrigger;
 	private boolean autoRender = true;
 	private boolean synchRender = false;
+	private boolean propagateSelection = true;
 
 	private JrScene jrScene;
 	private SceneGraphComponent sceneRoot;
 	private SceneGraphComponent scene;
 	private SceneGraphNode displayedNode;  //the node which is displayed in viewer
 
-	private SelectionManagerInterface selectionManager;
+	private SelectionManager selectionManager;
 	private BeanShell beanShell;
 	private Navigator navigator;
 
@@ -246,7 +247,7 @@ public class ViewerApp {
 		//load the scene depending on environment (desktop | portal)
 		setupViewer(jrScene);	
 
-		selectionManager = SelectionManager.selectionManagerForViewer(getViewer());
+		selectionManager = SelectionManagerImpl.selectionManagerForViewer(getViewer());
 //		System.err.println("VA: Selection man is "+selectionManager);
 //		set default selection
 		SceneGraphPath p = getToolSystem().getEmptyPickPath();
@@ -671,7 +672,7 @@ public class ViewerApp {
 	private void setupNavigator() {
 
 		navigator = new Navigator(getViewerSwitch(), frame);
-
+		navigator.setPropagateSelections(propagateSelection);
 		Component navigator = this.navigator.getComponent();
 		//init sizes
 		navigator.setPreferredSize(new Dimension(200, 0));
@@ -818,7 +819,7 @@ public class ViewerApp {
 	 * Get the SelectionManager managing selections in the ViewerApp.
 	 * @return the SelectionManager
 	 */
-	public SelectionManagerInterface getSelectionManager() {
+	public SelectionManager getSelectionManager() {
 		return selectionManager;
 	}
 
@@ -832,6 +833,10 @@ public class ViewerApp {
 		return navigator.getComponent();
 	}
 
+	public void setPropagateSelection(boolean b)	{
+		propagateSelection = b;
+		if (navigator != null) navigator.setPropagateSelections(b);
+	}
 
 	/**
 	 * Get the bean shell. 
@@ -1088,7 +1093,7 @@ public class ViewerApp {
 		viewerSwitch.dispose();
 		if (toolSystem != null) toolSystem.dispose();
 
-		SelectionManager.disposeForViewer(viewerSwitch);
+		SelectionManagerImpl.disposeForViewer(viewerSwitch);
 		
 		if (menu != null) menu.dispose();
 		

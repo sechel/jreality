@@ -92,8 +92,8 @@ public class Navigator implements SelectionListener {
 	private SceneTreeModel treeModel;
 	private TreeSelectionModel tsm;
 
-	private SelectionManagerInterface selectionManager;
-	private SelectionManagerInterface externalSelectionManager;
+	private SelectionManager selectionManager;
+	private SelectionManager externalSelectionManager;
 	private Viewer viewer;  //the underlying viewer
 
 	private Container navigator;
@@ -120,11 +120,11 @@ public class Navigator implements SelectionListener {
 	 */
 	public Navigator(Viewer viewer, Component parentComp) {
 
-		externalSelectionManager = SelectionManager.selectionManagerForViewer(viewer);
-		selectionManager = new SelectionManager(externalSelectionManager.getDefaultSelection());
+		externalSelectionManager = SelectionManagerImpl.selectionManagerForViewer(viewer);
+		selectionManager = new SelectionManagerImpl(externalSelectionManager.getDefaultSelection());
 		//selectionManager.addSelectionListener(this);
 		toolBar = createToolBar();
-		setPropagateSelections(true);
+//		setPropagateSelections(true);
 		setReceiveSelections(true);
 
 		this.parentComp = parentComp;

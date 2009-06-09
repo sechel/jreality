@@ -189,7 +189,7 @@ public class ViewerAppMenu {
 
 	private Component parentComp = null;
 	private ViewerApp viewerApp = null;
-	private SelectionManagerInterface sm = null;
+	private SelectionManager sm = null;
 	private Viewer viewer = null;
 	private JComponent viewingComp = null;
 	private JMenuBar menuBar;
@@ -277,7 +277,7 @@ private JMenu createFileMenu() {
 	 * @param parentComp use as parent component for dialogs
 	 * @param sm the selection manager to be used by contained actions
 	 */
-	protected static JMenu createEditMenu(Component parentComp, SelectionManagerInterface sm) {
+	protected static JMenu createEditMenu(Component parentComp, SelectionManager sm) {
 		JMenu editMenu = new JMenu(EDIT_MENU);
 		editMenu.setMnemonic(KeyEvent.VK_E);
 
