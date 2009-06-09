@@ -107,6 +107,10 @@ directly and download it for your platform. The JOGL version we are
 using is JSR-231 1.1.1 - May 22 2008. We will keep up to date with the
 latest release version of jogl.
 
+VISTA BUG:
+For Windows Vista users we suggest to use the runtime option
+-Dsun.java2d.d3d=false
+to avoid graphics errors in the menu bar.
 
 **** JREALITY WITH JAVA 5 ****
 
