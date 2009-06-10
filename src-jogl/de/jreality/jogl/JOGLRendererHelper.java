@@ -760,6 +760,8 @@ public class JOGLRendererHelper {
 		gl.glEnable(GL.GL_TEXTURE_2D);
 		jr.renderingState.texUnitCount = 1;
 		double[] bbm = new double[16];
+		jr.renderingState.smoothShading=true;
+		jr.renderingState.currentAlpha = 1.0;
 		for (int i = 0, n = labels.length; i < n; i++) {
 			ImageData img = labels[i];
 			tex2d.setImage(img);
@@ -770,7 +772,7 @@ public class JOGLRendererHelper {
 			Texture2DLoaderJOGL.render(gl, tex2d);
 			gl.glPushMatrix();
 			gl.glMultTransposeMatrixd(bbm, 0);
-			drawFaces(jr, bb, true, 1.0);
+			drawFaces(jr, bb);
 			gl.glPopMatrix();
 		}
 		gl.glPopAttrib();
