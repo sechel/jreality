@@ -40,6 +40,7 @@ import de.jreality.plugin.scene.Avatar;
 import de.jreality.plugin.scene.Lights;
 import de.jreality.plugin.scene.Sky;
 import de.jreality.plugin.scene.Terrain;
+import de.jreality.plugin.scene.VRExamples;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -439,6 +440,7 @@ public class JRViewer {
 			v.addVRSupport();
 			v.addContentSupport(ContentType.TerrainAligned);
 			v.setShowPanelSlots(true, false, false, false);
+			v.registerPlugin(new VRExamples());
 		} else {
 			v.registerPlugin(new ContentLoader());
 			v.registerPlugin(new ContentTools());
