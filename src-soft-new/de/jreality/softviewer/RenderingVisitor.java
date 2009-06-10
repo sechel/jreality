@@ -296,7 +296,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                 double radius = lineShader.getTubeRadius();
                 // world coordinates
                 if(lineShader.isRadiiWorldCoordinates())
-                    radius *= CameraUtility.getScalingFactor(currentTrafo, Pn.EUCLIDEAN);
+                    radius /= CameraUtility.getScalingFactor(currentTrafo, Pn.EUCLIDEAN);
                 if(radiiArray != null)
                     radius *= radiiArray.getValueAt(i);
                 
@@ -609,7 +609,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
                 for (int i = 0; i < n; i++) {
                     double r = pointShader.getPointRadius();
                     if(pointShader.isRadiiWorldCoordinates())
-                        r *= CameraUtility.getScalingFactor(currentTrafo, Pn.EUCLIDEAN);
+                        r /= CameraUtility.getScalingFactor(currentTrafo, Pn.EUCLIDEAN);
                     
                     r*=(vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):1);
                     pmat[0]  = pmat[5]  = pmat[10] = r;
