@@ -8,13 +8,14 @@ import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.ViewPreferences;
 import de.jreality.plugin.basic.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.icon.ImageHook;
+import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.AppearanceInspector;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class ContentAppearance extends ContentPanel implements ColorPickerModeChangedListener {
+public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = true;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;

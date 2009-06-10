@@ -93,7 +93,6 @@ public class VRExamples extends SceneShrinkPanel {
 			customContentButton.setAction(contentLoader.getAction());
 			shrinkPanel.setLayout(new GridLayout());
 			shrinkPanel.add(buttonGroupPanel);
-			shrinkPanel.setShrinked(true);
 		}
 	}
 	
@@ -106,7 +105,6 @@ public class VRExamples extends SceneShrinkPanel {
 		content = JRViewerUtility.getContentPlugin(c);
 		contentLoader = c.getPlugin(ContentLoader.class);
 		makePanel();
-		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 		super.install(c);
 	}
 	

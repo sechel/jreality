@@ -1,10 +1,8 @@
 package de.jreality.plugin.scene;
 
-import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.ShrinkPanelAggregator;
-import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
@@ -12,12 +10,6 @@ public class VRPanel extends ShrinkPanelAggregator {
 
 	public VRPanel() {
 		shrinkPanel.setTitle("VR Controls");
-	}
-	
-	@Override
-	public void install(Controller c) throws Exception {
-		super.install(c);
-		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 	}
 	
 	@Override

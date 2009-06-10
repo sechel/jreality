@@ -2,7 +2,6 @@ package de.jreality.plugin.basic;
 
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.ShrinkPanelAggregator;
-import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
@@ -10,7 +9,9 @@ public class MainPanel extends ShrinkPanelAggregator {
 
 	public MainPanel() {
 		super();
-		shrinkPanel.setTitle("Main Tools");
+		// need to obtain panel title from plugin info,
+		// otherwise inconsistant with in-scene title:
+		//shrinkPanel.setTitle("Main Tools");
 		shrinkPanel.setShrinked(true);
 	}
 	
@@ -19,16 +20,10 @@ public class MainPanel extends ShrinkPanelAggregator {
 	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
 		return View.class;
 	}
-
-	@Override
-	public void install(Controller c) throws Exception {
-		super.install(c);
-		setTriggerComponent(c.getPlugin(Scene.class).getContentComponent());
-	}
 	
 	@Override
 	public PluginInfo getPluginInfo() {
-		PluginInfo info = new PluginInfo("Main Shrink Panel", "jReality Group");
+		PluginInfo info = new PluginInfo("Main Tools", "jReality Group");
 		info.icon = ImageHook.getIcon("wrench_orange.png");
 		return info;
 	}

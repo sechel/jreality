@@ -440,7 +440,9 @@ public class JRViewer {
 			v.addVRSupport();
 			v.addContentSupport(ContentType.TerrainAligned);
 			v.setShowPanelSlots(true, false, false, false);
-			v.registerPlugin(new VRExamples());
+			VRExamples vrExamples = new VRExamples();
+			vrExamples.getShrinkPanel().setShrinked(false);
+			v.registerPlugin(vrExamples);
 		} else {
 			v.registerPlugin(new ContentLoader());
 			v.registerPlugin(new ContentTools());

@@ -5,12 +5,22 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 
+import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.View;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
 import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
+/**
+ * A ShrinkPanel that flops into the Scene when double-clicking on the terrain.
+ * Use the setTriggerComponent to attach it to another part of the scene.
+ * 
+ * @author Steffen Weissmann.
+ *
+ */
 public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 	
 	private ActionTool 
@@ -45,6 +55,8 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		
 		sceneSlot.getShrinkSlot().addShrinkPanel(internalShrinkPanel);
 		internalShrinkPanel.setVisible(false);
+		
+		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 
 	}
 
@@ -58,9 +70,6 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 	private void installTrigger(SceneGraphComponent trigger) {
 		if (trigger == currentTrigger) return;
 		if (currentTrigger != null) currentTrigger.removeTool(actionTool);
-//		String n1 = trigger == null ? "null" : trigger.getName();
-//		String n2 = currentTrigger == null ? "null" : currentTrigger.getName();
-//		System.out.println(SceneShrinkPanel.this.getClass().getName()+" newTrigger="+n1+" oldTrigger="+n2);
 		currentTrigger = trigger;
 		if (trigger != null) trigger.addTool(actionTool);
 	}
@@ -79,6 +88,7 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		windowInScene = true;
 		// move content to scene slot
 		JPanel content = shrinkPanel.getContentPanel();
+		internalShrinkPanel.setShrinked(shrinkPanel.isShrinked());
 		internalShrinkPanel.setContentPanel(content);
 		// hide outer panel
 		shrinkPanel.setVisible(false);
@@ -93,6 +103,7 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		windowInScene = false;
 		// move content to non-scene slot	
 		JPanel content = internalShrinkPanel.getContentPanel();
+		shrinkPanel.setShrinked(internalShrinkPanel.isShrinked());
 		shrinkPanel.setContentPanel(content);
 		// hide inner panel
 		internalShrinkPanel.setVisible(false);
@@ -107,5 +118,8 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		moveOutOfScene();
 	}
 	
-	
+	@Override
+	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
+		return View.class;
+	}
 }
