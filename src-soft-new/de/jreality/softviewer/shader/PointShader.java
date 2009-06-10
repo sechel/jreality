@@ -54,6 +54,7 @@ public abstract class PointShader {
     public abstract double getPointRadius();
     public abstract double getPointSize();
     public abstract boolean isSphereDraw();
+    public abstract boolean isRadiiWorldCoordinates();
     public double getOutlineFraction() {
         return 0.5;
     }

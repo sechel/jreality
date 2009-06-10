@@ -59,6 +59,7 @@ public class DefaultPointShader extends PointShader {
     private double outlineFraction;
     private boolean sphereDraw;
     private double pointSize;
+    private boolean radiiWorldCoordinates = false;
     
 //    public DefaultPointShader(PolygonShader coreShader, PolygonShader outlineShader) {
 //        super();
@@ -75,6 +76,7 @@ public class DefaultPointShader extends PointShader {
         this.pointRadius = pts.getPointRadius();
         this.pointSize = pts.getPointSize();
         this.sphereDraw = pts.getSpheresDraw();
+        radiiWorldCoordinates = pts.getRadiiWorldCoordinates();
     }
 
     
@@ -104,6 +106,11 @@ public class DefaultPointShader extends PointShader {
     @Override
     public boolean isSphereDraw() {
         return sphereDraw;
+    }
+
+
+    public boolean isRadiiWorldCoordinates() {
+        return radiiWorldCoordinates;
     }
 
 //    public void startGeometry(Geometry geom)

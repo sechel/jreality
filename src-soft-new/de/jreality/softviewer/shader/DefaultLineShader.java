@@ -54,6 +54,7 @@ public class DefaultLineShader extends LineShader {
     private double lineWidth =0.01;
     private double tubeRadius =0.01;
     private boolean drawTubes = true;
+    private boolean radiiWorldCoordinates = false;
     PolygonShader polygonShader =null;
     /**
      * 
@@ -64,6 +65,7 @@ public class DefaultLineShader extends LineShader {
         lineWidth = lis.getLineWidth();
         tubeRadius = lis.getTubeRadius();
         drawTubes = lis.getTubeDraw();
+        radiiWorldCoordinates = lis.getRadiiWorldCoordinates();
     }
 
     /* (non-Javadoc)
@@ -93,5 +95,9 @@ public class DefaultLineShader extends LineShader {
     @Override
     public boolean isDrawTubes() {
         return drawTubes;
+    }
+
+    public boolean isRadiiWorldCoordinates() {
+        return radiiWorldCoordinates;
     }
 }

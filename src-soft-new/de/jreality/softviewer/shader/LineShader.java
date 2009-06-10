@@ -53,7 +53,7 @@ public abstract class LineShader {
     public abstract double getLineWidth();
     public abstract double getTubeRadius();
     public abstract boolean isDrawTubes();
-
+    public abstract boolean isRadiiWorldCoordinates();
     public void startGeometry(Geometry geom) {
         
     }

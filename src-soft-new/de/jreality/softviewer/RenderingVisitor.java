@@ -47,6 +47,7 @@ import java.util.logging.Logger;
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.backends.texture.SimpleTexture;
 import de.jreality.geometry.SphereUtility;
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.DirectionalLight;
@@ -71,6 +72,7 @@ import de.jreality.softviewer.shader.DefaultPolygonShader;
 import de.jreality.softviewer.shader.LineShader;
 import de.jreality.softviewer.shader.PointShader;
 import de.jreality.softviewer.shader.PolygonShader;
+import de.jreality.util.CameraUtility;
 
 /**
  * This class traverses a scene graph starting from the given "root" scene graph
@@ -292,6 +294,9 @@ public class RenderingVisitor extends SceneGraphVisitor {
             for (int i = 0, n = edgeIndices.size(); i < n; i++) {
                 IntArray edge = edgeIndices.item(i).toIntArray();
                 double radius = lineShader.getTubeRadius();
+                // world coordinates
+                if(lineShader.isRadiiWorldCoordinates())
+                    radius *= CameraUtility.getScalingFactor(currentTrafo, Pn.EUCLIDEAN);
                 if(radiiArray != null)
                     radius *= radiiArray.getValueAt(i);
                 
@@ -602,7 +607,11 @@ public class RenderingVisitor extends SceneGraphVisitor {
                     pipeline.processPseudoSphere(a, i,vertexColors,vertexRadii);
             else
                 for (int i = 0; i < n; i++) {
-                    double r = pointShader.getPointRadius()*(vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):1);
+                    double r = pointShader.getPointRadius();
+                    if(pointShader.isRadiiWorldCoordinates())
+                        r *= CameraUtility.getScalingFactor(currentTrafo, Pn.EUCLIDEAN);
+                    
+                    r*=(vertexRadii!=null?vertexRadii.toDoubleArray().getValueAt(i):1);
                     pmat[0]  = pmat[5]  = pmat[10] = r;
                     DoubleArray da = a.item(i).toDoubleArray();
                     pmat[3] = da.getValueAt(0);
