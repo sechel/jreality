@@ -180,3 +180,12 @@ http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual
 jReality uses several 3rd party libraries. Please look into the folder
 3rd-party, the README file contains information about these libraries
 and their licenses.
+
+
+
+**** Using Eclipse ****
+
+The project file contains Eclipse project information. You can open it using
+New...->Java Project->"Create from existing source" with the jreality folder
+folder selected. The native library location needs to be set for the source
+folder jreality/src-core under "Java Build Path"->"Source".
