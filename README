@@ -139,28 +139,28 @@ right mouse button pressed to enable mouse look.
   right to select different examples and change appearance in the
   Content Appearance panel. Object size can also be adapted. Start with:
   
-  $> java de.jreality.plugin.JRViewer -vr
+  $> java -Xms512M -Xmx1024M de.jreality.plugin.JRViewer -vr
 
 
 * Audio examples:
 
-  $> java de.jreality.tutorial.audio.AudioExample 
-  $> java de.jreality.tutorial.audio.DopplerDemo 
+  $> java -Xms512M -Xmx1024M de.jreality.tutorial.audio.AudioExample 
+  $> java -Xms512M -Xmx1024M de.jreality.tutorial.audio.DopplerDemo 
 
   Let Leslie speaker rotate by typing PgUp or PgDn:
-  $> java de.jreality.tutorial.audio.LeslieDemo
+  $> java -Xms512M -Xmx1024M de.jreality.tutorial.audio.LeslieDemo
 
 
 * Misc:
   type 1 to toggle camera paths
-  $> java de.jreality.tutorial.scene.CameraPathExample 
+  $> java -Xms512M -Xmx1024M de.jreality.tutorial.scene.CameraPathExample 
 
 
 * Plain Viewers:
   
   To get a plain (VR) viewer for loading 3D files, try:
-  $> java de.jreality.plugin.JRViewer
-  $> java de.jreality.plugin.JRViewer -vr
+  $> java -Xms512M -Xmx1024M de.jreality.plugin.JRViewer
+  $> java -Xms512M -Xmx1024M de.jreality.plugin.JRViewer -vr
 
 
 
@@ -169,3 +169,12 @@ right mouse button pressed to enable mouse look.
 jReality uses several 3rd party libraries. Please look into the folder
 3rd-party, the README file contains information about these libraries
 and their licenses.
+
+
+
+**** Using Eclipse ****
+
+The project file contains Eclipse project information. You can open it using
+New...->Java Project->"Create from existing source" with the jreality folder
+folder selected. The native library location needs to be set for the source
+folder jreality/src-core under "Java Build Path"->"Source".
