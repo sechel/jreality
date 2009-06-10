@@ -16,6 +16,7 @@ import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentTools;
@@ -26,7 +27,6 @@ import de.jreality.util.Input;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 /**
  * Example showing how to write a content providing plugin. Requires vrExamples.jar in the classpath, can
@@ -35,7 +35,7 @@ import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
  * @author weissman
  *
  */
-public class VRExamples extends ShrinkPanelPlugin {
+public class VRExamples extends SceneShrinkPanel {
 
 	String[][] examples = new String[][] {
 			{ "Boy surface", "jrs/boy.jrs" },
@@ -98,6 +98,7 @@ public class VRExamples extends ShrinkPanelPlugin {
 	public void install(Controller c) throws Exception {
 		content = JRViewerUtility.getContentPlugin(c);
 		makePanel();
+		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 		super.install(c);
 	}
 	
