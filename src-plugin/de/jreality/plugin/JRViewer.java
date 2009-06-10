@@ -50,7 +50,6 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class JRViewer {
