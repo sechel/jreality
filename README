@@ -6,14 +6,14 @@ jars included.
 All current jReality contributors use Eclipse as IDE. This folder contains
 all eclipse project information. 
 
-For compiling the whole project from command line, ant is used.
+For compiling the whole project from command line, we use ant.
 
-jReality is developed using Sun Java 6, but we maintain compatibility with
-Java 5, since for many macosx machines Java 6 is not available. Other JDKs
+jReality is developed with Sun Java 6, but we maintain compatibility with
+Java 5, since for many Mac OS X machines Java 6 is not available. Other JDKs
 may also work, but we do no testing with other JDKs.
 
-Besides the following instructions we recommend to look into the jReality
-wiki and forum, which can be found at:
+In addition to the following instructions, you may want to look at the jReality
+wiki and forum:
 
 * http://www3.math.tu-berlin.de/jreality/mediawiki
 * http://www3.math.tu-berlin.de/jreality/phpbb
@@ -23,8 +23,8 @@ wiki and forum, which can be found at:
 **** SUPPORTED PLATFORMS ****
 
 As a java library jReality should run on all major platforms with
-sufficient Java support. Anyway we give a list of platforms+JDKs which
-we have successfully tested:
+sufficient Java support. The following is a list of platforms+JDKs
+on which we have successfully built and run jReality:
 
 OS                            JDK
 ------------------------------------------------------
@@ -43,7 +43,7 @@ Windows XP sp3				  java-1.6.0_13-b03
 jReality is built using an ant file. For a special feature (immersing
 Java frames into the 3D scene), we have source incompatibility between
 Java 1.5 and Java 6. This makes it necessary to modify the excludes.txt
-file when using a 1.5 JDK. However, we recommend to use Java 6.
+file when using a 1.5 JDK. Given the choice, we recommend Java 6.
 
 * Requirements *
 
