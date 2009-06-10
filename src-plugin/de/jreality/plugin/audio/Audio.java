@@ -1,7 +1,6 @@
 package de.jreality.plugin.audio;
 
 import java.awt.Window;
-import java.util.Timer;
 
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -26,7 +25,7 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class Audio extends Plugin implements ChangeListener {
 
-	
+
 	public static enum BackendType {
 		noSound,
 		javaSound,
@@ -34,30 +33,28 @@ public class Audio extends Plugin implements ChangeListener {
 		jackAmbisonicsFO,
 		jackAmbisonicsPSO;
 	}
-	
+
 	public static enum InterpolationType {
 		noInterpolation,
 		linearInterpolation,
 		cosineInterpolation,
 		cubicInterpolation;
 	}
-	
+
 	private View
-		view = null;
+	view = null;
 	private AudioPreferences 
-		prefs = null;
+	prefs = null;
 	private Scene
-		scene = null;
+	scene = null;
 	private AudioRenderer 
-		renderer = null;
+	renderer = null;
 	private Interpolation.Factory
-		interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
-	
+	interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
+
 	private SceneGraphPath lastMicrophonePath;
 
-	int startupDelay=4000;// timer used to delay audio launching on startup
-	Timer timer = new Timer();
-	
+
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo();
@@ -83,7 +80,7 @@ public class Audio extends Plugin implements ChangeListener {
 
 
 	private void updateAudioRenderer() throws Exception {
-		
+
 		if (renderer != null) {
 			try {
 				renderer.shutdown();
@@ -125,16 +122,16 @@ public class Audio extends Plugin implements ChangeListener {
 			interpolationFactory = Interpolation.Cubic.FACTORY;
 			break;
 		}
-		
+
 		if (renderer == null) return;
-		
+
 		renderer.setSceneRoot(scene.getSceneRoot());
 		SceneGraphPath micPath = scene.getMicrophonePath();
 		renderer.setMicrophonePath(micPath);
 		lastMicrophonePath = new SceneGraphPath(micPath);
-		
+
 		renderer.setInterpolationFactory(interpolationFactory);
-		
+
 		if (renderer instanceof AbstractJavaSoundRenderer) {
 			AbstractJavaSoundRenderer javaSoundRenderer = (AbstractJavaSoundRenderer) renderer;
 			javaSoundRenderer.setFrameSize(prefs.getJavaSoundFrameSize());
@@ -144,21 +141,22 @@ public class Audio extends Plugin implements ChangeListener {
 			ajr.setTarget(prefs.getJackTarget());
 			ajr.setRetries(prefs.getJackRetries());
 		}
-		
-//		if (timer == null) renderer.launch();
-//		else timer.schedule(new TimerTask() {
+
 		Thread launcher = new Thread() {
 			@Override
 			public void run() {
 				Window w = SwingUtilities.getWindowAncestor(view.getCenterComponent());
-				System.out.print("Audio is waiting for frontend.");
-				while (!w.isShowing()) {
+				System.out.println("Audio is waiting for graphics frontend.");
+				if (!w.isShowing()) {
 					try {
-						Thread.sleep(500);
-						System.out.print(".");
+						while (!w.isShowing()) {
+							Thread.sleep(500);
+							System.out.print(".");
+						}
+						Thread.sleep(1000);
 					} catch (InterruptedException e) {}
 				}
-				System.out.println("launch.");
+				System.out.println("Audio launch.");
 				try {
 					renderer.launch();
 				} catch (Exception e) {
@@ -167,8 +165,6 @@ public class Audio extends Plugin implements ChangeListener {
 			}
 		};
 		launcher.start();
-//		}, startupDelay);
-		timer = null;
 	}
 
 	@Override
@@ -190,5 +186,5 @@ public class Audio extends Plugin implements ChangeListener {
 			e1.printStackTrace();
 		}
 	}
-	
+
 }
