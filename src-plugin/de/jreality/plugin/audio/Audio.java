@@ -1,8 +1,9 @@
 package de.jreality.plugin.audio;
 
+import java.awt.Window;
 import java.util.Timer;
-import java.util.TimerTask;
 
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -16,6 +17,7 @@ import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
 import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.audio.javasound.VbapRenderer;
 import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.View;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphPath;
 import de.varylab.jrworkspace.plugin.Controller;
@@ -40,6 +42,8 @@ public class Audio extends Plugin implements ChangeListener {
 		cubicInterpolation;
 	}
 	
+	private View
+		view = null;
 	private AudioPreferences 
 		prefs = null;
 	private Scene
@@ -67,6 +71,7 @@ public class Audio extends Plugin implements ChangeListener {
 	public void install(Controller c) {
 		scene = c.getPlugin(Scene.class);	
 		prefs = c.getPlugin(AudioPreferences.class);
+		view = c.getPlugin(View.class);
 		prefs.addChangeListener(this);
 		scene.addChangeListener(this);
 		try {
@@ -140,18 +145,29 @@ public class Audio extends Plugin implements ChangeListener {
 			ajr.setRetries(prefs.getJackRetries());
 		}
 		
-		if (timer == null) renderer.launch();
-		else timer.schedule(new TimerTask() {
+//		if (timer == null) renderer.launch();
+//		else timer.schedule(new TimerTask() {
+		Thread launcher = new Thread() {
 			@Override
 			public void run() {
+				Window w = SwingUtilities.getWindowAncestor(view.getCenterComponent());
+				System.out.print("Audio is waiting for frontend.");
+				while (!w.isShowing()) {
+					try {
+						Thread.sleep(500);
+						System.out.print(".");
+					} catch (InterruptedException e) {}
+				}
+				System.out.println("launch.");
 				try {
 					renderer.launch();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-		}, startupDelay);
+		};
+		launcher.start();
+//		}, startupDelay);
 		timer = null;
 	}
 
