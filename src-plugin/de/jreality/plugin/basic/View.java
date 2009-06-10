@@ -218,7 +218,7 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	}
 
 	public String getTitle() {
-		return getPluginInfo().name;
+		return "jReality";
 	}
 
 	public void setVisible(boolean visible) {
