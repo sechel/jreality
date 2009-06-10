@@ -19,17 +19,17 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 
 	public static final boolean DEFAULT_SHOW_POINTS = true;
 	public static final boolean DEFAULT_POINTS_REFLECTING = true;
-	public static final double DEFAULT_POINT_RADIUS = .6;
+	public static final double DEFAULT_POINT_RADIUS = .5;
 	public static final Color DEFAULT_POINT_COLOR = Color.blue;
 	public static final boolean DEFAULT_SHOW_LINES = true;
 	public static final boolean DEFAULT_LINES_REFLECTING = true;
-	public static final double DEFAULT_TUBE_RADIUS = .5;
+	public static final double DEFAULT_TUBE_RADIUS = .4;
 	public static final Color DEFAULT_LINE_COLOR = Color.red;
 	public static final boolean DEFAULT_SHOW_FACES = true;
 	public static final boolean DEFAULT_FACES_REFLECTING = true;
-	public static final double DEFAULT_FACE_REFLECTION = .7;
-	public static final double DEFAULT_LINE_REFLECTION = .5;
-	public static final double DEFAULT_POINT_REFLECTION = .5;
+	public static final double DEFAULT_FACE_REFLECTION = .5;
+	public static final double DEFAULT_LINE_REFLECTION = .3;
+	public static final double DEFAULT_POINT_REFLECTION = .3;
 	public static final Color DEFAULT_FACE_COLOR = Color.white;
 	public static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
 	public static final double DEFAULT_TRANSPARENCY = .7;
