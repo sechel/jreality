@@ -125,24 +125,29 @@ latest release version of jogl.
 
 VISTA BUG:
 For Windows Vista users we suggest to use the runtime option
-java -Dsun.java2d.d3d=false de.jreality.plugin.JRViewer -vr
+
+-Dsun.java2d.d3d=false
+
 to avoid graphics errors in the menu bar.
 
 
 Java VM Flags:
 The apps run much better if one allows the JVM to use more memory.
-Add for instance -Xms512M -Xmx1024M when launching the examples.
+Add for instance
+
+-Xms512M -Xmx1024M
+
+when launching the examples.
 
 
 
 **** JReality Examples ****
 
 To get an idea of jreality, please check out the following examples.
-Usually, the VR Viewer is used, that allows to walk around using WASD
-(holding down Ctrl increases walking speed), Space to jump and keep
-right mouse button pressed to enable mouse look.
+Usually, the VR Viewer is used, please see the ViewerVR User tutorial:
+http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR_User_Manual
 
-* VR example, showing different example geometries. Use the GUI on the
+* ViewerVR, showing different example geometries. Use the GUI on the
   left to select different examples and change appearance in the
   Content Appearance panel. Object size can also be adapted. Start with:
   
@@ -163,12 +168,11 @@ right mouse button pressed to enable mouse look.
   $> java de.jreality.tutorial.scene.CameraPathExample 
 
 
-* Plain Viewers:
+* Plain File Viewer:
   
-  To get a plain (VR) viewer for loading 3D files, try:
+  To get a plain viewer for loading 3D files, try:
   $> java de.jreality.plugin.JRViewer
-  $> java de.jreality.plugin.JRViewer -vr
-
+  
 
 
 **** 3rd party libraries ****
