@@ -19,6 +19,7 @@ import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.reader.Readers;
@@ -48,6 +49,9 @@ public class VRExamples extends SceneShrinkPanel {
 	};
 	private HashMap<String, Integer> exampleIndices = new HashMap<String, Integer>();
 	private Content content;
+	private ContentLoader contentLoader = null;
+	private JRadioButton	
+		customContentButton = new JRadioButton("Load custom content...");
 
 	private void makePanel() {
 		if (examples != null) {
@@ -84,6 +88,9 @@ public class VRExamples extends SceneShrinkPanel {
 				group.add(button);
 				exampleIndices.put(examples[i][0], new Integer(i));
 			}
+			buttonGroupPanel.add(customContentButton);
+			group.add(customContentButton);
+			customContentButton.setAction(contentLoader.getAction());
 			shrinkPanel.setLayout(new GridLayout());
 			shrinkPanel.add(buttonGroupPanel);
 			shrinkPanel.setShrinked(true);
@@ -97,6 +104,7 @@ public class VRExamples extends SceneShrinkPanel {
 	@Override
 	public void install(Controller c) throws Exception {
 		content = JRViewerUtility.getContentPlugin(c);
+		contentLoader = c.getPlugin(ContentLoader.class);
 		makePanel();
 		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 		super.install(c);
