@@ -35,7 +35,7 @@ Ubuntu Studio 8.04.2, i386    java-6-sun-1.6.0.07
 Mac OS X 10.5.7, i386         java-1.5.0_16
 Ubuntu 9.04, i386			  java-6-sun-1.6.0.13
 Ubuntu 9.04, i386			  java-1.5.0-sun-1.5.0.18
-
+Windows XP sp3				  java-1.6.0_13-b03
 
 
 **** JREALITY BUILD INSTRUCTIONS **** 
@@ -59,10 +59,13 @@ For a complete build from sources you need:
     # **/Fake*5.java
 
 - Set the JAVA_HOME environment variable to the Sun Java 6 JDK folder,
-  for instance on an ubuntu installation:
+  for instance on an ubuntu installation or in a windows command prompt:  
   $> export JAVA_HOME=/usr/lib/jvm/java-6-sun
+  c:\jreality>set JAVA_HOME=C:\Program Files\Java\jdk1.6.0_12
+
 - Run the ant build:
   $> ant
+  c:\jreality>ant
 
 Some hints for Mac OS X:
    - The following JAVA_HOME setting should work:
@@ -74,17 +77,20 @@ Some hints for Mac OS X:
 
 Set up the class path. Most of the jars in the lib folder are required,
 as well as most of the jars created by the build file, in the dist folder.
-The commands to set the required classpath in a linux BASH are, for instance:
+The commands to set the required classpath in a linux BASH or the Windows
+command propt are, for instance:
   
   jReality jars:
   $> export CLASSPATH=dist/jReality-audio.jar:dist/jReality-backends-share.jar:dist/jReality-core.jar:dist/jReality-io.jar:dist/jReality-jogl.jar:dist/jReality-plugin.jar:dist/jReality-renderman.jar:dist/jReality-soft.jar:dist/jReality-sunflow.jar:dist/jReality-swing.jar:dist/jReality-tools.jar:dist/jReality-ui.jar:dist/jReality-vr.jar:dist/jReality-tutorial.jar
+  C:\jreality>set CLASSPATH=dist/jReality-audio.jar;dist/jReality-backends-share.jar;dist/jReality-core.jar;dist/jReality-io.jar;dist/jReality-jogl.jar;dist/jReality-plugin.jar;dist/jReality-renderman.jar;dist/jReality-soft.jar;dist/jReality-sunflow.jar;dist/jReality-swing.jar;dist/jReality-tools.jar;dist/jReality-ui.jar;dist/jReality-vr.jar;dist/jReality-tutorial.jar
 
   Required 3rd-party libraries:
   $> export CLASSPATH=$CLASSPATH:lib/antlr.jar:lib/bsh.jar:lib/colorpicker.jar:lib/gluegen-rt.jar:lib/iText-2.1.3.jar:lib/janino.jar:lib/jogl.jar:lib/jRWorkspacePluginSDK.jar:lib/jtem-beans.jar:lib/jterm.jar:lib/sunflow.jar:lib/xpp3.jar:lib/xstream.jar
+  C:\jreality>C:\Documents and Settings\Stefan\Desktop\jr-ossc\jreality>set CLASSPATH=%CLASSPATH%;lib/antlr.jar;lib/bsh.jar;lib/colorpicker.jar;lib/gluegen-rt.jar;lib/iText-2.1.3.jar;lib/janino.jar;lib/jogl.jar;lib/jRWorkspacePluginSDK.jar;lib/jtem-beans.jar;lib/jterm.jar;lib/sunflow.jar;lib/xpp3.jar;lib/xstream.jar 
 
   Data (textures, skyboxes, sample geometry files):
-  $> export CLASSPATH=$CLASSPATH:lib/vrData.jar:lib/vrExamples.jar
-
+  $> export CLASSPATH=$CLASSPATH:lib/vrData.jar:liv/vrExamples.jar
+  C:\jreality>C:\Documents and Settings\Stefan\Desktop\jr-ossc\jreality>set CLASSPATH=%CLASSPATH%;lib/vrData.jar;lib/vrExamples.jar
 
 Now you can run one of the examples included in jReality, for instance:
 
@@ -100,10 +106,11 @@ Enable OpenGL rendering:
 To make use of OpenGL rendering, a native library is required. This
 library depends on the OS and is in a sub-folder of jni. Look into
 that folder and see if there is a sub folder matching your platform.
-For instance, for a 64-bit linux system, set the following environment
-variable (BASH again):
+For instance, for a 64-bit linux system or a 32 bit windows, set the 
+following environment variable (BASH and Windows command prompt again):
 
   $> export LD_LIBRARY_PATH=jni/linux64
+  c:\jreality>set PATH=%PATH%;jni/win32
 
 Now the examples will start up using the much faster OpenGL rendering
 backend.
@@ -118,7 +125,7 @@ latest release version of jogl.
 
 VISTA BUG:
 For Windows Vista users we suggest to use the runtime option
--Dsun.java2d.d3d=false
+java -Dsun.java2d.d3d=false de.jreality.plugin.JRViewer -vr
 to avoid graphics errors in the menu bar.
 
 
@@ -136,31 +143,31 @@ Usually, the VR Viewer is used, that allows to walk around using WASD
 right mouse button pressed to enable mouse look.
 
 * VR example, showing different example geometries. Use the GUI on the
-  right to select different examples and change appearance in the
+  left to select different examples and change appearance in the
   Content Appearance panel. Object size can also be adapted. Start with:
   
-  $> java -Xms512M -Xmx1024M de.jreality.plugin.JRViewer -vr
+  $> java de.jreality.plugin.JRViewer -vr
 
 
 * Audio examples:
 
-  $> java -Xms512M -Xmx1024M de.jreality.tutorial.audio.AudioExample 
-  $> java -Xms512M -Xmx1024M de.jreality.tutorial.audio.DopplerDemo 
+  $> java de.jreality.tutorial.audio.AudioExample 
+  $> java de.jreality.tutorial.audio.DopplerDemo 
 
   Let Leslie speaker rotate by typing PgUp or PgDn:
-  $> java -Xms512M -Xmx1024M de.jreality.tutorial.audio.LeslieDemo
+  $> java de.jreality.tutorial.audio.LeslieDemo
 
 
 * Misc:
   type 1 to toggle camera paths
-  $> java -Xms512M -Xmx1024M de.jreality.tutorial.scene.CameraPathExample 
+  $> java de.jreality.tutorial.scene.CameraPathExample 
 
 
 * Plain Viewers:
   
   To get a plain (VR) viewer for loading 3D files, try:
-  $> java -Xms512M -Xmx1024M de.jreality.plugin.JRViewer
-  $> java -Xms512M -Xmx1024M de.jreality.plugin.JRViewer -vr
+  $> java de.jreality.plugin.JRViewer
+  $> java de.jreality.plugin.JRViewer -vr
 
 
 
@@ -169,12 +176,3 @@ right mouse button pressed to enable mouse look.
 jReality uses several 3rd party libraries. Please look into the folder
 3rd-party, the README file contains information about these libraries
 and their licenses.
-
-
-
-**** Using Eclipse ****
-
-The project file contains Eclipse project information. You can open it using
-New...->Java Project->"Create from existing source" with the jreality folder
-folder selected. The native library location needs to be set for the source
-folder jreality/src-core under "Java Build Path"->"Source".
