@@ -445,7 +445,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 
 	public void setShowPoints(boolean selected) {
 		showPoints.setSelected(selected);
-		
+		updateShowPoints();
 	}
 	
 	private void updateShowPoints() {
@@ -572,9 +572,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 
 	public void setShowLines(boolean selected) {
 		showLines.setSelected(selected);
-		if (appearance != null) {
-			appearance.setAttribute("showLines", selected);
-		}
+		updateShowLines();
 	}
 	
 	private void updateShowLines() {
