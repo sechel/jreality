@@ -47,22 +47,27 @@ public abstract class AbstractJavaSoundRenderer extends AbstractAudioRenderer im
 		sampleRate = (int) af.getSampleRate();
 		int bytesPerSample = (af.getSampleSizeInBits()+7)/8;
 		bufferLength = frameSize * bytesPerSample * channels;
-		System.out.println("stereo out buffer size = "+outputLine.getBufferSize());
-		outputLine.open(af, bufferLength);
-		System.out.println("stereoOut bufferSize: requested="+bufferLength+" obtained="+outputLine.getBufferSize());
+		//System.out.println("stereo out buffer size = "+outputLine.getBufferSize());
 		
+		// make the buffer of the outputLine twice as big as the backend buffer:
+		outputLine.open(af, 2*bufferLength);
+		
+		//System.out.println("stereoOut bufferSize: requested="+bufferLength+" obtained="+outputLine.getBufferSize());
+		
+		/*
 		if (bufferLength != outputLine.getBufferSize()) {
 			bufferLength = outputLine.getBufferSize();
 			System.out.println("Suggested buffer size not accepted. Adjusting frame size ["+frameSize+"] to "+(bufferLength/bytesPerSample));
 			frameSize = bufferLength/bytesPerSample;
 		}
+		*/
 		
 		outputLine.start();
 		
 		if (WRITE_TO_FILE) try {
 			System.out.println("try opening wav file...");
 			wavFile = new WavFileWriter(af.getChannels(), sampleRate, af.getSampleSizeInBits(), new File(AUDIO_FILE_NAME));
-			System.out.println("opened audio.wav");
+			System.out.println("opened "+AUDIO_FILE_NAME);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

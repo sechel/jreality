@@ -30,9 +30,6 @@ public class StereoRenderer extends AbstractJavaSoundRenderer {
 	public void launch() throws LineUnavailableException {
 		channels=2;
 		openSourceDataLine();
-
-		System.out.println("framesize="+frameSize);
-		
 		buffer = new byte[bufferLength];
 		fbuffer = new float[2*frameSize]; // 2 channels
 		fbuffer_lookAhead = new float[2*frameSize];

@@ -62,7 +62,7 @@ public class JavaSoundUtility {
 		List<SourceDataLine> mixerLines = new LinkedList<SourceDataLine>();
 		
 		for (Info info : mixerInfos) {
-			System.out.println("Checking mixer "+info);
+			//System.out.println("Checking mixer "+info);
 			Mixer mixer = AudioSystem.getMixer(info);
 			try {
 				mixer.open();
@@ -90,7 +90,7 @@ public class JavaSoundUtility {
 			return null;
 		}
 		if (possibleMixers.size() == 1) {
-			System.out.println("JavaSoundUtility.createSourceDataLine(): ONE MIXER");
+			//System.out.println("JavaSoundUtility.createSourceDataLine(): ONE MIXER");
 			return mixerLines.get(0);
 		}
 		

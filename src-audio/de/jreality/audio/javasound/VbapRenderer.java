@@ -35,9 +35,6 @@ public class VbapRenderer extends AbstractJavaSoundRenderer {
 	public void launch() throws LineUnavailableException {
 		channels = speakers.length;
 		openSourceDataLine();
-
-		System.out.println("framesize="+frameSize);
-		
 		buffer = new byte[bufferLength];
 		fbuffer = new float[channels*frameSize];
 		fbuffer_lookAhead = new float[channels*frameSize];
