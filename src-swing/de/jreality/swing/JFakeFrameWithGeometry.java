@@ -1,11 +1,18 @@
 package de.jreality.swing;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Rectangle;
+import java.awt.Window;
 
 import javax.swing.JRootPane;
+import javax.swing.UIManager;
+import javax.swing.plaf.RootPaneUI;
+import javax.swing.plaf.metal.MetalRootPaneUI;
+
+import com.sun.java.swing.plaf.windows.WindowsRootPaneUI;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;
@@ -46,11 +53,31 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	private SceneGraphComponent windowRoot;
 	private int layer;
 
-	protected void init() {
+	
+	private class MyRootPane extends JRootPane {
 		
+		private static final long 
+			serialVersionUID = 1L;
+		private RootPaneUI
+			rootPaneUI = new MetalRootPaneUI();
+		
+		public MyRootPane() {
+			setUI(rootPaneUI);
+		}
+		
+		@Override
+		public RootPaneUI getUI() {
+			return rootPaneUI;
+		}
+		
+	}
+	
+	
+	protected void init() {
+		setRootPane(new MyRootPane());
+		getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
     	setUndecorated(true);
-        getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
-
+    	
         normalBounds=new Rectangle();
 
         Tool leftMouseButtonTool = new PlanarMouseEventTool(drag0, 0, this);

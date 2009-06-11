@@ -16,7 +16,6 @@ import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.Content;
-import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;

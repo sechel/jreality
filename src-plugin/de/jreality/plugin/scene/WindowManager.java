@@ -28,8 +28,8 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	SceneGraphComponent windowRoot=new SceneGraphComponent("window root");
 	private int
-		resX=1024,
-		resY=768;
+		resX=600,
+		resY=450;
 	
 	private double
 		distance=2;

@@ -3,8 +3,6 @@ package de.jreality.plugin.scene;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JPanel;
-
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.scene.SceneGraphComponent;
@@ -13,6 +11,7 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlot;
 
 /**
  * A ShrinkPanel that flops into the Scene when double-clicking on the terrain.
@@ -29,6 +28,8 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 	private boolean windowInScene=false;
 
 	private SceneShrinkSlot sceneSlot;
+	private ShrinkSlot
+		lastSlot = null;
 	
 	private ShrinkPanel internalShrinkPanel;
 	
@@ -53,8 +54,8 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		internalShrinkPanel.setIcon(shrinkPanel.getIcon());
 		internalShrinkPanel.setFloatable(false);
 		
-		sceneSlot.getShrinkSlot().addShrinkPanel(internalShrinkPanel);
-		internalShrinkPanel.setVisible(false);
+//		sceneSlot.getShrinkSlot().addShrinkPanel(internalShrinkPanel);
+//		internalShrinkPanel.setVisible(false);
 		
 		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 
@@ -64,7 +65,7 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
 		installTrigger(null);
-		sceneSlot.unregisterAccessory(this);
+//		sceneSlot.unregisterAccessory(this);
 	}
 
 	private void installTrigger(SceneGraphComponent trigger) {
@@ -87,13 +88,17 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		if (windowInScene) return;
 		windowInScene = true;
 		// move content to scene slot
-		JPanel content = shrinkPanel.getContentPanel();
-		internalShrinkPanel.setShrinked(shrinkPanel.isShrinked());
-		internalShrinkPanel.setContentPanel(content);
-		// hide outer panel
-		shrinkPanel.setVisible(false);
-		// show internal panel
-		internalShrinkPanel.setVisible(true);
+//		JPanel content = shrinkPanel.getContentPanel();
+//		internalShrinkPanel.setShrinked(shrinkPanel.isShrinked());
+//		internalShrinkPanel.setContentPanel(content);
+//		// hide outer panel
+//		shrinkPanel.setVisible(false);
+//		// show internal panel
+//		internalShrinkPanel.setVisible(true);
+		lastSlot = shrinkPanel.getParentSlot();
+		lastSlot.removeShrinkPanel(shrinkPanel);
+		sceneSlot.getShrinkSlot().addShrinkPanel(shrinkPanel);
+		shrinkPanel.setFloatable(false);
 		// force display of scene slot
 		sceneSlot.setVisible(true);
 	}
@@ -102,13 +107,16 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		if (!windowInScene) return;
 		windowInScene = false;
 		// move content to non-scene slot	
-		JPanel content = internalShrinkPanel.getContentPanel();
-		shrinkPanel.setShrinked(internalShrinkPanel.isShrinked());
-		shrinkPanel.setContentPanel(content);
-		// hide inner panel
-		internalShrinkPanel.setVisible(false);
-		// show external panel
-		shrinkPanel.setVisible(true);
+//		JPanel content = internalShrinkPanel.getContentPanel();
+//		shrinkPanel.setShrinked(internalShrinkPanel.isShrinked());
+//		shrinkPanel.setContentPanel(content);
+//		// hide inner panel
+//		internalShrinkPanel.setVisible(false);
+//		// show external panel
+//		shrinkPanel.setVisible(true);
+		sceneSlot.getShrinkSlot().removeShrinkPanel(shrinkPanel);
+		lastSlot.addShrinkPanel(shrinkPanel);
+		shrinkPanel.setFloatable(true);
 		// close internal frame if empty
 		sceneSlot.closeFrameIfEmpty();
 		
