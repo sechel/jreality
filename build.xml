@@ -533,6 +533,7 @@
 			${scene_folder}/Avatar**,
 			${scene_folder}/Sky**, 
 			${scene_folder}/Terrain**, 
+			${scene_folder}/VRExamples**
 			${scene_folder}/VRPanel**
 		"/>
 		
