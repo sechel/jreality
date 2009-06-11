@@ -13,6 +13,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -68,14 +69,13 @@ public class AnimatedTextureExample {
 		
 // 		final ViewerApp va = ViewerApp.display(worldSGC);
 //		CameraUtility.encompass(va.getCurrentViewer());
-		JRViewer.display(worldSGC);
-		JRViewer jrviewer = JRViewer.getLastJRViewer();
+		final Viewer v = JRViewer.display(worldSGC);
 		// force regular rendering; each render will invoke the above runnable
 		// to update the texture
  		Timer timer = new Timer(20, new ActionListener()	{
 
 			public void actionPerformed(ActionEvent e) {
-//				jrviewer.getViewer().renderAsync();		
+				v.renderAsync();		
 			}
  			
  		});
