@@ -104,6 +104,11 @@ public class Scene extends Plugin {
 
 	JrScene theScene;
 	
+	
+	public Scene() {
+		this(null);
+	}
+	
 	public Scene(JrScene jrscene) {
 		if (jrscene != null) theScene = jrscene;
 		else theScene = defaultScene();
