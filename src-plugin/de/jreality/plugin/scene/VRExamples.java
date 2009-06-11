@@ -44,7 +44,7 @@ public class VRExamples extends SceneShrinkPanel {
 			{ "Tetranoid", "jrs/tetranoid.jrs" },
 			{ "Wente torus", "jrs/wente.jrs" },
 			{ "Schwarz P", "jrs/schwarz.jrs" },
-			{ "Matheon baer", "jrs/baer.jrs" }
+			{ "Matheon bear", "jrs/baer.jrs" }
 	};
 	private HashMap<String, Integer> exampleIndices = new HashMap<String, Integer>();
 	private Content content;
