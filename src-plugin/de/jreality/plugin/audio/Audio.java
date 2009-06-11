@@ -146,17 +146,14 @@ public class Audio extends Plugin implements ChangeListener {
 			@Override
 			public void run() {
 				Window w = SwingUtilities.getWindowAncestor(view.getCenterComponent());
-				System.out.println("Audio is waiting for graphics frontend.");
 				if (!w.isShowing()) {
 					try {
 						while (!w.isShowing()) {
 							Thread.sleep(500);
-							System.out.print(".");
 						}
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {}
 				}
-				System.out.println("Audio launch.");
 				try {
 					renderer.launch();
 				} catch (Exception e) {
