@@ -125,7 +125,9 @@ public class CenteredAndScaledContent extends Content implements ChangeListener,
 
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("Centered and Scaled Content", "jReality Group");
+		PluginInfo info = new PluginInfo("Centered and Scaled Content", "jReality Group");
+		info.isDynamic = false;
+		return info;
 	}
 	
 	@Override

@@ -35,7 +35,9 @@ public class DirectContent extends Content {
 
 	@Override
 	public PluginInfo getPluginInfo() {
-		return new PluginInfo("Direct Content", "jReality Group");
+		PluginInfo info = new PluginInfo("Direct Content", "jReality Group");
+		info.isDynamic = false;
+		return info;
 	}
 
 }
