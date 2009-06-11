@@ -65,9 +65,14 @@ BeanShell
     - http://www.beanshell.org
 
 jTerm
-    - java terminal - license still unclear
+    - java terminal - GPL or BSD
     - used as a terminal for the beanshell in the ViewerApp
     - http://www.jtem.de
+
+jterm-beans
+    - java bean inspector - GPL or BSD
+    - used for automatic Inspector panel generation
+    - will become available at http://www.jtem.de
 
 jRworkspaceSDK
 	- Plug-in SDK - BSD
