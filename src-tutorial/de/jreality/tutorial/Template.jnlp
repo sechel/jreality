@@ -15,7 +15,7 @@
   </security>
 
     <resources>
-      <j2se href="http://java.sun.com/products/autodl/j2se" version="1.5+" inital-heap-size="64m" max-heap-size="512m"/>
+      <j2se href="http://java.sun.com/products/autodl/j2se" version="1.5+" inital-heap-size="64m" max-heap-size="512m" java-vm-args="-Dsun.java2d.d3d=false"/>
       <jar href="../jars/jReality-tutorial.jar" main="true" />
       <jar href="../jars/jReality.jar" />
       <jar href="../jars/bsh.jar" />
