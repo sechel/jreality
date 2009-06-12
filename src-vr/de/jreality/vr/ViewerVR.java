@@ -1170,7 +1170,7 @@ public class ViewerVR {
 				{ "tetranoid", "jrs/tetranoid.jrs" },
 				{ "Wente torus", "jrs/wente.jrs" },
 				{ "Schwarz P", "jrs/schwarz.jrs" },
-				{ "Matheon baer", "jrs/baer.jrs" }
+				{ "Matheon bear", "jrs/baer.jrs" }
 		};
 		
 		ViewerVR vr = createDefaultViewerVR(examples);
