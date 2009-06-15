@@ -61,6 +61,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		lineColorChooser = new ColorPicker(false, false),
 		pointColorChooser = new ColorPicker(false, false),
 		faceColorChooser = new ColorPicker(false, false);
+	private LabelsInspector
+		faceFontInspector = new LabelsInspector("polygonShader"),
+		lineFontInspector = new LabelsInspector("lineShader"),
+		pointFontInspector = new LabelsInspector("pointShader");
 	private JSliderVR
 		tubeRadiusSlider = new JSliderVR(HORIZONTAL, 0, 100, 0),
 		sphereRadiusSlider = new JSliderVR(HORIZONTAL, 0, 100, 0),
@@ -168,6 +172,11 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.gridwidth = REMAINDER;
 		c.weightx = 1.0;
 		linesPanel.add(linesReflectionSlider, c);
+		ShrinkPanel lineLabelShrinker = new ShrinkPanel("Labels");
+		lineLabelShrinker.setShrinked(true);
+		lineLabelShrinker.setLayout(new GridLayout());
+		lineLabelShrinker.add(lineFontInspector);
+		linesPanel.add(lineLabelShrinker, c);
 
 		// points
 		JPanel pointsPanel = new JPanel();
@@ -191,6 +200,11 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.gridwidth = REMAINDER;
 		c.weightx = 1.0;
 		pointsPanel.add(pointsReflectionSlider, c);
+		ShrinkPanel pointLabelShrinker = new ShrinkPanel("Labels");
+		pointLabelShrinker.setShrinked(true);
+		pointLabelShrinker.setLayout(new GridLayout());
+		pointLabelShrinker.add(pointFontInspector);
+		pointsPanel.add(pointLabelShrinker, c);
 		
 		// faces
 		JPanel facesPanel = new JPanel();
@@ -214,13 +228,16 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.gridwidth = REMAINDER;
 		c.weightx = 1.0;
 		facesPanel.add(transparencySlider, c);
-	
-
 		facesPanel.add(facesFlat, c);
 		facesPanel.add(texturePanel, c);
 		texturePanel.setShrinked(true);
 		texturePanel.setLayout(new GridLayout());
 		texturePanel.add(textureInspector);
+		ShrinkPanel faceLabelShrinker = new ShrinkPanel("Labels");
+		faceLabelShrinker.setShrinked(true);
+		faceLabelShrinker.setLayout(new GridLayout());
+		faceLabelShrinker.add(faceFontInspector);
+		facesPanel.add(faceLabelShrinker, c);
 		
 		c.fill = BOTH;
 		c.gridwidth = REMAINDER;
@@ -386,6 +403,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 			
 			public void run() {
 				textureInspector.setAppearance(appearance);
+				pointFontInspector.setAppearance(appearance);
+				lineFontInspector.setAppearance(appearance);
+				faceFontInspector.setAppearance(appearance);
 				updateShowPoints();
 				updateShowLines();
 				updateShowFaces();
@@ -836,6 +856,103 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	
 	public void setTextureScale(double scale) {
 		textureInspector.setTextureScale(scale);
+	}
+	
+	
+	public void setShowPointLabels(boolean show) {
+		pointFontInspector.setShowLabels(show);
+	}
+	
+	public void setShowLineLabels(boolean show) {
+		lineFontInspector.setShowLabels(show);
+	}
+	
+	public void setShowFaceLabels(boolean show) {
+		faceFontInspector.setShowLabels(show);
+	}
+	
+	public boolean isShowPointLabels() {
+		return pointFontInspector.isShowLabels();
+	}
+
+	public boolean isShowLineLabels() {
+		return lineFontInspector.isShowLabels();
+	}
+	
+	public boolean isShowFaceLabels() {
+		return faceFontInspector.isShowLabels();
+	}
+	
+	public void setPointLabelColor(Color color) {
+		pointFontInspector.setFontColor(color);
+	}
+	
+	public void setLineLabelColor(Color color) {
+		lineFontInspector.setFontColor(color);
+	}
+	
+	public void setFaceLabelColor(Color color) {
+		faceFontInspector.setFontColor(color);
+	}
+	
+	public Color getPointLabelColor() {
+		return pointFontInspector.getFontColor();
+	}
+	
+	public Color getLineLabelColor() {
+		return lineFontInspector.getFontColor();
+	}
+	
+	public Color getFaceLabelColor() {
+		return faceFontInspector.getFontColor();
+	}
+	
+	public double getPointLabelSize() {
+		return pointFontInspector.getLabelSize();
+	}
+	
+	public double getLineLabelSize() {
+		return lineFontInspector.getLabelSize();
+	}
+	
+	public double getFaceLabelSize() {
+		return faceFontInspector.getLabelSize();
+	}
+	
+	public void setPointLabelSize(double size) {
+		pointFontInspector.setLabelSize(size);
+	}
+	
+	public void setLineLabelSize(double size) {
+		lineFontInspector.setLabelSize(size);
+	}
+	
+	public void setFaceLabelSize(double size) {
+		faceFontInspector.setLabelSize(size);
+	}
+	
+	public int getPointLabelResolution() {
+		return pointFontInspector.getLabelResolution();
+	}
+	
+	public int getLineLabelResolution() {
+		return lineFontInspector.getLabelResolution();
+	}
+	
+	public int getFaceLabelResolution() {
+		return faceFontInspector.getLabelResolution();
+	}
+	
+	public void setPointLabelResolution(int res) {
+		pointFontInspector.setLabelResolution(res);
+	}
+	
+	public void setLineLabelResolution(int res) {
+		lineFontInspector.setLabelResolution(res);
+	}
+	
+	public void setFaceLabelResolution(int res) {
+		faceFontInspector.setLabelResolution(res);
 	}
 	
 	private void switchTo(JComponent content) {
