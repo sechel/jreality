@@ -268,7 +268,7 @@ public class LabelUtility {
 	  // HACK: the previous implementation failed for strings without descent...
 	  // I got cut-off in the vertical dir, so i added a border of width 2
 	  int height = (int) f.getLineMetrics(s,frc).getHeight();//new TextLayout("fg", f, frc).getBounds().getBounds().height;
-    int width = (r.width+4);
+    int width = (r.width+20);
     
     BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
 	  Graphics2D g = (Graphics2D) img.getGraphics();
