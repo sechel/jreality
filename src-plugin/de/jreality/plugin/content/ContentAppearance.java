@@ -77,10 +77,8 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	
 	public void install(Scene scene) {
 		Appearance contentApp = scene.getContentAppearance();
-		contentApp.setAttribute(
-				CommonAttributes.RADII_WORLD_COORDINATES,
-				true
-		);
+		contentApp.setAttribute(CommonAttributes.RADII_WORLD_COORDINATES, true);
+		contentApp.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
 		appearanceInspector.setAppearance(contentApp);
 	}
 
