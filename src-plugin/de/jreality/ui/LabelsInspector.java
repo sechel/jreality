@@ -39,7 +39,7 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		sizeSlider = new JSliderVR(1, 100, 30),
 		resolutionSlider = new JSliderVR(1, 200, 48);
 	private Font
-		labelFont = new Font("arial", Font.PLAIN, 48);
+		labelFont = new Font("Sans Serif", Font.PLAIN, 48);
 	
 	public LabelsInspector(String shaderPrefix) {
 		this.shaderPrefix = shaderPrefix;
