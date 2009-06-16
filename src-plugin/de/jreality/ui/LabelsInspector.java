@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -38,6 +40,10 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 	private JSliderVR
 		sizeSlider = new JSliderVR(1, 100, 30),
 		resolutionSlider = new JSliderVR(1, 200, 48);
+	private SpinnerNumberModel
+		resModel = new SpinnerNumberModel(48, 1, 100, 1);
+	private JSpinner
+		resolutionSpinner = new JSpinner(resModel);
 	private Font
 		labelFont = new Font("Sans Serif", Font.PLAIN, 48);
 	
@@ -47,6 +53,7 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		sizeSlider.addChangeListener(this);
 		resolutionSlider.addChangeListener(this);
 		fontColorButton.addColorChangedListener(this);
+		resolutionSpinner.addChangeListener(this);
 		
 		setLayout(new MinSizeGridBagLayout());
 		GridBagConstraints c1 = new GridBagConstraints();
@@ -64,7 +71,8 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		add(new JLabel("Size"), c1);
 		add(sizeSlider, c2);
 		add(new JLabel("Resolution"), c1);
-		add(resolutionSlider, c2);
+//		add(resolutionSlider, c2);
+		add(resolutionSpinner, c2);
 	}
 	
 	
@@ -100,24 +108,26 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 	
 	public void updateLabelSize() {
 		if (app != null) {
-			double resolution = resolutionSlider.getValue() / 100.0;
+			double resolution = getLabelResolution() / 100.0;
 			app.setAttribute(shaderPrefix + ".textShader.scale", getLabelSize() / resolution / 100.0);
 		}
 	}
 	
 	public int getLabelResolution() {
-		return resolutionSlider.getValue();
+//		return resolutionSlider.getValue();
+		return resModel.getNumber().intValue();
 	}
 	
 	public void setLabelResolution(int res) {
-		resolutionSlider.setValue(res);
+//		resolutionSlider.setValue(res);
+		resModel.setValue(res);
 		updateLabelSize();
 		updateLabelResolution();
 	}
 	
 	public void updateLabelResolution() {
 		if (app != null) {
-			int fontSize = (int)(resolutionSlider.getValue());
+			int fontSize = (int)(getLabelResolution());
 			labelFont = new Font("arial", Font.PLAIN, fontSize);
 			app.setAttribute(shaderPrefix + ".textShader.font", labelFont);
 		}
