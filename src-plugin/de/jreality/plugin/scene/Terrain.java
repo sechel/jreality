@@ -37,6 +37,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.ui.ColorChooseJButton;
 import de.jreality.ui.JSliderVR;
 import de.jreality.ui.TextureInspector;
 import de.jreality.util.PickUtility;
@@ -84,8 +85,9 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		panel = new JPanel(),
 		colorPanel = new JPanel();
 	private JButton 
-		closeButton = new JButton("<-- Back"),
-		faceColorButton = new JButton("Color...");
+		closeButton = new JButton("<-- Back");
+	private ColorChooseJButton
+		faceColorButton = new ColorChooseJButton(false);
 	private JCheckBox 
 		facesReflecting = new JCheckBox("Reflection"),
 		reflectScene = new JCheckBox("Reflect Scene Content"),
@@ -97,9 +99,9 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 	private ColorPicker 
 		faceColorChooser = new ColorPicker(false, false);
 	private TextureInspector 
-		textureInspector = new TextureInspector();
+		textureInspector = new TextureInspector(54);
 	private ShrinkPanel 
-		textureShrinker = new ShrinkPanel("Terrain Texture");
+		textureShrinker = new ShrinkPanel("Texture");
 
 	private HashMap<String, String> 
 		textures = new HashMap<String, String>();
@@ -127,7 +129,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		shrinkPanel.setShrinked(true);
 		shrinkPanel.add(panel);
 		GridBagConstraints c = new GridBagConstraints();
-		c.insets = new Insets(2, 2, 2, 2);
+		c.insets = new Insets(1,0,1,0);
 		c.fill = BOTH;
 		c.weightx = 1.0;
 		c.weighty = 0.0;
@@ -151,18 +153,6 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.gridwidth = REMAINDER;
 		panel.add(faceColorButton, c);
 		
-		textureInspector.setMaximalTextureScale(MAXIMAL_TEXTURE_SCALE);
-		textureInspector.setLogarithmicRange(LOGARITHMIC_RANGE);
-		textureInspector.setTextureScale(DEFAULT_TEXTURE_SCALE );
-		c.weightx = 1.0;
-		c.weighty = 1.0;
-		c.gridwidth = REMAINDER;
-		textureShrinker.setHeaderColor(new Color(0.8f, 0.8f, 0.5f));
-		textureShrinker.setShrinked(true);
-		textureShrinker.setLayout(new GridLayout());
-		textureShrinker.add(textureInspector);
-		panel.add(textureShrinker, c);
-		
 		c.weightx = 0.0;
 		c.weighty = 0.0;
 		c.gridwidth = RELATIVE;
@@ -171,18 +161,30 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.gridwidth = REMAINDER;
 		panel.add(faceReflectionSlider, c);
 		
-		c.weightx = 1.0;
-		c.gridwidth = REMAINDER;	
-		panel.add(reflectScene, c);
-		reflectScene.setEnabled(false);
-		reflectScene.setToolTipText("Coming soon...");
-		
 		c.weightx = 0.0;
 		c.gridwidth = RELATIVE;
 		panel.add(transparency, c);
 		c.weightx = 1.0;
 		c.gridwidth = REMAINDER;
 		panel.add(transparencySlider, c);
+		
+		c.weightx = 1.0;
+		c.gridwidth = REMAINDER;	
+		panel.add(reflectScene, c);
+		reflectScene.setEnabled(false);
+		reflectScene.setToolTipText("Coming soon...");
+		
+		textureInspector.setMaximalTextureScale(MAXIMAL_TEXTURE_SCALE);
+		textureInspector.setLogarithmicRange(LOGARITHMIC_RANGE);
+		textureInspector.setTextureScale(DEFAULT_TEXTURE_SCALE );
+		c.weightx = 1.0;
+		c.weighty = 1.0;
+		c.gridwidth = REMAINDER;
+		textureShrinker.setIcon(ImageHook.getIcon("photo.png"));
+		textureShrinker.setShrinked(true);
+		textureShrinker.setLayout(new GridLayout());
+		textureShrinker.add(textureInspector);
+		panel.add(textureShrinker, c);
 		
 		closeButton.addActionListener(this);
 		visibleCheckBox.addActionListener(this);
@@ -305,6 +307,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 					getFaceColor()
 			);
 		}
+		faceColorButton.setColor(getFaceColor());
 	}
 
 	public double getTransparency() {

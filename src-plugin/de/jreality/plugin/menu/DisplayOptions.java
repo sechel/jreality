@@ -132,6 +132,7 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
 		c.getPlugin(ViewMenuBar.class).removeAll(getClass());
+		c.getPlugin(ViewToolBar.class).removeAll(getClass());
 	}
 
 	@Override

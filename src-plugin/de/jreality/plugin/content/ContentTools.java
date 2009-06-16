@@ -280,6 +280,8 @@ public class ContentTools extends Plugin {
 		setToolEnabled(draggingTool, false);
 		setToolEnabled(rotateTool, false);
 		setToolEnabled(snapDragTool, false);
+		c.getPlugin(ViewMenuBar.class).removeAll(getClass());
+		c.getPlugin(ViewToolBar.class).removeAll(getClass());
 		super.uninstall(c);
 	}
 

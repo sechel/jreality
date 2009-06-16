@@ -71,7 +71,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 		appearanceInspector = new AppearanceInspector();
 		restoreDefaults();
-		shrinkPanel.setShrinked(true);
 	}
 	double worldSize = 1.0;
 	
@@ -223,7 +222,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		super.uninstall(c);
-		shrinkPanel.removeAll();
 		viewPreferences.removeColorPickerChangedListener(this);
 	}
 

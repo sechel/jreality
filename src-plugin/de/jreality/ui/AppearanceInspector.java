@@ -4,7 +4,6 @@ import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
 import static java.awt.GridBagConstraints.VERTICAL;
 import static java.awt.GridBagConstraints.WEST;
-import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.SwingConstants.HORIZONTAL;
 
 import java.awt.Color;
@@ -28,6 +27,7 @@ import javax.swing.event.ChangeListener;
 
 import com.bric.swing.ColorPicker;
 
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Scene;
 import de.jreality.shader.CommonAttributes;
@@ -95,7 +95,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	private GridBagConstraints
 		c = new GridBagConstraints();
 	private Insets
-		insets = new Insets(2, 2, 2, 2);
+		insets = new Insets(1,0,1,0);
 
 	
 	public AppearanceInspector() {
@@ -150,8 +150,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.anchor = WEST;
 		
 		// lines
-		JPanel linesPanel = new JPanel();
-		linesPanel.setBorder(createTitledBorder("Lines"));
+		ShrinkPanel linesPanel = new ShrinkPanel("Lines");
+		linesPanel.setIcon(ImageHook.getIcon("shape_edges.png"));
+		linesPanel.setShrinked(true);
+//		linesPanel.setBorder(createTitledBorder("Lines"));
 		linesPanel.setLayout(new GridBagLayout());
 		
 		c.gridwidth = 1;
@@ -173,14 +175,17 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.weightx = 1.0;
 		linesPanel.add(linesReflectionSlider, c);
 		ShrinkPanel lineLabelShrinker = new ShrinkPanel("Labels");
+		lineLabelShrinker.setIcon(ImageHook.getIcon("font.png"));
 		lineLabelShrinker.setShrinked(true);
 		lineLabelShrinker.setLayout(new GridLayout());
 		lineLabelShrinker.add(lineFontInspector);
 		linesPanel.add(lineLabelShrinker, c);
 
 		// points
-		JPanel pointsPanel = new JPanel();
-		pointsPanel.setBorder(createTitledBorder("Points"));
+		ShrinkPanel pointsPanel = new ShrinkPanel("Points");
+		pointsPanel.setIcon(ImageHook.getIcon("shape_handles.png"));
+		pointsPanel.setShrinked(true);
+//		pointsPanel.setBorder(createTitledBorder("Points"));
 		pointsPanel.setLayout(new GridBagLayout());
 		c.gridwidth = 1;
 		c.weightx = 0.0;
@@ -201,14 +206,17 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.weightx = 1.0;
 		pointsPanel.add(pointsReflectionSlider, c);
 		ShrinkPanel pointLabelShrinker = new ShrinkPanel("Labels");
+		pointLabelShrinker.setIcon(ImageHook.getIcon("font.png"));
 		pointLabelShrinker.setShrinked(true);
 		pointLabelShrinker.setLayout(new GridLayout());
 		pointLabelShrinker.add(pointFontInspector);
 		pointsPanel.add(pointLabelShrinker, c);
 		
 		// faces
-		JPanel facesPanel = new JPanel();
-		facesPanel.setBorder(createTitledBorder("Faces"));
+		ShrinkPanel facesPanel = new ShrinkPanel("Faces");
+		facesPanel.setIcon(ImageHook.getIcon("shape_square.png"));
+		facesPanel.setShrinked(true);
+//		facesPanel.setBorder(createTitledBorder("Faces"));
 		facesPanel.setLayout(new GridBagLayout());
 		c.gridwidth = 1;
 		c.weightx = 0.0;
@@ -230,10 +238,12 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		facesPanel.add(transparencySlider, c);
 		facesPanel.add(facesFlat, c);
 		facesPanel.add(texturePanel, c);
+		texturePanel.setIcon(ImageHook.getIcon("photo.png"));
 		texturePanel.setShrinked(true);
 		texturePanel.setLayout(new GridLayout());
 		texturePanel.add(textureInspector);
 		ShrinkPanel faceLabelShrinker = new ShrinkPanel("Labels");
+		faceLabelShrinker.setIcon(ImageHook.getIcon("font.png"));
 		faceLabelShrinker.setShrinked(true);
 		faceLabelShrinker.setLayout(new GridLayout());
 		faceLabelShrinker.add(faceFontInspector);
