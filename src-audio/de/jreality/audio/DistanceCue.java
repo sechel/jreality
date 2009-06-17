@@ -76,7 +76,7 @@ public interface DistanceCue {
 	/**
 	 * Computes the next value, based on the new sample v and the distance r, as well as the location of
 	 * the microphone relative to the sound source.  Note that r^2 may not be equal to xMic^2+yMic^2+zMic^2
-	 * if the transformation from source to microphone coordinates is not a (euclidean) isometry.
+	 * if the transformation from source to microphone coordinates is not an isometry.
 	 * 
 	 * The microphone position is intended for sound sources with directional characteristics.  Since
 	 * directional characteristics will not be used routinely, the sound path is not expected to interpolate

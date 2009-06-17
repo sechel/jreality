@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.smartcardio.CommandAPDU;
-
 import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.scene.data.SampleReader;
@@ -41,6 +39,7 @@ public class DelayPath implements SoundPath {
 	private DistanceCue directionlessCue = directionlessFactory.getInstance();
 	private SampleProcessor preProcessor = preProcFactory.getInstance();
 
+	private int metric = Pn.EUCLIDEAN;
 	private float gain = AudioAttributes.DEFAULT_GAIN;
 	private float directionlessGain = AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN;
 	private float speedOfSound = AudioAttributes.DEFAULT_SPEED_OF_SOUND;
@@ -58,17 +57,16 @@ public class DelayPath implements SoundPath {
 	private Queue<Matrix> sourcePositions = new LinkedList<Matrix>();
 	private Matrix currentMicPosition, currentSourcePosition;
 
-	private LowPassFilter xFilter, yFilter, zFilter, wFilter;
-	private float xTarget, yTarget, zTarget, wTarget;
-	private float xCurrent, yCurrent, zCurrent, wCurrent;
-	private float xMic, yMic, zMic, wMic;
+	private LowPassFilter xFilter, yFilter, zFilter;
+	private float xTarget, yTarget, zTarget;
+	private float xCurrent, yCurrent, zCurrent;
+	private float xMic, yMic, zMic;
 
 	private float[] currentFrame = null;
 	private int currentLength = 0;
 	private int currentIndex = 0;
 	private int relativeTime = 0;
 	private int frameCount = 0;
-	private int metric = Pn.EUCLIDEAN;
 
 	private Interpolation interpolation;
 
@@ -90,12 +88,12 @@ public class DelayPath implements SoundPath {
 
 	// consider synchronization when changing this method...
 	public void setProperties(EffectiveAppearance app) {
+		metric = app.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
 		gain = app.getAttribute(AudioAttributes.VOLUME_GAIN_KEY, AudioAttributes.DEFAULT_GAIN);
 		directionlessGain = app.getAttribute(AudioAttributes.DIRECTIONLESS_GAIN_KEY, AudioAttributes.DEFAULT_DIRECTIONLESS_GAIN);
 		speedOfSound = app.getAttribute(AudioAttributes.SPEED_OF_SOUND_KEY, AudioAttributes.DEFAULT_SPEED_OF_SOUND);
 		updateCutoff = app.getAttribute(AudioAttributes.UPDATE_CUTOFF_KEY, AudioAttributes.DEFAULT_UPDATE_CUTOFF);
 		earshot = app.getAttribute(AudioAttributes.EARSHOT_KEY, AudioAttributes.DEFAULT_EARSHOT);
-		metric = app.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
 		updateParameters();
 
 		SampleProcessorFactory spf = (SampleProcessorFactory) app.getAttribute(AudioAttributes.PREPROCESSOR_KEY,
@@ -203,22 +201,34 @@ public class DelayPath implements SoundPath {
 	}
 
 	private Matrix auxiliaryMatrix = new Matrix();
+	private double[] auxiliaryArray = new double[3];
 
 	private void updateTarget() {
 		auxiliaryMatrix.assignFrom(sourcePositions.isEmpty() ? currentSourcePosition : sourcePositions.element());
 		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
-
-		// TODO: Adjust the rest of this method to generalize to curved geometries
-		xTarget = (float) auxiliaryMatrix.getEntry(0, 3);
-		yTarget = (float) auxiliaryMatrix.getEntry(1, 3);
-		zTarget = (float) auxiliaryMatrix.getEntry(2, 3);
-		wTarget = (float) auxiliaryMatrix.getEntry(3, 3);
+		
+		inverseExponentialMap(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
+		xTarget = (float) auxiliaryArray[0];
+		yTarget = (float) auxiliaryArray[1];
+		zTarget = (float) auxiliaryArray[2];
 
 		auxiliaryMatrix.invert();
-		xMic = (float) auxiliaryMatrix.getEntry(0, 3);
-		yMic = (float) auxiliaryMatrix.getEntry(1, 3);
-		zMic = (float) auxiliaryMatrix.getEntry(2, 3);
-		wMic = (float) auxiliaryMatrix.getEntry(3, 3);
+
+		inverseExponentialMap(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
+		xMic = (float) auxiliaryArray[0];
+		yMic = (float) auxiliaryArray[1];
+		zMic = (float) auxiliaryArray[2];
+	}
+	
+	private static void inverseExponentialMap(double[] dst, double[] src, int metric) {
+		double q = Pn.distanceBetween(Pn.originP3, src, metric);
+		double d = src[0]*src[0]+src[1]*src[1]+src[2]*src[2];
+		if (d>0) {
+			q /= Math.sqrt(d);
+		}
+		for(int i = 0; i<3; i++) {
+			dst[i] = src[i]*q;
+		}
 	}
 
 	private void advanceFrame() {
@@ -238,9 +248,7 @@ public class DelayPath implements SoundPath {
 
 	private void encodeFrame(SoundEncoder enc, int frameSize, float[] directionlessBuffer) {
 		for(int j=0; j<frameSize; j++) {
-			double[] currentPos = new double[]{xCurrent,yCurrent,zCurrent,wCurrent};
-			double norm = Pn.distanceBetween(currentPos, Pn.originP3, metric);
-			float distance = (float) norm; //(float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
+			float distance = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
 			float time = (relativeTime++)-gamma*distance;
 			int targetIndex = (int) time;
 			float fractionalTime = time-targetIndex;
