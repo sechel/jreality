@@ -100,7 +100,7 @@ public class TrackballRotateTool extends AbstractTool {
         SceneGraphComponent leaf = tc.getRootToLocal().getLastComponent();
         if (leaf.getName() == "band") {
         	SceneGraphPath shorter = tc.getRootToLocal().popNew();
-        	shorter.pop();
+        	//shorter.pop();
         	leaf = shorter.getLastComponent();
         }
         String name = leaf.getName();

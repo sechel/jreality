@@ -94,9 +94,7 @@ public class Avatar extends Plugin implements ChangeListener {
 		} else {
 			System.out.println("Avatar.updateComponents(): CAMERA CMP == NULL");
 		}
-		if (avatar != null) {
-			MatrixBuilder.euclidean().translate(0,0,20).assignTo(avatar);
-		}
+		setAvatarPosition(0, 0, 20);
 	}
 	
 	private void installTools() {
@@ -183,6 +181,12 @@ public class Avatar extends Plugin implements ChangeListener {
 			uninstallTools();
 			updateComponents(scene);
 			installTools();
+		}
+	}
+
+	public void setAvatarPosition(double x, double y, double z) {
+		if (avatar != null) {
+			MatrixBuilder.euclidean().translate(x, y, z).assignTo(avatar);
 		}
 	}
 

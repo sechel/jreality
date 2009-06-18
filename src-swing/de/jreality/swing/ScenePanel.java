@@ -203,11 +203,11 @@ public class ScenePanel {
 
 	public void show(SceneGraphComponent component, Matrix avatar) {
 		if (inScene) {
-		setPosition(avatar);
-		if (SceneGraphUtility.getIndexOfChild(component, getComponent()) == -1) {
-			component.addChild(getComponent());
-		}
-		frame.setVisible(true);
+			setPosition(avatar);
+			if (!component.isDirectAncestor(getComponent())) {
+				component.addChild(getComponent());
+			}
+			frame.setVisible(true);
 		} else {
 			externalFrame.setVisible(true);
 		}
@@ -219,7 +219,7 @@ public class ScenePanel {
 
 	public void hide(SceneGraphComponent cmp) {
 		if (inScene) {
-			if (SceneGraphUtility.getIndexOfChild(cmp, getComponent()) != -1) {
+			if (cmp.isDirectAncestor(getComponent())) {
 				cmp.removeChild(getComponent());
 			}
 			frame.setVisible(false);
