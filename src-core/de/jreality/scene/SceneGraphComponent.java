@@ -149,8 +149,13 @@ public class SceneGraphComponent extends SceneGraphNode {
    * @param sgcList
    */
   public void addChildren(SceneGraphComponent ... sgcList)	{
-	  for (SceneGraphComponent sgc : sgcList)
-		  addChild(sgc);
+	  startWriter();
+	  try {
+		  for (SceneGraphComponent sgc : sgcList)
+			  addChild(sgc);
+	  } finally {
+		  finishWriter();
+	  }
   }
   /**
   * Returns a child component node.
