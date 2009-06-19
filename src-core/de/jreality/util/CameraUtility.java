@@ -127,7 +127,16 @@ public class CameraUtility {
 	 * @param camera
 	 * @param viewer
 	 */
-	public static void encompass( de.jreality.scene.Viewer viewer) {
+	
+	public static void encompass(Viewer v) {
+		SceneGraphPath avatarPath = v.getCameraPath().popNew();
+		if (avatarPath.getLength() > 1) avatarPath.pop();
+		SceneGraphPath toBound = new SceneGraphPath(v.getSceneRoot());
+		CameraUtility.encompass(avatarPath, toBound, v.getCameraPath(), 1.2, SceneGraphUtility.getMetric(v.getCameraPath()));
+	}
+
+
+	public static void encompassOld( de.jreality.scene.Viewer viewer) {
 		// remove camera from the sceneRoot and encompass the result
 		SceneGraphPath cp = viewer.getCameraPath();
 		if (cp == null) throw new IllegalStateException("camerapath == null");
@@ -420,6 +429,7 @@ public class CameraUtility {
 	    camera.setNear(.02*radius);
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
+	    if (SystemProperties.isPortal) return;
 	    if (camera.isPerspective()) {
 		    MatrixBuilder.init(m, metric).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);	    	
 			camera.setFocus(Math.abs(m.getColumn(3)[2]) ); 		//focus);
