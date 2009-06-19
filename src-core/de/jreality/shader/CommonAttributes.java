@@ -43,7 +43,6 @@ package de.jreality.shader;
 import java.awt.Color;
 
 import de.jreality.geometry.FrameFieldType;
-import de.jreality.geometry.TubeUtility;
 import de.jreality.scene.Appearance;
 
 /**
