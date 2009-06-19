@@ -9,10 +9,15 @@ import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
 
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.basic.ToolSystemPlugin;
+import de.jreality.plugin.basic.View;
 import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.util.ConfigurationAttributes;
+import de.jreality.util.GuiUtility;
 
 public class RemoteExecutor {
 
@@ -20,16 +25,22 @@ public class RemoteExecutor {
 		Object va=null;
 		Exception cause=null;
 		try {
-			Method m = clazz.getMethod("remoteMain", String[].class);
+			Method m = null;
 			if (params == null) params=new String[0];
-			va = m.invoke(null, new Object[]{(String[]) params});
+			try {
+				m = clazz.getMethod("remoteMain", String[].class);
+				va = m.invoke(null, new Object[]{(String[]) params});
+				if (va == null) {
+					IllegalArgumentException ex = new IllegalArgumentException("calling remoteMain failed on "+clazz);
+					ex.initCause(cause);
+					throw ex;
+				}
+			} catch (NoSuchMethodException nsme) {
+				m = clazz.getMethod("main", String[].class);
+				m.invoke(null, new Object[]{(String[]) params});
+			}
 		} catch (Exception e) {
 			cause = e;
-		}
-		if (va == null) {
-			IllegalArgumentException ex = new IllegalArgumentException("calling remoteMain failed on "+clazz);
-			ex.initCause(cause);
-			throw ex;
 		}
 
 		Component viewingComponent=null;
@@ -43,24 +54,31 @@ public class RemoteExecutor {
 			viewingComponent = (Component)viewer.getViewingComponent();
 			toolSystem = ToolSystem.getToolSystemForViewer(viewer);
 		} else {
-			throw new IllegalArgumentException("insufficient return value of remoteMain of "+clazz);
+			JRViewer v = JRViewer.getLastJRViewer();
+			if (v == null) throw new IllegalArgumentException("insufficient return value of remoteMain of "+clazz);
+			viewingComponent = v.getPlugin(View.class).getViewer().getViewingComponent();
+			toolSystem = v.getPlugin(ToolSystemPlugin.class).getToolSystem();
 		}
 		
+		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 		
-		JFrame fsf = new JFrame("jReality Viewer");
-	    fsf.setUndecorated(true);
-	    
-	    // clear cursor
-	    BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-	    Graphics2D gfx = cursorImg.createGraphics();
-	    gfx.setColor(new Color(0, 0, 0, 0));
-	    gfx.fillRect(0, 0, 16, 16);
-	    gfx.dispose();
-	    fsf.setCursor(fsf.getToolkit().createCustomCursor(cursorImg, new Point(), ""));
-	    
-		fsf.getContentPane().add(viewingComponent);
-	    fsf.validate();
-	    fsf.getGraphicsConfiguration().getDevice().setFullScreenWindow(fsf);
+		JFrame frame = new JFrame("no title");
+		frame.getContentPane().add(viewingComponent);
+		GuiUtility.hideCursor(frame);
+
+		if (config.getBool("fullscreen")) {
+			frame.dispose();
+			frame.setUndecorated(true);
+			frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
+			frame.validate();
+		} else {
+			int w = config.getInt("screen.width");
+			int h = config.getInt("screen.height");
+			frame.setSize(w, h);
+			frame.setTitle(ConfigurationAttributes.getDefaultConfiguration().getProperty("frametitle"));
+		}
+
+		frame.setVisible(true);
 		
 		return (PortalToolSystem) toolSystem;
 	}
