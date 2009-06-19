@@ -195,7 +195,7 @@ public class ViewerKeyListener extends KeyAdapter {
 
 				case KeyEvent.VK_G:		// toggle face drawing
 					if (e.isShiftDown())		toggleValue(CommonAttributes.LINE_SHADER+"."+CommonAttributes.TUBE_STYLE);
-					else toggleValue(viewer,"fogEnabled", viewer.getSceneRoot().getAppearance());
+					//else toggleValue(viewer,CommonAttributes.FOG_ENABLED, viewer.getSceneRoot().getAppearance());
 					viewer.renderAsync();
 					break;
 
@@ -469,6 +469,11 @@ public class ViewerKeyListener extends KeyAdapter {
 	public  void modulateValueAdditive(Viewer viewer, String name, double defawlt, double inc, double min, double max, boolean increase) {
 		Appearance ap = getSelectedAppearance();
 		if (ap == null) return;
+		modulateValueAdditive(ap, name, defawlt, inc, min, max, increase);
+		viewer.renderAsync();		
+	}
+
+	public  static void modulateValueAdditive(Appearance ap, String name, double defawlt, double inc, double min, double max, boolean increase) {
 		Object obj = ap.getAttribute(name);
 		double newVal = defawlt;
 		if (obj != null && obj instanceof Double)	{
@@ -482,7 +487,6 @@ public class ViewerKeyListener extends KeyAdapter {
 		ap.setAttribute(name, newVal);
 		System.err.println("Setting value "+name+"Object is "+obj+"New value is "+newVal);
 		
-		viewer.renderAsync();		
 	}
 
 	private Appearance getSelectedAppearance()	{
