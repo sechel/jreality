@@ -359,6 +359,12 @@ private static final double[] ID = Rn.identityMatrix(4);
    */
   protected void transferToTexture(GL gl, FloatBuffer buffer, int texID, int size) {
     // version (a): HW-accelerated on NVIDIA
+	gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, size);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_FALSE);
     gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexSubImage2D(TEX_TARGET, 0, 0, 0, size, size, TEX_FORMAT,
         GL.GL_FLOAT, buffer);
