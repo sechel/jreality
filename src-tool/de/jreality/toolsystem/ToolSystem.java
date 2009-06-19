@@ -318,7 +318,7 @@ public class ToolSystem implements ToolEventReceiver {
 			}
 		}
 		
-		public MouseOverSupport(SceneGraphPath root) {
+		private MouseOverSupport(SceneGraphPath root) {
 			rootPath=new SceneGraphPath(root);
 		}
 		
@@ -394,6 +394,22 @@ public class ToolSystem implements ToolEventReceiver {
 
 		private void fireHit() {
 			eventQueue.addEvent(new ToolEvent(this, deviceManager.getSystemTime(), trigger, AxisState.PRESSED));
+		}
+
+		@Override
+		public int hashCode() {
+			return 31;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			throw new IllegalStateException("Duplicate MouseOverSupport!");
 		}
 		
 	}

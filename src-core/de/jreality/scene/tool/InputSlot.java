@@ -64,10 +64,12 @@ public class InputSlot implements Serializable
 	public static final InputSlot SHIFT_MIDDLE_BUTTON = InputSlot.getDevice("SecondaryMenu");
 	public static final InputSlot SHIFT_RIGHT_BUTTON = InputSlot.getDevice("SecondarySelection");
     
+	private final int hash;
 	private final String name;
     private InputSlot(String name)
     {
         this.name=name;
+        hash = name.hashCode();
     }
     /**
      * Get the canonical device for the logical name. Devices with the
@@ -96,4 +98,28 @@ public class InputSlot implements Serializable
     Object readResolve() throws ObjectStreamException {
       return getDevice(getName());
     }
+
+    @Override
+    public int hashCode() {
+    	return hash;
+    }
+    	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InputSlot other = (InputSlot) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+    
+    
 }

@@ -50,6 +50,9 @@ import java.util.List;
 
 public abstract class AbstractTool implements Tool {
 
+	static int counter;
+	private final int hash;
+	
   // Only protected for use by BeanshellTool. Should be private.
   protected transient List<InputSlot> activationSlots;
   
@@ -58,6 +61,7 @@ public abstract class AbstractTool implements Tool {
   private String description;
   
   public AbstractTool(InputSlot... activationSlots) {
+	  hash = hash();
 	if (activationSlots == null || activationSlots.length == 0 || activationSlots[0] == null)
 		this.activationSlots=Collections.emptyList();
 	else
@@ -119,4 +123,33 @@ public abstract class AbstractTool implements Tool {
   public void setDescription(String description) {
 	this.description=description;
   }
+
+private static int hash() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + counter++;
+	return result;
+}
+
+@Override
+public int hashCode() {
+	return hash;
+}
+
+@Override
+public boolean equals(Object obj) {
+	if (this == obj)
+		return true;
+	if (obj == null)
+		return false;
+	if (getClass() != obj.getClass())
+		return false;
+	AbstractTool other = (AbstractTool) obj;
+	if (hash != other.hash)
+		return false;
+	return true;
+}
+  
+  
+  
 }

@@ -87,7 +87,7 @@ public class DeviceManager {
   /**
    * contains a up-to-date map of (used) slots to used virtual devices
    */
-  private final HashMap<InputSlot, HashSet<VirtualDevice>> slot2virtual = new HashMap<InputSlot, HashSet<VirtualDevice>>();
+  private final HashMap<InputSlot, List<VirtualDevice>> slot2virtual = new HashMap<InputSlot, List<VirtualDevice>>();
   
   /**
    * contains the current axis states
@@ -295,8 +295,8 @@ public class DeviceManager {
     if (transformation != null && debugSlots.contains(slot)) LoggingSystem.getLogger(this).fine(slot+"\n"+Rn.matrixToString(transformation.toDoubleArray(null)));
   }
   
-  Set<VirtualDevice> getDevicesForSlot(InputSlot slot) {
-    if (!slot2virtual.containsKey(slot)) slot2virtual.put(slot, new HashSet<VirtualDevice>());
+  List<VirtualDevice> getDevicesForSlot(InputSlot slot) {
+    if (!slot2virtual.containsKey(slot)) slot2virtual.put(slot, new LinkedList<VirtualDevice>());
     return slot2virtual.get(slot);
   }
 
