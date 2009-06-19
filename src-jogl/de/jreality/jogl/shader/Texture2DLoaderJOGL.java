@@ -310,7 +310,11 @@ public class Texture2DLoaderJOGL {
 	                }
 	        	}
 	        } else {
-	          gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
+                gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
+    	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
+    	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
+        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_FALSE);
+        		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
 	              image.getWidth(), image.getHeight(), 0, srcPixelFormat,
 	              GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
 	        }
