@@ -83,6 +83,7 @@ public class ToolSystemPlugin extends Plugin implements ChangeListener {
 		} else {
 			runningEnvironment = RunningEnvironment.DESKTOP;
 		}
+		toolConfig = Secure.getProperty(SystemProperties.TOOL_CONFIG, SystemProperties.TOOL_CONFIG_DEFAULT);
 		// retrieve autoRender & synchRender system properties
 		String synchRenderProp = Secure.getProperty(SystemProperties.SYNCH_RENDER, SystemProperties.SYNCH_RENDER_DEFAULT);
 		if (synchRenderProp.equalsIgnoreCase("true")) {
