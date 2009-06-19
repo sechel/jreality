@@ -449,19 +449,12 @@ public class Texture2DLoaderJOGL {
         	System.err.println("Have automipmap generation = "+haveAutoMipmapGeneration);
         }
 	} 
-  /**
-	 * 
-	 */
+
 	public static void deleteAllTextures(GL gl) {
-        WeakHashMap ht = (WeakHashMap) lookupTextures.get(gl);
+        WeakHashMap<ImageData, Integer> ht = lookupTextures.get(gl);
 		if (ht == null) return;
-		Collection vals = ht.values();
-		Iterator it = vals.iterator();
-		while (it.hasNext())	{
-			Object obj = it.next();
-			if (obj == null || ! (obj instanceof Integer)) continue;
-			int[] list = new int[1];
-			list[0] = ((Integer) obj).intValue();
+		for (int idx : ht.values()) {
+			int[] list = new int[]{idx};
 			gl.glDeleteTextures(1, list, 0);
 		}
 		ht.clear();

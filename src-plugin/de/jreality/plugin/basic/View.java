@@ -57,8 +57,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.plugin.icon.ImageHook;
+import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.tool.Tool;
+import de.jreality.tools.PickShowTool;
+import de.jreality.tools.PointerDisplayTool;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.ui.viewerapp.ViewerSwitch;
@@ -122,6 +126,30 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		getContentPanel().add(viewerSwitch.getViewingComponent());
 		getContentPanel().setPreferredSize(new Dimension(800,600));
 		getContentPanel().setMinimumSize(new Dimension(300, 200));
+		
+		// TODO: move this into Scene Plugin...
+		
+		if (runningEnvironment != RunningEnvironment.DESKTOP) {
+			Camera cam = (Camera) scene.getCameraPath().getLastElement();
+			cam.setNear(0.01);
+			cam.setFar(1500);
+			cam.setOnAxis(false);
+			cam.setStereo(true);
+			SceneGraphComponent camNode = scene.getCameraComponent();
+			String headMoveTool;
+			if (runningEnvironment == RunningEnvironment.PORTAL_REMOTE)
+				headMoveTool = "de.jreality.tools.RemotePortalHeadMoveTool";
+			else
+				headMoveTool = "de.jreality.tools.PortalHeadMoveTool";
+			try {
+				Tool t = (Tool) Class.forName(headMoveTool).newInstance();
+				camNode.addTool(t);
+			} catch (Throwable t) {
+				System.err.println("crating headMoveTool failed");
+			}
+			scene.getSceneRoot().addTool(new PickShowTool());
+			scene.getAvatarComponent().addTool(new PointerDisplayTool());
+		}
 		
 	}
 	

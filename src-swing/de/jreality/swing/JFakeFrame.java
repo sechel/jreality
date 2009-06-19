@@ -129,8 +129,12 @@ public class JFakeFrame extends JFrame {
                 ImageData img = new de.jreality.shader.ImageData(bufferedImage);
                 if(appearance != null) {
 //                    System.err.print("set...");
-                    if(tex == null)
+                    if(tex == null) {
                         tex = TextureUtility.createTexture(appearance, praefix ,img);
+                        tex.setMipmapMode(false);
+                        tex.setMinFilter(Texture2D.GL_NEAREST);
+                        tex.setMagFilter(Texture2D.GL_NEAREST);
+                    }
                     else tex.setImage(img);
 //                    System.err.println(". texture "+bufferedImage.getWidth());
                 }

@@ -11,9 +11,10 @@ import javax.swing.event.ChangeListener;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.View;
+import de.jreality.plugin.basic.View.RunningEnvironment;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.ShaderUtility;
@@ -24,18 +25,21 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class WindowManager extends Plugin implements ChangeListener {
 
+	RunningEnvironment env;
+	
 	SceneGraphComponent parent;
 	
 	SceneGraphComponent windowRoot=new SceneGraphComponent("window root");
 	private int
-		resX=600,
-		resY=450;
+		resX=1024,
+		resY=768;
 	
-	private double
-		distance=2;
-	private double screenWidth=2;
+	private double screenWidth=2.48;
+	private double screenHeight=2.00;
+	private double screenHeightOffset = 0.4;
+	private double distance=screenWidth/2.0;
 	
-	private boolean showDesktopBorder=false;
+	private boolean showDesktopBorder=true;
 	SceneGraphComponent desktopBorder=new SceneGraphComponent("desktop bounds");
 	
 	List<WeakReference<JFakeFrameWithGeometry>> frameRefs = new LinkedList<WeakReference<JFakeFrameWithGeometry>>();
@@ -49,7 +53,9 @@ public class WindowManager extends Plugin implements ChangeListener {
 	}
 	
 	private void updateWindowRootTransformation() {
-		MatrixBuilder.euclidean().translate(0,0,-distance).scale(screenWidth/resX).rotateX(Math.PI).translate(-resX/2, -resY/2, 0).assignTo(windowRoot);
+		double yTranslation = 0;
+		if (env != RunningEnvironment.DESKTOP) yTranslation = screenHeight/2+screenHeightOffset;
+		MatrixBuilder.euclidean().translate(0,yTranslation,-distance).scale(screenWidth/resX).rotateX(Math.PI).translate(-resX/2, -resY/2, 0).assignTo(windowRoot);
 	}
 	
 	@Override
@@ -59,9 +65,11 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	@Override
 	public void install(Controller c) throws Exception {
+		env = c.getPlugin(View.class).getRunningEnvironment();
 		updateWindowRootTransformation();
 		updateParent(c.getPlugin(Scene.class));
 		c.getPlugin(Scene.class).addChangeListener(this);
+		setShowDesktopBorder(getShowDesktopBorder());
 	}
 	
 	@Override
@@ -73,8 +81,11 @@ public class WindowManager extends Plugin implements ChangeListener {
 
 	private void updateParent(Scene scene) {
 		SceneGraphComponent newParent = null;
-		SceneGraphPath camPath = scene.getCameraPath();
-		if (camPath != null) newParent = camPath.getLastComponent();
+		if (env == RunningEnvironment.DESKTOP) {
+			newParent = scene.getCameraComponent();
+		} else {
+			newParent = scene.getAvatarComponent();
+		}
 		setParent(newParent);
 	}
 
