@@ -24,13 +24,13 @@ import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.AnimatorTool;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
-import de.jreality.tutorial.util.SelectionRenderer;
 import de.jreality.ui.viewerapp.Selection;
 import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.SceneGraphUtility;
+import de.jreality.util.SelectionRenderer;
 
 public class SelectionExample {
 
