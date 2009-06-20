@@ -391,7 +391,9 @@ public class TrianglePipeline {
                 }
             }
             
-            VecMat.transformNormal(inverseTransposeMatrix,
+           if (normal != null)
+//        	   System.err.println("bad normal");
+        	   VecMat.transformNormal(inverseTransposeMatrix,
                     normal.getValueAt(0), normal.getValueAt(1), normal
                             .getValueAt(2), vertexData, AbstractPolygon.NX);
             

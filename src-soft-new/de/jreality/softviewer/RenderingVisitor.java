@@ -49,6 +49,7 @@ import de.jreality.backends.texture.SimpleTexture;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
@@ -115,6 +116,8 @@ public class RenderingVisitor extends SceneGraphVisitor {
     private double levelOfDetail;
     private boolean bestQuality = false;
     private boolean transparencyEnabled = false;
+    private ClippingPlaneSoft cps;
+    
     public boolean isBestQuality() {
         return bestQuality;
     }
@@ -168,6 +171,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         levelOfDetail = p.levelOfDetail;
         bestQuality = p.bestQuality;
         transparencyEnabled = p.transparencyEnabled;
+        cps = null;
         // pipeline.setPointOutlineShader(pointOutlineShader=p.pointOutlineShader);
         pipeline
                 .setMatrix(currentTrafo = initialTrafo = parentContext.currentTrafo);
@@ -221,8 +225,24 @@ public class RenderingVisitor extends SceneGraphVisitor {
     public void visit(SceneGraphComponent c) {
         if (c.isVisible())
             c.childrenAccept(subContext());
+        if (cps != null) {
+        	environment.removeClippingPlane(cps);
+        	cps = null;
+        }
     }
 
+    public void visit(ClippingPlane cp) {
+    	if (!cp.isLocal()) return;
+        double[] direction= new double[3];
+        //VecMat.transformNormal(currentTrafo.getMatrix(),0,0,-1,direction);
+        VecMat.transformNormal(currentTrafo, 0, 0, -1, direction);
+        VecMat.normalize(direction);
+        double[] src= new double[3];
+        //VecMat.transform(currentTrafo.getMatrix(),0,0,0,src);
+        VecMat.transform(currentTrafo, 0, 0, 0, src);
+        environment.addClippingPlane(new ClippingPlaneSoft(direction, src));
+    }
+   
     public void visit(Transformation t) {
         if (initialTrafo == currentTrafo)
             currentTrafo = new double[16];
@@ -504,7 +524,6 @@ public class RenderingVisitor extends SceneGraphVisitor {
         pipeline.setMatrix(currentTrafo);
     }
 
-    
  //   private int[] fni = new int[Polygon.VERTEX_LENGTH];
 
 //    private IntArray fnia = new IntArray(fni);

@@ -282,7 +282,7 @@ public final class Environment extends SceneGraphVisitor {
     public void visit(ClippingPlane c) {
         
         super.visit(c);
-
+        if (c.isLocal()) return;
         double[] direction= new double[3];
         //VecMat.transformNormal(currentTrafo.getMatrix(),0,0,-1,direction);
         VecMat.transformNormal(currentTrafo, 0, 0, -1, direction);
