@@ -49,7 +49,7 @@ public class CsoundSource extends RingBufferSource {
 		sampleRate = (int) csnd.GetSr();
 		scale = (float) csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
-		auxBuffer = new CsoundMYFLTArray(bufSize);  // too many buffers...
+		auxBuffer = new CsoundMYFLTArray(bufSize);
 	}
 
 	public Csound getCsound() {
