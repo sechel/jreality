@@ -71,11 +71,11 @@ public class CsoundSource extends RingBufferSource {
 			}
 			spout.SetValues(0, bufSize, csnd.GetSpout());
 			for(int j=0; j<ksmps; j++) {
-				double v = 0;
+				float v = 0;
 				for(int k=j; k<bufSize; k+=ksmps) {
 					v += spout.GetValue(k);
 				}
-				ringBuffer.write((float) (v/scale));
+				ringBuffer.write(v/scale);
 			}
 		}
 	}

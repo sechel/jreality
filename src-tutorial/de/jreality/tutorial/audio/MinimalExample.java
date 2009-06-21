@@ -25,7 +25,7 @@ import de.jreality.util.Input;
 public class MinimalExample {
 
 	public static void main(String[] args) throws IOException {
-		SceneGraphComponent audioComponent = Readers.read(Input.getInput("jrs/bear.jrs"));
+		SceneGraphComponent audioComponent = Readers.read(Input.getInput(MinimalExample.class.getResource("schwarz.jrs")));
 		Input input = Input.getInput(MinimalExample.class.getResource("trapped.csd"));
 		final AudioSource source = new CsoundSource("csound node", input);
 		source.start();
