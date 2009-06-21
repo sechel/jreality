@@ -108,4 +108,11 @@ public class RingBuffer {
 			source.get(buffer, 0, writePointer);
 		}
 	}
+	
+	public void write(float v) {
+		buffer[writePointer++] = v;
+		if (writePointer>=size) {
+			writePointer -= size;
+		}
+	}
 }

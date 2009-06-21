@@ -6,7 +6,6 @@ import csnd.CppSound;
 import csnd.Csound;
 import csnd.CsoundFile;
 import csnd.CsoundMYFLTArray;
-import csnd.SWIGTYPE_p_double;
 import de.jreality.audio.RingBuffer;
 import de.jreality.audio.RingBufferSource;
 import de.jreality.util.Input;
@@ -22,8 +21,6 @@ public class CsoundSource extends RingBufferSource {
 	private CppSound csnd = new CppSound();
 	private CsoundFile csf = csnd.getCsoundFile();
 	private CsoundMYFLTArray auxBuffer;
-	private SWIGTYPE_p_double csOutBuffer;
-	private float cumulativeBuffer[];
 	private int ksmps;
 	private int nchnls;
 	private int bufSize;
@@ -52,8 +49,6 @@ public class CsoundSource extends RingBufferSource {
 		sampleRate = (int) csnd.GetSr();
 		scale = (float) csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
-		cumulativeBuffer = new float[ksmps];
-		csOutBuffer = csnd.GetSpout();
 		auxBuffer = new CsoundMYFLTArray(bufSize);  // too many buffers...
 	}
 
@@ -74,15 +69,14 @@ public class CsoundSource extends RingBufferSource {
 				reset();
 				hasChanged = true;
 			}
-			auxBuffer.SetValues(0, bufSize, csOutBuffer);
+			auxBuffer.SetValues(0, bufSize, csnd.GetSpout());
 			for(int j=0; j<ksmps; j++) {
 				double v = 0;
 				for(int k=j; k<bufSize; k+=ksmps) {
 					v += auxBuffer.GetValue(k);
 				}
-				cumulativeBuffer[j] = (float) (v/scale);
+				ringBuffer.write((float) (v/scale));
 			}
-			ringBuffer.write(cumulativeBuffer, 0, ksmps);
 		}
 	}
 }
