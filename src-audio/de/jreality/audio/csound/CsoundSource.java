@@ -49,7 +49,7 @@ public class CsoundSource extends RingBufferSource {
 		sampleRate = (int) csnd.GetSr();
 		scale = (float) csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
-		spout = new CsoundMYFLTArray(bufSize);
+		spout = new CsoundMYFLTArray();
 	}
 
 	public Csound getCsound() {
@@ -69,7 +69,7 @@ public class CsoundSource extends RingBufferSource {
 				reset();
 				hasChanged = true;
 			}
-			spout.SetValues(0, bufSize, csnd.GetSpout());
+			spout.SetPtr(csnd.GetSpout());
 			for(int j=0; j<ksmps; j++) {
 				float v = 0;
 				for(int k=j; k<bufSize; k+=ksmps) {
