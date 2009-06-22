@@ -26,12 +26,9 @@ public abstract class RingBufferSource extends AudioSource {
 	protected int readSamples(RingBuffer.Reader reader, float buffer[], int initialIndex, int nSamples) {
 		startReader();
 		try {
-			if (state != State.RUNNING) {
-				return 0;
-			}
 			synchronized(this) {
 				int needed = nSamples-reader.valuesLeft();
-				if (needed>0) {
+				if (needed>0 && state==State.RUNNING) {
 					writeSamples(needed);
 				}
 			}
