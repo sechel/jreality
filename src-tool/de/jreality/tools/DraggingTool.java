@@ -63,7 +63,7 @@ import de.jreality.shader.EffectiveAppearance;
 public class DraggingTool extends AbstractTool {
 
     private boolean moveChildren;
-    transient private boolean dragInViewDirection;
+    transient protected boolean dragInViewDirection;
     
     static InputSlot activationSlot = InputSlot.getDevice("DragActivation");
     static InputSlot alongPointerSlot = InputSlot.getDevice("DragAlongViewDirection");
