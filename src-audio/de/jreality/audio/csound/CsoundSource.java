@@ -26,20 +26,21 @@ public class CsoundSource extends RingBufferSource {
 	private int bufSize;
 	private float scale;
 	private float[] cumulativeBuffer;
-	
+	private boolean loop = false;
+
 	public CsoundSource(String name, Input csd) throws IOException {
 		super(name);
 		csf.setCSD(csd.getContentAsString());
 		initFields();
 	}
-	
+
 	public CsoundSource(String name, Input orc, Input score) throws IOException {
 		super(name);
 		csf.setOrchestra(orc.getContentAsString());
 		csf.setScore(score.getContentAsString());
 		initFields();
 	}
-	
+
 	private void initFields() {
 		csf.setCommand("-n -d foo.orc foo.sco");
 		csf.exportForPerformance();
@@ -55,10 +56,14 @@ public class CsoundSource extends RingBufferSource {
 		cumulativeBuffer = new float[ksmps];
 	}
 
+	public void setLoop(boolean loop) {
+		this.loop = loop;
+	}
+
 	public Csound getCsound() {
 		return csnd;
 	}
-	
+
 	@Override
 	protected void reset() {
 		csnd.RewindScore();
@@ -68,9 +73,12 @@ public class CsoundSource extends RingBufferSource {
 	protected void writeSamples(int n) {
 		for(int i=0; i<n; i+=ksmps) {
 			if (csnd.PerformKsmps()!=0) {
-				state = State.STOPPED;
 				reset();
-				hasChanged = true;
+				if (!loop) {
+					state = State.STOPPED;
+					hasChanged = true;
+					break;
+				}
 			}
 			for(int j=0; j<ksmps; j++) {
 				float v = 0;
