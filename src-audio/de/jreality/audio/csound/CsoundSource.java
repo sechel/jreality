@@ -25,6 +25,7 @@ public class CsoundSource extends RingBufferSource {
 	private int nchnls;
 	private int bufSize;
 	private float scale;
+	private float[] cumulativeBuffer;
 	
 	public CsoundSource(String name, Input csd) throws IOException {
 		super(name);
@@ -50,6 +51,8 @@ public class CsoundSource extends RingBufferSource {
 		scale = (float) csnd.Get0dBFS();
 		ringBuffer = new RingBuffer(sampleRate);
 		spout = new CsoundMYFLTArray();
+		spout.SetPtr(csnd.GetSpout());
+		cumulativeBuffer = new float[ksmps];
 	}
 
 	public Csound getCsound() {
@@ -69,14 +72,14 @@ public class CsoundSource extends RingBufferSource {
 				reset();
 				hasChanged = true;
 			}
-			spout.SetPtr(csnd.GetSpout());
 			for(int j=0; j<ksmps; j++) {
 				float v = 0;
 				for(int k=j; k<bufSize; k+=ksmps) {
 					v += spout.GetValue(k);
 				}
-				ringBuffer.write(v/scale);
+				cumulativeBuffer[j] = v/scale;
 			}
+			ringBuffer.write(cumulativeBuffer, 0, ksmps);
 		}
 	}
 }
