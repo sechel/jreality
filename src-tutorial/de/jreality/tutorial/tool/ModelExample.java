@@ -54,7 +54,6 @@ public class ModelExample implements PointDragListener {
 		controlComponent.addTool(tool);
 		
 		base.addTool(new RotateTool());
-		base.addTool(new DraggingTool());
 		
 		Appearance app = new Appearance();
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
