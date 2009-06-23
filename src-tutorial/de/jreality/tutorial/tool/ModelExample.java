@@ -1,12 +1,17 @@
 package de.jreality.tutorial.tool;
 
 import java.awt.Color;
+import java.awt.GridLayout;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
@@ -15,73 +20,78 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
 import de.jreality.tools.RotateTool;
+import de.jreality.ui.JSliderVR;
+import de.varylab.jrworkspace.plugin.Controller;
+import de.varylab.jrworkspace.plugin.PluginInfo;
 
 
 
 public class ModelExample implements PointDragListener {
 	
-	PointSetFactory geom = new PointSetFactory();
+	PointSetFactory controlPoints = new PointSetFactory();
 	
 	SceneGraphComponent base = new SceneGraphComponent();
-	SceneGraphComponent comp = new SceneGraphComponent();
+	SceneGraphComponent controlComponent = new SceneGraphComponent();
 	SceneGraphComponent curveComponent = new SceneGraphComponent();
 	
 	double[][] vertices;
 	Color[] vertexColors;
+
+	private int subdivisionLevel=2;
 	
 	public ModelExample(int n) {
 		vertices = Primitives.regularPolygonVertices(n, 0);
 		vertexColors = new Color[n];
-		for (int i=0; i<n; i++) vertexColors[i] = Color.blue; 
-		geom.setVertexCount(n);
-		updateGeometry();
+		for (int i=0; i<n; i++) vertexColors[i] = Color.green; 
+		controlPoints.setVertexCount(n);
+		updateControlPoints();
+		updateCurve();
 
 		DragEventTool tool = new DragEventTool();
 		tool.addPointDragListener(this);
 		
-		comp.setGeometry(geom.getGeometry());
-		comp.addTool(tool);
+		controlComponent.setGeometry(controlPoints.getGeometry());
+		controlComponent.addTool(tool);
 		
 		base.addTool(new RotateTool());
 		base.addTool(new DraggingTool());
 		
 		Appearance app = new Appearance();
-		app.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.05);
-		app.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.SMOOTH_SHADING, false);
-		comp.setAppearance(app);
+		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
+		controlComponent.setAppearance(app);
 		
-		base.addChild(comp);
+		base.addChild(controlComponent);
 		base.addChild(curveComponent);
 	}
 	
-	private void updateGeometry() {
-		geom.setVertexCoordinates(vertices);
-		geom.setVertexColors(vertexColors);
-		geom.update();
+	private void updateControlPoints() {
+		controlPoints.setVertexCoordinates(vertices);
+		controlPoints.setVertexColors(vertexColors);
+		controlPoints.update();
 	}
 
 	// highlight the selected point
 	public void pointDragStart(PointDragEvent e) {
 		vertexColors[e.getIndex()] = Color.red;
-		updateGeometry();
+		updateControlPoints();
 	}
 	
 	// drag the point of the geometry
 	public void pointDragged(PointDragEvent e) {
 		vertices[e.getIndex()] = new double[]{e.getX(), e.getY(), e.getZ()};
-		updateGeometry();		
+		updateControlPoints();		
 		updateCurve();
 	}
 	
 	// remove highlight
 	public void pointDragEnd(PointDragEvent e) {
-		vertexColors[e.getIndex()] = Color.blue;
-		updateGeometry();
+		vertexColors[e.getIndex()] = Color.green;
+		updateControlPoints();
 	}
 
 	private void updateCurve() {
 		double[][] cur = vertices;
-		for (int i=0; i<3; i++) {
+		for (int i=0; i<subdivisionLevel; i++) {
 			double[][] sub = new double[2*cur.length][];
 			int n = cur.length;
 			for (int j=0; j<n; j++) {
@@ -91,6 +101,29 @@ public class ModelExample implements PointDragListener {
 			cur = sub;
 		}
 		curveComponent.setGeometry(IndexedLineSetUtility.createCurveFromPoints(cur, true));
+	}
+	
+	SceneShrinkPanel createPanel() {
+		return new SceneShrinkPanel() {
+			public PluginInfo getPluginInfo() {
+				return new PluginInfo("Subdivision Control");
+			}
+			@Override
+			public void install(Controller c) throws Exception {
+				super.install(c);
+				setTriggerComponent(base);
+				final JSliderVR slider = new JSliderVR(0, 6, subdivisionLevel);
+				slider.addChangeListener(new ChangeListener() {
+					public void stateChanged(ChangeEvent e) {
+						subdivisionLevel = slider.getValue();
+						updateCurve();
+					}
+				});
+				getShrinkPanel().setLayout(new GridLayout());
+				getShrinkPanel().add(slider);
+			}
+		};
+		
 	}
 	
 	private static double[] fourPointSubdivision(double[] v1, double[] v2, double[] v3, double[] v4) {
@@ -106,7 +139,7 @@ public class ModelExample implements PointDragListener {
 		v.addContentSupport(ContentType.TerrainAligned);
 		ModelExample example = new ModelExample(5);
 		v.setContent(example.base);
-		
+		v.registerPlugin(example.createPanel());
 		v.startup();
 	}
 }
