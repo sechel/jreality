@@ -1,17 +1,10 @@
 package de.jreality.portal;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
 
-import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.basic.ToolSystemPlugin;
-import de.jreality.plugin.basic.View;
 import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolSystem;
@@ -54,10 +47,12 @@ public class RemoteExecutor {
 			viewingComponent = (Component)viewer.getViewingComponent();
 			toolSystem = ToolSystem.getToolSystemForViewer(viewer);
 		} else {
+			/* TODO: fix dependencies here...
 			JRViewer v = JRViewer.getLastJRViewer();
 			if (v == null) throw new IllegalArgumentException("insufficient return value of remoteMain of "+clazz);
 			viewingComponent = v.getPlugin(View.class).getViewer().getViewingComponent();
 			toolSystem = v.getPlugin(ToolSystemPlugin.class).getToolSystem();
+			*/
 		}
 		
 		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
