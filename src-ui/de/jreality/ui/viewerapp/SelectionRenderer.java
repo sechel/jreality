@@ -1,4 +1,4 @@
-package de.jreality.util;
+package de.jreality.ui.viewerapp;
 
 import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -16,9 +16,9 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.SelectionEvent;
-import de.jreality.ui.viewerapp.SelectionListener;
-import de.jreality.ui.viewerapp.SelectionManager;
+import de.jreality.util.LoggingSystem;
+import de.jreality.util.Rectangle3D;
+import de.jreality.util.SceneGraphUtility;
 
 /**
  * A class which handles rendering the selection coming from a selection manager (see {@link SelectionManager})
