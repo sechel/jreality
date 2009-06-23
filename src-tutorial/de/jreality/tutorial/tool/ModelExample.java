@@ -1,28 +1,19 @@
 package de.jreality.tutorial.tool;
 
 import java.awt.Color;
-import java.awt.GridLayout;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
-import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
-import de.jreality.tools.DraggingTool;
 import de.jreality.tools.PointDragEvent;
 import de.jreality.tools.PointDragListener;
 import de.jreality.tools.RotateTool;
-import de.jreality.ui.JSliderVR;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
 
 
 
@@ -37,7 +28,7 @@ public class ModelExample implements PointDragListener {
 	double[][] vertices;
 	Color[] vertexColors;
 
-	private int subdivisionLevel=2;
+	private int subdivisionLevel=5;
 	
 	public ModelExample(int n) {
 		vertices = Primitives.regularPolygonVertices(n, 0);
@@ -102,29 +93,6 @@ public class ModelExample implements PointDragListener {
 		curveComponent.setGeometry(IndexedLineSetUtility.createCurveFromPoints(cur, true));
 	}
 	
-	SceneShrinkPanel createPanel() {
-		return new SceneShrinkPanel() {
-			public PluginInfo getPluginInfo() {
-				return new PluginInfo("Subdivision Control");
-			}
-			@Override
-			public void install(Controller c) throws Exception {
-				super.install(c);
-				setTriggerComponent(base);
-				final JSliderVR slider = new JSliderVR(0, 6, subdivisionLevel);
-				slider.addChangeListener(new ChangeListener() {
-					public void stateChanged(ChangeEvent e) {
-						subdivisionLevel = slider.getValue();
-						updateCurve();
-					}
-				});
-				getShrinkPanel().setLayout(new GridLayout());
-				getShrinkPanel().add(slider);
-			}
-		};
-		
-	}
-	
 	private static double[] fourPointSubdivision(double[] v1, double[] v2, double[] v3, double[] v4) {
 		double[] ret = new double[3];
     	for (int j=0; j<3; j++) ret[j] = (9.0*(v2[j]+v3[j])-v1[j]-v4[j])/16.0;
@@ -138,7 +106,6 @@ public class ModelExample implements PointDragListener {
 		v.addContentSupport(ContentType.TerrainAligned);
 		ModelExample example = new ModelExample(5);
 		v.setContent(example.base);
-		v.registerPlugin(example.createPanel());
 		v.startup();
 	}
 }
