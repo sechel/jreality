@@ -118,7 +118,7 @@ public class TrackballRotateTool extends AbstractTool {
     public void perform(ToolContext tc) {
     	if (!allesInOrdnung) return;
         Matrix root2Tool = new Matrix(tc.getRootToToolComponent().getInverseMatrix(null)); //(moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
-        root2Tool.assignFrom(P3.extractOrientationMatrix(null, root2Tool.getArray(), Pn.originP3, metric));
+        root2Tool.assignFrom(P3.extractOrientationMatrix(null, root2Tool.getArray(), P3.originP3, metric));
         evolution.assignFrom(tc.getTransformationMatrix(evolutionSlot));
         evolution.conjugateBy(root2Tool);
        if (type > 0)	{
