@@ -43,6 +43,7 @@ package de.jreality.tools;
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Camera;
@@ -91,7 +92,7 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
 	MatrixBuilder.init(null, metric).translate(head.getColumn(3)).times(CameraUtility.cameraOrientation).assignTo(cameraPath.getLastComponent());
 		
 	// calculate and set camera orientation matrix:
-	head.setColumn(3, Pn.originP3);
+	head.setColumn(3, P3.originP3);
 	Matrix camOrientationMatrix = MatrixBuilder.euclidean().times(CameraUtility.inverseCameraOrientation).times(head).getMatrix();
 	camera.setOrientationMatrix(camOrientationMatrix.getArray());
     
