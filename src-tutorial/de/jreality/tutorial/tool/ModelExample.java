@@ -15,6 +15,7 @@ import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphNode;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.PointDragEvent;
@@ -128,6 +129,10 @@ public class ModelExample implements PointDragListener {
 		}
 		return cur;
 	}
+
+	private SceneGraphNode getComponent() {
+		return base;
+	}
 	
 	private static double[] subdivide(double[] v1, double[] v2, double[] v3, double[] v4) {
 		double[] ret = new double[3];
@@ -142,7 +147,8 @@ public class ModelExample implements PointDragListener {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		ModelExample example = new ModelExample();
-		v.setContent(example.base);
+		v.setContent(example.getComponent());
 		v.startup();
 	}
+
 }
