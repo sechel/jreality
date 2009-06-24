@@ -25,13 +25,14 @@ import de.jreality.util.Input;
 
 
 
-public class ModelExample  {
+public class ModelExample implements PointDragListener {
 	
 	private static final Color DEFAULT_COLOR = Color.green;
 	private static final Color HIGHLIGHT_COLOR = Color.red;
 	
 	PointSetFactory controlPoints = new PointSetFactory();
-	CachedAudioInputStreamSource audioSource;
+	
+	CachedAudioInputStreamSource audioSource = new CachedAudioInputStreamSource("bells", Input.getInput("sound/churchbell_loop.wav"), true);
 	
 	SceneGraphComponent baseCmp = new SceneGraphComponent();
 	SceneGraphComponent controlCmp = new SceneGraphComponent();
@@ -42,86 +43,66 @@ public class ModelExample  {
 	double[][] vertices = Primitives.regularPolygonVertices(n, 0);
 	Color[] vertexColors = new Color[n];
 
-	public ModelExample() {
+	public ModelExample() throws UnsupportedAudioFileException, IOException {
+		for (int i=0; i<n; i++) vertexColors[i] = DEFAULT_COLOR;
 		controlPoints.setVertexCount(n);
-		for (int i=0; i<n; i++) vertexColors[i] = DEFAULT_COLOR; 
-		try {
-			audioSource = new CachedAudioInputStreamSource("hammond", Input.getInput("sound/churchbell_loop.wav"), true);
-		} catch (UnsupportedAudioFileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		audioCmp.setAudioSource(audioSource);
-		
-		updateControlPoints();
-		updateSpline();
+		updateContent();
 
 		DragEventTool tool = new DragEventTool();
-
-		tool.addPointDragListener(new PointDragListener() {
-			public void pointDragStart(PointDragEvent e) {
-				updateFeedback(e.getIndex(), true);
-				updateControlPoints();
-			}
-			public void pointDragged(PointDragEvent e) {
-				double[] pos = new double[]{e.getX(), e.getY(), e.getZ()}; //e.getPosition();
-				vertices[e.getIndex()] = pos;
-				MatrixBuilder.euclidean().translate(pos).assignTo(audioCmp);
-				updateControlPoints();		
-				updateSpline();
-			}
-			public void pointDragEnd(PointDragEvent e) {
-				updateFeedback(e.getIndex(), false);
-				updateControlPoints();
-			}
-		});
-		
-		controlCmp.setGeometry(controlPoints.getGeometry());
-		controlCmp.addTool(tool);
-		
-		baseCmp.addTool(new RotateTool());
+		tool.addPointDragListener(this);
 		
 		Appearance app = new Appearance();
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
-		controlCmp.setAppearance(app);
 		
 		baseCmp.addChild(controlCmp);
 		baseCmp.addChild(splineCmp);
 		baseCmp.addChild(audioCmp);
+		baseCmp.addTool(new RotateTool());
+		audioCmp.setAudioSource(audioSource);
+		controlCmp.setAppearance(app);
+		controlCmp.setGeometry(controlPoints.getGeometry());
+		controlCmp.addTool(tool);
 	}
 	
-	protected void updateFeedback(int index, boolean highlight) {
-		if (highlight) {
-			vertexColors[index] = HIGHLIGHT_COLOR;
-			audioSource.start();
-		}
-		else {
-			vertexColors[index] = DEFAULT_COLOR;
-			audioSource.stop();
-		}
-		updateControlPoints();
+	public void pointDragStart(PointDragEvent e) {
+		int idx = e.getIndex();
+		vertexColors[idx] = HIGHLIGHT_COLOR;
+		updateContent(vertices[idx]);
+		audioSource.start();
+	}
+	
+	public void pointDragged(PointDragEvent e) {
+		double[] pos = new double[]{e.getX(), e.getY(), e.getZ()};
+		vertices[e.getIndex()] = pos;
+		updateContent(pos);
+	}
+	
+	public void pointDragEnd(PointDragEvent e) {
+		audioSource.stop();
+		vertexColors[e.getIndex()] = DEFAULT_COLOR;
+		updateContent();
 	}
 
-	private void updateControlPoints() {
+	private void updateContent(double[] audioPos) {
+		MatrixBuilder.euclidean().translate(audioPos).assignTo(audioCmp);
+		updateContent();
+	}
+	
+	private void updateContent() {
 		controlPoints.setVertexCoordinates(vertices);
 		controlPoints.setVertexColors(vertexColors);
 		controlPoints.update();
+		
+		double[][] spline = computeSpline(vertices);
+		IndexedLineSet curve = IndexedLineSetUtility.createCurveFromPoints(spline, true);
+		splineCmp.setGeometry(curve);
 	}
 
-	private void updateSpline() {
-		double[][] spline = subdivide();
-		splineCmp.setGeometry(createCurve(spline));
+	private SceneGraphNode getComponent() {
+		return baseCmp;
 	}
 
-	private IndexedLineSet createCurve(double[][] newCurve) {
-		return IndexedLineSetUtility.createCurveFromPoints(newCurve, true);
-	}
-
-	private double[][] subdivide() {
+	private double[][] computeSpline(double[][] vertices) {
 		double[][] cur = vertices;
 		for (int i=0; i<3; i++) {
 			double[][] sub = new double[2*cur.length][];
@@ -139,10 +120,6 @@ public class ModelExample  {
 		}
 		return cur;
 	}
-
-	private SceneGraphNode getComponent() {
-		return baseCmp;
-	}
 	
 	private static double[] subdivide(double[] v1, double[] v2, double[] v3, double[] v4) {
 		double[] ret = new double[3];
@@ -150,7 +127,7 @@ public class ModelExample  {
     	return ret;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnsupportedAudioFileException, IOException {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addAudioSupport();
@@ -160,5 +137,4 @@ public class ModelExample  {
 		v.setContent(example.getComponent());
 		v.startup();
 	}
-
 }
