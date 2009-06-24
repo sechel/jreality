@@ -30,6 +30,7 @@ import de.jreality.geometry.SphereUtility;
 import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
@@ -298,7 +299,7 @@ public class NonEuclideanExample {
 			}
 
 			public void evaluate(double u, double v, double[] xyz, int index) {
-				double[] p = Pn.dragTowards(null, Pn.originP3, foo, v * scales[metric+1], metric);
+				double[] p = Pn.dragTowards(null, P3.originP3, foo, v * scales[metric+1], metric);
 				
 				xyz[0] = Math.cos(u) * p[0];
 				xyz[1] = Math.sin(u) * p[0];
