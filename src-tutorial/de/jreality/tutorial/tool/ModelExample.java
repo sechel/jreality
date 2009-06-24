@@ -54,9 +54,7 @@ public class ModelExample implements PointDragListener {
 		Appearance app = new Appearance();
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
 		
-		baseCmp.addChild(controlCmp);
-		baseCmp.addChild(splineCmp);
-		baseCmp.addChild(audioCmp);
+		baseCmp.addChildren(controlCmp, splineCmp, audioCmp);
 		baseCmp.addTool(new RotateTool());
 		audioCmp.setAudioSource(audioSource);
 		controlCmp.setAppearance(app);
@@ -67,14 +65,16 @@ public class ModelExample implements PointDragListener {
 	public void pointDragStart(PointDragEvent e) {
 		int idx = e.getIndex();
 		vertexColors[idx] = HIGHLIGHT_COLOR;
-		updateContent(vertices[idx]);
+		updateContent();
+		setSoundPosition(vertices[idx]);
 		audioSource.start();
 	}
 	
 	public void pointDragged(PointDragEvent e) {
 		double[] pos = new double[]{e.getX(), e.getY(), e.getZ()};
 		vertices[e.getIndex()] = pos;
-		updateContent(pos);
+		setSoundPosition(pos);
+		updateContent();
 	}
 	
 	public void pointDragEnd(PointDragEvent e) {
@@ -83,9 +83,8 @@ public class ModelExample implements PointDragListener {
 		updateContent();
 	}
 
-	private void updateContent(double[] audioPos) {
+	private void setSoundPosition(double[] audioPos) {
 		MatrixBuilder.euclidean().translate(audioPos).assignTo(audioCmp);
-		updateContent();
 	}
 	
 	private void updateContent() {
