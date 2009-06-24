@@ -8,6 +8,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.DragEventTool;
@@ -25,14 +26,11 @@ public class ModelExample implements PointDragListener {
 	SceneGraphComponent controlComponent = new SceneGraphComponent();
 	SceneGraphComponent curveComponent = new SceneGraphComponent();
 	
-	double[][] vertices;
-	Color[] vertexColors;
+	int n = 5;
+	double[][] vertices = Primitives.regularPolygonVertices(n, 0);
+	Color[] vertexColors = new Color[n];
 
-	private int subdivisionLevel=5;
-	
-	public ModelExample(int n) {
-		vertices = Primitives.regularPolygonVertices(n, 0);
-		vertexColors = new Color[n];
+	public ModelExample() {
 		for (int i=0; i<n; i++) vertexColors[i] = Color.green; 
 		controlPoints.setVertexCount(n);
 		updateControlPoints();
@@ -80,20 +78,34 @@ public class ModelExample implements PointDragListener {
 	}
 
 	private void updateCurve() {
+		double[][] newCurve = subdivide();
+		curveComponent.setGeometry(createCurve(newCurve));
+	}
+
+	private IndexedLineSet createCurve(double[][] newCurve) {
+		return IndexedLineSetUtility.createCurveFromPoints(newCurve, true);
+	}
+
+	private double[][] subdivide() {
 		double[][] cur = vertices;
-		for (int i=0; i<subdivisionLevel; i++) {
+		for (int i=0; i<3; i++) {
 			double[][] sub = new double[2*cur.length][];
 			int n = cur.length;
 			for (int j=0; j<n; j++) {
 				sub[2*j] = cur[j];
-				sub[2*j+1] = fourPointSubdivision(cur[(j-1+n)%n], cur[j], cur[(j+1)%n], cur[(j+2)%n]);
+				sub[2*j+1] = subdivide(
+								cur[(j-1+n)%n],
+								cur[j],
+								cur[(j+1)%n],
+								cur[(j+2)%n]
+							 );
 			}
 			cur = sub;
 		}
-		curveComponent.setGeometry(IndexedLineSetUtility.createCurveFromPoints(cur, true));
+		return cur;
 	}
 	
-	private static double[] fourPointSubdivision(double[] v1, double[] v2, double[] v3, double[] v4) {
+	private static double[] subdivide(double[] v1, double[] v2, double[] v3, double[] v4) {
 		double[] ret = new double[3];
     	for (int j=0; j<3; j++) ret[j] = (9.0*(v2[j]+v3[j])-v1[j]-v4[j])/16.0;
     	return ret;
@@ -104,7 +116,7 @@ public class ModelExample implements PointDragListener {
 		v.addBasicUI();
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
-		ModelExample example = new ModelExample(5);
+		ModelExample example = new ModelExample();
 		v.setContent(example.base);
 		v.startup();
 	}
