@@ -82,9 +82,6 @@ public class Pn {
 	public static final int ELLIPTIC	= 1;
 	public static final int EUCLIDEAN	= 0;
 	public static final int HYPERBOLIC = -1;
-	public static double[] originP3 = {0.0, 0.0, 0.0, 1.0};
-	
-
 	public static final int PROJECTIVE	= 2;
 	public static double[] zDirectionP3 = {0.0, 0.0, 1.0, 0.0};
 	

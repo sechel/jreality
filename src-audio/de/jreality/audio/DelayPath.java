@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import de.jreality.math.Matrix;
+import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.CommonAttributes;
@@ -221,7 +222,7 @@ public class DelayPath implements SoundPath {
 	}
 	
 	private static void inverseExponentialMap(double[] dst, double[] src, int metric) {
-		double q = Pn.distanceBetween(Pn.originP3, src, metric);
+		double q = Pn.distanceBetween(P3.originP3, src, metric);
 		double d = src[0]*src[0]+src[1]*src[1]+src[2]*src[2];
 		if (d>0) {
 			q /= Math.sqrt(d);

@@ -331,7 +331,7 @@ public class FactoredMatrix extends Matrix {
         }
         int n = Math.min(aTransV.length, 4);
         System.arraycopy(aTransV, 0, translationVector, 0, n);
-        System.arraycopy(Pn.originP3, n, translationVector, n, 4 - n);
+        System.arraycopy(P3.originP3, n, translationVector, n, 4 - n);
         factorHasChanged = true;
         update();
     }

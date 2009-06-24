@@ -111,6 +111,8 @@ public class P3 {
 	 */
 	static double[] zeroVector = {0,0,0,0};
 
+	public static double[] originP3 = {0.0, 0.0, 0.0, 1.0};
+
 	private P3()	{}
 
 	/**
@@ -227,7 +229,7 @@ public class P3 {
 		isFlipped[0] = (det < 0); 
 	
 		/* first extract the translation part */
-		Rn.matrixTimesVector(transV, m, Pn.originP3);
+		Rn.matrixTimesVector(transV, m, P3.originP3);
 		if (metric == Pn.EUCLIDEAN && transV[3] == 0.0)	{
 			throw new IllegalArgumentException("bad translation vector");
 		}

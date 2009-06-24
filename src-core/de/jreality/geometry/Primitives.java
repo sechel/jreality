@@ -389,7 +389,7 @@ public class Primitives {
 	 */
 	public static SceneGraphComponent sphere(double radius, double[] center, int metric) {
 		SceneGraphComponent sgc = SceneGraphUtility.createFullSceneGraphComponent("sphere");
-		if (center == null)  center = Pn.originP3;
+		if (center == null)  center = P3.originP3;
 		MatrixBuilder.init(null,metric).translate(center).scale(radius).assignTo(sgc.getTransformation());
 		sgc.setGeometry(new Sphere());
 		return sgc;
