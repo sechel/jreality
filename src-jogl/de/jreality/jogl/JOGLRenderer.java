@@ -191,8 +191,6 @@ public class JOGLRenderer   {
 		}
 	}
 	public void render() {
-// 		following optimization has been abandoned for now
-//		System.err.println("in render "+frameCount);
 		if (disposed) return;
 		Texture2DLoaderJOGL.postRender(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
@@ -203,6 +201,7 @@ public class JOGLRenderer   {
 			thePeerAuxilliaryRoot = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(
 					auxiliaryRoot, null, this);
 
+		renderingState.currentPath.clear();
 		renderingState.context  = new Graphics3D(theViewer.getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
@@ -259,11 +258,9 @@ public class JOGLRenderer   {
 		rhStack.push(RenderingHintsInfo.defaultRHInfo);
 		RenderingHintsInfo.defaultRHInfo.render(renderingState, null);
 		renderingState.flipped = (Rn.determinant(renderingState.worldToCamera) < 0.0);
-//		System.err.println("JOGLR: flipped = "+renderingState.flipped);
 		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
 		texResident=true;
-		renderingState.currentPath.clear();
 		thePeerRoot.render();		
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
 		if (topAp.isRenderSpherical() && !frontBanana) globalGL.glPopMatrix();
