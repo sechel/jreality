@@ -362,7 +362,7 @@ public class AABBPickSystem implements PickSystem {
 	  }
 			double[] c2w = viewer.getCameraPath().getMatrix(null); //deviceManager.getTransformationMatrix(camera2worldSlot).toDoubleArray(null);
 			Camera cam = CameraUtility.getCamera(viewer);
-			double[] eyeW = Rn.matrixTimesVector(null, c2w, cam.isPerspective() ? Pn.originP3 : Pn.zDirectionP3);
+			double[] eyeW = Rn.matrixTimesVector(null, c2w, cam.isPerspective() ? P3.originP3 : Pn.zDirectionP3);
 			double[] fromndc, tondc;
 			Graphics3D gc = new Graphics3D(viewer);
 			double[] w2ndc = gc.getWorldToNDC(); //deviceManager.getTransformationMatrix(world2ndcSlot).toDoubleArray(null);
