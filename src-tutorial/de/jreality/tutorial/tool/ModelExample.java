@@ -25,21 +25,26 @@ import de.jreality.util.Input;
 
 
 
-public class ModelExample implements PointDragListener {
+public class ModelExample  {
+	
+	private static final Color DEFAULT_COLOR = Color.green;
+	private static final Color HIGHLIGHT_COLOR = Color.red;
 	
 	PointSetFactory controlPoints = new PointSetFactory();
 	CachedAudioInputStreamSource audioSource;
 	
-	SceneGraphComponent base = new SceneGraphComponent();
-	SceneGraphComponent controlComponent = new SceneGraphComponent();
-	SceneGraphComponent curveComponent = new SceneGraphComponent();
-	SceneGraphComponent audioComponent = new SceneGraphComponent();
+	SceneGraphComponent baseCmp = new SceneGraphComponent();
+	SceneGraphComponent controlCmp = new SceneGraphComponent();
+	SceneGraphComponent splineCmp = new SceneGraphComponent();
+	SceneGraphComponent audioCmp = new SceneGraphComponent();
 	
 	int n = 5;
 	double[][] vertices = Primitives.regularPolygonVertices(n, 0);
 	Color[] vertexColors = new Color[n];
 
 	public ModelExample() {
+		controlPoints.setVertexCount(n);
+		for (int i=0; i<n; i++) vertexColors[i] = DEFAULT_COLOR; 
 		try {
 			audioSource = new CachedAudioInputStreamSource("hammond", Input.getInput("sound/churchbell_loop.wav"), true);
 		} catch (UnsupportedAudioFileException e) {
@@ -49,62 +54,67 @@ public class ModelExample implements PointDragListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		audioComponent.setAudioSource(audioSource);
+
+		audioCmp.setAudioSource(audioSource);
 		
-		for (int i=0; i<n; i++) vertexColors[i] = Color.green; 
-		controlPoints.setVertexCount(n);
 		updateControlPoints();
-		updateCurve();
+		updateSpline();
 
 		DragEventTool tool = new DragEventTool();
-		tool.addPointDragListener(this);
+
+		tool.addPointDragListener(new PointDragListener() {
+			public void pointDragStart(PointDragEvent e) {
+				updateFeedback(e.getIndex(), true);
+				updateControlPoints();
+			}
+			public void pointDragged(PointDragEvent e) {
+				double[] pos = new double[]{e.getX(), e.getY(), e.getZ()}; //e.getPosition();
+				vertices[e.getIndex()] = pos;
+				MatrixBuilder.euclidean().translate(pos).assignTo(audioCmp);
+				updateControlPoints();		
+				updateSpline();
+			}
+			public void pointDragEnd(PointDragEvent e) {
+				updateFeedback(e.getIndex(), false);
+				updateControlPoints();
+			}
+		});
 		
-		controlComponent.setGeometry(controlPoints.getGeometry());
-		controlComponent.addTool(tool);
+		controlCmp.setGeometry(controlPoints.getGeometry());
+		controlCmp.addTool(tool);
 		
-		base.addTool(new RotateTool());
+		baseCmp.addTool(new RotateTool());
 		
 		Appearance app = new Appearance();
 		app.setAttribute(CommonAttributes.POINT_RADIUS, 0.05);
-		controlComponent.setAppearance(app);
+		controlCmp.setAppearance(app);
 		
-		base.addChild(controlComponent);
-		base.addChild(curveComponent);
-		base.addChild(audioComponent);
+		baseCmp.addChild(controlCmp);
+		baseCmp.addChild(splineCmp);
+		baseCmp.addChild(audioCmp);
 	}
 	
+	protected void updateFeedback(int index, boolean highlight) {
+		if (highlight) {
+			vertexColors[index] = HIGHLIGHT_COLOR;
+			audioSource.start();
+		}
+		else {
+			vertexColors[index] = DEFAULT_COLOR;
+			audioSource.stop();
+		}
+		updateControlPoints();
+	}
+
 	private void updateControlPoints() {
 		controlPoints.setVertexCoordinates(vertices);
 		controlPoints.setVertexColors(vertexColors);
 		controlPoints.update();
 	}
 
-	// highlight the selected point
-	public void pointDragStart(PointDragEvent e) {
-		vertexColors[e.getIndex()] = Color.red;
-		updateControlPoints();
-		audioSource.start();
-	}
-	
-	// drag the point of the geometry
-	public void pointDragged(PointDragEvent e) {
-		double[] pos = new double[]{e.getX(), e.getY(), e.getZ()};
-		vertices[e.getIndex()] = pos;
-		MatrixBuilder.euclidean().translate(pos).assignTo(audioComponent);
-		updateControlPoints();		
-		updateCurve();
-	}
-	
-	// remove highlight
-	public void pointDragEnd(PointDragEvent e) {
-		vertexColors[e.getIndex()] = Color.green;
-		updateControlPoints();
-		audioSource.stop();
-	}
-
-	private void updateCurve() {
-		double[][] newCurve = subdivide();
-		curveComponent.setGeometry(createCurve(newCurve));
+	private void updateSpline() {
+		double[][] spline = subdivide();
+		splineCmp.setGeometry(createCurve(spline));
 	}
 
 	private IndexedLineSet createCurve(double[][] newCurve) {
@@ -131,7 +141,7 @@ public class ModelExample implements PointDragListener {
 	}
 
 	private SceneGraphNode getComponent() {
-		return base;
+		return baseCmp;
 	}
 	
 	private static double[] subdivide(double[] v1, double[] v2, double[] v3, double[] v4) {
