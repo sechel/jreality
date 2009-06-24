@@ -98,7 +98,7 @@ class JOGLSkyBox {
     gl.glColor4fv( white, 0);
     gl.glPushMatrix();
 	   
-    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN), 0);
+    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, P3.originP3, Pn.EUCLIDEAN), 0);
     double scale = (cam.getNear() + cam.getFar())/2;
     gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
 	for (int i = 0; i<6; ++i)	{
