@@ -99,7 +99,7 @@ class RendermanSkyBox {
     ribv.ri.transformBegin();
     ribv.ri.concatTransform(RIBHelper.fTranspose(Rn.times(null, 
     		Rn.inverse(null, w2c),
-    		P3.extractOrientationMatrix(null, w2c, Pn.originP3, Pn.EUCLIDEAN))));
+    		P3.extractOrientationMatrix(null, w2c, P3.originP3, Pn.EUCLIDEAN))));
 	ribv.ri.concatTransform(RIBHelper.fTranspose(P3.makeStretchMatrix(null, 500.0)));
 	ConstantTexture ct = new ConstantTexture();
 	float[] vvv = new float[12];
