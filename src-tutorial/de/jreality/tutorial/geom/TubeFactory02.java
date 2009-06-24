@@ -244,13 +244,13 @@ public class TubeFactory02 {
 		return panel;
 	}
 
-	public Plugin createShrinkPanel( final Component c, final String title) {
+	public static Plugin createShrinkPanel( final Component c, final String title) {
 		ShrinkPanelPlugin p = new ShrinkPanelPlugin() {
 			
 			{
 				GridLayout gl = new GridLayout();
 				gl.setRows(1);
-				setInitialPosition(SHRINKER_RIGHT);
+				setInitialPosition(SHRINKER_LEFT);
 				shrinkPanel.setName(title);
 				shrinkPanel.setLayout(gl);
 				shrinkPanel.add(c);
