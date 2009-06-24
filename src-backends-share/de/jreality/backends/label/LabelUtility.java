@@ -324,7 +324,7 @@ public static double[] calculateBillboardMatrix(double[] result,
 		int metric)	{
 	if (result == null) result = new double[16];
 	// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
-    double[] orientation = P3.extractOrientationMatrix(null, cameraToObject, Pn.originP3, metric);
+    double[] orientation = P3.extractOrientationMatrix(null, cameraToObject, P3.originP3, metric);
     double[] scale = P3.makeStretchMatrix(null, xscale, yscale, 1.0);
     //calculate translation for alignment
     double align=0, valign=0;  // default
