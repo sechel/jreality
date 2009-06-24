@@ -148,7 +148,7 @@ public class RotateTool extends AbstractTool {
     	return;
     }
 	try {
-	    object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), Pn.originP3, metric));
+	    object2avatar.assignFrom(P3.extractOrientationMatrix(null, object2avatar.getArray(), P3.originP3, metric));
 	} catch (Exception e)	{
 	    MatrixBuilder.euclidean().assignTo(object2avatar);	// set identity matrix
 	}
