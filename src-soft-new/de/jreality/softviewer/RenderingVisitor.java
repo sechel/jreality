@@ -240,7 +240,7 @@ public class RenderingVisitor extends SceneGraphVisitor {
         double[] src= new double[3];
         //VecMat.transform(currentTrafo.getMatrix(),0,0,0,src);
         VecMat.transform(currentTrafo, 0, 0, 0, src);
-        environment.addClippingPlane(new ClippingPlaneSoft(direction, src));
+        environment.addClippingPlane(cps = new ClippingPlaneSoft(direction, src));
     }
    
     public void visit(Transformation t) {
