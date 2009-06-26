@@ -42,6 +42,8 @@
  */
 package de.jreality.jogl.shader;
 
+import static de.jreality.shader.CommonAttributes.USE_GLSL;
+
 import java.awt.Color;
 
 import javax.media.opengl.GL;
@@ -54,6 +56,7 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -65,6 +68,7 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
@@ -94,7 +98,11 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	transient boolean changedTransp, changedLighting;
 	transient float[] diffuseColorAsFloat;
 	transient int faceCount = 0;		
-	 
+
+	NoneuclideanGLSLShader noneuc = new NoneuclideanGLSLShader();
+	boolean useGLSL, hasNoneuc = false;
+	GlslProgram glslProgram;
+
 	public DefaultLineShader(de.jreality.shader.DefaultLineShader orig)	{
 		templateShader = orig;
 	}
@@ -103,6 +111,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
 		super.setFromEffectiveAppearance(eap, name);
+		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, USE_GLSL), false);	
 		tubeDraw = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 		tubeRadius = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TUBE_RADIUS),CommonAttributes.TUBE_RADIUS_DEFAULT);
 		opaqueTubes = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.OPAQUE_TUBES_AND_SPHERES), CommonAttributes.OPAQUE_TUBES_AND_SPHERES_DEFAULT);
@@ -128,6 +137,18 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		}
 		else  //polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap, name, "polygonShader");
 			throw new IllegalStateException("Not from a template!");
+	    if (useGLSL)		{
+			if (GlslProgram.hasGlslProgram(eap, name)) {
+				// dummy to write glsl values like "lightingEnabled"
+				Appearance app = new Appearance();
+				glslProgram = new GlslProgram(app, eap, name);
+				hasNoneuc = false;
+			} else {
+				noneuc.setFromEffectiveAppearance(eap, name);
+//				noneuclideanInitialized = false;
+				hasNoneuc = true;
+			}
+	    } else hasNoneuc = false;
 	}
 
 	public void preRender(JOGLRenderingState jrs)	{
@@ -177,11 +198,22 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 //		}
 
 		if (!tubeDraw) gl.glDepthRange(0.0d, jrs.depthFudgeFactor);
+		if (useGLSL)	{
+	    	if ( hasNoneuc)	{
+	    		noneuc.render(jr);
+	    		glslProgram = noneuc.getNoneuclideanShader();
+	    	}
+	    	GlslLoader.render(glslProgram, jr);		
+		}
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
+		if (noneuc != null)
+			noneuc.postRender(gl);
+		else if (useGLSL)
+			GlslLoader.postRender(glslProgram, gl);
 		if (!tubeDraw) {
 			jr.globalGL.glDepthRange(0.0d, 1d);
 		} else 

@@ -55,14 +55,18 @@ import java.io.IOException;
 
 import javax.media.opengl.GL;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -86,7 +90,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public static final int FRONT = GL.GL_FRONT;
 	public static final int BACK = GL.GL_BACK;
 	
-	boolean		smoothShading = true;		// interpolate shaded values between vertices
+	boolean		smoothShading = true;
 	Texture2D texture2D,  texture2D_1, texture2D_2;
 	JOGLTexture2D joglTexture2D, joglTexture2D_1, joglTexture2D_2;
 	CubeMap reflectionMap;
@@ -95,7 +99,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	boolean useGLSL = false,
 		oneTexturePerImage = false;
 	int texUnit = 0, refMapUnit = 0;
-//	GlslPolygonShader glslShader = new GlslPolygonShader();
 	GlslProgram glslProgram;
 	transient boolean geometryHasTextureCoordinates = false, 
 		hasTextures = false,
@@ -104,9 +107,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	// try loading the OpenGL shader for the non-euclidean cases
-	static GlslProgram noneuclideanShader = null;
-	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
-	JOGLRenderingState theJRS;
+//	boolean		poincareModel = false;		// interpolate shaded values between vertices
+//	SceneGraphPath poincarePath;
+//	static GlslProgram noneuclideanShader = null;
+//	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
+	NoneuclideanGLSLShader noneuc = new NoneuclideanGLSLShader();
+	boolean hasNoneuc = false;
 	
 	public DefaultPolygonShader()	{
 		
@@ -152,19 +158,14 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				// dummy to write glsl values like "lightingEnabled"
 				Appearance app = new Appearance();
 				glslProgram = new GlslProgram(app, eap, name);
+				hasNoneuc = false;
 			} else {
-				if (noneuclideanShader == null) {
-					try {
-						Appearance ap = new Appearance();
-						noneuclideanShader = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}		
-				}
-				glslProgram = noneuclideanShader;
+				noneuc.setFromEffectiveAppearance(eap, name);
 				noneuclideanInitialized = false;
+				hasNoneuc = true;
+				glslProgram = noneuc.getNoneuclideanShader();
 			}
-	    }
+	    } else hasNoneuc = false;
 //	    System.err.println("useglsl = "+useGLSL);
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
@@ -224,33 +225,21 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
     
 		jr.renderingState.texUnitCount = texunitcoords; 
 		vertexShader.render(jrs); 
-	    if (useGLSL && glslProgram != null)		{
-	    	if ( glslProgram == noneuclideanShader)	{
-	    		// the only reason we're doing it here is because only now do we know what jrs is
-//	    		System.err.println("writing glsl shader");
-	    		// HACK this is a shoddy attempt to pass over parts of OpenGL state to a hypothetical GLSL shader
-	    		// should be done by the specific shader instead, since only it knows which uniform variables
-	    		// it has
-	    		glslProgram.setUniform("lightingEnabled", jrs.lighting);
-	    		glslProgram.setUniform("transparencyEnabled", jrs.transparencyEnabled);
-	    		glslProgram.setUniform("transparency", (float) (1.0f - jrs.diffuseColor[3]));
-	    		glslProgram.setUniform("numLights", jrs.numLights);
-	    		glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
-	    		glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
-	    		glslProgram.setUniform("useNormals4", jrs.normals4d);
-	    		noneuclideanInitialized = true;
+		if (useGLSL)	{
+	    	if ( hasNoneuc)	{
+	    		noneuc.render(jr);
 	    	}
-			
-			GlslLoader.render(glslProgram, jr);
-	    }
+	    	else GlslLoader.render(glslProgram, jr);		
+		}
 	    firstTime = false;
 }
 	
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.renderer.globalGL;
-		if (useGLSL)
-			GlslLoader.postRender(glslProgram, gl);
+		if (useGLSL) {
+			GlslLoader.postRender(glslProgram, gl);			
+		}
 //		for (int i = GL.GL_TEXTURE0; i <  GL.GL_TEXTURE0+3; ++i) {
 		if (hasTextures)	{
 		    if (joglTexture2D != null) {

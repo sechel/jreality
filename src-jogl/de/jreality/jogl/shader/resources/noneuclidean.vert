@@ -57,6 +57,9 @@ uniform float Nw;
 uniform float	transparency;
 uniform sampler2D texture;
 uniform int numLights;
+uniform bool poincareModel;
+uniform mat4 poincareMatrix;
+uniform mat4 poincareMatrixInv;
 
 // the inner product in klein model of hyperbolic space
 float dot4(in vec4 P, in vec4 Q)	{
@@ -94,6 +97,13 @@ void normalize4(in vec4 P, inout vec4 T)	{
 	projectToTangent(P,T);
 	normalize4(T);
 //	if (P.w * T.w < 0.0) T = -T;
+}
+
+void dehomogenize(inout vec4 P4)	 {
+    float w = P4.w;
+    if (w == 0.0) return;
+    w = 1.0/w;
+    P4 = w * P4;
 }
 
 // calculate the lighting incident on a position with given normal vector and 
@@ -191,10 +201,21 @@ void main (void)
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
-//    transformedNormal = -transformedNormal;
-//    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
+    transformedNormal = -transformedNormal;
+    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
 //     ftexgen(transformedNormal, ecPosition);
-     gl_Position = ftransform();
+     if (poincareModel)	{
+        // p4 is in the coordinate system of H3
+      	vec4 p4 =  poincareMatrix * ecPosition;
+     	dehomogenize(p4);
+     	float d = length4(p4);
+     	float s = 1.0/(1.0+d);
+    	p4.x = s * p4.x;
+     	p4.y = s * p4.y;
+     	p4.z = s * p4.z;
+     	gl_Position = gl_ModelViewProjectionMatrix * ( gl_ModelViewMatrixInverse * (poincareMatrixInv * p4)); 
+     }
+	else     gl_Position = ftransform();
 }
 
