@@ -65,7 +65,7 @@ import de.jreality.util.Rectangle3D;
  * @author weissman
  * 
  */
-public class Cloth2LineShader extends AbstractPrimitiveShader implements LineShader {
+public class Cloth2LineShader extends AbstractPrimitiveShader {
 
   Texture2D spriteTex;
   
