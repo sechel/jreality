@@ -178,10 +178,7 @@ public class RenderingHintsInfo  {
 				  gl.glEnable (GL.GL_BLEND);
 				  if (values[ZB][ACTIVE]) gl.glDepthMask(values[ZB][which]);
 				  else gl.glDepthMask(false);
-				  if (JOGLConfiguration.hasBlendFuncSeparate) 
-						gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
-				  else 
-						gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+				  JOGLConfiguration.glBlendFunc(gl);
 				  jrs.transparencyEnabled = true;
 				  if (values[ZB][ACTIVE]) 	jrs.zbufferEnabled = values[ZB][which];
 				  else jrs.zbufferEnabled = false;

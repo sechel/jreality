@@ -43,6 +43,7 @@ package de.jreality.jogl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.media.opengl.GL;
 import javax.swing.JPopupMenu;
 
 import de.jreality.util.LoggingSystem;
@@ -137,4 +138,10 @@ public class JOGLConfiguration {
 		return theLog;
 	}
 
+	public static void glBlendFunc(GL gl)	{
+		if (hasBlendFuncSeparate) 
+			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		else 
+			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);		
+	}
 }
