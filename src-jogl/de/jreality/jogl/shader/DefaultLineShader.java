@@ -52,6 +52,7 @@ import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.TubeUtility;
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
@@ -145,7 +146,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				hasNoneuc = false;
 			} else {
 				noneuc.setFromEffectiveAppearance(eap, name);
-//				noneuclideanInitialized = false;
+	    		glslProgram = noneuc.getNoneuclideanShader();
 				hasNoneuc = true;
 			}
 	    } else hasNoneuc = false;
@@ -191,7 +192,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			} else {
 				gl.glEnable (GL.GL_BLEND);
 				gl.glDepthMask(jrs.zbufferEnabled);
-				gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+				if (JOGLConfiguration.hasBlendFuncSeparate) 
+					gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+				else 
+					gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			}
 			changedTransp = true;					
 			}
@@ -201,7 +205,6 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (useGLSL)	{
 	    	if ( hasNoneuc)	{
 	    		noneuc.render(jr);
-	    		glslProgram = noneuc.getNoneuclideanShader();
 	    	}
 	    	GlslLoader.render(glslProgram, jr);		
 		}
@@ -210,9 +213,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
-		if (noneuc != null)
-			noneuc.postRender(gl);
-		else if (useGLSL)
+		if (useGLSL) 
 			GlslLoader.postRender(glslProgram, gl);
 		if (!tubeDraw) {
 			jr.globalGL.glDepthRange(0.0d, 1d);
@@ -222,8 +223,10 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			if (jrs.transparencyEnabled) {
 				gl.glEnable (GL.GL_BLEND);
 				gl.glDepthMask(jrs.zbufferEnabled);
-				//gl.glBlendFunc (GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);			
-				gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+				if (JOGLConfiguration.hasBlendFuncSeparate) 
+					gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+				else 
+					gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			} else {
 				gl.glDepthMask(true);
 				gl.glDisable(GL.GL_BLEND);						
