@@ -159,6 +159,12 @@ public class SystemProperties {
 
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
+	 * Values: <code>true | false</code>
+	 */
+	public final static String JOGL_BLEND_FUNC_SEPARATE = "jogl.hasBlendFuncSeparate";
+
+	/**
+	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>
 	 * Values: <code>finest | finer | fine | info</code> (static fields of {@link java.util.logging.Level})
 	 */
 	public final static String JOGL_LOGGING_LEVEL = "jreality.jogl.loggingLevel";
