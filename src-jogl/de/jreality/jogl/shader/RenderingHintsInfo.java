@@ -42,6 +42,7 @@ package de.jreality.jogl.shader;
 
 import javax.media.opengl.GL;
 
+import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.scene.Appearance;
@@ -177,7 +178,10 @@ public class RenderingHintsInfo  {
 				  gl.glEnable (GL.GL_BLEND);
 				  if (values[ZB][ACTIVE]) gl.glDepthMask(values[ZB][which]);
 				  else gl.glDepthMask(false);
-				  gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+				  if (JOGLConfiguration.hasBlendFuncSeparate) 
+						gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+				  else 
+						gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 				  jrs.transparencyEnabled = true;
 				  if (values[ZB][ACTIVE]) 	jrs.zbufferEnabled = values[ZB][which];
 				  else jrs.zbufferEnabled = false;
