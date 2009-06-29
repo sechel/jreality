@@ -58,8 +58,8 @@ uniform float	transparency;
 uniform sampler2D texture;
 uniform int numLights;
 uniform bool poincareModel;
-uniform mat4 poincareMatrix;
-uniform mat4 poincareMatrixInv;
+uniform mat4 cam2H;
+uniform mat4 H2NDC;
 
 // the inner product in klein model of hyperbolic space
 float dot4(in vec4 P, in vec4 Q)	{
@@ -207,14 +207,14 @@ void main (void)
 //     ftexgen(transformedNormal, ecPosition);
      if (poincareModel)	{
         // p4 is in the coordinate system of H3
-      	vec4 p4 =  poincareMatrix * ecPosition;
+      	vec4 p4 =  cam2H * ecPosition;
      	dehomogenize(p4);
      	float d = length4(p4);
      	float s = 1.0/(1.0+d);
     	p4.x = s * p4.x;
      	p4.y = s * p4.y;
      	p4.z = s * p4.z;
-     	gl_Position = gl_ModelViewProjectionMatrix * ( gl_ModelViewMatrixInverse * (poincareMatrixInv * p4)); 
+     	gl_Position = H2NDC * p4; 
      }
 	else     gl_Position = ftransform();
 }
