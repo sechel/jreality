@@ -52,7 +52,7 @@ public class NoneuclideanGLSLShader {
 	protected void render(JOGLRenderer jr)	{
 		// the only reason we're doing it here is because only now do we know what jrs is
 //		System.err.println("writing glsl shader");
-		if (needsRendered)  { //return;
+		if (true || needsRendered)  { //return;
 			JOGLRenderingState jrs = jr.renderingState;
 			glslProgram.setUniform("lightingEnabled", jrs.lighting);
 			glslProgram.setUniform("transparencyEnabled", jrs.transparencyEnabled);

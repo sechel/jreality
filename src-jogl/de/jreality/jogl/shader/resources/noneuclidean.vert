@@ -200,9 +200,9 @@ void main (void)
 //    	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
-    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
+//    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
     transformedNormal = -transformedNormal;
-    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
+    gl_FrontColor = gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
 //     ftexgen(transformedNormal, ecPosition);
      if (poincareModel)	{
@@ -214,7 +214,8 @@ void main (void)
     	p4.x = s * p4.x;
      	p4.y = s * p4.y;
      	p4.z = s * p4.z;
-     	gl_Position = H2NDC * p4; 
+    	gl_Position = H2NDC * p4; 
+//     	gl_Position = gl_ModelViewProjectionMatrix * ( gl_ModelViewMatrixInverse * (H2NDC * p4)); 
      }
 	else     gl_Position = ftransform();
 }

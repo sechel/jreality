@@ -161,12 +161,11 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				hasNoneuc = false;
 			} else {
 				noneuc.setFromEffectiveAppearance(eap, name);
-				noneuclideanInitialized = false;
 				hasNoneuc = true;
 				glslProgram = noneuc.getNoneuclideanShader();
+//			    System.err.println("using non euc shader");
 			}
 	    } else hasNoneuc = false;
-//	    System.err.println("useglsl = "+useGLSL);
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
 		firstTime = true;
