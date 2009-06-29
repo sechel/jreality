@@ -100,8 +100,9 @@ public class JOGLRenderingState {
 	public double levelOfDetail;
 	public double depthFudgeFactor;
 	public double currentAlpha = 1.0;
-	public double[] cameraToWorld = Rn.identityMatrix(4);
-	public double[] worldToCamera = Rn.identityMatrix(4);
+	public double[] cameraToWorld = Rn.identityMatrix(4),
+			worldToCamera = Rn.identityMatrix(4),
+			cameraToNDC  = Rn.identityMatrix(4);
 	
 	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
 	public float[] diffuseColor = new float[4];
