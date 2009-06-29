@@ -63,11 +63,12 @@ public class NoneuclideanGLSLShader {
 			glslProgram.setUniform("useNormals4", jrs.normals4d);
 			glslProgram.setUniform("poincareModel", poincareModel);
 			if (poincarePath != null) {
-	    		double[] p2c = Rn.transpose(null, Rn.times(null, jrs.worldToCamera, poincarePath.getMatrix(null))),
-				c2p = Rn.inverse(null, p2c);
+	    		double[] H2Cam = Rn.times(null, jrs.worldToCamera, poincarePath.getMatrix(null)),
+				cam2H = Rn.inverse(null, H2Cam);
+	    		double[] H2NDC = Rn.times(null, jrs.cameraToNDC, H2Cam);
 	//    		System.err.println("c2p = "+Rn.matrixToString(c2p));
-	    		glslProgram.setUniform("poincareMatrix", Rn.convertDoubleToFloatArray(c2p));	    			
-	    		glslProgram.setUniform("poincareMatrixInv", Rn.convertDoubleToFloatArray(p2c));	    			
+	    		glslProgram.setUniform("cam2H", Rn.convertDoubleToFloatArray(Rn.transpose(null,cam2H)));	    			
+	    		glslProgram.setUniform("H2NDC", Rn.convertDoubleToFloatArray(Rn.transpose(null,H2NDC)));	    			
 			}
 	
 			needsRendered = false;
