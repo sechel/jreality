@@ -67,6 +67,7 @@ public class JOGLConfiguration {
 	static boolean sharedContexts = true;
 	static boolean isLinux = false;
 	static boolean multiSample = true;
+	public static boolean hasBlendFuncSeparate = true;
 	public static boolean quadBufferedStereo = false;
 	static JOGLConfiguration ss = new JOGLConfiguration();
 	static Class<? extends GoBetween> goBetweenClass = null;
@@ -105,6 +106,8 @@ public class JOGLConfiguration {
 				// only for windows
 				Secure.setProperty("sun.java2d.noddraw", "true");
 			}
+			foo = Secure.getProperty("jogl.hasBlendFuncSeparate");  //TODO: move to de.jreality.util.SystemProperties
+			if (foo != null && foo.indexOf("false") != -1) hasBlendFuncSeparate = false;
 			// this doesn't really belong here but it's important that it gets evaluated
 			// before jogl backend classes begin to be instantiated, and this is the best place to guarantee that.
 			boolean copycat = "true".equals(Secure.getProperty(SystemProperties.JOGL_COPY_CAT));
