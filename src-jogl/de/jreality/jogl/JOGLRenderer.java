@@ -243,6 +243,7 @@ public class JOGLRenderer   {
 
 		renderingState.cameraToWorld = renderingState.context.getCameraToWorld();
 		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
+		renderingState.cameraToNDC = renderingState.context.getCameraToNDC();
 		globalGL.glMultTransposeMatrixd(renderingState.worldToCamera, 0);
 		if (topAp.getSkyboxCubemap() != null) 
 			JOGLSkyBox.render(globalGL, 
