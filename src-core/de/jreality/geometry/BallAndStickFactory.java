@@ -265,6 +265,10 @@ import de.jreality.util.SceneGraphUtility;
 		this.stickColor = stickColor;
 	}
 
+	public void setArrowColor(Color arrowColor) {
+		this.arrowColor = arrowColor;
+	}
+
 	public void setMetric(int metric) {
 		this.metric = metric;
 	}
