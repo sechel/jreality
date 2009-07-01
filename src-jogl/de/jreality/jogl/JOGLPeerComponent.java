@@ -319,7 +319,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	}
 
 	public void propagateGeometryChanged(int changed) {
-		geometryDirtyBits  = changed;
+		geometryDirtyBits  |= changed;
 		childlock.readLock();
 		for (JOGLPeerComponent child: children){		
 			child.propagateGeometryChanged(changed);
