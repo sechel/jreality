@@ -15,6 +15,7 @@ import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
 import de.jreality.ui.viewerapp.actions.file.ExportSTL;
 import de.jreality.ui.viewerapp.actions.file.ExportSVG;
+import de.jreality.ui.viewerapp.actions.file.ExportScreenshot;
 import de.jreality.ui.viewerapp.actions.file.ExportU3D;
 import de.jreality.ui.viewerapp.actions.file.ExportVRML;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
@@ -46,6 +47,7 @@ public class ExportMenu extends Plugin {
 		Component parent = viewer.getViewingComponent();
 		exportMenu.setIcon(ImageHook.getIcon("disk.png"));
 		exportMenu.add(new ExportImage("Image", viewer, parent));
+		exportMenu.add(new ExportScreenshot("Screenshot", viewer, parent));
 		exportMenu.add(new ExportRIB("RIB", viewer, parent));
 		exportMenu.add(new ExportSVG("SVG", viewer, parent));
 		exportMenu.add(new ExportPS("PS", viewer, parent));
