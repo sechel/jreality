@@ -39,7 +39,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 	private double screenHeightOffset = 0.4;
 	private double distance=screenWidth/2.0;
 	
-	private boolean showDesktopBorder=true;
+	private boolean showDesktopBorder=false;
 	SceneGraphComponent desktopBorder=new SceneGraphComponent("desktop bounds");
 	
 	List<WeakReference<JFakeFrameWithGeometry>> frameRefs = new LinkedList<WeakReference<JFakeFrameWithGeometry>>();
