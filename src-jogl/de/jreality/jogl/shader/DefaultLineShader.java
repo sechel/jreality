@@ -390,9 +390,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (g != null)	{
 			if (providesProxyGeometry())	{
 				//System.err.println("count is: "+jr.getRenderingState().polygonCount);
-				if (!useDisplayLists  || (useDisplayLists && dListProxy  == -1)) {
+				if (!useDisplayLists  || dListProxy  == -1) {
 					dListProxy  = proxyGeometryFor(jrs);						
-//					System.err.println("rendering tubes w/ dlist");
 					displayListsDirty = false;
 				}
 				jr.globalGL.glCallList(dListProxy);
@@ -420,13 +419,15 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 	public void flushCachedState(JOGLRenderer jr) {
 		LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+dList+" : "+dListProxy);
-		if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
-		if (dListProxy != -1) jr.globalGL.glDeleteLists(dListProxy,1);
+		if (dList != -1) 
+			jr.globalGL.glDeleteLists(dList, 1);
+		if (dListProxy != -1) 
+			jr.globalGL.glDeleteLists(dListProxy,1);
 		dList = dListProxy = -1;
 		displayListsDirty = true;
 		if (tubeDL != null) {
 			//LoggingSystem.getLogger(this).fine("LineShader: Flushing display lists "+tubeDL[0]+" : "+tubeDL[1]+" : "+tubeDL[2]);
-					for (int i = 0; i<3; ++i)
+			for (int i = 0; i<3; ++i)
 				if (tubeDL[i] != 0)	{
 					jr.globalGL.glDeleteLists(tubeDL[i], 1);
 					tubeDL[i] = 0;
