@@ -75,6 +75,9 @@ public class ExportScreenshot extends AbstractJrAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
+		//capture screenshot, before opening any dialog:
+		BufferedImage img = ImageUtility.captureScreenshot(viewer);
+
 		File file = FileLoaderDialog.selectTargetFile(null, null, false, FileFilter.createImageWriterFilters());
 		if (file == null) return;
 
@@ -84,8 +87,6 @@ public class ExportScreenshot extends AbstractJrAction {
 			return;
 		}
 		
-		//capture screenshot
-		BufferedImage img = ImageUtility.captureScreenshot(viewer);
 		try {
 			ImageUtility.writeBufferedImage(file, img);
 			System.out.println("Wrote screenshot "+file.getPath());
