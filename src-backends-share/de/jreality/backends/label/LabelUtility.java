@@ -256,38 +256,82 @@ public class LabelUtility {
   }
   
   public static BufferedImage createImageFromString(String s, Font f, Color foreground, Color background) {
-	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
-	  if (s==null || s.length()==0) {
-		  if (background.equals(TRANSPARENT)) return bi;
-		  else s = " ";
-	  }
-	  if (f == null) f = new Font("Sans Serif",Font.PLAIN,48);
-	  TextLayout tl = new TextLayout(s,f,frc);
-	  Rectangle r = tl.getBounds().getBounds();
-	  
-	  // HACK: the previous implementation failed for strings without descent...
-	  // I got cut-off in the vertical dir, so i added a border of width 2
-	  int height = (int) f.getLineMetrics(s,frc).getHeight();//new TextLayout("fg", f, frc).getBounds().getBounds().height;
-    int width = (r.width+20);
-    
-    BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-	  Graphics2D g = (Graphics2D) img.getGraphics();
-	  g.setBackground(background);
-	  g.clearRect(0,0,width,height);
-	  g.setColor(foreground);
-	  g.setFont(f);
-//	  LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
-	  g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		
-	  final float border = height - tl.getDescent();
-
-    g.drawString(s,0,border);
-	  return img;
+	  String[] lines = s.split("\n");
+	  return createImageFromStrings(lines,f,foreground, background);
+//	  //Rectangle r = f.getStringBounds(s,frc).getBounds();
+//	  if (s==null || s.length()==0) {
+//		  if (background.equals(TRANSPARENT)) return bi;
+//		  else s = " ";
+//	  }
+//	  if (f == null) f = new Font("Sans Serif",Font.PLAIN,48);
+//	  TextLayout tl = new TextLayout(s,f,frc);
+//	  Rectangle r = tl.getBounds().getBounds();
+//	  
+//	  // HACK: the previous implementation failed for strings without descent...
+//	  // I got cut-off in the vertical dir, so i added a border of width 2
+//	  int height = (int) f.getLineMetrics(s,frc).getHeight();//new TextLayout("fg", f, frc).getBounds().getBounds().height;
+//    int width = (r.width+20);
+//    
+//    BufferedImage img = new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+//	  Graphics2D g = (Graphics2D) img.getGraphics();
+//	  g.setBackground(background);
+//	  g.clearRect(0,0,width,height);
+//	  g.setColor(foreground);
+//	  g.setFont(f);
+////	  LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
+//	  g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//		
+//	  final float border = height - tl.getDescent();
+//
+//    g.drawString(s,0,border);
+//	  return img;
   }
  
-  private static final IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
+  public static BufferedImage createImageFromStrings(String[] ss, Font f, Color foreground, Color background) {
+	  // HACK: the previous implementation failed for strings without descent...
+	  // I got cut-off in the vertical dir, so i added a border of width 2
+	  int width = 0, height = 0, hh[] = new int[ss.length];
+	  float border = 0.0f;
+	  if (f == null) f = new Font("Sans Serif",Font.PLAIN,48);
+	  // process the strings to find out how large the image needs to be
+	  // I'm not sure if I'm handling the border correctly: should a new border
+	  // be added for each string?  Or only for the first or last?
+		for (int i = 0; i < ss.length; ++i) {
+			String s = ss[i];
+			if (s == null || s.length() == 0) {
+				if (background.equals(TRANSPARENT))
+					return bi;
+				else
+					s = " ";
+			}
+			TextLayout tl = new TextLayout(s, f, frc);
+			Rectangle r = tl.getBounds().getBounds();
+			hh[i] = (int) f.getLineMetrics(s, frc).getHeight();
+			height += hh[i];
+			int tmp = (r.width + 20);
+			if (tmp > width) width = tmp;
+			float ftmp = hh[i] - tl.getDescent();
+			if (ftmp > border) border = ftmp;
+		}
+		BufferedImage img = new BufferedImage(width, height,BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = (Graphics2D) img.getGraphics();
+		g.setBackground(background);
+		g.clearRect(0, 0, width, height);
+		g.setColor(foreground);
+		g.setFont(f);
+		// LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		height = 0;
+		for (int i = 0; i < ss.length; ++i) {
+			g.drawString(ss[i], 0, height + border);
+			height += hh[i];
+		}
+		return img;
+  	}
+  	private static final IndexedFaceSet bb = Primitives.texturedQuadrilateral(new double[]{0,1,0,1,1,0,1,0,0,0,0,0});
 
-  public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, int alignment, double[] camToObj, double[] position)  {
+  	public static SceneGraphComponent sceneGraphForLabel(SceneGraphComponent sgc, double xscale, double yscale,double[] offset, int alignment, double[] camToObj, double[] position)  {
   		if (sgc == null) sgc = new SceneGraphComponent();
   		if (sgc.getGeometry() == null) {
   			sgc.setGeometry(bb);
@@ -323,6 +367,7 @@ public static double[] calculateBillboardMatrix(double[] result,
 		double[] point, 			// the position of the anchor point in object coordinate system
 		int metric)	{
 	if (result == null) result = new double[16];
+	// TODO fix this method for noneuclidean metrics
 	// TODO the following call perhaps should return a determinant-1 matrix (throw out scaling)
     double[] orientation = P3.extractOrientationMatrix(null, cameraToObject, P3.originP3, metric);
     double[] scale = P3.makeStretchMatrix(null, xscale, yscale, 1.0);
@@ -339,6 +384,8 @@ public static double[] calculateBillboardMatrix(double[] result,
     	case SwingConstants.SOUTH_WEST : align=-xscale; valign=-yscale; break;
     	case SwingConstants.NORTH_WEST : align=-xscale; break;
     }
+//    System.err.println("Calculating translation for metric "+metric);
+    metric = Pn.EUCLIDEAN;
     double[] euclideanTranslation = P3.makeTranslationMatrix(null, Rn.add(null, xyzOffset, new double[]{align, valign, 0, 0}), metric); //Pn.EUCLIDEAN);
     double[] pointTranslation;
     if (Double.isNaN(point[0])) pointTranslation = Rn.identityMatrix(4);
