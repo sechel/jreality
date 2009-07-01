@@ -44,6 +44,8 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import javax.swing.JOptionPane;
+
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.ViewerSwitch;
@@ -78,7 +80,12 @@ public class ExportScreenshot extends AbstractJrAction {
 		//capture screenshot, before opening any dialog:
 		BufferedImage img = ImageUtility.captureScreenshot(viewer);
 
-		File file = FileLoaderDialog.selectTargetFile(null, null, false, FileFilter.createImageWriterFilters());
+		if (img == null) {
+			JOptionPane.showMessageDialog(parentComp, "Capturing screenshot failed!");
+			return;
+		}
+		
+		File file = FileLoaderDialog.selectTargetFile(parentComp, null, false, FileFilter.createImageWriterFilters());
 		if (file == null) return;
 
 		if (FileFilter.getFileExtension(file) == null) {  //no extension specified
