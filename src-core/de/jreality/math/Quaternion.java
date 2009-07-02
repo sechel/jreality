@@ -359,33 +359,34 @@ final public class Quaternion implements Cloneable, Serializable {
 			}
 		}
 		normalize(q, q);
-		// try new method (from Blaschke) and compare
-		Quaternion r[] = {
-				new Quaternion(0, m[0], m[n], m[2*n]),
-				new Quaternion(0, m[1], m[n+1], m[2*n+1]),
-				new Quaternion(0, m[2], m[n+2], m[2*n+2])
-		};
-//		System.err.println("rot = "+Rn.matrixToString(m));
-		Quaternion ret = null;
-		for (int i = 0; i<3; ++i)	{
-			int index0 = i, index1 = (i+1)%3, index2 = (i+2)%3;
-			// e2r3-e3r2-e1-r1
-			ret = subtract(null, 
-				subtract(null, 
-					times(null, eq[index1], r[index2]),
-					times(null, eq[index2], r[index1])),
-				add(null, eq[index0], r[index0]));
-			ret = conjugate(ret, ret);
-//			System.err.println("ret = "+ret.toString());
-			if (lengthSquared(ret) > .001) break;
-		}
-		normalize(ret, ret);
-//		if (!equals(ret, q, 10E-8)  && !equals(ret, negate(null, q), 10E-8)) {
-//			System.err.println("ret = "+ret.toString());
-//			System.err.println("q = "+q.toString());
-//			throw new IllegalStateException("not equal");			
+//		// try new method (from Blaschke) and compare
+//      does NOT WORK for the identit, see QuaternionTest - paul peters, Thu Jul  2 18:24:16 CEST 2009
+//		Quaternion r[] = {
+//				new Quaternion(0, m[0], m[n], m[2*n]),
+//				new Quaternion(0, m[1], m[n+1], m[2*n+1]),
+//				new Quaternion(0, m[2], m[n+2], m[2*n+2])
+//		};
+////		System.err.println("rot = "+Rn.matrixToString(m));
+//		Quaternion ret = null;
+//		for (int i = 0; i<3; ++i)	{
+//			int index0 = i, index1 = (i+1)%3, index2 = (i+2)%3;
+//			// e2r3-e3r2-e1-r1
+//			ret = subtract(null, 
+//				subtract(null, 
+//					times(null, eq[index1], r[index2]),
+//					times(null, eq[index2], r[index1])),
+//				add(null, eq[index0], r[index0]));
+//			ret = conjugate(ret, ret);
+////			System.err.println("ret = "+ret.toString());
+//			if (lengthSquared(ret) > .001) break;
 //		}
-		return ret;
+//		normalize(ret, ret);
+////		if (!equals(ret, q, 10E-8)  && !equals(ret, negate(null, q), 10E-8)) {
+////			System.err.println("ret = "+ret.toString());
+////			System.err.println("q = "+q.toString());
+////			throw new IllegalStateException("not equal");			
+////		}
+		return q;
 	}
 	static Quaternion eq[] = {
 		new Quaternion(0,1,0,0),
