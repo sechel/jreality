@@ -1,41 +1,41 @@
 /**
- *
- * This file is part of jReality. jReality is open source software, made
- * available under a BSD license:
- *
- * Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
- * Schmies, Steffen Weissmann.
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * - Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- * - Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
- * - Neither the name of jReality nor the names of its contributors nor the
- *   names of their associated organizations may be used to endorse or promote
- *   products derived from this software without specific prior written
- *   permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- */
+*
+* This file is part of jReality. jReality is open source software, made
+* available under a BSD license:
+*
+* Copyright (c) 2003-2006, jReality Group: Charles Gunn, Tim Hoffmann, Markus
+* Schmies, Steffen Weissmann.
+*
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* - Redistributions of source code must retain the above copyright notice, this
+*   list of conditions and the following disclaimer.
+*
+* - Redistributions in binary form must reproduce the above copyright notice,
+*   this list of conditions and the following disclaimer in the documentation
+*   and/or other materials provided with the distribution.
+*
+* - Neither the name of jReality nor the names of its contributors nor the
+*   names of their associated organizations may be used to endorse or promote
+*   products derived from this software without specific prior written
+*   permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*
+*/
 
 
 package de.jreality.geometry;
@@ -48,6 +48,7 @@ import javax.swing.SwingConstants;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Quaternion;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -62,37 +63,37 @@ import de.jreality.shader.CommonAttributes;
 
 
 /**
- * Factory for creating a representation of a coordinate system in Euclidean space.
- * <p>
- * This  is
- * created for an existing SceneGraphComponent (or for a given extent).<br> 
- * For a given SceneGraphComponent the factory creates a bounding box
- * and axes through the origin including ticks with their labels.<br>
- * A new SceneGraphNode containing the coordinate system is added to 
- * the children of the given SceneGraphComponent.
- * <p>
- * Use the factory as following:<br>
- * <code><b><pre>
- * SceneGraphCompontent component;
- * double axisScale = 10.0;
- * [...]
- * CoordinateSystemFactory factory = new CoordinateSystemFactory(component, axisScale);</pre></b></code>
- * Above line creates the coordinate system using default properties and adds it to the scene.<br>
- * <code>axisScale</code> (i.e. the distance between two ticks on the coordinate axes) depends on size of component.<br>
- * You can change properties afterwards:
- * <code><b><pre>
- * factory.showAxes(false);
- * factory.showBox(true);
- * factory.beautify(true);
- * [setting more properties]
- * </pre></b></code>
- * <p>
- * The coordinate system may be removed from the SceneGraph by<br>
- * <code><b><pre>component.removeChild(factory.getCoordinateSystem());</pre></b></code>
- * 
- * 
- * @author msommer
- */
+* Factory for creating a representation of a coordinate system in Euclidean space.
+* <p>
+* This  is
+* created for an existing SceneGraphComponent (or for a given extent).<br> 
+* For a given SceneGraphComponent the factory creates a bounding box
+* and axes through the origin including ticks with their labels.<br>
+* A new SceneGraphNode containing the coordinate system is added to 
+* the children of the given SceneGraphComponent.
+* <p>
+* Use the factory as following:<br>
+* <code><b><pre>
+* SceneGraphCompontent component;
+* double axisScale = 10.0;
+* [...]
+* CoordinateSystemFactory factory = new CoordinateSystemFactory(component, axisScale);</pre></b></code>
+* Above line creates the coordinate system using default properties and adds it to the scene.<br>
+* <code>axisScale</code> (i.e. the distance between two ticks on the coordinate axes) depends on size of component.<br>
+* You can change properties afterwards:
+* <code><b><pre>
+* factory.showAxes(false);
+* factory.showBox(true);
+* factory.beautify(true);
+* [setting more properties]
+* </pre></b></code>
+* <p>
+* The coordinate system may be removed from the SceneGraph by<br>
+* <code><b><pre>component.removeChild(factory.getCoordinateSystem());</pre></b></code>
+* 
+* 
+* @author msommer
+*/
 
 public class CoordinateSystemFactory {
 
@@ -152,7 +153,7 @@ public class CoordinateSystemFactory {
 	private boolean showLabels = true;  //show or hide labels of ticks & axes
 	private Color coordinateSystemColor = Color.BLACK;
 	private Color gridColor = Color.GRAY;
-  private Color boxColor = Color.BLACK;
+ private Color boxColor = Color.BLACK;
 	private Color labelColor = Color.BLACK;
 	private Font labelFont = new Font("Sans Serif", Font.PLAIN, 48);
 	private boolean beautify = true;  //for adding tool CoordinateSystemBeautifier
@@ -168,27 +169,27 @@ public class CoordinateSystemFactory {
 	 * axis are specified by <code>extent</code>, 
 	 * i.e. x,y,z are within [-<code>extent</code>, <code>extent</code>].
 	 * @param extent extent of each coordinate axis
-   * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
+  * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
 	public CoordinateSystemFactory(double extent, double axisScale) {
 		this(new double[]{extent, extent, extent}, axisScale);
 	}
 	
-  /**
-   * see <code>CoordinateSystemFactory(double extent, double axisScale)</code><br>
-   * here axisScale is set to 1.0
-   */
-  public CoordinateSystemFactory(double extent) {
-    this(extent, 1.0);
-  }
-  
+ /**
+  * see <code>CoordinateSystemFactory(double extent, double axisScale)</code><br>
+  * here axisScale is set to 1.0
+  */
+ public CoordinateSystemFactory(double extent) {
+   this(extent, 1.0);
+ }
+
 	
 	/**
 	 * Creates a coordinate system where min and max values of each of the three coordinate
 	 * axes is specified by <code>extent</code>, 
 	 * i.e. x is within [-<code>extent[0]</code>, <code>extent[0]</code>] etc.
 	 * @param extent the extent of each of the three coordinate axes
-   * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
+  * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
 	public CoordinateSystemFactory(double[] extent, double axisScale) {
 
@@ -198,19 +199,19 @@ public class CoordinateSystemFactory {
 		boxMin = new double[]{-extent[X], -extent[Y], -extent[Z]};
 		boxMax = new double[]{ extent[X],  extent[Y],  extent[Z]};
 		this.axisScale = axisScale;
-    
+
 		//create the coordinate system
 		coordinateSystem = createCoordinateSystem();
 	}
 
-  /**
-   * see <code>CoordinateSystemFactory(double[] extent, double axisScale)</code><br>
-   * here axisScale is set to 1.0
-   */
-  public CoordinateSystemFactory(double[] extent) {
-    this(extent, 1.0);
-  }
-  
+ /**
+  * see <code>CoordinateSystemFactory(double[] extent, double axisScale)</code><br>
+  * here axisScale is set to 1.0
+  */
+ public CoordinateSystemFactory(double[] extent) {
+   this(extent, 1.0);
+ }
+
 	
 	/**
 	 * Creates a coordinate system  where min and max values of each coordinate
@@ -218,7 +219,7 @@ public class CoordinateSystemFactory {
 	 * A new SceneGraphNode containing the coordinate system is added to 
 	 * the children of <code>component</code>.
 	 * @param component the SceneGraphComponent specifying the extent of the coordinate system
-   * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
+  * @param axisScale the axis scale, i.e. the distance between two ticks on the coordinate axes
 	 */
 	public CoordinateSystemFactory(SceneGraphComponent component, double axisScale) {
 		
@@ -238,9 +239,9 @@ public class CoordinateSystemFactory {
 				boxMax[axis] += 0.5;
 			}
 		}
-    
-    this.axisScale = axisScale;
-    	this.component = component;
+
+   this.axisScale = axisScale;
+   	this.component = component;
 		//create the coordinate system
 		coordinateSystem = createCoordinateSystem();
 		component.addChild(coordinateSystem);
@@ -249,15 +250,15 @@ public class CoordinateSystemFactory {
 		component.setTransformation(tmp);
 	}
 
-  /**
-   * see <code>CoordinateSystemFactory(SceneGraphComponent component, double axisScale)</code><br>
-   * here axisScale is set to 1.0
-   */
-  public CoordinateSystemFactory(SceneGraphComponent component) {
-    this(component, 1.0);
-  }
+ /**
+  * see <code>CoordinateSystemFactory(SceneGraphComponent component, double axisScale)</code><br>
+  * here axisScale is set to 1.0
+  */
+ public CoordinateSystemFactory(SceneGraphComponent component) {
+   this(component, 1.0);
+ }
 	
-  
+
 	public void dispose()	{
 		if (component!= null && component.isDirectAncestor(coordinateSystem))
 			component.removeChild(coordinateSystem);
@@ -358,10 +359,10 @@ public class CoordinateSystemFactory {
 	    box.addChild(calculate2DGrid());
 	    
 	    Appearance app = new Appearance();
-      app.setName("boxAppearance");
-      app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
-      box.setAppearance(app);
-      
+     app.setName("boxAppearance");
+     app.setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, boxColor);
+     box.setAppearance(app);
+
 	    box.setVisible(showBox);
 	    nodes.put("box", box);
 	    return box;
@@ -416,7 +417,7 @@ public class CoordinateSystemFactory {
 
 	/**
 	 * calculate the vertices of the axes (specified by the choice of the constructor)<br>
- 	 * first index specifies the coordinate axis (0,1,2)<br>
+	 * first index specifies the coordinate axis (0,1,2)<br>
 	 * second index specifies starting and endpoint of each coordinate axis {start, end}
 	 */
 	private void calculateAxesVertices(){
@@ -548,6 +549,9 @@ public class CoordinateSystemFactory {
 		m.setStretch(arrowStretch); //stretch urCone
 		//translate to axis tip
 		m.setTranslation(max);
+//		double[] matrix = new double[16];
+//		Quaternion q = getAxisRotation(axis);
+//		MatrixBuilder.euclidean().translate(max).rotate(q.re, q.x,q.y,q.z)
 		Transformation trans = new Transformation(m.getArray());
 		trans.setName("arrowTransformation");
 		trans.setReadOnly(true);
@@ -557,6 +561,8 @@ public class CoordinateSystemFactory {
 	}
 		
 	
+	double[][] axes = {{0,1,0},{1,0,0},{0,0,1}};
+	double[] angles = {Math.PI/2, -Math.PI/2, 0.0};
 	/**
 	 * get the ticks on the coordinate axis specified by <code>axis</code> 
 	 * between min and max as a SceneGraphComponent (IndexedFaceSet)
@@ -621,10 +627,8 @@ public class CoordinateSystemFactory {
 		translation[axis] = 0;
 		m.setTranslation(translation);
 		m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
-		Transformation trans = new Transformation(m.getArray());
-		trans.setName("tickTransformation");
-		trans.setReadOnly(true);
-		ticks.setTransformation(trans);
+		MatrixBuilder.euclidean().translate(translation).
+			rotate(angles[axis], axes[axis]).scale(tickStretch, tickStretch, 1).assignTo(ticks);
 
 		ticks.addChild(labels);
 		return ticks;
@@ -690,17 +694,13 @@ public class CoordinateSystemFactory {
 		//create the SceneGraphComponent and rotate the ticks onto the corresponding coordinate axis
 		ticksGeom.setName("ticks");
 		ticks.setGeometry(ticksGeom);
-		FactoredMatrix m = new FactoredMatrix();
-		m.setRotation(Quaternion.times(new Quaternion(), getTickRotation(axis, k), getAxisRotation(axis)));
 		double[] translation = (double[])min.clone();
 		translation[axis] = 0;
-		m.setTranslation(translation);
-		m.setStretch(tickStretch, tickStretch, 1); //stretch ticks
-		Transformation trans = new Transformation(m.getArray());
-		trans.setName("tickTransformation");
-		trans.setReadOnly(true);
-		ticks.setTransformation(trans);
-
+		double[] tickr = getTickRotation(axis, k);
+		MatrixBuilder.euclidean().translate(translation).
+				rotate(tickr[3], tickr[0], tickr[1], tickr[2]).
+				rotate(angles[axis], axes[axis]).
+				scale(tickStretch, tickStretch, 1).assignTo(ticks);
 		ticks.addChild(labels);
 		return ticks;
 	}
@@ -742,7 +742,7 @@ public class CoordinateSystemFactory {
 						current = new double[]{points[3*i], points[3*i+1], points[3*i+2], 0};
 						translation = (double[])boxVertices[axis][2*(k+line*next)].clone();  //minimum end point
 						translation[axis] = 0;
-						trans = new FactoredMatrix(nodes.get(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation());  //e.g. x00ticks
+						trans = new FactoredMatrix(nodes.get(axesNames[axis]+toBinaryString(k+line*next)+"ticks").getTransformation()); //e.g. x00ticks
 						result = trans.multiplyVector(current);  
 						vertices[n*line+i][0] = result[0]+translation[0];
 						vertices[n*line+i][1] = result[1]+translation[1];
@@ -774,8 +774,7 @@ public class CoordinateSystemFactory {
 		} //end loop for axis
 		
 		//create SceneGraphNodes
-		SceneGraphComponent grid = new SceneGraphComponent();
-		grid.setName("grid");
+		SceneGraphComponent grid = new SceneGraphComponent("grid");
 		nodes.put("grid", grid);
 		for (int i=0; i<gridComp.length; i++) {
 			SceneGraphComponent face = new SceneGraphComponent();
@@ -817,43 +816,8 @@ public class CoordinateSystemFactory {
 	 */
 	private IndexedLineSet mergeIndexedLineSets(IndexedLineSet a, IndexedLineSet b) {
 		
-		if (a==null) a = new IndexedLineSet();  //empty line set
-		if (b==null) b = new IndexedLineSet();  //empty line set
-		
-		//extract vertices and indices of a & b
-		double[] aVertices = new double[0];
-		double[] bVertices = new double[0];
-		int[] aIndices = new int[0];
-		int[] bIndices = new int[0];
-		
-		if (a.getNumPoints() != 0) aVertices=a.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
-		if (b.getNumPoints() != 0) bVertices=b.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null);
-		if (a.getNumEdges() != 0) aIndices=a.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
-		if (b.getNumEdges() != 0) bIndices=b.getEdgeAttributes(Attribute.INDICES).toIntArray(null);
-		
-		//create merged vertices and indices arrays
-		double[] vertices = new double[aVertices.length+bVertices.length];
-		int[] indices = new int[aIndices.length+bIndices.length];
-		
-		for (int i=0; i<aVertices.length; i++)
-			vertices[i] = aVertices[i];
-		for (int i=0; i<bVertices.length; i++)
-			vertices[i+aVertices.length] = bVertices[i];
-		
-		for (int i=0; i<aIndices.length; i++)
-			indices[i] = aIndices[i];
-		for (int i=0; i<bIndices.length; i++)
-			indices[i+aIndices.length] = bIndices[i]+aVertices.length/3;
-		
-		//create new IndexedLineSet
-		IndexedLineSetFactory fac = new IndexedLineSetFactory();
-		fac.setVertexCount(vertices.length/3);
-		fac.setEdgeCount(indices.length/2);
-		fac.setVertexCoordinates(vertices);
-		fac.setEdgeIndices(indices);
-		fac.update();
-		
-		return fac.getIndexedLineSet();		
+		GeometryMergeFactory gmf = new GeometryMergeFactory();
+		return gmf.mergeIndexedLineSets(new IndexedLineSet[]{a,b});
 	}
 	
 	
@@ -882,7 +846,7 @@ public class CoordinateSystemFactory {
 	 * @param k the copy of the coordinate axis (0..3)
 	 * @return a quaternion specifying the rotation 
 	 */
-	private Quaternion getTickRotation(int axis, int k) {
+	private double[] getTickRotation(int axis, int k) {
 		
 		//determine the factor of pi/2-rotation
 		int c = new int[]{0,3,1,2}[k];
@@ -891,12 +855,11 @@ public class CoordinateSystemFactory {
 		case Y : c*=-1; c--;  // *-1 => switch 1 and 3
 		}
 		
-		double[] rotationAxis = new double[]{0,0,0};
-		rotationAxis[axis] = 1;
-		FactoredMatrix rot = new FactoredMatrix();
-		rot.setRotation(c*Math.PI/2, rotationAxis);
-
-		return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
+		double[] retvalue = new double[4];
+		retvalue[axis] = 1;
+		retvalue[3] = c*Math.PI/2;
+		return retvalue;
+		//return Quaternion.rotationMatrixToQuaternion(new Quaternion(), rot.getArray());
 	}
 	
 
@@ -1270,25 +1233,25 @@ public class CoordinateSystemFactory {
 	}
 	
 	
-  /**
-   * Set the color of the bounding box.
-   * @param c the color
-   */
-  public void setBoxColor(Color c) {
-    boxColor = c;
-    nodes.get("box").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
-  }
+ /**
+  * Set the color of the bounding box.
+  * @param c the color
+  */
+ public void setBoxColor(Color c) {
+   boxColor = c;
+   nodes.get("box").getAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, c);
+ }
 
 
-  /**
-   * Get the current color of the bounding box.
-   * @return the current color
-   */
-  public Color getBoxColor() {
-    return boxColor;
-  }
-  
-  
+ /**
+  * Get the current color of the bounding box.
+  * @return the current color
+  */
+ public Color getBoxColor() {
+   return boxColor;
+ }
+
+
 	/**
 	 * Set the color of all labels of the coordinate system.
 	 * @param c the color
