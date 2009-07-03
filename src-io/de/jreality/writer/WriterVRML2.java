@@ -17,6 +17,7 @@ package de.jreality.writer;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public class WriterVRML2{
 	private DefaultTextShader dvts;
 	private DefaultPolygonShader dlps;
 	private DefaultPolygonShader dvps;
-	private String fileStem = String.format("texture-%10d-", System.currentTimeMillis());
+	private String fileStem = "unnamed";
 	private PrintWriter out=null;
 	private static final String spacing="  ";// for outlay
 	private static String hist="";// for outlay
@@ -92,23 +93,41 @@ public class WriterVRML2{
 	private static enum GeoTyp{TEX_FACE,FACE,TUBE,LINE,SPHERE,POINT}
 	// -----------------constructor----------------------
 	/** this Writer can write vrml2 */
+	public WriterVRML2(File f) {
+		try {
+			out = new PrintWriter(new FileOutputStream(f));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		setWritePath(f.getParent());
+		String wrl = f.getName();
+		int end = wrl.indexOf(".");
+		if (end == -1) end = wrl.length();
+		wrl = wrl.substring(0, end);
+		setFileStem(wrl);
+	}
 	public WriterVRML2(OutputStream outS) {	
 		out=new PrintWriter( outS );
 	}
 	/** this Writer can write vrml2 */
-	public WriterVRML2(FileWriter outS) {
+	private WriterVRML2(FileWriter outS) {
 		out=new PrintWriter( outS );
 	}
 	/** this Writer can write vrml2 */
-	public WriterVRML2(PrintWriter outS) {
+	private WriterVRML2(PrintWriter outS) {
 		out=outS;
+	}
+	
+	public void setFileStem(String s)	{
+		fileStem = s;
 	}
 	/** writes a vrml2-file of the scene into the stream
 	 * (use default settings)  
 	 * @param sceneRoot
 	 * @param stream
 	 */
-	public static void write(SceneGraphComponent sceneRoot, FileOutputStream stream)   {
+	private static void write(SceneGraphComponent sceneRoot, FileOutputStream stream)   {
 		WriterVRML writer = new WriterVRML(stream);
 		writer.write(sceneRoot);
 	}
@@ -263,7 +282,7 @@ public class WriterVRML2{
 			if (writeTextureFiles)	{
 				String fileName = textureMaps.get(tex.getImage());
 				if (fileName == null)	{
-					fileName = fileStem+String.format("%04d", textureCount)+".png";
+					fileName = fileStem+String.format("-texture-%04d", textureCount)+".png";
 					String fullName = writePath+fileName;
 					textureCount++;
 					BufferedImage image = (BufferedImage) tex.getImage().getImage();
