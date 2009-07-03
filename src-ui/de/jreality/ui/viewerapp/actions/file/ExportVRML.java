@@ -56,7 +56,7 @@ public class ExportVRML extends AbstractJrAction {
 //			WriterVRML.write(viewer.getSceneRoot(), new FileOutputStream(file));
 
 			if(writeVrml2){
-				WriterVRML2 writer = new WriterVRML2(new FileOutputStream(file));	
+				WriterVRML2 writer = new WriterVRML2(file);	
 				writer.setWritePath(file.getParent()+"/");
 				writer.setWriteTextureFiles(writeTextureFiles);
 				writer.setDrawSpheres(drawSpheres);
