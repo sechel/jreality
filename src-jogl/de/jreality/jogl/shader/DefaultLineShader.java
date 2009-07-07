@@ -209,6 +209,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
+		if (!jrs.shadeGeometry) return;
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
 		if (useGLSL) 
@@ -386,7 +387,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if ( !(g instanceof IndexedLineSet))	{
 			throw new IllegalArgumentException("Must be IndexedLineSet");
 		}
-		preRender(jrs);
+		if (jrs.shadeGeometry) preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
 				//System.err.println("count is: "+jr.getRenderingState().polygonCount);

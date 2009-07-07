@@ -73,7 +73,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 	}
 
 	private void readMatrices() {
-		matrices = theDropBox.matrixList;
+		matrices = theDropBox.getMatrixList();
 		matrixIsReflection = new boolean[matrices.length];
 		accepted = new boolean[matrices.length];
 		for (int i = 0; i<matrices.length; ++i)	{
@@ -89,21 +89,21 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 		if (childCount == 0 && goBetween.peerGeometry == null) return;
 		insideDL = false;
 		if (isCopyCat) {
-			if (matrices.length != theDropBox.matrixList.length) {
+			if (matrices.length != theDropBox.getMatrixList().length) {
 				readMatrices();				
 				displayListDirty = true;			
 			}
 //			if (displayListDirty) setDisplayListDirty();
 			// figure out whether to use display lists
-			if ((theDropBox.newVisibleList || localVisibleList == null)) {
-				localVisibleList = theDropBox.visibleList.clone();
-				theDropBox.newVisibleList = false;
+			if ((theDropBox.isNewVisibleList() || localVisibleList == null)) {
+				localVisibleList = theDropBox.getVisibleList().clone();
+				theDropBox.setNewVisibleList(false);
 				displayListDirty = true;
 //				System.err.println("Got visible list");
-			} else if (jr.perfMeter.beginRenderTime - lastDisplayListCreationTime > theDropBox.delay)	{
+			} else if (jr.perfMeter.beginRenderTime - lastDisplayListCreationTime > theDropBox.getDelay()){
 				displayListDirty = true;
 			}
-			jr.renderingState.componentDisplayLists = theDropBox.componentDisplayLists;
+			jr.renderingState.componentDisplayLists = theDropBox.isComponentDisplayLists();
 			if (jr.renderingState.componentDisplayLists  && 
 				jr.renderingState.useDisplayLists &&
 				!jr.offscreenMode) {
@@ -179,11 +179,16 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			if (debug) theLog.fine("In renderChildren()"+name);
 			boolean isReflectionBefore = jr.renderingState.flipped; //cumulativeIsReflection;
 			int nn = matrices.length;
-			theDropBox.rendering = true;
-			boolean clipToCamera = theDropBox.clipToCamera && !jr.offscreenMode;
+			theDropBox.setRendering(true);
+			boolean clipToCamera = theDropBox.isClipToCamera() && !jr.offscreenMode;
 
 			int count = 0;
 			MatrixListJOGLPeerComponent child = (MatrixListJOGLPeerComponent) children.get(0);
+			// an optimatization hack: do polygon shader here, set flag so shading below this node is skipped
+			if (!theDropBox.isShadeGeometry())	{
+				geometryShader.polygonShader.render(jr.renderingState);
+				jr.renderingState.shadeGeometry = false;
+			}
 			for (int j = 0; j<nn; ++j)	{
 				if (clipToCamera)	{
 					if (!localVisibleList[j]) 	continue; 
@@ -198,7 +203,11 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				child.render();
 				popTransformation();
 			}
-			theDropBox.rendering = false;
+			if (!theDropBox.isShadeGeometry())	{
+				geometryShader.polygonShader.postRender(jr.renderingState);
+				jr.renderingState.shadeGeometry = true;
+			}
+			theDropBox.setRendering(false);
 			jr.renderingState.flipped = isReflectionBefore;
 			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;

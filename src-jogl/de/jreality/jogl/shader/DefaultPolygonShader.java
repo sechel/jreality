@@ -41,7 +41,6 @@
 package de.jreality.jogl.shader;
 
 import static de.jreality.shader.CommonAttributes.ONE_TEXTURE2D_PER_IMAGE;
-import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;
@@ -51,22 +50,16 @@ import static de.jreality.shader.CommonAttributes.TEXTURE_2D_2;
 import static de.jreality.shader.CommonAttributes.USE_GLSL;
 
 import java.awt.Color;
-import java.io.IOException;
 
 import javax.media.opengl.GL;
-
-import com.sun.org.apache.bcel.internal.generic.NEW;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -77,7 +70,6 @@ import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -96,8 +88,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
 	public DefaultVertexShader vertexShader = new DefaultVertexShader();
-	boolean useGLSL = false,
-		oneTexturePerImage = false;
+	boolean useGLSL = false; //, oneTexturePerImage = false;
 	int texUnit = 0, refMapUnit = 0;
 	GlslProgram glslProgram;
 	transient boolean geometryHasTextureCoordinates = false, 
@@ -127,7 +118,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,SMOOTH_SHADING), SMOOTH_SHADING_DEFAULT);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, USE_GLSL), false);	
-		oneTexturePerImage = eap.getAttribute(ShaderUtility.nameSpace(name,ONE_TEXTURE2D_PER_IMAGE), true);	
+		//oneTexturePerImage = eap.getAttribute(ShaderUtility.nameSpace(name,ONE_TEXTURE2D_PER_IMAGE), true);	
 	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = null;
 	    joglCubeMap = null;
 	    hasTextures = false;
@@ -193,21 +184,21 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 			    if (joglTexture2D != null) {
 			    	gl.glActiveTexture(GL.GL_TEXTURE0);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, joglTexture2D, oneTexturePerImage);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D, jrs.oneTexture2DPerImage);
 				    texUnit++;
 				    texunitcoords++;		
 			    }
 			    if (joglTexture2D_1 != null) {
 				    gl.glActiveTexture(GL.GL_TEXTURE0+1);
 				    gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, joglTexture2D_1, oneTexturePerImage);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_1, jrs.oneTexture2DPerImage);
 				    texUnit++;
 				    texunitcoords++;
 			    }
 			    if (joglTexture2D_2 != null) {
 			    	gl.glActiveTexture(GL.GL_TEXTURE0+2);
 			      	gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, joglTexture2D_2, oneTexturePerImage);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_2, jrs.oneTexture2DPerImage);
 				    texUnit++;
 				    texunitcoords++;		
 			    }
@@ -234,6 +225,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 }
 	
 	public void postRender(JOGLRenderingState jrs)	{
+		if (!jrs.shadeGeometry) return;
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jrs.renderer.globalGL;
 		if (useGLSL) {
@@ -276,7 +268,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		Geometry g = jrs.currentGeometry;
 		JOGLRenderer jr = jrs.renderer;
 		boolean useDisplayLists = jrs.useDisplayLists;
-		preRender(jrs);
+		if (jrs.shadeGeometry) preRender(jrs);
 		if (g != null)	{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
 				int i = 3;

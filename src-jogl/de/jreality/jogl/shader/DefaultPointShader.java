@@ -248,6 +248,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	}
 
 	public void postRender(JOGLRenderingState jrs)	{
+		if (!jrs.shadeGeometry) return;
 		JOGLRenderer jr = jrs.renderer; 
 		GL gl = jr.globalGL;
 		if (!sphereDraw)	{
@@ -359,7 +360,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if ( !(g instanceof PointSet))	{
 			throw new IllegalArgumentException("Must be PointSet");
 		}
-		preRender(jrs);
+		if (jrs.shadeGeometry) preRender(jrs);
 		if (g != null)	{
 			if (providesProxyGeometry())	{
 				if (!useDisplayLists || dListProxy == -1) {
