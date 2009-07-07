@@ -52,7 +52,6 @@ public interface PrimitiveShader extends Shader {
 	public boolean providesProxyGeometry();
 	public int proxyGeometryFor(JOGLRenderingState jrs);
 	public DefaultTextShader getTextShader();
-	public void render(JOGLRenderingState jrs);
 	public void flushCachedState(JOGLRenderer jr);
 	public boolean displayListsDirty();
 }
