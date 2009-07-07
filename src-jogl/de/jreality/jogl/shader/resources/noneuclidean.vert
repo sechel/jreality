@@ -195,13 +195,13 @@ void main (void)
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
-//    if (transformedNormal.w * transformedNormal.z < 0.0) 
+    if (transformedNormal.w * transformedNormal.z > 0.0) 
 //    if (transformedNormal.w < 0.0) 
-//    	transformedNormal = -transformedNormal;
+    	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
 //    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
-    transformedNormal = -transformedNormal;
+//    transformedNormal = -transformedNormal;
     gl_FrontColor = gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
 //     ftexgen(transformedNormal, ecPosition);
