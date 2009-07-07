@@ -41,6 +41,9 @@
 package de.jreality.tutorial.geom;
 
 import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.SwingConstants;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
@@ -84,7 +87,7 @@ public class LabelsOnCube {
 
 public static void main(String[] args) {
 
-    IndexedFaceSet ifs = Primitives.cube();
+    IndexedFaceSet ifs = Primitives.coloredCube();
 	label(ifs);
     
     SceneGraphComponent cmp = new SceneGraphComponent("Labels on cube");
@@ -96,7 +99,7 @@ public static void main(String[] args) {
 	dgs.setShowFaces(true);
 	dgs.setShowLines(true);
 	dgs.setShowPoints(true);
-   DefaultTextShader pts = (DefaultTextShader) ((DefaultPointShader)dgs.getPointShader()).getTextShader();
+    DefaultTextShader pts = (DefaultTextShader) ((DefaultPointShader)dgs.getPointShader()).getTextShader();
     DefaultTextShader ets = (DefaultTextShader) ((DefaultLineShader)dgs.getLineShader()).getTextShader();
     DefaultTextShader fts = (DefaultTextShader) ((DefaultPolygonShader)dgs.getPolygonShader()).getTextShader();
     
@@ -104,17 +107,28 @@ public static void main(String[] args) {
     ets.setDiffuseColor(Color.orange);
     fts.setDiffuseColor(Color.green);
     
+    // scale the label
     Double scale = new Double(0.01);
-    pts.setScale(scale);
-    ets.setScale(scale);
+    pts.setScale(.75*scale);
+    ets.setScale(.5*scale);
     fts.setScale(scale);
     
+    // apply a translation to the position of the label in camera coordinates (-z away from camera)
     double[] offset = new double[]{-.1,0,0.3};
     pts.setOffset(offset);
     ets.setOffset(offset);
     fts.setOffset(offset);
     
-    dgs.setShowPoints(true);
+    // the alignment specifies a direction in which the label will be shifted in the 2d-plane of the billboard
+    pts.setAlignment(SwingConstants.NORTH_WEST);
+    ets.setAlignment(SwingConstants.NORTH_EAST);	// default
+    fts.setAlignment(SwingConstants.CENTER);
+    
+    // here you can specify any available Java font
+    Font f = new Font("Arial Bold", Font.ITALIC, 48);
+    pts.setFont(f);
+    ets.setFont(f);
+    fts.setFont(f);
     
  	JRViewer.display(cmp);
 	}
