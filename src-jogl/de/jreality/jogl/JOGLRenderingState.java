@@ -81,7 +81,7 @@ public class JOGLRenderingState {
 	public boolean useVertexColors=false;		// for line shaders a question
 	public boolean normals4d = false;
 	public boolean shadeGeometry = true;		// may allow shading to occur at scene graph component
-	public boolean oneTexture2DPerImage = true;	// Texture2DLoaderJOGL uses this to optimimize
+	public boolean oneTexture2DPerImage = false;	// the conservative choice: always render texture anew
 	
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
