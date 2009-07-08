@@ -119,7 +119,7 @@ public class JOGLRenderer   {
 		frontBanana = false,
 		texResident = true;
 	protected Viewer theViewer;
-	Camera theCamera;
+	protected Camera theCamera;
 
 	static {
 		MatrixBuilder.euclidean().translate(0,0,-.5).scale(1,1,.5).assignTo(frontZBuffer);
@@ -201,6 +201,7 @@ public class JOGLRenderer   {
 			thePeerAuxilliaryRoot = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(
 					auxiliaryRoot, null, this);
 
+		renderingState.oneTexture2DPerImage = topAp.isOneTexture2DPerImage();
 		renderingState.currentPath.clear();
 		renderingState.context  = new Graphics3D(theViewer.getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
@@ -508,6 +509,7 @@ public class JOGLRenderer   {
 			if (bgColors != null) theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, bg);
 			
 			context.release();
+			// restore the state of non-offscreen mode
 			theCamera = CameraUtility.getCamera(theViewer);
 			Dimension d = theViewer.getViewingComponentSize();
 			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());

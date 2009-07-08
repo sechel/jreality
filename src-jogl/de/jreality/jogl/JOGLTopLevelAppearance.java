@@ -11,6 +11,7 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.shader.CubeMap;
+import de.jreality.util.LoggingSystem;
 
 public class JOGLTopLevelAppearance {
 
@@ -19,7 +20,7 @@ public class JOGLTopLevelAppearance {
 	transient protected boolean renderSpherical = false,
 			frontBanana = true,
 			forceResidentTextures = true,
-			oneTexture2DPerImage = true;
+			oneTexture2DPerImage = false;
 	transient protected CubeMap skyboxCubemap;
 	public JOGLTopLevelAppearance(Appearance ap)	{
 		rootAp = ap;
@@ -46,7 +47,7 @@ public class JOGLTopLevelAppearance {
 		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
 		obj = rootAp.getAttribute(ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
 		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
-//		theLog.fine("one texture per image: "+oneTexture2DPerImage);
+		LoggingSystem.getLogger(this).info("one texture per image: "+oneTexture2DPerImage);
 		obj = rootAp.getAttribute(CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
 //		if (obj instanceof Boolean) {
 //			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
