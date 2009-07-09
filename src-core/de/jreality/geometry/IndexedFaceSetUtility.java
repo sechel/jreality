@@ -1109,7 +1109,7 @@ public class IndexedFaceSetUtility {
   		int total=0;
   		for (LinkedList<Integer> inds : table.values()) {
   			if (inds.size()==1) continue;
-  			if (inds.size() > 2) System.out.println(inds.size()+"-fold point");
+  			//if (inds.size() > 2) System.out.println(inds.size()+"-fold point");
   			LinkedList<Integer> indices = inds;
   			
   			while (indices.size() > 1) {
@@ -1147,12 +1147,12 @@ public class IndexedFaceSetUtility {
 	  				if (!written.add(i)) throw new RuntimeException();
 	  			}
 	  			if (Rn.innerProduct(n, target) < 0) throw new RuntimeException();
-	  			if (cnt>2) System.out.println("merged "+cnt);
+	  			//if (cnt>2) System.out.println("merged "+cnt);
 	  			indices=remaining;
   			}
   		}
   		//IndexedFaceSetUtility.assignSmoothVertexNormals(self, 5)
-  		System.out.println("merged "+total+" points");
+  		//System.out.println("merged "+total+" points");
   		ifs.setVertexAttributes(Attribute.NORMALS, new DoubleArrayArray.Array(na, na[0].length));
   	}
   	
