@@ -31,6 +31,7 @@ import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGri
 public class Avatar extends Plugin implements ChangeListener {
 
 	public static final double DEFAULT_SPEED = 4;
+	public static final double DEFAULT_JUMP_SPEED = 4;
 
 	private SceneGraphComponent avatar;
 	private SceneGraphComponent cameraComponent;
@@ -38,6 +39,7 @@ public class Avatar extends Plugin implements ChangeListener {
 	private Tool headTool;
 	private ShrinkPanel panel;
 	private JSliderVR speedSlider;
+	private JSliderVR jumpSpeedSlider;
 
 	public Avatar() {
 		panel = new ShrinkPanel("Avatar");
@@ -49,7 +51,7 @@ public class Avatar extends Plugin implements ChangeListener {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(2,2,2,2);
 		
-		JLabel gainLabel = new JLabel("Speed");
+		JLabel gainLabel = new JLabel("Navigation Speed");
 		c.weightx = 0.0;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 		panel.add(gainLabel, c);
@@ -63,6 +65,22 @@ public class Avatar extends Plugin implements ChangeListener {
 		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		panel.add(speedSlider, c);
+
+	
+		gainLabel = new JLabel("Jump Speed");
+		c.weightx = 0.0;
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		panel.add(gainLabel, c);
+		jumpSpeedSlider = new JSliderVR(0, 3000, (int) (100 * DEFAULT_JUMP_SPEED));
+		jumpSpeedSlider.setPreferredSize(new Dimension(200,26));
+		jumpSpeedSlider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				setJumpSpeed(getJumpSpeed());
+			}
+		});
+		c.weightx = 1.0;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		panel.add(jumpSpeedSlider, c);
 	}
 
 	private void createTools(RunningEnvironment environment) {
@@ -78,6 +96,9 @@ public class Avatar extends Plugin implements ChangeListener {
 		if (!portal && !portalRemote) {
 			headTool = new HeadTransformationTool();
 		}
+		
+		setNavigationSpeed(getNavigationSpeed());
+		setJumpSpeed(getJumpSpeed());
 	}
 	
 	private void updateComponents(Scene scene) {
@@ -125,6 +146,20 @@ public class Avatar extends Plugin implements ChangeListener {
 	}
 	
 
+	public double getJumpSpeed() {
+		double speed = 0.01*jumpSpeedSlider.getValue();
+		return speed;
+	}
+
+	public void setJumpSpeed(double jumpSpeed) {
+		int speed = (int)(100*jumpSpeed);
+		jumpSpeedSlider.setValue(speed);
+		if (shipNavigationTool != null) {
+			shipNavigationTool.setJumpSpeed(jumpSpeed);
+		}
+	}
+	
+
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
@@ -162,12 +197,14 @@ public class Avatar extends Plugin implements ChangeListener {
 	@Override
 	public void restoreStates(Controller c) throws Exception {
 		setNavigationSpeed(c.getProperty(getClass(), "navigationSpeed", getNavigationSpeed()));
+		setJumpSpeed(c.getProperty(getClass(), "jumpSpeed", getJumpSpeed()));
 		super.restoreStates(c);
 	}
 
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "navigationSpeed", getNavigationSpeed());
+		c.storeProperty(getClass(), "jumpSpeed", getJumpSpeed());
 		super.storeStates(c);
 	}
 
