@@ -43,6 +43,7 @@ package de.jreality.reader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -53,29 +54,77 @@ import de.jreality.util.Input;
  */
 public final class Readers {
 
+	static HashMap<String, Class<? extends SceneReader>> formatToReader = new HashMap<String, Class<? extends SceneReader>>(); 
+	static HashMap<String, String> endingToFormat = new HashMap<String, String>();
+	
+	static {
+		registerFileEndings("FE", "fe");
+		registerFileEndings("MESH", "mesh");
+		registerFileEndings("POLY", "top");
+		registerFileEndings("POV", "pov");
+		registerFileEndings("BSH", "bsh");
+		registerFileEndings("LAS", "las");
+		registerFileEndings("OBJ", "obj");
+		registerFileEndings("3DS", "3ds");
+		registerFileEndings("JVX", "jvx");
+		registerFileEndings("JRS", "jrs");
+		registerFileEndings("PTS", "pts");
+		registerFileEndings("STL", "stl");
+		registerFileEndings("MATHEMATICA", "m");
+		registerFileEndings("MSMS", "fe");
+		registerFileEndings("OOGL", ".off", ".quad", ".mesh", ".vect", ".bez", ".grp", ".oogl", ".list", ".inst");
+		registerFileEndings("VRML", "wrl", "vrml", ".iv");
+	}
+	
 	// avoid instanciating this class
 	private Readers() {}
-
+	
+	/**
+	 * Register a file ending for a format. Overwrites previous and default registrations.
+	 * 
+	 * @param fileEnding the file ending.
+	 * @param format the format.
+	 */
+	public static void registerFileEndings(String format, String... fileEndings) {
+		for (String fe : fileEndings)
+			endingToFormat.put(fe.toLowerCase(), format);
+	}
+	
+	/**
+	 * Register a reader class to read a certain format.
+	 * 
+	 * @param format the format
+	 * @param reader the reader class
+	 */
+	public static void registerReader(String format, Class<? extends SceneReader> reader) {
+		formatToReader.put(format, reader);
+	}
+	
 	/**
 	 * returns a reader for the given format if available - null if not.
 	 * @param format String representation for the format to read.
 	 * @return a matching reader or null.
 	 */
+	@SuppressWarnings("unchecked")
 	public static SceneReader findReader(String format)
 	{
+		Class<? extends SceneReader> clazz = formatToReader.get(format);
+		if (clazz == null) {
+			try
+			{
+				clazz = (Class<? extends SceneReader>) Class.forName("de.jreality.reader.Reader"+format);
+			} catch (ClassNotFoundException e)
+			{
+				return null;
+			}
+		}
 		Exception ex;
-		try
-		{
-			return (SceneReader)Class.forName("de.jreality.reader.Reader"+format).newInstance();
-		} catch (InstantiationException e)
-		{
+		try {
+			return clazz.newInstance();
+		} catch (InstantiationException e) {
+			ex = e;
+		} catch (IllegalAccessException e) {
 			ex=e;
-		} catch (IllegalAccessException e)
-		{
-			ex=e;
-		} catch (ClassNotFoundException e)
-		{
-			return null;
 		}
 		IllegalStateException rtex=new IllegalStateException("invalid reader");
 		rtex.initCause(ex);
@@ -141,8 +190,6 @@ public final class Readers {
 	 * @throws IOException
 	 */
 	public static SceneGraphComponent read(Input input) throws IOException {
-		//SceneGraphComponent sgc = null;
-		//String lc = input.toURL().toExternalForm();
 		String lc = input.getDescription();
 		String format = findFormat(lc);
 		if (format == null) throw new IllegalArgumentException("unknown file format");
@@ -152,51 +199,15 @@ public final class Readers {
 	}
 
 	public static String findFormat(String resourceName) {
-		String format=null;
-		String lcName = resourceName.toLowerCase();
-		if (lcName.endsWith(".fe")) {
-			format = "FE";
-		} else if (lcName.endsWith(".mesh")) {
-			format = "MESH";
-		} else if (lcName.endsWith(".top")) {
-			format = "POLY";
-		} else if (lcName.endsWith(".pov")) {
-			format = "POV";
-		} else if (lcName.endsWith(".bsh")) {
-			format = "BSH";
-		} else if (lcName.endsWith(".las")) {
-			format = "LAS";
-		} else if (lcName.endsWith(".obj")) {
-			format = "OBJ";
-		} else if (lcName.endsWith(".3ds")) {
-			format = "3DS";
-		} else if (lcName.endsWith(".jvx")) {
-			format = "JVX";
-		} else if (lcName.endsWith(".jrs")) {
-			format = "JRS";
-		} else if (lcName.endsWith(".pts")) {
-			format = "PTS";
-		} else if (lcName.endsWith(".stl")) {
-			format = "STL";
-		} else if (lcName.endsWith(".wrl") || lcName.endsWith(".vrml") || lcName.endsWith(".iv")) {
-			format = "VRML";
-		} else if (lcName.endsWith(".m")) {
-			format = "MATHEMATICA";
-		} else if (lcName.endsWith(".msms")) {
-			format = "MSMS";
-		} else  if (lcName.endsWith(".off") || lcName.endsWith(".quad") || lcName.endsWith(".mesh") || lcName.endsWith(".vect") || lcName.endsWith(".bez") 
-				|| lcName.endsWith(".grp") || lcName.endsWith(".oogl") || lcName.endsWith(".list") || lcName.endsWith(".inst")){
-			format = "OOGL";
+		String ending = getEnding(resourceName);
+		return endingToFormat.get(ending); //NULL if unknown format (needed for <jReality 3D data files> FileFilter)
+	}
 
-			// currently removed (licensing unclear)
-
-//			} else if (lcName.endsWith(".bsp")) {
-//			format = "BSP";
-//			} else if (lcName.endsWith(".ase")) {
-//			format = "ASE";
-		}
-
-		return format;  //NULL if unknown format (needed for <jReality 3D data files> FileFilter)
+	private static String getEnding(String resource) {
+		String resourceName = resource.toLowerCase();
+		int idx = resourceName.lastIndexOf('.');
+		if (idx == -1) return "";
+		return resourceName.substring(idx+1);
 	}
 
 }
