@@ -71,7 +71,7 @@ public class ConstructPeerGraphVisitor extends SceneGraphVisitor	{
 		} else {
 			try {
 				try {
-					peer = peerClass.getConstructor(null).newInstance(null);
+					peer = peerClass.getConstructor().newInstance();
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				} catch (SecurityException e) {

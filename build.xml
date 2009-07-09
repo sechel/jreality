@@ -35,8 +35,14 @@
 	<property name="lib" location="lib" />
 	<property name="dist" location="dist" />
 
+	<property name="jni-linux32" location="jni/linux32" />
+	<property name="jni-linux64" location="jni/linux64" />
+	<property name="jni-macosx" location="jni/macosx" />
+	<property name="jni-win32" location="jni/win32" />
+	<property name="jni-win64" location="jni/win64" />
+	
 	<property environment="env"/>
-
+	
 	<path id="backends-share.classpath">
 		<fileset dir="dist">
 			<include name="jReality-core.jar"/>
@@ -517,7 +523,7 @@
 	<target name="dist" depends="core,audio,io,jogl,soft,renderman,portal,gpgpu,examples,sunflow,plugin,tutorial" description="generate the distribution">
 	</target>
 
-	<target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial" description="generate a big jar that contains all classes needed for the tutorial">
+	<target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial, release-jni" description="generate a big jar that contains all classes needed for the tutorial">
 		<copy file="${lib}/vrData.jar" todir="release" />
 	</target>
 
@@ -617,30 +623,8 @@
 		<mkdir dir="release" />
 		<mkdir dir="release/tmp/src" />
 		<copy todir="release/tmp/src">
-			<fileset dir="${core}" />
-			<fileset dir="${audio}" />
-			<fileset dir="${tools}" />
-			<fileset dir="${backends-share}" />
-			<fileset dir="${io}" />
-			<fileset dir="${ui}" />
-
-			<fileset dir="${soft}" />
-			<fileset dir="${soft-new}" />
-			<fileset dir="${renderman}" />
-			<fileset dir="${sunflow}" />
-			<fileset dir="${jogl}" />
-			<fileset dir="${plugin}" />
-
-			<fileset dir="${proxies}" />
-			<fileset dir="${portal}" />
-
-			<!--fileset dir="${swt}" /-->
-			<fileset dir="${gpgpu}" />
-			<fileset dir="${swing}" />
-			<fileset dir="${vr}" />
-
-			<fileset dir="${examples}">
-				<exclude name="**/SwtExample*"/>
+			<fileset dir="." excludesfile="excludes.txt">
+				<include name="src-*/**/*" />
 			</fileset>
 		</copy>
 		<zip destfile="release/jReality-src.zip" basedir="release/tmp"/>
@@ -666,7 +650,7 @@
 
 	</target>
 
-	<target name="release-3rdparty" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
+	<target name="release-3rdparty" depends="dist" description="zip all jars">
 		<mkdir dir="release" />
 		<mkdir dir="release/tmp/lib" />
 		<copy file="${lib}/antlr.jar" todir="release/tmp/lib" />
@@ -693,13 +677,76 @@
 		<delete dir="release/tmp"/>
 	</target>
 
+	
+	<target name="release-jni-linux32" depends="dist" description="zip all jni libs">
+		<mkdir dir="release" />
+		<mkdir dir="release/tmp/jni" />
+		<copy todir="release/tmp/jni">
+			<fileset dir="${jni-linux32}" />
+		</copy>
+		<zip destfile="release/jReality-jni-linux32.zip" >
+			<fileset dir="release/tmp" />
+		</zip>
+		<delete dir="release/tmp"/>
+	</target>
+
+	<target name="release-jni-linux64" depends="dist" description="zip all jni libs">
+		<mkdir dir="release" />
+		<mkdir dir="release/tmp/jni" />
+		<copy todir="release/tmp/jni">
+			<fileset dir="${jni-linux64}" />
+		</copy>
+		<zip destfile="release/jReality-jni-linux64.zip" >
+			<fileset dir="release/tmp" />
+		</zip>
+		<delete dir="release/tmp"/>
+	</target>
+	
+	<target name="release-jni-macosx" depends="dist" description="zip all jni libs">
+		<mkdir dir="release" />
+		<mkdir dir="release/tmp/jni" />
+		<copy todir="release/tmp/jni">
+			<fileset dir="${jni-macosx}" />
+		</copy>
+		<zip destfile="release/jReality-jni-macosx.zip" >
+			<fileset dir="release/tmp" />
+		</zip>
+		<delete dir="release/tmp"/>
+	</target>
+
+	<target name="release-jni-win32" depends="dist" description="zip all jni libs">
+		<mkdir dir="release" />
+		<mkdir dir="release/tmp/jni" />
+		<copy todir="release/tmp/jni">
+			<fileset dir="${jni-win32}" />
+		</copy>
+		<zip destfile="release/jReality-jni-win32.zip" >
+			<fileset dir="release/tmp" />
+		</zip>
+		<delete dir="release/tmp"/>
+	</target>
+
+	<target name="release-jni-win64" depends="dist" description="zip all jni libs">
+		<mkdir dir="release" />
+		<mkdir dir="release/tmp/jni" />
+		<copy todir="release/tmp/jni">
+			<fileset dir="${jni-win64}" />
+		</copy>
+		<zip destfile="release/jReality-jni-win64.zip" >
+			<fileset dir="release/tmp" />
+		</zip>
+		<delete dir="release/tmp"/>
+	</target>
+
+	<target name="release-jni" depends="release-jni-linux32,release-jni-linux64,release-jni-macosx,release-jni-win32,release-jni-win64" />
+
 	<target name="release-tutorial" depends="dist, javadoc" description="generate a big jar that contains all classes needed for the tutorial">
 		<mkdir dir="release" />
-		<mkdir dir="release/tmp/tutorial" />
-		<copy todir="release/tmp/tutorial">
+		<mkdir dir="release/tmp/src-tutorial" />
+		<copy todir="release/tmp/src-tutorial">
 			<fileset dir="src-tutorial" />
 		</copy>
-		<zip destfile="release/jReality-tutorial.zip" basedir="release/tmp"/>
+		<zip destfile="release/jReality-tutorial-src.zip" basedir="release/tmp"/>
 		<delete dir="release/tmp"/>
 	</target>
 
