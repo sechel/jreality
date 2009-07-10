@@ -63,7 +63,7 @@ public class Viewer extends AbstractViewer {
 		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
 		initializeFrom(root, camPath);	
 	}
-@Override
+	@Override
 	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
 		setCameraPath(p);
