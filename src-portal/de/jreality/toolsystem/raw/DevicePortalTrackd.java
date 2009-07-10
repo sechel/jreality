@@ -10,11 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JRadioButton;
 
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.toolsystem.ToolEvent;
 
 public class DevicePortalTrackd extends DeviceTrackd {
 	
@@ -42,10 +38,9 @@ public class DevicePortalTrackd extends DeviceTrackd {
 		f.getContentPane().add(b1);
 		f.getContentPane().add(b2);
 		f.pack();
-		f.show();
+		f.setVisible(true);
 	}
 	
-	@SuppressWarnings("serial")
 	protected void fixHead() {
 		disableSensor(headSensorID);
 	}
@@ -65,7 +60,6 @@ public class DevicePortalTrackd extends DeviceTrackd {
 		m.setEntry(0, 3, x*0.254);
 		m.setEntry(1, 3, y*0.254+0.25);
 		m.setEntry(2, 3, z*0.254);
-		
 	}
 	
 	@Override
