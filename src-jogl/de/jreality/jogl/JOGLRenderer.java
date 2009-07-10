@@ -88,6 +88,7 @@ public class JOGLRenderer   {
 	transient protected JOGLLightHelper lightHelper;
 	transient protected JOGLTopLevelAppearance topAp;
 	transient protected JOGLOffscreenRenderer offscreenRenderer;
+	transient protected JOGLFBOViewer fboViewer;
 	transient protected JOGLPerformanceMeter perfMeter;
 	transient protected GeometryGoBetween geometryGB;
 
@@ -107,7 +108,8 @@ public class JOGLRenderer   {
 	// miscellaneous fields and methods
 	transient protected int clearColorBits;
 	// pick-related stuff
-	transient protected boolean offscreenMode = false;
+	transient protected boolean offscreenMode = false,
+		fboMode = false;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
 	transient public static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
 
@@ -192,7 +194,7 @@ public class JOGLRenderer   {
 	}
 	public void render() {
 		if (disposed) return;
-		Texture2DLoaderJOGL.postRender(globalGL);
+		Texture2DLoaderJOGL.clearAnimatedTextureTable(globalGL);
 		if (thePeerRoot == null || theViewer.getSceneRoot() != thePeerRoot.getOriginalComponent())	{
 			setSceneRoot(theViewer.getSceneRoot());
 			thePeerRoot = ConstructPeerGraphVisitor.constructPeerForSceneGraphComponent(theRoot, null, this); 
@@ -406,6 +408,7 @@ public class JOGLRenderer   {
 	protected int[] whichTile = new int[2];
 	
 	public void display(GL gl) {
+//		System.err.println("display "+width+" "+height);
 		globalGL=gl;
 		perfMeter.beginFrame();
 		renderingState.initializeGLState();
@@ -514,7 +517,13 @@ public class JOGLRenderer   {
 			Dimension d = theViewer.getViewingComponentSize();
 			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
 			offscreenMode = false;
-		} else if (theCamera.isStereo())		{
+		} else if (fboMode)	{
+//			System.err.println("rendering fbo");
+			fboViewer.preRender(gl);
+			render();
+			fboViewer.postRender(gl);
+		}
+		else if (theCamera.isStereo())		{
 			setupRightEye(width, height);
 			renderingState.currentEye = whichEye;
 			render();

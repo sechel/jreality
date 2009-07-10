@@ -359,6 +359,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	private boolean pendingUpdate;
 	
 	public void display(GLAutoDrawable arg0) {
+		if (fbo != null) fbo.render(arg0.getGL());
 		renderer.display(arg0);
 	}
 
@@ -394,7 +395,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 			} catch(InterruptedException ex) {}
 		}
 	}
-  
+	public JOGLFBOViewer fbo;
 	public void run() {
 		if (!EventQueue.isDispatchThread())
 			throw new IllegalStateException();
