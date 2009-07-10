@@ -477,14 +477,23 @@ public class SceneGraphComponent extends SceneGraphNode {
     }
   }
 
+  /**
+   *
+   * Add a tool to this component. When the tool was added before, nothing happens.
+   *
+   * @param tool The tool to add.
+   */
   public void addTool(Tool tool) {
     startWriter();
-    if(tools == Collections.EMPTY_LIST)
-    	tools= new ArrayList<Tool>();
-    if (tools.contains(tool)) throw new IllegalStateException("duplicate tool");
-    tools.add(tool);
-    fireToolAdded(tool);
-    finishWriter();
+    try {
+	    if(tools == Collections.EMPTY_LIST)
+	    	tools= new ArrayList<Tool>();
+	    if (tools.contains(tool)) return;//throw new IllegalStateException("duplicate tool");
+	    tools.add(tool);
+	    fireToolAdded(tool);
+    } finally {
+	    finishWriter();
+    }
   }
 
   public boolean removeTool(Tool tool) {
