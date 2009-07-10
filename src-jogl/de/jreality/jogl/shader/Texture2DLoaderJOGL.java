@@ -129,7 +129,7 @@ public class Texture2DLoaderJOGL {
   		return ht;
   }
 
-    public static void postRender(GL gl) {
+    public static void clearAnimatedTextureTable(GL gl) {
     	if (animatedTextures.get(gl) == null)	{
     		animatedTextures.put(gl, new Vector<ImageData>());
     		return;
@@ -139,11 +139,16 @@ public class Texture2DLoaderJOGL {
     }
     /******************* new Textures *******************/
     public static void render(GL gl, Texture2D tex) {
-      render(gl, tex, true);
+    	JOGLTexture2D jogltex= new JOGLTexture2D(tex);
+      render(gl, jogltex, false);
     }
+
+    public static void render(GL gl, JOGLTexture2D tex) {
+        render(gl, tex, false);
+      }
     static Texture2D lastRendered = null;
     static boolean haveAutoMipmapGeneration, haveCheckedAutoMipmapGeneration;
-    public static void render(GL gl, Texture2D tex, boolean oneTexturePerImage) {
+    public static void render(GL gl, JOGLTexture2D tex, boolean oneTexturePerImage) {
 //    	System.err.println("rendering texture length "+tex.getImage().getByteArray().length);
  
       	ImageData image = tex.getImage();
@@ -152,11 +157,20 @@ public class Texture2DLoaderJOGL {
         // can't do this statically at start-up since we need a GL context to inquire
 		checkForTextureExtensions(gl);
     	boolean first = true;
+    	boolean fbo = false;
     	boolean replace = false;
     
     	WeakHashMap<ImageData, Integer> ht = getTextureTableForGL(gl);
 
-    	Integer texid = ht.get(image);
+    	Integer texid = null;
+    	// hack for fbo generated texture id's
+    	if (tex.getTexID() != -1) {
+    		texid = tex.getTexID();
+    		fbo = true;
+//    		System.err.println("Got texid "+texid);
+    	}
+    	else texid = ht.get(image);
+ //   	System.err.println("texid = "+texid);
     	if (texid != null) {
     		first = false;
     	} else {
@@ -220,32 +234,37 @@ public class Texture2DLoaderJOGL {
 
 //		 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
 		 	    DataBuffer dataBuffer = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
-		 	    Buffer buffer;
-		 	    if (dataBuffer instanceof DataBufferByte) {
-		 	      buffer =  ByteBuffer.wrap(((DataBufferByte) dataBuffer).getData());
-		 	    } else if (dataBuffer instanceof DataBufferDouble) {
-		 	      throw new RuntimeException("DataBufferDouble rasters not supported by OpenGL");
-		 	    } else if (dataBuffer instanceof DataBufferFloat) {
-		 	      buffer =  FloatBuffer.wrap(((DataBufferFloat) dataBuffer).getData());
-		 	    } else if (dataBuffer instanceof DataBufferInt) {
-		 	      buffer =  IntBuffer.wrap(((DataBufferInt) dataBuffer).getData());
-		 	    } else if (dataBuffer instanceof DataBufferShort) {
-		 	      buffer =  ShortBuffer.wrap(((DataBufferShort) dataBuffer).getData());
-		 	    } else if (dataBuffer instanceof DataBufferUShort) {
-		 	      buffer =  ShortBuffer.wrap(((DataBufferUShort) dataBuffer).getData());
-		 	    } else {
-		 	      throw new RuntimeException("Unexpected DataBuffer type?");
+		 	    Buffer buffer = null;
+		 	    if ( tex.getTexID() == -1 ) {
+			 	    if (dataBuffer instanceof DataBufferByte) {
+				 	      buffer =  ByteBuffer.wrap(((DataBufferByte) dataBuffer).getData());
+				 	    } else if (dataBuffer instanceof DataBufferDouble) {
+				 	      throw new RuntimeException("DataBufferDouble rasters not supported by OpenGL");
+				 	    } else if (dataBuffer instanceof DataBufferFloat) {
+				 	      buffer =  FloatBuffer.wrap(((DataBufferFloat) dataBuffer).getData());
+				 	    } else if (dataBuffer instanceof DataBufferInt) {
+				 	      buffer =  IntBuffer.wrap(((DataBufferInt) dataBuffer).getData());
+				 	    } else if (dataBuffer instanceof DataBufferShort) {
+				 	      buffer =  ShortBuffer.wrap(((DataBufferShort) dataBuffer).getData());
+				 	    } else if (dataBuffer instanceof DataBufferUShort) {
+				 	      buffer =  ShortBuffer.wrap(((DataBufferUShort) dataBuffer).getData());
+				 	    } else {
+				 	      throw new RuntimeException("Unexpected DataBuffer type?");
+				 	    }		 	    	
+			        gl.glTexSubImage2D(GL.GL_TEXTURE_2D, 0,
+	                           0, 0, width, height,
+	                           srcPixelFormat, GL.GL_UNSIGNED_BYTE,
+	                           buffer);
+//         gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
+//                 width, height, 0, srcPixelFormat,
+//                 GL.GL_UNSIGNED_BYTE, buffer);
 		 	    }
-		        gl.glTexSubImage2D(GL.GL_TEXTURE_2D, 0,
-		                           0, 0, width, height,
-		                           srcPixelFormat, GL.GL_UNSIGNED_BYTE,
-		                           buffer);
 
 		    	animatedTextures.get(gl).add(image);	    		
 	    	}
 	    }
 	    
-    if (first ||  !oneTexturePerImage || lastRendered  == null  || image != lastRendered.getImage()) {
+    if ( first ||  !oneTexturePerImage || lastRendered  == null  || image != lastRendered.getImage()) {
 //    	System.err.println("rerendering texture id:" + texid);
 	    	// calls to glTexParameter get saved and restored by "bind()" so should be handled separately
 	    lastRendered = tex;
@@ -281,7 +300,7 @@ public class Texture2DLoaderJOGL {
 	    }    
 	     // create either a series of mipmaps of a single texture image based on
 	    // what's loaded
-	    if (first || replace) {
+	    if (!fbo && (first || replace)) {
 	    	byte[] data = image.getByteArray();
 	    	boolean mipmapped = tex.getMipmapMode();
 	        if (mipmapped) {

@@ -42,6 +42,7 @@ public class JOGLTexture2D implements Texture2D {
 	protected Boolean animated, mipmapMode;
 	protected Runnable runnable;
 	protected Integer pixelFormat;
+	protected Integer texID = -1;
 	public JOGLTexture2D(Texture2D t)	{
 		super();
 		proxy = t;
@@ -76,6 +77,11 @@ public class JOGLTexture2D implements Texture2D {
 		mipmapMode = proxy.getMipmapMode();
 		runnable = proxy.getRunnable();
 		pixelFormat = proxy.getPixelFormat();
+		if (source0Alpha == 23) {
+			if (source1Alpha != Texture2D.SOURCE1_ALPHA_DEFAULT)
+				texID = source1Alpha;
+			System.err.println("Got texid = "+texID);
+		}
 	}
 	
 	public Integer getApplyMode() {
@@ -278,6 +284,14 @@ public class JOGLTexture2D implements Texture2D {
 
 	public void setPixelFormat(Integer i) {
 		pixelFormat = i;
+	}
+
+	public Integer getTexID() {
+		return texID;
+	}
+
+	public void setTexID(Integer texID) {
+		this.texID = texID;
 	}
 
 }
