@@ -72,7 +72,7 @@ public final class Readers {
 		registerFileEndings("STL", "stl");
 		registerFileEndings("MATHEMATICA", "m");
 		registerFileEndings("MSMS", "fe");
-		registerFileEndings("OOGL", ".off", ".quad", ".mesh", ".vect", ".bez", ".grp", ".oogl", ".list", ".inst");
+		registerFileEndings("OOGL", "off", "quad", "mesh", "vect", "bez", "grp", "oogl", "list", "inst");
 		registerFileEndings("VRML", "wrl", "vrml", ".iv");
 	}
 	
