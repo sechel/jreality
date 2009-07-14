@@ -81,6 +81,7 @@ float distance4(in vec4 a, in vec4 b)    {
     		return acosh(-d);
     else return abs(acos(d));
 }
+
 // project the vector T into the hyperbolic tangent space of P
 void projectToTangent(in vec4 P, inout vec4 T) {
 		T = (dot4(P,P) * T - dot4(P,T) * P);
@@ -89,14 +90,12 @@ void projectToTangent(in vec4 P, inout vec4 T) {
 // find the representative of the given point with length +/- 1
 void normalize4(inout vec4 P)	{
     P = (1.0/length4(P))*P;
-//    if (P.w < 0.0) P = -P;
- }
+}
  
 // adjust T to be a unit tangent vector to the point P
 void normalize4(in vec4 P, inout vec4 T)	{
 	projectToTangent(P,T);
 	normalize4(T);
-//	if (P.w * T.w < 0.0) T = -T;
 }
 
 void dehomogenize(inout vec4 P4)	 {
@@ -180,7 +179,7 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 
     color = clamp( color, 0.0, 1.0 );
     if (fogEnabled) color = mix( (gl_Fog.color), color, fog);
-    color.a = 1-transparency;
+    color.a = 1.0-transparency;
     if (color.a != 0.0 && !transparencyEnabled) color.a = 1.0;
    return color;
 }
@@ -196,15 +195,12 @@ void main (void)
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
     if (transformedNormal.w * transformedNormal.z > 0.0) 
-//    if (transformedNormal.w < 0.0) 
     	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
 //    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
 //    transformedNormal = -transformedNormal;
     gl_FrontColor = gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
-//    if (dot4(ecPosition, ecPosition) > 0.0) gl_FrontColor = vec4(1,0,0,1);
-//     ftexgen(transformedNormal, ecPosition);
      if (poincareModel)	{
         // p4 is in the coordinate system of H3
       	vec4 p4 =  cam2H * ecPosition;
