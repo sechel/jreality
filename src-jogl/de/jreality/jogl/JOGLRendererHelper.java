@@ -418,20 +418,8 @@ public class JOGLRendererHelper {
 		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 		DataList lightMapCoords = sg.getVertexAttributes(Attribute
 				.attributeForName("lightmap coordinates"));
-		Texture2D[] textures = (Texture2D[]) sg.getGeometryAttributes("textureUnits");
-		JOGLTexture2D[] jtextures = null;
-		if (textures != null) {
-			jtextures = new JOGLTexture2D[textures.length];
-			for (int i = 0; i<textures.length; ++i) {
-				jtextures[i] = new JOGLTexture2D(textures[i]);
-			}
-//			System.err.println("blend = "+jtextures[0].getBlendColor().getAlpha());
-		}
 		
-		DataList textureUnitsDL = sg.getFaceAttributes(Attribute.attributeForName("textureUnits"));
-		int[] textureUnits = null;
-		if (textures != null && textureUnitsDL != null) textureUnits = textureUnitsDL.toIntArray(null);
-		int textureCount = (textureUnits != null) ? 1 : jr.renderingState.texUnitCount;
+		int textureCount = jr.renderingState.texUnitCount;
 		
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
@@ -617,11 +605,6 @@ public class JOGLRendererHelper {
 						.toIntArray();
 				final int nf = tf.getLength();
 				// hack to allow texture per face!
-				if (textures != null)	{
-					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
-			      	gl.glEnable(GL.GL_TEXTURE_2D);
-					Texture2DLoaderJOGL.render(gl, jtextures[i]);
-				}
 				gl.glBegin(GL.GL_POLYGON);
 				for (int j = 0; j < nf; ++j) {
 					int k = tf.getValueAt(j);
@@ -648,7 +631,7 @@ public class JOGLRendererHelper {
 					}
 					for (int nn = 0; nn<textureCount; ++nn)	{
 //						if (nn != textureUnits[i]) continue;
-						int texunit = GL.GL_TEXTURE0+((textureUnitsDL != null) ? textureUnits[i] : nn);
+						int texunit = GL.GL_TEXTURE0+nn;
 						if (nn == 0 && lightMapCoords != null) {
 							da = lightMapCoords.item(k).toDoubleArray();
 						}
@@ -673,10 +656,6 @@ public class JOGLRendererHelper {
 								.getValueAt(2), da.getValueAt(3));
 				}
 				gl.glEnd();
-				if (textures != null)	{	
-					gl.glActiveTexture(GL.GL_TEXTURE0+textureUnits[i]);
-			      	gl.glDisable(GL.GL_TEXTURE_2D);
-				}
 			}
 		}
 	}
