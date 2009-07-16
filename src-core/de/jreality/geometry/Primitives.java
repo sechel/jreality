@@ -354,7 +354,9 @@ public class Primitives {
 		int n = center.length;
 		double[][] pts = new double[1][n];
 		System.arraycopy(center,0,pts[0],0,n);
+		double[][] texc = {{0,0}};
 		ps.setVertexCountAndAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(n).createReadOnly(pts));
+		ps.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(2).createReadOnly(texc));
 		return ps;
 	}
 
