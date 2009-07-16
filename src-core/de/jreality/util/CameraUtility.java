@@ -128,15 +128,15 @@ public class CameraUtility {
 	 * @param viewer
 	 */
 	
-	public static void encompass(Viewer v) {
+	public static void encompassNew(Viewer v) {
 		SceneGraphPath avatarPath = v.getCameraPath().popNew();
 		if (avatarPath.getLength() > 1) avatarPath.pop();
 		SceneGraphPath toBound = new SceneGraphPath(v.getSceneRoot());
-		CameraUtility.encompass(avatarPath, toBound, v.getCameraPath(), 1.2, SceneGraphUtility.getMetric(v.getCameraPath()));
+		CameraUtility.encompass(avatarPath, toBound, v.getCameraPath(), 1.1, SceneGraphUtility.getMetric(v.getCameraPath()));
 	}
 
 
-	public static void encompassOld( de.jreality.scene.Viewer viewer) {
+	public static void encompass( de.jreality.scene.Viewer viewer) {
 		// remove camera from the sceneRoot and encompass the result
 		SceneGraphPath cp = viewer.getCameraPath();
 		if (cp == null) throw new IllegalStateException("camerapath == null");
