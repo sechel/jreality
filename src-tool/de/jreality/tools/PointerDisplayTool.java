@@ -74,7 +74,7 @@ public class PointerDisplayTool extends AbstractTool {
 		cmp.getAppearance().setAttribute("showLines", true);
 		cmp.getAppearance().setAttribute("lineShader.tubeDraw", true);
 		cmp.getAppearance().setAttribute("lineShader.tubeRadius", radius);
-		cmp.getAppearance().setAttribute(CommonAttributes.PICKABLE, false);
+		cmp.setPickable(false);
 		cmp.setTransformation(new Transformation());	
 		
 		setHighlight(false);
