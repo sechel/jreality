@@ -2,6 +2,8 @@ package de.jreality.plugin;
 
 import static de.jreality.util.CameraUtility.encompass;
 
+import java.awt.Component;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -38,6 +40,7 @@ import de.jreality.plugin.menu.DisplayOptions;
 import de.jreality.plugin.menu.ExportMenu;
 import de.jreality.plugin.scene.Avatar;
 import de.jreality.plugin.scene.Lights;
+import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.plugin.scene.Sky;
 import de.jreality.plugin.scene.Terrain;
 import de.jreality.plugin.scene.VRExamples;
@@ -50,6 +53,7 @@ import de.jreality.util.Secure;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
 
@@ -452,5 +456,32 @@ public class JRViewer {
 		}
 		v.startup();
 	}
+
+	public static SceneShrinkPanel createSceneShrinkPanel( final Component c, final String title) {
+		SceneShrinkPanel p = new SceneShrinkPanel() {
+			
+			{
+				GridLayout gl = new GridLayout();
+				gl.setRows(1);
+				setInitialPosition(SHRINKER_LEFT);
+				shrinkPanel.setName(title);
+				shrinkPanel.setLayout(gl);
+				shrinkPanel.add(c);
+			}
+			
+			@Override
+			public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
+				return View.class;
+			}
+
+			@Override
+			public PluginInfo getPluginInfo() {
+				return new PluginInfo(title);
+			}
+		};
+		return p;
+
+	}
+
 
 }
