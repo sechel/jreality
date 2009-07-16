@@ -344,6 +344,7 @@ public class IndexedFaceSetUtility {
 			ifs2.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array().createReadOnly(newc));
 		}
 		IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs2);
+		IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs2);
 		return ifs2;
 	}
 	private static double[][] getMinMax(int[] indices, double[][] array2d)	{
@@ -1109,7 +1110,7 @@ public class IndexedFaceSetUtility {
   		int total=0;
   		for (LinkedList<Integer> inds : table.values()) {
   			if (inds.size()==1) continue;
-  			//if (inds.size() > 2) System.out.println(inds.size()+"-fold point");
+  			if (inds.size() > 2) System.out.println(inds.size()+"-fold point");
   			LinkedList<Integer> indices = inds;
   			
   			while (indices.size() > 1) {
