@@ -34,6 +34,10 @@ public class Avatar extends Plugin implements ChangeListener {
 	public static final double DEFAULT_JUMP_SPEED = 4;
 
 	private SceneGraphComponent avatar;
+	public SceneGraphComponent getAvatar() {
+		return avatar;
+	}
+
 	private SceneGraphComponent cameraComponent;
 	private ShipNavigationTool shipNavigationTool;
 	private Tool headTool;
