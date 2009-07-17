@@ -91,7 +91,7 @@ public class ToolSystemPlugin extends Plugin implements ChangeListener {
 		}
 		ViewerSwitch viewerSwitch = view.getViewer();
 		RenderTrigger trigger = view.getRenderTrigger();
-		if (synchRender) {
+		if (trigger != null && synchRender) {
 			trigger.setAsync(false);
 		}
 		toolSystem = createToolSystem(viewerSwitch, synchRender ? trigger : null);
