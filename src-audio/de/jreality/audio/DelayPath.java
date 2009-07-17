@@ -58,11 +58,14 @@ public class DelayPath implements SoundPath {
 	private Queue<Matrix> sourcePositions = new LinkedList<Matrix>();
 	private Matrix currentMicPosition, currentSourcePosition;
 
-	private LowPassFilter xFilter, yFilter, zFilter;
-	private float xTarget, yTarget, zTarget;
-	private float xCurrent, yCurrent, zCurrent;
+	private LowPassFilter rFilter, thetaFilter, phiFilter;
+	private float rTarget, thetaTarget, phiTarget;
+	private float rCurrent, thetaCurrent, phiCurrent;
 	private float xMic, yMic, zMic;
 
+	private Matrix auxiliaryMatrix = new Matrix();
+	private double[] auxiliaryArray = new double[3];
+	
 	private float[] currentFrame = null;
 	private int currentLength = 0;
 	private int currentIndex = 0;
@@ -80,9 +83,9 @@ public class DelayPath implements SoundPath {
 		preProcessor.initialize(reader);
 		interpolation = factory.newInterpolation();
 
-		xFilter = new LowPassFilter(sampleRate);
-		yFilter = new LowPassFilter(sampleRate);
-		zFilter = new LowPassFilter(sampleRate);
+		rFilter = new LowPassFilter(sampleRate);
+		thetaFilter = new LowPassFilter(sampleRate);
+		phiFilter = new LowPassFilter(sampleRate);
 
 		updateParameters();
 	}
@@ -131,10 +134,10 @@ public class DelayPath implements SoundPath {
 
 	private void updateParameters() {
 		gamma = (speedOfSound>0f) ? sampleRate/speedOfSound : 0f; // samples per distance
-		if (updateCutoff!=xFilter.getCutOff()) {
-			xFilter.setCutOff(updateCutoff);
-			yFilter.setCutOff(updateCutoff);
-			zFilter.setCutOff(updateCutoff);
+		if (updateCutoff!=rFilter.getCutOff()) {
+			rFilter.setCutOff(updateCutoff);
+			thetaFilter.setCutOff(updateCutoff);
+			phiFilter.setCutOff(updateCutoff);
 		}
 	}
 	
@@ -195,41 +198,53 @@ public class DelayPath implements SoundPath {
 			currentLength = size;
 			currentFrame = frame;
 
-			xCurrent = xFilter.initialize(xTarget);
-			yCurrent = yFilter.initialize(yTarget);
-			zCurrent = zFilter.initialize(zTarget);
+			rCurrent = rFilter.initialize(rTarget);
+			thetaCurrent = thetaFilter.initialize(thetaTarget);
+			phiCurrent = phiFilter.initialize(phiTarget);
 		}
 	}
-
-	private Matrix auxiliaryMatrix = new Matrix();
-	private double[] auxiliaryArray = new double[3];
 
 	private void updateTarget() {
 		auxiliaryMatrix.assignFrom(sourcePositions.isEmpty() ? currentSourcePosition : sourcePositions.element());
 		auxiliaryMatrix.multiplyOnLeft(currentMicPosition);
 		
-		inverseExponentialMap(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
-		xTarget = (float) auxiliaryArray[0];
-		yTarget = (float) auxiliaryArray[1];
-		zTarget = (float) auxiliaryArray[2];
+		homogeneousToSpherical(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
+		rTarget = (float) auxiliaryArray[0];
+		thetaTarget = (float) auxiliaryArray[1];
+		phiTarget = (float) auxiliaryArray[2];
 
+		while (thetaTarget-thetaCurrent>Math.PI) thetaCurrent += 2*Math.PI;
+		while (thetaCurrent-thetaTarget>Math.PI) thetaCurrent -= 2*Math.PI;
+		thetaFilter.initialize(thetaCurrent);
+		
 		auxiliaryMatrix.invert();
 
-		inverseExponentialMap(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
+		homogeneousToSpherical(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
+		sphericalToRectangular(auxiliaryArray);
 		xMic = (float) auxiliaryArray[0];
 		yMic = (float) auxiliaryArray[1];
 		zMic = (float) auxiliaryArray[2];
 	}
 	
-	private static void inverseExponentialMap(double[] dst, double[] src, int metric) {
-		double q = Pn.distanceBetween(P3.originP3, src, metric);
-		double d = src[0]*src[0]+src[1]*src[1]+src[2]*src[2];
-		if (d>0) {
-			q /= Math.sqrt(d);
-		}
-		for(int i = 0; i<3; i++) {
-			dst[i] = src[i]*q;
-		}
+	private static void homogeneousToSpherical(double[] dst, double[] src, int metric) {
+		double x = src[0];
+		double y = src[1];
+		double z = src[2];
+		dst[0] = Pn.distanceBetween(P3.originP3, src, metric);
+		dst[1] = Math.atan2(x, z);
+		dst[2] = Math.atan2(y, Math.sqrt(x*x+z*z));
+	}
+	
+	private static void sphericalToRectangular(double[] p) {
+		double r = p[0];
+		double theta = p[1];
+		double phi = p[2];
+		
+		double cp = r*Math.cos(phi);
+		double sp = r*Math.sin(phi);
+		p[2] = (float) (cp*Math.cos(theta));
+		p[0] = (float) (cp*Math.sin(theta));
+		p[1] = (float) sp;
 	}
 
 	private void advanceFrame() {
@@ -249,8 +264,7 @@ public class DelayPath implements SoundPath {
 
 	private void encodeFrame(SoundEncoder enc, int frameSize, float[] directionlessBuffer) {
 		for(int j=0; j<frameSize; j++) {
-			float distance = (float) Math.sqrt(xCurrent*xCurrent+yCurrent*yCurrent+zCurrent*zCurrent);
-			float time = (relativeTime++)-gamma*distance;
+			float time = (relativeTime++)-gamma*rCurrent;
 			int targetIndex = (int) time;
 			float fractionalTime = time-targetIndex;
 
@@ -262,18 +276,25 @@ public class DelayPath implements SoundPath {
 					advanceFrame();
 				}
 				float newSample = (currentFrame!=null) ? currentFrame[currentIndex]*gain : 0f;
-				interpolation.put(directionlessCue.nextValue(newSample, distance, xMic, yMic, zMic));
+				newSample = directionlessCue.nextValue(newSample, rCurrent, xMic, yMic, zMic);
+				interpolation.put(newSample);
 			}
 
 			float v = interpolation.get(fractionalTime);
-			enc.encodeSample(distanceCue.nextValue(v, distance, xMic, yMic, zMic), j, xCurrent, yCurrent, zCurrent);
+			v = distanceCue.nextValue(v, rCurrent, xMic, yMic, zMic);
+			
+			auxiliaryArray[0] = 1f;  // we want a unit vector indicating the direction
+			auxiliaryArray[1] = thetaCurrent;
+			auxiliaryArray[2] = phiCurrent;
+			sphericalToRectangular(auxiliaryArray);
+			enc.encodeSample(v, j, rCurrent, (float) auxiliaryArray[0], (float) auxiliaryArray[1], (float) auxiliaryArray[2]);
 			if (directionlessBuffer!=null) {
 				directionlessBuffer[j] += v*directionlessGain;
 			}
 
-			xCurrent = xFilter.nextValue(xTarget);
-			yCurrent = yFilter.nextValue(yTarget);
-			zCurrent = zFilter.nextValue(zTarget);
+			rCurrent = rFilter.nextValue(rTarget);
+			thetaCurrent = thetaFilter.nextValue(thetaTarget);
+			phiCurrent = phiFilter.nextValue(phiTarget);
 		}
 	}
 

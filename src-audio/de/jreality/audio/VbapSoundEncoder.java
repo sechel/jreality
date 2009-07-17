@@ -77,9 +77,8 @@ public abstract class VbapSoundEncoder implements SoundEncoder {
 
 	private float g[] = new float[2];
 	
-	public void encodeSample(float v, int i, float x0, float y0, float z0) {
-		float r = (float) Math.sqrt(x0*x0+y0*y0+z0*z0);
-
+	public void encodeSample(float v, int i, float r0, float x0, float y0, float z0) {
+		float r = (float) Math.sqrt(x0*x0+z0*z0);
 		if (r>1e-6f) {
 			float x = -z0/r;
 			float y = -x0/r;

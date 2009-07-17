@@ -31,7 +31,7 @@ public abstract class AmbisonicsPlanar2ndOrderSoundEncoder implements SoundEncod
 	
 	public abstract void finishFrame();
 
-	public void encodeSample(float v, int idx, float x, float y, float z) {
+	public void encodeSample(float v, int idx, float r, float x, float y, float z) {
 		// The point (x, y, z) in graphics corresponds to (-z, -x, y) in Ambisonics.
 		float rp = (float) Math.sqrt(z*z+x*x);
 

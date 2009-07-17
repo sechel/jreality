@@ -39,15 +39,13 @@ public interface DistanceCue {
 	
 	public static final class CONICAL extends Attenuation {
 		public float nextValue(float v, float r, float xMic, float yMic, float zMic) {
-			float rMic = xMic*xMic+yMic*yMic+zMic*zMic;
-			return (zMic>0) ? v*zMic*zMic/rMic : 0;
+			return v*zMic*zMic;
 		}
 	}
 	
 	public static final class CARDIOID extends Attenuation {
 		public float nextValue(float v, float r, float xMic, float yMic, float zMic) {
-			float rMic = (float) Math.sqrt(xMic*xMic+yMic*yMic+zMic*zMic);
-			return 0.5f*v*(1+zMic/rMic);  // v*(1+cos t)/2
+			return 0.5f*v*(1+zMic);  // v*(1+cos t)/2
 		}
 	}
 	
@@ -75,8 +73,7 @@ public interface DistanceCue {
 	
 	/**
 	 * Computes the next value, based on the new sample v and the distance r, as well as the location of
-	 * the microphone relative to the sound source.  Note that r^2 may not be equal to xMic^2+yMic^2+zMic^2
-	 * if the transformation from source to microphone coordinates is not an isometry.
+	 * the microphone relative to the sound source.
 	 * 
 	 * The microphone position is intended for sound sources with directional characteristics.  Since
 	 * directional characteristics will not be used routinely, the sound path is not expected to interpolate
@@ -84,7 +81,7 @@ public interface DistanceCue {
 	 * 
 	 * @param v sample
 	 * @param r distance from observer when sample is heard (in microphone coordinates)
-	 * @param x, y, z  location of microphone (in source coordinates)
+	 * @param x, y, z  direction of microphone (unit vector in source coordinates)
 	 * @return updated value based on v and r
 	 */
 	float nextValue(float v, float r, float xMic, float yMic, float zMic);
