@@ -144,6 +144,7 @@ public class ToolSystemPlugin extends Plugin implements ChangeListener {
 								toolSystemConfiguration,
 								synchRenderTrigger
 						);
+						viewerSwitch.setToolSystem(ts);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
