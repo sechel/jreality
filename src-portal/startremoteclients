@@ -1,3 +1,3 @@
-#JAVA_HOME=/central/java/ibm-java2-i386-50
-JAVA_HOME=/central/java/jdk1.6.0
-execute -clrf  'DISPLAY=:0.0 '$JAVA_HOME'/bin/java -Xms1024M -Xmx1568M -Djava.library.path=/central/home/demo/.jnilib -Dde.jreality.viewerapp.env=portal-remote -Dde.jreality.scene.tool.Config=portal-remote -Djreality.jogl.quadBufferedStereo=true -Djreality.config='$PWD'/portal.$HOSTNAME -Djreality.data=/net/MathVis/data/testData3D -Dde.jreality.ui.viewerapp.autoRender=false -Dde.jreality.ui.viewerapp.synchRender=false -jar '$PWD'/../lib/smrj-client.jar >/dev/null'
+#!/bin/bash
+NATIVE_LIBS=/usr/local/jReality
+execute -clrf  'DISPLAY=:0.0 java -Xms1024M -Xmx1568M -Djava.library.path='$NATIVE_LIBS' -Dde.jreality.viewerapp.env=portal-remote -Dde.jreality.scene.tool.Config=portal-remote -Djreality.jogl.quadBufferedStereo=true -Djreality.config='$PWD'/portal.$HOSTNAME -Djreality.data=/net/MathVis/data/testData3D -Dde.jreality.ui.viewerapp.autoRender=false -Dde.jreality.ui.viewerapp.synchRender=false -jar '$PWD'/../lib/smrj-client.jar >& /central/java/jreality/LOGS/$HOSTNAME.log'
