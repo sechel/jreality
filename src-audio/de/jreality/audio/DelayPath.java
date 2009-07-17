@@ -242,9 +242,9 @@ public class DelayPath implements SoundPath {
 		
 		double cp = r*Math.cos(phi);
 		double sp = r*Math.sin(phi);
-		p[2] = (float) (cp*Math.cos(theta));
-		p[0] = (float) (cp*Math.sin(theta));
-		p[1] = (float) sp;
+		p[2] = cp*Math.cos(theta);
+		p[0] = cp*Math.sin(theta);
+		p[1] = sp;
 	}
 
 	private void advanceFrame() {
