@@ -157,6 +157,11 @@ public class Scene extends Plugin {
 		fireStateChanged();
 	}
 	
+	public void setBackdropPath(SceneGraphPath path) {
+		theScene.addPath("backdropPath", path);
+		fireStateChanged();
+	}
+	
 	public void setAvatarPath(SceneGraphPath path) {
 		theScene.addPath("avatarPath", path);
 		fireStateChanged();
