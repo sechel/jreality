@@ -74,6 +74,7 @@ public class ShipNavigationTool extends AbstractTool {
 	private transient final InputSlot gravityToggle = InputSlot.getDevice("GravityToggle");
 	private transient final InputSlot groundToggle = InputSlot.getDevice("GroundToggle");
 
+	private transient double[] velocity = {0,0,0};
 	private transient boolean touchGround;
 
 	private double gain = 4;
@@ -84,7 +85,7 @@ public class ShipNavigationTool extends AbstractTool {
 	private boolean hasCenter = false;
 	private double[] center={0,0,0,1};
 	
-	private boolean pollingDevice=false; // should be true for mouse look, false for some axis/button device TODO!!
+	private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
 
 	private transient boolean rotate=false;
 	private transient boolean fall;
@@ -100,8 +101,6 @@ public class ShipNavigationTool extends AbstractTool {
 		addCurrentSlot(groundToggle);
 	}
 
-	double[] velocity = {0,0,0};
-	double sign = 1;
 	public void perform(ToolContext tc) {
 
 		if (tc.getSource() == gravityToggle) {
@@ -133,7 +132,7 @@ public class ShipNavigationTool extends AbstractTool {
 		
 		double rot = tc.getAxisState(horizontalRotation).doubleValue();
 		if (pollingDevice && tc.getSource() == horizontalRotation) {
-			MatrixBuilder.euclidean(myMatrix).rotateY(-sign*rot);
+			MatrixBuilder.euclidean(myMatrix).rotateY(-rot);
 			myMatrix.assignTo(myComponent);
 			return;
 		}
@@ -145,25 +144,23 @@ public class ShipNavigationTool extends AbstractTool {
 		} else velocity[1]=0;
 		
 		if (tc.getSource() != timer) return;
-		double sec = 0.001* tc.getAxisState(timer).intValue(); // time since
-		if (!pollingDevice) {
-			MatrixBuilder.euclidean(myMatrix).rotateY(-sign*rot*sec).assignTo(myComponent);
+		AxisState axis;
+		if ((axis = tc.getAxisState(forwardBackward)) != null) {
+			velocity[2] = gain*axis.doubleValue();
 		}
-		AxisState fbaxis, lraxis;
-		if ((fbaxis = tc.getAxisState(forwardBackward)) != null) {
-			velocity[2] = sign*gain*remap(fbaxis.doubleValue());
+		if ((axis = tc.getAxisState(leftRight)) != null) {
+			velocity[0] = -gain*axis.doubleValue();
 		}
-		// HACK! only translate if the z-direction is non-zero
-		if (velocity[2] != 0 && (lraxis = tc.getAxisState(leftRight)) != null) {
-			velocity[0] = sign*gain*lraxis.doubleValue();
-		} else velocity[0] = 0;
-		
 		if (tc.getAxisState(run) != null && tc.getAxisState(run).isPressed()) {
 			velocity[0]*=runFactor;
 			velocity[2]*=runFactor;
 		}
 		if (!(touchGround && velocity[0] == 0 && velocity[1] == 0 && velocity[2] == 0)) {
 
+			double sec = 0.001* tc.getAxisState(timer).intValue(); // time since
+			if (!pollingDevice) {
+				MatrixBuilder.euclidean(myMatrix).rotateY(-rot*sec).assignTo(myComponent);
+			}
 			double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
 			double[] dest = myMatrix.multiplyVector(trans);
 			Pn.dehomogenize(dest,dest);
@@ -225,20 +222,6 @@ public class ShipNavigationTool extends AbstractTool {
 		}
 	}
 	
-	double minFB = 0;
-	private double remap(double d) {
-		if (d > 0)	{
-			d = d - minFB;
-			if (d<0) d = 0;
-			return d/(1-minFB);			
-		} else {
-			d  = -d;
-			d = d - minFB;
-			if (d<0) d = 0;
-			return -d/(1-minFB);			
-		}
-	}
-
 	protected double[] getHit(ToolContext tc, double[] pickStart, double[] dest) {
 		if (pickDelegate != null) {
 			return pickDelegate.getHit(tc, pickStart, dest);
