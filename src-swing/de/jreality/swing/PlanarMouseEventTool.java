@@ -35,7 +35,7 @@ public class PlanarMouseEventTool extends DragEventTool implements FaceDragListe
 
 	public void faceDragEnd(FaceDragEvent e) {
 		dispatchMouseEvent(newPoint, MouseEvent.MOUSE_RELEASED, currentButton);
-		if(oldPoint.equals(newPoint)) {
+		if(oldPoint.distance(newPoint) < 15) {
 			dispatchMouseEvent(newPoint, MouseEvent.MOUSE_CLICKED, currentButton);
 		}
 	}
