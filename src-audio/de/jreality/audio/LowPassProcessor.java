@@ -3,33 +3,21 @@ package de.jreality.audio;
 import de.jreality.scene.data.SampleReader;
 import de.jreality.shader.EffectiveAppearance;
 
+
 /**
  * 
- * Simple reader with a low-pass filter, mostly as a proof of concept.
+ * Simple processor with a low-pass filter, mostly as a proof of concept.
  * 
  * @author brinkman
  *
  */
-public class LowPassProcessor implements SampleProcessor {
+public class LowPassProcessor extends SampleProcessor {
 
-	private SampleReader reader;
 	private LowPassFilter lpf;
 	
-	public LowPassProcessor() {
-		// do nothing
-	}
-	
 	public LowPassProcessor(SampleReader reader) {
-		initialize(reader);
-	}
-
-	public void initialize(SampleReader reader) {
-		this.reader = reader;
+		super(reader);
 		lpf = new LowPassFilter(reader.getSampleRate());
-	}
-	
-	public int getSampleRate() {
-		return reader.getSampleRate();
 	}
 	
 	public void setCutOff(float cutOff) {
@@ -41,7 +29,7 @@ public class LowPassProcessor implements SampleProcessor {
 	}
 	
 	public void clear() {
-		reader.clear();
+		super.clear();
 		lpf.initialize(0);
 	}
 
@@ -56,10 +44,11 @@ public class LowPassProcessor implements SampleProcessor {
 	}
 
 	public void setProperties(EffectiveAppearance app) {
+		super.setProperties(app);
 		setCutOff(app.getAttribute("lowPassProcessorCutOff", 44000));
 	}
 	
 	public boolean hasMore() {
-		return lpf.hasMore();
+		return lpf.hasMore() || super.hasMore();
 	}
 }

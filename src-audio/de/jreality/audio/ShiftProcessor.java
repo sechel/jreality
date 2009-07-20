@@ -15,10 +15,9 @@ import de.jreality.shader.EffectiveAppearance;
  * @author brinkman
  *
  */
-public class ShiftProcessor implements SampleProcessor {
+public class ShiftProcessor extends SampleProcessor {
 	private static final float WINDOW_SIZE = 0.025f;
 	
-	private SampleReader reader;
 	private float[] inBuf;
 	private int bufSize;
 	private int writeIndex = 0;
@@ -26,7 +25,6 @@ public class ShiftProcessor implements SampleProcessor {
 	private int index1, index2;
 	private int windowSize;
 	private float halfWindow;
-	private int sampleRate;
 	private float alpha = 0;
 	private float phase1;
 	private Interpolation inter1 = new Interpolation.Cubic(), inter2 = new Interpolation.Cubic();
@@ -34,12 +32,12 @@ public class ShiftProcessor implements SampleProcessor {
 	private float qEnv;
 
 	
-	public void initialize(SampleReader reader) {
-		this.reader = reader;
-		sampleRate = reader.getSampleRate();
-		bufSize = sampleRate;
+	public ShiftProcessor(SampleReader reader) {
+		super(reader);
+		int sr = reader.getSampleRate();
+		bufSize = sr;
 		inBuf = new float[bufSize];
-		windowSize = (int) (WINDOW_SIZE*sampleRate);
+		windowSize = (int) (WINDOW_SIZE*sr);
 		halfWindow = (float) windowSize/2;
 		phase1 = 0;
 		readIndex = bufSize-windowSize;
@@ -48,6 +46,7 @@ public class ShiftProcessor implements SampleProcessor {
 	}
 
 	public void setProperties(EffectiveAppearance app) {
+		super.setProperties(app);
 		float q = app.getAttribute(AudioAttributes.PITCH_SHIFT_KEY, AudioAttributes.DEFAULT_PITCH_SHIFT);
 		setPitchShift(q);
 	}
@@ -60,18 +59,10 @@ public class ShiftProcessor implements SampleProcessor {
 	}
 	
 	public void clear() {
-		reader.clear();
+		super.clear();
 		inter1.reset();
 		inter2.reset();
 		Arrays.fill(inBuf, 0);
-	}
-
-	public int getSampleRate() {
-		return sampleRate;
-	}
-	
-	public boolean hasMore() {
-		return false;
 	}
 
 	public int read(float[] buffer, int initialIndex, int samples) {
@@ -148,5 +139,4 @@ public class ShiftProcessor implements SampleProcessor {
 		}
 		return nRead;
 	}
-
 }

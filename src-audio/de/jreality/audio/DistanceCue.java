@@ -64,7 +64,7 @@ public interface DistanceCue {
 	}
 	
 	
-	void setSampleRate(float sr);
+	void setSampleRate(float sampleRate);
 	
 	/**
 	 * @return true if there will be audible output in the future, even if all future inputs are zero

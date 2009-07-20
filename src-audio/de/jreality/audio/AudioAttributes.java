@@ -1,5 +1,7 @@
 package de.jreality.audio;
 
+import de.jreality.scene.data.SampleReader;
+
 public interface AudioAttributes {
 	public static final String PREPROCESSOR_KEY = "preprocessorKey";
 	public static final String DIRECTIONLESS_PROCESSOR_KEY = "directionlessProcessor";
@@ -29,13 +31,14 @@ public interface AudioAttributes {
 	
 	public static final DistanceCueFactory DEFAULT_DISTANCE_CUE_FACTORY = new DistanceCueFactory() {
 		private final DistanceCue cue = new DistanceCue.CONSTANT();
-		public DistanceCue getInstance() {
+		public DistanceCue getInstance(float sampleRate) {
+			cue.setSampleRate(sampleRate);
 			return cue;
 		}
 	};
 	public static final SampleProcessorFactory DEFAULT_PROCESSOR_FACTORY = new SampleProcessorFactory() {
-		public SampleProcessor getInstance() {
-			return new SampleProcessor.NullProcessor();
+		public SampleProcessor getInstance(SampleReader reader) {
+			return new SampleProcessor(reader);
 		}
 	};
 	

@@ -13,26 +13,17 @@ import de.jreality.shader.EffectiveAppearance;
  * @author brinkman
  *
  */
-public class SchroederReverb implements SampleProcessor {
+public class SchroederReverb extends SampleProcessor {
 
 	private static final float[] delays = {0.0297f, 0.0371f, 0.0411f, 0.0437f, 0.09683f, 0.03292f};
 	private float[] coeffs = new float[6];
 	private float[][] delayLines = new float[6][];
 	private int[] lineIndices = new int[6];
 	private float reverbTime = AudioAttributes.DEFAULT_REVERB_TIME;
-	private SampleReader reader;
 
 	
 	public SchroederReverb(SampleReader reader) {
-		initialize(reader);
-	}
-	
-	public SchroederReverb() {
-		// do nothing
-	}
-	
-	public void initialize(SampleReader reader) {
-		this.reader = reader;
+		super(reader);
 		int sampleRate = reader.getSampleRate();
 		for(int i = 0; i<6; i++) {
 			delayLines[i] = new float[(int) (sampleRate*delays[i]*2+0.5)];
@@ -41,6 +32,7 @@ public class SchroederReverb implements SampleProcessor {
 	}
 
 	public void setProperties(EffectiveAppearance app) {
+		super.setProperties(app);
 		float reverbTime = app.getAttribute(AudioAttributes.REVERB_TIME_KEY, AudioAttributes.DEFAULT_REVERB_TIME);
 		if (reverbTime!=getReverbTime()) {
 			setReverbTime(reverbTime);
@@ -63,18 +55,10 @@ public class SchroederReverb implements SampleProcessor {
 	}
 	
 	public void clear() {
-		reader.clear();
+		super.clear();
 		for(int i = 0; i < 6; i++) {
 			Arrays.fill(delayLines[i], 0);
 		}
-	}
-
-	public int getSampleRate() {
-		return reader.getSampleRate();
-	}
-	
-	public boolean hasMore() {
-		return false;
 	}
 
 	public int read(float[] buf, int initialIndex, int samples) {

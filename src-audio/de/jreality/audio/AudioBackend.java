@@ -91,13 +91,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 		SampleProcessorFactory newDirectionlessFactory = (SampleProcessorFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_PROCESSOR_KEY, null, SampleProcessorFactory.class);
 		if (directionlessFactory!=newDirectionlessFactory) {
 			directionlessFactory = newDirectionlessFactory;
-			if (directionlessFactory!=null) {
-				SampleProcessor proc = directionlessFactory.getInstance();
-				proc.initialize(directionlessReader);
-				directionlessProcessor = proc;
-			} else {
-				directionlessProcessor = null;
-			}
+			directionlessProcessor = (directionlessFactory!=null) ? directionlessFactory.getInstance(directionlessReader) : null;
 		}
 
 		SampleProcessor proc = directionlessProcessor;
@@ -211,7 +205,7 @@ public class AudioBackend extends UpToDateSceneProxyBuilder implements Appearanc
 			super.removeTreeNode(tn);
 			audioSources.remove((AudioTreeNode) tn);
 		}
-		
+
 		@Override
 		protected void dispose() {
 			for (SceneTreeNode tn : getTreeNodes()) {

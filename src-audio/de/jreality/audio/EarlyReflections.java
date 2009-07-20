@@ -3,7 +3,6 @@ package de.jreality.audio;
 import java.util.Arrays;
 
 import de.jreality.scene.data.SampleReader;
-import de.jreality.shader.EffectiveAppearance;
 
 /**
  * Simple simulation of early reflections, based on Moorer's "About This Reverberation Business."
@@ -11,7 +10,7 @@ import de.jreality.shader.EffectiveAppearance;
  * @author brinkman
  *
  */
-public class EarlyReflections implements SampleProcessor {
+public class EarlyReflections extends SampleProcessor {
 
 	private static final float[] tapTimes = {.0199f, .0354f, .0389f, .0414f, .0699f, .0796f}; // numbers from Table 3
 	private static final float[] gains = {1.02f, .818f, .635f, .719f, .267f, .242f};
@@ -22,19 +21,9 @@ public class EarlyReflections implements SampleProcessor {
 	private long silentCount = 0;
 	private int maxDelay;
 	private int index = 0;
-	
-	SampleReader reader;
 
-	public EarlyReflections() {
-		// do nothing
-	}
-
-	public void setProperties(EffectiveAppearance app) {
-		// do nothing for the time being
-	}
-
-	public void initialize(SampleReader reader) {
-		this.reader = reader;
+	public EarlyReflections(SampleReader reader) {
+		super(reader);
 		maxDelay = 0;
 		for(int i=0; i<nTaps; i++) {
 			int n = offsets[i] = (int) (reader.getSampleRate()*tapTimes[i]+0.5);
@@ -46,13 +35,9 @@ public class EarlyReflections implements SampleProcessor {
 	}
 
 	public void clear() {
+		super.clear();
 		Arrays.fill(delayLine, 0);
 		silentCount = 0;
-		reader.clear();
-	}
-
-	public int getSampleRate() {
-		return reader.getSampleRate();
 	}
 
 	public int read(float[] buffer, int initialIndex, int nSamples) {
@@ -77,6 +62,6 @@ public class EarlyReflections implements SampleProcessor {
 	}
 	
 	public boolean hasMore() {
-		return silentCount<maxDelay;
+		return (silentCount<maxDelay) || super.hasMore();
 	}
 }

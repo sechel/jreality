@@ -36,9 +36,9 @@ public class DelayPath implements SoundPath {
 	private DistanceCueFactory directionlessFactory = AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY;
 	private SampleProcessorFactory preProcFactory = AudioAttributes.DEFAULT_PROCESSOR_FACTORY;
 
-	private DistanceCue distanceCue = directedFactory.getInstance();
-	private DistanceCue directionlessCue = directionlessFactory.getInstance();
-	private SampleProcessor preProcessor = preProcFactory.getInstance();
+	private DistanceCue distanceCue;
+	private DistanceCue directionlessCue;
+	private SampleProcessor preProcessor;
 
 	private int metric = Pn.EUCLIDEAN;
 	private float gain = AudioAttributes.DEFAULT_GAIN;
@@ -74,13 +74,13 @@ public class DelayPath implements SoundPath {
 
 	private Interpolation interpolation;
 
-
 	public void initialize(SampleReader reader, Interpolation.Factory factory) {
 		this.reader = reader;
+		
 		sampleRate = reader.getSampleRate();
-		distanceCue.setSampleRate(sampleRate);
-		directionlessCue.setSampleRate(sampleRate);
-		preProcessor.initialize(reader);
+		preProcessor = preProcFactory.getInstance(reader);
+		distanceCue = directedFactory.getInstance(sampleRate);
+		directionlessCue = directionlessFactory.getInstance(sampleRate);
 		interpolation = factory.newInterpolation();
 
 		rFilter = new LowPassFilter(sampleRate);
@@ -104,8 +104,7 @@ public class DelayPath implements SoundPath {
 				AudioAttributes.DEFAULT_PROCESSOR_FACTORY, SampleProcessorFactory.class);
 		if (spf!=preProcFactory) {
 			preProcFactory = spf;
-			SampleProcessor proc = spf.getInstance();
-			proc.initialize(reader);
+			SampleProcessor proc = spf.getInstance(reader);
 			preProcessor = proc;
 		}
 
@@ -113,18 +112,14 @@ public class DelayPath implements SoundPath {
 				AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY, DistanceCueFactory.class);
 		if (dcf!=directedFactory) {
 			directedFactory = dcf;
-			DistanceCue dc = dcf.getInstance();
-			dc.setSampleRate(sampleRate);
-			distanceCue = dc;
+			distanceCue = dcf.getInstance(sampleRate);
 		}
 
 		dcf = (DistanceCueFactory) app.getAttribute(AudioAttributes.DIRECTIONLESS_CUE_KEY,
 				AudioAttributes.DEFAULT_DISTANCE_CUE_FACTORY, DistanceCueFactory.class);
 		if (dcf!=directionlessFactory) {
 			directionlessFactory = dcf;
-			DistanceCue dc = dcf.getInstance();
-			dc.setSampleRate(sampleRate);
-			directionlessCue = dc;
+			directionlessCue = dcf.getInstance(sampleRate);
 		}
 
 		preProcessor.setProperties(app);
@@ -220,6 +215,7 @@ public class DelayPath implements SoundPath {
 		auxiliaryMatrix.invert();
 
 		homogeneousToSpherical(auxiliaryArray, auxiliaryMatrix.getColumn(3), metric);
+		auxiliaryArray[0] = 1f; // we want a unit vector
 		sphericalToRectangular(auxiliaryArray);
 		xMic = (float) auxiliaryArray[0];
 		yMic = (float) auxiliaryArray[1];

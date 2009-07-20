@@ -12,28 +12,20 @@ import de.jreality.shader.EffectiveAppearance;
  * @author brinkman
  *
  */
-public class FDNReverb implements SampleProcessor {
+public class FDNReverb extends SampleProcessor {
 
-	private SampleReader reader;
 	private FDNParameters parameters;
 	private float[][] delayLines;
 	private int[] lineIndices;
 	private float[] outBuffer, inBuffer;
 	
-	public FDNReverb() {
-		// do nothing
-	}
-	
-	public FDNReverb(SampleReader reader, FDNParameters params) {
-		initialize(reader);
-		setParameters(params);
-	}
-	
-	public void initialize(SampleReader reader) {
-		this.reader = reader;
+	public FDNReverb(SampleReader reader) {
+		super(reader);
+		setParameters(AudioAttributes.DEFAULT_FDN_PARAMETERS);
 	}
 
 	public void setProperties(EffectiveAppearance app) {
+		super.setProperties(app);
 		FDNParameters params = (FDNParameters) app.getAttribute(AudioAttributes.FDN_PARAMETER_KEY, AudioAttributes.DEFAULT_FDN_PARAMETERS, FDNParameters.class);
 		if (params!=parameters) {
 			setParameters(params);
@@ -60,18 +52,10 @@ public class FDNReverb implements SampleProcessor {
 	}
 
 	public void clear() {
-		reader.clear();
+		super.clear();
 		for(float[] line: delayLines) {
 			Arrays.fill(line, 0);
 		}
-	}
-
-	public int getSampleRate() {
-		return reader.getSampleRate();
-	}
-	
-	public boolean hasMore() {
-		return false;  // TODO: implement properly
 	}
 
 	public synchronized int read(float[] buffer, int i0, int samples) {

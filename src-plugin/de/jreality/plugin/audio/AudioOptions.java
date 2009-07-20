@@ -22,7 +22,6 @@ import de.jreality.audio.DistanceCueFactory;
 import de.jreality.audio.EarlyReflections;
 import de.jreality.audio.FDNReverb;
 import de.jreality.audio.SampleProcessor;
-import de.jreality.audio.SampleProcessorChain;
 import de.jreality.audio.SampleProcessorFactory;
 import de.jreality.audio.SchroederReverb;
 import de.jreality.audio.ShiftProcessor;
@@ -30,6 +29,7 @@ import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.data.SampleReader;
 import de.jreality.ui.JSliderVR;
 import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -61,20 +61,19 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 	private int[] selectedProcs = new int[0];
 	private class PreProcessorFactory implements SampleProcessorFactory {
-		public SampleProcessor getInstance() {
-			List<SampleProcessor> list = new ArrayList<SampleProcessor>(2);
+		public SampleProcessor getInstance(SampleReader reader) {
 			for(int n: selectedProcs) {
 				int cnt = 1;
-				if      (n==cnt++) list.add(new EarlyReflections());
-				else if (n==cnt++) list.add(new ShiftProcessor());
+				if      (n==cnt++) reader = new EarlyReflections(reader);
+				else if (n==cnt++) reader = new ShiftProcessor(reader);
 			}
-			return SampleProcessorChain.create(list);
+			return (reader instanceof SampleProcessor) ? (SampleProcessor) reader : new SampleProcessor(reader);
 		}
 	};
 
 	private int[] selectedCues = new int[0];
 	private class DirectedCueFactory implements DistanceCueFactory {
-		public DistanceCue getInstance() {
+		public DistanceCue getInstance(float sampleRate) {
 			List<DistanceCue> list = new ArrayList<DistanceCue>(4);
 			for(int i: selectedCues) {
 				int cnt = 1;
@@ -84,17 +83,19 @@ public class AudioOptions extends ShrinkPanelPlugin {
 				else if (i==cnt++) list.add(new DistanceCue.LINEAR());
 				else if (i==cnt++) list.add(new DistanceCue.EXPONENTIAL());
 			}
-			return DistanceCueChain.create(list);
+			DistanceCue dc = DistanceCueChain.create(list);
+			dc.setSampleRate(sampleRate);
+			return dc;
 		}
 	};
 
 	private int reverbType = 0;
 	private class ReverbFactory implements SampleProcessorFactory {
-		public SampleProcessor getInstance() {
+		public SampleProcessor getInstance(SampleReader reader) {
 			int cnt = 1;
-			if      (reverbType==cnt++) return new SchroederReverb();
-			else if (reverbType==cnt++) return new FDNReverb();
-			else                    return new SampleProcessor.NullProcessor();
+			if      (reverbType==cnt++) return new SchroederReverb(reader);
+			else if (reverbType==cnt++) return new FDNReverb(reader);
+			else                    	return new SampleProcessor(reader);
 		}
 	};
 
