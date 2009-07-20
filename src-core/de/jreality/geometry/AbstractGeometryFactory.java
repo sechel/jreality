@@ -27,7 +27,7 @@ import de.jreality.scene.data.DataList;
  * @author gunn
  *
  */
-class AbstractGeometryFactory implements GeometryFactory {
+public class AbstractGeometryFactory implements GeometryFactory {
 
 	final OoNode metric;
 	

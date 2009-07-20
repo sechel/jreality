@@ -60,7 +60,7 @@ import de.jreality.util.PickUtility;
  * This class implements the functionality of the API class {@link IndexedFaceSetFactory}. 
  * Should only be accessed via IndexedFaceSetFactory.  
  */
-class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
+public class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory {
 	
 	/** The IndexedFaceSet to be generated. Reference will not change any more.**/
 	final IndexedFaceSet ifs;

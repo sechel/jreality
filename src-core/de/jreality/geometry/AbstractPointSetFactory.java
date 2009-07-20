@@ -53,7 +53,7 @@ import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 
-class AbstractPointSetFactory extends AbstractGeometryFactory {
+public class AbstractPointSetFactory extends AbstractGeometryFactory {
 	
 	final PointSet ps;
 

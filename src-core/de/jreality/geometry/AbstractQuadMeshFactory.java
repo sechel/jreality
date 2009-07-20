@@ -43,14 +43,11 @@ package de.jreality.geometry;
 import java.awt.Dimension;
 import java.util.logging.Level;
 
-import de.jreality.geometry.AbstractPointSetFactory.AttributeGenerator;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArrayArray;
 import de.jreality.util.LoggingSystem;
 
 /**
@@ -58,7 +55,7 @@ import de.jreality.util.LoggingSystem;
  * @author schmies
  *
  */
-class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
+public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	
 	AttributeGenerator textureCoordinates = attributeGeneratorNode( vertex, double[][].class, Attribute.TEXTURE_COORDINATES);
 	

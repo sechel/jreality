@@ -43,11 +43,7 @@ package de.jreality.geometry;
 // TODO:  no support for setting edge attributes
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 
-import de.jreality.geometry.AbstractPointSetFactory.AttributeGenerator;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedLineSet;
@@ -60,7 +56,7 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 
-class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
+public class AbstractIndexedLineSetFactory extends AbstractPointSetFactory {
 	
 	final IndexedLineSet ils;
 	
