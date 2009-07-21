@@ -163,9 +163,6 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 		public String
 			name = "NoName";
 
-		public WebModel() {
-		}
-
 		public WebModel(URI url, String name) {
 			this.uri = url;
 			this.name = name;

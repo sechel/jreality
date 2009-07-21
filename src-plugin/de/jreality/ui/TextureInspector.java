@@ -1,11 +1,15 @@
 package de.jreality.ui;
 
+import static de.jreality.scene.Appearance.INHERITED;
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.JFileChooser.FILES_ONLY;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -19,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
@@ -26,6 +31,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -46,7 +54,7 @@ import de.jreality.util.SystemProperties;
 import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 @SuppressWarnings("serial")
-public class TextureInspector extends JPanel {
+public class TextureInspector extends JPanel implements ChangeListener {
 	
 	private static final double 
 		DEFAULT_TEXTURE_SCALE = 20;
@@ -55,10 +63,11 @@ public class TextureInspector extends JPanel {
 	
 	// maximal value of texture scale
 	private double 
-		maximalTextureScale = 400;
+		maximalTextureScale = 400.0;
 	// ratio of maximal value and minimal value of texture scale
 	private double 
-		logarithmicRange = 400;
+		logarithmicRange = 400.0,
+		textureRatio = 1.0;
 	
 	private JButton 
 		textureLoadButton = new JButton("Load...", ImageHook.getIcon("folder.png")),
@@ -66,7 +75,25 @@ public class TextureInspector extends JPanel {
 	private ButtonGroup 
 		textureGroup = new ButtonGroup();
 	private JSliderVR
-		texScaleSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
+		rotateSlider = new JSliderVR(SwingConstants.HORIZONTAL, -100, 100, 0),
+		translateUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
+		translateVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
+		scaleUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
+		scaleVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
+	private SpinnerNumberModel
+		rotateModel = new SpinnerNumberModel(0.0, -Math.PI, Math.PI, 0.001),
+		translateUModel = new SpinnerNumberModel(0.0, 0, 1000.0, 0.001),
+		translateVModel = new SpinnerNumberModel(0.0, 0, 1000.0, 0.001),
+		scaleUModel = new SpinnerNumberModel(1.0, 0, 1000.0, 0.001),
+		scaleVModel = new SpinnerNumberModel(1.0, 0, 1000.0, 0.001);
+	private JSpinner
+		rotateSpinner = new JSpinner(rotateModel),
+		translateUSpinner = new JSpinner(translateUModel),
+		translateVSpinner = new JSpinner(translateVModel),
+		scaleUSpinner = new JSpinner(scaleUModel),
+		scaleVSpinner = new JSpinner(scaleVModel);
+	private JToggleButton
+		scaleLockToggle = new JToggleButton(ImageHook.getIcon("closedChain.gif"));
 	private Map<String, String> 
 		textureNameToTexture = new HashMap<String, String>();
 	private Map<String, AbstractButton> 
@@ -117,7 +144,7 @@ public class TextureInspector extends JPanel {
 		c.weighty = 1.0;
 		c.weightx = 1.0;
 		add(texScroller, c);
-		
+
 		// load button
 		textureLoadButton.setToolTipText("Add a new texture");
 		textureLoadButton.setMargin(new Insets(0,5,0,5));
@@ -128,7 +155,7 @@ public class TextureInspector extends JPanel {
 		});
 		c.weighty = 0.0;
 		c.weightx = 1.0;
-		c.gridwidth = 2;
+		c.gridwidth = GridBagConstraints.RELATIVE;
 		add(textureLoadButton, c);
 		c.weightx = 0.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
@@ -141,21 +168,209 @@ public class TextureInspector extends JPanel {
 		add(removeButton, c);
 		
 		// scale slider
-		texScaleSlider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent arg0) {
-				updateTextureScale();
-			}
-		});
+		scaleUSlider.addChangeListener(this);
+		scaleUSpinner.addChangeListener(this);
+		scaleVSlider.addChangeListener(this);
+		scaleVSpinner.addChangeListener(this);
+		translateUSlider.addChangeListener(this);
+		translateUSpinner.addChangeListener(this);
+		translateVSlider.addChangeListener(this);
+		translateVSpinner.addChangeListener(this);
+		rotateSlider.addChangeListener(this);
+		rotateSpinner.addChangeListener(this);
+		
+		JPanel scalePanel = new JPanel();
+		scalePanel.setBorder(BorderFactory.createTitledBorder("Scale"));
+		scalePanel.setLayout(new GridBagLayout());
+		c.gridheight = 1;
 		c.gridwidth = 1;
 		c.weightx = 0.0;
-		add(new JLabel("Scale"), c);
+		scalePanel.add(new JLabel("U"), c);
+		c.gridwidth = 1;
+		c.weightx = 1.0;
+		scalePanel.add(scaleUSlider, c);
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		c.weightx = 0.0;
+		scalePanel.add(scaleUSpinner, c);
+		c.weightx = 0.0;
+		c.gridheight = 2;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		scaleLockToggle.setSelectedIcon(ImageHook.getIcon("openChain.gif"));
+		scaleLockToggle.setPreferredSize(new Dimension(10, 10));
+		scalePanel.add(scaleLockToggle, c);
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		c.weightx = 0.0;
+		scalePanel.add(new JLabel("V"), c);
+		c.gridx = 1;
+		c.gridwidth = 1;
+		c.weightx = 1.0;
+		scalePanel.add(scaleVSlider, c);
+		c.gridx = 2;
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		c.weightx = 0.0;
+		scalePanel.add(scaleVSpinner, c);
+		
+		
+		c.gridx = GridBagConstraints.RELATIVE;
+		c.gridy = GridBagConstraints.RELATIVE;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.weightx = 1.0;
-		add(texScaleSlider, c);
+		c.weighty = 0.0;
+		add(scalePanel, c);
+		
+		
+		JPanel translatePanel = new JPanel();
+		translatePanel.setBorder(BorderFactory.createTitledBorder("Translate"));
+		translatePanel.setLayout(new GridBagLayout());
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		c.weightx = 0.0;
+		translatePanel.add(new JLabel("U"), c);
+		c.gridwidth = 1;
+		c.weightx = 1.0;
+		translatePanel.add(translateUSlider, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 0.0;
+		translatePanel.add(translateUSpinner, c);
+		c.gridwidth = 1;
+		c.weightx = 0.0;
+		translatePanel.add(new JLabel("V"), c);
+		c.gridwidth = 1;
+		c.weightx = 1.0;
+		translatePanel.add(translateVSlider, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 0.0;
+		translatePanel.add(translateVSpinner, c);
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 1.0;
+		c.weighty = 0.0;
+		add(translatePanel, c);
+		
+		JPanel rotatePanel = new JPanel();
+		rotatePanel.setBorder(BorderFactory.createTitledBorder("Rotate"));
+		rotatePanel.setLayout(new GridBagLayout());
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		c.weightx = 0.0;
+		rotatePanel.add(new JLabel("Angle"), c);
+		c.gridwidth = 1;
+		c.weightx = 1.0;
+		rotatePanel.add(rotateSlider, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 0.0;
+		rotatePanel.add(rotateSpinner, c);
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 1.0;
+		c.weighty = 0.0;
+		add(rotatePanel, c);
 		
 		makeFileChooser();
 		setTexture(DEFAULT_TEXTURE);
-		setTextureScale(DEFAULT_TEXTURE_SCALE);
+		setTextureUScale(DEFAULT_TEXTURE_SCALE);
+	}
+	
+	
+	/**
+	 * Beware! Ugly code
+	 */
+	public void stateChanged(ChangeEvent e) {
+		Object s = e.getSource();
+		if (scaleUSlider == s) {
+			double sliderVal = scaleUSlider.getValue() * 0.01;
+			double d = Math.exp(Math.log(logarithmicRange) * sliderVal)/logarithmicRange * maximalTextureScale;
+			scaleUSpinner.removeChangeListener(this);
+			scaleUModel.setValue(d);
+			scaleUSpinner.addChangeListener(this);
+			if (!scaleLockToggle.isSelected()) {
+				scaleVSpinner.removeChangeListener(this);
+				scaleVModel.setValue(d * textureRatio);
+				scaleVSpinner.addChangeListener(this);
+				scaleVSlider.removeChangeListener(this);
+				scaleVSlider.setValue((int)(scaleUSlider.getValue() * textureRatio));
+				scaleVSlider.addChangeListener(this);
+			}
+		}
+		if (scaleUSpinner == s) {
+			double d = getTextureUScale();
+			int value = (int)(Math.log(d / maximalTextureScale * logarithmicRange)/Math.log(logarithmicRange)*100);
+			scaleUSlider.removeChangeListener(this);
+			scaleUSlider.setValue(value);
+			scaleUSlider.addChangeListener(this);
+			if (!scaleLockToggle.isSelected()) {
+				scaleVSpinner.removeChangeListener(this);
+				scaleVModel.setValue(d * textureRatio);
+				scaleVSpinner.addChangeListener(this);
+				scaleVSlider.removeChangeListener(this);
+				scaleVSlider.setValue((int)(value * textureRatio));
+				scaleVSlider.addChangeListener(this);
+			}		
+		}
+		if (scaleVSlider == s) {
+			double sliderVal = scaleVSlider.getValue() * 0.01;
+			double d = Math.exp(Math.log(logarithmicRange) * sliderVal)/logarithmicRange * maximalTextureScale;
+			scaleVSpinner.removeChangeListener(this);
+			scaleVModel.setValue(d);
+			scaleVSpinner.addChangeListener(this);
+			if (!scaleLockToggle.isSelected()) {
+				scaleUSpinner.removeChangeListener(this);
+				scaleUModel.setValue(d / textureRatio);
+				scaleUSpinner.addChangeListener(this);
+				scaleUSlider.removeChangeListener(this);
+				scaleUSlider.setValue((int)(scaleVSlider.getValue() / textureRatio));
+				scaleUSlider.addChangeListener(this);
+			}
+		}
+		if (scaleVSpinner == s) {
+			double d = getTextureVScale();
+			int value = (int)(Math.log(d / maximalTextureScale * logarithmicRange)/Math.log(logarithmicRange)*100);
+			scaleVSlider.removeChangeListener(this);
+			scaleVSlider.setValue(value);
+			scaleVSlider.addChangeListener(this);
+			if (!scaleLockToggle.isSelected()) {
+				scaleUSpinner.removeChangeListener(this);
+				scaleUModel.setValue(d / textureRatio);
+				scaleUSpinner.addChangeListener(this);
+				scaleUSlider.removeChangeListener(this);
+				scaleUSlider.setValue((int)(value / textureRatio));
+				scaleUSlider.addChangeListener(this);
+			}
+		}
+		if (translateUSlider == s) {
+			translateUSpinner.removeChangeListener(this);
+			translateUModel.setValue(translateUSlider.getValue() / 100.0);
+			translateUSpinner.addChangeListener(this);
+		}
+		if (translateVSlider == s) {
+			translateVSpinner.removeChangeListener(this);
+			translateVModel.setValue(translateVSlider.getValue() / 100.0);
+			translateVSpinner.addChangeListener(this);
+		}
+		if (translateUSpinner == s) {
+			translateUSlider.removeChangeListener(this);
+			translateUSlider.setValue((int)(translateUModel.getNumber().doubleValue() * 100));
+			translateUSlider.addChangeListener(this);
+		}
+		if (translateVSpinner == s) {
+			translateVSlider.removeChangeListener(this);
+			translateVSlider.setValue((int)(translateVModel.getNumber().doubleValue() * 100));
+			translateVSlider.addChangeListener(this);
+		}
+		if (rotateSlider == s) {
+			rotateSlider.removeChangeListener(this);
+			rotateModel.setValue((rotateSlider.getValue() / 100.0) * Math.PI);
+			rotateSlider.addChangeListener(this);
+		}
+		if (rotateSpinner == s) {
+			rotateSlider.removeChangeListener(this);
+			rotateSlider.setValue((int)((rotateModel.getNumber().doubleValue() / Math.PI) * 100));
+			rotateSlider.addChangeListener(this);
+		}
+		updateTextureTransform();
 	}
 	
 	
@@ -194,20 +409,53 @@ public class TextureInspector extends JPanel {
 		return textureNameToTexture;
 	}
 	
-	public double getTextureScale() {
-		double d = .01 * texScaleSlider.getValue();
-		return Math.exp(Math.log(logarithmicRange) * d)/logarithmicRange * maximalTextureScale;
+	public double getTextureUScale() {
+		return scaleUModel.getNumber().doubleValue();
 	}
 	
-	public void setTextureScale(double d) {
-		texScaleSlider.setValue(
-				(int)(Math.log(d / maximalTextureScale * logarithmicRange)/Math.log(logarithmicRange)*100)
-		);
+	public void setTextureUScale(double d) {
+		scaleUModel.setValue(d);
 	}
 	
-	private void updateTextureScale() {
+	public double getTextureVScale() {
+		return scaleVModel.getNumber().doubleValue();
+	}
+	
+	public void setTextureVScale(double d) {
+		scaleVModel.setValue(d);
+	}
+	
+	public double getTextureUTranslation() {
+		return translateUModel.getNumber().doubleValue();
+	}
+	
+	public void setTextureUTranslation(double d) {
+		translateUModel.setValue(d);
+	}
+	
+	public double getTextureVTranslation() {
+		return translateVModel.getNumber().doubleValue();
+	}
+	
+	public void setTextureVTranslation(double d) {
+		translateVModel.setValue(d);
+	}
+	
+	public double getTextureRotation() {
+		return rotateModel.getNumber().doubleValue();
+	}
+	
+	public void setTextureRotation(double r) {
+		rotateModel.setValue(r);
+	}
+	
+	private void updateTextureTransform() {
 		if (tex != null) {
-			tex.setTextureMatrix(MatrixBuilder.euclidean().scale(getTextureScale()).getMatrix());
+			MatrixBuilder mb = MatrixBuilder.euclidean();
+			mb.translate(getTextureUTranslation(), getTextureVTranslation(), 0);
+			mb.rotate(getTextureRotation(), 0, 0, 1);
+			mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
+			tex.setTextureMatrix(mb.getMatrix());
 		}
 	}
 
@@ -233,18 +481,28 @@ public class TextureInspector extends JPanel {
 			String texResource = textureNameToTexture.get(texture);
 			if (texResource == null) {
 				appearance.setAttribute(
-						CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.TEXTURE_2D,
-						Appearance.INHERITED,
+						POLYGON_SHADER + "." + TEXTURE_2D,
+						INHERITED,
 						Texture2D.class
 				);
+				textureRatio = 1.0;
 			} else {
 				try {
 					ImageData texData = ImageData.load(Input.getInput(texResource));
+					textureRatio = texData.getWidth() / (double)texData.getHeight();
 					applyTexture(texData);
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				updateTextureScale();
+				if (!scaleLockToggle.isSelected()) {
+					scaleVSpinner.removeChangeListener(this);
+					scaleVModel.setValue(getTextureUScale() * textureRatio);
+					scaleVSpinner.addChangeListener(this);
+					scaleVSlider.removeChangeListener(this);
+					scaleVSlider.setValue((int)(scaleUSlider.getValue() * textureRatio));
+					scaleVSlider.addChangeListener(this);
+				}
+				updateTextureTransform();
 			}
 		}
 	}
@@ -252,7 +510,7 @@ public class TextureInspector extends JPanel {
 	public void setAppearance(Appearance appearance) {
 		this.appearance = appearance;
 		updateTexture();
-		updateTextureScale();
+		updateTextureTransform();
 	}
 
 	private void makeFileChooser() {
@@ -283,7 +541,7 @@ public class TextureInspector extends JPanel {
 			try {
 				ImageData img = ImageData.load(Input.getInput(file));
 				applyTexture(img);
-				setTextureScale(getTextureScale());
+				setTextureUScale(getTextureUScale());
 				String texName = textureNameToTexture.keySet().size() + " " + file.getName();
 				textureNameToTexture.put(texName, file.getAbsolutePath());
 				addTexture(texName, file.getAbsolutePath());

@@ -237,11 +237,6 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		c.weightx = 1.0;
 		facesPanel.add(transparencySlider, c);
 		facesPanel.add(facesFlat, c);
-		facesPanel.add(texturePanel, c);
-		texturePanel.setIcon(ImageHook.getIcon("photo.png"));
-		texturePanel.setShrinked(true);
-		texturePanel.setLayout(new GridLayout());
-		texturePanel.add(textureInspector);
 		ShrinkPanel faceLabelShrinker = new ShrinkPanel("Labels");
 		faceLabelShrinker.setIcon(ImageHook.getIcon("font.png"));
 		faceLabelShrinker.setShrinked(true);
@@ -249,11 +244,17 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		faceLabelShrinker.add(faceFontInspector);
 		facesPanel.add(faceLabelShrinker, c);
 		
+		texturePanel.setIcon(ImageHook.getIcon("photo.png"));
+		texturePanel.setShrinked(true);
+		texturePanel.setLayout(new GridLayout());
+		texturePanel.add(textureInspector);
+		
 		c.fill = BOTH;
 		c.gridwidth = REMAINDER;
 		c.weighty = 1.0;
 		c.weightx = 1.0;
 		mainPanel.add(facesPanel, c);
+		mainPanel.add(texturePanel, c);
 		mainPanel.add(linesPanel, c);
 		mainPanel.add(pointsPanel, c);
 		
@@ -861,11 +862,11 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	}
 
 	public double getTextureScale() {
-		return textureInspector.getTextureScale();
+		return textureInspector.getTextureUScale();
 	}
 	
 	public void setTextureScale(double scale) {
-		textureInspector.setTextureScale(scale);
+		textureInspector.setTextureUScale(scale);
 	}
 	
 	

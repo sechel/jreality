@@ -176,7 +176,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		
 		textureInspector.setMaximalTextureScale(MAXIMAL_TEXTURE_SCALE);
 		textureInspector.setLogarithmicRange(LOGARITHMIC_RANGE);
-		textureInspector.setTextureScale(DEFAULT_TEXTURE_SCALE );
+		textureInspector.setTextureUScale(DEFAULT_TEXTURE_SCALE );
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.gridwidth = REMAINDER;
@@ -437,7 +437,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		setReflectSceneContent(c.getProperty(getClass(), "reflectSceneContent", false));
 		textureInspector.setTextures(c.getProperty(getClass(), "textures", textures));
 		textureInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
-		textureInspector.setTextureScale(c.getProperty(getClass(), "textureScale",DEFAULT_TEXTURE_SCALE));
+		textureInspector.setTextureUScale(c.getProperty(getClass(), "textureScale",DEFAULT_TEXTURE_SCALE));
 		setVisible(c.getProperty(getClass(), "visible", true));
 		super.restoreStates(c);
 	}
@@ -446,7 +446,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "textures", textureInspector.getTextures());
 		c.storeProperty(getClass(), "texture", textureInspector.getTexture());
-		c.storeProperty(getClass(), "textureScale", textureInspector.getTextureScale());
+		c.storeProperty(getClass(), "textureScale", textureInspector.getTextureUScale());
 		c.storeProperty(getClass(), "visible", isVisible());
 		c.storeProperty(getClass(), "faceColor", getFaceColor());
 		c.storeProperty(getClass(), "transparency", getTransparency());

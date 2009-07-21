@@ -12,6 +12,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JToggleButton;
 
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.util.Input;
 
 public class TextureJButton extends JToggleButton {
@@ -35,6 +36,7 @@ public class TextureJButton extends JToggleButton {
 				int w = texImage.getWidth(this);
 				int h = texImage.getHeight(this);
 				ratio = w / (double)h;
+				texImage = ImageHook.scaleImage(texImage, 100, (int)(100 / ratio));
 			} catch (IOException e) {}
 		}
 	}
