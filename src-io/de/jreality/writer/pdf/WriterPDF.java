@@ -119,6 +119,7 @@ public class WriterPDF implements SceneWriter {
 		}
 		String script = null;
 		switch (prefs) {
+			default:
 			case Default:
 			case ViewerApp:
 				script = defaultScript;

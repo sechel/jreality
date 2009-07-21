@@ -34,9 +34,11 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import de.jreality.geometry.BallAndStickFactory;
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.BoundingBoxUtility;
+import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.io.JrScene;
@@ -53,6 +55,7 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CubeMap;
@@ -350,8 +353,11 @@ public class U3DSceneUtility {
 				Geometry g = c.getGeometry();
 				if (g != null && g instanceof PointSet){
 					EffectiveAppearance ea = EffectiveAppearance.create(p);
+					Appearance ballsAndSticksAppearance = new Appearance();
+					ea.create(ballsAndSticksAppearance);
 					DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ea);
 					DefaultPointShader dps = (DefaultPointShader) dgs.getPointShader();
+					DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
 					DefaultPolygonShader dpos = (DefaultPolygonShader)dps.getPolygonShader();
 					IndexedLineSet ils;
 					if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
@@ -360,79 +366,110 @@ public class U3DSceneUtility {
 						ils.setVertexCountAndAttributes(((PointSet)g).getVertexAttributes());
 					}
 					if (dgs.getShowPoints()) { // create spheres for point set 
-						BallAndStickFactory bsf = new BallAndStickFactory(ils);
-						bsf.setBallGeometry(POINT_SPHERE);
-						bsf.setBallColor(dpos.getDiffuseColor());
-						bsf.setBallRadius(dps.getPointRadius());
-						bsf.setShowBalls(true);
-						bsf.setShowSticks(false);
-						bsf.update();
-						basPoints = bsf.getSceneGraphComponent();
-						basPoints.setOwner("foo");
-						basPoints.setName("spheres");
-						Appearance app = basPoints.getAppearance();
-						if (app == null) {
-							app = new Appearance();
-							basPoints.setAppearance(app);
+						if (dps.getSpheresDraw()) {
+							BallAndStickFactory bsf = new BallAndStickFactory(ils);
+							bsf.setBallGeometry(POINT_SPHERE);
+							bsf.setBallColor(dpos.getDiffuseColor());
+							bsf.setBallRadius(dps.getPointRadius());
+							bsf.setShowBalls(true);
+							bsf.setShowSticks(false);
+							bsf.update();
+							basPoints = bsf.getSceneGraphComponent();
+							basPoints.setOwner("foo");
+							basPoints.setName("Spheres");
+							Appearance app = basPoints.getAppearance();
+							if (app == null) {
+								app = new Appearance();
+								basPoints.setAppearance(app);
+							}
+							app.setAttribute(FACE_DRAW, true);
+							if (TextureUtility.hasReflectionMap(ea, "pointShader.polygonShader")) {
+								CubeMap cm = TextureUtility.readReflectionMap(ea, "pointShader.polygonShader.reflectionMap");
+								CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
+										cm.getBack(),
+										cm.getFront(),
+										cm.getBottom(),
+										cm.getTop(),
+										cm.getLeft(),
+										cm.getRight()
+										);
+								cmDest.setBlendColor(cm.getBlendColor());
+							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+						} else {
+							PointSet ps = (PointSet)g;
+							PointSetFactory psf = new PointSetFactory();
+							psf.setVertexCount(ps.getNumPoints());
+							psf.setVertexAttributes(ps.getVertexAttributes());
+							psf.update();
+							basPoints = new SceneGraphComponent();
+							basPoints.setOwner("foo");
+							basPoints.setName("Points");
+							basPoints.setGeometry(psf.getGeometry());
+							Appearance app = basPoints.getAppearance();
+							if (app == null) {
+								app = new Appearance();
+								basPoints.setAppearance(app);
+							}
 						}
-						app.setAttribute(FACE_DRAW, true);
-						if (TextureUtility.hasReflectionMap(ea, "pointShader.polygonShader")) {
-							CubeMap cm = TextureUtility.readReflectionMap(ea, "pointShader.polygonShader.reflectionMap");
-							CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
-									cm.getBack(),
-									cm.getFront(),
-									cm.getBottom(),
-									cm.getTop(),
-									cm.getLeft(),
-									cm.getRight()
-									);
-							cmDest.setBlendColor(cm.getBlendColor());
-						} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
 					}
 					if (g instanceof IndexedLineSet && dgs.getShowLines()) { // create sticks for line set
-						DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-						BallAndStickFactory bsf = new BallAndStickFactory(ils);
-						bsf.setStickGeometry(LINE_CYLINDER);
-						bsf.setStickColor(((DefaultPolygonShader) dls.getPolygonShader()).getDiffuseColor());
-						bsf.setStickRadius(dls.getTubeRadius());
-						bsf.setShowBalls(false);
-						bsf.setShowSticks(true);
-						bsf.update();
-						basLines = bsf.getSceneGraphComponent();
-						basLines.setOwner("foo");
-						basLines.setName("tubes");
-						Appearance app = basLines.getAppearance();
-						if (app == null) {
-							app = new Appearance();
-							basLines.setAppearance(app);
+						if (dls.getTubeDraw()) {
+							BallAndStickFactory bsf = new BallAndStickFactory(ils);
+							bsf.setStickGeometry(LINE_CYLINDER);
+							bsf.setStickColor(dpos.getDiffuseColor());
+							bsf.setStickRadius(dls.getTubeRadius());
+							bsf.setShowBalls(false);
+							bsf.setShowSticks(true);
+							bsf.update();
+							basLines = bsf.getSceneGraphComponent();
+							basLines.setOwner("foo");
+							basLines.setName("Tubes");
+							Appearance app = basLines.getAppearance();
+							if (app == null) {
+								app = new Appearance();
+								basLines.setAppearance(app);
+							}
+							app.setAttribute(FACE_DRAW, true);
+							if (TextureUtility.hasReflectionMap(ea, "lineShader.polygonShader")) {
+								CubeMap cm = TextureUtility.readReflectionMap(ea, "lineShader.polygonShader.reflectionMap");
+								CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
+										cm.getBack(),
+										cm.getFront(),
+										cm.getBottom(),
+										cm.getTop(),
+										cm.getLeft(),
+										cm.getRight()
+										);
+								cmDest.setBlendColor(cm.getBlendColor());
+							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+						} else {
+							IndexedLineSet ls = (IndexedLineSet)g;
+							IndexedLineSetFactory lsf = new IndexedLineSetFactory();
+							lsf.setVertexCount(ls.getNumPoints());
+							lsf.setVertexAttributes(ls.getVertexAttributes());
+							lsf.setEdgeCount(ls.getNumEdges());
+							lsf.setEdgeIndices(ls.getEdgeAttributes(Attribute.INDICES));
+							lsf.update();
+							basLines = new SceneGraphComponent();
+							basLines.setOwner("foo");
+							basLines.setName("Lines");
+							basLines.setGeometry(lsf.getGeometry());
+							Appearance app = basLines.getAppearance();
+							if (app == null) {
+								app = new Appearance();
+								basLines.setAppearance(app);
+							}
 						}
-						app.setAttribute(FACE_DRAW, true);
-						if (TextureUtility.hasReflectionMap(ea, "lineShader.polygonShader")) {
-							CubeMap cm = TextureUtility.readReflectionMap(ea, "lineShader.polygonShader.reflectionMap");
-							CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
-									cm.getBack(),
-									cm.getFront(),
-									cm.getBottom(),
-									cm.getTop(),
-									cm.getLeft(),
-									cm.getRight()
-									);
-							cmDest.setBlendColor(cm.getBlendColor());
-						} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
 					}
 					
 				}
 				c.childrenWriteAccept(this, false, false, false, false, false, true);
-//				if (flat) {
-//					if (basPoints != null) 
-//						basPoints = flatten(basPoints, true);
-//					if (basLines != null) 
-//						basLines = flatten(basLines, true);
-//				}
 				if (basPoints != null) { 
+					basPoints.getAppearance().setAttribute("U3D_ForceVisible", true);
 					c.addChild(basPoints);
 				}
 				if (basLines != null) { 
+					basLines.getAppearance().setAttribute("U3D_ForceVisible", true);
 					c.addChild(basLines);
 				}
 				p.pop();
@@ -712,10 +749,12 @@ public class U3DSceneUtility {
 	) {
 		boolean visible = root.isVisible() && subTreeV;
 		EffectiveAppearance ea = appMap.get(root);
-		boolean showFaces = visible && ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT); 
+		boolean forceVisible = ea.getAttribute("U3D_ForceVisible", false);
+		boolean showFaces = (visible && ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT)) || forceVisible; 
 		map.put(root, showFaces);
-		for (int i = 0; i < root.getChildComponentCount(); i++)
+		for (int i = 0; i < root.getChildComponentCount(); i++) {
 			getVisibility_R(root.getChildComponent(i), map, visible, appMap);
+		}
 	}
 	
 	public static HashMap<SceneGraphComponent, Boolean> getVisibility(JrScene scene, HashMap<SceneGraphComponent, EffectiveAppearance> appMap) {

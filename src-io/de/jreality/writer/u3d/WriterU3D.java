@@ -356,7 +356,7 @@ public class WriterU3D implements SceneWriter {
 			w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
 			w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
 			
-			if (nData != null) {
+			if (nData != null && normals != null) {
 				// new normal count
 				w.WriteCompressedU32(uACContextNumLocalNormals, 1);
 				double[] nPosition = normals[currPosInd];
@@ -446,7 +446,7 @@ public class WriterU3D implements SceneWriter {
 			w.WriteCompressedU32(uACContextPositionDiffMagY, udY);
 			w.WriteCompressedU32(uACContextPositionDiffMagZ, udZ);
 			
-			if (nData != null) {
+			if (nData != null && normals != null) {
 				// new normal count
 				w.WriteCompressedU32(uACContextNumLocalNormals, 1);
 				double[] nPosition = normals[currPosInd];
@@ -566,14 +566,14 @@ public class WriterU3D implements SceneWriter {
 			w.WriteF32((float) v[2]);
 		}
 		// normals
-		if (vnCount != 0) { // vertex normals
+		if (vnCount != 0 && vNormals != null) { // vertex normals
 			for (int i = 0; i < vNormals.length; i++) {
 				double[] n = vNormals[i];
 				w.WriteF32((float) n[0]);
 				w.WriteF32((float) n[1]);
 				w.WriteF32((float) n[2]);
 			}
-		} else if (fnCount != 0){ // face normals
+		} else if (fnCount != 0 && fNormals != null){ // face normals
 			for (int i = 0; i < fNormals.length; i++) {
 				double[] n = fNormals[i];
 				w.WriteF32((float) n[0]);
@@ -582,7 +582,7 @@ public class WriterU3D implements SceneWriter {
 			}
 		}
 		// texture coordinates
-		if (tvertCount != 0) {
+		if (tvertCount != 0 && tVerts != null) {
 			for (int i = 0; i < tVerts.length; i++) {
 				double[] v = tVerts[i];
 				w.WriteF32((float) v[0]);
@@ -1365,8 +1365,9 @@ public class WriterU3D implements SceneWriter {
 			writeDataBlock(getModifierChain(c), o);
 			if (getPreparedGeometry(c) != null) {
 				EffectiveAppearance a = appearanceMap.get(c);
-				for (DataBlock b : getMaterialBlocks(a))
+				for (DataBlock b : getMaterialBlocks(a)) {
 					writeDataBlock(b, o);
+				}
 			}
 		}
 		for (SceneGraphComponent viewNode : viewNodes) {
@@ -1378,24 +1379,31 @@ public class WriterU3D implements SceneWriter {
 		for (Geometry g : preparedGeometries){
 			writeDataBlock(getModifierChain(g), o);
 		}
-		for (U3DTexture tex : textures) 
+		for (U3DTexture tex : textures) {
 			writeDataBlock(getModifierChain(tex), o);
+		}
 		
 		// continuations
-		for (SceneGraphComponent c : nodes)
-			for (DataBlock b : getContinuations(c))
+		for (SceneGraphComponent c : nodes) {
+			for (DataBlock b : getContinuations(c)) {
 				writeDataBlock(b, o);
-		for (Camera c : cameras)
-			writeDataBlock(getViewResource(c), o);	
-		for (Light l : lights) 
+			}
+		}
+		for (Camera c : cameras) {
+			writeDataBlock(getViewResource(c), o);
+		}
+		for (Light l : lights) { 
 			writeDataBlock(getLightResource(l), o);
+		}
 		for (Geometry g : preparedGeometries){
-			for (DataBlock b : getContinuations(g)) 
+			for (DataBlock b : getContinuations(g)) { 
 				writeDataBlock(b, o);
+			}
 		}
 		for (U3DTexture tex : textures) {
-			for (DataBlock b : getContinuations(tex))
+			for (DataBlock b : getContinuations(tex)) {
 				writeDataBlock(b, o);
+			}
 		}
 		o.close();
 		System.out.println("done.");
