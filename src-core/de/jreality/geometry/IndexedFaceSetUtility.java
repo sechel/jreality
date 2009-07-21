@@ -45,11 +45,8 @@ import static de.jreality.shader.CommonAttributes.FACE_DRAW;
 import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
 import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -57,17 +54,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import java.util.logging.Level;
 
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphVisitor;
@@ -80,8 +74,6 @@ import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
@@ -709,11 +701,15 @@ public class IndexedFaceSetUtility {
      * Moreover it assumes that the facenormals are set.
      * This method is not R4 safe at the moment.
      * 
- 	 * @author Tim Hoffmann
+  	 * @author Tim Hoffmann
 	 * 
 	 * @param fs  
      * @return
-     */
+ 	 * 
+     * @deprecated This mehtod may lead to an infinite loop. Use with care, or use the simpler method 
+     * {@link #simpleTriangulate(IndexedFaceSet)}.
+    */
+    @Deprecated
     public static IndexedFaceSet triangulate(IndexedFaceSet fs) {
      IndexedFaceSet ts = new IndexedFaceSet();
      DataListSet vertexData = fs.getVertexAttributes();
@@ -769,6 +765,7 @@ public class IndexedFaceSetUtility {
              double[] e2 = Rn.subtract(null,p3,p2);
              double[] e3 = Rn.subtract(null,p1,p3);
              // TODO  fix! following code can lead to infinite loop -gunn 30.08.07
+             // TODO yes it does - paul 21.7.09
              double[] cnormal = Rn.crossProduct(null,e2,e1);
              double d = Rn.innerProduct(normal, cnormal);
              if(Math.abs(d) < EPS) {
