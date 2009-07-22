@@ -32,7 +32,7 @@ public class SliderExample {
 	 * y = -cos alpha sinh v cos u + sin alpha cosh v sin u 
 	 * z = u cos alpha + v sin alpha
 	 * 
-	 * u \in [0,2 Pi[
+	 * u \in [-Pi,Pi[
 	 * v \in \R
 	 * 
 	 * alpha = 0 helicoid
