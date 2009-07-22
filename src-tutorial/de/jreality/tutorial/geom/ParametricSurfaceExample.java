@@ -9,6 +9,11 @@ import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 
+/** An easy example to visualize the graph of a map R^2->R^3.
+ * 
+ * @author G. Paul Peters, 22.07.2009
+ *
+ */
 public class ParametricSurfaceExample {
 	// to use the ParametricSurfaceFactory one needs an instance of immersion
 	// That is, a function that maps  (u,v) values into a 3- or 4-space
