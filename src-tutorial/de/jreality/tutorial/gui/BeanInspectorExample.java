@@ -24,7 +24,7 @@ import de.jtem.beans.InspectorPanel;
  *
  */
 public class BeanInspectorExample {
-	public static Immersion swallowtailImmersion = new Immersion() {
+	public static class Swallowtail implements Immersion {
 		public void evaluate(double u, double v, double[] xyz, int index) {
 			xyz[index]= 10*(u-v*v);
 			xyz[index+1]= 10*u*v;
@@ -35,7 +35,7 @@ public class BeanInspectorExample {
 	};
 	
 	public static void main(String[] args) {
-		final ParametricSurfaceFactory psf = new ParametricSurfaceFactory(swallowtailImmersion);
+		final ParametricSurfaceFactory psf = new ParametricSurfaceFactory(new Swallowtail());
 		psf.setUMin(-.3);psf.setUMax(.3);psf.setVMin(-.4);psf.setVMax(.4);
 		psf.setULineCount(20);psf.setVLineCount(20);
 		psf.setGenerateEdgesFromFaces(true);

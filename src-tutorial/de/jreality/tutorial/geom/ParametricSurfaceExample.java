@@ -17,7 +17,7 @@ import de.jreality.scene.SceneGraphComponent;
 public class ParametricSurfaceExample {
 	// to use the ParametricSurfaceFactory one needs an instance of immersion
 	// That is, a function that maps  (u,v) values into a 3- or 4-space
-	public static Immersion swallowtailImmersion = new Immersion() {
+	public static class Swallowtail implements Immersion {
 		public void evaluate(double u, double v, double[] xyz, int index) {
 			xyz[index]= 10*(u-v*v);
 			xyz[index+1]= 10*u*v;
@@ -33,7 +33,7 @@ public class ParametricSurfaceExample {
 	
 	public static void main(String[] args) {
 		//initialize the parametric surface factory
-		final ParametricSurfaceFactory psf = new ParametricSurfaceFactory(swallowtailImmersion);
+		final ParametricSurfaceFactory psf = new ParametricSurfaceFactory(new Swallowtail());
 		//uv-extension of the domain
 		psf.setUMin(-.3);psf.setUMax(.3);psf.setVMin(-.4);psf.setVMax(.4);
 		//subdivisions of th domain
