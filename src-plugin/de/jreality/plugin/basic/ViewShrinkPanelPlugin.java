@@ -25,6 +25,7 @@ public class ViewShrinkPanelPlugin extends ShrinkPanelPlugin {
 
 	public ViewShrinkPanelPlugin(PluginInfo pinfo) {
 		super();
+		//TODO: pinfoDummy hack because ShrinkPanelPlugin needs a PluginInfo with non-null name!
 		shrinkPanel.setTitle(pinfo.name);
 		this.pinfo=pinfo;
 	}
