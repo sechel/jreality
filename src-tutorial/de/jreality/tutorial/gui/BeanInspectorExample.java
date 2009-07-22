@@ -15,8 +15,14 @@ import de.jreality.plugin.basic.ViewShrinkPanelPlugin;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.tutorial.geom.ParametricSurfaceExample;
 import de.jtem.beans.InspectorPanel;
 
+/** Extends {@link ParametricSurfaceExample} by an inspector plugin panel.
+ * 
+ * @author G. Paul Peters, 22.07.2009
+ *
+ */
 public class BeanInspectorExample {
 	// to use the ParametricSurfaceFactory one needs an instance of immersion
 	// That is, a function that maps  (u,v) values into a 3- or 4-space
@@ -44,10 +50,10 @@ public class BeanInspectorExample {
 		//generate edges and normals
 		psf.setGenerateEdgesFromFaces(true);
 		psf.setGenerateVertexNormals(true);
-		//do it
+		//generate the IndexFaceSet
 		psf.update();
 		
-		//put the produced Indexed into the SceneGraphComponent sgc
+		//put the generated IndexedFaceSet into the SceneGraphComponent sgc
 		SceneGraphComponent sgc = new SceneGraphComponent("Swallowtail");
 		sgc.setGeometry(psf.getIndexedFaceSet());
 		
@@ -60,7 +66,7 @@ public class BeanInspectorExample {
 		v.registerPlugin(new ContentTools());
 		v.setContent(sgc);
 
-		//add an Inspector for the domain
+		//create an Inspector for the domain
 		InspectorPanel inspector = new InspectorPanel();
 		inspector.setObject(psf, null);
 		JButton updateButton=new JButton("update");
@@ -71,8 +77,7 @@ public class BeanInspectorExample {
 		});		
 		inspector.add(updateButton,BorderLayout.SOUTH);
 		inspector.revalidate();
-
-		
+		//add the inspector to the viewer
 		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin("Domain");
 		plugin.getShrinkPanel().add(inspector);
 		v.registerPlugin(plugin);
