@@ -1,22 +1,18 @@
 package de.jreality.tutorial.gui;
 
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-
 import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.basic.Shell;
 import de.jreality.plugin.basic.ViewShrinkPanelPlugin;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tutorial.geom.ParametricSurfaceExample;
 import de.jtem.beans.InspectorPanel;
+import de.varylab.jrworkspace.plugin.PluginInfo;
 
 /** Extends {@link ParametricSurfaceExample} by an inspector plugin panel.
  * 
@@ -53,21 +49,23 @@ public class BeanInspectorExample {
 		v.registerPlugin(new ContentTools());
 		v.setContent(sgc);
 
-		//create an Inspector for the domain
+		//create an Inspector for the domain and tell it about the method "update", which it needs to call if
+		//changes should have an effect.
 		InspectorPanel inspector = new InspectorPanel();
-		inspector.setObject(psf, null);
-		JButton updateButton=new JButton("update");
-		updateButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				psf.update();
+		inspector.setObject(psf, "update");
+		
+		//add the inspector to the viewer. 
+		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin() {
+			@Override
+			public PluginInfo getPluginInfo() {
+				return new PluginInfo("Domain");
 			}
-		});		
-		inspector.add(updateButton,BorderLayout.SOUTH);
-		inspector.revalidate();
-		//add the inspector to the viewer
-		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin("Domain");
+		};
 		plugin.getShrinkPanel().add(inspector);
 		v.registerPlugin(plugin);
+		
+		v.setShowPanelSlots(true, true, true, true);
+		v.getPlugin(Shell.class).getShrinkPanel().setShrinked(false);
 		
 		//Start the viewer
 		v.startup();
