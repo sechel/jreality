@@ -28,7 +28,7 @@ public class DarbouxDemo {
 	SubdividedPolygon subPoly;
 	
 	static double initialR = 0.5;
-	static int initialN = 2;
+	static int initialN = 0;
 	
 	public void setR(double r) {
 		dt_plus.setR(r);
@@ -45,13 +45,23 @@ public class DarbouxDemo {
 	
 	public DarbouxDemo() {
 		DragPointSet dps = new DragPointSet(circle(5, 1));
-		dps.setClosed(closed);
+		
+		dps.setClosed(false);
 		root.addChild(dps.getBase());
 		subPoly = new SubdividedPolygon(dps);
 	
 		double[] startPoint = new double[3];
-		dt_plus = new DarbouxTransform(subPoly, startPoint);
-		dt_minus = new DarbouxTransform(subPoly, startPoint);
+		dt_plus = new DarbouxTransform(dps, startPoint);
+		dt_minus = new DarbouxTransform(dps, startPoint);
+		
+		final StartPoint sp = new StartPoint(dps);
+		sp.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				dt_plus.setStartPoint(sp.getPoint());
+				dt_minus.setStartPoint(sp.getPoint());
+			}
+		});
+		root.addChild(sp.getRoot());
 		
 		PointSequenceView curveView = new PointSequenceView(subPoly);
 		curveView.setPointRadius(0.03);
