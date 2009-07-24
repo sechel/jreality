@@ -23,8 +23,8 @@ import de.jreality.util.Input;
 
 /**
  * This class contains the third in a series of 8 simple introductory examples which mimic the
- * functionality of the 
- * <a href="http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/User_Tutorial"> jReality User Tutorial 
+ * 	functionality of the 
+ * <a href="http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/User_Tutorial">jReality User Tutorial 
  *</a>.  
  *
  * Same as {@link Intro02} but material properties changed (using {@link Appearance#setAttribute(String, Object)
@@ -35,8 +35,13 @@ import de.jreality.util.Input;
 public class Intro03 {
 
 	public static void main(String[] args)	{
-		SceneGraphComponent dodecSGC = readDodec();
-		Appearance ap = dodecSGC.getAppearance();
+		SceneGraphComponent sgc = readDodec();
+		Appearance ap = sgc.getAppearance();
+//		SceneGraphComponent sgc = new SceneGraphComponent("Intro3");
+//		sgc.setGeometry(Primitives.icosahedron());
+//		Appearance ap = new Appearance();
+//		sgc.setAppearance(ap);
+
 		// change the color and size of the tubes and spheres
 		// do so without using shader interfaces
 		ap.setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.yellow);
@@ -48,7 +53,7 @@ public class Intro03 {
 		ap.setAttribute(TRANSPARENCY_ENABLED, true);
 		ap.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
 		ap.setAttribute(POLYGON_SHADER+"."+TRANSPARENCY, .4);
-		JRViewer.display(dodecSGC);
+		JRViewer.display(sgc);
 	}
 
 	private static SceneGraphComponent readDodec() {
@@ -56,8 +61,8 @@ public class Intro03 {
 		SceneGraphComponent scp = null;
 		try {
 			scp = Readers.read(Input.getInput(url));
-// alternative to access the file as a URL
-//			scp = Readers.read(Input.getInput("http://www3.math.tu-berlin.de/jreality/download/data/dodec.off"));
+			// alternative to access the file as a URL
+			//scp = Readers.read(Input.getInput("http://www3.math.tu-berlin.de/jreality/download/data/dodec.off"));
 			scp.setName("Dodecahedron");
 		} catch (IOException e) {
 			e.printStackTrace();

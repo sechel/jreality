@@ -25,16 +25,16 @@ public class Intro02 {
 
 	private static SceneGraphComponent readDodec() {
 		URL url = Intro02.class.getResource("dodec.off");
-		SceneGraphComponent scp = null;
+		SceneGraphComponent sgc = null;
 		try {
-			scp = Readers.read(Input.getInput(url));
+			sgc = Readers.read(Input.getInput(url));
 // alternative to access the file as a URL
-//			scp = Readers.read(Input.getInput("http://www3.math.tu-berlin.de/jreality/download/data/dodec.off"));
-			scp.setName("Dodecahedron");
+//			sgc = Readers.read(Input.getInput("http://www3.math.tu-berlin.de/jreality/download/data/dodec.off"));
+			sgc.setName("Dodecahedron");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return scp;
+		return sgc;
 	}
 
 }
