@@ -20,6 +20,7 @@ import de.jreality.tutorial.util.TextSlider;
 import de.jreality.tutorial.util.polygon.DragPointSet;
 import de.jreality.tutorial.util.polygon.PointSequenceView;
 import de.jreality.tutorial.util.polygon.SubdividedPolygon;
+import de.varylab.jrworkspace.plugin.PluginInfo;
 
 public class DarbouxDemo {
 
@@ -122,7 +123,12 @@ public class DarbouxDemo {
 			}
 		});
 		
-		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin("alpha");
+		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin() {
+			@Override
+			public PluginInfo getPluginInfo() {
+				return new PluginInfo("r Slider");
+			}
+		};
 		plugin.getShrinkPanel().setLayout(new GridBagLayout());
 		plugin.getShrinkPanel().add(slider);
 		plugin.getShrinkPanel().add(subdivSpinner);
