@@ -8,34 +8,57 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.math.Rn;
 
+/**
+ * A subdivider that uses 4-point subdivision. For closed or open point sequences.
+ * It will be updated whenever the control point sequence changes.
+ * 
+ * @author Steffen Weissmann
+ */
 public class SubdividedPolygon implements ChangeListener, PointSequence {
 
-	int subdivisionSteps = 3;
+	int subdivisionSteps = 2;
 	
-	PointSequence controlPointSet;
+	// the PointSequence we will subdivide...
+	private PointSequence controlPoints;
+	
+	// the resulting points
 	private double[][] pts;
 	
-	public SubdividedPolygon(PointSequence dragPS) {
-		controlPointSet=dragPS;
-		controlPointSet.addChangeListener(this);
+	/**
+	 * Create a SubdividedPolygon for a set of control points.
+	 * @param controlPoints the control point sequence used for subdivision.
+	 */
+	public SubdividedPolygon(PointSequence controlPoints) {
+		this.controlPoints=controlPoints;
+		// we attach this class as a change listener to the control points.
+		controlPoints.addChangeListener(this);
 		update();
 	}
-		
-	private void update() {
-		pts = computeSpline();
-		fireChange();
+
+	/**
+	 * Set the number of subdivision steps.
+	 * @param n number of steps
+	 */
+	public void setSubdivisionLevel(int n) {
+		this.subdivisionSteps=n;
+		update();
 	}
-	
+
+	// compute the subdivided points
 	private double[][] computeSpline() {
-		double[][] cur = controlPointSet.getPoints();
+		double[][] cur = controlPoints.getPoints();
 		for (int i=0; i<subdivisionSteps; i++) {
-			int n = controlPointSet.isClosed() ? cur.length : cur.length-1;
+			int n = isClosed() ? cur.length : cur.length-1;
 			double[][] sub = new double[cur.length+n][];
 			for (int j=0; j<n; j++) {
 				sub[2*j] = cur[j];
-				sub[2*j+1] = subdivide(point(cur, j-1), point(cur, j), point(cur, j+1), point(cur, j+2));
+				sub[2*j+1] = subdivide(
+						point(cur, j-1),
+						point(cur, j),
+						point(cur, j+1),
+						point(cur, j+2));
 			}
-			if (!controlPointSet.isClosed()) {
+			if (!isClosed()) {
 				sub[2*n]=cur[n];
 			}
 			cur = sub;
@@ -46,20 +69,18 @@ public class SubdividedPolygon implements ChangeListener, PointSequence {
 	private double[] point(double[][] pts, int j) {
 		int n=pts.length;
 		if (j>=0 && j<n) return pts[j];
-		if (controlPointSet.isClosed()) return pts[(j+n)%n];
+		if (controlPoints.isClosed()) return pts[(j+n)%n];
+		double[] p0=null, p1=null;
 		if (j==-1) {
-			double[] p0 = pts[0];
-			double[] p1 = pts[1];
-			double[] ret = Rn.linearCombination(null, 2, p0, -1, p1);
-			return ret;
+			p0 = pts[0];
+			p1 = pts[1];
 		}
 		if (j==n) {
-			double[] p0 = pts[n-2];
-			double[] p1 = pts[n-1];
-			double[] ret = Rn.linearCombination(null, 2, p1, -1, p0);
-			return ret;
+			p1 = pts[n-2];
+			p0 = pts[n-1];
 		}
-		throw new IllegalArgumentException();
+		double[] ret = Rn.linearCombination(null, 2, p0, -1, p1);
+		return ret;
 	}
 
 	private static double[] subdivide(double[] v1, double[] v2, double[] v3, double[] v4) {
@@ -68,14 +89,32 @@ public class SubdividedPolygon implements ChangeListener, PointSequence {
     	return ret;
 	}
 
+	// recompute subdivision
+	private void update() {
+		pts = computeSpline();
+		fireChange();
+	}
+	
+	/**
+	 * returns the subdivided point sequence.
+	 */
 	public double[][] getPoints() {
 		return pts;
 	}
-	
+
+	/**
+	 * this is called from the control point sequence.
+	 */
 	public void stateChanged(ChangeEvent e) {
 		update();
 	}
 
+	public boolean isClosed() {
+		return controlPoints.isClosed();
+	}
+	
+	/******** listener code ********/
+	
 	private List<ChangeListener> listeners = new LinkedList<ChangeListener>();
 	
 	private void fireChange() {
@@ -95,15 +134,6 @@ public class SubdividedPolygon implements ChangeListener, PointSequence {
 		synchronized (listeners) {
 			listeners.remove(cl);
 		}
-	}
-
-	public void setSubdivisionLevel(int n) {
-		this.subdivisionSteps=n;
-		update();
-	}
-	
-	public boolean isClosed() {
-		return controlPointSet.isClosed();
 	}
 	
 }

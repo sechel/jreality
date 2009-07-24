@@ -13,29 +13,47 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.ShaderUtility;
 
+/**
+ * A geometry representation for a {@link PointSequence}. Will update to any changes of
+ * the sequence.
+ * 
+ * @author Steffen Weissmann
+ */
 public class PointSequenceView implements ChangeListener {
 
-	SceneGraphComponent base = new SceneGraphComponent("subdivided poly");
-	IndexedLineSetFactory lsf = new IndexedLineSetFactory();
+	// the component containing the polygon geometry
+	private SceneGraphComponent base = new SceneGraphComponent("subdivided poly");
+	private IndexedLineSetFactory lsf = new IndexedLineSetFactory();
+	
+	// the point sequence to render as a polygon
 	private PointSequence sequence;
-	private DefaultGeometryShader dps;
+	
+	// Shaders to set appearance attributes
 	private DefaultPointShader ps;
 	private DefaultLineShader ls;
 	
+	/**
+	 * Constructs a geometry for a point sequence.
+	 * 
+	 * @param sequence the sequence to visualize.
+	 */
 	public PointSequenceView(PointSequence sequence) {
 		this.sequence = sequence;
 		sequence.addChangeListener(this);
 		base.setGeometry(lsf.getGeometry());
 		base.setAppearance(new Appearance());
-		dps = (DefaultGeometryShader) ShaderUtility.createDefaultGeometryShader(base.getAppearance(), false);
+		
+		DefaultGeometryShader dps = (DefaultGeometryShader)
+			ShaderUtility.createDefaultGeometryShader(base.getAppearance(), false);
 		ps = (DefaultPointShader) dps.getPointShader();
 		ls = (DefaultLineShader) dps.getLineShader();
+		
 		setPointRadius(0.04);
 		setLineRadius(0.02);
 		setLineColor(Color.orange);
 		setPointColor(Color.green);
 		
-		setPoints(sequence.getPoints());
+		update();
 	}
 
 	public void setPointRadius(double r) {
@@ -54,7 +72,9 @@ public class PointSequenceView implements ChangeListener {
 		ls.setDiffuseColor(c);
 	}
 	
-	private void setPoints(double[][] pts) {
+	// update the geometry
+	private void update() {
+		double[][] pts = sequence.getPoints();
 		int n = pts.length;
 		if (n != lsf.getVertexCount()) {
 			int [][] inds = new int[n][2];
@@ -71,7 +91,7 @@ public class PointSequenceView implements ChangeListener {
 	}
 	
 	public void stateChanged(ChangeEvent e) {
-		setPoints(sequence.getPoints());
+		update();
 	}
 
 	public SceneGraphComponent getBase() {
