@@ -31,7 +31,7 @@ public class BeanInspectorExample {
 	};
 	
 	public static void main(String[] args) {
-		final ParametricSurfaceFactory psf = new ParametricSurfaceFactory(new Swallowtail());
+		ParametricSurfaceFactory psf = new ParametricSurfaceFactory(new Swallowtail());
 		psf.setUMin(-.3);psf.setUMax(.3);psf.setVMin(-.4);psf.setVMax(.4);
 		psf.setULineCount(20);psf.setVLineCount(20);
 		psf.setGenerateEdgesFromFaces(true);
