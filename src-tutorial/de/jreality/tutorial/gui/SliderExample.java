@@ -15,6 +15,7 @@ import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tutorial.geom.ParametricSurfaceExample;
 import de.jreality.ui.JSliderVR;
+import de.varylab.jrworkspace.plugin.PluginInfo;
 
 /** 
  * Extends {@link ParametricSurfaceExample}. Visualizes the associated family of 
@@ -90,8 +91,13 @@ public class SliderExample {
 			}
 		});
 		
-		//add the slider to the viewer
-		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin("alpha");
+		//wrap  the slider in a plugin in order to add it to the viewer
+		ViewShrinkPanelPlugin plugin = new ViewShrinkPanelPlugin() {
+			@Override
+			public PluginInfo getPluginInfo() {
+				return new PluginInfo("alpha");
+			}
+		};
 		plugin.getShrinkPanel().setLayout(new GridBagLayout());
 		plugin.getShrinkPanel().add(slider);
 		v.registerPlugin(plugin);
