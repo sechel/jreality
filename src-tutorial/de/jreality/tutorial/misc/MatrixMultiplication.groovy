@@ -2,7 +2,7 @@
 // Author: Michael Pacchioli
 // Version 0.2
 
-package de.jreality.examples
+package de.jreality.tutorial.misc
 
 import java.awt.Color
 import javax.swing.SwingConstants

@@ -1,4 +1,7 @@
 // a sample groovy script using jReality classes
+
+package de.jreality.tutorial.misc
+
 import de.jreality.geometry.*
 import de.jreality.scene.*
 import de.jreality.util.*
