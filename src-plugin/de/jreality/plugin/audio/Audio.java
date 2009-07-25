@@ -12,6 +12,7 @@ import de.jreality.audio.Interpolation;
 import de.jreality.audio.jack.AbstractJackRenderer;
 import de.jreality.audio.jack.JackAmbisonicsPlanar2ndOrderRenderer;
 import de.jreality.audio.jack.JackAmbisonicsRenderer;
+import de.jreality.audio.jack.JackManager;
 import de.jreality.audio.javasound.AbstractJavaSoundRenderer;
 import de.jreality.audio.javasound.StereoRenderer;
 import de.jreality.audio.javasound.VbapRenderer;
@@ -139,7 +140,7 @@ public class Audio extends Plugin implements ChangeListener {
 			AbstractJackRenderer ajr = (AbstractJackRenderer) renderer;
 			ajr.setLabel(prefs.getJackLabel());
 			ajr.setTarget(prefs.getJackTarget());
-			ajr.setRetries(prefs.getJackRetries());
+			JackManager.setRetries(prefs.getJackRetries());
 		}
 
 		Thread launcher = new Thread() {

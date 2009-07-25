@@ -43,7 +43,7 @@ public class JackAmbisonicsStereoDecoder {
 				}
 			}
 		});
-		client.start(null, "");
+		client.connectOutputPorts("");
 		
 		while (true) {
 			Thread.sleep(100);
