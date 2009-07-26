@@ -76,7 +76,7 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 
 	public void process(JJackAudioEvent ev) {
 		currentJJackEvent = ev;
-		try {
+		try { // NullPointerException is conceivable if singleBackend is false and shutdown() is called while process callback is pending...
 			backend.processFrame(encoder, ev.getOutput().capacity());
 		} catch (NullPointerException e) {
 			// do nothing
