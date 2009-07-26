@@ -13,6 +13,16 @@ import de.gulden.framework.jjack.JJackNativeClientEvent;
 import de.gulden.framework.jjack.JJackNativeClientListener;
 
 /**
+ * Manages a single JACK client across all JACK sources and backends.  Using a single client is the only way to
+ * guarantee that inputs will be processed before outputs (because the outputs will depend on input from the inputs).
+ * Both inputs and outputs are implementations of {@link JJackAudioProcessor}.
+ * 
+ * Inputs and outputs request a range of ports from JackManager and receive a key with which to access the ports.
+ * After the native client has been launched, sinks and sources can obtain port numbers of the native client
+ * corresponding to their keys.
+ * 
+ * Note that port assignments may change when the native client is restarted, so that port numbers should not be
+ * cached.
  * 
  * @author brinkman
  *
@@ -21,10 +31,10 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 
 	private static String label = "jReality";
 	private static int portsIn = 0, portsOut = 0;
-	private static JackManager manager = new JackManager();
+	private static JackManager manager = new JackManager(); // singleton
 	private static JJackNativeClient nativeClient = null;
 	
-	private static long currentKey = 0L;
+	private static long currentKey = 1L;
 	private static HashMap<Long, Boolean> isInput = new HashMap<Long, Boolean>();
 	private static HashMap<Long, Integer> ranges = new HashMap<Long, Integer>();
 	private static HashMap<Long, String> targets = new HashMap<Long, String>();
@@ -37,86 +47,12 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 		inputs = new CopyOnWriteArrayList<WeakReference<JJackAudioProcessor>>(),
 		outputs = new CopyOnWriteArrayList<WeakReference<JJackAudioProcessor>>();
 
-	public static int getPort(long key) {
-		return ports.get(key);
-	}
 	
-	public static synchronized long requestInputPorts(int range, String target) {
-		checkRange(range, portsIn);
-		portsIn += range;
-		return requestPorts(range, target, true);
-	}
-	
-	public static synchronized long requestOutputPorts(int range, String target) {
-		checkRange(range, portsOut);
-		portsOut += range;
-		return requestPorts(range, target, false);
-	}
-	
-	public static synchronized void releasePorts(long key) {
-		if (!ranges.containsKey(key)) return;
-		
-		int r = ranges.get(key);
-		if (isInput.get(key)) {
-			portsIn -= r;
-		} else {
-			portsOut -= r;
-		}
-		
-		isInput.remove(key);
-		ranges.remove(key);
-		targets.remove(key);
-		ports.remove(key);
-	}
-	
-	private static void checkRange(int range, int p0) {
-		if (range<=0) {
-			throw new IllegalArgumentException("range must be positive");
-		}
-		if (p0+range>JJackNativeClient.getMaxPorts()) {
-			throw new IllegalStateException("total number of ports too large");
-		}
-	}
-	
-	private static long requestPorts(int range, String target, boolean inp) {
-		isInput.put(currentKey, inp);
-		ranges.put(currentKey, range);
-		targets.put(currentKey, target);
-		return currentKey++;
-	}
-	
-	public static synchronized void addInput(JJackAudioProcessor proc) {
-		addProcessor(proc, inputs);
-	}
-	
-	public static synchronized void removeInput(JJackAudioProcessor proc) {
-		inputs.remove(findReference(proc, inputs));
-	}
-	
-	public static synchronized void addOutput(JJackAudioProcessor proc) {
-		addProcessor(proc, outputs);
-	}
-	
-	public static synchronized void removeOutput(JJackAudioProcessor proc) {
-		outputs.remove(findReference(proc, outputs));
-	}
-	
-	private static void addProcessor(JJackAudioProcessor proc, List<WeakReference<JJackAudioProcessor>> list) {
-		if (findReference(proc, list)!=null) return;
-		list.add(new WeakReference<JJackAudioProcessor>(proc));
-	}
-
-	private static WeakReference<JJackAudioProcessor> findReference(JJackAudioProcessor proc, List<WeakReference<JJackAudioProcessor>> list) {
-		for(WeakReference<JJackAudioProcessor> ref: list) {
-			if (ref.get()==proc) return ref;
-		}
-		return null;
-	}
-	
-	public static void setLabel(String label) {
-		JackManager.label = label;
-	}
-	
+	/**
+	 * Launches a native JACK client
+	 * 
+	 * @throws JJackException
+	 */
 	public static synchronized void launch() throws JJackException {
 		shutdown();
 		nativeClient = new JJackNativeClient(label, portsIn, portsOut, manager);
@@ -139,12 +75,137 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 		ready = true;
 	}
 	
+	/**
+	 * Shuts down the native JACK client, if any
+	 */
 	public static synchronized void shutdown() {
 		if (nativeClient!=null) {
 			nativeClient.close();
 			nativeClient = null;
 			ready = false;
 		}
+	}
+	
+	/**
+	 * Sets the name of the native JACK client.
+	 * 
+	 * @param label
+	 */
+	public static void setLabel(String label) {
+		JackManager.label = label;
+	}
+
+	/**
+	 * Sets the number of attempts to relaunch the native client after zombification.
+	 * 
+	 * @param retries
+	 */
+	public static void setRetries(int retries) {
+		JackManager.retries = retries;
+	}
+	
+	public static synchronized void addInput(JJackAudioProcessor proc) {
+		addProcessor(proc, inputs);
+	}
+	
+	public static synchronized void removeInput(JJackAudioProcessor proc) {
+		inputs.remove(findReference(proc, inputs));
+	}
+	
+	public static synchronized void addOutput(JJackAudioProcessor proc) {
+		addProcessor(proc, outputs);
+	}
+	
+	public static synchronized void removeOutput(JJackAudioProcessor proc) {
+		outputs.remove(findReference(proc, outputs));
+	}
+	
+	/**
+	 * Reserves a range of input ports
+	 * 
+	 * @param range: number of ports requested
+	 * @param target: regular expression defining output ports to autoconnect to
+	 * @return a key (of type long) representing this range of ports
+	 */
+	public static synchronized long requestInputPorts(int range, String target) {
+		checkRange(range, portsIn);
+		portsIn += range;
+		return requestPorts(range, target, true);
+	}
+	
+	/**
+	 * Reserves a range of output ports
+	 * 
+	 * @param range: number of ports requested
+	 * @param target: regular expression defining input ports to autoconnect to
+	 * @return a key (of type long) representing this range of ports
+	 */
+	public static synchronized long requestOutputPorts(int range, String target) {
+		checkRange(range, portsOut);
+		portsOut += range;
+		return requestPorts(range, target, false);
+	}
+	
+	/**
+	 * Releases a range of ports corresponding to a key
+	 * 
+	 * @param key
+	 */
+	public static synchronized void releasePorts(long key) {
+		if (!ranges.containsKey(key)) return;
+		
+		int r = ranges.get(key);
+		if (isInput.get(key)) {
+			portsIn -= r;
+		} else {
+			portsOut -= r;
+		}
+		
+		isInput.remove(key);
+		ranges.remove(key);
+		targets.remove(key);
+		ports.remove(key);
+	}
+
+	/**
+	 * Returns the number of the first port in the range corresponding to the given key
+	 * 
+	 * @param key
+	 * @return port number
+	 */
+	public static int getPort(long key) {
+		return ports.get(key);
+	}
+	
+	
+	// the rest is for internal use only
+	
+	private static void checkRange(int range, int p0) {
+		if (range<=0) {
+			throw new IllegalArgumentException("range must be positive");
+		}
+		if (p0+range>JJackNativeClient.getMaxPorts()) {
+			throw new IllegalStateException("total number of ports too large");
+		}
+	}
+	
+	private static long requestPorts(int range, String target, boolean inp) {
+		isInput.put(currentKey, inp);
+		ranges.put(currentKey, range);
+		targets.put(currentKey, target);
+		return currentKey++;
+	}
+	
+	private static void addProcessor(JJackAudioProcessor proc, List<WeakReference<JJackAudioProcessor>> list) {
+		if (findReference(proc, list)!=null) return;
+		list.add(new WeakReference<JJackAudioProcessor>(proc));
+	}
+
+	private static WeakReference<JJackAudioProcessor> findReference(JJackAudioProcessor proc, List<WeakReference<JJackAudioProcessor>> list) {
+		for(WeakReference<JJackAudioProcessor> ref: list) {
+			if (ref.get()==proc) return ref;
+		}
+		return null;
 	}
 
 	private JackManager() {}
@@ -164,10 +225,6 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 				list.remove(ref);
 			}
 		}
-	}
-
-	public static void setRetries(int retries) {
-		JackManager.retries = retries;
 	}
 	
 	public void handleShutdown(JJackNativeClientEvent e) {

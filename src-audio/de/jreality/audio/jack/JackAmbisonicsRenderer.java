@@ -12,6 +12,10 @@ import de.jreality.audio.AudioBackend;
  */
 public class JackAmbisonicsRenderer extends AbstractJackRenderer {
 	
+	{
+		nPorts = 4;
+	}
+	
 	public JackAmbisonicsRenderer() {
 		encoder = new AmbisonicsSoundEncoder() {
 			public void finishFrame() {
@@ -22,10 +26,5 @@ public class JackAmbisonicsRenderer extends AbstractJackRenderer {
 				currentJJackEvent.getOutput(port+3).put(bz);
 			}
 		};
-	}
-
-	@Override
-	protected long registerPorts() {
-		return JackManager.requestOutputPorts(4, target);
 	}
 }

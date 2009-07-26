@@ -9,6 +9,9 @@ import de.jreality.audio.AmbisonicsPlanar2ndOrderSoundEncoder;
  */
 public class JackAmbisonicsPlanar2ndOrderRenderer extends AbstractJackRenderer {
 
+	{
+		nPorts = 5;
+	}
 	
 	public JackAmbisonicsPlanar2ndOrderRenderer() {
 		encoder=new AmbisonicsPlanar2ndOrderSoundEncoder() {
@@ -21,10 +24,5 @@ public class JackAmbisonicsPlanar2ndOrderRenderer extends AbstractJackRenderer {
 				currentJJackEvent.getOutput(port+4).put(bv);
 			}
 		};
-	}
-
-	@Override
-	protected long registerPorts() {
-		return JackManager.requestOutputPorts(5, target);
 	}
 }
