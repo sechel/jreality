@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.ViewShrinkPanelPlugin;
@@ -12,6 +13,7 @@ import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
+import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
 import de.jtem.beans.InspectorPanel;
 import de.varylab.jrworkspace.plugin.PluginInfo;
@@ -29,12 +31,16 @@ public class KSurfacesApp {
 	private double a2=.9;
 	private double b1=1.2;
 	private double b2=1.1;
+	private int t=1;
 	private double[][][] gaussMap;
 	private double[][][] initialGaussMap;
+	private double[][][] map;
 	
 	final private SceneGraphComponent root=new SceneGraphComponent("k-surfaces");
 	final private SceneGraphComponent gaussMapSgc=new SceneGraphComponent("Gauss map");
 	final private IndexedFaceSetFactory gaussMapIfs = new IndexedFaceSetFactory();
+	final private SceneGraphComponent mapSgc=new SceneGraphComponent("The K-surface");
+	final private IndexedFaceSetFactory mapIfs = new IndexedFaceSetFactory();
 
 	final private SceneGraphComponent initalData0=new SceneGraphComponent("initial data, t=0");
 	final private IndexedLineSetFactory initialDataIls0 = new IndexedLineSetFactory();
@@ -48,6 +54,13 @@ public class KSurfacesApp {
 		gaussMapIfs.setGenerateFaceNormals(true);
 		gaussMapSgc.setGeometry(gaussMapIfs.getGeometry());
 		root.addChild(gaussMapSgc);
+
+		mapIfs.setGenerateEdgesFromFaces(true);
+		mapIfs.setGenerateFaceNormals(true);
+		mapSgc.setGeometry(mapIfs.getGeometry());
+		mapSgc.setTransformation(new Transformation(
+				MatrixBuilder.euclidean().translate(3,0,0).getArray()));
+		root.addChild(mapSgc);
 
 		initalData0.setGeometry(initialDataIls0.getGeometry());
 		initalData0.setAppearance(new Appearance());
@@ -86,34 +99,16 @@ public class KSurfacesApp {
 		}
 	}
 	
+	//calculate the gauss map and update it via gaussMapIfs
 	private void gaussMap() {
 		//calculate the gauss map
 		gaussMap=new double[m][n][3];
 		KSurfaces.gaussMapFromInitialAnnulus(initialGaussMap, gaussMap);
 		
-		//rearrange the vertices for use in an IndexedFaceSetFactory
-		double[][] vertices=new double[n*m][3];
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
-				for (int k = 0; k < 3; k++) { 
-					vertices[j+i*n][k]=gaussMap[i][j][k];
-				}
-			}
-		}
-		
-		//calculate the combinatorics of the faces for use in an IndexedFaceSetFactory
-		int[][] faces = new int[n*(m-2)][4];
-		for (int i = 0; i < m-2; i++) {
-			for (int j = 0; j < n; j++) {
-				int k = j + i*n;
-				faces[k][0] = j       + i*n;
-				faces[k][1] = j       + (i+1)*n;
-				faces[k][2] = (j+1)%n + (i+2)*n;
-				faces[k][3] = (j+1)%n + (i+1)*n;
-			}
-		}
+		double[][] vertices = rearrangeVertices(gaussMap);
+		int[][] faces = calcFaces();
 
-		//put the data into the IndexedFaceSetFactory ifs and update the Geometry
+		//put the data into the IndexedFaceSetFactory and update the Geometry
 		gaussMapIfs.setVertexCount(n*m);
 		gaussMapIfs.setVertexCoordinates(vertices);
 		gaussMapIfs.setFaceCount(n*(m-2));
@@ -124,8 +119,53 @@ public class KSurfacesApp {
 		initialDataIls0.setVertexCoordinates(gaussMap[0]);
 		initialDataIls0.update();
 		initialDataIls1.setVertexCount(n);
-		initialDataIls1.setVertexCoordinates(gaussMap[1]);
+		initialDataIls1.setVertexCoordinates(gaussMap[t]);
 		initialDataIls1.update();
+	}
+
+	//calculate the map of K-surface and update it via gaussMapIfs
+	private void map() {
+		//calculate the map
+		map=new double[m][n][3];
+		KSurfaces.kSurfaceFromGaussMap(gaussMap, map);
+		
+		double[][] vertices = rearrangeVertices(map);
+		int[][] faces = calcFaces();
+
+		//put the data into the IndexedFaceSetFactory and update the Geometry
+		mapIfs.setVertexCount(n*m);
+		mapIfs.setVertexCoordinates(vertices);
+		mapIfs.setFaceCount(n*(m-2));
+		mapIfs.setFaceIndices(faces);
+		mapIfs.update();
+	}
+
+	//calculate the combinatorics of the faces for use in an IndexedFaceSetFactory
+	private int[][] calcFaces() {
+		int[][] faces = new int[n*(m-2)][4];
+		for (int i = 0; i < m-2; i++) {
+			for (int j = 0; j < n; j++) {
+				int k = j + i*n;
+				faces[k][0] = j       + i*n;
+				faces[k][1] = j       + (i+1)*n;
+				faces[k][2] = (j+1)%n + (i+2)*n;
+				faces[k][3] = (j+1)%n + (i+1)*n;
+			}
+		}
+		return faces;
+	}
+
+	//rearrange the vertices for use in an IndexedFaceSetFactory
+	private double[][] rearrangeVertices(double[][][] xtVertices) {
+		double[][] vertices=new double[n*m][3];
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				for (int k = 0; k < 3; k++) { 
+					vertices[j+i*n][k]=xtVertices[i][j][k];
+				}
+			}
+		}
+		return vertices;
 	}
 	
 	
@@ -135,6 +175,7 @@ public class KSurfacesApp {
 	public void update() {
 		ellipticConesInitialCondition();
 		gaussMap();
+		map();
 	}
 
 	/**
@@ -150,6 +191,7 @@ public class KSurfacesApp {
 
 	public void setM(int m) {
 		if (m<2) return;
+		if (m<=t) return;
 		this.m = m;
 	}
 
@@ -194,6 +236,15 @@ public class KSurfacesApp {
 		this.b2 = b2;
 	}
 
+	public int getT() {
+		return t;
+	}
+
+	public void setT(int t) {
+		if (t<2) return;
+		if (t>=m) m=t+1;
+		this.t = t;
+	}
 
 	public static void main(String[] args) {
 		KSurfacesApp ksa = new KSurfacesApp();
@@ -221,6 +272,7 @@ public class KSurfacesApp {
 
 		v.startup();
 	}
+
 
 }
 
