@@ -45,6 +45,7 @@ public class SliderExample {
 		//add a parameter to the surface
 		private double alpha;
 
+		//get and set methods to read and write the parameter
 		public double getAlpha() {
 			return alpha;
 		}
@@ -52,27 +53,35 @@ public class SliderExample {
 			this.alpha = alpha;
 		}
 		
+		//implementation of the formula
 		public void evaluate(double u, double v, double[] xyz, int index) {
 			xyz[index]= Math.cos(alpha) * Math.sinh(v) * Math.sin(u) + Math.sin(alpha) * Math.cosh(v) * Math.cos(u);
 			xyz[index+2]= -Math.cos(alpha) * Math.sinh(v) * Math.cos(u) + Math.sin(alpha) * Math.cosh(v) * Math.sin(u);
 			xyz[index+1]= u * Math.cos(alpha) + v * Math.sin(alpha);
 		}
+		//the values of that map are elements of 3-space
 		public int getDimensionOfAmbientSpace() { return 3;	}
+		//the surface is mutable, because the extra alpha parameter changes the behavior of the evaluate method 
 		public boolean isImmutable() { return false; }
 	};
 	
 	public static void main(String[] args) {
+		//The immersion and the factory need to be final, because we want to access them from
+		//the listener of the factory.
 		final HelicoidCatenoid helicoidCatenoid = new HelicoidCatenoid();
 		final ParametricSurfaceFactory psf = new ParametricSurfaceFactory(helicoidCatenoid);
+		//parameters of the factory
 		psf.setUMin(-Math.PI);psf.setUMax(Math.PI);psf.setVMin(-1);psf.setVMax(1);
 		psf.setULineCount(31);psf.setVLineCount(10);
 		psf.setGenerateEdgesFromFaces(true);
 		psf.setGenerateVertexNormals(true);
 		psf.update();
 		
+		//put the geometry into a scene graph component
 		SceneGraphComponent sgc = new SceneGraphComponent("Helicoid-Catenoid");
 		sgc.setGeometry(psf.getIndexedFaceSet());
 		
+		//build a JRViewerVR
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addVRSupport();
@@ -83,7 +92,10 @@ public class SliderExample {
 
 		//create a slider for the parameter alpha 
 		final int steps=60;
+		//also the slider is made final, so that we can access it from the listener
 		final JSliderVR slider=new JSliderVR(0,steps,0);
+		//now we add an anonymous class as listener to the slider by implementing the
+		//interface ChangeListener 
 		slider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				helicoidCatenoid.setAlpha( 2*Math.PI * slider.getValue()/ steps );
@@ -98,6 +110,8 @@ public class SliderExample {
 				return new PluginInfo("alpha");
 			}
 		};
+		//a layout manager is needed, so that the slider is stretched
+		//to fill the available horizontal space
 		plugin.getShrinkPanel().setLayout(new GridBagLayout());
 		plugin.getShrinkPanel().add(slider);
 		v.registerPlugin(plugin);
