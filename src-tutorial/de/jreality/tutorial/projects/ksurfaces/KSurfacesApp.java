@@ -2,6 +2,9 @@ package de.jreality.tutorial.projects.ksurfaces;
 
 import java.awt.Color;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.math.MatrixBuilder;
@@ -15,6 +18,9 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.tutorial.util.polygon.DragPointSet;
+import de.jreality.tutorial.util.polygon.PointSequenceView;
+import de.jreality.tutorial.util.polygon.SubdividedPolygon;
 import de.jtem.beans.InspectorPanel;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
@@ -26,12 +32,12 @@ import de.varylab.jrworkspace.plugin.PluginInfo;
 public class KSurfacesApp {
 	
 	private int m=3; 
-	private int n=30; 
+	private int n=10; 
 	private double a1=1; 
 	private double a2=.9;
 	private double b1=1.2;
 	private double b2=1.1;
-	private int t=1;
+	private int time=1;
 	private double[][][] gaussMap;
 	private double[][][] initialGaussMap;
 	private double[][][] map;
@@ -44,12 +50,13 @@ public class KSurfacesApp {
 
 	final private SceneGraphComponent initalData0=new SceneGraphComponent("initial data, t=0");
 	final private IndexedLineSetFactory initialDataIls0 = new IndexedLineSetFactory();
-	final private SceneGraphComponent initalData1=new SceneGraphComponent("initial data, t=1");
-	final private IndexedLineSetFactory initialDataIls1 = new IndexedLineSetFactory();
+	final private DragPointSet dragPointSet;
+	final private SubdividedPolygon time1SubdivPoly;
 	
 	final private SceneGraphComponent sphere=new SceneGraphComponent("unit sphere");
 	
 	public KSurfacesApp() {
+		// scene graph component for the gauss map
 		gaussMapIfs.setGenerateEdgesFromFaces(true);
 		gaussMapIfs.setGenerateFaceNormals(true);
 		gaussMapSgc.setGeometry(gaussMapIfs.getGeometry());
@@ -65,15 +72,42 @@ public class KSurfacesApp {
 		initalData0.setGeometry(initialDataIls0.getGeometry());
 		initalData0.setAppearance(new Appearance());
 		initalData0.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.red);
-		initalData0.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, .3);
+		initalData0.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, .2);
 		gaussMapSgc.addChild(initalData0);
 
-		initalData1.setGeometry(initialDataIls1.getGeometry());
-		initalData1.setAppearance(new Appearance());
-		initalData1.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, Color.yellow);
-		initalData1.getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, .3);
-		gaussMapSgc.addChild(initalData1);
+		//initial condition at time 1 draggable points
+		a1=0;a2=0;
+		b1=.2;b2=.2;
+		ellipticConesInitialCondition();
+		//to keep the points on the unit sphre override the transform method
+		dragPointSet=new DragPointSet(initialGaussMap[1]) {
+			@Override
+			public void transform(double[] vertex) {
+				double l=R3.norm(vertex);
+				vertex[0]=vertex[0]/l;
+				vertex[1]=vertex[1]/l;
+				vertex[2]=vertex[2]/l;
+			}
+		};
+		dragPointSet.getBase().getAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, .16);
+		gaussMapSgc.addChild(dragPointSet.getBase());
+		dragPointSet.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				KSurfacesApp.this.update();
+			}
+		});
 		
+
+		//initial condition at time 1 subdivided Polygon points
+		time1SubdivPoly = new SubdividedPolygon(dragPointSet);
+		time1SubdivPoly.setSubdivisionLevel(0);
+		PointSequenceView time1CurveView = new PointSequenceView(time1SubdivPoly);
+		time1CurveView.setPointRadius(0.01);
+		time1CurveView.setLineRadius(0.04);
+		time1CurveView.setPointColor(Color.yellow);
+		time1CurveView.setLineColor(Color.green);
+		gaussMapSgc.addChild(time1CurveView.getBase());
+				
 		sphere.setGeometry(new Sphere());
 		gaussMapSgc.addChild(sphere);
 		
@@ -118,9 +152,6 @@ public class KSurfacesApp {
 		initialDataIls0.setVertexCount(n);
 		initialDataIls0.setVertexCoordinates(gaussMap[0]);
 		initialDataIls0.update();
-		initialDataIls1.setVertexCount(n);
-		initialDataIls1.setVertexCoordinates(gaussMap[t]);
-		initialDataIls1.update();
 	}
 
 	//calculate the map of K-surface and update it via gaussMapIfs
@@ -173,7 +204,9 @@ public class KSurfacesApp {
 	 * scene graph one gets from {@link #getRoot()}. 
 	 */
 	public void update() {
+		n=time1SubdivPoly.getPoints().length;
 		ellipticConesInitialCondition();
+		initialGaussMap[1]=time1SubdivPoly.getPoints();
 		gaussMap();
 		map();
 	}
@@ -191,7 +224,7 @@ public class KSurfacesApp {
 
 	public void setM(int m) {
 		if (m<2) return;
-		if (m<=t) return;
+		if (m<=time) return;
 		this.m = m;
 	}
 
@@ -237,13 +270,13 @@ public class KSurfacesApp {
 	}
 
 	public int getT() {
-		return t;
+		return time;
 	}
 
 	public void setT(int t) {
 		if (t<2) return;
 		if (t>=m) m=t+1;
-		this.t = t;
+		this.time = t;
 	}
 
 	public static void main(String[] args) {

@@ -88,9 +88,19 @@ public class DragPointSet implements PointSequence {
 		vertices[e.getIndex()][0]=e.getX();
 		vertices[e.getIndex()][1]=e.getY();
 		vertices[e.getIndex()][2]=e.getZ();
+		transform(vertices[e.getIndex()]);
 		psf.setVertexCoordinates(vertices);
 		psf.update();
 		fireChange();
+	}
+	
+	
+	/**Override this method and do a transformation of the drag vertex, 
+	 * e.g., projection to the sphere.
+	 * 
+	 * @param vertex
+	 */
+	public void transform(double[] vertex) {	
 	}
 	
 	/**
