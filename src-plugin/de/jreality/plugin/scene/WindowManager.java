@@ -1,5 +1,7 @@
 package de.jreality.plugin.scene;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,6 +15,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.View.RunningEnvironment;
+import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
@@ -37,7 +40,6 @@ public class WindowManager extends Plugin implements ChangeListener {
 	private double screenWidth=2.48;
 	private double screenHeight=2.00;
 	private double screenHeightOffset = 0.4;
-	private double distance=screenWidth/2.0;
 	
 	private boolean showDesktopBorder=false;
 	SceneGraphComponent desktopBorder=new SceneGraphComponent("desktop bounds");
@@ -54,8 +56,12 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	private void updateWindowRootTransformation() {
 		double yTranslation = 0;
-		if (env != RunningEnvironment.DESKTOP) yTranslation = screenHeight/2+screenHeightOffset;
-		MatrixBuilder.euclidean().translate(0,yTranslation,-distance).scale(screenWidth/resX).rotateX(Math.PI).translate(-resX/2, -resY/2, 0).assignTo(windowRoot);
+		double ps = 1.0;
+		if (env != RunningEnvironment.DESKTOP) {
+			ps = PortalCoordinateSystem.getPortalScale();
+			yTranslation = ps*(screenHeight/2+ screenHeightOffset);
+		}
+		MatrixBuilder.euclidean().translate(0,yTranslation,-ps*screenWidth/2.0).scale(ps*screenWidth/resX).rotateX(Math.PI).translate(-resX/2, -resY/2, 0).assignTo(windowRoot);
 	}
 	
 	@Override
@@ -70,6 +76,14 @@ public class WindowManager extends Plugin implements ChangeListener {
 		updateParent(c.getPlugin(Scene.class));
 		c.getPlugin(Scene.class).addChangeListener(this);
 		setShowDesktopBorder(getShowDesktopBorder());
+		if (env != RunningEnvironment.DESKTOP)
+			PortalCoordinateSystem.addChangeListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent arg0) {
+				updateWindowRootTransformation();
+				System.err.println("WM: Updating portal scale");
+			}
+		});
 	}
 	
 	@Override
