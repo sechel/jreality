@@ -194,7 +194,7 @@ void main (void)
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
-    if (transformedNormal.w * transformedNormal.z > 0.0) 
+    if (hyperbolic && transformedNormal.w * transformedNormal.z > 0.0) 
     	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
