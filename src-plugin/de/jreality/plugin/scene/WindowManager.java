@@ -43,6 +43,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	private boolean showDesktopBorder=false;
 	SceneGraphComponent desktopBorder=new SceneGraphComponent("desktop bounds");
+	ActionListener portalScaleListener;
 	
 	List<WeakReference<JFakeFrameWithGeometry>> frameRefs = new LinkedList<WeakReference<JFakeFrameWithGeometry>>();
 	
@@ -68,7 +69,6 @@ public class WindowManager extends Plugin implements ChangeListener {
 	public PluginInfo getPluginInfo() {
 		return new PluginInfo("Window Manager", "jReality Group");
 	}
-	
 	@Override
 	public void install(Controller c) throws Exception {
 		env = c.getPlugin(View.class).getRunningEnvironment();
@@ -77,7 +77,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 		c.getPlugin(Scene.class).addChangeListener(this);
 		setShowDesktopBorder(getShowDesktopBorder());
 		if (env != RunningEnvironment.DESKTOP)
-			PortalCoordinateSystem.addChangeListener(new ActionListener() {
+			PortalCoordinateSystem.addChangeListener(portalScaleListener = new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
 				updateWindowRootTransformation();
@@ -89,6 +89,8 @@ public class WindowManager extends Plugin implements ChangeListener {
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		c.getPlugin(Scene.class).removeChangeListener(this);
+		if (env != RunningEnvironment.DESKTOP && portalScaleListener != null)
+			PortalCoordinateSystem.removeChangeListener(portalScaleListener);
 		frameRefs.clear();
 		setParent(null);
 	}
