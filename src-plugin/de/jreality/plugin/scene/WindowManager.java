@@ -34,11 +34,11 @@ public class WindowManager extends Plugin implements ChangeListener {
 	
 	SceneGraphComponent windowRoot=new SceneGraphComponent("window root");
 	private int
-		resX=1024,
-		resY=768;
+		resX=1280,
+		resY=1024;
 	
-	private double screenWidth=2.48;
-	private double screenHeight=2.00;
+	private double screenWidth=2.4798528;//2.48;
+	private double screenHeight=1.9997928;//2.0;
 	private double screenHeightOffset = 0.4;
 	
 	private boolean showDesktopBorder=false;
