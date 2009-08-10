@@ -152,6 +152,14 @@
       </prop>
     </virtualdevice>
     
+   <virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
+      <inputslot>PrimaryNavigationNDC</inputslot>
+      <outputslot>LeftRightAxis</outputslot>
+      <prop name="axis">
+        <string>translationX</string>
+      </prop>
+    </virtualdevice>
+    
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
       <inputslot>PrimaryNavigationNDC</inputslot>
       <outputslot>HorizontalShipRotationAngleEvolution</outputslot>
