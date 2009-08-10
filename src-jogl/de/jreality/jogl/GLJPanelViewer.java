@@ -60,7 +60,7 @@ import de.jreality.jogl.AbstractViewer.RenderListener;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
-public class GLJPanelViewer extends Viewer {
+public class GLJPanelViewer extends AbstractViewer {
 	GLJPanel panel;
 	GLPbuffer sharedPBuffer;
 	boolean opaque = false;
