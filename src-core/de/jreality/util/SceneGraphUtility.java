@@ -420,7 +420,7 @@ public class SceneGraphUtility {
 		}
 
 	/**
-	 * A convenience method to find the deepest occurance of an {@link Appearance} in an
+	 * A convenience method to find the deepest occurrence of an {@link Appearance} in an
 	 * instance of SceneGraphPath.
 	 * @param theSelection
 	 * @return

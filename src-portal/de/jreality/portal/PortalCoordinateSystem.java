@@ -164,7 +164,7 @@ public class PortalCoordinateSystem {
 		listeners.add(l);
 	}
 
-	public static void removeChangeListener(SelectionListener l)	{
+	public static void removeChangeListener(ActionListener l)	{
 		listeners.remove(l);
 	}
 
