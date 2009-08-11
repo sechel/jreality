@@ -5,8 +5,8 @@ import java.nio.FloatBuffer;
 import de.jreality.scene.data.SampleReader;
 
 /**
- * Ring buffer for audio sources.  Each ring buffer has one writer, the audio source that owns it, and any
- * number of readers that can access the buffer concurrently.
+ * Ring buffer for audio sources.  Each ring buffer has one writer (typically the audio source that owns it).
+ * Any number of readers can access the buffer concurrently.
  * 
  * @author brinkman
  *

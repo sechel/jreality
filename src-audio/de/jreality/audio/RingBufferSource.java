@@ -5,7 +5,7 @@ import de.jreality.scene.AudioSource;
 import de.jreality.scene.data.SampleReader;
 
 /**
- * An subclass of AudioSource using ring buffers.
+ * A subclass of AudioSource using ring buffers.
  * 
  * @author brinkman
  *
