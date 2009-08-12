@@ -24,8 +24,8 @@ import de.varylab.jrworkspace.plugin.Controller;
 import de.varylab.jrworkspace.plugin.Plugin;
 import de.varylab.jrworkspace.plugin.PluginInfo;
 
-public class Audio extends Plugin implements ChangeListener {
 
+public class Audio extends Plugin implements ChangeListener {
 
 	public static enum BackendType {
 		noSound,
@@ -42,16 +42,11 @@ public class Audio extends Plugin implements ChangeListener {
 		cubicInterpolation;
 	}
 
-	private View
-	view = null;
-	private AudioPreferences 
-	prefs = null;
-	private Scene
-	scene = null;
-	private AudioRenderer 
-	renderer = null;
-	private Interpolation.Factory
-	interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
+	private View view = null;
+	private AudioPreferences prefs = null;
+	private Scene scene = null;
+	private AudioRenderer renderer = null;
+	private Interpolation.Factory interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
 
 	private SceneGraphPath lastMicrophonePath;
 
@@ -79,21 +74,18 @@ public class Audio extends Plugin implements ChangeListener {
 		}
 	}
 
-
 	private void updateAudioRenderer() throws Exception {
-
 		if (renderer != null) {
 			try {
 				renderer.shutdown();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			renderer = null;
 		}
 		switch (prefs.getBackendType()) {
 		case noSound:
-			renderer=null;
-			return;
+			break;
 		case javaSound:
 			renderer = new StereoRenderer();
 			break;
@@ -105,8 +97,6 @@ public class Audio extends Plugin implements ChangeListener {
 			break;
 		case jackAmbisonicsPSO:
 			renderer = new JackAmbisonicsPlanar2ndOrderRenderer();
-			break;
-		default:
 			break;
 		}
 		switch (prefs.getInterpolationType()) {
@@ -167,7 +157,9 @@ public class Audio extends Plugin implements ChangeListener {
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
-		if (renderer != null) renderer.shutdown();
+		if (renderer != null) {
+			renderer.shutdown();
+		}
 	}
 
 	public void stateChanged(ChangeEvent e) {
@@ -179,10 +171,8 @@ public class Audio extends Plugin implements ChangeListener {
 				if (lastMicrophonePath != null && lastMicrophonePath.isEqual(newMicPath)) return;
 				updateAudioRenderer();
 			}
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
-
 }
