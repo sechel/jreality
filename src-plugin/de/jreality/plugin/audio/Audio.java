@@ -48,7 +48,7 @@ public class Audio extends Plugin implements ChangeListener {
 	private AudioRenderer renderer = null;
 	private Interpolation.Factory interpolationFactory = AudioAttributes.DEFAULT_INTERPOLATION_FACTORY;
 
-	private SceneGraphPath lastMicrophonePath;
+	private SceneGraphPath lastMicrophonePath = null;
 
 
 	@Override
@@ -167,7 +167,6 @@ public class Audio extends Plugin implements ChangeListener {
 			if (e.getSource() instanceof AudioPreferences) updateAudioRenderer();
 			if (e.getSource() instanceof Scene) {
 				SceneGraphPath newMicPath = scene.getMicrophonePath();
-				if (newMicPath == lastMicrophonePath) return;
 				if (lastMicrophonePath != null && lastMicrophonePath.isEqual(newMicPath)) return;
 				updateAudioRenderer();
 			}
