@@ -88,7 +88,11 @@ public class ShipNavigationTool extends AbstractTool {
 	private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
 
 	private transient boolean rotate=false;
+	
+	// if the "fall activation" (F-Key as default) is pressed, this is true...
 	private transient boolean fall;
+	
+	
 	private double minHeight;
 	private PickDelegate pickDelegate;
 
@@ -130,6 +134,8 @@ public class ShipNavigationTool extends AbstractTool {
 		SceneGraphComponent myComponent = path.getLastComponent();
 		Matrix myMatrix = myComponent.getTransformation() != null ? new Matrix(myComponent.getTransformation()) : new Matrix();	
 		
+		
+		// pollingDevice only seems to affect horizontal rotation?
 		double rot = tc.getAxisState(horizontalRotation).doubleValue();
 		if (pollingDevice && tc.getSource() == horizontalRotation) {
 			MatrixBuilder.euclidean(myMatrix).rotateY(-rot);
@@ -143,7 +149,11 @@ public class ShipNavigationTool extends AbstractTool {
 			}
 		} else velocity[1]=0;
 		
+		
 		if (tc.getSource() != timer) return;
+		// All the following happens only when perfrom was triggered with timer...
+		
+		// read velocity in x- and z- dir from forwardBackward- and leftRight-axes:
 		AxisState axis;
 		if ((axis = tc.getAxisState(forwardBackward)) != null) {
 			velocity[2] = gain*axis.doubleValue();
@@ -155,12 +165,17 @@ public class ShipNavigationTool extends AbstractTool {
 			velocity[0]*=runFactor;
 			velocity[2]*=runFactor;
 		}
+		
+		
+		// only do something when we have non-zero velocity or we are falling...
 		if (!(touchGround && velocity[0] == 0 && velocity[1] == 0 && velocity[2] == 0)) {
 
 			double sec = 0.001* tc.getAxisState(timer).intValue(); // time since
 			if (!pollingDevice) {
 				MatrixBuilder.euclidean(myMatrix).rotateY(-rot*sec).assignTo(myComponent);
 			}
+			
+			// dest is the point we would like to move to...
 			double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
 			double[] dest = myMatrix.multiplyVector(trans);
 			Pn.dehomogenize(dest,dest);
@@ -174,41 +189,37 @@ public class ShipNavigationTool extends AbstractTool {
 				upDir4[3]=0;
 				Rn.normalize(upDir4, upDir4);
 			}
-			double[] pickStart= Rn.linearCombination(null, 1, dest, 1.7, upDir4);
 
-			double[] hit = null;
 			if (isGravitEnabled()) {
+				// if fall is true, we ignore any pick hits and just fall through
 				if (!fall) {
-					hit = getHit(tc, pickStart, dest);
+					// pick from the eye position down to the feet position:
+					double[] pickStart= Rn.linearCombination(null, 1, dest, 1.7, upDir4);
+					double[] hit = getHit(tc, pickStart, dest);
+					// if we have hit something, make the pick point the new dist and update y-velocity to 0 and remember that we are touching the ground 
+					if (hit != null) {
+						dest = hit;
+						velocity[1] = 0;
+						touchGround = true;
+					}
 				}
-				
-				if (hit != null) {
-					dest = hit;
+				// fall=true: just fall until we reach minheight...
+				double h = isCenter() ? Math.sqrt(dest[0]*dest[0]+dest[1]*dest[1]+dest[2]*dest[2]) : dest[1];
+				// minheight reached: lift position to minheight and set y-velocity to zero.
+				if (h<minHeight) {
+					if (isCenter()) {
+						dest=Rn.times(dest, minHeight/h, dest);
+						dest[3]=1;
+					} else {
+						dest[1]=h;
+					}
 					velocity[1] = 0;
 					touchGround = true;
 				} else {
-					if (isCenter()) {
-						double h = Math.sqrt(dest[0]*dest[0]+dest[1]*dest[1]+dest[2]*dest[2]);
-						if (h<minHeight) {
-							dest=Rn.times(dest, minHeight/h, dest);
-							dest[3]=1;
-							velocity[1] = 0;
-							touchGround = true;
-						} else {
-							velocity[1] -= sec*gravity;
-							touchGround = false;	
-						}
-					}else {
-						if (dest[1]<minHeight) {
-							dest[1]=minHeight;
-							velocity[1] = 0;
-							touchGround = true;
-						} else {
-							velocity[1] -= sec*gravity;
-							touchGround = false;
-						}
-					}
+					velocity[1] -= sec*gravity;
+					touchGround = false;
 				}
+				
 			}
 			if (hasCenter)	{
 				double[] rotateFrom4=Rn.subtract(null, Pn.dehomogenize(null,myMatrix.getColumn(3)), center);
