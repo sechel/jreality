@@ -18,7 +18,7 @@ public class JackSource extends RingBufferSource implements JJackAudioProcessor 
 		super(name);
 		sampleRate = JJackNativeClient.getSampleRate();
 		ringBuffer = new RingBuffer(sampleRate);
-		key = JackManager.requestInputPorts(1, "");
+		key = JackManager.requestInputPorts(1, target);
 		JackManager.addInput(this);
 	}
 
