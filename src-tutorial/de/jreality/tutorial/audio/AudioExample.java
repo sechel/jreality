@@ -1,5 +1,6 @@
 package de.jreality.tutorial.audio;
 
+import java.io.InputStream;
 
 import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.geometry.Primitives;
@@ -15,8 +16,8 @@ import de.jreality.util.Input;
 public class AudioExample {
 
 	public static SceneGraphComponent getAudioComponent() throws Exception {
-		Input wavFile = Input.getInput("sound/churchbell_loop.wav");
-		final AudioSource source = new CachedAudioInputStreamSource("Churchbell", wavFile, true);
+		InputStream wavFile = AudioExample.class.getResourceAsStream("zarathustra.wav");
+		final AudioSource source = new CachedAudioInputStreamSource("zarathustra", Input.getInput("zarathustra", wavFile), true);
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
 		audioComponent.setGeometry(Primitives.cube());

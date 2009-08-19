@@ -1,10 +1,17 @@
 package de.jreality.tutorial.audio;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import de.jreality.audio.SynthSource;
+import de.jreality.audio.javasound.CachedAudioInputStreamSource;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.scene.AudioSource;
 import de.jreality.tutorial.tool.AnimationExample;
+import de.jreality.util.Input;
 
 /**
  * This demo is based on the AnimationExample from the tools section.
@@ -42,10 +49,21 @@ public class DopplerDemo extends AnimationExample {
 		v.addVRSupport();
 		v.addAudioSupport();
 		v.addContentSupport(ContentType.Raw);
-		
-		// add the audio source to the moving component of the animation example:
-		example.getMovingComponent().setAudioSource(asrc);
-		
+
+		InputStream wavFile = AudioExample.class.getResourceAsStream("70936__guitarguy1985__police.wav");
+		AudioSource source;
+		try {
+			source = new CachedAudioInputStreamSource("siren", Input.getInput("siren", wavFile), true);
+			// add the audio source to the moving component of the animation example:
+			example.getMovingComponent().setAudioSource(source);
+			source.start();
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// set the center component of the ellipse as content:
 		v.setContent(example.getCenterComponent());
@@ -53,7 +71,5 @@ public class DopplerDemo extends AnimationExample {
 		// startup the viewer:
 		v.startup();
 
-		// start the audio source:
-		asrc.start();
 	}
 }
