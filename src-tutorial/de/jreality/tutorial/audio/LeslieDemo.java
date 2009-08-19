@@ -79,12 +79,12 @@ public class LeslieDemo {
 	}
 	
 	private static SceneGraphComponent getHubComponent() throws Exception {
-		InputStream is = LeslieDemo.class.getResourceAsStream("hammond.wav");
+		InputStream is = LeslieDemo.class.getResourceAsStream("pale.wav");
 		final AudioSource source = new CachedAudioInputStreamSource("hammond", Input.getInput("hammond", is), true);
 		
 		final float r = 0.15f;
 		SceneGraphComponent hub = new SceneGraphComponent("LeslieHub");
-		int nHorns = 2;
+		int nHorns = 1;
 		Geometry cone = Primitives.cone(20, -r);
 		for(int i=0; i<nHorns; i++) {
 			SceneGraphComponent horn = new SceneGraphComponent("horn"+i);
