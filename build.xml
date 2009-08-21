@@ -252,6 +252,7 @@
 		</fileset>
         <fileset dir="lib">
             <include name="jRWorkspacePluginSDK.jar" />
+        	<include name="jtem-beans.jar" />
             <include name="jogl.jar" />
         </fileset>
 	</path>
