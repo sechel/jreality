@@ -19,4 +19,5 @@
 **/csound/**
 # this uses CSound:
 **/MinimalExample.java
+**/u3d/TestScene.java
 
