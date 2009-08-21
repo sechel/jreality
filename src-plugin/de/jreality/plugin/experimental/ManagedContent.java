@@ -84,7 +84,6 @@ public class ManagedContent extends Plugin {
 	public void addContent(Class<?> context, SceneGraphComponent c) {
 		SceneGraphComponent contextRoot = getContextRoot(context);
 		contextRoot.addChild(c);
-		updateContent();
 		fireContentAdded(context, c);
 	}
 	
@@ -101,7 +100,6 @@ public class ManagedContent extends Plugin {
 			contextRoot.addChild(c);
 			fireContentAdded(context, c);
 		}
-		updateContent();
 	}
 	
 	
@@ -117,7 +115,6 @@ public class ManagedContent extends Plugin {
 		}
 		if (contextRoot.getChildComponents().contains(c)) {
 			contextRoot.removeChild(c);
-			updateContent();
 			fireContentRemoved(context, c);
 		}
 	}
@@ -134,7 +131,6 @@ public class ManagedContent extends Plugin {
 		contextMap.remove(context);
 		if (contentRoot.getChildComponents().contains(contextRoot)) {
 			contentRoot.removeChild(contextRoot);
-			updateContent();
 			fireContentRemoved(context);
 		}
 	}
@@ -145,7 +141,6 @@ public class ManagedContent extends Plugin {
 	public void clearContent() {
 		contextMap.clear();
 		contentRoot = new SceneGraphComponent();
-		updateContent();
 		fireContentCleared();
 	}
 	
@@ -190,7 +185,7 @@ public class ManagedContent extends Plugin {
 	}
 	
 	
-	private void updateContent() {
+	public void update() {
 		content.setContent(contentRoot);
 	}
 	

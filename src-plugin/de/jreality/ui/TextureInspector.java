@@ -452,9 +452,9 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	private void updateTextureTransform() {
 		if (tex != null) {
 			MatrixBuilder mb = MatrixBuilder.euclidean();
-			mb.translate(getTextureUTranslation(), getTextureVTranslation(), 0);
-			mb.rotate(getTextureRotation(), 0, 0, 1);
 			mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
+			mb.rotate(getTextureRotation(), 0, 0, 1);
+			mb.translate(getTextureUTranslation(), getTextureVTranslation(), 0);
 			tex.setTextureMatrix(mb.getMatrix());
 		}
 	}
