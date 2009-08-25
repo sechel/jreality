@@ -52,15 +52,19 @@ import de.jreality.scene.data.DoubleArray;
  * variety of methods for setting and getting the transformation. One instance
  * can handle a series of transformations, based on the so-called polar
  * decomposition. See
- * {@link <a href="www.cs.wisc.edu/graphics/Courses/cs-838-2002/Papers/polar-decomp.pdf">Duff and Shoemaker paper</a>}.
+ * {@link <a href="http://www.cs.wisc.edu/graphics/Courses/838-s2002/Papers/polar-decomp.pdf">
+ * Duff and Shoemaker paper</a>}.
  * To be exact, the matrix M is factored as the matrix product M=T*R*S. Note
  * that matrices act on column vectors which stand to the right of the matrix. S
  * is a "stretch" or "scale" matrix -- a diagonal matrix. R is an arbitrary
  * rotation of Euclidean 3-space, and T is a translation.
  * <p>
  * 
- * NOTE: the current implementation omits part of the factorization described in the above
- * paper.  There is only one scale matrix.
+ * NOTE: The full polar decomposition according to Duff and Shoemaker includes a second
+ * rotation U that conjugates the scaling matrix, i.e., M=TRUSU'.  We assume that U is the
+ * identity, which amounts to assuming that M has no shearing component.  This appears to
+ * a fairly safe assumption, but be aware that the factorization will be wrong if you have
+ * a shearing component.
  * <p>
  * 
  * Users may set the matrix directly, then the factors will be computed and are
