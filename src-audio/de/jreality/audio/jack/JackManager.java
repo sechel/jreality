@@ -2,6 +2,7 @@ package de.jreality.audio.jack;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -35,10 +36,10 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 	private static JJackNativeClient nativeClient = null;
 	
 	private static long currentKey = 1L;
-	private static HashMap<Long, Boolean> isInput = new HashMap<Long, Boolean>();
-	private static HashMap<Long, Integer> ranges = new HashMap<Long, Integer>();
-	private static HashMap<Long, String> targets = new HashMap<Long, String>();
-	private static HashMap<Long, Integer> ports = new HashMap<Long, Integer>();
+	private static HashMap<Long, Boolean> isInput = new LinkedHashMap<Long, Boolean>();
+	private static HashMap<Long, Integer> ranges = new LinkedHashMap<Long, Integer>();
+	private static HashMap<Long, String> targets = new LinkedHashMap<Long, String>();
+	private static HashMap<Long, Integer> ports = new LinkedHashMap<Long, Integer>();
 	
 	private static boolean ready = false;
 	private static int retries = 0;
