@@ -121,7 +121,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 				return true;
 			}
 			String name = f.getName().toLowerCase();
-			return name.endsWith(".xml") || name.endsWith(".jrs");
+			return name.endsWith(".xml") || name.endsWith(".jrw");
 		}
 
 		@Override
