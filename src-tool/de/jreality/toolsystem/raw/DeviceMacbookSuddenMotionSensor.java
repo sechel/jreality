@@ -41,7 +41,7 @@ public class DeviceMacbookSuddenMotionSensor implements RawDevice, PollingDevice
 		this.queue = queue;
 	}
 
-	static final double scale = 9.81/255.0;
+	static final double scale = 1.0/255.0;
 	
 	public void poll() {
 		int[] v = Unimotion.getSMSArray();
@@ -53,7 +53,7 @@ public class DeviceMacbookSuddenMotionSensor implements RawDevice, PollingDevice
 	public static void main(String[] args) throws InterruptedException {
 		while (true) {
 			int[] v = Unimotion.getSMSArray();
-			MatrixBuilder mm = MatrixBuilder.euclidean().translate(scale*v[1], scale*v[2], -scale*v[0]);
+			MatrixBuilder mm = MatrixBuilder.euclidean().translate(scale*v[0], scale*v[1], scale*v[2]);
 			System.out.println(Arrays.toString(mm.getMatrix().getColumn(3)));
 			Thread.sleep(250);
 		}
