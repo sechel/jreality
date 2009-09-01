@@ -302,8 +302,32 @@
       </prop>
     </virtualdevice>
 
-
 <!--
+    <constant name="CorrectionSMS_MacBookPro_Peter">
+      <array class="double" length="16">
+        
+        <void index="0"><double>-1</double></void>
+        <void index="1"><double>0</double></void>
+        <void index="2"><double>0</double></void>
+        <void index="3"><double>0</double></void>        
+        
+        <void index="4"><double>0</double></void>
+        <void index="5"><double>0</double></void>
+        <void index="6"><double>-1</double></void>
+        <void index="7"><double>0</double></void>
+        
+        <void index="8"><double>0</double></void>
+        <void index="9"><double>1</double></void>
+        <void index="10"><double>0</double></void>
+        <void index="11"><double>0</double></void>
+
+        <void index="12"><double>0</double></void>
+        <void index="13"><double>0</double></void>
+        <void index="14"><double>0</double></void>
+        <void index="15"><double>1</double></void>
+      </array>
+    </constant>
+    
     <constant name="CorrectionSMS_MacBookPro_5,3">
       <array class="double" length="16">
         
@@ -330,10 +354,11 @@
     </constant>
 
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualProductMatrix">
-      <inputslot>RawGravityVector</inputslot>
       <inputslot>CorrectionSMS_MacBookPro_5,3</inputslot>
+      <inputslot>RawGravityVector</inputslot>
       <outputslot>GravityVector</outputslot>
     </virtualdevice>
+    
 -->
 
 	<!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualGameTrackTranslation">

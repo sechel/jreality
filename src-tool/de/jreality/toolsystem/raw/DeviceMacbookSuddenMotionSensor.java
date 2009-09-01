@@ -45,18 +45,9 @@ public class DeviceMacbookSuddenMotionSensor implements RawDevice, PollingDevice
 	
 	public void poll() {
 		int[] v = Unimotion.getSMSArray();
-		MatrixBuilder.euclidean(mat).reset().translate(scale*v[1], scale*v[2], -scale*v[0]);
+		MatrixBuilder.euclidean(mat).reset().translate(scale*v[0], scale*v[1], scale*v[2]);
 		ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, new DoubleArray(mat.getArray()));
 		queue.addEvent(te);
 	}
 
-	public static void main(String[] args) throws InterruptedException {
-		while (true) {
-			int[] v = Unimotion.getSMSArray();
-			MatrixBuilder mm = MatrixBuilder.euclidean().translate(scale*v[0], scale*v[1], scale*v[2]);
-			System.out.println(Arrays.toString(mm.getMatrix().getColumn(3)));
-			Thread.sleep(250);
-		}
-	}
-	
 }
