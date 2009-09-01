@@ -9,6 +9,7 @@
     <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJinputJoystick"/-->
     
  	<!-- 
+    <rawdevice id="MacSMS" type="de.jreality.toolsystem.raw.DeviceMacbookSuddenMotionSensor" />
  	<rawdevice id="WiiMoteOSC" type="de.jreality.toolsystem.raw.WiiMoteOSC"/>
  	-->
  	
@@ -19,6 +20,8 @@
   <!-- map slots of raw devices to InputSlots -->
   
   <!--
+    <mapping device="MacSMS" src="SMSout" target="GravityVector" />
+
   	<mapping device="WiiMoteOSC" src="/wii/button/up" target="forward"/>
   	<mapping device="WiiMoteOSC" src="/wii/button/down" target="backward"/>
   	<mapping device="WiiMoteOSC" src="/wii/button/left" target="left"/>
