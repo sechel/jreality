@@ -1,12 +1,9 @@
 package de.jreality.toolsystem.raw;
 
-import java.util.Arrays;
 import java.util.Map;
 
-import sms.Unimotion;
-
+import de.jreality.macosx.sms.SMSLib;
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.InputSlot;
@@ -29,7 +26,7 @@ public class DeviceMacbookSuddenMotionSensor implements RawDevice, PollingDevice
 	}
 
 	public void initialize(Viewer viewer, Map<String, Object> config) {
-		
+		SMSLib.initSMS();
 	}
 	
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
@@ -41,11 +38,11 @@ public class DeviceMacbookSuddenMotionSensor implements RawDevice, PollingDevice
 		this.queue = queue;
 	}
 
-	static final double scale = 1.0/255.0;
-	
 	public void poll() {
-		int[] v = Unimotion.getSMSArray();
-		MatrixBuilder.euclidean(mat).reset().translate(scale*v[0], scale*v[1], scale*v[2]);
+		float[] v = SMSLib.getValues();
+		mat.setEntry(0, 3, v[0]);
+		mat.setEntry(1, 3, v[1]);
+		mat.setEntry(2, 3, v[2]);
 		ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, new DoubleArray(mat.getArray()));
 		queue.addEvent(te);
 	}
