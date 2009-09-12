@@ -334,6 +334,26 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		}
 	}
 	
+	public void updateAll() {
+		
+		updateEnabledStates();
+		
+		// lines
+			updateShowLines();
+			updateLinesReflecting();
+			updateTubes();
+		
+		// points
+			updateShowPoints();
+			updatePointsReflecting();
+			updateSpheres();
+		
+		// faces
+			updateShowFaces();
+			updateFacesReflecting();
+			updateFacesFlat();
+			updateTransparencyEnabled();
+	}
 	
 	public void stateChanged(ChangeEvent e) {
 		Object s = e.getSource();
@@ -375,7 +395,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	}
 	
 	
-	private void updateEnabledStates() {
+	public void updateEnabledStates() {
 		lineColorButton.setEnabled(isShowLines());
 		linesReflecting.setEnabled(isShowLines() && isTubes());
 		linesReflectionSlider.setEnabled(isShowLines() && isLinesReflecting() && isTubes());

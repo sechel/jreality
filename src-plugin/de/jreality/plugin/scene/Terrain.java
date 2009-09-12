@@ -232,6 +232,17 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		}
 	}
 	
+	void updateAll() {
+		updateVisible();
+		updateFacesReflecting();
+		updateTransparencyEnabled();
+		switchTo(colorPanel);
+		updateReflectSceneContent();
+		updateFaceReflection();
+		updateTransparency();
+		updateFaceColor();
+	}
+
 	public void colorPickerModeChanged(int mode) {
 		faceColorChooser.setMode(mode);		
 	}
@@ -439,6 +450,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		textureInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
 		textureInspector.setTextureUScale(c.getProperty(getClass(), "textureScale",DEFAULT_TEXTURE_SCALE));
 		setVisible(c.getProperty(getClass(), "visible", true));
+		updateAll();
 		super.restoreStates(c);
 	}
 

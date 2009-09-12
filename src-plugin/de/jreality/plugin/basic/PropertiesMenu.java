@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Reader;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -182,4 +183,10 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		propertiesListener = l;
 	}
 
+	public boolean loadPreferences(Reader r) {
+		if (propertiesListener == null) return false;
+		propertiesListener.readProperties(r);
+		return true;
+	}
+	
 }

@@ -163,6 +163,9 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setTextures(c.getProperty(getClass(), "textures", textures));
 		appearanceInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
 		appearanceInspector.setTextureScale(c.getProperty(getClass(), "textureScale", DEFAULT_TEXTURE_SCALE));
+		
+		appearanceInspector.updateAll();
+		
 		super.restoreStates(c);
 	}
 	

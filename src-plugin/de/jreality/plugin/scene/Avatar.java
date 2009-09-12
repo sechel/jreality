@@ -40,7 +40,11 @@ public class Avatar extends Plugin implements ChangeListener {
 
 	private SceneGraphComponent cameraComponent;
 	private ShipNavigationTool shipNavigationTool;
-	private Tool headTool;
+	private HeadTransformationTool headTransformationTool;
+	public HeadTransformationTool getHeadTransformationTool() {
+		return headTransformationTool;
+	}
+
 	private ShrinkPanel panel;
 	private JSliderVR speedSlider;
 	private JSliderVR jumpSpeedSlider;
@@ -98,7 +102,7 @@ public class Avatar extends Plugin implements ChangeListener {
 
 		// head transformation tool
 		if (!portal && !portalRemote) {
-			headTool = new HeadTransformationTool();
+			headTransformationTool = new HeadTransformationTool();
 		}
 		
 		setNavigationSpeed(getNavigationSpeed());
@@ -124,12 +128,12 @@ public class Avatar extends Plugin implements ChangeListener {
 	
 	private void installTools() {
 		if (avatar != null) avatar.addTool(shipNavigationTool);
-		if (cameraComponent != null && headTool != null) cameraComponent.addTool(headTool);
+		if (cameraComponent != null && headTransformationTool != null) cameraComponent.addTool(headTransformationTool);
 	}
 		
 	private void uninstallTools() {
 		if (avatar != null) avatar.removeTool(shipNavigationTool);
-		if (cameraComponent != null && headTool != null) cameraComponent.removeTool(headTool);
+		if (cameraComponent != null && headTransformationTool != null) cameraComponent.removeTool(headTransformationTool);
 	}
 	
 	public Component getPanel() {

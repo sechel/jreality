@@ -121,8 +121,8 @@ public class Sky extends Plugin {
 					return null;
 				}
 			});
-			ImageData[] cm = environment == "custom" ? customCubeMap : cubeMap;
-			loadButton.setEnabled(getEnvironment() == "custom");
+			ImageData[] cm = environment.equals("Custom") ? customCubeMap : cubeMap;
+			loadButton.setEnabled(getEnvironment().equals("Custom"));
 			environment =  skyBoxes[selectionIndex][0];
 			setCubeMap(cm);
 		}
