@@ -211,7 +211,7 @@ public class ShipNavigationTool extends AbstractTool {
 						dest=Rn.times(dest, minHeight/h, dest);
 						dest[3]=1;
 					} else {
-						dest[1]=h;
+						dest[1]=minHeight;
 					}
 					velocity[1] = 0;
 					touchGround = true;
