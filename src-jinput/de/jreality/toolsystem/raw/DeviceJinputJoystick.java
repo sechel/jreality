@@ -140,7 +140,7 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
 			if(!newState.isReleased() || newState.intValue() != oldState.intValue()) {
 				//System.out.println("new event");
 				queue.addEvent(
-						new ToolEvent(this, element.getValue(), newState)
+						new ToolEvent(this, System.currentTimeMillis(), element.getValue(), newState)
 						);
                 lastValues.put(c,newState);
 			}
