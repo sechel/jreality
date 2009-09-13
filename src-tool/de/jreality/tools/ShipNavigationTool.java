@@ -234,7 +234,7 @@ public class ShipNavigationTool extends AbstractTool {
 	}
 	
 	protected double[] getHit(ToolContext tc, double[] pickStart, double[] dest) {
-		if (pickDelegate != null) {
+		if (pickDelegate != null && pickDelegate.isEnabled()) {
 			return pickDelegate.getHit(tc, pickStart, dest);
 		} else {
 			double[] hit = null;
@@ -363,6 +363,7 @@ public class ShipNavigationTool extends AbstractTool {
 				double[] pickStart,
 				double[] dest
 		);
+		public boolean isEnabled();
 	}
 
 	public PickDelegate getPickDelegate() {
