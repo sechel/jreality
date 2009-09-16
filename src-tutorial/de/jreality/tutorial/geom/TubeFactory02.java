@@ -33,7 +33,6 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.tutorial.gui.InspectorExample;
 import de.jreality.tutorial.util.TextSlider;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
@@ -47,7 +46,7 @@ import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
  * This example shows how to use {@link PolygonalTubeFactory} to create a tube around a torus knot. 
  * 
  * It's organized with a single doIt() method to allow creation of other classes which refer to the same
- * code but in a different package of the tutorial. In this case, see {@link InspectorExample}.
+ * code but in a different package of the tutorial. 
  * 
  * @author Charles Gunn
  *
