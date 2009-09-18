@@ -294,8 +294,8 @@ public class TransformationCustomizer  extends JPanel implements Customizer, Tra
 		}
 
 		public void setValue(double d) {
-			textField.setValue(new Double(d));
 			value = d;
+			if (!textField.hasFocus()) textField.setValue(new Double(d));
 		}
 
 		public double getValue() {
