@@ -22,9 +22,9 @@ import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.swing.JFakeFrameWithGeometry;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class WindowManager extends Plugin implements ChangeListener {
 

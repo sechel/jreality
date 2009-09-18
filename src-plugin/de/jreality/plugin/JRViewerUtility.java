@@ -13,7 +13,7 @@ import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.CameraUtility;
-import de.varylab.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Controller;
 
 public class JRViewerUtility {
 

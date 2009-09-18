@@ -51,7 +51,7 @@ import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.util.Input;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 @SuppressWarnings("serial")
 public class TextureInspector extends JPanel implements ChangeListener {

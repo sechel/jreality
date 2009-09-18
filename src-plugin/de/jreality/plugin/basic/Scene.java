@@ -13,8 +13,8 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.ShaderUtility;
 import de.jtem.beans.ChangeEventMulticaster;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class Scene extends Plugin {
 	

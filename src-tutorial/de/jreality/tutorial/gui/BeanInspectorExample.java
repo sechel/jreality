@@ -12,7 +12,7 @@ import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tutorial.geom.ParametricSurfaceExample;
 import de.jtem.beans.InspectorPanel;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 /** Extends {@link ParametricSurfaceExample} by an inspector plugin panel.
  * 

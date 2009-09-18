@@ -43,10 +43,10 @@ import de.jreality.plugin.scene.Sky;
 import de.jreality.plugin.scene.VRExamples;
 import de.jreality.plugin.scene.VRPanel;
 import de.jreality.plugin.scene.WindowManager;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.PreferencesFlavor;
 
 public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEditorListener {
 

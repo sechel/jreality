@@ -34,10 +34,10 @@ import de.jreality.plugin.basic.View;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 public class WebContentLoader extends ShrinkPanelPlugin implements ActionListener {
 

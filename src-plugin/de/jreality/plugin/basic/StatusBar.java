@@ -1,9 +1,9 @@
 package de.jreality.plugin.basic;
 
 import de.jreality.plugin.icon.ImageHook;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.StatusFlavor;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.StatusFlavor;
 
 public class StatusBar extends Plugin implements StatusFlavor {
 

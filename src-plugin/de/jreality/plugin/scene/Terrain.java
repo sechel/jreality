@@ -41,11 +41,11 @@ import de.jreality.ui.ColorChooseJButton;
 import de.jreality.ui.JSliderVR;
 import de.jreality.ui.TextureInspector;
 import de.jreality.util.PickUtility;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
 public class Terrain extends Plugin implements ActionListener, ChangeListener, ColorPickerModeChangedListener {
 

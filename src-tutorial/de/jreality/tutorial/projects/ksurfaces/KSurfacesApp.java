@@ -22,7 +22,7 @@ import de.jreality.tutorial.util.polygon.DragPointSet;
 import de.jreality.tutorial.util.polygon.PointSequenceView;
 import de.jreality.tutorial.util.polygon.SubdividedPolygon;
 import de.jtem.beans.InspectorPanel;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 /** This class contains the application to display the K-surfaces and their Gauss map.
  * 

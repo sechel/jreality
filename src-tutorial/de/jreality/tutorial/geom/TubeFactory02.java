@@ -36,11 +36,11 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.tutorial.util.TextSlider;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
-import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
 
 /**
  * This example shows how to use {@link PolygonalTubeFactory} to create a tube around a torus knot. 

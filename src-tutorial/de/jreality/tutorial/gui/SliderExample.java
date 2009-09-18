@@ -15,7 +15,7 @@ import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tutorial.geom.ParametricSurfaceExample;
 import de.jreality.ui.JSliderVR;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 /** 
  * Extends {@link ParametricSurfaceExample}. Visualizes the associated family of 

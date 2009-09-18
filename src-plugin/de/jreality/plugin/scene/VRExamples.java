@@ -24,9 +24,9 @@ import de.jreality.plugin.icon.ImageHook;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
 /**
  * Example showing how to write a content providing plugin. Requires vrExamples.jar in the classpath, can

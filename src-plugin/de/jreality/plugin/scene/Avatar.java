@@ -22,11 +22,11 @@ import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.tools.ShipNavigationTool.PickDelegate;
 import de.jreality.ui.JSliderVR;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
 public class Avatar extends Plugin implements ChangeListener {
 

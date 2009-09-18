@@ -2,8 +2,8 @@ package de.jreality.plugin.basic;
 
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.ShrinkPanelAggregator;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
 public class MainPanel extends ShrinkPanelAggregator {
 

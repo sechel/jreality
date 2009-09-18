@@ -31,7 +31,7 @@ import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Scene;
 import de.jreality.shader.CommonAttributes;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 @SuppressWarnings("serial")
 public class AppearanceInspector extends JPanel implements ActionListener, ChangeListener {

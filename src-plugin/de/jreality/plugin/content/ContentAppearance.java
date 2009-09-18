@@ -12,8 +12,8 @@ import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.AppearanceInspector;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener {
 

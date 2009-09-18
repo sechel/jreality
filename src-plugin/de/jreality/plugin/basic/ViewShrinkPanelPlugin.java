@@ -1,9 +1,9 @@
 package de.jreality.plugin.basic;
 
 import de.jreality.plugin.JRViewer;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 /** Use this class to get a  {@link ShrinkPanelPlugin} that belongs to the 
  * main {@link Plugin}, i.e., {@link View}, of {@link JRViewer}. Extend this class#

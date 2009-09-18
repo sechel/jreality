@@ -31,10 +31,10 @@ import de.jreality.plugin.audio.Audio.BackendType;
 import de.jreality.plugin.audio.Audio.InterpolationType;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.util.Secure;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.PreferencesFlavor;
 
 public class AudioPreferences extends Plugin implements PreferencesFlavor, ActionListener {
 	

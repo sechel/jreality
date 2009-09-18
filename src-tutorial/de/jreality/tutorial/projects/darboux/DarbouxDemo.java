@@ -20,7 +20,7 @@ import de.jreality.tutorial.util.TextSlider;
 import de.jreality.tutorial.util.polygon.DragPointSet;
 import de.jreality.tutorial.util.polygon.PointSequenceView;
 import de.jreality.tutorial.util.polygon.SubdividedPolygon;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class DarbouxDemo {
 

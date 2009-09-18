@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.jreality.swing.JFakeFrameWithGeometry;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
 public class SceneShrinkSlot extends Plugin {
 

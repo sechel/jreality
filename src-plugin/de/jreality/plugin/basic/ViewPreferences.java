@@ -18,11 +18,11 @@ import javax.swing.JPanel;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.FrontendFlavor;
-import de.varylab.jrworkspace.plugin.flavor.PreferencesFlavor;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.FrontendFlavor;
+import de.jtem.jrworkspace.plugin.flavor.PreferencesFlavor;
 
 public class ViewPreferences extends Plugin implements PreferencesFlavor, ActionListener, FrontendFlavor {
 

@@ -7,11 +7,11 @@ import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
-import de.varylab.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkSlot;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkSlot;
 
 /**
  * A ShrinkPanel that flops into the Scene when double-clicking on the terrain.

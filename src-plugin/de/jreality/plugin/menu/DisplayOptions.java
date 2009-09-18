@@ -16,11 +16,11 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.PickShowTool;
 import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
 import de.jreality.util.GuiUtility;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.flavor.FrontendFlavor;
-import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.FrontendFlavor;
+import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 /**
  * 

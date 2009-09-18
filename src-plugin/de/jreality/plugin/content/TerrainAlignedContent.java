@@ -23,8 +23,8 @@ import de.jreality.scene.Transformation;
 import de.jreality.ui.JSliderVR;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class TerrainAlignedContent extends Content {
 

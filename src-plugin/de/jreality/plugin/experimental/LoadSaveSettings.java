@@ -16,9 +16,9 @@ import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.util.Secure;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class LoadSaveSettings extends Plugin {
 	

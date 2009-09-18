@@ -19,11 +19,11 @@ import de.jreality.tools.DraggingTool;
 import de.jreality.tools.EncompassTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
-import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.aggregators.ToolBarAggregator;
+import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 public class ContentTools extends Plugin {
 

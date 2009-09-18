@@ -70,9 +70,9 @@ import de.jreality.util.LoggingSystem;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
 
 /**

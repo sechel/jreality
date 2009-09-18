@@ -7,10 +7,10 @@ import javax.swing.JMenuItem;
 
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.actions.file.Quit;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.aggregators.MenuAggregator;
-import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.aggregators.MenuAggregator;
+import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 public class ViewMenuBar extends MenuAggregator {
 

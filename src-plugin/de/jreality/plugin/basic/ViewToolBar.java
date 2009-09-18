@@ -1,8 +1,8 @@
 package de.jreality.plugin.basic;
 
-import de.varylab.jrworkspace.plugin.PluginInfo;
-import de.varylab.jrworkspace.plugin.aggregators.ToolBarAggregator;
-import de.varylab.jrworkspace.plugin.flavor.PerspectiveFlavor;
+import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.aggregators.ToolBarAggregator;
+import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
 public class ViewToolBar extends ToolBarAggregator {
 

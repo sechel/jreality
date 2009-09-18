@@ -22,7 +22,7 @@ import de.jreality.plugin.basic.PropertiesMenu;
 import de.jreality.scene.Appearance;
 import de.jreality.ui.ColorChooseJButton.ColorChangedEvent;
 import de.jreality.ui.ColorChooseJButton.ColorChangedListener;
-import de.varylab.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
+import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel.MinSizeGridBagLayout;
 
 public class LabelsInspector extends JPanel implements ActionListener, ChangeListener, ColorChangedListener {
 

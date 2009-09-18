@@ -19,9 +19,9 @@ import de.jreality.ui.viewerapp.actions.file.ExportScreenshot;
 import de.jreality.ui.viewerapp.actions.file.ExportU3D;
 import de.jreality.ui.viewerapp.actions.file.ExportVRML;
 import de.jreality.ui.viewerapp.actions.file.SaveScene;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class ExportMenu extends Plugin {
 	

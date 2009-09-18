@@ -5,9 +5,9 @@ import java.awt.Component;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class ViewerKeyListenerPlugin extends Plugin {
 

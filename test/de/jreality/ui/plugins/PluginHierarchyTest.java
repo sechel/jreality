@@ -6,7 +6,7 @@ import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.scene.Avatar;
 import de.jreality.plugin.scene.Lights;
 import de.jreality.plugin.scene.Terrain;
-import de.varylab.jrworkspace.plugin.simplecontroller.SimpleController;
+import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
 
 public class PluginHierarchyTest {
 

@@ -10,9 +10,9 @@ import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.Tool;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 /**
  * A managed content that handles its content with a context map.

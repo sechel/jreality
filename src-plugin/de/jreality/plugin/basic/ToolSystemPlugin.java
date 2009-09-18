@@ -57,9 +57,9 @@ import de.jreality.util.Input;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.Plugin;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 /**
  * @author Steffen Weissmann

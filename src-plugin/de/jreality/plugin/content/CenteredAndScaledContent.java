@@ -20,8 +20,8 @@ import de.jreality.scene.event.TransformationListener;
 import de.jreality.ui.JSliderVR;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
-import de.varylab.jrworkspace.plugin.Controller;
-import de.varylab.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class CenteredAndScaledContent extends Content implements ChangeListener, TransformationListener {
 
