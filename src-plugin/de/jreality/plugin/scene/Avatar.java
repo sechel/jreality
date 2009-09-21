@@ -17,7 +17,6 @@ import de.jreality.plugin.basic.View.RunningEnvironment;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.tool.Tool;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.tools.ShipNavigationTool.PickDelegate;
