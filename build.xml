@@ -231,7 +231,7 @@
 			<include name="jjack_min.jar"/>
 			<include name="colorpicker.jar"/>
 			<include name="jtem-beans.jar"/>
-			<include name="jRWorkspacePluginSDK.jar"/>
+			<include name="jrworkspace.jar"/>
 		</fileset>
 		<fileset dir="dist">
 			<include name="jReality-io.jar"/>
@@ -251,7 +251,7 @@
 			<include name="*.jar"/>
 		</fileset>
         <fileset dir="lib">
-            <include name="jRWorkspacePluginSDK.jar" />
+            <include name="jrworkspace.jar" />
         	<include name="jtem-beans.jar" />
             <include name="jogl.jar" />
         </fileset>
