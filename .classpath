@@ -49,7 +49,7 @@
 	<classpathentry kind="lib" path="lib/jjack_min.jar"/>
 	<classpathentry kind="lib" path="lib/netutil.jar"/>
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
-	<classpathentry kind="lib" path="lib/jrworkspace.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3.8.1"/>
 	<classpathentry kind="lib" path="lib/jtem-beans.jar"/>
 	<classpathentry kind="output" path="bin"/>
