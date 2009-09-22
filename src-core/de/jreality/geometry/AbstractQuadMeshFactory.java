@@ -277,7 +277,6 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		
 		super.recompute();
 	
-		edgeIndices.update();
 		faceIndices.update();
 		textureCoordinates.update();
 		
