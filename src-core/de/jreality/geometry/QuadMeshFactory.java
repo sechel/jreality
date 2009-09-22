@@ -124,7 +124,7 @@ public class QuadMeshFactory extends AbstractQuadMeshFactory {
 	
 	/**
 	 * A convenience method to allow users to work with a rectangular 3D array to describe a quad mesh
-	 * @param points a 3-dimension, rectangular array; the first to dimension must equal
+	 * @param points a 3-dimension, rectangular array; the first two dimensions must equal
 	 * the number of v-lines (@link getVLineCount) and u-lines (@link getULineCount).
 	 */
 	public void setVertexCoordinates(double[][][] points) {
