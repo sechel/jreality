@@ -36,11 +36,13 @@ import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.DefaultMatrixSupport;
 import de.jreality.util.SceneGraphUtility;
+import de.jtem.jrworkspace.plugin.annotation.Experimental;
 
 /**
  * @author Charles Gunn
  *
  */
+@Experimental
 public class ViewerKeyListener extends KeyAdapter {
 	Viewer viewer;
 	de.jreality.jogl.Viewer jViewer = null;

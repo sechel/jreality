@@ -36,9 +36,12 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.annotation.Experimental;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
+
+@Experimental
 public class WebContentLoader extends ShrinkPanelPlugin implements ActionListener {
 
 	private Content 

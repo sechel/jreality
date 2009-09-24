@@ -8,7 +8,9 @@ import de.jreality.util.LoggingSystem;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.annotation.Experimental;
 
+@Experimental
 public class InfoOverlayPlugin extends Plugin {
 	
 	private View sceneView;

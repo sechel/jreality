@@ -13,11 +13,13 @@ import de.jreality.scene.tool.Tool;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.annotation.Experimental;
 
 /**
  * A managed content that handles its content with a context map.
  * @author Stefan Sechelmann
  */
+@Experimental
 public class ManagedContent extends Plugin {
 
 	/**

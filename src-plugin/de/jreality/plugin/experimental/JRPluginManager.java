@@ -46,8 +46,10 @@ import de.jreality.plugin.scene.WindowManager;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.annotation.Experimental;
 import de.jtem.jrworkspace.plugin.flavor.PreferencesFlavor;
 
+@Experimental
 public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEditorListener {
 
 	private Controller
