@@ -68,7 +68,6 @@ public class RotateTool extends AbstractTool {
 
   static InputSlot activationSlot = InputSlot.getDevice("RotateActivation");
   static InputSlot evolutionSlot = InputSlot.getDevice("TrackballTransformation");
-  static InputSlot camPath = InputSlot.getDevice("WorldToCamera");
 
   boolean fixOrigin=false;
   private boolean rotateOnPick=false;
@@ -76,7 +75,6 @@ public class RotateTool extends AbstractTool {
   public RotateTool() {
     super(activationSlot);
     addCurrentSlot(evolutionSlot);
-    addCurrentSlot(camPath);
   }
 
   transient SceneGraphComponent comp;
@@ -143,6 +141,9 @@ public class RotateTool extends AbstractTool {
   private double animTimeMax=750;
   private boolean updateCenter;
   public void perform(ToolContext tc) {
+	  
+	  System.out.println("RotateTool.perform(): "+tc.getSource());
+	  
     Matrix object2avatar = new Matrix((moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
     if (Rn.isNan(object2avatar.getArray())) {
     	return;

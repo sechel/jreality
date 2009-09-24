@@ -82,7 +82,9 @@ import de.jreality.util.LoggingSystem;
  */
 public class DeviceManager {
   
-  Viewer viewer;
+  private static final double MATRIX_EPS = 1E-12;
+
+Viewer viewer;
   
   /**
    * contains a up-to-date map of (used) slots to used virtual devices
@@ -352,8 +354,8 @@ public List<ToolEvent> updateImplicitDevices() {
       double[] matrix = null;
       if (viewer.getCameraPath() != null) {
         matrix = viewer.getCameraPath().getInverseMatrix(null);
-  	    if (!Rn.equals(matrix, worldToCamTrafo)) {
-	          Rn.copy(worldToCamTrafo, matrix);
+  	    if (!Rn.equals(matrix, worldToCamTrafo, MATRIX_EPS)) {
+  	    	 Rn.copy(worldToCamTrafo, matrix);
 	          worldToCamChanged = true;
 	      }
   	    if (viewer.hasViewingComponent() && viewer.getViewingComponentSize() != null) {
@@ -364,14 +366,14 @@ public List<ToolEvent> updateImplicitDevices() {
   	    } else {
   	    	matrix = Rn.identityMatrix(4);
   	    }
-        if (!Rn.equals(matrix, camToNDCTrafo)) {
+        if (!Rn.equals(matrix, camToNDCTrafo, MATRIX_EPS)) {
             Rn.copy(camToNDCTrafo, matrix);
             camToNDCChanged = true;
         }
       }
       if (avatarPath != null) matrix = avatarPath.getMatrix(null);
       else if (viewer.getCameraPath() != null) matrix = viewer.getCameraPath().getMatrix(null);
-      if (matrix != null && !Rn.equals(matrix, avatarTrafo)) {
+      if (matrix != null && !Rn.equals(matrix, avatarTrafo, MATRIX_EPS)) {
           Rn.copy(avatarTrafo, matrix);
           avatarChanged = true;
       }
