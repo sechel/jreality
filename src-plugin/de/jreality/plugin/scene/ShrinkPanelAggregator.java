@@ -1,4 +1,4 @@
-package de.jreality.ui;
+package de.jreality.plugin.scene;
 
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -16,7 +16,6 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import de.jreality.plugin.scene.SceneShrinkPanel;
 
 public abstract class ShrinkPanelAggregator extends SceneShrinkPanel {
 

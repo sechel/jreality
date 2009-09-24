@@ -1,7 +1,7 @@
 package de.jreality.plugin.basic;
 
 import de.jreality.plugin.icon.ImageHook;
-import de.jreality.ui.ShrinkPanelAggregator;
+import de.jreality.plugin.scene.ShrinkPanelAggregator;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 
