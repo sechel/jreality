@@ -142,8 +142,6 @@ public class RotateTool extends AbstractTool {
   private boolean updateCenter;
   public void perform(ToolContext tc) {
 	  
-	  System.out.println("RotateTool.perform(): "+tc.getSource());
-	  
     Matrix object2avatar = new Matrix((moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
     if (Rn.isNan(object2avatar.getArray())) {
     	return;
