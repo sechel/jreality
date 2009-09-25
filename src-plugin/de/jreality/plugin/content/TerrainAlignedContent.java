@@ -194,7 +194,6 @@ public class TerrainAlignedContent extends Content {
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = new PluginInfo("Terrain Aligned Content", "jReality Group");
-		info.isDynamic = false;
 		return info;
 	}
 	
