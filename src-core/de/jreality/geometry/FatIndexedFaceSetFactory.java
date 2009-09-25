@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
@@ -68,11 +67,11 @@ public class FatIndexedFaceSetFactory {
 		if (boundaryIndices!=null) setBoundaryIndicesImpl(boundaryIndices);
 	}
 
-	public double getEpsilon() {
+	public double getFatness() {
 		return epsilon;
 	}
 
-	public void setEpsilon(double epsilon) {
+	public void setFatness(double epsilon) {
 		this.epsilon = epsilon;
 	}
 
@@ -80,8 +79,7 @@ public class FatIndexedFaceSetFactory {
 		return generateBoundaryIndices;
 	}
 
-	public void setGenerateBoundaryIndices(boolean generateBoundaryIndices) {
-		
+	public void setGenerateBoundaryIndices(boolean generateBoundaryIndices) {	
 		this.generateBoundaryIndices = generateBoundaryIndices;
 	}
 	
