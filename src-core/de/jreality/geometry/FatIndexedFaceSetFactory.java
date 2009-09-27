@@ -28,7 +28,7 @@ public class FatIndexedFaceSetFactory {
 	
 	private IndexedFaceSet inputIFS;
 	private List<int[]> boundaryIndices=new ArrayList<int[]>();
-	private double epsilon=.05;
+	private double fatness=.05;
 	private boolean generateBoundaryIndices=false;
 
 	private final IndexedFaceSet topIFS;
@@ -68,11 +68,11 @@ public class FatIndexedFaceSetFactory {
 	}
 
 	public double getFatness() {
-		return epsilon;
+		return fatness;
 	}
 
-	public void setFatness(double epsilon) {
-		this.epsilon = epsilon;
+	public void setFatness(double fatness) {
+		this.fatness = fatness;
 	}
 
 	public boolean isGenerateBoundaryIndices() {
@@ -96,13 +96,13 @@ public class FatIndexedFaceSetFactory {
 	private void setBoundaryIndicesImpl(List<int[]> boundaryIndices) {
 		if (this.boundaryIndices == boundaryIndices) return;
 		
-		boolean onlyUpdate=
-			this.boundaryIndices != null && boundaryIndices != null
-			&& this.boundaryIndices.size() == boundaryIndices.size();
+		boolean nbOfComponentsChanged=
+			this.boundaryIndices == null || boundaryIndices == null
+			|| this.boundaryIndices.size() != boundaryIndices.size();
 		
 		this.boundaryIndices = boundaryIndices;
 		
-		if (!onlyUpdate) {
+		if (nbOfComponentsChanged) {
 			boundaryIFSs.clear();
 			boundaryIFSFs.clear();
 			boundarySGCs.clear();
@@ -114,7 +114,7 @@ public class FatIndexedFaceSetFactory {
 		for (int i = 0; i < boundaryIndices.size(); i++) {
 			IndexedFaceSet ifs;
 			SceneGraphComponent sgc;
-			if (!onlyUpdate){
+			if (nbOfComponentsChanged){
 				IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 				ifs = ifsf.getIndexedFaceSet();
 				sgc=new SceneGraphComponent();
@@ -135,6 +135,17 @@ public class FatIndexedFaceSetFactory {
 			ifs.setName("Boundary("+inputIFS.getName()+")["+i+"]");
 			sgc.setName(ifs.getName());
 		}
+	}
+	
+	/** Use this method to initialize the lists returned by {@link #getBoundaryIFSFs()}, {@link #getBoundaryIFSs()}, and 
+	 * {@link #getBoundarySGCs()}. This is useful when boundary components are to be generated, the number of boundary 
+	 * components is known, but one wants to set properties e.g. of the <code>IndexedFaceSetFactory</code> that 
+	 * generates a boundary component before {@link #update()} is called.    
+	 * 
+	 * @param expectedNbOfBoundaryComponents
+	 */
+	public void initBoundary(int expectedNbOfBoundaryComponents) {
+		setBoundaryIndicesImpl(Arrays.asList(new int[expectedNbOfBoundaryComponents][]));
 	}
 
 	public IndexedFaceSet getTopIFS() {
@@ -186,6 +197,9 @@ public class FatIndexedFaceSetFactory {
 		if (inputIFS.getFaceAttributes(Attribute.INDICES)==null) {
 			throw new UnsupportedOperationException("The input IndexedFaceSet has no faces.");
 		}
+		if (inputIFS.getVertexAttributes(Attribute.NORMALS)==null) {
+			throw new UnsupportedOperationException("The input IndexedFaceSet has no VertexNormals.");
+		}
 		updateImpl();
 	}
 	
@@ -193,22 +207,17 @@ public class FatIndexedFaceSetFactory {
 		copyAllAttributes(inputIFS, topIFSF, true, true, true);
 		copyAllAttributes(inputIFS, bottomIFSF, true, true, true);
 		
-		if (inputIFS.getVertexAttributes(Attribute.NORMALS)!=null)
-			setWithFlippedNormalsAndFaces();	
+		setWithFlippedNormalsAndFaces();	
 
-		if (epsilon!=0 && inputIFS.getVertexAttributes(Attribute.NORMALS)!=null) {
-			setMovedVertices(topIFSF,epsilon);
-			setMovedVertices(bottomIFSF,-epsilon);
-		}
+		setMovedVertices(topIFSF,fatness);
+		setMovedVertices(bottomIFSF,-fatness);
  		
 		topIFSF.update();
 		bottomIFSF.update();
 		
 		if (generateBoundaryIndices) generateBoundaryIndices();
 		
-		if (epsilon!=0 
-				&& inputIFS.getVertexAttributes(Attribute.NORMALS)!=null
-				&& boundaryIndices != null) {
+		if (boundaryIndices != null) {
 			updateBoundaryFaces();
 		}
 		for (IndexedFaceSetFactory ifsf : boundaryIFSFs) ifsf.update();
@@ -339,17 +348,22 @@ public class FatIndexedFaceSetFactory {
 			}
 		}
 		
-		Set<Integer> outerBoundaryVertices=new HashSet<Integer>();
-		for (int i = 1; i < isOnlyOuterBoundaryVertex.length; i++) {
-			if (isOnlyOuterBoundaryVertex[i]) outerBoundaryVertices.add(i);
-		}
-
 		Set<Integer> boundaryVertices=new HashSet<Integer>();
 		for (int i=1; i<edgesAtVertex.size(); i++)
 			if (edgesAtVertex.get(i)!=null)
 				boundaryVertices.add(i);
 		if (boundaryVertices.isEmpty()) return;
+		System.out
+				.println("FatIndexedFaceSetFactory.generateBoundaryIndices() "+boundaryVertices);
 		
+		Set<Integer> outerBoundaryVertices=new HashSet<Integer>();
+		for (int i = 1; i < isOnlyOuterBoundaryVertex.length; i++) {
+			if (isOnlyOuterBoundaryVertex[i] && boundaryVertices.contains(i)) 
+				outerBoundaryVertices.add(i);
+		}
+		System.out
+				.println("FatIndexedFaceSetFactory.generateBoundaryIndices() "+outerBoundaryVertices);
+
 		List<int[]> boundary =new LinkedList<int[]>() ;
 		int vertex;
 		do {
@@ -366,6 +380,7 @@ public class FatIndexedFaceSetFactory {
 			boolean closed=false;
 			do {
 				Integer newVertex=0;
+				System.out.println("FatIndexedFaceSetFactory.generateBoundaryIndices()"+vertex+": "+edgesAtVertex.get(vertex));
 				for (Iterator<Integer> iterator = edgesAtVertex.get(vertex).iterator(); iterator.hasNext();) {
 					newVertex = iterator.next();
 					if (newVertex>0) break;
@@ -373,7 +388,7 @@ public class FatIndexedFaceSetFactory {
 				if (newVertex<=0) break;
 				if (!vertices.add(vertex=newVertex)) {closed=true;
 				System.out
-						.println("FatIndexedFaceSetFactory.generateBoundaryIndices()"); break;}
+						.println("FatIndexedFaceSetFactory.generateBoundaryIndices() CLOSED"); break;}
 				if (!isOnlyOuterBoundaryVertex[vertex]) boundaryVertices.remove((Integer) vertex);
 
 			}
@@ -382,11 +397,12 @@ public class FatIndexedFaceSetFactory {
 			int[] verticesArray=new int[closed?vertices.size()+1:vertices.size()];
 			int i=0;
 			for (Integer v : vertices)	verticesArray[i++]=v-1; //switch back to vertex indices starting at 0
-			if (closed) verticesArray[verticesArray.length]=verticesArray[0];
+			if (closed) verticesArray[verticesArray.length-1]=verticesArray[0];
 			boundary.add(verticesArray);
 		}
 		while (boundaryVertices.iterator().hasNext());
 		
 		setBoundaryIndicesImpl(boundary);
 	}
+
 }
