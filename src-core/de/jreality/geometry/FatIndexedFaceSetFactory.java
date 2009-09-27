@@ -28,7 +28,7 @@ public class FatIndexedFaceSetFactory {
 	
 	private IndexedFaceSet inputIFS;
 	private List<int[]> boundaryIndices=new ArrayList<int[]>();
-	private double epsilon=0;
+	private double epsilon=.05;
 	private boolean generateBoundaryIndices=false;
 
 	private final IndexedFaceSet topIFS;
@@ -60,11 +60,11 @@ public class FatIndexedFaceSetFactory {
 
 	public void setInputIFS(IndexedFaceSet inputIFS) {
 		this.inputIFS = inputIFS;
+		compoundSGC.setName("fat "+inputIFS.getName());
 		topIFS.setName("Top("+inputIFS.getName()+")");
 		topSGC.setName(topIFS.getName());
 		bottomIFS.setName("Bottom("+inputIFS.getName()+")");
 		bottomSGC.setName(bottomIFS.getName());
-		if (boundaryIndices!=null) setBoundaryIndicesImpl(boundaryIndices);
 	}
 
 	public double getFatness() {
@@ -84,7 +84,7 @@ public class FatIndexedFaceSetFactory {
 	}
 	
 	public List<int[]> getBoundaryIndices() {
-		return Collections.unmodifiableList(boundaryIndices);
+		return boundaryIndices==null?null:Collections.unmodifiableList(boundaryIndices);
 	}
 
 	public void setBoundaryIndices(List<int[]> boundaryIndices)  {
@@ -94,27 +94,46 @@ public class FatIndexedFaceSetFactory {
 	}
 
 	private void setBoundaryIndicesImpl(List<int[]> boundaryIndices) {
+		if (this.boundaryIndices == boundaryIndices) return;
+		
+		boolean onlyUpdate=
+			this.boundaryIndices != null && boundaryIndices != null
+			&& this.boundaryIndices.size() == boundaryIndices.size();
+		
 		this.boundaryIndices = boundaryIndices;
 		
-		boundaryIFSs.clear();
-		boundaryIFSFs.clear();
-		for (SceneGraphComponent sgc : boundarySGCs) compoundSGC.removeChild(sgc);
+		if (!onlyUpdate) {
+			boundaryIFSs.clear();
+			boundaryIFSFs.clear();
+			boundarySGCs.clear();
+			for (SceneGraphComponent sgc : boundarySGCs) compoundSGC.removeChild(sgc);
+		}
 
 		if (boundaryIndices==null) return;
 
 		for (int i = 0; i < boundaryIndices.size(); i++) {
-			IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
-			IndexedFaceSet ifs = ifsf.getIndexedFaceSet();
-			SceneGraphComponent sgc=new SceneGraphComponent();
-			
-			boundaryIFSFs.add(ifsf);;
-			boundaryIFSs.add(ifs);
-			compoundSGC.addChild(sgc);
+			IndexedFaceSet ifs;
+			SceneGraphComponent sgc;
+			if (!onlyUpdate){
+				IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+				ifs = ifsf.getIndexedFaceSet();
+				sgc=new SceneGraphComponent();
+
+				boundaryIFSFs.add(ifsf);;
+				boundaryIFSs.add(ifs);
+				compoundSGC.addChild(sgc);
+				boundarySGCs.add(sgc);
+				ifsf.setGenerateVertexNormals(true);			
+				sgc.setGeometry(ifs);
+
+			}
+			else {
+				ifs=boundaryIFSs.get(i);
+				sgc=boundarySGCs.get(i);
+			}
 
 			ifs.setName("Boundary("+inputIFS.getName()+")["+i+"]");
-			ifsf.setGenerateVertexNormals(true);
 			sgc.setName(ifs.getName());
-			sgc.setGeometry(ifs);
 		}
 	}
 
@@ -164,6 +183,9 @@ public class FatIndexedFaceSetFactory {
 	public void update()  {
 		if (inputIFS==null) 
 			throw new UnsupportedOperationException("The input IndexedFaceSet needs to be set first.");
+		if (inputIFS.getFaceAttributes(Attribute.INDICES)==null) {
+			throw new UnsupportedOperationException("The input IndexedFaceSet has no faces.");
+		}
 		updateImpl();
 	}
 	
@@ -184,7 +206,9 @@ public class FatIndexedFaceSetFactory {
 		
 		if (generateBoundaryIndices) generateBoundaryIndices();
 		
-		if (epsilon!=0 && inputIFS.getVertexAttributes(Attribute.NORMALS)!=null) {
+		if (epsilon!=0 
+				&& inputIFS.getVertexAttributes(Attribute.NORMALS)!=null
+				&& boundaryIndices != null) {
 			updateBoundaryFaces();
 		}
 		for (IndexedFaceSetFactory ifsf : boundaryIFSFs) ifsf.update();
@@ -289,10 +313,11 @@ public class FatIndexedFaceSetFactory {
 				int vertex1=face.getValueAt(j)+1;
 				int vertex2=face.getValueAt((j+1) % face.getLength())+1;
 
+				//save edge outgoing edge of vertex1
 				List<Integer> adjacentVertices = edgesAtVertex.get(vertex1);
 				if (adjacentVertices== null) 
 					edgesAtVertex.set(vertex1,adjacentVertices=new LinkedList<Integer>());
-				if (adjacentVertices.contains(-vertex2)) {
+				if (adjacentVertices.contains(-vertex2)) { //thats an inner edge, remove it
 					adjacentVertices.remove((Integer) (-vertex2));
 					if (adjacentVertices.isEmpty()) 
 						edgesAtVertex.set(vertex1,null);
@@ -300,10 +325,11 @@ public class FatIndexedFaceSetFactory {
 				}
 				else adjacentVertices.add(vertex2);
 				
+				//save edge as incomming edge of vertex2
 				adjacentVertices = edgesAtVertex.get(vertex2);
 				if (adjacentVertices== null) 
 					edgesAtVertex.set(vertex2,adjacentVertices=new LinkedList<Integer>());
-				if (adjacentVertices.contains(vertex1)) {
+				if (adjacentVertices.contains(vertex1)) {//thats an inner edge, remove it
 					adjacentVertices.remove((Integer) (vertex1));
 					if (adjacentVertices.isEmpty()) 
 						edgesAtVertex.set(vertex2,null);
@@ -317,7 +343,7 @@ public class FatIndexedFaceSetFactory {
 		for (int i = 1; i < isOnlyOuterBoundaryVertex.length; i++) {
 			if (isOnlyOuterBoundaryVertex[i]) outerBoundaryVertices.add(i);
 		}
-		
+
 		Set<Integer> boundaryVertices=new HashSet<Integer>();
 		for (int i=1; i<edgesAtVertex.size(); i++)
 			if (edgesAtVertex.get(i)!=null)
@@ -345,8 +371,10 @@ public class FatIndexedFaceSetFactory {
 					if (newVertex>0) break;
 				}
 				if (newVertex<=0) break;
-				if (!vertices.add(vertex=newVertex)) {closed=true; break;}
-				boundaryVertices.remove((Integer) vertex);
+				if (!vertices.add(vertex=newVertex)) {closed=true;
+				System.out
+						.println("FatIndexedFaceSetFactory.generateBoundaryIndices()"); break;}
+				if (!isOnlyOuterBoundaryVertex[vertex]) boundaryVertices.remove((Integer) vertex);
 
 			}
 			while (!isOnlyOuterBoundaryVertex[vertex]);
