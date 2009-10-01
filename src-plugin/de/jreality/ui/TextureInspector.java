@@ -40,6 +40,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileSystemView;
 
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
@@ -451,11 +452,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	
 	private void updateTextureTransform() {
 		if (tex != null) {
-			MatrixBuilder mb = MatrixBuilder.euclidean();
-			mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
-			mb.rotate(getTextureRotation(), 0, 0, 1);
-			mb.translate(getTextureUTranslation(), getTextureVTranslation(), 0);
-			tex.setTextureMatrix(mb.getMatrix());
+			tex.setTextureMatrix(getTextureMatrix());
 		}
 	}
 
@@ -474,6 +471,15 @@ public class TextureInspector extends JPanel implements ChangeListener {
 			bm.doClick();
 		}
 	}
+	
+	public Matrix getTextureMatrix() {
+		MatrixBuilder mb = MatrixBuilder.euclidean();
+		mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
+		mb.rotate(getTextureRotation(), 0, 0, 1);
+		mb.translate(getTextureUTranslation(), getTextureVTranslation(), 0);
+		return mb.getMatrix();
+	}
+	
 	
 	private void updateTexture() {
 		String texture = getTexture();

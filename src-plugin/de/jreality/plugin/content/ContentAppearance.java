@@ -49,7 +49,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	public static final boolean DEFAULT_TUBES = true;
 	public static final boolean DEFAULT_SPHERES = true;
 	public static final String DEFAULT_TEXTURE = "none";
-	public static final double DEFAULT_TEXTURE_SCALE = .5;
 
 	private ViewPreferences
 		viewPreferences = null;
@@ -121,7 +120,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setTubes(DEFAULT_TUBES);
 		appearanceInspector.setSpheres(DEFAULT_SPHERES);
 		appearanceInspector.setTexture(DEFAULT_TEXTURE);
-		appearanceInspector.setTextureScale(DEFAULT_TEXTURE_SCALE); 
 	}
 	
 	@Override
@@ -162,7 +160,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setSpheres(c.getProperty(getClass(), "spheres", DEFAULT_SPHERES));
 		appearanceInspector.setTextures(c.getProperty(getClass(), "textures", textures));
 		appearanceInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
-		appearanceInspector.setTextureScale(c.getProperty(getClass(), "textureScale", DEFAULT_TEXTURE_SCALE));
 		
 		appearanceInspector.updateAll();
 		
@@ -207,7 +204,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		c.storeProperty(getClass(), "spheres", appearanceInspector.isSpheres());
 		c.storeProperty(getClass(), "textures", appearanceInspector.getTextures());
 		c.storeProperty(getClass(), "texture", appearanceInspector.getTexture());
-		c.storeProperty(getClass(), "textureScale", appearanceInspector.getTextureScale());
 		super.storeStates(c);
 	}
 
@@ -235,6 +231,10 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		info.vendorName = "Ulrich Pinkall";
 		info.icon = ImageHook.getIcon("lupeblau.png");
 		return info; 
+	}
+	
+	public AppearanceInspector getAppearanceInspector() {
+		return appearanceInspector;
 	}
 	
 	

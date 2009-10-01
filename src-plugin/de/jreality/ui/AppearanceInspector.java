@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 
 import com.bric.swing.ColorPicker;
 
+import de.jreality.math.Matrix;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Scene;
@@ -880,15 +881,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public void setTexture(String texture) {
 		textureInspector.setTexture(texture);
 	}
-
-	public double getTextureScale() {
-		return textureInspector.getTextureUScale();
-	}
 	
-	public void setTextureScale(double scale) {
-		textureInspector.setTextureUScale(scale);
+	public Matrix getTextureMatrix() {
+		return textureInspector.getTextureMatrix();
 	}
-	
 	
 	public void setShowPointLabels(boolean show) {
 		pointFontInspector.setShowLabels(show);
