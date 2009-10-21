@@ -197,5 +197,19 @@ public class TerrainAlignedContent extends Content {
 		return info;
 	}
 	
+	@Override
+	public void restoreStates(Controller c) throws Exception {
+		setContentSize(c.getProperty(getClass(), "size", getContentSize()));
+		setVerticalOffset(c.getProperty(getClass(), "offset", getVerticalOffset()));
+		super.restoreStates(c);
+	}
+
+	@Override
+	public void storeStates(Controller c) throws Exception {
+		c.storeProperty(getClass(), "size", getContentSize());
+		c.storeProperty(getClass(), "offset", getVerticalOffset());
+		super.storeStates(c);
+	}
+
 	
 }
