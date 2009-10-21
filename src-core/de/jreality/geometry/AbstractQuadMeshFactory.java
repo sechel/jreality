@@ -369,7 +369,7 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		
 		uTextureScale = textureScale;
 		
-		vertexCoordinates.outdate();
+		textureCoordinates.outdate();
 	}
 
 	public double getVTextureScale() {
@@ -382,7 +382,7 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		
 		vTextureScale = textureScale;
 		
-		vertexCoordinates.outdate();
+		textureCoordinates.outdate();
 	}
 
 	public double getUTextureShift() {
@@ -395,7 +395,7 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		
 		uTextureShift = textureShift;
 		
-		vertexCoordinates.outdate();
+		textureCoordinates.outdate();
 	}
 
 	public double getVTextureShift() {
@@ -408,7 +408,7 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		
 		vTextureShift = textureShift;
 		
-		vertexCoordinates.outdate();
+		textureCoordinates.outdate();
 	}
 
 	public boolean isEdgeFromQuadMesh() {
