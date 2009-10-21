@@ -27,12 +27,16 @@ import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class TerrainAlignedContent extends Content {
+	
+	public static final double
+		DEFAULT_CONTENT_SIZE=20D,
+		DEFAULT_VERTICAL_OFFSET=1D;
 
 	SceneGraphComponent transformationComponent;
 	SceneGraphComponent scalingComponent = new SceneGraphComponent("scaling");
 	
-	private double contentSize=20;
-	private double verticalOffset=1;
+	private double contentSize=DEFAULT_CONTENT_SIZE;
+	private double verticalOffset=DEFAULT_VERTICAL_OFFSET;
 
 	private Rectangle3D bounds;
 	
@@ -199,8 +203,8 @@ public class TerrainAlignedContent extends Content {
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
-		setContentSize(c.getProperty(getClass(), "size", getContentSize()));
-		setVerticalOffset(c.getProperty(getClass(), "offset", getVerticalOffset()));
+		setContentSize(c.getProperty(getClass(), "size", DEFAULT_CONTENT_SIZE));
+		setVerticalOffset(c.getProperty(getClass(), "offset", DEFAULT_VERTICAL_OFFSET));
 		super.restoreStates(c);
 	}
 
