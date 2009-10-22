@@ -46,6 +46,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Geometry;
@@ -62,7 +63,7 @@ import de.jreality.util.SceneGraphUtility;
 
 /**
  * Static methods for generating a variety of geometric primitives either as 
- * instances of {@link Geometry} or {@link SceneGraphComponent}. The main cateegories of
+ * instances of {@link Geometry} or {@link SceneGraphComponent}. The main categories of
  * primitives are:
  * <ul>
  * <li>Polyhedra: cube, tetrahedron, icosahedron, pyramids, ...</li>

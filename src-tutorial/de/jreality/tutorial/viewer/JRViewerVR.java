@@ -16,7 +16,7 @@ public class JRViewerVR {
 		v.setContent(Primitives.icosahedron());
 		v.registerPlugin(new ContentAppearance());
 		v.registerPlugin(new ContentLoader());
-		v.setPropertiesFile("JRViewerVR.wrl");
+		v.setPropertiesFile("JRViewerVR.xml");
 		v.startup();
 	}
 
