@@ -19,9 +19,23 @@ import de.jreality.scene.data.DataListSet;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
 
-/** Make a thick <code>IndexedFaceSet</code>.
+/** Fatten an <code>IndexedFaceSet</code>. This factory makes out of one <code>IndexedFaceSet</code>
+ * two <code>IndexedFaceSet</code>s, top and bottom, by moving the given <code>IndexedFaceSet</code> along its
+ * vertex normals "up" and "down" (in this process the length of the vertex normals
+ * is not normalized). It may also generate <code>IndexedFaceSet</code>s for the 
+ * boundary. All vertex, edges, and face attributes of the given <code>IndexedFaceSet</code> are
+ * copied to the top and bottom 
+ * <code>IndexedFaceSet</code>s. For the boundary this must be handled elsewhere.
+ * 
+ * <p> The {@link ThickenedSurfaceFactory} also fattens a given <code>IndexedFaceSet</code>, but
+ * puts everything into one <code>IndexedFaceSet</code>. It is also not flexible at the
+ * boundary. On the other hand, the <code>ThickenedSurfaceFactory</code> 
+ * can make holes into the face, which is not possible with
+ * the <code>FatIndexedFaceSetFactory</code>.
  * 
  * @author G. Paul Peters, Sep 23, 2009
+
+ * @see ThickenedSurfaceFactory 
  *
  */
 public class FatIndexedFaceSetFactory {
@@ -58,6 +72,10 @@ public class FatIndexedFaceSetFactory {
 	}
 
 
+	/** The <code>IndexedFaceSet</code> to be fattened.
+	 * 
+	 * @param inputIFS
+	 */
 	public void setInputIFS(IndexedFaceSet inputIFS) {
 		this.inputIFS = inputIFS;
 		compoundSGC.setName("fat "+inputIFS.getName());
@@ -68,17 +86,34 @@ public class FatIndexedFaceSetFactory {
 	}
 
 	public double getFatness() {
-		return fatness;
+		return 2*fatness;
 	}
 
+	/** The vertex coordinates of the top and bottom <code>IndexedFaceSet</code>s 
+	 * are obtained by adding &plusmn;&frac12;<code>fatness</code> times the vertex normal
+	 * to the given vertex.
+	 * 
+	 * @param fatness
+	 */
 	public void setFatness(double fatness) {
-		this.fatness = fatness;
+		this.fatness = fatness/2;
 	}
 
 	public boolean isGenerateBoundaryIndices() {
 		return generateBoundaryIndices;
 	}
 
+	/** Set to true, when the factory should detect the boundary edges.  
+	 * A boundary edge is an edge in the given <code>IndexedFaceSet</code>
+	 * that does only occur once in the list of face indices 
+	 * of the <code>IndexedFaceSet</code>, i.e., has only one adjacent face. 
+	 * A boundary component is either closed or starts and ends at vertices,
+	 * that only have two adjacent edges. This leads to correct, i.e., four, 
+	 * boundary components in the case of <code>IndexedFaceSet</code>s produced
+	 * by a {@link QuadMeshFactory}.
+	 * 
+	 * @param generateBoundaryIndices
+	 */
 	public void setGenerateBoundaryIndices(boolean generateBoundaryIndices) {	
 		this.generateBoundaryIndices = generateBoundaryIndices;
 	}
@@ -87,6 +122,11 @@ public class FatIndexedFaceSetFactory {
 		return boundaryIndices==null?null:Collections.unmodifiableList(boundaryIndices);
 	}
 
+	/** Determines the boundary components.
+	 * 
+	 * @param boundaryIndices of boundary components. Each entry is an int array, where
+	 * consecutive indices describe an edge (they point to the start and end vertices of that edge). 
+	 */
 	public void setBoundaryIndices(List<int[]> boundaryIndices)  {
 		if (generateBoundaryIndices)
 			throw new IllegalStateException("You can not set the boundary indices when boundary indices are to be generated.");
@@ -140,7 +180,8 @@ public class FatIndexedFaceSetFactory {
 	/** Use this method to initialize the lists returned by {@link #getBoundaryIFSFs()}, {@link #getBoundaryIFSs()}, and 
 	 * {@link #getBoundarySGCs()}. This is useful when boundary components are to be generated, the number of boundary 
 	 * components is known, but one wants to set properties e.g. of the <code>IndexedFaceSetFactory</code> that 
-	 * generates a boundary component before {@link #update()} is called.    
+	 * generates a boundary component before {@link #update()} is called.  Otherwise it is not necessary to call this
+	 * method. Then the boundary components are initialized when {@link #update()} is called.
 	 * 
 	 * @param expectedNbOfBoundaryComponents
 	 */
@@ -148,49 +189,100 @@ public class FatIndexedFaceSetFactory {
 		setBoundaryIndicesImpl(Arrays.asList(new int[expectedNbOfBoundaryComponents][]));
 	}
 
+	/** The returned reference is final.
+	 * 
+	 */
 	public IndexedFaceSet getTopIFS() {
 		return topIFS;
 	}
 
 
+	/** The returned reference is final.
+	 * 
+	 */
 	public IndexedFaceSet getBottomIFS() {
 		return bottomIFS;
 	}
 
+	/** The returned reference is final. The references in the list only change, when the number of
+	 * boundary components changes. 
+	 * 
+	 */
 	public List<IndexedFaceSet>getBoundaryIFSs() {
 		return boundaryIFSs;
 	}
 	
+	/** The returned reference is final. Change the properties of the returned factory
+	 *  to influence the generation of 
+	 * the top indexed face set.
+	 * 
+	 * @return the factory that is used to generate the top indexed face set. 
+	 */
 	public IndexedFaceSetFactory getTopIFSF() {
 		return topIFSF;
 	}
 
+	/** The returned reference is final. Change the properties of the returned factory
+	 * to influence the generation of the bottom indexed face set.
+	 * 
+	 * @return the factory that is used to generate the bottom indexed face set. 
+	 */
 	public IndexedFaceSetFactory getBottomIFSF() {
 		return bottomIFSF;
 	}
 
+	/** The returned reference is final. The references in the list only change, when the number of
+	 * boundary components changes. Change the properties of the returned factory
+	 *  to influence the generation of 
+	 * the boundary indexed face sets.
+	 * 
+	 * @return the factories that are used to generate the boundary indexed face sets. 
+	 */
 	public List<IndexedFaceSetFactory> getBoundaryIFSFs() {
 		return boundaryIFSFs;
 	}
 
+	/** The returned reference is final. 
+	 * 
+	 * @return the <code>SceneGraphComponent</code> with the top indexed face set as geometry. 
+	 */
 	public SceneGraphComponent getTopSGC() {
 		return topSGC;
 	}
 
+	/** The returned reference is final. 
+	 * 
+	 * @return the <code>SceneGraphComponent</code> with the bottom indexed face set as geometry. 
+	 */
 	public SceneGraphComponent getBottomSGC() {
 		return bottomSGC;
 	}
 
+	/** The returned reference is final. The references in the list only change, when the number of
+	 * boundary components changes.
+	 * 
+	 * @return the list of <code>SceneGraphComponent</code>s with the 
+	 * boundary indexed face sets as geometry. 
+	 */
 	public List<SceneGraphComponent> getBoundarySGCs() {
 		return boundarySGCs;
 	}
 
+	/** Returns all components of the fat indexed face set as children of one <code>SceneGraphComponent</code>.
+	 * 
+	 */
 	public SceneGraphComponent getAllInOneSceneGraphComponent() {
 		return compoundSGC;
 	}
 
 	
 
+	/** Call this to generate the first time or update the components of the fat indexed face set 
+	 * whenever ingredients - in particular the input index face set - change. 
+	 * 
+	 * @throws UnsupportedOperationException when the input index face set ({@link #setInputIFS(IndexedFaceSet)})
+	 * is null, has no faces or no vertex normals.
+	 */
 	public void update()  {
 		if (inputIFS==null) 
 			throw new UnsupportedOperationException("The input IndexedFaceSet needs to be set first.");
