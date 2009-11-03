@@ -95,7 +95,7 @@ public class DragPointSet implements PointSequence {
 	}
 	
 	
-	/**Override this method and do a transformation of the drag vertex, 
+	/**Override this method and do a transformation of the dragged vertex, 
 	 * e.g., projection to the sphere.
 	 * 
 	 * @param vertex
