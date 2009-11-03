@@ -31,18 +31,23 @@ public class AddPointsExample extends AbstractTool {
 	public void perform(ToolContext tc) {
 		if (!tc.getAxisState(InputSlot.SHIFT_LEFT_BUTTON).isPressed()) return;
 		
+		// determine the pointer transformation:
+		// translation is the mouse pointer on the near clipping plane
+		// z-axis is the direction of the mouse ray out of the screen
+		// for a 6DOF input device, it is the position/orientation of the device
 		Matrix m = new Matrix(tc.getTransformationMatrix(InputSlot.POINTER_TRANSFORMATION));
 				
+		// we compute the coordinates of the new point in world coordinates
 		double[] foot = m.getColumn(3);
 		double[] dir = m.getColumn(2);
 		double[] offset = Rn.times(null, -5, dir);
 		double[] newPoint = Rn.add(null, foot, offset);
 		
+		// now we transform the world coordinates to the coordinate system of the tool component
 		points.add(ToolUtility.worldToLocal(tc, newPoint));
 		
 		updateGeometry();
 		
-		System.out.println("AddPointsExample.perform()");
 	}
 
 	private void updateGeometry() {
