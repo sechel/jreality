@@ -9,10 +9,10 @@ import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
  * main {@link Plugin}, i.e., {@link View}, of {@link JRViewer}. Extend this class
  * and add it to the JRViewer with {@link JRViewer#registerPlugin()};
  * 
- * <p>If a file <code>clazz.getSimpleName</code>.html is found as a resource of <code>clazz</code>, then this is
+ * <p>If a file "<code>clazz.getSimpleName()</code>.html" is found as a resource of <code>clazz</code>, then this is
  * attached as the help file of this plugin, where <code>clazz</code> is the top level 
  * enclosing class of the runtime class of this object. Note that in Eclipse you most likely need to 
- * remove *.thml from "Filtered resources" under Window&rarr;Preferences&rarr;Java&rarr;Compiler&rarr;Building
+ * remove *.html from "Filtered resources" under Window &rarr; Preferences &rarr; Java &rarr; Compiler &rarr; Building
  * 
  * @author G. Paul Peters, 22.07.2009
  *
