@@ -46,7 +46,6 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.renderman.RIBViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Geometry;
@@ -709,7 +708,7 @@ public class Primitives {
 
 	/**
 	 * Create a torus with the given parameters. The resulting instance also has a {@link Geometry} {@link Attribute}
-	 * so that the RenderMan viewer {@link RIBViewer} will produce an exact torus.
+	 * so that the RenderMan viewer <code>de.jreality.renderman.RIBViewer</code> will produce an exact torus.
 	 * @param bR	Major radius
 	 * @param sR	Minor radius
 	 * @param bDetail	Number of sample points around major circle
