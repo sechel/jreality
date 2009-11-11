@@ -511,7 +511,7 @@
 			<fileset dir="${vr}" defaultexcludes="yes">
 				<include name="de/jreality/**/*.java" />
 			</fileset>
-			<fileset dir="${plugin}" defaultexcludes="yes">
+			<fileset dir="${plugin}" excludes="de/jreality/plugin/experimental/**/*.java" defaultexcludes="yes">
 				<include name="de/jreality/**/*.java" />
 			</fileset>
 			<fileset dir="${tutorial}" defaultexcludes="yes">
