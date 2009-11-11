@@ -48,13 +48,19 @@ public class InfoOverlay implements GLEventListener {
 	public static final int LOWER_LEFT = 1;
 	public static final int UPPER_RIGHT = 2;
 	public static final int LOWER_RIGHT = 3;
-
+	static List<InfoOverlay> infoOverlays = new Vector<InfoOverlay>();
+	static void setAllVisible(boolean b)	{
+		for (InfoOverlay io : infoOverlays)
+			io.visible = b;
+	}
+	public static boolean together = true;
 	/**
 	 * @param v
 	 */
 	public InfoOverlay(AbstractViewer v) {
 		viewer = v;
 		viewer.getDrawable().addGLEventListener(this);
+		infoOverlays.add(this);
 	}
 
 	public boolean isVisible() {
@@ -62,7 +68,8 @@ public class InfoOverlay implements GLEventListener {
 	}
 
 	public void setVisible(boolean visible) {
-		this.visible = visible;
+		if (together) setAllVisible(visible);
+		else this.visible = visible;
 	}
 
 	public int getPosition() {
