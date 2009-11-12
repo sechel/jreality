@@ -283,6 +283,7 @@ public class Pn {
 				}
 				d = Math.sqrt(d);
 				if ( !(d==0 || d == 1.0))	d /= Math.abs(ulvl);
+				if (ul == 0 || vl == 0) d = Double.MAX_VALUE;
 				break;
 			case HYPERBOLIC:
 				double uu, uv, vv;
