@@ -114,12 +114,15 @@ private static final double[] ID = Rn.identityMatrix(4);
       JOptionPane.showMessageDialog(null, "<html><center>Driver does not support OpenGL Shading Language!<br>Cannot execute program.</center></html>");
       System.exit(-1);
     }
+    if (drawable.getGL().isExtensionAvailable("GL_APPLE_client_storage")) {
+    	System.out.println("AbstractCalculation.init(): GL_APPLE_client_storage");
+    }
    //drawable.setGL(new DebugGL(drawable.getGL()));
    String vendor = drawable.getGL().glGetString(GL.GL_VENDOR);
-   tex2D = false;//!vendor.startsWith("NVIDIA");
+   tex2D = true;//!vendor.startsWith("NVIDIA");
    atiHack=false;//tex2D;
-   TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_NV;
-   TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_FLOAT_RGBA32_NV;
+   TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_ARB;
+   TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_RGBA32F_ARB;
    renderer = new GlslProgram(new Appearance(), "foo", null, isTex2D() ? RENDER_PROGRAM.replaceAll("Rect", "2D") : RENDER_PROGRAM);
   }
   
@@ -250,11 +253,6 @@ private static final double[] ID = Rn.identityMatrix(4);
   
   /**
    * just a callback when the calculation is done, can be used
-  public abstract long openLibrary(java.lang.String arg0);
-  
-  public abstract long lookupSymbol(long arg0, java.lang.String arg1);
-  
-  public abstract void closeLibrary(long arg0);
    * to retrigger the calculation again,...
    */
   protected void calculationFinished() {

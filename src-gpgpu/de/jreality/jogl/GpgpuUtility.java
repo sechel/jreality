@@ -91,38 +91,32 @@ public class GpgpuUtility {
   }
   
   static void checkBuf(GL gl) {
-    String res = checkFrameBufferStatus(gl);
-    if (!res.equals("OK")) {
-      //System.out.println(res);
-      throw new RuntimeException(res);
-    }
-  }
-
-  private static String checkFrameBufferStatus(GL gl) {
     int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
+    String ret;
     switch (status) {
-    // unfortunately the name of the constant changed between the latest jogl version...
-//    case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-//      return "FrameBuffer incomplete attachments";
-//    case GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-//      return "FrameBuffer incomplete missing attachment";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
-      return "FrameBuffer incomplete duplicate";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-      return "FrameBuffer incomplete dimensions";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-      return "FrameBuffer incomplete formats";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-      return "FrameBuffer incomplete draw buffer";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-      return "FrameBuffer incomplete read buffer";
     case GL.GL_FRAMEBUFFER_COMPLETE_EXT:
-      return "OK";
+    	return;
+    // unfortunately the name of the constant changed between the latest jogl version...
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+      ret = "FrameBuffer incomplete attachments";
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+      ret = "FrameBuffer incomplete missing attachment";
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
+      ret = "FrameBuffer incomplete duplicate";
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+      ret = "FrameBuffer incomplete dimensions";
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+      ret = "FrameBuffer incomplete formats";
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+      ret = "FrameBuffer incomplete draw buffer";
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
+      ret = "FrameBuffer incomplete read buffer";
     case GL.GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-      return "FrameBuffer unsupported";
+      ret = "FrameBuffer unsupported";
     default:
-      return "FrameBuffer unrecognized error";
+      ret = "FrameBuffer unrecognized error";
     }
+    throw new IllegalStateException(ret);
   }
 
   public static void run(GLEventListener listener) {
