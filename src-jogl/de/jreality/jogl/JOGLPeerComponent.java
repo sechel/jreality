@@ -176,7 +176,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		if (goBetween.peerGeometry != null && goBetween.peerGeometry.localClippingPlane)	{
 			JOGLRendererHelper.pushClippingPlane(jr, null);
 		}
-		else if (renderGeometry != null )	{
+		else if (renderGeometry != null && goBetween.peerGeometry != null )	{
 //			LoggingSystem.getLogger(this).info("rendering geometry");
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry, renderGeometry );
 		}
