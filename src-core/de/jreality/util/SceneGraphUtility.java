@@ -47,6 +47,8 @@ import java.util.logging.Level;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
@@ -338,7 +340,10 @@ public class SceneGraphUtility {
 		 * @param rejectInvis	if true, non-visible scene graph components are skipped (default: false)
 		 * @return
 		 */
-		 public static SceneGraphComponent flatten(SceneGraphComponent sgc, final boolean rejectInvis)		{
+	 public static SceneGraphComponent flatten(SceneGraphComponent sgc, final boolean rejectInvis)		{
+		 return flatten(sgc, rejectInvis, true);
+	 }
+	 public static SceneGraphComponent flatten(SceneGraphComponent sgc, final boolean rejectInvis, final boolean removeTform)		{
 		    final double[] flipit = P3.makeStretchMatrix(null, new double[] {-1,0, -1,0, -1.0});
 			final ArrayList geoms = new ArrayList();
 			//TODO evaluate the appearance also and stick it in the flattened node with the geometry.
@@ -350,10 +355,13 @@ public class SceneGraphUtility {
 	            	PointSet geometry = (PointSet) copy(oldi);
 	            	//System.err.println("point set is "+i);
 	            	if (geometry.getVertexAttributes(Attribute.COORDINATES) == null) return;
-	           	    double[][] v = geometry.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-	            	double[] currentMatrix = thePath.getMatrix(null);
-	            	double[][] nv = Rn.matrixTimesVector(null, currentMatrix, v);
-	            	geometry.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	            	 double[][] v = null, nv = null;
+		            double[] currentMatrix = thePath.getMatrix(null);
+	            	 if (removeTform)	{
+		           	    v = geometry.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		            	nv = Rn.matrixTimesVector(null, currentMatrix, v);
+		            	geometry.setVertexAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));        		
+	            	}
 	                double[] cmp = null;
 	         	    if (geometry instanceof IndexedFaceSet)	{
 	            	    IndexedFaceSet ifs = (IndexedFaceSet) geometry; //(IndexedFaceSet) SceneGraphUtility.copy(i); //
@@ -364,31 +372,33 @@ public class SceneGraphUtility {
 	//             	   else 
 	             	   cmp = mat;
 	            	   if (ifs.getFaceAttributes(Attribute.NORMALS) != null)	{
-	               	   //System.out.println("Setting face normals");
-	            	v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-	                    nv = Rn.matrixTimesVector(null, cmp, v);
-	                    ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-	            	       } else IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
+	            		   //System.out.println("Setting face normals");
+	            		   v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+	            		   if (removeTform)	{
+		            		   nv = Rn.matrixTimesVector(null, cmp, v);
+		            		   ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));	            			   
+	            		   } else if (Rn.determinant(currentMatrix) < 0.0 ) {
+		               	   		nv = Rn.matrixTimesVector(null, flipit, v);
+		               	   		ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	            		   }
+	            	   } //else IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
 	               	   if (ifs.getVertexAttributes(Attribute.NORMALS) != null)	{
-	           	   		//System.out.println("Setting vertex normals");
-	                      v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-	                        nv = Rn.matrixTimesVector(null, cmp, v);
-	                        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-	            	       } else IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
-	              	   if (Rn.determinant(currentMatrix) < 0.0)	{           	
-	               	   		//System.out.println("Flipping normals");
-	               	   		v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-	               	   		nv = Rn.matrixTimesVector(null, flipit, v);
-	               	   		ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-	               	   		v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-	               	   		nv = Rn.matrixTimesVector(null, flipit, v);
-	               	   		ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
-	             	   }
+	               		   	v = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+	               		   if (removeTform) {
+		           	   			//System.out.println("Setting vertex normals");
+		                        nv = Rn.matrixTimesVector(null, cmp, v);
+		                        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	               		   } else if (Rn.determinant(currentMatrix) < 0.0 ) {
+		               	   		nv = Rn.matrixTimesVector(null, flipit, v);	               	 		               			   
+		                        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
+	               		   }
+	            	   } //else IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
 	           	   }
 	         	   //System.out.println("det is "+Rn.determinant(currentMatrix));
 	//	          if (Rn.determinant(currentMatrix) < 0.0)	{
 		                SceneGraphComponent foo = new SceneGraphComponent();
 		                foo.setGeometry(geometry);
+		                if (!removeTform) MatrixBuilder.euclidean(new Matrix(currentMatrix)).assignTo(foo);
 		                if (thePath.getLastComponent().getAppearance() != null)	{
 		                	foo.setAppearance(thePath.getLastComponent().getAppearance());
 		                }
@@ -416,6 +426,7 @@ public class SceneGraphUtility {
 	             SceneGraphComponent foo = (SceneGraphComponent)iter.next(); ;
 	             flat.addChild(foo);
 	       }
+            System.err.println("flat sgc");
 	        return flat;
 		}
 
