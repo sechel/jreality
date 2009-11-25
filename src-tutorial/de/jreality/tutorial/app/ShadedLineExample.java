@@ -9,13 +9,20 @@ import java.awt.Color;
 import javax.swing.SwingConstants;
 
 import de.jreality.geometry.BallAndStickFactory;
+import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.PointSetFactory;
+import de.jreality.geometry.PointSetUtility;
+import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.geometry.TubeFactory;
+import de.jreality.geometry.TubeUtility.FrameInfo;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.math.Rn;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
@@ -92,10 +99,14 @@ public class ShadedLineExample {
 	world.addChild(child);
 	// create the label at the center of the example
 
-	IndexedLineSet tknot =Primitives.discreteTorusKnot(1.0, 0.5, 51, 91, 25000);
-	tknot.setVertexAttributes(Attribute.NORMALS, tknot.getVertexAttributes(Attribute.COORDINATES));
+	IndexedLineSet tknot =Primitives.discreteTorusKnot(1.0, 0.6, 51, 91, 25000);
+	double[][] pts = tknot.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+	tknot.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array().createReadOnly(calculateCurveNormals(tknot)));
 	child.setGeometry(tknot);
 
+	SceneGraphComponent sgc = PointSetUtility.displayVertexNormals(tknot, .5, 0);
+//	world.addChild(sgc);
+	sgc.getAppearance().setAttribute("lineShading", false);
 	// set up the line shader
 	Appearance ap = child.getAppearance();
 	DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ap, true);
@@ -104,12 +115,12 @@ public class ShadedLineExample {
 	RenderingHintsShader rhs = ShaderUtility.createDefaultRenderingHintsShader(ap, true);
 	DefaultLineShader dls = (DefaultLineShader) dgs.createLineShader("default");
 	dls.setTubeDraw(false);
-	dls.setLineWidth(2.0);
+	dls.setLineWidth(3.0);
 	dls.setLineLighting(true);
 
 	// this polygon shader controls how the lines are rendered when line lighting is true
 	DefaultPolygonShader dpls = (DefaultPolygonShader) dls.createPolygonShader("default");
-	dpls.setDiffuseCoefficient(.3);
+	dpls.setDiffuseCoefficient(.5);
 	dpls.setSpecularCoefficient(1.0);
 	dpls.setDiffuseColor(new Color(100,100,255));
 	dpls.setSpecularColor(Color.white);
@@ -117,5 +128,21 @@ public class ShadedLineExample {
 	Viewer viewer = JRViewer.display(world);
 	viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, Color.black);
 	viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.INHERITED);
+  }
+  
+  private static double[][] calculateCurveNormals(IndexedLineSet ifs)	{
+	  TubeFactory tf = new PolygonalTubeFactory(ifs, 0);
+	  tf.setFrameFieldType(FrameFieldType.FRENET);
+	  tf.setClosed(true);
+	  tf.update();
+	  FrameInfo[] frames = tf.getFrameField();
+	  int n = frames.length-1;
+	  double[][] nn = new double[n][3];
+	  for (int i = 0; i<n; ++i)	{
+		  double[] frame = Rn.transpose(null, frames[i].frame);
+		  System.arraycopy(frame, 0, nn[i], 0, 3);
+	  }
+	  Rn.times(nn, -1, nn);
+	  return nn;
   }
 }
