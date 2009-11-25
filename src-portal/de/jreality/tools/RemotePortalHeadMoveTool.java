@@ -87,11 +87,13 @@ public class RemotePortalHeadMoveTool extends AbstractTool {
   private void setHeadMatrix(Matrix head, SceneGraphPath cameraPath, SceneGraphPath portalPath) {
 
 	Camera camera = (Camera) cameraPath.getLastElement();
-  
+//	metric = Pn.ELLIPTIC;
 	// the transformation of the camera node is headTranslation * cameraOrientation
 	MatrixBuilder.init(null, metric).translate(head.getColumn(3)).times(CameraUtility.cameraOrientation).assignTo(cameraPath.getLastComponent());
-		
+//	System.err.println("in setheadmatrix");
 	// calculate and set camera orientation matrix:
+	double[] mat = cameraPath.getLastComponent().getTransformation().getMatrix();
+//	System.err.println("head matrix = "+Rn.matrixToString(mat));
 	head.setColumn(3, P3.originP3);
 	Matrix camOrientationMatrix = MatrixBuilder.euclidean().times(CameraUtility.inverseCameraOrientation).times(head).getMatrix();
 	camera.setOrientationMatrix(camOrientationMatrix.getArray());
