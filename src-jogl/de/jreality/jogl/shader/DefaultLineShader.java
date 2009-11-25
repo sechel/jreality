@@ -180,6 +180,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				else gl.glDisable(GL.GL_LIGHTING);
 				changedLighting = true;
 			}			
+			if (lineLighting) polygonShader.render(jrs);
 		}
 
 		// this little bit of code forces tubes to be opaque: could add
