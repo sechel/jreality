@@ -104,7 +104,7 @@ public class Inspector extends ShrinkPanelPlugin {
 	
 	@Override
 	public String getHelpPath() {
-		return "../help/";
+		return "/de/jreality/plugin/help/";
 	}
 	
 	@Override

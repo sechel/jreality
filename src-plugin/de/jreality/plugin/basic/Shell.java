@@ -123,7 +123,7 @@ public class Shell extends ShrinkPanelPlugin {
 	
 	@Override
 	public String getHelpPath() {
-		return "../help/";
+		return "/de/jreality/plugin/help/";
 	}
 	
 	@Override

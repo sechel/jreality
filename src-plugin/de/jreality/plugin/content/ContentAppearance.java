@@ -245,7 +245,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	
 	@Override
 	public String getHelpPath() {
-		return "../help/";
+		return "/de/jreality/plugin/help/";
 	}
 	
 	@Override
