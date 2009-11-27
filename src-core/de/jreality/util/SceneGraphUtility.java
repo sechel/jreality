@@ -426,7 +426,7 @@ public class SceneGraphUtility {
 	             SceneGraphComponent foo = (SceneGraphComponent)iter.next(); ;
 	             flat.addChild(foo);
 	       }
-            System.err.println("flat sgc");
+            //System.err.println("flat sgc");
 	        return flat;
 		}
 
