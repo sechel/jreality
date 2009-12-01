@@ -1,8 +1,8 @@
 package de.jreality.plugin.basic;
 
 import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jtem.jrworkspace.plugin.Plugin;
-import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 /** Use this class to get a  {@link ShrinkPanelPlugin} that belongs to the 
@@ -17,7 +17,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
  * @author G. Paul Peters, 22.07.2009
  *
  */
-abstract public class ViewShrinkPanelPlugin extends ShrinkPanelPlugin {
+abstract public class ViewShrinkPanelPlugin extends SceneShrinkPanel {
 
 	protected String helpDocument;
 	protected String helpPath;
@@ -26,11 +26,6 @@ abstract public class ViewShrinkPanelPlugin extends ShrinkPanelPlugin {
 	
 	public ViewShrinkPanelPlugin() {
 		super();
-	}
-	
-	@Override
-	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
-		return View.class;
 	}
 	
 	@Override
