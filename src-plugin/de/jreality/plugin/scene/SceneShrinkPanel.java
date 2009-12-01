@@ -57,7 +57,8 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 //		sceneSlot.getShrinkSlot().addShrinkPanel(internalShrinkPanel);
 //		internalShrinkPanel.setVisible(false);
 		
-		setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
+		if (currentTrigger==null) 
+			setTriggerComponent(c.getPlugin(Scene.class).getBackdropComponent());
 
 	}
 
