@@ -3,6 +3,7 @@ package de.jreality.plugin.basic;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 /** Use this class to get a  {@link ShrinkPanelPlugin} that belongs to the 
@@ -15,13 +16,15 @@ import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
  * remove *.html from "Filtered resources" under Window &rarr; Preferences &rarr; Java &rarr; Compiler &rarr; Building
  * 
  * @author G. Paul Peters, 22.07.2009
+ * 
+ * @see SceneShrinkPanel
  *
  */
-abstract public class ViewShrinkPanelPlugin extends SceneShrinkPanel {
+abstract public class ViewShrinkPanelPlugin extends ShrinkPanelPlugin {
 
-	protected String helpDocument;
-	protected String helpPath;
-	protected Class<?> helpHandle;
+	private String helpDocument;
+	private String helpPath;
+	private Class<?> helpHandle;
 	private boolean helpResourceChecked=false;
 	
 	public ViewShrinkPanelPlugin() {
@@ -60,6 +63,10 @@ abstract public class ViewShrinkPanelPlugin extends SceneShrinkPanel {
 			helpHandle=clazz;
 		}
 		helpResourceChecked=true;
+	}
+	
+	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
+		return View.class;
 	}
 	
 
