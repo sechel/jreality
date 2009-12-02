@@ -17,7 +17,12 @@ import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkSlot;
  * A ShrinkPanel that flops into the Scene when double-clicking on the terrain.
  * Use the setTriggerComponent to attach it to another part of the scene.
  * 
- * @author Steffen Weissmann.
+ * <p>Attach online help: If a file "<code>clazz.getSimpleName()</code>.html" is found as a resource of <code>clazz</code>, then this is
+ * attached as the help file of this plugin, where <code>clazz</code> is the top level 
+ * enclosing class of the runtime class of this object. Note that in Eclipse you most likely need to 
+ * remove *.html from "Filtered resources" under Window &rarr; Preferences &rarr; Java &rarr; Compiler &rarr; Building
+ *
+ * @author Steffen Weissmann, Paul Peters.
  *
  */
 public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
@@ -34,6 +39,11 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 	private ShrinkPanel internalShrinkPanel;
 	
 	private SceneGraphComponent currentTrigger;
+	
+	private String helpDocument;
+	private String helpPath;
+	private Class<?> helpHandle;
+	private boolean helpResourceChecked=false;
 	
 	public SceneShrinkPanel() {
 		actionTool.addActionListener(new ActionListener() {
@@ -128,8 +138,41 @@ public abstract class SceneShrinkPanel extends ShrinkPanelPlugin {
 		moveOutOfScene();
 	}
 	
-	@Override
 	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
 		return View.class;
+	}
+	
+	@Override
+	public String getHelpDocument() {
+		checkHelpResource();
+		return helpDocument==null ? super.getHelpDocument() : helpDocument;
+	}
+
+	@Override
+	public String getHelpPath() {
+		checkHelpResource();
+		return helpPath==null ? super.getHelpPath() : helpPath;
+	}
+
+	@Override
+	public Class<?> getHelpHandle() {
+		checkHelpResource();
+		return helpHandle==null ? super.getHelpHandle() : helpHandle;
+	}
+	
+	
+	private void checkHelpResource() {
+		if (helpResourceChecked) return;
+		Class<?> clazz = getClass();
+		while (null != clazz.getEnclosingClass()) {
+			clazz = clazz.getEnclosingClass();
+		}
+		String filename = clazz.getSimpleName()+".html";
+		if (null!=clazz.getResource(filename)) {
+			helpDocument=filename;
+			helpPath="";
+			helpHandle=clazz;
+		}
+		helpResourceChecked=true;
 	}
 }
