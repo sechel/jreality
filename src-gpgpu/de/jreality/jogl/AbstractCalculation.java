@@ -83,18 +83,18 @@ private static final double[] ID = Rn.identityMatrix(4);
   
   private int[] fbos = new int[1]; // 1 framebuffer
   private int[] vbo = new int[1]; // 1 vertexbuffer
-  private int[] valueTextures = new int[2]; // ping pong textures
+  private int[] initialValuesTextureID = new int[2]; // ping pong textures
   private int[] attachments = {GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT};
   protected int readTex;
 
   private int writeTex = 1;
 
   protected FloatBuffer valueBuffer;
-  private int valueTextureSize;
+  protected int valueTextureSize;
   protected int numValues;
 
-  private boolean valuesChanged;
-  private boolean valueTextureSizeChanged;
+  protected boolean valuesChanged;
+  protected boolean valueTextureSizeChanged;
   private boolean hasValues;
 
   private boolean hasValidVBO;
@@ -146,9 +146,9 @@ private static final double[] ID = Rn.identityMatrix(4);
       initDataTextures(gl);
 
       gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-          attachments[readTex], TEX_TARGET, valueTextures[readTex], 0);      
+          attachments[readTex], TEX_TARGET, initialValuesTextureID[readTex], 0);      
       gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-          attachments[writeTex], TEX_TARGET, valueTextures[writeTex], 0);
+          attachments[writeTex], TEX_TARGET, initialValuesTextureID[writeTex], 0);
 
       GpgpuUtility.checkBuf(gl);
       
@@ -157,7 +157,7 @@ private static final double[] ID = Rn.identityMatrix(4);
       // set all values
       // ping pong - current values
       gl.glActiveTexture(GL.GL_TEXTURE0);
-      gl.glBindTexture(TEX_TARGET, valueTextures[readTex]);
+      gl.glBindTexture(TEX_TARGET, initialValuesTextureID[readTex]);
       program.setUniform("values", 0);
       
       // user uniforms
@@ -193,7 +193,7 @@ private static final double[] ID = Rn.identityMatrix(4);
       if (displayTexture) {
         initViewport(gl, glu, false);
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glBindTexture(TEX_TARGET, valueTextures[writeTex]);
+        gl.glBindTexture(TEX_TARGET, initialValuesTextureID[writeTex]);
         renderer.setUniform("values", 0);
         renderer.setUniform("scale", 1.); //findScale());
         GlslLoader.render(renderer, gl);
@@ -292,22 +292,22 @@ private static final double[] ID = Rn.identityMatrix(4);
     program = new GlslProgram(new Appearance(), "foo", null, src);
   }
 
-  private void initTextures(GL gl) {
+  protected void initTextures(GL gl) {
     if (valueTextureSizeChanged) {
       gl.glEnable(TEX_TARGET);
-      if (valueTextures[0] != 0) {
-        gl.glDeleteTextures(2, valueTextures, 0);
+      if (initialValuesTextureID[0] != 0) {
+        gl.glDeleteTextures(2, initialValuesTextureID, 0);
       }
-      gl.glGenTextures(2, valueTextures, 0);
-      setupTexture(gl, valueTextures[0], valueTextureSize);
-      setupTexture(gl, valueTextures[1], valueTextureSize);
+      gl.glGenTextures(2, initialValuesTextureID, 0);
+      setupTexture(gl, initialValuesTextureID[0], valueTextureSize);
+      setupTexture(gl, initialValuesTextureID[1], valueTextureSize);
       valueTextureSizeChanged=false;
       System.out.println("[initTextures] new particles tex size: "+valueTextureSize);
     }
     if (valuesChanged) {
       gl.glEnable(TEX_TARGET);
       valueBuffer.clear();
-      transferToTexture(gl, valueBuffer, valueTextures[readTex], valueTextureSize);
+      transferToTexture(gl, valueBuffer, initialValuesTextureID[readTex], valueTextureSize);
       System.out.println("[initTextures] new particle data");
 //      if (!readData) {
 //          gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbos[0]);
