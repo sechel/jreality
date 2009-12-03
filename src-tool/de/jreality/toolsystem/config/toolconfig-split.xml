@@ -1,0 +1,23 @@
+<toolconfig>
+
+  <import href="junks/toolconfig-mouse-keyboard.xml" />
+  <import href="junks/toolconfig-desktop.xml" />
+
+  <rawdevices>
+    <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>     	
+  </rawdevices>
+
+  <rawslots>
+    <mapping device="SystemTimer" src="tick" target="SystemTime"/>
+  </rawslots>
+  
+  
+  <virtualdevices>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualEvolutionOperator">
+      <inputslot>PointerTransformation</inputslot>
+      <outputslot>PointerEvolution</outputslot>
+    </virtualdevice>
+
+  </virtualdevices>
+</toolconfig>
