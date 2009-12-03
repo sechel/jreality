@@ -62,7 +62,7 @@ import de.jreality.toolsystem.ToolEventQueue;
  * @author weissman/hoffmann
  *
  **/
-public class DeviceSpaceNavigator implements RawDevice, PollingDevice {
+public class DeviceJinputController implements RawDevice, PollingDevice {
 
     private ToolEventQueue queue;
     
@@ -70,23 +70,9 @@ public class DeviceSpaceNavigator implements RawDevice, PollingDevice {
 	private HashMap<Component,AxisState> lastValues = new HashMap<Component,AxisState>();
 	private HashMap<Component,Float> maxValues = new HashMap<Component,Float>();
     
-    private Controller spaceNavigator;
+    private Controller device;
+    
 	private net.java.games.input.Component[] components;
-	
-	
-	public DeviceSpaceNavigator() {
-		ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
-		Controller[] controllers = env.getControllers();
-		for (Controller ctrl : controllers) {
-			System.out.println(ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
-			if (ctrl.getName().equals("3Dconnexion SpaceNavigator")) {
-				System.out.println("Found SpaceNavigator!");
-				spaceNavigator = ctrl;
-				break;
-			}
-		}
-		components = spaceNavigator.getComponents();
-	}
 	
     public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
 		String[] nums = rawDeviceName.split("_");
@@ -103,6 +89,7 @@ public class DeviceSpaceNavigator implements RawDevice, PollingDevice {
             	System.err.println("invalid max value: "+nums[2]);
             }
             maxValues.put(c, maxVal);
+            System.out.println("Mapped "+device+"->"+c+" <=> "+inputDevice);
 			return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("no such raw axis");
@@ -117,32 +104,58 @@ public class DeviceSpaceNavigator implements RawDevice, PollingDevice {
     }
 
     public void initialize(Viewer viewer, Map<String, Object> config) {
+		ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
+		Controller[] controllers = env.getControllers();
+		String id_string = config.get("id_string").toString();
+		for (Controller ctrl : controllers) {
+			//System.out.println(ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
+			if (ctrl.getName().matches(id_string)) {
+				System.out.println("Found "+ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
+				device = ctrl;
+				break;
+			} else {
+				System.out.println("\""+id_string+"\" did not match \""+ctrl.getName()+"\"");
+			}
+		}
+		components = device.getComponents();
+		if (device == null) throw new IllegalStateException("no controller matching "+id_string);
     }
 
     public String getName() {
-        return "jinputJoystick";
+        return "jinput ["+(device == null ? "<null>":device.getName())+"]";
     }
     
 	public void poll() {
 		if (queue == null) return;
-        spaceNavigator.poll();
-		//Set keys = componentMap.keySet();
-		 Set<Map.Entry<Component, InputSlot>> entries = componentMap.entrySet();
-		//for (Iterator iter = entries.iterator(); iter.hasNext();) {
-         for (Map.Entry<Component, InputSlot> element : entries) {
-            
+        device.poll();
+		Set<Map.Entry<Component, InputSlot>> entries = componentMap.entrySet();
+		for (Map.Entry<Component, InputSlot> element : entries) {
             Component c = element.getKey();
-			//InputSlot inputDevice = (InputSlot) element.getValue();
-            float val = c.getPollData()/maxValues.get(c);
-            AxisState newState = new AxisState(val);
+			float pollData = c.getPollData();
+			float val = pollData/maxValues.get(c);
+            // TODO google how to calibrate controllers
+            //old controller calibration
+            //if (val == 0.003921628f) val = 0f;
+            //saitek: better controller, calibration
+           // if (val == -0.043137252f) val = 0f;
+            //if (val == -0.027450979f) val = 0f;
+			//System.out.println("val: "+val);
+            AxisState newState = new AxisState((double) val);
 			AxisState oldState = lastValues.get(c);
-			if(!newState.isReleased() || newState.intValue() != oldState.intValue()) {
-				//System.out.println("new event");
-				queue.addEvent(
-						new ToolEvent(this, System.currentTimeMillis(), element.getValue(), newState)
-						);
+			if(newState.intValue() != oldState.intValue()) {
+				InputSlot slot = element.getValue();
+				queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slot, newState));
                 lastValues.put(c,newState);
+                //if (slot.getName().endsWith("RZRaw")) System.out.println(slot+" val="+val+" pollData="+pollData);
 			}
+		}
+	}
+
+	public static void main(String[] args) {
+		ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
+		Controller[] controllers = env.getControllers();
+		for (Controller ctrl : controllers) {
+			System.out.println(ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
 		}
 	}
 
