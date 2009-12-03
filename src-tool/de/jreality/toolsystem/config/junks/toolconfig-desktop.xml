@@ -1,5 +1,7 @@
 <toolconfig>
 
+    <import href="junks/toolconfig-ndc.xml" />
+
 	<virtualdevices>
 
 		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualInvertMatrix">

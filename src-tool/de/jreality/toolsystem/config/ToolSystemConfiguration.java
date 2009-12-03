@@ -77,9 +77,11 @@ import de.jreality.util.Input;
  */
 public class ToolSystemConfiguration {
   
-  public static ToolSystemConfiguration loadDefaultConfiguration() {
+  private static final String DEFAULT_TOOLCONFIG = "toolconfig.xml";
+
+public static ToolSystemConfiguration loadDefaultConfiguration() {
     try {
-      final URL toolconfig = ToolSystemConfiguration.class.getResource("toolconfig.xml");
+      final URL toolconfig = ToolSystemConfiguration.class.getResource(DEFAULT_TOOLCONFIG);
       if (toolconfig == null) {
     	  String text="Resource \"toolconfig.xml\" not found.\n Expected in "+ToolSystemConfiguration.class.getPackage().toString()
 		  +".\n This is often caused by Eclipse when Preferences->Java->Building->Filtered Resources includes \"*.xml\".";    	  
@@ -102,13 +104,13 @@ public class ToolSystemConfiguration {
   }
 
   public static ToolSystemConfiguration loadDefaultDesktopConfiguration() throws IOException {
-    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml")));
+    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource(DEFAULT_TOOLCONFIG)));
   }
   
   public static ToolSystemConfiguration loadDefaultDesktopConfiguration(List<Input> additionalInputs) throws IOException {
-    if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml")));
+    if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource(DEFAULT_TOOLCONFIG)));
     List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();
-    all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml"))));
+    all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource(DEFAULT_TOOLCONFIG))));
     all.add(loadConfiguration(additionalInputs));
     return merge(all);
   }
@@ -128,7 +130,7 @@ public class ToolSystemConfiguration {
   public static ToolSystemConfiguration loadDefaultPortalConfiguration(List<Input> additionalInputs) throws IOException {
     if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
     List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();
-    all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xml"))));
+    all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource(DEFAULT_TOOLCONFIG))));
     all.add(loadConfiguration(additionalInputs));
     return merge(all);
   }
@@ -140,6 +142,7 @@ public class ToolSystemConfiguration {
 			try {
 				URL url = ToolSystemConfiguration.class.getResource(href);
 				Input input = url == null ? Input.getInput(href) : Input.getInput(url);
+				System.out.println("resolved: "+input);
 				return new StreamSource(input.getInputStream());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block

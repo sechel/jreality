@@ -45,13 +45,6 @@
 			<outputslot>ShipRotateActivation</outputslot>
 		</virtualdevice>
 
-		<virtualdevice
-			type="de.jreality.toolsystem.virtual.VirtualMousePointerTrafo">
-			<inputslot>NDCToWorld</inputslot>
-			<inputslot>PointerNDC</inputslot>
-			<outputslot>PointerTransformation</outputslot>
-		</virtualdevice>
-
 	</virtualdevices>
 
 </toolconfig>

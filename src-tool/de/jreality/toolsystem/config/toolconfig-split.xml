@@ -1,6 +1,8 @@
 <toolconfig>
 
-  <import href="junks/toolconfig-mouse-keyboard.xml" />
+  <!-- import href="junks/toolconfig-mouse-keyboard.xml" / -->
+  <import href="junks/toolconfig-SpaceNavigator.xml" />
+  <import href="junks/toolconfig-no-mouse.xml" />
   <import href="junks/toolconfig-desktop.xml" />
 
   <rawdevices>
