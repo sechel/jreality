@@ -3,23 +3,18 @@ package de.jreality.util;
 import java.awt.AWTException;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
-import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.awt.image.renderable.ParameterBlock;
 import java.beans.Statement;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.Buffer;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
@@ -38,7 +33,6 @@ public class ImageUtility {
 
 	public static void writeBufferedImage(File file, BufferedImage img) {
 		String suffix = getFileSuffix(file);
-		System.err.println("Suffix is "+suffix);
 		if ("tiff".equals(suffix) || "tif".equals(suffix)) {
 			try {
 				  Class encParamClass = Class.forName("com.sun.media.jai.codec.TIFFEncodeParam");
