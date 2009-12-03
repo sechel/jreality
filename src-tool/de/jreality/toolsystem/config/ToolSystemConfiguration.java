@@ -51,9 +51,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -132,14 +135,46 @@ public class ToolSystemConfiguration {
 
   public static ToolSystemConfiguration loadConfiguration(Input xmlFile) throws IOException {
     TransformerFactory tfactory = TransformerFactory.newInstance();
+    tfactory.setURIResolver(new URIResolver() {
+		public Source resolve(String href, String base) throws TransformerException {
+			try {
+				URL url = ToolSystemConfiguration.class.getResource(href);
+				Input input = url == null ? Input.getInput(href) : Input.getInput(url);
+				return new StreamSource(input.getInputStream());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace(); 
+			}
+			return null;
+		}
+	});
     Input xslt = Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig.xsl"));
-    DOMResult outResult = new DOMResult();    
-    try {
-      Transformer transformer = tfactory.newTransformer(new StreamSource(xslt.getInputStream()));
-      transformer.transform(new StreamSource(xmlFile.getInputStream()), outResult);
-    } catch (TransformerException e) {
-      e.printStackTrace();
-    }
+      Transformer transformer = null;
+	try {
+		transformer = tfactory.newTransformer(new StreamSource(xslt.getInputStream()));
+	} catch (TransformerConfigurationException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+      StreamSource src = new StreamSource(xmlFile.getInputStream());
+      DOMResult outResult = null;
+      
+      for (int i=0; i<5; i++) {
+    	  if (outResult != null) src = new StreamSource(domToInputStream(outResult.getNode()));
+    	  outResult = new DOMResult();
+    	  try {
+			transformer.transform(src, outResult);
+		} catch (TransformerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 
+		
+		//System.out.println("After transform: ");
+		//sysoutXML(outResult);
+    	    
+      };  
+      
+    
     XMLDecoder dec = new XMLDecoder(domToInputStream(outResult.getNode()), null,
         new ExceptionListener() {
         public void exceptionThrown(Exception e) {
@@ -151,6 +186,12 @@ public class ToolSystemConfiguration {
     ToolSystemConfiguration tsc = (ToolSystemConfiguration) dec.readObject();
     return tsc;
   }
+
+private static void sysoutXML(DOMResult outResult) {
+	StringBuffer sb = new StringBuffer(1024);
+	domToString(outResult.getNode(), sb, 0);
+	System.out.println(sb.toString());
+}
   
   public static ToolSystemConfiguration loadConfiguration(List<Input> inputs) throws IOException {
     List<ToolSystemConfiguration> confs = new LinkedList<ToolSystemConfiguration>();
@@ -343,7 +384,8 @@ public class ToolSystemConfiguration {
   }
 
   public static void main(String[] args) throws IOException {
-    ToolSystemConfiguration ts = ToolSystemConfiguration.loadDefaultConfiguration();
+    //ToolSystemConfiguration ts = ToolSystemConfiguration.loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("test-single-toolconfigs.xml")));
+	ToolSystemConfiguration ts = ToolSystemConfiguration.loadDefaultConfiguration();
     System.out.println(ts);
   }
 }
