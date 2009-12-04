@@ -297,8 +297,6 @@ public class ViewerVR {
 					} 
 				}
 			});
-			
-			shipNavigationTool.setPollingDevice(false);
 		}
 		if (!portal && !portalRemote) {
 			headTransformationTool = new HeadTransformationTool();
