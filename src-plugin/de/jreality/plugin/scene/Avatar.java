@@ -95,9 +95,6 @@ public class Avatar extends Plugin implements ChangeListener {
 		boolean portalRemote = environment == RunningEnvironment.PORTAL_REMOTE;
 		// navigation tool
 		shipNavigationTool = new ShipNavigationTool();
-		if (portal || portalRemote) {
-			shipNavigationTool.setPollingDevice(false);
-		}
 
 		// head transformation tool
 		if (!portal && !portalRemote) {

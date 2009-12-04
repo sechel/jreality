@@ -40,8 +40,6 @@
 
 package de.jreality.tools;
 
-import java.text.NumberFormat;
-
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -56,89 +54,86 @@ import de.jreality.scene.tool.ToolContext;
  */
 public class HeadTransformationTool extends AbstractTool {
 
-  private transient InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
-  private transient final InputSlot verticalRotation = InputSlot.getDevice("VerticalHeadRotationAngleEvolution");
+	private transient InputSlot rotateActivation = InputSlot.getDevice("ShipRotateActivation");
+	private transient final InputSlot verticalRotation = InputSlot.getDevice("VerticalHeadRotationAngleEvolution");
 
-  private double maxAngle = Math.PI*0.35;
-  private double minAngle = -Math.PI*0.35;
-  
-  private boolean invert;
-  
-  private transient double[] headTranslation;
-  
-  private transient double currentAngle;
-  private transient boolean rotate;
-  
-  private final transient Matrix m=new Matrix();
-  
-  static final boolean SPACE_NAVIGATOR_USAGE=false;
-  
-  public HeadTransformationTool() {
-	addCurrentSlot(verticalRotation);
-    if (!SPACE_NAVIGATOR_USAGE) addCurrentSlot(rotateActivation);
-  }
+	private double maxAngle = Math.PI*0.35;
+	private double minAngle = -Math.PI*0.35;
 
-  public void perform(ToolContext tc) {
-    if (!SPACE_NAVIGATOR_USAGE) {
+	private boolean invert;
+
+	private transient double[] headTranslation;
+
+	private transient double currentAngle;
+	private transient boolean rotate;
+
+	private final transient Matrix m=new Matrix();
+
+	public HeadTransformationTool() {
+		addCurrentSlot(verticalRotation);
+		addCurrentSlot(rotateActivation);
+	}
+
+	public void perform(ToolContext tc) {
 		if (rotate) {
-	      if (!tc.getAxisState(rotateActivation).isPressed()) {
-	        removeCurrentSlot(verticalRotation);
-	        rotate = false;
-	      }
-	    } else {
-	      if (tc.getAxisState(rotateActivation).isPressed()) {
-	        addCurrentSlot(verticalRotation);
-	        rotate = true;
-	      }
-	    }
-		if (tc.getSource() == rotateActivation || !rotate) return;
-    }
-    double deltaAngle = tc.getAxisState(verticalRotation).doubleValue();
-    if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
-      tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
-      if (headTranslation == null) {
-	      FactoredMatrix fm = new FactoredMatrix(m.getArray());
-	      currentAngle=fm.getRotationAngle();
-	      if (currentAngle > Math.PI) currentAngle-=2*Math.PI;
-      }
-      headTranslation=m.getColumn(3);
-    } else {
-      headTranslation=new double[]{0,1.7,0};
-    }
-	double dAngle = (invert ? -1 : 1) * deltaAngle;
-	//System.out.println(NumberFormat.getNumberInstance().format(dAngle));
-	if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) {
-    	return;
-    }
-    currentAngle+=dAngle;
-    SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
-    MatrixBuilder.euclidean().translate(headTranslation).rotateX(currentAngle).assignTo(myComponent);
-  }
+			if (!tc.getAxisState(rotateActivation).isPressed()) {
+				removeCurrentSlot(verticalRotation);
+				rotate = false;
+			}
+		} else {
+			if (tc.getAxisState(rotateActivation).isPressed()) {
+				addCurrentSlot(verticalRotation);
+				rotate = true;
+			}
 
-  public double getMaxAngle() {
-    return maxAngle;
-  }
+			if (tc.getSource() == rotateActivation || !rotate) return;
+		}	
+		double deltaAngle = tc.getAxisState(verticalRotation).doubleValue();
+		if (tc.getRootToToolComponent().getLastComponent().getTransformation() != null) {
+			tc.getRootToToolComponent().getLastComponent().getTransformation().getMatrix(m.getArray());
+			if (headTranslation == null) {
+				FactoredMatrix fm = new FactoredMatrix(m.getArray());
+				currentAngle=fm.getRotationAngle();
+				if (currentAngle > Math.PI) currentAngle-=2*Math.PI;
+			}
+			headTranslation=m.getColumn(3);
+		} else {
+			headTranslation=new double[]{0,1.7,0};
+		}
+		double dAngle = (invert ? -1 : 1) * deltaAngle;
+		//System.out.println(NumberFormat.getNumberInstance().format(dAngle));
+		if (currentAngle + dAngle > maxAngle || currentAngle + dAngle < minAngle) {
+			return;
+		}
+		currentAngle+=dAngle;
+		SceneGraphComponent myComponent = tc.getRootToToolComponent().getLastComponent();
+		MatrixBuilder.euclidean().translate(headTranslation).rotateX(currentAngle).assignTo(myComponent);
+	}
 
-  public void setMaxAngle(double maxAngle) {
-    this.maxAngle = maxAngle;
-  }
+	public double getMaxAngle() {
+		return maxAngle;
+	}
 
-  public double getMinAngle() {
-    return minAngle;
-  }
+	public void setMaxAngle(double maxAngle) {
+		this.maxAngle = maxAngle;
+	}
 
-  public void setMinAngle(double minAngle) {
-	  this.minAngle = minAngle;
-  }
+	public double getMinAngle() {
+		return minAngle;
+	}
 
-  public boolean isInvert() {
-	  return invert;
-  }
+	public void setMinAngle(double minAngle) {
+		this.minAngle = minAngle;
+	}
 
-  public void setInvert(boolean invert) {
-	  this.invert = invert;
-  }
-  public void currentAngle(double ang){
-	  currentAngle=ang;
-  }
+	public boolean isInvert() {
+		return invert;
+	}
+
+	public void setInvert(boolean invert) {
+		this.invert = invert;
+	}
+	public void currentAngle(double ang){
+		currentAngle=ang;
+	}
 }

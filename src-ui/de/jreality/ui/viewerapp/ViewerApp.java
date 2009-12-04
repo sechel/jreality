@@ -1091,6 +1091,13 @@ public class ViewerApp {
 			renderTrigger.removeViewer(viewerSwitch);
 		}
 		viewerSwitch.dispose();
+		
+		for (Viewer v : viewers) {
+			v.setSceneRoot(null);
+			v.setCameraPath(null);
+			v.setAuxiliaryRoot(null);
+		}
+		
 		if (toolSystem != null) toolSystem.dispose();
 
 		SelectionManagerImpl.disposeForViewer(viewerSwitch);
@@ -1102,7 +1109,6 @@ public class ViewerApp {
 		frame.dispose();
 		if (externalNavigatorFrame!=null) externalNavigatorFrame.dispose();
 		if (externalBeanShellFrame!=null) externalBeanShellFrame.dispose();
-
 	}
 
 }

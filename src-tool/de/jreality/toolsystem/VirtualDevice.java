@@ -53,7 +53,7 @@ import de.jreality.scene.tool.InputSlot;
 public interface VirtualDevice {
 
     public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException;
-    public abstract void initialize(List inputSlots, InputSlot result, Map configuration);
+    public abstract void initialize(List<InputSlot> inputSlots, InputSlot result, Map<String, Object> configuration);
 
     public void dispose();
     public String getName();

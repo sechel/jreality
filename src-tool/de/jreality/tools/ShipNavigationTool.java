@@ -85,8 +85,6 @@ public class ShipNavigationTool extends AbstractTool {
 	private boolean hasCenter = false;
 	private double[] center={0,0,0,1};
 	
-	private boolean pollingDevice=true; // should be true for mouse look, false for some axis/button device TODO!!
-
 	private transient boolean rotate=false;
 	
 	// if the "fall activation" (F-Key as default) is pressed, this is true...
@@ -137,7 +135,7 @@ public class ShipNavigationTool extends AbstractTool {
 		
 		// pollingDevice only seems to affect horizontal rotation?
 		double rot = tc.getAxisState(horizontalRotation).doubleValue();
-		if (pollingDevice && tc.getSource() == horizontalRotation) {
+		if (tc.getSource() == horizontalRotation) {
 			MatrixBuilder.euclidean(myMatrix).rotateY(-rot);
 			myMatrix.assignTo(myComponent);
 			return;
@@ -171,9 +169,6 @@ public class ShipNavigationTool extends AbstractTool {
 		if (!(touchGround && velocity[0] == 0 && velocity[1] == 0 && velocity[2] == 0)) {
 
 			double sec = 0.001* tc.getAxisState(timer).intValue(); // time since
-			if (!pollingDevice) {
-				MatrixBuilder.euclidean(myMatrix).rotateY(-rot*sec).assignTo(myComponent);
-			}
 			
 			// dest is the point we would like to move to...
 			double[] trans = new double[]{sec*velocity[0], sec*velocity[1], sec*velocity[2], 1};
@@ -263,9 +258,6 @@ public class ShipNavigationTool extends AbstractTool {
 		if (tc.getAxisState(leftRight) != null && !tc.getAxisState(leftRight).isReleased()) {
 			needTimer = true;
 		}
-		if (!pollingDevice && tc.getAxisState(horizontalRotation) != null && !tc.getAxisState(horizontalRotation).isReleased()) {
-			needTimer = true;
-		}
 		if (tc.getAxisState(jump) != null
 				&& tc.getAxisState(jump).isPressed())
 			needTimer = true;
@@ -304,14 +296,6 @@ public class ShipNavigationTool extends AbstractTool {
 
 	public void setJumpSpeed(double jumpSpeed) {
 		this.jumpSpeed = jumpSpeed;
-	}
-
-	public boolean isPollingDevice() {
-		return pollingDevice;
-	}
-
-	public void setPollingDevice(boolean pollingDevice) {
-		this.pollingDevice = pollingDevice;
 	}
 
 	public double getRunFactor() {
