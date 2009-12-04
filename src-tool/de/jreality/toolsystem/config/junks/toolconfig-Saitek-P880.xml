@@ -4,7 +4,7 @@
 		<rawdevice id="Gamepad"
 			type="de.jreality.toolsystem.raw.DeviceJinputController">
 			<prop name="id_string">
-				<string>SAITEK P880</string>
+				<string>.*P880.*</string>
 			</prop>
 		</rawdevice>
 	</rawdevices>
@@ -15,9 +15,9 @@
 		<mapping device="Gamepad" src="axis_12" target="RightLeftAxis" />
 		<mapping device="Gamepad" src="axis_13" target="ForwardBackwardAxis" />
 		<mapping device="Gamepad" src="axis_14"
-			target="VerticalHeadRotationAngleEvolution" />
+			target="VerticalHeadRotationAngleSpeed" />
 		<mapping device="Gamepad" src="axis_15"
-			target="HorizontalShipRotationAngleEvolution" />
+			target="HorizontalShipRotationAngleSpeed" />
 	</rawslots>
 
 	<virtualdevices>
@@ -25,6 +25,25 @@
 			<inputslot>RightLeftAxis</inputslot>
 			<outputslot>LeftRightAxis</outputslot>
 		</virtualdevice>
-	</virtualdevices>
+	
+		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>VerticalHeadRotationAngleSpeed</inputslot>
+			<inputslot>SystemTime</inputslot>
+			<outputslot>VerticalHeadRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>1</double>
+			</prop>
+		</virtualdevice>
 
+		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>HorizontalShipRotationAngleSpeed</inputslot>
+			<inputslot>SystemTime</inputslot>
+			<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>1</double>
+			</prop>
+		</virtualdevice>
+	</virtualdevices>
 </toolconfig>

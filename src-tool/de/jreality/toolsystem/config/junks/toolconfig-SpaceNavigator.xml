@@ -4,32 +4,34 @@
 		<rawdevice id="SpaceNavigator"
 			type="de.jreality.toolsystem.raw.DeviceJinputController">
 			<prop name="id_string">
-				<string>3Dconnexion SpaceNavigator</string>
+				<string>.*SpaceNavigator.*</string>
 			</prop>
 		</rawdevice>
 	</rawdevices>
 
 	<rawslots>
-		<mapping device="SpaceNavigator" src="axis_2" target="X" />
-		<mapping device="SpaceNavigator" src="axis_3" target="Y" />
-		<mapping device="SpaceNavigator" src="axis_4" target="Z" />
-		<mapping device="SpaceNavigator" src="axis_5" target="RXRaw" />
-		<mapping device="SpaceNavigator" src="axis_6" target="RYRaw" />
-		<mapping device="SpaceNavigator" src="axis_7" target="RZRaw" />
+		<mapping device="SpaceNavigator" src="axis_0" target="X" />
+		<mapping device="SpaceNavigator" src="axis_1" target="Y" />
+		<mapping device="SpaceNavigator" src="axis_2" target="Z" />
+		<mapping device="SpaceNavigator" src="axis_3" target="RXRaw" />
+		<mapping device="SpaceNavigator" src="axis_4" target="RYRaw" />
+		<mapping device="SpaceNavigator" src="axis_5" target="RZRaw" />
 		<!--
 			mapping device="SpaceNavigator" src="button_0"
 			target="PrimaryAction"/
 		-->
-		<mapping device="SpaceNavigator" src="button_1" target="PrimaryMenu" />
+		<mapping device="SpaceNavigator" src="button_7" target="PrimaryMenu" />
 	</rawslots>
 
 	<virtualdevices>
 
 		<mapping src="X" target="LeftRightAxis" />
-		<mapping src="RZ" target="HorizontalShipRotationAngleEvolution" />
+		<mapping src="RZRaw" target="HorizontalShipRotationAngleSpeed" />
 		<mapping src="Y" target="ForwardBackwardAxis" />
+		<mapping src="RXRaw" target="VerticalHeadRotationAngleSpeed" />
 		<!--mapping src="Z" target="JumpActivation" /-->
 
+<!-- 
 		<virtualdevice
 			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxisFirst">
 			<inputslot>RXRaw</inputslot>
@@ -51,7 +53,27 @@
 		<virtualdevice
 			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxis">
 			<inputslot>RX</inputslot>
+			<outputslot>VerticalHeadRotationAngleSpeed</outputslot>
+		</virtualdevice>
+ -->
+		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>VerticalHeadRotationAngleSpeed</inputslot>
+			<inputslot>SystemTime</inputslot>
 			<outputslot>VerticalHeadRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>3</double>
+			</prop>
+		</virtualdevice>
+
+		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>HorizontalShipRotationAngleSpeed</inputslot>
+			<inputslot>SystemTime</inputslot>
+			<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>3</double>
+			</prop>
 		</virtualdevice>
 
 		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractPositive">
