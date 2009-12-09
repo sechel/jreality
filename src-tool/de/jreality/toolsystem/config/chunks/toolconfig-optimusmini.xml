@@ -1,0 +1,13 @@
+<toolconfig>
+
+  <rawdevices>
+    	<rawdevice id="OptimusMini" type="de.jreality.toolsystem.raw.LinuxOptimusMiniDevice" /> 	
+  </rawdevices>
+
+  <rawslots>
+  		<mapping device="OptimusMini" src="Key1" target="key1" />
+  		<mapping device="OptimusMini" src="Key2" target="PrimaryMenu" />
+  		<mapping device="OptimusMini" src="Key3" target="key2" />
+  </rawslots>
+  
+</toolconfig>

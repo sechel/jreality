@@ -1,0 +1,49 @@
+<toolconfig>
+
+	<rawdevices>
+		<rawdevice id="Gamepad"
+			type="de.jreality.toolsystem.raw.DeviceJinputController">
+			<prop name="id_string">
+				<string>.*P880.*</string>
+			</prop>
+		</rawdevice>
+	</rawdevices>
+
+	<rawslots>
+		<mapping device="Gamepad" src="button_7" target="PrimaryMenu" />
+		<mapping device="Gamepad" src="button_2" target="JumpActivation" />
+		<mapping device="Gamepad" src="axis_12" target="RightLeftAxis" />
+		<mapping device="Gamepad" src="axis_13" target="ForwardBackwardAxis" />
+		<mapping device="Gamepad" src="axis_14"
+			target="VerticalHeadRotationAngleSpeed" />
+		<mapping device="Gamepad" src="axis_15"
+			target="HorizontalShipRotationAngleSpeed" />
+	</rawslots>
+
+	<virtualdevices>
+		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualReverseAxis">
+			<inputslot>RightLeftAxis</inputslot>
+			<outputslot>LeftRightAxis</outputslot>
+		</virtualdevice>
+	
+		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>VerticalHeadRotationAngleSpeed</inputslot>
+			<inputslot>SystemTime</inputslot>
+			<outputslot>VerticalHeadRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>1</double>
+			</prop>
+		</virtualdevice>
+
+		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>HorizontalShipRotationAngleSpeed</inputslot>
+			<inputslot>SystemTime</inputslot>
+			<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>1</double>
+			</prop>
+		</virtualdevice>
+	</virtualdevices>
+</toolconfig>
