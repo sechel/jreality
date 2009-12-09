@@ -101,6 +101,7 @@ public class ShipNavigationTool extends AbstractTool {
 		addCurrentSlot(jump);
 		addCurrentSlot(gravityToggle);
 		addCurrentSlot(groundToggle);
+		addCurrentSlot(horizontalRotation);
 	}
 
 	public void perform(ToolContext tc) {
@@ -135,7 +136,7 @@ public class ShipNavigationTool extends AbstractTool {
 		
 		// pollingDevice only seems to affect horizontal rotation?
 		double rot = tc.getAxisState(horizontalRotation).doubleValue();
-		if (tc.getSource() == horizontalRotation) {
+		if (rotate && tc.getSource() == horizontalRotation) {
 			MatrixBuilder.euclidean(myMatrix).rotateY(-rot);
 			myMatrix.assignTo(myComponent);
 			return;
