@@ -881,6 +881,14 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public void setTexture(String texture) {
 		textureInspector.setTexture(texture);
 	}
+
+	public double getTextureScale() {
+		return textureInspector.getTextureUScale();
+	}
+	
+	public void setTextureScale(double scale) {
+		textureInspector.setTextureUScale(scale);
+	}
 	
 	public Matrix getTextureMatrix() {
 		return textureInspector.getTextureMatrix();
