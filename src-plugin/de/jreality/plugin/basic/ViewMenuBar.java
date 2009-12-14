@@ -1,6 +1,8 @@
 package de.jreality.plugin.basic;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -11,10 +13,12 @@ import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.aggregators.MenuAggregator;
 import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
+import de.jtem.jrworkspace.plugin.flavor.ShutdownFlavor;
 
-public class ViewMenuBar extends MenuAggregator {
+public class ViewMenuBar extends MenuAggregator implements ShutdownFlavor {
 
 	private View viewerPlugin = null;
+	private ShutdownListener shutdownListener;
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -36,7 +40,13 @@ public class ViewMenuBar extends MenuAggregator {
 		addMenu(getClass(), 0.0, fileMenu);
 	
 		addMenuSeparator(getClass(), 99, "File");
-		addMenuItem(getClass(), 100, new Quit("Quit"), "File");
+		Quit quitMenuAction = new Quit("Quit");
+		quitMenuAction.setActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				shutdownListener.shutdown();
+			}
+		});
+		addMenuItem(getClass(), 100, quitMenuAction, "File");
 		
 		// Viewer menu
 		JMenu viewerMenu = viewerPlugin.createViewerMenu();
@@ -67,5 +77,11 @@ public class ViewMenuBar extends MenuAggregator {
 	public Class<? extends PerspectiveFlavor> getPerspective() {
 		return View.class;
 	}
+
+	public void setShutdownListener(ShutdownListener shutdownListener) {
+		this.shutdownListener = shutdownListener;
+	}
+	
+	
 
 }

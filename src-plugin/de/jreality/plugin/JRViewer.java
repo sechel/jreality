@@ -49,14 +49,82 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Secure;
+import de.jreality.vr.ViewerVR;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.PropertiesFlavor;
+import de.jtem.jrworkspace.plugin.flavor.ShutdownFlavor;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
 
+/** JRViewer is the default viewer of jReality. It replaces {@link ViewerVR} and {@link ViewerApp}.
+ * 
+ * <h4>Behind the scenes</h4>
+ * The JRViewer is the jReality front end to the {@link SimpleController}. It implements convenient methods to register jReality related plugins 
+ * and delegates other methods directly to the controller. The controller may be accessed directly via {@link #getController()}.
+ * 
+ * <h4>Plugin properties</h4>
+ * The SimpleController, which works behind the scenes of the JRViewer, allows {@link Plugin}s to read and save properties. These properties 
+ * are read from and saved to a file 
+ * at startup and shutdown via <a href="http://xstream.codehaus.org/">XStream</a>.
+ * 
+ * <p>When {@link SimpleController#shutdown()} is called (from the main windows closing method or from a plugin that implements 
+ * {@link ShutdownFlavor}) the user gets the chance to decide where the properties are saved. 
+ * The decisions are saved
+ * via the java preferences API (see {@link #setPropertiesResource(Class, String)}. If nothing
+ * else is specified the <code>SimpleController</code> tries to read the plugin properties from
+ * <pre> 
+ * 		System.getProperty("user.home") + "/.jrworkspace/default_simple.xml"
+ * </pre>
+ * and saves the user decisions in the preferences node of the package of the SimpleController.
+ *  
+ * <p> Besides the name (and path) of the properties file the user may choose
+ * <ul>
+ * 	<li> whether to load properties from the file at startup (default: <code>true</code>), </li>
+ *  <li> whether to save the properties file,</li>
+ *  <li> whether to remember the users decisions, which disables the dialog next time (so the 
+ *  user should get the chance to revise this decision via a plugin that implements {@link PropertiesFlavor}).</li>
+ * </ul>
+ * The user may cancel the dialog, which also cancels the shutdown process.
+ *
+ * <p>It is recommended that applications call
+ * <pre>
+ * 		setPropertiesResource(MyClass.class,"propertiesFileName")
+ * </pre>
+ * before calling {@link #startup()}. Then the controller loads the plugin properties from this resource. After deployment this 
+ * resource may most likely only be opened for reading, which has the effect that it will only be used
+ * to call {@link #setPropertiesInputStream(InputStream)} and the properties file will retain its default 
+ * value or whatever it is set to via {@link #setPropertiesFile(File)}.
+ * 
+ * <p>When loading properties the availability of a properties file is checked in the following order
+ * <ol>
+ * <li> the user properties file (from the java preferences), when loadFromUserPropertyFile is <code>true</code></li>
+ * <li> the propertiesInputStream</li>
+ * <li> the propertiesFile</li>
+ * </ol>
+ * When saving properties the availability of a properties file for output is checked in the following order
+ * <ol>
+ * <li> the user properties file (from the java preferences)</li>
+ * <li> the propertiesFile</li>
+ * </ol>
+ * The user is prompted when askBeforeSaveOnExit is <code>true</code> or both files above can't be opened for writing.
+ * 
+ * <p>Note to Eclipse developers: if you change  the path of the file to save the properties into
+ * in the dialog at shutdown 
+ * to point to the source folder and DISABLE the load from this file check box, then the resource will be accessed
+ * to load the properties (and the situation after deployment is always tested) and the source folder file 
+ * is used to save (which then may be included in version control). 
+ * In order to trigger copying of the source folder file to the bin folder one may add a do nothing builder which has 
+ * "Refresh resources upon completion" enabled and make sure that the "Filtered resources" do not filter this file. 
+ * 
+
+ *
+ * @author sechelmann, pinkall, weissmann, peters
+ */
 public class JRViewer {
 
 	private SimpleController
@@ -118,7 +186,6 @@ public class JRViewer {
 	public JRViewer(JrScene s) {
 		setShowPanelSlots(false, false, false, false);
 		c.setManageLookAndFeel(false);
-		c.setPropertiesFile(null);
 		c.registerPlugin(view);
 		c.registerPlugin(viewPreferences);
 		c.registerPlugin(new Scene(s));
@@ -185,27 +252,54 @@ public class JRViewer {
 		c.registerPlugin(new ContentInjectionPlugin(node));
 	}
 	
+	/** The provided resource serves 2 purposes: 
+	 * <ol>
+	 * <li>to set the properties <code>File</code> and <code>InputStream</code> via {@link #setPropertiesFile(File)} 
+	 * (if this resource allows write access) and {@link #setPropertiesInputStream(InputStream)} 
+	 * (if this resource allows read access),</li>
+	 * <li>to save and read user decisions about the reading and loading of the property file in a package specific node, via
+	 * the <a href="http://java.sun.com/javase/6/docs/technotes/guides/preferences/index.html">Java Preferences API</a>.  
+	 * </li>
+	 * </ol> 
+	 * 
+	 * @param clazz the class from which the resource may be obtained, the the 
+	 * properties node of package of this class is used to save the user decisions. 
+	 * @param propertiesFileName name of the resource that contains the plugin properties. This argument may 
+	 * be null, then only the second purpose is served and the properties <code>File</code> and 
+	 * <code>InputStream</code> are NOT set to null and may be set independently.
+	 */
+	public void setPropertiesResource(Class<?> clazz, String propertiesFileName) {
+		c.setPropertiesResource(clazz, propertiesFileName);
+	}
 	
 	/**
-	 * Sets the properties File of this JRViewer's controller
-	 * @param filename a file name
+	 * Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
+	 * and persisted as user properties.
+	 * @param propertiesFile a file or null
+	 * @see #setPropertiesResource(Class, String)
 	 */
 	public void setPropertiesFile(String filename) {
 		File f = new File(filename);
 		setPropertiesFile(f);
 	}
 	
+
 	/**
-	 * Sets the properties File of this JRViewer's controller
-	 * @param filename a file name
+	 * Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
+	 * and persisted as user properties.
+	 * @param propertiesFile a file or null
+	 * @see #setPropertiesResource(Class, String)
 	 */
 	public void setPropertiesFile(File file) {
 		c.setPropertiesFile(file);
 	}
 	
 	/**
-	 * Sets the properties InputStream of this JRViewer's controller
-	 * @param in An InputStream
+	 * Sets the properties InputStream of the SimpleController. If also a properties <code>File</code> is provided
+	 * the <code>InputStream</code> is used for reading the properties.
+	 * 
+	 * @param in an InputStream or null
+	 * @see #setPropertiesResource(Class, String)
 	 */
 	public void setPropertiesInputStream(InputStream in) {
 		c.setPropertiesInputStream(in);

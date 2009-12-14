@@ -41,13 +41,14 @@
 package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 
 
 /**
- * Closes the current application.
+ * Closes the current application or informs a listener if one is registered.
  * 
  * @author msommer
  *
@@ -56,15 +57,31 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 public class Quit extends AbstractJrAction {
 
 
-  public Quit(String name) {
-    super(name);
-    setShortCut(KeyEvent.VK_W, 0, true);
-    setShortDescription("Quit");
-  }
-  
-  @Override
-  public void actionPerformed(ActionEvent e) {
-    System.exit(0);
-  }
- 
+	private ActionListener actionListener;
+
+	public Quit(String name) {
+		super(name);
+		setShortCut(KeyEvent.VK_W, 0, true);
+		setShortDescription("Quit");
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (actionListener == null) {
+			System.exit(0);
+		} else {
+			actionListener.actionPerformed(new ActionEvent(e, 1, "quit"));
+		}
+			
+	}
+
+	/** If an action listener is set and the application is not closed by this class.
+	 * 
+	 * @param actionListener
+	 */
+	public void setActionListener(ActionListener actionListener) {
+		this.actionListener=actionListener;
+	}
+
 }
