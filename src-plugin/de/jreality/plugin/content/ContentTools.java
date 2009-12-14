@@ -25,6 +25,10 @@ import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.aggregators.ToolBarAggregator;
 import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
 
+/** A plugin that adds tools to the viewer: rotate, drag, encompass, snap to grid, and pick faces, edges,
+ * and vertices to the scene; and corresponding enable/disable buttons to the tool bar and to the "Content" menu.
+ *
+ */
 public class ContentTools extends Plugin {
 
 	private static final boolean DEFAULT_PICK_FACES = true;

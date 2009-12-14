@@ -62,8 +62,33 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
 
-/** JRViewer is the default viewer of jReality. It replaces {@link ViewerVR} and {@link ViewerApp}.
+/** JRViewer is the default viewer of jReality. It replaces the older viewers: {@link ViewerVR} and {@link ViewerApp}. 
  * 
+ * <p>The simplest way to use the JRViewer is to call the static method 
+ * <pre>
+ * 	JRViewer.display(SceneGraphNode node);
+ * </pre> 
+ * 
+ * <p>Any JRViewer is a composition of {@link Plugin}s. There are static add* methods to add bunches of related plugins.
+ * To get a virtual reality JRViewer with a movable avatar you may call the convenient static method
+ * <pre>
+ * 	JRViewer v=JRViewer.createJRViewerVR(SceneGraphNode contentNode);
+ * 	v.startup();
+ * </pre>
+ * This is a shortcut for
+ * <pre>
+ * 	JRViewer v = new JRViewer();
+ * 
+ * 	v.addBasicUI();
+ * 	v.addVRSupport();
+ *	v.addContentSupport(ContentType.TerrainAligned);
+ * 	v.registerPlugin(new ContentAppearance());
+ * 	v.registerPlugin(new ContentTools());
+ * 	v.setContent(SceneGraphNode contentNode);
+ * 
+ *	v.startup();
+ * </pre>
+ *
  * <h4>Behind the scenes</h4>
  * The JRViewer is the jReality front end to the {@link SimpleController}. It implements convenient methods to register jReality related plugins 
  * and delegates other methods directly to the controller. The controller may be accessed directly via {@link #getController()}.
@@ -276,7 +301,7 @@ public class JRViewer {
 	/**
 	 * Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
 	 * and persisted as user properties.
-	 * @param propertiesFile a file or null
+	 * @param filename a file or null
 	 * @see #setPropertiesResource(Class, String)
 	 */
 	public void setPropertiesFile(String filename) {
@@ -288,7 +313,7 @@ public class JRViewer {
 	/**
 	 * Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
 	 * and persisted as user properties.
-	 * @param propertiesFile a file or null
+	 * @param file a file or null
 	 * @see #setPropertiesResource(Class, String)
 	 */
 	public void setPropertiesFile(File file) {
@@ -330,7 +355,7 @@ public class JRViewer {
 	 * automatically.
 	 * This method does not open the main window. Instead it returns the 
 	 * root pane.
-	 * @return
+	 * @return JRootPane with the created viewer
 	 */
 	public JRootPane startupLocal() {
 		return c.startupLocal();
@@ -409,8 +434,9 @@ public class JRViewer {
 	}
 	
 	/**
-	 * Basic UI support like scene graph inspector, bean shell,
-	 * background color, export menu, camera settings menu...
+	 * Basic UI support: scene graph inspector, bean shell,
+	 * menu bar, view menu (with display options and background color), 
+	 * export menu, camera settings menu, and properties menu.
 	 */
 	public void addBasicUI() {
 		c.registerPlugin(new Inspector());
@@ -465,6 +491,32 @@ public class JRViewer {
 		v.addBasicUI();
 		v.startup();
 		return v.getPlugin(View.class).getViewer();
+	}
+	
+	/** Create a JRViewer that displays the provided <code>SceneGraphNode</code> in a
+	 * virtual reality environment with movable avatar etc. ({@link #addBasicUISupport()}, 
+	 * {@link #addVRSUpport()}, terrain aligned content, {@link ContentAppearance}, {@link ContentTools}).
+	 * The created viewer is not started yet, so you need to call {@link #startup()} on the returned 
+	 * <code>JRViewer</code>.
+	 * 
+	 * @see <a href="http://www3.math.tu-berlin.de/jreality/mediawiki/index.php/ViewerVR/Navigation">ViewerVR Manual</a>
+	 * 
+	 * @param contentNode the scene graph component to be displayed or <code>null</code>.
+	 * @return the created JRViewer.
+	 */
+	public static JRViewer createJRViewerVR(SceneGraphNode contentNode) {
+		JRViewer v = new JRViewer();
+		
+		v.addBasicUI();
+		v.addVRSupport();
+		v.addContentSupport(ContentType.TerrainAligned);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentTools());
+		if (contentNode != null) {
+			v.setContent(contentNode);
+		}
+		
+		return v;
 	}
 
 	
@@ -553,6 +605,9 @@ public class JRViewer {
 		v.startup();
 	}
 
+	/**
+	 * @deprecated use {@link SceneShrinkPanel}
+	 */
 	public static SceneShrinkPanel createSceneShrinkPanel( final Component c, final String title) {
 		SceneShrinkPanel p = new SceneShrinkPanel() {
 			

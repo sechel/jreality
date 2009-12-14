@@ -15,6 +15,9 @@ import de.jreality.ui.AppearanceInspector;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
+/** A plugin that adds an inspector for the appearance of the viewers contents.
+ *
+ */
 public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = true;

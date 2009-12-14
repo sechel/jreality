@@ -69,6 +69,7 @@ import javax.swing.UIManager;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.math.Pn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
@@ -125,6 +126,8 @@ import de.jreality.util.SystemProperties;
  * and extract needed components for use in a different context.
  * 
  * @author weissman, msommer
+ * 
+ * @deprecated use {@link JRViewer} instead
  */
 public class ViewerApp {
 

@@ -28,12 +28,16 @@ import javax.swing.event.ChangeListener;
 import com.bric.swing.ColorPicker;
 
 import de.jreality.math.Matrix;
+import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Scene;
 import de.jreality.shader.CommonAttributes;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
+/** The gui component of the {@link ContentAppearance} plugin.
+ *
+ */
 @SuppressWarnings("serial")
 public class AppearanceInspector extends JPanel implements ActionListener, ChangeListener {
 

@@ -86,6 +86,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
@@ -124,6 +125,9 @@ import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
 
 
+/**
+ * @deprecated use {@link JRViewer} instead
+ */
 public class ViewerVR {
 
 	private static final int CMD_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
