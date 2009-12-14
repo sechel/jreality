@@ -14,9 +14,9 @@ import java.io.Reader;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
 
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
@@ -25,6 +25,7 @@ import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.flavor.PropertiesFlavor;
+import de.jtem.jrworkspace.plugin.simplecontroller.widget.SaveOnExitDialog.PropertiesFileFilter;
 
 public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 
@@ -129,10 +130,6 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 			if (propertiesListener.getUserPropertyFile()!=null) {
 				userPropertiesFileChooser.setSelectedFile(new File(propertiesListener.getUserPropertyFile()));
 			}
-//			userPropertiesFileChooser.addChoosableFileFilter(new SaveOnExitDialog.PropertiesFileFilter());
-			userPropertiesFileChooser.addChoosableFileFilter(new PropertiesFileFilter());
-			userPropertiesFileChooser.setAcceptAllFileFilterUsed(false);
-			userPropertiesFileChooser.setFileSelectionMode(FILES_ONLY);
 
 			Component parent = SwingUtilities.getWindowAncestor(view.getCenterComponent());
 			int result = userPropertiesFileChooser.showDialog(parent, "Select");
@@ -164,20 +161,42 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 	private JFileChooser
 		fileChooser = new JFileChooser(),
 		userPropertiesFileChooser = new JFileChooser();
+	private final JMenuItem
+		saveOnExit,
+		askBeforeSaveOnExit,
+		loadFromUserProperties;
 	
-	
+	@SuppressWarnings("serial")
 	public PropertiesMenu() {
 		String dir = Secure.getProperty("user.dir", "");
 		fileChooser.setCurrentDirectory(new File(dir));
-		//fileChooser.addChoosableFileFilter(new SaveOnExitDialog.PropertiesFileFilter());
 		fileChooser.addChoosableFileFilter(new PropertiesFileFilter());
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileSelectionMode(FILES_ONLY);
+		
+		userPropertiesFileChooser.addChoosableFileFilter(new PropertiesFileFilter());
+		userPropertiesFileChooser.setAcceptAllFileFilterUsed(false);
+		userPropertiesFileChooser.setFileSelectionMode(FILES_ONLY);
+		
+		saveOnExit = new AbstractJrToggleAction("save on exit") {
+			public void actionPerformed(ActionEvent e) {
+				propertiesListener.setSaveOnExit(isSelected());
+			}
+		}.createMenuItem();
+		askBeforeSaveOnExit = new AbstractJrToggleAction("ask before save on exit") {
+			public void actionPerformed(ActionEvent e) {
+				propertiesListener.setAskBeforeSaveOnExit(isSelected());
+			}
+		}.createMenuItem();
+		loadFromUserProperties = new AbstractJrToggleAction("on next startup load from properties file") {
+			public void actionPerformed(ActionEvent e) {
+				propertiesListener.setLoadFromUserPropertyFile(isSelected());
+			}
+		}.createMenuItem();
 	}
 	
 	
 	@Override
-	@SuppressWarnings("serial")
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		view = c.getPlugin(View.class);
@@ -187,24 +206,14 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		viewMenuBar.addMenuSeparator(getClass(), 2.5, "Properties");
 		viewMenuBar.addMenuItem(getClass(), 3, loadDefaultAction, "Properties");
 		viewMenuBar.addMenuSeparator(getClass(), 3.5, "Properties");
-		viewMenuBar.addMenuItem(getClass(), 4, new AbstractJrToggleAction("save on exit") {
-			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setSaveOnExit(isSelected());
-			}
-		}.createMenuItem(),
-		"Properties");
-		viewMenuBar.addMenuItem(getClass(), 5, new AbstractJrToggleAction("ask before save on exit") {
-			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setAskBeforeSaveOnExit(isSelected());
-			}
-		}.createMenuItem(),
-		"Properties");
-		viewMenuBar.addMenuItem(getClass(), 6, new AbstractJrToggleAction("on next startup load from properties file") {
-			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setLoadFromUserPropertyFile(isSelected());
-			}
-		}.createMenuItem(),
-		"Properties");
+
+		saveOnExit.setSelected(propertiesListener.isSaveOnExit());
+		viewMenuBar.addMenuItem(getClass(), 4, saveOnExit,"Properties");
+		askBeforeSaveOnExit.setSelected(propertiesListener.isAskBeforeSaveOnExit());
+		viewMenuBar.addMenuItem(getClass(), 5, askBeforeSaveOnExit,	"Properties");
+		loadFromUserProperties.setSelected(propertiesListener.isLoadFromUserPropertyFile());
+		viewMenuBar.addMenuItem(getClass(), 6, loadFromUserProperties,	"Properties");
+		
 		viewMenuBar.addMenuItem(getClass(), 7, chooseUserPropertiesFileAction, "Properties");
 	}
 
@@ -230,25 +239,6 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		return true;
 	}
 	
-	
-	private class PropertiesFileFilter extends FileFilter {
-
-		@Override
-		public boolean accept(File f) {
-			if (f.isDirectory()) {
-				return true;
-			}
-			String name = f.getName().toLowerCase();
-			return name.endsWith(".xml") || name.endsWith(".jrw");
-		}
-
-		@Override
-		public String getDescription() {
-			return "Property Files (*.xml, *.jrw)";
-		}
-		
-	}
-
 	
 	
 }
