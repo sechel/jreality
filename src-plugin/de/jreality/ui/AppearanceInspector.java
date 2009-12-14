@@ -262,7 +262,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		
 		// line color panel
 		c.weightx = 1.0;
-		c.weighty = 0.0;
+		c.weighty = 1.0;
 		c.insets = insets;
 		c.gridwidth = REMAINDER;
 		c.anchor = WEST;
@@ -271,20 +271,25 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		lineColorChooser.setPreferredSize(new Dimension(220, 230));
 		lineColorPanel.add(lineColorChooser, c);
 		c.fill = VERTICAL;
+		c.weighty = 0.0;
 		lineColorPanel.add(closeLineColorsButton, c);
 		// point color panel
 		pointColorPanel.setLayout(new GridBagLayout());
 		c.fill = BOTH;
 		pointColorChooser.setPreferredSize(new Dimension(220, 230));
+		c.weighty = 1.0;
 		pointColorPanel.add(pointColorChooser, c);
 		c.fill = VERTICAL;
+		c.weighty = 0.0;
 		pointColorPanel.add(closePointColorsButton, c);
 		// face color panel
 		faceColorPanel.setLayout(new GridBagLayout());
 		c.fill = BOTH;
 		faceColorChooser.setPreferredSize(new Dimension(220, 230));
+		c.weighty = 1.0;
 		faceColorPanel.add(faceColorChooser, c);
 		c.fill = VERTICAL;
+		c.weighty = 0.0;
 		faceColorPanel.add(closeFaceColorsButton, c);
 	}
 

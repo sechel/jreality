@@ -132,13 +132,14 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		c.insets = new Insets(1,0,1,0);
 		c.fill = BOTH;
 		c.weightx = 1.0;
-		c.weighty = 0.0;
+		c.weighty = 1.0;
 		c.gridwidth = REMAINDER;
 		c.anchor = WEST;
 		colorPanel.setLayout(new GridBagLayout());
 		faceColorChooser.setPreferredSize(new Dimension(220, 230));
 		colorPanel.add(faceColorChooser, c);
 		c.fill = VERTICAL;
+		c.weighty = 0.0;
 		colorPanel.add(closeButton, c);
 		
 		// panel
@@ -236,7 +237,6 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		updateVisible();
 		updateFacesReflecting();
 		updateTransparencyEnabled();
-		switchTo(colorPanel);
 		updateReflectSceneContent();
 		updateFaceReflection();
 		updateTransparency();
