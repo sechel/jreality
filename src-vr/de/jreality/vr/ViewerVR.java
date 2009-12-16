@@ -86,7 +86,6 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.plugin.JRViewer;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;

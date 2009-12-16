@@ -69,7 +69,6 @@ import javax.swing.UIManager;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.math.Pn;
-import de.jreality.plugin.JRViewer;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
