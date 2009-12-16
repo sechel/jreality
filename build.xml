@@ -2,6 +2,10 @@
 	<description>
 		jReality build file
 	</description>
+	
+	<tstamp>
+		<format property="version" pattern="yyyy-MM-dd"/>
+	</tstamp>
 
 	<!-- the following should belong to core... -->
 	<property name="core" location="src-core" />
@@ -595,6 +599,14 @@
 	<target name="release-jar" depends="dist" description="generate a big jar that contains all classes needed for the tutorial">
 		<mkdir dir="release" />
 		<jar jarfile="release/jReality.jar">
+			
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Implementation-Title" value="http://www.jreality.de"/>
+				<attribute name="Implementation-Version" value="${version}"/>
+				<attribute name="Implementation-URL" value="http://fs.math.tu-berlin.de:8000/svn/jreality/"/>
+			</manifest>
+			
 			<fileset dir="${build}/core" />
 			<fileset dir="${build}/tools" />
 			<fileset dir="${build}/audio" />
