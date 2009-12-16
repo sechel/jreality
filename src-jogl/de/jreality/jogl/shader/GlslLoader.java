@@ -215,7 +215,7 @@ public class GlslLoader {
     }
   }
   
-  private static void printInfoLog(String name, int objectHandle, GL gl) {
+  public static void printInfoLog(String name, int objectHandle, GL gl) {
     int[] logLength = new int[1];
     int[] charsWritten = new int[1];
     byte[] infoLog;
