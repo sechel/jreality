@@ -60,6 +60,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.Scene;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -264,12 +265,19 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	}
 
 	static Color[] cdbg = {Color.BLUE, Color.GREEN, Color.YELLOW,  Color.RED,Color.GRAY, Color.WHITE};
-	public void render(JOGLRenderingState jrs)	{
-		Geometry g = jrs.currentGeometry;
-		JOGLRenderer jr = jrs.renderer;
-		boolean useDisplayLists = jrs.useDisplayLists;
+	public void render(final JOGLRenderingState jrs)	{
+		final Geometry g = jrs.currentGeometry;
+		final JOGLRenderer jr = jrs.renderer;
+		final boolean useDisplayLists = jrs.useDisplayLists;
 		if (jrs.shadeGeometry) preRender(jrs);
-		if (g != null)	{
+		
+		// I had to do locking here, seems that jogl backend only locks on the corresponding component...
+		// maybe this needs to be done at other places too...?
+		if (g != null)	
+		Scene.executeReader(g, new Runnable() {
+			
+			public void run() 
+		{
 			if (g instanceof Sphere || g instanceof Cylinder)	{	
 				int i = 3;
 				int dlist;
@@ -309,6 +317,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				}	
 			}
 		}
+		});
 	}
 
     public static void defaultPolygonRender(JOGLRenderingState jrs)	{
