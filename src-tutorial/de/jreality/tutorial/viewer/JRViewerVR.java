@@ -5,6 +5,7 @@ import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 
 public class JRViewerVR {
 	public static void main(String[] args) {
@@ -16,7 +17,7 @@ public class JRViewerVR {
 		v.setContent(Primitives.icosahedron());
 		v.registerPlugin(new ContentAppearance());
 		v.registerPlugin(new ContentLoader());
-		v.setPropertiesFile("JRViewerVR.xml");
+		v.registerPlugin(new ContentTools());
 		v.startup();
 	}
 
