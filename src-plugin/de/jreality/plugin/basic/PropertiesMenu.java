@@ -158,7 +158,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		loadAction = new LoadPropertiesAction(),
 		loadDefaultAction = new LoadDefaultPropertiesAction(),
 		chooseUserPropertiesFileAction = new ChooseUserPropertiesFileAction();
-	private JFileChooser
+	private final JFileChooser
 		fileChooser = new JFileChooser(),
 		userPropertiesFileChooser = new JFileChooser();
 	private final JMenuItem
@@ -172,10 +172,12 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		fileChooser.setCurrentDirectory(new File(dir));
 		fileChooser.addChoosableFileFilter(new PropertiesFileFilter());
 		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setFileHidingEnabled(false);
 		fileChooser.setFileSelectionMode(FILES_ONLY);
 		
 		userPropertiesFileChooser.addChoosableFileFilter(new PropertiesFileFilter());
 		userPropertiesFileChooser.setAcceptAllFileFilterUsed(false);
+		userPropertiesFileChooser.setFileHidingEnabled(false);
 		userPropertiesFileChooser.setFileSelectionMode(FILES_ONLY);
 		
 		saveOnExit = new AbstractJrToggleAction("save on exit") {
