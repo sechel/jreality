@@ -1,26 +1,40 @@
 #!/usr/bin/perl
+
+#This perl script generates .jnlp files for all classes defined in the subdirectories
+#of the directory $srcdir (neither checks whether they have a main method nor 
+#decends further into subsubdirectories). Make sure that $srcdir is up to date.
+#The .jnlpfiles or written to $outdir .
+#
+#Make sure that all files referenced in the template jnlp
+#file ($template) are up to date and signed with the same key. The purpose of the
+#generated .jnlp files is to allow web start launch of the examples from the developer 
+#turtorial in the jreality wiki. 
+
 $jrealitybase="/net/www3/pub/jreality/";
 $codebase="http://www3.math.tu-berlin.de/jreality/tutorial/jnlp/";
 $outdir=$jrealitybase."tutorial/jnlp/";
-$dirname = $jrealitybase."tutorial/src/de/jreality/tutorial/";
-#print $dirname,"\n";
-#opendir( ALLDIR, $dirname) || die "Error in opening $dirname\n";
-#while (($dir = readdir(ALLDIR))) {
-while ( $dir = <*>) {
-    if (-d $dir) {
+$srcdir = $jrealitybase."tutorial/src/de/jreality/tutorial/";
+$template=$srcdir."Template.jnlp";
+
+print $srcdir,"\n";
+opendir(SRCDIR,$srcdir) || die "error: can't open $srcdir\n";
+
+while ($dir = readdir(SRCDIR)) {
+    if (-d $srcdir.$dir) {
         print $dir,"\n";
-        print $dirname.$dir,"\n";
-        opendir(DIR, $dirname.$dir);
+        
+        opendir(DIR, $srcdir.$dir);
         @files = readdir(DIR);
+        closedir(DIR);
+        
         foreach $file (@files)  {
-            $end = ".java";
-            print $file,"\n";
-            if ($file =~ /.*$end\b/) {
+            $end = "\.java";
+            if ($file =~ /.*$end$/) {
                 $file =~ s/$end//;
-                open(IN, "Template.jnlp");
+                open(IN, "<$template") || die "error: can't read from $template";
                 $outfile = $outdir.$file.".jnlp";
                 print "\t",$outfile,"\n";
-                open(OUT, ">$outfile");
+                open(OUT, ">$outfile") || die "error: can't write to $outfile";
                 while (<IN>)    {
                     s/CODEBASE/$codebase/;
                     s/CLASSNAME/$file/;
@@ -33,3 +47,6 @@ while ( $dir = <*>) {
         }
     }
 }
+
+closedir(SRCDIR);
+
