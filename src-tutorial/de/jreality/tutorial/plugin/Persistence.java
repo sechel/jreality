@@ -76,7 +76,7 @@ public class Persistence extends ViewShrinkPanelPlugin {
 		v.registerPlugin(new Persistence());
 		v.registerPlugin(new ContentTools());
 		v.registerPlugin(new PropertiesMenu());
-		v.setPropertiesFile("properties.xml");
+		v.setPropertiesResource(Persistence.class, "PersistenceProperties.xml");
 		v.setShowPanelSlots(true, false, false, false);
 		v.startup();
 	}
