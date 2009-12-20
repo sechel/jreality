@@ -28,6 +28,7 @@ import de.jreality.plugin.basic.ToolSystemPlugin;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewPreferences;
+import de.jreality.plugin.basic.ViewShrinkPanelPlugin;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.content.CenteredAndScaledContent;
 import de.jreality.plugin.content.ContentAppearance;
@@ -60,7 +61,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
 
-/** JRViewer is the default viewer of jReality. It replaces the older viewers: {@link ViewerVR} and {@link ViewerApp}. 
+/** JRViewer is the default viewer of jReality. It replaces the older viewers: <code>ViewerVR</code> and <code>ViewerApp</code>. 
  * 
  * <p>The simplest way to use the JRViewer is to call the static method 
  * <pre>
@@ -604,7 +605,7 @@ public class JRViewer {
 	}
 
 	/**
-	 * @deprecated use {@link SceneShrinkPanel}
+	 * @deprecated extend {@link SceneShrinkPanel} or {@link ViewShrinkPanelPlugin}
 	 */
 	public static SceneShrinkPanel createSceneShrinkPanel( final Component c, final String title) {
 		SceneShrinkPanel p = new SceneShrinkPanel() {
