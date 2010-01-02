@@ -585,6 +585,8 @@ public class JRViewer {
 		Set<String> params = new HashSet<String>();
 		for (String param : args) params.add(param.toLowerCase());
 		JRViewer v = new JRViewer();
+		v.setPropertiesFile("JRViewer.xml");
+		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
 		if (params.contains("-vr")) {
 			v.addContentUI();
