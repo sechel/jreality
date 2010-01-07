@@ -69,6 +69,7 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 	private HashMap<Component,InputSlot> componentMap = new HashMap<Component,InputSlot>();
 	private HashMap<Component,AxisState> lastValues = new HashMap<Component,AxisState>();
 	private HashMap<Component,Float> maxValues = new HashMap<Component,Float>();
+	private HashMap<Component,Float> origins = new HashMap<Component,Float>();
     
     private Controller device;
     
@@ -82,12 +83,15 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
             net.java.games.input.Component c = components[j];
 			componentMap.put(c,inputDevice);
             lastValues.put(c,AxisState.ORIGIN);
+            float zeroVal = c.getPollData();
+            System.out.println("origin of "+c+" is "+zeroVal);
+            origins.put(c, zeroVal);
             float maxVal = 1;
-            if (nums.length==3) try {
-            	maxVal = Float.parseFloat(nums[2]);
-            } catch (NumberFormatException nbfe) {
-            	System.err.println("invalid max value: "+nums[2]);
-            }
+//            if (nums.length==3) try {
+//            	maxVal = Float.parseFloat(nums[2]);
+//            } catch (NumberFormatException nbfe) {
+//            	System.err.println("invalid max value: "+nums[2]);
+//            }
             maxValues.put(c, maxVal);
             System.out.println("Mapped "+device+"->"+c+" <=> "+inputDevice);
 			return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
@@ -117,6 +121,7 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 				System.out.println("\""+id_string+"\" did not match \""+ctrl.getName()+"\"");
 			}
 		}
+		device.poll();
 		components = device.getComponents();
 		if (device == null) throw new IllegalStateException("no controller matching "+id_string);
     }
@@ -131,22 +136,21 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 		Set<Map.Entry<Component, InputSlot>> entries = componentMap.entrySet();
 		for (Map.Entry<Component, InputSlot> element : entries) {
             Component c = element.getKey();
-			float pollData = c.getPollData();
-			float val = pollData/maxValues.get(c);
-            // TODO google how to calibrate controllers
-            //old controller calibration
-            //if (val == 0.003921628f) val = 0f;
-            //saitek: better controller, calibration
-           // if (val == -0.043137252f) val = 0f;
-            //if (val == -0.027450979f) val = 0f;
-			//System.out.println("val: "+val);
+            float origin = origins.get(c);
+			float pollData = c.getPollData()-origin;
+			float maxVal = maxValues.get(c);
+			if (Math.abs(pollData) > maxVal) {
+				maxVal = Math.abs(pollData);
+				maxValues.put(c, maxVal);
+			}
+			float val = pollData/maxVal;
             AxisState newState = new AxisState((double) val);
 			AxisState oldState = lastValues.get(c);
 			if(newState.intValue() != oldState.intValue()) {
 				InputSlot slot = element.getValue();
 				queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slot, newState));
                 lastValues.put(c,newState);
-                //if (slot.getName().endsWith("RZRaw")) System.out.println(slot+" val="+val+" pollData="+pollData);
+                //if (slot.getName().endsWith("Y")) System.out.println(slot+" val="+val+" pollData="+pollData);
 			}
 		}
 	}

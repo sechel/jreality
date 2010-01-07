@@ -6,7 +6,7 @@
 
   <rawslots>
   		<mapping device="OptimusMini" src="Key1" target="key1" />
-  		<mapping device="OptimusMini" src="Key2" target="PrimaryMenu" />
+  		<mapping device="OptimusMini" src="Key2" target="DragActivation" />
   		<mapping device="OptimusMini" src="Key3" target="key2" />
   </rawslots>
   

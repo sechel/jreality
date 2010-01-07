@@ -1,5 +1,7 @@
 <toolconfig>
 
+    <!-- better use toolconfig-Spacenav.xml !!! -->
+
 	<rawdevices>
 		<rawdevice id="SpaceNavigator"
 			type="de.jreality.toolsystem.raw.DeviceJinputController">
@@ -16,46 +18,46 @@
 		<mapping device="SpaceNavigator" src="axis_5" target="RXRaw" />
 		<mapping device="SpaceNavigator" src="axis_6" target="RYRaw" />
 		<mapping device="SpaceNavigator" src="axis_7" target="RZRaw" />
+		<!--DragActivation == 'Shoot-Imputslot' -->
+		<mapping device="SpaceNavigator" src="button_1" target="DragActivation" />
 		<!--
 			mapping device="SpaceNavigator" src="button_0"
 			target="PrimaryAction"/
 		-->
-		<mapping device="SpaceNavigator" src="button_1" target="DragActivation" />
 	</rawslots>
 
 	<virtualdevices>
 
 		<mapping src="X" target="LeftRightAxis" />
-		<mapping src="RZRaw" target="HorizontalShipRotationAngleSpeed" />
+		<mapping src="RZ" target="HorizontalShipRotationAngleSpeed" />
 		<mapping src="Y" target="ForwardBackwardAxis" />
-		<mapping src="RXRaw" target="VerticalHeadRotationAngleSpeed" />
+		<mapping src="RX" target="VerticalHeadRotationAngleSpeed" />
 		<!--mapping src="Z" target="JumpActivation" /-->
 
-<!-- 
 		<virtualdevice
-			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxisFirst">
+			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxis">
 			<inputslot>RXRaw</inputslot>
 			<outputslot>RX</outputslot>
 		</virtualdevice>
 
 		<virtualdevice
-			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxisFirst">
+			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxis">
 			<inputslot>RYRaw</inputslot>
 			<outputslot>RY</outputslot>
 		</virtualdevice>
 
 		<virtualdevice
-			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxisFirst">
+			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxis">
 			<inputslot>RZRaw</inputslot>
 			<outputslot>RZ</outputslot>
 		</virtualdevice>
-
+ <!--
 		<virtualdevice
 			type="de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxis">
 			<inputslot>RX</inputslot>
 			<outputslot>VerticalHeadRotationAngleSpeed</outputslot>
 		</virtualdevice>
- -->
+ --> 
 		<virtualdevice
 					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
 			<inputslot>VerticalHeadRotationAngleSpeed</inputslot>

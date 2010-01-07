@@ -52,25 +52,37 @@ import de.jreality.toolsystem.VirtualDeviceContext;
 
 /**
  * 
- * Transforms an Axis.
- *
+ * Eliminates zeros that often occur when reading data from a space navigator, probably only under linux.
+ * 
+ * ...
+ * axisValue=-0.24943181837416803 [-0.00374147727561252]
+ * axisValue=0.0 [0.0]
+ * axisValue=-0.24829545582099605 [-0.0029795454698519526]
+ * axisValue=0.0 [0.0]
+ * axisValue=-0.24715909326782406 [-0.003707386399017361]
+ * axisValue=0.0 [0.0]
+ * ...
+ * 
  */
 public class VirtualSpaceNavigatorFixAxis implements VirtualDevice {
 
 	InputSlot inSlot, outSlot;
 	
-	AxisState state;
-	
-	double eps=0.06;
-	
+	int n=4;
+	int curcount=n;
+
+
 	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
 		double val = context.getAxisState(inSlot).doubleValue();
-		//System.out.println("val="+val);
-//		double ret = Math.abs(val) >= eps ? Math.signum(val) : 0;
-//		ret *= max;
-		double ret = Math.abs(val) >= eps ? val : 0;
-		ret*=0.1;
-		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(ret));
+
+		if (val == 0) {
+			curcount++;
+			if (curcount < n) {
+				return null;
+			}
+		}
+		curcount=0;
+		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(val));
 	}
 
 	public void initialize(List inputSlots, InputSlot result,
@@ -83,7 +95,7 @@ public class VirtualSpaceNavigatorFixAxis implements VirtualDevice {
 	}
 
 	public String getName() {
-		return "BumpAxis";
+		return "SpaceNavigatorFixAxis";
 	}
 
 }

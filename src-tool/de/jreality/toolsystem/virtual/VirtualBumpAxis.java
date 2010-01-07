@@ -63,9 +63,16 @@ public class VirtualBumpAxis implements VirtualDevice {
 	
 	double eps=0.1;
 	
+	double lastVal = Double.NaN;
+	
 	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
 		double val = context.getAxisState(inSlot).doubleValue();
-		double ret = Math.pow(val+eps, 2)*Math.pow(val-eps, 2)*Math.signum(val);
+		double ret = 0.0;
+		if (Math.abs(val) > eps) { 
+			ret = Math.pow(val+eps, 2)*Math.pow(val-eps, 2)*Math.signum(val);
+		}
+		if (ret == lastVal) return null;
+		lastVal = ret;
 		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(ret));
 	}
 
@@ -73,6 +80,8 @@ public class VirtualBumpAxis implements VirtualDevice {
 			Map configuration) {
 		inSlot = (InputSlot) inputSlots.get(0);
 		outSlot = result;
+		Double ed = (Double) configuration.get("eps");
+		if (ed != null) eps = ed.doubleValue();
 	}
 
 	public void dispose() {

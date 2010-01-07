@@ -50,72 +50,41 @@ import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.VirtualDevice;
 import de.jreality.toolsystem.VirtualDeviceContext;
 
-
 /**
- *
- * TODO: comment this
- *
- * @author weissman 
+ * 
+ * Transforms an Axis.
  *
  */
-public class VirtualTimestepEvolution implements VirtualDevice {
+public class VirtualFilterAxis implements VirtualDevice {
 
-    InputSlot inSlot;
-    InputSlot timer;
-    
-    InputSlot outSlot;
-    
-    double gain = 1;
-    
-    boolean released = false;
-    
-    public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
-      
-    	if (context.getEvent().getSource().getClass() == de.jreality.toolsystem.DeviceManager.class) {
-    		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.ORIGIN);
-    	}
-    	
-    	double axisValue = context.getAxisState(inSlot).doubleValue();
-    	double dt = gain * context.getAxisState(timer).intValue() * 0.001;
-    	double val = axisValue * dt;
-    	
-    	if (val == 0.0) {
-    		if (released) return null;
-    		released = true;
-    	} else {
-    		released = false;
-    	}
-    	
-    	//if (outSlot == InputSlot.getDevice("HorizontalShipRotationAngleEvolution")) System.out.println("axisValue="+axisValue+" ["+val+"]");
-    	
-    	return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(val)) {
-			private static final long serialVersionUID = 1349929946764175018L;
-			@Override
-    		protected void replaceWith(ToolEvent replacement) {
-    			axis = new AxisState(axis.intValue()+replacement.getAxisState().intValue());
-    		}
-    	};
-  }
+	InputSlot inSlot, outSlot;
+	
+	AxisState state;
+	
+	double eps=0.1;
+	
+	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+		double val = context.getAxisState(inSlot).doubleValue();
+		double ret = 0.0;
+		if (Math.abs(val) > eps) { 
+			ret = val;
+		}
+		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(ret));
+	}
 
-    public void initialize(List<InputSlot> inputSlots, InputSlot result,
-            Map<String, Object> configuration) {
-        inSlot = inputSlots.get(0);
-        timer = inputSlots.get(1);
-        outSlot = result;
-        try {
-        	gain = ((Double) configuration.get("gain"));
-        } catch (Exception e) {
-          // assume is Transformation
-        }
-    }
+	public void initialize(List inputSlots, InputSlot result,
+			Map configuration) {
+		inSlot = (InputSlot) inputSlots.get(0);
+		outSlot = result;
+		Double ed = (Double) configuration.get("eps");
+		if (ed != null) eps = ed.doubleValue();
+	}
 
-    public void dispose() {
-        // TODO Auto-generated method stub
+	public void dispose() {
+	}
 
-    }
-
-    public String getName() {
-        return "TimestepEvolution";
-    }
+	public String getName() {
+		return "BumpAxis";
+	}
 
 }
