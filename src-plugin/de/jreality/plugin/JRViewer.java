@@ -165,6 +165,7 @@ public class JRViewer {
 	
 	static {
 		NativePathUtility.set("jni");
+		NativePathUtility.set("../jreality/jni");
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua") || lnfClass.contains("Windows")) {
