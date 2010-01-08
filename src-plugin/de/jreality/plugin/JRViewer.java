@@ -51,6 +51,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.util.NativePathUtility;
 import de.jreality.util.Secure;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
@@ -163,6 +164,7 @@ public class JRViewer {
 	
 	
 	static {
+		NativePathUtility.set("jni");
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua") || lnfClass.contains("Windows")) {
