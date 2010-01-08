@@ -14,7 +14,6 @@ public class NativePathUtility {
 	public static void set(String pathPrefix) {
 		String vmName = Secure.getProperty("java.vm.name");
 		if (!vmName.contains("HotSpot")) {
-			System.err.println("Cannot set native library path on this virtual machine: " + vmName);
 			return;
 		}
 		String webstartVersion = Secure.getProperty("webstart.version");
