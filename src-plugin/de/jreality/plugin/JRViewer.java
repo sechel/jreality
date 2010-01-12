@@ -290,8 +290,8 @@ public class JRViewer {
 	 * </li>
 	 * </ol> 
 	 * 
-	 * @param clazz the class from which the resource may be obtained, the the 
-	 * properties node of package of this class is used to save the user decisions. 
+	 * @param clazz the class from which the resource may be obtained, the 
+	 * properties node of the package of this class is used to save the user decisions. 
 	 * @param propertiesFileName name of the resource that contains the plugin properties. This argument may 
 	 * be null, then only the second purpose is served and the properties <code>File</code> and 
 	 * <code>InputStream</code> are NOT set to null and may be set independently.
