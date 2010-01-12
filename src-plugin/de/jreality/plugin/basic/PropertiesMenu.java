@@ -121,7 +121,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 			serialVersionUID = 1L;
 
 		public ChooseUserPropertiesFileAction() {
-			putValue(Action.NAME, "choose properties file...");
+			putValue(Action.NAME, "Properties File...");
 			putValue(Action.SMALL_ICON, ImageHook.getIcon("folder.png"));
 		}
 		
@@ -162,9 +162,9 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		fileChooser = new JFileChooser(),
 		userPropertiesFileChooser = new JFileChooser();
 	private final JMenuItem
-		saveOnExit,
-		askBeforeSaveOnExit,
-		loadFromUserProperties;
+		saveOnExitAction,
+		quiteExitAction,
+		loadAtStartAction;
 	
 	@SuppressWarnings("serial")
 	public PropertiesMenu() {
@@ -180,17 +180,17 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		userPropertiesFileChooser.setFileHidingEnabled(false);
 		userPropertiesFileChooser.setFileSelectionMode(FILES_ONLY);
 		
-		saveOnExit = new AbstractJrToggleAction("save on exit") {
+		saveOnExitAction = new AbstractJrToggleAction("Save On Exit") {
 			public void actionPerformed(ActionEvent e) {
 				propertiesListener.setSaveOnExit(isSelected());
 			}
 		}.createMenuItem();
-		askBeforeSaveOnExit = new AbstractJrToggleAction("ask before save on exit") {
+		quiteExitAction = new AbstractJrToggleAction("Quite Exit") {
 			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setAskBeforeSaveOnExit(isSelected());
+				propertiesListener.setAskBeforeSaveOnExit(!isSelected());
 			}
 		}.createMenuItem();
-		loadFromUserProperties = new AbstractJrToggleAction("on next startup load from properties file") {
+		loadAtStartAction = new AbstractJrToggleAction("Load At Startup") {
 			public void actionPerformed(ActionEvent e) {
 				propertiesListener.setLoadFromUserPropertyFile(isSelected());
 			}
@@ -209,12 +209,12 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		viewMenuBar.addMenuItem(getClass(), 3, loadDefaultAction, "Properties");
 		viewMenuBar.addMenuSeparator(getClass(), 3.5, "Properties");
 
-		saveOnExit.setSelected(propertiesListener.isSaveOnExit());
-		viewMenuBar.addMenuItem(getClass(), 4, saveOnExit,"Properties");
-		askBeforeSaveOnExit.setSelected(propertiesListener.isAskBeforeSaveOnExit());
-		viewMenuBar.addMenuItem(getClass(), 5, askBeforeSaveOnExit,	"Properties");
-		loadFromUserProperties.setSelected(propertiesListener.isLoadFromUserPropertyFile());
-		viewMenuBar.addMenuItem(getClass(), 6, loadFromUserProperties,	"Properties");
+		quiteExitAction.setSelected(!propertiesListener.isAskBeforeSaveOnExit());
+		viewMenuBar.addMenuItem(getClass(), 4, quiteExitAction,	"Properties", "Options");
+		saveOnExitAction.setSelected(propertiesListener.isSaveOnExit());
+		viewMenuBar.addMenuItem(getClass(), 5, saveOnExitAction,"Properties", "Options");
+		loadAtStartAction.setSelected(propertiesListener.isLoadFromUserPropertyFile());
+		viewMenuBar.addMenuItem(getClass(), 6, loadAtStartAction,	"Properties", "Options");
 		
 		viewMenuBar.addMenuItem(getClass(), 7, chooseUserPropertiesFileAction, "Properties");
 	}
