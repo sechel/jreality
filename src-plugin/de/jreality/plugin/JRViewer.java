@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
 import de.jreality.io.JrScene;
@@ -167,6 +168,7 @@ public class JRViewer {
 		NativePathUtility.set("jni");
 		NativePathUtility.set("../jreality/jni");
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua") || lnfClass.contains("Windows")) {
 			Secure.setProperty("apple.laf.useScreenMenuBar", "true");
