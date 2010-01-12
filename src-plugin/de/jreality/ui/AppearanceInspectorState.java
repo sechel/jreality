@@ -179,6 +179,7 @@ public class AppearanceInspectorState {
 		appearanceInspector.updateAll();
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> T read(HashMap<String, Object> state, String string, T defVal) {
 		T val = (T) state.get(string);
 		return (val == null) ? defVal : val;
