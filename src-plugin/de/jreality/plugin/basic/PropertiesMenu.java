@@ -163,7 +163,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		userPropertiesFileChooser = new JFileChooser();
 	private final JMenuItem
 		saveOnExitAction,
-		quiteExitAction,
+		quietExitAction,
 		loadAtStartAction;
 	
 	@SuppressWarnings("serial")
@@ -185,7 +185,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 				propertiesListener.setSaveOnExit(isSelected());
 			}
 		}.createMenuItem();
-		quiteExitAction = new AbstractJrToggleAction("Quite Exit") {
+		quietExitAction = new AbstractJrToggleAction("Quiet Exit") {
 			public void actionPerformed(ActionEvent e) {
 				propertiesListener.setAskBeforeSaveOnExit(!isSelected());
 			}
@@ -209,8 +209,8 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		viewMenuBar.addMenuItem(getClass(), 3, loadDefaultAction, "Properties");
 		viewMenuBar.addMenuSeparator(getClass(), 3.5, "Properties");
 
-		quiteExitAction.setSelected(!propertiesListener.isAskBeforeSaveOnExit());
-		viewMenuBar.addMenuItem(getClass(), 4, quiteExitAction,	"Properties", "Options");
+		quietExitAction.setSelected(!propertiesListener.isAskBeforeSaveOnExit());
+		viewMenuBar.addMenuItem(getClass(), 4, quietExitAction,	"Properties", "Options");
 		saveOnExitAction.setSelected(propertiesListener.isSaveOnExit());
 		viewMenuBar.addMenuItem(getClass(), 5, saveOnExitAction,"Properties", "Options");
 		loadAtStartAction.setSelected(propertiesListener.isLoadFromUserPropertyFile());
