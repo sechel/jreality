@@ -266,6 +266,13 @@ public class JRViewer {
 		return c.getPlugin(clazz);
 	}
 	
+	/**
+	 * @return the {@link Viewer} of this <code>JRViewer</code> (only works 
+	 * after startup).
+	 */
+	public Viewer getViewer() {
+		return getPlugin(View.class).getViewer();
+	}
 	
 	/**
 	 * Sets a content node. The content node will be added to the
@@ -494,7 +501,7 @@ public class JRViewer {
 		}
 		v.addBasicUI();
 		v.startup();
-		return v.getPlugin(View.class).getViewer();
+		return v.getViewer();
 	}
 	
 	/** Create a JRViewer that displays the provided <code>SceneGraphNode</code> in a
@@ -544,7 +551,7 @@ public class JRViewer {
 		private SceneGraphNode
 			content = null;
 		private boolean
-			encompass = false;
+			encompass = true;
 		
 		
 		public ContentInjectionPlugin(SceneGraphNode content) {
