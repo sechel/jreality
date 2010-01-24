@@ -9,9 +9,32 @@ import javax.media.opengl.GLAutoDrawable;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.Texture2D;
+import de.jreality.tutorial.viewer.JOGLFBOTextureExample;
 
 
-public class JOGLFBOViewer  extends Viewer{
+/**
+ * This class is experimental.  It is designed to be used as the source of a 2d texture
+ * which is active in another viewer, called here the <i>main</i> viewer.  
+ * I don't really understand the OpenGL code;
+ * I copied some code off an OpenGL tutorial somewhere and hacked at it until it worked.
+ * 
+ * The main methods here are {@link #setSize(Dimension)}, to set the size of the texture image
+ * created, and {@link #setTexture2D(Texture2D)}, to set the instance of Texture2D whose
+ * image data is to be replaced by the rendered image of this viewer.
+ * 
+ * The implementation is not pretty.  It abuses methods in the {@link Texture2D} interface to pass
+ * around JOGL-specific information, in particular the texture ID which the JOGLFBOViewer
+ * generates when it binds its rendered output to a texture.  It expects that the
+ * methods {@link Texture2D#setSource0Alpha(Integer)} and {@link Texture2D#setSource1Alpha(Integer)}
+ * (and their <i>get</i> counterparts) are not otherwise used.  The first is used below to set 
+ * a magic value (23) which means that the value contained in the second should be interpreted
+ * as the designated texture ID. 
+ * 
+ * For working example, see {@link JOGLFBOTextureExample} in the jReality tutorial.
+ * 
+ * @author Charles Gunn
+ *
+ */public class JOGLFBOViewer  extends Viewer  {
 
 	int  width = -1, height = -1;
 	int[] fbo = {-1}, rbuffer = {-1}, txt = {-1};
