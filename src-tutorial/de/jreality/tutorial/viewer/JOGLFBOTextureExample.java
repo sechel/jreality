@@ -43,7 +43,7 @@ import de.jreality.util.SceneGraphUtility;
  * <p>
  * When the example runs, you should see a black square with a rotating icosahedron within
  * it.  You can rotate the quadrilateral, then it will be clear the icosahedron is a 2D image
- * textured onto it.
+ * textured onto it.  The rotation of the icosahedron can be toggled via the '1' key.
  * <p>
  * Warning: JOGLFBOViewer is not a standard jReality class. It was written to show "proof of concept".
  * It is not well-integrated into the rest of jReality (as this example shows).  But because
