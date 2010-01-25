@@ -90,7 +90,9 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	public static final int 	RED_GREEN_STEREO = 2;
 	public static final int 	RED_CYAN_STEREO =  3;
 	public static final int 	HARDWARE_BUFFER_STEREO = 4;
-	public static final int 	STEREO_TYPES = 5;
+	public static final int   	LEFT_EYE_STEREO = 5; //<-- New
+	public static final int   	RIGHT_EYE_STEREO = 6; //<-- New
+	public static final int 	STEREO_TYPES = 7;
 	protected int stereoType = 		CROSS_EYED_STEREO;	
 	protected boolean debug = false;
 	public AbstractViewer() {

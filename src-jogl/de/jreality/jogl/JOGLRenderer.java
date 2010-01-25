@@ -526,14 +526,23 @@ public class JOGLRenderer   {
 //			fboViewer.postRender(gl);
 //		}
 		else if (theCamera.isStereo())		{
+			// allow fbo textures to be stereo
 			if (fboMode) fboViewer.preRender(globalGL);
-			setupRightEye(width, height);
-			renderingState.currentEye = whichEye;
-			render();
-			setupLeftEye(width, height);
-			renderingState.currentEye = whichEye;
-			render();
-			renderingState.colorMask =15; //globalGL.glColorMask(true, true, true, true);			
+			// all types render two images except two new ones
+			boolean doRight = renderingState.stereoType != AbstractViewer.LEFT_EYE_STEREO,
+				doLeft = renderingState.stereoType != AbstractViewer.RIGHT_EYE_STEREO;
+			if (doRight) {
+				setupRightEye(width, height);
+				renderingState.currentEye = whichEye;
+				render();				
+			}
+			if (doLeft)	{
+				setupLeftEye(width, height);
+				renderingState.currentEye = whichEye;
+				render();				
+			}
+			renderingState.colorMask =15;
+			
 			if (fboMode) fboViewer.postRender(globalGL);
 		} 
 		else {
@@ -563,7 +572,7 @@ public class JOGLRenderer   {
 	protected void setupRightEye(int width, int height) {
 		int which = renderingState.stereoType;
 		switch(which)	{
-		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
+		case AbstractViewer.CROSS_EYED_STEREO:
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			//globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
 			int w = width/2;
@@ -571,20 +580,21 @@ public class JOGLRenderer   {
 			myglViewport(0,0, w,h);
 			break;
 
-		case de.jreality.jogl.Viewer.RED_BLUE_STEREO:
-		case de.jreality.jogl.Viewer.RED_CYAN_STEREO:
-		case de.jreality.jogl.Viewer.RED_GREEN_STEREO:
+		case AbstractViewer.RED_BLUE_STEREO:
+		case AbstractViewer.RED_CYAN_STEREO:
+		case AbstractViewer.RED_GREEN_STEREO:
 			myglViewport(0,0, width, height);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
-			if (which == de.jreality.jogl.Viewer.RED_GREEN_STEREO) renderingState.colorMask = 10; //globalGL.glColorMask(false, true, false, true);
-			else if (which == de.jreality.jogl.Viewer.RED_BLUE_STEREO) renderingState.colorMask = 12; //globalGL.glColorMask(false, false, true, true);
-			else if (which == de.jreality.jogl.Viewer.RED_CYAN_STEREO) renderingState.colorMask = 14; //globalGL.glColorMask(false, true, true, true);
+			if (which == AbstractViewer.RED_GREEN_STEREO) renderingState.colorMask = 10; //globalGL.glColorMask(false, true, false, true);
+			else if (which == AbstractViewer.RED_BLUE_STEREO) renderingState.colorMask = 12; //globalGL.glColorMask(false, false, true, true);
+			else if (which == AbstractViewer.RED_CYAN_STEREO) renderingState.colorMask = 14; //globalGL.glColorMask(false, true, true, true);
 			break;
 
-		case de.jreality.jogl.Viewer.HARDWARE_BUFFER_STEREO:
+		case AbstractViewer.HARDWARE_BUFFER_STEREO:
+			globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
+		case AbstractViewer.RIGHT_EYE_STEREO:
 			myglViewport(0,0, width, height);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
-			globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 			break;			
 		}
 		whichEye=CameraUtility.RIGHT_EYE;
@@ -593,24 +603,25 @@ public class JOGLRenderer   {
 	protected void setupLeftEye(int width, int height) {
 		int which = renderingState.stereoType;
 		switch(which)	{
-		case de.jreality.jogl.Viewer.CROSS_EYED_STEREO:
+		case AbstractViewer.CROSS_EYED_STEREO:
 			int w = width/2;
 			int h = height;
 			renderingState.clearBufferBits = 0;
 			myglViewport(w, 0, w,h);
 			break;
 
-		case de.jreality.jogl.Viewer.RED_BLUE_STEREO:
-		case de.jreality.jogl.Viewer.RED_CYAN_STEREO:
-		case de.jreality.jogl.Viewer.RED_GREEN_STEREO:
+		case AbstractViewer.RED_BLUE_STEREO:
+		case AbstractViewer.RED_CYAN_STEREO:
+		case AbstractViewer.RED_GREEN_STEREO:
 			renderingState.colorMask = 9; //globalGL.glColorMask(true, false, false, true);
 			renderingState.clearBufferBits = GL.GL_DEPTH_BUFFER_BIT;
 			break;
 
-		case de.jreality.jogl.Viewer.HARDWARE_BUFFER_STEREO:
+		case AbstractViewer.HARDWARE_BUFFER_STEREO:
 			globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
-			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
-//			globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
+		case AbstractViewer.LEFT_EYE_STEREO:
+	        myglViewport(0,0, width, height);
+	        renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			break;
 		}
 		whichEye=CameraUtility.LEFT_EYE;
