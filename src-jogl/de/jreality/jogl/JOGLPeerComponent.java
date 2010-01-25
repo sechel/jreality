@@ -5,6 +5,7 @@
 package de.jreality.jogl;
 
 import static de.jreality.shader.CommonAttributes.TRANSPARENCY_ENABLED;
+import static de.jreality.shader.RenderingHintsShader.TRANSPARENCY_ENABLED_DEFAULT;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -33,6 +34,7 @@ import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.RenderingHintsShader;
 import de.jreality.util.LoggingSystem;
 
 
@@ -374,7 +376,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
 		metric = eAp.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
-		transparencyEnabled = eAp.getAttribute(TRANSPARENCY_ENABLED, transparencyEnabled);		
+		transparencyEnabled = eAp.getAttribute(TRANSPARENCY_ENABLED, 
+				TRANSPARENCY_ENABLED_DEFAULT);		
 		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;
