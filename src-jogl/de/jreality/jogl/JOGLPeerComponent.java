@@ -4,6 +4,8 @@
  */
 package de.jreality.jogl;
 
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY_ENABLED;
+
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.WeakHashMap;
@@ -52,15 +54,17 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	Lock childlock = new Lock();
 	protected Runnable renderGeometry = null;
 	final JOGLPeerComponent self = this;
-	protected boolean appearanceDirty = true, originalAppearanceDirty = false;
-	boolean isReflection = false,
+	transient boolean isReflection = false,
 		isIdentity = false,
 		cumulativeIsReflection = false,
 		effectiveAppearanceDirty = true,
+		appearanceDirty = true, 
+		originalAppearanceDirty = false,
 		geometryIsDirty = true,
 		boundIsDirty = true,
 		renderRunnableDirty = true,
-		isVisible = true;
+		isVisible = true,
+		transparencyEnabled = false;
 	int geometryDirtyBits  = ALL_GEOMETRY_CHANGED, displayList = -1;
 	protected int childCount = 0;
 	// copycat related fields
@@ -370,6 +374,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 //		can happen that the effective appearance isn't initialized yet; skip
 		if (eAp == null) return; 
 		metric = eAp.getAttribute(CommonAttributes.METRIC, Pn.EUCLIDEAN);
+		transparencyEnabled = eAp.getAttribute(TRANSPARENCY_ENABLED, transparencyEnabled);		
 		thisAp = goBetween.originalComponent.getAppearance(); 
 		if (thisAp == null && goBetween.originalComponent.getGeometry() == null && parent != null)	{
 			geometryShader = parent.geometryShader;
