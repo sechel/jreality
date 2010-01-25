@@ -157,7 +157,7 @@ public class AbstractGeometryFactory implements GeometryFactory {
 			}
 		} else if (!gals.DLS.containsAttribute(attr)
 				&& geometry.getAttributes(gals.category, attr) != null) {
-			log("cancle", attr, category);
+			log("cancel", attr, category);
 			geometry.setAttributes(category, attr, null);
 		}	
 	}
