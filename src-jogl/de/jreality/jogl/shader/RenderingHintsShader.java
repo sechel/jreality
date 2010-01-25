@@ -51,7 +51,7 @@ import de.jreality.shader.ShaderUtility;
 
 /**
  * @author Charles Gunn
- *
+ *  @deprecated  Use {@link RenderingHintsInfo} instead.
  */
 public class RenderingHintsShader  {
 	double levelOfDetail = 0.0;			// a number between 0= min and 1=max level and detail.

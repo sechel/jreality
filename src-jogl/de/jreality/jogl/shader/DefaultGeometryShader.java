@@ -125,44 +125,26 @@ public class DefaultGeometryShader  implements Shader {
 	    }
 	}
 
-		/**
-		 * @return
-		 */
 		public boolean isEdgeDraw() {
 			return edgeDraw;
 		}
 
-		/**
-		 * @return
-		 */
 		public boolean isFaceDraw() {
 			return faceDraw;
 		}
 
-		/**
-		 * @return
-		 */
 		public boolean isVertexDraw() {
 			return vertexDraw;
 		}
 
-		/**
-		 * @return
-		 */
 		public Shader getLineShader() {
 			return lineShader;
 		}
 
-		/**
-		 * @return
-		 */
 		public Shader getPointShader() {
 			return pointShader;
 		}
 
-		/**
-		 * @return
-		 */
 		public Shader getPolygonShader() {
 			return polygonShader;
 		}
