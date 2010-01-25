@@ -134,6 +134,7 @@ public class JOGLRenderer   {
 		offscreenRenderer = new JOGLOffscreenRenderer(this);
 		perfMeter = new JOGLPerformanceMeter(this);
 		geometryGB = new GeometryGoBetween(this);
+		renderingState = new JOGLRenderingState(this);
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());	
 	}
 
@@ -220,6 +221,7 @@ public class JOGLRenderer   {
 		if (topAp.isForceResidentTextures()) forceResidentTextures();
 
 		lightListDirty = false;
+		
 	}
 
 
@@ -374,7 +376,7 @@ public class JOGLRenderer   {
 		System.err.println("initing gl");
 		globalGL = gl;
 	
-		renderingState = new JOGLRenderingState(this);
+//		renderingState = new JOGLRenderingState(this);
 		lightHelper = new JOGLLightHelper(this);
 		String vv = globalGL.glGetString(GL.GL_VERSION);
 		theLog.log(Level.FINE,"new GL: "+gl);			
@@ -517,26 +519,30 @@ public class JOGLRenderer   {
 			Dimension d = theViewer.getViewingComponentSize();
 			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
 			offscreenMode = false;
-		} else if (fboMode)	{
+		} //else if (fboMode)	{
 //			System.err.println("rendering fbo");
-			fboViewer.preRender(gl);
-			render();
-			fboViewer.postRender(gl);
-		}
+//			fboViewer.preRender(gl);
+//			render();
+//			fboViewer.postRender(gl);
+//		}
 		else if (theCamera.isStereo())		{
+			if (fboMode) fboViewer.preRender(globalGL);
 			setupRightEye(width, height);
 			renderingState.currentEye = whichEye;
 			render();
 			setupLeftEye(width, height);
 			renderingState.currentEye = whichEye;
 			render();
-			renderingState.colorMask =15; //globalGL.glColorMask(true, true, true, true);
+			renderingState.colorMask =15; //globalGL.glColorMask(true, true, true, true);			
+			if (fboMode) fboViewer.postRender(globalGL);
 		} 
 		else {
+			if (fboMode) fboViewer.preRender(globalGL);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			myglViewport(0,0,width, height);
 			whichEye=CameraUtility.MIDDLE_EYE;
 			render();			
+			if (fboMode) fboViewer.postRender(globalGL);
 		}
 
 		perfMeter.endFrame();
