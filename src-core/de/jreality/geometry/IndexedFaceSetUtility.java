@@ -221,19 +221,23 @@ public class IndexedFaceSetUtility {
 		for (int i = 0; i<points.length; ++i)	ind[0][i] = i;
 		if (ifs == null) ifs = new IndexedFaceSet();
 		// TODO replace this code when it's fixed to initialize the factory with the existing ifs.
-		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();// Pn.EUCLIDEAN, true, false, true);
+		IndexedFaceSetFactory ifsf = null;
+		Object factory = ifs.getGeometryAttributes(GeometryUtility.FACTORY);
+		if (factory != null) ifsf = (IndexedFaceSetFactory) factory;
+		else ifsf = new IndexedFaceSetFactory();// Pn.EUCLIDEAN, true, false, true);
 		ifsf.setMetric(sig);
 //		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setVertexCount(points.length);
 		ifsf.setFaceCount(1);
 		ifsf.setVertexCoordinates(points);
+		ifsf.setFaceIndices(new int[][]{{}});
 		ifsf.setFaceIndices(ind);
-//		ifsf.setEdgeCount(1);
-//		ind = new int[1][points.length+1];
-//		for (int i = 0; i<=points.length; ++i)	ind[0][i] = (i%points.length);
-//		ifsf.setEdgeIndices(ind);
-		ifsf.setGenerateEdgesFromFaces(true);
+		ifsf.setEdgeCount(1);
+		ind = new int[1][points.length+1];
+		for (int i = 0; i<=points.length; ++i)	ind[0][i] = (i%points.length);
+		ifsf.setEdgeIndices(ind);
+//		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.update();
 		
 		return ifsf.getIndexedFaceSet();
