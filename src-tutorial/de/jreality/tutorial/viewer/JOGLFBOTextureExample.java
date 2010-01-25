@@ -1,9 +1,12 @@
 package de.jreality.tutorial.viewer;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Timer;
 
@@ -18,6 +21,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
+import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
@@ -54,13 +58,17 @@ public class JOGLFBOTextureExample  {
 
 	private Texture2D tex2d;
 	private SceneGraphComponent world;
-
+	boolean rotating = true,
+		stereoTexture = false;
 	// this method creates a simple textured quadrilateral:
 	// the "movie screen" onto which the texture will be projected.
 	public SceneGraphComponent makeWorld() {
 		world = SceneGraphUtility.createFullSceneGraphComponent("world");
+		SceneGraphComponent screen = SceneGraphUtility.createFullSceneGraphComponent("world");
 		IndexedFaceSet square = Primitives.texturedQuadrilateral();
-		world.setGeometry(square);
+		screen.setGeometry(square);
+		MatrixBuilder.euclidean().scale(stereoTexture ? 2 : 1,1,1).assignTo(screen);
+		world.addChild(screen);
 		world.getAppearance().setAttribute("polygonShader.diffuseColor", Color.white);
 		world.getAppearance().setAttribute(CommonAttributes.EDGE_DRAW, false);
 		world.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, false);
@@ -113,8 +121,14 @@ public class JOGLFBOTextureExample  {
 	    
 	    // create a viewer to view this simple scene
 		joglFBOViewer = new JOGLFBOViewer(camPath, rootNode);
-		joglFBOViewer.setSize(new Dimension(512,512));
+		joglFBOViewer.setSize(new Dimension(512,stereoTexture ? 256 : 512));
 		joglFBOViewer.setTexture2D(tex2d);
+		if (stereoTexture) {
+		    camera.setFocus(4.0);
+		    camera.setEyeSeparation(.45);
+		    camera.setStereo(true);	    	
+			joglFBOViewer.setStereoType(AbstractViewer.CROSS_EYED_STEREO);
+		}
 
 		// a timer to rotate the scene smoothly around the vertical axis
 	    Timer timer = new Timer(20, new ActionListener() {
@@ -122,22 +136,41 @@ public class JOGLFBOTextureExample  {
 			public void actionPerformed(ActionEvent e) {
 				double[] mat = MatrixBuilder.euclidean().rotateY(t).getArray();
 				new Matrix(mat).assignTo(geometryNode);
-				t += .01;
+				if (rotating) t += .01;
 				// this is just there to trigger rendering in the main viewer
 				MatrixBuilder.euclidean().assignTo(world);
 			}
 	    	
 	    });
 	    timer.start();
+	    
+	    
 	}
 	
 	public static void main(String args[])	{
-		JOGLFBOTextureExample tfbot = new JOGLFBOTextureExample();
+		final JOGLFBOTextureExample tfbot = new JOGLFBOTextureExample();
 		tfbot.makeWorld();
 		Viewer jrv = JRViewer.display(tfbot.world);
 		tfbot.setupJOGLFBOViewer();
 		if (jrv instanceof ViewerSwitch)	jrv = ((ViewerSwitch)jrv).getCurrentViewer();
 		if (jrv instanceof AbstractViewer) ((AbstractViewer) jrv).fbo = tfbot.joglFBOViewer;
+
+		Component comp = ((Component) jrv.getViewingComponent());
+		comp.addKeyListener(new KeyAdapter() {
+ 				public void keyPressed(KeyEvent e)	{ 
+					switch(e.getKeyCode())	{
+						
+					case KeyEvent.VK_H:
+						System.err.println("	1: toggle rotating");
+						break;
+		
+					case KeyEvent.VK_1:
+						tfbot.rotating = !tfbot.rotating;
+						break;
+				}
+		
+				}
+			});
 
 	}
 }
