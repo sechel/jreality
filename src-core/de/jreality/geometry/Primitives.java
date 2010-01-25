@@ -397,13 +397,16 @@ public class Primitives {
 		return sgc;
 	}
 
+	public static SceneGraphComponent wireframeSphere() {
+		return wireframeSphere(40, 20);
+	}
 	/**
 	 *  A {@link SceneGraphComponent} with wire-frame sphere (azimuth/elevation coordinate mesh)
 	 * @return
 	 */
-	public static SceneGraphComponent wireframeSphere() {
+	public static SceneGraphComponent wireframeSphere(int w, int h) {
 		SceneGraphComponent hypersphere = SceneGraphUtility.createFullSceneGraphComponent("wireframe sphere");
-		hypersphere.setGeometry(SphereUtility.sphericalPatch(0.0, 0.0, 360.0, 180.0, 40, 20, 1.0));
+		hypersphere.setGeometry(SphereUtility.sphericalPatch(0.0, 0.0, 360.0, 180.0, w, h, 1.0));
 		Appearance ap = hypersphere.getAppearance();
 		ap.setAttribute(CommonAttributes.FACE_DRAW, false);
 		ap.setAttribute(CommonAttributes.EDGE_DRAW, true);
