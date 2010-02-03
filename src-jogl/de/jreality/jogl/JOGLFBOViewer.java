@@ -1,15 +1,12 @@
 package de.jreality.jogl;
 
 import java.awt.Dimension;
-import java.util.logging.Level;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.Texture2D;
-import de.jreality.tutorial.viewer.JOGLFBOTextureExample;
 
 
 /**
@@ -30,7 +27,7 @@ import de.jreality.tutorial.viewer.JOGLFBOTextureExample;
  * a magic value (23) which means that the value contained in the second should be interpreted
  * as the designated texture ID. 
  * 
- * For working example, see {@link JOGLFBOTextureExample} in the jReality tutorial.
+ * For working example, see <code>de.jreality.tutorial.viewer.JOGLFBOTextureExample</code> in the jReality tutorial.
  * 
  * @author Charles Gunn
  *
