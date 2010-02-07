@@ -492,6 +492,8 @@ public class JRViewer {
 	 */
 	public static Viewer display(SceneGraphNode node) {
 		JRViewer v = new JRViewer();
+		v.setPropertiesFile("JRViewer.xml");
+		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
 		if (node != null) {
