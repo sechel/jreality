@@ -37,4 +37,26 @@ public class QuadMeshTest extends TestCase {
 		qmf.setVertexCoordinates(grid3);
 		qmf.update();
 	}
+	
+	public void testSwapDimensions() {
+		int x1=18, y1=7, x2=y1, y2=x1; 
+
+		double [][][] coords = new double [x1][y1][3];
+
+		QuadMeshFactory factory = new QuadMeshFactory();
+		factory.setVLineCount(x1);
+		factory.setULineCount(y1);
+		factory.setVertexCoordinates(coords);   
+		factory.setGenerateEdgesFromFaces(true);
+		factory.setEdgeFromQuadMesh(true);    
+		factory.update();
+
+		coords = new double [x2][y2][3];
+		factory.setVLineCount(x2); 
+		factory.setULineCount(y2);
+		factory.setVertexCoordinates(coords);   
+		factory.setGenerateEdgesFromFaces(true);
+		factory.setEdgeFromQuadMesh(true);
+		factory.update();
+	}
 }

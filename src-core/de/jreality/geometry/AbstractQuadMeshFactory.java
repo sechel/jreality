@@ -45,6 +45,7 @@ import java.util.logging.Level;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -116,10 +117,10 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		
 		uLineCount.setObject(new Integer(maxU2));  uLineCount_ = maxU2; // ugly, but we need this for fast access
 		vLineCount.setObject(new Integer(maxV2));
-			
+					
 		super.setVertexCount( getULineCount()*getVLineCount());
 		super.setFaceCount( (getULineCount()-1)*(getVLineCount()-1) );
-
+		
 	}
 
 	public void setVertexCount( int count ) {
@@ -142,13 +143,18 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 	int [][] generateEdgeIndices( ) {
 		if (!((Boolean) edgeFromQuadMesh.getObject()).booleanValue()) 
 			return super.generateEdgeIndices();
+		
 		int uLineCount = getULineCount();
 		int vLineCount = getVLineCount();
 		
 		int sizeUCurve = vLineCount;
 		int sizeVCurve = uLineCount;
 		int numVerts = getULineCount()*getVLineCount();
-		int[][] indices = new int[uLineCount +vLineCount][];
+		int nbOfEdges = uLineCount +vLineCount;
+		
+		geometry.setNumEntries(Geometry.CATEGORY_EDGE, nbOfEdges);
+		
+		int[][] indices = new int[nbOfEdges][];
 		for (int i = 0; i<uLineCount; ++i)	{
 			indices[i] = new int[sizeUCurve];
 			for (int j = 0; j< sizeUCurve; ++j)	  indices[i][j] = ((j)*uLineCount + (i%uLineCount))%numVerts;
