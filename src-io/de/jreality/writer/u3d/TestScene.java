@@ -14,9 +14,11 @@ import java.util.Random;
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.writer.pdf.WriterPDF;
 
 public class TestScene {
 
@@ -49,10 +51,11 @@ public class TestScene {
 		g.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(vertexColors));
 		g.setEdgeAttributes(Attribute.COLORS, new DoubleArrayArray.Array(edgeColors));
 		g.setFaceAttributes(Attribute.COLORS, new DoubleArrayArray.Array(faceColors));
-
+		
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("Test Scene Root");
 		root.setGeometry(g);
+		root.setLight(new PointLight());
 		Appearance app = new Appearance(); 
 		app.setAttribute(VERTEX_DRAW, true);
 		app.setAttribute(EDGE_DRAW, true);
@@ -61,10 +64,9 @@ public class TestScene {
 		app.setAttribute(LINE_SHADER + "." + TUBES_DRAW, false);
 		
 		root.setAppearance(app);
-		
-		WriterU3D writer = new WriterU3D();
+		WriterPDF writer = new WriterPDF();
 		try {
-			FileOutputStream out = new FileOutputStream("test.u3d");
+			FileOutputStream out = new FileOutputStream("test.pdf");
 			writer.write(root, out);
 			out.close();
 		} catch (Exception e) {

@@ -72,6 +72,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -1284,7 +1285,7 @@ public class WriterU3D implements SceneWriter {
 		return b;
 	}
 	
-	protected void writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
+	protected int writeDataBlock(DataBlock b, WritableByteChannel o) throws IOException {
 		int dataSize = (int)Math.ceil(b.getDataSize() / 4.0); // include padding
 		int metaDataSize = (int)Math.ceil(b.getMetaDataSize() / 4.0); // include padding
 ///*		
@@ -1306,6 +1307,7 @@ public class WriterU3D implements SceneWriter {
 			buffer.putInt((int)b.getMetaData()[i]);
 		buffer.rewind();
 		o.write(buffer);
+		return blockLength;
 //*/
 		
 /*	
@@ -1356,56 +1358,62 @@ public class WriterU3D implements SceneWriter {
 		prepareSceneData(scene);
 		System.out.print("writing...");
 		
-		WritableByteChannel o = Channels.newChannel(out);
-		// this is wrong, the real sizes should be computed
-		writeDataBlock(getHeaderBlock(0, 0), o);
-		
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+		WritableByteChannel o = Channels.newChannel(bOut);
+		int ds = 0;
 		// declarations
 		for (SceneGraphComponent c : nodes) {
-			writeDataBlock(getModifierChain(c), o);
+			ds += writeDataBlock(getModifierChain(c), o);
 			if (getPreparedGeometry(c) != null) {
 				EffectiveAppearance a = appearanceMap.get(c);
 				for (DataBlock b : getMaterialBlocks(a)) {
-					writeDataBlock(b, o);
+					ds += writeDataBlock(b, o);
 				}
 			}
 		}
 		for (SceneGraphComponent viewNode : viewNodes) {
-			writeDataBlock(getViewNodeModifierChain(viewNode), o);
+			ds += writeDataBlock(getViewNodeModifierChain(viewNode), o);
 		}
 		for (SceneGraphComponent lightNode: lightNodes) {
-			writeDataBlock(getLightNodeModifierChain(lightNode), o);
+			ds += writeDataBlock(getLightNodeModifierChain(lightNode), o);
 		}
 		for (Geometry g : preparedGeometries){
-			writeDataBlock(getModifierChain(g), o);
+			ds += writeDataBlock(getModifierChain(g), o);
 		}
 		for (U3DTexture tex : textures) {
-			writeDataBlock(getModifierChain(tex), o);
+			ds += writeDataBlock(getModifierChain(tex), o);
 		}
 		
+		int cs = 0;
 		// continuations
 		for (SceneGraphComponent c : nodes) {
 			for (DataBlock b : getContinuations(c)) {
-				writeDataBlock(b, o);
+				cs += writeDataBlock(b, o);
 			}
 		}
 		for (Camera c : cameras) {
-			writeDataBlock(getViewResource(c), o);
+			cs += writeDataBlock(getViewResource(c), o);
 		}
 		for (Light l : lights) { 
-			writeDataBlock(getLightResource(l), o);
+			cs += writeDataBlock(getLightResource(l), o);
 		}
 		for (Geometry g : preparedGeometries){
 			for (DataBlock b : getContinuations(g)) { 
-				writeDataBlock(b, o);
+				cs += writeDataBlock(b, o);
 			}
 		}
 		for (U3DTexture tex : textures) {
 			for (DataBlock b : getContinuations(tex)) {
-				writeDataBlock(b, o);
+				cs += writeDataBlock(b, o);
 			}
 		}
 		o.close();
+
+		// write header and data
+		o = Channels.newChannel(out);
+		writeDataBlock(getHeaderBlock(ds, cs), o);
+		bOut.writeTo(out);
+		out.close();
 		System.out.println("done.");
 	}
 
