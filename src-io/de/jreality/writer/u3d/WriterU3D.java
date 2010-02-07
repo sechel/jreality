@@ -391,7 +391,6 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getLineSetContinuation(IndexedLineSet g){
-		// TODO untested replaced by tubes and spheres at the moment
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0); // chain index 
@@ -701,8 +700,7 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(1);
 		// standard shading
 		w.WriteU32(0x00000000);
-		w.WriteU32(1);
-		w.WriteU32(2);
+		w.WriteU32(0);
 		w.WriteU32(0);
 		
 		// not relevant for point sets
@@ -739,7 +737,6 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getLineSetDeclaration(IndexedLineSet g) {
-		// TODO untested replaced by tubes and spheres at the moment
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0);
@@ -774,8 +771,7 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(1);
 		// standard shading
 		w.WriteU32(0x00000000);
-		w.WriteU32(1);
-		w.WriteU32(2);
+		w.WriteU32(0);
 		w.WriteU32(0);
 		
 		// not relevant for point sets
