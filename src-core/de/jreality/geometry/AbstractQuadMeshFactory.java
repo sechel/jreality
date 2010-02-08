@@ -152,7 +152,7 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		int numVerts = getULineCount()*getVLineCount();
 		int nbOfEdges = uLineCount +vLineCount;
 		
-		geometry.setNumEntries(Geometry.CATEGORY_EDGE, nbOfEdges);
+		geometry.setAttributes(Geometry.CATEGORY_EDGE, Attribute.INDICES, null);
 		
 		int[][] indices = new int[nbOfEdges][];
 		for (int i = 0; i<uLineCount; ++i)	{
