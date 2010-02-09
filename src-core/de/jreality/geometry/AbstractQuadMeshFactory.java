@@ -102,10 +102,37 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		setClosedInVDirection(closeV);
 		
 		faceIndices.setGenerate(true);
+		setGenerateTextureCoordinates(true);
+
 		edgeIndices.addIngr( faceIndices );
 		edgeIndices.addIngr( edgeFromQuadMesh );
+		edgeIndices.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {		
+						return generateEdgeIndices( );					
+					}					
+				}
+		);
 
-		setGenerateTextureCoordinates(true);
+		faceIndices.addIngr( uLineCount );
+		faceIndices.addIngr( vLineCount );
+		faceIndices.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {		
+						return generateFaceIndices( (int[][])object);					
+					}					
+				}
+		);
+
+		textureCoordinates.addIngr( uLineCount );
+		textureCoordinates.addIngr( vLineCount );
+		textureCoordinates.setUpdateMethod(
+				new OoNode.UpdateMethod() {
+					public Object update( Object object) {					
+						return generateTextureCoordinates( (double[][])object);					
+					}					
+				}
+		);
 	}
 	
 	void setMeshSize(int maxU2, int maxV2) {
@@ -164,19 +191,6 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 			for (int j = 0; j< sizeVCurve; ++j)	  indices[i+uLineCount][j] = (i*uLineCount + (j%uLineCount))%numVerts;
 		}	
 		return indices;
-	}
-	
-	{
-		//faceIndices.addIngr( face); //allready in superclass
-		faceIndices.addIngr( uLineCount );
-		faceIndices.addIngr( vLineCount );
-		faceIndices.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {		
-						return generateFaceIndices( (int[][])object);					
-					}					
-				}
-		);
 	}
 	
 	int [][] generateFaceIndices( int [][] faceIndices ) {
@@ -238,18 +252,6 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		closedInVDirection.setObject( new Boolean(close));
 	}
 
-	{
-		textureCoordinates.addIngr( uLineCount );
-		textureCoordinates.addIngr( vLineCount );
-		textureCoordinates.setUpdateMethod(
-				new OoNode.UpdateMethod() {
-					public Object update( Object object) {					
-						return generateTextureCoordinates( (double[][])object);					
-					}					
-				}
-		);
-	}
-	
 	double [][] generateTextureCoordinates( double [][] textureCoordinates ) {
 		
 		if( vertex.DLS.containsAttribute(Attribute.TEXTURE_COORDINATES))
