@@ -33,12 +33,26 @@ public class AbstractGeometryFactory implements GeometryFactory {
 	
 	UpdateCounter update = new UpdateCounter();
 	
+	static boolean storeFactory = false;
+	
 	static class UpdateCounter implements IsUpdateCounter {
 		long counter = 0;
 		public long getUpdateCount() {
 			return counter;
 		}
 	};
+	
+	/**
+	 * Set this to true in order to store the factory as an attribute of 
+	 * the associated geometry for every newly constructed instance of
+	 * {@link AbstractGeometryFactory}.  Default is false.
+	 * <p>
+	 * Warning: Use this feature carefully; it may lead to excessive memory usage
+	 * @param b
+	 */
+	public  static void setStoreFactory(boolean b) {
+		storeFactory = b;
+	}
 	
 	final Geometry geometry;
 	
@@ -47,7 +61,7 @@ public class AbstractGeometryFactory implements GeometryFactory {
 		this.metric = node( new Integer( metric ), "metric" );
 		this.geometry = geometry;
 		GeometryUtility.setMetric( geometry,metric);
-		geometry.setGeometryAttributes(GeometryUtility.FACTORY, this);
+		if (storeFactory) geometry.setGeometryAttributes(GeometryUtility.FACTORY, this);
 	}
 	
 	public Geometry getGeometry() {
