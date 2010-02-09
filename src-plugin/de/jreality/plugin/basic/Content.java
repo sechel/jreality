@@ -66,7 +66,7 @@ public abstract class Content extends Plugin {
 		if (getToolComponent().getTools().contains(tool)) {
 			return false;
 		} else {
-			getContentRoot().addTool(tool);
+			getToolComponent().addTool(tool);
 			ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ToolAdded);
 			cce.tool = tool;
 			fireContentChanged(cce);
