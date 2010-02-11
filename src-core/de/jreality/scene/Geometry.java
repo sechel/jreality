@@ -43,7 +43,6 @@ package de.jreality.scene;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -160,7 +159,12 @@ public abstract class Geometry extends SceneGraphNode {
       WritableDataList w;
       if(replace) { target.reset(d.size()); w=null; } 
       else w=target.getWritableList(a);
-      if(w==null) w=target.addWritable(a, d.getStorageModel());
+      // problem with indices; easiest way around is to remove old indices before setting new
+      // we need a way to check if the complete 2D array of the new data 
+      // is the same dimension as the old; if not, we get exception when a copy
+      // lacking that, we assume they're different. note that the same fix is needed
+      // in de.jreality.geometry.GeometryAttributeListSet.setAttrImpl(DataListSet target, Attribute a, DataLi
+      if(w==null || a == Attribute.INDICES) w=target.addWritable(a, d.getStorageModel());
       d.copyTo(w);
     }
   }

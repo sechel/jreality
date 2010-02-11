@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
@@ -77,11 +76,6 @@ public class GeometryAttributeListSet {
 	void setAttribute(Attribute attr, DataList data) {
 		if( isBlockedAttribute(attr))
 			throw new UnsupportedOperationException( "cannot set attribute " + attr );
-		// problem with indices; easiest way around is to remove old indices before setting new
-		// we need a way to check if the complete 2D array of the new data 
-		// is the same dimension as the old; if not, we get exception when a copy
-		// lacking that, we assume they're different.
-		if (attr == Attribute.INDICES)	DLS.remove(attr);
 		setAttrImpl(DLS, attr, data);
 		attributeNode(attr).setObject(data);
 	}
@@ -122,7 +116,12 @@ public class GeometryAttributeListSet {
 		} else {
 			WritableDataList w;
 			w = target.getWritableList(a);
-			if (w == null) {
+			// problem with indices; easiest way around is to remove old indices before setting new
+			// we need a way to check if the complete 2D array of the new data 
+			// is the same dimension as the old; if not, we get exception when a copy
+			// lacking that, we assume they're different. note that the same fix is needed
+			// in de.jreality.scene.Geometry.setAttrImpl(DataListSet target, Attribute a, DataList d, boolean replace)
+			if (w == null || a == Attribute.INDICES) {
 				w = target.addWritable(a, d.getStorageModel());
 			} 	
 			d.copyTo(w);

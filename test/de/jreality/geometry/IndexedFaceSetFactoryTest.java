@@ -67,16 +67,15 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 	IndexedFaceSetFactory factory;
 
 	static double [] faceNormalse  = new double[] {
-	 0,  0,  1,
-	-1,  0,  0,
-	 1,  0,  0,
-	 0,  1,  0,
-	-1,  0,  0,
-	 0, -1,  0
+		0,  0,  1,
+		-1,  0,  0,
+		1,  0,  0,
+		0,  1,  0,
+		-1,  0,  0,
+		0, -1,  0
 	 };
 	
 	static double [] vertices  = new double[] {
-
 		 0,  0,  0,
 		 1,  0,  0,
 		 1,  1,  0,
@@ -86,11 +85,9 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		 1,  0,  1,
 		 1,  1,  1,
 		 0,  1,  1,
-
-		};
+	};
 
 	static double [] unwrapVertices  = new double[] {
-
 		 0,  0,  0, //0
 		 1,  0,  0, //1
 		 1,  1,  0, //2
@@ -109,8 +106,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		 
 		 0,  1,  0, //12 -> 3
 		 0,  1,  1, //13 -> 7	 
-
-		};
+	};
 
 	static int [][] unwrapIndices = new int [][] {
 		// first two have different orientation from the other 4
@@ -120,7 +116,6 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		{ 1, 8, 9, 5 }, //{ 1, 2, 6, 5 }, 
 		{ 8, 10, 11, 9 }, //{ 2, 3, 7, 6 }, 
 		{ 12, 0, 4, 13 }, //{ 3, 0, 4, 7 }, 
-	
 	};
 	
 	static double [][] unwrapTextureCoordinates = new double[][] {
@@ -159,29 +154,50 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 
 		};
 
-	static int [][] indices = new int [][] {
-
+	static int [][] faceIndices = new int [][] {
 		{ 0, 1, 2, 3 }, 
 		{ 7, 6, 5, 4 }, 
 		{ 0, 1, 5, 4 }, 
 		{ 1, 2, 6, 5 }, 
 		{ 2, 3, 7, 6 }, 
-		{ 3, 0, 4, 7 }, 
+		{ 3, 0, 4, 7 }
+	};
 
+	static int [][] faceIndicesTriangles = new int [][] {
+
+		{ 0, 1, 2 }, 
+		{ 7, 6, 5 }, 
+		{ 0, 1, 5 }, 
+		{ 1, 2, 6 }, 
+		{ 2, 3, 7 }, 
+		{ 3, 0, 4 }
+	};
+
+	static int [][] edgeIndicesShort = new int [][] {
+		{0, 1} , {1, 2} , {2, 3}, {3, 0}, 
+		{7, 6} , {6, 5} , {5, 4}, {4, 7}, 
+		{1, 5} , {4, 0}, 
+		{2, 6} , {5, 1}, 
+		{3, 7} , {6, 2}
+	};
+	
+	static int [][] edgeIndicesLong = new int [][] {
+		{ 0, 1, 2, 3 }, 
+		{ 7, 6, 5, 4 }, 
+		{ 0, 1, 5, 4 }, 
+		{ 1, 2, 6, 5 }, 
+		{ 2, 3, 7, 6 }, 
+		{ 3, 0, 4, 7 }
 	};
 
 
-
-
-	static int [][] indices2 = new int [][] {
-
-	{ 7, 6, 5, 4 }, 
-	{ 0, 1, 2, 3 }, 
-	{ 1, 2, 6, 5 }, 
-	{ 0, 1, 5, 4 }, 
-	{ 3, 0, 4, 7 }, 
-	{ 2, 3, 7, 6 }, 
-
+	static int [][] faceIndices2 = new int [][] {
+		{ 7, 6, 5, 4 }, 
+		{ 0, 1, 2, 3 }, 
+		{ 1, 2, 6, 5 }, 
+		{ 0, 1, 5, 4 }, 
+		{ 3, 0, 4, 7 }, 
+		{ 2, 3, 7, 6 }, 
 	};
 
 	public void setUp() {
@@ -247,8 +263,8 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		assertTrue(factory.getVertexCount()== vertices.length);
 		factory.setVertexCoordinates( vertices );	
 		
-		factory.setFaceCount( indices.length );
-		factory.setFaceIndices( indices );
+		factory.setFaceCount( faceIndices.length );
+		factory.setFaceIndices( faceIndices );
 		factory.setGenerateFaceLabels( true );
 		factory.update();
 		
@@ -334,8 +350,8 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		//factory.debug = true;
 		factory.setVertexCount( vertices.length);
 		factory.setVertexCoordinates( vertices );
-		factory.setFaceCount( indices.length );
-		factory.setFaceIndices( indices );
+		factory.setFaceCount( faceIndices.length );
+		factory.setFaceIndices( faceIndices );
 		
 		factory.setGenerateEdgeLabels(true);
 		factory.setGenerateEdgesFromFaces( true );
@@ -403,8 +419,8 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		//factory.debug = true;
 		factory.setVertexCount( vertices.length/3);
 		factory.setVertexCoordinates( vertices );
-		factory.setFaceCount( indices.length );
-		factory.setFaceIndices( indices );
+		factory.setFaceCount( faceIndices.length );
+		factory.setFaceIndices( faceIndices );
 		
 		factory.setGenerateEdgeLabels(true);
 		factory.setGenerateEdgesFromFaces( true );
@@ -434,7 +450,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
 		assertTrue(aabb == aabb2);
 		
-		factory.setFaceIndices(indices2);
+		factory.setFaceIndices(faceIndices2);
 		factory.update();
 
 		aabb = (AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE); 
@@ -477,8 +493,8 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		 /* initialize without unwrap face indices (but already to much vertices) */
 		 factory.setVertexCount( unwrapVertices.length/3);
 		 factory.setVertexCoordinates( unwrapVertices );
-		 factory.setFaceCount( indices.length );
-		 factory.setFaceIndices( indices );
+		 factory.setFaceCount( faceIndices.length );
+		 factory.setFaceIndices( faceIndices );
 		 factory.setVertexTextureCoordinates( unwrapTextureCoordinates );
 		 factory.setGenerateAABBTree( true );
 		 factory.setGenerateEdgeLabels(true);
@@ -495,7 +511,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		  */
 		 IndexedFaceSet ifs=factory.getIndexedFaceSet();
 		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
-		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
+		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), faceIndices));
 		 assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
 		 AABBTree aabbTree=(AABBTree) ifs.getGeometryAttributes(PickUtility.AABB_TREE);
 		 String[] edgeLabels = ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null);
@@ -529,19 +545,19 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 
 		 /* check the unwrap vertex attributes methods */
 		 assertTrue(Arrays.equals(factory.unwrapVertexAttributes(vertices,3),unwrapVertices));
-		 assertTrue(Arrays.equals(IndexedFaceSetFactory.unwrapVertexAttributes(vertices,3,indices,unwrapIndices,14),unwrapVertices));
+		 assertTrue(Arrays.equals(IndexedFaceSetFactory.unwrapVertexAttributes(vertices,3,faceIndices,unwrapIndices,14),unwrapVertices));
 		 assertTrue(Arrays.equals(factory.unwrapVertexAttributes(
 				 new String[] {"0","1","2","3","4","5","6","7"}),
 				 new String[] {"0","1","2","3","4","5","6","7","2","6","3","7","3","7"}));
 		 assertTrue(Arrays.equals(IndexedFaceSetFactory.unwrapVertexAttributes(
-				 new String[] {"0","1","2","3","4","5","6","7"},indices, unwrapIndices,14),
+				 new String[] {"0","1","2","3","4","5","6","7"},faceIndices, unwrapIndices,14),
 				 new String[] {"0","1","2","3","4","5","6","7","2","6","3","7","3","7"}));
 		 
 		 /* check whether a reset of unwrap face indices works */
 		 factory.setUnwrapFaceIndices((int[])null);
 		 factory.update();
 		 assertTrue(Arrays.equals(ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null),unwrapVertices));
-		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), indices));
+		 assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), faceIndices));
 		 assertTrue(Arrays.deepEquals(ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null), unwrapTextureCoordinates));
 		 assertEquals(ifs.getGeometryAttributes(PickUtility.AABB_TREE), aabbTree);
 		 assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.LABELS).toStringArray(null),edgeLabels));
@@ -552,6 +568,56 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		 double[][] normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
 		 assertTrue(Arrays.deepEquals(normals, vertexNormals));
 	 }
+	 
+	 public void testSetFaceIndicesDifferentSizes() {
+			factory.setVertexCount(vertices.length/3);
+			factory.setVertexCoordinates(vertices);
+			IndexedFaceSet ifs = factory.getIndexedFaceSet();
+			
+			factory.setFaceCount(faceIndicesTriangles.length);
+			factory.setFaceIndices(faceIndicesTriangles);
+			factory.update();
+			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), 
+					faceIndicesTriangles));
+			
+			factory.setFaceCount(faceIndices.length);
+			factory.setFaceIndices(faceIndices);
+			factory.update();
+			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), 
+					faceIndices));
+			
+			factory.setFaceCount(faceIndicesTriangles.length);
+			factory.setFaceIndices(faceIndicesTriangles);
+			factory.update();
+			assertTrue(Arrays.deepEquals(ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null), 
+					faceIndicesTriangles));
+	 }
+
+	 public void testSetEdgeIndicesDifferentSizes() {
+			factory.setVertexCount( vertices.length/3);
+			factory.setVertexCoordinates( vertices );
+			IndexedFaceSet ifs = factory.getIndexedFaceSet();
+	
+			factory.setEdgeCount(edgeIndicesShort.length);
+			factory.setEdgeIndices(edgeIndicesShort);
+			factory.update();
+			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null), 
+					edgeIndicesShort));
+		 
+			
+			factory.setEdgeCount(edgeIndicesLong.length);
+			factory.setEdgeIndices(edgeIndicesLong);
+			factory.update();
+			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null), 
+					edgeIndicesLong));
+
+			
+			factory.setEdgeCount(edgeIndicesShort.length);
+			factory.setEdgeIndices(edgeIndicesShort);
+			factory.update();
+			assertTrue(Arrays.deepEquals(ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null), 
+					edgeIndicesShort));
+}
 
 	public static void main( String [] arg ) {
 
@@ -559,7 +625,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory2.setVertexCount( 8 );
 		factory2.setFaceCount( 6 );	
 		factory2.setVertexCoordinates( vertices );
-		factory2.setFaceIndices( indices );
+		factory2.setFaceIndices( faceIndices );
 		factory2.setGenerateFaceNormals( true );
 		factory2.setGenerateVertexNormals( false );
 		factory2.setGenerateEdgesFromFaces( true );
@@ -575,7 +641,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory3.setVertexCount( 8 );
 		factory3.setFaceCount( 6 );	
 		factory3.setVertexCoordinates( vertices );
-		factory3.setFaceIndices( indices );
+		factory3.setFaceIndices( faceIndices );
 		factory3.setGenerateFaceNormals( true );
 		factory3.setGenerateVertexNormals( false );
 		factory3.setGenerateEdgesFromFaces( true );
@@ -594,7 +660,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		ifsf.setVertexAttribute(Attribute.TEXTURE_COORDINATES, unwrapTextureCoordinates);
 		
 		ifsf.setFaceCount( 6 );	
-		ifsf.setFaceIndices( indices );
+		ifsf.setFaceIndices( faceIndices );
 
 		ifsf.setGenerateVertexNormals( true );
 		ifsf.setGenerateEdgesFromFaces( true );
@@ -619,12 +685,12 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 			public void actionPerformed(ActionEvent e) {
 				mode = (mode +1) % 3;
 				if (mode==0) {
-					ifsf.setFaceIndices( indices ); 
+					ifsf.setFaceIndices( faceIndices ); 
 					ifsf.setUnwrapFaceIndices((int[][]) null); 
 					ifsf.setVertexLabels(new String[]{"","","","","","    NO unwrapped face indices","","","","","","","",""});
 				}
 				if (mode==1) {
-					ifsf.setFaceIndices( indices ); 
+					ifsf.setFaceIndices( faceIndices ); 
 					ifsf.setUnwrapFaceIndices( unwrapIndices ); 
 					ifsf.setVertexLabels(new String[]{"","","","","","    wrapped and UNWRAPPED face indices","","","","","","","",""});
 					}

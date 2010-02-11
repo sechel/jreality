@@ -45,7 +45,6 @@ import java.util.logging.Level;
 
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -178,8 +177,6 @@ public class AbstractQuadMeshFactory extends AbstractIndexedFaceSetFactory {
 		int sizeVCurve = uLineCount;
 		int numVerts = getULineCount()*getVLineCount();
 		int nbOfEdges = uLineCount +vLineCount;
-		
-		geometry.setAttributes(Geometry.CATEGORY_EDGE, Attribute.INDICES, null);
 		
 		int[][] indices = new int[nbOfEdges][];
 		for (int i = 0; i<uLineCount; ++i)	{
