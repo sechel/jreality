@@ -12,6 +12,7 @@ import static de.jreality.shader.CommonAttributes.FACE_DRAW_DEFAULT;
 import static de.jreality.shader.CommonAttributes.LIGHTING_ENABLED;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SKY_BOX;
+import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SPECULAR_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.TextureUtility.createTexture;
@@ -37,11 +38,10 @@ import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
-import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.io.JrScene;
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -68,6 +68,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.util.CameraUtility;
 import de.jreality.util.Rectangle3D;
 import de.jreality.writer.u3d.texture.SphereMapGenerator;
 
@@ -240,22 +241,39 @@ public class U3DSceneUtility {
 	}
 	
 
-	private static List<Geometry> getGeometries_R(SceneGraphComponent root) {
+	private static List<Geometry> getGeometries_R(SceneGraphComponent root, SceneGraphPath p) {
+		p.push(root);
 		LinkedList<Geometry> r = new LinkedList<Geometry>();
-		if (root.getGeometry() != null)
+		if (root.getGeometry() != null) {
+			Geometry g = root.getGeometry();
+			if (g instanceof PointSet) { // remove vertex normals if flat shading
+				PointSet pSet = (PointSet)g;
+				if (pSet.getVertexAttributes().containsAttribute(Attribute.NORMALS)) {
+					EffectiveAppearance ea = EffectiveAppearance.create(p);
+					DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ea);
+					DefaultPolygonShader ps = (DefaultPolygonShader)dgs.getPolygonShader();
+					if (!ps.getSmoothShading()) {
+						pSet.setVertexAttributes(Attribute.NORMALS, null);
+					}
+					
+				}
+			}
 			r.add(root.getGeometry());
+		}
 		for (int i = 0; i < root.getChildComponentCount(); i++) {
-			List<Geometry> subList = getGeometries_R(root.getChildComponent(i));
+			List<Geometry> subList = getGeometries_R(root.getChildComponent(i), p);
 			if (subList.size() != 0)
 				r.addAll(subList);
 		}
 		HashSet<Geometry> uniqueSet = new HashSet<Geometry>(r);
+		p.pop();
 		return new LinkedList<Geometry>(uniqueSet);
 	}	
 	
 	
 	public static List<Geometry> getGeometries(JrScene scene) {
-		return getGeometries_R(scene.getSceneRoot());
+		SceneGraphPath p = new SceneGraphPath();
+		return getGeometries_R(scene.getSceneRoot(), p);
 	}
 	
 	
@@ -358,7 +376,6 @@ public class U3DSceneUtility {
 					DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ea);
 					DefaultPointShader dps = (DefaultPointShader) dgs.getPointShader();
 					DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-					DefaultPolygonShader dpos = (DefaultPolygonShader)dps.getPolygonShader();
 					IndexedLineSet ils;
 					if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
 					else {
@@ -366,11 +383,18 @@ public class U3DSceneUtility {
 						ils.setVertexCountAndAttributes(((PointSet)g).getVertexAttributes());
 					}
 					if (dgs.getShowPoints()) { // create spheres for point set 
-						if (dps.getSpheresDraw()) {
+//						if (dps.getSpheresDraw()) {
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setBallGeometry(POINT_SPHERE);
-							bsf.setBallColor(dpos.getDiffuseColor());
-							bsf.setBallRadius(dps.getPointRadius());
+							bsf.setBallColor(dps.getDiffuseColor());
+							dps.getRadiiWorldCoordinates();
+							double sphereSizeFactor = 1.0;
+							if (dls.getRadiiWorldCoordinates())	{
+								double[] o2w = p.getMatrix(null);
+								sphereSizeFactor = CameraUtility.getScalingFactor(o2w, Pn.EUCLIDEAN);
+								sphereSizeFactor = 1.0 / sphereSizeFactor;
+							}
+							bsf.setBallRadius(dps.getPointRadius() * sphereSizeFactor);
 							bsf.setShowBalls(true);
 							bsf.setShowSticks(false);
 							bsf.update();
@@ -383,6 +407,7 @@ public class U3DSceneUtility {
 								basPoints.setAppearance(app);
 							}
 							app.setAttribute(FACE_DRAW, true);
+							app.setAttribute(POLYGON_SHADER + "." + SMOOTH_SHADING, true);
 							if (TextureUtility.hasReflectionMap(ea, "pointShader.polygonShader")) {
 								CubeMap cm = TextureUtility.readReflectionMap(ea, "pointShader.polygonShader.reflectionMap");
 								CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
@@ -395,29 +420,35 @@ public class U3DSceneUtility {
 										);
 								cmDest.setBlendColor(cm.getBlendColor());
 							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
-						} else {
-							PointSet ps = (PointSet)g;
-							PointSetFactory psf = new PointSetFactory();
-							psf.setVertexCount(ps.getNumPoints());
-							psf.setVertexAttributes(ps.getVertexAttributes());
-							psf.update();
-							basPoints = new SceneGraphComponent();
-							basPoints.setOwner("foo");
-							basPoints.setName("Points");
-							basPoints.setGeometry(psf.getGeometry());
-							Appearance app = basPoints.getAppearance();
-							if (app == null) {
-								app = new Appearance();
-								basPoints.setAppearance(app);
-							}
-						}
+//						} else {
+//							PointSet ps = (PointSet)g;
+//							PointSetFactory psf = new PointSetFactory();
+//							psf.setVertexCount(ps.getNumPoints());
+//							psf.setVertexAttributes(ps.getVertexAttributes());
+//							psf.update();
+//							basPoints = new SceneGraphComponent();
+//							basPoints.setOwner("foo");
+//							basPoints.setName("Points");
+//							basPoints.setGeometry(psf.getGeometry());
+//							Appearance app = basPoints.getAppearance();
+//							if (app == null) {
+//								app = new Appearance();
+//								basPoints.setAppearance(app);
+//							}
+//						}
 					}
 					if (g instanceof IndexedLineSet && dgs.getShowLines()) { // create sticks for line set
-						if (dls.getTubeDraw()) {
+//						if (dls.getTubeDraw()) {
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setStickGeometry(LINE_CYLINDER);
-							bsf.setStickColor(dpos.getDiffuseColor());
-							bsf.setStickRadius(dls.getTubeRadius());
+							bsf.setStickColor(dls.getDiffuseColor());
+							double tubeSizeFactor = 1.0;
+							if (dls.getRadiiWorldCoordinates())	{
+								double[] o2w = p.getMatrix(null);
+								tubeSizeFactor = CameraUtility.getScalingFactor(o2w, Pn.EUCLIDEAN);
+								tubeSizeFactor = 1.0 / tubeSizeFactor;
+							}
+							bsf.setStickRadius(dls.getTubeRadius() * tubeSizeFactor);
 							bsf.setShowBalls(false);
 							bsf.setShowSticks(true);
 							bsf.update();
@@ -430,6 +461,7 @@ public class U3DSceneUtility {
 								basLines.setAppearance(app);
 							}
 							app.setAttribute(FACE_DRAW, true);
+							app.setAttribute(POLYGON_SHADER + "." + SMOOTH_SHADING, true);
 							if (TextureUtility.hasReflectionMap(ea, "lineShader.polygonShader")) {
 								CubeMap cm = TextureUtility.readReflectionMap(ea, "lineShader.polygonShader.reflectionMap");
 								CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
@@ -442,24 +474,24 @@ public class U3DSceneUtility {
 										);
 								cmDest.setBlendColor(cm.getBlendColor());
 							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
-						} else {
-							IndexedLineSet ls = (IndexedLineSet)g;
-							IndexedLineSetFactory lsf = new IndexedLineSetFactory();
-							lsf.setVertexCount(ls.getNumPoints());
-							lsf.setVertexAttributes(ls.getVertexAttributes());
-							lsf.setEdgeCount(ls.getNumEdges());
-							lsf.setEdgeIndices(ls.getEdgeAttributes(Attribute.INDICES));
-							lsf.update();
-							basLines = new SceneGraphComponent();
-							basLines.setOwner("foo");
-							basLines.setName("Lines");
-							basLines.setGeometry(lsf.getGeometry());
-							Appearance app = basLines.getAppearance();
-							if (app == null) {
-								app = new Appearance();
-								basLines.setAppearance(app);
-							}
-						}
+//						} else {
+//							IndexedLineSet ls = (IndexedLineSet)g;
+//							IndexedLineSetFactory lsf = new IndexedLineSetFactory();
+//							lsf.setVertexCount(ls.getNumPoints());
+//							lsf.setVertexAttributes(ls.getVertexAttributes());
+//							lsf.setEdgeCount(ls.getNumEdges());
+//							lsf.setEdgeIndices(ls.getEdgeAttributes(Attribute.INDICES));
+//							lsf.update();
+//							basLines = new SceneGraphComponent();
+//							basLines.setOwner("foo");
+//							basLines.setName("Lines");
+//							basLines.setGeometry(lsf.getGeometry());
+//							Appearance app = basLines.getAppearance();
+//							if (app == null) {
+//								app = new Appearance();
+//								basLines.setAppearance(app);
+//							}
+//						}
 					}
 					
 				}

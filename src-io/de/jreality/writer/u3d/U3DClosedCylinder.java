@@ -4,30 +4,31 @@ import static de.jreality.scene.data.Attribute.COORDINATES;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.StorageModel.DOUBLE3_ARRAY;
 import static de.jreality.scene.data.StorageModel.INT_ARRAY_ARRAY;
-import static de.jreality.writer.u3d.U3DAttribute.U3D_FLAG;
-import static de.jreality.writer.u3d.U3DAttribute.U3D_NONORMALS;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.DataList;
 
 
 public class U3DClosedCylinder extends IndexedFaceSet{
 
-	
 	private static final double[]
 	    zPosNormal = {0,0,1},
 	    zNegNormal = {0,0,-1};
 	
+	public U3DClosedCylinder() {
+	}
+	
 	public U3DClosedCylinder(int resolution, double thickness){
 		makeDisk(resolution, thickness);
-		setVertexAttributes(U3D_NONORMALS, U3D_FLAG);
+		IndexedFaceSetUtility.calculateAndSetNormals(this);
 	}
 	
 	public U3DClosedCylinder(int resolution){
 		makeDiskNoThickness(resolution);
-		setVertexAttributes(U3D_NONORMALS, U3D_FLAG);
+		IndexedFaceSetUtility.calculateAndSetNormals(this);
 	}
 	
 	

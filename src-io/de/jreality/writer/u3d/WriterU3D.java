@@ -1491,7 +1491,7 @@ public class WriterU3D implements SceneWriter {
 		appearances = new HashSet<EffectiveAppearance>(appearanceMap.values());
 		appearanceNameMap = U3DSceneUtility.getAppearanceNames(appearances);
 		visibilityMap = U3DSceneUtility.getVisibility(scene, appearanceMap);
-		
+	
 		// remove non-geometry materials
 		LinkedList<SceneGraphComponent> keys = new LinkedList<SceneGraphComponent>(appearanceMap.keySet());
 		for (SceneGraphComponent c : keys) {
