@@ -387,9 +387,8 @@ public class U3DSceneUtility {
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setBallGeometry(POINT_SPHERE);
 							bsf.setBallColor(dps.getDiffuseColor());
-							dps.getRadiiWorldCoordinates();
 							double sphereSizeFactor = 1.0;
-							if (dls.getRadiiWorldCoordinates())	{
+							if (dps.getRadiiWorldCoordinates() != null && dps.getRadiiWorldCoordinates())	{
 								double[] o2w = p.getMatrix(null);
 								sphereSizeFactor = CameraUtility.getScalingFactor(o2w, Pn.EUCLIDEAN);
 								sphereSizeFactor = 1.0 / sphereSizeFactor;
@@ -443,7 +442,7 @@ public class U3DSceneUtility {
 							bsf.setStickGeometry(LINE_CYLINDER);
 							bsf.setStickColor(dls.getDiffuseColor());
 							double tubeSizeFactor = 1.0;
-							if (dls.getRadiiWorldCoordinates())	{
+							if (dls.getRadiiWorldCoordinates() != null && dls.getRadiiWorldCoordinates())	{
 								double[] o2w = p.getMatrix(null);
 								tubeSizeFactor = CameraUtility.getScalingFactor(o2w, Pn.EUCLIDEAN);
 								tubeSizeFactor = 1.0 / tubeSizeFactor;
