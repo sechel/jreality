@@ -2,7 +2,9 @@ package de.jreality.audio;
 
 import de.jreality.scene.data.SampleReader;
 
-public interface AudioAttributes {
+public class AudioAttributes {
+	private AudioAttributes() {}; // not to be instantiated
+	
 	public static final String PREPROCESSOR_KEY = "preprocessorKey";
 	public static final String DIRECTIONLESS_PROCESSOR_KEY = "directionlessProcessor";
 	public static final String REVERB_TIME_KEY = "reverbTime";
