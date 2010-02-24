@@ -5,7 +5,7 @@ public final class U3DConstants {
 
 	public final static short
 		EXPORTER_VERSION_MINOR = 0,
-		EXPORTER_VERSION_MAJOR = 1;
+		EXPORTER_VERSION_MAJOR = 0;
 	public final static long 
 		PROFILE_OPTIONS = 0x00000000,
 		CHARACTER_ENCODING = 106,

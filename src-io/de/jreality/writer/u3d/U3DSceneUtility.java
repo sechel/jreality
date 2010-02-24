@@ -38,6 +38,8 @@ import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
+import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.io.JrScene;
@@ -383,7 +385,7 @@ public class U3DSceneUtility {
 						ils.setVertexCountAndAttributes(((PointSet)g).getVertexAttributes());
 					}
 					if (dgs.getShowPoints()) { // create spheres for point set 
-//						if (dps.getSpheresDraw()) {
+						if (dps.getSpheresDraw()) {
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setBallGeometry(POINT_SPHERE);
 							bsf.setBallColor(dps.getDiffuseColor());
@@ -419,25 +421,25 @@ public class U3DSceneUtility {
 										);
 								cmDest.setBlendColor(cm.getBlendColor());
 							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
-//						} else {
-//							PointSet ps = (PointSet)g;
-//							PointSetFactory psf = new PointSetFactory();
-//							psf.setVertexCount(ps.getNumPoints());
-//							psf.setVertexAttributes(ps.getVertexAttributes());
-//							psf.update();
-//							basPoints = new SceneGraphComponent();
-//							basPoints.setOwner("foo");
-//							basPoints.setName("Points");
-//							basPoints.setGeometry(psf.getGeometry());
-//							Appearance app = basPoints.getAppearance();
-//							if (app == null) {
-//								app = new Appearance();
-//								basPoints.setAppearance(app);
-//							}
-//						}
+						} else {
+							PointSet ps = (PointSet)g;
+							PointSetFactory psf = new PointSetFactory();
+							psf.setVertexCount(ps.getNumPoints());
+							psf.setVertexAttributes(ps.getVertexAttributes());
+							psf.update();
+							basPoints = new SceneGraphComponent();
+							basPoints.setOwner("foo");
+							basPoints.setName("Points");
+							basPoints.setGeometry(psf.getGeometry());
+							Appearance app = basPoints.getAppearance();
+							if (app == null) {
+								app = new Appearance();
+								basPoints.setAppearance(app);
+							}
+						}
 					}
 					if (g instanceof IndexedLineSet && dgs.getShowLines()) { // create sticks for line set
-//						if (dls.getTubeDraw()) {
+						if (dls.getTubeDraw()) {
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setStickGeometry(LINE_CYLINDER);
 							bsf.setStickColor(dls.getDiffuseColor());
@@ -473,24 +475,24 @@ public class U3DSceneUtility {
 										);
 								cmDest.setBlendColor(cm.getBlendColor());
 							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
-//						} else {
-//							IndexedLineSet ls = (IndexedLineSet)g;
-//							IndexedLineSetFactory lsf = new IndexedLineSetFactory();
-//							lsf.setVertexCount(ls.getNumPoints());
-//							lsf.setVertexAttributes(ls.getVertexAttributes());
-//							lsf.setEdgeCount(ls.getNumEdges());
-//							lsf.setEdgeIndices(ls.getEdgeAttributes(Attribute.INDICES));
-//							lsf.update();
-//							basLines = new SceneGraphComponent();
-//							basLines.setOwner("foo");
-//							basLines.setName("Lines");
-//							basLines.setGeometry(lsf.getGeometry());
-//							Appearance app = basLines.getAppearance();
-//							if (app == null) {
-//								app = new Appearance();
-//								basLines.setAppearance(app);
-//							}
-//						}
+						} else {
+							IndexedLineSet ls = (IndexedLineSet)g;
+							IndexedLineSetFactory lsf = new IndexedLineSetFactory();
+							lsf.setVertexCount(ls.getNumPoints());
+							lsf.setVertexAttributes(ls.getVertexAttributes());
+							lsf.setEdgeCount(ls.getNumEdges());
+							lsf.setEdgeIndices(ls.getEdgeAttributes(Attribute.INDICES));
+							lsf.update();
+							basLines = new SceneGraphComponent();
+							basLines.setOwner("foo");
+							basLines.setName("Lines");
+							basLines.setGeometry(lsf.getGeometry());
+							Appearance app = basLines.getAppearance();
+							if (app == null) {
+								app = new Appearance();
+								basLines.setAppearance(app);
+							}
+						}
 					}
 					
 				}

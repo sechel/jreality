@@ -616,18 +616,31 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	
-	protected List<DataBlock> getContinuations(Geometry g) {
-		LinkedList<DataBlock> r = new LinkedList<DataBlock>();
+	protected DataBlock getGeometryContinuation(Geometry g) {
+		if (g instanceof IndexedFaceSet) {
+			return getCLODBaseMeshContinuation((IndexedFaceSet)g);
+		}
+		BitStreamWrite w = new BitStreamWrite();
+		w.WriteString(geometryNameMap.get(g));
+		w.WriteU32(0x00000001); // model resource modifier chain
+		w.WriteU32(0x00000000); // no attributes
+		w.AlignTo4Byte(); // modifier chain padding
+		
 		DataBlock geomCont = null;
-		if (g instanceof IndexedFaceSet)
-			geomCont = getCLODBaseMeshContinuation((IndexedFaceSet)g);
-		else if (g instanceof IndexedLineSet)
+		if (g instanceof IndexedLineSet)
 			geomCont = getLineSetContinuation((IndexedLineSet)g);
 		else if (g instanceof PointSet)
 			geomCont = getPointSetContinuation((PointSet)g);
-		if (geomCont != null)
-			r.add(geomCont);
-		return r;
+		if (geomCont != null) {
+			w.WriteU32(1);
+			w.WriteDataBlock(geomCont);
+		} else {
+			w.WriteU32(0);
+		}
+		
+		DataBlock b = w.GetDataBlock();
+		b.setBlockType(TYPE_MOFIFIER_CHAIN);
+		return b;
 	}
 	
 	
@@ -1394,9 +1407,7 @@ public class WriterU3D implements SceneWriter {
 			cs += writeDataBlock(getLightResource(l), o);
 		}
 		for (Geometry g : preparedGeometries){
-			for (DataBlock b : getContinuations(g)) { 
-				cs += writeDataBlock(b, o);
-			}
+			cs += writeDataBlock(getGeometryContinuation(g), o);
 		}
 		for (U3DTexture tex : textures) {
 			for (DataBlock b : getContinuations(tex)) {

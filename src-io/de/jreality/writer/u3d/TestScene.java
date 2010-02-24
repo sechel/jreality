@@ -3,9 +3,11 @@ package de.jreality.writer.u3d;
 import static de.jreality.shader.CommonAttributes.EDGE_DRAW;
 import static de.jreality.shader.CommonAttributes.FACE_DRAW;
 import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.POINT_RADIUS;
 import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
 import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
+import static de.jreality.shader.CommonAttributes.TUBE_RADIUS;
 import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
 
 import java.io.FileOutputStream;
@@ -13,12 +15,15 @@ import java.util.Random;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.writer.pdf.WriterPDF;
 
 public class TestScene {
@@ -31,24 +36,24 @@ public class TestScene {
 	 */
 	public static void main(String[] args) {
 		IndexedFaceSet g = Primitives.icosahedron();
-//		double[][] vertexColors = new double[12][3];
-//		for (double[] c : vertexColors) {
-//			c[0] = rnd.nextDouble();
-//			c[1] = rnd.nextDouble();
-//			c[2] = rnd.nextDouble();
-//		}
-//		double[][] faceColors = new double[20][3];
-//		for (double[] c : faceColors) {
-//			c[0] = rnd.nextDouble();
-//			c[1] = rnd.nextDouble();
-//			c[2] = rnd.nextDouble();
-//		}
-//		double[][] edgeColors = new double[30][3];
-//		for (double[] c : edgeColors) {
-//			c[0] = rnd.nextDouble();
-//			c[1] = rnd.nextDouble();
-//			c[2] = rnd.nextDouble();
-//		}
+		double[][] vertexColors = new double[12][3];
+		for (double[] c : vertexColors) {
+			c[0] = rnd.nextDouble();
+			c[1] = rnd.nextDouble();
+			c[2] = rnd.nextDouble();
+		}
+		double[][] faceColors = new double[20][3];
+		for (double[] c : faceColors) {
+			c[0] = rnd.nextDouble();
+			c[1] = rnd.nextDouble();
+			c[2] = rnd.nextDouble();
+		}
+		double[][] edgeColors = new double[30][3];
+		for (double[] c : edgeColors) {
+			c[0] = rnd.nextDouble();
+			c[1] = rnd.nextDouble();
+			c[2] = rnd.nextDouble();
+		}
 //		g.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(vertexColors));
 //		g.setEdgeAttributes(Attribute.COLORS, new DoubleArrayArray.Array(edgeColors));
 //		g.setFaceAttributes(Attribute.COLORS, new DoubleArrayArray.Array(faceColors));
@@ -57,12 +62,15 @@ public class TestScene {
 		root.setName("Test Scene Root");
 		root.setGeometry(g);
 //		root.setLight(new PointLight());
+//		root.setCamera(new Camera("Test Camera"));
 		Appearance app = new Appearance(); 
-		app.setAttribute(VERTEX_DRAW, false);
-		app.setAttribute(EDGE_DRAW, false);
+		app.setAttribute(VERTEX_DRAW, true);
+		app.setAttribute(EDGE_DRAW, true);
 		app.setAttribute(FACE_DRAW, true);
-//		app.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, true);
-//		app.setAttribute(LINE_SHADER + "." + TUBES_DRAW, true);
+		app.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, false);
+		app.setAttribute(LINE_SHADER + "." + TUBES_DRAW, false);
+		app.setAttribute(POINT_SHADER + "." + POINT_RADIUS, 0.1);
+		app.setAttribute(LINE_SHADER + "." + TUBE_RADIUS, 0.05);
 		root.setAppearance(app);
 		WriterU3D writerU3D = new WriterU3D();
 		WriterPDF writerPDF = new WriterPDF();
@@ -76,6 +84,7 @@ public class TestScene {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+//		JRViewer.display(root);
 	}
 
 }
