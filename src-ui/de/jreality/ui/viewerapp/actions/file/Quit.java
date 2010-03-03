@@ -45,6 +45,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -68,10 +69,13 @@ public class Quit extends AbstractJrAction {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		LoggingSystem.getLogger(this).fine("Quit action performed.");
 		if (actionListener == null) {
+			LoggingSystem.getLogger(this).fine("Direct system exit.");
 			System.exit(0);
 		} else {
-			actionListener.actionPerformed(new ActionEvent(e, 1, "quit"));
+			LoggingSystem.getLogger(this).fine("Inform the listener.");
+			actionListener.actionPerformed(new ActionEvent(this, 1, "quit"));
 		}
 			
 	}
