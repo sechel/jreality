@@ -43,7 +43,6 @@ package de.jreality.reader;
 import java.io.File;
 import java.io.IOException;
 
-import junit.framework.TestCase;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Secure;
@@ -53,7 +52,7 @@ import de.jreality.util.SystemProperties;
 /**
  * @author msommer
  */
-public class LASReaderTest extends TestCase {
+public class LASReaderTest {
 
 	/**
 	 * @param args
