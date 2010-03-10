@@ -14,12 +14,11 @@ import java.io.Reader;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import de.jreality.plugin.icon.ImageHook;
-import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
 import de.jreality.util.Secure;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
@@ -115,38 +114,6 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		
 	}
 	
-	protected class ChooseUserPropertiesFileAction extends AbstractAction {
-		
-		private static final long 
-			serialVersionUID = 1L;
-
-		public ChooseUserPropertiesFileAction() {
-			putValue(Action.NAME, "Properties File...");
-			putValue(Action.SMALL_ICON, ImageHook.getIcon("folder.png"));
-		}
-		
-		
-		public void actionPerformed(ActionEvent e) {
-			if (propertiesListener.getUserPropertyFile()!=null) {
-				userPropertiesFileChooser.setSelectedFile(new File(propertiesListener.getUserPropertyFile()));
-			}
-
-			Component parent = SwingUtilities.getWindowAncestor(view.getCenterComponent());
-			int result = userPropertiesFileChooser.showDialog(parent, "Select");
-			if (result != JFileChooser.APPROVE_OPTION) {
-				return;
-			}
-			try {
-				propertiesListener.setUserPropertyFile(userPropertiesFileChooser.getSelectedFile().getAbsolutePath());
-			} catch (SecurityException ex) {
-				propertiesListener.setUserPropertyFile(userPropertiesFileChooser.getSelectedFile().getPath());
-			}
-		}
-		
-	}
-	
-
-	
 	private ViewMenuBar
 		viewMenuBar = null;
 	private View
@@ -156,17 +123,10 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 	private Action
 		writeAction = new WritePropertiesAction(),
 		loadAction = new LoadPropertiesAction(),
-		loadDefaultAction = new LoadDefaultPropertiesAction(),
-		chooseUserPropertiesFileAction = new ChooseUserPropertiesFileAction();
+		loadDefaultAction = new LoadDefaultPropertiesAction();
 	private final JFileChooser
-		fileChooser = new JFileChooser(),
-		userPropertiesFileChooser = new JFileChooser();
-	private final JMenuItem
-		saveOnExitAction,
-		quietExitAction,
-		loadAtStartAction;
+		fileChooser = new JFileChooser();
 	
-	@SuppressWarnings("serial")
 	public PropertiesMenu() {
 		String dir = Secure.getProperty("user.dir", "");
 		fileChooser.setCurrentDirectory(new File(dir));
@@ -174,28 +134,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileHidingEnabled(false);
 		fileChooser.setFileSelectionMode(FILES_ONLY);
-		
-		userPropertiesFileChooser.addChoosableFileFilter(new PropertiesFileFilter());
-		userPropertiesFileChooser.setAcceptAllFileFilterUsed(false);
-		userPropertiesFileChooser.setFileHidingEnabled(false);
-		userPropertiesFileChooser.setFileSelectionMode(FILES_ONLY);
-		
-		saveOnExitAction = new AbstractJrToggleAction("Save On Exit") {
-			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setSaveOnExit(isSelected());
 			}
-		}.createMenuItem();
-		quietExitAction = new AbstractJrToggleAction("Quiet Exit") {
-			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setAskBeforeSaveOnExit(!isSelected());
-			}
-		}.createMenuItem();
-		loadAtStartAction = new AbstractJrToggleAction("Load At Startup") {
-			public void actionPerformed(ActionEvent e) {
-				propertiesListener.setLoadFromUserPropertyFile(isSelected());
-			}
-		}.createMenuItem();
-	}
 	
 	
 	@Override
@@ -203,20 +142,26 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		super.install(c);
 		view = c.getPlugin(View.class);
 		viewMenuBar = c.getPlugin(ViewMenuBar.class);
-		viewMenuBar.addMenuItem(getClass(), 1, writeAction, "Properties");
-		viewMenuBar.addMenuItem(getClass(), 2, loadAction, "Properties");
-		viewMenuBar.addMenuSeparator(getClass(), 2.5, "Properties");
-		viewMenuBar.addMenuItem(getClass(), 3, loadDefaultAction, "Properties");
-		viewMenuBar.addMenuSeparator(getClass(), 3.5, "Properties");
-
-		quietExitAction.setSelected(!propertiesListener.isAskBeforeSaveOnExit());
-		viewMenuBar.addMenuItem(getClass(), 4, quietExitAction,	"Properties", "Options");
-		saveOnExitAction.setSelected(propertiesListener.isSaveOnExit());
-		viewMenuBar.addMenuItem(getClass(), 5, saveOnExitAction,"Properties", "Options");
-		loadAtStartAction.setSelected(propertiesListener.isLoadFromUserPropertyFile());
-		viewMenuBar.addMenuItem(getClass(), 6, loadAtStartAction,	"Properties", "Options");
 		
-		viewMenuBar.addMenuItem(getClass(), 7, chooseUserPropertiesFileAction, "Properties");
+		JMenu propertiesMenu = new JMenu("Properties");
+		propertiesMenu.setMnemonic('P');
+		viewMenuBar.addMenu(getClass(), 200, propertiesMenu);
+		
+		JMenu writeMenu = new JMenu(writeAction);
+		writeMenu.setMnemonic('S');
+		viewMenuBar.addMenuItem(getClass(), 1, writeMenu, "Properties");
+		
+		JMenu loadMenu = new JMenu(loadAction);
+		loadMenu.setMnemonic('L');
+		viewMenuBar.addMenuItem(getClass(), 2, loadMenu, "Properties");
+		viewMenuBar.addMenuSeparator(getClass(), 2.5, "Properties");
+
+		
+		JMenu defaultMenu = new JMenu(loadDefaultAction);
+		defaultMenu.setMnemonic('D');
+		viewMenuBar.addMenuItem(getClass(), 3, defaultMenu, "Properties");
+		
+		c.getPlugin(PropertyPreferences.class);
 	}
 
 	@Override

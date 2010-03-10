@@ -180,6 +180,9 @@ public class JRViewer {
 		}
 	}
 	
+	static {
+		ToolTipManager.sharedInstance().setDismissDelay(20000);
+	}
 	
 	public static enum ContentType {
 		Raw,

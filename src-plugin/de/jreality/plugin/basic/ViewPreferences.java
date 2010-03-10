@@ -6,8 +6,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -41,7 +41,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	private JComboBox
 		colorChooserModeCombo = new JComboBox(new String[] {"HUE", "SAT", "BRI", "RED", "GREEN", "BLUE"});
 	private List<ColorPickerModeChangedListener>
-		colorModeListeners = new LinkedList<ColorPickerModeChangedListener>();
+		colorModeListeners = new CopyOnWriteArrayList<ColorPickerModeChangedListener>();
 	private FrontendListener
 		frontendListener = null;
 	
@@ -167,7 +167,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	}
 
 	public String getMainName() {
-		return "jReality Viewer";
+		return "jReality Properties";
 	}
 
 	public JPanel getMainPage() {
