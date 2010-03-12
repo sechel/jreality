@@ -76,4 +76,8 @@ class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 		
 	}
 
+	public void updateWindow() {
+		// TODO Auto-generated method stub
+	}
+
 }
