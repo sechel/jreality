@@ -1,6 +1,7 @@
 package de.jreality.writer.u3d;
 
 import static de.jreality.math.MatrixBuilder.euclidean;
+import static de.jreality.scene.Appearance.INHERITED;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.Attribute.NORMALS;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
@@ -691,7 +692,10 @@ public class U3DSceneUtility {
 	
 	public static SceneGraphComponent getSkyBox(JrScene scene) {
 		Appearance rootApp = scene.getSceneRoot().getAppearance();
-		if (rootApp == null) return null;
+		Object skyBoxAttribute = rootApp.getAttribute(SKY_BOX);
+		if (rootApp == null || skyBoxAttribute == INHERITED) {
+			return null;
+		}
 		CubeMap skyBox = (CubeMap)createAttributeEntity(CubeMap.class, SKY_BOX, rootApp, true);
 		if (skyBox == null) return null;
 		if (skyBox.getFront() 	== null
