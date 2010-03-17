@@ -1,5 +1,6 @@
 package de.jreality.ui;
 
+import static de.jreality.shader.CommonAttributes.Z_BUFFER_ENABLED;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
 import static java.awt.GridBagConstraints.VERTICAL;
@@ -802,6 +803,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 					CommonAttributes.TRANSPARENCY_ENABLED,
 					isTransparencyEnabled()
 			);
+			appearance.setAttribute(Z_BUFFER_ENABLED, true);
 		}
 		updateEnabledStates();
 	}
