@@ -308,7 +308,7 @@ public class WriterU3D implements SceneWriter {
 
 		
 	protected DataBlock getPointSetContinuation(PointSet g){
-		// TODO Does not work very well with acrobat, is replaced by tubes and spheres
+		// TODO Only partially supported by adobe reader
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0); // chain index 
@@ -536,13 +536,21 @@ public class WriterU3D implements SceneWriter {
 			}
 			fnCount = fNormals.length;
 		}
+		
+		DoubleArrayArray vcData = (DoubleArrayArray)g.getVertexAttributes(COLORS);
+		double[][] vColors = null;
+		int vcCount = 0;
+		if (vcData != null) {
+			vColors = vcData.toDoubleArrayArray(null);
+			vcCount = vColors.length;
+		}
 
 		// base mesh description
 		w.WriteU32(0); // chain index 
 		w.WriteU32(faceCount);
 		w.WriteU32(vertCount);
 		w.WriteU32(vnCount != 0 ? vnCount : fnCount);
-		w.WriteU32(0); // no per vertex diffuse colors
+		w.WriteU32(vColors != null ? vcCount : 0); // no per vertex diffuse colors
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvertCount == 0 ? 1 : tvertCount); // no texture coordinates
 		DoubleArrayArray vData = (DoubleArrayArray)g.getVertexAttributes(COORDINATES);
@@ -584,6 +592,19 @@ public class WriterU3D implements SceneWriter {
 				w.WriteF32((float) n[2]);
 			}
 		}
+		if (vColors != null) {
+			for (int i = 0; i < vColors.length; i++) {
+				double[] c = vColors[i];
+				w.WriteF32((float) c[0]);
+				w.WriteF32((float) c[1]);
+				w.WriteF32((float) c[2]);
+				if (c.length > 3) {
+					w.WriteF32((float) c[3]);
+				} else {
+					w.WriteF32(1.0f);
+				}
+			}
+		}
 		// texture coordinates
 		if (tvertCount != 0 && tVerts != null) {
 			for (int i = 0; i < tVerts.length; i++) {
@@ -609,6 +630,9 @@ public class WriterU3D implements SceneWriter {
 					w.WriteCompressedU32(uACStaticFull + vnCount, f[j]);
 				else if (fnData != null)
 					w.WriteCompressedU32(uACStaticFull + fnCount, i);
+				if (vcData != null) {
+					w.WriteCompressedU32(uACStaticFull + vcCount, f[j]);
+				}
 				w.WriteCompressedU32(uACStaticFull + (tvertCount == 0 ? 1 : tvertCount), tvertCount == 0 ? 0 : f[j]);
 			}
 		}
@@ -681,7 +705,7 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getPointSetDeclaration(PointSet g) {
-		// TODO Does not work very well with acrobat, is replaced by tubes and spheres
+		// TODO Not supported by any program
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0);
@@ -823,16 +847,18 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected void WriteResourceDescriptionDummy(BitStreamWrite w) {
+		// All of these values are crucial to some adobe 
+		// reader implementations and have to be 0.
 		// Resource Description Quality Factors
-		w.WriteU32(1000);
-		w.WriteU32(1000);
-		w.WriteU32(1000);
+		w.WriteU32(0);
+		w.WriteU32(0);
+		w.WriteU32(0);
 		// Resource Inverse Quantization
 		for (int i = 0; i < 5; i++)
-			w.WriteF32(1.0f);
+			w.WriteF32(0f);
 		// Resource parameters
 		for (int i = 0; i < 3; i++)
-			w.WriteF32(1.0f);
+			w.WriteF32(0f);
 	}
 	
 	
@@ -843,6 +869,7 @@ public class WriterU3D implements SceneWriter {
 		
 		DoubleArrayArray tvData = (DoubleArrayArray)g.getVertexAttributes(TEXTURE_COORDINATES);
 		DoubleArrayArray vnData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
+		DoubleArrayArray vcData = (DoubleArrayArray)g.getVertexAttributes(COLORS);
 		DoubleArrayArray fnData = (DoubleArrayArray)g.getFaceAttributes(NORMALS);
 		// Max Mesh Description
 		boolean noNormals = g.getVertexAttributes(U3D_NONORMALS) != null;
@@ -858,14 +885,22 @@ public class WriterU3D implements SceneWriter {
 		} else {
 			w.WriteU32(vnData != null ? vnData.size() : (fnData != null ? fnData.size() : 0)); // normals
 		}
-		w.WriteU32(0); // no per vertex diffuse colors
+		if (vcData != null) {
+			w.WriteU32(vcData.size());
+		} else {
+			w.WriteU32(0); // no per vertex diffuse colors
+		}
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvData == null ? 1 : tvData.size()); // one default coordinate
 		
 		// shading count
 		w.WriteU32(1); // standard shading description
-		// Standard shading
-		w.WriteU32(0x00000000);
+		
+		if (vcData != null) {
+			w.WriteU32(0x00000001); // diffuse colors per vertex
+		} else {
+			w.WriteU32(0x00000000); // no diffuse or specular colors
+		}
 		if (tvData != null) {
 			w.WriteU32(1);
 		} else {
@@ -1226,7 +1261,7 @@ public class WriterU3D implements SceneWriter {
 	
 	protected DataBlock getLightNodeModifierChain(SceneGraphComponent c) {
 		BitStreamWrite w = new BitStreamWrite();
-		w.WriteString(nodeNameMap.get(c));
+		w.WriteString(nodeNameMap.get(c) + ".light");
 		w.WriteU32(0x00000000); // node modifier chain
 		w.WriteU32(0x00000000); // no attributes
 		w.AlignTo4Byte(); // modifier chain padding
@@ -1242,7 +1277,7 @@ public class WriterU3D implements SceneWriter {
 	
 	protected DataBlock getViewNodeModifierChain(SceneGraphComponent c) {
 		BitStreamWrite w = new BitStreamWrite();
-		w.WriteString(nodeNameMap.get(c));
+		w.WriteString(nodeNameMap.get(c) + ".camera");
 		w.WriteU32(0x00000000); // node modifier chain
 		w.WriteU32(0x00000000); // no attributes
 		w.AlignTo4Byte(); // modifier chain padding
@@ -1521,7 +1556,7 @@ public class WriterU3D implements SceneWriter {
 		textureNameMap = U3DSceneUtility.getTextureNames("Texture", textures);
 		texturePNGData = U3DSceneUtility.preparePNGTextures(textures);
 		
-		/*		
+//		/*		
 		U3DSceneUtility.printNodes("SceneGraphComponents", nodes);
 		U3DSceneUtility.printNameMap(nodeNameMap);
 		U3DSceneUtility.printNodes("View Nodes", viewNodes);
@@ -1538,7 +1573,7 @@ public class WriterU3D implements SceneWriter {
 		U3DSceneUtility.printAppearanceNameMap(appearanceNameMap);
 		U3DSceneUtility.printTextures(textures);
 		U3DSceneUtility.printTextureNameMap(textureNameMap);
-		*/
+//		*/
 	}
 
 
