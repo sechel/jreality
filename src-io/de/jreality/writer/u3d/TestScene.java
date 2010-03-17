@@ -15,11 +15,7 @@ import java.util.Random;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointLight;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
 import de.jreality.writer.pdf.WriterPDF;
 
