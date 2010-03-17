@@ -13,9 +13,7 @@ import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
 import java.io.FileOutputStream;
 import java.util.Random;
 
-import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
-import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
@@ -23,7 +21,6 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.writer.pdf.WriterPDF;
 
 public class TestScene {
@@ -36,6 +33,7 @@ public class TestScene {
 	 */
 	public static void main(String[] args) {
 		IndexedFaceSet g = Primitives.icosahedron();
+		g.setVertexAttributes(U3DAttribute.U3D_NONORMALS, U3DAttribute.U3D_FLAG);
 		double[][] vertexColors = new double[12][3];
 		for (double[] c : vertexColors) {
 			c[0] = rnd.nextDouble();
@@ -60,12 +58,12 @@ public class TestScene {
 		
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("Test Scene Root");
-		root.setGeometry(g);
+		root.setGeometry(Primitives.tetrahedron(false));
 //		root.setLight(new PointLight());
 //		root.setCamera(new Camera("Test Camera"));
 		Appearance app = new Appearance(); 
-		app.setAttribute(VERTEX_DRAW, true);
-		app.setAttribute(EDGE_DRAW, true);
+		app.setAttribute(VERTEX_DRAW, false);
+		app.setAttribute(EDGE_DRAW, false);
 		app.setAttribute(FACE_DRAW, true);
 		app.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, false);
 		app.setAttribute(LINE_SHADER + "." + TUBES_DRAW, false);

@@ -509,8 +509,9 @@ public class WriterU3D implements SceneWriter {
 		 */
 		boolean noNormals = g.getVertexAttributes(U3D_NONORMALS) != null;
 		DoubleArrayArray vnData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
-		if (noNormals)
+		if (noNormals) {
 			vnData = null;
+		}
 		double[][] vNormals = null;
 		int vnCount = 0;
 		if (vnData != null) {
@@ -522,8 +523,9 @@ public class WriterU3D implements SceneWriter {
 			vnCount = vNormals.length;
 		}
 		DoubleArrayArray fnData = (DoubleArrayArray)g.getFaceAttributes(NORMALS);
-		if (noNormals)
+		if (noNormals) {
 			fnData = null;
+		}
 		double[][] fNormals = null;
 		int fnCount = 0;
 		if (fnData != null && vnData == null) {
@@ -545,22 +547,23 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(tvertCount == 0 ? 1 : tvertCount); // no texture coordinates
 		DoubleArrayArray vData = (DoubleArrayArray)g.getVertexAttributes(COORDINATES);
 		double[][] vertices = null;
-		if (vData == null)
+		if (vData == null) {
 			vertices = new double[0][0];
-		else
-			vertices = vData.toDoubleArrayArray(null); 
+		} else {
+			vertices = vData.toDoubleArrayArray(null);
+		}
 		IntArrayArray fData = (IntArrayArray)g.getFaceAttributes(INDICES);
 		int[][] faces = null;
-		if (fData == null)
+		if (fData == null) {
 			faces = new int[0][0];
-		else
+		} else {
 			faces = fData.toIntArrayArray(null);
+		}
 		
 		// vertices
 		for (int i = 0; i < vertCount; i++) {
 			double[] v = vertices[i];
-			if (v.length > 3)
-				Pn.dehomogenize(v, v);
+			if (v.length > 3) Pn.dehomogenize(v, v);
 			w.WriteF32((float) v[0]);
 			w.WriteF32((float) v[1]);
 			w.WriteF32((float) v[2]);
@@ -850,11 +853,11 @@ public class WriterU3D implements SceneWriter {
 		}
 		w.WriteU32(g.getNumFaces());
 		w.WriteU32(g.getNumPoints());
-		if (noNormals)
+		if (noNormals) {
 			w.WriteU32(0);
-		else
+		} else {
 			w.WriteU32(vnData != null ? vnData.size() : (fnData != null ? fnData.size() : 0)); // normals
-			
+		}
 		w.WriteU32(0); // no per vertex diffuse colors
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvData == null ? 1 : tvData.size()); // one default coordinate
@@ -863,10 +866,11 @@ public class WriterU3D implements SceneWriter {
 		w.WriteU32(1); // standard shading description
 		// Standard shading
 		w.WriteU32(0x00000000);
-		if (tvData != null)
+		if (tvData != null) {
 			w.WriteU32(1);
-		else
+		} else {
 			w.WriteU32(0);
+		}
 		w.WriteU32(2);
 		w.WriteU32(0);
 		
@@ -1286,8 +1290,8 @@ public class WriterU3D implements SceneWriter {
 		w.WriteI16(EXPORTER_VERSION_MAJOR);
 		w.WriteI16(EXPORTER_VERSION_MINOR);
 		w.WriteU32(PROFILE_OPTIONS);
-		w.WriteU32(declSize);
-		w.WriteU64(36 + contSize + declSize);
+		w.WriteU32(36 + declSize);
+		w.WriteU64(36 + declSize + contSize);
 		w.WriteU32(CHARACTER_ENCODING);
 		DataBlock b = w.GetDataBlock();
 		b.setBlockType(TYPE_FILE_HEADER);
