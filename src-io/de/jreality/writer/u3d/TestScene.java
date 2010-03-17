@@ -69,8 +69,8 @@ public class TestScene {
 		app.setAttribute(EDGE_DRAW, true);
 		app.setAttribute(FACE_DRAW, true);
 		app.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, Color.WHITE);
-		app.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, false);
-		app.setAttribute(LINE_SHADER + "." + TUBES_DRAW, false);
+		app.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, true);
+		app.setAttribute(LINE_SHADER + "." + TUBES_DRAW, true);
 		app.setAttribute(POINT_SHADER + "." + POINT_RADIUS, 0.1);
 		app.setAttribute(LINE_SHADER + "." + TUBE_RADIUS, 0.05);
 		root.setAppearance(app);
@@ -86,7 +86,6 @@ public class TestScene {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-//		JRViewer.display(root);
 	}
 
 }
