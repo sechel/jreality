@@ -16,6 +16,7 @@ import static de.jreality.shader.CommonAttributes.SKY_BOX;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SPECULAR_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY_ENABLED;
 import static de.jreality.shader.TextureUtility.createTexture;
 import static java.awt.Color.WHITE;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
@@ -410,6 +411,7 @@ public class U3DSceneUtility {
 							}
 							app.setAttribute(FACE_DRAW, true);
 							app.setAttribute(POLYGON_SHADER + "." + SMOOTH_SHADING, true);
+							app.setAttribute(POLYGON_SHADER + "." + TRANSPARENCY_ENABLED, false);
 							if (TextureUtility.hasReflectionMap(ea, "pointShader.polygonShader")) {
 								CubeMap cm = TextureUtility.readReflectionMap(ea, "pointShader.polygonShader.reflectionMap");
 								CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
@@ -464,6 +466,7 @@ public class U3DSceneUtility {
 							}
 							app.setAttribute(FACE_DRAW, true);
 							app.setAttribute(POLYGON_SHADER + "." + SMOOTH_SHADING, true);
+							app.setAttribute(POLYGON_SHADER + "." + TRANSPARENCY_ENABLED, false);
 							if (TextureUtility.hasReflectionMap(ea, "lineShader.polygonShader")) {
 								CubeMap cm = TextureUtility.readReflectionMap(ea, "lineShader.polygonShader.reflectionMap");
 								CubeMap cmDest = TextureUtility.createReflectionMap(app, "polygonShader", 
