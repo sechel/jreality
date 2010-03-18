@@ -229,12 +229,6 @@ public class WriterPDF implements SceneWriter {
 		for (SceneGraphComponent c : cameraNodes) {
 			camPaths.addAll(getPathsBetween(scene.getSceneRoot(), c));
 		}
-		String defaultCamName = "";
-		SceneGraphPath camPath = scene.getPath("cameraPath");
-		if (camPath != null) {
-			SceneGraphComponent defaultCam = camPath.getLastComponent();
-			defaultCamName = defaultCam.getName() + ".camera";
-		}
 		// Create PDF
 		Rectangle pageSize = new Rectangle(size.width, size.height);
 		Document doc = new Document(pageSize);
@@ -242,7 +236,7 @@ public class WriterPDF implements SceneWriter {
 			PdfWriter wr = PdfWriter.getInstance(doc, out);
 			doc.open();			
 			
-			String script = getSceneScript(scene, defaultCamName);
+			String script = getSceneScript(scene);
 			PdfStream oni = new PdfStream(PdfEncodings.convertToBytes(script, null));
             oni.flateCompress();
             PdfIndirectReference initScriptRef = wr.addToBody(oni).getIndirectReference();
@@ -301,7 +295,7 @@ public class WriterPDF implements SceneWriter {
 	}
 	
 	
-	private String getSceneScript(JrScene scene, String defaultCamName) {
+	private String getSceneScript(JrScene scene) {
 		if (userScriptFile != null) {
 			FileInputStream fin;
 			try {
@@ -313,7 +307,7 @@ public class WriterPDF implements SceneWriter {
 			return getJSScript(fin);
 		} else {
 			String script = defaultScript;
-			script = script.replace("##cam##", defaultCamName);
+			script = script.replace("##cam##", "DefaultView");
 			Appearance rootApp = scene.getSceneRoot().getAppearance();
 			Color cUpper = Color.WHITE;
 			Color cLower = Color.WHITE; 

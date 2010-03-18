@@ -88,6 +88,7 @@ import java.util.List;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
@@ -142,6 +143,8 @@ public class WriterU3D implements SceneWriter {
 		preparedGeometries = null;
 	protected Collection<SceneGraphComponent>
 		viewNodes = null;
+	protected SceneGraphComponent
+		defaultView = null;
 	protected Collection<Camera>
 		cameras = null;
 	protected HashMap<Camera, String>
@@ -241,9 +244,13 @@ public class WriterU3D implements SceneWriter {
 		
 		
 		
-	protected DataBlock getViewResource(Camera c) {
+	protected DataBlock getViewResource(Camera c, boolean defaultView) {
 		BitStreamWrite w = new BitStreamWrite();
-		w.WriteString(cameraNameMap.get(c));
+		if (defaultView) {
+			w.WriteString("DefCamera");
+		} else {
+			w.WriteString(cameraNameMap.get(c));
+		}
 		// pass count
 		w.WriteU32(1);
 		w.WriteString(nodeNameMap.get(rootNode));
@@ -264,16 +271,26 @@ public class WriterU3D implements SceneWriter {
 	}
 		
 		
-	protected DataBlock getViewNodeDeclaration(SceneGraphComponent c) {
+	protected DataBlock getViewNodeDeclaration(SceneGraphComponent c, boolean defaultView) {
 		Camera cam = c.getCamera();
 		BitStreamWrite w = new BitStreamWrite();
 		// cameras are extra nodes under their component
-		w.WriteString(nodeNameMap.get(c) + ".camera");
-		w.WriteU32(1);
-		w.WriteString(nodeNameMap.get(c));
-		WriteMatrix(euclidean().getArray(), w);
+		if (defaultView) {
+			w.WriteString("DefaultView");
+			w.WriteU32(1); // no parent
+			w.WriteString("");
+		} else {
+			w.WriteString(nodeNameMap.get(c) + ".camera");
+			w.WriteU32(1);
+			w.WriteString(nodeNameMap.get(c));
+		}
+		WriteTransform(c, w);
 		
-		w.WriteString(cameraNameMap.get(cam));
+		if (defaultView) {
+			w.WriteString("DefCamera");
+		} else {
+			w.WriteString(cameraNameMap.get(cam));
+		}
 		// view node attributes
 		w.WriteU32(0x00000000); // three point projection
 		// view clipping
@@ -1289,15 +1306,19 @@ public class WriterU3D implements SceneWriter {
 	}
 	
 	
-	protected DataBlock getViewNodeModifierChain(SceneGraphComponent c) {
+	protected DataBlock getViewNodeModifierChain(SceneGraphComponent c, boolean defaultView) {
 		BitStreamWrite w = new BitStreamWrite();
-		w.WriteString(nodeNameMap.get(c) + ".camera");
+		if (defaultView) {
+			w.WriteString("DefaultView");
+		} else {
+			w.WriteString(nodeNameMap.get(c) + ".camera");
+		}
 		w.WriteU32(0x00000000); // node modifier chain
 		w.WriteU32(0x00000000); // no attributes
 		w.AlignTo4Byte(); // modifier chain padding
 		
 		w.WriteU32(1); // modifier count (only hierarchy)
-		w.WriteDataBlock(getViewNodeDeclaration(c));
+		w.WriteDataBlock(getViewNodeDeclaration(c, defaultView));
 		
 		DataBlock b = w.GetDataBlock();
 		b.setBlockType(TYPE_MOFIFIER_CHAIN);
@@ -1435,7 +1456,10 @@ public class WriterU3D implements SceneWriter {
 			}
 		}
 		for (SceneGraphComponent viewNode : viewNodes) {
-			ds += writeDataBlock(getViewNodeModifierChain(viewNode), o);
+			ds += writeDataBlock(getViewNodeModifierChain(viewNode, false), o);
+		}
+		if (defaultView != null) {
+			ds += writeDataBlock(getViewNodeModifierChain(defaultView, true), o);
 		}
 		for (SceneGraphComponent lightNode: lightNodes) {
 			ds += writeDataBlock(getLightNodeModifierChain(lightNode), o);
@@ -1455,7 +1479,10 @@ public class WriterU3D implements SceneWriter {
 			}
 		}
 		for (Camera c : cameras) {
-			cs += writeDataBlock(getViewResource(c), o);
+			cs += writeDataBlock(getViewResource(c, false), o);
+		}
+		if (defaultView != null) {
+			cs += writeDataBlock(getViewResource(defaultView.getCamera(), true), o);
 		}
 		for (Light l : lights) { 
 			cs += writeDataBlock(getLightResource(l), o);
@@ -1525,13 +1552,29 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected void prepareSceneData(JrScene originalScene) {
+		// make a copy so we can mess with the scene
 		SceneGraphComponent copy = copy(originalScene.getSceneRoot());
 		JrScene scene = new JrScene(copy);
 		rootNode = scene.getSceneRoot();
 		
+		// default view from original scene 
+		SceneGraphPath camPath = originalScene.getPath("cameraPath");
+		if (camPath != null) {
+			if (camPath.getLastComponent().getCamera() != null) {
+				defaultView = new SceneGraphComponent("DefaultView");
+				defaultView.setCamera(camPath.getLastComponent().getCamera());
+				MatrixBuilder T = euclidean();
+				T.rotate(PI, 0, 0, 1);
+				T.rotate(PI / 2, 1, 0, 0);
+				T.times(camPath.getMatrix(null));
+				T.assignTo(defaultView);
+			}
+		}
+		
+		// tubes and spheres
 		U3DSceneUtility.prepareTubesAndSpheres(rootNode);
 		
-		// add skybox helper component
+		// add sky box helper component
 		SceneGraphComponent skyBox = U3DSceneUtility.getSkyBox(scene);
 		if (skyBox != null) rootNode.addChild(skyBox);
 		
