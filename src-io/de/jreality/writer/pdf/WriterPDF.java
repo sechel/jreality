@@ -2,12 +2,14 @@ package de.jreality.writer.pdf;
 
 import static de.jreality.util.SceneGraphUtility.getPathsBetween;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.OutputStream;
@@ -32,6 +34,7 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import de.jreality.io.JrScene;
 import de.jreality.reader.ReaderJRS;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -57,19 +60,122 @@ public class WriterPDF implements SceneWriter {
 	    PDF_NAME_XN = "XN";
 	
     
-    public enum PDF3DPreferences {
-    	Default,
-    	ViewerVR,
-    	ViewerApp
+    public enum PDF3DTool {
+    	MEASURE("Measure"),
+    	PAN("Pan"),
+    	ROTATE("Rotate"),
+    	SPIN("Spin"),
+    	WALK("Walk"),
+    	ZOOM("Zoom");
+    	
+    	private String
+    		name = "";
+    	
+    	private PDF3DTool(String name) {
+    		this.name = name;
+    	}
+    	
+    	public String getName() {
+    		return name;
+    	}
+    	
+    }
+    
+    public static enum PDF3DLightingScene {
+    	FILE("file"),
+    	NONE("none"),
+    	WHITE("white"),
+    	DAY("day"),
+    	BRIGHT("bright"),
+    	RGB("rgb"),
+    	NIGHT("night"),
+    	BLUE("blue"),
+    	RED("red"),
+    	CUBE("cube"),
+    	CAD("cad"),
+    	HEADLAMP("headlamp");
+    	
+    	private String
+    		name = "";
+    	
+    	private PDF3DLightingScene(String name) {
+    		this.name = name;
+    	}
+    	
+    	public String getName() {
+    		return name;
+    	}
+    	
+    }
+    
+    public static enum PDF3DRenderMode {
+    	DEFAULT("default"),
+    	BOUNDING_BOX("bounding box"),
+    	TRANSPARENT_BOUNDING_BOX("transparent bounding box"),
+    	TRANSPARENT_BOUNDING_BOX_OUTLINE("transparent bounding box outline"),
+    	VERTICES("vertices"),
+    	SHADED_VERTICES("shaded vertices"),
+    	WIREFRAME("wireframe"),
+    	SHADED_WIREFRAME("shaded wireframe"),
+    	SOLID("solid"),
+    	TRANSPARENT("transparent"),
+    	SHADED_SOLID_WIREFRAME("solid wireframe"),
+    	TRANSPARENT_WIREFRAME("transparent wireframe"),
+    	ILLUSTRATION("illustration"),
+    	SOLID_OUTLINE("solid outline"),
+    	SHADED_ILLUSTRATION("shaded illustration"),
+    	HIDDEN_WIREFRAME("hidden wireframe");
+    	
+    	private String
+    		name = "";
+    	
+    	private PDF3DRenderMode(String name) {
+    		this.name = name;
+    	}
+    	
+    	public String getName() {
+    		return name;
+    	}
+    	
     }
     
     
-    private PDF3DPreferences
-    	prefs = PDF3DPreferences.Default;
+    public static enum PDF3DGridMode {
+    	GRID_MODE_OFF("off"),
+    	GRID_MODE_SOLID("solid"),
+    	GRID_MODE_TRANSPARENT("transparent"),
+    	GRID_MODE_WIRE("wire");
+    	
+    	private String
+    		name = "";
+    	
+    	private PDF3DGridMode(String name) {
+    		this.name = name;
+    	}
+    	
+    	public String getName() {
+    		return name;
+    	}
+    	
+    }
+    
+    
     private Dimension
     	size = new Dimension(800, 600);
+    private PDF3DTool
+    	tool = PDF3DTool.ROTATE;
+    private PDF3DLightingScene
+    	lighting = PDF3DLightingScene.DAY;
+    private PDF3DRenderMode
+    	renderMode = PDF3DRenderMode.SOLID;
+    private PDF3DGridMode
+    	gridMode = PDF3DGridMode.GRID_MODE_OFF;
+    private boolean
+    	showGrid = false,
+    	showAxes = false;
+    private File
+    	userScriptFile = null;
     private static final String
-    	viewerVRScript = getJSScript("viewerVRPrefs.js"),
     	defaultScript = getJSScript("defaultPrefs.js");
     
 	/**
@@ -99,7 +205,13 @@ public class WriterPDF implements SceneWriter {
 		return R;
 	}
 	
-	
+	private String colorToString(Color c) {
+		String cs = "";
+		cs += c.getRed() / 255.0 + ", ";
+		cs += c.getGreen() / 255.0 + ", ";
+		cs += c.getBlue() / 255.0;
+		return cs;
+	}
 	
 	/**
 	 * Exports a given {@link JrScene} into a PDF document. 
@@ -117,22 +229,12 @@ public class WriterPDF implements SceneWriter {
 		for (SceneGraphComponent c : cameraNodes) {
 			camPaths.addAll(getPathsBetween(scene.getSceneRoot(), c));
 		}
-		String script = null;
-		switch (prefs) {
-			default:
-			case Default:
-			case ViewerApp:
-				script = defaultScript;
-				break;
-			case ViewerVR:
-				script = viewerVRScript;
-				break;
+		String defaultCamName = "";
+		SceneGraphPath camPath = scene.getPath("cameraPath");
+		if (camPath != null) {
+			SceneGraphComponent defaultCam = camPath.getLastComponent();
+			defaultCamName = defaultCam.getName() + ".camera";
 		}
-		if (cameraNodes.size() > 0) {
-			SceneGraphComponent cam0 = cameraNodes.get(0);
-			script = script.replace("##cam##", cam0.getName() + ".camera");
-		}
-		
 		// Create PDF
 		Rectangle pageSize = new Rectangle(size.width, size.height);
 		Document doc = new Document(pageSize);
@@ -140,6 +242,7 @@ public class WriterPDF implements SceneWriter {
 			PdfWriter wr = PdfWriter.getInstance(doc, out);
 			doc.open();			
 			
+			String script = getSceneScript(scene, defaultCamName);
 			PdfStream oni = new PdfStream(PdfEncodings.convertToBytes(script, null));
             oni.flateCompress();
             PdfIndirectReference initScriptRef = wr.addToBody(oni).getIndirectReference();
@@ -196,6 +299,46 @@ public class WriterPDF implements SceneWriter {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	private String getSceneScript(JrScene scene, String defaultCamName) {
+		if (userScriptFile != null) {
+			FileInputStream fin;
+			try {
+				fin = new FileInputStream(userScriptFile);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				return "";
+			}
+			return getJSScript(fin);
+		} else {
+			String script = defaultScript;
+			script = script.replace("##cam##", defaultCamName);
+			Appearance rootApp = scene.getSceneRoot().getAppearance();
+			Color cUpper = Color.WHITE;
+			Color cLower = Color.WHITE; 
+			if (rootApp.getAttribute("backgroundColors") instanceof Color[]) {
+				Color[] colors = (Color[])rootApp.getAttribute("backgroundColors");
+				cUpper = colors[0];
+				cLower = colors[2];
+			} else if (rootApp.getAttribute("backgroundColor") instanceof Color) {
+				Color color = (Color)rootApp.getAttribute("backgroundColor");
+				cUpper = color;
+				cLower = color;
+			}
+			script = script.replace("##backgroundColorUpper##", colorToString(cUpper));
+			script = script.replace("##backgroundColorLower##", colorToString(cLower));
+			script = script.replace("##tool##", tool.getName());
+			script = script.replace("##lighting##", lighting.getName());
+			script = script.replace("##render_mode##", renderMode.getName());
+			script = script.replace("##grid_mode##", gridMode.getName());
+			script = script.replace("##show_axes##", ((Boolean)showAxes).toString());
+			script = script.replace("##show_grid##", ((Boolean)showGrid).toString());
+			return script;
+		}
+	}
+	
+	
 
 	/**
 	 * This method cannot be used for PDF exporting. 
@@ -219,16 +362,21 @@ public class WriterPDF implements SceneWriter {
 		writer.writeScene(scene, out);
 	}
 	
+
+	private static String getJSScript(String resourceName) {
+		InputStream in = WriterPDF.class.getResourceAsStream(resourceName);
+		return getJSScript(in);
+	}
 	
 	
-	private static String getJSScript(String name) {
+	private static String getJSScript(InputStream in) {
 		StringBuffer result = new StringBuffer();
-		InputStreamReader inReader = new InputStreamReader(WriterPDF.class.getResourceAsStream(name));
-		LineNumberReader in = new LineNumberReader(inReader);
+		InputStreamReader inReader = new InputStreamReader(in);
+		LineNumberReader lineIn = new LineNumberReader(inReader);
 		String line = null;
 		try {
-			while ((line = in.readLine()) != null) {
-				result.append(line);
+			while ((line = lineIn.readLine()) != null) {
+				result.append(line + "\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -237,22 +385,37 @@ public class WriterPDF implements SceneWriter {
 	}
 
 	
-	/**
-	 * Sets the viewer preferences
-	 * @param prefs
-	 */
-	public void setPreferences(PDF3DPreferences prefs) {
-		this.prefs = prefs;
+	public void setTool(PDF3DTool tool) {
+		this.tool = tool;
 	}
 	
-	/**
-	 * The Dimension of the 3D Annotaion. Only the ratio is used
-	 * @param size
-	 */
 	public void setSize(Dimension size) {
 		this.size = size;
 	}
 	
+	public void setLighting(PDF3DLightingScene lighting) {
+		this.lighting = lighting;
+	}
+	
+	public void setRenderMode(PDF3DRenderMode renderMode) {
+		this.renderMode = renderMode;
+	}
+	
+	public void setGridMode(PDF3DGridMode gridMode) {
+		this.gridMode = gridMode;
+	}
+	
+	public void setShowAxes(boolean showAxes) {
+		this.showAxes = showAxes;
+	}
+	
+	public void setShowGrid(boolean showGrid) {
+		this.showGrid = showGrid;
+	}
+	
+	public void setUserScriptFile(File userScriptFile) {
+		this.userScriptFile = userScriptFile;
+	}
 	
 	public static void main(String[] args) {
 		ReaderJRS reader = new ReaderJRS();

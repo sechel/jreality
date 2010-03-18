@@ -37,25 +37,25 @@ public class TestScene {
 	public static void main(String[] args) {
 		IndexedFaceSet g = Primitives.icosahedron();
 		g.setVertexAttributes(U3DAttribute.U3D_NONORMALS, U3DAttribute.U3D_FLAG);
-		double[][] vertexColors = new double[12][3];
+		double[][] vertexColors = new double[g.getNumPoints()][3];
 		for (double[] c : vertexColors) {
 			c[0] = rnd.nextDouble();
 			c[1] = rnd.nextDouble();
 			c[2] = rnd.nextDouble();
 		}
-		double[][] faceColors = new double[20][3];
+		double[][] faceColors = new double[g.getNumFaces()][3];
 		for (double[] c : faceColors) {
 			c[0] = rnd.nextDouble();
 			c[1] = rnd.nextDouble();
 			c[2] = rnd.nextDouble();
 		}
-		double[][] edgeColors = new double[30][3];
+		double[][] edgeColors = new double[g.getNumEdges()][3];
 		for (double[] c : edgeColors) {
 			c[0] = rnd.nextDouble();
 			c[1] = rnd.nextDouble();
 			c[2] = rnd.nextDouble();
 		}
-		g.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(vertexColors));
+//		g.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(vertexColors));
 		g.setEdgeAttributes(Attribute.COLORS, new DoubleArrayArray.Array(edgeColors));
 		g.setFaceAttributes(Attribute.COLORS, new DoubleArrayArray.Array(faceColors));
 		

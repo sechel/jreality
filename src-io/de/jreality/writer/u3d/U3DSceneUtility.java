@@ -2,15 +2,19 @@ package de.jreality.writer.u3d;
 
 import static de.jreality.math.MatrixBuilder.euclidean;
 import static de.jreality.scene.Appearance.INHERITED;
+import static de.jreality.scene.data.Attribute.COLORS;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.Attribute.NORMALS;
 import static de.jreality.scene.data.AttributeEntityUtility.createAttributeEntity;
 import static de.jreality.shader.CommonAttributes.AMBIENT_COEFFICIENT;
 import static de.jreality.shader.CommonAttributes.AMBIENT_COLOR;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COEFFICIENT;
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR_DEFAULT;
 import static de.jreality.shader.CommonAttributes.FACE_DRAW;
 import static de.jreality.shader.CommonAttributes.FACE_DRAW_DEFAULT;
 import static de.jreality.shader.CommonAttributes.LIGHTING_ENABLED;
+import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SKY_BOX;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
@@ -23,6 +27,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.Double.MAX_VALUE;
 import static java.lang.Math.PI;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
@@ -61,6 +66,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultGeometryShader;
@@ -322,6 +328,7 @@ public class U3DSceneUtility {
 	
 	public static IndexedFaceSet prepareFaceSet(IndexedFaceSet ifs) {
 		IntArrayArray fData = (IntArrayArray)ifs.getFaceAttributes(INDICES);
+		DoubleArrayArray fcData = (DoubleArrayArray)ifs.getFaceAttributes(COLORS);
 		if (fData == null) return ifs;
 		int[][] faces = fData.toIntArrayArray(null);
 		boolean needsTreatment = false;
@@ -338,26 +345,48 @@ public class U3DSceneUtility {
 			return ifs;
 		IndexedFaceSet rifs = new IndexedFaceSet();
 		int[][] newFaceData = new int[numFaces][];
+		double[][] fColors = null;
+		double[][] newFaceColors = null;
+		if (fcData != null) {
+			 fColors = fcData.toDoubleArrayArray(null);
+			 newFaceColors = new double[numFaces][];
+		}
 		int j = 0;
-		for (int[]f : faces) {
+		int faceIndex = 0;
+		for (int[] f : faces) {
 			if (f.length != 3){
 				int v = f.length;
 				for (int k = 0; k < v / 2 - 1; k++){
 					newFaceData[j++] = new int[]{ f[k], f[k+1], f[v - 1 - k]};
 					newFaceData[j++] = new int[]{ f[k+1], f[v - 2 - k], f[v - 1 - k]};
+					if (fColors != null) {
+						newFaceColors[j - 1] = fColors[faceIndex];
+						newFaceColors[j - 2] = fColors[faceIndex];
+					}
 				}
 				if (v % 2 != 0) {
 					int k = v / 2 - 1;
 					newFaceData[j++] = new int[]{ f[k], f[k+1], f[k+2]};
+					if (fColors != null) {
+						newFaceColors[j - 1] = fColors[faceIndex];
+					}
 				}
 			} else {
 				newFaceData[j++] = f;
+				if (fColors != null) {
+					newFaceColors[j - 1] = fColors[faceIndex];
+				}
 			}
+			faceIndex++;
 		}
 		rifs.setVertexCountAndAttributes(ifs.getVertexAttributes());
 		rifs.setFaceCountAndAttributes(INDICES, new IntArrayArray.Array(newFaceData).readOnlyList());
-		if (ifs.getFaceAttributes(NORMALS) != null)
+		if (fColors != null) {
+			rifs.setFaceAttributes(COLORS, new DoubleArrayArray.Array(newFaceColors).readOnlyList());
+		}
+		if (ifs.getFaceAttributes(NORMALS) != null) {
 			IndexedFaceSetUtility.calculateAndSetFaceNormals(rifs);
+		}
 		return rifs;
 	}
 	
@@ -380,17 +409,19 @@ public class U3DSceneUtility {
 					DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(ea);
 					DefaultPointShader dps = (DefaultPointShader) dgs.getPointShader();
 					DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
-					IndexedLineSet ils;
-					if (g instanceof IndexedLineSet) ils = (IndexedLineSet) g;
-					else {
+					IndexedLineSet ils = null;
+					if (g instanceof IndexedLineSet) {
+						ils = (IndexedLineSet) g;
+					} else {
 						ils = new IndexedLineSet();
 						ils.setVertexCountAndAttributes(((PointSet)g).getVertexAttributes());
 					}
 					if (dgs.getShowPoints()) { // create spheres for point set 
 						if (dps.getSpheresDraw()) {
+							Color difColor = (Color)ea.getAttribute(POINT_SHADER + "." + DIFFUSE_COLOR, DIFFUSE_COLOR_DEFAULT);
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setBallGeometry(POINT_SPHERE);
-							bsf.setBallColor(dps.getDiffuseColor());
+							bsf.setBallColor(difColor);
 							double sphereSizeFactor = 1.0;
 							if (dps.getRadiiWorldCoordinates() != null && dps.getRadiiWorldCoordinates())	{
 								double[] o2w = p.getMatrix(null);
@@ -423,7 +454,9 @@ public class U3DSceneUtility {
 										cm.getRight()
 										);
 								cmDest.setBlendColor(cm.getBlendColor());
-							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+							} else {
+								app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+							}
 						} else {
 							PointSet ps = (PointSet)g;
 							PointSetFactory psf = new PointSetFactory();
@@ -443,9 +476,10 @@ public class U3DSceneUtility {
 					}
 					if (g instanceof IndexedLineSet && dgs.getShowLines()) { // create sticks for line set
 						if (dls.getTubeDraw()) {
+							Color difColor = (Color)ea.getAttribute("lineShader.polygonShader." + DIFFUSE_COLOR, DIFFUSE_COLOR_DEFAULT);
 							BallAndStickFactory bsf = new BallAndStickFactory(ils);
 							bsf.setStickGeometry(LINE_CYLINDER);
-							bsf.setStickColor(dls.getDiffuseColor());
+							bsf.setStickColor(difColor);
 							double tubeSizeFactor = 1.0;
 							if (dls.getRadiiWorldCoordinates() != null && dls.getRadiiWorldCoordinates())	{
 								double[] o2w = p.getMatrix(null);
@@ -478,7 +512,9 @@ public class U3DSceneUtility {
 										cm.getRight()
 										);
 								cmDest.setBlendColor(cm.getBlendColor());
-							} else app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+							} else {
+								app.setAttribute("polygonShader.reflectionMap", Appearance.DEFAULT);
+							}
 						} else {
 							IndexedLineSet ls = (IndexedLineSet)g;
 							IndexedLineSetFactory lsf = new IndexedLineSetFactory();

@@ -538,13 +538,19 @@ public class WriterU3D implements SceneWriter {
 		}
 		
 		DoubleArrayArray vcData = (DoubleArrayArray)g.getVertexAttributes(COLORS);
+		DoubleArrayArray fcData = (DoubleArrayArray)g.getFaceAttributes(COLORS);
+		boolean useVertexColors = vcData != null;
+		boolean useFaceColors = vcData == null && fcData != null;
 		double[][] vColors = null;
 		int vcCount = 0;
-		if (vcData != null) {
+		if (useVertexColors) {
 			vColors = vcData.toDoubleArrayArray(null);
 			vcCount = vColors.length;
+		} else if (useFaceColors) {
+			vColors = fcData.toDoubleArrayArray(null);
+			vcCount = vColors.length;
 		}
-
+		
 		// base mesh description
 		w.WriteU32(0); // chain index 
 		w.WriteU32(faceCount);
@@ -626,12 +632,15 @@ public class WriterU3D implements SceneWriter {
 			w.WriteCompressedU32(uACContextBaseShadingID, 0);
 			for (int j = 0; j < 3; j++) {
 				w.WriteCompressedU32(uACStaticFull + vertCount, f[j]);
-				if (vnData != null)
+				if (vnData != null) {
 					w.WriteCompressedU32(uACStaticFull + vnCount, f[j]);
-				else if (fnData != null)
+				} else if (fnData != null) {
 					w.WriteCompressedU32(uACStaticFull + fnCount, i);
-				if (vcData != null) {
+				}
+				if (useVertexColors) {
 					w.WriteCompressedU32(uACStaticFull + vcCount, f[j]);
+				} else if (useFaceColors) {
+					w.WriteCompressedU32(uACStaticFull + vcCount, i);
 				}
 				w.WriteCompressedU32(uACStaticFull + (tvertCount == 0 ? 1 : tvertCount), tvertCount == 0 ? 0 : f[j]);
 			}
@@ -871,6 +880,7 @@ public class WriterU3D implements SceneWriter {
 		DoubleArrayArray vnData = (DoubleArrayArray)g.getVertexAttributes(NORMALS);
 		DoubleArrayArray vcData = (DoubleArrayArray)g.getVertexAttributes(COLORS);
 		DoubleArrayArray fnData = (DoubleArrayArray)g.getFaceAttributes(NORMALS);
+		DoubleArrayArray fcData = (DoubleArrayArray)g.getFaceAttributes(COLORS);
 		// Max Mesh Description
 		boolean noNormals = g.getVertexAttributes(U3D_NONORMALS) != null;
 		if (noNormals || (vnData == null && fnData == null)) {
@@ -885,18 +895,22 @@ public class WriterU3D implements SceneWriter {
 		} else {
 			w.WriteU32(vnData != null ? vnData.size() : (fnData != null ? fnData.size() : 0)); // normals
 		}
-		if (vcData != null) {
-			w.WriteU32(vcData.size());
-		} else {
-			w.WriteU32(0); // no per vertex diffuse colors
+		boolean useVertexColors = vcData != null;
+		boolean useFaceColors = vcData == null && fcData != null;
+		int numVertexColors = 0;
+		if (useVertexColors) {
+			numVertexColors = vcData.size();
+		} else if (useFaceColors) {
+			numVertexColors = fcData.size();
 		}
+		w.WriteU32(numVertexColors); // vertex colors count
 		w.WriteU32(0); // no per vertex specular colors
 		w.WriteU32(tvData == null ? 1 : tvData.size()); // one default coordinate
 		
 		// shading count
 		w.WriteU32(1); // standard shading description
 		
-		if (vcData != null) {
+		if (useVertexColors || useFaceColors) {
 			w.WriteU32(0x00000001); // diffuse colors per vertex
 		} else {
 			w.WriteU32(0x00000000); // no diffuse or specular colors
@@ -1300,9 +1314,9 @@ public class WriterU3D implements SceneWriter {
 		
 		List<DataBlock> modifiers = getNodeModifiers(c);
 		w.WriteU32(modifiers.size()); // modifier count (only hierarchy)
-		for (DataBlock modBlock : modifiers)
+		for (DataBlock modBlock : modifiers) {
 			w.WriteDataBlock(modBlock);
-		
+		}
 		DataBlock b = w.GetDataBlock();
 		b.setBlockType(TYPE_MOFIFIER_CHAIN);
 		return b;
@@ -1312,8 +1326,9 @@ public class WriterU3D implements SceneWriter {
 	protected List<DataBlock> getMaterialBlocks(EffectiveAppearance a) {
 		List<DataBlock> r = new LinkedList<DataBlock>();
 		U3DTexture tex = textureMap.get(a);
-		if (tex != null)
+		if (tex != null) {
 			r.add(getModifierChain(tex));
+		}
 	    r.add(getLitTextureShader(a));
 	    r.add(getMaterialResource(a));
 		return r;
