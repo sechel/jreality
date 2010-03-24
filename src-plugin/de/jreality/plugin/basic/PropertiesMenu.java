@@ -15,6 +15,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -134,7 +135,7 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.setFileHidingEnabled(false);
 		fileChooser.setFileSelectionMode(FILES_ONLY);
-			}
+	}
 	
 	
 	@Override
@@ -147,17 +148,17 @@ public class PropertiesMenu extends Plugin implements PropertiesFlavor {
 		propertiesMenu.setMnemonic('P');
 		viewMenuBar.addMenu(getClass(), 200, propertiesMenu);
 		
-		JMenu writeMenu = new JMenu(writeAction);
+		JMenuItem writeMenu = new JMenuItem(writeAction);
 		writeMenu.setMnemonic('S');
 		viewMenuBar.addMenuItem(getClass(), 1, writeMenu, "Properties");
 		
-		JMenu loadMenu = new JMenu(loadAction);
+		JMenuItem loadMenu = new JMenuItem(loadAction);
 		loadMenu.setMnemonic('L');
 		viewMenuBar.addMenuItem(getClass(), 2, loadMenu, "Properties");
 		viewMenuBar.addMenuSeparator(getClass(), 2.5, "Properties");
 
 		
-		JMenu defaultMenu = new JMenu(loadDefaultAction);
+		JMenuItem defaultMenu = new JMenuItem(loadDefaultAction);
 		defaultMenu.setMnemonic('D');
 		viewMenuBar.addMenuItem(getClass(), 3, defaultMenu, "Properties");
 		
