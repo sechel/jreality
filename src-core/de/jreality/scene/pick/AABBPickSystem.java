@@ -206,44 +206,54 @@ public class AABBPickSystem implements PickSystem {
         }
    }
     
-    public void visit(SceneGraphComponent c) {
-      if (!c.isVisible() || !c.isPickable()) return;
-      PickInfo pickInfo = null;
-      if (c.getTransformation() != null)	{
-    	  if (matrixStack[stackCounter+1] == null) matrixStack[stackCounter+1] = new Matrix();
-    	  Rn.times(matrixStack[stackCounter+1].getArray(), matrixStack[stackCounter].getArray(), c.getTransformation().getMatrix());
-    	  stackCounter++;
-    	  m = matrixStack[stackCounter];
-    	  mInv = m.getInverse();
-       }
-      if (c.getAppearance()!=null) {
-          // following is actually deprecated and can be removed any time now
-          Object foo =  c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
-          if (foo instanceof Boolean && ((Boolean)foo).booleanValue() == false) {
-        	  return;
-          }
-         pickInfo = new PickInfo(currentPI, c.getAppearance());
-        if (pickInfo.hasNewPickInfo) appStack.push(currentPI = pickInfo);
-        if (pickInfo.radiiWorldCoords)	{
- 			double[] o2w = path.getMatrix(null);
-			radiusFactor = CameraUtility.getScalingFactor(o2w, pickInfo.metric);
-			radiusFactor = 1.0/radiusFactor;
-      }
-      }
-//      System.err.println("visiting "+c.getName());
-      path.push(c);
-      c.childrenAccept(this);
-      path.pop();
-      if (c.getAppearance()!=null && pickInfo.hasNewPickInfo) {
-         appStack.pop();
-         currentPI = appStack.elementAt(appStack.size()-1);
-      }
-      if (c.getTransformation() != null) 	{
-    	  stackCounter--;
-    	  m = matrixStack[stackCounter];
-    	  mInv = m.getInverse();
-     }
-    }
+	public void visit(SceneGraphComponent c) {
+		if (!c.isVisible() || !c.isPickable())
+			return;
+		PickInfo pickInfo = null;
+		if (c.getTransformation() != null) {
+			if (matrixStack[stackCounter + 1] == null)
+				matrixStack[stackCounter + 1] = new Matrix();
+			Rn.times(matrixStack[stackCounter + 1].getArray(),
+					matrixStack[stackCounter].getArray(), c
+							.getTransformation().getMatrix());
+			stackCounter++;
+			m = matrixStack[stackCounter];
+			mInv = m.getInverse();
+		}
+		if (c.getAppearance() != null) {
+			// following is actually deprecated and can be removed any time
+			// now
+			Object foo = c.getAppearance().getAttribute(CommonAttributes.PICKABLE);
+			if (foo instanceof Boolean && ((Boolean) foo).booleanValue() == false) {
+				path.pop();
+				return;
+			}
+			pickInfo = new PickInfo(currentPI, c.getAppearance());
+			if (pickInfo.hasNewPickInfo) {
+				appStack.push(currentPI = pickInfo);
+			}
+			if (pickInfo.radiiWorldCoords) {
+				SceneGraphPath o2wPath = new SceneGraphPath(path);
+				o2wPath.push(c);
+				double[] o2w = o2wPath.getMatrix(null);
+				radiusFactor = CameraUtility.getScalingFactor(o2w, pickInfo.metric);
+				radiusFactor = 1.0 / radiusFactor;
+			}
+		}
+		// System.err.println("visiting "+c.getName());
+		path.push(c);
+		c.childrenAccept(this);
+		path.pop();
+		if (c.getAppearance() != null && pickInfo.hasNewPickInfo) {
+			appStack.pop();
+			currentPI = appStack.elementAt(appStack.size() - 1);
+		}
+		if (c.getTransformation() != null) {
+			stackCounter--;
+			m = matrixStack[stackCounter];
+			mInv = m.getInverse();
+		}
+	}
     
     
     private boolean isPickable(Geometry g) {
