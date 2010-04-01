@@ -2,7 +2,7 @@
 #
 #To run this example with the JOGL backend enabled:
 #1) download jruby (jruby.codehaus.org) 
-#2) setenv CLASSPATH  to include the jarfiles jReality.jar, jtem-beans.jar, and jogl.jar
+#2) setenv CLASSPATH  to include the jarfiles jReality.jar, beans.jar, and jogl.jar
 #3) setenv JAVA_LIBRARY_PATH to include the native libraries for jogl.
 #4) run "jruby test.rb"
 #

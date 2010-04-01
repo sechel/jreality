@@ -28,7 +28,7 @@
       <jar href="../jars/jinput.jar" download="lazy"/>
       <jar href="../jars/jjack_min.jar" download="lazy"/>
       <jar href="../jars/jrworkspace.jar" download="lazy"/>
-      <jar href="../jars/jtem-beans.jar" download="lazy"/>
+      <jar href="../jars/beans.jar" download="lazy"/>
       <jar href="../jars/jterm.jar" download="lazy"/>
       <jar href="../jars/sunflow.jar" download="lazy"/>
       <jar href="../jars/xpp3.jar" download="lazy"/>
