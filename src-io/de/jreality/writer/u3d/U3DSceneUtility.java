@@ -359,7 +359,7 @@ public class U3DSceneUtility {
 				for (int k = 0; k < v / 2 - 1; k++){
 					newFaceData[j++] = new int[]{ f[k], f[k+1], f[v - 1 - k]};
 					newFaceData[j++] = new int[]{ f[k+1], f[v - 2 - k], f[v - 1 - k]};
-					if (fColors != null) {
+					if (newFaceColors != null && fColors != null) {
 						newFaceColors[j - 1] = fColors[faceIndex];
 						newFaceColors[j - 2] = fColors[faceIndex];
 					}
@@ -367,13 +367,13 @@ public class U3DSceneUtility {
 				if (v % 2 != 0) {
 					int k = v / 2 - 1;
 					newFaceData[j++] = new int[]{ f[k], f[k+1], f[k+2]};
-					if (fColors != null) {
+					if (newFaceColors != null && fColors != null) {
 						newFaceColors[j - 1] = fColors[faceIndex];
 					}
 				}
 			} else {
 				newFaceData[j++] = f;
-				if (fColors != null) {
+				if (newFaceColors != null && fColors != null) {
 					newFaceColors[j - 1] = fColors[faceIndex];
 				}
 			}
