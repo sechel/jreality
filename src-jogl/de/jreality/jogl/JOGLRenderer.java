@@ -58,6 +58,8 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLPbuffer;
 
+import quicktime.app.display.Drawable;
+
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -369,7 +371,7 @@ public class JOGLRenderer   {
 			width = theCanvas.getWidth();
 			height = theCanvas.getHeight();
 		}
-		init(drawable.getGL());
+		init(theCanvas.getGL());
 	}
 
 	public void init(GL gl) {
@@ -457,9 +459,9 @@ public class JOGLRenderer   {
 					bgColors[3]=bg[3].getRGBComponents(null);
 				}
 			}
-			double[] c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
-					CameraUtility.getAspectRatio(theViewer),
-					CameraUtility.MIDDLE_EYE);
+//			double[] c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
+//					CameraUtility.getAspectRatio(theViewer),
+//					CameraUtility.MIDDLE_EYE);
 //			System.err.println("c2ndc is "+Rn.matrixToString(c2ndc));
 			int numImages = offscreenCamera.isStereo() ? 2 : 1;
 			tileSizeX = tileSizeX / numImages;
@@ -482,9 +484,9 @@ public class JOGLRenderer   {
 						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
 //						System.err.println("Setting vp to "+lr.toString());
 						offscreenCamera.setViewPort(lr);
-						c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
-								CameraUtility.getAspectRatio(theViewer),
-								CameraUtility.MIDDLE_EYE);
+//						c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
+//								CameraUtility.getAspectRatio(theViewer),
+//								CameraUtility.MIDDLE_EYE);
 //						System.err.println(i+j+"c2ndc is "+Rn.matrixToString(c2ndc));
 						
 						if (bgColors != null) {
@@ -497,7 +499,7 @@ public class JOGLRenderer   {
 						}
 						
 						render();
-						if (i == 0 && j == 0) render();
+						if (i == 0 && j == 0) render();	// ?? rerender the first t
 						globalGL.glPixelStorei(GL.GL_PACK_ROW_LENGTH,numImages*numTiles*tileSizeX);
 						globalGL.glPixelStorei(GL.GL_PACK_SKIP_ROWS, i*tileSizeY);
 						globalGL.glPixelStorei(GL.GL_PACK_SKIP_PIXELS, (st*numTiles+j)*tileSizeX);
@@ -505,7 +507,7 @@ public class JOGLRenderer   {
 
 						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
 								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenRenderer.getOffscreenBuffer());
-//								GL.GL_RGB, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+		//						GL.GL_RGB, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
 					}
 				}
 				
@@ -519,6 +521,7 @@ public class JOGLRenderer   {
 			Dimension d = theViewer.getViewingComponentSize();
 			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
 			offscreenMode = false;
+			
 		} //else if (fboMode)	{
 //			System.err.println("rendering fbo");
 //			fboViewer.preRender(gl);
