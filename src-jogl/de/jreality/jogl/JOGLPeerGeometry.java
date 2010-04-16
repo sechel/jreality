@@ -73,6 +73,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 
 	public void render(JOGLPeerComponent jpc) {
 		DefaultGeometryShader geometryShader = jpc.geometryShader;
+		if (geometryShader == null) return;
 		jr.renderingState.currentGeometry = originalGeometry;
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
