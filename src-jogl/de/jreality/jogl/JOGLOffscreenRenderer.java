@@ -21,7 +21,7 @@ public class JOGLOffscreenRenderer {
 	transient private GLPbuffer offscreenPBuffer;
 	transient private Buffer offscreenBuffer;
 
-	transient private int tileSizeX=1024, tileSizeY=768,numTiles=4;
+	transient private int tileSizeX=1024, tileSizeY=768,numTiles=4, lastWidth = -1, lastHeight = -1;
 	private JOGLRenderer jr;
 	
 	public JOGLOffscreenRenderer(JOGLRenderer jr)	{
@@ -46,6 +46,8 @@ public class JOGLOffscreenRenderer {
 		if (numTiles == 0) numTiles = 1;
 		tileSizeX = (imageWidth/numTiles);
 		tileSizeY = (imageHeight/numTiles);
+		tileSizeX = 4 * (tileSizeX/4);
+		tileSizeY = 4 * (tileSizeY/4);
 		imageWidth = (tileSizeX) * numTiles;
 		imageHeight = (tileSizeY) * numTiles;
 		System.err.println("Tile size x = "+tileSizeX);
@@ -55,12 +57,18 @@ public class JOGLOffscreenRenderer {
 		caps.setDoubleBuffered(false);
 		caps.setAlphaBits(8);
 		if (offscreenPBuffer == null ||
-				offscreenPBuffer.getWidth() != tileSizeX ||
-				offscreenPBuffer.getHeight() != tileSizeY )
+				lastWidth != tileSizeX ||
+				lastHeight != tileSizeY ) {
+			System.err.println("Allocating new pbuffer");
+			lastWidth = tileSizeX;
+			lastHeight = tileSizeY;
+			if (offscreenPBuffer != null)
+				offscreenPBuffer.destroy();
 			offscreenPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(
-				caps, null,
-				tileSizeX, tileSizeY,
-				canvas.getContext());
+					caps, null,
+					tileSizeX, tileSizeY,
+					canvas.getContext());		
+		}
 		offscreenImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR); //TYPE_3BYTE_BGR); //
 		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) offscreenImage.getRaster().getDataBuffer()).getData());
 		jr.offscreenMode = true;
@@ -72,7 +80,9 @@ public class JOGLOffscreenRenderer {
 		ImageUtil.flipImageVertically(bi);
 		// a magic incantation to get the alpha channel to show up correctly
 		bi.coerceData(true);
+//		offscreenPBuffer.getContext().destroy();
 //		offscreenPBuffer.destroy();
+//		offscreenPBuffer = null;
 		return bi;
 	}
 
