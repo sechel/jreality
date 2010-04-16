@@ -96,8 +96,8 @@ public class AABBPickSystem implements PickSystem {
   }
   
   public List<PickResult> computePick(double[] f, double[] t) {
-    from=(double[]) f.clone();
-    to=(double[]) t.clone();
+    from=f.clone();
+    to=t.clone();
     hits.clear();
     // get the metric fresh each invocation
     // this is actually dangerous since metric may change inside the scene graph
@@ -210,6 +210,8 @@ public class AABBPickSystem implements PickSystem {
 		if (!c.isVisible() || !c.isPickable())
 			return;
 		PickInfo pickInfo = null;
+		// System.err.println("visiting "+c.getName());
+		path.push(c);
 		if (c.getTransformation() != null) {
 			if (matrixStack[stackCounter + 1] == null)
 				matrixStack[stackCounter + 1] = new Matrix();
@@ -233,17 +235,12 @@ public class AABBPickSystem implements PickSystem {
 				appStack.push(currentPI = pickInfo);
 			}
 			if (pickInfo.radiiWorldCoords) {
-				SceneGraphPath o2wPath = new SceneGraphPath(path);
-				o2wPath.push(c);
-				double[] o2w = o2wPath.getMatrix(null);
+				double[] o2w = path.getMatrix(null);
 				radiusFactor = CameraUtility.getScalingFactor(o2w, pickInfo.metric);
 				radiusFactor = 1.0 / radiusFactor;
 			}
 		}
-		// System.err.println("visiting "+c.getName());
-		path.push(c);
 		c.childrenAccept(this);
-		path.pop();
 		if (c.getAppearance() != null && pickInfo.hasNewPickInfo) {
 			appStack.pop();
 			currentPI = appStack.elementAt(appStack.size() - 1);
@@ -253,6 +250,7 @@ public class AABBPickSystem implements PickSystem {
 			m = matrixStack[stackCounter];
 			mInv = m.getInverse();
 		}
+		path.pop();
 	}
     
     
