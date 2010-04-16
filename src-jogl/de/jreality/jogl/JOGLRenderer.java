@@ -58,8 +58,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLPbuffer;
 
-import quicktime.app.display.Drawable;
-
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
