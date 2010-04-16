@@ -217,6 +217,10 @@ public class IndexedFaceSetUtility {
 		return constructPolygon(ifs, points, Pn.EUCLIDEAN);
 	}
 	public static IndexedFaceSet constructPolygon(IndexedFaceSet ifs, double[][] points, int sig)	{
+		return constructPolygonFactory(ifs, points, sig).getIndexedFaceSet();
+	}
+	
+	public static IndexedFaceSetFactory constructPolygonFactory(IndexedFaceSet ifs, double[][] points, int sig)	{
 		int[][] ind = new int[1][points.length];
 		for (int i = 0; i<points.length; ++i)	ind[0][i] = i;
 		if (ifs == null) ifs = new IndexedFaceSet();
@@ -235,7 +239,7 @@ public class IndexedFaceSetUtility {
 		ifsf.setEdgeIndices(ind);
 		ifsf.update();
 		
-		return ifsf.getIndexedFaceSet();
+		return ifsf;
 	}
 
 	public static IntArrayArray edgesFromFaces( int [][] faces ) {

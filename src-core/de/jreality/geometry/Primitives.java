@@ -607,8 +607,12 @@ public class Primitives {
 	 * @return
 	 */
 	public static IndexedFaceSet regularPolygon(int order, double offset) {
+		return regularPolygonFactory(order, offset).getIndexedFaceSet();
+	}
+
+	public static IndexedFaceSetFactory regularPolygonFactory(int order, double offset) {
 		double[][] verts = regularPolygonVertices(order, offset);
-		return IndexedFaceSetUtility.constructPolygon(verts);
+		return IndexedFaceSetUtility.constructPolygonFactory(null, verts, Pn.EUCLIDEAN);
 	}
 
 	public static double[][] regularPolygonVertices(int order, double offset) {
@@ -819,6 +823,10 @@ public class Primitives {
 		return texturedQuadrilateral(new double[]{0,0,0, 1,0,0,  1,1,0,  0,1,0});
 	}
 
+	public static IndexedFaceSet texturedQuadrilateral(double[] points) {
+		IndexedFaceSetFactory fac =  texturedQuadrilateralFactory(points);
+		return fac.getIndexedFaceSet();
+	}
 	/**
 	 * Generate a textured quadrilateral using the given array <i>points</i>.  This
 	 * should have length 12 or 16, depending on whether the point coordinates are dehomogenized 
@@ -826,7 +834,7 @@ public class Primitives {
 	 * @param points
 	 * @return
 	 */
-	public static IndexedFaceSet texturedQuadrilateral(double[] points) {
+	public static IndexedFaceSetFactory texturedQuadrilateralFactory(double[] points) {
 
 		IndexedFaceSetFactory factory = new IndexedFaceSetFactory();
 
@@ -841,7 +849,7 @@ public class Primitives {
 
 		factory.update();
 
-		return factory.getIndexedFaceSet();
+		return factory;
 	}
 
 	/**

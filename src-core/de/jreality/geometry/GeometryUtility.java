@@ -121,7 +121,16 @@ public class GeometryUtility {
 		}
 		return null;
 	}
-
+	/**
+	 * Set the geometry attribute {@link GeometryUtility#FACTORY} to the given factory,
+	 * which may be <i>null</i>.
+	 * @param g
+	 * @param fac
+	 */
+	public static void setFactory(Geometry g, AbstractGeometryFactory fac)	{
+		g.setGeometryAttributes(GeometryUtility.FACTORY, fac);
+	}
+	
 	/**
 	 * Set the metric ({@link Pn}) associated to this geometry.
 	 * @param g

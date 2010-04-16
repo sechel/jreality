@@ -165,7 +165,8 @@ public class BoundingBoxTraversal extends SceneGraphVisitor {
       currentTrafo= new double[16];
     Rn.copy(currentTrafo, initialTrafo);
     if (Rn.isNan(t.getMatrix()))	{
-    	throw new IllegalStateException("bad matrix");
+    	return;
+    	//throw new IllegalStateException("bad matrix");
     }
     Rn.times(currentTrafo, currentTrafo, t.getMatrix());
   }
