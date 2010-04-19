@@ -86,8 +86,8 @@ command propt are, for instance:
   C:\jreality>set CLASSPATH=dist/jReality-audio.jar;dist/jReality-backends-share.jar;dist/jReality-core.jar;dist/jReality-io.jar;dist/jReality-jogl.jar;dist/jReality-plugin.jar;dist/jReality-renderman.jar;dist/jReality-soft.jar;dist/jReality-sunflow.jar;dist/jReality-swing.jar;dist/jReality-tools.jar;dist/jReality-ui.jar;dist/jReality-vr.jar;dist/jReality-tutorial.jar
 
   Required 3rd-party libraries:
-  $> export CLASSPATH=$CLASSPATH:lib/antlr.jar:lib/bsh.jar:lib/colorpicker.jar:lib/gluegen-rt.jar:lib/iText-2.1.3.jar:lib/janino.jar:lib/jogl.jar:lib/jRWorkspacePluginSDK.jar:lib/beans.jar:lib/jterm.jar:lib/sunflow.jar:lib/xpp3.jar:lib/xstream.jar
-  C:\jreality>set CLASSPATH=%CLASSPATH%;lib/antlr.jar;lib/bsh.jar;lib/colorpicker.jar;lib/gluegen-rt.jar;lib/iText-2.1.3.jar;lib/janino.jar;lib/jogl.jar;lib/jRWorkspacePluginSDK.jar;lib/beans.jar;lib/jterm.jar;lib/sunflow.jar;lib/xpp3.jar;lib/xstream.jar 
+  $> export CLASSPATH=$CLASSPATH:lib/antlr.jar:lib/bsh.jar:lib/colorpicker.jar:lib/gluegen-rt.jar:lib/iText-2.1.3.jar:lib/janino.jar:lib/jogl.jar:lib/jrworkspace.jar:lib/beans.jar:lib/jterm.jar:lib/sunflow.jar:lib/xpp3.jar:lib/xstream.jar
+  C:\jreality>set CLASSPATH=%CLASSPATH%;lib/antlr.jar;lib/bsh.jar;lib/colorpicker.jar;lib/gluegen-rt.jar;lib/iText-2.1.3.jar;lib/janino.jar;lib/jogl.jar;lib/jrworkspace.jar;lib/beans.jar;lib/jterm.jar;lib/sunflow.jar;lib/xpp3.jar;lib/xstream.jar 
 
   Data (textures, skyboxes, sample geometry files):
   $> export CLASSPATH=$CLASSPATH:lib/vrData.jar:liv/vrExamples.jar
