@@ -19,6 +19,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -107,7 +109,7 @@ public class PropertyPreferences extends Plugin implements PreferencesFlavor, Pr
 		mainPage.add(help, c);
 		
 		c.insets = new Insets(2,2,2,2);
-		JCheckBox askBeforeSaveOnExitCheckBox = new JCheckBox("Quiet exit", ! propertiesListener.isAskBeforeSaveOnExit());
+		final JCheckBox askBeforeSaveOnExitCheckBox = new JCheckBox("Quiet exit", ! propertiesListener.isAskBeforeSaveOnExit());
 		askBeforeSaveOnExitCheckBox.setToolTipText("<html>Apply the three preferences below at program exit<br>" +
 				" instead of showing a dialog which allows to change these preferences.</html>");
 		askBeforeSaveOnExitCheckBox.addChangeListener(new ChangeListener() {
@@ -117,7 +119,7 @@ public class PropertyPreferences extends Plugin implements PreferencesFlavor, Pr
 		});
 		mainPage.add(askBeforeSaveOnExitCheckBox, c);
 		
-		JCheckBox saveOnExitCheckBox = new JCheckBox("Save On Exit", propertiesListener.isSaveOnExit());
+		final JCheckBox saveOnExitCheckBox = new JCheckBox("Save On Exit", propertiesListener.isSaveOnExit());
 		saveOnExitCheckBox.setToolTipText("<html>Plugin properties are saved to the file specified below.<br>" +
 				" This setting has no effect if \"Quiet exit\" is turned off.</html>");
 		saveOnExitCheckBox.addChangeListener(new ChangeListener() {
@@ -127,7 +129,7 @@ public class PropertyPreferences extends Plugin implements PreferencesFlavor, Pr
 		});
 		mainPage.add(saveOnExitCheckBox, c);
 		
-		JCheckBox loadFromUserPropertyFileCheckBox = new JCheckBox("Load At Startup", propertiesListener.isLoadFromUserPropertyFile());
+		final JCheckBox loadFromUserPropertyFileCheckBox = new JCheckBox("Load At Startup", propertiesListener.isLoadFromUserPropertyFile());
 		loadFromUserPropertyFileCheckBox.setToolTipText("At next startup plugin properties will be loaded from the file specified below.");
 		loadFromUserPropertyFileCheckBox.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -141,9 +143,26 @@ public class PropertyPreferences extends Plugin implements PreferencesFlavor, Pr
 		mainPage.add(new JLabel("Properties File: "), c);
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.weightx = 1;
-		JComponent fileChooser = new PropertyFileChooser();
+		final PropertyFileChooser fileChooser = new PropertyFileChooser();
 		mainPage.add(fileChooser, c);
 		fileChooser.setToolTipText("Choose a file to save the plugin properties to and load them from.");
+
+		mainPage.addAncestorListener(new AncestorListener() {
+			public void ancestorAdded(AncestorEvent event) {
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						askBeforeSaveOnExitCheckBox.setSelected(! propertiesListener.isAskBeforeSaveOnExit());
+						saveOnExitCheckBox.setSelected(propertiesListener.isSaveOnExit());
+						loadFromUserPropertyFileCheckBox.setSelected(propertiesListener.isLoadFromUserPropertyFile());
+						fileChooser.updateTextField();
+					}
+				});
+			}
+			public void ancestorMoved(AncestorEvent event) {
+			}
+			public void ancestorRemoved(AncestorEvent event) {
+			}
+		});
 	}
 	
 	private class PropertyFileChooser extends JPanel {
@@ -172,10 +191,14 @@ public class PropertyPreferences extends Plugin implements PreferencesFlavor, Pr
 			((JComponent)textField.getCustomEditor()).setToolTipText(text);
 			fileChooserButton.setToolTipText(text);
 		}
+		
+		public void updateTextField() {
+			textField.setAsText(propertiesListener.getUserPropertyFile() == null ? "" :  propertiesListener.getUserPropertyFile());
+		}
 
 		private void initTextFieldAndButton() {
 			textField = new StringEditor();
-			textField.setAsText(propertiesListener.getUserPropertyFile() == null ? "" :  propertiesListener.getUserPropertyFile());
+			updateTextField();
 			textField.addPropertyChangeListener(new PropertyChangeListener() {
 				public void propertyChange(PropertyChangeEvent evt) {
 					propertiesListener.setUserPropertyFile(textField.getAsText());
