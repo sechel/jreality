@@ -52,6 +52,8 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.ui.viewerapp.SelectionManagerImpl;
+import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.NativePathUtility;
 import de.jreality.util.Secure;
 import de.jtem.jrworkspace.plugin.Controller;
@@ -373,6 +375,21 @@ public class JRViewer {
 	 */
 	public JRootPane startupLocal() {
 		return c.startupLocal();
+	}
+	
+	
+	/**
+	 * Calls the dispose methods on the View and the ToolSystem Plug-ins
+	 * to stop running Threads and free the resources.
+	 * This JRViewer cannot be used again after calling this method.
+	 * Do not call this method before startup.
+	 */
+	public void dispose() {
+		ViewerSwitch view = getPlugin(View.class).getViewer();
+		view.dispose();
+        getPlugin(ToolSystemPlugin.class).getToolSystem().dispose();
+        SelectionManagerImpl.disposeForViewer(view);
+        getController().dispose();
 	}
 	
 	
