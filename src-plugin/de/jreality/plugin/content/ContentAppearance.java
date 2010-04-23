@@ -2,14 +2,21 @@ package de.jreality.plugin.content;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
+
+import javax.swing.JToggleButton;
 
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.ViewPreferences;
+import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.basic.ViewPreferences.ColorPickerModeChangedListener;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.event.AppearanceEvent;
+import de.jreality.scene.event.AppearanceListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.AppearanceInspector;
 import de.jtem.jrworkspace.plugin.Controller;
@@ -18,7 +25,7 @@ import de.jtem.jrworkspace.plugin.PluginInfo;
 /** A plugin that adds an inspector for the appearance of the viewers contents.
  *
  */
-public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener {
+public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener, ActionListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = true;
 	public static final boolean DEFAULT_SHOW_POINT_LABELS = true;
@@ -58,6 +65,10 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		viewPreferences = null;
 	private AppearanceInspector 
 		appearanceInspector = null;
+	private JToggleButton
+		showVerticesToggle = new JToggleButton(ImageHook.getIcon("shape_handles.png")),
+		showEdgeToggle = new JToggleButton(ImageHook.getIcon("shape_edges.png")),
+		showFacesToggle = new JToggleButton(ImageHook.getIcon("shape_square.png"));
 	
 	private HashMap<String, String> 
 		textures = new HashMap<String, String>();
@@ -74,14 +85,42 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 		appearanceInspector = new AppearanceInspector();
 		restoreDefaults();
+		
+		showVerticesToggle.setToolTipText("Show Vertices");
+		showEdgeToggle.setToolTipText("Show Edges");
+		showFacesToggle.setToolTipText("Show Faces");
 	}
 	double worldSize = 1.0;
 	
+	
+	public void actionPerformed(ActionEvent e) {
+		if (showVerticesToggle == e.getSource()) {
+			appearanceInspector.setShowPoints(showVerticesToggle.isSelected());
+		}
+		if (showEdgeToggle == e.getSource()) {
+			appearanceInspector.setShowLines(showEdgeToggle.isSelected());
+		}
+		if (showFacesToggle == e.getSource()) {
+			appearanceInspector.setShowFaces(showFacesToggle.isSelected());
+		}
+	}
+	
+	
 	public void install(Scene scene) {
-		Appearance contentApp = scene.getContentAppearance();
+		final Appearance contentApp = scene.getContentAppearance();
 		contentApp.setAttribute(CommonAttributes.RADII_WORLD_COORDINATES, true);
 		contentApp.setAttribute(CommonAttributes.OPAQUE_TUBES_AND_SPHERES, true);
 		appearanceInspector.setAppearance(contentApp);
+		contentApp.addAppearanceListener(new AppearanceListener() {
+			public void appearanceChanged(AppearanceEvent ev) {
+				boolean showV = (Boolean)contentApp.getAttribute(CommonAttributes.VERTEX_DRAW);
+				showVerticesToggle.setSelected(showV);
+				boolean showE = (Boolean)contentApp.getAttribute(CommonAttributes.EDGE_DRAW);
+				showEdgeToggle.setSelected(showE);
+				boolean showF = (Boolean)contentApp.getAttribute(CommonAttributes.FACE_DRAW);
+				showFacesToggle.setSelected(showF);
+			}
+		});
 	}
 
 	public void colorPickerModeChanged(int mode) {
@@ -222,7 +261,16 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		viewPreferences.addColorPickerChangedListener(this);
 		getPanel().setColorPickerMode(viewPreferences.getColorPickerMode());
 		shrinkPanel.setLayout(new GridLayout());
-		shrinkPanel.add(appearanceInspector); 
+		shrinkPanel.add(appearanceInspector);
+		
+		ViewToolBar mainToolbar = c.getPlugin(ViewToolBar.class);
+		mainToolbar.addSeparator(getClass(), 1.705);
+		mainToolbar.addTool(getClass(), 1.71, showVerticesToggle);
+		mainToolbar.addTool(getClass(), 1.72, showEdgeToggle);
+		mainToolbar.addTool(getClass(), 1.73, showFacesToggle);
+		showVerticesToggle.addActionListener(this);
+		showEdgeToggle.addActionListener(this);
+		showFacesToggle.addActionListener(this);
 	}
 
 	@Override
