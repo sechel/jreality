@@ -86,15 +86,6 @@ public abstract class AbstractJrAction extends javax.swing.AbstractAction {
 	}
 
 
-	//  /**
-	//   * Uses the ViewerApp's frame.
-	//   * @see AbstractJrAction#AbstractAction(String, Component)
-	//   */
-	//  public AbstractJrAction(String name, ViewerApp viewerApp) {
-	//    this(name, viewerApp.getFrame());
-	//  }
-
-
 	public abstract void actionPerformed(ActionEvent e);
 
 
