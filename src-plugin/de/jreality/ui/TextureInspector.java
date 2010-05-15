@@ -76,13 +76,13 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	private ButtonGroup 
 		textureGroup = new ButtonGroup();
 	private JSliderVR
-		rotateSlider = new JSliderVR(SwingConstants.HORIZONTAL, -100, 100, 0),
+		rotateSlider = new JSliderVR(SwingConstants.HORIZONTAL, -180, 180, 0),
 		translateUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		translateVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		scaleUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		scaleVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
 	private SpinnerNumberModel
-		rotateModel = new SpinnerNumberModel(0.0, -Math.PI, Math.PI, 0.001),
+		rotateModel = new SpinnerNumberModel(0.0, -180, 180, 0.1),
 		translateUModel = new SpinnerNumberModel(0.0, 0, 1000.0, 0.001),
 		translateVModel = new SpinnerNumberModel(0.0, 0, 1000.0, 0.001),
 		scaleUModel = new SpinnerNumberModel(1.0, 0, 1000.0, 0.001),
@@ -257,7 +257,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		c.gridheight = 1;
 		c.gridwidth = 1;
 		c.weightx = 0.0;
-		rotatePanel.add(new JLabel("Angle"), c);
+		rotatePanel.add(new JLabel("Angle °"), c);
 		c.gridwidth = 1;
 		c.weightx = 1.0;
 		rotatePanel.add(rotateSlider, c);
@@ -363,12 +363,12 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		}
 		if (rotateSlider == s) {
 			rotateSlider.removeChangeListener(this);
-			rotateModel.setValue((rotateSlider.getValue() / 100.0) * Math.PI);
+			rotateModel.setValue(rotateSlider.getValue());
 			rotateSlider.addChangeListener(this);
 		}
 		if (rotateSpinner == s) {
 			rotateSlider.removeChangeListener(this);
-			rotateSlider.setValue((int)((rotateModel.getNumber().doubleValue() / Math.PI) * 100));
+			rotateSlider.setValue((int)rotateModel.getNumber().doubleValue());
 			rotateSlider.addChangeListener(this);
 		}
 		updateTextureTransform();
@@ -443,11 +443,11 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	}
 	
 	public double getTextureRotation() {
-		return rotateModel.getNumber().doubleValue();
+		return Math.toRadians(rotateModel.getNumber().doubleValue());
 	}
 	
 	public void setTextureRotation(double r) {
-		rotateModel.setValue(r);
+		rotateModel.setValue(Math.toDegrees(r));
 	}
 	
 	private void updateTextureTransform() {
