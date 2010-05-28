@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Content;
@@ -61,14 +62,14 @@ public class TerrainAlignedContent extends Content {
 		double[] center = bounds.getCenter();
 		double objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
 		scale = contentSize/objectSize;
-		center[0] *= -scale;
-		center[1] *= -scale;
-		center[2] *= -scale;
+//		center[0] *= -scale;
+//		center[1] *= -scale;
+//		center[2] *= -scale;
 		Matrix matrix = MatrixBuilder.euclidean().scale(
 				scale
-		).translate(
-				center
-		).getMatrix();
+		)
+//		.translate(center)
+		.getMatrix();
 		
 		/*
 		Matrix toolModification = new Matrix(lastMatrix);
@@ -81,19 +82,26 @@ public class TerrainAlignedContent extends Content {
 		*/
 		
 		matrix.assignTo(scalingComponent);
-		
-		// translate contentComponent
+
 		bounds = bounds.transformByMatrix(
 				bounds,
 				matrix.getArray()
 		);
 		center = bounds.getCenter();
+		
+		// translate contentComponent
+		FactoredMatrix factoredMatrix = new FactoredMatrix(transformationComponent.getTransformation());
+		double angle = factoredMatrix.getRotationAngle();
+		double[] axis = factoredMatrix.getRotationAxis();
 				
-		Matrix m = MatrixBuilder.euclidean().translate(
+		Matrix m = MatrixBuilder.euclidean()
+			.translate(
 				-center[0], 
 				-bounds.getMinY() + verticalOffset,
 				-center[2]
-		).getMatrix();
+			)
+			.rotate(angle, axis)
+			.getMatrix();
 		m.assignTo(transformationComponent);
 		bounds = bounds.transformByMatrix(
 				bounds,

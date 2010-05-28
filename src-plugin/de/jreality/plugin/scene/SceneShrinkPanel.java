@@ -8,12 +8,11 @@ import de.jreality.plugin.basic.ViewShrinkPanelPlugin;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.ActionTool;
 import de.jtem.jrworkspace.plugin.Controller;
-import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkSlot;
 
 /**
- * A {@link ShrinkPanelPlugin} that flops into the Scene when double-clicking on the terrain.
+ * A {@link ViewShrinkPanelPlugin} that flops into the Scene when double-clicking on the terrain.
  * Use the setTriggerComponent to attach it to another part of the scene.
  * 
  * @author Steffen Weissmann
