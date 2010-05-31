@@ -56,7 +56,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    textField = new JTextField();
 		slider = new JSlider(orientation, sliderMin, sliderMax, sliderValue);
 		Font  f = new Font("Helvetica",Font.PLAIN, 10);
-	    slider.setFont(f);
+	    textField.setFont(f);
+	    slider.setMinimumSize(new Dimension(10, 3));
 	    this.min=min; this.max=max; 
 	    
 		textField.setText(getFormattedValue(sliderToText()));
@@ -140,6 +141,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		}
 
 		setPreferredSize(new Dimension(preferredSize,PREFERRED_HEIGHT));
+		setMinimumSize(getPreferredSize());
 		setMaximumSize(new Dimension(10000,PREFERRED_HEIGHT));
 	}
 	
