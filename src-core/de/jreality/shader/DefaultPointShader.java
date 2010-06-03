@@ -57,6 +57,9 @@ import java.awt.Color;
   public final static double POINT_RADIUS_DEFAULT = 0.025;
   public final static double POINT_SIZE_DEFAULT = 3.0;
   public final static boolean ATTENUATE_POINT_SIZE_DEFAULT = true;
+  
+  public static final boolean RADII_WORLD_COORDINATES_DEFAULT = CommonAttributes.RADII_WORLD_COORDINATES_DEFAULT;
+
 	public abstract Color getDiffuseColor();
 	public abstract void setDiffuseColor(Color c);
   
