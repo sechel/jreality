@@ -40,6 +40,7 @@
 
 package de.jreality.jogl;
 
+import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.lang.ref.WeakReference;
 import java.util.logging.Level;
@@ -98,4 +99,14 @@ public class Viewer extends AbstractViewer {
 		canvas=null;
 	}
 	
+	public void setStereoType(int type)	{
+		super.setStereoType(type);
+		if ((JOGLConfiguration.quadBufferedStereo && type != HARDWARE_BUFFER_STEREO)
+			|| (!JOGLConfiguration.quadBufferedStereo && type == HARDWARE_BUFFER_STEREO)) {
+			JOGLConfiguration.quadBufferedStereo = !JOGLConfiguration.quadBufferedStereo;
+			if (drawable != null) drawable.removeGLEventListener(this);
+			initializeFrom(getSceneRoot(), getCameraPath());
+			component.add("Center", (Component) drawable);
+		}
+	}
 }

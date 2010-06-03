@@ -154,7 +154,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 		return true;
 	}
 
-	private JPanel component;
+	protected JPanel component;
 
 	KeyListener keyListener = new KeyListener() {
         public void keyPressed(KeyEvent e) {
