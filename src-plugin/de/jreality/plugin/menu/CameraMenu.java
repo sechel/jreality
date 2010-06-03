@@ -2,16 +2,20 @@ package de.jreality.plugin.menu;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
+import de.jreality.scene.Viewer;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
@@ -48,7 +52,6 @@ public class CameraMenu extends Plugin {
 		
 	};
 	
-	
 	private JMenu createCameraMenu() {
 		JMenu cameraMenu = new JMenu("Camera");
 		cameraMenu.setMnemonic(KeyEvent.VK_C);
@@ -71,7 +74,62 @@ public class CameraMenu extends Plugin {
         saveAction = new SaveCameraPreferences("Save Preferences", viewer);
 		saveAction.setIcon(ImageHook.getIcon("film_save.png"));
 		cameraMenu.add(saveAction.createMenuItem());
-
+		
+		JMenu stereoTypesMenu = new JMenu("StereoType");
+		ButtonGroup bg = new ButtonGroup();
+		
+		JRadioButtonMenuItem b = new JRadioButtonMenuItem("CROSS_EYED_STEREO");
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Viewer v = viewer.getCurrentViewer();
+				((de.jreality.jogl.Viewer) v).setStereoType(0);
+			}
+		});
+		bg.add(b);
+		stereoTypesMenu.add(b);
+		
+		b = new JRadioButtonMenuItem("RED_BLUE_STEREO");
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Viewer v = viewer.getCurrentViewer();
+				((de.jreality.jogl.Viewer) v).setStereoType(1);
+			}
+		});
+		bg.add(b);
+		stereoTypesMenu.add(b);
+		
+		b = new JRadioButtonMenuItem("RED_GREEN_STEREO");
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Viewer v = viewer.getCurrentViewer();
+				((de.jreality.jogl.Viewer) v).setStereoType(2);
+			}
+		});
+		bg.add(b);
+		stereoTypesMenu.add(b);
+		
+		b = new JRadioButtonMenuItem("RED_CYAN_STEREO");
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Viewer v = viewer.getCurrentViewer();
+				((de.jreality.jogl.Viewer) v).setStereoType(3);
+			}
+		});
+		bg.add(b);
+		stereoTypesMenu.add(b);
+		
+//		b = new JRadioButtonMenuItem("HARDWARE_BUFFER_STEREO");
+//		b.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				Viewer v = viewer.getCurrentViewer();
+//				((de.jreality.jogl.Viewer) v).setStereoType(4);
+//			}
+//		});
+//		bg.add(b);
+//		stereoTypesMenu.add(b);
+		
+		cameraMenu.addSeparator();
+		cameraMenu.add(stereoTypesMenu);
 		return cameraMenu;
 	}
 
