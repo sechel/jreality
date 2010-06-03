@@ -240,6 +240,15 @@ public class AABBPickSystem implements PickSystem {
 				radiusFactor = 1.0 / radiusFactor;
 			}
 		}
+		
+		if (currentPI.radiiWorldCoords) {
+			double[] o2w = path.getMatrix(null);
+			radiusFactor = CameraUtility.getScalingFactor(o2w, currentPI.metric);
+			radiusFactor = 1.0 / radiusFactor;
+		} else {
+			radiusFactor = 1.0;
+		}
+		
 		c.childrenAccept(this);
 		if (c.getAppearance() != null && pickInfo.hasNewPickInfo) {
 			appStack.pop();
