@@ -65,7 +65,7 @@ public class DefaultLineShader extends LineShader {
         lineWidth = lis.getLineWidth();
         tubeRadius = lis.getTubeRadius();
         drawTubes = lis.getTubeDraw();
-        //radiiWorldCoordinates = lis.getRadiiWorldCoordinates();
+        radiiWorldCoordinates = lis.getRadiiWorldCoordinates();
     }
 
     /* (non-Javadoc)

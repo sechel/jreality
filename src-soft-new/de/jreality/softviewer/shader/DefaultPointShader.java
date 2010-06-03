@@ -76,7 +76,7 @@ public class DefaultPointShader extends PointShader {
         this.pointRadius = pts.getPointRadius();
         this.pointSize = pts.getPointSize();
         this.sphereDraw = pts.getSpheresDraw();
-        //radiiWorldCoordinates = pts.getRadiiWorldCoordinates();
+        radiiWorldCoordinates = pts.getRadiiWorldCoordinates();
     }
 
     
