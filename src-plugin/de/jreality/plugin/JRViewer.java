@@ -140,15 +140,14 @@ import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
  * <li> the user properties file (from the java preferences)</li>
  * <li> the propertiesFile</li>
  * </ol>
- * The user is prompted when askBeforeSaveOnExit is <code>true</code> or both files above can't be opened for writing.
+ * The user is asked when askBeforeSaveOnExit is <code>true</code> or both files above can't be opened for writing.
  * 
  * <p>Note to Eclipse developers: if you change  the path of the file to save the properties into
  * in the dialog at shutdown 
  * to point to the source folder and DISABLE the load from this file check box, then the resource will be accessed
  * to load the properties (and the situation after deployment is always tested) and the source folder file 
- * is used to save (which then may be included in version control). 
- * In order to trigger copying of the source folder file to the bin folder one may add a do nothing builder which has 
- * "Refresh resources upon completion" enabled and make sure that the "Filtered resources" do not filter this file. 
+ * is used to save (which then may be included in version control). Copying of the properties xml file to the bin folder
+ * needs to be triggered manually by refreshing the source folder 
  * 
 
  *
@@ -308,15 +307,20 @@ public class JRViewer {
 	 * properties node of the package of this class is used to save the user decisions. 
 	 * @param propertiesFileName name of the resource that contains the plugin properties. This argument may 
 	 * be null, then only the second purpose is served and the properties <code>File</code> and 
-	 * <code>InputStream</code> are NOT set to null and may be set independently.
+	 * <code>InputStream</code> are NOT set to null and may be set independently (e.g. to specify a default file, when
+	 * the resource gets read only after deployment).
 	 */
 	public void setPropertiesResource(Class<?> clazz, String propertiesFileName) {
 		c.setPropertiesResource(clazz, propertiesFileName);
 	}
 	
 	/**
-	 * Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
-	 * and persisted as user properties.
+	 * <p>Sets the properties File of the SimpleController. 
+	 * 
+	 * <p>WARNING: This method does not overwrite a file chosen by the the user. Moreover the user decisions are saved
+	 * in the same place for all JRViewer applications, unless you use {@link #setPropertiesResource(Class, String)},
+	 * where the class parameter allows to identify an application specific place to save user preferences.
+	 * 
 	 * @param filename a file or null
 	 * @see #setPropertiesResource(Class, String)
 	 */
@@ -327,8 +331,13 @@ public class JRViewer {
 	
 
 	/**
-	 * Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
+	 * <p>Sets the properties File of the SimpleController. This does not overwrite a file chosen by the the user
 	 * and persisted as user properties.
+	 * 
+	 * <p>WARNING: This method does not overwrite a file chosen by the the user. Moreover the user decisions are saved
+	 * in the same place for all JRViewer applications, unless you use {@link #setPropertiesResource(Class, String)},
+	 * where the class parameter allows to identify an application specific place to save user preferences.
+	 *
 	 * @param file a file or null
 	 * @see #setPropertiesResource(Class, String)
 	 */
@@ -340,6 +349,10 @@ public class JRViewer {
 	 * Sets the properties InputStream of the SimpleController. If also a properties <code>File</code> is provided
 	 * the <code>InputStream</code> is used for reading the properties.
 	 * 
+	 * <p>WARNING: This method does not overwrite a file chosen by the the user. Moreover the user decisions are saved
+	 * in the same place for all JRViewer applications, unless you use {@link #setPropertiesResource(Class, String)},
+	 * where the class parameter allows to identify an application specific place to save user preferences.
+	 *
 	 * @param in an InputStream or null
 	 * @see #setPropertiesResource(Class, String)
 	 */
@@ -512,7 +525,6 @@ public class JRViewer {
 	 */
 	public static Viewer display(SceneGraphNode node) {
 		JRViewer v = new JRViewer();
-		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
@@ -619,7 +631,6 @@ public class JRViewer {
 		Set<String> params = new HashSet<String>();
 		for (String param : args) params.add(param.toLowerCase());
 		JRViewer v = new JRViewer();
-		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
 		if (params.contains("-vr")) {
