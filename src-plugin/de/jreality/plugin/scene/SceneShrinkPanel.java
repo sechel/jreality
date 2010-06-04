@@ -101,7 +101,7 @@ public abstract class SceneShrinkPanel extends ViewShrinkPanelPlugin {
 		shrinkPanel.setFloatable(false);
 		// force display of scene slot
 		sceneSlot.setVisible(true);
-		System.out.println(getClass().getSimpleName()+".moveIntoScene()");
+//		System.out.println(getClass().getSimpleName()+".moveIntoScene()");
 	}
 	
 	void moveOutOfScene() {
@@ -120,7 +120,7 @@ public abstract class SceneShrinkPanel extends ViewShrinkPanelPlugin {
 		shrinkPanel.setFloatable(true);
 		// close internal frame if empty
 		sceneSlot.closeFrameIfEmpty();
-		System.out.println(getClass().getSimpleName()+".moveOutOfScene()");
+//		System.out.println(getClass().getSimpleName()+".moveOutOfScene()");
 	}
 	
 	void sceneFrameClosed() {
