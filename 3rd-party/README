@@ -69,15 +69,15 @@ jTerm
     - used as a terminal for the beanshell in the ViewerApp
     - http://www.jtem.de
 
-jterm-beans
+beans
     - java bean inspector - GPL or BSD
     - used for automatic Inspector panel generation
-    - will become available at http://www.jtem.de
+    - http://www.jtem.de
 
-jRworkspaceSDK
+jrworkspace
 	- Plug-in SDK - BSD
 	- used for the JRViewer plug-in system
-	- http://www.sechel.de
+	- http://www.jtem.de
 
 Sunflow
     - java rendering system for photo-realistic image synthesis - MIT License
