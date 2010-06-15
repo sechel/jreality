@@ -28,28 +28,27 @@ import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class TerrainAlignedContent extends Content {
-	
+
 	public static final double
-		DEFAULT_CONTENT_SIZE=20D,
-		DEFAULT_VERTICAL_OFFSET=1D;
+		DEFAULT_CONTENT_SIZE = 20D,
+		DEFAULT_VERTICAL_OFFSET = 1D;
 
 	SceneGraphComponent transformationComponent;
 	SceneGraphComponent scalingComponent = new SceneGraphComponent("scaling");
-	
-	private double contentSize=DEFAULT_CONTENT_SIZE;
-	private double verticalOffset=DEFAULT_VERTICAL_OFFSET;
+
+	private double contentSize = DEFAULT_CONTENT_SIZE;
+	private double verticalOffset = DEFAULT_VERTICAL_OFFSET;
 
 	private Rectangle3D bounds;
-	
-//	private Matrix lastMatrix=new Matrix();
-	
-	private JPanel
-		panel = new JPanel();
-	final JSliderVR sizeSlider = new JSliderVR(1, 5001);
-	final JSliderVR offsetSlider = new JSliderVR(-250, 5000-250);
-//	private JPanel guiPanel;
 
-	
+	// private Matrix lastMatrix=new Matrix();
+
+	private JPanel panel = new JPanel();
+	final JSliderVR sizeSlider = new JSliderVR(1, 5001);
+	final JSliderVR offsetSlider = new JSliderVR(-250, 5000 - 250);
+
+	// private JPanel guiPanel;
+
 	public void alignContent() {
 		try {
 			bounds = calculateBoundingBox(wrap(content));
@@ -61,52 +60,35 @@ public class TerrainAlignedContent extends Content {
 		double[] e = bounds.getExtent();
 		double[] center = bounds.getCenter();
 		double objectSize = Math.max(Math.max(e[0], e[1]), e[2]);
-		scale = contentSize/objectSize;
-//		center[0] *= -scale;
-//		center[1] *= -scale;
-//		center[2] *= -scale;
+		scale = contentSize / objectSize;
 		Matrix matrix = MatrixBuilder.euclidean().scale(
 				scale
-		)
-//		.translate(center)
-		.getMatrix();
-		
-		/*
-		Matrix toolModification = new Matrix(lastMatrix);
-		toolModification.invert();
-		toolModification.multiplyOnRight(scalingComponent.getTransformation().getMatrix());
+			)
+			.getMatrix();
 
-		lastMatrix.assignFrom(matrix);
-		
-		matrix.multiplyOnRight(toolModification);
-		*/
-		
 		matrix.assignTo(scalingComponent);
 
 		bounds = bounds.transformByMatrix(
 				bounds,
 				matrix.getArray()
-		);
+			);
 		center = bounds.getCenter();
-		
-		// translate contentComponent
+
 		FactoredMatrix factoredMatrix = new FactoredMatrix(transformationComponent.getTransformation());
 		double angle = factoredMatrix.getRotationAngle();
 		double[] axis = factoredMatrix.getRotationAxis();
-				
+
 		Matrix m = MatrixBuilder.euclidean()
-			.translate(
-				-center[0], 
-				-bounds.getMinY() + verticalOffset,
-				-center[2]
-			)
+			.translate(0, verticalOffset, 0)
 			.rotate(angle, axis)
+			.translate(-center[0], -bounds.getMinY(), -center[2]
+			)
 			.getMatrix();
 		m.assignTo(transformationComponent);
 		bounds = bounds.transformByMatrix(
 				bounds,
 				m.getArray()
-		);
+			);
 	}
 
 	@Override
@@ -119,12 +101,12 @@ public class TerrainAlignedContent extends Content {
 		scalingComponent.setTransformation(new Transformation("scaling trafo"));
 		transformationComponent.addChild(scalingComponent);
 		SceneGraphPath newEmptyPick = scene.getContentPath().pushNew(scalingComponent);
-		scene.setEmptyPickPath(newEmptyPick);		
+		scene.setEmptyPickPath(newEmptyPick);
 		createGUI();
 		MainPanel msp = c.getPlugin(MainPanel.class);
 		msp.addComponent(getClass(), panel, 0.0, "Content");
 	}
-	
+
 	@Override
 	public void uninstall(Controller c) throws Exception {
 		MainPanel msp = c.getPlugin(MainPanel.class);
@@ -132,7 +114,7 @@ public class TerrainAlignedContent extends Content {
 		transformationComponent.removeChild(scalingComponent);
 		super.uninstall(c);
 	}
-	
+
 	private SceneGraphComponent wrap(SceneGraphNode node) {
 		if (node instanceof SceneGraphComponent) return (SceneGraphComponent) node;
 		SceneGraphComponent wrap = new SceneGraphComponent("wrapper");
@@ -181,23 +163,23 @@ public class TerrainAlignedContent extends Content {
 		offsetSlider.setValue((int) (verticalOffset * 100));
 		alignContent();
 	}
-	
-	private void createGUI() {	
+
+	private void createGUI() {
 		panel.setBorder(BorderFactory.createTitledBorder("Terrain Content"));
 		sizeSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setContentSize(sizeSlider.getValue()/100.);
+				setContentSize(sizeSlider.getValue() / 100.);
 			}
 		});
 		offsetSlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				setVerticalOffset(offsetSlider.getValue()/100.);
+				setVerticalOffset(offsetSlider.getValue() / 100.);
 			}
 		});
-		panel.setLayout(new GridLayout(2,1));
-		sizeSlider.setMinimumSize(new Dimension(250,35));
+		panel.setLayout(new GridLayout(2, 1));
+		sizeSlider.setMinimumSize(new Dimension(250, 35));
 		sizeSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Size"));
-		offsetSlider.setMinimumSize(new Dimension(250,35));
+		offsetSlider.setMinimumSize(new Dimension(250, 35));
 		offsetSlider.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Offset"));
 		panel.add(sizeSlider);
 		panel.add(offsetSlider);
@@ -208,7 +190,7 @@ public class TerrainAlignedContent extends Content {
 		PluginInfo info = new PluginInfo("Terrain Aligned Content", "jReality Group");
 		return info;
 	}
-	
+
 	@Override
 	public void restoreStates(Controller c) throws Exception {
 		setContentSize(c.getProperty(getClass(), "size", DEFAULT_CONTENT_SIZE));
@@ -223,5 +205,4 @@ public class TerrainAlignedContent extends Content {
 		super.storeStates(c);
 	}
 
-	
 }
