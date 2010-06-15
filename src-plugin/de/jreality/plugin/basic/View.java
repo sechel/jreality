@@ -83,7 +83,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	private ViewerSwitch viewerSwitch;
 	private RenderTrigger renderTrigger;
 	private boolean autoRender = true;
-
+	private String title = "jReality";
+	
 	private RunningEnvironment runningEnvironment;
 
 	public enum RunningEnvironment {
@@ -246,7 +247,15 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	}
 
 	public String getTitle() {
-		return "jReality";
+		return title;
+	}
+	
+	/** Influences the window title when set before startup.
+	 *
+	 * @param title
+	 */
+	public void setTitle(String title) {
+		this.title = "jReality - " + title;
 	}
 
 	public void setVisible(boolean visible) {
