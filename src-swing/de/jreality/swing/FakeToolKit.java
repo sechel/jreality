@@ -99,6 +99,9 @@ import java.awt.peer.WindowPeer;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+
+import de.jreality.util.LoggingSystem;
 
 abstract class FakeToolKit extends Toolkit {
 	
@@ -114,7 +117,7 @@ abstract class FakeToolKit extends Toolkit {
 				throw  new ExceptionInInitializerError(e);
 			}
     	}
-    	System.out.println("created Toolkit: "+ftk);
+    	LoggingSystem.getLogger(FakeToolKit.class).log(Level.CONFIG, "created Toolkit: "+ftk);
 	}
     
     public static Toolkit getDefaultToolkit() {
