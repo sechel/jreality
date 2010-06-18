@@ -16,7 +16,13 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import de.jreality.plugin.basic.MainPanel;
 
+
+/** Collects many <code>JComponent</code>s in one <code>SceneShrinkPanel</code> plugin. 
+ * Subclass this plugin to get your own aggregator, e.g., see {@link MainPanel}.
+ *
+ */
 public abstract class ShrinkPanelAggregator extends SceneShrinkPanel {
 
 	protected Map<Class<?>, Set<MainPanelContent>>
