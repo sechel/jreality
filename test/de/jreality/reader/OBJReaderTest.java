@@ -40,11 +40,17 @@
 
 package de.jreality.reader;
 
-import java.io.File;
+import java.net.URL;
+import java.util.List;
+import java.util.logging.Level;
 
 import junit.framework.TestCase;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.data.Attribute;
 import de.jreality.util.Input;
+import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -59,13 +65,23 @@ public class OBJReaderTest extends TestCase {
     public static void main(String[] args) {
         junit.swingui.TestRunner.run(OBJReaderTest.class);
     }
-    
+	
+	public void setUp() {
+       LoggingSystem.getLogger(ParserMTL.class).setLevel(Level.OFF);
+	}
+
+	public void tearDown() {
+       LoggingSystem.getLogger(ParserMTL.class).setLevel(null);
+	}
+
     public void testOBJReader() throws Exception {
         //String fileName = "/home/gollwas/bolt1.obj";
         //String fileName = "/home/gollwas/cube2.obj";
-        String fileName = "/home/gollwas/obj/square.obj";
-        SceneGraphComponent sgc = new ReaderOBJ().read(new File(fileName)); 
-        System.out.println(sgc);
+        URL url = this.getClass().getResource("square.obj");
+        SceneGraphComponent sgc = new ReaderOBJ().read(url); 
+        assertEquals("sgc 0", sgc.getName());
+        assertEquals("[len=4 storage=double[][3]]", 
+        	sgc.getChildComponent(0).getGeometry().getAttributes(Geometry.CATEGORY_VERTEX, Attribute.COORDINATES).toString());
     }
     
 //    public void test3DSReader() throws Exception {
@@ -74,8 +90,9 @@ public class OBJReaderTest extends TestCase {
 //    }
 
     public void testMTLReader() throws Exception {
-        String fileName = "/home/gollwas/Buddy-Mesh.mtl";
-        ParserMTL.readAppearences(Input.getInput(new File(fileName)));
+        URL url = this.getClass().getResource("vp.mtl");
+        List<?> list = ParserMTL.readAppearences(Input.getInput(url));
+        assertEquals("baerFinal", ((Appearance) list.get(0)).getName());
     }
 
 }
