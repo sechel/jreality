@@ -127,6 +127,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	private TextSlider(String label, int orientation, T min, T max, T value, int sliderMin, int sliderMax, int sliderValue, 
 			SliderComposition sliderComp)	{
 		super();
+		setName(label);
 		if (sliderMax < sliderValue) sliderMax = sliderValue;
 		this.label  = new JLabel(label, JLabel.LEFT);
 	    this.min=min; this.max=max; 
