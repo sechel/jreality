@@ -1,9 +1,11 @@
-package de.jreality.tutorial.util;
+package de.jreality.ui.widgets;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
@@ -11,10 +13,13 @@ import java.util.Vector;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
@@ -22,135 +27,37 @@ import javax.swing.event.ChangeListener;
 
 
 /**
- * @author Charles Gunn, G. Paul Peters
+ * @author Charles Gunn
+ * @author G. Paul Peters
  * 
- * This is the generic base for the TextSliders.
- *
  * @param <T> data type.
  */
 public abstract class TextSlider<T extends Number> extends JPanel  {
-	
-	/** An <code>enum</code> indicating the possible compositions of the {@link TextSlider}. 
+	private static final long serialVersionUID = 1L;
+
+	/** An <code>enum</code> indicating the composition of the <code>TextSlider</code>. 
 	 */
-	public static enum SliderComposition {SliderOnly,SliderAndTextField,SliderTextFieldAndMaxMinButtons}
-	public static final SliderComposition DEFAULT_SLIDER_COMPOSITION=SliderComposition.SliderAndTextField;
+	public static enum SliderComposition {SliderOnly, SliderAndTextField,  SliderTextFieldAndMaxMinButtons}
+	public static SliderComposition DEFAULT_SLIDER_COMPOSITION = SliderComposition.SliderTextFieldAndMaxMinButtons;
 
 	private static final int TEXT_FIELD_COLUMNS = 6;
-	private static final float MAX_TEXT_FIELD_STRETCH = 1.5f;
-	private static final float MAX_TEXT_FIELD_SHRINK = .8f;
-	private static final int PREFERRED_HEIGHT = 35;
+	private static final int PREFERRED_HEIGHT = 40;
+	private static final int EXTRA_WIDTH = -45;
 	
 	private final JSlider slider;
 	private final JLabel label;
 	private final JTextField textField;
 	private String textContents;
 	private T min, max;
-	
-	private TextSlider(String label, int orientation, 
-			T min, T max, T value, 
-			int sliderMin, int sliderMax, int sliderValue, 
-			SliderComposition sliderComp)	{
-		super();
-		if (sliderMax < sliderValue) sliderMax= sliderValue;
-		this.label  = new JLabel(label, JLabel.LEFT);
-	    textField = new JTextField();
-		slider = new JSlider(orientation, sliderMin, sliderMax, sliderValue);
-		Font  f = new Font("Helvetica",Font.PLAIN, 10);
-	    textField.setFont(f);
-	    slider.setMinimumSize(new Dimension(10, 3));
-	    this.min=min; this.max=max; 
-	    
-		textField.setText(getFormattedValue(sliderToText()));
-	    textContents = textField.getText();
-	    textField.setColumns(TEXT_FIELD_COLUMNS);
-	    textField.setEditable(true);
-	    Dimension d = textField.getPreferredSize();
-	    textField.setMaximumSize(new Dimension((int)(d.width*MAX_TEXT_FIELD_STRETCH),(int) (d.height*MAX_TEXT_FIELD_STRETCH)));
-	    textField.setMinimumSize(new Dimension((int)(d.width*MAX_TEXT_FIELD_SHRINK),(int) (d.height*MAX_TEXT_FIELD_SHRINK)));
-	    textField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				adjustSliderMinMax();
-				slider.setValue(textToSlider());
-				textContents = textField.getText();
-				fireActionPerformed();
-				textField.setForeground(Color.black);
-			}
- 	    	
- 	    });
-	    textField.addCaretListener(new CaretListener() {
-			public void caretUpdate(CaretEvent e) {
-				if (textField.getText().compareTo(textContents) != 0)
-					textField.setForeground(Color.RED);
-			}	    	
-	    });
-		slider.addChangeListener( new ChangeListener()	{
-		    public void stateChanged(ChangeEvent e) {
-			    textField.setText(getFormattedValue(sliderToText()));
-		        fireActionPerformed();
-		    }
-		});
-		setLayout(new BoxLayout(this,BoxLayout.LINE_AXIS));
-		add(this.label);
-		add(Box.createHorizontalStrut(8));
-		add(textField);
-		final Component s1 = Box.createHorizontalStrut(2);
-		add(s1);
-		add(slider);
 
-		final JButton minButton=new JButton("min");
-		minButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setMin(getValue());
-			}
-		});
-		
-		final JButton maxButton=new JButton("max");
-		maxButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setMax(getValue());
-			}
-		});
-			
-		final Component s2 = Box.createHorizontalStrut(8);
-		add(s2);
-		add(minButton);
-		final Component s3 = Box.createHorizontalStrut(2);
-		add(s3);
-		add(maxButton);
-		//don't stretch the Buttons
-		minButton.setMaximumSize(minButton.getPreferredSize());
-		maxButton.setMaximumSize(maxButton.getPreferredSize());
-
-		//visibility of elements
-		int preferredSize=slider.getPreferredSize().width
-			+ textField.getPreferredSize().width  
-			+ this.label.getPreferredSize().width
-			+ minButton.getPreferredSize().width 
-			+ maxButton.getPreferredSize().width
-			+ 70;
-		switch (sliderComp) {
-		case SliderOnly: 
-			textField.setVisible(false); 
-			s1.setVisible(false);
-			preferredSize-=textField.getPreferredSize().width+8;
-		case SliderAndTextField: maxButton.setVisible(false); 
-			minButton.setVisible(false);
-			s2.setVisible(false);
-			s3.setVisible(false);
-			preferredSize-=minButton.getPreferredSize().width + maxButton.getPreferredSize().width+50;
-		}
-
-		setPreferredSize(new Dimension(preferredSize,PREFERRED_HEIGHT));
-		setMinimumSize(getPreferredSize());
-		setMaximumSize(new Dimension(10000,PREFERRED_HEIGHT));
-	}
-	
 	public T getMin() {
 		return min;
 	}
+
 	public T getMax() {
 		return max;
 	}
+
 	public void setMin(T min) {
 		this.min=min;
 	    Vector<ActionListener> remember = listeners;
@@ -158,6 +65,7 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    textField.postActionEvent();
 	    listeners=remember;
 	}
+
 	public void setMax(T max) {
 		this.max=max;
 	    Vector<ActionListener> remember = listeners;
@@ -183,7 +91,6 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	    textField.setText(getFormattedValue(n));
 	    textField.postActionEvent();
 	    listeners = remember;
-		//textField.setText(sliderToText().toString());
 	}
 
 
@@ -215,8 +122,147 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 			}
 		}
 	}
+
+	
+	private TextSlider(String label, int orientation, T min, T max, T value, int sliderMin, int sliderMax, int sliderValue, 
+			SliderComposition sliderComp)	{
+		super();
+		if (sliderMax < sliderValue) sliderMax = sliderValue;
+		this.label  = new JLabel(label, JLabel.LEFT);
+	    this.min=min; this.max=max; 
+
+		slider = initSlider(orientation, sliderMin, sliderMax, sliderValue);
+		textField = initTextField();
+	    initListeners();
+		
+		final JButton minButton = initMinButton();
+		final JButton maxButton = initMaxButton();
+	
+		setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.insets = new Insets(1, 1, 1, 1);
+		c.gridx = 0;
+		c.gridwidth = 200;
+		c.anchor = GridBagConstraints.WEST;
+		c.weightx = 1;
+		add(this.label, c);
+		c.gridwidth = 1;
+		c.gridx = GridBagConstraints.RELATIVE;
+		c.anchor = GridBagConstraints.EAST;
+		c.weightx = .5;
+		add(Box.createHorizontalGlue(), c);
+		c.weightx = 0;
+		add(minButton, c);
+		add(Box.createHorizontalStrut(2), c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		add(maxButton, c);
+		c.gridx = 0;
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.WEST;
+		add(textField, c);
+		c.gridx = 1;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.anchor = GridBagConstraints.EAST;
+		add(slider, c);
+
+		switch (sliderComp) {
+		case SliderOnly: 
+			textField.setVisible(false); 
+		case SliderAndTextField: 
+			maxButton.setVisible(false); 
+			minButton.setVisible(false);
+		}
+
+		setPreferredSize(new Dimension(getPreferredSize().width + EXTRA_WIDTH, PREFERRED_HEIGHT));
+		setMinimumSize(getPreferredSize());
+		setMaximumSize(new Dimension(10000, PREFERRED_HEIGHT));
+	}
+
+
+	private JSlider initSlider(int orientation, int sliderMin, int sliderMax, int sliderValue) {
+		JSlider slider = new JSlider(orientation, sliderMin, sliderMax, sliderValue);
+		slider.setBounds(1, 1, 1, 1);
+		slider.setMinimumSize(slider.getPreferredSize());
+		slider.setMaximumSize(new Dimension(10000, slider.getPreferredSize().height));
+	    return slider;
+	}
+
+	private JTextField initTextField() {
+		JTextField textField = new JTextField();
+		textField.setText(getFormattedValue(sliderToText()));
+	    textContents = textField.getText();
+	    textField.setColumns(TEXT_FIELD_COLUMNS);
+	    textField.setEditable(true);
+		Font  f = new Font("Helvetica", Font.PLAIN, 9);
+	    textField.setFont(f);	    
+	    
+	    Dimension d = textField.getPreferredSize();
+	    textField.setPreferredSize(new Dimension(d.width, d.height - 2));
+	    textField.setMinimumSize(textField.getPreferredSize());    
+	    textField.setMaximumSize(textField.getPreferredSize());   
+	    textField.setBorder(new EmptyBorder(1, 1, 1, 1));
+	    return textField;
+	}
+
+	private void initListeners() {
+		textField.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				adjustSliderMinMax();
+				slider.setValue(textToSlider());
+				textContents = textField.getText();
+				fireActionPerformed();
+				textField.setForeground(Color.black);
+			}
+ 	    	
+ 	    });
+	    textField.addCaretListener(new CaretListener() {
+			public void caretUpdate(CaretEvent e) {
+				if (textField.getText().compareTo(textContents) != 0)
+					textField.setForeground(Color.RED);
+			}	    	
+	    });
+		slider.addChangeListener( new ChangeListener()	{
+		    public void stateChanged(ChangeEvent e) {
+			    textField.setText(getFormattedValue(sliderToText()));
+		        fireActionPerformed();
+		    }
+		});
+	}
+
+	private JButton initMinButton() {
+		final JButton minButton = initButton("min");
+		minButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setMin(getValue());
+			}
+		});		
+		return minButton;
+	}
+
+	private JButton initMaxButton() {
+		final JButton maxButton = initButton("max");
+		maxButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setMax(getValue());
+			}
+		});
+		return maxButton;
+	}
+	
+	private JButton initButton(String label) {
+		final JButton button=new JButton(label);
+		button.setBorder(new EmptyBorder(1, 2, 1, 2));
+		button.setMaximumSize(button.getPreferredSize());
+		button.setMinimumSize(button.getPreferredSize());
+		button.setToolTipText("Set the current value as " + label + " value of the slider.");
+		return button;
+	}
+
 	
 	public static class Integer extends TextSlider<java.lang.Integer>	{
+
+		private static final long serialVersionUID = 1L;
+
 		public Integer(String l, int orientation, int min, int max, int value)	{
 			this(l, orientation, min, max, value, DEFAULT_SLIDER_COMPOSITION);
 		}
@@ -283,6 +329,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	
 	private static double scaler = 10E8;
 	public static class Double extends TextSlider<java.lang.Double>	{
+		private static final long serialVersionUID = 1L;
+
 		public Double(String l, int orientation, double min, double max, double value)	{
 			this(l, orientation, min, max, value, DEFAULT_SLIDER_COMPOSITION);
 		}
@@ -314,14 +362,11 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		@Override
 		void adjustSliderMinMax() {
 			double val= java.lang.Double.valueOf(super.textField.getText());
-			//System.err.println("value is "+val);
 			if (val > super.max) {
 				setMax(val);
-//				System.err.println("Setting max to "+max);
 			}
 			if (val < super.min) {
 				setMin(val); 
-//				System.err.println("Setting min to "+min);
 			}
 		}
 						
@@ -331,6 +376,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	}
 	
 	public static class DoubleLog extends TextSlider.Double	{
+		private static final long serialVersionUID = 1L;
+
 		public DoubleLog(String l, int orientation, double min, double max, double value)	{
 			this(l, orientation, min, max,value,DEFAULT_SLIDER_COMPOSITION);
 		}
@@ -360,8 +407,8 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 	}
 
 	public static class IntegerLog extends TextSlider.DoubleLog	{
-		
-		
+		private static final long serialVersionUID = 1L;
+
 		public IntegerLog(String l, int orientation, double min, double max, double value) {
 			super(l, orientation, min, max, value);
 		}
@@ -381,8 +428,32 @@ public abstract class TextSlider<T extends Number> extends JPanel  {
 		String getFormattedValue(java.lang.Double n) {
 			System.err.println("integerlog format = "+n);
 			return String.format("%8d",((int)(n+.001)));
-		}
-				
+		}			
+	}
+	
+	public static void main(String[] args) {
+		JFrame frame = new JFrame("Test TextSilder in GridBagLayout");
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		GridBagLayout layout = new GridBagLayout();
+		frame.setLayout(layout);
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = GridBagConstraints.REMAINDER;
+		c.weightx = 1;
+		
+		frame.add(new Double("Text: ", 0, -3, 3, 0), c);
+		frame.add(new TextSlider.Double("Text223333333333322: ", 0, -3, 3, 0), c);
+		frame.pack();
+		frame.setVisible(true);
+
+		frame = new JFrame("Test TextSilder");
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
+		
+		frame.add(new Double("Text: ", 0, -3, 3, 0));
+		frame.add(new Double("Text223333333333333322: ", 0, -3, 3, 0));
+		frame.pack();
+		frame.setVisible(true);
+
 	}
 
 }

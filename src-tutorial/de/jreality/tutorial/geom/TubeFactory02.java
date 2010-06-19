@@ -33,7 +33,7 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.tutorial.util.TextSlider;
+import de.jreality.ui.widgets.TextSlider;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 import de.jtem.jrworkspace.plugin.Plugin;

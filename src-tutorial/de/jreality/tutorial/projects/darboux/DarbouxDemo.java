@@ -16,10 +16,10 @@ import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.ViewShrinkPanelPlugin;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.tutorial.util.TextSlider;
 import de.jreality.tutorial.util.polygon.DragPointSet;
 import de.jreality.tutorial.util.polygon.PointSequenceView;
 import de.jreality.tutorial.util.polygon.SubdividedPolygon;
+import de.jreality.ui.widgets.TextSlider;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class DarbouxDemo {
