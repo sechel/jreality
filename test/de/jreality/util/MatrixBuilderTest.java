@@ -55,7 +55,7 @@ import de.jreality.math.MatrixBuilder;
 public class MatrixBuilderTest extends TestCase {
 
   public static void main(String[] args) {
-    junit.swingui.TestRunner.run(MatrixBuilderTest.class);
+    junit.textui.TestRunner.run(MatrixBuilderTest.class);
   }
 
   public void testOne() {

@@ -63,7 +63,7 @@ import de.jreality.util.LoggingSystem;
 public class OBJReaderTest extends TestCase {
 
     public static void main(String[] args) {
-        junit.swingui.TestRunner.run(OBJReaderTest.class);
+        junit.textui.TestRunner.run(OBJReaderTest.class);
     }
 	
 	public void setUp() {

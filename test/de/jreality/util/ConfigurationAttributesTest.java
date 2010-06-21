@@ -53,7 +53,7 @@ import junit.framework.TestCase;
 public class ConfigurationAttributesTest extends TestCase {
 
     public static void main(String[] args) {
-        junit.swingui.TestRunner.run(ConfigurationAttributesTest.class);
+        junit.textui.TestRunner.run(ConfigurationAttributesTest.class);
     }
 
     public void testCA() throws Exception {

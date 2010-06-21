@@ -55,7 +55,7 @@ import de.jreality.math.Rn;
 public class FactoredMatrixTest extends TestCase {
 
   public static void main(String[] args) {
-    junit.swingui.TestRunner.run(FactoredMatrixTest.class);
+    junit.textui.TestRunner.run(FactoredMatrixTest.class);
   }
 
   public void testConstructor() {

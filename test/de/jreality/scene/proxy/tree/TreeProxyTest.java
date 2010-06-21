@@ -71,7 +71,7 @@ public class TreeProxyTest extends TestCase {
   MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
 
   public static void main(String[] args) {
-    junit.swingui.TestRunner.run(TreeProxyTest.class);
+    junit.textui.TestRunner.run(TreeProxyTest.class);
   }
   
   static class PrintFactory extends ProxyFactory {

@@ -58,7 +58,7 @@ import de.jreality.shader.Texture2D;
 public class AttributeEntityTest extends TestCase {
 
   public static void main(String[] args) {
-    junit.swingui.TestRunner.run(AttributeEntityTest.class);
+    junit.textui.TestRunner.run(AttributeEntityTest.class);
   }
   
   public void testTexture2dSingleton() throws Exception {

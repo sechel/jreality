@@ -69,7 +69,7 @@ public class SMRJMirrorFactoryTest extends TestCase {
     private final static Receiver[] rec = new Receiver[localClients*2]; 
 
     public static void main(String[] args) {
-        junit.swingui.TestRunner.run(SMRJMirrorFactoryTest.class);
+        junit.textui.TestRunner.run(SMRJMirrorFactoryTest.class);
     }
 
     SMRJMirrorScene proxyScene;
