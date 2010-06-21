@@ -12,7 +12,7 @@ public class PointSetFactoryBeanInfo extends SimpleBeanInfo {
 	private final BeanDescriptor bd = new BeanDescriptor(PointSetFactory.class, PointSetFactoryCustomizer.class);
 	
 	public PointSetFactoryBeanInfo() {
-		bd.setDisplayName("Poin Set Factory Explorer");
+		bd.setDisplayName("Point Set Factory Explorer");
 	}
 
 	@Override
