@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import de.jreality.geometry.AbstractGeometryFactoryCustomizer;
 import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.ParametricSurfaceFactoryCustomizer;
 import de.jreality.plugin.JRViewer;
@@ -24,7 +25,7 @@ import de.jtem.jrworkspace.plugin.PluginInfo;
 public class ParametricSurfaceFactoryPlugin extends SceneShrinkPanel {
 	
 	
-	private final ParametricSurfaceFactoryCustomizer psfCustomizer;
+	private final AbstractGeometryFactoryCustomizer<ParametricSurfaceFactory> psfCustomizer;
 	private final ParametricSurfaceFactory psf;
 	private final ArrayList<PropertyDescriptor> properties = new ArrayList<PropertyDescriptor>();
 	private final List<TextSlider<Integer>> intSliders = new ArrayList<TextSlider<Integer>>();
