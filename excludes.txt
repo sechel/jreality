@@ -10,8 +10,8 @@
 # 6. call 'ant' again
 #
 
-**/Fake*6.java
-# **/Fake*5.java
+# **/Fake*6.java
+**/Fake*5.java
 
 
 **/JLink*.java
