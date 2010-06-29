@@ -72,6 +72,7 @@ public class CenteredAndScaledContent extends Content implements ChangeListener,
 		}
 		setContentNode(node);
 		if (getContentNode() != null) {
+			root.setGeometry(null);
 			SceneGraphUtility.addChildNode(root, getContentNode());
 		}
 		if (getContentNode() != null) {
@@ -135,6 +136,20 @@ public class CenteredAndScaledContent extends Content implements ChangeListener,
 		MainPanel msp = c.getPlugin(MainPanel.class);
 		msp.addComponent(getClass(), panel, 0.0, "Content");
 		getContentRoot().getTransformation().addTransformationListener(this);
+	}
+	
+	
+	@Override
+	public void storeStates(Controller c) throws Exception {
+		super.storeStates(c);
+		c.storeProperty(getClass(), "scale", size);
+	}
+
+	
+	@Override
+	public void restoreStates(Controller c) throws Exception {
+		super.restoreStates(c);
+		size = c.getProperty(getClass(), "scale", size);
 	}
 	
 	

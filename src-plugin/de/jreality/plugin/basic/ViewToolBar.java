@@ -2,8 +2,6 @@ package de.jreality.plugin.basic;
 
 import java.awt.Component;
 
-import javax.swing.Action;
-
 import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.aggregators.ToolBarAggregator;
 import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;

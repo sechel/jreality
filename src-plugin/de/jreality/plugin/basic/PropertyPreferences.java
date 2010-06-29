@@ -166,6 +166,7 @@ public class PropertyPreferences extends Plugin implements PreferencesFlavor, Pr
 	}
 	
 	private class PropertyFileChooser extends JPanel {
+		private static final long serialVersionUID = 1L;
 		private StringEditor textField;
 		private JButton fileChooserButton;
 		private JFileChooser userPropertiesFileChooser = new JFileChooser();
