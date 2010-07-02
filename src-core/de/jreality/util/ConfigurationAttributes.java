@@ -103,6 +103,13 @@ public class ConfigurationAttributes extends Properties {
     public int getInt(String key) {
         return Integer.parseInt(getProperty(key));
     }
+    
+    public int getInt(String key, int def){
+    	String str = getProperty(key);
+    	if (str==null) return def;
+    	return Integer.parseInt(str);
+    }
+    
     public String getProperty(String key) {
         return super.getProperty(key);
     }
