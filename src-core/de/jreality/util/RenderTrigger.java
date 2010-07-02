@@ -213,7 +213,7 @@ public class RenderTrigger implements SceneGraphComponentListener,
         }
         void render(boolean async)
         {
-            if (async) v.renderAsync();
+            if (async) { if (v.canRenderAsync()) v.renderAsync(); }
             else {
                 synchronized (this) {
                     if (rendering) return;
