@@ -15,6 +15,7 @@ import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
+import de.jreality.scene.Camera;
 import de.jreality.scene.Viewer;
 import de.jreality.tools.ClickWheelCameraZoomTool;
 import de.jreality.ui.viewerapp.ViewerSwitch;
@@ -25,6 +26,7 @@ import de.jreality.ui.viewerapp.actions.camera.ShiftEyeSeparation;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFieldOfView;
 import de.jreality.ui.viewerapp.actions.camera.ShiftFocus;
 import de.jreality.ui.viewerapp.actions.camera.ToggleStereo;
+import de.jreality.util.CameraUtility;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
@@ -67,7 +69,14 @@ public class CameraMenu extends Plugin {
 		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation("Decrease Eye Separation", viewer, true)));
 		cameraMenu.add(new JMenuItem(new ShiftEyeSeparation("Increase Eye Separation", viewer, false)));
 		cameraMenu.addSeparator();
-		cameraMenu.add(new JMenuItem(new ToggleStereo("Toggle Stereo", viewer)));
+		final JMenu stereoTypesMenu = new JMenu("StereoType");
+		cameraMenu.add(new JMenuItem(new ToggleStereo("Toggle Stereo", viewer) {
+			public void actionPerformed(ActionEvent e) {
+			    super.actionPerformed(e);
+				Camera camera = CameraUtility.getCamera(viewer);
+			    stereoTypesMenu.setEnabled(camera.isStereo());
+			}
+		}));
 		loadAction = new LoadCameraPreferences("Load Preferences", viewer);
         loadAction.setIcon(ImageHook.getIcon("film_go.png"));
 		cameraMenu.add(loadAction.createMenuItem());
@@ -75,10 +84,10 @@ public class CameraMenu extends Plugin {
 		saveAction.setIcon(ImageHook.getIcon("film_save.png"));
 		cameraMenu.add(saveAction.createMenuItem());
 		
-		JMenu stereoTypesMenu = new JMenu("StereoType");
 		ButtonGroup bg = new ButtonGroup();
 		
 		JRadioButtonMenuItem b = new JRadioButtonMenuItem("CROSS_EYED_STEREO");
+		b.setSelected(true);
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Viewer v = viewer.getCurrentViewer();
@@ -128,6 +137,9 @@ public class CameraMenu extends Plugin {
 //		bg.add(b);
 //		stereoTypesMenu.add(b);
 		
+		Camera camera = CameraUtility.getCamera(viewer);
+	    stereoTypesMenu.setEnabled(camera.isStereo());
+	    
 		cameraMenu.addSeparator();
 		cameraMenu.add(stereoTypesMenu);
 		return cameraMenu;
