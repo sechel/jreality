@@ -45,6 +45,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -89,21 +91,21 @@ Viewer viewer;
   /**
    * contains a up-to-date map of (used) slots to used virtual devices
    */
-  private final HashMap<InputSlot, List<VirtualDevice>> slot2virtual = new HashMap<InputSlot, List<VirtualDevice>>();
+  private final HashMap<InputSlot, List<VirtualDevice>> slot2virtual = new LinkedHashMap<InputSlot, List<VirtualDevice>>();
   
   /**
    * contains the current axis states
    * (used for VirtualDevice-/Tool-Context)
    */
-  private final HashMap<InputSlot, AxisState> slot2axis = new HashMap<InputSlot, AxisState>();
+  private final HashMap<InputSlot, AxisState> slot2axis = new LinkedHashMap<InputSlot, AxisState>();
   
   /**
    * contains the current transformations
    * (used for VirtualDevice-/Tool-Context)
    */
-  private final HashMap<InputSlot, DoubleArray> slot2transformation = new HashMap<InputSlot, DoubleArray>();
+  private final HashMap<InputSlot, DoubleArray> slot2transformation = new LinkedHashMap<InputSlot, DoubleArray>();
   
-  private HashMap<InputSlot, LinkedList<InputSlot>> slots2virtualMappings = new HashMap<InputSlot, LinkedList<InputSlot>>();
+  private HashMap<InputSlot, LinkedList<InputSlot>> slots2virtualMappings = new LinkedHashMap<InputSlot, LinkedList<InputSlot>>();
   
   private VirtualDeviceContextImpl virtualDeviceContext = new VirtualDeviceContextImpl();
   
@@ -146,7 +148,7 @@ Viewer viewer;
   private double[] camToNDCTrafo = new Matrix().getArray();
 
   // TODO: remove this
-  HashSet<InputSlot> debugSlots=new HashSet<InputSlot>();
+  HashSet<InputSlot> debugSlots=new LinkedHashSet<InputSlot>();
 
   private SceneGraphPath avatarPath;
 

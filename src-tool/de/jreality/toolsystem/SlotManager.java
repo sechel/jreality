@@ -44,6 +44,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,27 +70,27 @@ public class SlotManager {
     /**
      * up-to-date map of (used) slots to activatable Tools
      */
-    private final HashMap<InputSlot, HashSet<Tool>> slot2activation = new HashMap<InputSlot, HashSet<Tool>>();
+    private final HashMap<InputSlot, HashSet<Tool>> slot2activation = new LinkedHashMap<InputSlot, HashSet<Tool>>();
     /**
      * up-to-date map of (used) slots to active Tools
      */
-    private final HashMap<InputSlot, HashSet<Tool>> slot2active = new HashMap<InputSlot, HashSet<Tool>>();
+    private final HashMap<InputSlot, HashSet<Tool>> slot2active = new LinkedHashMap<InputSlot, HashSet<Tool>>();
     /**
      * up-to-date map of (used) slots to active Tools
      */
-    private final HashMap<Tool, HashSet<InputSlot>> tool2currentSlots = new HashMap<Tool, HashSet<InputSlot>>();
+    private final HashMap<Tool, HashSet<InputSlot>> tool2currentSlots = new LinkedHashMap<Tool, HashSet<InputSlot>>();
 
     /**
      * up-to-date map of deactivation-slots to active Tools
      */
-    private final HashMap<InputSlot, HashSet<Tool>> slot2deactivation = new HashMap<InputSlot, HashSet<Tool>>();
+    private final HashMap<InputSlot, HashSet<Tool>> slot2deactivation = new LinkedHashMap<InputSlot, HashSet<Tool>>();
     
-    private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappings = new HashMap<InputSlot, HashSet<InputSlot>>();
-    private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappingsInv = new HashMap<InputSlot, HashSet<InputSlot>>();
+    private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappings = new LinkedHashMap<InputSlot, HashSet<InputSlot>>();
+    private final HashMap<InputSlot, HashSet<InputSlot>> virtualMappingsInv = new LinkedHashMap<InputSlot, HashSet<InputSlot>>();
     
-    private final HashMap<Tool, HashMap<InputSlot, InputSlot>> slotsToMappingsForTool = new HashMap<Tool, HashMap<InputSlot, InputSlot>>();
+    private final HashMap<Tool, HashMap<InputSlot, InputSlot>> slotsToMappingsForTool = new LinkedHashMap<Tool, HashMap<InputSlot, InputSlot>>();
     
-    private final HashMap<Tool, HashSet<InputSlot>> virtualSlotsForTool = new HashMap<Tool, HashSet<InputSlot>>();
+    private final HashMap<Tool, HashSet<InputSlot>> virtualSlotsForTool = new LinkedHashMap<Tool, HashSet<InputSlot>>();
 
     SlotManager(ToolSystemConfiguration config) {
       List virtualMappings = config.getVirtualMappings();
@@ -182,7 +184,7 @@ public class SlotManager {
      * @return
      */
     Set<InputSlot> resolveSlot(InputSlot slot) {
-      HashSet<InputSlot> ret = new HashSet<InputSlot>();
+      HashSet<InputSlot> ret = new LinkedHashSet<InputSlot>();
       findTriggerSlots(ret, slot);
       return ret;
     }
@@ -197,7 +199,7 @@ public class SlotManager {
         findTriggerSlots(l, sl);
     }
     private Set<InputSlot> resolveSlots(List<InputSlot> slotSet) {
-      Set<InputSlot> ret = new HashSet<InputSlot>();
+      Set<InputSlot> ret = new LinkedHashSet<InputSlot>();
       for (InputSlot slot : slotSet )
         findTriggerSlots(ret, slot);
       return ret;

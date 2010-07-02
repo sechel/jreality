@@ -45,6 +45,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -61,8 +63,8 @@ import de.jreality.scene.tool.Tool;
  */
 public class ToolManager {
 
-    private final HashSet<Tool> toolsWithPick = new HashSet<Tool>();
-    private final HashMap<Tool, List<SceneGraphPath>> toolToPaths = new HashMap<Tool, List<SceneGraphPath>>();
+    private final HashSet<Tool> toolsWithPick = new LinkedHashSet<Tool>();
+    private final HashMap<Tool, List<SceneGraphPath>> toolToPaths = new LinkedHashMap<Tool, List<SceneGraphPath>>();
     
     boolean addTool(Tool tool, SceneGraphPath path) {
     	boolean first = pathsForTool(tool).isEmpty();
