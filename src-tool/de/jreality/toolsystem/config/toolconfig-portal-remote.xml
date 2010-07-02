@@ -137,17 +137,17 @@
       </prop>
     </virtualdevice>
     
-   <virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
+   <!-- virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
       <inputslot>PrimaryNavigationNDC</inputslot>
       <outputslot>LeftRightAxis</outputslot>
       <prop name="axis">
         <string>translationX</string>
       </prop>
-    </virtualdevice>
+    </virtualdevice -->
     
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
       <inputslot>PrimaryNavigationNDC</inputslot>
-      <outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+      <outputslot>HorizontalShipRotationAngleEvolutionRAW</outputslot>
       <prop name="axis">
         <string>translationX</string>
       </prop>
@@ -155,6 +155,17 @@
         <double>1</double>
       </prop>
     </virtualdevice>
+    
+    		<virtualdevice
+					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+			<inputslot>HorizontalShipRotationAngleEvolutionRAW</inputslot>
+			<inputslot>SystemTime</inputslot>
+			<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+			<prop name="gain">
+				<double>1</double>
+			</prop>
+		</virtualdevice>
+    
 
   </virtualdevices>
 </toolconfig>
