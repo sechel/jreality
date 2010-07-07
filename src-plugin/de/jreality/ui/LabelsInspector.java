@@ -38,6 +38,9 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 	private ColorChooseJButton
 		fontColorButton = new ColorChooseJButton();
 	private JSliderVR
+		offsetXSlider = new JSliderVR(-100, 100, 1), 
+		offsetYSlider = new JSliderVR(-100, 100, 1), 
+		offsetZSlider = new JSliderVR(-100, 100, 1), 
 		sizeSlider = new JSliderVR(1, 100, 30),
 		resolutionSlider = new JSliderVR(1, 200, 48);
 	private SpinnerNumberModel
@@ -54,6 +57,9 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		resolutionSlider.addChangeListener(this);
 		fontColorButton.addColorChangedListener(this);
 		resolutionSpinner.addChangeListener(this);
+		offsetXSlider.addChangeListener(this);
+		offsetYSlider.addChangeListener(this);
+		offsetZSlider.addChangeListener(this);
 		
 		setLayout(new MinSizeGridBagLayout());
 		GridBagConstraints c1 = new GridBagConstraints();
@@ -70,6 +76,12 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		add(fontColorButton, c2);
 		add(new JLabel("Size"), c1);
 		add(sizeSlider, c2);
+		add(new JLabel("Offset X"), c1);
+		add(offsetXSlider, c2);
+		add(new JLabel("Offset Y"), c1);
+		add(offsetYSlider, c2);
+		add(new JLabel("Offset Z"), c1);
+		add(offsetZSlider, c2);
 		add(new JLabel("Resolution"), c1);
 //		add(resolutionSlider, c2);
 		add(resolutionSpinner, c2);
@@ -85,6 +97,7 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 	public void stateChanged(ChangeEvent e) {
 		updateLabelResolution();
 		updateLabelSize();
+		updateLabelOffset();
 	}
 	
 	public void colorChanged(ColorChangedEvent cce) {
@@ -110,6 +123,28 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		if (app != null) {
 			double resolution = getLabelResolution() / 100.0;
 			app.setAttribute(shaderPrefix + ".textShader.scale", getLabelSize() / resolution / 100.0);
+		}
+	}
+	
+	public double[] getLabelOffset() {
+		double[] result = new double[3];
+		result[0] = offsetXSlider.getValue() / 100.0;
+		result[1] = offsetYSlider.getValue() / 100.0;
+		result[2] = offsetZSlider.getValue() / 100.0;
+		return result;
+	}
+	
+	public void setLabelOffset(double[] off) {
+		offsetXSlider.setValue((int)off[0] * 100);
+		offsetYSlider.setValue((int)off[1] * 100);
+		offsetZSlider.setValue((int)off[2] * 100);
+		updateLabelOffset();
+	}
+	
+	public void updateLabelOffset() {
+		if (app != null) {
+			double[] off = getLabelOffset();
+			app.setAttribute(shaderPrefix + ".textShader.offset", off);
 		}
 	}
 	
@@ -173,6 +208,7 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		updateLabelColor();
 		updateLabelSize();
 		updateLabelResolution();
+		updateLabelOffset();
 	}
 	
 	public void setShaderPrefix(String shaderPrefix) {

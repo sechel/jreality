@@ -35,6 +35,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	public static final Color DEFAULT_POINT_LABEL_COLOR = Color.black;
 	public static final double DEFAULT_POINT_LABEL_SIZE = 0.5;
 	public static final int DEFAULT_POINT_LABEL_RESOLUTION = 48;
+	public static final double[] DEFAULT_POINT_LABEL_OFFSET = {0, 0, 0};
 	public static final boolean DEFAULT_SHOW_LINES = true;
 	public static final boolean DEFAULT_SHOW_LINE_LABELS = true;
 	public static final boolean DEFAULT_LINES_REFLECTING = true;
@@ -43,6 +44,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	public static final Color DEFAULT_LINE_LABEL_COLOR = Color.black;
 	public static final double DEFAULT_LINE_LABEL_SIZE = 0.5;
 	public static final int DEFAULT_LINE_LABEL_RESOLUTION = 48;
+	public static final double[] DEFAULT_LINE_LABEL_OFFSET = {0, 0, 0};
 	public static final boolean DEFAULT_SHOW_FACES = true;
 	public static final boolean DEFAULT_SHOW_FACE_LABELS = true;
 	public static final boolean DEFAULT_FACES_REFLECTING = true;
@@ -53,6 +55,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	public static final Color DEFAULT_FACE_LABEL_COLOR = Color.black;
 	public static final double DEFAULT_FACE_LABEL_SIZE = 0.5;
 	public static final int DEFAULT_FACE_LABEL_RESOLUTION = 48;
+	public static final double[] DEFAULT_FACE_LABEL_OFFSET = {0, 0, 0};
 	public static final boolean DEFAULT_TRANSPARENCY_ENABLED = false;
 	public static final double DEFAULT_TRANSPARENCY = .7;
 	public static final boolean DEFAULT_FACES_FLAT = false;
@@ -137,6 +140,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setPointLabelColor(DEFAULT_POINT_LABEL_COLOR);
 		appearanceInspector.setPointLabelSize(DEFAULT_POINT_LABEL_SIZE);
 		appearanceInspector.setPointLabelResolution(DEFAULT_POINT_LABEL_RESOLUTION);
+		appearanceInspector.setPointLabelOffset(DEFAULT_POINT_LABEL_OFFSET);
 		
 		appearanceInspector.setShowLines(DEFAULT_SHOW_LINES);
 		appearanceInspector.setShowLineLabels(DEFAULT_SHOW_LINE_LABELS);
@@ -147,6 +151,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setLineLabelColor(DEFAULT_LINE_LABEL_COLOR);
 		appearanceInspector.setLineLabelSize(DEFAULT_LINE_LABEL_SIZE);
 		appearanceInspector.setLineLabelResolution(DEFAULT_LINE_LABEL_RESOLUTION);
+		appearanceInspector.setLineLabelOffset(DEFAULT_LINE_LABEL_OFFSET);
 		
 		appearanceInspector.setShowFaces(DEFAULT_SHOW_FACES);
 		appearanceInspector.setShowFaceLabels(DEFAULT_SHOW_FACE_LABELS);
@@ -156,6 +161,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setFaceLabelColor(DEFAULT_FACE_LABEL_COLOR);
 		appearanceInspector.setFaceLabelSize(DEFAULT_FACE_LABEL_SIZE);
 		appearanceInspector.setFaceLabelResolution(DEFAULT_FACE_LABEL_RESOLUTION);
+		appearanceInspector.setFaceLabelOffset(DEFAULT_FACE_LABEL_OFFSET);
 		
 		appearanceInspector.setTransparencyEnabled(DEFAULT_TRANSPARENCY_ENABLED);
 		appearanceInspector.setTransparency(DEFAULT_TRANSPARENCY);
@@ -177,6 +183,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setPointLabelColor(c.getProperty(getClass(), "pointLabelColor", DEFAULT_POINT_LABEL_COLOR));
 		appearanceInspector.setPointLabelSize(c.getProperty(getClass(), "pointLabelSize", DEFAULT_POINT_LABEL_SIZE));
 		appearanceInspector.setPointLabelResolution(c.getProperty(getClass(), "pointLabelResolution", DEFAULT_POINT_LABEL_RESOLUTION));
+		appearanceInspector.setPointLabelOffset(c.getProperty(getClass(), "pointLabelOffset", DEFAULT_POINT_LABEL_OFFSET));
 		
 		appearanceInspector.setShowLines(c.getProperty(getClass(), "showLines", DEFAULT_SHOW_LINES));
 		appearanceInspector.setShowLineLabels(c.getProperty(getClass(), "showLineLabels", DEFAULT_SHOW_LINE_LABELS));
@@ -187,6 +194,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setLineLabelColor(c.getProperty(getClass(), "lineLabelColor", DEFAULT_LINE_LABEL_COLOR));
 		appearanceInspector.setLineLabelSize(c.getProperty(getClass(), "lineLabelSize", DEFAULT_LINE_LABEL_SIZE));
 		appearanceInspector.setLineLabelResolution(c.getProperty(getClass(), "lineLabelResolution", DEFAULT_LINE_LABEL_RESOLUTION));
+		appearanceInspector.setLineLabelOffset(c.getProperty(getClass(), "lineLabelOffset", DEFAULT_LINE_LABEL_OFFSET));
 		
 		appearanceInspector.setShowFaces(c.getProperty(getClass(), "showFaces", DEFAULT_SHOW_FACES));
 		appearanceInspector.setShowFaceLabels(c.getProperty(getClass(), "showFaceLabels", DEFAULT_SHOW_FACE_LABELS));
@@ -196,6 +204,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setFaceLabelColor(c.getProperty(getClass(), "faceLabelColor", DEFAULT_FACE_LABEL_COLOR));
 		appearanceInspector.setFaceLabelSize(c.getProperty(getClass(), "faceLabelSize", DEFAULT_FACE_LABEL_SIZE));
 		appearanceInspector.setFaceLabelResolution(c.getProperty(getClass(), "faceLabelResolution", DEFAULT_FACE_LABEL_RESOLUTION));
+		appearanceInspector.setFaceLabelOffset(c.getProperty(getClass(), "faceLabelOffset", DEFAULT_FACE_LABEL_OFFSET));
 		
 		appearanceInspector.setTransparencyEnabled(c.getProperty(getClass(), "transparencyEnabled", DEFAULT_TRANSPARENCY_ENABLED));
 		appearanceInspector.setTransparency(c.getProperty(getClass(), "transparency", DEFAULT_TRANSPARENCY));
@@ -207,7 +216,6 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setTextureScale(c.getProperty(getClass(), "textureScale", DEFAULT_TEXTURE_SCALE));
 		
 		appearanceInspector.updateAll();
-		
 		super.restoreStates(c);
 	}
 	
@@ -222,6 +230,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		c.storeProperty(getClass(), "pointLabelColor", appearanceInspector.getPointLabelColor());
 		c.storeProperty(getClass(), "pointLabelSize", appearanceInspector.getPointLabelSize());
 		c.storeProperty(getClass(), "pointLabelResolution", appearanceInspector.getPointLabelResolution());
+		c.storeProperty(getClass(), "pointLabelOffset", appearanceInspector.getPointLabelOffset());
 		
 		c.storeProperty(getClass(), "showLines", appearanceInspector.isShowLines());
 		c.storeProperty(getClass(), "showLineLabels", appearanceInspector.isShowLineLabels());
@@ -232,6 +241,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		c.storeProperty(getClass(), "lineLabelColor", appearanceInspector.getLineLabelColor());
 		c.storeProperty(getClass(), "lineLabelSize", appearanceInspector.getLineLabelSize());
 		c.storeProperty(getClass(), "lineLabelResolution", appearanceInspector.getLineLabelResolution());
+		c.storeProperty(getClass(), "lineLabelOffset", appearanceInspector.getLineLabelOffset());
 		
 		c.storeProperty(getClass(), "showFaces", appearanceInspector.isShowFaces());
 		c.storeProperty(getClass(), "showFaceLabels", appearanceInspector.isShowFaceLabels());
@@ -241,6 +251,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		c.storeProperty(getClass(), "faceLabelColor", appearanceInspector.getFaceLabelColor());
 		c.storeProperty(getClass(), "faceLabelSize", appearanceInspector.getFaceLabelSize());
 		c.storeProperty(getClass(), "faceLabelResolution", appearanceInspector.getFaceLabelResolution());		
+		c.storeProperty(getClass(), "faceLabelOffset", appearanceInspector.getFaceLabelOffset());		
 		
 		c.storeProperty(getClass(), "transparencyEnabled", appearanceInspector.isTransparencyEnabled());
 		c.storeProperty(getClass(), "transparency", appearanceInspector.getTransparency());
@@ -250,6 +261,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		c.storeProperty(getClass(), "textures", appearanceInspector.getTextures());
 		c.storeProperty(getClass(), "texture", appearanceInspector.getTexture());
 		c.storeProperty(getClass(), "textureScale", appearanceInspector.getTextureScale());
+		
 		super.storeStates(c);
 	}
 

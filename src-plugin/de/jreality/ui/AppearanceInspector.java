@@ -977,6 +977,30 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		faceFontInspector.setLabelSize(size);
 	}
 	
+	public double[] getPointLabelOffset() {
+		return pointFontInspector.getLabelOffset();
+	}
+	
+	public double[] getLineLabelOffset() {
+		return lineFontInspector.getLabelOffset();
+	}
+	
+	public double[] getFaceLabelOffset() {
+		return faceFontInspector.getLabelOffset();
+	}
+	
+	public void setPointLabelOffset(double[] size) {
+		pointFontInspector.setLabelOffset(size);
+	}
+	
+	public void setLineLabelOffset(double[] size) {
+		lineFontInspector.setLabelOffset(size);
+	}
+	
+	public void setFaceLabelOffset(double[] size) {
+		faceFontInspector.setLabelOffset(size);
+	}	
+	
 	public int getPointLabelResolution() {
 		return pointFontInspector.getLabelResolution();
 	}
