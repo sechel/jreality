@@ -55,7 +55,7 @@ public class TestScene {
 			c[1] = rnd.nextDouble();
 			c[2] = rnd.nextDouble();
 		}
-//		g.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(vertexColors));
+		g.setVertexAttributes(Attribute.COLORS, new DoubleArrayArray.Array(vertexColors));
 		g.setEdgeAttributes(Attribute.COLORS, new DoubleArrayArray.Array(edgeColors));
 		g.setFaceAttributes(Attribute.COLORS, new DoubleArrayArray.Array(faceColors));
 		
