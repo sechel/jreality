@@ -116,19 +116,19 @@ public static ToolSystemConfiguration loadDefaultConfiguration() {
   }
 
   public static ToolSystemConfiguration loadDefaultPortalConfiguration() throws IOException {
-    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
+    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("chunks/toolconfig-portal.xml")));
   }
   
   public static ToolSystemConfiguration loadRemotePortalConfiguration() throws IOException {
-    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal-remote.xml")));
+    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("chunks/toolconfig-portal-remote.xml")));
   }
 	  
   public static ToolSystemConfiguration loadRemotePortalMasterConfiguration() throws IOException {
-    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal-remote-master.xml")));
+    return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("chunks/toolconfig-portal-remote-master.xml")));
   }
 		  
   public static ToolSystemConfiguration loadDefaultPortalConfiguration(List<Input> additionalInputs) throws IOException {
-    if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("toolconfig-portal.xml")));
+    if (additionalInputs.isEmpty()) return loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource("chunks/toolconfig-portal.xml")));
     List<ToolSystemConfiguration> all = new LinkedList<ToolSystemConfiguration>();
     all.add(loadConfiguration(Input.getInput(ToolSystemConfiguration.class.getResource(DEFAULT_TOOLCONFIG))));
     all.add(loadConfiguration(additionalInputs));

@@ -1,8 +1,8 @@
 <toolconfig>  
-  
-   <rawdevices>
-   <rawdevice id="Remote" type="de.jreality.toolsystem.raw.DevicePortalRemote"/>
-   </rawdevices>
+
+  <rawdevices>
+    <rawdevice id="Remote" type="de.jreality.toolsystem.raw.DevicePortalRemote"/>
+  </rawdevices>
    
   <rawslots>
   <!-- map slots of raw devices to InputSlots -->
@@ -22,8 +22,8 @@
   </rawslots>
   
   <virtualdevices>
-
-    <mapping src="PrimaryAction" target="PanelAction"/>
+  
+	<mapping src="PrimaryAction" target="PanelAction"/>
     <mapping src="PrimaryMenu" target="PanelMenu"/>
     <mapping src="PrimarySelection" target="PanelSelection"/>
 
@@ -49,11 +49,6 @@
       <inputslot>PrimaryAction</inputslot>
       <outputslot>PanelActivation</outputslot>
     </virtualdevice>
-
-    <!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
-      <inputslot>PrimarySelection</inputslot>
-      <outputslot>GravityToggle</outputslot>
-    </virtualdevice-->
 
     <constant name="FollowPointerSwitch">
       <double>1</double>
@@ -101,11 +96,6 @@
       <outputslot>TrackballTransformation</outputslot>
     </virtualdevice>
     
-    <!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualInvertMatrix">
-      <inputslot>TrackballTransformationInv</inputslot>
-      <outputslot>TrackballTransformation</outputslot>
-    </virtualdevice-->
-
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualEvolutionOperator">
       <inputslot>PointerTransformation</inputslot>
       <outputslot>PointerEvolution</outputslot>
@@ -125,7 +115,7 @@
         <double>1</double>
       </prop>
       <prop name="factorY">
-        <double>1</double>
+        <double>-1</double>
       </prop>
     </virtualdevice>
 
@@ -136,14 +126,6 @@
         <string>translationY</string>
       </prop>
     </virtualdevice>
-    
-   <!-- virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
-      <inputslot>PrimaryNavigationNDC</inputslot>
-      <outputslot>LeftRightAxis</outputslot>
-      <prop name="axis">
-        <string>translationX</string>
-      </prop>
-    </virtualdevice -->
     
     <virtualdevice type="de.jreality.toolsystem.virtual.VirtualExtractAxis">
       <inputslot>PrimaryNavigationNDC</inputslot>
@@ -156,16 +138,14 @@
       </prop>
     </virtualdevice>
     
-    		<virtualdevice
-					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
-			<inputslot>HorizontalShipRotationAngleEvolutionRAW</inputslot>
-			<inputslot>SystemTime</inputslot>
-			<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
-			<prop name="gain">
-				<double>1</double>
-			</prop>
-		</virtualdevice>
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
+		<inputslot>HorizontalShipRotationAngleEvolutionRAW</inputslot>
+		<inputslot>SystemTime</inputslot>
+		<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
+		<prop name="gain">
+			<double>1</double>
+		</prop>
+	</virtualdevice>
     
-
-  </virtualdevices>
+ </virtualdevices>
 </toolconfig>

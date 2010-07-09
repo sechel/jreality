@@ -1,7 +1,7 @@
 <toolconfig>
 
   <rawdevices>
-    <!--rawdevice id="Motionstar" type="de.jreality.toolsystem.raw.DeviceMotionstar"/-->
+  
     <rawdevice id="Trackd" type="de.jreality.toolsystem.raw.DevicePortalTrackd">
       <prop name="tracker_shmkey">
         <int>4126</int>
@@ -13,16 +13,11 @@
       	<int>1</int>
       </prop>
     </rawdevice>
-    <!--rawdevice id="Keyboard" type="de.jreality.toolsystem.raw.DeviceKeyboard"/-->
-    <!--rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse"/-->
-    <rawdevice id="SystemTimer" type="de.jreality.toolsystem.raw.DeviceSystemTimer"/>
-    <!--rawdevice id="Joystick" type="de.jreality.toolsystem.raw.DeviceJoystick"/-->
+    
   </rawdevices>
 
   <rawslots>
 
-    <mapping device="SystemTimer" src="tick" target="SystemTime"/>
-    
     <mapping device="Trackd" src="button_0" target="PrimaryAction"/>
     <mapping device="Trackd" src="button_1" target="PrimaryMenu"/>
     <mapping device="Trackd" src="button_2" target="PrimarySelection"/>
@@ -35,17 +30,9 @@
     <mapping device="Trackd" src="sensor_0" target="RawPointerShipTransformation"/>
     <mapping device="Trackd" src="sensor_1" target="RawShipHeadTransformation"/>
     
-    
-    
   </rawslots>
   
   <virtualdevices>
-
-    <!--virtualdevice type="de.jreality.toolsystem.virtual.VirtualScalePortalCoordinateSystem">
-      <inputslot>RawPointerShipTransformation</inputslot>
-      <outputslot>PointerShipTransformation</outputslot>
-    </virtualdevice-->
-
   
   </virtualdevices>
   
