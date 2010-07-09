@@ -1,10 +1,14 @@
 package de.jreality.portal;
 
 import java.awt.Component;
+import java.awt.GraphicsEnvironment;
 import java.lang.reflect.Method;
 
 import javax.swing.JFrame;
 
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.basic.ToolSystemPlugin;
+import de.jreality.plugin.basic.View;
 import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolSystem;
@@ -39,41 +43,60 @@ public class RemoteExecutor {
 		Component viewingComponent=null;
 		ToolSystem toolSystem=null;
 		
-		if (va instanceof ViewerApp) {
+		if (va != null && va instanceof ViewerApp) {
 			viewingComponent = ((ViewerApp) va).getViewingComponent();
 			toolSystem = ((ViewerApp) va).getToolSystem();
-		} else if (va instanceof Viewer) {
+		} else if (va != null && va instanceof Viewer) {
 			Viewer viewer = (Viewer)va;
 			viewingComponent = (Component)viewer.getViewingComponent();
 			toolSystem = ToolSystem.getToolSystemForViewer(viewer);
 		} else {
-			/* TODO: fix dependencies here...
+			// TODO: fix dependencies here...
 			JRViewer v = JRViewer.getLastJRViewer();
 			if (v == null) throw new IllegalArgumentException("insufficient return value of remoteMain of "+clazz);
 			viewingComponent = v.getPlugin(View.class).getViewer().getViewingComponent();
 			toolSystem = v.getPlugin(ToolSystemPlugin.class).getToolSystem();
-			*/
+			//
 		}
 		
 		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
 		
-		JFrame frame = new JFrame("no title");
-		frame.getContentPane().add(viewingComponent);
-		GuiUtility.hideCursor(frame);
-
 		if (config.getBool("fullscreen")) {
+			JFrame frame = new JFrame("no title");
+			frame.setLayout(null);
+			
+			int defWidth = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getWidth();
+			int defHeight = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getHeight();
+			
+			int x = config.getInt("screen.offset.x", 0);
+			int y = config.getInt("screen.offset.y", 0);
+			int width = config.getInt("screen.width", defWidth);
+			int height = config.getInt("screen.height", defHeight);
+			
+			viewingComponent.setBounds(x, y, width, height);
+			
+			frame.getContentPane().add(viewingComponent);
+			GuiUtility.hideCursor(viewingComponent);
+			
 			frame.dispose();
 			frame.setUndecorated(true);
 			frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
 			frame.validate();
+			
+			frame.setVisible(true);
 		} else {
+			JFrame frame = new JFrame("no title");
+			frame.getContentPane().add(viewingComponent);
+			GuiUtility.hideCursor(viewingComponent);
+			
 			int w = config.getInt("screen.width");
 			int h = config.getInt("screen.height");
 			frame.setSize(w, h);
 			frame.setTitle(ConfigurationAttributes.getDefaultConfiguration().getProperty("frametitle"));
+			
+			frame.setVisible(true);
 		}
 
-		frame.setVisible(true);
 		
 		return (PortalToolSystem) toolSystem;
 	}

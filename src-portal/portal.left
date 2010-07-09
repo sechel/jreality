@@ -1,8 +1,0 @@
-# portal configurtation file
-
-# load shared config
-parent: portal.props
-
-camera.orientation: 90. 0. 1. 0.
-
-frametitle: left

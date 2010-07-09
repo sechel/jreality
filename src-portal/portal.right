@@ -1,7 +1,0 @@
-# portal configurtation file
-
-parent: portal.props
-
-camera.orientation: -90. 0. 1. 0.
-
-frametitle: right

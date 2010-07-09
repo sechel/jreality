@@ -1,3 +1,0 @@
-#!/bin/sh
-NATIVE_LIBS=/usr/local/jReality
-execute -clrf 'DISPLAY=:0.0 java -Xms512M -Xmx1248M -Djava.library.path='$NATIVE_LIBS' -Djreality.config='$PWD'/portal.$HOSTNAME -Djreality.jogl.quadBufferedStereo=true -jar '$PWD'/../lib/smrj-client.jar'
