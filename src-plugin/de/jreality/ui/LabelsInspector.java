@@ -135,9 +135,9 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 	}
 	
 	public void setLabelOffset(double[] off) {
-		offsetXSlider.setValue((int)off[0] * 100);
-		offsetYSlider.setValue((int)off[1] * 100);
-		offsetZSlider.setValue((int)off[2] * 100);
+		offsetXSlider.setValue((int)(off[0] * 100));
+		offsetYSlider.setValue((int)(off[1] * 100));
+		offsetZSlider.setValue((int)(off[2] * 100));
 		updateLabelOffset();
 	}
 	
