@@ -40,8 +40,6 @@
 
 package de.jreality.jogl;
 
-import static de.jreality.shader.CommonAttributes.BACKGROUND_TEXTURE2D;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -56,7 +54,6 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -76,6 +73,8 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ImageData;
+import de.jreality.shader.RootAppearance;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 
 public class JOGLRendererHelper {
@@ -129,14 +128,29 @@ public class JOGLRendererHelper {
 		if (obj == Appearance.INHERITED)	{
 			boolean hasTexture = false, hasColors = false;
 			double textureAR = 1.0;
-			bgo = topAp.getAttribute(BACKGROUND_TEXTURE2D);
+			
 			Texture2D tex = null;
+
+			// TODO: remove this!!!
+			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
 			if (bgo != null && bgo instanceof List) {
 				tex = (Texture2D) ((List)bgo).get(0);
+				System.out.println("found bg tex list: "+tex.getImage());
+			}
+			
+			if (tex == null) {
+				// This is how the background texture should be accessed...
+				// Maybe cache the RootAppearance proxy for performance
+				RootAppearance ra = ShaderUtility.createRootAppearance(topAp);
+				tex = ra.getBackgroundTexture2d();
+			}
+			
+			if (tex != null && tex.getImage() != null) {
 				textureAR = tex.getImage().getWidth()
-						/ ((double) tex.getImage().getHeight());
+				/ ((double) tex.getImage().getHeight());
 				hasTexture = true;
 			}
+			
 			double ar = width / ((double) height) / textureAR;
 			double xl = 0, xr = 1, yb = 0, yt = 1;
 			if (ar > 1.0) {
@@ -150,6 +164,7 @@ public class JOGLRendererHelper {
 				xl = .5 * (1 - ar);
 				xr = 1.0 - xl;
 			}
+			
 			if (jr.offscreenMode)	{
 				int numTiles = jr.offscreenRenderer.getNumTiles();
 				double xmin = ((double)jr.whichTile[0])/numTiles;
