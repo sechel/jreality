@@ -8,6 +8,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
 
 public class BackgroundExample {
@@ -23,8 +24,13 @@ public class BackgroundExample {
 	         e.printStackTrace();
 	      }
 	      Appearance rootApp = view.getViewer().getSceneRoot().getAppearance();
-	      RootAppearance ra = ShaderUtility.createRootAppearance(rootApp);
-	      ra.createBackgroundTexture2d().setImage(id);
+
+	      // either
+//	      RootAppearance ra = ShaderUtility.createRootAppearance(rootApp);
+//	      ra.createBackgroundTexture2D().setImage(id);
+	      
+	      // or
+	      TextureUtility.setBackgroundTexture(rootApp, id);
 	      
 	   }
 

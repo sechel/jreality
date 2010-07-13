@@ -76,6 +76,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 
 public class JOGLRendererHelper {
 
@@ -141,8 +142,7 @@ public class JOGLRendererHelper {
 			if (tex == null) {
 				// This is how the background texture should be accessed...
 				// Maybe cache the RootAppearance proxy for performance
-				RootAppearance ra = ShaderUtility.createRootAppearance(topAp);
-				tex = ra.getBackgroundTexture2d();
+				tex = TextureUtility.getBackgroundTexture(topAp);
 			}
 			
 			if (tex != null && tex.getImage() != null) {

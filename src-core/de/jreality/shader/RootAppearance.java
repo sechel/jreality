@@ -72,6 +72,6 @@ public interface RootAppearance extends AttributeEntity {
   Boolean getRenderS3();
   void setRenderS3(Boolean b);
   
-  Texture2D createBackgroundTexture2d();
-  Texture2D getBackgroundTexture2d();
+  Texture2D createBackgroundTexture2D();
+  Texture2D getBackgroundTexture2D();
 }

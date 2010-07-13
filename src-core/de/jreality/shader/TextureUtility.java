@@ -478,4 +478,21 @@ public class TextureUtility {
 		String key = (shader == null || shader.equals("")) ? "reflectionMap" : shader+".reflectionMap";
 		return AttributeEntityUtility.hasAttributeEntity(CubeMap.class, key, app);
 	}
+
+	/********** Background image ************/
+	
+	public static void setBackgroundTexture(Appearance rootApp, ImageData id) {
+		createTextureImpl(rootApp, CommonAttributes.BACKGROUND_TEXTURE2D, id, false);
+	}
+	
+	
+	public static Texture2D getBackgroundTexture(Appearance rootApp) {
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, CommonAttributes.BACKGROUND_TEXTURE2D, rootApp)) {
+			return (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, CommonAttributes.BACKGROUND_TEXTURE2D, rootApp, true);
+		}
+		return null;
+	}
+	
+	
+	
 }
