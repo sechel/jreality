@@ -373,7 +373,7 @@ public class JOGLRenderer   {
 	}
 
 	public void init(GL gl) {
-		System.err.println("initing gl");
+		System.err.println("initing gl "+gl);
 		globalGL = gl;
 	
 //		renderingState = new JOGLRenderingState(this);
@@ -382,6 +382,7 @@ public class JOGLRenderer   {
 		theLog.log(Level.FINE,"new GL: "+gl);			
 		theLog.log(Level.FINE,"version: "+vv);			
 		lightsChanged = true;
+		forceNewDisplayLists();
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
 		JOGLCylinderUtility.setupCylinderDLists(this);
 		JOGLSphereHelper.setupSphereDLists(this);
