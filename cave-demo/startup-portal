@@ -2,7 +2,6 @@
 
 JR=/central/home/ptldemo/steffen_testws/jreality
 ARGS="-Xms256M -Xmx396M -Djava.library.path=$JR/jni/linux64 -Djreality.jogl.quadBufferedStereo=true"
-ARGS=$ARGS" -Dde.jreality.viewerapp.env=portal-remote -Dde.jreality.scene.tool.Config=portal-remote -Dde.jreality.ui.viewerapp.autoRender=false -Dde.jreality.ui.viewerapp.synchRender=false"
 
 ssh left DISPLAY=:0.0 java -Djreality.config=$JR/cave-demo/portal.left $ARGS -jar $JR/lib/smrj-client.jar tcp 4444 &
 ssh center DISPLAY=:0.0 java -Djreality.config=$JR/cave-demo/portal.center $ARGS -jar $JR/lib/smrj-client.jar tcp 4444 &
@@ -31,7 +30,7 @@ ssh right DISPLAY=:0.0 java -Djreality.config=$JR/cave-demo/portal.right $ARGS -
 # add the following java arguments to the client commands:
 # ARGS=$ARGS" -Dde.jreality.viewerapp.env=portal-remote -Dde.jreality.scene.tool.Config=portal-remote -Dde.jreality.ui.viewerapp.autoRender=false -Dde.jreality.ui.viewerapp.synchRender=false"
 #
-# then, to run an application (say de.jreality.tutorial.geom.Cube06), run in eclipse
+# then, to run an application (say, de.jreality.tutorial.geom.Cube06), run in eclipse
 # the class de.jreality.portal.MasterApplication with Program arguments
 #
 # de.jreality.tutorial.geom.Cube06
@@ -41,5 +40,5 @@ ssh right DISPLAY=:0.0 java -Djreality.config=$JR/cave-demo/portal.right $ARGS -
 # -Dde.smrj.clients="left center right"
 # -Dde.smrj.clients.port=4444
 #
-# Other parameters are not required, but the libTrackdAPI needs to be in the java.library.path
+# Other parameters are not required, but libTrackdAPI needs to be in the java.library.path
 #
