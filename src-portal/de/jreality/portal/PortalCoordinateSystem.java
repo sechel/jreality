@@ -92,15 +92,6 @@ public class PortalCoordinateSystem {
 
 		zOffsetPORTAL = config.getDouble("screen.offset.z", zOffsetPORTAL);
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("Portal screen setup: ").append(SystemProperties.hostname).append('\n');
-		sb.append("\t xDim="+xDimPORTAL).append('\n');
-		sb.append("\t yDim="+yDimPORTAL).append('\n');
-		sb.append("\t xOff="+xOffsetPORTAL).append('\n');
-		sb.append("\t yOff="+yOffsetPORTAL).append('\n');
-		sb.append("\t zOff="+zOffsetPORTAL).append('\n');
-		
-		System.out.println(sb.toString());
 	}
 	
 	public static double[] getPortalCenter() {

@@ -17,15 +17,3 @@ java -Djreality.config=demo.floor $ARGS -jar ../lib/smrj-client.jar &
 # -Dde.jreality.viewerapp.env=portal
 # -Dde.jreality.portal.localViewer=de.jreality.jogl.Viewer
 #
-# in a CAVE:
-# 
-# 1. add the flag
-# -Dde.jreality.scene.tool.Config=portal
-#
-# 2. run the above java commands on the different machines
-#
-# 3. adapt the demo.* files:
-# - set fullscreen to true
-# - remove frame.size and frame.offset (unless your screen is smaller than the whole projection area)
-# - eventually adapt the screen settings to actual dimensions
-#

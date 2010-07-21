@@ -142,6 +142,7 @@ public class View extends SideContainerPerspective implements ChangeListener {
 			// this is required to get something rendered on the floor
 			// in a test setup where head tracking is not available...
 			MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
+			MatrixBuilder.euclidean().translate(0,0,5).assignTo(scene.getAvatarComponent());
 			
 			String headMoveTool;
 			if (runningEnvironment == RunningEnvironment.PORTAL_REMOTE)
