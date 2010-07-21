@@ -59,44 +59,7 @@ public class RemoteExecutor {
 			//
 		}
 		
-		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
-		
-		if (config.getBool("fullscreen")) {
-			JFrame frame = new JFrame("no title");
-			frame.setLayout(null);
-			
-			int defWidth = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getWidth();
-			int defHeight = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDisplayMode().getHeight();
-			
-			int x = config.getInt("screen.offset.x", 0);
-			int y = config.getInt("screen.offset.y", 0);
-			int width = config.getInt("screen.width", defWidth);
-			int height = config.getInt("screen.height", defHeight);
-			
-			viewingComponent.setBounds(x, y, width, height);
-			
-			frame.getContentPane().add(viewingComponent);
-			GuiUtility.hideCursor(viewingComponent);
-			
-			frame.dispose();
-			frame.setUndecorated(true);
-			frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-			frame.validate();
-			
-			frame.setVisible(true);
-		} else {
-			JFrame frame = new JFrame("no title");
-			frame.getContentPane().add(viewingComponent);
-			GuiUtility.hideCursor(viewingComponent);
-			
-			int w = config.getInt("screen.width");
-			int h = config.getInt("screen.height");
-			frame.setSize(w, h);
-			frame.setTitle(ConfigurationAttributes.getDefaultConfiguration().getProperty("frametitle"));
-			
-			frame.setVisible(true);
-		}
-
+		PortalUtility.displayPortalViewingComponent(viewingComponent);
 		
 		return (PortalToolSystem) toolSystem;
 	}

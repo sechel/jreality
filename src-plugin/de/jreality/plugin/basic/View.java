@@ -56,6 +56,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -137,6 +138,11 @@ public class View extends SideContainerPerspective implements ChangeListener {
 			cam.setOnAxis(false);
 			cam.setStereo(true);
 			SceneGraphComponent camNode = scene.getCameraComponent();
+			
+			// this is required to get something rendered on the floor
+			// in a test setup where head tracking is not available...
+			MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
+			
 			String headMoveTool;
 			if (runningEnvironment == RunningEnvironment.PORTAL_REMOTE)
 				headMoveTool = "de.jreality.tools.RemotePortalHeadMoveTool";

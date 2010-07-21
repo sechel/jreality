@@ -88,8 +88,9 @@ public class ConfigurationAttributes extends Properties {
         return getProperty(string, "false").trim().equalsIgnoreCase("true");
     }
 
-    public double getDouble(String key) {
-        return Double.parseDouble(getProperty(key));
+    public double getDouble(String key, double defVal) {
+        String val = getProperty(key);
+        return val == null ? defVal : Double.parseDouble(val);
     }
     public double[] getDoubleArray(String key) {
         String str = getProperty(key);

@@ -48,7 +48,7 @@ import java.util.Vector;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Camera;
-import de.jreality.ui.viewerapp.SelectionListener;
+import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
 
@@ -62,10 +62,11 @@ public class PortalCoordinateSystem {
 	 */
 	//  static double xDimPORTAL = 4.068;   // half PORTAL screen x-dim in feet
 	//  static double yDimPORTAL = 6.561;   // full PORTAL screen y-dim in feet
-	public static final double xDimPORTAL = 2*4.068*0.3048;   // full PORTAL screen x-dim in METER
-	public static final double yDimPORTAL = 6.561*0.3048;   // full PORTAL screen y-dim in METER
-	public static final double zDimPORTAL = xDimPORTAL;
-	public static final double yOffsetPORTAL = 0.4;		// the height (in meters) of the base of the walls
+	static double xDimPORTAL = 2.48;   // full PORTAL screen x-dim in METER
+	static double yDimPORTAL = 2.00;   // full PORTAL screen y-dim in METER
+	static double zOffsetPORTAL = xDimPORTAL/2.0;
+	static double xOffsetPORTAL = -xDimPORTAL/2.0;
+	static double yOffsetPORTAL = 0.4;		// the height (in meters) of the base of the walls
 
 	private static double portalScale = 1.0;
 	static double[] portalCenter = {0,0,0,1};
@@ -79,7 +80,27 @@ public class PortalCoordinateSystem {
 	static {
 		String bar = Secure.getProperty(SystemProperties.PORTAL_SCALE);
 		if (bar != null) setPortalScale(Double.parseDouble(bar));
-//		System.err.println("PCS: Portal scale is "+getPortalScale());         
+//		System.err.println("PCS: Portal scale is "+getPortalScale());
+		
+		// read screen setup from config file:
+		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
+		xDimPORTAL = config.getDouble("screen.width", xDimPORTAL);
+		yDimPORTAL = config.getDouble("screen.height", yDimPORTAL);
+
+		xOffsetPORTAL = config.getDouble("screen.offset.x", xOffsetPORTAL);
+		yOffsetPORTAL = config.getDouble("screen.offset.y", yOffsetPORTAL);
+
+		zOffsetPORTAL = config.getDouble("screen.offset.z", zOffsetPORTAL);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("Portal screen setup: ").append(SystemProperties.hostname).append('\n');
+		sb.append("\t xDim="+xDimPORTAL).append('\n');
+		sb.append("\t yDim="+yDimPORTAL).append('\n');
+		sb.append("\t xOff="+xOffsetPORTAL).append('\n');
+		sb.append("\t yOff="+yOffsetPORTAL).append('\n');
+		sb.append("\t zOff="+zOffsetPORTAL).append('\n');
+		
+		System.out.println(sb.toString());
 	}
 	
 	public static double[] getPortalCenter() {
@@ -109,7 +130,7 @@ public class PortalCoordinateSystem {
 	public static Rectangle2D getWallPort() {
 		Rectangle2D wp = new Rectangle2D.Double();
 		wp.setFrame(
-				portalScale*(-xDimPORTAL/2-portalCenter[0]),
+				portalScale*(xOffsetPORTAL-portalCenter[0]),
 				portalScale*(yOffsetPORTAL-portalCenter[1]),
 				portalScale*xDimPORTAL,
 				portalScale*yDimPORTAL);
@@ -120,7 +141,8 @@ public class PortalCoordinateSystem {
 
 		double xmin=0, ymin=0;
 		Rectangle2D wallport = getWallPort();
-		double z = -origin[2] + convertMeters(zDimPORTAL)/2;  // make wall z=0
+		double z = -origin[2] + convertMeters(zOffsetPORTAL);  // make wall z=0
+		
 		cam.setFocus(z);
 		xmin = (wallport.getMinX()+(origin[0]))/z;
 		ymin = (wallport.getMinY()+(origin[1]))/z;

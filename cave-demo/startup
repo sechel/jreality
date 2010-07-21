@@ -1,0 +1,31 @@
+#!/bin/bash
+
+JR=/Users/weissman/Development/jreality_ws/jreality
+ARGS="-Xms256M -Xmx396M -Djava.library.path=$JR/jni/macosx"
+
+java -Djreality.config=demo.left $ARGS -jar ../lib/smrj-client.jar &
+java -Djreality.config=demo.center $ARGS -jar ../lib/smrj-client.jar &
+java -Djreality.config=demo.right $ARGS -jar ../lib/smrj-client.jar &
+java -Djreality.config=demo.floor $ARGS -jar ../lib/smrj-client.jar &
+
+
+#
+# to test the cave rendering on 4 walls
+# run JRViewer or tutorials with the following vm arguments:
+#
+# -Dde.jreality.scene.Viewer=de.jreality.portal.PortalServerViewer
+# -Dde.jreality.viewerapp.env=portal
+# -Dde.jreality.portal.localViewer=de.jreality.jogl.Viewer
+#
+# in a CAVE:
+# 
+# 1. add the flag
+# -Dde.jreality.scene.tool.Config=portal
+#
+# 2. run the above java commands on the different machines
+#
+# 3. adapt the demo.* files:
+# - set fullscreen to true
+# - remove frame.size and frame.offset (unless your screen is smaller than the whole projection area)
+# - eventually adapt the screen settings to actual dimensions
+#

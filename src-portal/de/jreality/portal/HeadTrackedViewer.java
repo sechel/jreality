@@ -120,25 +120,9 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 
 	public static HeadTrackedViewer create(ConfigurationAttributes config, Class<? extends Viewer> viewerClass) {
 		if (frame == null) {
-			frame = new JFrame("no title");
 			hv = new HeadTrackedViewer(config, viewerClass);
-			frame.getContentPane().add((Component) hv.getViewingComponent());
-			GuiUtility.hideCursor(frame);
-
-			if (config.getBool("fullscreen")) {
-				frame.dispose();
-				frame.setUndecorated(true);
-				frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(frame);
-				frame.validate();
-			} else {
-				int w = config.getInt("screen.width");
-				int h = config.getInt("screen.height");
-				frame.setSize(w, h);
-				frame.setTitle(ConfigurationAttributes.getDefaultConfiguration().getProperty("frametitle"));
-			}
-
-			frame.setVisible(true);
-
+			Component viewingComponent = (Component) hv.getViewingComponent();
+			frame = PortalUtility.displayPortalViewingComponent(viewingComponent);
 		}
 		return hv;
 	}
