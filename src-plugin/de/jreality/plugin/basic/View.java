@@ -84,7 +84,10 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	private ViewerSwitch viewerSwitch;
 	private RenderTrigger renderTrigger;
 	private boolean autoRender = true;
-	private String title = "jReality";
+	private static String 
+		title = "jReality";
+	private static Icon
+		mainIcon = ImageHook.getIcon("hausgruen.png");
 	
 	private RunningEnvironment runningEnvironment;
 
@@ -222,7 +225,7 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		PluginInfo info = new PluginInfo();
 		info.name = "View";
 		info.vendorName = "Ulrich Pinkall"; 
-		info.icon = ImageHook.getIcon("hausgruen.png");
+		info.icon = mainIcon;
 		info.isDynamic = false;
 		return info;
 	}
@@ -252,21 +255,22 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	public Icon getIcon() {
 		return getPluginInfo().icon;
 	}
+	public static void setIcon(Icon mainIcon) {
+		View.mainIcon = mainIcon;
+	}
 
 	public String getTitle() {
 		return title;
 	}
-	
-	/** Influences the window title when set before startup.
-	 *
+	/** 
+	 * Set the window title when before startup.
 	 * @param title
 	 */
-	public void setTitle(String title) {
-		this.title = "jReality - " + title;
+	public static void setTitle(String title) {
+		View.title = title;
 	}
-
+	
 	public void setVisible(boolean visible) {
-
 	}
 
 	public SelectionManager getSelectionManager() {
