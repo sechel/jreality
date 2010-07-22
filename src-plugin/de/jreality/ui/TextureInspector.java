@@ -257,7 +257,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		c.gridheight = 1;
 		c.gridwidth = 1;
 		c.weightx = 0.0;
-		rotatePanel.add(new JLabel("Angle °"), c);
+		rotatePanel.add(new JLabel("Angle Â°"), c);
 		c.gridwidth = 1;
 		c.weightx = 1.0;
 		rotatePanel.add(rotateSlider, c);
