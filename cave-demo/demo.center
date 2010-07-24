@@ -5,5 +5,5 @@ parent: demo.props
 frametitle: center
 
 frame.offset.x: 248
-frame.offset.y: 200
+frame.offset.y: 248
 

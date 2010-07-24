@@ -5,7 +5,7 @@ parent: demo.props
 frame.title: left
 
 frame.offset.x: 0
-frame.offset.y: 200
+frame.offset.y: 248
 
 camera.orientation: 90. 0. 1. 0.
 
