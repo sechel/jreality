@@ -3,15 +3,17 @@ package de.jreality.plugin.content;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.util.HashMap;
 
-import javax.swing.JToggleButton;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
 
 import de.jreality.plugin.basic.Scene;
+import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewPreferences;
-import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.basic.ViewPreferences.ColorPickerModeChangedListener;
+import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jreality.scene.Appearance;
@@ -19,13 +21,14 @@ import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.AppearanceInspector;
+import de.jreality.ui.viewerapp.actions.AbstractJrToggleAction;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
 /** A plugin that adds an inspector for the appearance of the viewers contents.
  *
  */
-public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener, ActionListener {
+public class ContentAppearance extends SceneShrinkPanel implements ColorPickerModeChangedListener {
 
 	public static final boolean DEFAULT_SHOW_POINTS = true;
 	public static final boolean DEFAULT_SHOW_POINT_LABELS = true;
@@ -68,10 +71,110 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		viewPreferences = null;
 	private AppearanceInspector 
 		appearanceInspector = null;
-	private JToggleButton
-		showVerticesToggle = new JToggleButton(ImageHook.getIcon("shape_handles.png")),
-		showEdgeToggle = new JToggleButton(ImageHook.getIcon("shape_edges.png")),
-		showFacesToggle = new JToggleButton(ImageHook.getIcon("shape_square.png"));
+	private AbstractJrToggleAction
+		showVerticesAction = new AbstractJrToggleAction("Vertices") {
+			private static final long 
+				serialVersionUID = 1L;
+
+			{
+				setIcon(ImageHook.getIcon("shape_handles.png"));
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('1'));
+			}
+		
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				appearanceInspector.setShowPoints(showVerticesAction.isSelected());				
+			}
+		},
+		showEdgesAction = new AbstractJrToggleAction("Edges") {
+			private static final long 
+				serialVersionUID = 1L;
+
+			{
+				setIcon(ImageHook.getIcon("shape_edges.png"));
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('2'));
+			}
+		
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				appearanceInspector.setShowLines(showEdgesAction.isSelected());				
+			}
+		},
+		showFacesAction = new AbstractJrToggleAction("Faces") {
+			private static final long 
+				serialVersionUID = 1L;
+
+			{
+				setIcon(ImageHook.getIcon("shape_square.png"));
+				putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('3'));
+			}
+		
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				appearanceInspector.setShowFaces(showFacesAction.isSelected());				
+			}
+		};
+		private AbstractAction
+			increasePointRadiusAction = new AbstractAction() {
+				private static final long 
+					serialVersionUID = 1L;
+		
+				{
+					putValue(NAME, "Increase Point Size");
+					putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('1', InputEvent.CTRL_DOWN_MASK));
+				}
+			
+				public void actionPerformed(ActionEvent e) {
+					double ps = appearanceInspector.getPointRadius();
+					ps *= 1.1;
+					appearanceInspector.setPointRadius(ps);
+				}
+			},
+		decreasePointRadiusAction = new AbstractAction() {
+				private static final long 
+					serialVersionUID = 1L;
+		
+				{
+					putValue(NAME, "Decrease Point Size");
+					putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('1', InputEvent.ALT_DOWN_MASK));
+				}
+			
+				public void actionPerformed(ActionEvent e) {
+					double ps = appearanceInspector.getPointRadius();
+					ps /= 1.1;
+					appearanceInspector.setPointRadius(ps);
+				}
+			},
+		increaseTubeRadiusAction = new AbstractAction() {
+				private static final long 
+					serialVersionUID = 1L;
+		
+				{
+					putValue(NAME, "Increase Tube Size");
+					putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('2', InputEvent.CTRL_DOWN_MASK));
+				}
+			
+				public void actionPerformed(ActionEvent e) {
+					double ps = appearanceInspector.getTubeRadius();
+					ps *= 1.1;
+					appearanceInspector.setTubeRadius(ps);
+				}
+			},
+		decreaseTubeRadiusAction = new AbstractAction() {
+				private static final long 
+					serialVersionUID = 1L;
+		
+				{
+					putValue(NAME, "Decrease Tube Size");
+					putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke('2', InputEvent.ALT_DOWN_MASK));
+				}
+			
+				public void actionPerformed(ActionEvent e) {
+					double ps = appearanceInspector.getTubeRadius();
+					ps /= 1.1;
+					appearanceInspector.setTubeRadius(ps);
+				}
+			};
 	
 	private HashMap<String, String> 
 		textures = new HashMap<String, String>();
@@ -88,25 +191,9 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 		appearanceInspector = new AppearanceInspector();
 		restoreDefaults();
-		
-		showVerticesToggle.setToolTipText("Show Vertices");
-		showEdgeToggle.setToolTipText("Show Edges");
-		showFacesToggle.setToolTipText("Show Faces");
 	}
 	double worldSize = 1.0;
 	
-	
-	public void actionPerformed(ActionEvent e) {
-		if (showVerticesToggle == e.getSource()) {
-			appearanceInspector.setShowPoints(showVerticesToggle.isSelected());
-		}
-		if (showEdgeToggle == e.getSource()) {
-			appearanceInspector.setShowLines(showEdgeToggle.isSelected());
-		}
-		if (showFacesToggle == e.getSource()) {
-			appearanceInspector.setShowFaces(showFacesToggle.isSelected());
-		}
-	}
 	
 	
 	public void install(Scene scene) {
@@ -117,11 +204,11 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		contentApp.addAppearanceListener(new AppearanceListener() {
 			public void appearanceChanged(AppearanceEvent ev) {
 				boolean showV = (Boolean)contentApp.getAttribute(CommonAttributes.VERTEX_DRAW);
-				showVerticesToggle.setSelected(showV);
+				showVerticesAction.setSelected(showV);
 				boolean showE = (Boolean)contentApp.getAttribute(CommonAttributes.EDGE_DRAW);
-				showEdgeToggle.setSelected(showE);
+				showEdgesAction.setSelected(showE);
 				boolean showF = (Boolean)contentApp.getAttribute(CommonAttributes.FACE_DRAW);
-				showFacesToggle.setSelected(showF);
+				showFacesAction.setSelected(showF);
 			}
 		});
 	}
@@ -277,12 +364,17 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 		ViewToolBar mainToolbar = c.getPlugin(ViewToolBar.class);
 		mainToolbar.addSeparator(getClass(), 1.705);
-		mainToolbar.addTool(getClass(), 1.71, showVerticesToggle);
-		mainToolbar.addTool(getClass(), 1.72, showEdgeToggle);
-		mainToolbar.addTool(getClass(), 1.73, showFacesToggle);
-		showVerticesToggle.addActionListener(this);
-		showEdgeToggle.addActionListener(this);
-		showFacesToggle.addActionListener(this);
+		mainToolbar.addTool(getClass(), 1.71, showVerticesAction.createToolboxItem());
+		mainToolbar.addTool(getClass(), 1.72, showEdgesAction.createToolboxItem());
+		mainToolbar.addTool(getClass(), 1.73, showFacesAction.createToolboxItem());
+		ViewMenuBar menuBar = c.getPlugin(ViewMenuBar.class);
+		menuBar.addMenuItem(getClass(), 0, showVerticesAction.createMenuItem(), "Content", "Appearance");
+		menuBar.addMenuItem(getClass(), 1, showEdgesAction.createMenuItem(), "Content", "Appearance");
+		menuBar.addMenuItem(getClass(), 2, showFacesAction.createMenuItem(), "Content", "Appearance");
+		menuBar.addMenuItem(getClass(), 0.1, increasePointRadiusAction, "Content", "Appearance");
+		menuBar.addMenuItem(getClass(), 0.2, decreasePointRadiusAction, "Content", "Appearance");
+		menuBar.addMenuItem(getClass(), 1.1, increaseTubeRadiusAction, "Content", "Appearance");
+		menuBar.addMenuItem(getClass(), 1.2, decreaseTubeRadiusAction, "Content", "Appearance");
 	}
 
 	@Override
