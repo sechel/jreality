@@ -126,7 +126,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 			
 				public void actionPerformed(ActionEvent e) {
 					double ps = appearanceInspector.getPointRadius();
-					ps *= 1.1;
+					ps *= 1.2;
 					appearanceInspector.setPointRadius(ps);
 				}
 			},
@@ -141,7 +141,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 			
 				public void actionPerformed(ActionEvent e) {
 					double ps = appearanceInspector.getPointRadius();
-					ps /= 1.1;
+					ps /= 1.2;
 					appearanceInspector.setPointRadius(ps);
 				}
 			},
@@ -156,7 +156,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 			
 				public void actionPerformed(ActionEvent e) {
 					double ps = appearanceInspector.getTubeRadius();
-					ps *= 1.1;
+					ps *= 1.2;
 					appearanceInspector.setTubeRadius(ps);
 				}
 			},
@@ -171,7 +171,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 			
 				public void actionPerformed(ActionEvent e) {
 					double ps = appearanceInspector.getTubeRadius();
-					ps /= 1.1;
+					ps /= 1.2;
 					appearanceInspector.setTubeRadius(ps);
 				}
 			};
