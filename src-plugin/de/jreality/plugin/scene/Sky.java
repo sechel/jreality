@@ -18,6 +18,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileSystemView;
 
@@ -34,9 +35,10 @@ import de.jreality.util.SystemProperties;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.UIFlavor;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
-public class Sky extends Plugin {
+public class Sky extends Plugin implements UIFlavor {
 
 	private static String sideNames= "rt,lf,up,dn,bk,ft";
 
@@ -275,6 +277,9 @@ public class Sky extends Plugin {
 		vp.removeAll(getClass());
 	}
 	
+	public void mainUIChanged(String arg0) {
+		SwingUtilities.updateComponentTreeUI(fileChooser);
+	}
 	
 	@Override
 	public PluginInfo getPluginInfo() {
