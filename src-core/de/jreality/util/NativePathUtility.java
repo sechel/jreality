@@ -13,7 +13,7 @@ public class NativePathUtility {
 	 */
 	public static void set(String pathPrefix) {
 		String vmName = Secure.getProperty("java.vm.name");
-		if (!vmName.contains("HotSpot")) {
+		if (!vmName.contains("HotSpot") && !vmName.contains("OpenJDK")) {
 			return;
 		}
 		String webstartVersion = Secure.getProperty("webstart.version");
