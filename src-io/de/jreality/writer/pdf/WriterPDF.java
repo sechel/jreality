@@ -278,7 +278,7 @@ public class WriterPDF implements SceneWriter {
             annot.put(PdfName.SUBTYPE, new PdfName(PDF_NAME_3D)); // Mandatory keys
             annot.put(PdfName.TYPE, PdfName.ANNOT);
             annot.put(new PdfName(PDF_NAME_3DD), u3dStreamRef); // Reference to stream object
-            annot.put(new PdfName("3DI"), PdfBoolean.PDFFALSE);
+            annot.put(new PdfName("3DI"), PdfBoolean.PDFTRUE);
 //            annot.put(new PdfName("3DV"), new PdfName("F")); // First view is the default one
             annot.setAppearance(PdfAnnotation.APPEARANCE_NORMAL, ap); // Assign appearance and page
             annot.put(new PdfName("3DA"), activationDict);
