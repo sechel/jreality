@@ -1,5 +1,6 @@
 <toolconfig>
 
+  <!-- Import required controllers here /-->
   <import href="chunks/toolconfig-mouse-keyboard.xml" />
   <import href="chunks/toolconfig-desktop.xml" />
   <!-- import href="chunks/toolconfig-Spacenav.xml" /-->
