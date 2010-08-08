@@ -77,7 +77,7 @@ import de.jreality.util.Input;
  */
 public class ToolSystemConfiguration {
   
-  private static final String DEFAULT_TOOLCONFIG = "toolconfig.xml";
+  private static final String DEFAULT_TOOLCONFIG = "toolconfig-split.xml";
 
 public static ToolSystemConfiguration loadDefaultConfiguration() {
     try {
