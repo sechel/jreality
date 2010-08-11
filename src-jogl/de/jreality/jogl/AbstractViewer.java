@@ -178,6 +178,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
         }
         public void mousePressed(MouseEvent e) {
           component.dispatchEvent(e);
+          ((Component)drawable).requestFocus();
         }
         public void mouseReleased(MouseEvent e) {
           component.dispatchEvent(e);
