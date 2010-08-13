@@ -2,7 +2,7 @@ package de.jreality.tools;
 
 
 
-final class LineDragEventMulticaster implements LineDragListener
+public final class LineDragEventMulticaster implements LineDragListener
 {
   private final LineDragListener a, b;
   private LineDragEventMulticaster(LineDragListener a, LineDragListener b) {

@@ -2,7 +2,7 @@ package de.jreality.tools;
 
 
 
-final class FaceDragEventMulticaster implements FaceDragListener
+public final class FaceDragEventMulticaster implements FaceDragListener
 {
   private final FaceDragListener a, b;
   private FaceDragEventMulticaster(FaceDragListener a, FaceDragListener b) {
