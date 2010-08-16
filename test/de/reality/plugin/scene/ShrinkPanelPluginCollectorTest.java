@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.jreality.junitutils.GuiTestUtils;
-import de.jreality.junitutils.PropertyVault;
 import de.jreality.junitutils.GuiTestUtils.ComponentsFinder;
+import de.jreality.junitutils.PropertyVault;
 import de.jreality.plugin.scene.ShrinkPanelPluginCollector;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.PluginInfo;
@@ -18,7 +18,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
-import de.jtem.jrworkspace.plugin.widget.SPIPluginTest;
+import de.jtem.jrworkspace.plugin.simplecontroller.widget.SPIPluginTest;
 
 public class ShrinkPanelPluginCollectorTest {
 	private ShrinkPanelPluginCollector pluginCollector;
