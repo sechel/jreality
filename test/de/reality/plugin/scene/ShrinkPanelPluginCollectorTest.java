@@ -18,7 +18,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
-import de.jtem.jrworkspace.plugin.simplecontroller.widget.SPIPluginTest;
+import de.jtem.jrworkspace.plugin.widget.SPIPluginTest;
 
 public class ShrinkPanelPluginCollectorTest {
 	private ShrinkPanelPluginCollector pluginCollector;
