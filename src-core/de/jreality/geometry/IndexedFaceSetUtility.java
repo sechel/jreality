@@ -1300,6 +1300,7 @@ public class IndexedFaceSetUtility {
 	 * @throws Exception
 	 */
 	public static boolean makeConsistentOrientation(IndexedFaceSet ifs){
+		if (ifs.getFaceAttributes(Attribute.INDICES) == null) return true;
 		int[][] fIndis= ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
 		if (fIndis==null) return false;
 		int numV= ifs.getNumPoints();
