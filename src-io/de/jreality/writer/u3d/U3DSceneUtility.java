@@ -66,6 +66,7 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.CubeMap;
@@ -388,6 +389,32 @@ public class U3DSceneUtility {
 			IndexedFaceSetUtility.calculateAndSetFaceNormals(rifs);
 		}
 		return rifs;
+	}
+	
+
+	//TODO: write label preparation
+	static void prepareLabels(SceneGraphComponent root) {
+		SceneGraphComponent dummy = new SceneGraphComponent();
+		dummy.addChild(root);
+		dummy.childrenWriteAccept(new SceneGraphVisitor() {
+			SceneGraphPath p = new SceneGraphPath();
+			@Override
+			public void visit(SceneGraphComponent c) {
+				p.push(c);
+				Geometry g = c.getGeometry();
+				if (g != null && g instanceof PointSet) {
+					PointSet ps = (PointSet)g;
+					DataList labelList = ps.getVertexAttributes(Attribute.LABELS);
+					if (labelList != null) {
+//						SceneGraphComponent LabelUtility.sceneGraphForLabel(sgc, xscale, yscale, offset, alignment, camToObj, position)
+					}
+				}
+				
+				c.childrenWriteAccept(this, false, false, false, false, false, true);
+				p.pop();
+			}
+		}, false, false, false, false, false, true);
+		
 	}
 	
 	
