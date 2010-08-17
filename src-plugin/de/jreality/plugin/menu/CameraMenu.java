@@ -71,6 +71,7 @@ public class CameraMenu extends Plugin {
 		cameraMenu.addSeparator();
 		final JMenu stereoTypesMenu = new JMenu("StereoType");
 		cameraMenu.add(new JMenuItem(new ToggleStereo("Toggle Stereo", viewer) {
+			private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 			    super.actionPerformed(e);
 				Camera camera = CameraUtility.getCamera(viewer);

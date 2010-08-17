@@ -288,8 +288,10 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		ButtonGroup bgr = new ButtonGroup();
 		for (int i=0; i<viewerSwitch.getNumViewers(); i++) {
 			final int index = i;
-			final JRadioButtonMenuItem item = new JRadioButtonMenuItem(
-			new AbstractAction(viewerNames[index]) {
+			String name = viewerNames[i];
+			name = name.substring(name.lastIndexOf('.') + 1);
+			JRadioButtonMenuItem item = new JRadioButtonMenuItem(
+			new AbstractAction(name) {
 				private static final long serialVersionUID = 1L;
 				public void actionPerformed(ActionEvent e) {
 					viewerSwitch.selectViewer(index);
@@ -301,7 +303,6 @@ public class View extends SideContainerPerspective implements ChangeListener {
 			bgr.add(item);
 			menu.add(item);
 		}
-		
 		return menu;
 	}
 	
