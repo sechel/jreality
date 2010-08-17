@@ -75,6 +75,11 @@ public class FileFilter extends javax.swing.filechooser.FileFilter {
   
 
   @Override
+	public String toString() {
+		return getDescription();
+	}
+  
+  @Override
   public boolean accept(File f) {
     if (f == null) return false;
     if(f.isDirectory()) return true;
