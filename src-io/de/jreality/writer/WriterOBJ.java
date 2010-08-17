@@ -145,17 +145,21 @@ public class WriterOBJ {
 			Pn.dehomogenize(points3, points);
 			points = points3;
 		}
-        final double [][] normals;
+        double [][] normals = null;
 		if( ifs.getVertexAttributes( Attribute.NORMALS ) != null ) {
+			try {
 			normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray().toDoubleArrayArray(null);
-		} else {
-			normals = null;
+			} catch (NullPointerException e) {
+				System.err.println("Skipped normals WriterOBJ.write(): Null value normal data");
+			}
 		}
-		final double [][] texture;
+		double [][] texture = null;
 		if( ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES ) != null ) {
-			texture = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
-		} else {
-			texture = null;
+			try {
+				texture = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
+			} catch (NullPointerException e) {
+				System.err.println("Skipped texture coordinates WriterOBJ.write(): Null value texture coordinate data");
+			}
 		}
 		
 		write( out, points, "v" );
