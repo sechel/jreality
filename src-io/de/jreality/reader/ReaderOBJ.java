@@ -297,10 +297,12 @@ public class ReaderOBJ extends AbstractReader {
     int ix = 0; // side counter
     int jx = 0; // vertex/vertex-texture/vertex-normal index
     boolean lastWasNumber = false;
-    while (st.nextToken() != StreamTokenizer.TT_EOL) {
+    st.nextToken();
+    while (st.ttype != StreamTokenizer.TT_EOL && st.ttype != StreamTokenizer.TT_EOF) {
       if (st.ttype == '/') {
         jx++;
         lastWasNumber = false;
+        st.nextToken();
         continue;
       }
       if (st.ttype == StreamTokenizer.TT_NUMBER) {
@@ -320,6 +322,7 @@ public class ReaderOBJ extends AbstractReader {
       } else {
         System.out.println("unknown tag " + st.sval + " " + st.ttype);
       }
+      st.nextToken();
     }
     ix++;
     int[] faceV = new int[ix];
