@@ -342,7 +342,7 @@ import de.jreality.scene.data.IntArrayArray;
 				ur2 = lr2;
 				lr2 = tmp;
 			}
-			System.err.println("leftright flip = "+se.flipped+"\tup-down flip = "+normalflip);
+//			System.err.println("leftright flip = "+se.flipped+"\tup-down flip = "+normalflip);
 			mergeVertices(newVertices, ul1, ul2);
 			mergeVertices(newVertices, ur1, ur2);
 			mergeVertices(newVertices, ll1, ll2);
@@ -384,9 +384,9 @@ import de.jreality.scene.data.IntArrayArray;
 			totalEdges += origIndices[i].length;
 			allVerts += (origIndices[i].length*stepsPerEdge+1)*profileCurveSize;
 		}
-		System.err.println("Found "+totalEdges+" edges");
+//		System.err.println("Found "+totalEdges+" edges");
 		int allFaces = totalEdges * stepsPerEdge * (profileCurveSize-1) + stepsPerEdge*numBoundaryEdges;
-		System.err.println("Vert, face # = "+allVerts+" "+allFaces);
+//		System.err.println("Vert, face # = "+allVerts+" "+allFaces);
 		allVertices = new double[allVerts][4];
 		double[][] allTexCoords = new double[allVerts][2];
 		int[][] allIndices = new int[allFaces][4];
@@ -526,7 +526,7 @@ import de.jreality.scene.data.IntArrayArray;
 	}
 
 	private void setVertex(int ii, double[] vv) {
-		System.err.println("setting index "+ii);
+//		System.err.println("setting index "+ii);
 		allVertices[ii] = vv;
 	}
 
