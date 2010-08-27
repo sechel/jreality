@@ -40,6 +40,7 @@
 
 package de.jreality.jogl.shader;
 
+import de.jreality.jogl.JOGLPeerComponent;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
@@ -148,7 +149,10 @@ public class DefaultGeometryShader  implements Shader {
 		public Shader getPolygonShader() {
 			return polygonShader;
 		}
-
+		
+		public void preRender(JOGLRenderingState jrs, JOGLPeerComponent jpc){
+		}
+		
 		public void postRender(JOGLRenderingState jrs) {
 		}
 

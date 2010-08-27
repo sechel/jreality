@@ -67,6 +67,8 @@ import de.jreality.scene.proxy.tree.SceneGraphNodeEntity;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
 import de.jreality.scene.tool.Tool;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.HapticShader;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.Selection;
@@ -129,14 +131,15 @@ public class SceneTreeModel extends AbstractTreeModel {
       if ((sn.getNode() instanceof Appearance)) {
         Object[] ents = (Object[]) entities.get(sn);
         if (ents == null) {
-          Object o1 = ShaderUtility.createDefaultGeometryShader((Appearance) sn.getNode(), false);
-          Object o11 = ShaderUtility.createDefaultRenderingHintsShader((Appearance) sn.getNode(), false);
-          Object o2 = null;
-          if (AttributeEntityUtility.hasAttributeEntity(RootAppearance.class, "", (Appearance)sn.getNode()))
-            o2 = ShaderUtility.createRootAppearance((Appearance) sn.getNode());
-          ents = new Object[o2 == null ? 2 : 3];
-          ents[0] = o1; ents[1] = o11;
-          if (o2 != null) ents[2] = o2;
+        	LinkedList<AttributeEntity> entitiesList = new LinkedList<AttributeEntity>();
+        	entitiesList.add(ShaderUtility.createDefaultGeometryShader((Appearance) sn.getNode(), false));
+        	entitiesList.add(ShaderUtility.createDefaultRenderingHintsShader((Appearance) sn.getNode(), false));
+        	if (AttributeEntityUtility.hasAttributeEntity(RootAppearance.class, "", (Appearance)sn.getNode()))
+          	  entitiesList.add(ShaderUtility.createRootAppearance((Appearance) sn.getNode()));
+        	if (AttributeEntityUtility.hasAttributeEntity(HapticShader.class, CommonAttributes.HAPTIC_SHADER, (Appearance)sn.getNode()))
+          	  entitiesList.add(ShaderUtility.createHapticShader((Appearance) sn.getNode()));
+            
+          ents = entitiesList.toArray();
           entities.put(sn, ents);
           for (int i = 0; i < ents.length; i++)
             parents.put(ents[i], sn);

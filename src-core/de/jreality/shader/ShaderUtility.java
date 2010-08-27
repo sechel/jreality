@@ -43,6 +43,7 @@ package de.jreality.shader;
 import java.awt.Color;
 
 import de.jreality.scene.Appearance;
+import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.data.AttributeEntityUtility;
 
 /**
@@ -140,4 +141,8 @@ public class ShaderUtility {
       }
    throw new IllegalArgumentException("unhandled entity class "+type);
   }
+
+public static HapticShader createHapticShader(Appearance node) {
+	return (HapticShader) AttributeEntityUtility.createAttributeEntity(HapticShader.class, CommonAttributes.HAPTIC_SHADER, node, true);
+}
 }

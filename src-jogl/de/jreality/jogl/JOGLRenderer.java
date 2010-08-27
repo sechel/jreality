@@ -267,12 +267,16 @@ public class JOGLRenderer   {
 		globalGL.glFrontFace(renderingState.flipped ? GL.GL_CW : GL.GL_CCW);
 
 		texResident=true;
-		thePeerRoot.render();		
+		renderPeerRoot();		
 		if (thePeerAuxilliaryRoot != null) thePeerAuxilliaryRoot.render();
 		if (topAp.isRenderSpherical() && !frontBanana) globalGL.glPopMatrix();
 		globalGL.glLoadIdentity();
 	}
 
+	protected void renderPeerRoot() {
+		thePeerRoot.render();
+	}
+	
 	List clipPlanes = null;
 	private void processClippingPlanes() {
 		if (clipPlanes == null  || clippingPlanesDirty) {

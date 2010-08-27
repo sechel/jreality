@@ -74,6 +74,7 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 	public void render(JOGLPeerComponent jpc) {
 		DefaultGeometryShader geometryShader = jpc.geometryShader;
 		if (geometryShader == null) return;
+		geometryShader.preRender(jr.renderingState, jpc);
 		jr.renderingState.currentGeometry = originalGeometry;
 		//theLog.fine("Rendering sgc "+jpc.getOriginalComponent().getName());
 		//theLog.fine("vertex:edge:face:"+geometryShader.isVertexDraw()+geometryShader.isEdgeDraw()+geometryShader.isFaceDraw());
@@ -99,6 +100,8 @@ public class JOGLPeerGeometry extends JOGLPeerNode	implements GeometryListener{
 		if (geometryShader.isFaceDraw() && hasFaceLabels) {
 			JOGLRendererHelper.drawFaceLabels(jr, ifs,  jpc.geometryShader.polygonShader.getTextShader());
 		}
+		
+		geometryShader.postRender(jr.renderingState);
 	}
 
 	public void geometryChanged(GeometryEvent ev) {

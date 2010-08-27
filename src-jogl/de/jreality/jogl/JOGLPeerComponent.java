@@ -334,7 +334,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 
 	}
 
-	private void handleAppearanceChanged() {
+	protected void handleAppearanceChanged() {
 		if (originalAppearanceDirty) propagateAppearanceChanged();
 		if (effectiveAppearanceDirty)  	propagateEffectiveAppearanceChanged();
 		thisAp = goBetween.originalComponent.getAppearance(); 
@@ -385,7 +385,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		} else  if (goBetween.originalComponent.getGeometry() != null ){		
 			if (debug) theLog.log(Level.FINER,"Updating shaders for "+name);
 			if (geometryShader == null || parent == null || geometryShader == parent.geometryShader)
-				geometryShader = DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
+				geometryShader = createGeometryShader();
 			else 
 				geometryShader.setFromEffectiveAppearance(eAp, "");
 //	    	LoggingSystem.getLogger(this).info("Updating shader for "+getName());
@@ -395,6 +395,10 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			rhInfo.setFromAppearance(thisAp);			
 		}
 
+	}
+
+	protected DefaultGeometryShader createGeometryShader() {
+		return DefaultGeometryShader.createFromEffectiveAppearance(eAp, "");
 	}
 
 	protected boolean someSubNodeIsDirty()	{
