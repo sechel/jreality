@@ -1,0 +1,18 @@
+<toolconfig>
+
+	<!-- use touch screen for shooting balls in museum installation -->
+
+	<rawdevices>
+		<rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse" />
+		<!--
+			rawdevice id="Mouse"
+			type="de.jreality.toolsystem.raw.DeviceMouseSWT"/
+		-->
+	</rawdevices>
+
+	<rawslots>
+		<mapping device="Mouse" src="left" target="DragActivation" />
+		<mapping device="Mouse" src="axes" target="PointerNDC" />
+	</rawslots>
+
+</toolconfig>

@@ -18,7 +18,7 @@
 		<mapping device="SpaceNavigator" src="rz" target="RawRZ" />
 		<!--DragActivation == 'Shoot-Imputslot' -->
 		<mapping device="SpaceNavigator" src="buttonRight" target="DragActivation" />
-		<mapping device="SpaceNavigator" src="buttonLeft" target="buttonL"/>
+		<mapping device="SpaceNavigator" src="buttonLeft" target="key2"/>
 	</rawslots>
 
 	<virtualdevices>
