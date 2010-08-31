@@ -53,12 +53,14 @@ import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
+import de.jreality.util.LoggingSystem;
 
 /**
  * A device that utilizes the jinput library for polling mice and joysticks.
  * The k-th axis of the l-th device can be addressed via "axis_l_k"
  * 
- * TODO: rename this to DeviceJInput, since it provides access to ALL jinput devices
+ * TODO: Check if maxValues and/or origins can be removed or are required.
+ *
  * @author weissman/hoffmann
  *
  **/
@@ -76,15 +78,18 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 	private net.java.games.input.Component[] components;
 	
     public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
-		String[] nums = rawDeviceName.split("_");
-		if(nums.length < 2) throw new IllegalArgumentException("no such raw axis");
 		try {
-			int j = Integer.parseInt(nums[1]);
-            net.java.games.input.Component c = components[j];
+			Component c = null;
+			for (Component cmp : components) {
+				if (cmp.getName().equals(rawDeviceName)) {
+					c = cmp;
+				}
+			}
+			
 			componentMap.put(c,inputDevice);
             lastValues.put(c,AxisState.ORIGIN);
-            float zeroVal = c.getPollData();
-            System.out.println("origin of "+c+" is "+zeroVal);
+            float zeroVal = c.getDeadZone();
+            
             origins.put(c, zeroVal);
             float maxVal = 1;
 //            if (nums.length==3) try {
@@ -93,7 +98,7 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 //            	System.err.println("invalid max value: "+nums[2]);
 //            }
             maxValues.put(c, maxVal);
-            System.out.println("Mapped "+device+"->"+c+" <=> "+inputDevice);
+            LoggingSystem.getLogger(this).config("Mapped "+device+"-> \""+c+"\" <=> "+inputDevice);
 			return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("no such raw axis");
@@ -109,21 +114,22 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 
     public void initialize(Viewer viewer, Map<String, Object> config) {
 		ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
+		
 		Controller[] controllers = env.getControllers();
 		String id_string = config.get("id_string").toString();
 		for (Controller ctrl : controllers) {
 			//System.out.println(ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
 			if (ctrl.getName().matches(id_string)) {
-				System.out.println("Found "+ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
+				LoggingSystem.getLogger(this).config("Found "+ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
 				device = ctrl;
 				break;
 			} else {
-				System.out.println("\""+id_string+"\" did not match \""+ctrl.getName()+"\"");
+				LoggingSystem.getLogger(this).config("\""+id_string+"\" did not match \""+ctrl.getName()+"\"");
 			}
 		}
+		if (device == null) throw new IllegalStateException("no controller matching "+id_string);
 		device.poll();
 		components = device.getComponents();
-		if (device == null) throw new IllegalStateException("no controller matching "+id_string);
     }
 
     public String getName() {
@@ -136,30 +142,29 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 		Set<Map.Entry<Component, InputSlot>> entries = componentMap.entrySet();
 		for (Map.Entry<Component, InputSlot> element : entries) {
             Component c = element.getKey();
+            
+            /*
             float origin = origins.get(c);
-			float pollData = c.getPollData()-origin;
-			float maxVal = maxValues.get(c);
+			
+            float pollData = c.getPollData()-origin;
+			
+            float maxVal = maxValues.get(c);
 			if (Math.abs(pollData) > maxVal) {
 				maxVal = Math.abs(pollData);
 				maxValues.put(c, maxVal);
 			}
 			float val = pollData/maxVal;
+			*/
+            
+            float val = c.getPollData();
+            
             AxisState newState = new AxisState((double) val);
 			AxisState oldState = lastValues.get(c);
 			if(newState.intValue() != oldState.intValue()) {
 				InputSlot slot = element.getValue();
 				queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slot, newState));
                 lastValues.put(c,newState);
-                //if (slot.getName().endsWith("Y")) System.out.println(slot+" val="+val+" pollData="+pollData);
 			}
-		}
-	}
-
-	public static void main(String[] args) {
-		ControllerEnvironment env = ControllerEnvironment.getDefaultEnvironment();
-		Controller[] controllers = env.getControllers();
-		for (Controller ctrl : controllers) {
-			System.out.println(ctrl+" :: "+Arrays.toString(ctrl.getComponents()));
 		}
 	}
 
