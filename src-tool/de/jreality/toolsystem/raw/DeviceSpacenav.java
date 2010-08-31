@@ -1,5 +1,6 @@
 package de.jreality.toolsystem.raw;
 
+import java.io.IOException;
 import java.util.Map;
 
 import net.sf.spacenav.SpaceNav;
@@ -26,6 +27,8 @@ public class DeviceSpacenav implements RawDevice, Runnable {
 	private ToolEventQueue queue;
 
 	private double sensitivity;
+
+	private volatile long timestamp = System.currentTimeMillis();
 	
 	synchronized boolean isRunning() {
 		return running;
@@ -40,8 +43,7 @@ public class DeviceSpacenav implements RawDevice, Runnable {
 	}
 
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Spacenav";
 	}
 
 	public void initialize(Viewer viewer, Map<String, Object> config) {
@@ -50,8 +52,36 @@ public class DeviceSpacenav implements RawDevice, Runnable {
 		if (config.containsKey("sensitivity")) {
 			sensitivity = (Double) config.get("sensitivity");
 		}
+		// this is not this.sensitivity!!
 	    s.setSensitivity(1.0);
+	    
 	    new Thread(this).start();
+	    
+	    if (config.containsKey("screensaver-wakeup-cmd")) {
+			final String SCREENSAVER_WAKEUP_CMD = (String) config.get("screensaver-wakeup-cmd");
+		    Thread t = new Thread(
+		    	new Runnable() {
+					public void run() {
+						while (isRunning()) {
+							synchronized (DeviceSpacenav.this) {
+								try {
+									DeviceSpacenav.this.wait(1000);
+								} catch (InterruptedException e1) {
+								}
+							}
+							long ct = System.currentTimeMillis();
+							int diff = (int) (ct - timestamp);
+							try {
+								if (diff < 2500) Runtime.getRuntime().exec(SCREENSAVER_WAKEUP_CMD);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+		    	});
+		    t.setPriority(Thread.MIN_PRIORITY);
+		    t.start();
+	    }
 	}
 
 	public ToolEvent mapRawDevice(String rawDeviceName, InputSlot inputDevice) {
@@ -98,56 +128,66 @@ public class DeviceSpacenav implements RawDevice, Runnable {
 		cx = e.getX();
 		if (cx!=x) {
 			x=cx;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[0], new AxisState(sensitivity*x)));
+			queue.addEvent(new ToolEvent(this, timestamp, slots[0], new AxisState(sensitivity*x)));
 		}
 		cy = e.getY();
 		if (cy!=y){
 			y=cy;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[1], new AxisState(sensitivity*y)));
+			queue.addEvent(new ToolEvent(this, timestamp, slots[1], new AxisState(sensitivity*y)));
 
 		}
 		cz = e.getZ();
 		if (cz!=z){
 			z=cz;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[2], new AxisState(sensitivity*z)));
+			queue.addEvent(new ToolEvent(this, timestamp, slots[2], new AxisState(sensitivity*z)));
 
 		}
 		crx = e.getRX();
 		if (crx!=rx){
 			rx=crx;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[3], new AxisState(sensitivity*rx)));
+			queue.addEvent(new ToolEvent(this, timestamp, slots[3], new AxisState(sensitivity*rx)));
 
 		}
 		cry = e.getRY();
 		if (cry!=ry){
 			ry=cry;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[4], new AxisState(sensitivity*ry)));
+			queue.addEvent(new ToolEvent(this, timestamp, slots[4], new AxisState(sensitivity*ry)));
 
 		}
 		crz = e.getRZ();
 		if (crz!=rz){
 			rz=crz;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[5], new AxisState(sensitivity*rz)));
+			queue.addEvent(new ToolEvent(this, timestamp, slots[5], new AxisState(sensitivity*rz)));
 
 		}
 	}
 
 	public void run() {
-			SpaceNavEvent e;
-			while((e=s.waitForEvent())!=null && isRunning()) {
-				if(e instanceof SpaceNavMotionEvent) {
-					SpaceNavMotionEvent m=(SpaceNavMotionEvent) e;
-					motion(m);
-				}
-				else if(e instanceof SpaceNavButtonEvent) {
-					SpaceNavButtonEvent b=(SpaceNavButtonEvent) e;
-					button(b);
-				}
-				else {
-					System.out.println("Unknown event!");
+		SpaceNavEvent e;
+		while((e=s.waitForEvent())!=null && isRunning()) {
+			long ct = System.currentTimeMillis();
+			long dt = ct - timestamp;
+			timestamp = ct;
+			if (dt > 1000) {
+				synchronized(this) {
+					// quit screensaver
+					this.notifyAll();
 				}
 			}
-		
+			if(e instanceof SpaceNavMotionEvent) {
+				SpaceNavMotionEvent m=(SpaceNavMotionEvent) e;
+				motion(m);
+			}
+			else if(e instanceof SpaceNavButtonEvent) {
+				SpaceNavButtonEvent b=(SpaceNavButtonEvent) e;
+				button(b);
+			}
+			else {
+				System.out.println("Unknown event!");
+			}
+		}
 		s.closeDevice();
 	}
+	
+	
 }
