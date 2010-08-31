@@ -134,11 +134,16 @@ public class ShipNavigationTool extends AbstractTool {
 		Matrix myMatrix = myComponent.getTransformation() != null ? new Matrix(myComponent.getTransformation()) : new Matrix();	
 		
 		
-		// pollingDevice only seems to affect horizontal rotation?
-		double rot = tc.getAxisState(horizontalRotation).doubleValue();
 		if (rotate && tc.getSource() == horizontalRotation) {
+			double rot = tc.getAxisState(horizontalRotation).doubleValue();
 			MatrixBuilder.euclidean(myMatrix).rotateY(-rot);
 			myMatrix.assignTo(myComponent);
+			
+			/*
+			ToolEvent te = ((ToolContextImpl) tc).getEvent();
+			System.out.println("rot="+rot+"\t dt="+tc.getAxisState(timer).intValue()+"\t vel="+(rot/(0.001*tc.getAxisState(timer).intValue()))+"\t when="+tc.getTime()+"\n\t"+te);
+			*/
+			
 			return;
 		}
 		
