@@ -50,80 +50,54 @@ import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.VirtualDevice;
 import de.jreality.toolsystem.VirtualDeviceContext;
 
-
 /**
- *
- * TODO: comment this
- *
- * @author weissman 
+ * 
+ * TODO: implement this ;-)
  *
  */
-public class VirtualTimestepEvolution implements VirtualDevice {
+public class VirtualClick implements VirtualDevice {
 
-    InputSlot inSlot;
-    InputSlot timer;
-    
-    InputSlot outSlot;
-    
-    double gain = 1;
-    
-    boolean released = false;
-    
-    public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
-      
-    	
-    	if (context.getEvent().getSource().getClass() == de.jreality.toolsystem.DeviceManager.class) {
-    		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.ORIGIN);
-    	}
-
-    	// only create an event when source is timer
-    	if (context.getEvent().getInputSlot() == inSlot) return null;
-    	
-    	double axisValue = context.getAxisState(inSlot).doubleValue();
-    	double dt = gain * context.getAxisState(timer).intValue() * 0.001;
-    	double val = axisValue * dt;
-    	
-    	if (val == 0.0) {
-    		if (released) return null;
-    		released = true;
-    	} else {
-    		released = false;
+	InputSlot inSlot, outSlot;
+	
+	private double maxDelay=300;
+  private long lastClickTime=-1;
+  
+  private boolean init=true;
+  
+	public ToolEvent process(VirtualDeviceContext context) throws MissingSlotException {
+    if (init) {
+      init=false;
+      return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.ORIGIN);
+    }
+    	AxisState state = context.getAxisState(inSlot);
+    	if (state.isPressed()) {
+    		lastClickTime = context.getEvent().getTimeStamp();
+    		return null;
     	}
     	
-    	//if (outSlot == InputSlot.getDevice("HorizontalShipRotationAngleEvolution")) System.out.println("axisValue="+axisValue+" ["+val+"]");
-    	
-    	return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, new AxisState(val)) {
-			private static final long serialVersionUID = 1349929946764175018L;
-			{
-				axisEps = 10.0;
-			}
-			  protected void replaceWith(ToolEvent replacement) {
-				  System.out.println("replace!");
-				  super.replaceWith(replacement);
-			  }
+    	int delay = (int) (context.getEvent().getTimeStamp() - lastClickTime);
+    	if (delay < maxDelay) {
+    		return new ToolEvent(context.getEvent().getSource(), context.getEvent().getTimeStamp(), outSlot, AxisState.PRESSED);
+    	}
+    	return null;
+	}
 
-    	};
-  }
+	public void initialize(List inputSlots, InputSlot result,
+			Map configuration) {
+		inSlot = (InputSlot) inputSlots.get(0);
+		outSlot = result;
+		try {
+			maxDelay = ((Double)configuration.get("maxDelay")).doubleValue();
+		} catch (Exception e) {
+			// no gain set...
+		}
+	}
 
-    public void initialize(List<InputSlot> inputSlots, InputSlot result,
-            Map<String, Object> configuration) {
-        inSlot = inputSlots.get(0);
-        timer = inputSlots.get(1);
-        outSlot = result;
-        try {
-        	gain = ((Double) configuration.get("gain"));
-        } catch (Exception e) {
-          // assume is Transformation
-        }
-    }
+	public void dispose() {
+	}
 
-    public void dispose() {
-        // TODO Auto-generated method stub
-
-    }
-
-    public String getName() {
-        return "TimestepEvolution";
-    }
+	public String getName() {
+		return "Click";
+	}
 
 }
