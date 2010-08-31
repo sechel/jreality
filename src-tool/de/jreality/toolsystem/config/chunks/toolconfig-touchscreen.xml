@@ -11,8 +11,20 @@
 	</rawdevices>
 
 	<rawslots>
-		<mapping device="Mouse" src="left" target="DragActivation" />
+		<mapping device="Mouse" src="left" target="RotateActivation" />
 		<mapping device="Mouse" src="axes" target="PointerNDC" />
 	</rawslots>
+
+	<virtualdevices>
+	
+		<virtualdevice
+			type="de.jreality.toolsystem.virtual.VirtualClick">
+			<inputslot>RotateActivation</inputslot>
+			<outputslot>DragActivation</outputslot>
+			<prop name="maxDelay">
+				<double>80</double>
+            </prop>		
+        </virtualdevice>
+	</virtualdevices>
 
 </toolconfig>

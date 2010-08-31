@@ -6,6 +6,9 @@
 			<prop name="sensitivity">
 				<double>0.0025</double>
 			</prop>
+            <prop name="screensaver-wakeup-cmd">
+            	<string>/usr/bin/xscreensaver-command -deactivate</string>
+            </prop>
 		</rawdevice>
 	</rawdevices>
 
@@ -23,9 +26,6 @@
 
 	<virtualdevices>
 
-		<mapping src="RX" target="VerticalHeadRotationAngleSpeed" />
-
-
 <!-- 
 
 All axes are first averaged (mostly a moving average computation, but it also sorts out
@@ -33,9 +33,11 @@ exceptional values). Then we bump the axis around zero, to enable control for ve
 movements. This is done by applying the two virtual devices
 
 - de.jreality.toolsystem.virtual.VirtualSpaceNavigatorFixAxisFirst
-- de.jreality.toolsystem.virtual.VirtualBumpAxis
+- de.jreality.toolsystem.virtual.VirtualBumpAxis //TODO: ??? this is not used...
 
 to the axes (in that order).
+
+Before, negative values are scaled by 1.7, to make device values more symmetric.
 
 -->
 
@@ -152,26 +154,26 @@ to the axes (in that order).
 
 		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualReverseAxis">
 			<inputslot>RY</inputslot>
-			<outputslot>HorizontalShipRotationAngleSpeed</outputslot>
+			<outputslot>ReverseRY</outputslot>
 		</virtualdevice>
 
 		<virtualdevice
 					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
-			<inputslot>VerticalHeadRotationAngleSpeed</inputslot>
+			<inputslot>RX</inputslot>
 			<inputslot>SystemTime</inputslot>
 			<outputslot>VerticalHeadRotationAngleEvolution</outputslot>
 			<prop name="gain">
-				<double>3</double>
+				<double>1.0</double>
 			</prop>
 		</virtualdevice>
 
 		<virtualdevice
 					type="de.jreality.toolsystem.virtual.VirtualTimestepEvolution">
-			<inputslot>HorizontalShipRotationAngleSpeed</inputslot>
+			<inputslot>ReverseRY</inputslot>
 			<inputslot>SystemTime</inputslot>
 			<outputslot>HorizontalShipRotationAngleEvolution</outputslot>
 			<prop name="gain">
-				<double>3</double>
+				<double>1.0</double>
 			</prop>
 		</virtualdevice>
 

@@ -1,12 +1,13 @@
 <toolconfig>
 
-    <!-- TODO: this is broken... look at toolconfig-hama-gamepad.xml -->
+    <!-- TODO: create a common set of InputSlots for gamepads and
+               move virtual device config to a shared file for all game pads. -->
 
 	<rawdevices>
 		<rawdevice id="Gamepad"
 			type="de.jreality.toolsystem.raw.DeviceJinputController">
 			<prop name="id_string">
-				<string>.*P880.*</string>
+				<string>DragonRise.*</string>
 			</prop>
 		</rawdevice>
 	</rawdevices>
