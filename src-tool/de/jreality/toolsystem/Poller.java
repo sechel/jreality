@@ -44,7 +44,8 @@ class Poller implements Runnable {
 	public void run() {
 		while (true) {
 			synchronized (pollingDevices) {
-				for (PollingDevice pd : pollingDevices) pd.poll();
+				long when = System.currentTimeMillis();
+				for (PollingDevice pd : pollingDevices) pd.poll(when);
 			}
 			try {
 				Thread.sleep(5);

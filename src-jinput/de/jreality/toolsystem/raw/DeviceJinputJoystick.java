@@ -122,7 +122,7 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
         return "jinputJoystick";
     }
     
-	public void poll() {
+	public void poll(long when) {
 		if (queue == null) return;
 		for (int i = 0; i < controllers.length; i++) {
             controllers[i].poll();
@@ -140,7 +140,7 @@ public class DeviceJinputJoystick implements RawDevice, PollingDevice {
 			if(!newState.isReleased() || newState.intValue() != oldState.intValue()) {
 				//System.out.println("new event");
 				queue.addEvent(
-						new ToolEvent(this, System.currentTimeMillis(), element.getValue(), newState)
+						new ToolEvent(this, when, element.getValue(), newState)
 						);
                 lastValues.put(c,newState);
 			}

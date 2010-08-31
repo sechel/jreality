@@ -136,7 +136,7 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
         return "jinput ["+(device == null ? "<null>":device.getName())+"]";
     }
     
-	public void poll() {
+	public void poll(long when) {
 		if (queue == null) return;
         device.poll();
 		Set<Map.Entry<Component, InputSlot>> entries = componentMap.entrySet();
@@ -162,7 +162,7 @@ public class DeviceJinputController implements RawDevice, PollingDevice {
 			AxisState oldState = lastValues.get(c);
 			if(newState.intValue() != oldState.intValue()) {
 				InputSlot slot = element.getValue();
-				queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slot, newState));
+				queue.addEvent(new ToolEvent(this, when, slot, newState));
                 lastValues.put(c,newState);
 			}
 		}

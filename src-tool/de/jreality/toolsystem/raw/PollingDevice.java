@@ -12,7 +12,8 @@ public interface PollingDevice {
 
 	/**
 	 * Perform polling for the device in this method.
+	 * @param when 
 	 */
-	void poll();
+	void poll(long when);
 	
 }

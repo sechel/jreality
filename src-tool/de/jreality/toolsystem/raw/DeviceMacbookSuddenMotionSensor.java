@@ -38,12 +38,12 @@ public class DeviceMacbookSuddenMotionSensor implements RawDevice, PollingDevice
 		this.queue = queue;
 	}
 
-	public void poll() {
+	public void poll(long when) {
 		float[] v = SMSLib.getValues();
 		mat.setEntry(0, 3, v[0]);
 		mat.setEntry(1, 3, v[1]);
 		mat.setEntry(2, 3, v[2]);
-		ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, new DoubleArray(mat.getArray()));
+		ToolEvent te = new ToolEvent(this, when, slot, new DoubleArray(mat.getArray()));
 		queue.addEvent(te);
 	}
 

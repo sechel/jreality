@@ -113,7 +113,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 		this.queue=queue;
 	}
 
-	public synchronized void poll() {
+	public synchronized void poll(long when) {
 		for (Entry<Integer, double[]> e : matrix.entrySet()) {
 			int i = e.getKey();
 			if (disabledSensors.contains(i)) continue;
@@ -122,7 +122,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			trackd.getMatrix(tmpMatrix, i);
 			copy(tmpMatrix, val);
 			calibrate(val, i);
-			ToolEvent te = new MyToolEvent(this, slot, null, new DoubleArray(val));
+			ToolEvent te = new MyToolEvent(this, when, slot, null, new DoubleArray(val));
 			if (queue != null) queue.addEvent(te);
 			else System.out.println(te);
 		}
@@ -133,7 +133,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			int newVal = trackd.getButton(i);
 			if (newVal != val) {
 				button.put(i, newVal);
-				ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, newVal == 0 ? AxisState.ORIGIN : AxisState.PRESSED, null);
+				ToolEvent te = new ToolEvent(this, when, slot, newVal == 0 ? AxisState.ORIGIN : AxisState.PRESSED, null);
 				if (queue != null) queue.addEvent(te);
 				else System.out.println(te);
 			}
@@ -145,7 +145,7 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 			double newVal = trackd.getValuator(i);
 			if (newVal != val) {
 				valuator.put(i, newVal);
-				ToolEvent te = new ToolEvent(this, System.currentTimeMillis(), slot, new AxisState(newVal), null);
+				ToolEvent te = new ToolEvent(this, when, slot, new AxisState(newVal), null);
 				if (queue != null) queue.addEvent(te);
 				else System.out.println(te);
 			}
@@ -171,8 +171,8 @@ public class DeviceTrackd implements RawDevice, PollingDevice {
 		
 		private static final long serialVersionUID = -8503410127439268525L;
 
-		public MyToolEvent(Object source, InputSlot device, AxisState axis, DoubleArray trafo) {
-			super(source, System.currentTimeMillis(), device, axis, trafo);
+		public MyToolEvent(Object source, long when, InputSlot device, AxisState axis, DoubleArray trafo) {
+			super(source, when, device, axis, trafo);
 		}
 
 		protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {

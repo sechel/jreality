@@ -185,7 +185,7 @@ public class DeviceKeyboard implements RawDevice, KeyListener, AWTEventListener,
 		return "RawDevice: Keyboard";
 	}
 
-	public synchronized void poll() {
+	public synchronized void poll(long when) {
 		long ct = System.currentTimeMillis();
 		while (!myQueue.isEmpty()) {
 
