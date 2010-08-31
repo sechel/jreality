@@ -55,6 +55,8 @@ public class ToolEvent implements Serializable {
     
 	private static final long serialVersionUID = -574219336588808514L;
 
+	protected double axisEps = 0;
+
 	InputSlot device;
     
     // these must be accessable from sublasses replace-methods
@@ -149,7 +151,7 @@ public class ToolEvent implements Serializable {
             || (axis1.isReleased() && !axis2.isReleased())
             || (!axis1.isReleased() && axis2.isReleased()) )
             return false;
-        return (axis1.doubleValue() - axis2.doubleValue() < 0.0001);
+        return (Math.abs(axis1.doubleValue() - axis2.doubleValue()) < axisEps);
     }
     
   protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {

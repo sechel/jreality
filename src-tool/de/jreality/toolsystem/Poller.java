@@ -1,11 +1,6 @@
 package de.jreality.toolsystem;
 
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.LinkedList;
-
-import javax.swing.Timer;
 
 import de.jreality.toolsystem.raw.PollingDevice;
 
@@ -19,13 +14,9 @@ import de.jreality.toolsystem.raw.PollingDevice;
  * @author Steffen Weissmann
  *
  */
-class Poller implements ActionListener {
-
-	private final Timer timer;
+class Poller implements Runnable {
 	
 	private final LinkedList<PollingDevice> pollingDevices=new LinkedList<PollingDevice>();
-	
-	private static final long period=5;
 	
 	private static Poller pollerInstance=new Poller();
 	
@@ -34,34 +25,35 @@ class Poller implements ActionListener {
 	}
 	
 	private Poller() {
-		timer=new Timer((int) period, this);
-		timer.setCoalesce(true);
-		timer.start();
+		Thread thread = new Thread(this, "jreality raw device polling");
+		thread.setPriority(Thread.NORM_PRIORITY+1);
+		thread.start();
 	}
 
-	private void pollDevices() {
+	void addPollingDevice(final PollingDevice pd) {
 		synchronized (pollingDevices) {
-			for (PollingDevice pd : pollingDevices) pd.poll();
+			pollingDevices.add(pd);
+		}
+	}
+	void removePollingDevice(final PollingDevice pd) {
+		synchronized (pollingDevices) {
+			pollingDevices.remove(pd);
 		}
 	}
 	
-	void addPollingDevice(final PollingDevice pd) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				pollingDevices.add(pd);
+	public void run() {
+		while (true) {
+			synchronized (pollingDevices) {
+				for (PollingDevice pd : pollingDevices) pd.poll();
 			}
-		});
-	}
-	void removePollingDevice(final PollingDevice pd) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				pollingDevices.remove(pd);
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		});
+		}
 	}
-	
-	public void actionPerformed(ActionEvent e) {
-		pollDevices();
-	}
+
 	
 }
