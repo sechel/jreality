@@ -33,6 +33,9 @@ public class SkyboxAndReflMapExample {
 		dgs.setShowPoints(false);
 		DefaultPolygonShader dps = (DefaultPolygonShader) dgs.createPolygonShader("default");
 		dps.setDiffuseColor(Color.white);
+		ap.setAttribute(
+				"polygonShader.reflectionMap:blendColor",
+				new Color(1f, 1f, 1f, .5f));
 		// basic class needed for both reflection maps and skyboxes is a CubeMap
 		// we load this over the net since 
 		CubeMap rm = null;
