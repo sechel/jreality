@@ -18,8 +18,8 @@ public class PdExample {
 
 	public static SceneGraphComponent getAudioComponent() throws Exception {
 		PureDataHub.init(44100, 1);
-		URL url = PdExample.class.getResource("./test.pd");
-		PdUtils.openPatch(new File(url.getPath()));
+		URL url = PdExample.class.getResource("test.pd");
+		PdUtils.openPatch(new File(url.toURI()));
 		final AudioSource source = PureDataHub.getPureDataSource(0);
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);
@@ -30,7 +30,6 @@ public class PdExample {
 		return audioComponent;
 	}
 
-	
 	public static void main(String[] args) throws Exception {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
