@@ -17,6 +17,8 @@
 **/RemoteExecutor.java
 **/MasterApplication.java
 
+**/PureDataHub.java
+**/PdExample.java
 **/JLink*.java
 **/SwtExample.java
 **/csound/**
