@@ -17,10 +17,9 @@
 **/RemoteExecutor.java
 **/MasterApplication.java
 
-**/PureDataHub.java
-**/PdExample.java
 **/JLink*.java
 **/SwtExample.java
+**/puredata/**
 **/csound/**
 # this uses CSound:
 **/MinimalExample.java
