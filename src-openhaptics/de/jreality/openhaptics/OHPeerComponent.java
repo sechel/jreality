@@ -2,11 +2,16 @@ package de.jreality.openhaptics;
 
 import de.jreality.jogl.JOGLPeerComponent;
 import de.jreality.shader.CommonAttributes;
-import de.varylab.openhaptics.HL;
+import de.jtem.openhaptics.HL;
 
 public class OHPeerComponent extends JOGLPeerComponent{
 
 	int shapeId = -1;
+	private boolean haptic;
+	public boolean isHaptic() {
+		return haptic;
+	}
+
 	private float stiffness, damping, staticFriction, dynamicFriction;
 	
 	public int getShapeId() {
@@ -31,6 +36,7 @@ public class OHPeerComponent extends JOGLPeerComponent{
 		damping = (float)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_DAMPING, CommonAttributes.HAPTIC_DAMPING_DEFAULT);
 		staticFriction = (float)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_STATIC_FRICTION, CommonAttributes.HAPTIC_STATIC_FRICTION_DEFAULT);
 		dynamicFriction = (float)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_DYNAMIC_FRICTION, CommonAttributes.HAPTIC_DYNAMIC_FRICTION_DEFAULT);
+		haptic = (boolean)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_ENABLED, CommonAttributes.HAPTIC_ENABLED_DEFAULT);
 	}
 	
 	void callHlMaterial(){

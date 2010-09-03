@@ -8,7 +8,11 @@ public interface HapticShader extends AttributeCollection {
 	static final double DYNAMIC_FRICTION_DEFAULT = CommonAttributes.HAPTIC_DYNAMIC_FRICTION_DEFAULT;
 	static final double STATIC_FRICTION_DEFAULT = CommonAttributes.HAPTIC_STATIC_FRICTION_DEFAULT;
 	static final double DAMPING_DEFAULT = CommonAttributes.HAPTIC_DAMPING_DEFAULT;
+	static final boolean HAPTIC_ENABLED_DEFAULT = CommonAttributes.HAPTIC_ENABLED_DEFAULT;
 	
+	public boolean getHapticEnabled();
+	public void setHapticEnabled(boolean enabled);
+
 	public double getStiffness();
 	public void setStiffness(double stiffness);
 

@@ -228,14 +228,14 @@ import de.jreality.scene.Appearance;
 
   
 	public static final String HAPTIC_SHADER = "hapticShader";
+	public static final String HAPTIC_ENABLED = "hapticEnabled";
+	public static final boolean HAPTIC_ENABLED_DEFAULT = false;
 	public static final String HAPTIC_STIFFNESS = "stiffness";
-	public static final double HAPTIC_STIFFNESS_DEFAULT = 0.7;
+	public static final double HAPTIC_STIFFNESS_DEFAULT = 0.3;
 	public static final String HAPTIC_DAMPING = "damping";
 	public static final double HAPTIC_DAMPING_DEFAULT = 0.1;
 	public static final String HAPTIC_STATIC_FRICTION = "staticFriction";
 	public static final double HAPTIC_STATIC_FRICTION_DEFAULT = 0.2;
 	public static final String HAPTIC_DYNAMIC_FRICTION = "dynamicFriction";
 	public static final double HAPTIC_DYNAMIC_FRICTION_DEFAULT = 0.3;
-
-
 }

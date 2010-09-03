@@ -20,22 +20,23 @@
 	</rawdevices>
 
 	<rawslots>
-		<mapping device="PhantomDesktop" src="trafo" target="PointerTrafo" />
+		<mapping device="PhantomDesktop" src="trafo" target="PointerTransformation" />
 		<mapping device="PhantomDesktop" src="button_1" target="PrimaryAction" />
 	</rawslots>
 
 	<virtualdevices>
-	
+	<!-- 
 		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualRepeater">
 			<inputslot>PointerTrafo</inputslot>
 			<inputslot>SystemTime</inputslot>
 			<outputslot>PointerTransformation</outputslot>
 		</virtualdevice>
-	
+	 -->
 		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualDoubleClick">
 			<inputslot>PrimaryAction</inputslot>
 			<outputslot>PanelActivation</outputslot>
 		</virtualdevice>
+	 
 	</virtualdevices>
 
 </toolconfig>

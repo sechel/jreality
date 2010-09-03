@@ -2,6 +2,7 @@ package de.jreality.toolsystem.raw;
 
 import java.util.Map;
 
+import de.jreality.math.Rn;
 import de.jreality.openhaptics.OHRawDevice;
 import de.jreality.openhaptics.OHViewer;
 import de.jreality.scene.Viewer;
@@ -11,10 +12,11 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.ui.viewerapp.ViewerSwitch;
-import de.varylab.openhaptics.HL;
+import de.jtem.openhaptics.HL;
+import de.jtem.openhaptics.HLeventProc;
 
-public class PhantomDesktop implements RawDevice, OHRawDevice {
-	boolean running=true;
+public class PhantomDesktop implements RawDevice, OHRawDevice, HLeventProc {
+	boolean deviceActive=true;
 	
 	InputSlot[] slots = new InputSlot[2];
 	
@@ -22,32 +24,12 @@ public class PhantomDesktop implements RawDevice, OHRawDevice {
 	
 	private OHViewer ohviewer;
 
-	private boolean lastButtonState = false;
-
-
-	synchronized boolean isRunning() {
-		return running;
-	}
-	
-	synchronized void stop() {
-		running = false;
-	}
-	
-	public void dispose() {
-		stop();
-	}
-
 	public String getName() {
 		return "PhantomDesktop";
 	}
 
 	
 	public void initialize(Viewer viewer, Map<String, Object> config) {
-//		sensitivity = 1.0;
-//		if (config.containsKey("sensitivity")) {
-//			sensitivity = (Double) config.get("sensitivity");
-//		}
-		
 		if(viewer instanceof ViewerSwitch){
 			for(Viewer v : ((ViewerSwitch) viewer).getViewers()){
 				if(v instanceof OHViewer){
@@ -79,29 +61,39 @@ public class PhantomDesktop implements RawDevice, OHRawDevice {
 		this.queue = queue;
 	}
 	
-	public void checkDevice() {
+	public void initHaptic() {
+		deviceActive = ohviewer != null && ohviewer.getRenderer().isDevicePresent();
+		if(!deviceActive){
+			return;
+		}
+		else{
+			HL.hlAddEventCallback(HL.HL_EVENT_1BUTTONUP, HL.HL_OBJECT_ANY, HL.HL_COLLISION_THREAD, new HLeventProc() {
+				public void eventProc(long event, int object, long thread, long cache) {
+					queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[1], new AxisState(0)));
+				}
+			});
+			HL.hlAddEventCallback(HL.HL_EVENT_1BUTTONDOWN, HL.HL_OBJECT_ANY, HL.HL_COLLISION_THREAD, new HLeventProc() {
+				public void eventProc(long event, int object, long thread, long cache) {
+					queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[1], new AxisState(1)));
+				}
+			});
+			HL.hlAddEventCallback(HL.HL_EVENT_MOTION, HL.HL_OBJECT_ANY, HL.HL_COLLISION_THREAD, this);
+		}
+	}
+
+	public void dispose() {
+	}
+
+	public void eventProc(long event, int object, long thread, long cache) {
 		double trafo[] = new double[16];
-		HL.hlGetDoublev(HL.HL_PROXY_TRANSFORM, trafo, 0);
-		queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[0], new DoubleArray(trafo)) {
+		HL.hlCacheGetDoublev(cache, HL.HL_PROXY_TRANSFORM, trafo, 0);
+		
+		queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[0], new DoubleArray(Rn.transpose(null, trafo))) {
 			private static final long serialVersionUID = 5542511510287252014L;
 			@Override
 			protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {
 				return true;
 			}
 		});
-		
-		byte buttonState[] = new byte [1];
-		HL.hlGetBooleanv(HL.HL_BUTTON1_STATE, buttonState, 0);
-		
-		boolean newButtonState = buttonState[0]==1;
-		if(newButtonState != lastButtonState){
-			lastButtonState = newButtonState;
-			queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[1], new AxisState(buttonState[0]==0x1 ? 1: 0)));
-		}
-	}
-
-	public void start() {
-		// check if haptic device was initialized:
-		running = ohviewer != null && ohviewer.getRenderer().isDevicePresent();
 	}
 }

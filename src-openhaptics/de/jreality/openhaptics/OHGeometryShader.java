@@ -3,14 +3,16 @@ package de.jreality.openhaptics;
 import de.jreality.jogl.JOGLPeerComponent;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.shader.DefaultGeometryShader;
-import de.varylab.openhaptics.HL;
+import de.jtem.openhaptics.HL;
 
 public class OHGeometryShader extends DefaultGeometryShader {
 
+	boolean needEndShape;
+	
 	@Override
 	public void postRender(JOGLRenderingState jrs) {
 		super.postRender(jrs);
-		if(OHRenderingState.isHapticRendering(jrs)){
+		if(needEndShape && OHRenderingState.isHapticRendering(jrs)){
 			HL.hlEndShape();
 			OHRenderer.checkHLError();
 		}
@@ -18,12 +20,15 @@ public class OHGeometryShader extends DefaultGeometryShader {
 	
 	@Override
 	public void preRender(JOGLRenderingState jrs, JOGLPeerComponent jpc) {
-		if(OHRenderingState.isHapticRendering(jrs)){
+		if(OHRenderingState.isHapticRendering(jrs) && ((OHPeerComponent) jpc).isHaptic()){
 			HL.hlBeginShape(HL.HL_SHAPE_FEEDBACK_BUFFER, ((OHPeerComponent) jpc).getShapeId());
 			OHRenderer.checkHLError();
-			
+			needEndShape = true;
 			((OHPeerComponent) jpc).callHlMaterial();
 			OHRenderer.checkHLError();
+		}
+		else{
+			needEndShape = false;
 		}
 		super.preRender(jrs, jpc);
 	}

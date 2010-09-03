@@ -46,11 +46,11 @@ import javax.media.opengl.glu.GLUquadric;
 
 import de.jreality.jogl.ConstructPeerGraphVisitor;
 import de.jreality.jogl.JOGLRenderer;
-import de.varylab.openhaptics.HD;
-import de.varylab.openhaptics.HDErrorInfo;
-import de.varylab.openhaptics.HL;
-import de.varylab.openhaptics.HLU;
-import de.varylab.openhaptics.HLerror;
+import de.jtem.openhaptics.HD;
+import de.jtem.openhaptics.HDErrorInfo;
+import de.jtem.openhaptics.HL;
+import de.jtem.openhaptics.HLU;
+import de.jtem.openhaptics.HLerror;
 
 public class OHRenderer  extends JOGLRenderer {
 
@@ -70,15 +70,14 @@ public class OHRenderer  extends JOGLRenderer {
 
 		if(devicePresent){
 			hlFitWorkspace();
-
-			for(OHRawDevice dev : getViewer().getRawDevices())
-				dev.checkDevice();
-			
 			((OHRenderingState)renderingState).isHapticRendering = true;
 			HL.hlBeginFrame();
 			checkHLError();
+			
+			HL.hlCheckEvents(); // check events and call HL_CLIENT_THREAD registered call back functions if necessary
+			checkHLError();
 	
-			// Use OpenGL commands to create geometry.
+			// Use OpenGL commands to create haptic geometry.
 			thePeerRoot.render();
 	
 			// End the haptic frame.
@@ -89,7 +88,6 @@ public class OHRenderer  extends JOGLRenderer {
 			drawCursor(globalGL); // TODO allow free geometry
 		}
 		
-		
 		thePeerRoot.render();
 	}
 
@@ -99,9 +97,8 @@ public class OHRenderer  extends JOGLRenderer {
 		super.init(gl);
 		initHL();
 		
-		
 		for(OHRawDevice dev : getViewer().getRawDevices())
-			dev.start();
+			dev.initHaptic();
 	}
 
 	public final static int CURSOR_SIZE_PIXELS = 20;
@@ -112,17 +109,19 @@ public class OHRenderer  extends JOGLRenderer {
 
 //	int hlShapeId;
 	void initHL() {
+		System.loadLibrary("jopenhaptics");
 		hHD = HD.hdInitDevice(HD.HD_DEFAULT_DEVICE);
 		devicePresent = true;
 		if (checkHDError()) {
 			devicePresent = false;
+			return;
 		}
 
-		if(!devicePresent) return;
-
-		
 		hHLRC = HL.hlCreateContext(hHD);
 		checkHDError();
+		
+		HD.hdSetDoublev(HD.HD_SOFTWARE_FORCE_IMPULSE_LIMIT, new double[] {0.1}, 0); //TODO remove force limit
+//		HD.hdSetDoublev(HD.HD_SOFTWARE_VELOCITY_LIMIT, new double[] {1}, 0);
 		
 		HL.hlMakeCurrent(hHLRC);
 		checkHLError();
@@ -132,26 +131,23 @@ public class OHRenderer  extends JOGLRenderer {
 		HL.hlEnable(HL.HL_HAPTIC_CAMERA_VIEW);
 		checkHLError();
 
-		// Generate id for the shape.
-//		hlShapeId = HL.hlGenShapes(1);
-		checkHLError();
-
-		HL.hlTouchableFace(HL.HL_FRONT);
+		HL.hlTouchableFace(HL.HL_FRONT_AND_BACK);
 		checkHLError();
 	}
 
-	static void checkHLError() {
+	static boolean checkHLError() {
 		HLerror error;
-		while(HL.HL_ERROR(error = HL.hlGetError())){
+//		int count = 0;
+		if(HL.HL_ERROR(error = HL.hlGetError())){
+//			count ++;
 			System.err.println(error);
+			return true;
 		}
+		return false;
 	}
 
 	static boolean checkHDError() {
-		return checkError(HD.hdGetError());
-	}
-
-	static boolean checkError(HDErrorInfo error) {
+		HDErrorInfo error = HD.hdGetError();
 		if(HD.HD_DEVICE_ERROR(error)) {
 			System.out.println(error);
 			return true;
@@ -168,7 +164,6 @@ public class OHRenderer  extends JOGLRenderer {
 	public boolean isDevicePresent() {
 		return devicePresent;
 	}
-
 
 	void drawCursor(GL gl) {
 		double kCursorRadius = 0.5;
@@ -230,7 +225,6 @@ public class OHRenderer  extends JOGLRenderer {
 		checkHLError();
 
 		// Fit haptic workspace to view volume.
-		
 		HLU.hluFitWorkspaceBox(modelview, 0, getViewer().getP0(), 0, getViewer().getP1(), 0);
 //		HLU.hluFitWorkspace(projection, 0);
 		checkHLError();
