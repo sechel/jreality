@@ -46,7 +46,7 @@ import java.io.StreamTokenizer;
  * @author weissman
  *
  **/
-class ParserUtil {
+public class ParserUtil {
   final static double parseNumber(StreamTokenizer st)
       throws java.io.IOException {
 
