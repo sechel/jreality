@@ -47,23 +47,22 @@ import java.io.StreamTokenizer;
  *
  **/
 public class ParserUtil {
-  final static double parseNumber(StreamTokenizer st)
-      throws java.io.IOException {
+	public final static double parseNumber(StreamTokenizer st)
+		throws java.io.IOException {
+		st.nextToken();
+		
+		double number = st.nval;
 
-    st.nextToken();
+		st.nextToken();
     
-    double number = st.nval;
-
-    st.nextToken();
-    
-    if (st.ttype == StreamTokenizer.TT_NUMBER || st.ttype == StreamTokenizer.TT_EOL  || st.ttype == StreamTokenizer.TT_EOF ) {
-      st.pushBack();
-      return number;
-    }
-
-    assert (st.sval.charAt(0) == 'e' || st.sval.charAt(0) == 'E');
-
-    double exp = Double.parseDouble( st.sval.substring(1) );
-    return number *  Math.pow(10, exp);
-  }
+	    if (st.ttype == StreamTokenizer.TT_NUMBER || st.ttype == StreamTokenizer.TT_EOL  || st.ttype == StreamTokenizer.TT_EOF ) {
+	      st.pushBack();
+	      return number;
+	    }
+	
+	    assert (st.sval.charAt(0) == 'e' || st.sval.charAt(0) == 'E');
+	
+	    double exp = Double.parseDouble( st.sval.substring(1) );
+	    return number *  Math.pow(10, exp);
+	  }
 }
