@@ -4,10 +4,6 @@
 
 	<rawdevices>
 		<rawdevice id="Mouse" type="de.jreality.toolsystem.raw.DeviceMouse" />
-		<!--
-			rawdevice id="Mouse"
-			type="de.jreality.toolsystem.raw.DeviceMouseSWT"/
-		-->
 	</rawdevices>
 
 	<rawslots>
@@ -17,14 +13,14 @@
 
 	<virtualdevices>
 	
-		<virtualdevice
-			type="de.jreality.toolsystem.virtual.VirtualClick">
+		<virtualdevice type="de.jreality.toolsystem.virtual.VirtualClick">
 			<inputslot>RotateActivation</inputslot>
 			<outputslot>DragActivation</outputslot>
 			<prop name="maxDelay">
 				<double>80</double>
-            </prop>		
+            </prop>
         </virtualdevice>
+        
 	</virtualdevices>
 
 </toolconfig>

@@ -74,7 +74,8 @@ public class DeviceSpacenav implements RawDevice, Runnable {
 							try {
 								if (diff < 2500) Runtime.getRuntime().exec(SCREENSAVER_WAKEUP_CMD);
 							} catch (IOException e) {
-								e.printStackTrace();
+								System.out.println("Could not trigger screensaver - giving up.");
+								return;
 							}
 						}
 					}

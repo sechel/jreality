@@ -20,11 +20,23 @@
 		<mapping device="SpaceNavigator" src="ry" target="RawRY" />
 		<mapping device="SpaceNavigator" src="rz" target="RawRZ" />
 		<!--DragActivation == 'Shoot-Imputslot' -->
-		<mapping device="SpaceNavigator" src="buttonRight" target="DragActivation" />
+		<mapping device="SpaceNavigator" src="buttonRight" target="Shoot" />
 		<mapping device="SpaceNavigator" src="buttonLeft" target="key2"/>
 	</rawslots>
 
 	<virtualdevices>
+	
+	<virtualdevice type="de.jreality.toolsystem.virtual.VirtualMap">
+		<inputslot>Shoot</inputslot>
+		<outputslot>DragActivation</outputslot>
+   	</virtualdevice>
+   	
+	<virtualdevice type="de.jreality.toolsystem.virtual.VirtualFixedOnPressed">
+		<inputslot>Shoot</inputslot>
+		<outputslot>PointerNDC</outputslot>
+    </virtualdevice>
+	
+	
 
 <!-- 
 
