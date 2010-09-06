@@ -102,7 +102,7 @@ public class OHRenderer  extends JOGLRenderer {
 	}
 
 	public final static int CURSOR_SIZE_PIXELS = 20;
-	static double gCursorScale;
+	static double gCursorScale = 0.5;
 
 	int hHD;
 	long hHLRC;
@@ -131,7 +131,7 @@ public class OHRenderer  extends JOGLRenderer {
 		HL.hlEnable(HL.HL_HAPTIC_CAMERA_VIEW);
 		checkHLError();
 
-		HL.hlTouchableFace(HL.HL_FRONT_AND_BACK);
+		HL.hlTouchableFace(HL.HL_FRONT);
 		checkHLError();
 	}
 
@@ -200,7 +200,7 @@ public class OHRenderer  extends JOGLRenderer {
 		}
 
 		// Apply the local cursor scale factor.
-//		gl.glScaled(gCursorScale, gCursorScale, gCursorScale);
+		gl.glScaled(gCursorScale, gCursorScale, gCursorScale);
 
 		gl.glEnable(GL.GL_COLOR_MATERIAL);
 		gl.glColor3f(0.0f, 0.5f, 1.0f);
@@ -230,7 +230,8 @@ public class OHRenderer  extends JOGLRenderer {
 		checkHLError();
 
 		// Compute cursor scale.
-		gCursorScale = HLU.hluScreenToModelScale(modelview, 0, projection, 0, viewport, 0);
-		gCursorScale *= CURSOR_SIZE_PIXELS;
+		//TODO Die beiden folgenden Zeilen scheinen einen zu kleinen Cursor zu bewirken!
+//		gCursorScale = HLU.hluScreenToModelScale(modelview, 0, projection, 0, viewport, 0);
+//		gCursorScale *= CURSOR_SIZE_PIXELS;
 	}
 }

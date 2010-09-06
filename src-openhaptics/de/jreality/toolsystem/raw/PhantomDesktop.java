@@ -54,7 +54,7 @@ public class PhantomDesktop implements RawDevice, OHRawDevice, HLeventProc {
 		else 
 			throw new IllegalArgumentException("no such device: " + rawDeviceName);
 		System.out.println("registered "+rawDeviceName+"->"+inputDevice);
-		return new ToolEvent(this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
+		return new ToolEvent(PhantomDesktop.this, System.currentTimeMillis(), inputDevice, AxisState.ORIGIN);
 	}
 
 	public void setEventQueue(ToolEventQueue queue) {
@@ -69,12 +69,12 @@ public class PhantomDesktop implements RawDevice, OHRawDevice, HLeventProc {
 		else{
 			HL.hlAddEventCallback(HL.HL_EVENT_1BUTTONUP, HL.HL_OBJECT_ANY, HL.HL_COLLISION_THREAD, new HLeventProc() {
 				public void eventProc(long event, int object, long thread, long cache) {
-					queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[1], new AxisState(0)));
+					queue.addEvent(new ToolEvent(PhantomDesktop.this, System.currentTimeMillis(), slots[1], AxisState.ORIGIN));
 				}
 			});
 			HL.hlAddEventCallback(HL.HL_EVENT_1BUTTONDOWN, HL.HL_OBJECT_ANY, HL.HL_COLLISION_THREAD, new HLeventProc() {
 				public void eventProc(long event, int object, long thread, long cache) {
-					queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[1], new AxisState(1)));
+					queue.addEvent(new ToolEvent(PhantomDesktop.this, System.currentTimeMillis(), slots[1], AxisState.PRESSED));
 				}
 			});
 			HL.hlAddEventCallback(HL.HL_EVENT_MOTION, HL.HL_OBJECT_ANY, HL.HL_COLLISION_THREAD, this);
@@ -88,7 +88,7 @@ public class PhantomDesktop implements RawDevice, OHRawDevice, HLeventProc {
 		double trafo[] = new double[16];
 		HL.hlCacheGetDoublev(cache, HL.HL_PROXY_TRANSFORM, trafo, 0);
 		
-		queue.addEvent(new ToolEvent(this, System.currentTimeMillis(), slots[0], new DoubleArray(Rn.transpose(null, trafo))) {
+		queue.addEvent(new ToolEvent(PhantomDesktop.this, System.currentTimeMillis(), slots[0], new DoubleArray(Rn.transpose(null, trafo))) {
 			private static final long serialVersionUID = 5542511510287252014L;
 			@Override
 			protected boolean compareTransformation(DoubleArray trafo1, DoubleArray trafo2) {

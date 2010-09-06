@@ -36,6 +36,25 @@
 			<inputslot>PrimaryAction</inputslot>
 			<outputslot>PanelActivation</outputslot>
 		</virtualdevice>
+		
+		<mapping src="PrimaryAction" target="PanelAction" />
+		<mapping src="PrimaryMenu" target="PanelMenu" />
+		<mapping src="PrimarySelection" target="PanelSelection" />
+		<mapping src="PrimarySelection" target="ShowPanel" />
+		<mapping src="PrimaryAction" target="RotateActivation" />
+		<mapping src="PrimaryAction" target="AllDragActivation" />
+		<mapping src="PrimaryAction" target="PointDragActivation" />
+		<mapping src="PrimaryAction" target="EdgeDragActivation" />
+		<mapping src="PrimaryAction" target="FaceDragActivation" />
+		<mapping src="PrimaryAction" target="DragActivation" />
+		<mapping src="PrimarySelection" target="ScaleActivation" />
+		<mapping src="PrimaryAction" target="DeformActivation" />
+		
+		<!-- mapping device="PhantomDesktop" src="PrimaryAction" target="SelectionActivation" / -->
+	    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMap">
+     		<inputslot>PrimaryAction</inputslot>
+      		<outputslot>SelectionActivation</outputslot>
+    	</virtualdevice>
 	 
 	</virtualdevices>
 
