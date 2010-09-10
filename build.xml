@@ -497,7 +497,7 @@
 
 	<target name="javadoc" description="generate javadoc in docs/api">
 		<mkdir dir="${javadoc}" />
-		<javadoc destdir="${javadoc}" access="public" author="true" version="true" use="true" windowtitle="jReality API" source="1.5">
+		<javadoc destdir="${javadoc}" access="public" author="true" version="true" use="true" useexternalfile="true" windowtitle="jReality API" source="1.5">
 			<fileset dir="${core}" defaultexcludes="yes">
 				<include name="de/jreality/**/*.java" />
 			</fileset>
