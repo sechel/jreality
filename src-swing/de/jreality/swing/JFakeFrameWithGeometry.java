@@ -1,18 +1,13 @@
 package de.jreality.swing;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
 import java.awt.Rectangle;
-import java.awt.Window;
 
 import javax.swing.JRootPane;
-import javax.swing.UIManager;
 import javax.swing.plaf.RootPaneUI;
 import javax.swing.plaf.metal.MetalRootPaneUI;
-
-import com.sun.java.swing.plaf.windows.WindowsRootPaneUI;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;
@@ -24,6 +19,7 @@ import de.jreality.shader.CommonAttributes;
 
 public class JFakeFrameWithGeometry extends JFakeFrame {
 	 
+	private static final long serialVersionUID = 1L;
 	SceneGraphComponent windowComponent;
 	IndexedFaceSetFactory quadFactory;
 	
@@ -73,6 +69,7 @@ public class JFakeFrameWithGeometry extends JFakeFrame {
 	}
 	
 	
+	@Override
 	protected void init() {
 		setRootPane(new MyRootPane());
 		getRootPane().setWindowDecorationStyle(JRootPane.FRAME);
