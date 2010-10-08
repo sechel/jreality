@@ -312,14 +312,20 @@
 		<jar jarfile="${dist}/jReality-backends-share.jar" basedir="${build}/backends-share" />
 	</target>
 
-	<target name="swing" depends="core" description="compile the swing widget integration">
-		<mkdir dir="${build}/swing" />
-		<javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${swing}" destdir="${build}/swing" debug="true">
-			<classpath refid="swing.classpath"/>
-		</javac>
-		<jar jarfile="${dist}/jReality-swing.jar" basedir="${build}/swing" />
-	</target>
-
+    <target name="swing" depends="core,tools,backends-share" description="compile the swing widget integration">
+        <condition property="java5">
+        	<equals arg1="${ant.java.version}" arg2="1.5"/>
+      	</condition>
+        <mkdir dir="${build}/swing" />
+        <javac source="1.5" target="1.5" excludesfile="excludes.txt" srcdir="${swing}" destdir="${build}/swing" debug="true">
+           	<exclude name="**/Fake*5.java" unless="java5"/>
+            <exclude name="**/Fake*6.java" if="java5"/>
+            <classpath refid="swing.classpath"/>
+        </javac>
+     	<jar jarfile="${dist}/jReality-swing.jar" basedir="${build}/swing" />
+    </target>
+	
+	
 	<target name="io" depends="core, tools, backends-share" description="build readers and writers">
 		<mkdir dir="${build}/io" />
 		<antlr target="${io}/de/jreality/reader/vrml/vrml-v1.0.g">
