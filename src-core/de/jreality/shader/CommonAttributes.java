@@ -229,6 +229,10 @@ import de.jreality.scene.Appearance;
   
 	public static final String HAPTIC_SHADER = "hapticShader";
 	public static final String HAPTIC_ENABLED = "hapticEnabled";
+	public static final String HAPTIC_TOUCHABLE_FRONT = "hapticToutchableFront";
+	public static final boolean HAPTIC_TOUCHABLE_FRONT_DEFAULT = true;
+	public static final String HAPTIC_TOUCHABLE_BACK = "hapticToutchableBack";
+	public static final boolean HAPTIC_TOUCHABLE_BACK_DEFAULT = false;
 	public static final boolean HAPTIC_ENABLED_DEFAULT = false;
 	public static final String HAPTIC_STIFFNESS = "stiffness";
 	public static final double HAPTIC_STIFFNESS_DEFAULT = 0.3;

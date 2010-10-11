@@ -85,7 +85,7 @@ public class OHRenderer  extends JOGLRenderer {
 			HL.hlEndFrame();
 			checkHLError();
 	
-			drawCursor(globalGL); // TODO allow free geometry
+			drawCursor(globalGL); // TODO allow free cursor geometry
 		}
 		
 		thePeerRoot.render();
@@ -129,9 +129,6 @@ public class OHRenderer  extends JOGLRenderer {
 		// Enable optimization of the viewing parameters when rendering
 		// geometry for OpenHaptics.
 		HL.hlEnable(HL.HL_HAPTIC_CAMERA_VIEW);
-		checkHLError();
-
-		HL.hlTouchableFace(HL.HL_FRONT);
 		checkHLError();
 	}
 
@@ -189,15 +186,10 @@ public class OHRenderer  extends JOGLRenderer {
 			gl.glEndList();
 		}
 		
-		if(devicePresent){
-			// Get the proxy transform in world coordinates.
-			HL.hlGetDoublev(HL.HL_PROXY_TRANSFORM, proxyxform, 0);
-			checkHLError();
-			gl.glMultMatrixd(proxyxform, 0);
-//			System.out.println(proxyxform[12]+", "+ proxyxform[13]+", "+proxyxform[14]);
-		}
-		else{
-		}
+		// Get the proxy transform in world coordinates.
+		HL.hlGetDoublev(HL.HL_PROXY_TRANSFORM, proxyxform, 0);
+		checkHLError();
+		gl.glMultMatrixd(proxyxform, 0);
 
 		// Apply the local cursor scale factor.
 		gl.glScaled(gCursorScale, gCursorScale, gCursorScale);

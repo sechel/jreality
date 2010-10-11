@@ -24,7 +24,7 @@ public class OHGeometryShader extends DefaultGeometryShader {
 			HL.hlBeginShape(HL.HL_SHAPE_FEEDBACK_BUFFER, ((OHPeerComponent) jpc).getShapeId());
 			OHRenderer.checkHLError();
 			needEndShape = true;
-			((OHPeerComponent) jpc).callHlMaterial();
+			((OHPeerComponent) jpc).prepareHapticRendering();
 			OHRenderer.checkHLError();
 		}
 		else{

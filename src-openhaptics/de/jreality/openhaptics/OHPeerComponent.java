@@ -8,6 +8,8 @@ public class OHPeerComponent extends JOGLPeerComponent{
 
 	int shapeId = -1;
 	private boolean haptic;
+	private long touchableMode = HL.HL_FRONT;
+	
 	public boolean isHaptic() {
 		return haptic;
 	}
@@ -37,9 +39,32 @@ public class OHPeerComponent extends JOGLPeerComponent{
 		staticFriction = (float)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_STATIC_FRICTION, CommonAttributes.HAPTIC_STATIC_FRICTION_DEFAULT);
 		dynamicFriction = (float)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_DYNAMIC_FRICTION, CommonAttributes.HAPTIC_DYNAMIC_FRICTION_DEFAULT);
 		haptic = (boolean)eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_ENABLED, CommonAttributes.HAPTIC_ENABLED_DEFAULT);
+		
+		boolean touchableBack = (boolean) eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_TOUCHABLE_BACK, CommonAttributes.HAPTIC_TOUCHABLE_BACK_DEFAULT);
+		boolean touchableFront = (boolean) eAp.getAttribute(CommonAttributes.HAPTIC_SHADER+"."+CommonAttributes.HAPTIC_TOUCHABLE_FRONT, CommonAttributes.HAPTIC_TOUCHABLE_FRONT_DEFAULT);
+		if(touchableBack){
+			if(touchableFront){
+				touchableMode = HL.HL_FRONT_AND_BACK;
+			}
+			else{
+				touchableMode = HL.HL_BACK;
+			}
+		}
+		else{
+			if(touchableFront){
+				touchableMode = HL.HL_FRONT;
+			}
+			else{
+				touchableMode = HL.HL_FRONT;
+				haptic = false;
+			}
+		}
+		//TODO TEST TOUCHABLE BACK / FRONT 
 	}
 	
-	void callHlMaterial(){
+	void prepareHapticRendering(){
+		HL.hlTouchableFace(touchableMode);
+
 		HL.hlMaterialf(HL.HL_FRONT_AND_BACK, HL.HL_STIFFNESS, stiffness);
 		HL.hlMaterialf(HL.HL_FRONT_AND_BACK, HL.HL_DAMPING, damping);
 		HL.hlMaterialf(HL.HL_FRONT_AND_BACK, HL.HL_STATIC_FRICTION, staticFriction);
