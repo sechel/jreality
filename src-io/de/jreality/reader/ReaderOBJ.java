@@ -105,6 +105,10 @@ public class ReaderOBJ extends AbstractReader {
     st.wordChars('+', '+');
     st.wordChars('\u00A0', '\u00FF');
     st.whitespaceChars('\u0000', '\u0020');
+    
+    // handle line breaks with '\' as white space (occurs in rhino files)
+    st.whitespaceChars(92, 92);
+    
     st.commentChar('#');
     st.ordinaryChar('/');
     st.parseNumbers();
