@@ -43,7 +43,7 @@ public class Intro07 {
 	private static DefaultPointShader dpts;
 	private static RenderingHintsShader rhs;
 	private static DefaultPolygonShader dps;
-	private final static String	textureFileURL = "http://www3.math.tu-berlin.de/jreality/downloads/data/gridSmall.jpg";
+	private final static String	textureFileURL = "http://www3.math.tu-berlin.de/jreality/download/data/gridSmall.jpg";
 
 	public static void main(String[] args)	{
 			SceneGraphComponent myscene = SceneGraphUtility.createFullSceneGraphComponent("myscene");
