@@ -632,10 +632,14 @@ public class WriterU3D implements SceneWriter {
 		if (tvertCount != 0 && tVerts != null) {
 			for (int i = 0; i < tVerts.length; i++) {
 				double[] v = tVerts[i];
-				w.WriteF32((float) v[0]);
-				w.WriteF32((float) v[1]);
-				w.WriteF32(0f);
-				w.WriteF32(0f);
+				float h = 1.0f;
+				if (v.length > 2) {
+					h = (float)v[2];
+				}
+				w.WriteF32((float) v[0] / h);
+				w.WriteF32((float) v[1] / h);
+				w.WriteF32(0.0f);
+				w.WriteF32(1.0f);
 			}
 		} else {
 			w.WriteF32(0f);
