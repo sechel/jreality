@@ -99,6 +99,10 @@ public class ExportPDF extends AbstractJrAction {
 
 		setShortDescription("Save scene as a PDF file");
 	}
+	
+	public PDFExportAccessory getAccessory() {
+		return accessory;
+	}
 
 
 	@Override
