@@ -33,10 +33,30 @@ public class WindowManager extends Plugin implements ChangeListener {
 	SceneGraphComponent parent;
 	
 	SceneGraphComponent windowRoot=new SceneGraphComponent("window root");
+	public SceneGraphComponent getWindowRoot() {
+		return windowRoot;
+	}
+
 	private int
-		resX=1280,
-		resY=1024;
+		screenResolutionX=1920,
+		screenResolutionY=1200;
 	
+	public int getScreenResolutionX() {
+		return screenResolutionX;
+	}
+
+	public void setScreenResolutionX(int screenResolutionX) {
+		this.screenResolutionX = screenResolutionX;
+	}
+
+	public int getScreenResolutionY() {
+		return screenResolutionY;
+	}
+
+	public void setScreenResolutionY(int screenResolutionY) {
+		this.screenResolutionY = screenResolutionY;
+	}
+
 	private double screenWidth=2.4798528;//2.48;
 	private double screenHeight=1.9997928;//2.0;
 	private double screenHeightOffset = 0.4;
@@ -52,17 +72,22 @@ public class WindowManager extends Plugin implements ChangeListener {
 		DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(desktopBorder.getAppearance(), false);
 		DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
 		dls.setTubeRadius(1.0);
-		desktopBorder.setGeometry(IndexedLineSetUtility.createCurveFromPoints(new double[][]{{0,0,0},{resX,0,0},{resX,resY,0},{0,resY,0}}, true));
+		desktopBorder.setGeometry(IndexedLineSetUtility.createCurveFromPoints(new double[][]{{0,0,0},{screenResolutionX,0,0},{screenResolutionX,screenResolutionY,0},{0,screenResolutionY,0}}, true));
 	}
 	
-	private void updateWindowRootTransformation() {
-		double yTranslation = 0;
-		double ps = 1.0;
+	private void updateWindowRootTransformation(double near) {
 		if (env != RunningEnvironment.DESKTOP) {
+			double yTranslation = 0;
+			double ps = 1.0;
 			ps = PortalCoordinateSystem.getPortalScale();
 			yTranslation = ps*(screenHeight/2+ screenHeightOffset);
+			MatrixBuilder.euclidean().translate(0,yTranslation,-ps*screenWidth/2.0).scale(ps*screenWidth/screenResolutionX).rotateX(Math.PI).translate(-screenResolutionX/2, -screenResolutionY/2, 0).assignTo(windowRoot);
+		} else {
+			double tan = Math.tan(Math.PI/6); //assuming field of view == pi/3
+			near *= 1.1; // move behind the near clipping plane
+			double scale = 2*tan*near/screenResolutionY;
+			MatrixBuilder.euclidean().translate(0, 0, -near).scale(scale).rotateX(Math.PI).translate(-screenResolutionX/2, -screenResolutionY/2, 0).assignTo(windowRoot);
 		}
-		MatrixBuilder.euclidean().translate(0,yTranslation,-ps*screenWidth/2.0).scale(ps*screenWidth/resX).rotateX(Math.PI).translate(-resX/2, -resY/2, 0).assignTo(windowRoot);
 	}
 	
 	@Override
@@ -72,7 +97,8 @@ public class WindowManager extends Plugin implements ChangeListener {
 	@Override
 	public void install(Controller c) throws Exception {
 		env = c.getPlugin(View.class).getRunningEnvironment();
-		updateWindowRootTransformation();
+		double near = c.getPlugin(Scene.class).getCameraComponent().getCamera().getNear();
+		updateWindowRootTransformation(near);
 		updateParent(c.getPlugin(Scene.class));
 		c.getPlugin(Scene.class).addChangeListener(this);
 		setShowDesktopBorder(getShowDesktopBorder());
@@ -80,7 +106,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 			PortalCoordinateSystem.addChangeListener(portalScaleListener = new ActionListener() {
 			
 			public void actionPerformed(ActionEvent arg0) {
-				updateWindowRootTransformation();
+				updateWindowRootTransformation(-1);
 				System.err.println("WM: Updating portal scale");
 			}
 		});
@@ -128,8 +154,8 @@ public class WindowManager extends Plugin implements ChangeListener {
 			}
 		};
 		ff.setDesktopComponent(windowRoot);
-		ff.setDesktopWidth(resX);
-		ff.setDesktopHeight(resY);
+		ff.setDesktopWidth(screenResolutionX);
+		ff.setDesktopHeight(screenResolutionY);
 		ff.setLayer(frameRefs.size());
 		frameRefs.add(new WeakReference<JFakeFrameWithGeometry>(ff));
 		return ff;
