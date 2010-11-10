@@ -223,7 +223,7 @@ public class SceneGraphPathObserver implements AppearanceListener, Transformatio
 			fireTransformationChanged();
 			break;
 		case SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE:
-			((Appearance)ev.getNewChildElement()).addAppearanceListener(this);
+			((Appearance)ev.getNewChildElement()).removeAppearanceListener(this);
 			fireAppearanceChanged();
 			break;
 		}
