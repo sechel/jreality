@@ -19,7 +19,7 @@
 
 **/JLink*.java
 **/SwtExample.java
-**/puredata/**
+# **/puredata/**
 **/csound/**
 # this uses CSound:
 **/MinimalExample.java

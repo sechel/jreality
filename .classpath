@@ -23,14 +23,14 @@
 	<classpathentry kind="src" path="src-vr"/>
 	<classpathentry kind="src" path="src-plugin"/>
 	<classpathentry kind="src" path="src-jinput"/>
-	<classpathentry excluding="de/jreality/audio/csound/|de/jreality/audio/jass/|de/jreality/audio/puredata/PureDataHub.java" kind="src" path="src-audio"/>
+	<classpathentry excluding="de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="src-audio"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="test-backends-share"/>
 	<classpathentry kind="src" path="test-io"/>
 	<classpathentry kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
-	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/|de/jreality/audio/puredata/PdExample.java" kind="src" path="test-audio"/>
+	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/antlr.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
@@ -51,6 +51,7 @@
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar"/>
 	<classpathentry kind="lib" path="lib/beans.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pd.jar" sourcepath="/PdCore"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
