@@ -71,6 +71,7 @@
 		</fileset>
 		<fileset dir="lib">
 			<include name="jjack_min.jar"/>
+			<include name="pd.jar"/>
 		</fileset>
 	</path>
 
