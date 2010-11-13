@@ -10,16 +10,11 @@
 # 6. call 'ant' again
 #
 
-# **/Fake*6.java
-# **/Fake*5.java
-
-
 **/RemoteExecutor.java
 **/MasterApplication.java
 
 **/JLink*.java
 **/SwtExample.java
-# **/puredata/**
 **/csound/**
 # this uses CSound:
 **/MinimalExample.java
