@@ -3,6 +3,7 @@ package de.jreality.plugin.menu;
 import java.awt.Component;
 
 import javax.swing.JMenu;
+import javax.swing.SwingUtilities;
 
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
@@ -22,12 +23,15 @@ import de.jreality.ui.viewerapp.actions.file.SaveScene;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
+import de.jtem.jrworkspace.plugin.flavor.UIFlavor;
 
-public class ExportMenu extends Plugin {
+public class ExportMenu extends Plugin implements UIFlavor {
 	
 	private ViewMenuBar viewMenuBar;
 	private JMenu 
 		exportMenu = new JMenu("Export");
+	private ExportPDF
+		exportPDF = null;
 	
 	@Override
 	public PluginInfo getPluginInfo() {
@@ -54,7 +58,7 @@ public class ExportMenu extends Plugin {
 		exportMenu.add(new ExportVRML("VRML", viewer, parent));
 		exportMenu.add(new ExportSTL("STL", viewer, parent));
 		exportMenu.add(new ExportU3D("U3D", viewer, parent));
-		exportMenu.add(new ExportPDF("PDF", viewer, parent));
+		exportMenu.add(exportPDF = new ExportPDF("PDF", viewer, parent));
 		exportMenu.add(new SunflowMenu(viewer));
 		SaveScene saveSceneAction = new SaveScene("Save Scene", viewer, parent);
 		saveSceneAction.setIcon(ImageHook.getIcon("disk.png"));
@@ -62,6 +66,10 @@ public class ExportMenu extends Plugin {
 		viewMenuBar.addMenuItem(getClass(), 2, exportMenu, "File");
 	}
 	
+	
+	public void mainUIChanged(String uiClass) {
+		SwingUtilities.updateComponentTreeUI(exportPDF.getAccessory());
+	}
 
 	@Override
 	public void uninstall(Controller c) throws Exception {
