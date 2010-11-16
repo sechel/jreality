@@ -82,11 +82,11 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		scaleUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		scaleVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
 	private SpinnerNumberModel
-		rotateModel = new SpinnerNumberModel(0.0, -180, 180, 0.1),
-		translateUModel = new SpinnerNumberModel(0.0, 0, 1000.0, 0.001),
-		translateVModel = new SpinnerNumberModel(0.0, 0, 1000.0, 0.001),
-		scaleUModel = new SpinnerNumberModel(1.0, 0, 1000.0, 0.001),
-		scaleVModel = new SpinnerNumberModel(1.0, 0, 1000.0, 0.001);
+		rotateModel = new SpinnerNumberModel(0.0, -180.0, 180.0, 0.1),
+		translateUModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
+		translateVModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
+		scaleUModel = new SpinnerNumberModel(1.0, 0.0, 1000.0, 0.001),
+		scaleVModel = new SpinnerNumberModel(1.0, 0.0, 1000.0, 0.001);
 	private JSpinner
 		rotateSpinner = new JSpinner(rotateModel),
 		translateUSpinner = new JSpinner(translateUModel),
@@ -363,7 +363,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		}
 		if (rotateSlider == s) {
 			rotateSlider.removeChangeListener(this);
-			rotateModel.setValue(rotateSlider.getValue());
+			rotateModel.setValue((double)rotateSlider.getValue());
 			rotateSlider.addChangeListener(this);
 		}
 		if (rotateSpinner == s) {
