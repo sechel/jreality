@@ -142,7 +142,7 @@ public static ToolSystemConfiguration loadDefaultConfiguration() {
 			try {
 				URL url = ToolSystemConfiguration.class.getResource(href);
 				Input input = url == null ? Input.getInput(href) : Input.getInput(url);
-				System.out.println("resolved: "+input);
+				//System.out.println("resolved: "+input);
 				return new StreamSource(input.getInputStream());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
