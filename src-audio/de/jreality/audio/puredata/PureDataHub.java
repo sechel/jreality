@@ -9,6 +9,12 @@ import de.jreality.scene.data.SampleReader;
 
 public class PureDataHub {
 
+	static {
+		try {
+			System.loadLibrary("pthreadVC2");
+		} catch (Exception e) {}
+	}
+	
 	private final static Object lock = new Object();
 	private final static int BLOCKSIZE = PdBase.blockSize();
 	private static int sampleRate, nChannels;
