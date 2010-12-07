@@ -34,6 +34,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	private JPanel 
 		mainPage = new JPanel();
 	private JCheckBox
+		useExclusiveFullscreen = new JCheckBox("Exclusive Fullscreen", true),
 		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
 	private AbstractJrToggleAction
 		showMenubarToggle = null,
@@ -67,6 +68,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		mainPage.add(colorChooserModeCombo, c);
 		colorChooserModeCombo.setSelectedIndex(1);
+		mainPage.add(useExclusiveFullscreen, c);
 		
 		threadSafeChecker.addActionListener(this);
 		colorChooserModeCombo.addActionListener(this);
@@ -148,6 +150,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		c.storeProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex());
 		c.storeProperty(getClass(), "showMenuBar", showMenubarToggle.isSelected());
 		c.storeProperty(getClass(), "showToolBar", showToolbarToggle.isSelected());
+		c.storeProperty(getClass(), "useExclusiveFullscreen", useExclusiveFullscreen.isSelected());
 		super.storeStates(c);
 	}
 	
@@ -158,6 +161,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		colorChooserModeCombo.setSelectedIndex(c.getProperty(getClass(), "colorChooserMode", colorChooserModeCombo.getSelectedIndex()));
 		showMenubarToggle.setSelected(c.getProperty(getClass(), "showMenuBar", showMenubarToggle.isSelected()));
 		showToolbarToggle.setSelected(c.getProperty(getClass(), "showToolBar", showToolbarToggle.isSelected()));
+		useExclusiveFullscreen.setSelected(c.getProperty(getClass(), "useExclusiveFullscreen", useExclusiveFullscreen.isSelected()));
 		super.restoreStates(c);
 	}
 	
@@ -220,6 +224,10 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 
 	public void setFrontendListener(FrontendListener l) {
 		frontendListener = l;
+	}
+	
+	public boolean isExclusiveFullscreen() {
+		return useExclusiveFullscreen.isSelected();
 	}
 
 }

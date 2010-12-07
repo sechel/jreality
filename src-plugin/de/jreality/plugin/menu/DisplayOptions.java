@@ -10,6 +10,7 @@ import javax.swing.KeyStroke;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.basic.ViewMenuBar;
+import de.jreality.plugin.basic.ViewPreferences;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.SceneGraphComponent;
@@ -31,6 +32,8 @@ import de.jtem.jrworkspace.plugin.flavor.PerspectiveFlavor;
  */
 public class DisplayOptions extends Plugin implements FrontendFlavor {
 
+	private ViewPreferences
+		viewPreferences = null;
 	private AbstractJrToggleAction pickBox;
 	
 	private AbstractJrToggleAction  
@@ -80,7 +83,7 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 		frontendListener.setShowMenuBar(!fs);
 		frontendListener.setShowToolBar(!fs);
 		frontendListener.setShowStatusBar(!fs);
-		frontendListener.setFullscreen(fs);
+		frontendListener.setFullscreen(fs, viewPreferences.isExclusiveFullscreen());
 		frontendListener.updateFrontendUI();
 		view.getViewer().getViewingComponent().requestFocusInWindow();
 	}
@@ -117,6 +120,7 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 		super.install(c);
 		view = c.getPlugin(View.class);
 		scene = c.getPlugin(Scene.class);
+		viewPreferences = c.getPlugin(ViewPreferences.class);
 		ViewMenuBar viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		viewMenuBar.addMenuItem(getClass(), 1.0, pickBox.createMenuItem(), "Viewer");
 		viewMenuBar.addMenuSeparator(getClass(), 1.5, "Viewer");
