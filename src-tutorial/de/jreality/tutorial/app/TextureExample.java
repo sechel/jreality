@@ -46,11 +46,13 @@ import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
@@ -62,7 +64,12 @@ import de.jreality.util.Input;
 
 public class TextureExample {
   
-  
+/**
+ * This tutorial shows how to apply a 2D texture image to a jReality geometry.  It also shows how to disable this
+ * texture for nodes in the subgraph of the node containing the texture (that is, how to disable inheriting the texture).  
+ * @param args
+ * @throws IOException
+ */
 public static void main(String[] args) throws IOException {
 	  	IndexedFaceSet geom = new CatenoidHelicoid(40);
 		SceneGraphComponent sgc = new SceneGraphComponent("TextureExample");
@@ -89,9 +96,17 @@ public static void main(String[] args) throws IOException {
 			scale = 10;
 			dps.setDiffuseColor(Color.white);
 		}
-		Texture2D tex = TextureUtility.createTexture(sgc.getAppearance(), POLYGON_SHADER,id);
+		// Attach a node below the textured one and show how to turn off texturing in this node
+		SceneGraphComponent sgc1 = new SceneGraphComponent("UnTextureExample");
+		sgc.addChild(sgc1);
+		sgc1.setGeometry(Primitives.texturedQuadrilateral());
+		MatrixBuilder.euclidean().scale(5).translate(-.5, -.5, 0).assignTo(sgc1);
+		ap = new Appearance();
+		sgc1.setAppearance(ap);
+		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, id);
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
-    	
+		// TODO: there should be a method in TextureUtility to do this
+   		ap.setAttribute("polygonShader.texture2d", Appearance.INHERITED);
 		JRViewer.display(sgc);
   }
 }
