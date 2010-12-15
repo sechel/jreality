@@ -325,7 +325,7 @@ public class WriterU3D implements SceneWriter {
 
 		
 	protected DataBlock getPointSetContinuation(PointSet g){
-		// TODO Only partially supported by adobe reader
+		// Only partially supported by adobe reader
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0); // chain index 
@@ -560,10 +560,10 @@ public class WriterU3D implements SceneWriter {
 		boolean useFaceColors = vcData == null && fcData != null;
 		double[][] vColors = null;
 		int vcCount = 0;
-		if (useVertexColors) {
+		if (useVertexColors && vcData != null) {
 			vColors = vcData.toDoubleArrayArray(null);
 			vcCount = vColors.length;
-		} else if (useFaceColors) {
+		} else if (useFaceColors && fcData != null) {
 			vColors = fcData.toDoubleArrayArray(null);
 			vcCount = vColors.length;
 		}
@@ -735,7 +735,7 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getPointSetDeclaration(PointSet g) {
-		// TODO Not supported by any program
+		// Only partially supported by adobe reader
 		BitStreamWrite w = new BitStreamWrite();
 		w.WriteString(geometryNameMap.get(g));
 		w.WriteU32(0);
@@ -919,9 +919,9 @@ public class WriterU3D implements SceneWriter {
 		boolean useVertexColors = vcData != null;
 		boolean useFaceColors = vcData == null && fcData != null;
 		int numVertexColors = 0;
-		if (useVertexColors) {
+		if (useVertexColors && vcData != null) {
 			numVertexColors = vcData.size();
-		} else if (useFaceColors) {
+		} else if (useFaceColors && fcData != null) {
 			numVertexColors = fcData.size();
 		}
 		w.WriteU32(numVertexColors); // vertex colors count
@@ -1012,10 +1012,11 @@ public class WriterU3D implements SceneWriter {
 
 		Geometry g = getPreparedGeometry(c);
 		w.WriteString(geometryNameMap.get(g));
-		if (!visibilityMap.get(c))
+		if (!visibilityMap.get(c)) {
 			w.WriteU32(0x00000000); // invisible
-		else
+		} else {
 			w.WriteU32(0x00000003); // front and back
+		}
 		DataBlock b = w.GetDataBlock();
 		b.setBlockType(TYPE_MODEL_NODE);
 		return b;
