@@ -81,10 +81,11 @@ public class Primitives {
 	private Primitives()	{
 		super();
 	}
+	static double a = 1.0;
 	static private double[][] cubeVerts3 =  
-	{{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1}};
+	{{a,a,a},{a,a,-a},{a,-a,a},{a,-a,-a},{-a,a,a},{-a,a,-a},{-a,-a,a},{-a,-a,-a}};
 	static private double[][] cubeVerts4 =  
-	{{1,1,1,1},{1,1,-1,1},{1,-1,1,1},{1,-1,-1,1},{-1,1,1,1},{-1,1,-1,1},{-1,-1,1,1},{-1,-1,-1,1}};
+	{{a,a,a,a},{a,a,-a,a},{a,-a,a,a},{a,-a,-a,a},{-a,a,a,a},{-a,a,-a,a},{-a,-a,a,a},{-a,-a,-a,a}};
 
 	static private int[][] cubeIndices = {
 		{0,2,3,1},
@@ -819,8 +820,9 @@ public class Primitives {
 		return factory.getIndexedFaceSet();
 	}
 
+	private static double[] defaultPoints = {0,0,0, 1,0,0,  1,1,0,  0,1,0};
 	public static IndexedFaceSet texturedQuadrilateral() {
-		return texturedQuadrilateral(new double[]{0,0,0, 1,0,0,  1,1,0,  0,1,0});
+		return texturedQuadrilateral(defaultPoints);
 	}
 
 	public static IndexedFaceSet texturedQuadrilateral(double[] points) {
@@ -840,7 +842,7 @@ public class Primitives {
 
 		factory.setVertexCount( 4 );
 		factory.setFaceCount(1);
-		factory.setVertexCoordinates(points);
+		factory.setVertexCoordinates(points == null? defaultPoints : points);
 		factory.setFaceIndices(new int[][] {{ 0,1,2,3}});
 		factory.setVertexTextureCoordinates(new double[] { 0,0,1,0,1,1,0,1});
 		factory.setGenerateVertexNormals(true);
