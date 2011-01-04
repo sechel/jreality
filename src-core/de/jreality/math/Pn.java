@@ -603,7 +603,7 @@ public class Pn {
 	 * @return
 	 */
 	public static double[] makeHarmonicHarmology(double[] dst, double[] center, double[] axis){ 
-		return makeGeneralizedProjection(dst, center, axis, -2);
+		return makeGeneralizedProjection(dst, center, axis, -1);
 	}
 	
 	/**
@@ -615,15 +615,16 @@ public class Pn {
 	 * @return
 	 */
 	public static double[] makeFlattenProjection(double[] dst, double[] center, double[] axis)	{
-		return makeGeneralizedProjection(dst, center, axis, -1 );
+		return makeGeneralizedProjection(dst, center, axis, 0 );
 	}
 	
 /**
  * Create a projectivity that leaves center <i>C</i> invariant (planewise), axis <i>A</i> invariant (point-wise) and
  * otherwise moves a general point P along the line <i>l</i> through P and the center depending on  
  * <i>val</i>. To be exact, let Q be the intersection of <i>l</i> with the axis.  Define projective
- * coordinates on <i>l</i> by setting <i>C,P,Q</i> to 0,1,infinity  respectively. Then the projective coordinate
- * of <i>f(P)</i> is <i>val</i>.
+ * coordinates on <i>l</i> by setting <i>Q,P,C</i> to 0,1,infinity  respectively. Then the projective coordinate
+ * of <i>f(P)</i> is <i>val</i>.  A value of 1 gives the identity, of 0 gives the projection onto the axis,
+ * and of infinity gives projection onto the center.
  * @param dst
  * @param center
  * @param axis
@@ -636,9 +637,14 @@ public class Pn {
 		int n = center.length;
 		if (dst == null) dst = new double[n*n];
 	     double f = 1.0/Rn.innerProduct(center, axis); 
+	     double val1 = 0;
+	     //if (val!=0) 
+	     	val1 = val-1;// (1-val)/val; 
 	     for (int i = 0; i<n; ++i)  {    
 	         for (int j = 0; j<n; ++j) {
-	              dst[n*i+j] = (i==j? 1 : 0) + val * f * center[i] * axis[j];
+	              //if (val != 0) 
+	            	  	dst[n*i+j] = (i==j? 1 : 0) +  val1 * f * center[i] * axis[j];
+	              //else dst[n*i+j] = f*center[i] * axis[j];
 	         }
 	     }
 	     return dst; 		
