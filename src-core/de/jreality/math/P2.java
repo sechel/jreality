@@ -248,6 +248,37 @@ final public class P2 {
 		return newPolygon;
 	}
 	
+	public static double[] makeDirectIsometryFromFrames(double[] dst, double[] p0, double[] p1, double[] q0, double[] q1, int signature) {
+		double[] toP = makeDirectIsometryFromFrame(null, p0, p1, signature);
+		double[] toQ = makeDirectIsometryFromFrame(null, q0, q1, signature);
+		double[] iToP = Rn.inverse(null,toP);
+		dst = Rn.times(dst, toQ, iToP);
+		return dst;
+	}
+
+	private static double[] makeDirectIsometryFromFrame(double[] dst, double[] p0,
+			double[] p1, int signature) {
+		if (dst == null) dst = new double[9];
+		Pn.normalize(p0, p0, signature);
+		double[] polarP = Pn.polarize(null, p0, signature);
+		double[] lineP = lineFromPoints(null, p0, p1);
+		double[] p1n = Pn.normalize(null, pointFromLines(null, polarP, lineP), signature);
+		double[] p2 = Pn.polarize(null, lineP, signature);
+		Pn.normalize(p2, p2, signature);
+		makeMatrixFromColumns(dst, p0, p1n, p2);
+		return dst;
+	}
+	
+	public static double[] makeMatrixFromColumns(double[] dst, double[] p0, double[] p1, double[] p2) {
+		if (dst == null) dst = new double[9];
+		double[][] ptrs = {p0, p1, p2};
+		for (int i = 0; i<3; ++i)	{
+			for (int j = 0; j<3; ++j)	{
+				dst[3*i+j] = ptrs[j][i];
+			}
+		}
+		return dst;
+	}
 	/**
 	 * Convert the input (x,y,z,w) into (x,y,w).
 	 * @param vec3
@@ -268,7 +299,8 @@ final public class P2 {
 	 * @param vec4
 	 * @param vec3
 	 * @return
-	 */public static double[] imbedP2InP3(double[] vec4, double[] vec3)	{
+	 */
+	 public static double[] imbedP2InP3(double[] vec4, double[] vec3)	{
 		double[] dst;
 		if (vec4 == null)	dst = new double[4];
 		else dst = vec4;
@@ -278,5 +310,21 @@ final public class P2 {
 		dst[3] = vec3[2];
 		return dst;
 	}
+
+	 private static int[] which = {0,1,3};
+	 public static double[] imbedMatrixP2InP3(double[] dst, double[] m3)	{
+			if (dst == null)	dst = new double[16];
+			for (int i = 0; i<3; ++i)	{
+				int i4 = which[i];
+				for (int j = 0; j<3; ++j)	{
+					int j4 = which[j] + 4 * i4;
+					int j3 = i*3 + j;
+					dst[j4] = m3[j3];
+				}
+			}
+			dst[2] = dst[6] = dst[8] = dst[9] = dst[11] = 0.0; dst[10] = 1.0;
+			return dst;
+		}
+
 
 }
