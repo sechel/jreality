@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -50,6 +52,7 @@ import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.ui.viewerapp.FileFilter;
 import de.jreality.util.Input;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
@@ -79,14 +82,14 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		rotateSlider = new JSliderVR(SwingConstants.HORIZONTAL, -180, 180, 0),
 		translateUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		translateVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
-		scaleUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
-		scaleVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0);
+		scaleUSlider = new JSliderVR(SwingConstants.HORIZONTAL, -100, 100, 0),
+		scaleVSlider = new JSliderVR(SwingConstants.HORIZONTAL, -100, 100, 0);
 	private SpinnerNumberModel
 		rotateModel = new SpinnerNumberModel(0.0, -180.0, 180.0, 0.1),
 		translateUModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
 		translateVModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
-		scaleUModel = new SpinnerNumberModel(1.0, 0.0, 1000.0, 0.001),
-		scaleVModel = new SpinnerNumberModel(1.0, 0.0, 1000.0, 0.001);
+		scaleUModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.001),
+		scaleVModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.001);
 	private JSpinner
 		rotateSpinner = new JSpinner(rotateModel),
 		translateUSpinner = new JSpinner(translateUModel),
@@ -99,6 +102,8 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		textureNameToTexture = new HashMap<String, String>();
 	private Map<String, AbstractButton> 
 		textureNameToButton = new HashMap<String, AbstractButton>();
+	private Map<String, ImageData>
+		textureCache = new HashMap<String, ImageData>();
 	private JFileChooser 
 		fileChooser = null;
 
@@ -389,6 +394,30 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	}
 	
 	
+	public void addTexture(String name, Image image) {
+		if (textureNameToButton.containsKey(name)) {
+			AbstractButton button = textureNameToButton.get(name);
+			button.removeActionListener(texturesListener);
+			textureGroup.remove(button);
+			texPanel.remove(button);
+			textureCache.remove(name);
+		}
+		TextureJButton texButton = new TextureJButton(image);
+		texButton.setPreferredSize(new Dimension(texButtonSize, texButtonSize));
+		texButton.setActionCommand(name);
+		texButton.setToolTipText(name);
+		// simulate a cached texture
+		textureNameToButton.put(name, texButton);
+		textureNameToTexture.put(name, name);
+		textureCache.put(name, new ImageData(image));
+		texButton.addActionListener(texturesListener);
+		textureGroup.add(texButton);
+		texPanel.add(texButton);
+		doLayout();
+		updateUI();
+	}
+	
+	
 	public String setTextures(Map<String, String> textures) {
 		textureNameToTexture = textures;
 		List<String> keyList = new LinkedList<String>(textureNameToTexture.keySet());
@@ -487,18 +516,24 @@ public class TextureInspector extends JPanel implements ChangeListener {
 			String texResource = textureNameToTexture.get(texture);
 			if (texResource == null) {
 				appearance.setAttribute(
-						POLYGON_SHADER + "." + TEXTURE_2D,
-						INHERITED,
-						Texture2D.class
+					POLYGON_SHADER + "." + TEXTURE_2D,
+					INHERITED,
+					Texture2D.class
 				);
 				textureRatio = 1.0;
 			} else {
-				try {
-					ImageData texData = ImageData.load(Input.getInput(texResource));
+				ImageData texData = textureCache.get(texResource);
+				if (texData == null) {
+					try {
+						texData = ImageData.load(Input.getInput(texResource));
+						textureCache.put(texResource, texData);
+					} catch (IOException e1) {}
+				}
+				if (texData != null) {
 					textureRatio = texData.getWidth() / (double)texData.getHeight();
 					applyTexture(texData);
-				} catch (IOException e1) {
-					e1.printStackTrace();
+				} else {
+					LoggingSystem.getLogger(TextureInspector.class).log(Level.INFO, "Cannot load texture: " + texResource);
 				}
 				if (!scaleLockToggle.isSelected()) {
 					scaleVSpinner.removeChangeListener(this);

@@ -42,6 +42,15 @@ public class TextureJButton extends JToggleButton {
 	}
 	
 	
+	public TextureJButton(Image image) {
+		this.texImage = image;
+		int w = texImage.getWidth(this);
+		int h = texImage.getHeight(this);
+		ratio = w / (double)h;
+		texImage = ImageHook.scaleImage(texImage, 100, (int)(100 / ratio));
+	}
+	
+	
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);

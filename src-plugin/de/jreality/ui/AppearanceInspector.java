@@ -471,6 +471,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		});
 	}
 
+	public TextureInspector getTextureInspector() {
+		return textureInspector;
+	}
+	
 	public double getMaximalRadius() {
 		return maximalRadius;
 	}
