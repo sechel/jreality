@@ -6,7 +6,6 @@ import de.gulden.framework.jjack.JJackAudioEvent;
 import de.gulden.framework.jjack.JJackAudioProcessor;
 import de.gulden.framework.jjack.JJackException;
 import de.gulden.framework.jjack.JJackNativeClient;
-import de.jreality.plugin.JRViewer;
 
 /**
  * An Ambisonics stereo decoder for Jack, mostly for testing on desktop systems; reads an Ambisonics
@@ -27,7 +26,7 @@ public class JackAmbisonicsStereoDecoder {
 	}
 	
 	public static void main(String args[]) throws InterruptedException, JJackException {
-		JRViewer.getLastJRViewer();
+		//JRViewer.getLastJRViewer();
 		JJackNativeClient client = new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
 			public void process(JJackAudioEvent ev) {
 				FloatBuffer bw = ev.getInput(0);
