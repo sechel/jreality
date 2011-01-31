@@ -248,6 +248,17 @@ final public class P2 {
 		return newPolygon;
 	}
 	
+	/**
+	 * Generate a direct isometry that carries the frame determined by <i>p0</i> and <i>p1</i> to that determined
+	 * by <i>q0</i> and <i>q1</i>.  See {@link #makeDirectIsometryFromFrame(double[], double[], double[], int)}.
+	 * @param dst
+	 * @param p0
+	 * @param p1
+	 * @param q0
+	 * @param q1
+	 * @param signature
+	 * @return 
+	 */
 	public static double[] makeDirectIsometryFromFrames(double[] dst, double[] p0, double[] p1, double[] q0, double[] q1, int signature) {
 		double[] toP = makeDirectIsometryFromFrame(null, p0, p1, signature);
 		double[] toQ = makeDirectIsometryFromFrame(null, q0, q1, signature);
@@ -256,20 +267,31 @@ final public class P2 {
 		return dst;
 	}
 
-	private static double[] makeDirectIsometryFromFrame(double[] dst, double[] p0,
-			double[] p1, int signature) {
+	/**
+	 * Generate a direct isometry which maps the frame <i>F</i> determined by <i>point</i> and <i>xdir</i> to the 
+	 * standard frame represented by the identity matrix.  <i>F</i> is the frame based at <i>point</i>
+	 * whose whose tangent space is spanned by a unit tangent vector in the direction of <i>xdir</i>, and 
+	 * a second tangent vector orthogonal to both <i>point</i> and <i>xdir</i>.
+	 * @param dst
+	 * @param point
+	 * @param xdir
+	 * @param metric
+	 * @return
+	 */
+	private static double[] makeDirectIsometryFromFrame(double[] dst, double[] point,
+			double[] xdir, int metric) {
 		if (dst == null) dst = new double[9];
-		Pn.normalize(p0, p0, signature);
-		double[] polarP = Pn.polarize(null, p0, signature);
-		double[] lineP = lineFromPoints(null, p0, p1);
-		double[] p1n = Pn.normalize(null, pointFromLines(null, polarP, lineP), signature);
-		double[] p2 = Pn.polarize(null, lineP, signature);
-		Pn.normalize(p2, p2, signature);
-		makeMatrixFromColumns(dst, p0, p1n, p2);
+		Pn.normalize(point, point, metric);
+		double[] polarP = Pn.polarize(null, point, metric);
+		double[] lineP = lineFromPoints(null, point, xdir);
+		double[] p1n = Pn.normalize(null, pointFromLines(null, polarP, lineP), metric);
+		double[] p2 = Pn.polarize(null, lineP, metric);
+		Pn.normalize(p2, p2, metric);
+		makeMatrixFromColumns(dst, p1n, p2, point);
 		return dst;
 	}
 	
-	public static double[] makeMatrixFromColumns(double[] dst, double[] p0, double[] p1, double[] p2) {
+	private static double[] makeMatrixFromColumns(double[] dst, double[] p0, double[] p1, double[] p2) {
 		if (dst == null) dst = new double[9];
 		double[][] ptrs = {p0, p1, p2};
 		for (int i = 0; i<3; ++i)	{

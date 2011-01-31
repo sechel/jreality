@@ -52,7 +52,7 @@ import de.jreality.util.LoggingSystem;
  * are purely projective, while others relate to the various metric geometries contained 
  * within projective geometry. 
  * <p>
- * The bulk of the methods here fall into three categories:
+ * The bulk of the methods here fall into three categories: 
  * <ul>
  * <li>Methods to generate isometries of a particular 3-dimensional metric geometry, 
  * <li>Methods related to perspective transformations in 3D rendering, and </li>
@@ -623,7 +623,8 @@ public class P3 {
 	}
 	/**
 	 * Calculate a translation matrix in the given metric 
-	 * which carries the point <i>from</i> to the point <i>to</i>.
+	 * which carries the point <i>from</i> to the point <i>to</i> 
+	 * and maps the line joining  <i>from</i> and <i>to</i> to itself (the axis of the isometry).
 	 * @param dst
 	 * @param from
 	 * @param to
@@ -655,8 +656,8 @@ public class P3 {
 		if (to.length == 3)	toL1 = Pn.homogenize(null, to);
 		else if (to.length == 4) toL1 = (double[]) to.clone();
 		if ((metric == Pn.EUCLIDEAN && toL1[3] == 0.0))	{
-//			return Rn.identityMatrix(4);
-			throw new IllegalArgumentException("Infinite euclidean translation vector");
+			return Rn.identityMatrix(4);
+//			throw new IllegalArgumentException("Infinite euclidean translation vector");
 		}
 		double[] toL = Pn.normalize(null, toL1, metric);
 //		LoggingSystem.getLogger(P3.class).finer("Translation vector is "+Rn.toString(toL));
@@ -757,6 +758,62 @@ public class P3 {
 		return m;
 	}
 
+	/**
+	 * Generate a direct isometry that carries the frame determined by <i>p0</i>, <i>p1</i> and <i>p2</i> to that determined
+	 * by <i>q0</i>, <i>	q1</i> and <i>q2</i>.  See {@link #makeDirectIsometryFromFrame(double[], double[], double[], int)}.
+	 * @param dst
+	 * @param p0
+	 * @param p1
+	 * @param q0
+	 * @param q1
+	 * @param metric
+	 * @return 
+	 */
+	public static double[] makeDirectIsometryFromFrames(double[] dst, double[] p0, double[] p1, double[] p2,
+			double[] q0, double[] q1, double[] q2, int metric) {
+		double[] toP = makeDirectIsometryFromFrame(null, p0, p1, p2, metric);
+		double[] toQ = makeDirectIsometryFromFrame(null, q0, q1, q2, metric);
+		double[] iToP = Rn.inverse(null,toP);
+		dst = Rn.times(dst, toQ, iToP);
+		return dst;
+	}
+
+	/**
+	 * Generate a direct isometry which maps the frame <i>F</i> determined by <i>point</i>, <i>xdir</i>, and <i>xydir</i> to the 
+	 * standard frame represented by the identity matrix.  <i>F</i> is the frame based at <i>point</i>
+	 * whose whose tangent space is spanned by a unit tangent vector in the direction of <i>xdir</i>, with 
+	 * a second orthonormal tangent vector in the plane spanned by <i>point</i>, <i>xdir</i>, and <i>xydir</i>.
+ 	 * the last basis vector is orthogonal to the latter plane.
+ 	 */
+	private static double[] makeDirectIsometryFromFrame(double[] dst, double[] point,
+			double[] xdir, double[] xydir, int metric) {
+		if (dst == null) dst = new double[16];
+		Pn.normalize(point, point, metric);
+		// calculate the polar plane of the base point
+		double[] polarP = Pn.polarizePoint(null, point, metric);
+		// and the plane containing all three given points
+		double[] xyplane = planeFromPoints(null, point, xdir, xydir);
+		// this is the normalized tangent vector in the xdirection
+		double[] pxdir = Pn.normalize(null, lineIntersectPlane(null, point, xdir, polarP), metric);
+		double[] pzdir = Pn.polarizePlane(null, xyplane, metric);
+		Pn.normalize(pzdir, pzdir, metric);
+		double[] pydir = lineIntersectPlane(null, point, xydir, polarP);
+		pydir = Pn.normalize(pydir, Pn.projectOntoComplement(null, pxdir, pydir, metric), metric);
+		makeMatrixFromColumns(dst, pxdir, pydir, pzdir, point);
+		return dst;
+	}
+		
+	private static double[] makeMatrixFromColumns(double[] dst, double[] p0, double[] p1, double[] p2, double[] p3) {
+		if (dst == null) dst = new double[16];
+		double[][] ptrs = {p0, p1, p2, p3};
+		for (int i = 0; i<4; ++i)	{
+			for (int j = 0; j<4; ++j)	{
+				dst[4*i+j] = ptrs[j][i];
+			}
+		}
+		return dst;
+	}
+ 
 
 	/**
 	 * Calculate the determinant of the matrix spanned by the three input vectors
