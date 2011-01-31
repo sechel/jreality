@@ -77,7 +77,7 @@ import de.jreality.scene.Appearance;
 	public static final String CLEAR_COLOR_BUFFER = "clearColorBuffer";
 	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
 	public final static String USE_OLD_TRANSPARENCY = "useOldTransparency";		// use the alpha channels of shader colors: pre-2006
-	
+	public final static String ANTI_ALIASING_FACTOR = "antiAliasingFactor";
     // rendering hints that can appear anywhere in the scene graph
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
 	public final static String ANTIALIASING_ENABLED = 	"antiAliasing";
