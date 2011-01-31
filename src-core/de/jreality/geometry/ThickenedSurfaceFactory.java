@@ -101,6 +101,10 @@ import de.jreality.scene.data.IntArrayArray;
 		return theSurface;
 	}
 
+	public void setSurface(IndexedFaceSet theSurface) {
+		this.theSurface = theSurface;
+	}
+
 	public boolean isMakeHoles() {
 		return makeHoles;
 	}
@@ -518,8 +522,8 @@ import de.jreality.scene.data.IntArrayArray;
 
 	private void mergeVertices(double[][] newVertices, int ul1, int ul2) {
 		double[] v1 = newVertices[ul1], v2 = newVertices[ul2];
-				System.err.println("redefining vertices "+Rn.toString(v1));
-				System.err.println("redefining vertices "+Rn.toString(v2));
+//				System.err.println("redefining vertices "+Rn.toString(v1));
+//				System.err.println("redefining vertices "+Rn.toString(v2));
 		double[] vv = Rn.times(null, .5, Rn.add(null, v1, v2));
 //				System.err.println("new vertex "+Rn.toString(vv));
 		newVertices[ul1] = newVertices[ul2] = vv;

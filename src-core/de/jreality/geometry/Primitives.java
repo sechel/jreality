@@ -628,6 +628,30 @@ public class Primitives {
 		return verts;
 	}
 
+	public static IndexedFaceSet regularAnnulus(int order, double offset, double r) {
+		if (r == 0.0) return regularPolygon(order, offset);
+		QuadMeshFactory qmf = new QuadMeshFactory();
+		double[][][] allverts = new double[2][order+1][3];
+		double start = offset*(2*Math.PI)/order;
+		for (int  i =0; i<=order; ++i)	{
+			double angle = start+i * 2.0*Math.PI/order;
+			allverts[0][i][0] = Math.cos(angle);
+			allverts[0][i][1] = Math.sin(angle);
+			allverts[0][i][2] = 0.0;
+		}
+//		allverts[0] = regularPolygonVertices(order, offset);
+		double[] scaler = P3.makeScaleMatrix(null, r);
+		allverts[1] = Rn.matrixTimesVector(null, scaler, allverts[0]);
+		qmf.setULineCount(order+1);
+		qmf.setVLineCount(2);
+		qmf.setVertexCoordinates(allverts);
+		qmf.setClosedInUDirection(true);
+		qmf.setClosedInVDirection(false);
+		qmf.setGenerateEdgesFromFaces(true);
+		qmf.setGenerateFaceNormals(true);
+		qmf.update();
+		return qmf.getIndexedFaceSet();
+	}
 	/**
 	 * @return {@link #arrow(double, double, double, double, double, boolean)} with final parameter false.
 	 */
