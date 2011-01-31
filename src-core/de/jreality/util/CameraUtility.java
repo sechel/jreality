@@ -58,6 +58,7 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.shader.CommonAttributes;
 
 /**
  * A collection of static methods related to the jReality Camera class.
@@ -146,13 +147,18 @@ public class CameraUtility {
 		boolean visible = false;
 		SceneGraphComponent cameraBranch = (SceneGraphComponent) cp.iterator(1).next();
 		SceneGraphComponent root = viewer.getSceneRoot();
+		Object foo = root.getAppearance().getAttribute(CommonAttributes.METRIC);
+		int metric = Pn.EUCLIDEAN;
+		if (foo instanceof Integer) {
+			metric = ((Integer) foo).intValue();
+		}
 		try {
 			// TODO this is always true if camerapath starts at root
 			if(root.isDirectAncestor(cameraBranch)) {
 				visible = cameraBranch.isVisible();
 				cameraBranch.setVisible(false);
 			} 
-  		encompass(viewer, root, true);
+  		encompass(viewer, root, true, metric);
 		} finally {
 			cameraBranch.setVisible(visible);
 		}
@@ -165,6 +171,7 @@ public class CameraUtility {
 	 * @param sgc
 	 * @param setStereoParameters
 	 */
+	@Deprecated
 	public static void encompass(Viewer viewer, SceneGraphComponent sgc, boolean setStereoParameters)	{
 		encompass(viewer, sgc, setStereoParameters, Pn.EUCLIDEAN);
 	}
