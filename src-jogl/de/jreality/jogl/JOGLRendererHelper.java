@@ -360,6 +360,7 @@ public class JOGLRendererHelper {
 		int numEdges = sg.getNumEdges();
 		// if (pickMode) JOGLConfiguration.theLog.log(Level.INFO,"Rendering
 		// edges in picking mode");
+//		System.err.println("rendering line set with edge count = "+numEdges);
 		for (int i = 0; i < numEdges; ++i) {
 			gl.glBegin(GL.GL_LINE_STRIP);
 			int[] ed = sg.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray(null);

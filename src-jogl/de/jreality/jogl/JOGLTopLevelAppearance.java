@@ -10,6 +10,7 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.util.LoggingSystem;
 
@@ -21,6 +22,7 @@ public class JOGLTopLevelAppearance {
 			frontBanana = true,
 			forceResidentTextures = true,
 			oneTexture2DPerImage = false;
+	transient protected double globalAntiAliasingFactor = 1.0;
 	transient protected CubeMap skyboxCubemap;
 	public JOGLTopLevelAppearance(Appearance ap)	{
 		rootAp = ap;
@@ -62,6 +64,8 @@ public class JOGLTopLevelAppearance {
 			skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
 				SKY_BOX, rootAp, true);
 		} else skyboxCubemap = null;
+		obj = rootAp.getAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, Double.class);		// assume the best ...
+		if (obj instanceof Double) globalAntiAliasingFactor = ((Double) obj).doubleValue();
 	}
 
 	public boolean isRenderSpherical() {
@@ -83,5 +87,14 @@ public class JOGLTopLevelAppearance {
 	public CubeMap getSkyboxCubemap() {
 		return skyboxCubemap;
 	}
+
+	public double getGlobalAntiAliasingFactor() {
+		return globalAntiAliasingFactor;
+	}
+
+	public void setGlobalAntiAliasingFactor(double globalAntiAliasingFactor) {
+		this.globalAntiAliasingFactor = globalAntiAliasingFactor;
+	}
+
 
 }

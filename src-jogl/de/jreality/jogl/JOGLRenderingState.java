@@ -102,6 +102,7 @@ public class JOGLRenderingState {
 	public double levelOfDetail;
 	public double depthFudgeFactor;
 	public double currentAlpha = 1.0;
+	public double globalAntiAliasingFactor = 1.0; // for offscreen rendering, when image will be anti-aliased
 	public double[] cameraToWorld = Rn.identityMatrix(4),
 			worldToCamera = Rn.identityMatrix(4),
 			cameraToNDC  = Rn.identityMatrix(4);

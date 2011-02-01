@@ -37,12 +37,18 @@ public class JOGLOffscreenRenderer {
 	boolean preMultiplied = false;		// not sure about this!
 	private javax.swing.Timer followTimer;
 	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
+		return renderOffscreen(imageWidth, imageHeight, 1.0, canvas);
+	}
+	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, double aa, GLAutoDrawable canvas) {
 		if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
 			return null;
 		}
+		double oldaa = jr.renderingState.globalAntiAliasingFactor;
+		jr.renderingState.globalAntiAliasingFactor = aa;
+		System.err.println("setting global aa factor to "+aa);
 		jr.lightsChanged = true;
-		numTiles = Math.max(imageWidth/512, imageHeight/512);
+		numTiles = Math.max(imageWidth/1024, imageHeight/1024);
 		if (numTiles == 0) numTiles = 1;
 		tileSizeX = (imageWidth/numTiles);
 		tileSizeY = (imageHeight/numTiles);
@@ -74,6 +80,7 @@ public class JOGLOffscreenRenderer {
 		jr.offscreenMode = true;
 		jr.lightListDirty = true;
 		canvas.display();
+		jr.renderingState.globalAntiAliasingFactor = oldaa;
 		// why I can't just use img is a mystery to me ... go figure
 		// I seem to be just copying the data directly from one image to the other.
 		BufferedImage bi = ImageUtility.rearrangeChannels(offscreenImage);
