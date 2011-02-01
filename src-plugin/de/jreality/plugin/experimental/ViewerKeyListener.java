@@ -35,6 +35,7 @@ import de.jreality.ui.viewerapp.SelectionManager;
 import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.DefaultMatrixSupport;
+import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
 import de.jtem.jrworkspace.plugin.annotation.Experimental;
 
@@ -169,7 +170,6 @@ public class ViewerKeyListener extends KeyAdapter {
 //						getSelectedAppearance().setAttribute(CommonAttributes.LINE_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 //						getSelectedAppearance().setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, color);
 					}
-					viewer.renderAsync();
 					viewer.renderAsync();
 					break;
 					
@@ -371,33 +371,6 @@ public class ViewerKeyListener extends KeyAdapter {
 	  		rootAp.setAttribute(CommonAttributes.BACKGROUND_COLORS, showColors ? savedColors : Appearance.INHERITED);
 	}
 
-	public static void handleFullScreen(boolean isFullScreen, Frame frame, Component c)	{
-		    if(isFullScreen) {
-		      frame.dispose();
-		      frame.setUndecorated(true);
-		    }
-		    if (isFullScreen) {
-		      if (frame instanceof JFrame)	{
-		        JFrame jframe = (JFrame) frame;
-		        jframe.setJMenuBar(null);
-		        jframe.setContentPane(new Container());
-		        jframe.getContentPane().setLayout(new BorderLayout());
-		        jframe.getContentPane().add("Center",c);
-		      } else 
-		        frame.add("center",c);
-		    } 
-		    frame.getGraphicsConfiguration().getDevice().setFullScreenWindow(
-		        isFullScreen ? frame : null
-		    );
-		    if(!isFullScreen) {
-		      frame.dispose();
-		      frame.setUndecorated(false);
-		    }
-		    frame.validate();
-		    frame.setVisible(true);
-		  }
-		  
-
 	private void toggleValue(String  name)	{
 		toggleValue(viewer, name,getSelectedAppearance());
 	}
@@ -414,7 +387,7 @@ public class ViewerKeyListener extends KeyAdapter {
 		if (obj != null && obj instanceof Boolean)	{
 			boolean newVal = true;
 			newVal = !((Boolean) obj).booleanValue();
-			JOGLConfiguration.getLogger().log(Level.INFO,"Turning "+(newVal ? "on" : "off")+" property "+name);
+			LoggingSystem.getLogger("de.jreality.plugin.experimental").log(Level.INFO,"Turning "+(newVal ? "on" : "off")+" property "+name);
 			ap.setAttribute(name, newVal);
 			viewer.renderAsync();
 			return;
@@ -464,15 +437,16 @@ public class ViewerKeyListener extends KeyAdapter {
 	 * @param g
 	 * @param b
 	 */
-	private void modulateValueAdditive(String name, double def, double inc, double min, double max, boolean increase) {
+	public void modulateValueAdditive(String name, double def, double inc, double min, double max, boolean increase) {
 		modulateValueAdditive(viewer, name, def, inc, min, max, increase);
 	}
 		
-	public  void modulateValueAdditive(Viewer viewer, String name, double defawlt, double inc, double min, double max, boolean increase) {
-		Appearance ap = getSelectedAppearance();
+	public  static void modulateValueAdditive(Viewer viewer, String name, double defawlt, double inc, double min, double max, boolean increase) {
+		SceneGraphPath selection = SelectionManagerImpl.selectionManagerForViewer(viewer).getSelectionPath();
+		Appearance ap = SceneGraphUtility.findDeepestAppearance(selection);
 		if (ap == null) return;
 		modulateValueAdditive(ap, name, defawlt, inc, min, max, increase);
-		viewer.renderAsync();		
+//		viewer.renderAsync();		
 	}
 
 	public  static void modulateValueAdditive(Appearance ap, String name, double defawlt, double inc, double min, double max, boolean increase) {
