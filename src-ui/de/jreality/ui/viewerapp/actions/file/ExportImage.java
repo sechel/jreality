@@ -80,7 +80,7 @@ public class ExportImage extends AbstractJrAction {
 	private DimensionPanel dimPanel;
 	private JComponent options;
 	private int antialiasing;
-	private boolean saveAlpha = true;
+	private boolean saveAlpha = false;  // this is somehow broken on jogl backend so turn off by default
 	private JCheckBox checkbox;
 
 	
@@ -120,13 +120,15 @@ public class ExportImage extends AbstractJrAction {
 		
 		//render offscreen
 		BufferedImage scaledImg = null;
+		double aa = antialiasing;
 		try {
-			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height});
+			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height, aa});
 //			expr.execute();
 			scaledImg = (BufferedImage) expr.getValue();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+
 		int type = saveAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
 		BufferedImage img = new BufferedImage(dim.width, dim.height, type);
 		Graphics2D g = (Graphics2D) img.getGraphics();
