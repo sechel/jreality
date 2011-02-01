@@ -130,15 +130,6 @@ public class ViewerSwitch implements Viewer {
  //     newViewer.setMetric(currentViewer.getMetric());
     } catch (Exception e) {}
    
-// I would like to know why these are set to null.  Viewer instances which 
-// automatically instantiate a new camera path when null is provided cause problems here.
-//  e.g. charlesgunn.jreality.jogl.InteractiveViewer does this.
-//   currentViewer.setCameraPath(null);
-//    currentViewer.setSceneRoot(null);
-//    try {
-//      currentViewer.setAuxiliaryRoot(null);
-//    } catch (Exception e) {}
-
     if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component) unregisterComponent((Component) currentViewer.getViewingComponent());
     if (newViewer.hasViewingComponent()  && newViewer.getViewingComponent() instanceof Component) {
       if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component)
