@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -252,9 +253,9 @@ public class U3DSceneUtility {
 	}
 	
 
-	private static List<Geometry> getGeometries_R(SceneGraphComponent root, SceneGraphPath p) {
+	private static Map<Geometry, SceneGraphComponent> getGeometries_R(SceneGraphComponent root, SceneGraphPath p) {
 		p.push(root);
-		LinkedList<Geometry> r = new LinkedList<Geometry>();
+		Map<Geometry, SceneGraphComponent> r = new HashMap<Geometry, SceneGraphComponent>();
 		if (root.getGeometry() != null) {
 			Geometry g = root.getGeometry();
 			if (g instanceof PointSet) { // remove vertex normals if flat shading
@@ -269,20 +270,27 @@ public class U3DSceneUtility {
 					
 				}
 			}
-			r.add(root.getGeometry());
+			r.put(root.getGeometry(), root);
 		}
 		for (int i = 0; i < root.getChildComponentCount(); i++) {
-			List<Geometry> subList = getGeometries_R(root.getChildComponent(i), p);
-			if (subList.size() != 0)
-				r.addAll(subList);
+			Map<Geometry, SceneGraphComponent> subList = getGeometries_R(root.getChildComponent(i), p);
+			if (subList.size() != 0) {
+				r.putAll(subList);
+			}
 		}
-		HashSet<Geometry> uniqueSet = new HashSet<Geometry>(r);
 		p.pop();
-		return new LinkedList<Geometry>(uniqueSet);
+		return r;
 	}	
 	
 	
-	public static List<Geometry> getGeometries(JrScene scene) {
+	/**
+	 * TODO
+	 * Returns a map that contains data that is used to build a workaround
+	 * for the texture matrix bug in adobe reader. 
+	 * @param scene
+	 * @return
+	 */
+	public static Map<Geometry, SceneGraphComponent> getGeometries(JrScene scene) {
 		SceneGraphPath p = new SceneGraphPath();
 		return getGeometries_R(scene.getSceneRoot(), p);
 	}
@@ -578,7 +586,7 @@ public class U3DSceneUtility {
 	}
 	
 	
-	public static HashMap<Geometry, Geometry> prepareGeometry(Collection<Geometry> geometry) {
+	public static HashMap<Geometry, Geometry> prepareGeometries(Collection<Geometry> geometry) {
 		HashMap<Geometry, Geometry> r = new HashMap<Geometry, Geometry>();
 		for (Geometry g : geometry) {
 			if (g instanceof IndexedFaceSet) {

@@ -84,6 +84,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.io.JrScene;
@@ -159,6 +160,8 @@ public class WriterU3D implements SceneWriter {
 		parentMap = null;
 	protected HashMap<SceneGraphComponent, String>
 		nodeNameMap = null;
+	protected Map<Geometry, SceneGraphComponent>
+		geometryMap = null;
 	protected HashMap<Geometry, String>
 		geometryNameMap = null;
 	protected HashMap<Geometry, Geometry>
@@ -629,23 +632,36 @@ public class WriterU3D implements SceneWriter {
 			}
 		}
 		// texture coordinates
+		// TODO: this is a hack for adobe reader that does
+		// not support texture matrices correctly. We take some 
+		// texture matrix and hope for the best
+		Matrix T = new Matrix();
+		SceneGraphComponent comp = geometryMap.get(g); // some component with this geometry
+		try {
+			EffectiveAppearance ea = appearanceMap.get(comp);
+			Texture2D texInfo = (Texture2D) createAttributeEntity(Texture2D.class, POLYGON_SHADER + "." + TEXTURE_2D, ea);
+			T = texInfo.getTextureMatrix();
+		} catch (Exception e) {} 
+		
 		if (tvertCount != 0 && tVerts != null) {
 			for (int i = 0; i < tVerts.length; i++) {
 				double[] v = tVerts[i];
 				float h = 1.0f;
 				if (v.length > 2) {
-					h = (float)v[2];
+					h = (float)v[v.length - 1];
 				}
-				w.WriteF32((float) v[0] / h);
-				w.WriteF32((float) v[1] / h);
-				w.WriteF32(0.0f);
-				w.WriteF32(1.0f);
+				double[] tp = {v[0] / h, v[1] / h, 0, 1};
+				tp = T.multiplyVector(tp);
+				w.WriteF32((float) (tp[0] / tp[3]));
+				w.WriteF32((float) (tp[1] / tp[3]));
+				w.WriteF32(0f);
+				w.WriteF32(1f);
 			}
 		} else {
 			w.WriteF32(0f);
 			w.WriteF32(0f);
 			w.WriteF32(0f);
-			w.WriteF32(0f);		
+			w.WriteF32(1f);		
 		}
 		// faces
 		for (int i = 0; i < faceCount; i++) {
@@ -674,7 +690,7 @@ public class WriterU3D implements SceneWriter {
 	
 	
 	protected DataBlock getGeometryContinuation(Geometry g) {
-		if (g instanceof IndexedFaceSet) {
+		if (g instanceof IndexedFaceSet) { // meshes are not part of a modifier chain
 			return getCLODBaseMeshContinuation((IndexedFaceSet)g);
 		}
 		BitStreamWrite w = new BitStreamWrite();
@@ -1196,8 +1212,10 @@ public class WriterU3D implements SceneWriter {
 			// texture mode
 			w.WriteU8((short)0x00);
 			// texture transform matrix
-			Matrix T = texInfo.getTextureMatrix();
-			WriteMatrix(T.getArray(), w);
+			// TODO: use texture matrix if acrobat supports it
+//			Matrix T = texInfo.getTextureMatrix(); 
+//			WriteMatrix(T.getArray(), w);
+			WriteMatrix(euclidean().getArray(), w);
 			// texture wrap transform matrix element
 			WriteMatrix(euclidean().getArray(), w); // not implemented
 			short repeat = 0;
@@ -1595,8 +1613,9 @@ public class WriterU3D implements SceneWriter {
 		lights = U3DSceneUtility.getLights(scene);
 		lightNameMap = U3DSceneUtility.getUniqueNames(lights);
 		
-		geometries = U3DSceneUtility.getGeometries(scene);
-		preparedGeometryMap = U3DSceneUtility.prepareGeometry(geometries);
+		geometryMap = U3DSceneUtility.getGeometries(scene);
+		geometries = geometryMap.keySet(); // get the unique set of geometries
+		preparedGeometryMap = U3DSceneUtility.prepareGeometries(geometries);
 		preparedGeometries = new HashSet<Geometry>(preparedGeometryMap.values());
 		geometryNameMap = U3DSceneUtility.getUniqueNames(preparedGeometries);
 		
