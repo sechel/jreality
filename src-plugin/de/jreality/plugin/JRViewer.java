@@ -247,6 +247,15 @@ public class JRViewer {
 		c.registerPlugin(p);
 	}
 	
+	/**
+	 * Adds a plug-in to this JTViewer's registered plug-ins. The
+	 * viewer application is then assembled on startup by these plug-ins.
+	 * @param p
+	 */
+	public void registerPlugin(Class<? extends Plugin> p) {
+		c.registerPlugin(p);
+	}
+	
 	
 	/**
 	 * Registered a set of plug-ins at once
