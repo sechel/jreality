@@ -809,6 +809,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 			);
 			appearance.setAttribute(Z_BUFFER_ENABLED, true);
 		}
+		updateTransparency();
 		updateEnabledStates();
 	}
 	
@@ -864,7 +865,8 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 			appearance.setAttribute(
 					CommonAttributes.POLYGON_SHADER + "." +
 					CommonAttributes.TRANSPARENCY,
-					getTransparency()
+					// TODO this is a workaround for a jogl backend bug
+					isTransparencyEnabled() ? getTransparency() : 0.0
 			);
 		}
 	}
