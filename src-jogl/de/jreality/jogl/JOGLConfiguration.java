@@ -96,11 +96,10 @@ public class JOGLConfiguration {
 			foo = Secure.getProperty("os.name");
 			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
 			// allocate a GLCanvas to be the "sharer": it will never be destroyed
-			foo = Secure.getProperty("jreality.jogl.sharedContexts");  //TODO: move to de.jreality.util.SystemProperties
-			if (foo != null && foo.indexOf("true") != -1) sharedContexts = true;
-			if (sharedContexts)	{
-				theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
-			}
+			//TODO: move to de.jreality.util.SystemProperties
+			foo = Secure.getProperty("jreality.jogl.sharedContexts");  
+			if (foo != null && foo.equals("false")) sharedContexts = false;
+			theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
 			quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn
