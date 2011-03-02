@@ -533,21 +533,10 @@ public class JRViewer {
 	 * @param node
 	 */
 	public static Viewer display(SceneGraphNode node) {
-		JRViewer v = new JRViewer();
-		v.setPropertiesFile("JRViewer.xml");
-		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
-		v.registerPlugin(new DirectContent());
-		v.registerPlugin(new ContentTools());
-		if (node != null) {
-			v.registerPlugin(new ContentInjectionPlugin(node, true));
-		} else {
-			v.registerPlugin(new ContentLoader());
-		}
-		v.addBasicUI();
+		JRViewer v = createJRViewer(node);
 		v.startup();
 		return v.getViewer();
 	}
-	
 	
 	
 	/**
