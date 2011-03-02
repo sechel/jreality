@@ -68,7 +68,7 @@ public class ConfigurationAttributes extends Properties {
             return new ConfigurationAttributes(
                 Input.getInput(new File(Secure.getProperty(SystemProperties.CONFIG_SETTINGS, SystemProperties.CONFIG_SETTINGS_DEFAULT))),
                 null);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LoggingSystem.getLogger(ConfigurationAttributes.class).log(Level.WARNING, "loading default Configuration", e);
         }
         return new ConfigurationAttributes();
