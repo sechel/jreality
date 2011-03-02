@@ -534,6 +534,7 @@ public class JRViewer {
 	 */
 	public static Viewer display(SceneGraphNode node) {
 		JRViewer v = new JRViewer();
+		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
@@ -547,7 +548,30 @@ public class JRViewer {
 		return v.getViewer();
 	}
 	
-	/** Create a JRViewer that displays the provided <code>SceneGraphNode</code> in a
+	
+	
+	/**
+	 * Quick display method with encompass
+	 * @param node
+	 */
+	public static JRViewer createJRViewer(SceneGraphNode node) {
+		JRViewer v = new JRViewer();
+		v.setPropertiesFile("JRViewer.xml");
+		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
+		v.registerPlugin(new DirectContent());
+		v.registerPlugin(new ContentTools());
+		if (node != null) {
+			v.registerPlugin(new ContentInjectionPlugin(node, true));
+		} else {
+			v.registerPlugin(new ContentLoader());
+		}
+		v.addBasicUI();
+		return v;
+	}
+	
+	
+	/** 
+	 * Create a JRViewer that displays the provided <code>SceneGraphNode</code> in a
 	 * virtual reality environment with movable avatar etc. ({@link #addBasicUISupport()}, 
 	 * {@link #addVRSUpport()}, terrain aligned content, {@link ContentAppearance}, {@link ContentTools}).
 	 * The created viewer is not started yet, so you need to call {@link #startup()} on the returned 
@@ -560,7 +584,8 @@ public class JRViewer {
 	 */
 	public static JRViewer createJRViewerVR(SceneGraphNode contentNode) {
 		JRViewer v = new JRViewer();
-		
+		v.setPropertiesFile("JRViewer.xml");
+		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
@@ -569,7 +594,6 @@ public class JRViewer {
 		if (contentNode != null) {
 			v.setContent(contentNode);
 		}
-		
 		return v;
 	}
 
