@@ -12,8 +12,8 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.ToolEvent;
 import de.jreality.toolsystem.ToolEventQueue;
 import de.jreality.ui.viewerapp.ViewerSwitch;
-import de.jtem.openhaptics.HL;
-import de.jtem.openhaptics.HLeventProc;
+import de.jtem.jopenhaptics.HL;
+import de.jtem.jopenhaptics.HLeventProc;
 
 public class PhantomDesktop implements RawDevice, OHRawDevice, HLeventProc {
 	boolean deviceActive=true;

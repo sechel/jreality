@@ -2,7 +2,7 @@ package de.jreality.openhaptics;
 
 import de.jreality.jogl.JOGLPeerComponent;
 import de.jreality.shader.CommonAttributes;
-import de.jtem.openhaptics.HL;
+import de.jtem.jopenhaptics.HL;
 
 public class OHPeerComponent extends JOGLPeerComponent{
 

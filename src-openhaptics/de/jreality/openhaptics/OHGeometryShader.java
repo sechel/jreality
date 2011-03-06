@@ -3,7 +3,7 @@ package de.jreality.openhaptics;
 import de.jreality.jogl.JOGLPeerComponent;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.shader.DefaultGeometryShader;
-import de.jtem.openhaptics.HL;
+import de.jtem.jopenhaptics.HL;
 
 public class OHGeometryShader extends DefaultGeometryShader {
 

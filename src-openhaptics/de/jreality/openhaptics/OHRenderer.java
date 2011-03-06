@@ -46,11 +46,11 @@ import javax.media.opengl.glu.GLUquadric;
 
 import de.jreality.jogl.ConstructPeerGraphVisitor;
 import de.jreality.jogl.JOGLRenderer;
-import de.jtem.openhaptics.HD;
-import de.jtem.openhaptics.HDErrorInfo;
-import de.jtem.openhaptics.HL;
-import de.jtem.openhaptics.HLU;
-import de.jtem.openhaptics.HLerror;
+import de.jtem.jopenhaptics.HD;
+import de.jtem.jopenhaptics.HDErrorInfo;
+import de.jtem.jopenhaptics.HL;
+import de.jtem.jopenhaptics.HLU;
+import de.jtem.jopenhaptics.HLerror;
 
 public class OHRenderer  extends JOGLRenderer {
 
