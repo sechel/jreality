@@ -120,6 +120,7 @@ public class ExportPDF extends AbstractJrAction {
 			writer.setRenderMode(accessory.getRenderMode());
 			writer.setGridMode(accessory.getGridMode());
 			writer.setShowGrid(accessory.isUseGrid());
+			writer.setShowInventory(accessory.isShowInventory());
 			writer.setShowAxes(accessory.isUseAxes());
 			JrScene s = new JrScene(viewer.getSceneRoot());
 			s.addPath("cameraPath", viewer.getCameraPath());
@@ -157,6 +158,7 @@ public class ExportPDF extends AbstractJrAction {
 		private JButton
 			browseButton= new JButton("User Script...");
 		private JCheckBox
+			showInventoryChecker = new JCheckBox("PDF Inventory"),
 			useGridChecker = new JCheckBox("Grid"),
 			useAxesChecker = new JCheckBox("Show Axes");
 		
@@ -183,6 +185,8 @@ public class ExportPDF extends AbstractJrAction {
 			add(useGridChecker, c);
 			c.gridwidth = GridBagConstraints.REMAINDER;
 			add(gridModeCombo, c);
+			c.gridwidth = GridBagConstraints.RELATIVE;
+			add(showInventoryChecker, c);
 			c.gridwidth = GridBagConstraints.REMAINDER;
 			add(useAxesChecker, c);
 			c.gridwidth = GridBagConstraints.RELATIVE;
@@ -235,6 +239,10 @@ public class ExportPDF extends AbstractJrAction {
 		
 		public boolean isUseAxes() {
 			return useAxesChecker.isSelected();
+		}
+		
+		public boolean isShowInventory() {
+			return showInventoryChecker.isSelected();
 		}
 		
 

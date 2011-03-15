@@ -1,5 +1,7 @@
 package de.jreality.writer.pdf;
 
+import static com.lowagie.text.pdf.PdfBoolean.PDFFALSE;
+import static com.lowagie.text.pdf.PdfBoolean.PDFTRUE;
 import static de.jreality.util.SceneGraphUtility.getPathsBetween;
 
 import java.awt.Color;
@@ -171,6 +173,7 @@ public class WriterPDF implements SceneWriter {
     private PDF3DGridMode
     	gridMode = PDF3DGridMode.GRID_MODE_OFF;
     private boolean
+    	showInventory = false,
     	showGrid = false,
     	showAxes = false;
     private File
@@ -278,7 +281,8 @@ public class WriterPDF implements SceneWriter {
             annot.put(PdfName.SUBTYPE, new PdfName(PDF_NAME_3D)); // Mandatory keys
             annot.put(PdfName.TYPE, PdfName.ANNOT);
             annot.put(new PdfName(PDF_NAME_3DD), u3dStreamRef); // Reference to stream object
-            annot.put(new PdfName("3DI"), PdfBoolean.PDFTRUE);
+            PdfBoolean value3DI = showInventory ? PDFTRUE : PDFFALSE;
+            annot.put(new PdfName("3DI"), value3DI);
 //            annot.put(new PdfName("3DV"), new PdfName("F")); // First view is the default one
             annot.setAppearance(PdfAnnotation.APPEARANCE_NORMAL, ap); // Assign appearance and page
             annot.put(new PdfName("3DA"), activationDict);
@@ -409,6 +413,10 @@ public class WriterPDF implements SceneWriter {
 	
 	public void setUserScriptFile(File userScriptFile) {
 		this.userScriptFile = userScriptFile;
+	}
+	
+	public void setShowInventory(boolean showInventory) {
+		this.showInventory = showInventory;
 	}
 	
 	public static void main(String[] args) {
