@@ -88,8 +88,8 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		rotateModel = new SpinnerNumberModel(0.0, -180.0, 180.0, 0.1),
 		translateUModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
 		translateVModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
-		scaleUModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.001),
-		scaleVModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.001);
+		scaleUModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.1),
+		scaleVModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.1);
 	private JSpinner
 		rotateSpinner = new JSpinner(rotateModel),
 		translateUSpinner = new JSpinner(translateUModel),
@@ -128,7 +128,8 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	
 	private GridBagConstraints 
 		c = new GridBagConstraints();
-
+	private boolean
+		blockListeners = false;
 	
 	public TextureInspector(int btnSize) {
 		this();
@@ -285,6 +286,8 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	 * Beware! Ugly code
 	 */
 	public void stateChanged(ChangeEvent e) {
+		if (blockListeners) return;
+		blockListeners = true;
 		Object s = e.getSource();
 		if (scaleUSlider == s) {
 			double sliderVal = scaleUSlider.getValue() * 0.01;
@@ -377,6 +380,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 			rotateSlider.addChangeListener(this);
 		}
 		updateTextureTransform();
+		blockListeners = false;
 	}
 	
 	
