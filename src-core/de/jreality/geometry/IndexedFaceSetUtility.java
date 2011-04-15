@@ -1311,7 +1311,7 @@ public class IndexedFaceSetUtility {
 		return false;
 	} 
 	
-	private static int[][] collectVertxFaces(int numV,int[][] faces){
+	private static int[][] collectVertexFaces(int numV,int[][] faces){
 		Object[] a= new Object[numV];
 		for (int i = 0; i < numV; i++) {
 			a[i]=new LinkedList<Integer>();
@@ -1358,7 +1358,7 @@ public class IndexedFaceSetUtility {
 		int numV=numVertices;
 		int numF=faces.length;
 		//Liste 1: 
-		int[][] facesOfVert=collectVertxFaces(numV, faces);
+		int[][] facesOfVert=collectVertexFaces(numV, faces);
 		// Liste 2:
 		boolean[] doneFace= new boolean[numF];
 		for (int i = 0; i < numF; i++) {
@@ -1461,14 +1461,18 @@ public class IndexedFaceSetUtility {
 		System.arraycopy(result, 0, face, 0, face.length);
 	}
 	private static boolean haveSameOrientation(int p1,int p2,int[] face1,int[] face2){
-		boolean orient1=posOrientatet(p1, p2, face1);
-		boolean orient2=posOrientatet(p2, p1, face2);
+		if (face1.length < 3 || face2.length < 3) { 
+			// digons are always correctly oriented
+			return true;
+		}
+		boolean orient1=posOrientated(p1, p2, face1);
+		boolean orient2=posOrientated(p2, p1, face2);
 		return (orient1==orient2);
 		}
 	/** returnes true if p1 and p2 appear side by side in Face
 	 * and p1 appears leftside of p2 (in face) 
 	 */
-	private static boolean posOrientatet(int p1,int p2, int[] face){
+	private static boolean posOrientated(int p1,int p2, int[] face){
 		for (int i = 0; i < face.length; i++) 
 			if(face[i]==p1){
 				if(i+1<face.length){
