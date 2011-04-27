@@ -238,7 +238,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		    	Rn.times(jr.matrixStack[stackCounter].getArray(), jr.matrixStack[stackCounter-1].getArray(), cachedTform);				
 			}
 //			jr.globalGL.glLoadTransposeMatrixd(jr.context.getObjectToCamera(),0);	
-			jr.globalGL.glLoadTransposeMatrixd(jr.matrixStack[stackCounter].getArray(),0);	
+			transpose(mat, jr.matrixStack[stackCounter].getArray());
+			jr.globalGL.glLoadMatrixd(mat,0);	
 		}
 		jr.stackDepth++;
 	}

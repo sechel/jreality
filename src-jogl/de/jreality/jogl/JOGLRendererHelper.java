@@ -755,7 +755,8 @@ public class JOGLRendererHelper {
 					jr.renderingState.currentMetric); //)Pn.EUCLIDEAN);
 			Texture2DLoaderJOGL.render(gl, tex2d);
 			gl.glPushMatrix();
-			gl.glMultTransposeMatrixd(bbm, 0);
+			Rn.transpose(bbm, bbm);
+			gl.glMultMatrixd(bbm, 0);
 			drawFaces(jr, bb);
 			gl.glPopMatrix();
 		}
@@ -790,7 +791,8 @@ public class JOGLRendererHelper {
 				if ( ((ClippingPlane) cp).isLocal()) continue;
 				double[] mat = lp.getMatrix(null);
 				jr.globalGL.glPushMatrix();
-				jr.globalGL.glMultTransposeMatrixd(mat,0);
+				Rn.transpose(mat, mat);
+				jr.globalGL.glMultMatrixd(mat,0);
 				pushClippingPlane(jr, clipPlane);
 				jr.globalGL.glPopMatrix();
 			}

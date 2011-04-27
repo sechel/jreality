@@ -46,6 +46,7 @@ import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -100,7 +101,9 @@ class JOGLSkyBox {
 	   
     gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, P3.originP3, Pn.EUCLIDEAN), 0);
     double scale = (cam.getNear() + cam.getFar())/2;
-    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
+    double[] mat = P3.makeStretchMatrix(null, scale);
+    Rn.transpose(mat, mat);
+    gl.glMultMatrixd(mat,0);
 	for (int i = 0; i<6; ++i)	{
 		jogltex.setImage(imgs[i]);
 	    Texture2DLoaderJOGL.render(gl, jogltex);

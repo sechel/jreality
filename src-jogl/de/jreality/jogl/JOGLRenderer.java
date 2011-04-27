@@ -235,7 +235,8 @@ public class JOGLRenderer   {
 		globalGL.glLoadIdentity();
 		if (topAp.isRenderSpherical())	
 		{
-			globalGL.glMultTransposeMatrixd(frontBanana ? frontZBuffer : backZBuffer, 0);
+			transpose(tmpMat, frontBanana ? frontZBuffer : backZBuffer);
+			globalGL.glMultMatrixd(tmpMat, 0);
 //			System.err.println("c2ndc = "+Rn.matrixToString(
 //					Rn.times(null, frontBanana ? frontZBuffer : backZBuffer, c2ndc)));
 		}
