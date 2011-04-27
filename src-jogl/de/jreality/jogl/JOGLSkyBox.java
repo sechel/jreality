@@ -85,6 +85,8 @@ class JOGLSkyBox {
     jogltex = new JOGLTexture2D(tex);
   }
 
+	private static double[] mat = new double[16];
+	
   static void render(GL gl, double[] w2c, CubeMap cm, Camera cam)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
     jogltex.setBlendColor(cm.getBlendColor());
@@ -98,8 +100,9 @@ class JOGLSkyBox {
 //	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, white);
     gl.glColor4fv( white, 0);
     gl.glPushMatrix();
-	   
-    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, P3.originP3, Pn.EUCLIDEAN), 0);
+    P3.extractOrientationMatrix(mat, w2c, P3.originP3, Pn.EUCLIDEAN);
+	Rn.transpose(mat, mat);
+    gl.glLoadMatrixd(mat, 0);
     double scale = (cam.getNear() + cam.getFar())/2;
     double[] mat = P3.makeStretchMatrix(null, scale);
     Rn.transpose(mat, mat);

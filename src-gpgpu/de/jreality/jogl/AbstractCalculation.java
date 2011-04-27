@@ -105,7 +105,7 @@ private static final double[] ID = Rn.identityMatrix(4);
   private int[] canvasViewport = new int[2];
 
   private boolean measureCPS=true;
-
+  private double[] mat = new double[16];
   public void init(GLAutoDrawable drawable) {
     if (!drawable.getGL().isExtensionAvailable("GL_ARB_fragment_shader")
         || !drawable.getGL().isExtensionAvailable("GL_ARB_vertex_shader")
@@ -134,7 +134,8 @@ private static final double[] ID = Rn.identityMatrix(4);
       
       gl.glEnable(TEX_TARGET);
       gl.glMatrixMode(GL.GL_TEXTURE);
-      gl.glLoadTransposeMatrixd(ID,0);
+      Rn.transpose(mat, ID);
+      gl.glLoadMatrixd(mat,0);
 
       initPrograms(gl);
       initFBO(gl);
