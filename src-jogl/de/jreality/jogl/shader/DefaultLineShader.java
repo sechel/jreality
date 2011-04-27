@@ -103,7 +103,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	NoneuclideanGLSLShader noneuc = new NoneuclideanGLSLShader();
 	boolean useGLSL, hasNoneuc = false;
 	GlslProgram glslProgram;
-
+	
 	public DefaultLineShader(de.jreality.shader.DefaultLineShader orig)	{
 		templateShader = orig;
 	}
@@ -338,7 +338,9 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					if (cc.getGeometry() != null)	{
 						if (pickMode) gl.glPushName(j);
 						gl.glPushMatrix();
-						gl.glMultTransposeMatrixd(cc.getTransformation().getMatrix(mat),0);
+						cc.getTransformation().getMatrix(mat);
+						Rn.transpose(mat, mat);
+						gl.glMultMatrixd(mat,0);
 						gl.glCallList(tubeDL[sig+1]);						
 						gl.glPopMatrix();
 						if (pickMode) 	gl.glPopName();					

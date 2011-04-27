@@ -46,6 +46,7 @@ import java.util.logging.Level;
 import javax.media.opengl.GL;
 
 import de.jreality.geometry.SphereUtility;
+import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.CameraUtility;
@@ -61,6 +62,7 @@ public class JOGLSphereHelper extends SphereUtility {
 	static boolean sharedDisplayLists;
 	static WeakHashMap<GL, int[]> sphereDListsTable = new WeakHashMap<GL, int[]>();
 	static int[] globalSharedSphereDisplayLists = null;
+	static double[] mat = new double[16];
 	public static void setupSphereDLists(JOGLRenderer jr)	{
 		// we read this once -- had better be set to correct value when we do so!
 		sharedDisplayLists = JOGLConfiguration.sharedContexts;
@@ -78,7 +80,8 @@ public class JOGLSphereHelper extends SphereUtility {
 			IndexedFaceSet qms = (IndexedFaceSet) tcs.getChildComponent(0).getGeometry();
 			for (int j = 0; j<tcs.getChildComponentCount(); ++j)	{
 				gl.glPushMatrix();
-				gl.glMultTransposeMatrixd(tcs.getChildComponent(j).getTransformation().getMatrix(),0);
+				Rn.transpose(mat, tcs.getChildComponent(j).getTransformation().getMatrix());
+				gl.glMultMatrixd(mat,0);
 				JOGLRendererHelper.drawFaces(jr,qms,true, 1.0);
 				gl.glPopMatrix();
 			}				

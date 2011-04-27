@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.media.opengl.GL;
 
+import de.jreality.math.Rn;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
@@ -107,7 +108,8 @@ public class JOGLLightHelper {
 		for (int i = 0; i < n; ++i) {
 			SceneGraphNode light = lights.get(i).getLastElement();
 			globalGL.glPushMatrix();
-			globalGL.glMultTransposeMatrixd(matlist[i], 0);
+			Rn.transpose(mat, matlist[i]);
+			globalGL.glMultMatrixd(mat, 0);
 			light.accept(ogllv);
 			globalGL.glPopMatrix();
 			lightCount++;
