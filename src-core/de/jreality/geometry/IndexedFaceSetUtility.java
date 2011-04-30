@@ -1376,32 +1376,35 @@ public class IndexedFaceSetUtility {
 			// start again with new face:
 			unfinishedFace[getFirst(doneFace,false)]=true;
 			numUnf++;
-			// orientate unfinished Faces neighbors
-			while(numUnf>0){
+			// orient unfinished Faces neighbors
+			while(numUnf > 0){
 				numDone++;
 				// take out
-				int currNum=getFirst(unfinishedFace,true);
-				int[] currFace=faces[currNum];
-				int len= currFace.length;
-				unfinishedFace[currNum]=false;
+				int currNum = getFirst(unfinishedFace,true);
+				int[] currFace = faces[currNum];
+				int len = currFace.length;
+				unfinishedFace[currNum] = false;
 				numUnf--;
-				doneFace[currNum]=true;
+				doneFace[currNum] = true;
 				// care about neighbors:
 				for (int i = 0; i < len; i++) {// all edges
 					// Edge Vertices:
 					int p1=currFace[i];
 					int p2=currFace[(i+1)%len];
-					List<Integer> neighbor =
-						getTouchingFaces(p1, p2, facesOfVert, currNum);
+					if (p1 == p2) continue;
+					Set<Integer> neighbor = getTouchingFaces(p1, p2, facesOfVert, currNum);
 					if (neighbor.size()<1) continue;
-					if (neighbor.size()>1) return false;
-					int neighb=neighbor.get(0);
+					if (neighbor.size()>1) {
+						return false;
+					}
+					int neighb = neighbor.iterator().next();
 					// check orientation
 					boolean welloriented=haveSameOrientation(p1,p2,currFace,faces[neighb]);
 					if(!welloriented){
 						// have to switch orientation
-						if(doneFace[neighb]|unfinishedFace[neighb])
+						if(doneFace[neighb]|unfinishedFace[neighb]) {
 							return false;
+						}
 						invertOrientation(faces[neighb]);
 						unfinishedFace[neighb]=true;
 						numUnf++;
@@ -1437,10 +1440,10 @@ public class IndexedFaceSetUtility {
 	 * @param facesOfVerts (fuer jeden Vertex eine Liste von angrenzenden Facetten)
 	 * @return
 	 */
-	private static List<Integer> getTouchingFaces(int p1,int p2,int[][] facesOfVerts,int me){
+	private static Set<Integer> getTouchingFaces(int p1,int p2,int[][] facesOfVerts,int me){
 		int[] faces1=facesOfVerts[p1];
 		int[] faces2=facesOfVerts[p2];
-		List<Integer> facesInBoth=new LinkedList<Integer>();
+		Set<Integer> facesInBoth = new HashSet<Integer>();
 		for (int i = 0; i < faces1.length;i++) {
 			for (int j = 0; j < faces2.length; j++) {
 				if(faces1[i]==faces2[j])
@@ -1462,7 +1465,7 @@ public class IndexedFaceSetUtility {
 	}
 	private static boolean haveSameOrientation(int p1,int p2,int[] face1,int[] face2){
 		if (face1.length < 3 || face2.length < 3) { 
-			// digons are always correctly oriented
+			// digons or monogons are always correctly oriented
 			return true;
 		}
 		boolean orient1=posOrientated(p1, p2, face1);
