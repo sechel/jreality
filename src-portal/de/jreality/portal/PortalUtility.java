@@ -1,5 +1,6 @@
 package de.jreality.portal;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.DisplayMode;
 import java.awt.GraphicsEnvironment;
@@ -8,6 +9,10 @@ import javax.swing.JFrame;
 
 import de.jreality.util.ConfigurationAttributes;
 import de.jreality.util.GuiUtility;
+
+/*
+* @author bruckschen, heydt, weissmann, gunn, +others
+*/
 
 public class PortalUtility {
 
@@ -32,6 +37,9 @@ public class PortalUtility {
 		JFrame frame = new JFrame(title);
 		if (fullscreen) {
 			frame.setLayout(null);
+			//set background black for improved cave rendering
+			frame.getContentPane().setBackground(Color.black);
+			frame.getContentPane().setForeground(Color.black);
 			viewingComponent.setBounds(x, y, width, height);
 			frame.getContentPane().add(viewingComponent);
 			frame.dispose();
