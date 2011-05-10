@@ -4,6 +4,8 @@ import static de.jreality.scene.Appearance.INHERITED;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static java.awt.FlowLayout.LEFT;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 import static javax.swing.JFileChooser.FILES_ONLY;
 
 import java.awt.Dimension;
@@ -80,18 +82,21 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		textureGroup = new ButtonGroup();
 	private JSliderVR
 		rotateSlider = new JSliderVR(SwingConstants.HORIZONTAL, -180, 180, 0),
+		shearSlider = new JSliderVR(SwingConstants.HORIZONTAL, -90, 90, 0),
 		translateUSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		translateVSlider = new JSliderVR(SwingConstants.HORIZONTAL, 0, 100, 0),
 		scaleUSlider = new JSliderVR(SwingConstants.HORIZONTAL, -100, 100, 0),
 		scaleVSlider = new JSliderVR(SwingConstants.HORIZONTAL, -100, 100, 0);
 	private SpinnerNumberModel
 		rotateModel = new SpinnerNumberModel(0.0, -180.0, 180.0, 0.1),
+		shearModel = new SpinnerNumberModel(0.0, -90.0, 90.0, 0.1),
 		translateUModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
 		translateVModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001),
 		scaleUModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.1),
 		scaleVModel = new SpinnerNumberModel(1.0, -1000.0, 1000.0, 0.1);
 	private JSpinner
 		rotateSpinner = new JSpinner(rotateModel),
+		shearSpinner = new JSpinner(shearModel),
 		translateUSpinner = new JSpinner(translateUModel),
 		translateVSpinner = new JSpinner(translateVModel),
 		scaleUSpinner = new JSpinner(scaleUModel),
@@ -185,6 +190,8 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		translateVSpinner.addChangeListener(this);
 		rotateSlider.addChangeListener(this);
 		rotateSpinner.addChangeListener(this);
+		shearSlider.addChangeListener(this);
+		shearSpinner.addChangeListener(this);
 		
 		JPanel scalePanel = new JPanel();
 		scalePanel.setBorder(BorderFactory.createTitledBorder("Scale"));
@@ -263,7 +270,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		c.gridheight = 1;
 		c.gridwidth = 1;
 		c.weightx = 0.0;
-		rotatePanel.add(new JLabel("Angle °"), c);
+		rotatePanel.add(new JLabel("Angle \u00B0"), c);
 		c.gridwidth = 1;
 		c.weightx = 1.0;
 		rotatePanel.add(rotateSlider, c);
@@ -276,15 +283,31 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		c.weighty = 0.0;
 		add(rotatePanel, c);
 		
+		JPanel shearPanel = new JPanel();
+		shearPanel.setBorder(BorderFactory.createTitledBorder("Shear"));
+		shearPanel.setLayout(new GridBagLayout());
+		c.gridheight = 1;
+		c.gridwidth = 1;
+		c.weightx = 0.0;
+		shearPanel.add(new JLabel("Angle \u00B0"), c);
+		c.gridwidth = 1;
+		c.weightx = 1.0;
+		shearPanel.add(shearSlider, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 0.0;
+		shearPanel.add(shearSpinner, c);
+		
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.weightx = 1.0;
+		c.weighty = 0.0;
+		add(shearPanel, c);
+		
 		makeFileChooser();
 		setTexture(DEFAULT_TEXTURE);
 		setTextureUScale(DEFAULT_TEXTURE_SCALE);
 	}
 	
 	
-	/**
-	 * Beware! Ugly code
-	 */
 	public void stateChanged(ChangeEvent e) {
 		if (blockListeners) return;
 		blockListeners = true;
@@ -292,93 +315,63 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		if (scaleUSlider == s) {
 			double sliderVal = scaleUSlider.getValue() * 0.01;
 			double d = Math.exp(Math.log(logarithmicRange) * sliderVal)/logarithmicRange * maximalTextureScale;
-			scaleUSpinner.removeChangeListener(this);
 			scaleUModel.setValue(d);
-			scaleUSpinner.addChangeListener(this);
 			if (!scaleLockToggle.isSelected()) {
-				scaleVSpinner.removeChangeListener(this);
 				scaleVModel.setValue(d * textureRatio);
-				scaleVSpinner.addChangeListener(this);
-				scaleVSlider.removeChangeListener(this);
 				scaleVSlider.setValue((int)(scaleUSlider.getValue() * textureRatio));
-				scaleVSlider.addChangeListener(this);
 			}
 		}
 		if (scaleUSpinner == s) {
 			double d = getTextureUScale();
 			int value = (int)(Math.log(d / maximalTextureScale * logarithmicRange)/Math.log(logarithmicRange)*100);
-			scaleUSlider.removeChangeListener(this);
 			scaleUSlider.setValue(value);
-			scaleUSlider.addChangeListener(this);
 			if (!scaleLockToggle.isSelected()) {
-				scaleVSpinner.removeChangeListener(this);
 				scaleVModel.setValue(d * textureRatio);
-				scaleVSpinner.addChangeListener(this);
-				scaleVSlider.removeChangeListener(this);
 				scaleVSlider.setValue((int)(value * textureRatio));
-				scaleVSlider.addChangeListener(this);
 			}		
 		}
 		if (scaleVSlider == s) {
 			double sliderVal = scaleVSlider.getValue() * 0.01;
 			double d = Math.exp(Math.log(logarithmicRange) * sliderVal)/logarithmicRange * maximalTextureScale;
-			scaleVSpinner.removeChangeListener(this);
 			scaleVModel.setValue(d);
-			scaleVSpinner.addChangeListener(this);
 			if (!scaleLockToggle.isSelected()) {
-				scaleUSpinner.removeChangeListener(this);
 				scaleUModel.setValue(d / textureRatio);
-				scaleUSpinner.addChangeListener(this);
-				scaleUSlider.removeChangeListener(this);
 				scaleUSlider.setValue((int)(scaleVSlider.getValue() / textureRatio));
-				scaleUSlider.addChangeListener(this);
 			}
 		}
 		if (scaleVSpinner == s) {
 			double d = getTextureVScale();
 			int value = (int)(Math.log(d / maximalTextureScale * logarithmicRange)/Math.log(logarithmicRange)*100);
-			scaleVSlider.removeChangeListener(this);
 			scaleVSlider.setValue(value);
-			scaleVSlider.addChangeListener(this);
 			if (!scaleLockToggle.isSelected()) {
-				scaleUSpinner.removeChangeListener(this);
 				scaleUModel.setValue(d / textureRatio);
-				scaleUSpinner.addChangeListener(this);
-				scaleUSlider.removeChangeListener(this);
 				scaleUSlider.setValue((int)(value / textureRatio));
-				scaleUSlider.addChangeListener(this);
 			}
 		}
 		if (translateUSlider == s) {
-			translateUSpinner.removeChangeListener(this);
 			translateUModel.setValue(translateUSlider.getValue() / 100.0);
-			translateUSpinner.addChangeListener(this);
 		}
 		if (translateVSlider == s) {
-			translateVSpinner.removeChangeListener(this);
 			translateVModel.setValue(translateVSlider.getValue() / 100.0);
-			translateVSpinner.addChangeListener(this);
 		}
 		if (translateUSpinner == s) {
-			translateUSlider.removeChangeListener(this);
 			translateUSlider.setValue((int)(translateUModel.getNumber().doubleValue() * 100));
-			translateUSlider.addChangeListener(this);
 		}
 		if (translateVSpinner == s) {
-			translateVSlider.removeChangeListener(this);
 			translateVSlider.setValue((int)(translateVModel.getNumber().doubleValue() * 100));
-			translateVSlider.addChangeListener(this);
 		}
 		if (rotateSlider == s) {
-			rotateSlider.removeChangeListener(this);
 			rotateModel.setValue((double)rotateSlider.getValue());
-			rotateSlider.addChangeListener(this);
 		}
 		if (rotateSpinner == s) {
-			rotateSlider.removeChangeListener(this);
 			rotateSlider.setValue((int)rotateModel.getNumber().doubleValue());
-			rotateSlider.addChangeListener(this);
 		}
+		if (shearSlider == s) {
+			shearModel.setValue((double)shearSlider.getValue());
+		}
+		if (rotateSpinner == s) {
+			shearSlider.setValue((int)shearModel.getNumber().doubleValue());
+		}		
 		updateTextureTransform();
 		blockListeners = false;
 	}
@@ -483,6 +476,14 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		rotateModel.setValue(Math.toDegrees(r));
 	}
 	
+	public double getTextureShear() {
+		return Math.toRadians(shearModel.getNumber().doubleValue());
+	}
+	
+	public void setTextureShear(double r) {
+		shearModel.setValue(Math.toDegrees(r));
+	}
+	
 	private void updateTextureTransform() {
 		if (tex != null) {
 			tex.setTextureMatrix(getTextureMatrix());
@@ -508,6 +509,16 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	public Matrix getTextureMatrix() {
 		MatrixBuilder mb = MatrixBuilder.euclidean();
 		mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
+		double sa = getTextureShear();
+		System.out.println("shear " + sa);
+		Matrix s = new Matrix(new double[]{
+			1,		sin(sa),0,		0,
+			0,		cos(sa),0,		0,
+			0,		0,		1,		0,
+			0,		0,		0,		1	
+		});
+		s.invert();
+		mb.times(s);
 		mb.rotate(getTextureRotation(), 0, 0, 1);
 		mb.translate(getTextureUTranslation(), getTextureVTranslation(), 0);
 		return mb.getMatrix();
