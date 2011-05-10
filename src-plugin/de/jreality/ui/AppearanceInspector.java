@@ -508,12 +508,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isShowPoints() {
 		return showPoints.isSelected();
 	}
-
 	public void setShowPoints(boolean selected) {
 		showPoints.setSelected(selected);
 		updateShowPoints();
 	}
-	
 	private void updateShowPoints() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -527,11 +525,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isSpheres() {
 		return spheres.isSelected();
 	}
-	
 	public void setSpheres(boolean b) {
 		spheres.setSelected(b);
 	}
-	
 	private void updateSpheres() {
 		boolean spheres = isSpheres();
 		if (appearance != null) {
@@ -547,11 +543,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isPointsReflecting() {
 		return pointsReflecting.isSelected();
 	}
-
 	public void setPointsReflecting(boolean b) {
 		pointsReflecting.setSelected(b);
 	}
-	
 	private void updatePointsReflecting() {
 		if (isPointsReflecting()) {
 			updatePointReflection();
@@ -569,11 +563,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public double getPointReflection() {
 		return .01 * pointsReflectionSlider.getValue();
 	}
-
 	public void setPointReflection(double d) {
 		pointsReflectionSlider.setValue((int)(100*d));
 	}
-	
 	private void updatePointReflection() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -586,11 +578,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public double getPointRadius() {
 		return .01 * sphereRadiusSlider.getValue();
 	}
-
 	public void setPointRadius(double d) {
 		sphereRadiusSlider.setValue((int) (d * 100));
 	}
-	
 	private void updateSphereRadius() {
 		double r =
 			Math.exp(Math.log(logarithmicRange) * getPointRadius()) /
@@ -616,11 +606,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		int[] rgb = pointColorChooser.getRGB();
 		return new Color(rgb[0], rgb[1], rgb[2]);
 	}
-
 	public void setPointColor(Color c) {
 		pointColorChooser.setRGB(c.getRed(), c.getGreen(), c.getBlue());
 	}
-	
 	private void updatePointColor() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -635,12 +623,10 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isShowLines() {
 		return showLines.isSelected();
 	}
-
 	public void setShowLines(boolean selected) {
 		showLines.setSelected(selected);
 		updateShowLines();
 	}
-	
 	private void updateShowLines() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -650,14 +636,13 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		}
 		updateEnabledStates();
 	}
+	
 	public boolean isTubes() {
 		return tubes.isSelected();
 	}
-	
 	public void setTubes(boolean b) {
 		tubes.setSelected(b);
 	}
-	
 	private void updateTubes() {
 		if (appearance != null) {
 			boolean tubes = isTubes();
@@ -673,11 +658,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public double getLineReflection() {
 		return .01 * linesReflectionSlider.getValue();
 	}
-
 	public void setLineReflection(double d) {
 		linesReflectionSlider.setValue((int)(100*d));
 	}
-	
 	private void updateLineReflection() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -690,11 +673,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public double getTubeRadius() {
 		return .01 * tubeRadiusSlider.getValue();
 	}
-	
 	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
 	}
-	
 	private void updateTubeRadius() {
 		double r = Math.exp(Math.log(logarithmicRange) * getTubeRadius())
 		/ logarithmicRange * maximalRadius;
@@ -716,11 +697,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		int[] rgb = lineColorChooser.getRGB();
 		return new Color(rgb[0], rgb[1], rgb[2]);
 	}
-
 	public void setLineColor(Color c) {
 		lineColorChooser.setRGB(c.getRed(), c.getGreen(), c.getBlue());
 	}
-	
 	private void updateLineColor() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -735,11 +714,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isLinesReflecting() {
 		return linesReflecting.isSelected();
 	}
-	
 	public void setLinesReflecting(boolean b) {
 		linesReflecting.setSelected(b);
 	}
-	
 	private void updateLinesReflecting() {
 		if (isLinesReflecting()) {
 			updateLineReflection();
@@ -757,14 +734,12 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isShowFaces() {
 		return showFaces.isSelected();
 	}
-
 	public void setShowFaces(boolean selected) {
 		showFaces.setSelected(selected);
 		if (appearance != null) {
 			appearance.setAttribute("showFaces", selected);
 		}
 	}
-	
 	private void updateShowFaces() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -778,11 +753,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isFacesFlat() {
 		return facesFlat.isSelected();
 	}
-
 	public void setFacesFlat(boolean b) {
 		facesFlat.setSelected(b);
 	}
-	
 	private void updateFacesFlat() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -796,11 +769,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isTransparencyEnabled() {
 		return transparency.isSelected();
 	}
-
 	public void setTransparencyEnabled(boolean b) {
 		transparency.setSelected(b);
 	}
-	
 	private void updateTransparencyEnabled() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -816,11 +787,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public boolean isFacesReflecting() {
 		return facesReflecting.isSelected();
 	}
-
 	public void setFacesReflecting(boolean b) {
 		facesReflecting.setSelected(b);
 	}
-	
 	private void updateFacesReflecting() {
 		if (isFacesReflecting()) {
 			updateFaceReflection();
@@ -838,11 +807,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public double getFaceReflection() {
 		return .01 * facesReflectionSlider.getValue();
 	}
-
 	public void setFaceReflection(double d) {
 		facesReflectionSlider.setValue((int)(100*d));
 	}
-	
 	private void updateFaceReflection() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -855,11 +822,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public double getTransparency() {
 		return .01 * transparencySlider.getValue();
 	}
-
 	public void setTransparency(double d) {
 		transparencySlider.setValue((int)(100 * d));
 	}
-	
 	private void updateTransparency() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -875,11 +840,9 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		int[] rgb = faceColorChooser.getRGB();
 		return new Color(rgb[0], rgb[1], rgb[2]);
 	}
-
 	public void setFaceColor(Color c) {
 		faceColorChooser.setRGB(c.getRed(), c.getGreen(), c.getBlue());
 	}
-	
 	private void updateFaceColor() {
 		if (appearance != null) {
 			appearance.setAttribute(
@@ -894,19 +857,56 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	public String getTexture() {
 		return textureInspector.getTexture();
 	}
-	
 	public void setTexture(String texture) {
 		textureInspector.setTexture(texture);
 	}
 
-	public double getTextureScale() {
+	public double getTextureScaleU() {
 		return textureInspector.getTextureUScale();
 	}
-	
-	public void setTextureScale(double scale) {
+	public void setTextureScaleU(double scale) {
 		textureInspector.setTextureUScale(scale);
 	}
+	public double getTextureScaleV() {
+		return textureInspector.getTextureVScale();
+	}
+	public void setTextureScaleV(double scale) {
+		textureInspector.setTextureVScale(scale);
+	}
 	
+	public boolean isTextureScaleLock() {
+		return textureInspector.isTextureScaleLock();
+	}
+	public void setTextureScaleLock(boolean lock) {
+		textureInspector.setTextureScaleLock(lock);
+	}
+	public double getTextureTranslationU() {
+		return textureInspector.getTextureUTranslation();
+	}
+	public void setTextureTranslationU(double u) {
+		textureInspector.setTextureUTranslation(u);
+	}
+	
+	public double getTextureTranslationV() {
+		return textureInspector.getTextureVTranslation();
+	}
+	public void setTextureTranslationV(double v) {
+		textureInspector.setTextureVTranslation(v);
+	}
+	
+	public double getTextureRotationAngle() {
+		return textureInspector.getTextureRotation();
+	}
+	public void setTextureRotationAngle(double a) {
+		textureInspector.setTextureRotation(a);
+	}
+	
+	public double getTextureShearAngle() {
+		return textureInspector.getTextureShear();
+	}
+	public void setTextureShearAngle(double a) {
+		textureInspector.setTextureShear(a);
+	}
 	public Matrix getTextureMatrix() {
 		return textureInspector.getTextureMatrix();
 	}

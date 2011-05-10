@@ -65,7 +65,13 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	public static final boolean DEFAULT_TUBES = true;
 	public static final boolean DEFAULT_SPHERES = true;
 	public static final String DEFAULT_TEXTURE = "none";
-	public static final double DEFAULT_TEXTURE_SCALE = .5;
+	public static final double DEFAULT_TEXTURE_SCALE_U = 1.0;
+	public static final double DEFAULT_TEXTURE_SCALE_V = 1.0;
+	public static final boolean DEFAULT_TEXTURE_IS_SCALE_UNIFORM = true;
+	public static final double DEFAULT_TEXTURE_TRANSLATION_U = 0.0;
+	public static final double DEFAULT_TEXTURE_TRANSLATION_V = 0.0;
+	public static final double DEFAULT_TEXTURE_ROTATION_ANGLE = 0.0;
+	public static final double DEFAULT_TEXTURE_SHEAR_ANGLE = 0.0;
 
 	private ViewPreferences
 		viewPreferences = null;
@@ -256,8 +262,19 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setTubes(DEFAULT_TUBES);
 		appearanceInspector.setSpheres(DEFAULT_SPHERES);
 		appearanceInspector.setTexture(DEFAULT_TEXTURE);
-		appearanceInspector.setTextureScale(DEFAULT_TEXTURE_SCALE); 
+		restoreTextureDefaults();
 	}
+
+	public void restoreTextureDefaults() {
+		appearanceInspector.setTextureScaleLock(DEFAULT_TEXTURE_IS_SCALE_UNIFORM);
+		appearanceInspector.setTextureScaleU(DEFAULT_TEXTURE_SCALE_U); 
+		appearanceInspector.setTextureScaleV(DEFAULT_TEXTURE_SCALE_V);
+		appearanceInspector.setTextureTranslationU(DEFAULT_TEXTURE_TRANSLATION_U);
+		appearanceInspector.setTextureTranslationV(DEFAULT_TEXTURE_TRANSLATION_V);
+		appearanceInspector.setTextureRotationAngle(DEFAULT_TEXTURE_ROTATION_ANGLE);
+		appearanceInspector.setTextureShearAngle(DEFAULT_TEXTURE_SHEAR_ANGLE);
+	}
+	
 	
 	@Override
 	public void restoreStates(Controller c) throws Exception {
@@ -300,7 +317,13 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		appearanceInspector.setSpheres(c.getProperty(getClass(), "spheres", DEFAULT_SPHERES));
 		appearanceInspector.setTextures(c.getProperty(getClass(), "textures", textures));
 		appearanceInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
-		appearanceInspector.setTextureScale(c.getProperty(getClass(), "textureScale", DEFAULT_TEXTURE_SCALE));
+		appearanceInspector.setTextureScaleLock(c.getProperty(getClass(), "textureScaleLock", DEFAULT_TEXTURE_IS_SCALE_UNIFORM));
+		appearanceInspector.setTextureScaleU(c.getProperty(getClass(), "textureScaleU", DEFAULT_TEXTURE_SCALE_U));
+		appearanceInspector.setTextureScaleV(c.getProperty(getClass(), "textureScaleV", DEFAULT_TEXTURE_SCALE_V));
+		appearanceInspector.setTextureTranslationU(c.getProperty(getClass(), "textureTranslationU", DEFAULT_TEXTURE_TRANSLATION_U));
+		appearanceInspector.setTextureTranslationV(c.getProperty(getClass(), "textureTranslationV", DEFAULT_TEXTURE_TRANSLATION_V));
+		appearanceInspector.setTextureRotationAngle(c.getProperty(getClass(), "textureRotation", DEFAULT_TEXTURE_ROTATION_ANGLE));
+		appearanceInspector.setTextureShearAngle(c.getProperty(getClass(), "textureShear", DEFAULT_TEXTURE_SHEAR_ANGLE));
 		
 		appearanceInspector.updateAll();
 		super.restoreStates(c);
@@ -347,8 +370,14 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		c.storeProperty(getClass(), "spheres", appearanceInspector.isSpheres());
 		c.storeProperty(getClass(), "textures", appearanceInspector.getTextures());
 		c.storeProperty(getClass(), "texture", appearanceInspector.getTexture());
-		c.storeProperty(getClass(), "textureScale", appearanceInspector.getTextureScale());
-		
+		c.storeProperty(getClass(), "textureScale", appearanceInspector.getTextureScaleU());
+		c.storeProperty(getClass(), "textureScaleLock", appearanceInspector.isTextureScaleLock());
+		c.storeProperty(getClass(), "textureScaleU", appearanceInspector.getTextureScaleU());
+		c.storeProperty(getClass(), "textureScaleV", appearanceInspector.getTextureScaleV());
+		c.storeProperty(getClass(), "textureTranslationU", appearanceInspector.getTextureTranslationU());
+		c.storeProperty(getClass(), "textureTranslationV", appearanceInspector.getTextureTranslationV());
+		c.storeProperty(getClass(), "textureRotation", appearanceInspector.getTextureRotationAngle());
+		c.storeProperty(getClass(), "textureShear", appearanceInspector.getTextureShearAngle());
 		super.storeStates(c);
 	}
 
@@ -359,6 +388,9 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		viewPreferences = c.getPlugin(ViewPreferences.class);
 		viewPreferences.addColorPickerChangedListener(this);
 		getPanel().setColorPickerMode(viewPreferences.getColorPickerMode());
+		if (viewPreferences.isResetTextureTransform()) {
+			restoreTextureDefaults();
+		}
 		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.add(appearanceInspector);
 		

@@ -35,7 +35,8 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		mainPage = new JPanel();
 	private JCheckBox
 		useExclusiveFullscreen = new JCheckBox("Exclusive Fullscreen", true),
-		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe());
+		threadSafeChecker = new JCheckBox("Thread Safe Scene Graph", SceneGraphNode.getThreadSafe()),
+		resetTextureChecker = new JCheckBox("Reset Texture Transform on Startup", true);
 	private AbstractJrToggleAction
 		showMenubarToggle = null,
 		showToolbarToggle = null;
@@ -69,6 +70,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		mainPage.add(colorChooserModeCombo, c);
 		colorChooserModeCombo.setSelectedIndex(1);
 		mainPage.add(useExclusiveFullscreen, c);
+		mainPage.add(resetTextureChecker, c);
 		
 		threadSafeChecker.addActionListener(this);
 		colorChooserModeCombo.addActionListener(this);
@@ -151,6 +153,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		c.storeProperty(getClass(), "showMenuBar", showMenubarToggle.isSelected());
 		c.storeProperty(getClass(), "showToolBar", showToolbarToggle.isSelected());
 		c.storeProperty(getClass(), "useExclusiveFullscreen", useExclusiveFullscreen.isSelected());
+		c.storeProperty(getClass(), "resetTextureTransfom", resetTextureChecker.isSelected());
 		super.storeStates(c);
 	}
 	
@@ -162,6 +165,7 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 		showMenubarToggle.setSelected(c.getProperty(getClass(), "showMenuBar", showMenubarToggle.isSelected()));
 		showToolbarToggle.setSelected(c.getProperty(getClass(), "showToolBar", showToolbarToggle.isSelected()));
 		useExclusiveFullscreen.setSelected(c.getProperty(getClass(), "useExclusiveFullscreen", useExclusiveFullscreen.isSelected()));
+		resetTextureChecker.setSelected(c.getProperty(getClass(), "resetTextureTransfom", true));
 		super.restoreStates(c);
 	}
 	
@@ -204,6 +208,10 @@ public class ViewPreferences extends Plugin implements PreferencesFlavor, Action
 	
 	public boolean removeColorPickerChangedListener(ColorPickerModeChangedListener l) {
 		return colorModeListeners.remove(l);
+	}
+	
+	public boolean isResetTextureTransform() {
+		return resetTextureChecker.isSelected();
 	}
 	
 	@Override

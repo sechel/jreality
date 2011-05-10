@@ -451,6 +451,14 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	public void setTextureVScale(double d) {
 		scaleVModel.setValue(d);
 	}
+
+	public boolean isTextureScaleLock() {
+		return !scaleLockToggle.isSelected();
+	}
+	
+	public void setTextureScaleLock(boolean lock) {
+		scaleLockToggle.setSelected(!lock);
+	}
 	
 	public double getTextureUTranslation() {
 		return translateUModel.getNumber().doubleValue();
@@ -510,7 +518,6 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		MatrixBuilder mb = MatrixBuilder.euclidean();
 		mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
 		double sa = getTextureShear();
-		System.out.println("shear " + sa);
 		Matrix s = new Matrix(new double[]{
 			1,		sin(sa),0,		0,
 			0,		cos(sa),0,		0,
