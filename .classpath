@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry excluding="de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="src-audio"/>		
 	<classpathentry kind="src" path="src-backends-share"/>
 	<classpathentry kind="src" path="src-core">
 		<attributes>
@@ -18,9 +19,13 @@
 	<classpathentry kind="src" path="src-soft"/>
 	<classpathentry kind="src" path="src-soft-new"/>
 	<classpathentry kind="src" path="src-sunflow"/>
+	<classpathentry excluding="de/jreality/swing/FakeFramePeer5.java|de/jreality/swing/FakeToolKit5.java" kind="src" path="src-swing"/>
+	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceSpacenav.java" kind="src" path="src-tool"/>
+	<classpathentry excluding="de/jreality/tutorial/audio/Example.java|de/jreality/tutorial/misc/JLinkExample.java|de/jreality/tutorial/audio/MinimalExample.java" kind="src" path="src-tutorial"/>			
 	<classpathentry kind="src" path="src-ui"/>
 	<classpathentry kind="src" path="src-vr"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>	
 	<classpathentry kind="src" path="test-backends-share"/>
 	<classpathentry kind="src" path="test-io"/>
 	<classpathentry kind="src" path="test-portal"/>
@@ -42,12 +47,7 @@
 	<classpathentry kind="lib" path="lib/vrData.jar"/>
 	<classpathentry kind="lib" path="lib/jjack_min.jar"/>
 	<classpathentry kind="lib" path="lib/netutil.jar"/>
-	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
-	<classpathentry excluding="de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="src-audio"/>	
-	<classpathentry excluding="de/jreality/swing/FakeFramePeer5.java|de/jreality/swing/FakeToolKit5.java" kind="src" path="src-swing"/>
-	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceSpacenav.java" kind="src" path="src-tool"/>
-	<classpathentry excluding="de/jreality/tutorial/audio/Example.java|de/jreality/tutorial/misc/JLinkExample.java|de/jreality/tutorial/audio/MinimalExample.java" kind="src" path="src-tutorial"/>	
-	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>	
+	<classpathentry kind="lib" path="lib/vrExamples.jar"/>	
 	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/beans.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pd.jar" sourcepath="/PdCore"/>
