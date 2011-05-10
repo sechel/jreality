@@ -4,18 +4,15 @@
  */
 package de.jreality.plugin.experimental;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Frame;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 
 import javax.swing.JColorChooser;
-import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import de.jreality.geometry.FrameFieldType;

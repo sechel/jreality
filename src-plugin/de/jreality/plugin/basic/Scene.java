@@ -1,5 +1,10 @@
 package de.jreality.plugin.basic;
 
+import static java.util.Collections.synchronizedList;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -12,13 +17,13 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.ShaderUtility;
-import de.jtem.beans.ChangeEventMulticaster;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
 public class Scene extends Plugin {
 	
-	private ChangeListener changeListener;
+	private List<ChangeListener> 
+		changeListeners = synchronizedList(new LinkedList<ChangeListener>());
 	
 	static JrScene defaultScene() {
 		//sceneRoot of the JrScene
@@ -178,17 +183,18 @@ public class Scene extends Plugin {
 	}
 	
 	private void fireStateChanged() {
-		if (changeListener != null) {
-			changeListener.stateChanged(new ChangeEvent(this));
+		ChangeEvent e = new ChangeEvent(this);
+		for (ChangeListener l : changeListeners) {
+			l.stateChanged(e);
 		}
 	}
 	
-	public void addChangeListener(ChangeListener l) {
-		changeListener = ChangeEventMulticaster.add(changeListener, l);
+	public boolean addChangeListener(ChangeListener l) {
+		return changeListeners.add(l);
 	}
 	
-	public void removeChangeListener(ChangeListener listener) {
-		changeListener=ChangeEventMulticaster.remove(changeListener, listener);
+	public boolean removeChangeListener(ChangeListener listener) {
+		return changeListeners.remove(listener);
 	}
 
 	public SceneGraphComponent getSceneRoot() {
