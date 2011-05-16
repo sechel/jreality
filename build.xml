@@ -683,17 +683,15 @@
 		<copy file="${lib}/antlr.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/beans.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/bsh.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/jogl.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/colorpicker.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/iText-2.1.3.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/janino.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/jterm.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/smrj.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/jrworkspace.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/netutil.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/sunflow.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/xstream.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/xpp3.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/iText-2.1.3.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/sunflow.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/janino.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/colorpicker.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/jrworkspace.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/jjack_min.jar" todir="${release_dir}/tmp/lib" />
 		<copy todir="${release_dir}/tmp/lib">
 			<fileset dir="3rd-party" />
 		</copy>

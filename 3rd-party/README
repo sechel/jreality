@@ -4,6 +4,10 @@ JOGL
     - Java OpenGL bindings - BSD license
     - needed for the jogl backend (OpenGL rendering)
     - https://jogl.dev.java.net
+    
+GlueGen
+	- JOGL dependency to call C-libraries
+	- http://jogamp.org/gluegen/www/
 
 JJack
     - Java bindings for JACK, the JACK Audio Connection Kit - LGPL
@@ -37,6 +41,11 @@ Antlr
     - ANother Tool for Language Recognition - free software
     - Several jReality readers are gernerated with Antlr
     - http://www.antlr.org
+    
+ beans
+    - java bean inspector - GPL or BSD
+    - used for automatic Inspector panel generation
+    - http://www.jtem.de   
 
 BeanShell
     - java scripting - LGPL license
@@ -47,7 +56,22 @@ BeanShell
 ColorPicker
 	- Copyright (c) 2008 by Jeremy Wood - LGPL
 	- all color picker widgets in the JRViewer system
+	
+jTerm
+    - java terminal - GPL or BSD
+    - used as a terminal for the beanshell in the ViewerApp
+    - http://www.jtem.de
 
+jrworkspace
+	- Plug-in SDK - BSD
+	- used for the JRViewer plug-in system
+	- http://www.jtem.de	
+	
+NetUtil
+    - java library for sending and receiving messages using the OpenSoundControl (OSC) protocol - LGPL
+    - needed for OSC tools as well as WiiMote device class
+    - http://www.sciss.de/netutil/
+    
 XStream
     - an xml serialization library - BSD license
     - our JRS file format is based on XStream serialization
@@ -58,33 +82,9 @@ XPP3
     - xStream uses it to parse XML
     - http://www.extreme.indiana.edu/xgws/xsoap/xpp
 
-BeanShell
-    - java scripting - LGPL license
-    - can be used in the ViewerApp as a plugin to directly access the
-      scenegraph from the beanshell
-    - http://www.beanshell.org
-
-jTerm
-    - java terminal - GPL or BSD
-    - used as a terminal for the beanshell in the ViewerApp
-    - http://www.jtem.de
-
-beans
-    - java bean inspector - GPL or BSD
-    - used for automatic Inspector panel generation
-    - http://www.jtem.de
-
-jrworkspace
-	- Plug-in SDK - BSD
-	- used for the JRViewer plug-in system
-	- http://www.jtem.de
-
 Sunflow
     - java rendering system for photo-realistic image synthesis - MIT License
     - uses janino (http://www.janino.net/) - BSD License
     - http://sunflow.sourceforge.net
 
-NetUtil
-    - java library for sending and receiving messages using the OpenSoundControl (OSC) protocol - LGPL
-    - needed for OSC tools as well as WiiMote device class
-    - http://www.sciss.de/netutil/
+ ???? janino, iText
