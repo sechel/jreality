@@ -333,8 +333,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			gl.glPushMatrix();
 			P3.makeTranslationMatrix(mat, transVec,sig);
 			Rn.times(mat, mat, scale);
-			Rn.transpose(mat, mat);
-			gl.glMultMatrixd(mat,0);
+			gl.glMultTransposeMatrixd(mat,0);
 			if (vertexColors != null)	{
 				da = vertexColors.item(index).toDoubleArray();
 				if (colorLength == 3) 	{

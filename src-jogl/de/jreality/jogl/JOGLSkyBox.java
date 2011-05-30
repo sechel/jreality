@@ -46,7 +46,6 @@ import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.data.AttributeEntityUtility;
@@ -85,8 +84,6 @@ class JOGLSkyBox {
     jogltex = new JOGLTexture2D(tex);
   }
 
-	private static double[] mat = new double[16];
-	
   static void render(GL gl, double[] w2c, CubeMap cm, Camera cam)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
     jogltex.setBlendColor(cm.getBlendColor());
@@ -100,13 +97,10 @@ class JOGLSkyBox {
 //	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, white);
     gl.glColor4fv( white, 0);
     gl.glPushMatrix();
-    P3.extractOrientationMatrix(mat, w2c, P3.originP3, Pn.EUCLIDEAN);
-	Rn.transpose(mat, mat);
-    gl.glLoadMatrixd(mat, 0);
+	   
+    gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, P3.originP3, Pn.EUCLIDEAN), 0);
     double scale = (cam.getNear() + cam.getFar())/2;
-    double[] mat = P3.makeStretchMatrix(null, scale);
-    Rn.transpose(mat, mat);
-    gl.glMultMatrixd(mat,0);
+    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
 	for (int i = 0; i<6; ++i)	{
 		jogltex.setImage(imgs[i]);
 	    Texture2DLoaderJOGL.render(gl, jogltex);

@@ -4,7 +4,6 @@
  */
 package de.jreality.jogl;
 
-import static de.jreality.math.Rn.transpose;
 import static de.jreality.shader.CommonAttributes.TRANSPARENCY_ENABLED;
 import static de.jreality.shader.RenderingHintsShader.TRANSPARENCY_ENABLED_DEFAULT;
 
@@ -83,7 +82,6 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected final static int ALL_CHANGED = ALL_GEOMETRY_CHANGED | ALL_SHADERS_CHANGED;
 	public static int count = 0;
 	static boolean debug = false;
-	public double[] mat = new double[16];
 
 	HashMap<SceneGraphComponent, GoBetween> goBetweenTable = 
 		new HashMap<SceneGraphComponent, GoBetween>();
@@ -221,7 +219,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 	protected void pushTransformation(double[] m) {
 		if ( jr.stackDepth < JOGLRenderer.MAX_STACK_DEPTH) {
 			jr.globalGL.glPushMatrix();
-			jr.globalGL.glMultMatrixd(transpose(mat, m),0);
+			jr.globalGL.glMultTransposeMatrixd(m,0);
 		}
 		else {
 //			System.err.println("o2c: "+Rn.matrixToString(jr.context.getObjectToCamera()));
@@ -238,8 +236,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 		    	Rn.times(jr.matrixStack[stackCounter].getArray(), jr.matrixStack[stackCounter-1].getArray(), cachedTform);				
 			}
 //			jr.globalGL.glLoadTransposeMatrixd(jr.context.getObjectToCamera(),0);	
-			transpose(mat, jr.matrixStack[stackCounter].getArray());
-			jr.globalGL.glLoadMatrixd(mat,0);	
+			jr.globalGL.glLoadTransposeMatrixd(jr.matrixStack[stackCounter].getArray(),0);	
 		}
 		jr.stackDepth++;
 	}

@@ -40,7 +40,6 @@
 
 package de.jreality.jogl;
 
-import static de.jreality.math.Rn.transpose;
 import static de.jreality.shader.CommonAttributes.BACKGROUND_COLORS;
 
 import java.awt.Color;
@@ -123,7 +122,6 @@ public class JOGLRenderer   {
 		texResident = true;
 	protected Viewer theViewer;
 	protected Camera theCamera;
-	private double[] tmpMat = new double[16];
 
 	static {
 		MatrixBuilder.euclidean().translate(0,0,-.5).scale(1,1,.5).assignTo(frontZBuffer);
@@ -235,15 +233,14 @@ public class JOGLRenderer   {
 		globalGL.glLoadIdentity();
 		if (topAp.isRenderSpherical())	
 		{
-			transpose(tmpMat, frontBanana ? frontZBuffer : backZBuffer);
-			globalGL.glMultMatrixd(tmpMat, 0);
+			globalGL.glMultTransposeMatrixd(frontBanana ? frontZBuffer : backZBuffer, 0);
 //			System.err.println("c2ndc = "+Rn.matrixToString(
 //					Rn.times(null, frontBanana ? frontZBuffer : backZBuffer, c2ndc)));
 		}
 		double[] c2ndc = CameraUtility.getCameraToNDC(theCamera, 
 				aspectRatio,
 				whichEye);
-		globalGL.glMultMatrixd(transpose(tmpMat, c2ndc), 0);
+		globalGL.glMultTransposeMatrixd(c2ndc, 0);
 
 		// prepare for rendering the geometry
 		globalGL.glMatrixMode(GL.GL_MODELVIEW);
@@ -252,7 +249,7 @@ public class JOGLRenderer   {
 		renderingState.cameraToWorld = renderingState.context.getCameraToWorld();
 		renderingState.worldToCamera = Rn.inverse(null, renderingState.cameraToWorld);
 		renderingState.cameraToNDC = c2ndc;
-		globalGL.glMultMatrixd(transpose(tmpMat, renderingState.worldToCamera), 0);
+		globalGL.glMultTransposeMatrixd(renderingState.worldToCamera, 0);
 		if (topAp.getSkyboxCubemap() != null) 
 			JOGLSkyBox.render(globalGL, 
 					renderingState.worldToCamera, 
