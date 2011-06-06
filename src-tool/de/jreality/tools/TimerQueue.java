@@ -147,10 +147,10 @@ package de.jreality.tools;
     double nextRun=-1;
     
 	public boolean run(double time, double dt) {
+		currentTime=(long) time;
 		if (nextRun != -1) {
 			if (time < nextRun) return true;
 		}
-		currentTime=(long) time;
 		long timeToWait = processCurrentTimers();
 		nextRun = time+timeToWait;
 		return true;
