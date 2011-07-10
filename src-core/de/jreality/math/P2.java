@@ -278,7 +278,7 @@ final public class P2 {
 	 * @param metric
 	 * @return
 	 */
-	private static double[] makeDirectIsometryFromFrame(double[] dst, double[] point,
+	public static double[] makeDirectIsometryFromFrame(double[] dst, double[] point,
 			double[] xdir, int metric) {
 		if (dst == null) dst = new double[9];
 		Pn.normalize(point, point, metric);
