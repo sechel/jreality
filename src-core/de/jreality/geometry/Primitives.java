@@ -860,6 +860,9 @@ public class Primitives {
 	 * @param points
 	 * @return
 	 */
+	public static IndexedFaceSetFactory texturedQuadrilateralFactory() {
+		return texturedQuadrilateralFactory(defaultPoints);
+	}
 	public static IndexedFaceSetFactory texturedQuadrilateralFactory(double[] points) {
 
 		IndexedFaceSetFactory factory = new IndexedFaceSetFactory();

@@ -157,10 +157,20 @@ public class BezierPatchMesh {
 		return representBezierPatchMeshAsQuadMesh(null, bpm, 0);
 	}
 
+	public static QuadMeshFactory representBezierPatchMeshAsQuadMesh(BezierPatchMesh bpm, int metric)	{
+		QuadMeshFactory qmf = new QuadMeshFactory();
+		representBezierPatchMeshAsQuadMesh(qmf, null, bpm, metric);
+		return qmf;
+	}
+
 	public static IndexedFaceSet representBezierPatchMeshAsQuadMesh(IndexedFaceSet existing, BezierPatchMesh bpm, int metric)	{
+		return representBezierPatchMeshAsQuadMesh(null, existing, bpm, metric);
+	}
+	
+	protected static IndexedFaceSet representBezierPatchMeshAsQuadMesh(QuadMeshFactory qmf, IndexedFaceSet existing, BezierPatchMesh bpm, int metric)	{
 		double[][][] thePoints = bpm.getControlPoints();
 		//if (qmpatch == null) 
-		QuadMeshFactory qmf = new QuadMeshFactory();
+		if (qmf == null) qmf = new QuadMeshFactory();
 		qmf.setMetric(metric); 
 		qmf.setULineCount(bpm.uDegree == 1 ? thePoints[0].length : (thePoints[0].length/bpm.uDegree)+1);
 		qmf.setVLineCount(bpm.vDegree == 1 ? thePoints.length : (thePoints.length/bpm.vDegree)+1);
