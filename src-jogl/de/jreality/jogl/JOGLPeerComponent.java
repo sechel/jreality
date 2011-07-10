@@ -257,7 +257,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements TransformationLis
 			JOGLPeerComponent jpc = getPeerForChildComponent(sgc);
 			if (jpc == null)	{
 				theLog.log(Level.WARNING,"No peer for sgc "+sgc.getName());
-				jpc.childIndex = -1;
+				//jpc.childIndex = -1;
 			} else jpc.childIndex = i;
 		}									
 		childlock.readUnlock();

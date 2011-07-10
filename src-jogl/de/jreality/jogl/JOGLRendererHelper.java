@@ -40,8 +40,6 @@
 
 package de.jreality.jogl;
 
-import static de.jreality.shader.CommonAttributes.BACKGROUND_TEXTURE2D;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -56,7 +54,6 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.HeightFieldFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -495,7 +492,7 @@ public class JOGLRendererHelper {
 //			}
 //
 		numF = sg.getNumFaces();
-		if ( isQuadMesh) {
+		if (isQuadMesh) {
 			double[] pt = new double[3];
 			// this loops through the "rows" of the mesh (v is constant on each
 			// row)
@@ -512,7 +509,7 @@ public class JOGLRendererHelper {
 						int fnn = (i * maxFU + j % maxFU + incr * maxFU) % numF;
 						int v = (i + incr) % maxV;
 						if (normalBind == PER_FACE) {
-							if (incr == 0 ) { //&& j != maxFU) {
+							if (incr == 0 && j != maxFU) { //) { //
 								da = faceNormals.item(fnn).toDoubleArray();
 								if (nFiber == 3)
 									gl.glNormal3d(da.getValueAt(0), da.getValueAt(1),
