@@ -1,13 +1,24 @@
 package de.jreality.tutorial.geom;
 
+import static de.jreality.shader.CommonAttributes.ALIGNMENT;
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
+import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.OFFSET;
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.SCALE;
+
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.SwingConstants;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
@@ -93,7 +104,7 @@ public class CubeUnwrapped {
 		// The edge labels indicate that edges are doubled only in mode 2 below
 		ifsf.setGenerateEdgeLabels(true);
 		// Crude documentation 
-		ifsf.setVertexLabels(new String[]{"","","","","","    Klick with middle mouse","","","","","","","",""});
+		ifsf.setVertexLabels(new String[]{"","","","","","    Click with middle mouse","","","","","","","",""});
 		ifsf.update();
 		
 		SceneGraphComponent sgc = new SceneGraphComponent("scene");
@@ -133,6 +144,12 @@ public class CubeUnwrapped {
 		
 		// Add the texture
 		sgc.setAppearance(new Appearance());
+		sgc.getAppearance().setAttribute(POLYGON_SHADER+"."+DIFFUSE_COLOR, Color.white);
+		sgc.getAppearance().setAttribute(SCALE, .003);
+		sgc.getAppearance().setAttribute(OFFSET, new double[]{.1,0,.1});
+		sgc.getAppearance().setAttribute(ALIGNMENT, SwingConstants.CENTER);
+		sgc.getAppearance().setAttribute(DIFFUSE_COLOR, Color.GREEN);
+		sgc.getAppearance().setAttribute(LINE_SHADER+"."+DIFFUSE_COLOR, Color.blue);
 		Texture2D tex;
 		try{
 			tex=TextureUtility.createTexture(
@@ -145,9 +162,6 @@ public class CubeUnwrapped {
 			e.printStackTrace();
 		}
 		
-		// scale the cube in order to have relatively smaller labels
-		MatrixBuilder.euclidean().scale(4).assignTo(sgc);
-
 		JRViewer.display(sgc);
 	}
 
