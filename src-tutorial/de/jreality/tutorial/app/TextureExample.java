@@ -96,6 +96,9 @@ public static void main(String[] args) throws IOException {
 			scale = 10;
 			dps.setDiffuseColor(Color.white);
 		}
+		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, id);
+		System.err.println(ap.toString());
+		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
 		// Attach a node below the textured one and show how to turn off texturing in this node
 		SceneGraphComponent sgc1 = new SceneGraphComponent("UnTextureExample");
 		sgc.addChild(sgc1);
@@ -103,10 +106,8 @@ public static void main(String[] args) throws IOException {
 		MatrixBuilder.euclidean().scale(5).translate(-.5, -.5, 0).assignTo(sgc1);
 		ap = new Appearance();
 		sgc1.setAppearance(ap);
-		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, id);
-		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
 		// TODO: there should be a method in TextureUtility to do this
-   		ap.setAttribute("polygonShader.texture2d", Appearance.INHERITED);
+   		ap.setAttribute("polygonShader.texture2d", Appearance.DEFAULT);
 		JRViewer.display(sgc);
   }
 }
