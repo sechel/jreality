@@ -3,11 +3,11 @@
 JOGL
     - Java OpenGL bindings - BSD license
     - needed for the jogl backend (OpenGL rendering)
-    - https://jogl.dev.java.net
+    - http://jogamp.org/deployment/archive/master/jogl-old-1.1.1/
     
 GlueGen
 	- JOGL dependency to call C-libraries
-	- http://jogamp.org/gluegen/www/
+	- http://jogamp.org/deployment/archive/master/gluegen-old-1.0b6/
 
 JJack
     - Java bindings for JACK, the JACK Audio Connection Kit - LGPL
