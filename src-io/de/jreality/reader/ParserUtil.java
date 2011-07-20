@@ -55,7 +55,11 @@ public class ParserUtil {
 
 		st.nextToken();
     
-	    if (st.ttype == StreamTokenizer.TT_NUMBER || st.ttype == StreamTokenizer.TT_EOL  || st.ttype == StreamTokenizer.TT_EOF ) {
+	    if (st.ttype == StreamTokenizer.TT_NUMBER || 
+    		st.ttype == StreamTokenizer.TT_EOL  || 
+    		st.ttype == StreamTokenizer.TT_EOF ||
+    		st.ttype == '\\') 
+	    {
 	      st.pushBack();
 	      return number;
 	    }
