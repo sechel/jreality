@@ -39,6 +39,8 @@
 
 package de.jreality.reader;
 
+import static java.io.StreamTokenizer.TT_EOF;
+import static java.io.StreamTokenizer.TT_EOL;
 import static java.io.StreamTokenizer.TT_NUMBER;
 
 import java.io.FileNotFoundException;
@@ -106,10 +108,6 @@ public class ReaderOBJ extends AbstractReader {
 		st.wordChars('+', '+');
 		st.wordChars('\u00A0', '\u00FF');
 		st.whitespaceChars('\u0000', '\u0020');
-
-		// handle line breaks with '\' as white space (occurs in rhino files)
-		st.whitespaceChars(92, 92);
-
 		st.commentChar('#');
 		st.ordinaryChar('/');
 		st.parseNumbers();
@@ -173,17 +171,14 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				if (word.equalsIgnoreCase("f")) { // facet v1/vt1/vn1 v2/vt2/vn2
-													// ...
 					addFace(st);
 					continue;
 				}
 				if (word.equalsIgnoreCase("mtllib")) { // facet v1/vt1/vn1
-														// v2/vt2/vn2 ...
 					addMaterial(st);
 					continue;
 				}
 				if (word.equalsIgnoreCase("usemtl")) { // facet v1/vt1/vn1
-														// v2/vt2/vn2 ...
 					setCurrentMaterial(st);
 					continue;
 				}
@@ -198,13 +193,13 @@ public class ReaderOBJ extends AbstractReader {
 						"unhandled tag: " + word + " end");
 			}
 		}
-		for (Iterator i = groups.values().iterator(); i.hasNext();) {
-			Group g = (Group) i.next();
-			if (g.hasGeometry())
+		for (Group g : groups.values()) {
+			if (g.hasGeometry()) {
 				root.addChild(g.createComponent());
-			else
+			} else {
 				LoggingSystem.getLogger(this).fine(
 						"Ignoring group " + g.name + " [has no geometry]");
+			}
 		}
 	}
 
@@ -236,7 +231,12 @@ public class ReaderOBJ extends AbstractReader {
 	private void addVertex(StreamTokenizer st) throws IOException {
 		List<Double> cList = new LinkedList<Double>();
 		st.nextToken();
-		while (st.ttype == TT_NUMBER) {
+		while (st.ttype == TT_NUMBER || st.ttype == '\\') {
+			if (st.ttype == '\\') {
+				st.nextToken(); // the EOL
+				st.nextToken(); // continue parsing in the next line
+				continue;
+			} 
 			st.pushBack();
 			cList.add(ParserUtil.parseNumber(st));
 			st.nextToken();
@@ -249,11 +249,15 @@ public class ReaderOBJ extends AbstractReader {
 		v.add(coords);
 	}
 
-	private void addVertexTextureCoordinate(StreamTokenizer st)
-			throws IOException {
+	private void addVertexTextureCoordinate(StreamTokenizer st) throws IOException {
 		List<Double> cList = new LinkedList<Double>();
 		st.nextToken();
-		while (st.ttype == TT_NUMBER) {
+		while (st.ttype == TT_NUMBER || st.ttype == '\\') {
+			if (st.ttype == '\\') {
+				st.nextToken(); // the EOL
+				st.nextToken(); // continue parsing in the next line
+				continue;
+			}
 			st.pushBack();
 			cList.add(ParserUtil.parseNumber(st));
 			st.nextToken();
@@ -267,10 +271,26 @@ public class ReaderOBJ extends AbstractReader {
 	}
 
 	private void addVertexNormal(StreamTokenizer st) throws IOException {
-		double[] coords = new double[3];
-		coords[0] = ParserUtil.parseNumber(st);
-		coords[1] = ParserUtil.parseNumber(st);
-		coords[2] = ParserUtil.parseNumber(st);
+		List<Double> cList = new LinkedList<Double>();
+		st.nextToken();
+		while (st.ttype == TT_NUMBER || st.ttype == '\\') {
+			if (st.ttype == '\\') {
+				st.nextToken(); // the EOL
+				st.nextToken(); // continue parsing in the next line
+				continue;
+			}
+			st.pushBack();
+			cList.add(ParserUtil.parseNumber(st));
+			st.nextToken();
+		}
+		st.pushBack();
+		double[] coords = new double[cList.size()];
+		for (int i = 0; i < coords.length; i++) {
+			coords[i] = cList.get(i);
+		}
+		if (coords.length > 3) {
+			System.err.println("vertex normal " + vNorms.size() + " has " + coords.length + " dimensions");
+		}
 		vNorms.add(coords);
 	}
 
@@ -327,15 +347,19 @@ public class ReaderOBJ extends AbstractReader {
 		int jx = 0; // vertex/vertex-texture/vertex-normal index
 		boolean lastWasNumber = false;
 		st.nextToken();
-		while (st.ttype != StreamTokenizer.TT_EOL
-				&& st.ttype != StreamTokenizer.TT_EOF) {
+		while (st.ttype != TT_EOL && st.ttype != TT_EOF) {
 			if (st.ttype == '/') {
 				jx++;
 				lastWasNumber = false;
 				st.nextToken();
 				continue;
-			}
-			if (st.ttype == StreamTokenizer.TT_NUMBER) {
+			} 
+			else if (st.ttype == '\\') {
+				st.nextToken(); // the EOL
+				st.nextToken(); // continue parsing in the next line
+				continue;
+			} 
+			else if (st.ttype == StreamTokenizer.TT_NUMBER) {
 				if (lastWasNumber) {
 					ix++;
 					jx = 0;
@@ -349,7 +373,8 @@ public class ReaderOBJ extends AbstractReader {
 					temp[jx][ix] = v.size() + (int) st.nval;
 				}
 				lastWasNumber = true;
-			} else {
+			}
+			else {
 				System.out.println("unknown tag " + st.sval + " " + st.ttype);
 			}
 			st.nextToken();
