@@ -573,11 +573,11 @@ public class U3DSceneUtility {
 				}
 				c.childrenWriteAccept(this, false, false, false, false, false, true);
 				if (basPoints != null) { 
-					basPoints.getAppearance().setAttribute("U3D_ForceVisible", true);
+//					basPoints.getAppearance().setAttribute("U3D_ForceVisible", true);
 					c.addChild(basPoints);
 				}
 				if (basLines != null) { 
-					basLines.getAppearance().setAttribute("U3D_ForceVisible", true);
+//					basLines.getAppearance().setAttribute("U3D_ForceVisible", true);
 					c.addChild(basLines);
 				}
 				p.pop();
@@ -860,8 +860,8 @@ public class U3DSceneUtility {
 	) {
 		boolean visible = root.isVisible() && subTreeV;
 		EffectiveAppearance ea = appMap.get(root);
-		boolean forceVisible = ea.getAttribute("U3D_ForceVisible", false);
-		boolean showFaces = (visible && ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT)) || forceVisible; 
+//		boolean forceVisible = ea.getAttribute("U3D_ForceVisible", false);
+		boolean showFaces = (visible && ea.getAttribute(FACE_DRAW, FACE_DRAW_DEFAULT));// || forceVisible; 
 		map.put(root, showFaces);
 		for (int i = 0; i < root.getChildComponentCount(); i++) {
 			getVisibility_R(root.getChildComponent(i), map, visible, appMap);
