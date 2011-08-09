@@ -1213,9 +1213,9 @@ public class WriterU3D implements SceneWriter {
 			w.WriteU8((short)0x00);
 			// texture transform matrix
 			// TODO: use texture matrix if acrobat supports it
-//			Matrix T = texInfo.getTextureMatrix(); 
-//			WriteMatrix(T.getArray(), w);
-			WriteMatrix(euclidean().getArray(), w);
+			Matrix T = texInfo.getTextureMatrix(); 
+			WriteMatrix(T.getArray(), w);
+//			WriteMatrix(euclidean().getArray(), w);
 			// texture wrap transform matrix element
 			WriteMatrix(euclidean().getArray(), w); // not implemented
 			short repeat = 0;
