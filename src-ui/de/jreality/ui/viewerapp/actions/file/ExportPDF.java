@@ -204,7 +204,8 @@ public class ExportPDF extends AbstractJrAction {
 			c.gridwidth = GridBagConstraints.REMAINDER;
 			add(userFileField, c);
 
-			toolCombo.setSelectedItem(PDF3DTool.ROTATE);
+			// default values
+			toolCombo.setSelectedItem(PDF3DTool.SPIN);
 			lightingCombo.setSelectedItem(PDF3DLightingScene.DAY);
 			renderModeCombo.setSelectedItem(PDF3DRenderMode.SOLID);
 			gridModeCombo.setSelectedItem(PDF3DGridMode.GRID_MODE_OFF);
