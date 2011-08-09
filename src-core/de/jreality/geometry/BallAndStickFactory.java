@@ -44,7 +44,6 @@ import java.awt.Color;
 
 import de.jreality.math.FactoredMatrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -177,29 +176,31 @@ import de.jreality.util.SceneGraphUtility;
 					}					
 					DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 					DataList vertexColors = ils.getVertexAttributes(Attribute.COLORS);
+					DataList vertexRadii = ils.getVertexAttributes(Attribute.POINT_SIZE);
 					int n = ils.getNumPoints();
 					SceneGraphUtility.removeChildren(balls);
 					for (int i = 0; i<n; ++i)	{
-							double[] p1 = vertices.item(i).toDoubleArray(null);	
-							SceneGraphComponent cc = new SceneGraphComponent("ball"+i);
-							MatrixBuilder.init(null, metric).translate(p1).scale(ballRadius).assignTo(cc);
-							if (ballGeometry != null) cc.setGeometry(ballGeometry);
-							else cc.setGeometry(new Sphere());
-							if (vertexColors != null) {
-								Color ccc = null;
-								double[] dcc = vertexColors.item(i).toDoubleArray(null);
-								if (dcc.length == 4) ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2], (float) dcc[3]);
-								else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
-								Appearance ap = new Appearance();
-								ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
-								cc.setAppearance(ap);
-							}
-							balls.addChild(cc);
+						if (vertexRadii != null) {
+							ballRadius = vertexRadii.item(i).toDoubleArray(null)[0];
 						}
-					}				
-					
-				}
-
+						double[] p1 = vertices.item(i).toDoubleArray(null);	
+						SceneGraphComponent cc = new SceneGraphComponent("ball"+i);
+						MatrixBuilder.init(null, metric).translate(p1).scale(ballRadius).assignTo(cc);
+						if (ballGeometry != null) cc.setGeometry(ballGeometry);
+						else cc.setGeometry(new Sphere());
+						if (vertexColors != null) {
+							Color ccc = null;
+							double[] dcc = vertexColors.item(i).toDoubleArray(null);
+							if (dcc.length == 4) ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2], (float) dcc[3]);
+							else ccc = new Color((float) dcc[0], (float) dcc[1], (float) dcc[2]);
+							Appearance ap = new Appearance();
+							ap.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, ccc);
+							cc.setAppearance(ap);
+						}
+						balls.addChild(cc);
+					}
+				}				
+			}
 			if (showSticks)	{
 				DataList vertices = ils.getVertexAttributes(Attribute.COORDINATES);
 				DataList edgeColors = ils.getEdgeAttributes(Attribute.COLORS);
@@ -225,7 +226,7 @@ import de.jreality.util.SceneGraphUtility;
 							cc.setAppearance(ap);
 						}
 						if (cc != null) sticks.addChild(cc);
-						if (drawArrows)		{
+						if (drawArrows && cc != null)		{
 							arrow = new SceneGraphComponent("Arrows");
 							FactoredMatrix arrowM = new FactoredMatrix(metric);
 							double d;
