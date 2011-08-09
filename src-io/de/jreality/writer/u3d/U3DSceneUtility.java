@@ -426,7 +426,7 @@ public class U3DSceneUtility {
 	}
 	
 	
-	static void prepareTubesAndSpheres(SceneGraphComponent root) {
+	public static void prepareTubesAndSpheres(SceneGraphComponent root) {
 		SceneGraphComponent dummy = new SceneGraphComponent();
 		dummy.addChild(root);
 		dummy.childrenWriteAccept(new SceneGraphVisitor() {
