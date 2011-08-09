@@ -17,12 +17,13 @@ myEventHdlr.onEvent = function(event)
 runtime.addEventHandler(myEventHdlr);
 runtime.setCurrentTool("##tool##");
 
-scene.lightScheme = "##lighting##";
 scene.renderMode = "##render_mode##";
 scene.gridMode = "##grid_mode##";
 scene.showAxes = ##show_axes##;
 scene.showGrid = ##show_grid##;
-scene.lightScaleFactor = 1.0;
 scene.renderDoubleSided = true;
-scene.smoothing = true;
-scene.update();
+//scene.smoothing = true;
+//scene.smoothingAngle = 90;
+//scene.smoothingOverride = true;
+scene.lightScaleFactor = 1.0;
+scene.lightScheme = "##lighting##";
