@@ -575,12 +575,16 @@ public class U3DSceneUtility {
 				if (basPoints != null) { 
 //					basPoints.getAppearance().setAttribute("U3D_ForceVisible", true);
 					c.addChild(basPoints);
-					c.setGeometry(null);
+					if (!(g instanceof IndexedFaceSet)) {
+						c.setGeometry(null);
+					}
 				}
 				if (basLines != null) { 
 //					basLines.getAppearance().setAttribute("U3D_ForceVisible", true);
 					c.addChild(basLines);
-					c.setGeometry(null);
+					if (!(g instanceof IndexedFaceSet)) {
+						c.setGeometry(null);
+					}
 				}
 				p.pop();
 			}
