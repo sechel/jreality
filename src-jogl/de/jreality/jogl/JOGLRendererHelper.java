@@ -326,7 +326,6 @@ public class JOGLRendererHelper {
 		GL gl = jr.globalGL;
     
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
-		vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
 		DataList edgeColors = sg.getEdgeAttributes(Attribute.COLORS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
