@@ -180,7 +180,7 @@ import de.jreality.util.LoggingSystem;
 			double sangle = Math.sin( frames[i].theta/2.0);
 			double factor = 1.0;
 			if (sangle != 0) factor = 1.0/sangle;
-			double r = hasRadii ? radii2[i] : radii[0];
+			double r = hasRadii ? radii2[i+1] : radii[0];
 			rad[0] = r *factor;
 			rad[5] = r;
 			//System.err.println("frame is "+Rn.matrixToString(frames[i].frame));
