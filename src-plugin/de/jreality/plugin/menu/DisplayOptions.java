@@ -39,9 +39,13 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 	private AbstractJrToggleAction  
 		fullscreenToggle;
 	private boolean 
-		windowedHidePanelsTmp = false;
+		windowedHidesPanels = false;
 	private FrontendListener
 		frontendListener = null;
+	private boolean
+		windowHasToolbar = false,
+		windowHasMenuBar = false,
+		windowHasStatusBar = false;
 	
 	private View 
 		view = null;
@@ -75,14 +79,20 @@ public class DisplayOptions extends Plugin implements FrontendFlavor {
 	
 	public void setFullscreen(boolean fs) {
 		if (fs) {
-			windowedHidePanelsTmp = view.isHidePanels();
+			windowHasMenuBar = frontendListener.isShowMenuBar();
+			windowHasToolbar = frontendListener.isShowToolBar();
+			windowHasStatusBar = frontendListener.isShowStatusBar();
+			windowedHidesPanels = view.isHidePanels();
+			frontendListener.setShowMenuBar(false);
+			frontendListener.setShowToolBar(false);
+			frontendListener.setShowStatusBar(false);
 			view.setHidePanels(true);
 		} else {
-			view.setHidePanels(windowedHidePanelsTmp);
+			frontendListener.setShowMenuBar(windowHasMenuBar);
+			frontendListener.setShowToolBar(windowHasToolbar);
+			frontendListener.setShowStatusBar(windowHasStatusBar);
+			view.setHidePanels(windowedHidesPanels);
 		}
-		frontendListener.setShowMenuBar(!fs);
-		frontendListener.setShowToolBar(!fs);
-		frontendListener.setShowStatusBar(!fs);
 		frontendListener.setFullscreen(fs, viewPreferences.isExclusiveFullscreen());
 		frontendListener.updateFrontendUI();
 		view.getViewer().getViewingComponent().requestFocusInWindow();
