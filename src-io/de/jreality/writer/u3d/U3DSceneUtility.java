@@ -772,8 +772,7 @@ public class U3DSceneUtility {
 	
 	public static SceneGraphComponent getSkyBox(JrScene scene) {
 		Appearance rootApp = scene.getSceneRoot().getAppearance();
-		Object skyBoxAttribute = rootApp.getAttribute(SKY_BOX);
-		if (rootApp == null || skyBoxAttribute == INHERITED) {
+		if (rootApp == null || rootApp.getAttribute(SKY_BOX) == INHERITED) {
 			return null;
 		}
 		CubeMap skyBox = (CubeMap)createAttributeEntity(CubeMap.class, SKY_BOX, rootApp, true);
