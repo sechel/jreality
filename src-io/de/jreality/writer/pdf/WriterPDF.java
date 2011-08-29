@@ -315,14 +315,16 @@ public class WriterPDF implements SceneWriter {
 			Appearance rootApp = scene.getSceneRoot().getAppearance();
 			Color cUpper = Color.WHITE;
 			Color cLower = Color.WHITE; 
-			if (rootApp.getAttribute("backgroundColors") instanceof Color[]) {
-				Color[] colors = (Color[])rootApp.getAttribute("backgroundColors");
-				cUpper = colors[0];
-				cLower = colors[2];
-			} else if (rootApp.getAttribute("backgroundColor") instanceof Color) {
-				Color color = (Color)rootApp.getAttribute("backgroundColor");
-				cUpper = color;
-				cLower = color;
+			if (rootApp != null) {
+				if (rootApp.getAttribute("backgroundColors") instanceof Color[]) {
+					Color[] colors = (Color[])rootApp.getAttribute("backgroundColors");
+					cUpper = colors[0];
+					cLower = colors[2];
+				} else if (rootApp.getAttribute("backgroundColor") instanceof Color) {
+					Color color = (Color)rootApp.getAttribute("backgroundColor");
+					cUpper = color;
+					cLower = color;
+				}
 			}
 			script = script.replace("##backgroundColorUpper##", colorToString(cUpper));
 			script = script.replace("##backgroundColorLower##", colorToString(cLower));
