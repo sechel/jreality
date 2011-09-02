@@ -64,6 +64,7 @@ import de.jtem.jrworkspace.plugin.flavor.ShutdownFlavor;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
+import de.jtem.jrworkspace.plugin.simplecontroller.widget.SplashScreen;
 
 /** JRViewer is the default viewer of jReality. It replaces the older viewers: <code>ViewerVR</code> and <code>ViewerApp</code>. 
  * 
@@ -227,7 +228,6 @@ public class JRViewer {
 		lastViewer = new WeakReference<JRViewer>(this);
 	}
 	
-
 
 	/**
 	 * Returns the last created instance of JRViewer
@@ -526,6 +526,13 @@ public class JRViewer {
 		c.registerPlugin(new AudioPreferences());
 	}
 	
+	/**
+	 * Sets the splash screen used during startup
+	 * @param screen
+	 */
+	public void setSplashScreen(SplashScreen screen) {
+		c.setSplashScreen(screen);
+	}
 	
 	
 	/**
