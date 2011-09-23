@@ -377,7 +377,7 @@ public class JOGLRenderer   {
 	}
 
 	public void init(GL gl) {
-		System.err.println("initing gl "+gl);
+//		System.err.println("initing gl "+gl);
 		globalGL = gl;
 	
 //		renderingState = new JOGLRenderingState(this);

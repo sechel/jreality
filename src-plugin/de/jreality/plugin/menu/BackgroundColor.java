@@ -14,6 +14,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JMenu;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.UIManager;
 
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.ViewMenuBar;
@@ -55,6 +56,7 @@ public class BackgroundColor extends Plugin {
 		addChoice("White", Color.white);
 		addChoice("Gray", new Color(225, 225, 225));
 		addChoice("Black", Color.black);
+		addChoice("UI Background", Color.black);
 
 		setColor("Default");
 	}
@@ -68,9 +70,16 @@ public class BackgroundColor extends Plugin {
 	 * @param colors list of colors with length = 1 or 4
 	 */
 	public void setColor(String name) {
+		if (!nameToColors.containsKey(name)) {
+			System.err.println("Color name not registered: " + name);
+			return;
+		}
 		nameToButton.get(name).setSelected(true);
 		if (scene != null) {
 			Color[] colors = nameToColors.get(name);
+			if (name.equals("UI Background")) {
+				colors = new Color[] {UIManager.getColor("Panel.background")};
+			}
 			if (colors == null || (colors.length!=1 && colors.length!=4)) {
 				throw new IllegalArgumentException("illegal length of colors[]");
 			}
