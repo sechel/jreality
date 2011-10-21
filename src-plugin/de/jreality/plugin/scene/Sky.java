@@ -49,7 +49,7 @@ public class Sky extends Plugin implements UIFlavor {
 		{"Desert","textures/desert/desert_", sideNames, ".jpg",},
 //		{"Desert H3","textures/h3desert/h3desert_", sideNames, ".jpg",},
 		{"Emerald","textures/emerald/emerald_", sideNames, ".jpg",},
-		{"Underwater","textures/aqua9/aqua9_", sideNames, ".jpg",},
+		{"Underwater","textures/aqua9/aqua9_", "ft,bk,up,dn,rt,lf", ".jpg",},
 		{"Custom", null},
 		{"None", null}
 	};
