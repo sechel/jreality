@@ -122,6 +122,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 
 		if (autoRender) {
 			renderTrigger.addViewer(viewerSwitch);
+			// XXX: HACK!!! or maybe not...
+			renderTrigger.startCollect();
 			renderTrigger.addSceneGraphComponent(root);
 		}
 
