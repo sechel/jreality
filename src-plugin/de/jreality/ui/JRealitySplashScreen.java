@@ -1,7 +1,9 @@
 package de.jreality.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
@@ -12,17 +14,31 @@ public class JRealitySplashScreen extends SplashScreen {
 
 	private static final long 
 		serialVersionUID = 1L;
+	private Icon
+		icon = ImageHook.getIcon("splashJReality01.png");
 	private JLabel
-		image = new JLabel(ImageHook.getIcon("splashJReality01.png"));
+		image = new JLabel(icon);
 	private JProgressBar
 		progressBar = new JProgressBar(0, 100);
 	
+	
+	public JRealitySplashScreen(Icon imageIcon) {
+		this.icon = imageIcon;
+		this.image = new JLabel(imageIcon);
+		makeLayout();
+	}
+	
 	public JRealitySplashScreen() {
-		super();
+		makeLayout();
+	}
+	
+	private void makeLayout() {
 		setLayout(new BorderLayout());
 		add(image, BorderLayout.CENTER);
 		add(progressBar, BorderLayout.SOUTH);
 		progressBar.setStringPainted(true);
+		Dimension size = new Dimension(icon.getIconWidth(), icon.getIconHeight());
+		setPreferredSize(size);
 	}
 	
 	@Override
