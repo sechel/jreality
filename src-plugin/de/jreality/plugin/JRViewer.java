@@ -4,12 +4,15 @@ import static de.jreality.util.CameraUtility.encompass;
 
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.ToolTipManager;
@@ -37,6 +40,7 @@ import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.plugin.menu.BackgroundColor;
 import de.jreality.plugin.menu.CameraMenu;
 import de.jreality.plugin.menu.DisplayOptions;
@@ -169,22 +173,51 @@ public class JRViewer {
 	static {
 		NativePathUtility.set("jni");
 		NativePathUtility.set("../jreality/jni");
-		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua") || lnfClass.contains("Windows")) {
-			Secure.setProperty("apple.laf.useScreenMenuBar", "true");
+			if (lnfClass.contains("Aqua")) {
+				System.setProperty("com.apple.mrj.application.apple.menu.about.name", "jRealiy");
+				setApplicationIcon(ImageHook.getImage("hausgruen.png"));
+				Secure.setProperty("apple.laf.useScreenMenuBar", "true");
+			}
 			try {
 				UIManager.setLookAndFeel(lnfClass);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
 	}
 	
 	static {
 		ToolTipManager.sharedInstance().setDismissDelay(20000);
 	}
+	
+	
+	public static void setApplicationTitle(String title) {
+		Secure.setProperty("apple.laf.useScreenMenuBar", "true");
+		System.setProperty("com.apple.mrj.application.apple.menu.about.name", title);
+		View.setTitle(title);
+	}
+	
+	public static void setApplicationIcon(Image icon) {
+		ImageIcon image = new ImageIcon(icon, "€pplication Icon");
+		View.setIcon(image);
+		String lnfClass = UIManager.getSystemLookAndFeelClassName();
+		if (lnfClass.contains("Aqua")) {
+			try {
+				Class<?> clazz = Class.forName("com.apple.eawt.Application");
+				Method getAppMethod = clazz.getMethod("getApplication");
+				Method setDockIconMethod = clazz.getMethod("setDockIconImage", Image.class);
+				Object app = getAppMethod.invoke(clazz);
+				setDockIconMethod.invoke(app, icon);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	
 	public static enum ContentType {
 		Raw,
