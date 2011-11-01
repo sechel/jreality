@@ -89,6 +89,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (e.getModifiers() != 0) return;
 				appearanceInspector.setShowPoints(showVerticesAction.isSelected());				
 			}
 		},
@@ -103,6 +104,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (e.getModifiers() != 0) return;
 				appearanceInspector.setShowLines(showEdgesAction.isSelected());				
 			}
 		},
@@ -117,6 +119,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 		
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (e.getModifiers() != 0) return;
 				appearanceInspector.setShowFaces(showFacesAction.isSelected());				
 			}
 		};
