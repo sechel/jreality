@@ -103,6 +103,14 @@ public class Appearance extends SceneGraphNode
     }
   }
 
+  public HashMap getAttributes()	{
+	  return attributes;
+  }
+  
+  public String toString() {
+	  return attributes.toString();
+  }
+  
   public Object getAttribute(String key, Class type)
   {
     startReader();
