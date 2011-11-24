@@ -1390,12 +1390,26 @@ public class IndexedFaceSetUtility {
 				for (int i = 0; i < len; i++) {// all edges
 					// Edge Vertices:
 					int p1=currFace[i];
-					int p2=currFace[(i+1)%len];
-					if (p1 == p2) continue;
-					Set<Integer> neighbor = getTouchingFaces(p1, p2, facesOfVert, currNum);
-					if (neighbor.size()<1) continue;
-					if (neighbor.size()>1) {
-						return false;
+                    int p2=currFace[(i+1)%len];
+                    if (p1 == p2) continue;
+                    Set<Integer> neighbor = getTouchingFaces(p1, p2, facesOfVert, currNum);
+                    Set<Integer> nonNeighbors = new HashSet<Integer>();
+                    for(Integer neighIndex : neighbor) {
+                        int[] neighFace = faces[neighIndex];
+                        int j = 0;
+                        for (; j < neighFace.length; j++) {
+                            if(neighFace[j] == p2 && neighFace[(j+1)%neighFace.length]==p1) {
+                                break;
+                            }
+                        }
+                        if(j == neighFace.length) {
+                            nonNeighbors.add(neighIndex);
+                        }
+                    }
+                    neighbor.removeAll(nonNeighbors);
+                    if (neighbor.size()<1) continue;
+                    if (neighbor.size()>1) {
+                        return false;
 					}
 					int neighb = neighbor.iterator().next();
 					// check orientation
