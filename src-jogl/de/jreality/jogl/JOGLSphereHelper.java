@@ -98,7 +98,7 @@ public class JOGLSphereHelper extends SphereUtility {
 			JOGLConfiguration.getLogger().log(Level.WARNING,"Invalid sphere display lists");
 			return 0;
 		}
-		return dlists[i];
+		return dlists[dlists.length <= i ? dlists.length-1 : i];
 	}
 
 	/**
