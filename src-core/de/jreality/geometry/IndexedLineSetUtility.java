@@ -154,32 +154,40 @@ public class IndexedLineSetUtility {
 	public static IndexedLineSet createCurveFromPoints(double[][] points, boolean closed)	{
 		return createCurveFromPoints(null, points,  closed);
 	}
-		
+
+	public static IndexedLineSet createCurveFromPoints( IndexedLineSet g, final double[][] points, boolean closed)	{
+		return createCurveFactoryFromPoints(points, closed).getIndexedLineSet();
+	}
 	/**
 	 * @param points
 	 * @param closed
 	 * @return
 	 */
-	public static IndexedLineSet createCurveFromPoints(IndexedLineSet g, final double[][] points, boolean closed)	{
+	public static IndexedLineSetFactory createCurveFactoryFromPoints( final double[][] points, boolean closed)	{
 		int n = points.length;
 		int size = (closed) ? n+1 : n;
-		if (g==null) g = new IndexedLineSet(n,1);
-		final IndexedLineSet ils = g;
+//		if (g==null) g = new IndexedLineSet(n,1);
+//		final IndexedLineSet ils = g;
 		// TODO replace this with different call if IndexedLineSet exists.
 		final int[][] ind = new int[1][size];
 		for (int i = 0; i<size ; ++i)	{
 			ind[0][i] = (i%n);
 		}
 		//if (closed) ind[0][n] = 0;
-		final int vectorLength = points[0].length;
-		
-		Scene.executeWriter(ils, new Runnable () {
-			public void run() {
-				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
-				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createWritableDataList(points));
-				}
-		});
-		return g;
+//		final int vectorLength = points[0].length;
+		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+		ilsf.setVertexCount(points.length);
+		ilsf.setVertexCoordinates(points);
+		ilsf.setEdgeCount(1);
+		ilsf.setEdgeIndices(ind);
+		ilsf.update();
+//		Scene.executeWriter(ils, new Runnable () {
+//			public void run() {
+//				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
+//				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createWritableDataList(points));
+//				}
+//		});
+		return ilsf;
 	}
 
 	public static IndexedLineSet createCurveFromPoints( double[] points, int fiber, boolean closed)	{
@@ -212,6 +220,10 @@ public class IndexedLineSetUtility {
 	}
 
 	public static IndexedLineSet circle(int n, double cx, double cy, double r) {
+		return circleFactory(n, cx, cy, r).getIndexedLineSet();
+	}
+
+	public static IndexedLineSetFactory circleFactory(int n, double cx, double cy, double r) {
 		double[][] verts = new double[n][3];
 		double angle = 0, delta = Math.PI * 2 / (n);
 		for (int i = 0; i<n; ++i) {
@@ -219,8 +231,9 @@ public class IndexedLineSetUtility {
 			verts[i][0] = cx+r*Math.cos(angle);
 			verts[i][1] = cy+r*Math.sin(angle);
 		}
-		return createCurveFromPoints(verts, true);
+		return createCurveFactoryFromPoints(verts, true);
 	}
+	
 
 	public static IndexedLineSet circle(int n) {
 		return circle(n, 0, 0, 1);
