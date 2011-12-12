@@ -256,7 +256,7 @@ import de.jreality.util.LoggingSystem;
 		 				}
 		 			}
 		 		}
-		 		theLogger.log(Level.FINER,"Setting Face colors");
+		 		LoggingSystem.getLogger(this).log(Level.FINER,"Setting Face colors");
 //		 		theTube.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(colorLength).createReadOnly(faceColors));
 		 		qmf.setFaceColors(faceColors);
 		 	}
@@ -271,7 +271,7 @@ import de.jreality.util.LoggingSystem;
 		 				}
 		 			}
 		 		}
-		 		theLogger.log(Level.FINER,"Setting vertex colors");
+		 		LoggingSystem.getLogger(this).log(Level.FINER,"Setting vertex colors");
 //		 		theTube.setVertexAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array(colorLength).createReadOnly(vertColors));
 		 		qmf.setVertexColors(vertColors);
 		 	}
