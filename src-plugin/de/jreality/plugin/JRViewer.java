@@ -176,7 +176,7 @@ public class JRViewer {
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua") || lnfClass.contains("Windows")) {
 			if (lnfClass.contains("Aqua")) {
-				System.setProperty("com.apple.mrj.application.apple.menu.about.name", "jRealiy");
+				System.setProperty("com.apple.mrj.application.apple.menu.about.name", "jReality");
 				setApplicationIcon(ImageHook.getImage("hausgruen.png"));
 				Secure.setProperty("apple.laf.useScreenMenuBar", "true");
 			}
