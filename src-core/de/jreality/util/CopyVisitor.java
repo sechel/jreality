@@ -164,10 +164,11 @@ public class CopyVisitor extends SceneGraphVisitor {
   public void copyAttr(SceneGraphComponent src, SceneGraphComponent dst) {
       copyAttr((SceneGraphNode)src, (SceneGraphNode)dst);
       dst.setVisible(src.isVisible());
+      dst.setPickable(src.isPickable());
       dst.setOwner(src.getOwner());
   }
 
-  public void copyAttr(Appearance src, Appearance dst) {
+ public void copyAttr(Appearance src, Appearance dst) {
       Set lst = src.getStoredAttributes();
       for (Iterator i = lst.iterator(); i.hasNext(); ) {
         String aName = (String) i.next();
