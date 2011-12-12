@@ -132,7 +132,7 @@ public class AbstractPointSetFactory extends AbstractGeometryFactory {
 	}
 	
 	protected void setVertexNormals( double [][] data ) {
-		setVertexAttribute( Attribute.NORMALS, new DoubleArrayArray.Array( data, data[0].length ) );
+		setVertexAttribute( Attribute.NORMALS,  data == null ? null :  new DoubleArrayArray.Array( data, data[0].length ) );
 	}
 	
 	protected void setVertexColors( DataList data ) {
