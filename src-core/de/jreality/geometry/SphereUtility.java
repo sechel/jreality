@@ -213,6 +213,9 @@ public class SphereUtility {
 	}
 	
 
+	public static IndexedFaceSet sphericalPatch(double cU, double cV, double uSize, double vSize, int xDetail, int yDetail, double radius)	{
+		return sphericalPatchFactory(cU,cV,uSize,vSize,xDetail,yDetail,radius).getIndexedFaceSet();
+	}
 	/**
 	 * Generate a spherical patch. <i>(cU, cV)</i> specify the center of the patch in
 	 * spherical angles (longitude, latitude) in radians. 
@@ -225,13 +228,18 @@ public class SphereUtility {
 	 * @param r			radius of the sphere
 	 * @return
 	 */
-	public static IndexedFaceSet sphericalPatch(double cU, double cV, double uSize, double vSize, int xDetail, int yDetail, double radius)	{
+	public static QuadMeshFactory sphericalPatchFactory( double cU, double cV, double uSize, double vSize, int xDetail, int yDetail, double radius)	{
 		double factor = Math.PI/180.0;
 		double uH = uSize/2.0; double vH = vSize/2.0;
 		//Globe qms = new Globe(n, m, false, false, factor*(cU-uH), factor*(cU+uH), factor*(cV-vH), factor*(cV+vH), r);
 		//Globe qms = new Globe(n, m, false, false, 
 		double umin = factor*(cU-uH), umax = factor*(cU+uH), vmin = factor*(cV-vH), vmax= factor*(cV+vH);
-		AbstractQuadMeshFactory qmf = new AbstractQuadMeshFactory(xDetail, yDetail, false, false);
+		QuadMeshFactory qmf = new QuadMeshFactory();
+		qmf.setClosedInUDirection(false);
+		qmf.setClosedInVDirection(false);
+		qmf.setULineCount(xDetail);
+		qmf.setVLineCount(yDetail);
+		//xDetail, yDetail, false, false);
 		double du = umax - umin;
 		double dv = vmax - vmin;
 		du = du/(xDetail-1.0);
@@ -259,7 +267,7 @@ public class SphereUtility {
 		qmf.setGenerateFaceNormals(true);
 		qmf.setGenerateTextureCoordinates(true);
 		qmf.update();
-		return qmf.getIndexedFaceSet();
+		return qmf;
 	}
 	
 	/**
