@@ -187,8 +187,10 @@ public class Primitives {
 	 * @param metric	the metric
 	 * @return
 	 */
-
 	public static IndexedFaceSet box(double width,double height,double depth,boolean colored, int metric){
+		return boxFactory(width, height, depth, colored, metric).getIndexedFaceSet();
+	}
+	public static IndexedFaceSetFactory boxFactory(double width,double height,double depth,boolean colored, int metric){
 		double w=width/2;	double h=height/2;	double d=depth/2;
 		double[][] points =  
 		{{w,h,d},{w,h,-d},{w,-h,d},{w,-h,-d},
@@ -203,7 +205,7 @@ public class Primitives {
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setGenerateEdgesFromFaces(true);
 		ifsf.update();
-		return ifsf.getIndexedFaceSet();
+		return ifsf;
 	}
 
 	/**
