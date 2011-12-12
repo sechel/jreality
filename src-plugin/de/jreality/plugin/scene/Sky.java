@@ -231,6 +231,21 @@ public class Sky extends Plugin implements UIFlavor {
 			Appearance rootAppearance = scene.getRootAppearance();
 			ImageData[] cm = b ? cubeMap : null;
 			TextureUtility.createSkyBox(rootAppearance, cm);
+			TextureUtility.createReflectionMap(
+					rootAppearance,
+					CommonAttributes.POLYGON_SHADER,
+					cm
+			);
+			TextureUtility.createReflectionMap(
+					rootAppearance,
+					CommonAttributes.LINE_SHADER,
+					cm
+			);
+			TextureUtility.createReflectionMap(
+					rootAppearance,
+					CommonAttributes.POINT_SHADER,
+					cm
+			);
 		}
 	}
 
