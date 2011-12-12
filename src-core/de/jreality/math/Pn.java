@@ -591,6 +591,8 @@ public class Pn {
 			}	else { s0 = 1.0; s1 = 0.0; }				
 			
 		}
+		if (uu == null || vv == null) 
+			throw new NullPointerException();
 		return Rn.linearCombination(dst, s0, uu, s1, vv);
 	}
 	 
