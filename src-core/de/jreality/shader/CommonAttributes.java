@@ -124,6 +124,7 @@ import de.jreality.scene.Appearance;
 	public final static String VOLUME_SHADER = 	VOLUME+SHADER;
 	public final static String TEXT_SHADER = 	TEXT+SHADER;
 	// default point shader
+	public final static String SPRITES_DRAW = 	"spritesDraw";	// applies only when spheres = false
 	public final static String SPHERES_DRAW = 	"spheresDraw";
 	public final static boolean SPHERES_DRAW_DEFAULT = true;
 	public final static String POINT_RADIUS = 	"pointRadius";			// object coordinates
