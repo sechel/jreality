@@ -84,6 +84,7 @@ import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
@@ -99,8 +100,12 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	Color diffuseColor = java.awt.Color.RED;
 	float[] diffuseColorAsFloat;
 	float[] specularColorAsFloat = {0f,1f,1f,1f};		// for texturing point sprite to simulate sphere
-	boolean sphereDraw = false, lighting = true, opaqueSpheres = true, radiiWorldCoords = false;
-	boolean attenuatePointSize = true;
+	boolean sphereDraw = false, 
+		lighting = true, 
+		opaqueSpheres = true, 
+		radiiWorldCoords = false,
+		attenuatePointSize = true,
+		doSprites = true;
 	PolygonShader polygonShader = null;
 	Appearance a=new Appearance();
 	Texture2D spriteTexture=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a, true);
@@ -124,6 +129,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		super.setFromEffectiveAppearance(eap, name);
 		sphereDraw = eap.getAttribute(ShaderUtility.nameSpace(name,SPHERES_DRAW), SPHERES_DRAW_DEFAULT);
 		opaqueSpheres = eap.getAttribute(ShaderUtility.nameSpace(name, OPAQUE_TUBES_AND_SPHERES), OPAQUE_TUBES_AND_SPHERES_DEFAULT);
+		doSprites = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.SPRITES_DRAW), true);
 		lightDirection = (double[]) eap.getAttribute(ShaderUtility.nameSpace(name,LIGHT_DIRECTION),lightDirection);
 		lighting = eap.getAttribute(ShaderUtility.nameSpace(name,LIGHTING_ENABLED), true);
 		pointSize = eap.getAttribute(ShaderUtility.nameSpace(name,POINT_SIZE), POINT_SIZE_DEFAULT);
@@ -184,7 +190,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		
 		if (!sphereDraw)	{
 			//LoggingSystem.getLogger(JOGLRendererHelper.class).fine("Rendering sprites");
-				PointSet ps = (PointSet) jrs.currentGeometry;
+			PointSet ps = (PointSet) jrs.currentGeometry;
   			if (spriteNeedsUpdated) {
   				lighting = jrs.lighting;
   				if (ps.getVertexAttributes(Attribute.COLORS) != null) diffuseColor = Color.white;
@@ -203,16 +209,17 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				//TODO: i dont know - got error on ati radeon 9800
 			}
 			gl.glEnable(GL.GL_POINT_SMOOTH);
-			gl.glEnable(GL.GL_POINT_SPRITE_ARB);
-//			// TODO make sure this is OK; perhaps add field to JOGLRenderingState: nextAvailableTextureUnit?
-			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
-			if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null) 
-				spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
-			else // this way we get real specular highlights
-				spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
-			gl.glActiveTexture(GL.GL_TEXTURE0);
-			gl.glEnable(GL.GL_TEXTURE_2D);
-			Texture2DLoaderJOGL.render(gl, currentTex);
+			if (doSprites)	{
+				gl.glEnable(GL.GL_POINT_SPRITE_ARB);
+				gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
+				if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null) 
+					spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
+				else // this way we get real specular highlights
+					spriteTexture.setApplyMode(Texture2D.GL_REPLACE);
+				gl.glActiveTexture(GL.GL_TEXTURE0);
+				gl.glEnable(GL.GL_TEXTURE_2D);
+				Texture2DLoaderJOGL.render(gl, currentTex);				
+			}
 		} else	{
 			// really need to call the preRender() method on the polygonShader, but it doesn't exist.
 			Geometry g = jrs.currentGeometry;
