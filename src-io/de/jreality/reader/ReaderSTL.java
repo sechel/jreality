@@ -91,6 +91,12 @@ public class ReaderSTL extends AbstractReader {
     while (true) {
 	    line = r.readLine().trim();
 
+	    // handle lines that are split with \
+	    while (line.endsWith("\\")) {
+	    	line = line.substring(0, line.length()-2);
+	    	line += " "+r.readLine().trim();
+	    }
+	    
 	    //if ("endsolid".equals(line)) {
 	    if ((line.startsWith("end solid")) || (line.startsWith("endsolid"))) {
 	    	System.out.println("solid end: "+faceCount+" facets read.");
