@@ -6,18 +6,19 @@ JOGL
     - http://jogamp.org/deployment/archive/master/jogl-old-1.1.1/
     
 GlueGen
-	- JOGL dependency to call C-libraries
-	- http://jogamp.org/deployment/archive/master/gluegen-old-1.0b6/
+    - JOGL dependency to call C-libraries
+    - http://jogamp.org/deployment/archive/master/gluegen-old-1.0b6/
 
-JJack
+JackNativeClient
     - Java bindings for JACK, the JACK Audio Connection Kit - LGPL
     - needed for the JACK audio backend
-    - http://jjack.berlios.de/
-    - Note: jReality uses some new features of JJack that are not yet in
-      the official release; for the time being, you can get the new
-      version of JJack from the subversion repository, at
-      http://svn.berlios.de/svnroot/repos/jjack/branches/v04-proposal.
-    
+    - https://github.com/nettoyeurny/jacknativeclient
+
+libpd
+    - Pure Data as an embeddable library - LGPL
+    - needed for PureDataHub (audio nodes using Pd)
+    - https://github.com/libpd
+
 jInput
     - java bindings for various input devices - BSD license
     - needed for Input devices like Joysticks, Gamepads etc.
@@ -30,9 +31,9 @@ SMRJ
     - http://smrj.sf.net
     
 Csound
-	- java bindings for Csound synthesis package - LGPL
-	- only for Csound audio source
-	- http://www.csounds.com/
+    - java bindings for Csound synthesis package - LGPL
+    - only for Csound audio source
+    - http://www.csounds.com/
 
 
 3rd party libraries we distribute with jReality:
@@ -54,8 +55,8 @@ BeanShell
     - http://www.beanshell.org
 
 ColorPicker
-	- Copyright (c) 2008 by Jeremy Wood - LGPL
-	- all color picker widgets in the JRViewer system
+    - Copyright (c) 2008 by Jeremy Wood - LGPL
+    - all color picker widgets in the JRViewer system
 	
 jTerm
     - java terminal - GPL or BSD
@@ -63,9 +64,9 @@ jTerm
     - http://www.jtem.de
 
 jrworkspace
-	- Plug-in SDK - BSD
-	- used for the JRViewer plug-in system
-	- http://www.jtem.de	
+    - Plug-in SDK - BSD
+    - used for the JRViewer plug-in system
+    - http://www.jtem.de	
 	
 NetUtil
     - java library for sending and receiving messages using the OpenSoundControl (OSC) protocol - LGPL

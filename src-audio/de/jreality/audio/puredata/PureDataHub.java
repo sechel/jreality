@@ -1,7 +1,6 @@
 package de.jreality.audio.puredata;
 
 import org.puredata.core.PdBase;
-import org.puredata.core.utils.PdUtils;
 
 import de.jreality.audio.RingBuffer;
 import de.jreality.scene.AudioSource;
@@ -9,12 +8,6 @@ import de.jreality.scene.data.SampleReader;
 
 public class PureDataHub {
 
-	static {
-		try {
-			System.loadLibrary("pthreadVC2");
-		} catch (Exception e) {}
-	}
-	
 	private final static Object lock = new Object();
 	private final static int BLOCKSIZE = PdBase.blockSize();
 	private static int sampleRate, nChannels;
@@ -102,8 +95,8 @@ public class PureDataHub {
 		for (int i = 0; i < nChannels; i++) {
 			channels[i] = new PdSource("pd channel " + i, sampleRate);
 		}
-		PdBase.openAudio(0, nChannels, sampleRate, 1);
-		PdUtils.computeAudio(true);
+		PdBase.openAudio(0, nChannels, sampleRate);
+		PdBase.computeAudio(true);
 	}
 	
 	public static AudioSource getPureDataSource(int i) {

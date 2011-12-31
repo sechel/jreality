@@ -45,7 +45,7 @@
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/vrData.jar"/>
-	<classpathentry kind="lib" path="lib/jjack_min.jar"/>
+	<classpathentry kind="lib" path="lib/jacknativeclient.jar"/>
 	<classpathentry kind="lib" path="lib/netutil.jar"/>
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/beans.jar"/>

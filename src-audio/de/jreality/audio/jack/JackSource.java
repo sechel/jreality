@@ -2,21 +2,20 @@ package de.jreality.audio.jack;
 
 import java.nio.FloatBuffer;
 
-import de.gulden.framework.jjack.JJackAudioEvent;
-import de.gulden.framework.jjack.JJackAudioProcessor;
-import de.gulden.framework.jjack.JJackException;
-import de.gulden.framework.jjack.JJackNativeClient;
+import com.noisepages.nettoyeur.jack.JackException;
+import com.noisepages.nettoyeur.jack.JackNativeClient;
+
 import de.jreality.audio.RingBuffer;
 import de.jreality.audio.RingBufferSource;
 
 
-public class JackSource extends RingBufferSource implements JJackAudioProcessor {
+public class JackSource extends RingBufferSource implements JackProcessor {
 
-	private long key;
+	private final long key;
 	
-	public JackSource(String name, String target) throws JJackException {
+	public JackSource(String name, String target) throws JackException {
 		super(name);
-		sampleRate = JJackNativeClient.getSampleRate();
+		sampleRate = JackNativeClient.getSampleRate();
 		ringBuffer = new RingBuffer(sampleRate);
 		key = JackManager.requestInputPorts(1, target);
 		JackManager.addInput(this);
@@ -28,9 +27,9 @@ public class JackSource extends RingBufferSource implements JJackAudioProcessor 
 		super.finalize();
 	}
 	
-	public void process(JJackAudioEvent e) {
+	public void process(FloatBuffer[] inBufs, FloatBuffer[] outBufs) {
 		if (getState() == State.RUNNING) {
-			FloatBuffer buffer = e.getInput(JackManager.getPort(key));
+			FloatBuffer buffer = inBufs[JackManager.getPort(key)];
 			buffer.rewind();
 			ringBuffer.write(buffer);
 		}

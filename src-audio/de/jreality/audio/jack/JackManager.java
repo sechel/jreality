@@ -1,22 +1,20 @@
 package de.jreality.audio.jack;
 
 import java.lang.ref.WeakReference;
+import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import de.gulden.framework.jjack.JJackAudioEvent;
-import de.gulden.framework.jjack.JJackAudioProcessor;
-import de.gulden.framework.jjack.JJackException;
-import de.gulden.framework.jjack.JJackNativeClient;
-import de.gulden.framework.jjack.JJackNativeClientEvent;
-import de.gulden.framework.jjack.JJackNativeClientListener;
+import com.noisepages.nettoyeur.jack.JackException;
+import com.noisepages.nettoyeur.jack.JackNativeClient;
+import com.noisepages.nettoyeur.jack.JackNativeClientListener;
 
 /**
  * Manages a single JACK client across all JACK sources and backends.  Using a single client is the only way to
  * guarantee that inputs will be processed before outputs (because the outputs will depend on input from the inputs).
- * Both inputs and outputs are implementations of {@link JJackAudioProcessor}.
+ * Both inputs and outputs are implementations of {@link JackProcessor}.
  * 
  * Inputs and outputs request a range of ports from JackManager and receive a key with which to access the ports.
  * After the native client has been launched, sinks and sources can obtain port numbers of the native client
@@ -28,35 +26,43 @@ import de.gulden.framework.jjack.JJackNativeClientListener;
  * @author brinkman
  *
  */
-public class JackManager implements JJackAudioProcessor, JJackNativeClientListener {
+public class JackManager implements JackNativeClientListener {
 
 	private static String label = "jReality";
 	private static int portsIn = 0, portsOut = 0;
-	private static JackManager manager = new JackManager(); // singleton
-	private static JJackNativeClient nativeClient = null;
+	private static final JackManager manager = new JackManager(); // singleton
+	private static JackNativeClient nativeClient = null;
 	
 	private static long currentKey = 1L;
-	private static HashMap<Long, Boolean> isInput = new LinkedHashMap<Long, Boolean>();
-	private static HashMap<Long, Integer> ranges = new LinkedHashMap<Long, Integer>();
-	private static HashMap<Long, String> targets = new LinkedHashMap<Long, String>();
-	private static HashMap<Long, Integer> ports = new LinkedHashMap<Long, Integer>();
+	private static final HashMap<Long, Boolean> isInput = new LinkedHashMap<Long, Boolean>();
+	private static final HashMap<Long, Integer> ranges = new LinkedHashMap<Long, Integer>();
+	private static final HashMap<Long, String> targets = new LinkedHashMap<Long, String>();
+	private static final HashMap<Long, Integer> ports = new LinkedHashMap<Long, Integer>();
 	
-	private static boolean ready = false;
+	private static volatile boolean ready = false;
 	private static int retries = 0;
 	
-	private static List<WeakReference<JJackAudioProcessor>>
-		inputs = new CopyOnWriteArrayList<WeakReference<JJackAudioProcessor>>(),
-		outputs = new CopyOnWriteArrayList<WeakReference<JJackAudioProcessor>>();
+	private static final List<WeakReference<JackProcessor>>
+		inputs = new CopyOnWriteArrayList<WeakReference<JackProcessor>>(),
+		outputs = new CopyOnWriteArrayList<WeakReference<JackProcessor>>();
 
 	
 	/**
 	 * Launches a native JACK client
+	 * @throws JackException 
 	 * 
 	 * @throws JJackException
 	 */
-	public static synchronized void launch() throws JJackException {
+	public static synchronized void launch() throws JackException {
 		shutdown();
-		nativeClient = new JJackNativeClient(label, portsIn, portsOut, manager);
+		nativeClient = new JackNativeClient(label, portsIn, portsOut) {
+			@Override
+			protected void process(FloatBuffer[] inBufs, FloatBuffer[] outBufs) {
+				if (!ready) return;
+				manager.processList(inputs, inBufs, outBufs);
+				manager.processList(outputs, inBufs, outBufs);
+			}
+		};
 		nativeClient.addListener(manager);
 
 		int in = 0, out = 0;
@@ -105,19 +111,19 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 		JackManager.retries = retries;
 	}
 	
-	public static synchronized void addInput(JJackAudioProcessor proc) {
+	public static synchronized void addInput(JackProcessor proc) {
 		addProcessor(proc, inputs);
 	}
 	
-	public static synchronized void removeInput(JJackAudioProcessor proc) {
+	public static synchronized void removeInput(JackProcessor proc) {
 		inputs.remove(findReference(proc, inputs));
 	}
 	
-	public static synchronized void addOutput(JJackAudioProcessor proc) {
+	public static synchronized void addOutput(JackProcessor proc) {
 		addProcessor(proc, outputs);
 	}
 	
-	public static synchronized void removeOutput(JJackAudioProcessor proc) {
+	public static synchronized void removeOutput(JackProcessor proc) {
 		outputs.remove(findReference(proc, outputs));
 	}
 	
@@ -185,7 +191,7 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 		if (range<=0) {
 			throw new IllegalArgumentException("range must be positive");
 		}
-		if (p0+range>JJackNativeClient.getMaxPorts()) {
+		if (p0+range>JackNativeClient.getMaxPorts()) {
 			throw new IllegalStateException("total number of ports too large");
 		}
 	}
@@ -197,13 +203,13 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 		return currentKey++;
 	}
 	
-	private static void addProcessor(JJackAudioProcessor proc, List<WeakReference<JJackAudioProcessor>> list) {
+	private static void addProcessor(JackProcessor proc, List<WeakReference<JackProcessor>> list) {
 		if (findReference(proc, list)!=null) return;
-		list.add(new WeakReference<JJackAudioProcessor>(proc));
+		list.add(new WeakReference<JackProcessor>(proc));
 	}
 
-	private static WeakReference<JJackAudioProcessor> findReference(JJackAudioProcessor proc, List<WeakReference<JJackAudioProcessor>> list) {
-		for(WeakReference<JJackAudioProcessor> ref: list) {
+	private static WeakReference<JackProcessor> findReference(JackProcessor proc, List<WeakReference<JackProcessor>> list) {
+		for(WeakReference<JackProcessor> ref: list) {
 			if (ref.get()==proc) return ref;
 		}
 		return null;
@@ -211,24 +217,18 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 
 	private JackManager() {}
 
-	public void process(JJackAudioEvent e) {
-		if (!ready) return;
-		processList(e, inputs);
-		processList(e, outputs);
-	}
-
-	private void processList(JJackAudioEvent e, List<WeakReference<JJackAudioProcessor>> list) {
-		for(WeakReference<JJackAudioProcessor> ref: list) {
-			JJackAudioProcessor proc = ref.get();
+	private void processList(List<WeakReference<JackProcessor>> list, FloatBuffer[] inBufs, FloatBuffer[] outBufs) {
+		for(WeakReference<JackProcessor> ref: list) {
+			JackProcessor proc = ref.get();
 			if (proc!=null) {
-				proc.process(e);
+				proc.process(inBufs, outBufs);
 			} else {
 				list.remove(ref);
 			}
 		}
 	}
 	
-	public void handleShutdown(JJackNativeClientEvent e) {
+	public void handleShutdown(JackNativeClient arg0) {
 		shutdown();
 		if (retries>0) {
 			retries--;
@@ -240,8 +240,8 @@ public class JackManager implements JJackAudioProcessor, JJackNativeClientListen
 			System.err.println("relaunching jack client, "+retries+" attempts left");
 			try {
 				launch();
-			} catch (JJackException ex) {
-				ex.printStackTrace();
+			} catch (JackException e) {
+				e.printStackTrace();
 			}
 		} else {
 			System.err.println("jack client zombified; not trying to relaunch");

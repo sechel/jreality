@@ -2,10 +2,8 @@ package de.jreality.audio.jack;
 
 import java.nio.FloatBuffer;
 
-import de.gulden.framework.jjack.JJackAudioEvent;
-import de.gulden.framework.jjack.JJackAudioProcessor;
-import de.gulden.framework.jjack.JJackException;
-import de.gulden.framework.jjack.JJackNativeClient;
+import com.noisepages.nettoyeur.jack.JackException;
+import com.noisepages.nettoyeur.jack.JackNativeClient;
 
 /**
  * An Ambisonics stereo decoder for Jack, mostly for testing on desktop systems; reads an Ambisonics
@@ -25,14 +23,15 @@ public class JackAmbisonicsStereoDecoder {
 		// not to be instantiated
 	}
 	
-	public static void main(String args[]) throws InterruptedException, JJackException {
+	public static void main(String args[]) throws InterruptedException, JackException {
 		//JRViewer.getLastJRViewer();
-		JJackNativeClient client = new JJackNativeClient("StereoDecoder", 4, 2, new JJackAudioProcessor() {
-			public void process(JJackAudioEvent ev) {
-				FloatBuffer bw = ev.getInput(0);
-				FloatBuffer by = ev.getInput(2);
-				FloatBuffer left = ev.getOutput(0);
-				FloatBuffer right = ev.getOutput(1);
+		JackNativeClient client = new JackNativeClient("StereoDecoder", 4, 2) {
+			@Override
+			protected void process(FloatBuffer[] inBufs, FloatBuffer[] outBufs) {
+				FloatBuffer bw = inBufs[0];
+				FloatBuffer by = inBufs[2];
+				FloatBuffer left = outBufs[0];
+				FloatBuffer right = outBufs[1];
 
 				int n = left.capacity();
 				for(int i = 0; i<n; i++) {
@@ -43,7 +42,7 @@ public class JackAmbisonicsStereoDecoder {
 					right.put(w-y);
 				}
 			}
-		});
+		};
 		client.connectOutputPorts("");
 		
 		while (true) {

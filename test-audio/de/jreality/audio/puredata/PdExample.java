@@ -3,7 +3,7 @@ package de.jreality.audio.puredata;
 import java.io.File;
 import java.net.URL;
 
-import org.puredata.core.utils.PdUtils;
+import org.puredata.core.PdBase;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
@@ -19,7 +19,7 @@ public class PdExample {
 	public static SceneGraphComponent getAudioComponent() throws Exception {
 		PureDataHub.init(44100, 1);
 		URL url = PdExample.class.getResource("test.pd");
-		PdUtils.openPatch(new File(url.toURI()));
+		PdBase.openPatch(new File(url.toURI()));
 		final AudioSource source = PureDataHub.getPureDataSource(0);
 		SceneGraphComponent audioComponent = new SceneGraphComponent("monolith");
 		audioComponent.setAudioSource(source);

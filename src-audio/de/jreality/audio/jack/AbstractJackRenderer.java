@@ -1,9 +1,10 @@
 package de.jreality.audio.jack;
 
-import de.gulden.framework.jjack.JJackAudioEvent;
-import de.gulden.framework.jjack.JJackAudioProcessor;
-import de.gulden.framework.jjack.JJackException;
-import de.gulden.framework.jjack.JJackNativeClient;
+import java.nio.FloatBuffer;
+
+import com.noisepages.nettoyeur.jack.JackException;
+import com.noisepages.nettoyeur.jack.JackNativeClient;
+
 import de.jreality.audio.AbstractAudioRenderer;
 import de.jreality.audio.AudioBackend;
 import de.jreality.audio.SoundEncoder;
@@ -19,9 +20,10 @@ import de.jreality.audio.SoundEncoder;
  * @author brinkman
  *
  */
-public abstract class AbstractJackRenderer extends AbstractAudioRenderer implements JJackAudioProcessor {
+public abstract class AbstractJackRenderer extends AbstractAudioRenderer implements JackProcessor {
 
-	protected JJackAudioEvent currentJJackEvent;
+	protected FloatBuffer inBufs[];
+	protected FloatBuffer outBufs[];
 	protected String target = null;
 	protected SoundEncoder encoder;
 	protected int nPorts;  // number of ports; must be set by subclasses
@@ -56,9 +58,9 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 		JackManager.setLabel(label);
 	}
 	
-	public synchronized void launch() throws JJackException {
+	public synchronized void launch() throws JackException {
 		shutdown();  // just in case...
-		backend = new AudioBackend(root, microphonePath, JJackNativeClient.getSampleRate(), interpolationFactory, soundPathFactory);
+		backend = new AudioBackend(root, microphonePath, JackNativeClient.getSampleRate(), interpolationFactory, soundPathFactory);
 		key = JackManager.requestOutputPorts(nPorts, target);
 		JackManager.addOutput(this);
 		if (singleBackend) JackManager.launch();
@@ -74,10 +76,11 @@ public abstract class AbstractJackRenderer extends AbstractAudioRenderer impleme
 		}
 	}
 
-	public void process(JJackAudioEvent ev) {
-		currentJJackEvent = ev;
+	public void process(FloatBuffer[] inBufs, FloatBuffer[] outBufs) {
+		this.inBufs = inBufs;
+		this.outBufs = outBufs;
 		try { // NullPointerException is conceivable if singleBackend is false and shutdown() is called while process callback is pending...
-			backend.processFrame(encoder, ev.getOutput().capacity());
+			backend.processFrame(encoder, outBufs[0].capacity());
 		} catch (NullPointerException e) {
 			// do nothing
 		}
