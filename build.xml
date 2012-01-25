@@ -70,7 +70,7 @@
 			<include name="jReality-tools.jar"/>
 		</fileset>
 		<fileset dir="lib">
-			<include name="jjack_min.jar"/>
+			<include name="jacknativeclient.jar"/>
 			<include name="pd.jar"/>
 		</fileset>
 	</path>
