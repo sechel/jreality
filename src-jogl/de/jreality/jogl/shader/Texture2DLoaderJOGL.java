@@ -466,7 +466,8 @@ public class Texture2DLoaderJOGL {
         	String vendor = gl.glGetString(GL.GL_VENDOR);
         	System.err.println("Vendor = "+vendor);
         	haveAutoMipmapGeneration =
-                (vendor.startsWith("NVIDIA") && (gl.isExtensionAvailable("GL_VERSION_1_4") ||
+ //               (vendor.startsWith("NVIDIA") && (gl.isExtensionAvailable("GL_VERSION_1_4") ||
+                        ( (gl.isExtensionAvailable("GL_VERSION_1_4") ||
                  gl.isExtensionAvailable("GL_SGIS_generate_mipmap")));
         	haveCheckedAutoMipmapGeneration = true;
         	System.err.println("Have automipmap generation = "+haveAutoMipmapGeneration);
