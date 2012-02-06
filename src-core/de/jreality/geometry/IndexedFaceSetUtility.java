@@ -342,6 +342,7 @@ public class IndexedFaceSetUtility {
 		IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs2);
 		return ifs2;
 	}
+	// go through a set of indexed elements of array2d and for each coordinate find the min and max values
 	private static double[][] getMinMax(int[] indices, double[][] array2d)	{
 		int f = array2d[0].length;
 		double[][] minmax = new double[2][f];
@@ -487,13 +488,16 @@ public class IndexedFaceSetUtility {
 		int newVerts = 0;
 		double[][][] minmax = new double[nf][][];
 		boolean[][] textureJumps = new boolean[nf][2];
+		// mark the faces in which texture coordinates have large jumps
 		for (int i = 0; i<nf; ++i)		{
 			minmax[i] = getMinMax(indices[i], textureCoords );
-			if ( minmax[i][1][0] - minmax[i][0][0] > jumpSize) textureJumps[i][0] = true;
-			if ( minmax[i][1][1] - minmax[i][0][1] > jumpSize) textureJumps[i][1] = true;
-			if (textureJumps[i][0] || textureJumps[i][1]) newVerts += indices[i].length;
+			for (int k = 0; k<2; ++k)	
+				if ( minmax[i][1][k] - minmax[i][0][k] > jumpSize) textureJumps[i][k] = true;
+			if (textureJumps[i][0] || textureJumps[i][1]) {
+				newVerts += indices[i].length;
+			}
 		}
-		LoggingSystem.getLogger(GeometryUtility.class).log(Level.FINE, "Adding "+newVerts+" vertices");
+		LoggingSystem.getLogger(IndexedFaceSetUtility.class).log(Level.FINE, "Adding "+newVerts+" vertices");
 		double[][] oldVerts = src.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		double[][] on =null, nn = null;
 		int nl = 0;
@@ -504,26 +508,32 @@ public class IndexedFaceSetUtility {
 		}
 		double[][] nverts = new double[newVerts+np][oldVerts[0].length];
 		double[][] ntex = new double[newVerts+np][textureCoords[0].length];
-		int l = oldVerts[0].length;
+		int length = oldVerts[0].length;
 		for (int i = 0; i<np; ++i)	{
-			System.arraycopy(oldVerts[i], 0, nverts[i],0,l );
-			System.arraycopy(textureCoords[i], 0, ntex[i], 0, 2);
+			System.arraycopy(oldVerts[i], 0, nverts[i],0,length );
+			System.arraycopy(textureCoords[i], 0, ntex[i], 0, textureCoords[0].length);
 			if (on != null) System.arraycopy(on[i], 0, nn[i], 0 ,nl);
 		}
 		int outcount = np;
 		for (int i = 0; i<nf; ++i)	{
 			if ( textureJumps[i][0] || textureJumps[i][1])		{
-				LoggingSystem.getLogger(GeometryUtility.class).log(Level.INFO,"Face "+i);
+				LoggingSystem.getLogger(IndexedFaceSetUtility.class).log(Level.FINE,"Face "+i);
 				for (int j = 0; j<indices[i].length; ++j)	{
 					int which = indices[i][j];
-					System.arraycopy(oldVerts[which],0,nverts[outcount], 0, l);
-					System.arraycopy(textureCoords[which], 0, ntex[outcount], 0 ,2);
+					System.arraycopy(oldVerts[which],0,nverts[outcount], 0, length);
+					System.arraycopy(textureCoords[which], 0, ntex[outcount], 0 ,textureCoords[0].length);
 					if (on != null) System.arraycopy(on[which], 0, nn[outcount], 0 ,nl);
 					for (int k=0;k<2;++k)		{
 						if (textureJumps[i][k])	{
-							if (ntex[outcount][k] < .5) ntex[outcount][k] += 1.0;//Math.ceil(ntex[outcount][k] - minmax[i][0][k]); 
-							LoggingSystem.getLogger(GeometryUtility.class).log(Level.INFO, "Setting texture coordinate to "+ntex[outcount][k]+"from "+textureCoords[which][k]);
-												}
+							// here the challenge is to adjust the texture coordinates so they don't have a jump
+							// this has to be done from the 
+//							if (ntex[outcount][k] < .5) 
+							// have to figure out from minmax array 
+							while ((ntex[outcount][k] - minmax[i][0][k]) > .5) 
+								ntex[outcount][k] -= 1.0;//Math.ceil(ntex[outcount][k] - minmax[i][0][k]); 
+							while ((minmax[i][0][k] - ntex[outcount][k]) > .5) 
+								ntex[outcount][k] += 1.0;//Math.ceil(ntex[outcount][k] - minmax[i][0][k]); 
+							LoggingSystem.getLogger(IndexedFaceSetUtility.class).log(Level.FINE, "Setting texture coordinate to "+ntex[outcount][k]+"from "+textureCoords[which][k]);							}
 					}
 					indices[i][j] = outcount;
 					outcount++;
@@ -534,9 +544,14 @@ public class IndexedFaceSetUtility {
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 		ifsf.setVertexCount(nverts.length);
 		ifsf.setVertexCoordinates(nverts);
+		ifsf.setVertexTextureCoordinates(ntex);
+		ifsf.setEdgeCount(src.getNumEdges());
+		if( src.getEdgeAttributes(Attribute.INDICES) != null)
+			ifsf.setEdgeIndices(src.getEdgeAttributes(Attribute.INDICES));
+		if( src.getEdgeAttributes(Attribute.COLORS) != null)
+			ifsf.setEdgeIndices(src.getEdgeAttributes(Attribute.COLORS));
 		ifsf.setFaceCount(indices.length);
 		if (nn != null) ifsf.setVertexNormals(nn);
-		ifsf.setVertexTextureCoordinates(ntex);
 		ifsf.setFaceIndices(indices);
 		if( src.getFaceAttributes(Attribute.NORMALS) != null)
 			ifsf.setFaceNormals( src.getFaceAttributes(Attribute.NORMALS));
