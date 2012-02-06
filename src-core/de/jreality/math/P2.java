@@ -132,6 +132,15 @@ final public class P2 {
 		return pointFromLines(line, p1, p2);
 	}
 		
+	public static double[] normalizeLine(double[] dst, double[] src)	{
+		if (dst == null) dst = new double[3];
+		double nn = Rn.innerProduct(src, src, 2);
+		nn = Math.sqrt(nn);
+		if (nn == 0) {System.arraycopy(src, 0, dst, 0, 3); return dst; }
+		nn = 1.0/nn;
+		Rn.times(dst, nn, src);
+		return dst;
+	}
 	/**
 	 * Returns true if and only if <i>point</i> is  within the polygon determined by the
 	 * points contained in the array <i>polygon</i>.
