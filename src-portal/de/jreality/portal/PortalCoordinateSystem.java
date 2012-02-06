@@ -62,7 +62,7 @@ public class PortalCoordinateSystem {
 	 */
 	//  static double xDimPORTAL = 4.068;   // half PORTAL screen x-dim in feet
 	//  static double yDimPORTAL = 6.561;   // full PORTAL screen y-dim in feet
-	static double xDimPORTAL = 2.48;   // full PORTAL screen x-dim in METER
+	public static double xDimPORTAL = 2.48;   // full PORTAL screen x-dim in METER
 	static double yDimPORTAL = 2.00;   // full PORTAL screen y-dim in METER
 	static double zOffsetPORTAL = xDimPORTAL/2.0;
 	static double xOffsetPORTAL = -xDimPORTAL/2.0;
