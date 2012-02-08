@@ -966,6 +966,14 @@ public class Pn {
 		return dst;
 	}
 	
-	//public static double[] barycentricCoordinates
+	// calculate the weights required to write unit as a linear combination of tri
+	public static double[] barycentricCoordinates(double[] dst, double[][] tri, double[] unit)	{
+		int n = tri[0].length;
+		double[] mat = new double[n*n];
+		for (int i = 0; i<n; ++i)	System.arraycopy(tri[i], 0, mat, n*i, n);
+		double[] imat = Rn.inverse(null, Rn.transpose(null, mat));
+		return Rn.matrixTimesVector(dst, imat, unit);
+	}
+
 
 }		
