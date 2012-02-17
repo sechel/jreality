@@ -62,10 +62,10 @@ public class PortalCoordinateSystem {
 	 */
 	//  static double xDimPORTAL = 4.068;   // half PORTAL screen x-dim in feet
 	//  static double yDimPORTAL = 6.561;   // full PORTAL screen y-dim in feet
-	public static double xDimPORTAL = 2.48;   // full PORTAL screen x-dim in METER
+	private static double xDimPORTAL = 2.48;   // full PORTAL screen x-dim in METER
 	static double yDimPORTAL = 2.00;   // full PORTAL screen y-dim in METER
-	static double zOffsetPORTAL = xDimPORTAL/2.0;
-	static double xOffsetPORTAL = -xDimPORTAL/2.0;
+	static double zOffsetPORTAL = getxDimPORTAL()/2.0;
+	static double xOffsetPORTAL = -getxDimPORTAL()/2.0;
 	static double yOffsetPORTAL = 0.4;		// the height (in meters) of the base of the walls
 
 	private static double portalScale = 1.0;
@@ -84,7 +84,7 @@ public class PortalCoordinateSystem {
 		
 		// read screen setup from config file:
 		ConfigurationAttributes config = ConfigurationAttributes.getDefaultConfiguration();
-		xDimPORTAL = config.getDouble("screen.width", xDimPORTAL);
+		setxDimPORTAL(config.getDouble("screen.width", getxDimPORTAL()));
 		yDimPORTAL = config.getDouble("screen.height", yDimPORTAL);
 
 		xOffsetPORTAL = config.getDouble("screen.offset.x", xOffsetPORTAL);
@@ -123,7 +123,7 @@ public class PortalCoordinateSystem {
 		wp.setFrame(
 				portalScale*(xOffsetPORTAL-portalCenter[0]),
 				portalScale*(yOffsetPORTAL-portalCenter[1]),
-				portalScale*xDimPORTAL,
+				portalScale*getxDimPORTAL(),
 				portalScale*yDimPORTAL);
 		return wp;
 	}
@@ -193,6 +193,14 @@ public class PortalCoordinateSystem {
 				l.actionPerformed(e);
 			}
 		}
+	}
+
+	public static double getxDimPORTAL() {
+		return xDimPORTAL;
+	}
+
+	public static void setxDimPORTAL(double xDimPORTAL) {
+		PortalCoordinateSystem.xDimPORTAL = xDimPORTAL;
 	}
 
 }
