@@ -2,6 +2,7 @@ package de.jreality.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -44,13 +45,15 @@ public class JRealitySplashScreen extends SplashScreen {
 	@Override
 	public void setStatus(String status) {
 		progressBar.setString(status);
-		paint(getGraphics());
+		Rectangle r = new Rectangle(getWidth(), getHeight());
+		getRootPane().paintImmediately(r);
 	}
 
 	@Override
 	public void setProgress(double progress) {
 		progressBar.setValue((int)(progress * 100));
-		paint(getGraphics());
+		Rectangle r = new Rectangle(getWidth(), getHeight());
+		getRootPane().paintImmediately(r);
 	}
 
 }
