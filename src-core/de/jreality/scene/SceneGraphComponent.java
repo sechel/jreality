@@ -195,19 +195,30 @@ public class SceneGraphComponent extends SceneGraphNode {
     }
   }
 
-  public boolean removeChild(SceneGraphComponent sgc) {
-  	checkReadOnly();
-    startWriter();
-	  int index=children.indexOf(sgc);
- 	  if(index == -1) {
- 	    finishWriter();
- 	    return false;
-    }
-  	children.remove(index);
-  	fireSceneGraphElementRemoved(sgc, SceneGraphComponentEvent.CHILD_TYPE_COMPONENT, index);
-    finishWriter();
-    return true;
-  }
+	public boolean removeChild(SceneGraphComponent sgc) {
+		checkReadOnly();
+		startWriter();
+		int index = children.indexOf(sgc);
+		if (index == -1) {
+			finishWriter();
+			return false;
+		}
+		children.remove(index);
+		fireSceneGraphElementRemoved(sgc,
+				SceneGraphComponentEvent.CHILD_TYPE_COMPONENT, index);
+		finishWriter();
+		return true;
+	}
+  
+	
+	public void removeAllChildren() {
+		checkReadOnly();
+		while (getChildComponentCount() > 0) {
+			SceneGraphComponent child = getChildComponent(0);
+			removeChild(child);
+		}
+	}
+  
 
   public void setAppearance(Appearance newApp) {
     checkReadOnly();
