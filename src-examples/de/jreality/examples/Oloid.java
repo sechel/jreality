@@ -1,12 +1,12 @@
 package de.jreality.examples;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-
 import de.jreality.geometry.QuadMeshFactory;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.writer.WriterOBJ;
 
 /**
  * Creates an Oloid.
@@ -66,14 +66,13 @@ public class Oloid {
 	}
 	
 	public static void main(String[] args) {
-				
-//		try {
-//			WriterOBJ.write(factory.getIndexedFaceSet(), new FileOutputStream("/tmp/Oloid200.obj"));
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		ViewerApp.display( createOloid( 50 ) );
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(createOloid( 50 ));
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 
 	}
 

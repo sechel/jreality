@@ -43,6 +43,10 @@ package de.jreality.reader;
 import java.io.File;
 import java.io.IOException;
 
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Secure;
@@ -62,10 +66,13 @@ public class LASReaderTest {
 
 		String fileName = Secure.getProperty(SystemProperties.JREALITY_DATA, "/net/MathVis/data/testData3D") + "/gfz/Mallik3L.las";
         SceneGraphComponent sgc = new ReaderLAS().read(new File(fileName)); 
-        ViewerApp va = new ViewerApp(sgc);
-        va.setAttachNavigator(true);
-        va.update();
-        va.display();
+        JRViewer v = new JRViewer();
+    	v.addBasicUI();
+    	v.setContent(sgc);
+    	v.registerPlugin(new ContentAppearance());
+    	v.registerPlugin(new ContentLoader());
+    	v.registerPlugin(new ContentTools());
+    	v.startup();
 	}
 
 }

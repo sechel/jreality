@@ -45,10 +45,13 @@ import java.awt.Color;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.P3;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SceneGraphUtility;
 
 /**
@@ -110,6 +113,12 @@ public class ToolTestScene {
 
   public static void main(String[] args) {
     ToolTestScene tts = new ToolTestScene();
-	ViewerApp.display(tts.createScene());
+    JRViewer v = new JRViewer();
+	v.addBasicUI();
+	v.setContent(tts.createScene());
+	v.registerPlugin(new ContentAppearance());
+	v.registerPlugin(new ContentLoader());
+	v.registerPlugin(new ContentTools());
+	v.startup();
   }
 }

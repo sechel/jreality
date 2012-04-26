@@ -24,8 +24,11 @@ package de.jreality.soft;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.Primitives;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class Test4coords {
 
@@ -63,8 +66,13 @@ public class Test4coords {
         SceneGraphComponent cube = new SceneGraphComponent();
         cube.setGeometry(Primitives.coloredCube());
         root.addChild(cube);
-        
-        ViewerApp.display(root);
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(root);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
     }
 
 }

@@ -40,31 +40,17 @@
 
 package de.jreality.tools;
 
-import java.awt.Color;
-import java.util.List;
-
-import de.jreality.geometry.Primitives;
 import de.jreality.geometry.TubeFactory;
-import de.jreality.math.FactoredMatrix;
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
-import de.jreality.math.P3;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Sphere;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
-import de.jreality.scene.tool.AbstractTool;
-import de.jreality.scene.tool.InputSlot;
-import de.jreality.scene.tool.Tool;
-import de.jreality.scene.tool.ToolContext;
-import static de.jreality.shader.CommonAttributes.*;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.SceneGraphUtility;
 
 public class TrackballRotateToolTest {
 
@@ -87,10 +73,12 @@ public class TrackballRotateToolTest {
 
 				
 			});
-
-			ViewerApp va = new ViewerApp(sgc);
-			va.update();
-			va.display();
-
+		    JRViewer v = new JRViewer();
+			v.addBasicUI();
+			v.setContent(sgc);
+			v.registerPlugin(new ContentAppearance());
+			v.registerPlugin(new ContentLoader());
+			v.registerPlugin(new ContentTools());
+			v.startup();
 	   } 
 }

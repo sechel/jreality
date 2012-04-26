@@ -40,13 +40,16 @@
 
 package de.jreality.backends.label;
 
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SystemProperties;
 
 public class LabelsOnPointSet {
@@ -79,8 +82,13 @@ public class LabelsOnPointSet {
 		
 		System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
 
-		ViewerApp.display(sgc);
-
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(sgc);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 	}
 
 }

@@ -51,13 +51,15 @@ import java.util.List;
 import junit.framework.TestCase;
 import de.jreality.Debug;
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.proxy.ProxyFactory;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolUpdateProxy;
-import de.jreality.ui.viewerapp.ViewerApp;
-
 
 /**
  *
@@ -187,8 +189,14 @@ public class TreeProxyTest extends TestCase {
       sm.setSceneRoot(root);
     } else {
       //System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
-      ViewerApp.display(root);
-    }
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(root);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
+	}
     for (int i = 0; i < 500; i++) {
       CatenoidHelicoid ch = new CatenoidHelicoid(10);
       REFS.add(new X(ch));

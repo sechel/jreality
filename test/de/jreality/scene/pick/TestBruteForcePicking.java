@@ -43,6 +43,10 @@ package de.jreality.scene.pick;
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.IndexedFaceSet;
@@ -50,7 +54,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Sphere;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.PickShowTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestBruteForcePicking implements Runnable{
 	
@@ -164,8 +167,13 @@ static private int[][] icoIndices = {
     geoNode.setAppearance(new Appearance());
     geoNode.getAppearance().setAttribute(CommonAttributes.VERTEX_DRAW, true);
     geoNode.getAppearance().setAttribute(CommonAttributes.POINT_RADIUS, 0.04);
-    
-		ViewerApp.display(geoNode);
+    JRViewer v = new JRViewer();
+	v.addBasicUI();
+	v.setContent(geoNode);
+	v.registerPlugin(new ContentAppearance());
+	v.registerPlugin(new ContentLoader());
+	v.registerPlugin(new ContentTools());
+	v.startup();	
 	}
 
 	private void animate() {

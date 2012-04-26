@@ -44,6 +44,10 @@ import java.awt.Color;
 
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.IndexedLineSetUtility;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -55,7 +59,6 @@ import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SystemProperties;
 
 public class LabelsOnIndexedLineSet {
@@ -124,8 +127,14 @@ public class LabelsOnIndexedLineSet {
     dgs.setShowPoints(Boolean.TRUE);
     
     System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
-
-		ViewerApp.display(cmp);
+    
+    JRViewer v = new JRViewer();
+	v.addBasicUI();
+	v.setContent(cmp);
+	v.registerPlugin(new ContentAppearance());
+	v.registerPlugin(new ContentLoader());
+	v.registerPlugin(new ContentTools());
+	v.startup();
 
 	}
 

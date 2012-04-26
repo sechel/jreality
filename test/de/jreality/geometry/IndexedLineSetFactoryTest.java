@@ -41,18 +41,14 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 import junit.framework.TestCase;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class IndexedLineSetFactoryTest extends TestCase {
 
@@ -203,7 +199,12 @@ public class IndexedLineSetFactoryTest extends TestCase {
 		factory.setEdgeColors( new Color[] {Color.RED, Color.YELLOW} );
 		//factory.setEdgeLabels( new String[] {"A","B"} );
 		factory.update();
-		
-		ViewerApp.display(factory.getIndexedLineSet());
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(factory.getIndexedLineSet());
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 	}
 }

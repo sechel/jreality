@@ -51,6 +51,11 @@ import javax.swing.JPanel;
 public class TestLabelImages extends JPanel {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public void paintComponent(Graphics g) {
 		Image i = LabelUtility.createImageFromString("V24",
 				new Font("Serif",Font.PLAIN,64), Color.RED );

@@ -5,18 +5,21 @@ import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+
 import de.jreality.examples.PaintComponent;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.swing.jrwindows.JRWindowManager;
 import de.jreality.tools.RotateTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestJRWindows {
   public static void main(String[] args) {
@@ -102,12 +105,12 @@ public class TestJRWindows {
     
     System.out.println("nach: panelSize = "+panel.getWidth()+" ,"+panel.getHeight());
     System.out.println("nach: frameSize = "+frame4.getWidth()+" ,"+frame4.getHeight());
-  
-    ViewerApp va = new ViewerApp(root, cameraPath, emptyPickPath, avatarPath);
-//    va.setShowMenu(true);
-//    va.setAttachNavigator(true);
-//    va.setAttachBeanShell(true);
-    va.update();
-    va.display();
+    JRViewer v = new JRViewer();
+	v.addBasicUI();
+	v.setContent(root);
+	v.registerPlugin(new ContentAppearance());
+	v.registerPlugin(new ContentLoader());
+	v.registerPlugin(new ContentTools());
+	v.startup();
   }
 }

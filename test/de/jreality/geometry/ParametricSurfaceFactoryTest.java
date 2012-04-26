@@ -1,8 +1,11 @@
 package de.jreality.geometry;
 
-import de.jreality.scene.data.Attribute;
-import de.jreality.ui.viewerapp.ViewerApp;
 import junit.framework.TestCase;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
+import de.jreality.scene.data.Attribute;
 
 public class ParametricSurfaceFactoryTest extends TestCase {
 
@@ -170,7 +173,13 @@ public class ParametricSurfaceFactoryTest extends TestCase {
 		pause();
 		
 		self.debug = false;
-		ViewerApp.display(self.getIndexedFaceSet());
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(self.getIndexedFaceSet());
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 		self.debug = true;
 		
 		pause();

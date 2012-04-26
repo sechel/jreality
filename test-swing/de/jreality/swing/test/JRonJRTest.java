@@ -45,6 +45,10 @@ import java.awt.Component;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
@@ -57,7 +61,6 @@ import de.jreality.swing.JFakeFrame;
 import de.jreality.tools.DraggingTool;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
 
@@ -104,7 +107,13 @@ public class JRonJRTest {
         System.out.print("setting appearance ");
         catComp.setAppearance(f.getAppearance());
         System.out.println("done");
-        ViewerApp.display(catComp);
+        JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(catComp);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
         System.out.println("frame size " + f.getSize());
     }
 

@@ -2,13 +2,16 @@ package de.jreality.backends.label;
 import java.io.IOException;
 
 import de.jreality.geometry.IndexedLineSetFactory;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.TextureUtility;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.SystemProperties;
 
 
@@ -56,6 +59,7 @@ public class TestLabelBug {
 		  new java.awt.Color((float)0 ,(float)0,(float)0)
 		);
 		   appearance.setAttribute(CommonAttributes.POLYGON_SHADER+"."+CommonAttributes.DIFFUSE_COLOR, java.awt.Color.WHITE);
+		   //TODO check textures/desertstorm/desertstorm_ path 
 		   try {
 		  			CubeMap rm = TextureUtility.createReflectionMap(
 			                  appearance,
@@ -104,8 +108,13 @@ public class TestLabelBug {
 		
 		System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
 
-		ViewerApp.display(root);
-
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(root);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 
 		}
 }

@@ -57,11 +57,15 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.pick.AABBTree;
 import de.jreality.swing.JFakeFrame;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.PickUtility;
 
 public class PaintComponent extends JPanel implements MouseListener, MouseMotionListener,ActionListener {
@@ -196,8 +200,14 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
    System.out.print("setting appearance ");
       catComp.setAppearance(jrj.getAppearance());
       System.out.println("done");
-      ViewerApp.display(catComp);
-      
+
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(catComp);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
    }
 
 }

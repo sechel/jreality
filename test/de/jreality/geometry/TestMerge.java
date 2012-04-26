@@ -1,10 +1,12 @@
 package de.jreality.geometry;
 
 import java.awt.Color;
-import java.util.LinkedList;
-import java.util.List;
+
 import de.jreality.math.MatrixBuilder;
-import de.jreality.reader.vrml.VRMLHelper;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -12,11 +14,9 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestMerge {
 
-	static ViewerApp vApp ;
 	static SceneGraphComponent root= new SceneGraphComponent();
 
 	public static void main(String[] args) {
@@ -80,8 +80,14 @@ public class TestMerge {
 		//System.out.println("TestMerge.main(i)"+i);
 		IndexedFaceSet j= (IndexedFaceSet)RemoveDuplicateInfo.removeDuplicateVertices(i,new Attribute[]{Attribute.COLORS} );
 		//System.out.println("TestMerge.main(j)"+j);
-		
-		vApp.display(j);
+	    
+		JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(j);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 		
 	}
 

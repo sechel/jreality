@@ -47,6 +47,10 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -57,7 +61,6 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tools.ActionTool;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
@@ -633,8 +636,13 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory2.setVertexRelativeRadii( new double [] { 1, 2, 3, 4, 1, 2, 3, 4 } );
 		factory2.setFaceColors( new Color[] {Color.RED, Color.GREEN, Color.RED, Color.GREEN, Color.RED, Color.GREEN })  ;
 		factory2.update();
-		ViewerApp.display(factory2.getIndexedFaceSet());
-		
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(factory2.getIndexedFaceSet());
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 
 		
 		IndexedFaceSetFactory factory3 = new IndexedFaceSetFactory();
@@ -650,8 +658,13 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		factory3.setVertexRelativeRadii( new double [] { 1, 2, 3, 4, 1, 2, 3, 4 } );		
 		factory3.setFaceColors( new Color[] {Color.RED, Color.YELLOW, Color.RED, Color.YELLOW, Color.RED, Color.YELLOW })  ;
 		factory3.update();
-		ViewerApp.display(factory3.getIndexedFaceSet());
-		
+	    JRViewer v1 = new JRViewer();
+		v1.addBasicUI();
+		v1.setContent(factory3.getIndexedFaceSet());
+		v1.registerPlugin(new ContentAppearance());
+		v1.registerPlugin(new ContentLoader());
+		v1.registerPlugin(new ContentTools());
+		v1.startup();
 		
 		final IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 		
@@ -722,8 +735,14 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		/* scale the cube, to get the lables smaller */
 		MatrixBuilder.euclidean().scale(4).assignTo(sgc);
 
-		ViewerApp va = ViewerApp.display(sgc);
-		CameraUtility.encompass(va.getCurrentViewer());
+	    JRViewer v2 = new JRViewer();
+		v2.addBasicUI();
+		v2.setContent(sgc);
+		v2.registerPlugin(new ContentAppearance());
+		v2.registerPlugin(new ContentLoader());
+		v2.registerPlugin(new ContentTools());
+		v2.startup();
+		CameraUtility.encompass(v2.getViewer());
 	};
 	
 	public void testFaceIndicesUnset() throws Exception {

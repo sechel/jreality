@@ -43,9 +43,12 @@ package de.jreality.geometry;
 import java.awt.Color;
 
 import de.jreality.math.FactoredMatrix;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 
 public class CoordinateSystemTest {
@@ -90,7 +93,13 @@ public class CoordinateSystemTest {
     
     
     //display component
-    ViewerApp.display(component);
+    JRViewer v = new JRViewer();
+	v.addBasicUI();
+	v.setContent(component);
+	v.registerPlugin(new ContentAppearance());
+	v.registerPlugin(new ContentLoader());
+	v.registerPlugin(new ContentTools());
+	v.startup();
   }
   
   

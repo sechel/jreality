@@ -2,8 +2,11 @@ package de.jreality.geometry;
 
 import de.jreality.math.P3;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentLoader;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.ui.viewerapp.ViewerApp;
 
 public class TestTriangulate {
 
@@ -17,7 +20,13 @@ public class TestTriangulate {
 		// following call doesn't terminate in versions before SVN2945
 		dumbbell = IndexedFaceSetUtility.triangulate(dumbbell);
 		
-		ViewerApp.display(dumbbell);
+	    JRViewer v = new JRViewer();
+		v.addBasicUI();
+		v.setContent(dumbbell);
+		v.registerPlugin(new ContentAppearance());
+		v.registerPlugin(new ContentLoader());
+		v.registerPlugin(new ContentTools());
+		v.startup();
 
 	}
 	public static IndexedFaceSet surfaceOfRevolutionAsIFS(double[][] profile, int num, double angle)	{
