@@ -291,8 +291,8 @@ public class Pn {
 				vv = innerProduct(v, v, metric);
 				uv = innerProduct(u, v, metric);
 				if (uu == 0 || vv == 0) 	// error: infinite distance
-					throw new IllegalArgumentException("Points cannot lie on the hyperbolic absolute");
-					//return (Double.MAX_VALUE);
+//					throw new IllegalArgumentException("Points cannot lie on the hyperbolic absolute");
+					return (Double.MAX_VALUE);
 				double k =  (uv)/Math.sqrt(Math.abs(uu*vv));
 				if (uu < 0 && vv < 0) d = acosh(k);
 				else if ((uu < 0 && vv > 0) || (uu > 0 && vv < 0)) d = asinh(k);
