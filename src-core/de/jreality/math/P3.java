@@ -652,6 +652,7 @@ public class P3 {
 	 */
 	  public static double[] makeTranslationMatrix(double[] mat, double[] to, int metric)	{
 		if (mat == null) mat = new double[16];
+		if (true) return makeTranslationMatrixOld(mat, to, metric);
 		double[] toL1 = null;
 		if (to.length == 3)	toL1 = Pn.homogenize(null, to);
 		else if (to.length == 4) toL1 = (double[]) to.clone();
@@ -667,14 +668,13 @@ public class P3 {
 //			throw new IllegalStateException("bad translation vector: "+Rn.toString(toL1));
 		}
 //		if (toL[3] < 0) Rn.times(toL, -1.0, toL);
-		double f = 1.0/(1+toL[3]);
-		if (toL[3] <0) f = 1.0/(1-toL[3]);
-		for (int i = 0; i<3; ++i)	{
+		double f = (toL[3] <0) ? 1.0/(1-toL[3]) : 1.0/(1+toL[3]);
+			for (int i = 0; i<3; ++i)	{
 			for (int j = 0; j<3; ++j)	{
 				mat[i*4+j] = ((i == j) ? 1.0 : 0.0 ) - metric * f  * toL[i]*toL[j];
 			}
 		}
-		for (int i = 0; i<4; ++i)	mat[4*i+3] = toL[i];
+		for (int i = 0; i<4; ++i)	mat[4*i+3] = f * toL[i];
 		for (int i = 0; i<3; ++i) mat[12+i] = -metric*mat[4*i+3];
 		if (debug)	{
 			double[] oldm = makeTranslationMatrixOld(null, to, metric);
