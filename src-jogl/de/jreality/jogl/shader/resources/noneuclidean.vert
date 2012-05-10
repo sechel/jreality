@@ -57,6 +57,7 @@ uniform float Nw;
 uniform float	transparency;
 uniform sampler2D texture;
 uniform int numLights;
+uniform int numTextures;
 uniform bool poincareModel;
 uniform mat4 cam2H;
 uniform mat4 H2NDC;

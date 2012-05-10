@@ -66,6 +66,9 @@ public class JOGLTopLevelAppearance {
 		} else skyboxCubemap = null;
 		obj = rootAp.getAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, Double.class);		// assume the best ...
 		if (obj instanceof Double) globalAntiAliasingFactor = ((Double) obj).doubleValue();
+		obj = rootAp.getAttribute(CommonAttributes.USE_GLSL, Boolean.class);		// assume the best ...
+		if (obj instanceof Boolean) JOGLRenderingState.useGLSL = ((Boolean)obj).booleanValue();
+
 	}
 
 	public boolean isRenderSpherical() {

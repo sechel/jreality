@@ -58,6 +58,7 @@ import de.jreality.util.CameraUtility;
 public class JOGLRenderingState {
 
 	public static boolean useOldTransparency = false;
+	public static boolean useGLSL = false;
 	
 	public JOGLRenderer renderer;
 	public Geometry currentGeometry = null;

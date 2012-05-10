@@ -7,6 +7,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 
+import javax.media.opengl.DebugGL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLDrawableFactory;
@@ -79,10 +80,9 @@ public class JOGLOffscreenRenderer {
 		offscreenBuffer = ByteBuffer.wrap(((DataBufferByte) offscreenImage.getRaster().getDataBuffer()).getData());
 		jr.offscreenMode = true;
 		jr.lightListDirty = true;
+//		offscreenPBuffer.setGL(new DebugGL(offscreenPBuffer.getGL()));
 		canvas.display();
 		jr.renderingState.globalAntiAliasingFactor = oldaa;
-		// why I can't just use img is a mystery to me ... go figure
-		// I seem to be just copying the data directly from one image to the other.
 		BufferedImage bi = ImageUtility.rearrangeChannels(offscreenImage);
 		ImageUtil.flipImageVertically(bi);
 		// a magic incantation to get the alpha channel to show up correctly

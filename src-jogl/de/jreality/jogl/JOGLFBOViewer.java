@@ -94,6 +94,7 @@ import de.jreality.shader.Texture2D;
 			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, rbuffer[0]);
 			gl.glRenderbufferStorageEXT(GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT, width, height);
 			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, rbuffer[0]);
+
 			gl.glGenTextures(1, txt,0);
 			System.err.println("joglfbo tex = "+txt[0]);
 			gl.glBindTexture(GL.GL_TEXTURE_2D, txt[0]);

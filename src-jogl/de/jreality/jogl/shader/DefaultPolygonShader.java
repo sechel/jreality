@@ -56,6 +56,7 @@ import javax.media.opengl.GL;
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
+import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Cylinder;
 import de.jreality.scene.Geometry;
@@ -98,13 +99,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		noneuclideanInitialized = false;
 	
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
-	// try loading the OpenGL shader for the non-euclidean cases
-//	boolean		poincareModel = false;		// interpolate shaded values between vertices
-//	SceneGraphPath poincarePath;
-//	static GlslProgram noneuclideanShader = null;
-//	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
-	NoneuclideanGLSLShader noneuc = new NoneuclideanGLSLShader();
-	boolean hasNoneuc = false;
+	StandardGLSLShader standard;
+	boolean hasStandardGLSL = false;
 	
 	public DefaultPolygonShader()	{
 		
@@ -145,19 +141,25 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    	hasTextures = true;
 	    }
       
+	    hasStandardGLSL = false;	    
 	    if (useGLSL)		{
+			int metric = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.METRIC), Pn.EUCLIDEAN);	
 			if (GlslProgram.hasGlslProgram(eap, name)) {
 				// dummy to write glsl values like "lightingEnabled"
 				Appearance app = new Appearance();
 				glslProgram = new GlslProgram(app, eap, name);
-				hasNoneuc = false;
 			} else {
-				noneuc.setFromEffectiveAppearance(eap, name);
-				hasNoneuc = true;
-				glslProgram = noneuc.getNoneuclideanShader();
+				hasStandardGLSL = true;
+				if (metric == Pn.EUCLIDEAN)	{
+					standard = new EuclideanGLSLShader();
+				} else {
+					standard = new NoneuclideanGLSLShader();
+				}
+				standard.setFromEffectiveAppearance(eap, name);
+				glslProgram = standard.getStandardShader();					
 //			    System.err.println("using non euc shader");
 			}
-	    } else hasNoneuc = false;
+	    } 
 		vertexShader.setFromEffectiveAppearance(eap, name);
 		geometryHasTextureCoordinates = false;
 		firstTime = true;
@@ -217,8 +219,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		jr.renderingState.texUnitCount = texunitcoords; 
 		vertexShader.render(jrs); 
 		if (useGLSL)	{
-	    	if ( hasNoneuc)	{
-	    		noneuc.render(jr);
+	    	if (hasStandardGLSL)	{
+	    		standard.render(jr);
 	    	}
 	    	else GlslLoader.render(glslProgram, jr);		
 		}

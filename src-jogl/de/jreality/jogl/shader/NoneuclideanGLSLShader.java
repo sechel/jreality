@@ -17,27 +17,17 @@ import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.Input;
 
-public class NoneuclideanGLSLShader {
+public class NoneuclideanGLSLShader  extends StandardGLSLShader {
 	boolean		poincareModel = false,
 		needsRendered = true;		
 	SceneGraphPath poincarePath;
-	static GlslProgram glslProgram = null;
-	static String shaderLocation = "de/jreality/jogl/shader/resources/noneuclidean.vert";
 	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		if (glslProgram == null) {
-			try {
-				Appearance ap = new Appearance();
-				glslProgram = new GlslProgram(ap, POLYGON_SHADER, Input.getInput(shaderLocation), null);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}		
-		}
+		super.setFromEffectiveAppearance(eap,  name);
 		poincareModel = eap.getAttribute(ShaderUtility.nameSpace(name,"poincareModel"), false);	
 		if (poincareModel) {
 			poincarePath =  (SceneGraphPath) eap.getAttribute(ShaderUtility.nameSpace(name,"poincarePath"), new SceneGraphPath());
 			if (poincarePath.getLength() == 0) poincarePath=null;
 		}
-		needsRendered = true;
 	}
 	public boolean isPoincareModel() {
 		return poincareModel;
@@ -45,20 +35,11 @@ public class NoneuclideanGLSLShader {
 	public SceneGraphPath getPoincarePath() {
 		return poincarePath;
 	}
-	public  GlslProgram getNoneuclideanShader() {
-		return glslProgram;
-	}
-	
 	protected void render(JOGLRenderer jr)	{
 		// the only reason we're doing it here is because only now do we know what jrs is
 //		System.err.println("writing glsl shader");
 		if (true || needsRendered)  { //return;
 			JOGLRenderingState jrs = jr.renderingState;
-			glslProgram.setUniform("lightingEnabled", jrs.lighting);
-			glslProgram.setUniform("transparencyEnabled", jrs.transparencyEnabled);
-			glslProgram.setUniform("transparency", (float) (1.0f - jrs.diffuseColor[3]));
-			glslProgram.setUniform("numLights", jrs.numLights);
-			glslProgram.setUniform("fogEnabled", jrs.fogEnabled);
 			glslProgram.setUniform("hyperbolic", jrs.currentMetric == Pn.HYPERBOLIC);
 			glslProgram.setUniform("useNormals4", jrs.normals4d);
 			glslProgram.setUniform("poincareModel", poincareModel);
@@ -70,15 +51,13 @@ public class NoneuclideanGLSLShader {
 	    		glslProgram.setUniform("cam2H", Rn.convertDoubleToFloatArray(Rn.transpose(null,cam2H)));	    			
 	    		glslProgram.setUniform("H2NDC", Rn.convertDoubleToFloatArray(Rn.transpose(null,H2NDC)));	    			
 			}
-	
 			needsRendered = false;
 		}
-    	GlslLoader.render(glslProgram, jr);		
-//		noneuclideanInitialized = true;
-//
+		super.render(jr);
 	}
-	public void postRender(GL gl) {
-		GlslLoader.postRender(glslProgram,gl);
+	@Override
+	String getShaderLocation() {
+		return "de/jreality/jogl/shader/resources/noneuclidean.vert";
 	}
 
 }

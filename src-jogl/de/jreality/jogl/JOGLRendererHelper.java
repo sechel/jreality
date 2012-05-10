@@ -235,8 +235,10 @@ public class JOGLRendererHelper {
 				density = (float) ((Double) bgo).doubleValue();
 			}
 			gl.glFogf(GL.GL_FOG_DENSITY, density);
-		} else
+		} else {
 			gl.glDisable(GL.GL_FOG);
+			gl.glFogf(GL.GL_FOG_DENSITY, 0f);
+		}
 	}
 
 
@@ -420,8 +422,8 @@ public class JOGLRendererHelper {
 		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
 		DataList lightMapCoords = sg.getVertexAttributes(Attribute
 				.attributeForName("lightmap coordinates"));
-		
 		int textureCount = jr.renderingState.texUnitCount;
+//		if (lightMapCoords != null) System.err.println("got light map coordinates, # tex units = "+textureCount+" name "+sg.getName());
 		
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
@@ -549,7 +551,7 @@ public class JOGLRendererHelper {
 						}
 						for (int nn = 0; nn<textureCount; ++nn)	{
 							int texunit = GL.GL_TEXTURE0+nn;
-							if (nn == 0 && lightMapCoords != null) {
+							if (nn == textureCount-1 && lightMapCoords != null) {
 								da = lightMapCoords.item(vnn).toDoubleArray();
 							}
 							else if (texCoords != null) {
@@ -634,7 +636,8 @@ public class JOGLRendererHelper {
 					for (int nn = 0; nn<textureCount; ++nn)	{
 //						if (nn != textureUnits[i]) continue;
 						int texunit = GL.GL_TEXTURE0+nn;
-						if (nn == 0 && lightMapCoords != null) {
+						if (nn == textureCount-1 && lightMapCoords != null) {
+//						if (nn == 0 && lightMapCoords != null) {
 							da = lightMapCoords.item(k).toDoubleArray();
 						}
 						else if (texCoords != null) {
@@ -738,6 +741,7 @@ public class JOGLRendererHelper {
 		double[] c2o = jr.getContext().getCameraToObject();
 		gl.glActiveTexture(GL.GL_TEXTURE0);
 		gl.glEnable(GL.GL_TEXTURE_2D);
+		int oldTC = jr.renderingState.texUnitCount;
 		jr.renderingState.texUnitCount = 1;
 		double[] bbm = new double[16];
 		jr.renderingState.smoothShading=true;
@@ -756,7 +760,7 @@ public class JOGLRendererHelper {
 			gl.glPopMatrix();
 		}
 		gl.glPopAttrib();
-		jr.renderingState.texUnitCount = 0;
+		jr.renderingState.texUnitCount = oldTC;
 	}
 	private static double[] correctionNDC = null;
 	static {
