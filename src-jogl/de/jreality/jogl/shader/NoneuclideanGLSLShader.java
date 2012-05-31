@@ -51,9 +51,9 @@ public class NoneuclideanGLSLShader  extends StandardGLSLShader {
 	    		glslProgram.setUniform("cam2H", Rn.convertDoubleToFloatArray(Rn.transpose(null,cam2H)));	    			
 	    		glslProgram.setUniform("H2NDC", Rn.convertDoubleToFloatArray(Rn.transpose(null,H2NDC)));	    			
 			}
-			needsRendered = false;
 		}
 		super.render(jr);
+		needsRendered = false;
 	}
 	@Override
 	String getShaderLocation() {
