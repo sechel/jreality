@@ -94,10 +94,14 @@ public class ImageUtility {
 	 *
 	 */
 	public static BufferedImage rearrangeChannels(BufferedImage img)	{
+		return rearrangeChannels(null, img);
+	}
+	public static BufferedImage rearrangeChannels(BufferedImage bi, BufferedImage img)	{
 		 if (! (img.getRaster().getDataBuffer() instanceof DataBufferByte)) return img;
 		int imageHeight = img.getHeight();
 		int imageWidth = img.getWidth();
-	    BufferedImage bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+	    if (bi == null || bi.getWidth() != imageWidth || bi.getHeight() != bi.getHeight())
+	    	bi = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
 		WritableRaster raster = bi.getRaster();
 		byte[] byteArray = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
 		int[] dst = new int[4];
