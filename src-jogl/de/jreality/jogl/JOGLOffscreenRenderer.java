@@ -156,7 +156,7 @@ public class JOGLOffscreenRenderer {
 		if (rbuffer[0] == -1) gl.glGenRenderbuffersEXT(1, rbuffer, 0);
 //		System.err.println("rbuffer = "+rbuffer[0]);
 		gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, rbuffer[0]);
-		gl.glRenderbufferStorageMultisampleEXT(GL.GL_RENDERBUFFER_EXT, samples, GL.GL_DEPTH_COMPONENT, imageWidth, imageHeight);
+		gl.glRenderbufferStorageMultisampleEXT(GL.GL_RENDERBUFFER_EXT, samples, GL.GL_DEPTH_COMPONENT32, imageWidth, imageHeight);
 		gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, rbuffer[0]);
 		if (useColorBuffer)	{
 			if (cbuffer[0] == -1) gl.glGenRenderbuffersEXT(1, cbuffer, 0);
