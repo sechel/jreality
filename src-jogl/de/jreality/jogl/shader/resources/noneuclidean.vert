@@ -161,9 +161,9 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
     	fog = exp2(-d2eye * gl_Fog.density);
     	fog = clamp(fog, 0.0, 1.0);
     }   
-    normalize4(ecPosition, eye);
     // Clear the light intensity accumulators
     if (lightingEnabled)	{
+        normalize4(ecPosition, eye);
         Ambient  = Diffuse = Specular = vec4 (0.0);
         for ( i = 0; i<numLights; ++i)	{
     	    pointLight(i, normal, eye, ecPosition);
@@ -172,11 +172,11 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
       	    Ambient  * matpar.ambient +
       	    Diffuse  * matpar.diffuse +
       	    Specular * matpar.specular;
-    } else 
-   		color = gl_FrontLightModelProduct.sceneColor +
-      	   matpar.ambient +
-      	   matpar.diffuse;
-    
+    } else  {
+   		color = matpar.diffuse; //gl_FrontLightModelProduct.sceneColor +
+      	   //matpar.ambient +
+      	   //matpar.diffuse;
+    }
 
     color = clamp( color, 0.0, 1.0 );
     if (fogEnabled) color = mix( (gl_Fog.color), color, fog);
@@ -199,9 +199,9 @@ void main (void)
     	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
-//    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
-//    transformedNormal = -transformedNormal;
-    gl_FrontColor = gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
+    gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
+    transformedNormal = -transformedNormal;
+    gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
      if (poincareModel)	{
         // p4 is in the coordinate system of H3
       	vec4 p4 =  cam2H * ecPosition;
