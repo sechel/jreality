@@ -260,7 +260,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 		}
 
 		public void broadcastChange()	{
-			if (listeners == null) return;
+			if (listeners == null || renderingOffscreen) return;
 			//SyJOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
 			if (!listeners.isEmpty())	{
 				EventObject e = new EventObject(this);
@@ -311,13 +311,22 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 		    }
 		  }
 
-	  public BufferedImage renderOffscreen(int w, int h) {
-		  return renderOffscreen(w, h, 1.0);
+		  boolean renderingOffscreen = false;
+		  public BufferedImage renderOffscreen( int w, int h) {
+			return renderOffscreen(null, w, h);
+		  }
+	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h) {
+		  return renderOffscreen(dst, w, h, 1.0);
 	  }
 	  public BufferedImage renderOffscreen(int w, int h, double aa) {
+		  return renderOffscreen(null, w, h, aa);
+	  }
+	  public BufferedImage renderOffscreen(BufferedImage dst, int w, int h, double aa) {
 		  if (renderer != null) {
-			  BufferedImage ret = renderer.offscreenRenderer.renderOffscreen(w, h, aa, drawable);
-			  return ret;
+			  renderingOffscreen = true;
+			  dst = renderer.offscreenRenderer.renderOffscreen(dst, w, h, aa, drawable);
+			  renderingOffscreen = false;
+			  return dst;
 		  } else {
 			  JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
 			  return null;
@@ -325,8 +334,10 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	  }
 	  
 	  public void renderOffscreen(int w, int h, File file)	{
+		  renderingOffscreen = true;
 		  if (renderer != null) renderer.offscreenRenderer.renderOffscreen(w,h,file, drawable);
 		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
+		  renderingOffscreen = false;
 	  }
 
 	  public static Matrix[] cubeMapMatrices = new Matrix[6], textureMapMatrices = new Matrix[6];
@@ -355,7 +366,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 			  Matrix newCamMat = new Matrix(oldCamMat);
 			  newCamMat.multiplyOnRight(cubeMapMatrices[i]);
 			  newCamMat.assignTo(camNode);
-			  cmp[i] = renderOffscreen(size, size);
+			  cmp[i] = renderOffscreen(cmp[i], size, size);
 		  }
 		  cam.setFieldOfView(oldFOV);
 		  camNode.getTransformation().setMatrix(oldCamMat.getArray());
