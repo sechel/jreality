@@ -183,5 +183,10 @@ public class GLJPanelViewer extends AbstractViewer {
 		}
 	}
 
+	public GLJPanel getPanel() {
+		return panel;
+	}
+
+
 	
 }
