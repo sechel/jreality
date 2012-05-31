@@ -634,10 +634,10 @@ public class P3 {
 	  public static double[] makeTranslationMatrix(double[] dst, double[] from, double[] to, int metric)	{
 		// assert dim checks
 		if (dst == null) 	dst = new double[16];
-		double[] TP = P3.makeTranslationMatrix(null, from, metric);
+		double[] TP = makeTranslationMatrix(null, from, metric);
 		double[] iTP = Rn.inverse(null, TP);
 		double[] toPrime = Rn.matrixTimesVector(null, iTP, to );
-		P3.makeTranslationMatrix(dst, toPrime, metric);
+		makeTranslationMatrix(dst, toPrime, metric);
 		Rn.conjugateByMatrix(dst, dst, TP);
 		return dst;
 	}
