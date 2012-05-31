@@ -516,6 +516,7 @@ public  class TubeFactory {
 					if (Math.abs(foo) > Math.PI/2)  Rn.times(binormalField[i-1], -1, binormalField[i-1]);
 				}
 				if ((debug & 2) != 0) LoggingSystem.getLogger(this).log(Level.FINER,"Binormal is "+Rn.toString(binormalField[i-1]));
+//				System.err.println("Binormal field = "+Rn.toString(binormalField[i-1]));
 
 				/*
 				 * Next try to calculate the tangent as a "mid-plane" if the three points are not collinear
@@ -549,7 +550,7 @@ public  class TubeFactory {
 						// has to be flipped in this case but not in the non-euclidean case
 						//midPlane = Rn.times(null, -1.0, pseudoT);
 						midPlane = pseudoT;
-						// the eucliean polar of a point is the plane at infinity: we want something
+						// the euclidean polar of a point is the plane at infinity: we want something
 						// much more specific: 
 						// we assume the polygonal data is dehomogenized (last coord = 1)
 						midPlane[3] = -Rn.innerProduct(midPlane, polygonh[i], 3);						
@@ -576,6 +577,7 @@ public  class TubeFactory {
 					Rn.times(tangentField[i-1], -1.0, tangentField[i-1]);
 
 				Pn.setToLength(tangentField[i-1], tangentField[i-1], 1.0, metric);
+//				System.err.println("Tangent field = "+Rn.toString(tangentField[i-1]));
 				//System.err.println("tangent is "+Rn.toString(tangentField[i-1]));
 				// finally calculate the normal vector
 				Pn.polarizePlane(frenetNormalField[i-1], P3.planeFromPoints(null,binormalField[i-1], tangentField[i-1],  polygonh[i]),metric);					
