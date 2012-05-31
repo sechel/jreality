@@ -139,7 +139,7 @@ public class GlslSource implements Serializable {
 	      for (int i = 0; i < names.length; i++) {
 	        AttributeParameter param = new AttributeParameter(names[i]);
 	        attribs.put(names[i], param);
-	        System.out.println("found attrib "+param);
+//	        System.out.println("found attrib "+param);
 	      }
 	    }
 	  }
@@ -226,7 +226,7 @@ public class GlslSource implements Serializable {
       if (isMatrix()) sb.append("Matrix");
       sb.append(getPrimitiveSize());
       sb.append(getPrimitiveType() == float.class ? 'f' : 'i');
-      System.out.println("name="+name+" type="+type+" primitiveType="+getPrimitiveType());
+//      System.out.println("name="+name+" type="+type+" primitiveType="+getPrimitiveType());
       sb.append('v');
       //sb.append("ARB");
       stringRep = sb.toString();
