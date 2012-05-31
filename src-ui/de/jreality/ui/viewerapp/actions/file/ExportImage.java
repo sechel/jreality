@@ -39,6 +39,7 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -50,7 +51,11 @@ import java.awt.image.BufferedImage;
 import java.beans.Expression;
 import java.beans.Statement;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.media.jai.RenderedOp;
+import javax.media.jai.operator.SubsampleAverageDescriptor;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -82,7 +87,7 @@ public class ExportImage extends AbstractJrAction {
 	private int antialiasing;
 	private boolean saveAlpha = false;  // this is somehow broken on jogl backend so turn off by default
 	private JCheckBox checkbox;
-
+	private boolean useJAI = false, useFBO = true;
 	
 	public ExportImage(String name, ViewerSwitch viewer, Component parentComp) {
 		super(name, parentComp);
@@ -103,13 +108,11 @@ public class ExportImage extends AbstractJrAction {
 
 		// Hack
 		Viewer realViewer = viewer.getCurrentViewer();
-//		de.jreality.jogl.Viewer joglViewer = (de.jreality.jogl.Viewer) realViewer;
 		Dimension d = realViewer.getViewingComponentSize();
 		dimPanel.setDimension(d);
 
 		File file = FileLoaderDialog.selectTargetFile(parentComp, options, false, FileFilter.createImageWriterFilters());
 		Dimension dim = dimPanel.getDimension();
-//		Dimension dim = DimensionDialog.selectDimension(d,frame);
 		if (file == null || dim == null) return;
 
 		if (FileFilter.getFileExtension(file) == null) {  //no extension specified
@@ -120,6 +123,7 @@ public class ExportImage extends AbstractJrAction {
 		
 		//render offscreen
 		BufferedImage scaledImg = null;
+		// the following code is reduced since the new FBO technique in the JOGL backend returns properly anti-aliased RGBA images.
 		double aa = antialiasing;
 		try {
 			Expression expr = new Expression(realViewer, "renderOffscreen", new Object[]{antialiasing*dim.width, antialiasing*dim.height, aa});
@@ -128,34 +132,22 @@ public class ExportImage extends AbstractJrAction {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-
-		int type = saveAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
-		BufferedImage img = new BufferedImage(dim.width, dim.height, type);
-		Graphics2D g = (Graphics2D) img.getGraphics();
-		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-
-        g.setColor(new Color(255,255,255,0));
-        g.fillRect(0,0,dim.width,dim.height);
-        g.drawImage(
-				scaledImg.getScaledInstance(
-						dim.width,
-						dim.height,
-						BufferedImage.SCALE_SMOOTH
-				),
-				0,
-				0,
-				null
-		);
-		if (saveAlpha) img.coerceData(true);
-
-		//JOGLRenderer.writeBufferedImage(file,img2); :
+		if (!saveAlpha)	{  // strip off the alpha channel
+			int type = BufferedImage.TYPE_INT_RGB;
+			BufferedImage img = new BufferedImage(dim.width, dim.height, type);
+			Graphics2D g = (Graphics2D) img.getGraphics();
+	        g.setColor(new Color(0,0,0,0));
+	        g.fillRect(0,0,dim.width,dim.height);
+	        g.drawImage(scaledImg, 0,0,dim.width,dim.height, null);
+	        scaledImg = img;
+		}
 		try {
-			new Statement(Class.forName("de.jreality.util.ImageUtility"), "writeBufferedImage", new Object[]{file, img}).execute();
+			new Statement(Class.forName("de.jreality.util.ImageUtility"), "writeBufferedImage", new Object[]{file, scaledImg}).execute();
 			System.out.println("Wrote file "+file.getPath());
 		} catch (Exception ex) {
 			// and now?
 			throw new RuntimeException("writing image failed", ex);
-		}
+		}			
 	}
 
 
