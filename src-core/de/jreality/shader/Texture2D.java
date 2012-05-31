@@ -226,6 +226,7 @@ public interface Texture2D extends AttributeEntity {
   public abstract void setPixelFormat(Integer i);
   
   public abstract void setImage(ImageData image);
+  public abstract ImageData getImage();
   
   public abstract void setExternalSource(String b);
   
@@ -236,5 +237,4 @@ public interface Texture2D extends AttributeEntity {
   public abstract Runnable getRunnable();
   public abstract void setRunnable(Runnable r);
   
-  public abstract ImageData getImage();
 }
