@@ -361,7 +361,7 @@ public class Texture2DLoaderJOGL {
       textureID = createTextureID(gl); 
       ht.put(ref.getLeft(), new Integer(textureID));
     }
-    System.err.println("Binding cubemap texture for "+textureID);
+//    System.err.println("Binding cubemap texture for "+textureID);
     gl.glBindTexture(GL.GL_TEXTURE_CUBE_MAP, textureID); 
     
     double[] c2w = Rn.copy(null, jr.renderingState.cameraToWorld);
