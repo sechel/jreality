@@ -56,6 +56,7 @@ public class BackgroundColor extends Plugin {
 		addChoice("White", Color.white);
 		addChoice("Gray", new Color(225, 225, 225));
 		addChoice("Black", Color.black);
+		addChoice("Transparent Black", new Color(0,0,0,0));
 		addChoice("UI Background", Color.black);
 
 		setColor("Default");
@@ -109,7 +110,7 @@ public class BackgroundColor extends Plugin {
 	}
 
 	@SuppressWarnings("serial")
-	private void addChoice(final String name, final Color ... colors) {
+	public void addChoice(final String name, final Color ... colors) {
 		nameToColors.put(name, colors);
 		Action action = new AbstractAction(name) {
 
