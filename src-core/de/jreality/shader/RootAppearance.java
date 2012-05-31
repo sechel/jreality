@@ -52,6 +52,7 @@ public interface RootAppearance extends AttributeEntity {
   public final static Color  FOG_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
   public final static double FOG_DENSITY_DEFAULT = 0.1;
   public final static boolean RENDER_S3_DEFAULT = false;
+  public final static boolean USE_GLSL_DEFAULT = false;
 
 
   Color getBackgroundColor();
@@ -71,6 +72,9 @@ public interface RootAppearance extends AttributeEntity {
   
   Boolean getRenderS3();
   void setRenderS3(Boolean b);
+  
+  Boolean getUseGLSL();
+  void setUseGLSL(Boolean b);
   
   Texture2D createBackgroundTexture2D();
   Texture2D getBackgroundTexture2D();
