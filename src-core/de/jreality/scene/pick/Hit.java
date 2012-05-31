@@ -273,7 +273,7 @@ public class Hit implements PickResult {
               i2 = 0;
           } else {
               
-            LoggingSystem.getLogger(Hit.class).fine("mBaryInElementConvertFromVec3: triangle degenerated?");
+//            LoggingSystem.getLogger(Hit.class).fine("mBaryInElementConvertFromVec3: triangle degenerated?");
               //              
               //              fprintf(stderr, "gmBaryInElementConvertFromVec3: triangle
               // degenerated?\n");
@@ -312,9 +312,9 @@ public class Hit implements PickResult {
           .abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
           > 1.e-3) {
     	  // this is not an error and should not in my opinion be set to info level -gunn 18.5.6
-        LoggingSystem.getLogger(Hit.class).fine("gmBaryInElementConvertFromVec3: test for third row failed."
-                  +Math.abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
-                  );
+//        LoggingSystem.getLogger(Hit.class).fine("gmBaryInElementConvertFromVec3: test for third row failed."
+//                  +Math.abs(x0[i2] * bary[0] + x1[i2] * bary[1] + x2[i2] * bary[2] - x[i2])
+//                  );
 
           return false;
       }
