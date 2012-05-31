@@ -139,7 +139,7 @@ public class ViewerKeyListener extends KeyAdapter {
 	@Override
 	public void keyPressed(KeyEvent e)	{
 			//System.err.println("handling keyboard event");
-			if (e.isControlDown()) return;
+			if (e.isControlDown() || e.isMetaDown()) return;
 			switch(e.getKeyCode())	{
 			
 				case KeyEvent.VK_A:		// transparency
