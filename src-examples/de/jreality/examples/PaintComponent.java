@@ -58,7 +58,6 @@ import javax.swing.JPanel;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
@@ -187,7 +186,6 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
       
       
       catComp.setGeometry(catenoid);
-      SceneGraphComponent c;  
       
       //JRJComponent jrj = new JRJComponent();
       JFakeFrame jrj = new JFakeFrame("bla blubb");
