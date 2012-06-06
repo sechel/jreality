@@ -123,6 +123,8 @@ public class JOGLFBOTextureExample  {
 		joglFBOViewer = new JOGLFBOViewer(camPath, rootNode);
 		joglFBOViewer.setSize(new Dimension(512,stereoTexture ? 256 : 512));
 		joglFBOViewer.setTexture2D(tex2d);
+		// set this to false to get better quality but slower texture
+		joglFBOViewer.getJoglfbo().setAsTexture(true);
 		if (stereoTexture) {
 		    camera.setFocus(4.0);
 		    camera.setEyeSeparation(.45);
