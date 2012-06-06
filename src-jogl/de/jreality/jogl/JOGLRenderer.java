@@ -91,11 +91,13 @@ public class JOGLRenderer   {
 	transient protected JOGLLightHelper lightHelper;
 	transient protected JOGLTopLevelAppearance topAp;
 	transient protected JOGLOffscreenRenderer offscreenRenderer;
-	transient protected JOGLFBOViewer fboViewer;
+	transient protected JOGLFBO theFBO;
 	transient protected JOGLPerformanceMeter perfMeter;
 	transient protected GeometryGoBetween geometryGB;
 
-	transient protected int width, height;		// GLDrawable.getSize() isnt' implemented for GLPBuffer!
+	transient protected int width, height;		// need this when working with FBO's
+	transient protected int owidth, oheight;	
+
 	transient protected int whichEye = CameraUtility.MIDDLE_EYE;
 	transient protected int[] currentViewport = new int[4];
 
@@ -110,9 +112,6 @@ public class JOGLRenderer   {
 	transient protected int numberTries = 0;		// how many times we have tried to make textures resident
 	// miscellaneous fields and methods
 	transient protected int clearColorBits;
-	// pick-related stuff
-	transient protected boolean offscreenMode = false,
-		fboMode = false;
 	// an exotic mode: render the back hemisphere of the 3-sphere (currently disabled)
 	transient public static double[] frontZBuffer = new double[16], backZBuffer = new double[16];
 
@@ -122,7 +121,9 @@ public class JOGLRenderer   {
 		clippingPlanesDirty = true,
 		disposed = false,
 		frontBanana = false,
-		texResident = true;
+		texResident = true,
+		offscreenMode = false,
+		fboMode = false;
 	protected Viewer theViewer;
 	protected Camera theCamera;
 
@@ -351,22 +352,16 @@ public class JOGLRenderer   {
 	protected void myglViewport(int lx, int ly, int rx, int ry)	{
 		globalGL.glViewport(lx, ly, rx, ry);
 //		System.err.println("setting viewport to "+lx+" "+ly+" "+rx+" "+ry);
-		currentViewport[0] = lx;
-		currentViewport[1] = ly;
-		currentViewport[2] = rx;
-		currentViewport[3] = ry;
+		width = rx - lx;
+		height = ry - ly;
 	}
 
 	public Graphics3D getContext() {
 		return renderingState.context;
 	}
 
-	public int[] getCurrentViewport()	{
-		return currentViewport;
-	}
-
 	public double getAspectRatio() {
-		return ((double) currentViewport[2])/currentViewport[3];
+		return ((double) width)/height;
 	}
 
 	/*
@@ -434,12 +429,12 @@ public class JOGLRenderer   {
 		} catch (IllegalStateException ise) {
 			return;
 		}
+		if (fboMode)	{
+			owidth = width;
+			oheight = height;
+			myglViewport(0, 0, theFBO.width, theFBO.height);
+		}
 		if (offscreenMode) {
-//			if (true)	{
-				offscreenRenderer.preRenderOffscreen(gl);
-				render();
-				offscreenRenderer.postRenderOffscreen(gl);
-//			}
 //			if (theCamera.isStereo() && renderingState.stereoType != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
 //				theLog.warning("Invalid stereo mode: Can only save cross-eyed stereo offscreen");
 //				offscreenMode = false;
@@ -537,15 +532,10 @@ public class JOGLRenderer   {
 			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
 			offscreenMode = false;
 			
-		} //else if (fboMode)	{
-//			System.err.println("rendering fbo");
-//			fboViewer.preRender(gl);
-//			render();
-//			fboViewer.postRender(gl);
-//		}
+		} 
 		else if (theCamera.isStereo())		{
 			// allow fbo textures to be stereo
-			if (fboMode) fboViewer.preRender(globalGL);
+			if (fboMode) theFBO.preRender(globalGL);
 			// all types render two images except two new ones
 			boolean doRight = renderingState.stereoType != AbstractViewer.LEFT_EYE_STEREO,
 				doLeft = renderingState.stereoType != AbstractViewer.RIGHT_EYE_STEREO;
@@ -561,31 +551,35 @@ public class JOGLRenderer   {
 			}
 			renderingState.colorMask =15;
 			
-			if (fboMode) fboViewer.postRender(globalGL);
+			if (fboMode) theFBO.postRender(globalGL);
 		} 
 		else {
-			if (fboMode) fboViewer.preRender(globalGL);
+			if (fboMode) theFBO.preRender(globalGL);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			myglViewport(0,0,width, height);
+//			System.err.println("setting vp to "+width+":"+height);
 			whichEye=CameraUtility.MIDDLE_EYE;
 			render();			
-			if (fboMode) fboViewer.postRender(globalGL);
+			if (fboMode) theFBO.postRender(globalGL);
 		}
+
+		if (fboMode) 
+			myglViewport(0, 0, owidth, oheight);
 
 		perfMeter.endFrame();
 	}
 
-	private Color interpolateBG(float[][] bgColors, int i, int j, int numTiles) {
-		float[] col = new float[bgColors[0].length];
-		float alpha = ((float)j)/numTiles;
-		float beta = 1-((float)i)/numTiles;
-		//col = alpha*(1-beta)*bgColors[0]+(1-alpha)*(1-beta)*bgColors[1]+beta*(1-alpha)*bgColors[2]+alpha*beta*bgColors[3]
-		for (int k = 0; k < col.length; k++) {
-			col[k] = alpha*(1-beta)*bgColors[0][k]+(1-alpha)*(1-beta)*bgColors[1][k]+beta*(1-alpha)*bgColors[2][k]+alpha*beta*bgColors[3][k];
-		}
-		if (col.length == 3) return new Color(col[0], col[1], col[2]);
-		else return new Color(col[0], col[1], col[2], col[3]);
-	}
+//	private Color interpolateBG(float[][] bgColors, int i, int j, int numTiles) {
+//		float[] col = new float[bgColors[0].length];
+//		float alpha = ((float)j)/numTiles;
+//		float beta = 1-((float)i)/numTiles;
+//		//col = alpha*(1-beta)*bgColors[0]+(1-alpha)*(1-beta)*bgColors[1]+beta*(1-alpha)*bgColors[2]+alpha*beta*bgColors[3]
+//		for (int k = 0; k < col.length; k++) {
+//			col[k] = alpha*(1-beta)*bgColors[0][k]+(1-alpha)*(1-beta)*bgColors[1][k]+beta*(1-alpha)*bgColors[2][k]+alpha*beta*bgColors[3][k];
+//		}
+//		if (col.length == 3) return new Color(col[0], col[1], col[2]);
+//		else return new Color(col[0], col[1], col[2], col[3]);
+//	}
 
 	protected void setupRightEye(int width, int height) {
 		int which = renderingState.stereoType;
@@ -647,6 +641,22 @@ public class JOGLRenderer   {
 
 	public PickPoint[] performPick(double[] pickPointNDC) {
 		throw new IllegalArgumentException("Picking has been removed from JOGL renderer");
+	}
+
+	public JOGLFBO getTheFBO() {
+		return theFBO;
+	}
+
+	public void setTheFBO(JOGLFBO theFBO) {
+		this.theFBO = theFBO;
+	}
+
+	public boolean isFboMode() {
+		return fboMode;
+	}
+
+	public void setFboMode(boolean fboMode) {
+		this.fboMode = fboMode;
 	}
 
 }

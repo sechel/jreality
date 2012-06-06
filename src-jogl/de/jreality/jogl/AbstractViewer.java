@@ -72,6 +72,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.StereoViewer;
 import de.jreality.scene.Transformation;
+import de.jreality.shader.Texture2D;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 abstract public class AbstractViewer implements de.jreality.scene.Viewer, StereoViewer, GLEventListener, Runnable {
@@ -272,49 +273,61 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 			}
 		}
 
-		/****** Convenience methods ************/
-		public void addAuxiliaryComponent(SceneGraphComponent aux)	{
-			if (auxiliaryRoot == null)	{
-				setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
-			}
-			if (!auxiliaryRoot.isDirectAncestor(aux)) auxiliaryRoot.addChild(aux);
+	/****** Convenience methods ************/
+	public void addAuxiliaryComponent(SceneGraphComponent aux) {
+		if (auxiliaryRoot == null) {
+			setAuxiliaryRoot(SceneGraphUtility
+					.createFullSceneGraphComponent("AuxiliaryRoot"));
 		}
-		
-		public void removeAuxiliaryComponent(SceneGraphComponent aux)	{
-			if (auxiliaryRoot == null)	return;
-			if (!auxiliaryRoot.isDirectAncestor(aux) ) return;
-			auxiliaryRoot.removeChild(aux);
-		}
-		
-		 // Simple class to warn if results are not going to be as expected
-		  static class MultisampleChooser extends DefaultGLCapabilitiesChooser {
-		    public int chooseCapabilities(GLCapabilities desired,
-		                                  GLCapabilities[] available,
-		                                  int windowSystemRecommendedChoice) {
-		      boolean anyHaveSampleBuffers = false;
-		      for (int i = 0; i < available.length; i++) {
-		        GLCapabilities caps = available[i];
-		        if (caps != null && caps.getSampleBuffers()) {
-		          anyHaveSampleBuffers = true;
-		          break;
-		        }
-		      }
-		      int selection = super.chooseCapabilities(desired, available, windowSystemRecommendedChoice);
-		      if (!anyHaveSampleBuffers) {
-		      	JOGLConfiguration.getLogger().log(Level.WARNING,"WARNING: antialiasing will be disabled because none of the available pixel formats had it to offer");
-		      } else {
-		        if (!available[selection].getSampleBuffers()) {
-		        	JOGLConfiguration.getLogger().log(Level.WARNING,"WARNING: antialiasing will be disabled because the DefaultGLCapabilitiesChooser didn't supply it");
-		        }
-		      }
-		      return selection;
-		    }
-		  }
+		if (!auxiliaryRoot.isDirectAncestor(aux))
+			auxiliaryRoot.addChild(aux);
+	}
 
-		  boolean renderingOffscreen = false;
-		  public BufferedImage renderOffscreen( int w, int h) {
-			return renderOffscreen(null, w, h);
-		  }
+	public void removeAuxiliaryComponent(SceneGraphComponent aux) {
+		if (auxiliaryRoot == null)
+			return;
+		if (!auxiliaryRoot.isDirectAncestor(aux))
+			return;
+		auxiliaryRoot.removeChild(aux);
+	}
+
+	// Simple class to warn if results are not going to be as expected
+	static class MultisampleChooser extends DefaultGLCapabilitiesChooser {
+		public int chooseCapabilities(GLCapabilities desired,
+				GLCapabilities[] available, int windowSystemRecommendedChoice) {
+			boolean anyHaveSampleBuffers = false;
+			for (int i = 0; i < available.length; i++) {
+				GLCapabilities caps = available[i];
+				if (caps != null && caps.getSampleBuffers()) {
+					anyHaveSampleBuffers = true;
+					break;
+				}
+			}
+			int selection = super.chooseCapabilities(desired, available,
+					windowSystemRecommendedChoice);
+			if (!anyHaveSampleBuffers) {
+				JOGLConfiguration
+						.getLogger()
+						.log(Level.WARNING,
+								"WARNING: antialiasing will be disabled because none of the available pixel formats had it to offer");
+			} else {
+				if (!available[selection].getSampleBuffers()) {
+					JOGLConfiguration
+							.getLogger()
+							.log(Level.WARNING,
+									"WARNING: antialiasing will be disabled because the DefaultGLCapabilitiesChooser didn't supply it");
+				}
+			}
+			return selection;
+		}
+	}
+
+	boolean renderingOffscreen = false;
+
+	public BufferedImage renderOffscreen(int w, int h) {
+		return renderOffscreen(null, w, h);
+	}
+
 	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h) {
 		  return renderOffscreen(dst, w, h, 1.0);
 	  }
@@ -333,13 +346,6 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 		  }
 	  }
 	  
-	  public void renderOffscreen(int w, int h, File file)	{
-		  renderingOffscreen = true;
-		  if (renderer != null) renderer.offscreenRenderer.renderOffscreen(w,h,file, drawable);
-		  else JOGLConfiguration.getLogger().log(Level.WARNING,"Renderer not initialized");
-		  renderingOffscreen = false;
-	  }
-
 	  public static Matrix[] cubeMapMatrices = new Matrix[6], textureMapMatrices = new Matrix[6];
 	  static {
 		  for (int i = 0; i<6; i++) {
@@ -372,6 +378,28 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 		  camNode.getTransformation().setMatrix(oldCamMat.getArray());
 		  
 		  return cmp;
+		  
+	  }
+	  
+	  JOGLFBO[] fbos = new JOGLFBO[6];
+	  public void renderCubeMap(Texture2D[] texs, int size, boolean asTexture)	{
+		  Camera cam = CameraUtility.getCamera(this);
+		  double oldFOV = cam.getFieldOfView();
+		  cam.setFieldOfView(90.0);
+		  SceneGraphComponent camNode = CameraUtility.getCameraNode(this);
+		  if (camNode.getTransformation() == null) camNode.setTransformation(new Transformation());
+		  Matrix oldCamMat = new Matrix(camNode.getTransformation().getMatrix());
+		  renderer.offscreenRenderer.setAsTexture(asTexture);
+		  for (int i = 0; i<6; ++i)	{
+			  Matrix newCamMat = new Matrix(oldCamMat);
+			  newCamMat.multiplyOnRight(cubeMapMatrices[i]);
+			  newCamMat.assignTo(camNode);
+			  renderingOffscreen = true;
+			  fbos[i] = renderer.offscreenRenderer.renderOffscreen(fbos[i], texs[i], size, size);
+			  renderingOffscreen = false;
+		  }
+		  cam.setFieldOfView(oldFOV);
+		  camNode.getTransformation().setMatrix(oldCamMat.getArray());
 		  
 	  }
 	private boolean pendingUpdate;
