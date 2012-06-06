@@ -151,9 +151,6 @@ public class Texture2DLoaderJOGL {
     public static void render(GL gl, JOGLTexture2D tex, boolean oneTexturePerImage) {
 //    	System.err.println("rendering texture length "+tex.getImage().getByteArray().length);
  
-      	ImageData image = tex.getImage();
-    	if (image == null) return;
-    	int width = image.getWidth(), height = image.getHeight();
         // can't do this statically at start-up since we need a GL context to inquire
 		checkForTextureExtensions(gl);
     	boolean first = true;
@@ -162,14 +159,20 @@ public class Texture2DLoaderJOGL {
     
     	WeakHashMap<ImageData, Integer> ht = getTextureTableForGL(gl);
 
-    	Integer texid = null;
+     	ImageData image = tex.getImage();
+     	Integer texid = null;
+     	int width = 0, height = 0;
     	// hack for fbo generated texture id's
     	if (tex.getTexID() != -1) {
     		texid = tex.getTexID();
     		fbo = true;
 //    		System.err.println("Got texid "+texid);
-    	}
-    	else texid = ht.get(image);
+    	} else {
+        	if (image == null) return;
+        	width = image.getWidth();
+        	height = image.getHeight();
+        	texid = ht.get(image);
+   	}
  //   	System.err.println("texid = "+texid);
     	if (texid != null) {
     		first = false;
@@ -208,7 +211,6 @@ public class Texture2DLoaderJOGL {
     		refToDim.put(ref, new Dimension(image.getWidth(), image.getHeight()));
     	}
 
-//	    System.err.println("Binding 2d texture for "+texid);
 	    gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
         gl.glMatrixMode(GL.GL_TEXTURE);
         gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
@@ -264,7 +266,7 @@ public class Texture2DLoaderJOGL {
 	    	}
 	    }
 	    
-    if ( first ||  !oneTexturePerImage || lastRendered  == null  || image != lastRendered.getImage()) {
+    if ( (first ||  !oneTexturePerImage || lastRendered  == null  || image != lastRendered.getImage())) {
 //    	System.err.println("rerendering texture id:" + texid);
 	    	// calls to glTexParameter get saved and restored by "bind()" so should be handled separately
 	    lastRendered = tex;
@@ -272,11 +274,12 @@ public class Texture2DLoaderJOGL {
 	        gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
 	    } 
 	    
+//	    if (fbo) return;
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, tex.getRepeatS()); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, tex.getRepeatT()); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, tex.getMinFilter()); 
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
-	
+	    if (fbo) return;
 	    float[] texcolor = tex.getBlendColor().getRGBComponents(null);
 	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
 	    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
@@ -300,9 +303,9 @@ public class Texture2DLoaderJOGL {
 	    }    
 	     // create either a series of mipmaps of a single texture image based on
 	    // what's loaded
-	    if (!fbo && (first || replace)) {
+    	boolean mipmapped = tex.getMipmapMode();
+	    if ((first || replace)) {
 	    	byte[] data = image.getByteArray();
-	    	boolean mipmapped = tex.getMipmapMode();
 	        if (mipmapped) {
 	        	if (haveAutoMipmapGeneration) {
 	                gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
