@@ -63,7 +63,11 @@ public class InputSlot implements Serializable
 	public static final InputSlot SHIFT_LEFT_BUTTON = InputSlot.getDevice("SecondaryAction");
 	public static final InputSlot SHIFT_MIDDLE_BUTTON = InputSlot.getDevice("SecondaryMenu");
 	public static final InputSlot SHIFT_RIGHT_BUTTON = InputSlot.getDevice("SecondarySelection");
-    
+
+	public static final InputSlot META_LEFT_BUTTON = InputSlot.getDevice("TertiaryAction");
+	public static final InputSlot META_MIDDLE_BUTTON = InputSlot.getDevice("TertiaryMenu");
+	public static final InputSlot META_RIGHT_BUTTON = InputSlot.getDevice("TertiarySelection");
+	
 	private final int hash;
 	private final String name;
     private InputSlot(String name)

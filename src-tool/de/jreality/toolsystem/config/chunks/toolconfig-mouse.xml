@@ -32,7 +32,7 @@
 		<mapping src="PrimaryMenu" target="DragActivation" />
 		<mapping src="PrimarySelection" target="ScaleActivation" />
 		<mapping src="PrimaryAction" target="DeformActivation" />
-
+		
 		<mapping src="PointerNdcXevolution" target="HorizontalShipRotationAngleEvolution" />
 		<mapping src="PointerNdcXevolution" target="ScaleAxis" />
 		<mapping src="PointerNdcYevolution" target="VerticalShipRotationAngleEvolution" />

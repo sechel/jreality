@@ -12,6 +12,7 @@
 		<mapping device="Keyboard" src="VK_SPACE" target="JumpActivation" />
 		<mapping device="Keyboard" src="VK_SHIFT" target="Secondary" />
 		<mapping device="Keyboard" src="VK_CONTROL" target="Meta" />
+		<mapping device="Keyboard" src="VK_ALT" target="AltMeta" />
 		<mapping device="Keyboard" src="VK_1" target="key1" />
 		<mapping device="Keyboard" src="VK_2" target="key2" />
 		<mapping device="Keyboard" src="VK_3" target="key3" />
