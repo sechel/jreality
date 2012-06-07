@@ -64,6 +64,14 @@ public class InputSlot implements Serializable
 	public static final InputSlot SHIFT_MIDDLE_BUTTON = InputSlot.getDevice("SecondaryMenu");
 	public static final InputSlot SHIFT_RIGHT_BUTTON = InputSlot.getDevice("SecondarySelection");
 
+	/**
+	 * This inputslot can be used for customized tools. The standard key is CONTROL+mouseclick. 
+	 * If you want to use ALT+mouseclick instead just uncomment the mapping AltMeta and 
+	 * comment the Meta-mapping at the file toolconfig-mouse-keybord.xml 
+	 * at de.jreality.toolsystem.config.chunks. 
+	 * Be aware, that the most operating systems are using ALT+mouseclick for moving windows.
+	 * In that case, the usage of the Operating system will overwrite your Tool.   
+	 */
 	public static final InputSlot META_LEFT_BUTTON = InputSlot.getDevice("TertiaryAction");
 	public static final InputSlot META_MIDDLE_BUTTON = InputSlot.getDevice("TertiaryMenu");
 	public static final InputSlot META_RIGHT_BUTTON = InputSlot.getDevice("TertiarySelection");
