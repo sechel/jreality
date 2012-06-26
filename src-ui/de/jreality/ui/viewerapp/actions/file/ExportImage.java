@@ -39,23 +39,17 @@
 
 package de.jreality.ui.viewerapp.actions.file;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.beans.Expression;
 import java.beans.Statement;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
-import javax.media.jai.RenderedOp;
-import javax.media.jai.operator.SubsampleAverageDescriptor;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
