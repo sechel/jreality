@@ -327,7 +327,7 @@ public class P3 {
 		Rn.times(m, tm2, tm1);
 		if (roll != 0)	{
 			P3.makeRotationMatrix(tm1, P3.zaxis, roll);
-			Rn.times(m, tm1, m);
+			Rn.times(m, m, tm1);
 		}
 //		System.out.println("lookat: "+Rn.toString(Rn.matrixTimesVector(null, m, from)));
 //		System.out.println("rotationMatrix: "+Rn.toString(Rn.matrixTimesVector(null, Rn.times(null, tm2, tm1), from)));
@@ -609,6 +609,13 @@ public class P3 {
 		return makeStretchMatrix(dst, sx, sy, sz);
 	}
 	
+	public static double[] makeSkewMatrix(double[] dst, int i, int j, double val)	{
+		if (dst == null) dst = new double[16];
+		System.arraycopy(Rn.identityMatrix(4), 0, dst, 0, 16);
+		dst[4*i+j] = val;
+		return dst;
+	}
+
 	public static double[] makeScrewMotionMatrix(double[] dst, double[] p1, double[] p2, double angle, int metric){
 		double[] tlate = makeTranslationMatrix(null, p1, p2, metric);
 		double[] rot = makeRotationMatrix(null, p1, p2, angle, metric);

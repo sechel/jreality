@@ -283,12 +283,17 @@ public final class MatrixBuilder {
     return this;
   }
 
-  public MatrixBuilder translate(double[] vector) {
-    P3.makeTranslationMatrix(tmp, vector, metric);
-    matrix.multiplyOnRight(tmp);
-    return this;
+   public MatrixBuilder skew(int i, int j, double val)	{
+	   P3.makeSkewMatrix(tmp, i, j, val);
+	   matrix.multiplyOnRight(tmp);
+	   return this;
   }
   
+   public MatrixBuilder translate(double[] vector) {
+	    P3.makeTranslationMatrix(tmp, vector, metric);
+	    matrix.multiplyOnRight(tmp);
+	    return this;
+	  }
   public MatrixBuilder translate(double[] from, double[] to) {
 	    P3.makeTranslationMatrix(tmp, from, to, metric);
 	    matrix.multiplyOnRight(tmp);
