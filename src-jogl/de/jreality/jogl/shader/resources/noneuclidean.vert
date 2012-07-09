@@ -199,6 +199,7 @@ void main (void)
     	transformedNormal = -transformedNormal;
 // set the texture coordinate
     gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
+    gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
     transformedNormal = -transformedNormal;
     gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
