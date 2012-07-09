@@ -53,7 +53,7 @@ public class JOGLOffscreenRenderer {
 	}
 	HashMap<Long, GLPbuffer> pbuffers = new HashMap<Long, GLPbuffer>();
 	Boolean useFBO = true;
-	JOGLFBO joglFBO = null;
+	JOGLFBO joglFBO = null, joglFBOSlow;
 	int[] fbo = {-1}, rbuffer = {-1}, cbuffer = {-1}, txt = {-1}, normalFBO = {-1}, normalCBuffer = {-1};
 	int imageWidth, imageHeight;
 	static Matrix flipY = new Matrix();
@@ -81,13 +81,16 @@ public class JOGLOffscreenRenderer {
 		imageHeight = (int) (h/aa);
 		imageWidth = (int) (w/aa);
 		if (useFBO)	{
-			if (joglFBO == null) joglFBO = new JOGLFBO(imageWidth, imageHeight);
-			else joglFBO.setSize(new Dimension(imageWidth, imageHeight));
-			jr.setTheFBO(joglFBO);
-			joglFBO.setAsTexture(asTexture);
+			if (joglFBOSlow == null) 
+				joglFBOSlow = new JOGLFBO(imageWidth, imageHeight);
+			else 
+				joglFBOSlow.setSize(new Dimension(imageWidth, imageHeight));
+			jr.setTheFBO(joglFBOSlow);
+			joglFBOSlow.setAsTexture(false);
 			jr.setFboMode(true);
-			jr.theViewer.render();
-			dst = joglFBO.getImage();
+			//jr.theViewer.render();
+			canvas.display();
+			dst = joglFBOSlow.getImage();
 			jr.setFboMode(false);
 		} 
 		else {	// use pbuffers
