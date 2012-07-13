@@ -213,19 +213,18 @@ public class IndexedFaceSetUtility {
 	 * @param points
 	 * @return
 	 */
-	public static IndexedFaceSet constructPolygon(IndexedFaceSet ifs, double[][] points)	{
-		return constructPolygon(ifs, points, Pn.EUCLIDEAN);
+	public static IndexedFaceSet constructPolygon(IndexedFaceSetFactory ifsf, double[][] points)	{
+		return constructPolygon(ifsf, points, Pn.EUCLIDEAN);
 	}
-	public static IndexedFaceSet constructPolygon(IndexedFaceSet ifs, double[][] points, int sig)	{
-		return constructPolygonFactory(ifs, points, sig).getIndexedFaceSet();
+	public static IndexedFaceSet constructPolygon(IndexedFaceSetFactory ifsf, double[][] points, int sig)	{
+		return constructPolygonFactory(ifsf, points, sig).getIndexedFaceSet();
 	}
 	
-	public static IndexedFaceSetFactory constructPolygonFactory(IndexedFaceSet ifs, double[][] points, int sig)	{
+	public static IndexedFaceSetFactory constructPolygonFactory(IndexedFaceSetFactory ifsf, double[][] points, int sig)	{
 		int[][] ind = new int[1][points.length];
 		for (int i = 0; i<points.length; ++i)	ind[0][i] = i;
-		if (ifs == null) ifs = new IndexedFaceSet();
 		// TODO replace this code when it's fixed to initialize the factory with the existing ifs.
-		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();// Pn.EUCLIDEAN, true, false, true);
+		if (ifsf == null) ifsf = new IndexedFaceSetFactory();// Pn.EUCLIDEAN, true, false, true);
 		ifsf.setMetric(sig);
 		ifsf.setGenerateFaceNormals(true);
 		ifsf.setVertexCount(points.length);
