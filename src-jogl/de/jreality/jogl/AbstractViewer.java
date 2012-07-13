@@ -337,6 +337,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	  public BufferedImage renderOffscreen(BufferedImage dst, int w, int h, double aa) {
 		  if (renderer != null) {
 			  renderingOffscreen = true;
+			  renderer.offscreenRenderer.setAsTexture(false);
 			  dst = renderer.offscreenRenderer.renderOffscreen(dst, w, h, aa, drawable);
 			  renderingOffscreen = false;
 			  return dst;
