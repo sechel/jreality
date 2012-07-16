@@ -115,6 +115,10 @@ import de.jreality.util.LoggingSystem;
 	 * @return
 	 */
 	private double[][] polygon2, vals;
+	
+//	TODO This method is strange.  It kind of looks like a static method since it has so many parameters
+//	but isn't. It's only called once in the workspace, from update().  But it doesn't include all
+//	necessary parameters to work as a static method (no frames, for example).  
 	protected  double[][] makeTube(double[][] curve, double[] radii, double[][] xsec, FrameFieldType type, boolean closed, int metric, int twists)	{
 
 		int n = curve.length;
@@ -165,8 +169,8 @@ import de.jreality.util.LoggingSystem;
 			}
 		}
 //		FrameInfo[] 
-		          frames = makeFrameField(polygon2, type, metric);
-		LoggingSystem.getLogger(PolygonalTubeFactory.class).fine("Last phi is "+frames[frames.length-1].phi);
+		if (userFrames == null) frames = makeFrameField(polygon2, type, metric);
+		else frames = userFrames;
 		if (frames == null) 
 			throw new NullPointerException("No frames!");
 //		System.err.println("makeTube: sig = "+metric);
