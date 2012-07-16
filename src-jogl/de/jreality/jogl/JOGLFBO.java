@@ -127,7 +127,7 @@ public class JOGLFBO {
 					GL.GL_TEXTURE_2D, 
 					txt[0],  0);
 //		    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
-		    gl.glGenerateMipmapEXT(GL.GL_TEXTURE_2D);
+		    gl.glGenerateMipmapEXT(GL.GL_TEXTURE_2D);		
 		}
 		int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
 		if (status != GL.GL_FRAMEBUFFER_COMPLETE_EXT)	{
@@ -166,6 +166,8 @@ public class JOGLFBO {
 			tex.setSource0Alpha(23);
 		}
 		if (dispose) dispose(gl);
+
+		// restore the size of the interactive window
 		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);		
 	}
 	
