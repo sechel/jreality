@@ -20,6 +20,7 @@ import de.jreality.scene.Viewer;
  */
 public class SimpleViewer {
 
+	static boolean local = true;
 	public static void main(String[] args)	{
 		SceneGraphComponent world = new SceneGraphComponent();
 		world.setGeometry(Primitives.sharedIcosahedron);
@@ -27,7 +28,7 @@ public class SimpleViewer {
 		View.setIcon(getIcon("color_swatch.png"));
 		JRViewer v = JRViewer.createJRViewer(world);
 		
-		if (true) {
+		if (!local) {
 			v.startup();
 		} else {
 			v.startupLocal();
