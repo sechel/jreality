@@ -43,7 +43,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.beans.Expression;
@@ -58,6 +60,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.SwingConstants;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileFilter;
@@ -77,11 +80,12 @@ public class ExportImage extends AbstractJrAction {
 
 	private ViewerSwitch viewer;
 	private DimensionPanel dimPanel;
+	private Dimension previousDim = null;
 	private JComponent options;
 	private int antialiasing;
 	private boolean saveAlpha = false;  // this is somehow broken on jogl backend so turn off by default
 	private JCheckBox checkbox;
-	private boolean useJAI = false, useFBO = true;
+	private boolean rememberDim = false;
 	
 	public ExportImage(String name, ViewerSwitch viewer, Component parentComp) {
 		super(name, parentComp);
@@ -102,13 +106,16 @@ public class ExportImage extends AbstractJrAction {
 
 		// Hack
 		Viewer realViewer = viewer.getCurrentViewer();
-		Dimension d = realViewer.getViewingComponentSize();
-		dimPanel.setDimension(d);
+		if (!rememberDim ||  previousDim == null)	{
+			previousDim = realViewer.getViewingComponentSize();
+			dimPanel.setDimension(previousDim);			
+		}
 
 		File file = FileLoaderDialog.selectTargetFile(parentComp, options, false, FileFilter.createImageWriterFilters());
 		Dimension dim = dimPanel.getDimension();
 		if (file == null || dim == null) return;
-
+		dimPanel.setDimension(dim);			
+		
 		if (FileFilter.getFileExtension(file) == null) {  //no extension specified
 			System.err.println("Please specify a valid file extension.\n" +
 			"Export aborted.");
@@ -141,7 +148,8 @@ public class ExportImage extends AbstractJrAction {
 		} catch (Exception ex) {
 			// and now?
 			throw new RuntimeException("writing image failed", ex);
-		}			
+		}		
+		previousDim = dim;
 	}
 
 
@@ -171,6 +179,22 @@ public class ExportImage extends AbstractJrAction {
 		}
 		
 		Box accessory = Box.createVerticalBox();
+		JCheckBox remB = new JCheckBox("Remember dim");
+		remB.setSelected(rememberDim);
+		remB.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent arg0) {
+				rememberDim = ((JCheckBox) arg0.getSource()).isSelected();
+			}
+		});
+		// A small hack: add the check box for remembering the dimension to the dimension panel; 
+		// copy the layout approach used in that class
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.fill = GridBagConstraints.BOTH;
+		dimPanel.add(remB, gbc);
 		accessory.add(dimPanel);
 		accessory.add(Box.createVerticalGlue());
 		
