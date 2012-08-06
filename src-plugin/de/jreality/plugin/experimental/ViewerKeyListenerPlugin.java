@@ -2,6 +2,7 @@ package de.jreality.plugin.experimental;
 
 import java.awt.Component;
 
+import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;

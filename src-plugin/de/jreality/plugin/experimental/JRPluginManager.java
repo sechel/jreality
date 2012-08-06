@@ -20,6 +20,7 @@ import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
+import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.Inspector;
 import de.jreality.plugin.basic.MainPanel;
 import de.jreality.plugin.basic.PropertiesMenu;
@@ -314,6 +315,7 @@ public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEd
 		l.add(AudioOptions.class);
 		l.add(AudioPreferences.class);
 		// basic
+		l.add(InfoOverlayPlugin.class);
 		l.add(Inspector.class);
 		l.add(MainPanel.class);
 		l.add(PropertiesMenu.class);
@@ -327,7 +329,6 @@ public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEd
 		l.add(ContentLoader.class);
 		l.add(ContentTools.class);
 		// experimental
-		l.add(InfoOverlayPlugin.class);
 		l.add(LoadSaveSettings.class);
 		l.add(ManagedContent.class);
 		l.add(ManagedContentGUI.class);
