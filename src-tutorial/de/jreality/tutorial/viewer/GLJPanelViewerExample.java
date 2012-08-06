@@ -1,20 +1,17 @@
-package de.jreality.tutorial.viewer;
+  package de.jreality.tutorial.viewer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
-import javax.swing.JFrame;
-
 import de.jreality.geometry.Primitives;
 import de.jreality.jogl.GLJPanelViewer;
-import de.jreality.jogl.Viewer;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.Attribute;
-import de.jreality.ui.viewerapp.ViewerApp;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.SystemProperties;
 
@@ -32,7 +29,8 @@ import de.jreality.util.SystemProperties;
  *
  */
 public class GLJPanelViewerExample {
-
+	// set this to true to see how to add the viewing components of other JOGL viewers to the same panel
+	static boolean showOtherViewers = false;
 	public static void main(String[] args)	{
 		// force the class to be used by JRViewer when constructing viewers
 	    System.setProperty(SystemProperties.VIEWER, "de.jreality.jogl.GLJPanelViewer"); 
@@ -69,6 +67,30 @@ public class GLJPanelViewerExample {
 			}
 			
 		});
+		if (showOtherViewers)	{
+		    System.setProperty(SystemProperties.VIEWER, "de.jreality.jogl.Viewer"); 
+			world = new SceneGraphComponent();
+			world.setGeometry(Primitives.coloredCube());
+		    de.jreality.scene.Viewer viewer  = JRViewer.display(world);
+		    viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,0,0,0));
+		    viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.INHERITED);
+		    Component comp = (Component) viewer.getViewingComponent();
+		    comp.setSize(new Dimension(300, 200));
+		    comp.repaint();
+		    comp.validate();
+		    glpv.getPanel().add(comp);
+			world = new SceneGraphComponent();
+			world.setAppearance(new Appearance());
+		    world.getAppearance().setAttribute("diffuseColor", Color.white);
+			world.setGeometry(Primitives.torus(1, .3, 20,20));
+		    de.jreality.scene.Viewer viewer2  = JRViewer.display(world);
+		    Component comp2 = (Component) viewer2.getViewingComponent();
+		    comp2.setSize(new Dimension(300, 200));
+		    comp2.repaint();
+		    comp2.validate();
+		    glpv.getPanel().add(comp2);
+		    comp2.setLocation(500, 300);			
+		}
 //	in current configuration this doesn't work ...
 //        JFrame f = new JFrame();
 //        f.getContentPane().add((Component) glpv.getViewingComponent());
