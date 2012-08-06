@@ -107,6 +107,7 @@ public static void main(String[] args) throws IOException {
 		ap = new Appearance();
 		sgc1.setAppearance(ap);
 		// TODO: there should be a method in TextureUtility to do this
+		// comment the following line out in order to apply the texture to the square.
    		ap.setAttribute("polygonShader.texture2d", Appearance.DEFAULT);
 		JRViewer.display(sgc);
   }
