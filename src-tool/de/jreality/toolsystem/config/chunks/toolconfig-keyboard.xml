@@ -77,6 +77,43 @@
       <outputslot>RotationToggle</outputslot>
     </virtualdevice>
 
+   <virtualdevice type="de.jreality.toolsystem.virtual.VirtualCoupledAxis">
+      <inputslot>left</inputslot>
+      <inputslot>Secondary</inputslot>
+      <outputslot>ShiftLeft</outputslot>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualCoupledAxis">
+      <inputslot>right</inputslot>
+      <inputslot>Secondary</inputslot>
+      <outputslot>ShiftRight</outputslot>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualCoupledAxis">
+      <inputslot>forward</inputslot>
+      <inputslot>Secondary</inputslot>
+      <outputslot>ShiftForward</outputslot>
+    </virtualdevice>
+
+    <virtualdevice type="de.jreality.toolsystem.virtual.VirtualCoupledAxis">
+      <inputslot>backward</inputslot>
+      <inputslot>Secondary</inputslot>
+      <outputslot>ShiftBackward</outputslot>
+    </virtualdevice>
+
+
+       <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMergedAxis">
+      <inputslot>ShiftForward</inputslot>
+      <inputslot>ShiftBackward</inputslot>
+      <outputslot>ShiftForwardBackwardAxis</outputslot>
+    </virtualdevice>
+    
+       <virtualdevice type="de.jreality.toolsystem.virtual.VirtualMergedAxis">
+      <inputslot>ShiftRight</inputslot>
+      <inputslot>ShiftLeft</inputslot>
+      <outputslot>ShiftLeftRightAxis</outputslot>
+    </virtualdevice>
+    
     
     
 	</virtualdevices>
