@@ -48,6 +48,8 @@ import java.awt.event.ComponentEvent;
 import java.beans.Beans;
 import java.beans.Expression;
 import java.beans.Statement;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -55,6 +57,7 @@ import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -69,6 +72,7 @@ import javax.swing.UIManager;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.math.Pn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.reader.ReaderJRS;
 import de.jreality.reader.Readers;
 import de.jreality.scene.Appearance;
@@ -566,8 +570,13 @@ public class ViewerApp {
 						System.out.println("Possibly no jogl in classpath!");
 					} catch (UnsatisfiedLinkError le) {
 						System.out.println("Possibly no jogl libraries in java.library.path!");
+						try {
+							System.err.println("###\n"+new Scanner(new File("jni/README")).findWithinHorizon("(?s).*",0)+"\n###");                
+						} catch (FileNotFoundException e) {
+							System.err.println("see .../jreality/jni/README");
+						} 
 					}
-				}
+              }	
 				viewers = viewerList.toArray(new Viewer[viewerList.size()]);
 			}
 		} 
