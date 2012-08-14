@@ -90,9 +90,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
 	public DefaultVertexShader vertexShader = new DefaultVertexShader();
-	boolean useGLSL = false; //, oneTexturePerImage = false;
+	boolean useGLSL = false, oneGLSL = false; //, oneTexturePerImage = false;
 	int texUnit = 0, refMapUnit = 0;
 	GlslProgram glslProgram;
+	static GlslProgram oneGlslProgram;
 	transient boolean geometryHasTextureCoordinates = false, 
 		hasTextures = false,
 		firstTime = true,
@@ -100,6 +101,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	transient de.jreality.shader.DefaultPolygonShader templateShader;
 	StandardGLSLShader standard;
+	static StandardGLSLShader oneStandard;
 	boolean hasStandardGLSL = false;
 	
 	public DefaultPolygonShader()	{
@@ -115,6 +117,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		super.setFromEffectiveAppearance(eap,name);
 		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,SMOOTH_SHADING), SMOOTH_SHADING_DEFAULT);	
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, USE_GLSL), false);	
+		oneGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, "oneGLSL"), false);	
 		//oneTexturePerImage = eap.getAttribute(ShaderUtility.nameSpace(name,ONE_TEXTURE2D_PER_IMAGE), true);	
 	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = null;
 	    joglCubeMap = null;
@@ -145,7 +148,6 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (useGLSL)		{
 			int metric = eap.getAttribute(ShaderUtility.nameSpace(name, CommonAttributes.METRIC), Pn.EUCLIDEAN);	
 			if (GlslProgram.hasGlslProgram(eap, name)) {
-				// dummy to write glsl values like "lightingEnabled"
 				Appearance app = new Appearance();
 				glslProgram = new GlslProgram(app, eap, name);
 			} else {
@@ -155,8 +157,16 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				} else {
 					standard = new NoneuclideanGLSLShader();
 				}
-				standard.setFromEffectiveAppearance(eap, name);
-				glslProgram = standard.getStandardShader();					
+				if (!oneGLSL || oneGlslProgram == null) {
+					oneStandard = standard;
+					standard.setFromEffectiveAppearance(eap, name);
+					glslProgram = standard.getStandardShader();					
+					if (oneGLSL) oneGlslProgram = glslProgram;
+				}  
+				if (oneGLSL) {
+					standard = oneStandard;
+					glslProgram = oneGlslProgram;
+				}
 //			    System.err.println("using non euc shader");
 			}
 	    } 
