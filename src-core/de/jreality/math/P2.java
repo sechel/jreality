@@ -147,7 +147,38 @@ final public class P2 {
 	 * @param polygon
 	 * @param point
 	 * @return
-	 */public static boolean polygonContainsPoint(double[][] polygon, double[] point)	{
+	 */
+	public static boolean polygonContainsPoint(double[][] polygon, double[] point)	{
+		return polygonContainsPoint(polygon, null, point);
+	}
+	
+	public static boolean polygonContainsPoint(double[][] polygon, boolean[] open, double[] point)	{
+//		if (point.length != 3)	{
+//			throw new IllegalArgumentException("Input point must be homogeneous vector");
+//		}
+//		double metricn = 0.0;
+//		int n = polygon.length, j;
+//		double[] p1 = new double[3];
+//		double[] p2 = new double[3];
+//		double[] tmp;
+//		p1[2] = p2[2] = 1.0;
+//		p1[0] = polygon[0][0]; p1[1] = polygon[0][1];
+//		for (int i = 0; i<n; ++i)	{
+//			j = (i+1) % n;
+//			p2[0] = polygon[j][0]; p2[1] = polygon[j][1];
+//			double[] line = lineFromPoints(null, p1, p2);
+//			double ip = Rn.innerProduct(line, point);
+//			if (metricn == 0.0) metricn = ip;
+//			else if (metricn * ip < 0.0) return false;
+//			tmp = p1;
+//			p1 = p2;
+//			p2 = tmp;
+//		}
+//		return true;
+		return getFirstOutsideEdge(polygon, open, point) == -1;
+	}
+	
+	public static int getFirstOutsideEdge(double[][] polygon, boolean[] open, double[] point)	{
 		if (point.length != 3)	{
 			throw new IllegalArgumentException("Input point must be homogeneous vector");
 		}
@@ -158,21 +189,27 @@ final public class P2 {
 		double[] tmp;
 		p1[2] = p2[2] = 1.0;
 		p1[0] = polygon[0][0]; p1[1] = polygon[0][1];
+		double min = 10E10;
+		int which = -1;
 		for (int i = 0; i<n; ++i)	{
 			j = (i+1) % n;
 			p2[0] = polygon[j][0]; p2[1] = polygon[j][1];
 			double[] line = lineFromPoints(null, p1, p2);
 			double ip = Rn.innerProduct(line, point);
-			if (metricn == 0.0) metricn = ip;
-			else if (metricn * ip < 0.0) return false;
+//			if (metricn == 0.0) metricn = ip;
+//			else if (metricn * ip < 0.0) return i;
+			if (ip < min) {which = i; min = ip;}
 			tmp = p1;
 			p1 = p2;
 			p2 = tmp;
-			//System.arraycopy(p2,0,p1,0,3);
 		}
-		return true;
+		if (open != null && open[which]) {		// boundary line NOT included in polygon
+			if (min <= 0.0) return which;
+		} else if (min < 0.0) return which;		// boundary line included in polygon
+		return -1;
 	}
 	
+
 	/**
 	 * Returns true if and only if the polygon described by the point series <i>polygon</i> is convex.
 	 * @param polygon
