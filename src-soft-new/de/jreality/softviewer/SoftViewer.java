@@ -450,7 +450,7 @@ public class SoftViewer extends Component implements Runnable, Viewer {
         
         renderImpl(new Dimension(width,height),true);
         BufferedImage bi = offscreen;
-        //render();
+        render();
         return bi;
     }
 }
