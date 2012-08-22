@@ -40,14 +40,7 @@
 
 package de.jreality.jogl;
 
-import static de.jreality.shader.CommonAttributes.BACKGROUND_COLORS;
-
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
@@ -58,7 +51,6 @@ import java.util.logging.Logger;
 import javax.media.opengl.DebugGL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
 import javax.media.opengl.GLPbuffer;
 
 import de.jreality.jogl.pick.PickPoint;
@@ -74,7 +66,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.Graphics3D;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.CopyVisitor;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
 
@@ -94,6 +85,7 @@ public class JOGLRenderer   {
 	transient protected JOGLFBO theFBO;
 	transient protected JOGLPerformanceMeter perfMeter;
 	transient protected GeometryGoBetween geometryGB;
+	transient protected SceneGraphPath alternateCameraPath = null;
 
 	transient protected int width, height;		// need this when working with FBO's
 	transient protected int owidth, oheight;	
@@ -210,7 +202,7 @@ public class JOGLRenderer   {
 
 		renderingState.oneTexture2DPerImage = topAp.isOneTexture2DPerImage();
 		renderingState.currentPath.clear();
-		renderingState.context  = new Graphics3D(theViewer.getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
+		renderingState.context  = new Graphics3D(getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
@@ -386,8 +378,8 @@ public class JOGLRenderer   {
 //		renderingState = new JOGLRenderingState(this);
 		lightHelper = new JOGLLightHelper(this);
 		String vv = globalGL.glGetString(GL.GL_VERSION);
-		theLog.log(Level.FINE,"new GL: "+gl);			
-		theLog.log(Level.FINE,"version: "+vv);			
+		theLog.log(Level.INFO,"new GL: "+gl);			
+		theLog.log(Level.INFO,"version: "+vv);			
 		lightsChanged = true;
 		forceNewDisplayLists();
 		Texture2DLoaderJOGL.deleteAllTextures(globalGL);
@@ -410,7 +402,7 @@ public class JOGLRenderer   {
 	}
 
 	public void display(GLAutoDrawable drawable) {
-		if (theViewer.getSceneRoot() == null || theViewer.getCameraPath() == null) {
+		if (theViewer.getSceneRoot() == null || getCameraPath() == null) {
 			theLog.info("display called w/o scene root or camera path");
 		}
 		display(drawable.getGL());
@@ -657,6 +649,22 @@ public class JOGLRenderer   {
 
 	public void setFboMode(boolean fboMode) {
 		this.fboMode = fboMode;
+	}
+
+	public SceneGraphPath getAlternateCameraPath() {
+		return alternateCameraPath;
+	}
+
+	public void setAlternateCameraPath(SceneGraphPath alternateCameraPath) {
+		this.alternateCameraPath = alternateCameraPath;
+	}
+	
+	protected SceneGraphPath getCameraPath()	{
+		return alternateCameraPath == null ? theViewer.getCameraPath() : alternateCameraPath;
+	}
+
+	public JOGLOffscreenRenderer getOffscreenRenderer() {
+		return offscreenRenderer;
 	}
 
 }

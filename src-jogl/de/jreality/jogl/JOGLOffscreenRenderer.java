@@ -9,8 +9,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-import javax.media.opengl.DebugGL;
-import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLDrawableFactory;
@@ -20,7 +18,7 @@ import com.sun.opengl.util.ImageUtil;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.shader.ImageData;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
 
@@ -78,6 +76,9 @@ public class JOGLOffscreenRenderer {
 		return joglFBO;
 	}
 	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h, double aa, GLAutoDrawable canvas) {
+		return renderOffscreen(dst, w, h, aa, canvas, null);
+	}
+	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h, double aa, GLAutoDrawable canvas, SceneGraphPath cp) {
 		imageHeight = (int) (h/aa);
 		imageWidth = (int) (w/aa);
 		if (useFBO)	{
@@ -88,9 +89,11 @@ public class JOGLOffscreenRenderer {
 			jr.setTheFBO(joglFBOSlow);
 			joglFBOSlow.setAsTexture(false);
 			jr.setFboMode(true);
-			//jr.theViewer.render();
-			canvas.display();
+			jr.setAlternateCameraPath(cp);
+			jr.theViewer.render();
+			//canvas.display();
 			dst = joglFBOSlow.getImage();
+			jr.setAlternateCameraPath(null);
 			jr.setFboMode(false);
 		} 
 		else {	// use pbuffers
