@@ -316,7 +316,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		int n = ps.getNumPoints();
 		int resolution = 1;
 //		if (jr.renderingState.levelOfDetail == 0.0) resolution = 0;
-		resolution = (int) jr.renderingState.levelOfDetail;
+		// I happen to know that 15 is the highest LOD for the sphere display lists used here
+		resolution = (int) (15 * jr.renderingState.levelOfDetail);
 		if (resolution < 1) resolution = 1;
 		int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
 		polygonCount = n*24*resolution*(resolution+1)+6;
