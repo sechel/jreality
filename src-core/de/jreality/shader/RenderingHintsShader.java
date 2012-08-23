@@ -60,7 +60,7 @@ public interface RenderingHintsShader extends AttributeEntity {
 	  final static boolean LOCAL_LIGHT_MODEL_DEFAULT = true;		
 	  final static boolean SEPARATE_SPECULAR_DEFAULT = false;
 	  final static boolean FLIP_NORMALS_DEFAULT = false;	
-	  final static double LEVEL_OF_DETAIL_DEFAULT = 			1.0;
+	  final static double LEVEL_OF_DETAIL_DEFAULT = 			0.0;
 	  final static double DEPTH_FUDGE_FACTOR_DEFAULT = 1.0;
 	  
 	  Integer getMetric();
