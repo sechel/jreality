@@ -315,7 +315,9 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		if (vertexColors != null) colorLength = GeometryUtility.getVectorLength(vertexColors);
 		int n = ps.getNumPoints();
 		int resolution = 1;
-		if (jr.renderingState.levelOfDetail == 0.0) resolution = 0;
+//		if (jr.renderingState.levelOfDetail == 0.0) resolution = 0;
+		resolution = (int) jr.renderingState.levelOfDetail;
+		if (resolution < 1) resolution = 1;
 		int dlist = JOGLSphereHelper.getSphereDLists(resolution, jr);
 		polygonCount = n*24*resolution*(resolution+1)+6;
 		int nextDL = -1;
