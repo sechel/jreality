@@ -13,7 +13,7 @@
 $jrealitybase="/net/www3/pub/jreality/";
 $codebase="http://www3.math.tu-berlin.de/jreality/tutorial/jnlp/";
 $outdir=$jrealitybase."tutorial/jnlp/";
-$srcdir = $jrealitybase."tutorial/src/de/jreality/tutorial/";
+$srcdir = $jrealitybase."tutorial/jr/src/de/jreality/tutorial/";
 $template=$srcdir."Template.jnlp";
 
 print $srcdir,"\n";
