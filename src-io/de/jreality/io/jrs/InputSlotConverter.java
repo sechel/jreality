@@ -40,21 +40,21 @@
 
 package de.jreality.io.jrs;
 
-import com.thoughtworks.xstream.converters.basic.AbstractBasicConverter;
+import com.thoughtworks.xstream.converters.basic.AbstractSingleValueConverter;
 
 import de.jreality.scene.tool.InputSlot;
 
-class InputSlotConverter extends AbstractBasicConverter {
+class InputSlotConverter extends AbstractSingleValueConverter {
 
   public boolean canConvert(Class type) {
       return type.equals(InputSlot.class);
   }
 
-  protected String toString(Object obj) {
+  public String toString(Object obj) {
     return ((InputSlot)obj).getName();
   }
   
-  protected Object fromString(String str) {
+  public Object fromString(String str) {
     return InputSlot.getDevice(str);
   }
 

@@ -1,7 +1,7 @@
 package de.jreality.writer.pdf;
 
-import static com.lowagie.text.pdf.PdfBoolean.PDFFALSE;
-import static com.lowagie.text.pdf.PdfBoolean.PDFTRUE;
+import static com.itextpdf.text.pdf.PdfBoolean.PDFFALSE;
+import static com.itextpdf.text.pdf.PdfBoolean.PDFTRUE;
 import static de.jreality.util.SceneGraphUtility.getPathsBetween;
 
 import java.awt.Color;
@@ -19,20 +19,20 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.PdfAnnotation;
-import com.lowagie.text.pdf.PdfAppearance;
-import com.lowagie.text.pdf.PdfArray;
-import com.lowagie.text.pdf.PdfBoolean;
-import com.lowagie.text.pdf.PdfDictionary;
-import com.lowagie.text.pdf.PdfEncodings;
-import com.lowagie.text.pdf.PdfIndirectReference;
-import com.lowagie.text.pdf.PdfName;
-import com.lowagie.text.pdf.PdfStream;
-import com.lowagie.text.pdf.PdfString;
-import com.lowagie.text.pdf.PdfWriter;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfAnnotation;
+import com.itextpdf.text.pdf.PdfAppearance;
+import com.itextpdf.text.pdf.PdfArray;
+import com.itextpdf.text.pdf.PdfBoolean;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfEncodings;
+import com.itextpdf.text.pdf.PdfIndirectReference;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfStream;
+import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import de.jreality.io.JrScene;
 import de.jreality.reader.ReaderJRS;
