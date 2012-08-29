@@ -2,9 +2,11 @@ package de.jreality.swing;
 
 import java.awt.Component;
 import java.awt.Dialog;
+import java.awt.GraphicsConfiguration;
 import java.awt.Rectangle;
 import java.awt.BufferCapabilities.FlipContents;
 import java.awt.image.BufferedImage;
+import java.awt.peer.ComponentPeer;
 import java.awt.peer.FramePeer;
 
 import sun.awt.CausedFocusEvent.Cause;
@@ -78,6 +80,16 @@ class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 
 	public void updateWindow() {
 		// TODO Auto-generated method stub
+	}
+
+	public void setZOrder(ComponentPeer above) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean updateGraphicsData(GraphicsConfiguration gc) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
