@@ -22,7 +22,7 @@ libpd
 jInput
     - java bindings for various input devices - BSD license
     - needed for Input devices like Joysticks, Gamepads etc.
-    - https://jinput.dev.java.net
+    - http://java.net/projects/jinput
 
 SMRJ
     - Simple Multicast Remote Java - BSD license
@@ -30,12 +30,6 @@ SMRJ
       rendering, enables simultanious rendering on multiple clients
     - http://smrj.sf.net
     
-Csound
-    - java bindings for Csound synthesis package - LGPL
-    - only for Csound audio source
-    - http://www.csounds.com/
-
-
 3rd party libraries we distribute with jReality:
 
 Antlr
@@ -87,5 +81,11 @@ Sunflow
     - java rendering system for photo-realistic image synthesis - MIT License
     - uses janino (http://www.janino.net/) - BSD License
     - http://sunflow.sourceforge.net
-
- ???? janino, iText
+    
+iTextpdf   
+    - create and manipulate PDF documents
+    - http://itextpdf.com/
+ 
+janino
+    - super-small, super-fast Java™ compiler
+    - http://docs.codehaus.org/display/JANINO/Home

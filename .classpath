@@ -35,8 +35,6 @@
 	<classpathentry kind="lib" path="lib/jterm.jar"/>
 	<classpathentry kind="lib" path="lib/smrj.jar"/>
 	<classpathentry kind="lib" path="lib/sunflow.jar"/>
-	<classpathentry kind="lib" path="lib/xpp3.jar"/>
-	<classpathentry kind="lib" path="lib/jinput.jar"/>
 	<classpathentry kind="lib" path="lib/smrj-app.jar"/>
 	<classpathentry kind="lib" path="lib/bsh.jar"/>
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
@@ -45,13 +43,15 @@
 	<classpathentry kind="lib" path="lib/jacknativeclient.jar"/>
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/beans.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/pd.jar" sourcepath="/PdCore"/>
 	<classpathentry kind="lib" path="lib/antlr-3.4-complete.jar"/>
 	<classpathentry kind="lib" path="lib/NetUtil.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-1.4.3.jar"/>
+	<classpathentry kind="lib" path="lib/jinput.jar"/>
+	<classpathentry kind="lib" path="lib/libpd.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar"/>
 	<classpathentry kind="lib" path="lib/itextpdf-5.3.2.jar"/>
+	<classpathentry kind="lib" path="lib/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
