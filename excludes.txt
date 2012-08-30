@@ -20,3 +20,5 @@
 **/MinimalExample.java
 **/u3d/TestScene.java
 **/DeviceSpacenav.java
+**/WiiMoteOSC.java
+**/OSCPool.java
