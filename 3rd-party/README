@@ -37,7 +37,7 @@ Antlr
     - Several jReality readers are gernerated with Antlr
     - http://www.antlr.org
     
- beans
+beans
     - java bean inspector - GPL or BSD
     - used for automatic Inspector panel generation
     - http://www.jtem.de   
