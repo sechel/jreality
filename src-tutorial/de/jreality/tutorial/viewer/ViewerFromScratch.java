@@ -42,14 +42,17 @@ package de.jreality.tutorial.viewer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
@@ -59,12 +62,12 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.RotateTool;
+import de.jreality.tools.Timer;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.RenderTrigger;
 
 /**
- * A simple class showing how to construct a simple viewer from scratch, without using {@link ViewerApp} or another
+ * A simple class showing how to construct a simple viewer from scratch, without using {@link JRViewer} or another
  * ready-made method.  In contrast to ready-made viewers, this examples shows:
  * <ul>
  * <li>The camera is explicitly constructed.</li>
@@ -100,7 +103,7 @@ public class ViewerFromScratch {
 
     MatrixBuilder.euclidean().translate(0, 0, 3).assignTo(cameraNode);
 
-	Appearance rootApp= new Appearance();
+	final Appearance rootApp= new Appearance();
     rootApp.setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0f, .1f, .1f));
     rootApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(1f, 0f, 0f));
     rootNode.setAppearance(rootApp);
@@ -110,12 +113,21 @@ public class ViewerFromScratch {
     SceneGraphPath camPath = new SceneGraphPath(rootNode, cameraNode);
     camPath.push(camera);
     
-    Viewer viewer = new Viewer();
+    JOGLViewer viewer = new JOGLViewer();
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(camPath);
     ToolSystem toolSystem = ToolSystem.toolSystemForViewer(viewer);
     toolSystem.initializeSceneTools();
-    
+    Timer timer = new Timer(10, new ActionListener() {
+		int count = 0;
+		public void actionPerformed(ActionEvent arg0) {
+			count++;
+		    if (count > 255) count = 0;
+		    rootApp.setAttribute(CommonAttributes.DIFFUSE_COLOR, new Color(count, 0, (255-count)));
+		}
+	});
+    timer.attach(ToolSystem.getToolSystemForViewer(viewer));
+	timer.start();
     JFrame frame = new JFrame();
     frame.setVisible(true);
     frame.setSize(640, 480);
