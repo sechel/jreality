@@ -24,6 +24,7 @@ import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
 import de.jreality.plugin.basic.Content;
+import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.Inspector;
 import de.jreality.plugin.basic.PropertiesMenu;
 import de.jreality.plugin.basic.Scene;
@@ -252,7 +253,7 @@ public class JRViewer {
 	 * @param s the scene
 	 */
 	public JRViewer(JrScene s) {
-		setShowPanelSlots(false, false, false, false);
+		setShowPanelSlots(false, true, false, false);
 		c.setManageLookAndFeel(false);
 		c.registerPlugin(view);
 		c.registerPlugin(viewPreferences);
@@ -595,6 +596,7 @@ public class JRViewer {
 			v.registerPlugin(new ContentLoader());
 		}
 		v.addBasicUI();
+		v.registerPlugin(new InfoOverlayPlugin());
 		return v;
 	}
 	

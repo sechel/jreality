@@ -43,7 +43,7 @@ import de.jtem.jrworkspace.plugin.annotation.Experimental;
 @Experimental
 public class ViewerKeyListener extends KeyAdapter {
 	Viewer viewer;
-	de.jreality.jogl.Viewer jViewer = null;
+	de.jreality.jogl.JOGLViewer jViewer = null;
 	StereoViewer stereoViewer = null;
 	SelectionManager sm;
 	boolean motionToggle = false;
@@ -55,8 +55,8 @@ public class ViewerKeyListener extends KeyAdapter {
 	public ViewerKeyListener(Viewer v, HelpOverlay ho, InfoOverlay io) {
 		viewer = v;
 //		System.err.println("viewer is "+viewer.getClass().getName());
-		if (viewer instanceof de.jreality.jogl.Viewer) {
-			jViewer = (de.jreality.jogl.Viewer) viewer;
+		if (viewer instanceof de.jreality.jogl.JOGLViewer) {
+			jViewer = (de.jreality.jogl.JOGLViewer) viewer;
 		}
 		if (viewer instanceof StereoViewer) {
 			stereoViewer = (StereoViewer) viewer;
@@ -326,7 +326,7 @@ public class ViewerKeyListener extends KeyAdapter {
 				case KeyEvent.VK_Z:		
 					if (e.isShiftDown() && stereoViewer != null) {		// cycle stereo types
 						int which = stereoViewer.getStereoType();
-						which = (which+1) % de.jreality.jogl.Viewer.STEREO_TYPES;
+						which = (which+1) % de.jreality.jogl.JOGLViewer.STEREO_TYPES;
 						jViewer.setStereoType(which);						
 					} else {						// toggle stereo/mono
 						Camera cam = CameraUtility.getCamera(viewer);

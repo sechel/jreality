@@ -29,10 +29,10 @@ public class InfoOverlayPlugin extends Plugin {
 		sceneView = c.getPlugin(View.class);
 //		Component viewComp = sceneView.getViewer().getViewingComponent();
 		Viewer[] vlist = sceneView.getViewer().getViewers();
-		de.jreality.jogl.Viewer joglViewer = null;
+		de.jreality.jogl.JOGLViewer joglViewer = null;
 		for (Viewer v : vlist)	{
-			if (v instanceof de.jreality.jogl.Viewer) {
-				joglViewer = (de.jreality.jogl.Viewer) v;
+			if (v instanceof de.jreality.jogl.JOGLViewer) {
+				joglViewer = (de.jreality.jogl.JOGLViewer) v;
 			}
 		}
 		if (joglViewer == null)  { // signal error 

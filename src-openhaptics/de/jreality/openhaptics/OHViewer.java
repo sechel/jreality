@@ -50,7 +50,7 @@ import java.util.logging.Level;
 import javax.media.opengl.GLAutoDrawable;
 
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 
 
 public class OHViewer extends Viewer {

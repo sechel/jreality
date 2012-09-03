@@ -132,8 +132,8 @@ public class ToolSystemPlugin extends Plugin implements ChangeListener {
 						try {
 							Class<?> clazz = Class.forName("de.jreality.toolsystem.PortalToolSystemImpl");
 							Class<? extends ToolSystem> portalToolSystem = clazz.asSubclass(ToolSystem.class);
-							Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{de.jreality.jogl.Viewer.class, ToolSystemConfiguration.class});
-							de.jreality.jogl.Viewer cv = (de.jreality.jogl.Viewer) viewerSwitch.getCurrentViewer();
+							Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{de.jreality.jogl.JOGLViewer.class, ToolSystemConfiguration.class});
+							de.jreality.jogl.JOGLViewer cv = (de.jreality.jogl.JOGLViewer) viewerSwitch.getCurrentViewer();
 							ts = cc.newInstance(new Object[]{cv, toolSystemConfiguration});
 						} catch (Throwable t) {
 							t.printStackTrace();
