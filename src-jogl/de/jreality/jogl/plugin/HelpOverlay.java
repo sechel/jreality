@@ -17,17 +17,17 @@ import javax.swing.KeyStroke;
 
 import com.sun.opengl.util.GLUT;
 
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 
 /**
  * @author Pepijn Van Eeckhoudt
  */
 public class HelpOverlay implements GLEventListener {
-	Viewer viewer;
+	JOGLViewer viewer;
 	/**
 	 * @param v
 	 */
-	public HelpOverlay(Viewer v) {
+	public HelpOverlay(JOGLViewer v) {
 		viewer = v;
 	}
 

@@ -49,7 +49,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import de.jreality.jogl.JOGLConfiguration;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.math.P2;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
@@ -80,7 +80,7 @@ public class JOGLPickAction extends PickAction  {
 	static public int PROXY_GEOMETRY_FACE = GEOMETRY_BASE+5;
 	static boolean useOpenGL = true;
 	static boolean debug = true;
-	public JOGLPickAction(Viewer v) {
+	public JOGLPickAction(JOGLViewer v) {
 		super(v);
 	}
 	
@@ -89,8 +89,8 @@ public class JOGLPickAction extends PickAction  {
 	 */
 	
 	public Object visit() {
-		if (useOpenGL && theViewer instanceof de.jreality.jogl.Viewer)	{
-			PickPoint[] hits =  ((de.jreality.jogl.Viewer)theViewer).getRenderer().performPick(pickPointNDC);	
+		if (useOpenGL && theViewer instanceof de.jreality.jogl.JOGLViewer)	{
+			PickPoint[] hits =  ((de.jreality.jogl.JOGLViewer)theViewer).getRenderer().performPick(pickPointNDC);	
 			int n = 0;
 			if (hits != null)	n = hits.length;
 			pickHits = new Vector();
@@ -104,7 +104,7 @@ public class JOGLPickAction extends PickAction  {
 	 * @param selectBuffer
 	 * @return
 	 */
-	public static PickPoint[] processOpenGLSelectionBuffer(int numberHits, IntBuffer selectBuffer, double[] pickPoint, Viewer v) {
+	public static PickPoint[] processOpenGLSelectionBuffer(int numberHits, IntBuffer selectBuffer, double[] pickPoint, JOGLViewer v) {
 		double factor = 1.0/(0x7fffffff);
 		ArrayList al = new ArrayList();
 		PickPoint oneHit = null;

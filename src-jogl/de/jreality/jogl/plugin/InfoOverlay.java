@@ -18,7 +18,7 @@ import javax.media.opengl.glu.GLU;
 import com.sun.opengl.util.GLUT;
 
 import de.jreality.jogl.AbstractViewer;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 
 /**
  * @author Pepijn Van Eeckhoudt
@@ -171,7 +171,7 @@ public class InfoOverlay implements GLEventListener {
 		//TODO document this
 	}
 
-	public static InfoOverlay perfInfoOverlayFor(final Viewer v)	{
+	public static InfoOverlay perfInfoOverlayFor(final JOGLViewer v)	{
 		final InfoOverlay perfInfo = new InfoOverlay(v);
 		final List<String> infoStrings = new Vector<String>();
 		perfInfo.setPosition(InfoOverlay.LOWER_RIGHT);
@@ -184,7 +184,7 @@ public class InfoOverlay implements GLEventListener {
 		});
 		return perfInfo;
 	}
-	public static void updateInfoStrings(Viewer v, List<String> s, InfoOverlay io)	{
+	public static void updateInfoStrings(JOGLViewer v, List<String> s, InfoOverlay io)	{
 		//JOGLConfiguration.theLog.log(Level.INFO,"Providing info strings");
 		if (s != null) s.clear();
 		else s = new ArrayList<String>();

@@ -77,7 +77,7 @@ public class JOGLPickUtility {
 		return (double[]) pointWorld.clone();
 	}
 
-	public static Graphics3D getContext(PickPoint pp, de.jreality.jogl.Viewer v) {
+	public static Graphics3D getContext(PickPoint pp, de.jreality.jogl.JOGLViewer v) {
 		return new Graphics3D(pp.getCameraPath(), pp.getPickPath(), CameraUtility.getAspectRatio(v));
 	}
 
