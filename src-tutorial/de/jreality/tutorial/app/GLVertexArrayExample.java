@@ -59,8 +59,8 @@ public class GLVertexArrayExample {
 		viewer.getSceneRoot().getAppearance().setAttribute(BACKGROUND_COLOR, Color.black);
 		viewer.getSceneRoot().getAppearance().setAttribute(BACKGROUND_COLORS,Appearance.INHERITED);
 		// add an InfoOverlay to read off the frame rates
-		if (viewer instanceof ViewerSwitch && (((ViewerSwitch) viewer).getCurrentViewer()) instanceof de.jreality.jogl.Viewer) {
-			InfoOverlay io =InfoOverlay.perfInfoOverlayFor((de.jreality.jogl.Viewer)(((ViewerSwitch) viewer).getCurrentViewer()));
+		if (viewer instanceof ViewerSwitch && (((ViewerSwitch) viewer).getCurrentViewer()) instanceof de.jreality.jogl.JOGLViewer) {
+			InfoOverlay io =InfoOverlay.perfInfoOverlayFor((de.jreality.jogl.JOGLViewer)(((ViewerSwitch) viewer).getCurrentViewer()));
 			io.setVisible(true);
 		}
 		// add a key listener to allow toggling of vertexArrays and also displayLists
