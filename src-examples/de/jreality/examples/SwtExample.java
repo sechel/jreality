@@ -145,7 +145,7 @@ public class SwtExample {
       toolSystem.initializeSceneTools();
     }
     else {
-      viewer = new de.jreality.jogl.Viewer();
+      viewer = new de.jreality.jogl.JOGLViewer();
       JFrame f = new JFrame("AWT");
       f.setSize(640, 480);
       f.getContentPane().add((Component) viewer.getViewingComponent());

@@ -112,7 +112,7 @@ public class SystemProperties {
 	 * Values: class names of {@link de.jreality.scene.Viewer} implementations separated by space character 
 	 */
 	public final static String VIEWER = de.jreality.scene.Viewer.class.getName();
-	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.Viewer";  //de.jreality.jogl.Viewer.class.getName();
+	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.JOGLViewer";  //de.jreality.jogl.JOGLViewer.class.getName();
 	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
 //	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();
 	public final static String CROSS_EYED_STEREO = "jreality.crossEyedStereo"; // set to false to get wall-eyed
@@ -190,7 +190,7 @@ public class SystemProperties {
 	 * Values: class name of {@link de.jreality.scene.Viewer} implementation
 	 */
 	public final static String PORTAL_HEADTRACKED_VIEWER = "de.jreality.portal.HeadTrackedViewer";
-	public final static String PORTAL_HEADTRACKED_VIEWER_DEFAULT = "de.jreality.jogl.Viewer";
+	public final static String PORTAL_HEADTRACKED_VIEWER_DEFAULT = "de.jreality.jogl.JOGLViewer";
 
 	/**
 	 * Specifies the location of <code>bsh.jar</code> for reading bsh script files.

@@ -48,7 +48,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -97,7 +97,7 @@ public class ToolsAndAppearances {
     camPath.push(camera);
     
  //   ToolSystemViewer viewer = new ToolSystemViewer(new Viewer());
-    Viewer viewer = new Viewer();
+    JOGLViewer viewer = new JOGLViewer();
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(camPath);
 //    viewer.initializeTools();

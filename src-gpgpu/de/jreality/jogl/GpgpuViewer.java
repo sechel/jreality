@@ -44,7 +44,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 
 
-public class GpgpuViewer extends Viewer {
+public class GpgpuViewer extends JOGLViewer {
 
   AbstractCalculation calculation;
   private boolean calculationInited;
