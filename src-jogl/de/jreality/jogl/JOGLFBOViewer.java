@@ -25,7 +25,7 @@ import de.jreality.shader.Texture2D;
  * 
  * @author Charles Gunn
  *
- */public class JOGLFBOViewer  extends Viewer  {
+ */public class JOGLFBOViewer  extends JOGLViewer  {
 
 	 JOGLFBO joglfbo;
 	boolean init = false;

@@ -427,7 +427,7 @@ public class JOGLRenderer   {
 			myglViewport(0, 0, theFBO.width, theFBO.height);
 		}
 		if (offscreenMode) {
-//			if (theCamera.isStereo() && renderingState.stereoType != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
+//			if (theCamera.isStereo() && renderingState.stereoType != de.jreality.jogl.JOGLViewer.CROSS_EYED_STEREO) {
 //				theLog.warning("Invalid stereo mode: Can only save cross-eyed stereo offscreen");
 //				offscreenMode = false;
 //				return;

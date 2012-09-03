@@ -94,7 +94,7 @@ public class JOGLRenderingState {
 	public int currentMetric = Pn.EUCLIDEAN;
 	public int texUnitCount = 0;
 	public int polygonCount = 0;
-	public int stereoType = Viewer.CROSS_EYED_STEREO;
+	public int stereoType = JOGLViewer.CROSS_EYED_STEREO;
 	protected int[] sphereDisplayLists = null;
 	protected int[] cylinderDisplayLists = null;
 	

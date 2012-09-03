@@ -7,7 +7,6 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
-import javax.naming.ldap.HasControls;
 
 import com.sun.opengl.util.ImageUtil;
 
