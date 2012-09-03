@@ -68,7 +68,7 @@ public class GLJPanelViewerExample {
 			
 		});
 		if (showOtherViewers)	{
-		    System.setProperty(SystemProperties.VIEWER, "de.jreality.jogl.Viewer"); 
+		    System.setProperty(SystemProperties.VIEWER, "de.jreality.jogl.JOGLViewer"); 
 			world = new SceneGraphComponent();
 			world.setGeometry(Primitives.coloredCube());
 		    de.jreality.scene.Viewer viewer  = JRViewer.display(world);
