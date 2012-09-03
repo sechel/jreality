@@ -47,10 +47,12 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -62,7 +64,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.RotateTool;
 import de.jreality.toolsystem.ToolSystem;
-import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.ImageUtility;
 import de.jreality.util.RenderTrigger;
 
@@ -112,7 +113,7 @@ public class OffscreenRenderAlternateCameraPath {
     Camera camera2 = new Camera();
     camPath2.push(camera2);
    
-    Viewer viewer = new Viewer();
+    JOGLViewer viewer = new JOGLViewer();
     viewer.setSceneRoot(rootNode);
     viewer.setCameraPath(camPath);
     ToolSystem toolSystem = ToolSystem.toolSystemForViewer(viewer);
@@ -132,17 +133,29 @@ public class OffscreenRenderAlternateCameraPath {
     RenderTrigger rt = new RenderTrigger();
     rt.addSceneGraphComponent(rootNode);
     rt.addViewer(viewer);
-    // have to give the viewer time to initialize itself before doing offscreen rendering
     try {
-		Thread.sleep(1000);
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	// note that the size of the image is "unantialiased"; final size will be reduced by a factor 4
-    BufferedImage bi = viewer.getRenderer().getOffscreenRenderer().renderOffscreen(
-    		null, 1600, 1200, 4, viewer.getDrawable(), camPath2);
-    File file = new File("/tmp/foo.png");
-    ImageUtility.writeBufferedImage(file, bi);
-	}
+        Thread.sleep(2000);
+     } catch (InterruptedException e)  {
+     // TODO Auto-generated catch block
+     e.printStackTrace();
+  }
+   for (int i=0;i<15;i++) {
+        try {
+           Thread.sleep(500);
+        } catch (InterruptedException e) {
+           // TODO Auto-generated catch block
+           e.printStackTrace();
+        }
+        // note that the size of the image is "unantialiased"; final size will be reduced by a factor 4
+        BufferedImage bi = viewer.getRenderer().getOffscreenRenderer().renderOffscreen(
+              null, 1600, 1200, 4, viewer.getDrawable(), camPath2);
+        File file = new File("/tmp/foo.png");
+        ImageUtility.writeBufferedImage(file, bi);
+
+        JFrame snapshot = new JFrame("snapshot");
+        snapshot.getContentPane().add(new JLabel(new ImageIcon(bi)));
+        snapshot.pack();
+        snapshot.setVisible(true);
+     }    // have to give the viewer time to initialize itself before doing offscreen rendering
+ 	}
 }
