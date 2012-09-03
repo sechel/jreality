@@ -1,13 +1,13 @@
 package de.jreality.toolsystem;
 
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;
 
 public class PortalToolSystemImpl extends ToolSystem implements PortalToolSystem {
 
-	Viewer joglViewer;
+	JOGLViewer joglViewer;
 	
-	  public PortalToolSystemImpl(Viewer joglViewer, ToolSystemConfiguration config) {
+	  public PortalToolSystemImpl(JOGLViewer joglViewer, ToolSystemConfiguration config) {
 		  super(joglViewer, config, null);
 		  this.joglViewer=joglViewer;
 	  }

@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.media.opengl.GL;
 
 import de.jreality.jogl.JOGLRenderer;
-import de.jreality.jogl.Viewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -14,7 +14,7 @@ import de.jreality.shader.GlslProgram;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
-public class CylindricalPerspectiveViewer extends Viewer {
+public class CylindricalPerspectiveViewer extends JOGLViewer {
 
 	GlslProgram cylProg;
 	Camera cam;
