@@ -1,6 +1,6 @@
 package de.jreality.plugin.content;
 
-import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,10 @@ import de.jtem.jrworkspace.plugin.flavor.UIFlavor;
 
 public class ContentLoader extends Plugin implements UIFlavor {
 
-	private Content content = null;
+	private Content 
+		content = null;
+	private View
+		view = null;
 	private ViewMenuBar 
 		viewerMenuAggregator = null;
 	private ViewToolBar
@@ -46,8 +49,6 @@ public class ContentLoader extends Plugin implements UIFlavor {
 		chooser = FileLoaderDialog.createFileChooser();
 	private ContentLoadAction
 		contentLoadAction = new ContentLoadAction();
-	private Component 
-		parent = null;
 
 	public ContentLoader() {
 		Box checkBoxPanel = new Box(BoxLayout.Y_AXIS);
@@ -83,15 +84,15 @@ public class ContentLoader extends Plugin implements UIFlavor {
 		return contentLoadAction;
 	}
 	
-
 	public void install(View view, Content content) {
-		parent = view.getViewer().getViewingComponent();
+		this.view = view;
 		this.content = content;
 	}
 
 	private void loadFile() {
 		File file = null;
-		if (chooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+		Window w = SwingUtilities.getWindowAncestor(view.getViewer().getViewingComponent());
+		if (chooser.showOpenDialog(w) == JFileChooser.APPROVE_OPTION) {
 			file = chooser.getSelectedFile();
 		}
 		if (file != null) {
