@@ -80,7 +80,7 @@ public class ToolEventQueue {
                 }
                 if (isRunning) try {
                 	receiver.processToolEvent(event);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                 	e.printStackTrace();
                 }
                 else break;
