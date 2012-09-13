@@ -95,8 +95,8 @@
 		<fileset dir="lib">
 			<!-- include name="jogl.jar"/> -->
 			<include name="antlr-3.4-complete.jar"/>
-			<include name="xstream-1.4.3.jar"/>
-			<include name="xpp3-1.1.4c.jar"/>
+			<include name="xstream.jar"/>
+			<include name="xpp3.jar"/>
 			<include name="itextpdf-5.3.2.jar"/>
 		</fileset>
 		<fileset dir="dist">
@@ -690,8 +690,8 @@
 		<copy file="${lib}/jrworkspace.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/NetUtil.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/sunflow.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/xstream-1.4.3.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/xpp3-1.1.4c.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/xstream.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/xpp3.jar" todir="${release_dir}/tmp/lib" />
 		<copy todir="${release_dir}/tmp/lib">
 			<fileset dir="3rd-party" />
 		</copy>
