@@ -53,6 +53,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLPbuffer;
 
+import com.sun.tools.internal.xjc.outline.Aspect;
+
 import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -65,6 +67,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.Graphics3D;
+import de.jreality.tutorial.app.GLVertexArrayExample;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
@@ -87,9 +90,9 @@ public class JOGLRenderer   {
 	transient protected GeometryGoBetween geometryGB;
 	transient protected SceneGraphPath alternateCameraPath = null;
 
-	transient protected int width, height;		// need this when working with FBO's
+	transient protected int llx, lly, width, height;		// need this when working with FBO's
 	transient protected int owidth, oheight;	
-
+	transient protected double aspectRatio;
 	transient protected int whichEye = CameraUtility.MIDDLE_EYE;
 	transient protected int[] currentViewport = new int[4];
 
@@ -223,7 +226,7 @@ public class JOGLRenderer   {
 
 	private void renderOnePass() {
 		if (theCamera == null) return;
-		double aspectRatio = getAspectRatio();
+//		double aspectRatio = getAspectRatio();
 //		System.err.println("aspect ratio = "+aspectRatio);
 		// for pick mode the aspect ratio has to be set to that of the viewer component
 		globalGL.glMatrixMode(GL.GL_PROJECTION);
@@ -237,7 +240,7 @@ public class JOGLRenderer   {
 //		Rectangle2D viewPort = CameraUtility.getViewport(theCamera, aspectRatio);
 //		System.err.println("Camera viewport = "+viewPort.toString());
 		double[] c2ndc = CameraUtility.getCameraToNDC(theCamera, 
-				aspectRatio,
+				getAspectRatio(),
 				whichEye);
 //		System.err.println("C2ndc = "+Rn.matrixToString(c2ndc));
 		globalGL.glMultTransposeMatrixd(c2ndc, 0);
@@ -341,19 +344,28 @@ public class JOGLRenderer   {
 		return renderingState.polygonCount;
 	}
 	
-	protected void myglViewport(int lx, int ly, int rx, int ry)	{
+	protected void setViewport(int lx, int ly, int rx, int ry)	{
 		globalGL.glViewport(lx, ly, rx, ry);
-//		System.err.println("setting viewport to "+lx+" "+ly+" "+rx+" "+ry);
-		width = rx - lx;
-		height = ry - ly;
+		System.err.println("setting viewport to "+lx+" "+ly+" "+rx+" "+ry);
+		setAspectRatio(((double) rx)/ry);
 	}
+
+//	protected void myglViewport(int lx, int ly, int rx, int ry)	{
+//		globalGL.glViewport(lx, ly, rx, ry);
+//	}
+
 
 	public Graphics3D getContext() {
 		return renderingState.context;
 	}
 
+	public void setAspectRatio(double d) {
+		System.err.println("setting ar to "+aspectRatio);
+		aspectRatio = d;
+	}
+
 	public double getAspectRatio() {
-		return ((double) width)/height;
+		return aspectRatio;
 	}
 
 	/*
@@ -367,6 +379,7 @@ public class JOGLRenderer   {
 		if (!(theCanvas instanceof GLPbuffer))  {  // workaround in bug in implementation of GLPbuffer
 			width = theCanvas.getWidth();
 			height = theCanvas.getHeight();
+			setAspectRatio( ((double) width)/height);
 		}
 		init(theCanvas.getGL());
 	}
@@ -396,15 +409,15 @@ public class JOGLRenderer   {
 
 	public void reshape(GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
 		globalGL = arg0.getGL();
-		width = arg3-arg1;
-		height = arg4-arg2;
-		myglViewport(0,0, width, height);
+		width = arg3-arg1; height = arg4-arg2;
+//		setViewport(0,0, arg3-arg1, arg4-arg2);
 	}
 
 	public void display(GLAutoDrawable drawable) {
 		if (theViewer.getSceneRoot() == null || getCameraPath() == null) {
 			theLog.info("display called w/o scene root or camera path");
 		}
+		System.err.println("Width:height = "+width+":"+height);
 		display(drawable.getGL());
 	}
 	protected int[] whichTile = new int[2];
@@ -421,122 +434,25 @@ public class JOGLRenderer   {
 		} catch (IllegalStateException ise) {
 			return;
 		}
-		if (fboMode)	{
-			owidth = width;
-			oheight = height;
-			myglViewport(0, 0, theFBO.width, theFBO.height);
-		}
-		if (offscreenMode) {
-//			if (theCamera.isStereo() && renderingState.stereoType != de.jreality.jogl.JOGLViewer.CROSS_EYED_STEREO) {
-//				theLog.warning("Invalid stereo mode: Can only save cross-eyed stereo offscreen");
-//				offscreenMode = false;
-//				return;
-//			}
-//			GLContext context = offscreenRenderer.getOffscreenPBuffer().getContext();
-//			if (context.makeCurrent() == GLContext.CONTEXT_NOT_CURRENT) {
-//				JOGLConfiguration.getLogger().log(Level.WARNING,"Error making pbuffer's context current");
-//				offscreenMode = false;
-//				return;
-//			}
-//			globalGL = offscreenRenderer.getOffscreenPBuffer().getGL();
-//			if (true || !JOGLConfiguration.sharedContexts)  forceNewDisplayLists();
-//			renderingState.initializeGLState();
-//			// we need another camera to avoid alerting the listeners when
-//			// we change the camera while doing the offscreen render
-//			CopyVisitor copier = new CopyVisitor();
-//			copier.visit(theCamera);			
-//			Camera offscreenCamera = theCamera = (Camera) copier.getCopy();
-//			
-//			Color[] bg=null;
-//			float[][] bgColors=null;
-//			int tileSizeX = offscreenRenderer.getTileSizeX(),
-//			tileSizeY = offscreenRenderer.getTileSizeY(),
-//			numTiles = offscreenRenderer.getNumTiles();
-//			if (numTiles > 1) {
-//				if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
-//					bg = (Color[]) theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class);
-//					bgColors=new float[4][];
-//					bgColors[0]=bg[0].getRGBComponents(null);
-//					bgColors[1]=bg[1].getRGBComponents(null);
-//					bgColors[2]=bg[2].getRGBComponents(null);
-//					bgColors[3]=bg[3].getRGBComponents(null);
-//				}
-//			}
-////			double[] c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
-////					CameraUtility.getAspectRatio(theViewer),
-////					CameraUtility.MIDDLE_EYE);
-////			System.err.println("c2ndc is "+Rn.matrixToString(c2ndc));
-//			int numImages = offscreenCamera.isStereo() ? 2 : 1;
-//			tileSizeX = tileSizeX / numImages;
-//			myglViewport(0,0,tileSizeX, tileSizeY);
-//			Rectangle2D vp = CameraUtility.getViewport(theCamera, getAspectRatio()); //CameraUtility.getAspectRatio(theViewer));
-//			double dx = vp.getWidth()/numTiles;
-//			double dy = vp.getHeight()/numTiles;
-//			offscreenCamera.setOnAxis(false);
-//			for (int st = 0; st < numImages; ++st)	{
-//				if (offscreenCamera.isStereo()) {
-//					if (st == 0) whichEye = CameraUtility.RIGHT_EYE;
-//					else whichEye =  CameraUtility.LEFT_EYE;
-//				}
-//				else whichEye = CameraUtility.MIDDLE_EYE;
-//				for (int i = 0; i<numTiles; ++i)	{
-//					for (int j = 0; j<numTiles; ++j)	{
-//						whichTile[0] = j; whichTile[1] = i;
-//						renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
-//						Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
-////						System.err.println("Setting vp to "+lr.toString());
-//						offscreenCamera.setViewPort(lr);
-////						c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
-////								CameraUtility.getAspectRatio(theViewer),
-////								CameraUtility.MIDDLE_EYE);
-////						System.err.println(i+j+"c2ndc is "+Rn.matrixToString(c2ndc));
-//						
-//						if (bgColors != null) {
-//							Color[] currentBg = new Color[4];
-//							currentBg[1]=interpolateBG(bgColors, i+1, j, numTiles);
-//							currentBg[2]=interpolateBG(bgColors, i, j, numTiles);
-//							currentBg[3]=interpolateBG(bgColors, i, j+1, numTiles);
-//							currentBg[0]=interpolateBG(bgColors, i+1, j+1, numTiles);
-//							theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, currentBg);
-//						}
-//						
-//						render();
-//						if (i == 0 && j == 0) render();	// ?? rerender the first t
-//						globalGL.glPixelStorei(GL.GL_PACK_ROW_LENGTH,numImages*numTiles*tileSizeX);
-//						globalGL.glPixelStorei(GL.GL_PACK_SKIP_ROWS, i*tileSizeY);
-//						globalGL.glPixelStorei(GL.GL_PACK_SKIP_PIXELS, (st*numTiles+j)*tileSizeX);
-//						globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-//
-//						globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
-//								GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenRenderer.getOffscreenBuffer());
-//		//						GL.GL_RGB, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
-//					}
-//				}
-//				
-//			}
-//
-//			if (bgColors != null) theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, bg);
-//			
-//			context.release();
-			// restore the state of non-offscreen mode
-//			theCamera = CameraUtility.getCamera(theViewer);
-			Dimension d = theViewer.getViewingComponentSize();
-			myglViewport(0, 0, (int) d.getWidth(), (int) d.getHeight());
-			offscreenMode = false;
-			
-		} 
-		else if (theCamera.isStereo())		{
+//		if (fboMode)	{
+//			owidth = width;
+//			oheight = height;
+//			width = theFBO.width;
+//			height = theFBO.height;
+//			setViewport(0, 0, width, height);
+//		}
+		if (theCamera.isStereo())		{
 			// allow fbo textures to be stereo
 			if (fboMode) theFBO.preRender(globalGL);
 			// all types render two images except two new ones
 			boolean doRight = renderingState.stereoType != AbstractViewer.LEFT_EYE_STEREO,
 				doLeft = renderingState.stereoType != AbstractViewer.RIGHT_EYE_STEREO;
-			if (doRight) {
+			if (true || doRight) {
 				setupRightEye(width, height);
 				renderingState.currentEye = whichEye;
 				render();				
 			}
-			if (doLeft)	{
+			if (true || doLeft)	{
 				setupLeftEye(width, height);
 				renderingState.currentEye = whichEye;
 				render();				
@@ -548,15 +464,18 @@ public class JOGLRenderer   {
 		else {
 			if (fboMode) theFBO.preRender(globalGL);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
-			myglViewport(0,0,width, height);
+			setViewport(0,0,width, height);
 //			System.err.println("setting vp to "+width+":"+height);
 			whichEye=CameraUtility.MIDDLE_EYE;
 			render();			
 			if (fboMode) theFBO.postRender(globalGL);
 		}
-
-		if (fboMode) 
-			myglViewport(0, 0, owidth, oheight);
+		// revert the viewport
+//		if (fboMode)  {
+//			width = owidth;
+//			height = oheight;
+//			setViewport(0, 0, width, height);
+//		}
 
 		perfMeter.endFrame();
 	}
@@ -581,13 +500,13 @@ public class JOGLRenderer   {
 			//globalGL.glClear (clearColorBits | GL.GL_DEPTH_BUFFER_BIT);
 			int w = width/2;
 			int h = height;
-			myglViewport(0,0, w,h);
+			setViewport(0,0, w,h);
 			break;
 
 		case AbstractViewer.RED_BLUE_STEREO:
 		case AbstractViewer.RED_CYAN_STEREO:
 		case AbstractViewer.RED_GREEN_STEREO:
-			myglViewport(0,0, width, height);
+			setViewport(0,0, width, height);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			if (which == AbstractViewer.RED_GREEN_STEREO) renderingState.colorMask = 10; //globalGL.glColorMask(false, true, false, true);
 			else if (which == AbstractViewer.RED_BLUE_STEREO) renderingState.colorMask = 12; //globalGL.glColorMask(false, false, true, true);
@@ -597,7 +516,7 @@ public class JOGLRenderer   {
 		case AbstractViewer.HARDWARE_BUFFER_STEREO:
 			globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 		case AbstractViewer.RIGHT_EYE_STEREO:
-			myglViewport(0,0, width, height);
+			setViewport(0,0, width, height);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			break;			
 		}
@@ -611,7 +530,7 @@ public class JOGLRenderer   {
 			int w = width/2;
 			int h = height;
 			renderingState.clearBufferBits = 0;
-			myglViewport(w, 0, w,h);
+			setViewport(w, 0, w,h);
 			break;
 
 		case AbstractViewer.RED_BLUE_STEREO:
@@ -624,7 +543,7 @@ public class JOGLRenderer   {
 		case AbstractViewer.HARDWARE_BUFFER_STEREO:
 			globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
 		case AbstractViewer.LEFT_EYE_STEREO:
-	        myglViewport(0,0, width, height);
+	        setViewport(0,0, width, height);
 	        renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 			break;
 		}
