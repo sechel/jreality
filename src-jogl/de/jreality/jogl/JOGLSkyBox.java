@@ -59,8 +59,7 @@ import de.jreality.shader.TextureUtility;
  *
  */
 class JOGLSkyBox {
-	double stretch = 40.0;
-
+	static boolean mirrored = false;
   // TODO straighten out nomenclature on faces
 	static private double[][][] cubeVerts3 =  
 		{
@@ -100,7 +99,8 @@ class JOGLSkyBox {
 	   
     gl.glLoadTransposeMatrixd(P3.extractOrientationMatrix(null, w2c, P3.originP3, Pn.EUCLIDEAN), 0);
     double scale = (cam.getNear() + cam.getFar())/2;
-    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, scale),0);
+    // Here's where you can control whether the images appear mirrored or not
+    gl.glMultTransposeMatrixd(P3.makeStretchMatrix(null, new double[]{(mirrored ? -1 : 1) * scale, scale, scale}),0);
 	for (int i = 0; i<6; ++i)	{
 		jogltex.setImage(imgs[i]);
 	    Texture2DLoaderJOGL.render(gl, jogltex);
