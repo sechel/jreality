@@ -342,7 +342,7 @@ public class JOGLRenderer   {
 	
 	protected void setViewport(int lx, int ly, int rx, int ry)	{
 		globalGL.glViewport(lx, ly, rx, ry);
-		System.err.println("setting viewport to "+lx+" "+ly+" "+rx+" "+ry);
+//		System.err.println("setting viewport to "+lx+" "+ly+" "+rx+" "+ry);
 		setAspectRatio(((double) rx)/ry);
 	}
 
@@ -356,7 +356,7 @@ public class JOGLRenderer   {
 	}
 
 	public void setAspectRatio(double d) {
-		System.err.println("setting ar to "+aspectRatio);
+//		System.err.println("setting ar to "+aspectRatio);
 		aspectRatio = d;
 	}
 
