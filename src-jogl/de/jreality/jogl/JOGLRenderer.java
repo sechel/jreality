@@ -40,7 +40,6 @@
 
 package de.jreality.jogl;
 
-import java.awt.Dimension;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
@@ -48,14 +47,12 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.media.j3d.PickPoint;
 import javax.media.opengl.DebugGL;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLPbuffer;
 
-import com.sun.tools.internal.xjc.outline.Aspect;
-
-import de.jreality.jogl.pick.PickPoint;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Matrix;
@@ -67,7 +64,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.pick.Graphics3D;
-import de.jreality.tutorial.app.GLVertexArrayExample;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
@@ -548,10 +544,6 @@ public class JOGLRenderer   {
 			break;
 		}
 		whichEye=CameraUtility.LEFT_EYE;
-	}
-
-	public PickPoint[] performPick(double[] pickPointNDC) {
-		throw new IllegalArgumentException("Picking has been removed from JOGL renderer");
 	}
 
 	public JOGLFBO getTheFBO() {
