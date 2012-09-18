@@ -31,7 +31,7 @@ public class CylindricalPerspectiveViewer extends JOGLViewer {
 			}
 			@Override
 			protected void setupLeftEye(int width, int height) {
-				myglViewport(0, 0, width, height);
+				setViewport(0, 0, width, height);
 				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
 				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 0.);
@@ -40,7 +40,7 @@ public class CylindricalPerspectiveViewer extends JOGLViewer {
 			}
 			@Override
 			protected void setupRightEye(int width, int height) {
-				myglViewport(0,0, width, height);
+				setViewport(0,0, width, height);
 				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
 				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 1.);
