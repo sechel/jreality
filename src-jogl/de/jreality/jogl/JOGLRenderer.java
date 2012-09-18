@@ -413,7 +413,6 @@ public class JOGLRenderer   {
 		if (theViewer.getSceneRoot() == null || getCameraPath() == null) {
 			theLog.info("display called w/o scene root or camera path");
 		}
-		System.err.println("Width:height = "+width+":"+height);
 		display(drawable.getGL());
 	}
 	protected int[] whichTile = new int[2];
