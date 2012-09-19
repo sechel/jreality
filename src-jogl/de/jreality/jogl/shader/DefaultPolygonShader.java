@@ -47,6 +47,7 @@ import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D_1;
 import static de.jreality.shader.CommonAttributes.TEXTURE_2D_2;
+import static de.jreality.shader.CommonAttributes.TEXTURE_2D_3;
 import static de.jreality.shader.CommonAttributes.USE_GLSL;
 
 import java.awt.Color;
@@ -85,8 +86,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public static final int BACK = GL.GL_BACK;
 	
 	boolean		smoothShading = true;
-	Texture2D texture2D,  texture2D_1, texture2D_2;
-	JOGLTexture2D joglTexture2D, joglTexture2D_1, joglTexture2D_2;
+	Texture2D texture2D,  texture2D_1, texture2D_2, texture2D_3;
+	JOGLTexture2D joglTexture2D, joglTexture2D_1, joglTexture2D_2, joglTexture2D_3;
 	CubeMap reflectionMap;
 	JOGLCubeMap joglCubeMap;
 	public DefaultVertexShader vertexShader = new DefaultVertexShader();
@@ -119,7 +120,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		useGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, USE_GLSL), false);	
 		oneGLSL = eap.getAttribute(ShaderUtility.nameSpace(name, "oneGLSL"), false);	
 		//oneTexturePerImage = eap.getAttribute(ShaderUtility.nameSpace(name,ONE_TEXTURE2D_PER_IMAGE), true);	
-	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = null;
+	    joglTexture2D = joglTexture2D_1 = joglTexture2D_2 = joglTexture2D_3 = null;
 	    joglCubeMap = null;
 	    hasTextures = false;
 		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D), eap)) {
@@ -141,6 +142,12 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_2), eap)) {
 	    	texture2D_2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_2), eap);		    	
 	    	joglTexture2D_2 = new JOGLTexture2D(texture2D_2);
+	    	hasTextures = true;
+	    }
+      
+	    if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_3), eap)) {
+	    	texture2D_3 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_3), eap);		    	
+	    	joglTexture2D_3 = new JOGLTexture2D(texture2D_3);
 	    	hasTextures = true;
 	    }
       
@@ -215,6 +222,13 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 				    texUnit++;
 				    texunitcoords++;		
 			    }
+			    if (joglTexture2D_3 != null) {
+			    	gl.glActiveTexture(GL.GL_TEXTURE0+3);
+			      	gl.glEnable(GL.GL_TEXTURE_2D);
+					Texture2DLoaderJOGL.render(gl, joglTexture2D_3, jrs.oneTexture2DPerImage);
+				    texUnit++;
+				    texunitcoords++;		
+			    }
 		    }
 		}
 
@@ -256,6 +270,10 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		    }
 		    if (joglTexture2D_2 != null) {
 				gl.glActiveTexture(GL.GL_TEXTURE0+2);
+				gl.glDisable(GL.GL_TEXTURE_2D);
+		    }			
+		    if (joglTexture2D_3 != null) {
+				gl.glActiveTexture(GL.GL_TEXTURE0+3);
 				gl.glDisable(GL.GL_TEXTURE_2D);
 		    }			
 		}
