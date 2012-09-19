@@ -69,8 +69,12 @@ public class DraggingTool extends AbstractTool {
     static InputSlot alongPointerSlot = InputSlot.getDevice("DragAlongViewDirection");
     static InputSlot evolutionSlot = InputSlot.getDevice("PointerEvolution");
     
+    public DraggingTool(InputSlot ...activationSlots )	{
+    	super(activationSlots);
+    }
+    
     public DraggingTool() {
-        super(activationSlot);
+        this(activationSlot);
         addCurrentSlot(evolutionSlot);
         addCurrentSlot(alongPointerSlot);
     }
@@ -99,7 +103,7 @@ public class DraggingTool extends AbstractTool {
 
     transient EffectiveAppearance eap;
     transient private int metric;
-    transient Matrix result = new Matrix();
+    transient protected Matrix result = new Matrix();
     transient Matrix local2world = new Matrix();
     transient Matrix dragFrame;
     transient Matrix pointer = new Matrix();
