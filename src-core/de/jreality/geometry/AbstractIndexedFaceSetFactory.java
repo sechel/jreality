@@ -203,7 +203,7 @@ public class AbstractIndexedFaceSetFactory extends AbstractIndexedLineSetFactory
 	}
 	
 	protected void setFaceNormals( double [][] data ) {
-		setFaceAttribute( Attribute.NORMALS, new DoubleArrayArray.Array( data ) );
+		setFaceAttribute( Attribute.NORMALS, data == null ? null : new DoubleArrayArray.Array( data ) );
 	}
 	
 	protected void setFaceColors( DataList data ) {
