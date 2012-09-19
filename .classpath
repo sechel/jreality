@@ -27,7 +27,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>
 	<classpathentry kind="src" path="test-backends-share"/>
-	<classpathentry kind="src" path="test-io"/>
 	<classpathentry kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
