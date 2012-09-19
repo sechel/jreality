@@ -595,8 +595,8 @@ public class ViewerApp {
 		else  {
 			try {
 				Class portalToolSystem = Class.forName("de.jreality.toolsystem.PortalToolSystemImpl");
-				Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{de.jreality.jogl.Viewer.class, ToolSystemConfiguration.class});
-				de.jreality.jogl.Viewer cv = (de.jreality.jogl.Viewer) getCurrentViewer();
+				Constructor<? extends ToolSystem> cc = portalToolSystem.getConstructor(new Class[]{de.jreality.jogl.JOGLViewer.class, ToolSystemConfiguration.class});
+				de.jreality.jogl.JOGLViewer cv = (de.jreality.jogl.JOGLViewer) getCurrentViewer();
 				toolSystem = cc.newInstance(new Object[]{cv, cfg});
 			} catch (Throwable t) {
 				t.printStackTrace();
