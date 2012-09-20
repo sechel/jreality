@@ -1176,6 +1176,13 @@ final public class Rn {
 		for(int i=0, k=0; i<n; i++, k+=noffs) mat[k] = 1.0;
 		return mat;		
 	}
+  
+  public static float[] setIdentityMatrix(float[] mat)	{
+		int n = mysqrt(mat.length), noffs=n+1;
+		Arrays.fill(mat, 0);
+		for(int i=0, k=0; i<n; i++, k+=noffs) mat[k] = 1.0f;
+		return mat;		
+	}
 	
 	/**
 	 * Set the destination to vector to have constant value <i>val</i>.
@@ -1650,6 +1657,41 @@ final public class Rn {
 	public static boolean isZero(double[] iline, double tol) {
 		for (double d : iline)	if (Math.abs(d) > tol) return false;
 		return true;
+	}
+
+
+	public static float[] times(float[] dst, float[] src1,
+			float[] src2) {
+		if (src1.length != src2.length) {
+			throw new IllegalArgumentException("Matrices must be same size");
+		}
+		int n = mysqrt(src1.length);
+		float[] out;
+		boolean rewrite = false;
+		if (dst == src1 || dst == src2 || dst == null )	{
+			out = new float[src1.length];
+			if (dst != null) rewrite = true;
+		}
+		else		{
+			out = dst;
+		}
+		if (out.length != src1.length) {
+			throw new IllegalArgumentException("Matrices must be same size");
+		}
+	
+		for (int i=0; i<n; ++i)	{	
+			for (int j=0; j<n; ++j)	{
+				out[i*n+j] = 0.0f;
+				for (int k=0; k<n; ++k)		{
+					// the (i,j)th position is the inner product of the ith row and 
+					// the jth column of the two factors
+					out[i*n+j] += src1[i*n+k]*src2[k*n+j];
+				}
+			}
+		}
+		if (dst == null)	return out;
+		if (rewrite) 	System.arraycopy(out, 0, dst, 0, dst.length);
+		return out;
 	}
 
 

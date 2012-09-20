@@ -280,6 +280,10 @@ public class SceneTreeNode {
 		if (!isComponent) throw new UnsupportedOperationException("no component");
 		return getTreeNodeForChild(((SceneGraphComponent)node).getGeometry());
 	}
+	public SceneTreeNode getLightTreeNode() {
+		if (!isComponent) throw new UnsupportedOperationException("no component");
+		return getTreeNodeForChild(((SceneGraphComponent)node).getLight());
+	}
 
 	/**
 	 * disposes the whole tree from this node on
@@ -298,6 +302,10 @@ public class SceneTreeNode {
 		if (getEntity().isEmpty()) {
 			disposedEntities.add(getEntity());
 		}
+	}
+
+	public boolean isComponent() {
+		return isComponent;
 	}
 
 }

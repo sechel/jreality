@@ -113,6 +113,10 @@ public class SystemProperties {
 	 */
 	public final static String VIEWER = de.jreality.scene.Viewer.class.getName();
 	public final static String VIEWER_DEFAULT_JOGL = "de.jreality.jogl.JOGLViewer";  //de.jreality.jogl.JOGLViewer.class.getName();
+	public final static String VIEWER_DEFAULT_JOGL3 = "de.jreality.jogl3.Viewer";
+
+	public final static String VIEWER_JOGL_DOME = "de.jreality.jogl.DomeViewer";
+	
 	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
 //	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();
 	public final static String CROSS_EYED_STEREO = "jreality.crossEyedStereo"; // set to false to get wall-eyed

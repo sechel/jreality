@@ -85,7 +85,10 @@ public class EffectiveAppearance {
 private EffectiveAppearance parentApp;
   private Appearance app;
 
-  private EffectiveAppearance(EffectiveAppearance parent, Appearance app)
+public Appearance getApp() {
+	return app;
+}
+private EffectiveAppearance(EffectiveAppearance parent, Appearance app)
   {
     parentApp=parent;
     this.app=app;

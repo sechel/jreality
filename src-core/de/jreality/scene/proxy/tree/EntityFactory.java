@@ -44,12 +44,14 @@ package de.jreality.scene.proxy.tree;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.AudioSource;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.AudioListener;
 import de.jreality.scene.event.GeometryListener;
+import de.jreality.scene.event.LightListener;
 import de.jreality.scene.event.TransformationListener;
 
 
@@ -79,7 +81,14 @@ public class EntityFactory {
 	private boolean updateAppearance;
 	private boolean updateAudioSource;
 	private boolean updateGeometry;
+	private boolean updateLight;
 
+	public boolean isUpdateLight() {
+		return updateLight;
+	}
+	public void setUpdateLight(boolean updateLight) {
+		this.updateLight = updateLight;
+	}
 	public boolean isUpdateAppearance() {
 		return updateAppearance;
 	}
@@ -111,6 +120,13 @@ public class EntityFactory {
 	}
 	private SceneGraphVisitor createTraversal = new SceneGraphVisitor() {
 		@Override
+		public void visit(Light a) {
+			if (updateLight) {
+				produced = produceLightEntity(a);
+				a.addLightListener((LightListener) produced);
+			}
+			else super.visit(a);
+		}
 		public void visit(AudioSource a) {
 			if (updateAudioSource) {
 				produced = produceAudioSourceEntity(a);
@@ -151,6 +167,11 @@ public class EntityFactory {
 	}
 
 	private SceneGraphVisitor disposeTraversal = new SceneGraphVisitor() {
+		public void visit(Light l) {
+			if (updateLight) {
+				l.removeLightListener((LightListener) produced);
+			}
+		}
 		public void visit(Appearance a) {
 			if (updateAppearance) {
 				a.removeAppearanceListener((AppearanceListener) produced);
@@ -197,6 +218,13 @@ public class EntityFactory {
 	 * implements AudioListener!
 	 */
 	protected SceneGraphNodeEntity produceAudioSourceEntity(AudioSource g) {
+		throw new IllegalStateException("not implemented");
+	}
+	/**
+	 * this method must return a SceneGraphNodeEntity that
+	 * implements LightListener!
+	 */
+	protected SceneGraphNodeEntity produceLightEntity(Light l) {
 		throw new IllegalStateException("not implemented");
 	}
 }

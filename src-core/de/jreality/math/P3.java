@@ -165,6 +165,27 @@ public class P3 {
 	
 		return m;
 	}
+	
+	public static float[] makePerspectiveProjectionMatrix(float[] dst, Rectangle2D viewport, float near, float far)	{
+		// assert dim checks
+	 	if (dst == null) dst = new float[16];
+	 	float an = Math.abs(near);
+	 	float l = (float)viewport.getMinX() * an;
+	 	float r = (float)viewport.getMaxX() * an;
+	 	float b = (float)viewport.getMinY() * an;
+	 	float t = (float)viewport.getMaxY() * an;
+		Rn.setIdentityMatrix(dst);
+		dst[0] = 2*near/(r-l);
+		dst[5] = 2*near/(t-b);
+		dst[10] = (far+near)/(near-far);
+		dst[15] = 0.0f;
+		dst[2] = (r+l)/(r-l);
+		dst[6] = (t+b)/(t-b);
+		dst[11] = 2*near*far/(near-far);
+		dst[14] = -1.0f;
+		return dst;
+	}
+	
 	/**
 	 * Extract a matrix from the <i>src</i> input matrix, such that it fixes the input position <i>point</i>.
 	 * @param dst
