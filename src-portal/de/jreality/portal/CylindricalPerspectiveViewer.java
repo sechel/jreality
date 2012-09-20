@@ -4,6 +4,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLViewer;
@@ -25,14 +26,14 @@ public class CylindricalPerspectiveViewer extends JOGLViewer {
 		System.out.println("CYLINDRICAL PERSPECTIVE VIEWER");
 		renderer=new JOGLRenderer(this) {
 			@Override
-			public void display(GL gl) {
+			public void display(GL2 gl) {
 				whichEye=CameraUtility.MIDDLE_EYE;
 				super.display(gl);
 			}
 			@Override
 			protected void setupLeftEye(int width, int height) {
 				setViewport(0, 0, width, height);
-				globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
+				globalGL.glDrawBuffer(GL2.GL_BACK_LEFT);
 				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 0.);
 				else whichEye=CameraUtility.LEFT_EYE;
@@ -41,7 +42,7 @@ public class CylindricalPerspectiveViewer extends JOGLViewer {
 			@Override
 			protected void setupRightEye(int width, int height) {
 				setViewport(0,0, width, height);
-				globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
+				globalGL.glDrawBuffer(GL2.GL_BACK_RIGHT);
 				renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
 				if (cylProg != null) cylProg.setUniform("eye", 1.);
 				else whichEye=CameraUtility.RIGHT_EYE;
