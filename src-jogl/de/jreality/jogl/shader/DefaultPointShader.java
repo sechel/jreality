@@ -66,6 +66,7 @@ import static de.jreality.shader.CommonAttributes.TRANSPARENCY_DEFAULT;
 import java.awt.Color;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLConfiguration;
@@ -183,8 +184,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 
 	private void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.renderer.globalGL;
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
+		GL2 gl = jrs.renderer.globalGL;
+		gl.glMaterialfv(GL.GL_FRONT, GL2.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 		
@@ -203,15 +204,15 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			// this doesn't work on my powerbook with ati radeon
 			// (no exception, but the points don't show up no matter what the arguments given
 			try {
-				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, 
+				gl.glPointParameterfv(GL2.GL_POINT_DISTANCE_ATTENUATION, 
 						attenuatePointSize ? pointAttenuation : noPointAttentuation, 0);
 			} catch (Exception e){
 				//TODO: i dont know - got error on ati radeon 9800
 			}
-			gl.glEnable(GL.GL_POINT_SMOOTH);
+			gl.glEnable(GL2.GL_POINT_SMOOTH);
 			if (doSprites)	{
-				gl.glEnable(GL.GL_POINT_SPRITE_ARB);
-				gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
+				gl.glEnable(GL2.GL_POINT_SPRITE);
+				gl.glTexEnvi(GL2.GL_POINT_SPRITE, GL2.GL_COORD_REPLACE, GL.GL_TRUE);
 				if (currentTex == spriteTexture && ps.getVertexAttributes(Attribute.COLORS) != null) 
 					spriteTexture.setApplyMode(Texture2D.GL_MODULATE);
 				else // this way we get real specular highlights
@@ -232,8 +233,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 //		jr.renderingState.lighting = lighting;
 		changedLighting = false;
 		if (lighting != jrs.lighting)	{
-			if (lighting) gl.glEnable(GL.GL_LIGHTING);
-			else gl.glDisable(GL.GL_LIGHTING);	
+			if (lighting) gl.glEnable(GL2.GL_LIGHTING);
+			else gl.glDisable(GL2.GL_LIGHTING);	
 			changedLighting = true;
 		}
 		// TODO build in support for OPAQUE_TUBES_AND_SPHERES
@@ -257,11 +258,11 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 	public void postRender(JOGLRenderingState jrs)	{
 		if (!jrs.shadeGeometry) return;
 		JOGLRenderer jr = jrs.renderer; 
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		if (!sphereDraw)	{
-			gl.glDisable(GL.GL_POINT_SPRITE_ARB);
+			gl.glDisable(GL2.GL_POINT_SPRITE);
 			gl.glActiveTexture(GL.GL_TEXTURE0);
-			gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
+			gl.glTexEnvi(GL2.GL_POINT_SPRITE, GL2.GL_COORD_REPLACE, GL.GL_FALSE);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		} else {
 			polygonShader.postRender(jrs);
@@ -277,8 +278,8 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 			}
 		}
 		if (changedLighting)	{
-			if (jrs.lighting)  gl.glEnable(GL.GL_LIGHTING);
-			else gl.glDisable(GL.GL_LIGHTING);			
+			if (jrs.lighting)  gl.glEnable(GL2.GL_LIGHTING);
+			else gl.glDisable(GL2.GL_LIGHTING);			
 		}
 	}
 
@@ -291,7 +292,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		JOGLRenderer jr = jrs.renderer;
 		int sig = jrs.currentMetric;
 		boolean useDisplayLists = jrs.useDisplayLists;
-		GL gl = 	jr.globalGL;
+		GL2 gl = 	jr.globalGL;
 		PointSet ps = (PointSet) original;
 		DataList vertices = ps.getVertexAttributes(Attribute.COORDINATES);
 		if (vertices == null)	
@@ -324,7 +325,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 		int nextDL = -1;
 		if (useDisplayLists)	{
 			nextDL = gl.glGenLists(1);
-			gl.glNewList(nextDL, GL.GL_COMPILE);				
+			gl.glNewList(nextDL, GL2.GL_COMPILE);				
 		}
 		double[] mat = Rn.identityMatrix(4);
 		double[] scale = Rn.identityMatrix(4);
@@ -386,7 +387,7 @@ public class DefaultPointShader  extends AbstractPrimitiveShader implements Poin
 				} else {
 					if (useDisplayLists && dList == -1)	{
 						dList = jr.globalGL.glGenLists(1);
-						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						jr.globalGL.glNewList(dList, GL2.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawVertices(jr, (PointSet) g,  jr.renderingState.diffuseColor[3]);
 						jr.globalGL.glEndList();	
 						displayListsDirty = false;

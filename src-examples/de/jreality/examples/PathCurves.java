@@ -41,6 +41,7 @@
 package de.jreality.examples;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
 
 import de.jreality.jogl.AbstractCalculation;
 import de.jreality.jogl.GpgpuUtility;
@@ -93,5 +94,10 @@ public class PathCurves extends AbstractCalculation {
     ev.triggerCalculation();
     GpgpuUtility.run(ev);
   }
+
+public void dispose(GLAutoDrawable drawable) {
+	// TODO Auto-generated method stub
+	
+}
 
 }

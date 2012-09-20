@@ -52,8 +52,9 @@ import java.nio.IntBuffer;
 //import java.util.HashMap;
 import java.util.WeakHashMap;
 
-import javax.media.opengl.DebugGL;
+import javax.media.opengl.DebugGL2;
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.jogl.JOGLRenderer;
@@ -138,9 +139,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	boolean needsChecked = true, geometryHasTextureCoordinates, doTexture = false;
 	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
-		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-		else gl.glShadeModel(GL.GL_FLAT);
+		GL2 gl = jr.globalGL;
+		if (smoothShading) gl.glShadeModel(GL2.GL_SMOOTH);
+		else gl.glShadeModel(GL2.GL_FLAT);
 		jrs.smoothShading = smoothShading;
 
 //		vertexShader.setFrontBack(frontBack);
@@ -220,7 +221,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 					if ( !upToDate((IndexedFaceSet) g, smoothShading) || dList == -1)	{
 						if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
 						dList = jr.globalGL.glGenLists(1);
-						jr.globalGL.glNewList(dList, GL.GL_COMPILE); 
+						jr.globalGL.glNewList(dList, GL2.GL_COMPILE); 
 						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);
 						jr.globalGL.glEndList();	
 					}
@@ -245,9 +246,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		if (environmentMap != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE2);
 			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-			gl.glDisable(GL.GL_TEXTURE_GEN_S);
-			gl.glDisable(GL.GL_TEXTURE_GEN_T);
-			gl.glDisable(GL.GL_TEXTURE_GEN_R);
+			gl.glDisable(GL2.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL2.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL2.GL_TEXTURE_GEN_R);
 		}
 	}
 
@@ -262,7 +263,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha, boolean doNormals4) {
 		if (sg.getNumFaces() == 0)
 			return;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
@@ -291,9 +292,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		// "+colorBind);
 		if (colorBind != PER_PART) {
 			if (jr.renderingState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
-				gl.glEnable(GL.GL_COLOR_MATERIAL);
+				gl.glEnable(GL2.GL_COLOR_MATERIAL);
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
-						GL.GL_DIFFUSE);
+						GL2.GL_DIFFUSE);
 				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
@@ -334,7 +335,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		return n;
 	}
 	private static void renderFaces(IndexedFaceSet sg, double alpha, 
-				GL gl, 
+				GL2 gl, 
 				boolean pickMode, 
 				int colorBind, 
 				int normalBind, 
@@ -376,7 +377,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
 		if (renderInlined) {
 
-			gl = new DebugGL(gl);
+			gl = new DebugGL2(gl);
 
 			// count indices
 			int triagCnt=0;
@@ -533,21 +534,21 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			vertexBuffer.rewind();
 			if (!doNormals4) normalBuffer.rewind();
 
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			if (!doNormals4) gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
+			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+			if (!doNormals4) gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 
-			gl.glVertexPointer(vertexLength, GL.GL_DOUBLE, 0, vertexBuffer);
-			if (!doNormals4) gl.glNormalPointer(GL.GL_DOUBLE, 0, normalBuffer);
+			gl.glVertexPointer(vertexLength, GL2.GL_DOUBLE, 0, vertexBuffer);
+			if (!doNormals4) gl.glNormalPointer(GL2.GL_DOUBLE, 0, normalBuffer);
 			if (hasColors) {
-				gl.glEnableClientState(GL.GL_COLOR_ARRAY);
+				gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
 				colorBuffer.rewind();
-				gl.glColorPointer(colorLength, GL.GL_DOUBLE, 0, colorBuffer);
+				gl.glColorPointer(colorLength, GL2.GL_DOUBLE, 0, colorBuffer);
 			}
 			if (texCoords != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE0);
-				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 				texBuffer.rewind();
-				gl.glTexCoordPointer(texLength, GL.GL_DOUBLE, 0, texBuffer);
+				gl.glTexCoordPointer(texLength, GL2.GL_DOUBLE, 0, texBuffer);
 			}
 //			int TANGENT_ID=9;
 			if (tanCoords != null) {
@@ -555,8 +556,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 //				gl.glVertexAttribPointer(TANGENT_ID, 4, GL.GL_DOUBLE, true, 0, tanBuffer);
 //				gl.glEnableVertexAttribArray(TANGENT_ID);
 				gl.glClientActiveTexture(GL.GL_TEXTURE1);
-				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-				gl.glTexCoordPointer(4, GL.GL_DOUBLE, 0, tanBuffer);
+				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+				gl.glTexCoordPointer(4, GL2.GL_DOUBLE, 0, tanBuffer);
 			}
 			if (inlineI) {
 				indexBuffer.rewind();
@@ -564,18 +565,18 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			}
 			else gl.glDrawArrays(GL.GL_TRIANGLES, 0, triagCnt*3);
 
-			gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-			if (!doNormals4) gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
+			gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+			if (!doNormals4) gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 			if (texCoords != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE0);
-				gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 			}
 			if (hasColors) {
-				gl.glDisableClientState(GL.GL_COLOR_ARRAY);
+				gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
 			}
 			if (tanCoords != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE1);
-				gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 //				gl.glDisableVertexAttribArray(TANGENT_ID);
 			}
 

@@ -46,12 +46,17 @@ import java.nio.IntBuffer;
 import java.util.Random;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL3;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JFrame;
 
-import com.sun.opengl.util.Animator;
+import com.jogamp.opengl.util.Animator;
+
 
 import de.jreality.math.Rn;
 
@@ -90,28 +95,30 @@ public class GpgpuUtility {
     System.out.println();
   }
   
-  static void checkBuf(GL gl) {
-    int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
+  static void checkBuf(GL2 gl) {
+    int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
     String ret;
     switch (status) {
-    case GL.GL_FRAMEBUFFER_COMPLETE_EXT:
+    case GL2.GL_FRAMEBUFFER_COMPLETE:
     	return;
     // unfortunately the name of the constant changed between the latest jogl version...
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
       ret = "FrameBuffer incomplete attachments";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+    case GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
       ret = "FrameBuffer incomplete missing attachment";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
-      ret = "FrameBuffer incomplete duplicate";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+    //Ben has commented this, as GL2 in jogamp appears to miss this variable
+    //idea for fix: find numerical value of this variable and replace
+    //case GL2.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT:
+    //  ret = "FrameBuffer incomplete duplicate";
+    case GL2.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
       ret = "FrameBuffer incomplete dimensions";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+    case GL2.GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
       ret = "FrameBuffer incomplete formats";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+    case GL2.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
       ret = "FrameBuffer incomplete draw buffer";
-    case GL.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
+    case GL2.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
       ret = "FrameBuffer incomplete read buffer";
-    case GL.GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+    case GL2.GL_FRAMEBUFFER_UNSUPPORTED:
       ret = "FrameBuffer unsupported";
     default:
       ret = "FrameBuffer unrecognized error";
@@ -123,7 +130,7 @@ public class GpgpuUtility {
     JFrame f=new JFrame("gpgpu runner");
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     // get a GLCanvas
-    GLCapabilities capabilities = new GLCapabilities();
+    GLCapabilities capabilities = new GLCapabilities(GLProfile.get("GL2"));
 
     GLCanvas canvas =new GLCanvas(capabilities);	
           //GLDrawableFactory.getFactory().createGLCanvas(capabilities);

@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -60,7 +61,7 @@ public class SimpleLineShader extends AbstractPrimitiveShader implements LineSha
 
 
 	public void renderOld(JOGLRenderer jr) {
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		gl.glColor4fv( diffuseColorAsFloat,0);
 	}
 

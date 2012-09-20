@@ -43,6 +43,7 @@ package de.jreality.jogl.shader;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.jogl.JOGLConfiguration;
@@ -85,13 +86,13 @@ public class ImplodePolygonShader extends DefaultPolygonShader {
 		final boolean useDisplayLists = jrs.useDisplayLists;
 		if (!(original instanceof IndexedFaceSet)) return -1;
 		if (dListProxy != -1) return dListProxy;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		JOGLConfiguration.theLog.log(Level.FINE,this+"Providing proxy geometry "+implodeFactor);
 		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : jrs.diffuseColor[3];
 		if (useDisplayLists) {
 			dListProxy = gl.glGenLists(1);
-			gl.glNewList(dListProxy, GL.GL_COMPILE);
+			gl.glNewList(dListProxy, GL2.GL_COMPILE);
 		}
 		//if (jr.isPickMode())	gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
     JOGLRendererHelper.drawFaces(jr, ifs,  jrs.smoothShading, alpha);

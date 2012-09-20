@@ -43,6 +43,7 @@ package de.jreality.jogl.shader;
 import java.awt.Color;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRenderingState;
@@ -100,10 +101,10 @@ public class DefaultVertexShader {
 
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		int frontBack = jrs.frontBack;
 //		if (jr.openGLState.frontBack != frontBack)	{
-			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+			gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
 //			jr.openGLState.frontBack = frontBack;
 //		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
@@ -113,9 +114,9 @@ public class DefaultVertexShader {
 		    jrs.currentAlpha =jrs.diffuseColor[3];
 //		}
 			//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
-		gl.glMaterialfv(frontBack, GL.GL_AMBIENT, ambientColorAsFloat,0);
-		gl.glMaterialfv(frontBack, GL.GL_SPECULAR, specularColorAsFloat,0);
-		gl.glMaterialf(frontBack, GL.GL_SHININESS, (float) specularExponent);
+		gl.glMaterialfv(frontBack, GL2.GL_AMBIENT, ambientColorAsFloat,0);
+		gl.glMaterialfv(frontBack, GL2.GL_SPECULAR, specularColorAsFloat,0);
+		gl.glMaterialf(frontBack, GL2.GL_SHININESS, (float) specularExponent);
 //		LoggingSystem.getLogger(this).finest("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 

@@ -64,7 +64,9 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
+import javax.media.opengl.GL2;
+//import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.gl2.GLUgl2;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.math.Rn;
@@ -138,17 +140,17 @@ public class Texture2DLoaderJOGL {
     	lastRendered = null;
     }
     /******************* new Textures *******************/
-    public static void render(GL gl, Texture2D tex) {
+    public static void render(GL2 gl, Texture2D tex) {
     	JOGLTexture2D jogltex= new JOGLTexture2D(tex);
       render(gl, jogltex, false);
     }
 
-    public static void render(GL gl, JOGLTexture2D tex) {
+    public static void render(GL2 gl, JOGLTexture2D tex) {
         render(gl, tex, false);
       }
     static Texture2D lastRendered = null;
     static boolean haveAutoMipmapGeneration, haveCheckedAutoMipmapGeneration;
-    public static void render(GL gl, JOGLTexture2D tex, boolean oneTexturePerImage) {
+    public static void render(GL2 gl, JOGLTexture2D tex, boolean oneTexturePerImage) {
 //    	System.err.println("rendering texture length "+tex.getImage().getByteArray().length);
  
         // can't do this statically at start-up since we need a GL context to inquire
@@ -214,7 +216,7 @@ public class Texture2DLoaderJOGL {
 	    gl.glBindTexture(GL.GL_TEXTURE_2D, texid);
         gl.glMatrixMode(GL.GL_TEXTURE);
         gl.glLoadTransposeMatrixd(tex.getTextureMatrix().getArray(),0);
-        gl.glMatrixMode(GL.GL_MODELVIEW);  
+        gl.glMatrixMode(GL2.GL_MODELVIEW);  
 	    int srcPixelFormat = tex.getPixelFormat();
 	    boolean animated = tex.getAnimated();
 	    if (animated)	{
@@ -230,9 +232,9 @@ public class Texture2DLoaderJOGL {
 		    	if (r != null) {
 		    		r.run();
 		    	}
-		        gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
-		        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
-		        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
+		        gl.glPixelStorei(GL2.GL_UNPACK_ROW_LENGTH, image.getWidth());
+		        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_ROWS, 0);
+		        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_PIXELS, 0);
 
 //		 	    System.err.println("image size: "+image.getWidth()+":"+image.getHeight());
 		 	    DataBuffer dataBuffer = ((BufferedImage) image.getImage()).getRaster().getDataBuffer();
@@ -281,25 +283,25 @@ public class Texture2DLoaderJOGL {
 	    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, tex.getMagFilter());
 	    if (fbo) return;
 	    float[] texcolor = tex.getBlendColor().getRGBComponents(null);
-	    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
-	    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
+	    gl.glTexEnvfv(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_COLOR, texcolor, 0);
+	    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, tex.getApplyMode());
 	    if (tex.getApplyMode() == Texture2D.GL_COMBINE) 
 	    {
 	//    	System.err.println("Combining with alpha "+texcolor[3]);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, tex.getCombineMode());
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, tex.getSource0Color()); //GL.GL_TEXTURE);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, tex.getOperand0Color()); // GL.GL_SRC_COLOR);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, tex.getSource1Color()); //GL.GL_PREVIOUS);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_RGB, tex.getOperand1Color()); //GL.GL_SRC_COLOR);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_RGB, tex.getSource2Color()); // GL.GL_CONSTANT);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB,tex.getOperand2Color()); // GL.GL_SRC_ALPHA);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, tex.getCombineModeAlpha());
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_ALPHA, tex.getSource0Alpha()); //GL.GL_TEXTURE);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_ALPHA, tex.getOperand0Alpha()); // GL.GL_SRC_COLOR);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_ALPHA, tex.getSource1Alpha()); //GL.GL_PREVIOUS);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_ALPHA, tex.getOperand1Alpha()); //GL.GL_SRC_COLOR);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_ALPHA, tex.getSource2Alpha()); // GL.GL_CONSTANT);
-	    	gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_ALPHA,tex.getOperand2Alpha()); // GL.GL_SRC_ALPHA);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, tex.getCombineMode());
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE0_RGB, tex.getSource0Color()); //GL.GL_TEXTURE);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND0_RGB, tex.getOperand0Color()); // GL.GL_SRC_COLOR);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE1_RGB, tex.getSource1Color()); //GL.GL_PREVIOUS);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND1_RGB, tex.getOperand1Color()); //GL.GL_SRC_COLOR);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE2_RGB, tex.getSource2Color()); // GL.GL_CONSTANT);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND2_RGB,tex.getOperand2Color()); // GL.GL_SRC_ALPHA);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_ALPHA, tex.getCombineModeAlpha());
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE0_ALPHA, tex.getSource0Alpha()); //GL.GL_TEXTURE);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND0_ALPHA, tex.getOperand0Alpha()); // GL.GL_SRC_COLOR);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE1_ALPHA, tex.getSource1Alpha()); //GL.GL_PREVIOUS);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND1_ALPHA, tex.getOperand1Alpha()); //GL.GL_SRC_COLOR);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE2_ALPHA, tex.getSource2Alpha()); // GL.GL_CONSTANT);
+	    	gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND2_ALPHA,tex.getOperand2Alpha()); // GL.GL_SRC_ALPHA);
 	    }    
 	     // create either a series of mipmaps of a single texture image based on
 	    // what's loaded
@@ -308,20 +310,20 @@ public class Texture2DLoaderJOGL {
 	    	byte[] data = image.getByteArray();
 	        if (mipmapped) {
 	        	if (haveAutoMipmapGeneration) {
-	                gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
-	    	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
-	    	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
-	        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
+	                gl.glPixelStorei(GL2.GL_UNPACK_ROW_LENGTH, image.getWidth());
+	    	        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_ROWS, 0);
+	    	        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_PIXELS, 0);
+	        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP, GL.GL_TRUE);
 	                gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
 	                        width, height, 0, srcPixelFormat,
 	                        GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
 	        	}
 	        	else {
 	        		System.err.println("Building mipmaps");
-	                GLU glu = new GLU();
+	                GLUgl2 glu = new GLUgl2();
 	                try {
 	                	glu.gluBuild2DMipmaps(GL.GL_TEXTURE_2D, 
-	                			GL.GL_COMPRESSED_RGBA, 
+	                			GL2.GL_COMPRESSED_RGBA, 
 	                			width,
 	                			height,
 	                			srcPixelFormat, 
@@ -332,10 +334,10 @@ public class Texture2DLoaderJOGL {
 	                }
 	        	}
 	        } else {
-                gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, image.getWidth());
-    	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
-    	        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
-        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_FALSE);
+                gl.glPixelStorei(GL2.GL_UNPACK_ROW_LENGTH, image.getWidth());
+    	        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_ROWS, 0);
+    	        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_PIXELS, 0);
+        		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP, GL.GL_FALSE);
         		gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA, 
 	              image.getWidth(), image.getHeight(), 0, srcPixelFormat,
 	              GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
@@ -344,13 +346,13 @@ public class Texture2DLoaderJOGL {
     }
 }
 
-	 	static GLU glu = null;
+	 	static GLUgl2 glu = null;
   public static void render(JOGLRenderer jr, CubeMap ref) {
 //  public static void render(GL gl, CubeMap ref, double[] c2w) {
     boolean first = true;
     boolean mipmapped = true;
     lastRendered = null;	
-    GL gl = jr.globalGL;
+    GL2 gl = jr.globalGL;
     WeakHashMap<ImageData, Integer> ht = getCubeMapTableForGL(gl);
     checkForTextureExtensions(gl);
     //hash one side of the cube map and do only render sides when hashed image data changed
@@ -377,32 +379,32 @@ public class Texture2DLoaderJOGL {
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, Texture2D.GL_LINEAR);
 
     float[] texcolor = ref.getBlendColor().getRGBComponents(null);
-    gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, texcolor, 0);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, Texture2D.GL_COMBINE);
+    gl.glTexEnvfv(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_COLOR, texcolor, 0);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, Texture2D.GL_COMBINE);
     
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, Texture2D.COMBINE_MODE_DEFAULT);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE0_RGB, GL.GL_TEXTURE);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND0_RGB, GL.GL_SRC_COLOR);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE1_RGB, GL.GL_PREVIOUS);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND1_RGB, GL.GL_SRC_COLOR);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SOURCE2_RGB, GL.GL_CONSTANT);
-    gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_OPERAND2_RGB, GL.GL_SRC_ALPHA);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_COMBINE);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, Texture2D.COMBINE_MODE_DEFAULT);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE0_RGB, GL.GL_TEXTURE);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND0_RGB, GL.GL_SRC_COLOR);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE1_RGB, GL2.GL_PREVIOUS);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND1_RGB, GL.GL_SRC_COLOR);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SOURCE2_RGB, GL2.GL_CONSTANT);
+    gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_OPERAND2_RGB, GL.GL_SRC_ALPHA);
 
     gl.glMatrixMode(GL.GL_TEXTURE);
     gl.glLoadTransposeMatrixd(c2w, 0);
-    gl.glMatrixMode(GL.GL_MODELVIEW);       
+    gl.glMatrixMode(GL2.GL_MODELVIEW);       
     
-    gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_R, Texture2D.GL_CLAMP_TO_EDGE);
+    gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL2.GL_TEXTURE_WRAP_R, Texture2D.GL_CLAMP_TO_EDGE);
     gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_S, Texture2D.GL_CLAMP_TO_EDGE); 
     gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP, GL.GL_TEXTURE_WRAP_T, Texture2D.GL_CLAMP_TO_EDGE); 
     
-    gl.glTexGeni(GL.GL_S, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
-    gl.glTexGeni(GL.GL_T, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
-    gl.glTexGeni(GL.GL_R, GL.GL_TEXTURE_GEN_MODE, GL.GL_REFLECTION_MAP);
-    gl.glEnable(GL.GL_TEXTURE_GEN_S);
-    gl.glEnable(GL.GL_TEXTURE_GEN_T);
-    gl.glEnable(GL.GL_TEXTURE_GEN_R);
+    gl.glTexGeni(GL2.GL_S, GL2.GL_TEXTURE_GEN_MODE, GL2.GL_REFLECTION_MAP);
+    gl.glTexGeni(GL2.GL_T, GL2.GL_TEXTURE_GEN_MODE, GL2.GL_REFLECTION_MAP);
+    gl.glTexGeni(GL2.GL_R, GL2.GL_TEXTURE_GEN_MODE, GL2.GL_REFLECTION_MAP);
+    gl.glEnable(GL2.GL_TEXTURE_GEN_S);
+    gl.glEnable(GL2.GL_TEXTURE_GEN_T);
+    gl.glEnable(GL2.GL_TEXTURE_GEN_R);
     gl.glEnable(GL.GL_TEXTURE_CUBE_MAP);
 
     // create either a series of mipmaps of a single texture image based on what's loaded 
@@ -418,15 +420,15 @@ public class Texture2DLoaderJOGL {
         byte[] data = faces[i].getByteArray();
         int width = faces[i].getWidth();
         int height = faces[i].getHeight();
-        gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, width);
-        gl.glPixelStorei(GL.GL_UNPACK_SKIP_ROWS, 0);
-        gl.glPixelStorei(GL.GL_UNPACK_SKIP_PIXELS, 0);
-   	 	if (glu == null) glu = new GLU();
+        gl.glPixelStorei(GL2.GL_UNPACK_ROW_LENGTH, width);
+        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_ROWS, 0);
+        gl.glPixelStorei(GL2.GL_UNPACK_SKIP_PIXELS, 0);
+   	 	if (glu == null) glu = new GLUgl2();
          if (mipmapped) 
         	 // this doesn't work on my ATI card -cgg March, 2012
 	       if (false && haveAutoMipmapGeneration) {
-	        		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
-	                gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL.GL_COMPRESSED_RGBA, 
+	        		gl.glTexParameteri(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, GL2.GL_GENERATE_MIPMAP, GL.GL_TRUE);
+	                gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL2.GL_COMPRESSED_RGBA, 
 	                        width, height, 0, srcPixelFormat,
 	                        GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
 	       	} else {
@@ -441,7 +443,7 @@ public class Texture2DLoaderJOGL {
         else    
           gl.glTexImage2D(GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 
                   0, 
-                  GL.GL_COMPRESSED_RGBA, 
+                  GL2.GL_COMPRESSED_RGBA, 
                 width, 
                 height, 
                   0, 

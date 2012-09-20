@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.util.GLUT;
+import com.jogamp.opengl.util.gl2.GLUT;
+
 
 import de.jreality.jogl.AbstractViewer;
 import de.jreality.jogl.JOGLViewer;
@@ -89,14 +91,14 @@ public class InfoOverlay implements GLEventListener {
 		
 		//JOGLConfiguration.theLog.log(Level.FINE,"In info display");
 		
-		GL gl = glDrawable.getGL();
+		GL2 gl = glDrawable.getGL().getGL2();
 		GLU glu =  new GLU();
 
 		// Store old matrices
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
@@ -104,12 +106,12 @@ public class InfoOverlay implements GLEventListener {
 		gl.glViewport(0, 0, size.width, size.height);
 
 		// Store enabled state and disable lighting, texture mapping and the depth buffer
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
+		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
 		gl.glDisable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_LIGHTING);
+		gl.glDisable(GL2.GL_LIGHTING);
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glDisable(GL.GL_DEPTH_TEST);
-		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL.GL_CLIP_PLANE0);
+		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL2.GL_CLIP_PLANE0);
 
 		// Retrieve the current viewport and switch to orthographic mode
 		int viewPort[] = new int[4];
@@ -155,7 +157,7 @@ public class InfoOverlay implements GLEventListener {
 
 		// Restore old matrices
 		gl.glPopMatrix();
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPopMatrix();
 	}
 
@@ -199,6 +201,11 @@ public class InfoOverlay implements GLEventListener {
 		Runtime r = Runtime.getRuntime();
 		int block = 1024;
 		return "Memory usage: " + ((r.totalMemory() / block) - (r.freeMemory() / block)) + " kB";
+	}
+
+	public void dispose(GLAutoDrawable drawable) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

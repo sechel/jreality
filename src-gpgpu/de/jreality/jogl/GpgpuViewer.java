@@ -41,6 +41,7 @@
 package de.jreality.jogl;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 
 
@@ -68,14 +69,14 @@ public class GpgpuViewer extends JOGLViewer {
         calculationInited=true;
         calculation.init(arg0);
       }
-      arg0.getGL().glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+      arg0.getGL().getGL2().glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
       calculation.display(arg0);
-      arg0.getGL().glPopAttrib();
+      arg0.getGL().getGL2().glPopAttrib();
     }
-    arg0.getGL().glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+    arg0.getGL().getGL2().glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
     super.renderer.lightsChanged=true;
     super.display(arg0);
-    arg0.getGL().glPopAttrib();
+    arg0.getGL().getGL2().glPopAttrib();
   }
   
   public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3, int arg4) {

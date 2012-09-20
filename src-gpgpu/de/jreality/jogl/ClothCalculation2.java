@@ -46,6 +46,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
@@ -129,31 +130,31 @@ private boolean hasValidVBO;
     "} \n";
   }
   
-  protected void initViewport(GL gl, GLU glu) {
-    gl.glMatrixMode(GL.GL_PROJECTION);
+  protected void initViewport(GL2 gl, GLU glu) {
+    gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glLoadIdentity();
     glu.gluOrtho2D(0, NUM_ROWS, 0, NUM_COLS);
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glLoadIdentity();
     gl.glViewport(0, 0, NUM_ROWS, NUM_COLS);
   }
 
-  private void initVBO(GL gl) {
+  private void initVBO(GL2 gl) {
       if (vbo[0] == 0) {
-        gl.glGenBuffersARB(1, vbo, 0);
+        gl.glGenBuffers(1, vbo, 0);
         System.out.println("created VBO=" + vbo[0]);
-        gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-        gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL.GL_STREAM_COPY);
-        gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+        gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER, vbo[0]);
+        gl.glBufferData(GL2.GL_PIXEL_PACK_BUFFER, 1024*1024*4*4, (Buffer)null, GL2.GL_STREAM_COPY);
+        gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER, 0);
         hasValidVBO=true;
       }
     }
 
   
-  protected void renderQuad(GL gl) {
+  protected void renderQuad(GL2 gl) {
     gl.glColor3f(1,0,0);
-    gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-    gl.glBegin(GL.GL_QUADS);
+    gl.glPolygonMode(GL.GL_FRONT, GL2.GL_FILL);
+    gl.glBegin(GL2.GL_QUADS);
       gl.glTexCoord2d(0.0, 0.0);
       gl.glVertex2d(0.0,0.0);
       gl.glTexCoord2d(isTex2D() ? 1 : NUM_ROWS, 0.0);
@@ -165,17 +166,17 @@ private boolean hasValidVBO;
     gl.glEnd();
   }
   
-  protected void transferFromTextureToVBO(GL gl) {
-      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-      gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+  protected void transferFromTextureToVBO(GL2 gl) {
+      gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER, vbo[0]);
+      gl.glReadBuffer(GL2.GL_COLOR_ATTACHMENT0);
       gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
-      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+      gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER, 0);
       hasValidVBO=true;
     }
 
   public void display(GLAutoDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
-    GL gl = drawable.getGL();
+    GL2 gl = drawable.getGL().getGL2();
     GLU glu = new GLU(); // drawable.getGLU();
     if (hasData && doIntegrate) {
       
@@ -199,15 +200,15 @@ private boolean hasValidVBO;
       
       if(true) {
       
-        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong], 0);
-        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong], 0);
+        gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER,
+            GL2.GL_COLOR_ATTACHMENT0, TEX_TARGET, texIDsPositions[pingPong], 0);
+        gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER,
+            GL2.GL_COLOR_ATTACHMENT1, TEX_TARGET, texIDsVelocities[pingPong], 0);
     
         
         GpgpuUtility.checkBuf(gl);
         
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        gl.glDrawBuffer(GL2.GL_COLOR_ATTACHMENT0);
         
         // set all values
         // ping pong - current values
@@ -232,12 +233,12 @@ private boolean hasValidVBO;
         
        // gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 8);
         //gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 8);
-        gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0);
         
         if(false) {
             initVBO(gl);
             transferFromTextureToVBO(gl);
-        gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
+        gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0]);
         gl.glReadBuffer(GL.GL_ARRAY_BUFFER);
         gl.glReadPixels(0, 0, NUM_ROWS, NUM_COLS, TEX_FORMAT, GL.GL_UNSIGNED_BYTE, valueBuffer.slice());
         } else
@@ -252,7 +253,7 @@ private boolean hasValidVBO;
         //GpgpuUtility.dumpData(valueBuffer);
 
         
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
+        gl.glDrawBuffer(GL2.GL_COLOR_ATTACHMENT1);
         program.setUniform("point", false);
         GlslLoader.render(program, gl);
         renderQuad(gl);
@@ -271,7 +272,7 @@ private boolean hasValidVBO;
     
       gl.glDisable(TEX_TARGET);
       // switch back to old buffer
-      gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+      gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
     
       calculationFinished();
     }
@@ -383,4 +384,9 @@ private boolean hasValidVBO;
     cc.triggerCalculation();
     GpgpuUtility.run(cc);
   }
+
+public void dispose(GLAutoDrawable drawable) {
+	// TODO Auto-generated method stub
+	
+}
 }

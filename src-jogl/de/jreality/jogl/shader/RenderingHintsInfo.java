@@ -41,6 +41,7 @@
 package de.jreality.jogl.shader;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -168,7 +169,7 @@ public class RenderingHintsInfo  {
 	public void _render(JOGLRenderingState jrs, int which)	{
 		if (!hasSomeActiveField) return;
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 //		if (this == defaultRHInfo) 
 //			System.err.println("rendering default rhinfo");
 		// TODO handle zbuffer enabled correctly; it's a bit tricky 
@@ -191,8 +192,8 @@ public class RenderingHintsInfo  {
 //			System.err.println("Setting transp to "+values[TE][which]);
 		}
 		if (values[LE][ACTIVE]) {
-			if (values[LE][which])			gl.glEnable(GL.GL_LIGHTING);
-			else							gl.glDisable(GL.GL_LIGHTING);		
+			if (values[LE][which])			gl.glEnable(GL2.GL_LIGHTING);
+			else							gl.glDisable(GL2.GL_LIGHTING);		
 			jrs.lighting = values[LE][which];
 		}
 		if (values[FN][ACTIVE]) {
@@ -214,11 +215,11 @@ public class RenderingHintsInfo  {
 			gl.glAlphaFunc(values[IA][which] ? GL.GL_GREATER : GL.GL_ALWAYS, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
 		}
 		if (values[LL][ACTIVE]) {
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, values[LL][which] ? GL.GL_TRUE : GL.GL_FALSE);
+			gl.glLightModeli(GL2.GL_LIGHT_MODEL_LOCAL_VIEWER, values[LL][which] ? GL.GL_TRUE : GL.GL_FALSE);
 		}
 		if (values[SS][ACTIVE]) {
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
-			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
+			gl.glLightModeli(GL2.GL_LIGHT_MODEL_COLOR_CONTROL, values[SS][which] ?	
+			GL2.GL_SEPARATE_SPECULAR_COLOR : GL2.GL_SINGLE_COLOR);
 		}
 //		if (values[SM][ACTIVE])	{
 //			if (values[SM][which]) gl.glShadeModel(GL.GL_SMOOTH);

@@ -45,8 +45,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.DebugGL;
+import javax.media.opengl.DebugGL2;
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
@@ -84,7 +85,7 @@ private static final double[] ID = Rn.identityMatrix(4);
   private int[] fbos = new int[1]; // 1 framebuffer
   private int[] vbo = new int[1]; // 1 vertexbuffer
   private int[] initialValuesTextureID = new int[2]; // ping pong textures
-  private int[] attachments = {GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_COLOR_ATTACHMENT1_EXT};
+  private int[] attachments = {GL2.GL_COLOR_ATTACHMENT0, GL2.GL_COLOR_ATTACHMENT1};
   protected int readTex;
 
   private int writeTex = 1;
@@ -121,14 +122,14 @@ private static final double[] ID = Rn.identityMatrix(4);
    String vendor = drawable.getGL().glGetString(GL.GL_VENDOR);
    tex2D = true;//!vendor.startsWith("NVIDIA");
    atiHack=false;//tex2D;
-   TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL.GL_TEXTURE_RECTANGLE_ARB;
-   TEX_INTERNAL_FORMAT = tex2D ? GL.GL_RGBA32F_ARB : GL.GL_RGBA32F_ARB;
+   TEX_TARGET = tex2D ? GL.GL_TEXTURE_2D : GL2.GL_TEXTURE_RECTANGLE;
+   TEX_INTERNAL_FORMAT = tex2D ? GL2.GL_RGBA32F : GL2.GL_RGBA32F;
    renderer = new GlslProgram(new Appearance(), "foo", null, isTex2D() ? RENDER_PROGRAM.replaceAll("Rect", "2D") : RENDER_PROGRAM);
   }
   
   public void display(GLAutoDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
-    GL gl = drawable.getGL();
+    GL2 gl = drawable.getGL().getGL2();
     GLU glu = new GLU(); //drawable.getGLU();
     if (doIntegrate && hasValues) {
       
@@ -146,9 +147,9 @@ private static final double[] ID = Rn.identityMatrix(4);
       // user data textures
       initDataTextures(gl);
 
-      gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+      gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER,
           attachments[readTex], TEX_TARGET, initialValuesTextureID[readTex], 0);      
-      gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
+      gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER,
           attachments[writeTex], TEX_TARGET, initialValuesTextureID[writeTex], 0);
 
       GpgpuUtility.checkBuf(gl);
@@ -186,7 +187,7 @@ private static final double[] ID = Rn.identityMatrix(4);
       GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
 
       // switch back to old buffer
-      gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+      gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);
 
       doIntegrate=false;
       measure();
@@ -259,10 +260,10 @@ private static final double[] ID = Rn.identityMatrix(4);
   protected void calculationFinished() {
   }
   
-  protected void renderQuad(GL gl) {
+  protected void renderQuad(GL2 gl) {
     gl.glColor3f(1,0,0);
-    gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-    gl.glBegin(GL.GL_QUADS);
+    gl.glPolygonMode(GL.GL_FRONT, GL2.GL_FILL);
+    gl.glBegin(GL2.GL_QUADS);
       gl.glTexCoord2d(0.0, 0.0);
       gl.glVertex2d(0.0,0.0);
       gl.glTexCoord2d(tex2D ? 1 : valueTextureSize, 0.0);
@@ -274,18 +275,18 @@ private static final double[] ID = Rn.identityMatrix(4);
     gl.glEnd();
   }
 
-  private void initVBO(GL gl) {
+  private void initVBO(GL2 gl) {
     if (vbo[0] == 0) {
-      gl.glGenBuffersARB(1, vbo, 0);
+      gl.glGenBuffers(1, vbo, 0);
       System.out.println("created VBO=" + vbo[0]);
-      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
-      gl.glBufferDataARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL.GL_DYNAMIC_DRAW_ARB);
-      gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+      gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
+      gl.glBufferData(GL2.GL_PIXEL_PACK_BUFFER_EXT, 1024*1024*4*4, (Buffer)null, GL2.GL_DYNAMIC_DRAW);
+      gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER_EXT, 0);
       hasValidVBO=true;
     }
   }
 
-  protected void initPrograms(GL gl) {
+  protected void initPrograms(GL2 gl) {
     String src = program == null ? initSource() : updateSource();
     if (src == null) return;
     if (program != null) GlslLoader.dispose(gl, program);
@@ -330,8 +331,8 @@ private static final double[] ID = Rn.identityMatrix(4);
     gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
     gl.glTexImage2D(TEX_TARGET, 0, TEX_INTERNAL_FORMAT, size, size, 0,
         TEX_FORMAT, GL.GL_FLOAT, (Buffer) null);
 //    System.out.println("created texture: id="+texID+" size="+size+".");
@@ -340,7 +341,7 @@ private static final double[] ID = Rn.identityMatrix(4);
   /**
    * Transfers data from currently texture, and stores it in given array.
    */
-  private void transferFromTexture(GL gl, FloatBuffer data) {
+  private void transferFromTexture(GL2 gl, FloatBuffer data) {
     // version (a): texture is attached
     // recommended on both NVIDIA and ATI
     //if (!isTex2D()) {
@@ -358,12 +359,12 @@ private static final double[] ID = Rn.identityMatrix(4);
    */
   protected void transferToTexture(GL gl, FloatBuffer buffer, int texID, int size) {
     // version (a): HW-accelerated on NVIDIA
-	gl.glPixelStorei(GL.GL_UNPACK_ROW_LENGTH, size);
+	gl.glPixelStorei(GL2.GL_UNPACK_ROW_LENGTH, size);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
-    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_FALSE);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+    gl.glTexParameteri(TEX_TARGET, GL.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL2.GL_GENERATE_MIPMAP, GL.GL_FALSE);
     gl.glBindTexture(TEX_TARGET, texID);
     gl.glTexSubImage2D(TEX_TARGET, 0, 0, 0, size, size, TEX_FORMAT,
         GL.GL_FLOAT, buffer);
@@ -375,19 +376,19 @@ private static final double[] ID = Rn.identityMatrix(4);
     //    glDrawPixels(texSize,texSize,textureParameters.texFormat,GL_FLOAT,data);
   }
 
-  private void transferFromTextureToVBO(GL gl) {
-    gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
+  private void transferFromTextureToVBO(GL2 gl) {
+    gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER_EXT, vbo[0]);
     gl.glReadPixels(0, 0, valueTextureSize, valueTextureSize, TEX_FORMAT, GL.GL_FLOAT, 0l);
-    gl.glBindBufferARB(GL.GL_PIXEL_PACK_BUFFER_EXT, 0);
+    gl.glBindBuffer(GL2.GL_PIXEL_PACK_BUFFER_EXT, 0);
     hasValidVBO=true;
   }
 
-  protected void initFBO(GL gl) {
+  protected void initFBO(GL2 gl) {
     if (fbos[0] == 0) {
-      gl.glGenFramebuffersEXT(1, fbos, 0);
+      gl.glGenFramebuffers(1, fbos, 0);
       System.out.println("created FBO=" + fbos[0]);
     }
-    gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, fbos[0]);
+    gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, fbos[0]);
   }
 
 //  private void initVBO(GL gl) {
@@ -397,11 +398,11 @@ private static final double[] ID = Rn.identityMatrix(4);
 //    }
 //  }
   
-  protected void initViewport(GL gl, GLU glu, boolean gpgpu) {
-    gl.glMatrixMode(GL.GL_PROJECTION);
+  protected void initViewport(GL2 gl, GLU glu, boolean gpgpu) {
+    gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glLoadIdentity();
     glu.gluOrtho2D(0, valueTextureSize, 0, valueTextureSize);
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glLoadIdentity();
     if (gpgpu) gl.glViewport(0, 0, valueTextureSize, valueTextureSize);
     else  gl.glViewport(0, 0, canvasViewport[0], canvasViewport[1]);
@@ -522,15 +523,15 @@ private static final double[] ID = Rn.identityMatrix(4);
    */
   public void renderPoints(JOGLRenderer jr) {
     if (!hasValidVBO || readData) return;
-    GL gl = jr.globalGL;
+    GL2 gl = jr.globalGL;
     
-    gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, vbo[0]);
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0]);
     gl.glVertexPointer(4, GL.GL_FLOAT, 0, 0l);
-    gl.glBindBufferARB(GL.GL_ARRAY_BUFFER, 0);  
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);  
     
-    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
     gl.glDrawArrays(GL.GL_POINTS, 0, valueTextureSize*valueTextureSize);
-    gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
+    gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
   }
 
 }

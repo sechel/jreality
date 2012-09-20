@@ -47,6 +47,7 @@ import static de.jreality.shader.CommonAttributes.USE_GLSL;
 import java.awt.Color;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.IndexedLineSetUtility;
@@ -154,18 +155,18 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.renderer.globalGL;
-		gl.glMaterialfv(GL.GL_FRONT, GL.GL_DIFFUSE, diffuseColorAsFloat,0);
+		GL2 gl = jrs.renderer.globalGL;
+		gl.glMaterialfv(GL.GL_FRONT, GL2.GL_DIFFUSE, diffuseColorAsFloat,0);
 		gl.glColor4fv( diffuseColorAsFloat,0);
 		System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
 		
 		gl.glLineWidth((float) ( lineWidth * jrs.globalAntiAliasingFactor));
 		jrs.lineWidth = lineWidth * jrs.globalAntiAliasingFactor;
 		if (lineStipple) {
-			gl.glEnable(GL.GL_LINE_STIPPLE);
+			gl.glEnable(GL2.GL_LINE_STIPPLE);
 			gl.glLineStipple(lineFactor, (short) lineStipplePattern);
 		} 
-		else gl.glDisable(GL.GL_LINE_STIPPLE);
+		else gl.glDisable(GL2.GL_LINE_STIPPLE);
 
 		changedLighting = false;
 		if (tubeDraw)	{
@@ -176,8 +177,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		} else {
 //			System.err.println("line lighting = "+lineLighting);
 			if (lineLighting != jrs.lighting)	{
-				if (lineLighting) gl.glEnable(GL.GL_LIGHTING);
-				else gl.glDisable(GL.GL_LIGHTING);
+				if (lineLighting) gl.glEnable(GL2.GL_LIGHTING);
+				else gl.glDisable(GL2.GL_LIGHTING);
 				changedLighting = true;
 			}			
 			if (lineLighting) polygonShader.render(jrs);
@@ -212,7 +213,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	public void postRender(JOGLRenderingState jrs)	{
 		if (!jrs.shadeGeometry) return;
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		if (useGLSL) 
 			GlslLoader.postRender(glslProgram, gl);
 		if (!tubeDraw) {
@@ -230,8 +231,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 			}
 		}
 		if (changedLighting)	{
-			if (jrs.lighting)  gl.glEnable(GL.GL_LIGHTING);
-			else gl.glDisable(GL.GL_LIGHTING);			
+			if (jrs.lighting)  gl.glEnable(GL2.GL_LIGHTING);
+			else gl.glDisable(GL2.GL_LIGHTING);			
 		}
 
 
@@ -268,7 +269,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 	int[] tubeDL = null;
 	boolean testQMS = true;
 	public int createTubesOnEdgesAsDL(IndexedLineSet ils, double rad,  JOGLRenderer jr,  boolean pickMode, boolean useDisplayLists)	{
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		double[] p1 = new double[4],
 			p2 = new double[4];
 		p1[3] = p2[3] = 1.0;
@@ -288,7 +289,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (tubeDL[sig+1] == 0)	{
 			tubeDL[sig+1] = gl.glGenLists(1);
 			//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+tubeDL[sig+1]+" for gl "+jr.globalGL);
-			gl.glNewList(tubeDL[sig+1], GL.GL_COMPILE);
+			gl.glNewList(tubeDL[sig+1], GL2.GL_COMPILE);
 			JOGLRendererHelper.drawFaces(jr, TubeUtility.urTube[sig+1] );
 			gl.glEndList();	
 		}
@@ -298,7 +299,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 		if (useDisplayLists) {
 			nextDL = gl.glGenLists(1);
 			//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+nextDL+" for gl "+jr.globalGL);
-			gl.glNewList(nextDL, GL.GL_COMPILE);
+			gl.glNewList(nextDL, GL2.GL_COMPILE);
 		}
 		int  k, l;
 		DoubleArray da;
@@ -407,7 +408,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 					if (useDisplayLists && dList== -1)	{
 						dList = jr.globalGL.glGenLists(1);
 						//LoggingSystem.getLogger(this).fine("LineShader: Allocating new dlist "+dList+" for gl "+jr.globalGL);
-						jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+						jr.globalGL.glNewList(dList, GL2.GL_COMPILE); //_AND_EXECUTE);
 						JOGLRendererHelper.drawLines(jr, (IndexedLineSet) g,  vertexColors, jr.renderingState.diffuseColor[3]);
 //						System.err.println("rendering lines w/ dlist");
 						jr.globalGL.glEndList();									

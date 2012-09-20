@@ -45,6 +45,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
@@ -111,19 +112,19 @@ public class ClothCalculation extends AbstractCalculation {
     "} \n";
   }
   
-  protected void initViewport(GL gl, GLU glu) {
-    gl.glMatrixMode(GL.GL_PROJECTION);
+  protected void initViewport(GL2 gl, GLU glu) {
+    gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glLoadIdentity();
     glu.gluOrtho2D(0, dataTextureSize, 0, dataTextureSize);
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glLoadIdentity();
     gl.glViewport(0, 0, dataTextureSize, dataTextureSize);
   }
 
-  protected void renderQuad(GL gl) {
+  protected void renderQuad(GL2 gl) {
     gl.glColor3f(1,0,0);
-    gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-    gl.glBegin(GL.GL_QUADS);
+    gl.glPolygonMode(GL.GL_FRONT, GL2.GL_FILL);
+    gl.glBegin(GL2.GL_QUADS);
       gl.glTexCoord2d(0.0, 0.0);
       gl.glVertex2d(0.0,0.0);
       gl.glTexCoord2d(isTex2D() ? 1 : dataTextureSize, 0.0);
@@ -137,7 +138,7 @@ public class ClothCalculation extends AbstractCalculation {
 
   public void display( GLAutoDrawable drawable) {
     //GL gl = new DebugGL(drawable.getGL());
-    GL gl = drawable.getGL();
+    GL2 gl = drawable.getGL().getGL2();
     GLU glu = new GLU(); //drawable.getGLU();
     if (hasData && doIntegrate) {
       
@@ -160,14 +161,14 @@ public class ClothCalculation extends AbstractCalculation {
       
       for(int i = 0; i < NUM_ROWS-1; i++) {
       
-        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT0_EXT, TEX_TARGET, texIDsPositions[pingPong*NUM_ROWS+i+1], 0);
-        gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT,
-            GL.GL_COLOR_ATTACHMENT1_EXT, TEX_TARGET, texIDsVelocities[pingPong*NUM_ROWS+i+1], 0);
+        gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER,
+            GL2.GL_COLOR_ATTACHMENT0, TEX_TARGET, texIDsPositions[pingPong*NUM_ROWS+i+1], 0);
+        gl.glFramebufferTexture2D(GL.GL_FRAMEBUFFER,
+            GL2.GL_COLOR_ATTACHMENT1, TEX_TARGET, texIDsVelocities[pingPong*NUM_ROWS+i+1], 0);
     
         GpgpuUtility.checkBuf(gl);
         
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        gl.glDrawBuffer(GL2.GL_COLOR_ATTACHMENT0);
         
         // set all values
         // ping pong - current values
@@ -190,11 +191,11 @@ public class ClothCalculation extends AbstractCalculation {
         gl.glFinish();
         valueBuffer.position((i+1)*NUM_COLS*4).limit((i+2)*NUM_COLS*4);
         //System.out.println(valueBuffer);
-        gl.glReadBuffer(GL.GL_COLOR_ATTACHMENT0_EXT);
+        gl.glReadBuffer(GL2.GL_COLOR_ATTACHMENT0);
         //expensive;
         gl.glReadPixels(0, 0, dataTextureSize, dataTextureSize, TEX_FORMAT, GL.GL_FLOAT, valueBuffer.slice());
         
-        gl.glDrawBuffer(GL.GL_COLOR_ATTACHMENT1_EXT);
+        gl.glDrawBuffer(GL2.GL_COLOR_ATTACHMENT1);
         program.setUniform("point", false);
         GlslLoader.render(program, gl);
         renderQuad(gl);
@@ -211,7 +212,7 @@ public class ClothCalculation extends AbstractCalculation {
       GlslLoader.postRender(program, gl); // any postRender just resets the shader pipeline
     
       // switch back to old buffer
-      gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);
+      gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
     
       calculationFinished();
       gl.glDisable(TEX_TARGET);
@@ -310,4 +311,9 @@ public class ClothCalculation extends AbstractCalculation {
     cc.triggerCalculation();
     GpgpuUtility.run(cc);
   }
+
+public void dispose(GLAutoDrawable drawable) {
+	// TODO Auto-generated method stub
+	
+}
 }

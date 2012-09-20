@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -74,11 +75,11 @@ public class SimpleVertexShader implements VertexShader {
 	}
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 //		JOGLConfiguration.theLog.log(Level.FINER,"Rendering simple vertex shader");
 
 		if (jr.renderingState.frontBack != frontBack)	{
-			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+			gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
 			jr.renderingState.frontBack = frontBack;
 		}
 //		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {

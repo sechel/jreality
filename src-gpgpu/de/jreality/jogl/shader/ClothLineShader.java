@@ -48,6 +48,7 @@ import java.nio.IntBuffer;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.ClothCalculation;
 import de.jreality.jogl.GpgpuViewer;
@@ -319,18 +320,18 @@ public class ClothLineShader extends AbstractPrimitiveShader {
       return;
     }
         
-    GL gl = jr.globalGL;
+    GL2 gl = jr.globalGL;
         
-    gl.glPushAttrib(GL.GL_LIGHTING_BIT);
-    gl.glDisable(GL.GL_LIGHTING);
+    gl.glPushAttrib(GL2.GL_LIGHTING_BIT);
+    gl.glDisable(GL2.GL_LIGHTING);
 
       gl.glColor3fv(difCol,0);
       gl.glPointSize((float) pointSize);
       if (sprites && spriteTex != null) {
-        gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation, 0);
-        gl.glEnable(GL.GL_POINT_SPRITE_ARB);
+        gl.glPointParameterfv(GL2.GL_POINT_DISTANCE_ATTENUATION, pointAttenuation, 0);
+        gl.glEnable(GL2.GL_POINT_SPRITE);
         gl.glActiveTexture(GL.GL_TEXTURE0);
-        gl.glTexEnvi(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_TRUE);
+        gl.glTexEnvi(GL2.GL_POINT_SPRITE, GL2.GL_COORD_REPLACE, GL.GL_TRUE);
         gl.glEnable(GL.GL_TEXTURE_2D);
         Texture2DLoaderJOGL.render(jr.globalGL, spriteTex);
       }
@@ -347,8 +348,8 @@ public class ClothLineShader extends AbstractPrimitiveShader {
         Texture2DLoaderJOGL.render(jr.globalGL, tex);
       }
       
-        gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-        gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+        gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+        gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         
         gl.glVertexPointer(4, GL.GL_FLOAT, 0, data);
         gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, texCoords);
@@ -359,23 +360,23 @@ public class ClothLineShader extends AbstractPrimitiveShader {
         gl.glLockArraysEXT(0, data.remaining()/4);
         
         //gl.glDrawArrays(GL.GL_QUADS, 0, cnt);
-        gl.glDrawElements(GL.GL_QUADS, cnt, GL.GL_UNSIGNED_INT, index);
+        gl.glDrawElements(GL2.GL_QUADS, cnt, GL.GL_UNSIGNED_INT, index);
         
         gl.glUnlockArraysEXT();
-        gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+        gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
         //gl.glDisableClientState(GL.GL_INDEX_ARRAY);
-        gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
+        gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 
     gl.glPopAttrib();
   }
 
   public void postRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-    GL gl = jr.globalGL;
+    GL2 gl = jr.globalGL;
     if (sprites) {
-      gl.glDisable(GL.GL_POINT_SPRITE_ARB);
+      gl.glDisable(GL2.GL_POINT_SPRITE);
       gl.glActiveTexture(GL.GL_TEXTURE0);
-      gl.glTexEnvf(GL.GL_POINT_SPRITE_ARB, GL.GL_COORD_REPLACE_ARB, GL.GL_FALSE);
+      gl.glTexEnvf(GL2.GL_POINT_SPRITE, GL2.GL_COORD_REPLACE, GL.GL_FALSE);
       gl.glDisable(GL.GL_TEXTURE_2D);
     }
     if (tex != null) {

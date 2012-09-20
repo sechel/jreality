@@ -53,6 +53,7 @@ import static de.jreality.shader.CommonAttributes.USE_GLSL;
 import java.awt.Color;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
@@ -184,14 +185,14 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	
 	public void preRender(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
-		if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-		else		gl.glShadeModel(GL.GL_FLAT);
+		GL2 gl = jr.globalGL;
+		if (smoothShading) gl.glShadeModel(GL2.GL_SMOOTH);
+		else		gl.glShadeModel(GL2.GL_FLAT);
 		jrs.smoothShading = smoothShading;
 		int texunitcoords = 0;
 //    	hasTextures = false;
 		if (hasTextures) {
-			gl.glPushAttrib(GL.GL_TEXTURE_BIT);
+			gl.glPushAttrib(GL2.GL_TEXTURE_BIT);
 			texUnit = GL.GL_TEXTURE0; 
 		    Geometry curgeom = jr.renderingState.currentGeometry;
 		    if (firstTime)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
@@ -254,7 +255,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 	public void postRender(JOGLRenderingState jrs)	{
 		if (!jrs.shadeGeometry) return;
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jrs.renderer.globalGL;
+		GL2 gl = jrs.renderer.globalGL;
 		if (useGLSL) {
 			GlslLoader.postRender(glslProgram, gl);			
 		}
@@ -281,9 +282,9 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 		if (joglCubeMap != null) {
 			gl.glActiveTexture(refMapUnit);
 			gl.glDisable(GL.GL_TEXTURE_CUBE_MAP);
-			gl.glDisable(GL.GL_TEXTURE_GEN_S);
-			gl.glDisable(GL.GL_TEXTURE_GEN_T);
-			gl.glDisable(GL.GL_TEXTURE_GEN_R);
+			gl.glDisable(GL2.GL_TEXTURE_GEN_S);
+			gl.glDisable(GL2.GL_TEXTURE_GEN_T);
+			gl.glDisable(GL2.GL_TEXTURE_GEN_R);
 		}
 		jr.renderingState.texUnitCount=0;
 		// TODO fix this to return to previous state -- maybe textures NOT active
@@ -336,7 +337,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements Pol
 						if (dList == -1)	{
 							dList = jr.globalGL.glGenLists(1);
 //							LoggingSystem.getLogger(this).fine(" PolygonShader: is "+this+" Allocating new dlist "+dList+" for gl "+jr.globalGL);
-							jr.globalGL.glNewList(dList, GL.GL_COMPILE); //_AND_EXECUTE);
+							jr.globalGL.glNewList(dList, GL2.GL_COMPILE); //_AND_EXECUTE);
 							JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);
 							jr.globalGL.glEndList();	
 							displayListsDirty = false;

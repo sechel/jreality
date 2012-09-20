@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLRenderer;
 import de.jreality.shader.GlslProgram;
@@ -59,11 +60,11 @@ public class GlslLoader {
   private static final WeakHashMap GL_TO_GLSL=new WeakHashMap();
   
   public static void render(GlslProgram prog, JOGLRenderer jr) {
-    GL gl = jr.globalGL;
+    GL2 gl = jr.globalGL;
     render(prog, gl);
   }
   
-  public static void render(GlslProgram prog, GL gl) {
+  public static void render(GlslProgram prog, GL2 gl) {
 //	  System.err.println("in glslLoader render()");
     ProgramContext context = getContext(gl, prog);
     context.linkProgram(gl);
@@ -105,11 +106,11 @@ public class GlslLoader {
   }
 
   public static void postRender(GlslProgram prog, JOGLRenderer jr) {
-    GL gl = jr.globalGL;
+    GL2 gl = jr.globalGL;
     postRender(prog, gl);
   }
   
-  public static void postRender(GlslProgram prog, GL gl) {
+  public static void postRender(GlslProgram prog, GL2 gl) {
     ProgramContext context = getContext(gl, prog);
     context.deactivateProgram(gl);
   }
@@ -138,11 +139,11 @@ public class GlslLoader {
       this.source=source;
     }
     
-    public void activateProgram(GL gl) {
+    public void activateProgram(GL2 gl) {
       gl.glUseProgramObjectARB(progID.intValue());
     }
     
-    public void deactivateProgram(GL gl) {
+    public void deactivateProgram(GL2 gl) {
       gl.glUseProgramObjectARB(0);
     }
 
@@ -150,7 +151,7 @@ public class GlslLoader {
       return currentValues.get(parameter);
     }
     
-    void writeValue(GL gl, UniformParameter param, Object value) {
+    void writeValue(GL2 gl, UniformParameter param, Object value) {
       String rep = param.getStringRep();
       Object[] params = new Object[param.isMatrix() ? 5 : 4];
       params[0] = uniLocation(param.getName(), gl);
@@ -174,13 +175,13 @@ public class GlslLoader {
       currentValues.put(param, value);
     }
     
-    void linkProgram(GL gl) {
+    void linkProgram(GL2 gl) {
       if (isLinked) return;
 
       progID = new Integer(gl.glCreateProgramObjectARB());
 
       if (source.getVertexProgram() != null) {
-        int vertexProgID = gl.glCreateShaderObjectARB(GL.GL_VERTEX_SHADER_ARB);
+        int vertexProgID = gl.glCreateShaderObjectARB(GL2.GL_VERTEX_SHADER);
         gl.glShaderSource(vertexProgID, source.getVertexProgram().length, source.getVertexProgram(), (int[]) null, 0);
         gl.glCompileShaderARB(vertexProgID);
         printInfoLog("vert compile", vertexProgID, gl);
@@ -188,7 +189,7 @@ public class GlslLoader {
         printInfoLog("vert attatch", vertexProgID, gl);
       }
       if (source.getFragmentProgram() != null) {
-        int fragmentProgID = gl.glCreateShaderObjectARB(GL.GL_FRAGMENT_SHADER_ARB);
+        int fragmentProgID = gl.glCreateShaderObjectARB(GL2.GL_FRAGMENT_SHADER);
         gl.glShaderSourceARB(fragmentProgID, source.getFragmentProgram().length, source.getFragmentProgram(), (int[]) null, 0);
         gl.glCompileShaderARB(fragmentProgID);
         printInfoLog("frag compile", fragmentProgID, gl);
@@ -203,7 +204,7 @@ public class GlslLoader {
       isLinked = true;
     }
 
-    private Integer uniLocation(String name, GL gl) {
+    private Integer uniLocation(String name, GL2 gl) {
       int loc;
       loc = gl.glGetUniformLocationARB(progID.intValue(), name);
       if (loc == -1) {
@@ -215,12 +216,12 @@ public class GlslLoader {
     }
   }
   
-  public static void printInfoLog(String name, int objectHandle, GL gl) {
+  public static void printInfoLog(String name, int objectHandle, GL2 gl) {
     int[] logLength = new int[1];
     int[] charsWritten = new int[1];
     byte[] infoLog;
     
-    gl.glGetObjectParameterivARB(objectHandle, GL.GL_OBJECT_INFO_LOG_LENGTH_ARB, IntBuffer.wrap(logLength));
+    gl.glGetObjectParameterivARB(objectHandle, GL2.GL_OBJECT_INFO_LOG_LENGTH_ARB, IntBuffer.wrap(logLength));
     
     if (logLength[0] > 0) {
       infoLog = new byte[logLength[0]];
@@ -233,7 +234,7 @@ public class GlslLoader {
     }
   }
 
-  public static void dispose(GL gl, GlslProgram prog) {
+  public static void dispose(GL2 gl, GlslProgram prog) {
     ProgramContext context = getContext(gl, prog);
     if (context == null) {
       System.out.println("Context NULL while disposing!!!");

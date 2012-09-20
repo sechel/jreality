@@ -41,6 +41,7 @@
 package de.jreality.jogl.shader;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.JOGLConfiguration;
 import de.jreality.jogl.JOGLRenderer;
@@ -109,7 +110,7 @@ public class RenderingHintsShader  {
 	private boolean oldFlipped = flipNormalsEnabled;
 	public void render(JOGLRenderingState jrs)	{
 		JOGLRenderer jr = jrs.renderer;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		if (transparencyEnabled)	{
 		  gl.glEnable (GL.GL_BLEND);
 		  gl.glDepthMask(zBufferEnabled);
@@ -119,8 +120,8 @@ public class RenderingHintsShader  {
 		  gl.glDisable(GL.GL_BLEND);
 		}
 		jr.renderingState.transparencyEnabled = transparencyEnabled;
-		if (lightingEnabled)			gl.glEnable(GL.GL_LIGHTING);
-		else							gl.glDisable(GL.GL_LIGHTING);
+		if (lightingEnabled)			gl.glEnable(GL2.GL_LIGHTING);
+		else							gl.glDisable(GL2.GL_LIGHTING);
 		
 		if (backFaceCullingEnabled)  {
 			gl.glEnable(GL.GL_CULL_FACE);
@@ -143,12 +144,12 @@ public class RenderingHintsShader  {
 			jr.renderingState.ignoreAlpha0 = ignoreAlpha0;
 //		}
 		if (localLightModel != jr.renderingState.localLightModel) {
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
+			gl.glLightModeli(GL2.GL_LIGHT_MODEL_LOCAL_VIEWER, localLightModel ? GL.GL_TRUE : GL.GL_FALSE);
 			jr.renderingState.localLightModel = localLightModel;			
 		}
 		if (separateSpecularColor != jr.renderingState.separateSpecularColor) {
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_COLOR_CONTROL, separateSpecularColor ?	
-			GL.GL_SEPARATE_SPECULAR_COLOR : GL.GL_SINGLE_COLOR);
+			gl.glLightModeli(GL2.GL_LIGHT_MODEL_COLOR_CONTROL, separateSpecularColor ?	
+			GL2.GL_SEPARATE_SPECULAR_COLOR : GL2.GL_SINGLE_COLOR);
 			jr.renderingState.separateSpecularColor = separateSpecularColor;			
 		}
 		jr.renderingState.useDisplayLists = useDisplayLists; //(); //useDisplayLists(activeDL, jpc);
