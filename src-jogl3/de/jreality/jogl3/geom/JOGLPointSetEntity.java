@@ -1,0 +1,142 @@
+package de.jreality.jogl3.geom;
+
+import java.util.HashMap;
+import java.util.Set;
+
+import javax.media.opengl.GL3;
+
+import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.shader.GLVBO;
+import de.jreality.jogl3.shader.GLVBOFloat;
+import de.jreality.jogl3.shader.GLVBOInt;
+import de.jreality.math.Rn;
+import de.jreality.scene.PointSet;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.event.GeometryEvent;
+
+public class JOGLPointSetEntity extends JOGLGeometryEntity {
+
+	private HashMap<String, GLVBO> pointVbos = new HashMap<String, GLVBO>();
+	
+	public GLVBO getPointVBO(String s) {
+		// TODO Auto-generated method stub
+		return pointVbos.get(s);
+	}
+	public int getNumPointVBOs(){
+		return pointVbos.size();
+	}
+	public GLVBO[] getAllPointVBOs(){
+		GLVBO[] ret = new GLVBO[pointVbos.size()];
+		Set<String> keys = pointVbos.keySet();
+		int i = 0;
+		for(String s : keys){
+			ret[i] = pointVbos.get(s);
+			i++;
+		}
+		return ret;
+	}
+	
+	//protected GLVBOFloat vertexVBO = null;
+	public boolean dataUpToDate = false;
+
+	public JOGLPointSetEntity(PointSet node) {
+		super(node);
+	}
+
+	public void geometryChanged(GeometryEvent ev) {
+//		System.out.println("JOGLPointSetEntity.geometryChanged()");
+		dataUpToDate = false;
+	}
+
+	public void updateData(GL3 gl) {
+		
+		if (!dataUpToDate) {
+			//TODO convert to automatic creation of vbos
+			PointSet ps = (PointSet) getNode();
+			
+			Set<Attribute> aS = ps.getVertexAttributes().storedAttributes();
+			for(Attribute a : aS){
+				String shaderName = "";
+				for(String s : a.getName().split(" ")){
+					shaderName = shaderName + s;
+				}
+				//System.out.println(ps.getName() + "point set vertex attribute: "+a.getName());
+				DataList attribs = ps.getVertexAttributes(a);
+				if(isDoubleArray(attribs.getStorageModel())){
+					//the array containing one item per index
+					double[] inflatedAttributeArray = new double[ps.getNumPoints()*4];
+					//count = 0;
+					//for each index in the indexArray
+					for(int i = 0; i < ps.getNumPoints(); i++){
+						//we retrieve the vertex attribute
+						//int j = indexArray[i];
+						DoubleArray dA = (DoubleArray)attribs.get(i);
+						
+						inflatedAttributeArray[4*i+0] = dA.getValueAt(0);
+						if(dA.size() > 1)
+							inflatedAttributeArray[4*i+1] = dA.getValueAt(1);
+						else
+							inflatedAttributeArray[4*i+1] = 0;
+						if(dA.size() > 2)
+							inflatedAttributeArray[4*i+2] = dA.getValueAt(2);
+						else
+							inflatedAttributeArray[4*i+2] = 0;
+						if(dA.size() > 3)
+							inflatedAttributeArray[4*i+3] = dA.getValueAt(3);
+						else
+							inflatedAttributeArray[4*i+3] = 1;
+					}
+					pointVbos.put("vertex_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "vertex_"+a.getName()));
+					
+					System.out.println("creating in PointSetEntity " + "vertex_"+shaderName);
+				
+				}else if(isIntArray(attribs.getStorageModel())){
+					//the array containing one item per index
+					int[] inflatedAttributeArray = new int[ps.getNumPoints()*4];
+					//count = 0;
+					//for each index in the indexArray
+					for(int i = 0; i < ps.getNumPoints(); i++){
+						//we retrieve the vertex attribute
+						IntArray dA = (IntArray)attribs.get(i);
+						
+						inflatedAttributeArray[4*i+0] = dA.getValueAt(0);
+						if(dA.size() > 1)
+							inflatedAttributeArray[4*i+1] = dA.getValueAt(1);
+						else
+							inflatedAttributeArray[4*i+1] = 0;
+						if(dA.size() > 2)
+							inflatedAttributeArray[4*i+2] = dA.getValueAt(2);
+						else
+							inflatedAttributeArray[4*i+2] = 0;
+						if(dA.size() > 3)
+							inflatedAttributeArray[4*i+3] = dA.getValueAt(3);
+						else
+							inflatedAttributeArray[4*i+3] = 1;
+					}
+					pointVbos.put("vertex_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "vertex_"+a.getName()));
+//					System.out.println("creating " + "vertex_"+a.getName());
+				
+				}else{
+					System.out.println("not knowing what to do with " + attribs.getStorageModel().toString());
+				}
+				//System.out.println("face attribute names: " + a.getName());
+			}
+			
+			dataUpToDate = true;
+			
+//			DataList vA = ps.getVertexAttributes(Attribute.COORDINATES);
+//			System.out.println("num points = "+ ps.getNumPoints());
+//			double[] vertdata = new double[ps.getNumPoints()*3];
+//			vA.toDoubleArray(vertdata);
+//			
+//			vertexVBO = new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(vertdata), "vertex.coordinates");
+//			
+//			
+//			System.out.println("data up to date: "+getNode().getName());
+			
+		}
+	}
+}
