@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.geometry.GeometryUtility;
@@ -90,14 +91,14 @@ public class JOGLRendererHelper {
 
 	static Appearance pseudoAp = new Appearance();
 	static void handleBackground(JOGLRenderer jr, int width, int height, Appearance topAp) {
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		JOGLRenderingState openGLState = jr.renderingState;
 		Object bgo = null;
 		float[] backgroundColor = new float[4];
 		if (topAp == null) topAp = pseudoAp;
 //			return;
 		for (int i = 0; i < 6; ++i) {
-			gl.glDisable(i + GL.GL_CLIP_PLANE0);
+			gl.glDisable(i + GL2.GL_CLIP_PLANE0);
 		}
 		if (topAp != null)
 			bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_COLOR);
@@ -183,16 +184,16 @@ public class JOGLRendererHelper {
 			if (hasTexture || hasColors) {
 				// bgo = (Object) corners;
 				if (hasTexture)	{
-					gl.glPushAttrib(GL.GL_TEXTURE_BIT);
+					gl.glPushAttrib(GL2.GL_TEXTURE_BIT);
 					gl.glActiveTexture(GL.GL_TEXTURE0);
 					gl.glEnable(GL.GL_TEXTURE_2D);
 					Texture2DLoaderJOGL.render(gl, tex);
 				}
 //				gl.glPushAttrib(GL.GL_ENABLE_BIT);
 //				gl.glDisable(GL.GL_DEPTH_TEST);
-				gl.glDisable(GL.GL_LIGHTING);
-				gl.glShadeModel(GL.GL_SMOOTH);
-				gl.glBegin(GL.GL_POLYGON);
+				gl.glDisable(GL2.GL_LIGHTING);
+				gl.glShadeModel(GL2.GL_SMOOTH);
+				gl.glBegin(GL2.GL_POLYGON);
 				// gl.glScalef(.5f, .5f, 1.0f);
 				for (int q = 0; q < 4; ++q) {
 					if (hasTexture) {
@@ -207,10 +208,10 @@ public class JOGLRendererHelper {
 				// TODO push/pop this correctly (now may overwrite previous values)
 //				gl.glPopAttrib();
 				gl.glEnable(GL.GL_DEPTH_TEST);
-				gl.glEnable(GL.GL_LIGHTING);
+				gl.glEnable(GL2.GL_LIGHTING);
 				if  (hasTexture) {
 					gl.glDisable(GL.GL_TEXTURE_2D);
-					gl.glMatrixMode(GL.GL_PROJECTION);
+					gl.glMatrixMode(GL2.GL_PROJECTION);
 					gl.glPopAttrib();
 				}
 			}			
@@ -221,23 +222,23 @@ public class JOGLRendererHelper {
 			doFog = ((Boolean) bgo).booleanValue();
 		jr.renderingState.fogEnabled = doFog;
 		if (doFog) {
-			gl.glEnable(GL.GL_FOG);
+			gl.glEnable(GL2.GL_FOG);
 			bgo = topAp.getAttribute(CommonAttributes.FOG_COLOR);
 			float[] fogColor = backgroundColor;
 			if (bgo != null && bgo instanceof Color) {
 				fogColor = ((Color) bgo).getRGBComponents(null);
 			}
-			gl.glFogi(GL.GL_FOG_MODE, GL.GL_EXP);
-			gl.glFogfv(GL.GL_FOG_COLOR, fogColor,0);
+			gl.glFogi(GL2.GL_FOG_MODE, GL2.GL_EXP);
+			gl.glFogfv(GL2.GL_FOG_COLOR, fogColor,0);
 			bgo = topAp.getAttribute(CommonAttributes.FOG_DENSITY);
 			float density = (float) CommonAttributes.FOG_DENSITY_DEFAULT;
 			if (bgo != null && bgo instanceof Double) {
 				density = (float) ((Double) bgo).doubleValue();
 			}
-			gl.glFogf(GL.GL_FOG_DENSITY, density);
+			gl.glFogf(GL2.GL_FOG_DENSITY, density);
 		} else {
-			gl.glDisable(GL.GL_FOG);
-			gl.glFogf(GL.GL_FOG_DENSITY, 0f);
+			gl.glDisable(GL2.GL_FOG);
+			gl.glFogf(GL2.GL_FOG_DENSITY, 0f);
 		}
 	}
 
@@ -254,7 +255,7 @@ public class JOGLRendererHelper {
 	
 	public static void drawVertices(JOGLRenderer jr, PointSet sg) {
 		double alpha = jr.renderingState.currentAlpha;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		JOGLRenderingState openGLState = jr.renderingState;
 //		if (sg.getNumPoints() == 0)
 //			return;
@@ -273,7 +274,7 @@ public class JOGLRendererHelper {
 			colorLength = GeometryUtility.getVectorLength(vertexColors);
 			if (openGLState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
-						GL.GL_DIFFUSE);
+						GL2.GL_DIFFUSE);
 				openGLState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
@@ -325,7 +326,7 @@ public class JOGLRendererHelper {
 		if (sg.getNumEdges() == 0)
 			return;
 
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
     
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		int vertexLength = GeometryUtility.getVectorLength(vertices);
@@ -351,7 +352,7 @@ public class JOGLRendererHelper {
 		if (colorBind != PER_PART) {
 			if (jr.renderingState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
-						GL.GL_DIFFUSE);
+						GL2.GL_DIFFUSE);
 				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
@@ -410,7 +411,7 @@ public class JOGLRendererHelper {
 		double alpha = jr.renderingState.currentAlpha;
 		if (sg.getNumFaces() == 0)
 			return;
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		int colorBind = -1, normalBind, colorLength = 3;
 		DataList vertices = sg.getVertexAttributes(Attribute.COORDINATES);
 		DataList vertexNormals = sg.getVertexAttributes(Attribute.NORMALS);
@@ -444,9 +445,9 @@ public class JOGLRendererHelper {
 		// "+colorBind);
 		if (colorBind != PER_PART) {
 			if (jr.renderingState.frontBack != DefaultPolygonShader.FRONT_AND_BACK) {
-				gl.glEnable(GL.GL_COLOR_MATERIAL);
+				gl.glEnable(GL2.GL_COLOR_MATERIAL);
 				gl.glColorMaterial(DefaultPolygonShader.FRONT_AND_BACK,
-						GL.GL_DIFFUSE);
+						GL2.GL_DIFFUSE);
 				jr.renderingState.frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 			}
 		}
@@ -462,7 +463,7 @@ public class JOGLRendererHelper {
 //		System.err.println("Geom = "+sg.getName()+" normal length = "+nFiber);
 		jr.renderingState.normals4d = (nFiber == 4);
 		// HACK!!! make sure the vertex shader knows whether the normals are 4d or 3d
-		gl.glFogf(GL.GL_FOG_START,  nFiber == 4 ? 0.01f : 0f);
+		gl.glFogf(GL2.GL_FOG_START,  nFiber == 4 ? 0.01f : 0f);
 //		if (nFiber == 4) System.err.println("Rendering 4d normals for "+sg.getName());
 		DoubleArray da = null;
 		boolean isQuadMesh = false;
@@ -498,7 +499,7 @@ public class JOGLRendererHelper {
 			// this loops through the "rows" of the mesh (v is constant on each
 			// row)
 			for (int i = 0; i < maxFV; ++i) {
-				gl.glBegin(GL.GL_QUAD_STRIP);
+				gl.glBegin(GL2.GL_QUAD_STRIP);
 				// each iteration of this loop draws one quad strip consisting
 				// of 2 * maxU vertices
 				for (int j = 0; j <= maxFU; ++j) {
@@ -609,7 +610,7 @@ public class JOGLRendererHelper {
 						.toIntArray();
 				final int nf = tf.getLength();
 				// hack to allow texture per face!
-				gl.glBegin(GL.GL_POLYGON);
+				gl.glBegin(GL2.GL_POLYGON);
 				for (int j = 0; j < nf; ++j) {
 					int k = tf.getValueAt(j);
 					if (normalBind == PER_VERTEX) {
@@ -731,10 +732,10 @@ public class JOGLRendererHelper {
 			DoubleArrayArray vertices, IntArrayArray indices, double[] offset,
 			int alignment, double scale) {
 		if (labels == null )return;
-		GL gl = jr.globalGL;
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
+		GL2 gl = jr.globalGL;
+		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
 		gl.glEnable(GL.GL_BLEND);
-		gl.glDisable(GL.GL_LIGHTING);
+		gl.glDisable(GL2.GL_LIGHTING);
 		gl.glDepthMask(true);
 		JOGLConfiguration.glBlendFunc(gl);
 		gl.glColor3d(1, 1, 1);
@@ -773,7 +774,7 @@ public class JOGLRendererHelper {
 	/**
 	 * 
 	 */
-	final static int clipBase = GL.GL_CLIP_PLANE0;
+	final static int clipBase = GL2.GL_CLIP_PLANE0;
 	public static void processClippingPlanes(JOGLRenderer jr, List<SceneGraphPath> clipPlanes) {
 		int n = clipPlanes.size();
 		jr.renderingState.currentClippingPlane = clipBase;
@@ -798,7 +799,7 @@ public class JOGLRendererHelper {
 	}
 
 	public static void  pushClippingPlane(JOGLRenderer jr, double[] plane) {
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		gl.glClipPlane(jr.renderingState.currentClippingPlane, plane == null ? clipPlane : plane,0);
 		gl.glEnable(jr.renderingState.currentClippingPlane);
 		jr.renderingState.currentClippingPlane++;

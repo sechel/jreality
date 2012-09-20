@@ -44,6 +44,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
@@ -65,7 +66,7 @@ public class JOGLSphereHelper extends SphereUtility {
 		// we read this once -- had better be set to correct value when we do so!
 		sharedDisplayLists = JOGLConfiguration.sharedContexts;
 		int[] dlists = null; 
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		int n = SphereUtility.tessellatedCubes.length;
 		dlists = null;
 		dlists = new int[n];
@@ -74,7 +75,7 @@ public class JOGLSphereHelper extends SphereUtility {
 			SceneGraphComponent tcs = tessellatedCubeSphere(i, false);
 			dlists[i] = gl.glGenLists(1);
 //			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
-			gl.glNewList(dlists[i], GL.GL_COMPILE);
+			gl.glNewList(dlists[i], GL2.GL_COMPILE);
 			IndexedFaceSet qms = (IndexedFaceSet) tcs.getChildComponent(0).getGeometry();
 			for (int j = 0; j<tcs.getChildComponentCount(); ++j)	{
 				gl.glPushMatrix();

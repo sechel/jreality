@@ -45,6 +45,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.Pn;
@@ -78,7 +79,7 @@ public class JOGLCylinderUtility  {
 //		if (dlists != null)	{
 //			JOGLConfiguration.theLog.log(Level.WARNING,"Already have cylinder display lists for this renderer "+jr);
 //		}
-		GL gl = jr.globalGL;
+		GL2 gl = jr.globalGL;
 		int n = 6;
 		dlists = null;
 		//if (!sharedDisplayLists)	dlists = (int[] ) cylinderDListsTable.get(gl);
@@ -89,7 +90,7 @@ public class JOGLCylinderUtility  {
 		for (int i = 0; i<n; ++i)	{
 			dlists[i] = gl.glGenLists(1);
 			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
-			gl.glNewList(dlists[i], GL.GL_COMPILE);
+			gl.glNewList(dlists[i], GL2.GL_COMPILE);
 			//gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet cyl = Primitives.cylinder(nv);
 			nv *= 2;

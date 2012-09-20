@@ -40,7 +40,6 @@
 
 package de.jreality.jogl;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.lang.ref.WeakReference;
@@ -49,14 +48,16 @@ import java.util.Vector;
 import java.util.logging.Level;
 
 import javax.media.opengl.DefaultGLCapabilitiesChooser;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCapabilitiesChooser;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLJPanel;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLJPanel;
 import javax.media.opengl.GLPbuffer;
 
-import de.jreality.jogl.AbstractViewer.RenderListener;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
@@ -99,7 +100,7 @@ public class GLJPanelViewer extends AbstractViewer {
 	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
 		setCameraPath(p);
-		GLCapabilities caps = new GLCapabilities();
+		GLCapabilities caps = new GLCapabilities(GLProfile.get("GL2"));
 		caps.setAlphaBits(8);
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
@@ -115,7 +116,8 @@ public class GLJPanelViewer extends AbstractViewer {
 			chooser = new DefaultGLCapabilitiesChooser();
 		}
 		if (JOGLConfiguration.sharedContexts && sharedContext == null) 
-			setupSharedContext(caps, chooser);
+			setupSharedContext(caps, chooser, sharedContext.getGLDrawable());
+		
 		panel = new GLJPanel(caps, chooser, sharedContext) {
 
 			@Override
@@ -135,9 +137,9 @@ public class GLJPanelViewer extends AbstractViewer {
 
 	  // have to use a pbuffer to start with since panel has no context until
 	  // it's visible.
-	  private void setupSharedContext(GLCapabilities caps, GLCapabilitiesChooser chooser) {
+	  private void setupSharedContext(GLCapabilities caps, GLCapabilitiesChooser chooser, GLDrawable glDrawable) {
 		if (sharedPBuffer == null)
-			sharedPBuffer = GLDrawableFactory.getFactory().createGLPbuffer(caps, chooser, 1,1, null);
+			sharedPBuffer = GLDrawableFactory.getFactory(GLProfile.get("GL2")).createGLPbuffer(glDrawable.getNativeSurface().getGraphicsConfiguration().getScreen().getDevice(), caps, chooser, 1,1, null);
 		firstOne = new WeakReference<GLContext>(sharedPBuffer.getContext());
 	  }
 
@@ -185,6 +187,11 @@ public class GLJPanelViewer extends AbstractViewer {
 
 	public GLJPanel getPanel() {
 		return panel;
+	}
+
+	public void dispose(GLAutoDrawable drawable) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

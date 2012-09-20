@@ -1,6 +1,7 @@
 package de.jreality.jogl;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
 
 import de.jreality.math.Rn;
@@ -123,7 +124,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 						printUpState();
 					}
 					if (displayList < 0) displayList = jr.globalGL.glGenLists(1);
-					jr.globalGL.glNewList(displayList, GL.GL_COMPILE);
+					jr.globalGL.glNewList(displayList, GL2.GL_COMPILE);
 					insideDL = jr.renderingState.insideDisplayList = true;
 //					System.err.println("dlist elapsed time: "+(jr.perfMeter.beginRenderTime-lastDisplayListCreationTime));
 					lastDisplayListCreationTime = jr.perfMeter.beginRenderTime;

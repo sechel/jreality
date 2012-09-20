@@ -13,8 +13,10 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLProfile;
 
-import com.sun.opengl.util.ImageUtil;
+import com.jogamp.opengl.util.awt.ImageUtil;
+
 
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
@@ -98,7 +100,7 @@ public class JOGLOffscreenRenderer {
 		} 
 		else {	// use pbuffers
 			jr.offscreenMode = true;
-			if (!GLDrawableFactory.getFactory().canCreateGLPbuffer()) {
+			if (!GLDrawableFactory.getFactory(GLProfile.get("GL2")).canCreateGLPbuffer(canvas.getNativeSurface().getGraphicsConfiguration().getScreen().getDevice())) {
 				JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
 				return null;
 			}
@@ -126,13 +128,13 @@ public class JOGLOffscreenRenderer {
 				// lastWidth != tileSizeX ||
 				// lastHeight != tileSizeY ) {
 				System.err.println("Allocating new pbuffer");
-				GLCapabilities caps = new GLCapabilities();
+				GLCapabilities caps = new GLCapabilities(GLProfile.get("GL2"));
 				caps.setDoubleBuffered(false);
 				caps.setAlphaBits(8);
 				// if (offscreenPBuffer != null)
 				// offscreenPBuffer.destroy();
-				offscreenPBuffer = GLDrawableFactory.getFactory()
-						.createGLPbuffer(caps, null, tileSizeX, tileSizeY,
+				offscreenPBuffer = GLDrawableFactory.getFactory(GLProfile.get("GL2"))
+						.createGLPbuffer(canvas.getNativeSurface().getGraphicsConfiguration().getScreen().getDevice(),caps, null, tileSizeX, tileSizeY,
 								canvas.getContext());
 				pbuffers.put(hashkey, offscreenPBuffer);
 			} else {

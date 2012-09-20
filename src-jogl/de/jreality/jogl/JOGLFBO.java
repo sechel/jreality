@@ -7,8 +7,11 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.ImageUtil;
+import com.jogamp.opengl.util.awt.ImageUtil;
+
+//import com.sun.opengl.util.ImageUtil;
 
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
@@ -87,9 +90,9 @@ public class JOGLFBO {
 		return tex;
 	}
 	
-	protected void preRender(GL gl)	{
+	protected void preRender(GL2 gl)	{
 		if (!haveCheckedForMaxRBS) {
-			gl.glGetIntegerv(GL.GL_MAX_RENDERBUFFER_SIZE_EXT, maxrbuffer, 0);
+			gl.glGetIntegerv(GL2.GL_MAX_RENDERBUFFER_SIZE, maxrbuffer, 0);
 			haveCheckedForMaxRBS = true;
 			System.err.println("max render buffer size = "+maxrbuffer[0]);
 			checkSize();
@@ -100,55 +103,55 @@ public class JOGLFBO {
 			dirty = false;
 		}
 		if (fbo[0] == -1)	{
-			gl.glGenFramebuffersEXT(1, fbo, 0);
-			gl.glGenRenderbuffersEXT(1, rbuffer, 0);
-			gl.glGenRenderbuffersEXT(1, cbuffer, 0);
+			gl.glGenFramebuffers(1, fbo, 0);
+			gl.glGenRenderbuffers(1, rbuffer, 0);
+			gl.glGenRenderbuffers(1, cbuffer, 0);
 			gl.glGenTextures(1, txt,0);
-			gl.glGenFramebuffersEXT(1, fboN, 0);
-			gl.glGenRenderbuffersEXT(1, cbufferN, 0);
+			gl.glGenFramebuffers(1, fboN, 0);
+			gl.glGenRenderbuffers(1, cbufferN, 0);
 			System.err.println("creating fbo "+fbo[0]);
 		}
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, fbo[0]);
-		gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, rbuffer[0]);
-		if (!asTexture) gl.glRenderbufferStorageMultisampleEXT(GL.GL_RENDERBUFFER_EXT, samples, GL.GL_DEPTH_COMPONENT32, width, height);
-		else gl.glRenderbufferStorageEXT(GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT, width, height);
-		gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT, rbuffer[0]);
+		gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, fbo[0]);
+		gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, rbuffer[0]);
+		if (!asTexture) gl.glRenderbufferStorageMultisample(GL2.GL_RENDERBUFFER, samples, GL.GL_DEPTH_COMPONENT32, width, height);
+		else gl.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_DEPTH_COMPONENT, width, height);
+		gl.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_DEPTH_ATTACHMENT, GL2.GL_RENDERBUFFER, rbuffer[0]);
 
 		if (!asTexture)	{
-			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, cbuffer[0]);
-			gl.glRenderbufferStorageMultisampleEXT(GL.GL_RENDERBUFFER_EXT, samples, GL.GL_RGBA8, width, height);
-			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_RENDERBUFFER_EXT, cbuffer[0]);			
+			gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, cbuffer[0]);
+			gl.glRenderbufferStorageMultisample(GL2.GL_RENDERBUFFER, samples, GL.GL_RGBA8, width, height);
+			gl.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0, GL2.GL_RENDERBUFFER, cbuffer[0]);			
 		} else {
 			gl.glBindTexture(GL.GL_TEXTURE_2D, txt[0]);
 		    gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA8, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, null);
-			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, 
-					GL.GL_COLOR_ATTACHMENT0_EXT, 
+			gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, 
+					GL2.GL_COLOR_ATTACHMENT0, 
 					GL.GL_TEXTURE_2D, 
 					txt[0],  0);
 //		    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP, GL.GL_TRUE);
-		    gl.glGenerateMipmapEXT(GL.GL_TEXTURE_2D);		
+		    gl.glGenerateMipmap(GL.GL_TEXTURE_2D);		
 		}
-		int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
-		if (status != GL.GL_FRAMEBUFFER_COMPLETE_EXT)	{
+		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
+		if (status != GL2.GL_FRAMEBUFFER_COMPLETE)	{
 			System.err.println("Error in fbo: "+String.format("%d", status));
 		}
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, fbo[0]);
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, fbo[0]);
 	}
 
-	protected void postRender(GL gl) {
+	protected void postRender(GL2 gl) {
 		if (!asTexture)	{ 
 			image = new BufferedImage(width, height,
 					BufferedImage.TYPE_4BYTE_ABGR); // TYPE_3BYTE_BGR); //
 			buffer = ByteBuffer.wrap(((DataBufferByte) image.getRaster()
 							.getDataBuffer()).getData());
-			gl.glBindFramebufferEXT(GL.GL_DRAW_FRAMEBUFFER_EXT, fboN[0]);
-			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, cbufferN[0]);
-			gl.glRenderbufferStorageEXT(GL.GL_RENDERBUFFER_EXT,  GL.GL_RGBA8, width, height);
-			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_COLOR_ATTACHMENT0_EXT, GL.GL_RENDERBUFFER_EXT, cbufferN[0]);			
+			gl.glBindFramebuffer(GL2.GL_DRAW_FRAMEBUFFER, fboN[0]);
+			gl.glBindRenderbuffer(GL.GL_RENDERBUFFER, cbufferN[0]);
+			gl.glRenderbufferStorage(GL.GL_RENDERBUFFER,  GL.GL_RGBA8, width, height);
+			gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL.GL_COLOR_ATTACHMENT0, GL.GL_RENDERBUFFER, cbufferN[0]);			
 			// Blit the multisampled FBO to the normal FBO
-			gl.glBlitFramebufferEXT(0, 0, width, height, 0, 0, width, height, GL.GL_COLOR_BUFFER_BIT, GL.GL_LINEAR);
+			gl.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL.GL_COLOR_BUFFER_BIT, GL.GL_LINEAR);
 			//Bind the normal FBO for reading
-			gl.glBindFramebufferEXT(GL.GL_READ_FRAMEBUFFER_EXT, fboN[0]);
+			gl.glBindFramebuffer(GL2.GL_READ_FRAMEBUFFER, fboN[0]);
 			// Read the pixels into the buffer of the BufferedImage
 			gl.glReadPixels(0, 0, width, height,
 					GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, buffer);
@@ -167,16 +170,16 @@ public class JOGLFBO {
 		if (dispose) dispose(gl);
 
 		// restore the size of the interactive window
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, 0);		
+		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);		
 	}
 	
 	protected void dispose(GL gl) {
-		gl.glDeleteFramebuffersEXT(1, fbo, 0);
-		gl.glDeleteRenderbuffersEXT(1, rbuffer, 0);
+		gl.glDeleteFramebuffers(1, fbo, 0);
+		gl.glDeleteRenderbuffers(1, rbuffer, 0);
 		gl.glDeleteTextures(1, txt, 0);
-		gl.glDeleteRenderbuffersEXT(1, cbuffer, 0);
-		gl.glDeleteRenderbuffersEXT(1, cbufferN, 0);
-		gl.glDeleteFramebuffersEXT(1, fboN, 0);
+		gl.glDeleteRenderbuffers(1, cbuffer, 0);
+		gl.glDeleteRenderbuffers(1, cbufferN, 0);
+		gl.glDeleteFramebuffers(1, fboN, 0);
 		fbo[0] = rbuffer[0] = txt[0] = cbuffer[0] = cbuffer[0] = fboN[0] =  -1;
 	}
 

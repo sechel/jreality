@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
@@ -20,8 +21,8 @@ public class JOGLLightHelper {
 
 	private  double mat[] = new double[16];
 	private transient double[][] matlist;
-	private  int lightCount = GL.GL_LIGHT0;
-	private  GL lightGL = null;
+	private  int lightCount = GL2.GL_LIGHT0;
+	private  GL2 lightGL = null;
 	private  int maxLights = 8;
 	protected JOGLRenderer jr;
 	protected JOGLLightHelper(JOGLRenderer r)	{
@@ -47,16 +48,16 @@ public class JOGLLightHelper {
 	
   	HashMap<SceneGraphPath, SceneGraphPathObserver> lightListeners = 
   		new HashMap<SceneGraphPath, SceneGraphPathObserver>();
-	protected  void resetLights(GL globalGL, List<SceneGraphPath> lights) {
+	protected  void resetLights(GL2 globalGL, List<SceneGraphPath> lights) {
 		for (int i = 0; i < maxLights; ++i) {
-			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_CUTOFF, 0f); 
-			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_SPOT_EXPONENT, (float) 0);
-			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_CONSTANT_ATTENUATION,
+			globalGL.glLightf(GL2.GL_LIGHT0 + i, GL2.GL_SPOT_CUTOFF, 0f); 
+			globalGL.glLightf(GL2.GL_LIGHT0 + i, GL2.GL_SPOT_EXPONENT, (float) 0);
+			globalGL.glLightf(GL2.GL_LIGHT0 + i, GL2.GL_CONSTANT_ATTENUATION,
 					1.0f);
-			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_LINEAR_ATTENUATION, 0.0f);
-			globalGL.glLightf(GL.GL_LIGHT0 + i, GL.GL_QUADRATIC_ATTENUATION,
+			globalGL.glLightf(GL2.GL_LIGHT0 + i, GL2.GL_LINEAR_ATTENUATION, 0.0f);
+			globalGL.glLightf(GL2.GL_LIGHT0 + i, GL2.GL_QUADRATIC_ATTENUATION,
 					0.0f);
-			globalGL.glDisable(GL.GL_LIGHT0 + i);
+			globalGL.glDisable(GL2.GL_LIGHT0 + i);
 		}
 		int n = lights.size();
 		for (int i = 8; i<n; ++i)	lights.remove(i);
@@ -95,13 +96,13 @@ public class JOGLLightHelper {
 		lightListeners.clear();
 	}
 
-	public  void enableLights(GL globalGL, int num) {
+	public  void enableLights(GL2 globalGL, int num) {
 		for (int i = 0; i < num; ++i)
-			globalGL.glEnable(GL.GL_LIGHT0 + i);
+			globalGL.glEnable(GL2.GL_LIGHT0 + i);
 	}
 	
-	public  void processLights(GL globalGL, List<SceneGraphPath> lights) {
-		lightCount = GL.GL_LIGHT0;
+	public  void processLights(GL2 globalGL, List<SceneGraphPath> lights) {
+		lightCount = GL2.GL_LIGHT0;
 		lightGL = globalGL;
 		int n = lights.size();
 		for (int i = 0; i < n; ++i) {
@@ -118,44 +119,44 @@ public class JOGLLightHelper {
 
 	private  float[] origin = { 0, 0, 0, 1 };
 
-	private  void wisit(Light dl, GL globalGL, int lightCount) {
-		globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF, 180f); // use cutoff ==
+	private  void wisit(Light dl, GL2 globalGL, int lightCount) {
+		globalGL.glLightf(lightCount, GL2.GL_SPOT_CUTOFF, 180f); // use cutoff ==
 																// 0 as marker
 																// for invalid
 																// lights in
 																// glsl
-		globalGL.glLightfv(lightCount, GL.GL_DIFFUSE, dl
+		globalGL.glLightfv(lightCount, GL2.GL_DIFFUSE, dl
 				.getScaledColorAsFloat(),0);
 		float f = (float) dl.getIntensity();
 		float[] specC = { f, f, f };
-		globalGL.glLightfv(lightCount, GL.GL_SPECULAR, specC,0);
-		globalGL.glLightfv(lightCount, GL.GL_AMBIENT, dl
+		globalGL.glLightfv(lightCount, GL2.GL_SPECULAR, specC,0);
+		globalGL.glLightfv(lightCount, GL2.GL_AMBIENT, dl
 				.getScaledColorAsFloat(),0);
 	}
 
-  private  void wisit(DirectionalLight dl, GL globalGL, int lightCount) {
+  private  void wisit(DirectionalLight dl, GL2 globalGL, int lightCount) {
 		wisit((Light) dl, globalGL, lightCount);
-		globalGL.glLightfv(lightCount, GL.GL_POSITION, zDirection,0);
+		globalGL.glLightfv(lightCount, GL2.GL_POSITION, zDirection,0);
 	}
 
-  private  void wisit(PointLight dl, GL globalGL, int lightCount) {
+  private  void wisit(PointLight dl, GL2 globalGL, int lightCount) {
 		// gl.glLightfv(lightCount, GL.GL_AMBIENT, lightAmbient);
 		wisit((Light) dl, globalGL, lightCount);
-		globalGL.glLightfv(lightCount, GL.GL_POSITION, origin,0);
-		globalGL.glLightf(lightCount, GL.GL_CONSTANT_ATTENUATION, (float) dl
+		globalGL.glLightfv(lightCount, GL2.GL_POSITION, origin,0);
+		globalGL.glLightf(lightCount, GL2.GL_CONSTANT_ATTENUATION, (float) dl
 				.getFalloffA0());
-		globalGL.glLightf(lightCount, GL.GL_LINEAR_ATTENUATION, (float) dl
+		globalGL.glLightf(lightCount, GL2.GL_LINEAR_ATTENUATION, (float) dl
 				.getFalloffA1());
-		globalGL.glLightf(lightCount, GL.GL_QUADRATIC_ATTENUATION, (float) dl
+		globalGL.glLightf(lightCount, GL2.GL_QUADRATIC_ATTENUATION, (float) dl
 				.getFalloffA2());
 	}
 
-  private  void wisit(SpotLight dl, GL globalGL, int lightCount) {
+  private  void wisit(SpotLight dl, GL2 globalGL, int lightCount) {
 		wisit((PointLight) dl, globalGL, lightCount);
-		globalGL.glLightf(lightCount, GL.GL_SPOT_CUTOFF,
+		globalGL.glLightf(lightCount, GL2.GL_SPOT_CUTOFF,
 				(float) ((180.0 / Math.PI) * dl.getConeAngle()));
-		globalGL.glLightfv(lightCount, GL.GL_SPOT_DIRECTION, zDirection, 0);
-		globalGL.glLightf(lightCount, GL.GL_SPOT_EXPONENT, (float) dl
+		globalGL.glLightfv(lightCount, GL2.GL_SPOT_DIRECTION, zDirection, 0);
+		globalGL.glLightf(lightCount, GL2.GL_SPOT_EXPONENT, (float) dl
 				.getDistribution());
 	}
 

@@ -55,6 +55,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EventObject;
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -294,10 +295,10 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	// Simple class to warn if results are not going to be as expected
 	static class MultisampleChooser extends DefaultGLCapabilitiesChooser {
 		public int chooseCapabilities(GLCapabilities desired,
-				GLCapabilities[] available, int windowSystemRecommendedChoice) {
+				List<GLCapabilities> available, int windowSystemRecommendedChoice) {
 			boolean anyHaveSampleBuffers = false;
-			for (int i = 0; i < available.length; i++) {
-				GLCapabilities caps = available[i];
+			for (GLCapabilities caps : available) {
+				//GLCapabilities caps = available[i];
 				if (caps != null && caps.getSampleBuffers()) {
 					anyHaveSampleBuffers = true;
 					break;
@@ -311,7 +312,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 						.log(Level.WARNING,
 								"WARNING: antialiasing will be disabled because none of the available pixel formats had it to offer");
 			} else {
-				if (!available[selection].getSampleBuffers()) {
+				if (!available.get(selection).getSampleBuffers()) {
 					JOGLConfiguration
 							.getLogger()
 							.log(Level.WARNING,
@@ -406,7 +407,7 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer, Stereo
 	private boolean pendingUpdate;
 	
 	public void display(GLAutoDrawable arg0) {
-		if (fbo != null) fbo.render(arg0.getGL());
+		if (fbo != null) fbo.render(arg0.getGL().getGL2());
 		renderer.display(arg0);
 	}
 

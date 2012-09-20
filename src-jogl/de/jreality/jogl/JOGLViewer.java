@@ -45,10 +45,12 @@ import java.awt.GraphicsEnvironment;
 import java.lang.ref.WeakReference;
 import java.util.logging.Level;
 
-import javax.media.opengl.GLCanvas;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCapabilitiesChooser;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLProfile;
+import javax.media.opengl.awt.GLCanvas;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -68,7 +70,7 @@ public class JOGLViewer extends AbstractViewer {
 	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
 		setSceneRoot(r);
 		setCameraPath(p);
-		GLCapabilities caps = new GLCapabilities();
+		GLCapabilities caps = new GLCapabilities(GLProfile.get("GL2"));
 		caps.setAlphaBits(8);
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
@@ -92,7 +94,7 @@ public class JOGLViewer extends AbstractViewer {
 		}
 	}
 
-	public void dispose() {
+	public void dispose(GLAutoDrawable drawable) {
 		super.dispose();
 		if (drawable != null) drawable.removeGLEventListener(this);
 		drawable = null;

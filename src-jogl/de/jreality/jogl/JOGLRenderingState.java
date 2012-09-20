@@ -41,6 +41,7 @@
 package de.jreality.jogl;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.shader.DefaultPolygonShader;
 import de.jreality.jogl.shader.TwoSidePolygonShader;
@@ -129,32 +130,32 @@ public class JOGLRenderingState {
 			// TODO clean this up, provide an interface to set "OpenGL Preferences ..."
 			// and make sure everything is here.
 			// set drawing color and point size
-			GL gl = renderer.globalGL;
+			GL2 gl = renderer.globalGL;
 			gl.glDepthMask(true);
 			gl.glDisable(GL.GL_BLEND);
 			gl.glColor3f( 0.0f, 0.0f, 0.0f ); 
 			gl.glEnable(GL.GL_DEPTH_TEST);							// Enables Depth Testing
 			gl.glDepthFunc(GL.GL_LEQUAL);								// The Type Of Depth Testing To Do
-			gl.glEnable(GL.GL_ALPHA_TEST);
+			gl.glEnable(GL2.GL_ALPHA_TEST);
 			gl.glAlphaFunc(GL.GL_GREATER, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
 			gl.glClearDepth(1.0f);  
-			gl.glEnable(GL.GL_NORMALIZE);
+			gl.glEnable(GL2.GL_NORMALIZE);
 			gl.glEnable(GL.GL_MULTISAMPLE);	
-			gl.glEnable(GL.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-			gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
+			gl.glEnable(GL2.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+			gl.glLightModeli(GL2.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
 			float[] white = {1f, 1f, 1f, 1f};
-			gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, white,0 );
+			gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, white,0 );
 			float[] amb = {0f, 0f, 0f};
 			float[] spec = {.5f, .5f, .5f};
-			gl.glMaterialfv(frontBack, GL.GL_AMBIENT, amb,0);
-			gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, new float[]{1,0,0},0);
-			gl.glMaterialfv(frontBack, GL.GL_SPECULAR, spec,0);
-			gl.glMaterialf(frontBack, GL.GL_SHININESS, 60f);
-			gl.glEnable(GL.GL_COLOR_MATERIAL);
-			gl.glColorMaterial(frontBack, GL.GL_DIFFUSE);
+			gl.glMaterialfv(frontBack, GL2.GL_AMBIENT, amb,0);
+			gl.glMaterialfv(frontBack, GL2.GL_DIFFUSE, new float[]{1,0,0},0);
+			gl.glMaterialfv(frontBack, GL2.GL_SPECULAR, spec,0);
+			gl.glMaterialf(frontBack, GL2.GL_SHININESS, 60f);
+			gl.glEnable(GL2.GL_COLOR_MATERIAL);
+			gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
 
-			if (smoothShading) gl.glShadeModel(GL.GL_SMOOTH);
-			else		gl.glShadeModel(GL.GL_FLAT);
+			if (smoothShading) gl.glShadeModel(GL2.GL_SMOOTH);
+			else		gl.glShadeModel(GL2.GL_FLAT);
 					
 			if (flipped) gl.glFrontFace( GL.GL_CW);
 			else 		gl.glFrontFace( GL.GL_CCW);

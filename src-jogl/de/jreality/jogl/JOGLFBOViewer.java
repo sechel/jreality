@@ -3,6 +3,7 @@ package de.jreality.jogl;
 import java.awt.Dimension;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -45,7 +46,7 @@ import de.jreality.shader.Texture2D;
 		joglfbo.setSize(dim);
 	}
 	
-	protected void render(GL gl)	{
+	protected void render(GL2 gl)	{
 		if (!init)	{
 			renderer.init(gl);
 			renderer.theFBO = joglfbo;

@@ -47,8 +47,10 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.opengl.DebugGL;
+//import javax.media.opengl.DebugGL;
+import javax.media.opengl.DebugGL2;
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLPbuffer;
 
@@ -69,7 +71,7 @@ import de.jreality.util.SceneGraphUtility;
 
 public class JOGLRenderer   {
 
-	public GL globalGL;
+	public GL2 globalGL;
 	protected SceneGraphComponent theRoot, auxiliaryRoot;
 
 	// peer objects 
@@ -201,7 +203,7 @@ public class JOGLRenderer   {
 		renderingState.oneTexture2DPerImage = topAp.isOneTexture2DPerImage();
 		renderingState.currentPath.clear();
 		renderingState.context  = new Graphics3D(getCameraPath(), renderingState.currentPath, CameraUtility.getAspectRatio(theViewer));
-		globalGL.glMatrixMode(GL.GL_PROJECTION);
+		globalGL.glMatrixMode(GL2.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 
 		JOGLRendererHelper.handleBackground(this, width, height, theRoot.getAppearance());
@@ -224,7 +226,7 @@ public class JOGLRenderer   {
 //		double aspectRatio = getAspectRatio();
 //		System.err.println("aspect ratio = "+aspectRatio);
 		// for pick mode the aspect ratio has to be set to that of the viewer component
-		globalGL.glMatrixMode(GL.GL_PROJECTION);
+		globalGL.glMatrixMode(GL2.GL_PROJECTION);
 		globalGL.glLoadIdentity();
 		if (topAp.isRenderSpherical())	
 		{
@@ -241,7 +243,7 @@ public class JOGLRenderer   {
 		globalGL.glMultTransposeMatrixd(c2ndc, 0);
 
 		// prepare for rendering the geometry
-		globalGL.glMatrixMode(GL.GL_MODELVIEW);
+		globalGL.glMatrixMode(GL2.GL_MODELVIEW);
 		globalGL.glLoadIdentity();
 
 		renderingState.cameraToWorld = renderingState.context.getCameraToWorld();
@@ -368,7 +370,7 @@ public class JOGLRenderer   {
 	 */
 	public void init(GLAutoDrawable drawable) {
 		if (JOGLConfiguration.debugGL) {
-			drawable.setGL(new DebugGL(drawable.getGL()));
+			drawable.setGL(new DebugGL2(drawable.getGL().getGL2()));
 		}
 		GLAutoDrawable theCanvas = drawable;
 		if (!(theCanvas instanceof GLPbuffer))  {  // workaround in bug in implementation of GLPbuffer
@@ -376,10 +378,10 @@ public class JOGLRenderer   {
 			height = theCanvas.getHeight();
 			setAspectRatio( ((double) width)/height);
 		}
-		init(theCanvas.getGL());
+		init(theCanvas.getGL().getGL2());
 	}
 
-	public void init(GL gl) {
+	public void init(GL2 gl) {
 //		System.err.println("initing gl "+gl);
 		globalGL = gl;
 	
@@ -403,7 +405,7 @@ public class JOGLRenderer   {
 	}
 
 	public void reshape(GLAutoDrawable arg0,int arg1,int arg2,int arg3,int arg4) {
-		globalGL = arg0.getGL();
+		globalGL = arg0.getGL().getGL2();
 		width = arg3-arg1; height = arg4-arg2;
 //		setViewport(0,0, arg3-arg1, arg4-arg2);
 	}
@@ -412,11 +414,11 @@ public class JOGLRenderer   {
 		if (theViewer.getSceneRoot() == null || getCameraPath() == null) {
 			theLog.info("display called w/o scene root or camera path");
 		}
-		display(drawable.getGL());
+		display(drawable.getGL().getGL2());
 	}
 	protected int[] whichTile = new int[2];
 	
-	public void display(GL gl) {
+	public void display(GL2 gl) {
 //		System.err.println("display "+width+" "+height);
 		globalGL=gl;
 		perfMeter.beginFrame();
@@ -508,7 +510,7 @@ public class JOGLRenderer   {
 			break;
 
 		case AbstractViewer.HARDWARE_BUFFER_STEREO:
-			globalGL.glDrawBuffer(GL.GL_BACK_RIGHT);
+			globalGL.glDrawBuffer(GL2.GL_BACK_RIGHT);
 		case AbstractViewer.RIGHT_EYE_STEREO:
 			setViewport(0,0, width, height);
 			renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
@@ -535,7 +537,7 @@ public class JOGLRenderer   {
 			break;
 
 		case AbstractViewer.HARDWARE_BUFFER_STEREO:
-			globalGL.glDrawBuffer(GL.GL_BACK_LEFT);
+			globalGL.glDrawBuffer(GL2.GL_BACK_LEFT);
 		case AbstractViewer.LEFT_EYE_STEREO:
 	        setViewport(0,0, width, height);
 	        renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;

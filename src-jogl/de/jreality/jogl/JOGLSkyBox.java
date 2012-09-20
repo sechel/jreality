@@ -41,6 +41,7 @@
 package de.jreality.jogl;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import de.jreality.jogl.shader.JOGLTexture2D;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
@@ -83,13 +84,13 @@ class JOGLSkyBox {
     jogltex = new JOGLTexture2D(tex);
   }
 
-  static void render(GL gl, double[] w2c, CubeMap cm, Camera cam)	{
+  static void render(GL2 gl, double[] w2c, CubeMap cm, Camera cam)	{
     ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
     jogltex.setBlendColor(cm.getBlendColor());
-	gl.glPushAttrib(GL.GL_ENABLE_BIT);
+	gl.glPushAttrib(GL2.GL_ENABLE_BIT);
 	gl.glDisable(GL.GL_BLEND);
 	gl.glDisable(GL.GL_DEPTH_TEST);
-	gl.glDisable(GL.GL_LIGHTING);
+	gl.glDisable(GL2.GL_LIGHTING);
 	gl.glActiveTexture(GL.GL_TEXTURE0);
 	gl.glEnable(GL.GL_TEXTURE_2D);
     float[] white = {1f,1f,1f,1f};
@@ -104,7 +105,7 @@ class JOGLSkyBox {
 	for (int i = 0; i<6; ++i)	{
 		jogltex.setImage(imgs[i]);
 	    Texture2DLoaderJOGL.render(gl, jogltex);
-		gl.glBegin(GL.GL_POLYGON);
+		gl.glBegin(GL2.GL_POLYGON);
 		for (int j = 0; j<4; ++j)	{
 			gl.glTexCoord2dv(texCoords[j],0);
 			gl.glVertex3dv(cubeVerts3[i][j],0);
