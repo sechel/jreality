@@ -145,7 +145,7 @@ public class JOGLRenderer   {
 		LoggingSystem.getLogger(this).info("geom table has "+geometryGB.geometries.size());
 		geometryGB.dispose();
 	}
-
+	GLAutoDrawable theCanvas;
 	public int getStereoType() {
 		return renderingState.stereoType;
 	}
@@ -372,7 +372,7 @@ public class JOGLRenderer   {
 		if (JOGLConfiguration.debugGL) {
 			drawable.setGL(new DebugGL2(drawable.getGL().getGL2()));
 		}
-		GLAutoDrawable theCanvas = drawable;
+		theCanvas = drawable;
 		if (!(theCanvas instanceof GLPbuffer))  {  // workaround in bug in implementation of GLPbuffer
 			width = theCanvas.getWidth();
 			height = theCanvas.getHeight();
