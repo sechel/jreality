@@ -76,16 +76,17 @@ XPP3
     - XML Pull Parser - Indiana University Extreme! Lab Software License
     - xStream uses it to parse XML
     - http://www.extreme.indiana.edu/xgws/xsoap/xpp
+    
+ iTextpdf   
+    - create and manipulate PDF documents
+    - http://itextpdf.com/   
 
 Sunflow
     - java rendering system for photo-realistic image synthesis - MIT License
-    - uses janino (http://www.janino.net/) - BSD License
+    - ATTENTION: uses janino (http://www.janino.net/) - BSD License !!!!!
     - http://sunflow.sourceforge.net
-    
-iTextpdf   
-    - create and manipulate PDF documents
-    - http://itextpdf.com/
  
 janino
-    - super-small, super-fast Java™ compiler
+    - ATTENTION: related to Sunflow!!!!!!!!
+    - super-small, super-fast Java™ compiler 
     - http://docs.codehaus.org/display/JANINO/Home
