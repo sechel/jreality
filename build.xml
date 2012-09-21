@@ -169,6 +169,17 @@
 			<include name="gluegen-rt.jar"/>
 		</fileset>
 	</path>
+	
+	<path id="jogl3.classpath">
+		<path refid="backend.classpath"/>
+		<fileset dir="lib">
+			<include name="jogl.all.jar"/>
+			<include name="gluegen-rt.jar"/>
+		</fileset>
+		<fileset dir="dist">
+			<include name="jReality-jogl.jar"/>
+		</fileset>
+	</path>
 
 	<path id="gpgpu.classpath">
 		<path refid="jogl.classpath"/>
@@ -431,9 +442,9 @@
 	<target name="jogl3" depends="backends-share, proxies, jogl" description="build jogl3 backend">
 		<mkdir dir="${build}/jogl3" />
 		<javac source="1.6" target="1.6" excludesfile="excludes.txt" srcdir="${jogl3}"  destdir="${build}/jogl3" debug="true">
-			<classpath refid="jogl.classpath"/>
+			<classpath refid="jogl3.classpath"/>
 		</javac>
-		<copy todir="build/jogl">
+		<copy todir="build/jogl3">
 			<!-- copy shader progs -->
 			<fileset dir="${jogl3}">
 				<exclude name="**/*.java"/>
@@ -552,7 +563,7 @@
 		</javadoc>
 	</target>
 
-	<target name="dist" depends="core,audio,io,jogl,soft,renderman,portal,gpgpu,sunflow,plugin,examples,tutorial" description="generate the distribution">
+	<target name="dist" depends="core,audio,io,jogl,jogl3,soft,renderman,portal,gpgpu,sunflow,plugin,examples,tutorial" description="generate the distribution">
 	</target>
 
 	<target name="release" depends="release-jar, release-src, release-javadoc, release-3rdparty, release-tutorial, release-jni" description="generate a big jar that contains all classes needed for the tutorial">
