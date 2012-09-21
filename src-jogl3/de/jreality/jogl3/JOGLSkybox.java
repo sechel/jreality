@@ -1,10 +1,8 @@
 package de.jreality.jogl3;
 
-
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.shader.GLVBOFloat;
-import de.jreality.jogl3.shader.GLVBOInt;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;

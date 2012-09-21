@@ -5,14 +5,9 @@ import de.jreality.jogl3.geom.JOGLGeometryInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.light.JOGLLightEntity;
 import de.jreality.jogl3.light.JOGLLightInstance;
-import de.jreality.jogl3.shader.PolygonShader;
 import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Light;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.EffectiveAppearance;
 
 public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 

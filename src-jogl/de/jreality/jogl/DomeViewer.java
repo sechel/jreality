@@ -4,16 +4,14 @@ import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 
 import de.jreality.math.MatrixBuilder;
-import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;
 
 
 //author Benjamin Kutschan
-public class DomeViewer extends de.jreality.jogl3.Viewer {
+public class DomeViewer extends Viewer {
 	
 	private int[] texs = new int[6];
 	private int[] fbos = new int[6];
@@ -131,9 +129,10 @@ public class DomeViewer extends de.jreality.jogl3.Viewer {
 				MatrixBuilder.euclidean(tr).rotate(Math.PI/2, new double[]{1,0,0}).assignTo(tr);
 			MatrixBuilder.euclidean(tr).rotate(angle, axis).assignTo(tr);
 			
-			//renderer.width = width;
-			//renderer.height = height;
-			super.display(gla, width, height);
+			renderer.width = width;
+			renderer.height = height;
+			super.display(gla);
+//			super.display(gla, width, height);
 			
 			MatrixBuilder.euclidean(tr).rotate(-angle, axis).assignTo(tr);
 			if(zenith)

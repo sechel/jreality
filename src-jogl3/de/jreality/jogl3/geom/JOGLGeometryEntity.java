@@ -2,7 +2,6 @@ package de.jreality.jogl3.geom;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.event.GeometryListener;

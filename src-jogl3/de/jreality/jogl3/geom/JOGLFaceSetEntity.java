@@ -1,23 +1,19 @@
 package de.jreality.jogl3.geom;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Set;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.event.GeometryEvent;
 
 public class JOGLFaceSetEntity extends JOGLLineSetEntity {

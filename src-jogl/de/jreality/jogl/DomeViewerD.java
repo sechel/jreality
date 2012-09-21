@@ -5,9 +5,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 
 import de.jreality.math.MatrixBuilder;
-import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.util.CameraUtility;

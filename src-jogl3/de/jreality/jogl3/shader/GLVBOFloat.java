@@ -2,7 +2,6 @@ package de.jreality.jogl3.shader;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 public class GLVBOFloat extends GLVBO{

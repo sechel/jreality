@@ -4,24 +4,18 @@ import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl.shader.ShadedSphereImage;
 import de.jreality.jogl3.GLShader;
-import de.jreality.jogl3.GLvboVertex;
-import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.GLShader.ShaderVar;
-import de.jreality.jogl3.geom.JOGLFaceSetEntity;
-import de.jreality.jogl3.geom.JOGLPointSetEntity;
+import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
-import de.jreality.math.P3;
+import de.jreality.jogl3.geom.JOGLPointSetEntity;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.CameraUtility;
 
 public class PointShader {
 	//private static GLShaderHelper shader;

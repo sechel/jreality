@@ -1,7 +1,5 @@
 package de.jreality.jogl;
 
-import java.util.HashMap;
-
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 

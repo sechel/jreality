@@ -1,32 +1,13 @@
 package de.jreality.jogl3.shader;
 
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferDouble;
-import java.awt.image.DataBufferFloat;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.DataBufferUShort;
-import java.io.File;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-import java.util.List;
-import java.util.Vector;
 import java.util.WeakHashMap;
 
-import javax.imageio.ImageIO;
 import javax.media.opengl.GL3;
 
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
-import de.jreality.util.LoggingSystem;
 
 public class Texture2DLoader {
 	private static WeakHashMap<ImageData, Integer> textureLookup = new WeakHashMap<ImageData, Integer>();

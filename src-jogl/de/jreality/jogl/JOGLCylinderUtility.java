@@ -48,8 +48,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.LoggingSystem;

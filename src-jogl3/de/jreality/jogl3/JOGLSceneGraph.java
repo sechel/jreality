@@ -9,7 +9,6 @@ import de.jreality.jogl3.geom.JOGLPointSetEntity;
 import de.jreality.jogl3.geom.JOGLPointSetInstance;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
-import de.jreality.jogl3.light.JOGLLightEntity;
 import de.jreality.jogl3.light.JOGLPointLightEntity;
 import de.jreality.jogl3.light.JOGLPointLightInstance;
 import de.jreality.jogl3.light.JOGLSpotLightEntity;

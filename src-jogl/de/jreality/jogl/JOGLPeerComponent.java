@@ -9,7 +9,6 @@ import static de.jreality.shader.RenderingHintsShader.TRANSPARENCY_ENABLED_DEFAU
 
 import java.util.HashMap;
 import java.util.Vector;
-import java.util.WeakHashMap;
 import java.util.logging.Level;
 
 import javax.media.opengl.GL;
@@ -20,12 +19,10 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.Geometry;
 import de.jreality.scene.Lock;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.event.SceneGraphComponentEvent;
@@ -34,7 +31,6 @@ import de.jreality.scene.event.TransformationEvent;
 import de.jreality.scene.event.TransformationListener;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.RenderingHintsShader;
 import de.jreality.util.LoggingSystem;
 
 

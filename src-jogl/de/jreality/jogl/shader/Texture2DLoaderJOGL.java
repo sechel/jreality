@@ -56,16 +56,13 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import java.util.Collection;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-//import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.gl2.GLUgl2;
 
 import de.jreality.jogl.JOGLRenderer;

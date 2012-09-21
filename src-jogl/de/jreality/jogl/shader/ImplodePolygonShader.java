@@ -42,7 +42,6 @@ package de.jreality.jogl.shader;
 
 import java.util.logging.Level;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import de.jreality.geometry.IndexedFaceSetUtility;

@@ -1,10 +1,8 @@
 package de.jreality.jogl3;
 
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.media.opengl.GL3;
-//import javax.media.opengl.GL3bc;
 
 public class GLvboFaceIndices {
 	

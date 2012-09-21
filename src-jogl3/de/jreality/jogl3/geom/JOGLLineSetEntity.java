@@ -9,7 +9,6 @@ import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
 import de.jreality.math.Rn;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;

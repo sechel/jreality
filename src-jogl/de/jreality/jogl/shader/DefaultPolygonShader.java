@@ -40,7 +40,6 @@
 
 package de.jreality.jogl.shader;
 
-import static de.jreality.shader.CommonAttributes.ONE_TEXTURE2D_PER_IMAGE;
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;

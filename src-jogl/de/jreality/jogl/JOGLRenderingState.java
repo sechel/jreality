@@ -43,8 +43,6 @@ package de.jreality.jogl;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import de.jreality.jogl.shader.DefaultPolygonShader;
-import de.jreality.jogl.shader.TwoSidePolygonShader;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;

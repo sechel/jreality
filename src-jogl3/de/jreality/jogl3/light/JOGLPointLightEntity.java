@@ -2,10 +2,7 @@ package de.jreality.jogl3.light;
 
 import java.awt.Color;
 
-import de.jreality.scene.DirectionalLight;
-import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
-import de.jreality.scene.SceneGraphNode;
 
 public class JOGLPointLightEntity extends JOGLLightEntity {
 	

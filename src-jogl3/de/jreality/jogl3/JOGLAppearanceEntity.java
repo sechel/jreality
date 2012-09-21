@@ -4,7 +4,6 @@ import de.jreality.scene.Appearance;
 import de.jreality.scene.event.AppearanceEvent;
 import de.jreality.scene.event.AppearanceListener;
 import de.jreality.scene.proxy.tree.SceneGraphNodeEntity;
-import de.jreality.scene.proxy.tree.SceneTreeNode;
 
 public class JOGLAppearanceEntity extends SceneGraphNodeEntity implements AppearanceListener {
 

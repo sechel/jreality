@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;

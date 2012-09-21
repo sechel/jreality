@@ -50,7 +50,6 @@ import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.CameraUtility;
-import de.jreality.util.SceneGraphUtility;
 
 /**
  * @author gunn

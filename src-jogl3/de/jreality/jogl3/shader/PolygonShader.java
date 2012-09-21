@@ -1,41 +1,21 @@
 package de.jreality.jogl3.shader;
 
-import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
-import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING_DEFAULT;
-
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl.shader.ShadedSphereImage;
 import de.jreality.jogl3.GLShader;
-import de.jreality.jogl3.GLvboFaceIndices;
-import de.jreality.jogl3.GLvboNormals;
-import de.jreality.jogl3.GLvboVertex;
-import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.GLShader.ShaderVar;
+import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
-import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
-import de.jreality.math.P3;
 import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.Camera;
-import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
-import de.jreality.util.CameraUtility;
 
 public class PolygonShader{
 	

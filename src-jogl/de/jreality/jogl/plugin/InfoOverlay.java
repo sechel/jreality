@@ -18,7 +18,6 @@ import javax.media.opengl.glu.GLU;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
-
 import de.jreality.jogl.AbstractViewer;
 import de.jreality.jogl.JOGLViewer;
 

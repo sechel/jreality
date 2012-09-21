@@ -7,14 +7,9 @@ import javax.media.opengl.GL3;
 import de.jreality.jogl3.GLShader;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.shader.LineShader;
-import de.jreality.jogl3.shader.PointShader;
-import de.jreality.jogl3.shader.PolygonShader;
-import de.jreality.math.Matrix;
-import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
 public class JOGLLineSetInstance extends JOGLPointSetInstance {

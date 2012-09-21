@@ -23,9 +23,6 @@ import javax.swing.JPanel;
 
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.shader.PointShader;
-import de.jreality.jogl3.shader.PolygonShader;
-import de.jreality.math.P3;
-import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -33,7 +30,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.StereoViewer;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;
-import de.jreality.shader.ImageData;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 

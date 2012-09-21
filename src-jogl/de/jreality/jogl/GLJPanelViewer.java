@@ -54,9 +54,9 @@ import javax.media.opengl.GLCapabilitiesChooser;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawable;
 import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLJPanel;
-import javax.media.opengl.GLPbuffer;
 
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;

@@ -49,7 +49,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-//import java.util.HashMap;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.DebugGL2;

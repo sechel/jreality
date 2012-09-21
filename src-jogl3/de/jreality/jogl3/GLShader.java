@@ -1,5 +1,4 @@
 package de.jreality.jogl3;
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,11 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.media.opengl.GL3;
-
-import de.jreality.jogl.shader.ShadedSphereImage;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.Texture2D;
 
 
 /**

@@ -1,18 +1,15 @@
 package de.jreality.jogl3.geom;
 
-import java.awt.Color;
 import java.util.LinkedList;
 
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.GLShader;
 import de.jreality.jogl3.JOGLRenderState;
-import de.jreality.jogl3.GLShader.ShaderVar;
 import de.jreality.jogl3.shader.PolygonShader;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
 public class JOGLFaceSetInstance extends JOGLLineSetInstance {

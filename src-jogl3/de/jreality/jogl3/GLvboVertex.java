@@ -3,7 +3,6 @@ package de.jreality.jogl3;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL3;
-//import javax.media.opengl.GL3bc;
 
 public class GLvboVertex {
 	
