@@ -642,6 +642,7 @@
 			<fileset dir="${build}/renderman" />
 			<fileset dir="${build}/sunflow" />
 			<fileset dir="${build}/jogl" />
+			<fileset dir="${build}/jogl3" />
 			<fileset dir="${build}/plugin" />
 
 			<fileset dir="${build}/proxies" />
