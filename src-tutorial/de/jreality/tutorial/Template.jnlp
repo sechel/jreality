@@ -34,7 +34,7 @@
       <jar href="../jars/xpp3.jar" download="lazy"/>
       <jar href="../jars/xstream.jar" download="lazy"/>
       
-      <extension name="jogl" href="http://jogamp.org/deployment/archive/rc/gluegen_33-joal_20-jogl_45-jocl_29/jogl-all-awt.jnlp" />
+      <extension name="jogl" href="http://www3.math.tu-berlin.de/jreality/ws/jogl2/jogl-all-awt.jnlp" />
     </resources>
 
   <application-desc main-class="de.jreality.tutorial.PACKAGE.CLASSNAME">
