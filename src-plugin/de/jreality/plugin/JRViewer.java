@@ -203,7 +203,7 @@ public class JRViewer {
 	}
 	
 	public static void setApplicationIcon(Image icon) {
-		ImageIcon image = new ImageIcon(icon, "€pplication Icon");
+		ImageIcon image = new ImageIcon(icon, "Application Icon");
 		View.setIcon(image);
 		String lnfClass = UIManager.getSystemLookAndFeelClassName();
 		if (lnfClass.contains("Aqua")) {
