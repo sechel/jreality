@@ -25,6 +25,7 @@ import de.jreality.jogl.JOGLViewer;
  */
 public class HelpOverlay implements GLEventListener {
 	JOGLViewer viewer;
+
 	/**
 	 * @param v
 	 */
@@ -48,14 +49,15 @@ public class HelpOverlay implements GLEventListener {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
-		if (visible)		{
+		if (visible) {
 			mouseEntries.clear();
-//			ToolManager.toolManagerForViewer(viewer).getCurrentTool().registerHelp(this);
+			// ToolManager.toolManagerForViewer(viewer).getCurrentTool().registerHelp(this);
 		}
 	}
 
 	public void display(GLAutoDrawable glDrawable) {
-		if (!visible) return;
+		if (!visible)
+			return;
 		GL2 gl = glDrawable.getGL().getGL2();
 		GLU glu = new GLU();
 
@@ -67,16 +69,19 @@ public class HelpOverlay implements GLEventListener {
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
-		Dimension size = new Dimension(glDrawable.getWidth(), glDrawable.getHeight());
+		Dimension size = new Dimension(glDrawable.getWidth(),
+				glDrawable.getHeight());
 		gl.glViewport(0, 0, size.width, size.height);
 
-		// Store enabled state and disable lighting, texture mapping and the depth buffer
+		// Store enabled state and disable lighting, texture mapping and the
+		// depth buffer
 		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
 		gl.glDisable(GL.GL_BLEND);
 		gl.glDisable(GL2.GL_LIGHTING);
 		gl.glDisable(GL.GL_TEXTURE_2D);
 		gl.glDisable(GL.GL_DEPTH_TEST);
-		for (int i = 0; i< 6; ++i) gl.glDisable(i + GL2.GL_CLIP_PLANE0);
+		for (int i = 0; i < 6; ++i)
+			gl.glDisable(i + GL2.GL_CLIP_PLANE0);
 
 		// Retrieve the current viewport and switch to orthographic mode
 		int viewPort[] = new int[4];
@@ -93,7 +98,11 @@ public class HelpOverlay implements GLEventListener {
 		if (keyboardEntries.size() > 0) {
 			gl.glRasterPos2i(x, y);
 			glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, KEYBOARD_CONTROLS);
-			maxx = Math.max(maxx, OFFSET + glut.glutBitmapLength(GLUT.BITMAP_HELVETICA_12, KEYBOARD_CONTROLS));
+			maxx = Math.max(
+					maxx,
+					OFFSET
+							+ glut.glutBitmapLength(GLUT.BITMAP_HELVETICA_12,
+									KEYBOARD_CONTROLS));
 
 			y += OFFSET;
 			x += INDENT;
@@ -101,7 +110,11 @@ public class HelpOverlay implements GLEventListener {
 				gl.glRasterPos2f(x, y);
 				String text = (String) keyboardEntries.get(i);
 				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, text);
-				maxx = Math.max(maxx, OFFSET + glut.glutBitmapLength(GLUT.BITMAP_HELVETICA_12, text));
+				maxx = Math.max(
+						maxx,
+						OFFSET
+								+ glut.glutBitmapLength(
+										GLUT.BITMAP_HELVETICA_12, text));
 				y += OFFSET;
 			}
 		}
@@ -116,7 +129,8 @@ public class HelpOverlay implements GLEventListener {
 			x += INDENT;
 			for (int i = 0; i < mouseEntries.size(); i++) {
 				gl.glRasterPos2f(x, y);
-				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12, (String) mouseEntries.get(i));
+				glut.glutBitmapString(GLUT.BITMAP_HELVETICA_12,
+						(String) mouseEntries.get(i));
 				y += OFFSET;
 			}
 		}
@@ -130,35 +144,31 @@ public class HelpOverlay implements GLEventListener {
 	}
 
 	public void displayChanged(GLAutoDrawable glDrawable, boolean b, boolean b1) {
-		//TODO document this
+		// TODO document this
 	}
 
 	public void init(GLAutoDrawable glDrawable) {
-		//TODO document this
+		// TODO document this
 	}
 
 	public void reshape(GLAutoDrawable glDrawable, int i, int i1, int i2, int i3) {
-		//TODO document this
+		// TODO document this
 	}
 
 	public void registerKeyStroke(KeyStroke keyStroke, String description) {
-		String modifiersText = KeyEvent.getKeyModifiersText(keyStroke.getModifiers());
+		String modifiersText = KeyEvent.getKeyModifiersText(keyStroke
+				.getModifiers());
 		String keyText = KeyEvent.getKeyText(keyStroke.getKeyCode());
-		keyboardEntries.add(
-				(modifiersText.length() != 0 ? modifiersText + " " : "") +
-				keyText + ": " +
-				description
-		);
+		keyboardEntries.add((modifiersText.length() != 0 ? modifiersText + " "
+				: "") + keyText + ": " + description);
 	}
 
-	public void registerInfoString(String eventDesc,  String description) {
-		mouseEntries.add(
-				eventDesc + ": " + description
-		);
+	public void registerInfoString(String eventDesc, String description) {
+		mouseEntries.add(eventDesc + ": " + description);
 
 	}
-	
-	public void printOut()	{
+
+	public void printOut() {
 		for (int i = 0; i < keyboardEntries.size(); i++) {
 			String text = (String) keyboardEntries.get(i);
 			System.out.println(text);
@@ -168,6 +178,6 @@ public class HelpOverlay implements GLEventListener {
 
 	public void dispose(GLAutoDrawable drawable) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

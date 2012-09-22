@@ -37,9 +37,7 @@
  *
  */
 
-
 package de.jreality.jogl;
-
 
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -54,59 +52,71 @@ import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
- *
+ * 
  */
-public class JOGLCylinderUtility  {
+public class JOGLCylinderUtility {
 
-	private JOGLCylinderUtility()	{
+	private JOGLCylinderUtility() {
 	}
+
 	private static int numCyls = 6;
 	private static IndexedFaceSet[] cylinderList = new IndexedFaceSet[numCyls];
-	
-	private static IndexedFaceSet getCylinder(int i )	{
-		if (cylinderList[i] == null) cylinderList[i] = Primitives.cylinder(2^i);
-		 return cylinderList[i];
+
+	private static IndexedFaceSet getCylinder(int i) {
+		if (cylinderList[i] == null)
+			cylinderList[i] = Primitives.cylinder(2 ^ i);
+		return cylinderList[i];
 	}
+
 	static boolean sharedDisplayLists = JOGLConfiguration.sharedContexts;
 	static WeakHashMap<GL, int[]> cylinderDListsTable = new WeakHashMap<GL, int[]>();
 	static int[] globalSharedCylinderDisplayLists = null;
-	//TODO This can't be static; the display lists so created are invalid if the renderer parameter
-	// no longer exists.  So ... these display lists have to be tied to a specific context.
-	public static void setupCylinderDLists(JOGLRenderer jr)	{
-		int[] dlists = null; //getCylinderDLists(jr);
-//		if (dlists != null)	{
-//			JOGLConfiguration.theLog.log(Level.WARNING,"Already have cylinder display lists for this renderer "+jr);
-//		}
+
+	// TODO This can't be static; the display lists so created are invalid if
+	// the renderer parameter
+	// no longer exists. So ... these display lists have to be tied to a
+	// specific context.
+	public static void setupCylinderDLists(JOGLRenderer jr) {
+		int[] dlists = null; // getCylinderDLists(jr);
+		// if (dlists != null) {
+		// JOGLConfiguration.theLog.log(Level.WARNING,"Already have cylinder display lists for this renderer "+jr);
+		// }
 		GL2 gl = jr.globalGL;
 		int n = 6;
 		dlists = null;
-		//if (!sharedDisplayLists)	dlists = (int[] ) cylinderDListsTable.get(gl);
-		//else 
+		// if (!sharedDisplayLists) dlists = (int[] )
+		// cylinderDListsTable.get(gl);
+		// else
 		dlists = new int[n];
-		JOGLConfiguration.theLog.log(Level.INFO,"Setting up cylinder display lists for context "+gl);
+		JOGLConfiguration.theLog.log(Level.INFO,
+				"Setting up cylinder display lists for context " + gl);
 		int nv = 4;
-		for (int i = 0; i<n; ++i)	{
+		for (int i = 0; i < n; ++i) {
 			dlists[i] = gl.glGenLists(1);
-			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
+			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine(
+					"Allocating new dlist " + dlists[i]);
 			gl.glNewList(dlists[i], GL2.GL_COMPILE);
-			//gl.glDisable(GL.GL_SMOOTH);
+			// gl.glDisable(GL.GL_SMOOTH);
 			IndexedFaceSet cyl = Primitives.cylinder(nv);
 			nv *= 2;
 			JOGLRendererHelper.drawFaces(jr, cyl, true, 1.0);
 			gl.glEndList();
 		}
-		if (!sharedDisplayLists) cylinderDListsTable.put(jr.globalGL, dlists);
-		else globalSharedCylinderDisplayLists = dlists;
+		if (!sharedDisplayLists)
+			cylinderDListsTable.put(jr.globalGL, dlists);
+		else
+			globalSharedCylinderDisplayLists = dlists;
 	}
-	
+
 	/**
 	 * @param i
 	 * @return
 	 */
-	public static int getCylinderDLists(int i,JOGLRenderer jr) {
+	public static int getCylinderDLists(int i, JOGLRenderer jr) {
 		int[] dlists = getCylinderDLists(jr);
-		if (dlists == null) 	{
-			JOGLConfiguration.getLogger().log(Level.WARNING,"Invalid cylinder display lists");
+		if (dlists == null) {
+			JOGLConfiguration.getLogger().log(Level.WARNING,
+					"Invalid cylinder display lists");
 			return 0;
 		}
 		return dlists[i];
@@ -116,38 +126,41 @@ public class JOGLCylinderUtility  {
 	 * @param i
 	 * @return
 	 */
-	public static int[] getCylinderDLists( JOGLRenderer jr) {
+	public static int[] getCylinderDLists(JOGLRenderer jr) {
 		int dlists[];
-		if (!sharedDisplayLists)	
-		dlists =  (int[] ) cylinderDListsTable.get(jr.globalGL);
-		else dlists = globalSharedCylinderDisplayLists;
-		if (dlists == null) 	{
+		if (!sharedDisplayLists)
+			dlists = (int[]) cylinderDListsTable.get(jr.globalGL);
+		else
+			dlists = globalSharedCylinderDisplayLists;
+		if (dlists == null) {
 			setupCylinderDLists(jr);
-			if (!sharedDisplayLists)	
-				dlists = (int[] ) cylinderDListsTable.get(jr.globalGL);
-			else dlists = globalSharedCylinderDisplayLists;
+			if (!sharedDisplayLists)
+				dlists = (int[]) cylinderDListsTable.get(jr.globalGL);
+			else
+				dlists = globalSharedCylinderDisplayLists;
 		}
-		if (dlists == null)	{
-			throw new IllegalStateException("Can't make cylinder display lists successfully");
+		if (dlists == null) {
+			throw new IllegalStateException(
+					"Can't make cylinder display lists successfully");
 		}
 		return dlists;
 	}
 
 	public static void disposeCylinderDLists(JOGLRenderer jr) {
-		if (!sharedDisplayLists)	
-			   cylinderDListsTable.remove(jr);
+		if (!sharedDisplayLists)
+			cylinderDListsTable.remove(jr);
 	}
 
+	static double[] lodLevels = { .02, .08, .16, .32, .64 };
 
-	static double[] lodLevels = {.02,.08,.16,.32,.64};
 	public static int getResolutionLevel(double[] o2ndc, double lod) {
 		double d = lod * CameraUtility.getNDCExtent(o2ndc);
 		int i = 0;
-		for ( i = 0; i<5; ++i)	{
-			if (d < lodLevels[i]) break;
+		for (i = 0; i < 5; ++i) {
+			if (d < lodLevels[i])
+				break;
 		}
 		return i;
 	}
-
 
 }

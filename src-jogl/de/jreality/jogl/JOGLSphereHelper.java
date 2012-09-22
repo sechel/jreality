@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl;
 
 import java.util.WeakHashMap;
@@ -53,7 +52,7 @@ import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn
- *
+ * 
  */
 public class JOGLSphereHelper extends SphereUtility {
 
@@ -61,81 +60,92 @@ public class JOGLSphereHelper extends SphereUtility {
 	static boolean sharedDisplayLists;
 	static WeakHashMap<GL, int[]> sphereDListsTable = new WeakHashMap<GL, int[]>();
 	static int[] globalSharedSphereDisplayLists = null;
-	public static void setupSphereDLists(JOGLRenderer jr)	{
-		// we read this once -- had better be set to correct value when we do so!
+
+	public static void setupSphereDLists(JOGLRenderer jr) {
+		// we read this once -- had better be set to correct value when we do
+		// so!
 		sharedDisplayLists = JOGLConfiguration.sharedContexts;
-		int[] dlists = null; 
+		int[] dlists = null;
 		GL2 gl = jr.globalGL;
 		int n = SphereUtility.tessellatedCubes.length;
 		dlists = null;
 		dlists = new int[n];
-//		JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
-		for (int i = 0; i<n; ++i)	{
+		// JOGLConfiguration.theLog.log(Level.INFO,"Setting up sphere display lists for context "+gl);
+		for (int i = 0; i < n; ++i) {
 			SceneGraphComponent tcs = tessellatedCubeSphere(i, false);
 			dlists[i] = gl.glGenLists(1);
-//			LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
+			// LoggingSystem.getLogger(JOGLCylinderUtility.class).fine("Allocating new dlist "+dlists[i]);
 			gl.glNewList(dlists[i], GL2.GL_COMPILE);
-			IndexedFaceSet qms = (IndexedFaceSet) tcs.getChildComponent(0).getGeometry();
-			for (int j = 0; j<tcs.getChildComponentCount(); ++j)	{
+			IndexedFaceSet qms = (IndexedFaceSet) tcs.getChildComponent(0)
+					.getGeometry();
+			for (int j = 0; j < tcs.getChildComponentCount(); ++j) {
 				gl.glPushMatrix();
-				gl.glMultTransposeMatrixd(tcs.getChildComponent(j).getTransformation().getMatrix(),0);
-				JOGLRendererHelper.drawFaces(jr,qms,true, 1.0);
+				gl.glMultTransposeMatrixd(tcs.getChildComponent(j)
+						.getTransformation().getMatrix(), 0);
+				JOGLRendererHelper.drawFaces(jr, qms, true, 1.0);
 				gl.glPopMatrix();
-			}				
+			}
 			gl.glEndList();
 		}
-		if (!sharedDisplayLists) sphereDListsTable.put(jr.globalGL, dlists);
-		else globalSharedSphereDisplayLists = dlists;
-	}
-	
-	/**
-	 * @param i
-	 * @return
-	 */
-	public static int getSphereDLists(int i,JOGLRenderer jr) {
-		int[] dlists = getSphereDLists(jr);
-		if (dlists == null) 	{
-			JOGLConfiguration.getLogger().log(Level.WARNING,"Invalid sphere display lists");
-			return 0;
-		}
-		return dlists[dlists.length <= i ? dlists.length-1 : i];
+		if (!sharedDisplayLists)
+			sphereDListsTable.put(jr.globalGL, dlists);
+		else
+			globalSharedSphereDisplayLists = dlists;
 	}
 
 	/**
 	 * @param i
 	 * @return
 	 */
-	public static int[] getSphereDLists( JOGLRenderer jr) {
-		int dlists[];
-		if (!sharedDisplayLists)	
-			dlists =  (int[] ) sphereDListsTable.get(jr.globalGL);
-		else dlists = globalSharedSphereDisplayLists;
-		if (dlists == null) 	{
-			setupSphereDLists(jr);
-			if (!sharedDisplayLists)	
-				dlists = (int[] ) sphereDListsTable.get(jr.globalGL);
-			else dlists = globalSharedSphereDisplayLists;
+	public static int getSphereDLists(int i, JOGLRenderer jr) {
+		int[] dlists = getSphereDLists(jr);
+		if (dlists == null) {
+			JOGLConfiguration.getLogger().log(Level.WARNING,
+					"Invalid sphere display lists");
+			return 0;
 		}
-		if (dlists == null)	{
-			throw new IllegalStateException("Can't make sphere display lists successfully");
+		return dlists[dlists.length <= i ? dlists.length - 1 : i];
+	}
+
+	/**
+	 * @param i
+	 * @return
+	 */
+	public static int[] getSphereDLists(JOGLRenderer jr) {
+		int dlists[];
+		if (!sharedDisplayLists)
+			dlists = (int[]) sphereDListsTable.get(jr.globalGL);
+		else
+			dlists = globalSharedSphereDisplayLists;
+		if (dlists == null) {
+			setupSphereDLists(jr);
+			if (!sharedDisplayLists)
+				dlists = (int[]) sphereDListsTable.get(jr.globalGL);
+			else
+				dlists = globalSharedSphereDisplayLists;
+		}
+		if (dlists == null) {
+			throw new IllegalStateException(
+					"Can't make sphere display lists successfully");
 		}
 		return dlists;
 	}
 
 	public static void disposeSphereDLists(JOGLRenderer jr) {
-			if (!sharedDisplayLists)	
-			   sphereDListsTable.remove(jr);
-	  
+		if (!sharedDisplayLists)
+			sphereDListsTable.remove(jr);
+
 	}
 
+	static double[] lodLevels = { .02, .08, .16, .32, .64 };
 
-	static double[] lodLevels = {.02,.08,.16,.32,.64};
 	public static int getResolutionLevel(double[] o2ndc, double lod) {
 		double d = lod * CameraUtility.getNDCExtent(o2ndc);
-		//JOGLConfiguration.theLog.log(Level.FINE,"Distance is "+d);
+		// JOGLConfiguration.theLog.log(Level.FINE,"Distance is "+d);
 		int i = 0;
-		for ( i = 0; i<5; ++i)	{
-			if (d < lodLevels[i]) break;
+		for (i = 0; i < 5; ++i) {
+			if (d < lodLevels[i])
+				break;
 		}
 		return i;
 	}

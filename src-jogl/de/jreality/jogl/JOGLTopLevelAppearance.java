@@ -18,56 +18,82 @@ public class JOGLTopLevelAppearance {
 
 	Appearance rootAp;
 	transient protected AppearanceListener topLevelApListener;
-	transient protected boolean renderSpherical = false,
-			frontBanana = true,
-			forceResidentTextures = true,
-			oneTexture2DPerImage = false;
+	transient protected boolean renderSpherical = false, frontBanana = true,
+			forceResidentTextures = true, oneTexture2DPerImage = false;
 	transient protected double globalAntiAliasingFactor = 1.0;
 	transient protected CubeMap skyboxCubemap;
-	public JOGLTopLevelAppearance(Appearance ap)	{
+
+	public JOGLTopLevelAppearance(Appearance ap) {
 		rootAp = ap;
 		topLevelApListener = new AppearanceListener() {
 
 			public void appearanceChanged(AppearanceEvent ev) {
 				update();
 			}
-			
+
 		};
 		rootAp.addAppearanceListener(topLevelApListener);
 		update();
 	}
-	
-	public void dispose()	{
+
+	public void dispose() {
 		rootAp.removeAppearanceListener(topLevelApListener);
 	}
-	
-	public void update()	{
-//		theLog.finer("In extractGlobalParameters");
-		Object obj = rootAp.getAttribute(RENDER_S3, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) frontBanana = renderSpherical = ((Boolean) obj).booleanValue();
-		obj = rootAp.getAttribute(FORCE_RESIDENT_TEXTURES, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) forceResidentTextures = ((Boolean)obj).booleanValue();
-		obj = rootAp.getAttribute(ONE_TEXTURE2D_PER_IMAGE, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) oneTexture2DPerImage = ((Boolean)obj).booleanValue();
-		LoggingSystem.getLogger(this).fine("one texture per image: "+oneTexture2DPerImage);
-		obj = rootAp.getAttribute(CLEAR_COLOR_BUFFER, Boolean.class);		// assume the best ...
-//		if (obj instanceof Boolean) {
-//			renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
-////			theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
-//		}
-		obj = rootAp.getAttribute(USE_OLD_TRANSPARENCY, Boolean.class);		
-		// a bit ugly: we make this a static variable so shaders can access it easily
-		if (obj instanceof Boolean) JOGLRenderingState.useOldTransparency = ((Boolean)obj).booleanValue();
-//		theLog.fine("forceResTex = "+forceResidentTextures);
-//		theLog.info("component display lists = "+renderingState.componentDisplayLists);
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,SKY_BOX, rootAp)) {
-			skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class,
-				SKY_BOX, rootAp, true);
-		} else skyboxCubemap = null;
-		obj = rootAp.getAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, Double.class);		// assume the best ...
-		if (obj instanceof Double) globalAntiAliasingFactor = ((Double) obj).doubleValue();
-		obj = rootAp.getAttribute(CommonAttributes.USE_GLSL, Boolean.class);		// assume the best ...
-		if (obj instanceof Boolean) JOGLRenderingState.useGLSL = ((Boolean)obj).booleanValue();
+
+	public void update() {
+		// theLog.finer("In extractGlobalParameters");
+		Object obj = rootAp.getAttribute(RENDER_S3, Boolean.class); // assume
+																	// the best
+																	// ...
+		if (obj instanceof Boolean)
+			frontBanana = renderSpherical = ((Boolean) obj).booleanValue();
+		obj = rootAp.getAttribute(FORCE_RESIDENT_TEXTURES, Boolean.class); // assume
+																			// the
+																			// best
+																			// ...
+		if (obj instanceof Boolean)
+			forceResidentTextures = ((Boolean) obj).booleanValue();
+		obj = rootAp.getAttribute(ONE_TEXTURE2D_PER_IMAGE, Boolean.class); // assume
+																			// the
+																			// best
+																			// ...
+		if (obj instanceof Boolean)
+			oneTexture2DPerImage = ((Boolean) obj).booleanValue();
+		LoggingSystem.getLogger(this).fine(
+				"one texture per image: " + oneTexture2DPerImage);
+		obj = rootAp.getAttribute(CLEAR_COLOR_BUFFER, Boolean.class); // assume
+																		// the
+																		// best
+																		// ...
+		// if (obj instanceof Boolean) {
+		// renderingState.clearColorBuffer = ((Boolean)obj).booleanValue();
+		// //
+		// theLog.fine("Setting clear color buffer to "+renderingState.clearColorBuffer);
+		// }
+		obj = rootAp.getAttribute(USE_OLD_TRANSPARENCY, Boolean.class);
+		// a bit ugly: we make this a static variable so shaders can access it
+		// easily
+		if (obj instanceof Boolean)
+			JOGLRenderingState.useOldTransparency = ((Boolean) obj)
+					.booleanValue();
+		// theLog.fine("forceResTex = "+forceResidentTextures);
+		// theLog.info("component display lists = "+renderingState.componentDisplayLists);
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, SKY_BOX,
+				rootAp)) {
+			skyboxCubemap = (CubeMap) AttributeEntityUtility
+					.createAttributeEntity(CubeMap.class, SKY_BOX, rootAp, true);
+		} else
+			skyboxCubemap = null;
+		obj = rootAp.getAttribute(CommonAttributes.ANTI_ALIASING_FACTOR,
+				Double.class); // assume the best ...
+		if (obj instanceof Double)
+			globalAntiAliasingFactor = ((Double) obj).doubleValue();
+		obj = rootAp.getAttribute(CommonAttributes.USE_GLSL, Boolean.class); // assume
+																				// the
+																				// best
+																				// ...
+		if (obj instanceof Boolean)
+			JOGLRenderingState.useGLSL = ((Boolean) obj).booleanValue();
 
 	}
 
@@ -98,6 +124,5 @@ public class JOGLTopLevelAppearance {
 	public void setGlobalAntiAliasingFactor(double globalAntiAliasingFactor) {
 		this.globalAntiAliasingFactor = globalAntiAliasingFactor;
 	}
-
 
 }

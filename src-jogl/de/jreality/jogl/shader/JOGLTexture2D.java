@@ -9,28 +9,18 @@ import de.jreality.shader.Texture2D;
 /**
  * This class is essentially a cache for the Texture2D used in the constructor.
  * 
- * WARNING: the set methods are not supported.  Call update() to read out ALL values of the
- * associated Texture2D into the JOGLTexture2D.
+ * WARNING: the set methods are not supported. Call update() to read out ALL
+ * values of the associated Texture2D into the JOGLTexture2D.
+ * 
  * @author Charles Gunn
- *
+ * 
  */
 public class JOGLTexture2D implements Texture2D {
 	Texture2D proxy;
-	protected int applyMode,
-		combineModeAlpha,
-		combineModeColor,
-		source0Color,
-		source0Alpha,
-		source1Color,
-		source1Alpha,
-		source2Color,
-		source2Alpha,
-		operand0Color,
-		operand0Alpha,
-		operand1Color,
-		operand1Alpha,
-		operand2Color,
-		operand2Alpha;
+	protected int applyMode, combineModeAlpha, combineModeColor, source0Color,
+			source0Alpha, source1Color, source1Alpha, source2Color,
+			source2Alpha, operand0Color, operand0Alpha, operand1Color,
+			operand1Alpha, operand2Color, operand2Alpha;
 	protected Color blendColor;
 	protected String externalSource;
 	protected ImageData image;
@@ -43,13 +33,14 @@ public class JOGLTexture2D implements Texture2D {
 	protected Runnable runnable;
 	protected Integer pixelFormat;
 	protected Integer texID = -1;
-	public JOGLTexture2D(Texture2D t)	{
+
+	public JOGLTexture2D(Texture2D t) {
 		super();
 		proxy = t;
 		update();
 	}
-	
-	public void update()	{
+
+	public void update() {
 		applyMode = proxy.getApplyMode();
 		blendColor = proxy.getBlendColor();
 		combineModeColor = proxy.getCombineModeColor();
@@ -80,10 +71,10 @@ public class JOGLTexture2D implements Texture2D {
 		if (source0Alpha == 23) {
 			if (source1Alpha != Texture2D.SOURCE1_ALPHA_DEFAULT)
 				texID = source1Alpha;
-			System.err.println("Got texid = "+texID);
+			System.err.println("Got texid = " + texID);
 		}
 	}
-	
+
 	public Integer getApplyMode() {
 		return applyMode;
 	}
@@ -179,7 +170,7 @@ public class JOGLTexture2D implements Texture2D {
 	public Matrix getTextureMatrix() {
 		return textureMatrix;
 	}
-	
+
 	public Boolean getAnimated() {
 		return animated;
 	}
@@ -194,6 +185,7 @@ public class JOGLTexture2D implements Texture2D {
 
 	public void setCombineMode(Integer combineMode) {
 	}
+
 	// TODO: finish implementing the set() methods
 	public void setCombineModeAlpha(Integer i) {
 	}

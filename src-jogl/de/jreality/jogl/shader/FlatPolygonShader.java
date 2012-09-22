@@ -37,14 +37,13 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import de.jreality.shader.EffectiveAppearance;
 
 /**
  * @author gunn
- *
+ * 
  */
 public class FlatPolygonShader extends DefaultPolygonShader {
 
@@ -58,7 +57,7 @@ public class FlatPolygonShader extends DefaultPolygonShader {
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
-//		smoothShading = false;
+		// smoothShading = false;
 	}
 
 }

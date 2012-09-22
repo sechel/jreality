@@ -8,24 +8,25 @@ import java.util.logging.Logger;
 
 import de.jreality.util.LoggingSystem;
 
-public class JOGLPeerNode	{
+public class JOGLPeerNode {
 	String name;
 	JOGLRenderer jr;
 	static Logger theLog = LoggingSystem.getLogger(JOGLPeerNode.class);
 
-	public JOGLPeerNode()	{
+	public JOGLPeerNode() {
 		super();
 	}
-	public JOGLPeerNode(JOGLRenderer jr)	{
+
+	public JOGLPeerNode(JOGLRenderer jr) {
 		super();
-		this.jr =  jr;
+		this.jr = jr;
 	}
-	public String getName()	{
+
+	public String getName() {
 		return name;
 	}
 
-	public void setName(String n)	{
+	public void setName(String n) {
 		name = n;
 	}
 }
-

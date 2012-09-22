@@ -37,13 +37,11 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
-
 
 /**
  * @author gunn
- *
+ * 
  */
 public interface PolygonShader extends PrimitiveShader {
 }

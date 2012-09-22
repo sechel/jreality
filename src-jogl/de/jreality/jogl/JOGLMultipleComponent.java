@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl;
 
 import java.util.Iterator;

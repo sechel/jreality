@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import java.util.logging.Level;
@@ -57,53 +56,67 @@ import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
- *
+ * 
  */
 public class ImplodePolygonShader extends DefaultPolygonShader {
-    double implodeFactor;
+	double implodeFactor;
+
 	public ImplodePolygonShader(de.jreality.shader.DefaultPolygonShader ps) {
 		super(ps);
 	}
 
-	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
+	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
-		implodeFactor = eap.getAttribute(ShaderUtility.nameSpace(name, "implodeFactor"), implodeFactor);
-		System.err.println("implode factor = "+implodeFactor);
+		implodeFactor = eap.getAttribute(
+				ShaderUtility.nameSpace(name, "implodeFactor"), implodeFactor);
+		System.err.println("implode factor = " + implodeFactor);
 	}
-    
+
 	public double getImplodeFactor() {
 		return implodeFactor;
 	}
-	public boolean providesProxyGeometry() {		
-		//if (implodeFactor == 0.0) return false;
+
+	public boolean providesProxyGeometry() {
+		// if (implodeFactor == 0.0) return false;
 		return true;
 	}
-	public int proxyGeometryFor(JOGLRenderingState jrs)	{
+
+	public int proxyGeometryFor(JOGLRenderingState jrs) {
 		final Geometry original = jrs.currentGeometry;
 		final JOGLRenderer jr = jrs.renderer;
 		final int sig = jrs.currentMetric;
 		final boolean useDisplayLists = jrs.useDisplayLists;
-		if (!(original instanceof IndexedFaceSet)) return -1;
-		if (dListProxy != -1) return dListProxy;
+		if (!(original instanceof IndexedFaceSet))
+			return -1;
+		if (dListProxy != -1)
+			return dListProxy;
 		GL2 gl = jr.globalGL;
-		JOGLConfiguration.theLog.log(Level.FINE,this+"Providing proxy geometry "+implodeFactor);
-		IndexedFaceSet ifs =  IndexedFaceSetUtility.implode((IndexedFaceSet) original, implodeFactor);
+		JOGLConfiguration.theLog.log(Level.FINE, this
+				+ "Providing proxy geometry " + implodeFactor);
+		IndexedFaceSet ifs = IndexedFaceSetUtility.implode(
+				(IndexedFaceSet) original, implodeFactor);
 		double alpha = vertexShader == null ? 1.0 : jrs.diffuseColor[3];
 		if (useDisplayLists) {
 			dListProxy = gl.glGenLists(1);
 			gl.glNewList(dListProxy, GL2.GL_COMPILE);
 		}
-		//if (jr.isPickMode())	gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
-    JOGLRendererHelper.drawFaces(jr, ifs,  jrs.smoothShading, alpha);
-		//if (jr.isPickMode())	gl.glPopName();
-		if (useDisplayLists) gl.glEndList();
+		// if (jr.isPickMode()) gl.glPushName(JOGLPickAction.GEOMETRY_BASE);
+		JOGLRendererHelper.drawFaces(jr, ifs, jrs.smoothShading, alpha);
+		// if (jr.isPickMode()) gl.glPopName();
+		if (useDisplayLists)
+			gl.glEndList();
 		return dListProxy;
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
 		super.flushCachedState(jr);
-		LoggingSystem.getLogger(this).fine("ImplodePolygonShader: Flushing display lists "+dListProxy+" : "+dListProxy);
-		if (dListProxy != -1) { jr.globalGL.glDeleteLists(dListProxy, 1);  dListProxy = -1; }
+		LoggingSystem.getLogger(this).fine(
+				"ImplodePolygonShader: Flushing display lists " + dListProxy
+						+ " : " + dListProxy);
+		if (dListProxy != -1) {
+			jr.globalGL.glDeleteLists(dListProxy, 1);
+			dListProxy = -1;
+		}
 		displayListsDirty = true;
 	}
 }

@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl;
 
 import java.awt.Graphics;
@@ -61,43 +60,48 @@ import javax.media.opengl.awt.GLJPanel;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
+
 public class GLJPanelViewer extends AbstractViewer {
 	GLJPanel panel;
 	GLPbuffer sharedPBuffer;
 	boolean opaque = false;
 	transient boolean preRender = true;
 	transient Graphics2D g2d;
+
 	public GLJPanelViewer() {
 		this(null, null);
 	}
 
 	public GLJPanelViewer(SceneGraphPath camPath, SceneGraphComponent root) {
-		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
-		initializeFrom(root, camPath);	
+		setAuxiliaryRoot(SceneGraphUtility
+				.createFullSceneGraphComponent("AuxiliaryRoot"));
+		initializeFrom(root, camPath);
 		panel.setOpaque(opaque);
 	}
 
-	// override these methods as subclass to draw beneath (above) the jReality scene
-	public void paintBefore(Graphics g)	{
+	// override these methods as subclass to draw beneath (above) the jReality
+	// scene
+	public void paintBefore(Graphics g) {
 		preRender = true;
 		g2d = (Graphics2D) g;
 		broadcastChange();
-//		getSceneRoot().getAppearance().setAttribute("backgroundColor", new Color(0,255,0,128));
-//		g2.setColor(Color.blue);
-//		g2.fillRect(0, 50, 50, 50);		
+		// getSceneRoot().getAppearance().setAttribute("backgroundColor", new
+		// Color(0,255,0,128));
+		// g2.setColor(Color.blue);
+		// g2.fillRect(0, 50, 50, 50);
 	}
-	
-	public void paintAfter(Graphics g)	{
+
+	public void paintAfter(Graphics g) {
 		preRender = false;
 		g2d = (Graphics2D) g;
 		broadcastChange();
-//		Graphics2D g2 = (Graphics2D) g;
-//		g2.setColor(Color.pink);
-//		g2.fillRect(0, 0, 50, 50);
+		// Graphics2D g2 = (Graphics2D) g;
+		// g2.setColor(Color.pink);
+		// g2.fillRect(0, 0, 50, 50);
 	}
-	
-	  @Override
-	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
+
+	@Override
+	protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p) {
 		setSceneRoot(r);
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities(GLProfile.get("GL2"));
@@ -105,19 +109,19 @@ public class GLJPanelViewer extends AbstractViewer {
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
 		GLCapabilitiesChooser chooser = new MultisampleChooser();
-		
+
 		GLContext sharedContext = firstOne.get();
-		
-		if (JOGLConfiguration.multiSample)	{
+
+		if (JOGLConfiguration.multiSample) {
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
 			caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		} else {
 			chooser = new DefaultGLCapabilitiesChooser();
 		}
-		if (JOGLConfiguration.sharedContexts && sharedContext == null) 
+		if (JOGLConfiguration.sharedContexts && sharedContext == null)
 			setupSharedContext(caps, chooser, sharedContext.getGLDrawable());
-		
+
 		panel = new GLJPanel(caps, chooser, sharedContext) {
 
 			@Override
@@ -126,22 +130,29 @@ public class GLJPanelViewer extends AbstractViewer {
 				super.paintComponent(arg0);
 				paintAfter(arg0);
 			}
-			
+
 		};
 		drawable = panel;
-        JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
-        drawable.addGLEventListener(this);
- 		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
-// 		panel.updateUI();
+		JOGLConfiguration.getLogger().log(Level.INFO,
+				"Caps is " + caps.toString());
+		drawable.addGLEventListener(this);
+		if (JOGLConfiguration.quadBufferedStereo)
+			setStereoType(HARDWARE_BUFFER_STEREO);
+		// panel.updateUI();
 	}
 
-	  // have to use a pbuffer to start with since panel has no context until
-	  // it's visible.
-	  private void setupSharedContext(GLCapabilities caps, GLCapabilitiesChooser chooser, GLDrawable glDrawable) {
+	// have to use a pbuffer to start with since panel has no context until
+	// it's visible.
+	private void setupSharedContext(GLCapabilities caps,
+			GLCapabilitiesChooser chooser, GLDrawable glDrawable) {
 		if (sharedPBuffer == null)
-			sharedPBuffer = GLDrawableFactory.getFactory(GLProfile.get("GL2")).createGLPbuffer(glDrawable.getNativeSurface().getGraphicsConfiguration().getScreen().getDevice(), caps, chooser, 1,1, null);
+			sharedPBuffer = GLDrawableFactory.getFactory(GLProfile.get("GL2"))
+					.createGLPbuffer(
+							glDrawable.getNativeSurface()
+									.getGraphicsConfiguration().getScreen()
+									.getDevice(), caps, chooser, 1, 1, null);
 		firstOne = new WeakReference<GLContext>(sharedPBuffer.getContext());
-	  }
+	}
 
 	public boolean isOpaque() {
 		return opaque;
@@ -151,36 +162,43 @@ public class GLJPanelViewer extends AbstractViewer {
 		this.opaque = opaque;
 		panel.setOpaque(opaque);
 	}
-	
+
 	Vector<GLJPanelListener> panelListeners;
-	
-	public interface GLJPanelListener extends java.util.EventListener	{
+
+	public interface GLJPanelListener extends java.util.EventListener {
 		public void preRender(Graphics2D g2);
+
 		public void postRender(Graphics2D g2);
 	}
 
-	public void addRenderListener(GLJPanelListener l)	{
-		if (panelListeners == null)	panelListeners = new Vector<GLJPanelListener>();
-		if (panelListeners.contains(l)) return;
+	public void addRenderListener(GLJPanelListener l) {
+		if (panelListeners == null)
+			panelListeners = new Vector<GLJPanelListener>();
+		if (panelListeners.contains(l))
+			return;
 		panelListeners.add(l);
-		//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: Adding geometry listener"+l+"to this:"+this);
+		// JOGLConfiguration.theLog.log(Level.INFO,"Viewer: Adding geometry listener"+l+"to this:"+this);
 	}
-	
-	public void removeRenderListener(GLJPanelListener l)	{
-		if (panelListeners == null)	return;
+
+	public void removeRenderListener(GLJPanelListener l) {
+		if (panelListeners == null)
+			return;
 		panelListeners.remove(l);
 	}
 
-	public void broadcastChange()	{
-		if (panelListeners == null) return;
-		//SyJOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
-		if (!panelListeners.isEmpty())	{
+	public void broadcastChange() {
+		if (panelListeners == null)
+			return;
+		// SyJOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
+		if (!panelListeners.isEmpty()) {
 			EventObject e = new EventObject(this);
-			//JOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
-			for (int i = 0; i<panelListeners.size(); ++i)	{
+			// JOGLConfiguration.theLog.log(Level.INFO,"Viewer: broadcasting"+listeners.size()+" listeners");
+			for (int i = 0; i < panelListeners.size(); ++i) {
 				GLJPanelListener l = (GLJPanelListener) panelListeners.get(i);
-				if (preRender) l.preRender(g2d);
-				else l.postRender(g2d);
+				if (preRender)
+					l.preRender(g2d);
+				else
+					l.postRender(g2d);
 			}
 		}
 	}
@@ -191,9 +209,7 @@ public class GLJPanelViewer extends AbstractViewer {
 
 	public void dispose(GLAutoDrawable drawable) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-
-	
 }

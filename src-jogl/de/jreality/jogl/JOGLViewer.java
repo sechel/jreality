@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl;
 
 import java.awt.Component;
@@ -55,6 +54,7 @@ import javax.media.opengl.awt.GLCanvas;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.SceneGraphUtility;
+
 public class JOGLViewer extends AbstractViewer {
 	protected GLCanvas canvas;
 
@@ -63,11 +63,13 @@ public class JOGLViewer extends AbstractViewer {
 	}
 
 	public JOGLViewer(SceneGraphPath camPath, SceneGraphComponent root) {
-		setAuxiliaryRoot(SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot"));
-		initializeFrom(root, camPath);	
+		setAuxiliaryRoot(SceneGraphUtility
+				.createFullSceneGraphComponent("AuxiliaryRoot"));
+		initializeFrom(root, camPath);
 	}
+
 	@Override
-	  protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p)	{
+	protected void initializeFrom(SceneGraphComponent r, SceneGraphPath p) {
 		setSceneRoot(r);
 		setCameraPath(p);
 		GLCapabilities caps = new GLCapabilities(GLProfile.get("GL2"));
@@ -75,20 +77,24 @@ public class JOGLViewer extends AbstractViewer {
 		caps.setStereo(JOGLConfiguration.quadBufferedStereo);
 		caps.setDoubleBuffered(true);
 		GLContext sharedContext = firstOne.get();
-		if (JOGLConfiguration.multiSample)	{
+		if (JOGLConfiguration.multiSample) {
 			GLCapabilitiesChooser chooser = new MultisampleChooser();
 			caps.setSampleBuffers(true);
 			caps.setNumSamples(4);
 			caps.setStereo(JOGLConfiguration.quadBufferedStereo);
-			canvas = new GLCanvas(caps, chooser, sharedContext,  GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
+			canvas = new GLCanvas(caps, chooser, sharedContext,
+					GraphicsEnvironment.getLocalGraphicsEnvironment()
+							.getDefaultScreenDevice());
 		} else {
 			canvas = new GLCanvas(caps);
 		}
 		drawable = canvas;
-        JOGLConfiguration.getLogger().log(Level.INFO, "Caps is "+caps.toString());
- 		drawable.addGLEventListener(this);
- 		if (JOGLConfiguration.quadBufferedStereo) setStereoType(HARDWARE_BUFFER_STEREO);
-//		canvas.requestFocus();
+		JOGLConfiguration.getLogger().log(Level.INFO,
+				"Caps is " + caps.toString());
+		drawable.addGLEventListener(this);
+		if (JOGLConfiguration.quadBufferedStereo)
+			setStereoType(HARDWARE_BUFFER_STEREO);
+		// canvas.requestFocus();
 		if (JOGLConfiguration.sharedContexts && sharedContext == null) {
 			firstOne = new WeakReference<GLContext>(drawable.getContext());
 		}
@@ -96,17 +102,19 @@ public class JOGLViewer extends AbstractViewer {
 
 	public void dispose(GLAutoDrawable drawable) {
 		super.dispose();
-		if (drawable != null) drawable.removeGLEventListener(this);
+		if (drawable != null)
+			drawable.removeGLEventListener(this);
 		drawable = null;
-		canvas=null;
+		canvas = null;
 	}
-	
-	public void setStereoType(int type)	{
+
+	public void setStereoType(int type) {
 		super.setStereoType(type);
 		if ((JOGLConfiguration.quadBufferedStereo && type != HARDWARE_BUFFER_STEREO)
-			|| (!JOGLConfiguration.quadBufferedStereo && type == HARDWARE_BUFFER_STEREO)) {
+				|| (!JOGLConfiguration.quadBufferedStereo && type == HARDWARE_BUFFER_STEREO)) {
 			JOGLConfiguration.quadBufferedStereo = !JOGLConfiguration.quadBufferedStereo;
-			if (drawable != null) drawable.removeGLEventListener(this);
+			if (drawable != null)
+				drawable.removeGLEventListener(this);
 			initializeFrom(getSceneRoot(), getCameraPath());
 			component.add("Center", (Component) drawable);
 		}

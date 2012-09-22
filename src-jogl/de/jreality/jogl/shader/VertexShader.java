@@ -37,16 +37,14 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
-
 
 /**
  * @author gunn
- *
+ * 
  */
 public interface VertexShader extends Shader {
 	// this is an empty interface: but shader writers should make sure
-	// to set the field JOGLRenderingState.diffuseColor  since it is used
+	// to set the field JOGLRenderingState.diffuseColor since it is used
 	// when rendering the geometry AFTER the vertex shader is rendered
 }

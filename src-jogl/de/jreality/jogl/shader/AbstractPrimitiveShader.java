@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import javax.media.opengl.GL;
@@ -55,7 +54,7 @@ public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 	protected GL currentGL = null;
 	protected boolean displayListsDirty = true;
 	protected int dList = -1, dListProxy = -1;
-	
+
 	public boolean providesProxyGeometry() {
 		return false;
 	}
@@ -69,8 +68,13 @@ public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
-	    if (AttributeEntityUtility.hasAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(name,CommonAttributes.TEXT_SHADER), eap));
-	    	textShader = (DefaultTextShader) AttributeEntityUtility.createAttributeEntity(DefaultTextShader.class, ShaderUtility.nameSpace(name,"textShader"), eap);
+		if (AttributeEntityUtility.hasAttributeEntity(DefaultTextShader.class,
+				ShaderUtility.nameSpace(name, CommonAttributes.TEXT_SHADER),
+				eap))
+			;
+		textShader = (DefaultTextShader) AttributeEntityUtility
+				.createAttributeEntity(DefaultTextShader.class,
+						ShaderUtility.nameSpace(name, "textShader"), eap);
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
@@ -81,7 +85,7 @@ public abstract class AbstractPrimitiveShader implements PrimitiveShader {
 
 	public void render(JOGLRenderingState jrs) {
 	}
-	
+
 	public boolean displayListsDirty() {
 		return displayListsDirty;
 	}

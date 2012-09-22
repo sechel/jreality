@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderer;
@@ -46,12 +45,16 @@ import de.jreality.shader.DefaultTextShader;
 
 /**
  * @author gunn
- *
+ * 
  */
 public interface PrimitiveShader extends Shader {
 	public boolean providesProxyGeometry();
+
 	public int proxyGeometryFor(JOGLRenderingState jrs);
+
 	public DefaultTextShader getTextShader();
+
 	public void flushCachedState(JOGLRenderer jr);
+
 	public boolean displayListsDirty();
 }

@@ -181,10 +181,11 @@ public class View extends SideContainerPerspective implements ChangeListener {
 				e.printStackTrace();
 			}
 		} else {
-			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT); // de.jreality.portal.DesktopPortalViewer");
-//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_DEFAULT_SOFT); // de.jreality.portal.DesktopPortalViewer");
-//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_JOGL_DOME+" "+SystemProperties.VIEWER_DEFAULT_SOFT); // de.jreality.portal.DesktopPortalViewer");
-//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT); // de.jreality.portal.DesktopPortalViewer");
+			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
+//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
+//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_JOGL_DOME+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
+//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT); 
+			// de.jreality.portal.DesktopPortalViewer");
 			String[] vrs = viewer.split(" ");
 			List<Viewer> viewerList = new LinkedList<Viewer>();
 			String viewerClassName;

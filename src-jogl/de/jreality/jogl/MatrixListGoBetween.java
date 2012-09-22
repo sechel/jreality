@@ -11,15 +11,17 @@ import de.jreality.scene.event.TransformationEvent;
  * scene graphs with many identical children, as one finds in discrete groups.
  * 
  * To activate use, run java with "-DdiscreteGroup.copycat=true" flag
+ * 
  * @author Charles Gunn
- *
+ * 
  */
 public class MatrixListGoBetween extends GoBetween {
 
-	public MatrixListGoBetween()	{
+	public MatrixListGoBetween() {
 	}
-	
-	protected MatrixListGoBetween(SceneGraphComponent sgc, JOGLRenderer jr, boolean b) {
+
+	protected MatrixListGoBetween(SceneGraphComponent sgc, JOGLRenderer jr,
+			boolean b) {
 		super(sgc, jr, b);
 	}
 
@@ -55,7 +57,7 @@ public class MatrixListGoBetween extends GoBetween {
 
 	@Override
 	public void transformationMatrixChanged(TransformationEvent ev) {
-//		setPeerDisplayListDirty();
+		// setPeerDisplayListDirty();
 		super.transformationMatrixChanged(ev);
 	}
 
@@ -64,7 +66,7 @@ public class MatrixListGoBetween extends GoBetween {
 		setPeerDisplayListDirty();
 		super.visibilityChanged(ev);
 	}
-	
+
 	protected void setPeerDisplayListDirty() {
 		((MatrixListJOGLPeerComponent) peers.get(0)).setDisplayListDirty();
 	}

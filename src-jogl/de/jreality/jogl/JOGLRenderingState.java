@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl;
 
 import javax.media.opengl.GL;
@@ -52,13 +51,13 @@ import de.jreality.util.CameraUtility;
 
 /**
  * @author gunn
- *
+ * 
  */
 public class JOGLRenderingState {
 
 	public static boolean useOldTransparency = false;
 	public static boolean useGLSL = false;
-	
+
 	public JOGLRenderer renderer;
 	public Geometry currentGeometry = null;
 
@@ -76,19 +75,23 @@ public class JOGLRenderingState {
 	public boolean insideDisplayList = false;
 	public boolean componentDisplayLists = false;
 	public boolean currentPickMode = false;
-	public boolean useDisplayLists=true;
-	public boolean clearColorBuffer=true;
-	public boolean useVertexColors=false;		// for line shaders a question
+	public boolean useDisplayLists = true;
+	public boolean clearColorBuffer = true;
+	public boolean useVertexColors = false; // for line shaders a question
 	public boolean normals4d = false;
-	public boolean shadeGeometry = true;		// may allow shading to occur at scene graph component
-	public boolean oneTexture2DPerImage = false;	// the conservative choice: always render texture anew
-	
+	public boolean shadeGeometry = true; // may allow shading to occur at scene
+											// graph component
+	public boolean oneTexture2DPerImage = false; // the conservative choice:
+													// always render texture
+													// anew
+
 	public int activeTexture;
 	public int frontBack = GL.GL_FRONT_AND_BACK;
 	public int numLights = 0;
 	public int currentClippingPlane = 0;
 	public int currentEye = CameraUtility.MIDDLE_EYE;
-	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT;
+	public int clearBufferBits = GL.GL_COLOR_BUFFER_BIT
+			| GL.GL_DEPTH_BUFFER_BIT;
 	public int colorMask = 0xf;
 	public int currentMetric = Pn.EUCLIDEAN;
 	public int texUnitCount = 0;
@@ -96,79 +99,94 @@ public class JOGLRenderingState {
 	public int stereoType = JOGLViewer.CROSS_EYED_STEREO;
 	protected int[] sphereDisplayLists = null;
 	protected int[] cylinderDisplayLists = null;
-	
-	public double pointSize = 1.0,
-		lineWidth = 1.0;
+
+	public double pointSize = 1.0, lineWidth = 1.0;
 	public double levelOfDetail;
 	public double depthFudgeFactor;
 	public double currentAlpha = 1.0;
-	public double globalAntiAliasingFactor = 1.0; // for offscreen rendering, when image will be anti-aliased
-	public double[] cameraToWorld = Rn.identityMatrix(4),
-			worldToCamera = Rn.identityMatrix(4),
-			cameraToNDC  = Rn.identityMatrix(4);
-	
-	public float[][] subWindowTform = {{1,0,0},{0,1,0}};
+	public double globalAntiAliasingFactor = 1.0; // for offscreen rendering,
+													// when image will be
+													// anti-aliased
+	public double[] cameraToWorld = Rn.identityMatrix(4), worldToCamera = Rn
+			.identityMatrix(4), cameraToNDC = Rn.identityMatrix(4);
+
+	public float[][] subWindowTform = { { 1, 0, 0 }, { 0, 1, 0 } };
 	public float[] diffuseColor = new float[4];
 
 	public SceneGraphPath currentPath = new SceneGraphPath();
 	public Graphics3D context;
-	
+
 	public JOGLRenderingState(JOGLRenderer jr) {
 		super();
 		this.renderer = jr;
 	}
-  
-	public static boolean equals(float[] a, float[] b, float tol)	{
+
+	public static boolean equals(float[] a, float[] b, float tol) {
 		int n = a.length;
-		for (int i = 0; i<n ; ++i)	if (Math.abs(a[i]-b[i]) > tol) return false;
+		for (int i = 0; i < n; ++i)
+			if (Math.abs(a[i] - b[i]) > tol)
+				return false;
 		return true;
 	}
 
-		public  void initializeGLState()	{
-			// TODO clean this up, provide an interface to set "OpenGL Preferences ..."
-			// and make sure everything is here.
-			// set drawing color and point size
-			GL2 gl = renderer.globalGL;
-			gl.glDepthMask(true);
-			gl.glDisable(GL.GL_BLEND);
-			gl.glColor3f( 0.0f, 0.0f, 0.0f ); 
-			gl.glEnable(GL.GL_DEPTH_TEST);							// Enables Depth Testing
-			gl.glDepthFunc(GL.GL_LEQUAL);								// The Type Of Depth Testing To Do
-			gl.glEnable(GL2.GL_ALPHA_TEST);
-			gl.glAlphaFunc(GL.GL_GREATER, 0f);				// alpha = 0 gets ignored in fragment shader: cheap transparency
-			gl.glClearDepth(1.0f);  
-			gl.glEnable(GL2.GL_NORMALIZE);
-			gl.glEnable(GL.GL_MULTISAMPLE);	
-			gl.glEnable(GL2.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-			gl.glLightModeli(GL2.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
-			float[] white = {1f, 1f, 1f, 1f};
-			gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, white,0 );
-			float[] amb = {0f, 0f, 0f};
-			float[] spec = {.5f, .5f, .5f};
-			gl.glMaterialfv(frontBack, GL2.GL_AMBIENT, amb,0);
-			gl.glMaterialfv(frontBack, GL2.GL_DIFFUSE, new float[]{1,0,0},0);
-			gl.glMaterialfv(frontBack, GL2.GL_SPECULAR, spec,0);
-			gl.glMaterialf(frontBack, GL2.GL_SHININESS, 60f);
-			gl.glEnable(GL2.GL_COLOR_MATERIAL);
-			gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
+	public void initializeGLState() {
+		// TODO clean this up, provide an interface to set
+		// "OpenGL Preferences ..."
+		// and make sure everything is here.
+		// set drawing color and point size
+		GL2 gl = renderer.globalGL;
+		gl.glDepthMask(true);
+		gl.glDisable(GL.GL_BLEND);
+		gl.glColor3f(0.0f, 0.0f, 0.0f);
+		gl.glEnable(GL.GL_DEPTH_TEST); // Enables Depth Testing
+		gl.glDepthFunc(GL.GL_LEQUAL); // The Type Of Depth Testing To Do
+		gl.glEnable(GL2.GL_ALPHA_TEST);
+		gl.glAlphaFunc(GL.GL_GREATER, 0f); // alpha = 0 gets ignored in fragment
+											// shader: cheap transparency
+		gl.glClearDepth(1.0f);
+		gl.glEnable(GL2.GL_NORMALIZE);
+		gl.glEnable(GL.GL_MULTISAMPLE);
+		gl.glEnable(GL2.GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+		gl.glLightModeli(GL2.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_TRUE);
+		float[] white = { 1f, 1f, 1f, 1f };
+		gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, white, 0);
+		float[] amb = { 0f, 0f, 0f };
+		float[] spec = { .5f, .5f, .5f };
+		gl.glMaterialfv(frontBack, GL2.GL_AMBIENT, amb, 0);
+		gl.glMaterialfv(frontBack, GL2.GL_DIFFUSE, new float[] { 1, 0, 0 }, 0);
+		gl.glMaterialfv(frontBack, GL2.GL_SPECULAR, spec, 0);
+		gl.glMaterialf(frontBack, GL2.GL_SHININESS, 60f);
+		gl.glEnable(GL2.GL_COLOR_MATERIAL);
+		gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
 
-			if (smoothShading) gl.glShadeModel(GL2.GL_SMOOTH);
-			else		gl.glShadeModel(GL2.GL_FLAT);
-					
-			if (flipped) gl.glFrontFace( GL.GL_CW);
-			else 		gl.glFrontFace( GL.GL_CCW);
-		}
+		if (smoothShading)
+			gl.glShadeModel(GL2.GL_SMOOTH);
+		else
+			gl.glShadeModel(GL2.GL_FLAT);
+
+		if (flipped)
+			gl.glFrontFace(GL.GL_CW);
+		else
+			gl.glFrontFace(GL.GL_CCW);
+	}
+
 	public int getCylinderDisplayLists(int i) {
-		if (cylinderDisplayLists == null) cylinderDisplayLists = JOGLCylinderUtility.getCylinderDLists(renderer);
+		if (cylinderDisplayLists == null)
+			cylinderDisplayLists = JOGLCylinderUtility
+					.getCylinderDLists(renderer);
 		return cylinderDisplayLists[i];
 	}
+
 	public int getSphereDisplayLists(int i) {
-		if (sphereDisplayLists == null) sphereDisplayLists = JOGLSphereHelper.getSphereDLists(renderer);
+		if (sphereDisplayLists == null)
+			sphereDisplayLists = JOGLSphereHelper.getSphereDLists(renderer);
 		return sphereDisplayLists[i];
 	}
+
 	public boolean isClearColorBuffer() {
 		return clearColorBuffer;
 	}
+
 	public void setClearColorBuffer(boolean clearColorBuffer) {
 		this.clearColorBuffer = clearColorBuffer;
 	}

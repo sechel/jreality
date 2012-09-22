@@ -37,9 +37,7 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
-
 
 import java.util.logging.Level;
 
@@ -53,11 +51,12 @@ import de.jreality.util.LoggingSystem;
 
 /**
  * @author gunn
- *
+ * 
  */
-public class TwoSidePolygonShader extends AbstractPrimitiveShader implements PolygonShader {
-	   private PolygonShader front;
-	   private PolygonShader back;
+public class TwoSidePolygonShader extends AbstractPrimitiveShader implements
+		PolygonShader {
+	private PolygonShader front;
+	private PolygonShader back;
 
 	public TwoSidePolygonShader() {
 		super();
@@ -65,12 +64,13 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 		back = new DefaultPolygonShader();
 	}
 
-	public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader tsps)	{
+	public TwoSidePolygonShader(de.jreality.shader.TwoSidePolygonShader tsps) {
 		front = DefaultGeometryShader.createFrom(tsps.getFront());
-//	    front.setFrontBack(DefaultPolygonShader.FRONT);
+		// front.setFrontBack(DefaultPolygonShader.FRONT);
 		back = DefaultGeometryShader.createFrom(tsps.getFront());
-//	    back.setFrontBack(DefaultPolygonShader.BACK);
+		// back.setFrontBack(DefaultPolygonShader.BACK);
 	}
+
 	public void render(JOGLRenderingState jrs) {
 		Geometry g = jrs.currentGeometry;
 		jrs.currentGeometry = null;
@@ -85,43 +85,53 @@ public class TwoSidePolygonShader extends AbstractPrimitiveShader implements Pol
 		}
 		jrs.frontBack = GL.GL_FRONT_AND_BACK;
 	}
-	
+
 	public void postRender(JOGLRenderingState jrs) {
-		if (front != null) front.postRender(jrs);
-		if (back != null) back.postRender(jrs);
-		displayListsDirty = front.displayListsDirty() || back.displayListsDirty();
+		if (front != null)
+			front.postRender(jrs);
+		if (back != null)
+			back.postRender(jrs);
+		displayListsDirty = front.displayListsDirty()
+				|| back.displayListsDirty();
 	}
-	
-	public void setFromEffectiveAppearance(EffectiveAppearance eap, String shaderName) {
-//	      front = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName, CommonAttributes.POLYGON_SHADER, "front");
-//	      LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
-//	      front.setFrontBack(DefaultPolygonShader.FRONT);
-//	      back = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName,CommonAttributes.POLYGON_SHADER, "back");
-//	      back.setFrontBack(DefaultPolygonShader.BACK);
-		front.setFromEffectiveAppearance(eap, shaderName+".front");
-		back.setFromEffectiveAppearance(eap, shaderName+".back");
+
+	public void setFromEffectiveAppearance(EffectiveAppearance eap,
+			String shaderName) {
+		// front = (PolygonShader) ShaderLookup.getShaderAttr(eap, shaderName,
+		// CommonAttributes.POLYGON_SHADER, "front");
+		// LoggingSystem.getLogger(this).log(Level.FINER,"Front shader is "+front.getClass().toString());
+		// front.setFrontBack(DefaultPolygonShader.FRONT);
+		// back = (PolygonShader) ShaderLookup.getShaderAttr(eap,
+		// shaderName,CommonAttributes.POLYGON_SHADER, "back");
+		// back.setFrontBack(DefaultPolygonShader.BACK);
+		front.setFromEffectiveAppearance(eap, shaderName + ".front");
+		back.setFromEffectiveAppearance(eap, shaderName + ".back");
 	}
 
 	public boolean providesProxyGeometry() {
-		LoggingSystem.getLogger(this).log(Level.FINER,"Front has proxy: "+front.providesProxyGeometry());
-		if (front != null) return front.providesProxyGeometry();
+		LoggingSystem.getLogger(this).log(Level.FINER,
+				"Front has proxy: " + front.providesProxyGeometry());
+		if (front != null)
+			return front.providesProxyGeometry();
 		return false;
 	}
 
-	public  int proxyGeometryFor(JOGLRenderingState jrs)	{
+	public int proxyGeometryFor(JOGLRenderingState jrs) {
 		int dp = 0;
 		if (front != null) {
 			dp = front.proxyGeometryFor(jrs);
-			LoggingSystem.getLogger(this).log(Level.FINER,"Providing dl "+dp);
+			LoggingSystem.getLogger(this)
+					.log(Level.FINER, "Providing dl " + dp);
 			return dp;
 		}
-		return  -1;
+		return -1;
 	}
 
 	public void flushCachedState(JOGLRenderer jr) {
-		if (front != null) front.flushCachedState(jr);
-		if (back != null) back.flushCachedState(jr);
+		if (front != null)
+			front.flushCachedState(jr);
+		if (back != null)
+			back.flushCachedState(jr);
 	}
-
 
 }

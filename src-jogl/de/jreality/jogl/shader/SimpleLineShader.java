@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
@@ -52,25 +51,34 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
-public class SimpleLineShader extends AbstractPrimitiveShader implements LineShader {
+public class SimpleLineShader extends AbstractPrimitiveShader implements
+		LineShader {
 
-	Color	diffuseColor;		
-	double 	transparency, diffuseCoefficient;	
+	Color diffuseColor;
+	double transparency, diffuseCoefficient;
 	float[] diffuseColorAsFloat;
-
 
 	public void renderOld(JOGLRenderer jr) {
 		GL2 gl = jr.globalGL;
-		gl.glColor4fv( diffuseColorAsFloat,0);
+		gl.glColor4fv(diffuseColorAsFloat, 0);
 	}
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
-		JOGLConfiguration.theLog.log(Level.FINER,"Setting simple vertex shader");
-		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency, JOGLRenderingState.useOldTransparency);
-		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);		
+		JOGLConfiguration.theLog.log(Level.FINER,
+				"Setting simple vertex shader");
+		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,
+				CommonAttributes.DIFFUSE_COEFFICIENT),
+				CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.DIFFUSE_COLOR),
+				CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		transparency = eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.TRANSPARENCY),
+				CommonAttributes.TRANSPARENCY_DEFAULT);
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(
+				diffuseColor, transparency,
+				JOGLRenderingState.useOldTransparency);
+		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 	}
 
 }

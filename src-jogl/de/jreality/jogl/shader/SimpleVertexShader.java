@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
@@ -54,47 +53,67 @@ import de.jreality.shader.ShaderUtility;
 
 /**
  * @author gunn
- *
+ * 
  */
 public class SimpleVertexShader implements VertexShader {
-    	Color	diffuseColor;		
-    	double 	transparency, diffuseCoefficient;	
-    float[] diffuseColorAsFloat;
-    int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+	Color diffuseColor;
+	double transparency, diffuseCoefficient;
+	float[] diffuseColorAsFloat;
+	int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+
 	public Color getDiffuseColor() {
 		return diffuseColor;
 	}
+
 	public float[] getDiffuseColorAsFloat() {
 		return diffuseColorAsFloat;
 	}
+
 	public void setFrontBack(int f) {
 		frontBack = f;
 	}
-	public void postRender(JOGLRenderingState jrs)	{
+
+	public void postRender(JOGLRenderingState jrs) {
 	}
-	public void render(JOGLRenderingState jrs)	{
+
+	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
 		GL2 gl = jr.globalGL;
-//		JOGLConfiguration.theLog.log(Level.FINER,"Rendering simple vertex shader");
+		// JOGLConfiguration.theLog.log(Level.FINER,"Rendering simple vertex shader");
 
-		if (jr.renderingState.frontBack != frontBack)	{
+		if (jr.renderingState.frontBack != frontBack) {
 			gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
 			jr.renderingState.frontBack = frontBack;
 		}
-//		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
-		if (jr.renderingState.transparencyEnabled || diffuseColorAsFloat[3] == 0.0) gl.glColor4fv( diffuseColorAsFloat,0);
-		else gl.glColor3fv(diffuseColorAsFloat,0);
-//			gl.glColor4fv( diffuseColorAsFloat,0);
-//			System.err.println("Setting diffuse color to "+diffuseColor);
-//			System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor, 0, 4);
-//		}
+		// if (!(OpenGLState.equals(diffuseColorAsFloat,
+		// jr.openGLState.diffuseColor, (float) 10E-5))) {
+		if (jr.renderingState.transparencyEnabled
+				|| diffuseColorAsFloat[3] == 0.0)
+			gl.glColor4fv(diffuseColorAsFloat, 0);
+		else
+			gl.glColor3fv(diffuseColorAsFloat, 0);
+		// gl.glColor4fv( diffuseColorAsFloat,0);
+		// System.err.println("Setting diffuse color to "+diffuseColor);
+		// System.arraycopy(diffuseColorAsFloat, 0, jr.openGLState.diffuseColor,
+		// 0, 4);
+		// }
 	}
+
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
-		JOGLConfiguration.theLog.log(Level.FINER,"Setting simple vertex shader");
-		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency, JOGLRenderingState.useOldTransparency);
+		JOGLConfiguration.theLog.log(Level.FINER,
+				"Setting simple vertex shader");
+		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,
+				CommonAttributes.DIFFUSE_COEFFICIENT),
+				CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+		diffuseColor = (Color) eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.DIFFUSE_COLOR),
+				CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		transparency = eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.TRANSPARENCY),
+				CommonAttributes.TRANSPARENCY_DEFAULT);
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(
+				diffuseColor, transparency,
+				JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
 	}
 }

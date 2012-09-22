@@ -37,15 +37,13 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
-
 
 /**
  * @author gunn
- *
+ * 
  */
 public interface LineShader extends PrimitiveShader {
-//	public Color getDiffuseColor();
-//	public boolean isSmoothShading();
+	// public Color getDiffuseColor();
+	// public boolean isSmoothShading();
 }

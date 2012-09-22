@@ -17,7 +17,6 @@ import javax.media.opengl.GLProfile;
 
 import com.jogamp.opengl.util.awt.ImageUtil;
 
-
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.SceneGraphPath;
@@ -29,79 +28,98 @@ public class JOGLOffscreenRenderer {
 	transient private GLPbuffer offscreenPBuffer;
 	transient private Buffer offscreenBuffer;
 	BufferedImage offscreenImage, bi;
-	boolean preMultiplied = false;		// not sure about this!
+	boolean preMultiplied = false; // not sure about this!
 	boolean useColorBuffer = true;
 	boolean asTexture = false;
-	transient private int tileSizeX=1024, tileSizeY=768,numTiles=4;
+	transient private int tileSizeX = 1024, tileSizeY = 768, numTiles = 4;
 	private JOGLRenderer jr;
 	int[] maxrbuffer = new int[4];
-	
-	public JOGLOffscreenRenderer(JOGLRenderer jr)	{
+
+	public JOGLOffscreenRenderer(JOGLRenderer jr) {
 		this.jr = jr;
 	}
-	
-	public void renderOffscreen(int imageWidth, int imageHeight, File file, GLAutoDrawable canvas) {
+
+	public void renderOffscreen(int imageWidth, int imageHeight, File file,
+			GLAutoDrawable canvas) {
 		BufferedImage img = renderOffscreen(imageWidth, imageHeight, canvas);
 		ImageUtility.writeBufferedImage(file, img);
 	}
 
-	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, GLAutoDrawable canvas) {
+	public BufferedImage renderOffscreen(int imageWidth, int imageHeight,
+			GLAutoDrawable canvas) {
 		return renderOffscreen(imageWidth, imageHeight, 1.0, canvas);
 	}
-	public BufferedImage renderOffscreen(int imageWidth, int imageHeight, double aa, GLAutoDrawable canvas) {
+
+	public BufferedImage renderOffscreen(int imageWidth, int imageHeight,
+			double aa, GLAutoDrawable canvas) {
 		return renderOffscreen(null, imageWidth, imageHeight, aa, canvas);
 	}
+
 	HashMap<Long, GLPbuffer> pbuffers = new HashMap<Long, GLPbuffer>();
 	Boolean useFBO = true;
 	JOGLFBO joglFBO = null, joglFBOSlow;
-	int[] fbo = {-1}, rbuffer = {-1}, cbuffer = {-1}, txt = {-1}, normalFBO = {-1}, normalCBuffer = {-1};
+	int[] fbo = { -1 }, rbuffer = { -1 }, cbuffer = { -1 }, txt = { -1 },
+			normalFBO = { -1 }, normalCBuffer = { -1 };
 	int imageWidth, imageHeight;
 	static Matrix flipY = new Matrix();
 	{
-		MatrixBuilder.euclidean().scale(1,-1,1).assignTo(flipY);
+		MatrixBuilder.euclidean().scale(1, -1, 1).assignTo(flipY);
 	}
-	public JOGLFBO renderOffscreen(JOGLFBO fbo, Texture2D dst, int imageWidth, int imageHeight) {
-		if (fbo == null) joglFBO = new JOGLFBO(imageWidth, imageHeight);
-		else joglFBO = fbo;
-		// by setting the texture we get the image copied into the right place (in case asTexture = false)
+
+	public JOGLFBO renderOffscreen(JOGLFBO fbo, Texture2D dst, int imageWidth,
+			int imageHeight) {
+		if (fbo == null)
+			joglFBO = new JOGLFBO(imageWidth, imageHeight);
+		else
+			joglFBO = fbo;
+		// by setting the texture we get the image copied into the right place
+		// (in case asTexture = false)
 		joglFBO.setTexture(dst);
 		joglFBO.setAsTexture(asTexture);
 		joglFBO.setSize(new Dimension(imageWidth, imageHeight));
 		if (asTexture) {
 			dst.setTextureMatrix(flipY);
-//			dst.setMipmapMode(false);
-		} 
+			// dst.setMipmapMode(false);
+		}
 		jr.setTheFBO(joglFBO);
 		jr.setFboMode(true);
 		jr.theViewer.render();
 		jr.setFboMode(false);
 		return joglFBO;
 	}
-	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h, double aa, GLAutoDrawable canvas) {
+
+	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h,
+			double aa, GLAutoDrawable canvas) {
 		return renderOffscreen(dst, w, h, aa, canvas, null);
 	}
-	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h, double aa, GLAutoDrawable canvas, SceneGraphPath cp) {
-		imageHeight = (int) (h/aa);
-		imageWidth = (int) (w/aa);
-		if (useFBO)	{
-			if (joglFBOSlow == null) 
+
+	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h,
+			double aa, GLAutoDrawable canvas, SceneGraphPath cp) {
+		imageHeight = (int) (h / aa);
+		imageWidth = (int) (w / aa);
+		if (useFBO) {
+			if (joglFBOSlow == null)
 				joglFBOSlow = new JOGLFBO(imageWidth, imageHeight);
-			else 
+			else
 				joglFBOSlow.setSize(new Dimension(imageWidth, imageHeight));
 			jr.setTheFBO(joglFBOSlow);
 			joglFBOSlow.setAsTexture(false);
 			jr.setFboMode(true);
 			jr.setAlternateCameraPath(cp);
 			jr.theViewer.render();
-			//canvas.display();
+			// canvas.display();
 			dst = joglFBOSlow.getImage();
 			jr.setAlternateCameraPath(null);
 			jr.setFboMode(false);
-		} 
-		else {	// use pbuffers
+		} else { // use pbuffers
 			jr.offscreenMode = true;
-			if (!GLDrawableFactory.getFactory(GLProfile.get("GL2")).canCreateGLPbuffer(canvas.getNativeSurface().getGraphicsConfiguration().getScreen().getDevice())) {
-				JOGLConfiguration.getLogger().log(Level.WARNING,"PBuffers not supported");
+			if (!GLDrawableFactory.getFactory(GLProfile.get("GL2"))
+					.canCreateGLPbuffer(
+							canvas.getNativeSurface()
+									.getGraphicsConfiguration().getScreen()
+									.getDevice())) {
+				JOGLConfiguration.getLogger().log(Level.WARNING,
+						"PBuffers not supported");
 				return null;
 			}
 
@@ -133,9 +151,11 @@ public class JOGLOffscreenRenderer {
 				caps.setAlphaBits(8);
 				// if (offscreenPBuffer != null)
 				// offscreenPBuffer.destroy();
-				offscreenPBuffer = GLDrawableFactory.getFactory(GLProfile.get("GL2"))
-						.createGLPbuffer(canvas.getNativeSurface().getGraphicsConfiguration().getScreen().getDevice(),caps, null, tileSizeX, tileSizeY,
-								canvas.getContext());
+				offscreenPBuffer = GLDrawableFactory.getFactory(
+						GLProfile.get("GL2")).createGLPbuffer(
+						canvas.getNativeSurface().getGraphicsConfiguration()
+								.getScreen().getDevice(), caps, null,
+						tileSizeX, tileSizeY, canvas.getContext());
 				pbuffers.put(hashkey, offscreenPBuffer);
 			} else {
 				jr.renderingState.clearColorBuffer = true;

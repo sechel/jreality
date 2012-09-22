@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import java.awt.Color;
@@ -50,71 +49,85 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 
-
 /**
  * @author gunn
- *
+ * 
  */
 public class DefaultVertexShader {
-	public Color	
-		ambientColor,
-		diffuseColor,
-		specularColor;		
-	public double 	specularExponent, 
-		ambientCoefficient, 
-		diffuseCoefficient, 
-		specularCoefficient, 
-		transparency;	
-	public float[] 
-	    specularColorAsFloat, 
-	    ambientColorAsFloat, 
-	    diffuseColorAsFloat;
-	
+	public Color ambientColor, diffuseColor, specularColor;
+	public double specularExponent, ambientCoefficient, diffuseCoefficient,
+			specularCoefficient, transparency;
+	public float[] specularColorAsFloat, ambientColorAsFloat,
+			diffuseColorAsFloat;
+
 	public DefaultVertexShader() {
 		super();
 	}
 
-	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name)	{
-		specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPECULAR_EXPONENT), CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
-		ambientCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.AMBIENT_COEFFICIENT), CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
-		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COEFFICIENT), CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
-		specularCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPECULAR_COEFFICIENT), CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
-		ambientColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.AMBIENT_COLOR), CommonAttributes.AMBIENT_COLOR_DEFAULT);
+	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
+		specularExponent = eap.getAttribute(ShaderUtility.nameSpace(name,
+				CommonAttributes.SPECULAR_EXPONENT),
+				CommonAttributes.SPECULAR_EXPONENT_DEFAULT);
+		ambientCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,
+				CommonAttributes.AMBIENT_COEFFICIENT),
+				CommonAttributes.AMBIENT_COEFFICIENT_DEFAULT);
+		diffuseCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,
+				CommonAttributes.DIFFUSE_COEFFICIENT),
+				CommonAttributes.DIFFUSE_COEFFICIENT_DEFAULT);
+		specularCoefficient = eap.getAttribute(ShaderUtility.nameSpace(name,
+				CommonAttributes.SPECULAR_COEFFICIENT),
+				CommonAttributes.SPECULAR_COEFFICIENT_DEFAULT);
+		ambientColor = (Color) eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.AMBIENT_COLOR),
+				CommonAttributes.AMBIENT_COLOR_DEFAULT);
 		ambientColorAsFloat = ambientColor.getRGBComponents(null);
-		diffuseColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.DIFFUSE_COLOR), CommonAttributes.DIFFUSE_COLOR_DEFAULT);
-//		System.err.println("dc = "+diffuseColor);
-		transparency= eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT );
-		//JOGLConfiguration.theLog.log(Level.INFO,"Name is "+name+" transparency is "+transparency);
-		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(diffuseColor, transparency, JOGLRenderingState.useOldTransparency);
+		diffuseColor = (Color) eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.DIFFUSE_COLOR),
+				CommonAttributes.DIFFUSE_COLOR_DEFAULT);
+		// System.err.println("dc = "+diffuseColor);
+		transparency = eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.TRANSPARENCY),
+				CommonAttributes.TRANSPARENCY_DEFAULT);
+		// JOGLConfiguration.theLog.log(Level.INFO,"Name is "+name+" transparency is "+transparency);
+		diffuseColor = ShaderUtility.combineDiffuseColorWithTransparency(
+				diffuseColor, transparency,
+				JOGLRenderingState.useOldTransparency);
 		diffuseColorAsFloat = diffuseColor.getRGBComponents(null);
-		specularColor = (Color) eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SPECULAR_COLOR), CommonAttributes.SPECULAR_COLOR_DEFAULT);
+		specularColor = (Color) eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.SPECULAR_COLOR),
+				CommonAttributes.SPECULAR_COLOR_DEFAULT);
 		specularColorAsFloat = specularColor.getRGBComponents(null);
-		for (int i  = 0; i<3; ++i) {
+		for (int i = 0; i < 3; ++i) {
 			ambientColorAsFloat[i] *= (float) ambientCoefficient;
 			diffuseColorAsFloat[i] *= (float) diffuseCoefficient;
 			specularColorAsFloat[i] *= (float) specularCoefficient;
 		}
 	}
 
-	public void render(JOGLRenderingState jrs)	{
+	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
 		GL2 gl = jr.globalGL;
 		int frontBack = jrs.frontBack;
-//		if (jr.openGLState.frontBack != frontBack)	{
-			gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
-//			jr.openGLState.frontBack = frontBack;
-//		}
-//		if (!(OpenGLState.equals(diffuseColorAsFloat, jr.openGLState.diffuseColor, (float) 10E-5))) {
-			if (jr.renderingState.transparencyEnabled || diffuseColorAsFloat[3] == 0.0) gl.glColor4fv( diffuseColorAsFloat,0);
-			else gl.glColor3fv(diffuseColorAsFloat,0);
-			System.arraycopy(diffuseColorAsFloat, 0, jr.renderingState.diffuseColor, 0, 4);
-		    jrs.currentAlpha =jrs.diffuseColor[3];
-//		}
-			//gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
-		gl.glMaterialfv(frontBack, GL2.GL_AMBIENT, ambientColorAsFloat,0);
-		gl.glMaterialfv(frontBack, GL2.GL_SPECULAR, specularColorAsFloat,0);
+		// if (jr.openGLState.frontBack != frontBack) {
+		gl.glColorMaterial(frontBack, GL2.GL_DIFFUSE);
+		// jr.openGLState.frontBack = frontBack;
+		// }
+		// if (!(OpenGLState.equals(diffuseColorAsFloat,
+		// jr.openGLState.diffuseColor, (float) 10E-5))) {
+		if (jr.renderingState.transparencyEnabled
+				|| diffuseColorAsFloat[3] == 0.0)
+			gl.glColor4fv(diffuseColorAsFloat, 0);
+		else
+			gl.glColor3fv(diffuseColorAsFloat, 0);
+		System.arraycopy(diffuseColorAsFloat, 0,
+				jr.renderingState.diffuseColor, 0, 4);
+		jrs.currentAlpha = jrs.diffuseColor[3];
+		// }
+		// gl.glMaterialfv(frontBack, GL.GL_DIFFUSE, diffuseColorAsFloat);
+		gl.glMaterialfv(frontBack, GL2.GL_AMBIENT, ambientColorAsFloat, 0);
+		gl.glMaterialfv(frontBack, GL2.GL_SPECULAR, specularColorAsFloat, 0);
 		gl.glMaterialf(frontBack, GL2.GL_SHININESS, (float) specularExponent);
-//		LoggingSystem.getLogger(this).finest("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
+		// LoggingSystem.getLogger(this).finest("VertexShader: Setting diffuse color to: "+Rn.toString(getDiffuseColorAsFloat()));
 	}
 
 	public void postRender(JOGLRenderingState jrs) {

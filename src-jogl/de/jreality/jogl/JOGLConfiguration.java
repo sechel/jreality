@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl;
 
 import java.util.logging.Level;
@@ -50,20 +49,13 @@ import de.jreality.util.LoggingSystem;
 import de.jreality.util.Secure;
 import de.jreality.util.SystemProperties;
 
-/*
- * Author	gunn
- * Created on Apr 7, 2005
- *
- */
-
 /**
- * @author gunn
- *
+ * @author gunn Created on Apr 7, 2005
  */
 public class JOGLConfiguration {
 
 	public static Logger theLog;
-	//static boolean debugGL = true;
+	// static boolean debugGL = true;
 	static boolean debugGL = false;
 	static boolean sharedContexts = true;
 	static boolean isLinux = false;
@@ -73,74 +65,95 @@ public class JOGLConfiguration {
 	static JOGLConfiguration ss = new JOGLConfiguration();
 	static Class<? extends GoBetween> goBetweenClass = null;
 	static Class<? extends JOGLPeerComponent> peerClass = null;
-	
+
 	@SuppressWarnings("unchecked")
-	private JOGLConfiguration() { 
-		super(); 
-		theLog	= LoggingSystem.getLogger(this);
-	    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+	private JOGLConfiguration() {
+		super();
+		theLog = LoggingSystem.getLogger(this);
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		try {
-		    System.setProperty("sun.awt.noerasebackground", "true");
-			//theLog.setLevel(Level.INFO);
+			System.setProperty("sun.awt.noerasebackground", "true");
+			// theLog.setLevel(Level.INFO);
 			String foo = Secure.getProperty(SystemProperties.JOGL_DEBUG_GL);
-			if (foo != null) { if (foo.equals("false")) debugGL = false; else debugGL =true;}
+			if (foo != null) {
+				if (foo.equals("false"))
+					debugGL = false;
+				else
+					debugGL = true;
+			}
 			foo = Secure.getProperty(SystemProperties.JOGL_LOGGING_LEVEL);
-			if (foo != null)  {
+			if (foo != null) {
 				Level level = Level.INFO;
-				if (foo.indexOf("finest") != -1) level = Level.FINEST;
-				else if (foo.indexOf("finer") != -1) level = Level.FINER;
-				else if (foo.indexOf("fine") != -1) level = Level.FINE;
-				else if (foo.indexOf("info") != -1) level = Level.INFO;
+				if (foo.indexOf("finest") != -1)
+					level = Level.FINEST;
+				else if (foo.indexOf("finer") != -1)
+					level = Level.FINER;
+				else if (foo.indexOf("fine") != -1)
+					level = Level.FINE;
+				else if (foo.indexOf("info") != -1)
+					level = Level.INFO;
 				theLog.setLevel(level);
 			}
 			foo = Secure.getProperty("os.name");
-			if (foo != null && foo.indexOf("Linux") != -1) isLinux = true;
-			// allocate a GLCanvas to be the "sharer": it will never be destroyed
-			//TODO: move to de.jreality.util.SystemProperties
-			foo = Secure.getProperty("jreality.jogl.sharedContexts");  
-			if (foo != null && foo.equals("false")) sharedContexts = false;
-			theLog.log(Level.INFO,"Using shared contexts: "+sharedContexts);
-			quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
+			if (foo != null && foo.indexOf("Linux") != -1)
+				isLinux = true;
+			// allocate a GLCanvas to be the "sharer": it will never be
+			// destroyed
+			// TODO: move to de.jreality.util.SystemProperties
+			foo = Secure.getProperty("jreality.jogl.sharedContexts");
+			if (foo != null && foo.equals("false"))
+				sharedContexts = false;
+			theLog.log(Level.INFO, "Using shared contexts: " + sharedContexts);
+			quadBufferedStereo = "true".equals(Secure
+					.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
 			if (quadBufferedStereo) {
 				// hack, otherwise one side of swing gui will not be drawn
 				// only for windows
 				Secure.setProperty("sun.java2d.noddraw", "true");
 			}
-			foo = Secure.getProperty(SystemProperties.JOGL_BLEND_FUNC_SEPARATE); 
-			if (foo != null && foo.indexOf("false") != -1) hasBlendFuncSeparate = false;
-			// this doesn't really belong here but it's important that it gets evaluated
-			// before jogl backend classes begin to be instantiated, and this is the best place to guarantee that.
-			boolean copycat = "true".equals(Secure.getProperty(SystemProperties.JOGL_COPY_CAT));
+			foo = Secure.getProperty(SystemProperties.JOGL_BLEND_FUNC_SEPARATE);
+			if (foo != null && foo.indexOf("false") != -1)
+				hasBlendFuncSeparate = false;
+			// this doesn't really belong here but it's important that it gets
+			// evaluated
+			// before jogl backend classes begin to be instantiated, and this is
+			// the best place to guarantee that.
+			boolean copycat = "true".equals(Secure
+					.getProperty(SystemProperties.JOGL_COPY_CAT));
 			if (copycat)
 				try {
-					peerClass = (Class<? extends JOGLPeerComponent>) Class.forName("de.jreality.jogl.MatrixListJOGLPeerComponent");
+					peerClass = (Class<? extends JOGLPeerComponent>) Class
+							.forName("de.jreality.jogl.MatrixListJOGLPeerComponent");
 					ConstructPeerGraphVisitor.setPeerClass(peerClass);
-					System.err.println("Got peer class "+peerClass);
-					goBetweenClass = (Class<? extends GoBetween>) Class.forName("de.jreality.jogl.MatrixListGoBetween");
+					System.err.println("Got peer class " + peerClass);
+					goBetweenClass = (Class<? extends GoBetween>) Class
+							.forName("de.jreality.jogl.MatrixListGoBetween");
 					GoBetween.setGoBetweenClass(goBetweenClass);
-					System.err.println("Got go betwen class "+goBetweenClass);
+					System.err.println("Got go betwen class " + goBetweenClass);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-		} catch(SecurityException se)	{
-			theLog.log(Level.WARNING,"Security exception in setting configuration options",se);
+		} catch (SecurityException se) {
+			theLog.log(Level.WARNING,
+					"Security exception in setting configuration options", se);
 		}
-//		catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// catch (ClassNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
 	}
 
-	public static Logger getLogger()	{
+	public static Logger getLogger() {
 		return theLog;
 	}
 
-	public static void glBlendFunc(GL gl)	{
-		if (hasBlendFuncSeparate) 
-			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
-		else 
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);		
+	public static void glBlendFunc(GL gl) {
+		if (hasBlendFuncSeparate)
+			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA,
+					GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		else
+			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 	}
 }

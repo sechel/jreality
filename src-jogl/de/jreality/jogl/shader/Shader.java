@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import de.jreality.jogl.JOGLRenderingState;
@@ -45,10 +44,12 @@ import de.jreality.shader.EffectiveAppearance;
 
 /**
  * @author Charles Gunn
- *
+ * 
  */
 public interface Shader {
-	public void  setFromEffectiveAppearance(EffectiveAppearance eap, String name);
+	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name);
+
 	public void render(JOGLRenderingState jrs);
+
 	public void postRender(JOGLRenderingState jrs);
 }

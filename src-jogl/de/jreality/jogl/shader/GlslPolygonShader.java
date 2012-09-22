@@ -37,7 +37,6 @@
  *
  */
 
-
 package de.jreality.jogl.shader;
 
 import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
@@ -88,9 +87,10 @@ import de.jreality.shader.Texture2D;
  * it is assumed that the shader source code stayes FIXED!
  * 
  * @author Steffen Weissmann
- *
+ * 
  */
-public class GlslPolygonShader extends AbstractPrimitiveShader implements PolygonShader {
+public class GlslPolygonShader extends AbstractPrimitiveShader implements
+		PolygonShader {
 
 	private static final int PER_VERTEX = 0;
 	private static final int PER_FACE = 1;
@@ -98,79 +98,112 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	GlslProgram program;
 
 	Texture2D texture1, texture0, texture2;
-	
+
 	CubeMap environmentMap;
 	private DefaultVertexShader vertexShader = new DefaultVertexShader();
 	private boolean smoothShading;
-	private int frontBack=DefaultPolygonShader.FRONT_AND_BACK;
-	private boolean useVertexArrays = true,
-		doNormals4 = false;
-	
+	private int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+	private boolean useVertexArrays = true, doNormals4 = false;
+
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
 		super.setFromEffectiveAppearance(eap, name);
-		eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.METRIC), Pn.EUCLIDEAN);
-		smoothShading = eap.getAttribute(ShaderUtility.nameSpace(name,CommonAttributes.SMOOTH_SHADING), CommonAttributes.SMOOTH_SHADING_DEFAULT);
-		useVertexArrays = eap.getAttribute(ShaderUtility.nameSpace(name,"useVertexArrays"), true);
+		eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.METRIC),
+				Pn.EUCLIDEAN);
+		smoothShading = eap.getAttribute(
+				ShaderUtility.nameSpace(name, CommonAttributes.SMOOTH_SHADING),
+				CommonAttributes.SMOOTH_SHADING_DEFAULT);
+		useVertexArrays = eap.getAttribute(
+				ShaderUtility.nameSpace(name, "useVertexArrays"), true);
 		if (GlslProgram.hasGlslProgram(eap, name)) {
 			Appearance app = new Appearance();
 			EffectiveAppearance eap2 = eap.create(app);
 			program = new GlslProgram(app, eap2, name);
-		} else program = null;
-		// TODO remove duplicate names after steffen has refactored the texture and reflection map stuff
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D), eap)) {
-			texture0 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D), eap);
-		} else texture0 = null;
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_1), eap)) {
-			texture1 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D_1), eap);
-		} else texture1 = null;
-		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name,TEXTURE_2D_2), eap)) {
-			texture2 = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, ShaderUtility.nameSpace(name, TEXTURE_2D_2), eap);
-		} else texture1 = null;
-		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)) {
-			environmentMap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, ShaderUtility.nameSpace(name, REFLECTION_MAP), eap);
-		}  else environmentMap = null;
-		//vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name, CommonAttributes.VERTEX_SHADER);
+		} else
+			program = null;
+		// TODO remove duplicate names after steffen has refactored the texture
+		// and reflection map stuff
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class,
+				ShaderUtility.nameSpace(name, TEXTURE_2D), eap)) {
+			texture0 = (Texture2D) AttributeEntityUtility
+					.createAttributeEntity(Texture2D.class,
+							ShaderUtility.nameSpace(name, TEXTURE_2D), eap);
+		} else
+			texture0 = null;
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class,
+				ShaderUtility.nameSpace(name, TEXTURE_2D_1), eap)) {
+			texture1 = (Texture2D) AttributeEntityUtility
+					.createAttributeEntity(Texture2D.class,
+							ShaderUtility.nameSpace(name, TEXTURE_2D_1), eap);
+		} else
+			texture1 = null;
+		if (AttributeEntityUtility.hasAttributeEntity(Texture2D.class,
+				ShaderUtility.nameSpace(name, TEXTURE_2D_2), eap)) {
+			texture2 = (Texture2D) AttributeEntityUtility
+					.createAttributeEntity(Texture2D.class,
+							ShaderUtility.nameSpace(name, TEXTURE_2D_2), eap);
+		} else
+			texture1 = null;
+		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
+				ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)) {
+			environmentMap = (CubeMap) AttributeEntityUtility
+					.createAttributeEntity(CubeMap.class,
+							ShaderUtility.nameSpace(name, REFLECTION_MAP), eap);
+		} else
+			environmentMap = null;
+		// vertexShader = (VertexShader) ShaderLookup.getShaderAttr(eap, name,
+		// CommonAttributes.VERTEX_SHADER);
 		vertexShader.setFromEffectiveAppearance(eap, name);
-//    	System.err.println("glslpolygonshader: set from eap "+program);
-    	needsChecked = true;
-    	geometryHasTextureCoordinates = false;
+		// System.err.println("glslpolygonshader: set from eap "+program);
+		needsChecked = true;
+		geometryHasTextureCoordinates = false;
 	}
-	boolean needsChecked = true, geometryHasTextureCoordinates, doTexture = false;
+
+	boolean needsChecked = true, geometryHasTextureCoordinates,
+			doTexture = false;
+
 	public void render(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
 		GL2 gl = jr.globalGL;
-		if (smoothShading) gl.glShadeModel(GL2.GL_SMOOTH);
-		else gl.glShadeModel(GL2.GL_FLAT);
+		if (smoothShading)
+			gl.glShadeModel(GL2.GL_SMOOTH);
+		else
+			gl.glShadeModel(GL2.GL_FLAT);
 		jrs.smoothShading = smoothShading;
 
-//		vertexShader.setFrontBack(frontBack);
+		// vertexShader.setFrontBack(frontBack);
 		vertexShader.render(jrs);
-	   
+
 		doTexture = false;
 		if (texture0 != null) {
-		    Geometry curgeom = jr.renderingState.currentGeometry;
-		    if (needsChecked)	// assume geometry stays constant between calls to setFromEffectiveAppearance() ...
-		    	if (curgeom != null && (curgeom instanceof IndexedFaceSet) &&
-		    		((IndexedFaceSet) curgeom).getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
-		    			geometryHasTextureCoordinates = true; 
-		    			needsChecked = false;
-		    	}
-		    if (geometryHasTextureCoordinates) {
+			Geometry curgeom = jr.renderingState.currentGeometry;
+			if (needsChecked) // assume geometry stays constant between calls to
+								// setFromEffectiveAppearance() ...
+				if (curgeom != null
+						&& (curgeom instanceof IndexedFaceSet)
+						&& ((IndexedFaceSet) curgeom)
+								.getVertexAttributes(Attribute.TEXTURE_COORDINATES) != null) {
+					geometryHasTextureCoordinates = true;
+					needsChecked = false;
+				}
+			if (geometryHasTextureCoordinates) {
 				gl.glActiveTexture(GL.GL_TEXTURE0);
 				Texture2DLoaderJOGL.render(jr.globalGL, texture0);
 				gl.glEnable(GL.GL_TEXTURE_2D);
-//			    if (program != null && program.getSource().getUniformParameter("texture") != null) {
-//					doTexture = true;
-//			    	program.setUniform("texture",GL.GL_TEXTURE0);
-//			    	System.err.println("Setting texture to "+GL.GL_TEXTURE0);
-//			    }		    	
-		    }
+				// if (program != null &&
+				// program.getSource().getUniformParameter("texture") != null) {
+				// doTexture = true;
+				// program.setUniform("texture",GL.GL_TEXTURE0);
+				// System.err.println("Setting texture to "+GL.GL_TEXTURE0);
+				// }
+			}
 		}
-	    if (program != null && program.getSource().getUniformParameter("doTexture") != null)  {
-	    	program.setUniform("doTexture", doTexture);
-	    	System.err.println("Setting do texture = "+doTexture);
-	    }
-	    	
+		if (program != null
+				&& program.getSource().getUniformParameter("doTexture") != null) {
+			program.setUniform("doTexture", doTexture);
+			System.err.println("Setting do texture = " + doTexture);
+		}
+
 		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
 			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
@@ -189,40 +222,47 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		if (program != null) {
 			if (program.getSource().getUniformParameter("lightingEnabled") != null) {
 				program.setUniform("lightingEnabled", jrs.lighting);
-				System.err.println("setting lighting to "+jrs.lighting);
+				System.err.println("setting lighting to " + jrs.lighting);
 			}
 			if (program.getSource().getUniformParameter("transparency") != null) {
-				program.setUniform("transparency", jrs.transparencyEnabled ? jrs.diffuseColor[3] : 0f);
+				program.setUniform("transparency",
+						jrs.transparencyEnabled ? jrs.diffuseColor[3] : 0f);
 			}
-			if (program.getSource().getAttribute("normals4") != null)	{
+			if (program.getSource().getAttribute("normals4") != null) {
 				doNormals4 = true;
-			} else doNormals4 = false;
-//			System.err.println("normals4 = "+doNormals4);
+			} else
+				doNormals4 = false;
+			// System.err.println("normals4 = "+doNormals4);
 			GlslLoader.render(program, jr);
 		}
 		Geometry g = jrs.currentGeometry;
-		if (g != null)	{
-			if (g instanceof Sphere || g instanceof Cylinder)	{	
+		if (g != null) {
+			if (g instanceof Sphere || g instanceof Cylinder) {
 				int i = 3;
-				if (false) {//jr.debugGL)	{
+				if (false) {// jr.debugGL) {
 					double lod = jr.renderingState.levelOfDetail;
-					i = JOGLSphereHelper.getResolutionLevel(jr.getContext().getObjectToNDC(), lod);
+					i = JOGLSphereHelper.getResolutionLevel(jr.getContext()
+							.getObjectToNDC(), lod);
 				}
 				int dlist;
-				if (g instanceof Sphere) dlist = jr.renderingState.getSphereDisplayLists(i);
-				else 			 dlist = jr.renderingState.getCylinderDisplayLists(i);
+				if (g instanceof Sphere)
+					dlist = jr.renderingState.getSphereDisplayLists(i);
+				else
+					dlist = jr.renderingState.getCylinderDisplayLists(i);
 				jr.globalGL.glCallList(dlist);
-			}
-			else if ( g instanceof IndexedFaceSet)	{
-				if (useVertexArrays) 
-					drawFaces(jr, (IndexedFaceSet) g, smoothShading, jrs.diffuseColor[3], doNormals4);
-				else {	// use display lists to render
-					if ( !upToDate((IndexedFaceSet) g, smoothShading) || dList == -1)	{
-						if (dList != -1) jr.globalGL.glDeleteLists(dList, 1);
+			} else if (g instanceof IndexedFaceSet) {
+				if (useVertexArrays)
+					drawFaces(jr, (IndexedFaceSet) g, smoothShading,
+							jrs.diffuseColor[3], doNormals4);
+				else { // use display lists to render
+					if (!upToDate((IndexedFaceSet) g, smoothShading)
+							|| dList == -1) {
+						if (dList != -1)
+							jr.globalGL.glDeleteLists(dList, 1);
 						dList = jr.globalGL.glGenLists(1);
-						jr.globalGL.glNewList(dList, GL2.GL_COMPILE); 
+						jr.globalGL.glNewList(dList, GL2.GL_COMPILE);
 						JOGLRendererHelper.drawFaces(jr, (IndexedFaceSet) g);
-						jr.globalGL.glEndList();	
+						jr.globalGL.glEndList();
 					}
 					jr.globalGL.glCallList(dList);
 				}
@@ -233,7 +273,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	public void postRender(JOGLRenderingState jrs) {
 		JOGLRenderer jr = jrs.renderer;
 		GL gl = jr.globalGL;
-		if (program != null)  GlslLoader.postRender(program, jr);
+		if (program != null)
+			GlslLoader.postRender(program, jr);
 		if (texture0 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE0);
 			gl.glDisable(GL.GL_TEXTURE_2D);
@@ -252,14 +293,15 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	}
 
 	public void setFrontBack(int f) {
-		frontBack=f;
+		frontBack = f;
 	}
 
 	public void setProgram(GlslProgram program) {
 		this.program = program;
 	}
 
-	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg, boolean smooth, double alpha, boolean doNormals4) {
+	public static void drawFaces(JOGLRenderer jr, IndexedFaceSet sg,
+			boolean smooth, double alpha, boolean doNormals4) {
 		if (sg.getNumFaces() == 0)
 			return;
 		GL2 gl = jr.globalGL;
@@ -270,8 +312,10 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
-		DataList texCoords = sg.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
-		DataList lightMapCoords = sg.getVertexAttributes(Attribute.attributeForName("lightmap coordinates"));
+		DataList texCoords = sg
+				.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+		DataList lightMapCoords = sg.getVertexAttributes(Attribute
+				.attributeForName("lightmap coordinates"));
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
 		// JOGLConfiguration.theLog.log(Level.INFO,"alpha value is "+alpha);
@@ -303,87 +347,89 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			normalBind = PER_FACE;
 		} else
 			normalBind = PER_PART;
-		renderFaces(sg, alpha, gl, false, colorBind, normalBind, colorLength, 
-				vertices, vertexNormals, faceNormals, vertexColors, 
-				faceColors, texCoords, lightMapCoords, vertexLength, smooth, doNormals4);
+		renderFaces(sg, alpha, gl, false, colorBind, normalBind, colorLength,
+				vertices, vertexNormals, faceNormals, vertexColors, faceColors,
+				texCoords, lightMapCoords, vertexLength, smooth, doNormals4);
 	}
 
-	public static DataList correctNormals(DataList n)	{
+	public static DataList correctNormals(DataList n) {
 		if (n != null && n.toDoubleArrayArray().item(0).size() == 4) {
 			double[][] norms = n.toDoubleArrayArray(null);
 			double[][] norms3 = new double[norms.length][3];
-			for (int i = 0; i<norms.length; ++i)	{
+			for (int i = 0; i < norms.length; ++i) {
 				Pn.dehomogenize(norms3[i], norms[i]);
-				if (norms[i][3] < 0) Rn.times(norms3[i], -1, norms3[i]);
-				if (norms[i][3] == 0.0) Rn.times(norms3[i], 10000000, norms3[i]);
+				if (norms[i][3] < 0)
+					Rn.times(norms3[i], -1, norms3[i]);
+				if (norms[i][3] == 0.0)
+					Rn.times(norms3[i], 10000000, norms3[i]);
 			}
-			return StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3);			
-		}		
+			return StorageModel.DOUBLE_ARRAY.array(3).createReadOnly(norms3);
+		}
 		return n;
 	}
-	public static DataList correctNormals4(DataList n)	{
+
+	public static DataList correctNormals4(DataList n) {
 		if (n != null && n.toDoubleArrayArray().item(0).size() == 3) {
 			double[][] norms = n.toDoubleArrayArray(null);
 			double[][] norms4 = new double[norms.length][4];
-			for (int i = 0; i<norms.length; ++i)	{
+			for (int i = 0; i < norms.length; ++i) {
 				System.arraycopy(norms[i], 0, norms4[i], 0, 3);
-				norms4[i][3] = 10E-8;		// assume euclidean normal vectors but avoid orientation problems with setting 0.0 here
+				norms4[i][3] = 10E-8; // assume euclidean normal vectors but
+										// avoid orientation problems with
+										// setting 0.0 here
 			}
-			return StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(norms4);			
-		}		
+			return StorageModel.DOUBLE_ARRAY.array(4).createReadOnly(norms4);
+		}
 		return n;
 	}
-	private static void renderFaces(IndexedFaceSet sg, double alpha, 
-				GL2 gl, 
-				boolean pickMode, 
-				int colorBind, 
-				int normalBind, 
-				int colorLength, 
-				DataList vertices, 
-				DataList vertexNormals, 
-				DataList faceNormals, 
-				DataList vertexColors, 
-				DataList faceColors, 
-				DataList texCoords, 
-				DataList lightMapCoords, 
-				int vertexLength, 
-				boolean smooth,
-				boolean doNormals4) {
-//		System.err.println("rendering with vertex arrays");
+
+	private static void renderFaces(IndexedFaceSet sg, double alpha, GL2 gl,
+			boolean pickMode, int colorBind, int normalBind, int colorLength,
+			DataList vertices, DataList vertexNormals, DataList faceNormals,
+			DataList vertexColors, DataList faceColors, DataList texCoords,
+			DataList lightMapCoords, int vertexLength, boolean smooth,
+			boolean doNormals4) {
+		// System.err.println("rendering with vertex arrays");
 		boolean faceN = normalBind == PER_FACE;
-		
+
 		boolean faceC = colorBind == PER_FACE;
 
 		boolean faceT = false;
-		Attribute TANGENTS=Attribute.attributeForName("TANGENTS");
+		Attribute TANGENTS = Attribute.attributeForName("TANGENTS");
 
 		DataList tanCoords = null;
 
-		if (doNormals4)	{
-			if (faceN) { tanCoords = correctNormals4(faceNormals); }
-			else tanCoords = correctNormals4(vertexNormals);
+		if (doNormals4) {
+			if (faceN) {
+				tanCoords = correctNormals4(faceNormals);
+			} else
+				tanCoords = correctNormals4(vertexNormals);
 			faceT = faceN;
 			faceNormals = vertexNormals = null;
 		} else {
-			if (faceN) faceNormals = correctNormals(faceNormals);
-			else vertexNormals = correctNormals(vertexNormals);				
-		} 
+			if (faceN)
+				faceNormals = correctNormals(faceNormals);
+			else
+				vertexNormals = correctNormals(vertexNormals);
+		}
 		if (tanCoords == null) {
 			tanCoords = sg.getVertexAttributes(TANGENTS);
 		}
-		
-		boolean renderInlined = (normalBind == PER_VERTEX || faceN) && (colorBind == PER_VERTEX || colorBind == PER_PART || faceC);
+
+		boolean renderInlined = (normalBind == PER_VERTEX || faceN)
+				&& (colorBind == PER_VERTEX || colorBind == PER_PART || faceC);
 
 		if (renderInlined) {
 
 			gl = new DebugGL2(gl);
 
 			// count indices
-			int triagCnt=0;
-			IntArrayArray faces = sg.getFaceAttributes(Attribute.INDICES).toIntArrayArray();
+			int triagCnt = 0;
+			IntArrayArray faces = sg.getFaceAttributes(Attribute.INDICES)
+					.toIntArrayArray();
 			int numFaces = faces.getLength();
 			for (int i = 0; i < numFaces; i++) {
-				triagCnt+=(faces.getLengthAt(i)-2);
+				triagCnt += (faces.getLengthAt(i) - 2);
 			}
 
 			boolean hasColors = vertexColors != null || faceColors != null;
@@ -421,9 +467,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
 			double[] tmpN = new double[3];
 			boolean inlineN = !doNormals4;
-			DoubleBuffer normalBuffer=null;
-			if (inlineN)	{
-				normalBuffer = BufferCache.normal(sg, triagCnt);				
+			DoubleBuffer normalBuffer = null;
+			if (inlineN) {
+				normalBuffer = BufferCache.normal(sg, triagCnt);
 			}
 
 			double[] tmpC = new double[colorLength];
@@ -439,17 +485,22 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 
 				DoubleArrayArray verts = vertices.toDoubleArrayArray();
 				tc = inlineTex ? tc : null;
-				DoubleArrayArray t = inlineTan ? tanCoords.toDoubleArrayArray() : null;
+				DoubleArrayArray t = inlineTan ? tanCoords.toDoubleArrayArray()
+						: null;
 				DoubleArrayArray norms = null;
-				if (!doNormals4) norms = faceN ? faceNormals.toDoubleArrayArray() : vertexNormals.toDoubleArrayArray();
-				DoubleArrayArray cols = inlineC ? (faceC ? faceColors.toDoubleArrayArray() : vertexColors.toDoubleArrayArray()) : null;
+				if (!doNormals4)
+					norms = faceN ? faceNormals.toDoubleArrayArray()
+							: vertexNormals.toDoubleArrayArray();
+				DoubleArrayArray cols = inlineC ? (faceC ? faceColors
+						.toDoubleArrayArray() : vertexColors
+						.toDoubleArrayArray()) : null;
 
 				for (int i = 0; i < numFaces; i++) {
 					IntArray face = faces.getValueAt(i);
-					for (int j = 0; j < face.getLength()-2; j++) {
+					for (int j = 0; j < face.getLength() - 2; j++) {
 						final int i1 = face.getValueAt(0);
-						final int i2 = face.getValueAt(j+1);
-						final int i3 = face.getValueAt(j+2);
+						final int i2 = face.getValueAt(j + 1);
+						final int i3 = face.getValueAt(j + 2);
 						if (inlineI) {
 							indexBuffer.put(i1);
 							indexBuffer.put(i2);
@@ -462,7 +513,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 								vertexBuffer.put(tmpV);
 							} catch (Exception e) {
 								System.out.println(vertexBuffer);
-								System.out.println("triags="+triagCnt);
+								System.out.println("triags=" + triagCnt);
 							}
 							da = verts.getValueAt(i2);
 							da.toDoubleArray(tmpV);
@@ -531,13 +582,16 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				}
 			}
 			vertexBuffer.rewind();
-			if (!doNormals4) normalBuffer.rewind();
+			if (!doNormals4)
+				normalBuffer.rewind();
 
 			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-			if (!doNormals4) gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+			if (!doNormals4)
+				gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 
 			gl.glVertexPointer(vertexLength, GL2.GL_DOUBLE, 0, vertexBuffer);
-			if (!doNormals4) gl.glNormalPointer(GL2.GL_DOUBLE, 0, normalBuffer);
+			if (!doNormals4)
+				gl.glNormalPointer(GL2.GL_DOUBLE, 0, normalBuffer);
 			if (hasColors) {
 				gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
 				colorBuffer.rewind();
@@ -549,23 +603,26 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 				texBuffer.rewind();
 				gl.glTexCoordPointer(texLength, GL2.GL_DOUBLE, 0, texBuffer);
 			}
-//			int TANGENT_ID=9;
+			// int TANGENT_ID=9;
 			if (tanCoords != null) {
 				tanBuffer.rewind();
-//				gl.glVertexAttribPointer(TANGENT_ID, 4, GL.GL_DOUBLE, true, 0, tanBuffer);
-//				gl.glEnableVertexAttribArray(TANGENT_ID);
+				// gl.glVertexAttribPointer(TANGENT_ID, 4, GL.GL_DOUBLE, true,
+				// 0, tanBuffer);
+				// gl.glEnableVertexAttribArray(TANGENT_ID);
 				gl.glClientActiveTexture(GL.GL_TEXTURE1);
 				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 				gl.glTexCoordPointer(4, GL2.GL_DOUBLE, 0, tanBuffer);
 			}
 			if (inlineI) {
 				indexBuffer.rewind();
-				gl.glDrawElements(GL.GL_TRIANGLES, indexBuffer.remaining(), GL.GL_UNSIGNED_INT, indexBuffer);
-			}
-			else gl.glDrawArrays(GL.GL_TRIANGLES, 0, triagCnt*3);
+				gl.glDrawElements(GL.GL_TRIANGLES, indexBuffer.remaining(),
+						GL.GL_UNSIGNED_INT, indexBuffer);
+			} else
+				gl.glDrawArrays(GL.GL_TRIANGLES, 0, triagCnt * 3);
 
 			gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-			if (!doNormals4) gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+			if (!doNormals4)
+				gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
 			if (texCoords != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE0);
 				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
@@ -576,7 +633,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			if (tanCoords != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE1);
 				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-//				gl.glDisableVertexAttribArray(TANGENT_ID);
+				// gl.glDisableVertexAttribArray(TANGENT_ID);
 			}
 
 		} else {
@@ -587,12 +644,14 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 	private static WeakHashMap<IndexedFaceSet, Boolean> upToDateIFS = new WeakHashMap<IndexedFaceSet, Boolean>();
 
 	private static boolean upToDate(final IndexedFaceSet sg, boolean smooth) {
-		if (upToDateIFS.get(sg) == Boolean.valueOf(smooth)) return true;
+		if (upToDateIFS.get(sg) == Boolean.valueOf(smooth))
+			return true;
 		else {
 			upToDateIFS.put(sg, Boolean.valueOf(smooth));
 			sg.addGeometryListener(new GeometryListener() {
 				public void geometryChanged(GeometryEvent ev) {
-					if (!ev.getChangedVertexAttributes().isEmpty() || !ev.getChangedFaceAttributes().isEmpty()) {
+					if (!ev.getChangedVertexAttributes().isEmpty()
+							|| !ev.getChangedFaceAttributes().isEmpty()) {
 						upToDateIFS.remove(sg);
 						sg.removeGeometryListener(this);
 					}
@@ -601,7 +660,6 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 			return false;
 		}
 	}
-
 
 	private static final class BufferCache {
 
@@ -612,36 +670,46 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements Polygo
 		static WeakHashMap<IndexedFaceSet, ByteBuffer> colorBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
 		static WeakHashMap<IndexedFaceSet, ByteBuffer> indexBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
 
-		private BufferCache() {}
+		private BufferCache() {
+		}
 
-		static DoubleBuffer vertex(IndexedFaceSet ifs, int numTris, int vertexLen) {
-			return get(ifs, vertexBuffers, numTris*3*vertexLen*8).asDoubleBuffer();
+		static DoubleBuffer vertex(IndexedFaceSet ifs, int numTris,
+				int vertexLen) {
+			return get(ifs, vertexBuffers, numTris * 3 * vertexLen * 8)
+					.asDoubleBuffer();
 		}
 
 		static DoubleBuffer texCoord(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, texCoordBuffers, numTris*3*2*8).asDoubleBuffer();
+			return get(ifs, texCoordBuffers, numTris * 3 * 2 * 8)
+					.asDoubleBuffer();
 		}
 
-		static DoubleBuffer tangent(IndexedFaceSet ifs, int numTris, int tangentLen) {
-			return get(ifs, tangentBuffers, numTris*3*tangentLen*8).asDoubleBuffer();
+		static DoubleBuffer tangent(IndexedFaceSet ifs, int numTris,
+				int tangentLen) {
+			return get(ifs, tangentBuffers, numTris * 3 * tangentLen * 8)
+					.asDoubleBuffer();
 		}
 
 		static DoubleBuffer normal(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, normalBuffers, numTris*3*3*8).asDoubleBuffer();
+			return get(ifs, normalBuffers, numTris * 3 * 3 * 8)
+					.asDoubleBuffer();
 		}
 
 		static DoubleBuffer color(IndexedFaceSet ifs, int numTris, int colorLen) {
-			return get(ifs, colorBuffers, numTris*3*colorLen*8).asDoubleBuffer();
+			return get(ifs, colorBuffers, numTris * 3 * colorLen * 8)
+					.asDoubleBuffer();
 		}
 
 		static IntBuffer index(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, indexBuffers, numTris*3*4).asIntBuffer();
+			return get(ifs, indexBuffers, numTris * 3 * 4).asIntBuffer();
 		}
 
-		private static ByteBuffer get(IndexedFaceSet ifs, WeakHashMap<IndexedFaceSet, ByteBuffer> cache, int capacity) {
+		private static ByteBuffer get(IndexedFaceSet ifs,
+				WeakHashMap<IndexedFaceSet, ByteBuffer> cache, int capacity) {
 			ByteBuffer bb = cache.get(ifs);
 			if (bb == null || bb.capacity() < capacity) {
-				bb = ByteBuffer.allocateDirect(capacity).order(ByteOrder.nativeOrder());
+				bb = ByteBuffer.allocateDirect(capacity).order(
+						ByteOrder.nativeOrder());
 				cache.put(ifs, bb);
 			}
 			bb.position(0).limit(capacity);
