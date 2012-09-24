@@ -54,12 +54,12 @@ public interface PickSystem {
 
   /**
    * 
-   * The parameters need to be homogenious coordinates.
+   * The parameters need to be homogeneous coordinates.
    * 
    * @param from
-   *          foot point of ray in world coordinates
+   *          foot point of ray in world coordinates (x,y,z,1)
    * @param to
-   *          end point of ray in world coordinates (can be at infinity)
+   *          end point of ray in world coordinates (x,y,z,1) (can be at infinity)
    * Valid pick points are of the form p = a*from+b*to where a*b >= 0
    * That is, the affine coordinate (b/a) of p on the line with basis (from,to) is non-negative
    * @return list of PickResults sorted by distance from foot point
