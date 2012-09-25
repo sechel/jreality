@@ -77,7 +77,7 @@ public class RotateTool extends AbstractTool {
     addCurrentSlot(evolutionSlot);
   }
 
-  transient SceneGraphComponent comp;
+  transient protected SceneGraphComponent comp;
 
   transient Matrix center=new Matrix();
   
@@ -140,8 +140,9 @@ public class RotateTool extends AbstractTool {
   private double animTimeMin=250;
   private double animTimeMax=750;
   private boolean updateCenter;
+  protected boolean success = false;
   public void perform(ToolContext tc) {
-	  
+	  success = false;
     Matrix object2avatar = new Matrix((moveChildren ? tc.getRootToLocal():tc.getRootToToolComponent()).getInverseMatrix(null)); 
     if (Rn.isNan(object2avatar.getArray())) {
     	return;
@@ -167,6 +168,7 @@ public class RotateTool extends AbstractTool {
     result.multiplyOnRight(evolution);
     if (!fixOrigin) result.multiplyOnRight(center.getInverse());
     if (Rn.isNan(result.getArray())) return;
+    success = true;
     comp.getTransformation().setMatrix(result.getArray());
   }
 
