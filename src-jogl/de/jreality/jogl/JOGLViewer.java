@@ -39,6 +39,7 @@
 
 package de.jreality.jogl;
 
+
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.lang.ref.WeakReference;
