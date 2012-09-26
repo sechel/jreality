@@ -141,7 +141,9 @@ public class SceneGraphNode {
 		nodeLock.switchToReadLock();
 		try {
 			writingFinished(); // broadcast events
-		} finally {
+		} catch (StackOverflowError e) {
+			e.printStackTrace();
+		}  finally {
 			nodeLock.readUnlock();
 		}
 	}
