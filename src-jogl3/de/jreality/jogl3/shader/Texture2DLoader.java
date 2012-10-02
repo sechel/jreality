@@ -2,6 +2,7 @@ package de.jreality.jogl3.shader;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
@@ -11,6 +12,19 @@ import de.jreality.shader.Texture2D;
 
 public class Texture2DLoader {
 	private static WeakHashMap<ImageData, Integer> textureLookup = new WeakHashMap<ImageData, Integer>();
+	
+	public static void deleteTextures(GL3 gl){
+		Set<ImageData> keys = textureLookup.keySet();
+		int[] texs = new int[keys.size()];
+		int i = 0;
+		for(ImageData id : keys){
+			texs[i] = textureLookup.get(id);
+			i++;
+		}
+		if(texs.length != 0)
+			gl.glDeleteTextures(texs.length, texs, 0);
+		textureLookup = new WeakHashMap<ImageData, Integer>();
+	}
 	
 	private static int createTextureID(GL3 gl) 
 	{ 
@@ -102,7 +116,7 @@ public class Texture2DLoader {
         	
         	FloatBuffer maxAnisotropy = FloatBuffer.allocate(1);
         	gl.glGetFloatv(gl.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-	        System.out.println("max anisotropy "+ maxAnisotropy.get(0));
+	        //System.out.println("max anisotropy "+ maxAnisotropy.get(0));
         	gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
 
         	gl.glGenerateMipmap(gl.GL_TEXTURE_2D);

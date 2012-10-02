@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.shader.PointShader;
+import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -138,8 +139,8 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 			canvas.addMouseListener(mouseListener);
 			canvas.addMouseMotionListener(mouseMotionListener);
 			canvas.addMouseWheelListener(mouseWheelListener);
-		    }
-		    return component;
+		}
+		return component;
 	}
 
 	public Dimension getViewingComponentSize() {
@@ -194,7 +195,6 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		proxyScene = new JOGLSceneGraph(root);
 		proxyScene.createProxyTree();
 	}
-
 	public int getStereoType() {
 		System.out.println("getStereoType");
 		// TODO Auto-generated method stub
@@ -247,13 +247,15 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 			
 			//update sky box
 			JOGLAppearanceInstance rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
-			if(((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
+			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
+				System.out.println("cube map not upToDate");
 				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
 				if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,SKY_BOX, rootAp)) {
 					skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, SKY_BOX, rootAp, true);
 				}else{
 					skyboxCubemap = null;
 				}
+				Texture2DLoader.deleteTextures(gl);
 			}
 			
 			//render skybox

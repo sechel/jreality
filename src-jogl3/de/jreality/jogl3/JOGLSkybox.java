@@ -73,7 +73,7 @@ public class JOGLSkybox {
 public static void render(GL3 gl, double[] modelview, double[] projection, CubeMap cm, Camera cam)	{
     if(cm == null)
     	return;
-    System.err.println("rendering skybox" + cubeVerts3.length);
+    
     gl.glDisable(gl.GL_BLEND);
 	gl.glDisable(gl.GL_DEPTH_TEST);
 	
@@ -101,7 +101,7 @@ public static void render(GL3 gl, double[] modelview, double[] projection, CubeM
 		  
 	  }
 	float scale =(float) (cam.getNear() + cam.getFar())/2;
-	System.out.println(scale);
+	//System.out.println(scale);
 	
 	//matrices
 	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, Rn.convertDoubleToFloatArray(projection), 0);

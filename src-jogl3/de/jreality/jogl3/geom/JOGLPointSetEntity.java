@@ -90,7 +90,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 					}
 					pointVbos.put("vertex_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "vertex_"+a.getName()));
 					
-					System.out.println("creating in PointSetEntity " + "vertex_"+shaderName);
+					//System.out.println("creating in PointSetEntity " + "vertex_"+shaderName);
 				
 				}else if(isIntArray(attribs.getStorageModel())){
 					//the array containing one item per index

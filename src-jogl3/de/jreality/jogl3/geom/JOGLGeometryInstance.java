@@ -146,19 +146,19 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		
 		//		System.out.println("UpdateAppearance");
 		eap = EffectiveAppearance.create(sgp);
-		if(type.equals(CommonAttributes.POLYGON_SHADER)){
-			System.out.println("start eap for " + sgp.getLastComponent().getName());
-			//System.out.println(((IndexedFaceSet)(fse.getNode())).getName());
-			
-			//eap.getApp().getAttributes().keySet()
-			for( Object o : eap.getApp().getAttributes().keySet()){
-				String s = (String)o;
-				eap.getApp().getAttribute(s);
-				Object a = new Object();
-				System.out.println(s + " " + eap.getAttribute(s, a).getClass());
-			}
-			System.out.println("stop");
-		}
+//		if(type.equals(CommonAttributes.POLYGON_SHADER)){
+//			System.out.println("start eap for " + sgp.getLastComponent().getName());
+//			//System.out.println(((IndexedFaceSet)(fse.getNode())).getName());
+//			
+//			//eap.getApp().getAttributes().keySet()
+//			for( Object o : eap.getApp().getAttributes().keySet()){
+//				String s = (String)o;
+//				eap.getApp().getAttribute(s);
+//				Object a = new Object();
+//				System.out.println(s + " " + eap.getAttribute(s, a).getClass());
+//			}
+//			System.out.println("stop");
+//		}
 		//retrieve shader source if existent
 		String[] source = new String[]{};
 		
@@ -174,8 +174,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		//fashion
 		boolean hasTexture = false;
 		for(ShaderVar v : shader.shaderUniforms){
-			if(type.equals(CommonAttributes.POINT_SHADER))
-				System.out.println("shader var is " + v.getName() + ", type is " + v.getType());
+			//if(type.equals(CommonAttributes.POINT_SHADER))
+				//System.out.println("shader var is " + v.getName() + ", type is " + v.getType());
     		if(v.getName().equals("numDirLights"))
     			continue;
     		if(v.getName().equals("directionalLightColors"))
@@ -229,7 +229,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     			
     			if(value.getClass().equals(Color.class)){
     				float[] color = ((Color)value).getRGBComponents(null);
-    				System.out.println(sgp.getLastComponent().getName() + type + "." + v.getName() + color[0] + " " + color[1] + " " + color[2]);
+    				//System.out.println(sgp.getLastComponent().getName() + type + "." + v.getName() + color[0] + " " + color[1] + " " + color[2]);
     				c.add(new GlUniformVec4(v.getName(), color));
     			}else if(value.getClass().equals(float[].class)){
     				c.add(new GlUniformVec4(v.getName(), (float[])value));

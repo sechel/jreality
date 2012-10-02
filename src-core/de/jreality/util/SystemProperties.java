@@ -116,6 +116,7 @@ public class SystemProperties {
 	public final static String VIEWER_DEFAULT_JOGL3 = "de.jreality.jogl3.Viewer";
 
 	public final static String VIEWER_JOGL_DOME = "de.jreality.jogl.DomeViewer";
+	public final static String VIEWER_JOGL3_DOME = "de.jreality.jogl3.DomeViewerJOGL3";
 	
 	public final static String VIEWER_DEFAULT_SOFT = "de.jreality.softviewer.SoftViewer";  //de.jreality.softviewer.SoftViewer.class.getName();
 //	public final static String VIEWER_DEFAULT_PORTAL = "de.jreality.portal.PortalServerViewer";  //de.jreality.portal.PortalServerViewer.class.getName();

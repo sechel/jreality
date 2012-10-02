@@ -90,8 +90,8 @@ public class PointShader {
     		}
     	}
 		
-		
-		gl.glDrawArrays(gl.GL_POINTS, 0, pse.getPointVBO("vertex_coordinates").getLength()/4);
+		if(pse.getPointVBO("vertex_coordinates") != null)
+			gl.glDrawArrays(gl.GL_POINTS, 0, pse.getPointVBO("vertex_coordinates").getLength()/4);
 		
 		//gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"));
 		//disable all vbos

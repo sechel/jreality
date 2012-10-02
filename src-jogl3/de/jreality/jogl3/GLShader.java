@@ -186,13 +186,13 @@ public class GLShader
 		findVars(vsrc[0], new String[]{"in", "attribute", "varying"}, vertexAttributes);
 	}
 	
-	public void loadVertexShaderSource(String name){
+	private void loadVertexShaderSource(String name){
 		vsrc = loadShaderSrc(name);
 //		System.out.println("vertex shader uniforms");
 		findUniforms(vsrc[0], this.shaderUniforms);
 		findVertexAttributes();
 	}
-	public void loadFragmentShaderSource(String name){
+	private void loadFragmentShaderSource(String name){
 		fsrc = loadShaderSrc(name);
 //		System.out.println("fragment shader uniforms");
 		findUniforms(fsrc[0], this.shaderUniforms);
