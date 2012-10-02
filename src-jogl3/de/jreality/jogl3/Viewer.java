@@ -45,7 +45,7 @@ public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventLi
 		System.out.println("constuctor called");
 		this.auxiliaryRoot = SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot");
 		
-		GLProfile glp = GLProfile.getDefault();
+		GLProfile glp = GLProfile.getMaxProgrammable(true);
 		GLCapabilities caps = new GLCapabilities(glp);
 		//TODO: check caps.setAccumAlphaBits(8);
 		caps.setAlphaBits(8);

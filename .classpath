@@ -51,7 +51,7 @@
 	<classpathentry kind="lib" path="lib/itextpdf-5.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream.jar"/>
-	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/jogl.all.jar" sourcepath="jni/jogl-java-src.zip"/>
+	<classpathentry kind="lib" path="lib/gluegen-rt.jar" sourcepath="jni/gluegen-java-src.zip"/>
+	<classpathentry kind="lib" path="lib/jogl-all.jar" sourcepath="jni/jogl-java-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
