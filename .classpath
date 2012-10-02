@@ -52,10 +52,6 @@
 	<classpathentry kind="lib" path="lib/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="lib/jogl.all.jar" sourcepath="jni/jogl-java-src.zip">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jreality/jni/linux64"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/jogl.all.jar" sourcepath="jni/jogl-java-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
