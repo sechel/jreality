@@ -165,7 +165,7 @@
 	<path id="jogl.classpath">
 		<path refid="backend.classpath"/>
 		<fileset dir="lib">
-			<include name="jogl.all.jar"/>
+			<include name="jogl-all.jar"/>
 			<include name="gluegen-rt.jar"/>
 		</fileset>
 	</path>
@@ -173,7 +173,7 @@
 	<path id="jogl3.classpath">
 		<path refid="backend.classpath"/>
 		<fileset dir="lib">
-			<include name="jogl.all.jar"/>
+			<include name="jogl-all.jar"/>
 			<include name="gluegen-rt.jar"/>
 		</fileset>
 		<fileset dir="dist">
@@ -229,7 +229,7 @@
 		<path refid="backend.classpath"/>
 		<fileset dir="lib">
 			<include name="smrj.jar"/>
-			<include name="jogl.all.jar"/>
+			<include name="jogl-all.jar"/>
 		</fileset>
 		<fileset dir="dist">
 			<include name="jReality-io.jar"/>
