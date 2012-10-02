@@ -20,7 +20,7 @@
 	<classpathentry kind="src" path="src-soft"/>
 	<classpathentry kind="src" path="src-soft-new"/>
 	<classpathentry kind="src" path="src-sunflow"/>
-	<classpathentry excluding="de/jreality/swing/FakeFramePeer5.java|de/jreality/swing/FakeToolKit5.java" kind="src" path="src-swing"/>
+	<classpathentry kind="src" path="src-swing"/>
 	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceSpacenav.java|de/jreality/toolsystem/raw/WiiMoteOSC.java|de/jreality/toolsystem/util/OSCPool.java" kind="src" path="src-tool"/>
 	<classpathentry excluding="de/jreality/tutorial/audio/Example.java|de/jreality/tutorial/misc/JLinkExample.java|de/jreality/tutorial/audio/MinimalExample.java" kind="src" path="src-tutorial"/>
 	<classpathentry kind="src" path="src-ui"/>
@@ -51,11 +51,7 @@
 	<classpathentry kind="lib" path="lib/itextpdf-5.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream.jar"/>
-	<classpathentry kind="lib" path="lib/gluegen-rt.jar" sourcepath="jni/gluegen-java-src.zip">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jreality/jni/linux64"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.all.jar" sourcepath="jni/jogl-java-src.zip">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jreality/jni/linux64"/>
