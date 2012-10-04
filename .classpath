@@ -21,7 +21,7 @@
 	<classpathentry kind="src" path="src-soft-new"/>
 	<classpathentry kind="src" path="src-sunflow"/>
 	<classpathentry kind="src" path="src-swing"/>
-	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceSpacenav.java|de/jreality/toolsystem/raw/WiiMoteOSC.java" kind="src" path="src-tool"/>
+	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceSpacenav.java|de/jreality/toolsystem/raw/WiiMoteOSC.java|de/jreality/toolsystem/util/OSCPool.java" kind="src" path="src-tool"/>
 	<classpathentry excluding="de/jreality/tutorial/audio/Example.java|de/jreality/tutorial/misc/JLinkExample.java|de/jreality/tutorial/audio/MinimalExample.java" kind="src" path="src-tutorial"/>
 	<classpathentry kind="src" path="src-ui"/>
 	<classpathentry kind="src" path="src-vr"/>
@@ -42,9 +42,9 @@
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/beans.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-3.4-complete.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/NetUtil.jar"/>
+	<classpathentry kind="lib" path="lib/NetUtil.jar"/>
 	<classpathentry kind="lib" path="lib/jinput.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/libpd.jar"/>
+	<classpathentry kind="lib" path="lib/libpd.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar"/>
@@ -52,6 +52,6 @@
 	<classpathentry kind="lib" path="lib/xpp3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar" sourcepath="jni/gluegen-java-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/jogl-all.jar" sourcepath="jni/jogl-java-src.zip"/>
+	<classpathentry kind="lib" path="lib/jogl-all.jar" sourcepath="jni/jogl-java-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

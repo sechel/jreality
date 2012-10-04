@@ -142,7 +142,7 @@ public class DomeViewer extends Viewer {
 				angle = -Math.PI / 2;
 				break;
 			}
-
+			double oldFOV = CameraUtility.getCamera(this).getFieldOfView();
 			CameraUtility.getCamera(this).setFieldOfView(90);
 
 			SceneGraphPath sgp = getCameraPath();
@@ -166,7 +166,7 @@ public class DomeViewer extends Viewer {
 				MatrixBuilder.euclidean(tr)
 						.rotate(-Math.PI / 2, new double[] { 1, 0, 0 })
 						.assignTo(tr);
-
+			CameraUtility.getCamera(this).setFieldOfView(oldFOV);
 		}
 
 		// turn off FBO

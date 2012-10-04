@@ -146,8 +146,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 			
 			// this is required to get something rendered on the floor
 			// in a test setup where head tracking is not available...
-//			MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
-//			MatrixBuilder.euclidean().translate(0,0,5).assignTo(scene.getAvatarComponent());
+			MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
+			MatrixBuilder.euclidean().translate(0,0,5).assignTo(scene.getAvatarComponent());
 			
 			String headMoveTool;
 			if (runningEnvironment == RunningEnvironment.PORTAL_REMOTE)
@@ -181,7 +181,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 				e.printStackTrace();
 			}
 		} else {
-			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
+//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);
+			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_JOGL_DOME);
 //			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_JOGL3_DOME+" "+SystemProperties.VIEWER_DEFAULT_JOGL3); 
 //			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_JOGL_DOME+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
 //			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT); 

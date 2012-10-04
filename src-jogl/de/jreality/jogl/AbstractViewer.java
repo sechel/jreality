@@ -556,7 +556,8 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer,
 
 	public void dispose() {
 		disposed = true;
-		cameraPath.clear();
+		//cameraPath.clear();
+		//commenting this resolved the errors when switching to software viewer
 		cameraNode = null;
 		if (component != null) {
 			((Component) drawable).removeKeyListener(keyListener);
@@ -564,7 +565,8 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer,
 			((Component) drawable)
 					.removeMouseMotionListener(mouseMotionListener);
 			((Component) drawable).removeMouseWheelListener(mouseWheelListener);
-			component.removeAll();
+//			component.removeAll();
+			//commenting this resolved the errors when switching to software viewer
 			component = null;
 		}
 		setSceneRoot(null);

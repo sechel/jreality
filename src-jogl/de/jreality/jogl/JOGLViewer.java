@@ -102,9 +102,9 @@ public class JOGLViewer extends AbstractViewer {
 	}
 
 	public void dispose(GLAutoDrawable drawable) {
-		super.dispose();
-		if (drawable != null)
-			drawable.removeGLEventListener(this);
+		//super.dispose();
+		//if (drawable != null)
+		//	drawable.removeGLEventListener(this);
 		drawable = null;
 		canvas = null;
 	}
