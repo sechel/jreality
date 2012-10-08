@@ -43,7 +43,6 @@ package de.jreality.scene;
 import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 
-import de.jreality.math.Pn;
 import de.jreality.scene.event.CameraEvent;
 import de.jreality.scene.event.CameraEventMulticaster;
 import de.jreality.scene.event.CameraListener;
@@ -110,7 +109,9 @@ public class Camera extends SceneGraphNode {
 	Rectangle2D viewPort;
 	private boolean 	isOnAxis = true,
 			isPerspective = true,
-			isStereo = false;
+			isStereo = false,
+			isLeftEye = false,
+			isRightEye = false;
 	
 	double eyeSeparation = 0.07;
 	double[] orientationMatrix;		
@@ -237,7 +238,14 @@ public class Camera extends SceneGraphNode {
 	public boolean isStereo() {
 		return isStereo;
 	}
-
+	
+	public boolean isLeftEye() {
+		return isLeftEye;
+	}
+	
+	public boolean isRightEye() {
+		return isRightEye;
+	}
 
 	public void setStereo(boolean isStereo) {
     if (this.isStereo == isStereo) return;
@@ -248,7 +256,26 @@ public class Camera extends SceneGraphNode {
 		}
 		fireCameraChanged();
 	}
-	
+
+	public void setLeftEye(boolean isLeftEye) {
+    if (this.isLeftEye == isLeftEye) return;
+		this.isLeftEye = isLeftEye;
+		if (!isPerspective)	{
+ 			LoggingSystem.getLogger(this).log(Level.WARNING,"Stereo camera must be perspective, setting it so.");
+			isPerspective = true;
+		}
+		fireCameraChanged();
+	}
+
+	public void setRightEye(boolean isRightEye) {
+    if (this.isRightEye == isRightEye) return;
+		this.isRightEye = isRightEye;
+		if (!isPerspective)	{
+ 			LoggingSystem.getLogger(this).log(Level.WARNING,"Stereo camera must be perspective, setting it so.");
+			isPerspective = true;
+		}
+		fireCameraChanged();
+	}
 	
 	public void addCameraListener(CameraListener listener) {
     cameraListener=
