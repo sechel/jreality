@@ -43,6 +43,7 @@ public class Terrain {
 		{"tiles","textures/recycfloor1_clean2.png"},
 		//{"tech","textures/kf_techfloor10c.png"},
 		{"rust","textures/outfactory3.png"},
+		//{"tiles","textures/recycfloor1_clean2.png"},
 	};
 
 	private GeometryType geometryType = GeometryType.FLAT;

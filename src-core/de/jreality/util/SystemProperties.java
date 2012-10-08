@@ -155,6 +155,9 @@ public class SystemProperties {
 	 * Values: <code>true | false</code>
 	 */
 	public final static String JOGL_QUAD_BUFFERED_STEREO = "jreality.jogl.quadBufferedStereo";
+	public final static String JOGL_LEFT_STEREO = "jreality.jogl.leftStereo";
+    public final static String JOGL_RIGHT_STEREO = "jreality.jogl.rightStereo";
+    public final static String JOGL_MASTER_STEREO = "jreality.jogl.masterStereo";
 
 	/**
 	 * Flag converted into static field by {@link de.jreality.jogl.JOGLConfiguration}.<br>

@@ -96,7 +96,7 @@ public abstract class SceneShrinkPanel extends ViewShrinkPanelPlugin {
 //		// show internal panel
 //		internalShrinkPanel.setVisible(true);
 		lastSlot = shrinkPanel.getParentSlot();
-		lastSlot.removeShrinkPanel(shrinkPanel);
+		if (lastSlot != null) lastSlot.removeShrinkPanel(shrinkPanel);
 		sceneSlot.getShrinkSlot().addShrinkPanel(shrinkPanel);
 		shrinkPanel.setFloatable(false);
 		// force display of scene slot
@@ -116,7 +116,7 @@ public abstract class SceneShrinkPanel extends ViewShrinkPanelPlugin {
 //		// show external panel
 //		shrinkPanel.setVisible(true);
 		sceneSlot.getShrinkSlot().removeShrinkPanel(shrinkPanel);
-		lastSlot.addShrinkPanel(shrinkPanel);
+		if (lastSlot != null) lastSlot.addShrinkPanel(shrinkPanel);
 		shrinkPanel.setFloatable(true);
 		// close internal frame if empty
 		sceneSlot.closeFrameIfEmpty();

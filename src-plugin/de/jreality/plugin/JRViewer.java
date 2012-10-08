@@ -27,6 +27,7 @@ import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.Inspector;
 import de.jreality.plugin.basic.PropertiesMenu;
+import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.Shell;
 import de.jreality.plugin.basic.ToolSystemPlugin;
@@ -165,6 +166,8 @@ public class JRViewer {
 		c = new SimpleController();
 	private View
 		view = new View();
+	private static RunningEnvironment
+		env;
 	private ViewPreferences
 		viewPreferences = new ViewPreferences();
 	private static WeakReference<JRViewer>
@@ -590,8 +593,11 @@ public class JRViewer {
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.registerPlugin(new DirectContent());
 		v.registerPlugin(new ContentTools());
+		
 		if (node != null) {
-			v.registerPlugin(new ContentInjectionPlugin(node, true));
+			if (env != RunningEnvironment.DESKTOP)
+				v.registerPlugin(new ContentInjectionPlugin(node, false));
+			else v.registerPlugin(new ContentInjectionPlugin(node, true));
 		} else {
 			v.registerPlugin(new ContentLoader());
 		}

@@ -126,7 +126,9 @@ public class MasterApplication {
 		Broadcaster bc = new TCPBroadcasterNIO(port, Broadcaster.RESPONSE_TYPE_EXCEPTION);
 		Local.sendStart(port, cpPort, Broadcaster.RESPONSE_TYPE_EXCEPTION, ClientFactory.class);
 		js.waitForDownloads();
+		//class is either the 0-th argument or ViewerVR
 		Class appClass = Class.forName(args.length == 0 ? "de.jreality.vr.ViewerVR" : args[0]);
+		//other arguments are written in rest
 		String[] rest = null;
 		if (args.length > 1) rest = new String[args.length-1];
 		if (rest != null) for (int i = 0; i<args.length-1; ++i) rest[i] = args[i+1];

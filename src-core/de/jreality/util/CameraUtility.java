@@ -40,7 +40,6 @@
 
 package de.jreality.util;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.security.PrivilegedAction;

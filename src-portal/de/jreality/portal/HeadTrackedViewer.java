@@ -61,8 +61,9 @@ import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.RemoteSceneGraphComponent;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.GuiUtility;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 import de.smrj.ClientFactory;
 
 /**
@@ -211,6 +212,7 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 
 		camPath.pop(); // now this should be the portal path
 		portalPath = new SceneGraphPath(camPath);
+		System.err.println("portal path matrix = "+Rn.matrixToString(portalPath.getMatrix(null)));
 
 		// add camera position and orientation, add camera there
 		// DONT CHANGE SCENEGRAPH
@@ -220,13 +222,28 @@ public class HeadTrackedViewer implements Viewer, RemoteViewer, ClientFactory.Re
 			LoggingSystem.getLogger(CameraUtility.class).info("portal camera is on-axis: changing to off-axis");
 			cam.setOnAxis(false);
 		}
-
-		if (!cam.isStereo()) {
-			LoggingSystem.getLogger(CameraUtility.class).info("portal camera is not stereo: changing to stereo");
-			cam.setStereo(true);
+		
+		//added on 18.05.2012 andre
+		boolean quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
+		boolean isLeftEye = "true".equals(Secure.getProperty(SystemProperties.JOGL_LEFT_STEREO));
+		boolean isRightEye = "true".equals(Secure.getProperty(SystemProperties.JOGL_RIGHT_STEREO));
+		//andre 17.05.2012
+		boolean isMasterStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_MASTER_STEREO));
+		
+		if(quadBufferedStereo){//andre 19.04.2012
+			cam.setStereo(true);}//andre 19.04.2012
+		else if (isLeftEye || isRightEye){
+			cam.setStereo(false);//andre 19.04.2012
+			cam.setLeftEye(isLeftEye);//andre 19.04.2012
+			cam.setRightEye(isRightEye);//andre 19.04.2012
 		}
-
-
+		else if (isMasterStereo){//andre 17.05.2012
+			cam.setStereo(false);//andre 17.05.2012
+		}
+		else {//andre 19.04.2012
+			cam.setStereo(true);//andre 19.04.2012
+		}//andre 18.05.2012
+		
 		// build the right camera path
 		camPath.push(cameraTranslationNode);
 		camPath.push(cameraOrientationNode);

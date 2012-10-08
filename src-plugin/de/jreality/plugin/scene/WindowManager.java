@@ -14,7 +14,7 @@ import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
-import de.jreality.plugin.basic.View.RunningEnvironment;
+import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
@@ -38,7 +38,8 @@ public class WindowManager extends Plugin implements ChangeListener {
 	}
 
 	private int
-		screenResolutionX=1920,
+		screenResolutionXPortal=1600,//1600 for CAVE
+		screenResolutionX=1920, 
 		screenResolutionY=1200;
 	
 	public int getScreenResolutionX() {
@@ -72,6 +73,9 @@ public class WindowManager extends Plugin implements ChangeListener {
 		DefaultGeometryShader dgs = ShaderUtility.createDefaultGeometryShader(desktopBorder.getAppearance(), false);
 		DefaultLineShader dls = (DefaultLineShader) dgs.getLineShader();
 		dls.setTubeRadius(1.0);
+		if (env != RunningEnvironment.DESKTOP){
+			screenResolutionX=screenResolutionXPortal;//setting portal conditions
+		}
 		desktopBorder.setGeometry(IndexedLineSetUtility.createCurveFromPoints(new double[][]{{0,0,0},{screenResolutionX,0,0},{screenResolutionX,screenResolutionY,0},{0,screenResolutionY,0}}, true));
 	}
 	

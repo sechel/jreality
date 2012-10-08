@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.swing.JFakeFrameWithGeometry;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
@@ -15,6 +16,8 @@ import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkSlotVertical;
 
 public class SceneShrinkSlot extends Plugin {
 
+	RunningEnvironment env;
+	
 	Set<ShrinkPanel> panels = new HashSet<ShrinkPanel>();
 	
 	@SuppressWarnings("serial")
@@ -46,7 +49,9 @@ public class SceneShrinkSlot extends Plugin {
 		slotFrame = wm.createFrame("Controls");
 		slotFrame.setLayout(new GridLayout());
 		slotFrame.add(slot);
-		slotFrame.setBounds(slotFrame.getDesktopWidth()/2, slotFrame.getDesktopHeight()/2, 250, 350);
+		if(env != RunningEnvironment.DESKTOP) //if portal
+			slotFrame.setBounds(slotFrame.getDesktopWidth()/2, slotFrame.getDesktopHeight()/2, 350, 350);
+		else slotFrame.setBounds(slotFrame.getDesktopWidth()/2, slotFrame.getDesktopHeight()/2, 250, 350);
 		
 		slotFrame.addWindowListener(new WindowAdapter() {
 			@Override

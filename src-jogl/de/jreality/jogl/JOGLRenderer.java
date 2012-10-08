@@ -492,6 +492,40 @@ public class JOGLRenderer {
 
 			if (fboMode)
 				theFBO.postRender(globalGL);
+		} else if (theCamera.isLeftEye())		{
+				
+				//System.out.println("LLLLLLLLLEEEEEEEEEEFFFFFFFFFFTTTTTTTTTTT");
+				// allow fbo textures to be stereo
+				if (fboMode) theFBO.preRender(globalGL);
+				// all types render two images except two new ones
+				
+				//setupLeftEye(width, height);
+				whichEye=CameraUtility.LEFT_EYE;
+				renderingState.clearBufferBits = clearColorBits | GL2.GL_DEPTH_BUFFER_BIT;
+				setViewport(0,0,width, height);
+				renderingState.currentEye = whichEye;
+				
+				render();
+					
+				//renderingState.colorMask =15;
+				
+				if (fboMode) theFBO.postRender(globalGL);
+		}else if (theCamera.isRightEye())		{
+				//System.out.println("RRRRRRRIIIIIIIGGGGGGGHHHHHHHHTTTTTT");
+				// allow fbo textures to be stereo
+				if (fboMode) theFBO.preRender(globalGL);
+				// all types render two images except two new ones
+				//setupRightEye(width, height);
+				whichEye=CameraUtility.RIGHT_EYE;
+				renderingState.clearBufferBits = clearColorBits | GL2.GL_DEPTH_BUFFER_BIT;
+				setViewport(0,0,width, height);
+				//
+				renderingState.currentEye = whichEye;
+				render();				
+				
+				//renderingState.colorMask =15;
+				
+				if (fboMode) theFBO.postRender(globalGL);
 		} else {
 			if (fboMode)
 				theFBO.preRender(globalGL);

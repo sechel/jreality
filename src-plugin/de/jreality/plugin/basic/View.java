@@ -56,7 +56,6 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -91,12 +90,6 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	
 	private RunningEnvironment runningEnvironment;
 
-	public enum RunningEnvironment {
-		PORTAL,
-		PORTAL_REMOTE,
-		DESKTOP
-	};
-	
 	void init(Scene scene) {
 		SceneGraphComponent root=scene.getSceneRoot();
 		
@@ -141,13 +134,32 @@ public class View extends SideContainerPerspective implements ChangeListener {
 			cam.setNear(0.01);
 			cam.setFar(1500);
 			cam.setOnAxis(false);
-			cam.setStereo(true);
+			
+			boolean quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
+			boolean isLeftEye = "true".equals(Secure.getProperty(SystemProperties.JOGL_LEFT_STEREO));
+			boolean isRightEye = "true".equals(Secure.getProperty(SystemProperties.JOGL_RIGHT_STEREO));
+			//andre 17.05.2012
+			boolean isMasterStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_MASTER_STEREO));
+			if(quadBufferedStereo){//andre 19.04.2012
+				cam.setStereo(true);}//andre 19.04.2012
+			else if (isLeftEye || isRightEye){
+				cam.setStereo(false);//andre 19.04.2012
+				cam.setLeftEye(isLeftEye);//andre 19.04.2012
+				cam.setRightEye(isRightEye);//andre 19.04.2012
+			}
+			else if (isMasterStereo){//andre 17.05.2012
+				cam.setStereo(false);//andre 17.05.2012
+			}
+			else {//andre 19.04.2012
+				cam.setStereo(true);//andre 19.04.2012
+			}
+			
 			SceneGraphComponent camNode = scene.getCameraComponent();
 			
 			// this is required to get something rendered on the floor
 			// in a test setup where head tracking is not available...
-			MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
-			MatrixBuilder.euclidean().translate(0,0,5).assignTo(scene.getAvatarComponent());
+			//MatrixBuilder.euclidean().translate(0, 1.7, 0).assignTo(camNode);
+			//MatrixBuilder.euclidean().translate(0,0,5).assignTo(scene.getAvatarComponent());
 			
 			String headMoveTool;
 			if (runningEnvironment == RunningEnvironment.PORTAL_REMOTE)

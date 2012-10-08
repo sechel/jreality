@@ -228,6 +228,10 @@ public class ViewerVR {
 		// find out where we are running
 		boolean portalRemote = "portal-remote".equals(Secure.getProperty(SystemProperties.ENVIRONMENT));
 		boolean portal = "portal".equals(Secure.getProperty(SystemProperties.ENVIRONMENT));
+		//benjamin 29.3.12
+		boolean quadBufferedStereo = "true".equals(Secure.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
+		boolean isLeftEye = "true".equals(Secure.getProperty(SystemProperties.JOGL_LEFT_STEREO));
+		boolean isRightEye = "true".equals(Secure.getProperty(SystemProperties.JOGL_RIGHT_STEREO));
 
 		// build basic scene graph
 		sceneRoot.setName("root");
@@ -256,7 +260,15 @@ public class ViewerVR {
 		cam.setFar(1500);
 		if (portal || portalRemote) {
 			cam.setOnAxis(false);
-			cam.setStereo(true);
+			if(quadBufferedStereo){//benjamin 29.3.12
+				System.out.println("true");
+				cam.setStereo(true);}
+			else{//benjamin 29.3.12
+				System.out.println("false");
+				cam.setStereo(false);//benjamin 29.3.12
+				cam.setLeftEye(isLeftEye);//benjamin 29.3.12
+				cam.setRightEye(isRightEye);//benjamin 29.3.12
+			}
 			cam.setViewPort(new Rectangle2D.Double(-1, -1, 2, 2));
 		}
 
