@@ -465,13 +465,13 @@ public class JOGLRenderer {
 		} catch (IllegalStateException ise) {
 			return;
 		}
-		// if (fboMode) {
-		// owidth = width;
-		// oheight = height;
-		// width = theFBO.width;
-		// height = theFBO.height;
-		// setViewport(0, 0, width, height);
-		// }
+		 if (fboMode) {
+			 owidth = width;
+			 oheight = height;
+			 width = theFBO.width;
+			 height = theFBO.height;
+			 setViewport(0, 0, width, height);
+		 }
 		if (theCamera.isStereo()) {
 			// allow fbo textures to be stereo
 			if (fboMode)
@@ -538,12 +538,12 @@ public class JOGLRenderer {
 			if (fboMode)
 				theFBO.postRender(globalGL);
 		}
-		// revert the viewport
-		// if (fboMode) {
-		// width = owidth;
-		// height = oheight;
-		// setViewport(0, 0, width, height);
-		// }
+//		 revert the viewport
+		 if (fboMode) {
+			 width = owidth;
+			 height = oheight;
+			 setViewport(0, 0, width, height);
+		 }
 
 		perfMeter.endFrame();
 	}
