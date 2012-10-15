@@ -61,7 +61,7 @@ import de.jreality.geometry.TubeUtility;
  * <p>
  * Different backends implement different versions of this shader. For example, the
  * software renderer (@link de.jreality.soft.Viewer} always draws tubes; the specification of the tube radius is in world coordinates.
- * On the other hand, the JOGL backend {@link de.jreality.jogl.Viewer} can draw traditional Bresenham edges. In this case,
+ * On the other hand, the JOGL backend {@link de.jreality.jogl.JOGLViewer} can draw traditional Bresenham edges. In this case,
  * lighting is disabled so no shading effects are present. If tubes are enabled, then lighting is enabled, --- and the 
  * tube radius is in object coordinates.  
  * <p>
