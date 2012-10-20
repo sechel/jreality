@@ -69,7 +69,7 @@ public class ParserMTL {
     
     public static Appearance defaultApp = createDefault();
     
-    static Appearance createDefault() {
+    public static Appearance createDefault() {
         Appearance ret= new Appearance();
         /*
         ret.setName("default");
