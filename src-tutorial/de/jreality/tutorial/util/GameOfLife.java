@@ -11,7 +11,7 @@ public class GameOfLife {
 	int height = 128;
 	int width =  128;
 	int current = 0;
-	double[][] lifeColors = {{0,.4,.4,1}, {.6, 1,1,1}}; 
+	double[][] lifeColors = {{0,.6,1,1}, {1, 1,1,0}}; 
 	byte[] faceColors;
 	int[][][] lifeBoard;
 	BufferedImage bufferedImage;
