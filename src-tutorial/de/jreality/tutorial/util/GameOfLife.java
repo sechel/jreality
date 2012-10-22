@@ -26,7 +26,7 @@ public class GameOfLife {
 		faceColors = new byte[width*height*4];		
 		updateColors();
 	}
-	private void resetBoard() {
+	public void resetBoard() {
 		for (int i = 0; i<height; ++i)	{
 			for (int j = 0; j<width; ++j)	{
 				lifeBoard[current][i][j] = (Math.random() > .7) ? 1 : 0;
