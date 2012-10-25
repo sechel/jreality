@@ -102,7 +102,7 @@ public class DraggingTool extends AbstractTool {
     }
 
     transient EffectiveAppearance eap;
-    transient private int metric;
+    transient protected int metric;
     transient protected Matrix result = new Matrix();
     transient Matrix local2world = new Matrix();
     transient Matrix dragFrame;
