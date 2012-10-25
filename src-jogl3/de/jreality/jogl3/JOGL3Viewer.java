@@ -35,13 +35,13 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 
-public class Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventListener {
+public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventListener {
 
 	SceneGraphComponent auxiliaryRoot;
 	protected JPanel component;
 	protected GLCanvas canvas;
 	
-	public Viewer(){
+	public JOGL3Viewer(){
 		System.out.println("constuctor called");
 		this.auxiliaryRoot = SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot");
 		

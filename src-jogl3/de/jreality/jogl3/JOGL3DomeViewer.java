@@ -14,7 +14,7 @@ import de.jreality.util.CameraUtility;
 /**
  * @author Benjamin Kutschan
  */
-public class DomeViewerJOGL3 extends Viewer {
+public class JOGL3DomeViewer extends JOGL3Viewer {
 
 	private int[] texs = new int[6];
 	private int[] fbos = new int[6];
