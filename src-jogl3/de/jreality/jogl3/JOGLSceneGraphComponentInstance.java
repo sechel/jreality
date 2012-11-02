@@ -50,7 +50,20 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		JOGLRenderState state = new JOGLRenderState(parentState, getTrafo());
 		state.appearanceUpToDate = upToDate;
 		
-		
+		//if two scenegraph nodes on the same scene graph path reference
+		//to the same local light, then the light is duplicated and therefore its
+		//intensity is practically multiplied. There would be no other possible meaning in
+		//referencing a local light twice on the same scene graph path.
+		SceneTreeNode maybelight = this.getLightTreeNode();
+		if(maybelight instanceof JOGLLightInstance){
+			JOGLLightInstance light = (JOGLLightInstance) maybelight;
+			if(light != null){
+				JOGLLightEntity lightEntity = (JOGLLightEntity) light.getEntity();
+				if(!lightEntity.isGlobal()){
+					state.addLocalLight(light);
+				}
+			}
+		}
 		
 		SceneTreeNode gtn =  getGeometryTreeNode();
 		
@@ -79,7 +92,9 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 	}
 	
-	public void collectLights(double[] trafo, JOGLLightCollection collection) {
+	//this method collects global lights and updates the data in every
+	//(also local) lights
+	public void collectGlobalLights(double[] trafo, JOGLLightCollection collection) {
 
 		double[] newMatrix = new double[16];
 		
@@ -98,7 +113,8 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			//System.out.println(light.getEntity().getNode().getName() + light.getEntity().getNode().getClass());
 			//copy transformation to light.trafo
 			light.trafo = newMatrix;
-			light.addToList(collection);
+			if(lightEntity.isGlobal())
+				light.addToList(collection);
 		}
 		
 		for (SceneTreeNode child : getChildren()) {
@@ -106,7 +122,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
 			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
 			if(sgc.isVisible())
-				childInstance.collectLights(newMatrix, collection);
+				childInstance.collectGlobalLights(newMatrix, collection);
 		}
 	}
 	

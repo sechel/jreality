@@ -176,7 +176,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 					vbos.put("face_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "face_"+a.getName()));
 //					System.out.println("creating " + "face_"+a.getName());
 				}else{
-					System.out.println("not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("FSE 1: not knowing what to do with " + attribs.getStorageModel().toString());
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}
@@ -246,7 +246,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 //					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else{
-					System.out.println("not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("FSE2: not knowing what to do with " + attribs.getStorageModel().toString());
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}

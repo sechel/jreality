@@ -6,10 +6,8 @@ import de.jreality.scene.PointLight;
 
 public class JOGLPointLightEntity extends JOGLLightEntity {
 	
-	protected Color color;
-	protected double intensity;
-	protected boolean isShadowmap;
-	protected String shadowMap;
+	public boolean isShadowmap;
+	public String shadowMap;
 	
 	public JOGLPointLightEntity(PointLight node) {
 		super(node);
@@ -23,9 +21,9 @@ public class JOGLPointLightEntity extends JOGLLightEntity {
 			intensity = l.getIntensity();
 			shadowMap = l.getShadowMap();
 			isShadowmap = l.isUseShadowMap();
+			global = l.isGlobal();
 			
 			dataUpToDate = true;
 		}
 	}
-
 }

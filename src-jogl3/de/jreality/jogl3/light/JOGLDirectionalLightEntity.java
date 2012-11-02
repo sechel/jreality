@@ -5,17 +5,6 @@ import java.awt.Color;
 import de.jreality.scene.DirectionalLight;
 
 public class JOGLDirectionalLightEntity extends JOGLLightEntity {
-
-	protected Color color;
-	protected double intensity;
-	
-	public float[] getColor(){
-		return color.getComponents(new float[]{0, 0, 0, 0});
-	}
-	
-	public double getIntensity(){
-		return intensity;
-	}
 	
 	public JOGLDirectionalLightEntity(DirectionalLight node) {
 		super(node);
@@ -30,6 +19,7 @@ public class JOGLDirectionalLightEntity extends JOGLLightEntity {
 			DirectionalLight l = (DirectionalLight) getNode();
 			color = l.getColor();
 			intensity = l.getIntensity();
+			global = l.isGlobal();
 			
 			dataUpToDate = true;
 		}

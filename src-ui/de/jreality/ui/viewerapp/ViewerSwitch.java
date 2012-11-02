@@ -129,8 +129,10 @@ public class ViewerSwitch implements Viewer {
       newViewer.setAuxiliaryRoot(currentViewer.getAuxiliaryRoot());
  //     newViewer.setMetric(currentViewer.getMetric());
     } catch (Exception e) {}
-   
-    if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component) unregisterComponent((Component) currentViewer.getViewingComponent());
+    
+    if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component)
+    	unregisterComponent((Component) currentViewer.getViewingComponent());
+    
     if (newViewer.hasViewingComponent()  && newViewer.getViewingComponent() instanceof Component) {
       if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component)
         ((Component) newViewer.getViewingComponent()).setSize(currentViewer.getViewingComponentSize());
@@ -255,12 +257,15 @@ public class ViewerSwitch implements Viewer {
   }
   
   public void dispose() {
+	  System.out.println("calling dispose method");
     if (currentViewer.hasViewingComponent()  && currentViewer.getViewingComponent() instanceof Component) unregisterComponent((Component) currentViewer.getViewingComponent());
     for (int i = 0; i < viewers.length; i++) {
       Statement stm = new Statement(viewers[i], "dispose", null);
       try {
+    	  System.out.println("calling viewers.dispose");
         stm.execute();
       } catch (Exception e) {
+    	  System.out.println("exception when trying to dispose viewer "+this.viewerNames[i]);
         //e.printStackTrace();
       }
     }

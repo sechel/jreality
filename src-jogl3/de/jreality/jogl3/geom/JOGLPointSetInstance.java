@@ -23,6 +23,8 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 
 	@Override
 	public void render(JOGLRenderState state) {
+		if(eap == null)
+			return;
 		JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
 		if(visible)

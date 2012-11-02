@@ -3,6 +3,10 @@ package de.jreality.jogl3;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.light.JOGLLightCollection;
+import de.jreality.jogl3.light.JOGLLightInstance;
+import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
+import de.jreality.jogl3.light.JOGLSpotLightInstance;
+import de.jreality.jogl3.light.JOGLPointLightInstance;
 import de.jreality.math.Rn;
 
 public class JOGLRenderState {
@@ -15,7 +19,31 @@ public class JOGLRenderState {
 	public int screenSize = 0;
 	public float screenSizeInScene = 1;
 
-	private JOGLLightCollection lights = null;
+	private JOGLLightCollection globalLights = null;
+	private JOGLLightCollection localLights = null;
+	
+	//copy the references to the light instances to a new light collection
+	public JOGLLightCollection copyLocalLights(){
+		JOGLLightCollection ret = new JOGLLightCollection(null);
+		for(JOGLSpotLightInstance s : this.localLights.spotLights)
+			ret.spotLights.add(s);
+		for(JOGLPointLightInstance p : this.localLights.pointLights)
+			ret.pointLights.add(p);
+		for(JOGLDirectionalLightInstance d : this.localLights.directionalLights)
+			ret.directionalLights.add(d);
+		return ret;
+	}
+	
+	public void addLocalLight(JOGLLightInstance	l){
+		if(l instanceof JOGLDirectionalLightInstance)
+			localLights.directionalLights.add((JOGLDirectionalLightInstance) l);
+		else if(l instanceof JOGLPointLightInstance){
+			if((JOGLPointLightInstance)l instanceof JOGLSpotLightInstance)
+				localLights.spotLights.add((JOGLSpotLightInstance) l);
+			else
+				localLights.pointLights.add((JOGLPointLightInstance) l);
+		}
+	}
 	
 	public double[] getModelViewMatrix() {
 		return modelViewMatrix;
@@ -26,9 +54,10 @@ public class JOGLRenderState {
 	}
 
 	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, JOGLLightCollection c, int screenSize, float screenSizeInScene) {
+		localLights = new JOGLLightCollection(null);
 		this.screenSize = screenSize;
 		this.screenSizeInScene = screenSizeInScene;
-		lights = c;
+		globalLights = c;
 		System.arraycopy(inverseCameraMatrix, 0, modelViewMatrix, 0, 16);
 		System.arraycopy(projection, 0, projectionMatrix, 0, 16);
 		//System.arraycopy(inverseCameraMatrix, 0, projectionMatrix, 0, 16);
@@ -36,7 +65,8 @@ public class JOGLRenderState {
 	}
 	
 	public JOGLRenderState(JOGLRenderState parentState, double[] matrix) {
-		lights = parentState.getLights();
+		globalLights = parentState.getGlobalLights();
+		localLights = parentState.copyLocalLights();
 		screenSize = parentState.screenSize;
 		screenSizeInScene = parentState.screenSizeInScene;
 		
@@ -46,9 +76,9 @@ public class JOGLRenderState {
 		gl = parentState.getGL();
 	}
 
-	public JOGLLightCollection getLights() {
+	public JOGLLightCollection getGlobalLights() {
 		// TODO Auto-generated method stub
-		return lights;
+		return globalLights;
 	}
 
 	public GL3 getGL() {

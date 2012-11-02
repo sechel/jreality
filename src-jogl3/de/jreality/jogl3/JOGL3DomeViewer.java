@@ -16,6 +16,11 @@ import de.jreality.util.CameraUtility;
  */
 public class JOGL3DomeViewer extends JOGL3Viewer {
 
+	public JOGL3DomeViewer() throws Exception {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	private int[] texs = new int[6];
 	private int[] fbos = new int[6];
 	private int[] rbuffer = new int[6];

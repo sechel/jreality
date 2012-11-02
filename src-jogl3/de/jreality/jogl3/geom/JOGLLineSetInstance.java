@@ -20,6 +20,8 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		super(node);
 	}
 	public void render(JOGLRenderState state) {
+		if(eap==null)
+			return;
 		super.render(state);
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);

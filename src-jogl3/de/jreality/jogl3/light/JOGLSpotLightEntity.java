@@ -4,7 +4,7 @@ import de.jreality.scene.SpotLight;
 
 public class JOGLSpotLightEntity extends JOGLPointLightEntity {
 
-	protected double coneAngle, coneAngleDelta, distribution;
+	public double coneAngle, coneAngleDelta, distribution;
 	
 	public JOGLSpotLightEntity(SpotLight node) {
 		super(node);

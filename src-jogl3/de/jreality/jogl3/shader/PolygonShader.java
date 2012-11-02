@@ -45,7 +45,7 @@ public class PolygonShader{
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
-		JOGLLightCollection lc = state.getLights();
+		JOGLLightCollection lc = state.getGlobalLights();
 		
 		int numDirLights = lc.directionalLights.size();
 		float[] directionalLightColors = new float[numDirLights*4];
@@ -102,7 +102,7 @@ public class PolygonShader{
         	
         	//actual draw command
         	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
-		
+        	
         	//disable all vbos
         	for(ShaderVar v : l){
         		GLVBO vbo = fse.getVBO(v.getName());

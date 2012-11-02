@@ -12,16 +12,25 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLException;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
+import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
+import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
+import de.jreality.jogl3.light.JOGLPointLightEntity;
+import de.jreality.jogl3.light.JOGLPointLightInstance;
+import de.jreality.jogl3.light.JOGLSpotLightEntity;
+import de.jreality.jogl3.light.JOGLSpotLightInstance;
 import de.jreality.jogl3.shader.PointShader;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.scene.Appearance;
@@ -41,11 +50,39 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	protected JPanel component;
 	protected GLCanvas canvas;
 	
-	public JOGL3Viewer(){
-		System.out.println("constuctor called");
+	public JOGL3Viewer() throws Exception{
+		System.out.println("JOGL3Viewer constuctor called");
 		this.auxiliaryRoot = SceneGraphUtility.createFullSceneGraphComponent("AuxiliaryRoot");
 		
-		GLProfile glp = GLProfile.getMaxProgrammable(true);
+		GLProfile glp = null;
+		
+		try{
+			glp = GLProfile.get("GL3");
+		}catch(GLException e){
+			System.out.println(e.getMessage());
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL4");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL3bc");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL4bc");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+				throw new Exception("no openGL profile available to support JOGL3");
+			}
+		}
 		GLCapabilities caps = new GLCapabilities(glp);
 		//TODO: check caps.setAccumAlphaBits(8);
 		caps.setAlphaBits(8);
@@ -263,14 +300,17 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 
 			//enable depth test
 			gl.glEnable(gl.GL_DEPTH_TEST);
+			//collect lights from scene graph
 			JOGLLightCollection lightCollection = new JOGLLightCollection(dmat);
+			rootInstance.collectGlobalLights(dmat, lightCollection);
+			//can load global lights texture here.
+			loadGlobalLightTexture(lightCollection, gl);
 			
-			rootInstance.collectLights(dmat, lightCollection);
-			//System.out.println("screenSize = " + Math.min(component.getWidth(), component.getHeight()));
-			
+			//calculate window dimensions and such needed for sprite size calculation
 			Rectangle2D r = CameraUtility.getViewport(cam, ar);
 			float x = (float)(r.getMaxX()-r.getMinX());
 			float y = (float)(r.getMaxY()-r.getMinY());
+			//render scene graph
 			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat,lightCollection, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
 			rootInstance.render(rootState);
 			rootInstance.setAppearanceEntitiesUpToDate();
@@ -278,9 +318,73 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		}
 	}
 
+	private void loadGlobalLightTexture(JOGLLightCollection lc, GL3 gl) {
+		// TODO Auto-generated method stub
+		int[] textures = new int[1];
+		gl.glEnable(gl.GL_TEXTURE_1D);
+		gl.glGenTextures(1, textures, 0);
+		gl.glActiveTexture(gl.GL_TEXTURE0);
+		gl.glBindTexture(gl.GL_TEXTURE_1D, textures[0]);
+		int width = lc.directionalLights.size()*2+lc.pointLights.size()*2+lc.spotLights.size()*3;
+		float[] data = new float[width*4];
+		int i = 0;
+		for(JOGLDirectionalLightInstance d : lc.directionalLights){
+			JOGLDirectionalLightEntity dl = (JOGLDirectionalLightEntity)d.getEntity();
+			
+			data[i+0] = dl.getColor()[0]*(float)dl.getIntensity();
+			data[i+1] = dl.getColor()[1]*(float)dl.getIntensity();
+			data[i+2] = dl.getColor()[2]*(float)dl.getIntensity();
+			data[i+3] = dl.getColor()[3]*(float)dl.getIntensity();
+			
+			data[i+4] = (float)d.trafo[2];
+			data[i+5] = (float)d.trafo[6];
+			data[i+6] = (float)d.trafo[10];
+			
+			i+=8;
+		}
+		for(JOGLPointLightInstance d : lc.pointLights){
+			JOGLPointLightEntity dl = (JOGLPointLightEntity)d.getEntity();
+			
+			data[i+0] = dl.getColor()[0]*(float)dl.getIntensity();
+			data[i+1] = dl.getColor()[1]*(float)dl.getIntensity();
+			data[i+2] = dl.getColor()[2]*(float)dl.getIntensity();
+			data[i+3] = dl.getColor()[3]*(float)dl.getIntensity();
+			
+			data[i+4] = (float)d.trafo[2];
+			data[i+5] = (float)d.trafo[6];
+			data[i+6] = (float)d.trafo[10];
+			
+			i+=8;
+		}
+		for(JOGLSpotLightInstance d : lc.spotLights){
+			JOGLSpotLightEntity dl = (JOGLSpotLightEntity)d.getEntity();
+			
+			data[i+0] = dl.getColor()[0]*(float)dl.getIntensity();
+			data[i+1] = dl.getColor()[1]*(float)dl.getIntensity();
+			data[i+2] = dl.getColor()[2]*(float)dl.getIntensity();
+			data[i+3] = dl.getColor()[3]*(float)dl.getIntensity();
+			
+			data[i+4] = (float)d.trafo[2];
+			data[i+5] = (float)d.trafo[6];
+			data[i+6] = (float)d.trafo[10];
+			
+			data[i+8] = (float)dl.coneAngle;
+			data[i+9] = (float)dl.coneAngleDelta;
+			data[i+10] = (float)dl.distribution;
+			
+			i+=12;
+		}
+		gl.glTexImage1D(gl.GL_TEXTURE_1D, 0, gl.GL_RGBA32F, width, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+		
+		
+		//gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, 
+	    //    	image.getWidth(), image.getHeight(), 0, srcPixelFormat,
+	    //	    gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
+	}
+
 	public void dispose(GLAutoDrawable arg0) {
 		// TODO Auto-generated method stub
-		
+		System.out.println("calling JOGL3Viewer.dispose");
 	}
 	public void init(GLAutoDrawable arg0) {
 		System.out.println("init!!!!!!!!!!!!");

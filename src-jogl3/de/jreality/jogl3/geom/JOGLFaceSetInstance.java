@@ -22,6 +22,8 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	
 	@Override
 	public void render(JOGLRenderState state) {
+		if(eap==null)
+			return;
 		super.render(state);
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);

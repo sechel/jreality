@@ -137,6 +137,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 
 	public abstract void render(JOGLRenderState state);
 
+	
+	//this method copies appearance attributes to a list of uniform variables for later use in the openGL shader
+	//it furthermore returns the openGL shader to use
 	protected GLShader updateAppearance(SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, String type) {
 		GLShader shader = GLShader.defaultPolygonShader;
 		if(type.equals("lineShader"))

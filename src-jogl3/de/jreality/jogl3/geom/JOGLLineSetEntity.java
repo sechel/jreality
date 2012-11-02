@@ -144,7 +144,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 					lineVbos.put("edge_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "edge_"+a.getName()));
 //					System.out.println("creating " + "edge_"+a.getName());
 				}else{
-					System.out.println("not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("LSE1: not knowing what to do with " + attribs.getStorageModel().toString());
 				}
 			}
 			
@@ -214,7 +214,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 //					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else{
-					System.out.println("not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("LSE2: not knowing what to do with " + attribs.getStorageModel().toString());
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}

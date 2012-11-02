@@ -65,6 +65,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 				//System.out.println(ps.getName() + "point set vertex attribute: "+a.getName());
 				DataList attribs = ps.getVertexAttributes(a);
 				if(isDoubleArray(attribs.getStorageModel())){
+					
 					//the array containing one item per index
 					double[] inflatedAttributeArray = new double[ps.getNumPoints()*4];
 					//count = 0;
@@ -119,7 +120,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 //					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else{
-					System.out.println("not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("PSE1: not knowing what to do with " + attribs.getStorageModel().toString()+" "+attribs.getStorageModel().getClass().toString() + a.getName());
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}

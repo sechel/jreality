@@ -46,6 +46,7 @@ import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
+import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
@@ -74,6 +75,7 @@ public static void main(String[] args) throws IOException {
 	  	IndexedFaceSet geom = new CatenoidHelicoid(40);
 		SceneGraphComponent sgc = new SceneGraphComponent("TextureExample");
 		sgc.setGeometry(geom);
+		
 		Appearance ap = new Appearance();
 		sgc.setAppearance(ap);
 		DefaultGeometryShader dgs = (DefaultGeometryShader) ShaderUtility.createDefaultGeometryShader(ap, true);
