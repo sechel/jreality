@@ -59,18 +59,19 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		try{
 			glp = GLProfile.get("GL3");
 		}catch(GLException e){
+			System.out.println("test");
 			System.out.println(e.getMessage());
 		}
 		if(glp == null){
 			try{
-				glp = GLProfile.get("GL4");
+				glp = GLProfile.get("GL3bc");
 			}catch(GLException e){
 				System.out.println(e.getMessage());
 			}
 		}
 		if(glp == null){
 			try{
-				glp = GLProfile.get("GL3bc");
+				glp = GLProfile.get("GL4");
 			}catch(GLException e){
 				System.out.println(e.getMessage());
 			}
