@@ -97,7 +97,7 @@ public class AbstractPointSetFactory extends AbstractGeometryFactory {
 		setVertexAttribute( attr, data==null ? null : new DoubleArrayArray.Inlined( data, data.length / nov() ) );
 	}
 	
-	protected void setVertexAttribute(Attribute attr,  double [][] data ) {
+	public void setVertexAttribute(Attribute attr,  double [][] data ) {
 		setVertexAttribute( attr,
 				StorageModel.DOUBLE_ARRAY.array(data[0].length).createReadOnly(data));
 	}
