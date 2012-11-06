@@ -65,26 +65,32 @@ public class IndexedLineSetUtility {
 
 	public static IndexedLineSet refine(IndexedLineSet ils, int n)	{
 		int[][] indices = ils.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+		int totalSegments = 0;
 		for (int i=0; i<indices.length; ++i)	{
-			if (indices[i].length != 2) {
-				throw new IllegalArgumentException("Edge array can have only 2 points per curve");
-			}
+			totalSegments += indices[i].length-1;
+//			if (indices[i].length != 2) {
+//				throw new IllegalArgumentException("Edge array can have only 2 points per curve");
+//			}
 		}
 		double[][] verts = ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		int numEdges = ils.getNumEdges();
 		int veclength = verts[0].length;
-		double[][] newVerts = new double[n*numEdges][veclength];
-		int[][] newIndices = new int[numEdges][n];
+		double[][] newVerts = new double[n*totalSegments][veclength];
+		int[][] newIndices = new int[totalSegments][n];
+		int runningCount = 0;
 		for (int i = 0; i<numEdges; ++i)	{
-			int i0 = indices[i][0];
-			int i1 = indices[i][1];
-			double[] p0 = verts[i0];
-			double[] p1 = verts[i1];
-			for (int j = 0; j<n; ++j)	{
-				double t = (j)/(n-1.0);
-				double s = 1.0 - t;
-				newVerts[i*n+j] = Rn.linearCombination(null, s, p0, t, p1);
-				newIndices[i][j] = i*n+j;
+			for (int k = 0; k<indices[i].length-1; ++k)	{
+				int i0 = indices[i][k];
+				int i1 = indices[i][k+1];
+				double[] p0 = verts[i0];
+				double[] p1 = verts[i1];
+				for (int j = 0; j<n; ++j)	{
+					double t = (j)/(n-1.0);
+					double s = 1.0 - t;
+					newVerts[runningCount*n+j] = Rn.linearCombination(null, s, p0, t, p1);
+					newIndices[runningCount][j] = runningCount*n+j;
+				}		
+				runningCount++;
 			}
 		}
 		IndexedLineSetFactory ifsf = new IndexedLineSetFactory();
