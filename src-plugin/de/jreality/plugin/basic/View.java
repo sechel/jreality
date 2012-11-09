@@ -193,8 +193,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 				e.printStackTrace();
 			}
 		} else {
-//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);
-			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);//+" "+SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_JOGL_DOME);
+			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);
+//			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_JOGL_DOME);
 //			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_JOGL3_DOME+" "+SystemProperties.VIEWER_DEFAULT_JOGL3); 
 //			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_JOGL_DOME+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
 //			String viewer = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT); 
