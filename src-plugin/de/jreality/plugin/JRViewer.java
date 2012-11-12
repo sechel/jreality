@@ -602,7 +602,7 @@ public class JRViewer {
 			v.registerPlugin(new ContentLoader());
 		}
 		v.addBasicUI();
-		v.registerPlugin(new InfoOverlayPlugin());
+//		v.registerPlugin(new InfoOverlayPlugin());
 		return v;
 	}
 	
@@ -704,6 +704,7 @@ public class JRViewer {
 		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
+		v.registerPlugin(InfoOverlayPlugin.class);
 		if (params.contains("-vr")) {
 			v.addContentUI();
 			v.addVRSupport();
