@@ -421,7 +421,7 @@ public class CameraUtility {
 	    Rectangle3D worldBounds = bounds.transformByMatrix(new Rectangle3D(), rootToScene.getArray());
 	    Rectangle3D avatarBounds = worldBounds.transformByMatrix(new Rectangle3D(), avatarPath.getInverseMatrix(null));
 	    double [] e = avatarBounds.getExtent();
-	    double radius = Math.sqrt(e[0]*e[0] + e[2]*e[2] + e[1]*e[1]);
+	    double radius = Rn.euclideanNorm(e);
 	    double [] c = avatarBounds.getCenter();
 	    // TODO: read viewing angle from camera
 	    c[2] += margin*radius;
@@ -432,7 +432,7 @@ public class CameraUtility {
 	    
 	    Camera camera = ((Camera)cameraPath.getLastElement());
 		camera.setFar(margin*5*radius);
-	    camera.setNear(.02*radius);
+	    camera.setNear(.5*radius);
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
 	    if (SystemProperties.isPortal) return;
