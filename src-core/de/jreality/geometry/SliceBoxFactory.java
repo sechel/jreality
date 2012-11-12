@@ -187,7 +187,7 @@ import de.jreality.util.SceneGraphUtility;
 				double[] newCoords = currentPick.getObjectCoordinates();
 				double[] dd = Rn.subtract(null, originalCoords, newCoords);
 				int direction = oldDirection;
-				if (firstTime)	{
+				if (firstTime)	{  // figure out the direction of dragging
 					direction = (Math.abs(dd[index1]) > Math.abs(dd[index2])) ? index1 : index2;
 					if (!sameFace || direction != oldDirection)	{
 						double[] to = new double[3];
