@@ -116,7 +116,7 @@ public class Camera extends SceneGraphNode {
 	double eyeSeparation = 0.07;
 	double[] orientationMatrix;		
 	
-  private CameraListener cameraListener;
+  private CameraEventMulticaster cameraListener = new CameraEventMulticaster();
 
   private static int UNNAMED_ID;
 
@@ -278,13 +278,11 @@ public class Camera extends SceneGraphNode {
 	}
 	
 	public void addCameraListener(CameraListener listener) {
-    cameraListener=
-      CameraEventMulticaster.add(cameraListener, listener);
+    cameraListener.add(listener);
   }
 
   public void removeCameraListener(CameraListener listener) {
-    cameraListener=
-      CameraEventMulticaster.remove(cameraListener, listener);
+    cameraListener.remove(listener);
   }
   
   protected void fireCameraChanged() {

@@ -70,8 +70,8 @@ import de.jreality.scene.event.TransformationListener;
 public class SceneGraphPathObserver implements AppearanceListener, TransformationListener, SceneGraphComponentListener {
 	
 	SceneGraphPath currentPath;
-	private TransformationListener transformationListener;
-	private AppearanceListener appearanceListener;
+	private TransformationEventMulticaster transformationListener = new TransformationEventMulticaster();
+	private AppearanceEventMulticaster appearanceListener = new AppearanceEventMulticaster();
 
 	/** this is just a temp storage for creating trafo events */
 	private double[] matrixData = new double[16];
@@ -148,20 +148,16 @@ public class SceneGraphPathObserver implements AppearanceListener, Transformatio
 	}
 
 	public void addTransformationListener(TransformationListener listener) {
-		transformationListener=
-			TransformationEventMulticaster.add(transformationListener, listener);
+		transformationListener.add(listener);
 	}
 	public void removeTransformationListener(TransformationListener listener) {
-		transformationListener=
-			TransformationEventMulticaster.remove(transformationListener, listener);
+		transformationListener.remove( listener);
 	}
 	public void addAppearanceListener(AppearanceListener listener) {
-		appearanceListener =
-			AppearanceEventMulticaster.add(appearanceListener, listener);
+		appearanceListener.add( listener);
 	}
 	public void removeAppearanceListener(AppearanceListener listener) {
-		appearanceListener =
-			AppearanceEventMulticaster.remove(appearanceListener, listener);
+		appearanceListener.remove( listener);
 	}
 	
 	/**

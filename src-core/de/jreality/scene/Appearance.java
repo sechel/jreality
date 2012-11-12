@@ -76,7 +76,7 @@ public class Appearance extends SceneGraphNode
   public static final Object DEFAULT = new Object();
   public static final Object INHERITED = new Object();
 
-  private transient AppearanceListener appearanceListener;
+  private transient AppearanceEventMulticaster appearanceListener = new AppearanceEventMulticaster();
   private HashMap<String, Object> attributes=new HashMap<String, Object>();
   private Set<String> storedAttributes = Collections.unmodifiableSet(attributes.keySet());
   
@@ -180,12 +180,12 @@ public class Appearance extends SceneGraphNode
 
   public void addAppearanceListener(AppearanceListener listener) {
      startReader();
-	   appearanceListener=AppearanceEventMulticaster.add(appearanceListener, listener);
+	   appearanceListener.add(listener);
      finishReader();
    }
    public void removeAppearanceListener(AppearanceListener listener) {
      startReader();
-	   appearanceListener=AppearanceEventMulticaster.remove(appearanceListener, listener);
+	   appearanceListener.remove(listener);
      finishReader();
    }
 

@@ -40,38 +40,26 @@
 
 package de.jreality.scene.event;
 
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public final class AudioEventMulticaster implements AudioListener {
-  private final AudioListener a, b;
-  private AudioEventMulticaster(AudioListener a, AudioListener b) {
-      this.a = a; this.b = b;
-  }
-  private AudioListener remove(AudioListener oldl) {
-    if(oldl == a)  return b;
-    if(oldl == b)  return a;
-    AudioListener a2 = remove(a, oldl);
-    AudioListener b2 = remove(b, oldl);
-    if(a2 == a && b2 == b) return this;
-    return add(a2, b2);
-  }
-  public static AudioListener add(AudioListener a, AudioListener b)
-  {
-    final AudioListener result;
-    if(a==null) result=b; else if(b==null) result=a;
-    else result=new AudioEventMulticaster(a, b);
-    return result;
-  }
-  public static AudioListener remove(AudioListener l, AudioListener oldl)
-  {
-    final AudioListener result;
-    if(l==oldl||l==null) result=null;
-    else if(l instanceof AudioEventMulticaster)
-      result=((AudioEventMulticaster)l).remove(oldl);
-    else result=l;
-    return result;
-  }
+public final class AudioEventMulticaster implements AudioListener
+{
+	CopyOnWriteArrayList<AudioListener> cowal = new CopyOnWriteArrayList<AudioListener>();
 
-  public void audioChanged(AudioEvent ev) {
-	  a.audioChanged(ev); b.audioChanged(ev);
-  }
+	public AudioEventMulticaster() {
+	}
+
+	public void add(AudioListener b) {
+		cowal.add(cowal.size(), b);
+	}
+
+	public void remove(AudioListener oldl) {
+		cowal.remove(oldl);
+	}
+
+	public void audioChanged(AudioEvent ev) {
+		for (AudioListener l : cowal) {
+			l.audioChanged(ev);
+		}
+	}
 }

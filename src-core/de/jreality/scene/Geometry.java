@@ -70,7 +70,7 @@ public abstract class Geometry extends SceneGraphNode {
   public static final String CATEGORY_FACE = "FACE";
 	
   protected Map<String, Object> geometryAttributes=Collections.emptyMap();
-  private transient GeometryListener geometryListener;
+  private transient GeometryEventMulticaster geometryListener = new GeometryEventMulticaster();
   
   protected transient Set<String> changedGeometryAttributes=new HashSet<String>();
   protected transient Set<Attribute> changedVertexAttributes=new HashSet<Attribute>();
@@ -171,13 +171,13 @@ public abstract class Geometry extends SceneGraphNode {
 
   public void addGeometryListener(GeometryListener listener) {
     startReader();
-    geometryListener=GeometryEventMulticaster.add(geometryListener, listener);
+    geometryListener.add( listener);
     finishReader();
   }
 
   public void removeGeometryListener(GeometryListener listener) {
     startReader();
-    geometryListener=GeometryEventMulticaster.remove(geometryListener, listener);
+    geometryListener.remove( listener);
     finishReader();
   }
 

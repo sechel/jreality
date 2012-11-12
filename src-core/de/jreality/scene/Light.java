@@ -59,7 +59,7 @@ import de.jreality.scene.event.LightListener;
  */
 public abstract class Light extends SceneGraphNode {
   
-  private transient LightListener lightListener;
+  private transient LightEventMulticaster lightListener = new LightEventMulticaster();
   private transient boolean lightChanged;
   
   private Color color= new Color(1f, 1f, 1f);
@@ -184,13 +184,13 @@ public abstract class Light extends SceneGraphNode {
 
     public void addLightListener(LightListener listener) {
       startReader();
-      lightListener=LightEventMulticaster.add(lightListener, listener);
+      lightListener.add( listener);
       finishReader();
     }
 
     public void removeLightListener(LightListener listener) {
       startReader();
-      lightListener=LightEventMulticaster.remove(lightListener, listener);
+      lightListener.remove(listener);
       finishReader();
     }
     

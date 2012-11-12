@@ -20,7 +20,7 @@ import de.jreality.scene.event.AudioListener;
  */
 public abstract class AudioSource extends SceneGraphNode {
 	
-	protected transient AudioListener audioListener = null;
+	protected transient AudioEventMulticaster audioListener = new AudioEventMulticaster();
 	protected transient Boolean hasChanged = false;
 
 	public enum State {RUNNING, STOPPED, PAUSED}
@@ -127,7 +127,7 @@ public abstract class AudioSource extends SceneGraphNode {
 	public void addAudioListener(AudioListener listener) {
 		startReader();
 		try {
-			audioListener=AudioEventMulticaster.add(audioListener, listener);
+			audioListener.add(listener);
 		} finally {
 			finishReader();
 		}
@@ -135,7 +135,7 @@ public abstract class AudioSource extends SceneGraphNode {
 	public void removeAudioListener(AudioListener listener) {
 		startReader();
 		try {
-			audioListener=AudioEventMulticaster.remove(audioListener, listener);
+			audioListener.remove(listener);
 		} finally {
 			finishReader();
 		}

@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.jreality.scene.event.SceneEvent;
 import de.jreality.scene.event.SceneGraphComponentEvent;
@@ -85,8 +86,8 @@ public class SceneGraphComponent extends SceneGraphNode {
   protected List<SceneGraphComponent> children = Collections.emptyList();
   protected List<Tool> tools = Collections.emptyList();
 
-  private transient ToolListener toolListener;
-  private transient SceneGraphComponentListener containerListener;
+  private transient ToolEventMulticaster toolListener = new ToolEventMulticaster();
+  private transient SceneGraphComponentEventMulticaster containerListener = new SceneGraphComponentEventMulticaster();
   
   private transient List<SceneEvent> cachedEvents = new LinkedList<SceneEvent>();
 
@@ -547,15 +548,15 @@ public class SceneGraphComponent extends SceneGraphNode {
     }
   }
 
-  public void addToolListener(ToolListener listener) {
+   public void addToolListener(ToolListener listener) {
     startReader();
-    toolListener=ToolEventMulticaster.add(toolListener, listener);
+    toolListener.add(listener);
     finishReader();
   }
   
   public void removeToolListener(ToolListener listener) {
     startReader();
-    toolListener=ToolEventMulticaster.remove(toolListener, listener);
+    toolListener.remove(listener);
     finishReader();
   }
   
@@ -617,13 +618,13 @@ public class SceneGraphComponent extends SceneGraphNode {
 
   public void addSceneGraphComponentListener(SceneGraphComponentListener listener) {
     startReader();
-    containerListener=SceneGraphComponentEventMulticaster.add(containerListener, listener);
+    containerListener.add(listener);
     finishReader();
   }
 
   public void removeSceneGraphComponentListener(SceneGraphComponentListener listener) {
     startReader();
-    containerListener=SceneGraphComponentEventMulticaster.remove(containerListener, listener);
+    containerListener.remove( listener);
     finishReader();
   }
 

@@ -61,7 +61,7 @@ import de.jreality.scene.event.TransformationListener;
  */
 public class Transformation extends SceneGraphNode {
 
-  private transient TransformationListener transformationListener;
+  private transient TransformationEventMulticaster transformationListener = new TransformationEventMulticaster();
   
   protected double[] theMatrix;
   
@@ -167,12 +167,12 @@ public class Transformation extends SceneGraphNode {
 
 	public void addTransformationListener(TransformationListener listener) {
     startReader();
-		transformationListener=TransformationEventMulticaster.add(transformationListener, listener);
+		transformationListener.add(listener);
     finishReader();
 	}
 	public void removeTransformationListener(TransformationListener listener) {
     startReader();
-		transformationListener=TransformationEventMulticaster.remove(transformationListener, listener);
+		transformationListener.remove( listener);
     finishReader();
 	}
 
