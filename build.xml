@@ -272,6 +272,7 @@
             <include name="jrworkspace.jar" />
         	<include name="beans.jar" />
             <include name="jogl-all.jar" />
+            <include name="numericalMethods.jar" />
         </fileset>
 	</path>
 
