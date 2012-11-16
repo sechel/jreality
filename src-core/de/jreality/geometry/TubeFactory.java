@@ -454,17 +454,17 @@ public  class TubeFactory {
 		public  FrameInfo[] makeFrameField(double[][] polygon, FrameFieldType type, int metric)		{
 			if (frames!= null && !framesDirty) return frames;
 		 	int numberJoints = polygon.length;
-		 	double[][] polygonh = null;
+		 	double[][] polygonh;
 		 	// to simplify life, convert all points to homogeneous coordinates
 		 	if (polygon[0].length == 3) {
 		 		polygonh = Pn.homogenize(null, polygon);
 		 		Pn.normalize(polygonh, polygonh, metric);
 		 	}
 			else if (polygon[0].length == 4)	
-				polygonh = polygon; //Pn.normalize(null, polygon, metric);
-//			else {
-//				throw new IllegalArgumentException("Points must have dimension 4");
-//			}
+				polygonh = Pn.normalize(null, polygon, metric);
+			else {
+				throw new IllegalArgumentException("Points must have dimension 4");
+			}
 		 	if ((debug & 1) != 0)	
 		 		LoggingSystem.getLogger(this).log(Level.FINER,"Generating frame field for metric "+metric);
 		 	if (tangentField == null || tangentField.length != (numberJoints-2))	{
@@ -511,10 +511,10 @@ public  class TubeFactory {
 				if (userBinormals != null) 
 					System.arraycopy(userBinormals[i-1], 0, binormalField[i-1], 0, userBinormals[i-1].length);
 				Pn.setToLength(binormalField[i-1], binormalField[i-1], 1.0, metric);
-//				if (i>1 && metric == Pn.ELLIPTIC)	{
-//					double foo = Pn.angleBetween(binormalField[i-2], binormalField[i-1], metric);
-//					if (Math.abs(foo) > Math.PI/2)  Rn.times(binormalField[i-1], -1, binormalField[i-1]);
-//				}
+				if (i>1 && metric == Pn.ELLIPTIC)	{
+					double foo = Pn.angleBetween(binormalField[i-2], binormalField[i-1], metric);
+					if (Math.abs(foo) > Math.PI/2)  Rn.times(binormalField[i-1], -1, binormalField[i-1]);
+				}
 				if ((debug & 2) != 0) LoggingSystem.getLogger(this).log(Level.FINER,"Binormal is "+Rn.toString(binormalField[i-1]));
 //				System.err.println("Binormal field = "+Rn.toString(binormalField[i-1]));
 
@@ -560,8 +560,9 @@ public  class TubeFactory {
 				}
 				//System.err.println("calc'ed midplane is "+Rn.toString(midPlane));
 				if ((debug & 2) != 0) LoggingSystem.getLogger(this).log(Level.FINE,"Midplane is "+Rn.toString(midPlane));
-				Pn.polarizePlane(tangentField[i-1], midPlane, metric);						
-				if (userTangents != null){
+					Pn.polarizePlane(tangentField[i-1], midPlane, metric);						
+				if (userTangents == null){
+				} else {
 					System.arraycopy(userTangents[i-1], 0, tangentField[i-1], 0, userTangents[i-1].length);
 					midPlane = Rn.planeParallelToPassingThrough(null, userTangents[i-1], polygonh[i]);
 					//System.err.println("given midplane is "+Rn.toString(midPlane));
@@ -571,20 +572,16 @@ public  class TubeFactory {
 				// This is a hack to try to choose the correct version of the tangent vector:
 				// since we're in projective space, t and -t are equivalent but only one
 				// "points" in the correct direction.  Deserves further study!
-				Pn.setToLength(tangentField[i-1], tangentField[i-1], 1.0, metric);
 				double[] diff = Rn.subtract(null, polygonh[i], polygonh[i-1]);
-				if (i > 1 && Rn.innerProduct(tangentField[i-2], tangentField[i-1]) < 0.0)  
+				if (Rn.innerProduct(diff, tangentField[i-1]) < 0.0)  
 					Rn.times(tangentField[i-1], -1.0, tangentField[i-1]);
-				if (i > 1 && Rn.innerProduct(binormalField[i-2], binormalField[i-1]) < 0.0)  
-					Rn.times(binormalField[i-1], -1.0, binormalField[i-1]);
 
+				Pn.setToLength(tangentField[i-1], tangentField[i-1], 1.0, metric);
 //				System.err.println("Tangent field = "+Rn.toString(tangentField[i-1]));
 				//System.err.println("tangent is "+Rn.toString(tangentField[i-1]));
 				// finally calculate the normal vector
 				Pn.polarizePlane(frenetNormalField[i-1], P3.planeFromPoints(null,binormalField[i-1], tangentField[i-1],  polygonh[i]),metric);					
 				Pn.setToLength(frenetNormalField[i-1], frenetNormalField[i-1], 1.0, metric);
-				if (i > 1 && Rn.innerProduct(frenetNormalField[i-2], frenetNormalField[i-1]) < 0.0)  
-					Rn.times(frenetNormalField[i-1], -1.0, frenetNormalField[i-1]);
 				if ((debug & 2) != 0) LoggingSystem.getLogger(this).log(Level.FINE,"frenet normal is "+Rn.toString(frenetNormalField[i-1]));
 				if (type == FrameFieldType.PARALLEL)	{
 					// get started 
@@ -666,7 +663,7 @@ public  class TubeFactory {
 			SceneGraphComponent result = new SceneGraphComponent();
 			IndexedLineSet ils;
 			SceneGraphComponent geometry = getXYZAxes();
-			MatrixBuilder.euclidean().scale(.2).assignTo(geometry);
+			MatrixBuilder.euclidean().scale(.02).assignTo(geometry);
 			double[][] verts = new double[frames.length][];
 			int i = 0;
 			for (FrameInfo f : frames)	{
@@ -707,7 +704,6 @@ public  class TubeFactory {
 			basf.setArrowSlope(2.0);
 			basf.setShowBalls(false);
 			basf.setShowSticks(true);
-			basf.setMetric(Pn.ELLIPTIC);
 			basf.update();
 			SceneGraphComponent geometry = basf.getSceneGraphComponent();
 			return geometry;
