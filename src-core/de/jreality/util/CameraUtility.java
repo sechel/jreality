@@ -431,8 +431,8 @@ public class CameraUtility {
 	    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
 	    
 	    Camera camera = ((Camera)cameraPath.getLastElement());
-		camera.setFar(margin*5*radius);
-	    camera.setNear(.5*radius);
+		camera.setFar(margin*3*radius);
+	    camera.setNear(.3*radius);
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
 	    if (SystemProperties.isPortal) return;
