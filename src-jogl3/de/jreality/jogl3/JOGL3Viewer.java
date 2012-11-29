@@ -58,8 +58,12 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		
 		try{
 			glp = GLProfile.get("GL3");
+			String s = glp.glAvailabilityToString();
+			if(!s.contains("3.3")){
+				System.err.println("opengl 3.3 not available, thus no jogl3-backend");
+				throw new Exception("opengl 3.3 not available, thus no jogl3-backend");
+			}
 		}catch(GLException e){
-			System.out.println("test");
 			System.out.println(e.getMessage());
 		}
 		if(glp == null){
@@ -95,13 +99,6 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		
 		canvas = new GLCanvas(caps);
 		canvas.addGLEventListener(this);
-		try{
-			GL3 gl = canvas.getGL().getGL3();
-			gl.glVertexAttribDivisor(0, 1);
-		}catch(Exception e){
-			System.err.println("opengl 3.3 not supported, which is needed for the jogl3-Backend");
-			throw new Exception("no openGL 3.3 available to support JOGL3");
-		}
 		
 	}
 	
