@@ -84,6 +84,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 				throw new Exception("no openGL profile available to support JOGL3");
 			}
 		}
+		
 		GLCapabilities caps = new GLCapabilities(glp);
 		//TODO: check caps.setAccumAlphaBits(8);
 		caps.setAlphaBits(8);
@@ -94,6 +95,14 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		
 		canvas = new GLCanvas(caps);
 		canvas.addGLEventListener(this);
+		try{
+			GL3 gl = canvas.getGL().getGL3();
+			gl.glVertexAttribDivisor(0, 1);
+		}catch(Exception e){
+			System.err.println("opengl 3.3 not supported, which is needed for the jogl3-Backend");
+			throw new Exception("no openGL 3.3 available to support JOGL3");
+		}
+		
 	}
 	
 	public boolean canRenderAsync() {
