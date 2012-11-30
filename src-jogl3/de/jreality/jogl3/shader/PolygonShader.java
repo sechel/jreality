@@ -45,37 +45,19 @@ public class PolygonShader{
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
-		JOGLLightCollection lc = state.getGlobalLights();
 		
-		int numDirLights = lc.directionalLights.size();
-		float[] directionalLightColors = new float[numDirLights*4];
-		double[] directionalLightDirections = new double[numDirLights * 3];
-		for(int i = 0; i < numDirLights; i++){
-			JOGLDirectionalLightEntity dl = (JOGLDirectionalLightEntity) lc.directionalLights.get(i).getEntity();
-			directionalLightColors[i*4+0] = dl.getColor()[0]*(float)dl.getIntensity();
-			directionalLightColors[i*4+1] = dl.getColor()[1]*(float)dl.getIntensity();
-			directionalLightColors[i*4+2] = dl.getColor()[2]*(float)dl.getIntensity();
-			directionalLightColors[i*4+3] = dl.getColor()[3]*(float)dl.getIntensity();
-			
-			JOGLDirectionalLightInstance li = lc.directionalLights.get(i);
-			//System.out.println("name = " + li.getNode().getName());
-			directionalLightDirections[i*3+0] = li.trafo[2];
-			directionalLightDirections[i*3+1] = li.trafo[6];
-			directionalLightDirections[i*3+2] = li.trafo[10];
-			//System.out.println("dir Light: " + directionalLightDirections[i*3+0] + ", " + directionalLightDirections[i*3+1] + ", " + directionalLightDirections[i*3+2]);
-		}
-
 			shader.useShader(gl);
 			
         	//matrices
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
         	
-			//directional lights
-        	//TODO change to texture
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numDirLights"), numDirLights);
-			gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, "directionalLightColors"), numDirLights, directionalLightColors, 0);
-			gl.glUniform3fv(gl.glGetUniformLocation(shader.shaderprogram, "directionalLightDirections"), numDirLights, Rn.convertDoubleToFloatArray(directionalLightDirections), 0);
+			//global lights in a texture
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "globalLights"), 0);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalDirLights"), state.numGlobalDirLights);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalPointLights"), state.numGlobalPointLights);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalSpotLights"), state.numGlobalSpotLights);
+			
 			
 			//bind shader uniforms
 			//TODOhave to set default values here for shader uniforms not present in the appearance
@@ -100,6 +82,11 @@ public class PolygonShader{
         		}
         	}
         	
+        	//new way to do lights
+			gl.glEnable(gl.GL_TEXTURE_2D);
+			gl.glActiveTexture(gl.GL_TEXTURE0);
+			gl.glBindTexture(gl.GL_TEXTURE_2D, state.lightTex);
+			
         	//actual draw command
         	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
         	

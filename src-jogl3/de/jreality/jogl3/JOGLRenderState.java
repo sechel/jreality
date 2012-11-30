@@ -19,8 +19,12 @@ public class JOGLRenderState {
 	public int screenSize = 0;
 	public float screenSizeInScene = 1;
 
-	private JOGLLightCollection globalLights = null;
 	private JOGLLightCollection localLights = null;
+	public int numGlobalDirLights = 0;
+	public int numGlobalPointLights = 0;
+	public int numGlobalSpotLights = 0;
+	
+	public int lightTex = 0;
 	
 	//copy the references to the light instances to a new light collection
 	public JOGLLightCollection copyLocalLights(){
@@ -53,11 +57,14 @@ public class JOGLRenderState {
 		return projectionMatrix;
 	}
 
-	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, JOGLLightCollection c, int screenSize, float screenSizeInScene) {
+	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, int lightTex, int numGlobalDirLights, int numGlobalPointLights, int numGlobalSpotLights, int screenSize, float screenSizeInScene) {
 		localLights = new JOGLLightCollection(null);
 		this.screenSize = screenSize;
 		this.screenSizeInScene = screenSizeInScene;
-		globalLights = c;
+		this.lightTex = lightTex;
+		this.numGlobalDirLights = numGlobalDirLights;
+		this.numGlobalPointLights = numGlobalPointLights;
+		this.numGlobalSpotLights = numGlobalSpotLights;
 		System.arraycopy(inverseCameraMatrix, 0, modelViewMatrix, 0, 16);
 		System.arraycopy(projection, 0, projectionMatrix, 0, 16);
 		//System.arraycopy(inverseCameraMatrix, 0, projectionMatrix, 0, 16);
@@ -65,20 +72,17 @@ public class JOGLRenderState {
 	}
 	
 	public JOGLRenderState(JOGLRenderState parentState, double[] matrix) {
-		globalLights = parentState.getGlobalLights();
+		this.numGlobalDirLights = parentState.numGlobalDirLights;
+		this.numGlobalPointLights = parentState.numGlobalPointLights;
+		this.numGlobalSpotLights = parentState.numGlobalSpotLights;
 		localLights = parentState.copyLocalLights();
 		screenSize = parentState.screenSize;
 		screenSizeInScene = parentState.screenSizeInScene;
-		
+		this.lightTex = parentState.lightTex;
 		System.arraycopy(parentState.getProjectionMatrix(), 0, projectionMatrix, 0, 16);
 		if (matrix != null) Rn.times(modelViewMatrix, parentState.getModelViewMatrix(), matrix);
 		else System.arraycopy(parentState.getModelViewMatrix(), 0, modelViewMatrix, 0, 16);
 		gl = parentState.getGL();
-	}
-
-	public JOGLLightCollection getGlobalLights() {
-		// TODO Auto-generated method stub
-		return globalLights;
 	}
 
 	public GL3 getGL() {

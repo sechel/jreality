@@ -36,8 +36,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 		public void bind(GLShader shader, GL3 gl){
 			if(hasTexture){
-				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE0);
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 0);
+				//GL_TEXTURE0 reserved for lights.
+				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE1);
+				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 1);
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "hasTex"), 1);
 			}else{
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "hasTex"), 0);
@@ -66,7 +67,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 
 		@Override
 		public void bindToShader(GLShader shader, GL3 gl) {
-			Texture2DLoader.load(gl, tex, gl.GL_TEXTURE0);
+			Texture2DLoader.load(gl, tex, gl.GL_TEXTURE1);
 			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), value);
 		}
 	}
@@ -179,11 +180,13 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		for(ShaderVar v : shader.shaderUniforms){
 			//if(type.equals(CommonAttributes.POINT_SHADER))
 				//System.out.println("shader var is " + v.getName() + ", type is " + v.getType());
-    		if(v.getName().equals("numDirLights"))
+    		if(v.getName().equals("numGlobalDirLights"))
     			continue;
-    		if(v.getName().equals("directionalLightColors"))
+    		if(v.getName().equals("numGlobalPointLights"))
     			continue;
-    		if(v.getName().equals("directionalLightDirections"))
+    		if(v.getName().equals("numGlobalSpotLights"))
+    			continue;
+    		if(v.getName().equals("globalLights"))
     			continue;
     		if(v.getName().equals("projection"))
     			continue;

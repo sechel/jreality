@@ -311,28 +311,34 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			JOGLLightCollection lightCollection = new JOGLLightCollection(dmat);
 			rootInstance.collectGlobalLights(dmat, lightCollection);
 			//can load global lights texture here.
-			loadGlobalLightTexture(lightCollection, gl);
+			int lightTex = loadGlobalLightTexture(lightCollection, gl);
 			
 			//calculate window dimensions and such needed for sprite size calculation
 			Rectangle2D r = CameraUtility.getViewport(cam, ar);
 			float x = (float)(r.getMaxX()-r.getMinX());
 			float y = (float)(r.getMaxY()-r.getMinY());
 			//render scene graph
-			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat,lightCollection, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
+			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, lightTex, lightCollection.directionalLights.size(), lightCollection.pointLights.size(), lightCollection.spotLights.size(), Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
 			rootInstance.render(rootState);
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
 		}
 	}
 
-	private void loadGlobalLightTexture(JOGLLightCollection lc, GL3 gl) {
-		// TODO Auto-generated method stub
+	private int loadGlobalLightTexture(JOGLLightCollection lc, GL3 gl) {
+		//texture id
 		int[] textures = new int[1];
-		gl.glEnable(gl.GL_TEXTURE_1D);
-		gl.glGenTextures(1, textures, 0);
+		gl.glEnable(gl.GL_TEXTURE_2D);
 		gl.glActiveTexture(gl.GL_TEXTURE0);
-		gl.glBindTexture(gl.GL_TEXTURE_1D, textures[0]);
-		int width = lc.directionalLights.size()*2+lc.pointLights.size()*2+lc.spotLights.size()*3;
+		gl.glGenTextures(1, textures, 0);
+		
+		gl.glBindTexture(gl.GL_TEXTURE_2D, textures[0]);
+		
+		int width = lc.directionalLights.size()*2+lc.pointLights.size()*3+lc.spotLights.size()*4;
+//		System.out.println("dir lights" + lc.directionalLights.size());
+//		System.out.println("point lights" + lc.pointLights.size());
+//		System.out.println("spot lights" + lc.spotLights.size());
+//		System.out.println("width = " + width);
 		float[] data = new float[width*4];
 		int i = 0;
 		for(JOGLDirectionalLightInstance d : lc.directionalLights){
@@ -343,9 +349,11 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			data[i+2] = dl.getColor()[2]*(float)dl.getIntensity();
 			data[i+3] = dl.getColor()[3]*(float)dl.getIntensity();
 			
+			//direction of the light
 			data[i+4] = (float)d.trafo[2];
 			data[i+5] = (float)d.trafo[6];
 			data[i+6] = (float)d.trafo[10];
+			data[i+7] = (float)d.trafo[14];//?needed?
 			
 			i+=8;
 		}
@@ -357,11 +365,18 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			data[i+2] = dl.getColor()[2]*(float)dl.getIntensity();
 			data[i+3] = dl.getColor()[3]*(float)dl.getIntensity();
 			
-			data[i+4] = (float)d.trafo[2];
-			data[i+5] = (float)d.trafo[6];
-			data[i+6] = (float)d.trafo[10];
+			//position of the light
+			data[i+4] = (float)d.trafo[3];
+			data[i+5] = (float)d.trafo[7];
+			data[i+6] = (float)d.trafo[11];
+			data[i+7] = (float)d.trafo[15];
 			
-			i+=8;
+			//attenuation
+			data[i+8] = (float)dl.A0;
+			data[i+9] = (float)dl.A1;
+			data[i+10] = (float)dl.A2;
+			
+			i+=12;
 		}
 		for(JOGLSpotLightInstance d : lc.spotLights){
 			JOGLSpotLightEntity dl = (JOGLSpotLightEntity)d.getEntity();
@@ -371,22 +386,33 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			data[i+2] = dl.getColor()[2]*(float)dl.getIntensity();
 			data[i+3] = dl.getColor()[3]*(float)dl.getIntensity();
 			
+			//direction
 			data[i+4] = (float)d.trafo[2];
 			data[i+5] = (float)d.trafo[6];
 			data[i+6] = (float)d.trafo[10];
+			data[i+7] = (float)d.trafo[14];
 			
-			data[i+8] = (float)dl.coneAngle;
-			data[i+9] = (float)dl.coneAngleDelta;
-			data[i+10] = (float)dl.distribution;
+			//position
+			data[i+8] = (float)d.trafo[3];
+			data[i+9] = (float)d.trafo[7];
+			data[i+10] = (float)d.trafo[11];
+			data[i+11] = (float)d.trafo[15];
 			
-			i+=12;
+			data[i+12] = (float)dl.coneAngle;
+			data[i+13] = (float)dl.coneAngleDelta;
+			data[i+14] = (float)dl.distribution;
+			
+			i+=16;
 		}
-		gl.glTexImage1D(gl.GL_TEXTURE_1D, 0, gl.GL_RGBA32F, width, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
 		
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
+	    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+	    
+	    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, 
+    	width, 1, 0, gl.GL_RGBA,
+	    gl.GL_FLOAT, FloatBuffer.wrap(data));
 		
-		//gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, 
-	    //    	image.getWidth(), image.getHeight(), 0, srcPixelFormat,
-	    //	    gl.GL_UNSIGNED_BYTE, ByteBuffer.wrap(data));
+		return textures[0];
 	}
 
 	public void dispose(GLAutoDrawable arg0) {

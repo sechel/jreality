@@ -81,6 +81,7 @@ public class GLShader
 		StringBuilder sb = new StringBuilder();
 		try
 		{
+			System.out.println(name);
 			InputStream is = getClass().getResourceAsStream(name);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String line;
