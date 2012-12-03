@@ -170,29 +170,22 @@ public class IndexedLineSetUtility {
 	 * @return
 	 */
 	public static IndexedLineSetFactory createCurveFactoryFromPoints( final double[][] points, boolean closed)	{
+		return createCurveFactoryFromPoints(null, points, closed);
+		
+	}
+	public static IndexedLineSetFactory createCurveFactoryFromPoints(IndexedLineSetFactory ilsf, final double[][] points, boolean closed)	{
 		int n = points.length;
 		int size = (closed) ? n+1 : n;
-//		if (g==null) g = new IndexedLineSet(n,1);
-//		final IndexedLineSet ils = g;
-		// TODO replace this with different call if IndexedLineSet exists.
 		final int[][] ind = new int[1][size];
 		for (int i = 0; i<size ; ++i)	{
 			ind[0][i] = (i%n);
 		}
-		//if (closed) ind[0][n] = 0;
-//		final int vectorLength = points[0].length;
-		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+		if (ilsf == null) ilsf = new IndexedLineSetFactory();
 		ilsf.setVertexCount(points.length);
 		ilsf.setVertexCoordinates(points);
 		ilsf.setEdgeCount(1);
 		ilsf.setEdgeIndices(ind);
 		ilsf.update();
-//		Scene.executeWriter(ils, new Runnable () {
-//			public void run() {
-//				ils.setEdgeCountAndAttributes(Attribute.INDICES, new IntArrayArray.Array(ind));
-//				ils.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE_ARRAY.array(vectorLength).createWritableDataList(points));
-//				}
-//		});
 		return ilsf;
 	}
 
