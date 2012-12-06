@@ -1,15 +1,15 @@
 #!/bin/bash
 
-JR=/Users/weissman/Development/jreality_ws/jreality
-ARGS="-Xms32M -Xmx128M -Djava.library.path=$JR/jni/macosx"
+JR=PATH_TO_YOUR_WORKSPACE/jreality
+ARGS="-Xms128M -Xmx256M"
 
 java -Djreality.config=demo.left $ARGS -jar ../lib/smrj-client.jar &
 java -Djreality.config=demo.center $ARGS -jar ../lib/smrj-client.jar &
 java -Djreality.config=demo.right $ARGS -jar ../lib/smrj-client.jar &
-java -Djreality.config=demo.floor $ARGS -jar ../lib/smrj-client.jar &
-java -Djreality.config=demo.ceiling $ARGS -jar ../lib/smrj-client.jar &
-# java -Djreality.config=demo.floor-square $ARGS -jar ../lib/smrj-client.jar &
-# java -Djreality.config=demo.ceiling-square $ARGS -jar ../lib/smrj-client.jar &
+#java -Djreality.config=demo.floor $ARGS -jar ../lib/smrj-client.jar &
+#java -Djreality.config=demo.ceiling $ARGS -jar ../lib/smrj-client.jar &
+java -Djreality.config=demo.floor-square $ARGS -jar ../lib/smrj-client.jar &
+java -Djreality.config=demo.ceiling-square $ARGS -jar ../lib/smrj-client.jar &
 java -Djreality.config=demo.back $ARGS -jar ../lib/smrj-client.jar &
 
 

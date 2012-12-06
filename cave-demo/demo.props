@@ -7,7 +7,7 @@
 # setup the frame: fullscreen, undecorated, width, height (in pixel)
 #
 #
-frame.fullscreen: true
+frame.fullscreen: false
 frame.undecorated: true
 frame.width: 248
 frame.height: 200
