@@ -341,6 +341,17 @@ public class IndexedFaceSetUtility {
 		IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs2);
 		return ifs2;
 	}
+	public static double[][] extractVerticesForFace(IndexedFaceSet ifs, int which)	{
+		int[][] indices = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		double[][] vertices = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		int n = indices[which].length;
+		double[][] verts = new double[n][];
+		for (int i = 0; i<n; ++i)	{
+			verts[i] = vertices[indices[which][i]];
+		}
+		return verts;
+	}
+
 	// go through a set of indexed elements of array2d and for each coordinate find the min and max values
 	private static double[][] getMinMax(int[] indices, double[][] array2d)	{
 		int f = array2d[0].length;
