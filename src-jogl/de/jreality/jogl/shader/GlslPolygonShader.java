@@ -143,7 +143,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 					.createAttributeEntity(Texture2D.class,
 							ShaderUtility.nameSpace(name, TEXTURE_2D_2), eap);
 		} else
-			texture1 = null;
+			texture2 = null;
 		if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,
 				ShaderUtility.nameSpace(name, REFLECTION_MAP), eap)) {
 			environmentMap = (CubeMap) AttributeEntityUtility
@@ -204,14 +204,20 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			System.err.println("Setting do texture = " + doTexture);
 		}
 
+		if (texture0 != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE0);
+			Texture2DLoaderJOGL.render(jr.globalGL, texture0);
+			gl.glEnable(GL.GL_TEXTURE_2D);
+		}
+
 		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
 			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		}
-		if (texture1 != null) {
+		if (texture2 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE2);
-			Texture2DLoaderJOGL.render(jr.globalGL, texture1);
+			Texture2DLoaderJOGL.render(jr.globalGL, texture2);
 			gl.glEnable(GL.GL_TEXTURE_2D);
 		}
 		if (environmentMap != null) {
@@ -239,11 +245,6 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 		if (g != null) {
 			if (g instanceof Sphere || g instanceof Cylinder) {
 				int i = 3;
-				if (false) {// jr.debugGL) {
-					double lod = jr.renderingState.levelOfDetail;
-					i = JOGLSphereHelper.getResolutionLevel(jr.getContext()
-							.getObjectToNDC(), lod);
-				}
 				int dlist;
 				if (g instanceof Sphere)
 					dlist = jr.renderingState.getSphereDisplayLists(i);
@@ -281,6 +282,10 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 		}
 		if (texture1 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE1);
+			gl.glDisable(GL.GL_TEXTURE_2D);
+		}
+		if (texture2!= null) {
+			gl.glActiveTexture(GL.GL_TEXTURE2);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
 		if (environmentMap != null) {
@@ -398,7 +403,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 		Attribute TANGENTS = Attribute.attributeForName("TANGENTS");
 
 		DataList tanCoords = null;
-
+		System.err.println("face color = "+faceC);
 		if (doNormals4) {
 			if (faceN) {
 				tanCoords = correctNormals4(faceNormals);
