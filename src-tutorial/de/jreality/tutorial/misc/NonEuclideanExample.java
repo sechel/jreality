@@ -85,7 +85,7 @@ import de.jreality.util.SceneGraphUtility;
 public class NonEuclideanExample {
 
 	SceneGraphComponent world = SceneGraphUtility.createFullSceneGraphComponent("world");
-	int metric = Pn.EUCLIDEAN;
+	int metric = Pn.ELLIPTIC;
 	private SceneGraphComponent[] sigs = new SceneGraphComponent[3];
 	private PointLight pointLight;
 	private SceneGraphComponent lightNode;
