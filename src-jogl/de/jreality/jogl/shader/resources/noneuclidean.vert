@@ -39,7 +39,6 @@
 
 /* This is a non-euclidean polygon shader.
  * It does not have all the features of the standard DefaultPolygonShader.
- * In particular, it does not have texture support yet.
  * Author:  Charles Gunn
  */
 vec4 Ambient;
@@ -170,7 +169,7 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
         }
    		color = gl_FrontLightModelProduct.sceneColor +
       	    Ambient  * matpar.ambient +
-      	    Diffuse  * matpar.diffuse +
+      	    Diffuse  * gl_Color + // matpar.diffuse  +
       	    Specular * matpar.specular;
     } else  {
    		color = matpar.diffuse; //gl_FrontLightModelProduct.sceneColor +
