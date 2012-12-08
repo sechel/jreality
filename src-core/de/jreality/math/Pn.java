@@ -302,7 +302,10 @@ public class Pn {
 				uu = innerProduct(u, u, metric);
 				vv = innerProduct(v, v, metric);
 				uv = innerProduct(u, v, metric);
-				d = Math.acos( (uv)/Math.sqrt(Math.abs(uu*vv)));
+				double ip  =  (uv)/Math.sqrt(Math.abs(uu*vv));
+				if (ip>1) ip = 1;
+				if (ip < -1) ip = -1;
+				d = Math.acos(ip);
 				break;
 			}
 		return d;
