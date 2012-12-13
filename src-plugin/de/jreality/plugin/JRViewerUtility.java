@@ -62,7 +62,7 @@ public class JRViewerUtility {
 	
 	}
 	
-	
+	//nowhere used
 	public static void encompass(Scene scene, int metric) {
 		SceneGraphPath avatarPath = scene.getAvatarPath();
 		SceneGraphPath contentPath = scene.getContentPath();
@@ -74,11 +74,14 @@ public class JRViewerUtility {
 	
 	
 	public static void encompassEuclidean(Scene scene) {
+		encompassEuclidean(scene, true);
+	}
+	public static void encompassEuclidean(Scene scene, boolean setCameraParameters) {
 		SceneGraphPath avatarPath = scene.getAvatarPath();
 		SceneGraphPath contentPath = scene.getContentPath();
 		SceneGraphPath cameraPath = scene.getCameraPath();
 		try {
-			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
+			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN, setCameraParameters);
 		} catch (Exception e) {}
 	}
 	

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
@@ -173,6 +174,7 @@ public class JRViewer {
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
 	
+	private static boolean inVRmode = false;
 	
 	static {
 		NativePathUtility.set("jni");
@@ -634,7 +636,7 @@ public class JRViewer {
 		return v;
 	}
 
-	
+	//is nowhere used
 	/**
 	 * Call after startup. Encompasses the view
 	 */
@@ -687,7 +689,14 @@ public class JRViewer {
 			mc.setContent(content);
 			if (encompass) {
 				Scene scene = c.getPlugin(Scene.class);
-				JRViewerUtility.encompassEuclidean(scene);
+				//check for Terrain plugin. If it is installed, don't cut it off
+				//by an all to distant near clipping plane.
+				//this fixes the a problem caused by v.setContent()
+				List<Terrain> list = c.getPlugins(Terrain.class);
+				if(list.size() == 0)
+					JRViewerUtility.encompassEuclidean(scene, true);
+				else
+					JRViewerUtility.encompassEuclidean(scene, false);
 			}
 		}
 		

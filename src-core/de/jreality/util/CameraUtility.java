@@ -405,6 +405,7 @@ public class CameraUtility {
 		encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN);
 	}
   
+	
 	/**
 	 * A method for encompassing the scene.
 	 * @param avatarPath
@@ -414,6 +415,18 @@ public class CameraUtility {
 	 * @param metric
 	 */
 	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric) {
+		encompass(avatarPath, scene, cameraPath, margin, metric, true);
+	}
+	
+	/**
+	 * A method for encompassing the scene.
+	 * @param avatarPath
+	 * @param scene
+	 * @param cameraPath
+	 * @param margin
+	 * @param metric
+	 */
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric, boolean setCameraParameters) {
 	    Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scene.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
@@ -431,8 +444,13 @@ public class CameraUtility {
 	    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
 	    
 	    Camera camera = ((Camera)cameraPath.getLastElement());
-		camera.setFar(margin*3*radius);
-	    camera.setNear(.3*radius);
+		if(setCameraParameters){
+			camera.setFar(margin*3*radius);
+			camera.setNear(.3*radius);
+		}else{
+			camera.setFar(1000);
+			camera.setNear(.1);
+		}
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
 	    if (SystemProperties.isPortal) return;
