@@ -123,7 +123,7 @@ public class VRExamples extends SceneShrinkPanel {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addContentSupport(ContentType.TerrainAligned);
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		ContentAppearance capp = new ContentAppearance();
 		capp.getShrinkPanel().setShrinked(false);
 		v.registerPlugin(capp);

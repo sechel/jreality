@@ -63,10 +63,7 @@ public class EncompassTool extends AbstractTool {
   final static InputSlot SHIFT = InputSlot.getDevice("Secondary");
   final static InputSlot CTRL = InputSlot.getDevice("Meta");
 
-  private boolean VR=false;
-  
-  public EncompassTool(boolean VR) {
-	  this.VR = VR;
+  public EncompassTool() {
     addCurrentSlot(encompassSlot);
   }
   
@@ -84,8 +81,7 @@ public class EncompassTool extends AbstractTool {
     		  tc.getRootToLocal(), 
     		  tc.getViewer().getCameraPath(), 
     		  margin, 
-    		  Pn.EUCLIDEAN,
-    		  VR); //tc.getViewer().getMetric());
+    		  Pn.EUCLIDEAN); //tc.getViewer().getMetric());
     }
   }
 

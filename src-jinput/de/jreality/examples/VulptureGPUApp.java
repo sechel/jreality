@@ -764,7 +764,7 @@ public class VulptureGPUApp implements Runnable {
 		v.setContent(st.root);
 		v.registerPlugin(new ContentAppearance());
 		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		v.startup();
         
         System.out.println("-> go!");

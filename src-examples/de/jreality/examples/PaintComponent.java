@@ -204,7 +204,7 @@ public class PaintComponent extends JPanel implements MouseListener, MouseMotion
 		v.setContent(catComp);
 		v.registerPlugin(new ContentAppearance());
 		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new ContentTools(false));
+		v.registerPlugin(new ContentTools());
 		v.startup();
    }
 

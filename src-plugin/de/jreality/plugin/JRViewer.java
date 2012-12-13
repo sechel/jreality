@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.ImageIcon;
@@ -517,10 +516,9 @@ public class JRViewer {
 	/**
 	 * Registers advanced content tools. Includes an appearance
 	 * inspector, transformation tools, and file loaders
-	 * @param VR will cause the near and far clipping planes to be set independent of the content
 	 */
-	public void addContentUI(boolean VR) {
-		c.registerPlugin(new ContentTools(VR));
+	public void addContentUI() {
+		c.registerPlugin(new ContentTools());
 		c.registerPlugin(new ContentAppearance());
 		c.registerPlugin(new ContentLoader());
 	}
@@ -594,7 +592,7 @@ public class JRViewer {
 		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.registerPlugin(new DirectContent());
-		v.registerPlugin(new ContentTools(false));
+		v.registerPlugin(new ContentTools());
 		
 		if (node != null) {
 			if (env != RunningEnvironment.DESKTOP)
@@ -629,7 +627,7 @@ public class JRViewer {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		if (contentNode != null) {
 			v.setContent(contentNode);
 		}
@@ -646,7 +644,7 @@ public class JRViewer {
 		SceneGraphPath contentPath = scene.getContentPath();
 		SceneGraphPath cameraPath = scene.getCameraPath();
 		try {
-			encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN, false);
+			encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
 		} catch (Exception e) {}
 	}
 	
@@ -689,13 +687,7 @@ public class JRViewer {
 			mc.setContent(content);
 			if (encompass) {
 				Scene scene = c.getPlugin(Scene.class);
-				List<Terrain> l = c.getPlugins(Terrain.class);
-				//if there is no terrain and thus no virtual reality VR environment
-				if(l.size() == 0){
-					JRViewerUtility.encompassEuclidean(scene, false);
-				}else{
-					JRViewerUtility.encompassEuclidean(scene, true);
-				}
+				JRViewerUtility.encompassEuclidean(scene);
 			}
 		}
 		
@@ -714,7 +706,7 @@ public class JRViewer {
 		v.addBasicUI();
 		v.registerPlugin(InfoOverlayPlugin.class);
 		if (params.contains("-vr")) {
-			v.addContentUI(true);
+			v.addContentUI();
 			v.addVRSupport();
 			v.addContentSupport(ContentType.TerrainAligned);
 			v.setShowPanelSlots(true, false, false, false);
@@ -723,7 +715,7 @@ public class JRViewer {
 			v.registerPlugin(vrExamples);
 		} else {
 			v.registerPlugin(new ContentLoader());
-			v.registerPlugin(new ContentTools(false));
+			v.registerPlugin(new ContentTools());
 			v.getPlugin(Inspector.class).setInitialPosition(ShrinkPanelPlugin.SHRINKER_LEFT);
 			v.addContentSupport(ContentType.CenteredAndScaled);
 			v.setShowPanelSlots(true, false, false, false);

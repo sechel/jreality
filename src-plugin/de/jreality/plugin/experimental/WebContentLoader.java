@@ -106,7 +106,7 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 			}
 			contentPlugin.setContent(root);
 			if (encompassChecker.isSelected()) {
-				JRViewerUtility.encompassEuclidean(scene, false);
+				JRViewerUtility.encompassEuclidean(scene);
 			}
 			
 		}

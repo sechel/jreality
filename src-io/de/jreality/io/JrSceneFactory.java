@@ -170,7 +170,7 @@ public class JrSceneFactory {
 		SceneGraphComponent sceneNode = scene.getPath("emptyPickPath").getLastComponent();
 		
 		// encompass
-		EncompassTool encompassTool = new EncompassTool(false);
+		EncompassTool encompassTool = new EncompassTool();
 		sceneNode.addTool(encompassTool);
 		
 		// rotate

@@ -68,19 +68,17 @@ public class JRViewerUtility {
 		SceneGraphPath contentPath = scene.getContentPath();
 		SceneGraphPath cameraPath = scene.getCameraPath();
 		try {
-			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, metric, false);
+			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, metric);
 		} catch (Exception e) {}
 	}
 	
-	/**
-	* @param VR will cause the near and far clipping planes to be set independent of the content
-	 */
-	public static void encompassEuclidean(Scene scene, boolean VRmode) {
+	
+	public static void encompassEuclidean(Scene scene) {
 		SceneGraphPath avatarPath = scene.getAvatarPath();
 		SceneGraphPath contentPath = scene.getContentPath();
 		SceneGraphPath cameraPath = scene.getCameraPath();
 		try {
-			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN, VRmode);
+			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
 		} catch (Exception e) {}
 	}
 	
