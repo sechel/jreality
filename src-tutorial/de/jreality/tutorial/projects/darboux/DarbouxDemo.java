@@ -114,7 +114,7 @@ public class DarbouxDemo {
 		final DarbouxDemo demo = new DarbouxDemo();
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.addVRSupport();
 		

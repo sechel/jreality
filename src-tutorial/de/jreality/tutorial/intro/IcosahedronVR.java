@@ -54,7 +54,7 @@ public class IcosahedronVR {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		v.setContent(Primitives.icosahedron());
 		v.startup();
   }

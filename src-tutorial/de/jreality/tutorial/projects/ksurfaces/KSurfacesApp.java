@@ -288,7 +288,7 @@ public class KSurfacesApp {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		v.setContent(ksa.getRoot());
 
 		//add an Inspector for the KSurfacesApp to the viewer

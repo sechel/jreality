@@ -54,7 +54,7 @@ public class ParametricSurfaceExample {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		v.setContent(sgc);
 
 	

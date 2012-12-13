@@ -46,7 +46,7 @@ public class BeanInspectorExample {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools(true));
+		v.registerPlugin(new ContentTools());
 		v.setContent(sgc);
 
 		//create an Inspector for the domain and tell it about the method "update", which it needs to call if
