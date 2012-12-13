@@ -641,7 +641,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		v.setContent(factory2.getIndexedFaceSet());
 		v.registerPlugin(new ContentAppearance());
 		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new ContentTools(false));
+		v.registerPlugin(new ContentTools());
 		v.startup();
 
 		
@@ -663,7 +663,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		v1.setContent(factory3.getIndexedFaceSet());
 		v1.registerPlugin(new ContentAppearance());
 		v1.registerPlugin(new ContentLoader());
-		v1.registerPlugin(new ContentTools(false));
+		v1.registerPlugin(new ContentTools());
 		v1.startup();
 		
 		final IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
@@ -740,7 +740,7 @@ public class IndexedFaceSetFactoryTest extends TestCase {
 		v2.setContent(sgc);
 		v2.registerPlugin(new ContentAppearance());
 		v2.registerPlugin(new ContentLoader());
-		v2.registerPlugin(new ContentTools(false));
+		v2.registerPlugin(new ContentTools());
 		v2.startup();
 		CameraUtility.encompass(v2.getViewer());
 	};

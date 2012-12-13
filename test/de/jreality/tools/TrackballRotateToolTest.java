@@ -78,7 +78,7 @@ public class TrackballRotateToolTest {
 			v.setContent(sgc);
 			v.registerPlugin(new ContentAppearance());
 			v.registerPlugin(new ContentLoader());
-			v.registerPlugin(new ContentTools(false));
+			v.registerPlugin(new ContentTools());
 			v.startup();
 	   } 
 }

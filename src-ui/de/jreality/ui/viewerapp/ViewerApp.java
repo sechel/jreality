@@ -324,7 +324,7 @@ public class ViewerApp {
 			CameraUtility.encompass(va.getToolSystem().getAvatarPath(),
 					va.getToolSystem().getEmptyPickPath(),
 					va.getViewer().getCameraPath(),
-					1.75, Pn.EUCLIDEAN, false); //va.getViewer().getMetric());
+					1.75, Pn.EUCLIDEAN); //va.getViewer().getMetric());
 		}
 
 		va.display();
