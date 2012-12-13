@@ -15,6 +15,7 @@ uniform int has_vertex_texturecoordinates;
 
 void main(void)
 {
+	//TODO check for availability of texture, check for face colors, what is diffuseColor?
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	vec4 texColor = texture( image, texCoord.st);
 	
