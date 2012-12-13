@@ -25,7 +25,7 @@ public class AddViewerToInternalFrame {
 		      JRViewer v = new JRViewer();
 		      v.addBasicUI();
 		      v.registerPlugin(new ContentLoader());
-		      v.registerPlugin(new ContentTools());
+		      v.registerPlugin(new ContentTools(false));
 		      v.getPlugin(Inspector.class).setInitialPosition(ShrinkPanelPlugin.SHRINKER_LEFT);
 		      v.addContentSupport(ContentType.CenteredAndScaled);
 		      v.setShowPanelSlots(true, false, false, false);

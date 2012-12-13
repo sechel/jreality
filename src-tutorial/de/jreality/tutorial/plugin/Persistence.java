@@ -74,7 +74,7 @@ public class Persistence extends ViewShrinkPanelPlugin {
 	public static void main(String[] args) {
 		JRViewer v = new JRViewer();
 		v.registerPlugin(new Persistence());
-		v.registerPlugin(new ContentTools());
+		v.registerPlugin(new ContentTools(false));
 		v.registerPlugin(new PropertiesMenu());
 		v.setPropertiesResource(Persistence.class, "PersistenceProperties.xml");
 		v.setShowPanelSlots(true, false, false, false);

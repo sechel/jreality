@@ -128,11 +128,11 @@ public class CameraUtility {
 	 * @param viewer
 	 */
 	
-	public static void encompassNew(Viewer v) {
+	public static void encompassNew(Viewer v, boolean VRmode) {
 		SceneGraphPath avatarPath = v.getCameraPath().popNew();
 		if (avatarPath.getLength() > 1) avatarPath.pop();
 		SceneGraphPath toBound = new SceneGraphPath(v.getSceneRoot());
-		CameraUtility.encompass(avatarPath, toBound, v.getCameraPath(), 1.1, SceneGraphUtility.getMetric(v.getCameraPath()));
+		CameraUtility.encompass(avatarPath, toBound, v.getCameraPath(), 1.1, SceneGraphUtility.getMetric(v.getCameraPath()), VRmode);
 	}
 
 
@@ -401,8 +401,8 @@ public class CameraUtility {
 	}
 	
     
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath) {
-		encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN);
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, boolean VRmode) {
+		encompass(avatarPath, scene, cameraPath, 0, Pn.EUCLIDEAN, VRmode);
 	}
   
 	/**
@@ -412,8 +412,9 @@ public class CameraUtility {
 	 * @param cameraPath
 	 * @param margin
 	 * @param metric
+	 * @param VR will cause the near and far clipping planes to be set independent of the content
 	 */
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric) {
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric, boolean VRmode) {
 	    Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scene.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
@@ -431,8 +432,13 @@ public class CameraUtility {
 	    cameraPath.getInverseMatrix(camMatrix.getArray(), avatarPath.getLength());
 	    
 	    Camera camera = ((Camera)cameraPath.getLastElement());
-		camera.setFar(margin*3*radius);
-	    camera.setNear(.3*radius);
+		if(VRmode){
+			camera.setFar(1000);
+			camera.setNear(.1);
+		}else{
+	    	camera.setFar(margin*3*radius);
+			camera.setNear(.3*radius);
+		}
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
 	    if (SystemProperties.isPortal) return;

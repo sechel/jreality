@@ -45,7 +45,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 		v.setContent(sgc);
 		v.addBasicUI();
 		v.registerPlugin(new ContentLoader());
-		contentTools = new ContentTools();
+		contentTools = new ContentTools(false);
 		v.registerPlugin(contentTools);
 		v.getPlugin(Inspector.class).setInitialPosition(
 		            ShrinkPanelPlugin.SHRINKER_LEFT);

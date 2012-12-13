@@ -298,7 +298,7 @@ public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEd
 	public static void main(String[] args) {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
-		v.addContentUI();
+		v.addContentUI(false);
 		v.setShowPanelSlots(true, true, true, true);
 		v.setShowToolBar(true);
 		v.addContentSupport(ContentType.CenteredAndScaled);

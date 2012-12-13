@@ -58,7 +58,10 @@ public class ContentTools extends Plugin {
 	private Content content = null;
 	
 	@SuppressWarnings("serial")
-	public ContentTools() {
+	/**
+	* @param VR will cause the near and far clipping planes to be set independent of the content
+	 */
+	public ContentTools(boolean VR) {
 		
 		rotate = new AbstractJrToggleAction("Rotate") {
 			@Override
@@ -116,7 +119,7 @@ public class ContentTools extends Plugin {
 		};
 		encompass.setIcon(ImageHook.getIcon("arrow_out.png"));
 		
-		encompassTool = new EncompassTool();
+		encompassTool = new EncompassTool(VR);
 		
 		rotateTool = new RotateTool();
 		rotateTool.setFixOrigin(false);

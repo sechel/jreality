@@ -25,7 +25,7 @@ public class PerformanceMeterExample {
 		v.registerPlugin(vrExamples);
 		v.registerPlugin(new ContentAppearance());
 		v.registerPlugin(new ContentLoader());
-		v.registerPlugin(new ContentTools());
+		v.registerPlugin(new ContentTools(true));
 		// the following plugin displays performance statics (memory use, polygon count, FPS) 
 		// when the JOGL backend is being used.
 		v.registerPlugin(new InfoOverlayPlugin());

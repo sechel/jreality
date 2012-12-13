@@ -87,7 +87,7 @@ public class SliderExample {
 		v.addVRSupport();
 		v.addContentSupport(ContentType.TerrainAligned);
 		v.registerPlugin(new ContentAppearance());
-		v.registerPlugin(new ContentTools());
+		v.registerPlugin(new ContentTools(true));
 		v.setContent(sgc);
 
 		//create a slider for the parameter alpha 

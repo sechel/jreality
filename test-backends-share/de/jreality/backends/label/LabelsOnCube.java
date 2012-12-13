@@ -122,7 +122,7 @@ public class LabelsOnCube {
 	v.setContent(cmp);
 	v.registerPlugin(new ContentAppearance());
 	v.registerPlugin(new ContentLoader());
-	v.registerPlugin(new ContentTools());
+	v.registerPlugin(new ContentTools(false));
 	v.startup();
 	}
 

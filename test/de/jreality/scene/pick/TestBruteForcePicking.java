@@ -172,7 +172,7 @@ static private int[][] icoIndices = {
 	v.setContent(geoNode);
 	v.registerPlugin(new ContentAppearance());
 	v.registerPlugin(new ContentLoader());
-	v.registerPlugin(new ContentTools());
+	v.registerPlugin(new ContentTools(false));
 	v.startup();	
 	}
 

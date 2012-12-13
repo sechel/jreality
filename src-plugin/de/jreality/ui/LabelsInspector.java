@@ -222,7 +222,7 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		JRViewer v = new JRViewer();
 		v.setPropertiesFile("LabelInspectorTest.jrw");
 		v.addBasicUI();
-		v.addContentUI();
+		v.addContentUI(false);
 		v.addContentSupport(ContentType.CenteredAndScaled);
 		v.registerPlugin(new PropertiesMenu());
 		

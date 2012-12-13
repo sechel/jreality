@@ -41,7 +41,7 @@ public class ReaderExample {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addContentSupport(ContentType.CenteredAndScaled);
-		v.addContentUI();
+		v.addContentUI(false);
 		v.setContent(content);
 		v.startup();
 	}
