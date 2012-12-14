@@ -11,6 +11,7 @@ public class JOGLLightCollection {
 	public double[] getViewMatrix() {
 		return viewMatrix;
 	}
+	//is the matrix that transforms world coordinates to camera space
 	private double[] viewMatrix;
 	
 	public LinkedList<JOGLPointLightInstance> pointLights = new LinkedList<JOGLPointLightInstance>();

@@ -13,26 +13,25 @@ uniform int smoothShading = 1;
 
 //shadow map samplers later
 
-
+//LIGHTS
 uniform sampler2D globalLights;
 uniform int numGlobalDirLights;
 uniform int numGlobalPointLights;
 uniform int numGlobalSpotLights;
 
-//rename to reproduce the vertex attribute names
+//VERTEX ATTRIBUTES
 in vec4 vertex_coordinates;
-in vec3 vertex_normals;
 uniform int has_vertex_normals;
-in vec3 face_normals;
+in vec3 vertex_normals;
 uniform int has_face_normals;
-in vec2 vertex_texturecoordinates;
+in vec3 face_normals;
 uniform int has_vertex_texturecoordinates;
+in vec2 vertex_texturecoordinates;
+
 
 //out float shade;
 out vec3 lightInflux;
 out vec3 lightInfluxBackFace;
-//vec3 lightDir = vec3(0, .7, -.7);
-
 out vec2 texCoord;
 
 //!!!!!!!!  if some variable is not initialized properly, don't forget to exclude it
@@ -81,10 +80,10 @@ void main(void)
 			vec4 col = texture( globalLights, vec2((2*numGlobalDirLights+3*i+0.5)/lightTexSize, 0));
 			vec3 att = texture(globalLights, vec2((2*numGlobalDirLights+3*i+2+0.5)/lightTexSize, 0)).xyz;
 		
-			float dist = sqrt(vertex_coordinates.x-pos.x * vertex_coordinates.x-pos.x + vertex_coordinates.y-pos.y * vertex_coordinates.y-pos.y + vertex_coordinates.z-pos.z * vertex_coordinates.z-pos.z);
+			float dist = length(RelPos);
 			float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
 			
-			vec4 new = dott*col;
+			vec4 new = atten*dott*col;
 			vec3 new2 = new.xyz;
 			lightInflux = lightInflux + new2;
 		}
@@ -114,10 +113,10 @@ void main(void)
 			vec4 col = texture( globalLights, vec2((2*numGlobalDirLights+3*i+0.5)/lightTexSize, 0));
 			vec3 att = texture(globalLights, vec2((2*numGlobalDirLights+3*i+2+0.5)/lightTexSize, 0)).xyz;
 		
-			float dist = sqrt(vertex_coordinates.x-pos.x * vertex_coordinates.x-pos.x + vertex_coordinates.y-pos.y * vertex_coordinates.y-pos.y + vertex_coordinates.z-pos.z * vertex_coordinates.z-pos.z);
+			float dist = length(RelPos);
 			float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
 			
-			vec4 new = dott*col;
+			vec4 new = atten*dott*col;
 			vec3 new2 = new.xyz;
 			lightInfluxBackFace = lightInfluxBackFace + new2;
 		}

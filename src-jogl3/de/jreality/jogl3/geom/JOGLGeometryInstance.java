@@ -150,19 +150,19 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		
 		//		System.out.println("UpdateAppearance");
 		eap = EffectiveAppearance.create(sgp);
-//		if(type.equals(CommonAttributes.POLYGON_SHADER)){
-//			System.out.println("start eap for " + sgp.getLastComponent().getName());
-//			//System.out.println(((IndexedFaceSet)(fse.getNode())).getName());
-//			
-//			//eap.getApp().getAttributes().keySet()
-//			for( Object o : eap.getApp().getAttributes().keySet()){
-//				String s = (String)o;
-//				eap.getApp().getAttribute(s);
-//				Object a = new Object();
-//				System.out.println(s + " " + eap.getAttribute(s, a).getClass());
-//			}
-//			System.out.println("stop");
-//		}
+		if(type.equals(CommonAttributes.POLYGON_SHADER)){
+			System.out.println("start eap for " + sgp.getLastComponent().getName());
+			//System.out.println(((IndexedFaceSet)(fse.getNode())).getName());
+			
+			//eap.getApp().getAttributes().keySet()
+			for( Object o : eap.getApp().getAttributes().keySet()){
+				String s = (String)o;
+				eap.getApp().getAttribute(s);
+				Object a = new Object();
+				System.out.println(s + " " + eap.getAttribute(s, a).getClass());
+			}
+			System.out.println("stop");
+		}
 		//retrieve shader source if existent
 		String[] source = new String[]{};
 		

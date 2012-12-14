@@ -131,7 +131,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 					}
 					vbos.put("face_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "face_"+a.getName()));
 					//vbos.add(new GLVBOFloat(state.getGL(), Rn.convertDoubleToFloatArray(inflatedAttributeArray), "face_"+a.getName()));
-//					System.out.println("creating " + "face_"+a.getName());
+					System.out.println("creating " + "face_"+a.getName());
 				}else if(isIntArray(attribs.getStorageModel())){
 
 					//the array containing one item per index
@@ -174,7 +174,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 						count += (face.getLength()-2)*3;
 					}
 					vbos.put("face_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "face_"+a.getName()));
-//					System.out.println("creating " + "face_"+a.getName());
+					System.out.println("creating " + "face_"+a.getName());
 				}else{
 					System.out.println("FSE 1: not knowing what to do with " + attribs.getStorageModel().toString());
 				}
@@ -216,7 +216,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 					}
 					
 					vbos.put("vertex_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "vertex_"+a.getName()));
-//					System.out.println("creating " + "vertex_"+a.getName());
+					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else if(isIntArray(attribs.getStorageModel())){
 					//the array containing one item per index
@@ -243,7 +243,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 							inflatedAttributeArray[4*i+3] = 1;
 					}
 					vbos.put("vertex_"+ shaderName, new GLVBOInt(gl, inflatedAttributeArray, "vertex_"+a.getName()));
-//					System.out.println("creating " + "vertex_"+a.getName());
+					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else{
 					System.out.println("FSE2: not knowing what to do with " + attribs.getStorageModel().toString());
