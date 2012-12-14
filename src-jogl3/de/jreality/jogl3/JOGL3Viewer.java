@@ -335,7 +335,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		
 		gl.glBindTexture(gl.GL_TEXTURE_2D, textures[0]);
 		
-		int width = lc.directionalLights.size()*2+lc.pointLights.size()*3+lc.spotLights.size()*4;
+		int width = lc.directionalLights.size()*2+lc.pointLights.size()*3+lc.spotLights.size()*5;
 //		System.out.println("dir lights" + lc.directionalLights.size());
 //		System.out.println("point lights" + lc.pointLights.size());
 //		System.out.println("spot lights" + lc.spotLights.size());
@@ -403,7 +403,12 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			data[i+13] = (float)dl.coneAngleDelta;
 			data[i+14] = (float)dl.distribution;
 			
-			i+=16;
+			//attenuation
+			data[i+16] = (float)dl.A0;
+			data[i+17] = (float)dl.A1;
+			data[i+18] = (float)dl.A2;
+			
+			i+=20;
 		}
 		
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 

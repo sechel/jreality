@@ -24,9 +24,9 @@ uniform int has_vertex_texturecoordinates;
 vec3 lightInflux = vec3(0, 0, 0);
 vec3 lightInfluxBackFace = vec3(0, 0, 0);
 
-void calc(void){	
+void calculateLightInflux(void){	
 	//size of the light texture
-	int lightTexSize = numGlobalDirLights*2+numGlobalPointLights*3+numGlobalSpotLights*4;
+	int lightTexSize = numGlobalDirLights*2+numGlobalPointLights*3+numGlobalSpotLights*5;
 	lightInflux = vec3(0, 0, 0);
 	for(int i = 0; i < numGlobalDirLights; i++){
 		vec4 dir = texture(globalLights, vec2((2*i+1+0.5)/lightTexSize, 0));
@@ -54,6 +54,27 @@ void calc(void){
 			vec4 new = atten*dott*col;
 			vec3 new2 = new.xyz;
 			lightInflux = lightInflux + new2;
+		}
+	}
+	for(int i = 0; i < numGlobalSpotLights; i++){
+		vec4 pos = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+2+0.5)/lightTexSize, 0));
+		vec4 RelPos = pos - camSpaceCoord;
+		float dott = dot(camSpaceNormal, normalize(RelPos.xyz));
+		//light is on the right side of the face
+		if(dott > 0){
+			vec4 dir = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+1+0.5)/lightTexSize, 0));
+			vec4 coneAngles = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+3+0.5)/lightTexSize, 0));
+			float angle = acos(dot(-normalize(RelPos.xyz), dir.xyz));
+			if(angle < coneAngles.x){
+				vec4 col = texture( globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+0.5)/lightTexSize, 0));
+				float factor = pow(cos(angle), coneAngles.z);
+				vec3 att = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+4+0.5)/lightTexSize, 0)).xyz;
+				float dist = length(RelPos);
+				float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
+				vec4 new = atten*factor*dott*col;
+				vec3 new2 = new.xyz;
+				lightInflux = lightInflux + new2;
+			}
 		}
 	}
 	
@@ -86,12 +107,33 @@ void calc(void){
 			lightInfluxBackFace = lightInfluxBackFace + new2;
 		}
 	}
+	for(int i = 0; i < numGlobalSpotLights; i++){
+		vec4 pos = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+2+0.5)/lightTexSize, 0));
+		vec4 RelPos = pos - camSpaceCoord;
+		float dott = dot(-camSpaceNormal, normalize(RelPos.xyz));
+		//light is on the right side of the face
+		if(dott > 0){
+			vec4 dir = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+1+0.5)/lightTexSize, 0));
+			vec4 coneAngles = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+3+0.5)/lightTexSize, 0));
+			float angle = acos(dot(-normalize(RelPos.xyz), dir.xyz));
+			if(angle < coneAngles.x){
+				vec4 col = texture( globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+0.5)/lightTexSize, 0));
+				float factor = pow(cos(angle), coneAngles.z);
+				vec3 att = texture(globalLights, vec2((2*numGlobalDirLights+3*numGlobalPointLights+5*i+4+0.5)/lightTexSize, 0)).xyz;
+				float dist = length(RelPos);
+				float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
+				vec4 new = atten*factor*dott*col;
+				vec3 new2 = new.xyz;
+				lightInfluxBackFace = lightInfluxBackFace + new2;
+			}
+		}
+	}
 }
 
 
 void main(void)
 {
-	calc();
+	calculateLightInflux();
 	//TODO check for availability of texture, check for face colors, what is diffuseColor?
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	vec4 texColor = texture( image, texCoord.st);
@@ -99,6 +141,7 @@ void main(void)
 	vec4 color2 = diffuseColor; //vec4(1, 0, 0, 1);
 	if(has_vertex_texturecoordinates==1 && hasTex == 1)
 		color2 = texColor;
+	//here we can save by a factor of 2 by only calculating the required lightInflux
 	if(gl_FrontFacing)
 		gl_FragColor = vec4(color2.rgb * lightInflux, color2.a);
 	else

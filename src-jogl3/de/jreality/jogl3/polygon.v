@@ -45,6 +45,6 @@ void main(void)
 	
 	mat3 rotation = mat3(vec3(modelview[0][0], modelview[0][1], modelview[0][2]), vec3(modelview[1][0], modelview[1][1], modelview[1][2]), vec3(modelview[2][0], modelview[2][1], modelview[2][2]));
 	
-	camSpaceNormal = rotation*normals;
+	camSpaceNormal = normalize(rotation*normals);
 	camSpaceCoord = modelview*vertex_coordinates;
 }
