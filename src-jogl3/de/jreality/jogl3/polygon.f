@@ -13,12 +13,13 @@ in vec2 texCoord;
 in vec4 camSpaceCoord;
 in vec3 camSpaceNormal;
 
-//LIGHTS
+//GLOBAL LIGHTS
 uniform sampler2D globalLights;
 uniform int numGlobalDirLights;
 uniform int numGlobalPointLights;
 uniform int numGlobalSpotLights;
 
+//LOCAL LIGHTS
 uniform sampler2D localLights;
 uniform int numLocalDirLights;
 uniform int numLocalPointLights;
@@ -27,7 +28,6 @@ uniform int numLocalSpotLights;
 uniform int has_vertex_texturecoordinates;
 
 vec3 lightInflux = vec3(0, 0, 0);
-
 
 void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numSpot, sampler2D lights){	
 	//size of the light texture
