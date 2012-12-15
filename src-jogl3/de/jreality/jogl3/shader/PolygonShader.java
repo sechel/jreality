@@ -11,6 +11,7 @@ import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
+import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
@@ -34,10 +35,12 @@ public class PolygonShader{
 	
 	public static void render(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, GLShader shader, JOGLRenderState state){
 		
+		
 		//TODO replace by fsi or renderState
 		//GLShader shader = GLShader.defaultPolygonShader;
 		GL3 gl = state.getGL();
 		
+		state.getLightHelper().loadLocalLightTexture(state.getLocalLightCollection(), gl);
 		gl.glDisable(gl.GL_BLEND);
 		//gl.glBlendEquationSeparate(gl.GL_FUNC_ADD, gl.GL_FUNC_ADD);
 		gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
@@ -54,9 +57,15 @@ public class PolygonShader{
         	
 			//global lights in a texture
 			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "globalLights"), 0);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalDirLights"), state.numGlobalDirLights);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalPointLights"), state.numGlobalPointLights);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalSpotLights"), state.numGlobalSpotLights);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
+			
+			//local lights in a texture
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "localLights"), 1);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
 			
 			
 			//bind shader uniforms
@@ -83,9 +92,8 @@ public class PolygonShader{
         	}
         	
         	//new way to do lights
-			gl.glEnable(gl.GL_TEXTURE_2D);
-			gl.glActiveTexture(gl.GL_TEXTURE0);
-			gl.glBindTexture(gl.GL_TEXTURE_2D, state.lightTex);
+			state.getLightHelper().bindGlobalLightTexture(gl);
+			//state.getGlobalLightHelper().bindLocalLightTexture(gl);
 			
         	//actual draw command
         	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);

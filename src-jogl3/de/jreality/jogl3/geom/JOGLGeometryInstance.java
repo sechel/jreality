@@ -36,9 +36,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 		public void bind(GLShader shader, GL3 gl){
 			if(hasTexture){
-				//GL_TEXTURE0 reserved for lights.
-				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE1);
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 1);
+				//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.
+				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE2);
+				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 2);
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "hasTex"), 1);
 			}else{
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "hasTex"), 0);
@@ -58,20 +58,20 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		
 		
 	}
-	public class GlUniformSampler extends GlUniform<Integer>{
-		public Texture2D tex;
-		public GlUniformSampler(String name, Integer value, Texture2D tex) {
-			super(name, value);
-			this.tex = tex;
-		}
-
-		@Override
-		public void bindToShader(GLShader shader, GL3 gl) {
-			Texture2DLoader.load(gl, tex, gl.GL_TEXTURE1);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), value);
-		}
-	}
-	
+//	public class GlUniformSampler extends GlUniform<Integer>{
+//		public Texture2D tex;
+//		public GlUniformSampler(String name, Integer value, Texture2D tex) {
+//			super(name, value);
+//			this.tex = tex;
+//		}
+//
+//		@Override
+//		public void bindToShader(GLShader shader, GL3 gl) {
+//			Texture2DLoader.load(gl, tex, gl.GL_TEXTURE2);
+//			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), value);
+//		}
+//	}
+//	
 	public class GlUniformInt extends GlUniform<Integer>{
 
 		public GlUniformInt(String name, Integer value) {
@@ -186,7 +186,15 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     			continue;
     		if(v.getName().equals("numGlobalSpotLights"))
     			continue;
+    		if(v.getName().equals("numLocalDirLights"))
+    			continue;
+    		if(v.getName().equals("numLocalPointLights"))
+    			continue;
+    		if(v.getName().equals("numLocalSpotLights"))
+    			continue;
     		if(v.getName().equals("globalLights"))
+    			continue;
+    		if(v.getName().equals("localLights"))
     			continue;
     		if(v.getName().equals("projection"))
     			continue;
@@ -270,7 +278,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				Texture2D tex = (Texture2D)AttributeEntityUtility.createAttributeEntity(Texture2D.class, type + ".texture2d", eap);
     				texture.setTexture(tex);
     				c.add(new GlUniformMat4("textureMatrix", Rn.convertDoubleToFloatArray(tex.getTextureMatrix().getArray())));
-    				System.err.println("sampler2D");
+    				System.out.println("sampler2D: "+ v.getName());
     				hasTexture = true;
     			}
     		}else{

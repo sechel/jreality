@@ -79,7 +79,6 @@ public static void render(GL3 gl, double[] modelview, double[] projection, CubeM
 	
 	shader.useShader(gl);
     
-    
 	  ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
 	  for(int i = 0; i < 6; i++){
 		  String name = "right";
@@ -93,11 +92,11 @@ public static void render(GL3 gl, double[] modelview, double[] projection, CubeM
 			  name = "back";
 		  else if(i == 5)
 			  name = "front";
-		  gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), 1+i);
+		  gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), i);
 
 		  jogltex[i].setBlendColor(cm.getBlendColor());
 		  jogltex[i].setImage(imgs[i]);
-		  Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE1+i);
+		  Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE0+i);
 		  
 	  }
 	float scale =(float) (cam.getNear() + cam.getFar())/2;

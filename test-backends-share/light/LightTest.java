@@ -77,7 +77,7 @@ public class LightTest {
 		
 		SceneGraphComponent torus = new SceneGraphComponent();
 		torus.setGeometry(Primitives.torus(2, 1, 10, 10));
-		cmp.addChild(torus);
+		light2.addChild(torus);
 		
 		JRViewer vr = new JRViewer();
 		vr.addVRSupport();

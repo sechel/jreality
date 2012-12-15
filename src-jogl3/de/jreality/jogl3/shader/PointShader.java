@@ -39,7 +39,7 @@ public class PointShader {
 		GL3 gl = state.getGL();
 		//public static void render(GL3 gl, GLVBOFloat vbo, float[] modelview, float[] projection){
 		//GLShader shader = GLShader.defaultPointShader;
-		Texture2DLoader.load(gl, spriteTexture, gl.GL_TEXTURE1);
+		Texture2DLoader.load(gl, spriteTexture, gl.GL_TEXTURE2);
 		
 		//gl.glPointSize(50.0f);
 		//due to a driver bug we have to call this. In openGL3 POINT_SPRITE
@@ -53,7 +53,7 @@ public class PointShader {
 		
 		//TODO automatic uniforms
 		//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "pointSize"), pointSize);
-        gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "tex"), 1);
+        gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "tex"), 2);
 		
 		
 //        gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);

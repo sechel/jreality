@@ -286,9 +286,6 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	    	gl.glViewport(0, 0, width, height);
 	        
 	        
-	        
-			//rootState = new JOGLRenderState(rootState, dmat);
-			
 			JOGLSceneGraphComponentInstance rootInstance = (JOGLSceneGraphComponentInstance) proxyScene.getTreeRoot();
 			
 			//update sky box
@@ -310,23 +307,23 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			//enable depth test
 			gl.glEnable(gl.GL_DEPTH_TEST);
 			//collect lights from scene graph
-			JOGLLightCollection lightCollection = new JOGLLightCollection(dmat);
-			rootInstance.collectGlobalLights(dmat, lightCollection);
+			JOGLLightCollection globalLightCollection = new JOGLLightCollection(dmat);
+			rootInstance.collectGlobalLights(dmat, globalLightCollection);
 			//can load global lights texture here.
-			LightHelper.loadGlobalLightTexture(lightCollection, gl);
+			lightHelper.loadGlobalLightTexture(globalLightCollection, gl);
 			
 			//calculate window dimensions and such needed for sprite size calculation
 			Rectangle2D r = CameraUtility.getViewport(cam, ar);
 			float x = (float)(r.getMaxX()-r.getMinX());
 			float y = (float)(r.getMaxY()-r.getMinY());
 			//render scene graph
-			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, LightHelper.getTextureID(), lightCollection.directionalLights.size(), lightCollection.pointLights.size(), lightCollection.spotLights.size(), Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
+			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, lightHelper, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
 			rootInstance.render(rootState);
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
 		}
 	}
-	
+	LightHelper lightHelper;
 	public void dispose(GLAutoDrawable arg0) {
 		// TODO Auto-generated method stub
 		System.out.println("calling JOGL3Viewer.dispose");
@@ -358,7 +355,9 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		//initialize vbo once
 		
 		//create ligth texture
-		LightHelper.initLightTexture(gl);
+		lightHelper = new LightHelper();
+		lightHelper.initGlobalLightTexture(gl);
+		lightHelper.initLocalLightTexture(gl);
 	}
 	
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,

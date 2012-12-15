@@ -13,28 +13,79 @@ import de.jreality.jogl3.light.JOGLSpotLightEntity;
 import de.jreality.jogl3.light.JOGLSpotLightInstance;
 
 public class LightHelper {
+	
+	public LightHelper(){
+		
+	}
 
-	public static int getTextureID(){
-		return textureID;
+	public int getGlobalTextureID(){
+		return globalTextureID;
+	}
+	public int getLocalTextureID(){
+		return localTextureID;
 	}
 	
-	private static int textureID;
+	private int globalTextureID;
+	private int localTextureID;
 	
-	public static void initLightTexture(GL3 gl){
+	public void initGlobalLightTexture(GL3 gl){
+		globalTextureID = generateNewTexID(gl);
+	}
+	public void initLocalLightTexture(GL3 gl){
+		localTextureID = generateNewTexID(gl);
+	}
+	
+	private int generateNewTexID(GL3 gl){
 		int[] textures = new int[1];
-		gl.glEnable(gl.GL_TEXTURE_2D);
-		gl.glActiveTexture(gl.GL_TEXTURE0);
 		gl.glGenTextures(1, textures, 0);
-		textureID=textures[0];
+		return textures[0];
+	}
+	
+	public void loadGlobalLightTexture(JOGLLightCollection lc, GL3 gl){
+
+		numGlobalDirLights = lc.directionalLights.size();
+		numGlobalPointLights = lc.pointLights.size();
+		numGlobalSpotLights = lc.spotLights.size();
+		
+		loadLightTexture(globalTextureID, 0, lc, gl);
+	}
+	public void loadLocalLightTexture(JOGLLightCollection lc, GL3 gl){
+		numLocalDirLights = lc.directionalLights.size();
+		numLocalPointLights = lc.pointLights.size();
+		numLocalSpotLights = lc.spotLights.size();
+		
+		loadLightTexture(localTextureID, 1, lc, gl);
 	}
 
-	public static void loadGlobalLightTexture(JOGLLightCollection lc, GL3 gl) {
-		//texture id
+	private int numGlobalDirLights = 0;
+	private int numGlobalPointLights = 0;
+	private int numGlobalSpotLights = 0;
+	public int getNumGlobalDirLights() {
+		return numGlobalDirLights;
+	}
+	public int getNumGlobalPointLights() {
+		return numGlobalPointLights;
+	}
+	public int getNumGlobalSpotLights() {
+		return numGlobalSpotLights;
+	}
+	
+	private int numLocalDirLights = 0;
+	private int numLocalPointLights = 0;
+	private int numLocalSpotLights = 0;
+	public int getNumLocalDirLights() {
+		return numLocalDirLights;
+	}
+	public int getNumLocalPointLights() {
+		return numLocalPointLights;
+	}
+	public int getNumLocalSpotLights() {
+		return numLocalSpotLights;
+	}
+	
+	private void loadLightTexture(int texID, int texUnit, JOGLLightCollection lc, GL3 gl) {
 		
-		gl.glEnable(gl.GL_TEXTURE_2D);
-		gl.glActiveTexture(gl.GL_TEXTURE0);
 		
-		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
 		
 		int width = lc.directionalLights.size()*2+lc.pointLights.size()*3+lc.spotLights.size()*5;
 
@@ -108,12 +159,25 @@ public class LightHelper {
 			
 			i+=20;
 		}
+		gl.glEnable(gl.GL_TEXTURE_2D);
+		gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
+		
+		gl.glBindTexture(gl.GL_TEXTURE_2D, texID);
 		
 		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
 	    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
 	    
-	    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, 
-    	width, 1, 0, gl.GL_RGBA,
-	    gl.GL_FLOAT, FloatBuffer.wrap(data));
+	    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, width, 1, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+	}
+	
+	public void bindGlobalLightTexture(GL3 gl) {
+		gl.glEnable(gl.GL_TEXTURE_2D);
+		gl.glActiveTexture(gl.GL_TEXTURE0);
+		gl.glBindTexture(gl.GL_TEXTURE_2D, globalTextureID);
+	}
+	public void bindLocalLightTexture(GL3 gl) {
+		gl.glEnable(gl.GL_TEXTURE_2D);
+		gl.glActiveTexture(gl.GL_TEXTURE1);
+		gl.glBindTexture(gl.GL_TEXTURE_2D, localTextureID);
 	}
 }

@@ -2,6 +2,7 @@ package de.jreality.jogl3;
 
 import javax.media.opengl.GL3;
 
+import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.light.JOGLLightInstance;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
@@ -20,11 +21,11 @@ public class JOGLRenderState {
 	public float screenSizeInScene = 1;
 
 	private JOGLLightCollection localLights = null;
-	public int numGlobalDirLights = 0;
-	public int numGlobalPointLights = 0;
-	public int numGlobalSpotLights = 0;
+	public JOGLLightCollection getLocalLightCollection(){
+		return localLights;
+	}
 	
-	public int lightTex = 0;
+	//public int lightTex = 0;
 	
 	//copy the references to the light instances to a new light collection
 	public JOGLLightCollection copyLocalLights(){
@@ -57,14 +58,18 @@ public class JOGLRenderState {
 		return projectionMatrix;
 	}
 
-	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, int lightTex, int numGlobalDirLights, int numGlobalPointLights, int numGlobalSpotLights, int screenSize, float screenSizeInScene) {
+	private LightHelper globalLightHelper;
+	
+	public LightHelper getLightHelper() {
+		return globalLightHelper;
+	}
+
+	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, LightHelper globalLightHelper, int screenSize, float screenSizeInScene) {
 		localLights = new JOGLLightCollection(null);
+		this.globalLightHelper = globalLightHelper;
 		this.screenSize = screenSize;
 		this.screenSizeInScene = screenSizeInScene;
-		this.lightTex = lightTex;
-		this.numGlobalDirLights = numGlobalDirLights;
-		this.numGlobalPointLights = numGlobalPointLights;
-		this.numGlobalSpotLights = numGlobalSpotLights;
+		//this.lightTex = lightTex;
 		System.arraycopy(inverseCameraMatrix, 0, modelViewMatrix, 0, 16);
 		System.arraycopy(projection, 0, projectionMatrix, 0, 16);
 		//System.arraycopy(inverseCameraMatrix, 0, projectionMatrix, 0, 16);
@@ -72,13 +77,11 @@ public class JOGLRenderState {
 	}
 	
 	public JOGLRenderState(JOGLRenderState parentState, double[] matrix) {
-		this.numGlobalDirLights = parentState.numGlobalDirLights;
-		this.numGlobalPointLights = parentState.numGlobalPointLights;
-		this.numGlobalSpotLights = parentState.numGlobalSpotLights;
 		localLights = parentState.copyLocalLights();
+		globalLightHelper = parentState.getLightHelper();
 		screenSize = parentState.screenSize;
 		screenSizeInScene = parentState.screenSizeInScene;
-		this.lightTex = parentState.lightTex;
+		//this.lightTex = parentState.lightTex;
 		System.arraycopy(parentState.getProjectionMatrix(), 0, projectionMatrix, 0, 16);
 		if (matrix != null) Rn.times(modelViewMatrix, parentState.getModelViewMatrix(), matrix);
 		else System.arraycopy(parentState.getModelViewMatrix(), 0, modelViewMatrix, 0, 16);
