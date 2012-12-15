@@ -52,12 +52,28 @@ public class LightTest {
 		l3.setColor(Color.GREEN);
 		l3.setIntensity(0.5);
 		l3.setFalloff(1, 0, 0);
-		l3.setDistribution(0);
-		
+		l3.setDistribution(10);
 		SceneGraphComponent light3 = new SceneGraphComponent();
 		light3.setLight(l3);
 		MatrixBuilder.euclidean().translate(new double[]{-2, 1, 2, 1}).rotate(1.5, new double[]{1, 0, 0}).assignTo(light3);
 		cmp.addChild(light3);
+		
+//		double r = Math.sqrt(2)*2;
+//		SpotLight[] lights = new SpotLight[20];
+//		for(int i = 0; i < lights.length; i++){
+//			double a = i*Math.PI/10.0;
+//			lights[i] = new SpotLight();
+//			lights[i].setGlobal(true);
+//			lights[i].setColor(Color.GREEN);
+//			lights[i].setIntensity(0.5);
+//			lights[i].setFalloff(1, 0, 0);
+//			lights[i].setDistribution(0);
+//			lights[i].setConeAngle(0.2);
+//			SceneGraphComponent light = new SceneGraphComponent();
+//			light.setLight(lights[i]);
+//			MatrixBuilder.euclidean().translate(new double[]{r*Math.sin(a), 1, r*Math.cos(a), 1}).rotate(1.5, new double[]{1, 0, 0}).assignTo(light);
+//			cmp.addChild(light);
+//		}
 		
 		SceneGraphComponent torus = new SceneGraphComponent();
 		torus.setGeometry(Primitives.torus(2, 1, 10, 10));
