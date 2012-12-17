@@ -400,6 +400,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		// scene
 		Scene scene = c.getPlugin(Scene.class);
 		scene.getBackdropComponent().addChild(terrain);
+		scene.setAutomaticClippingPlanes(false);
 		
 		viewPreferences = c.getPlugin(ViewPreferences.class);
 		viewPreferences.addColorPickerChangedListener(this);
@@ -414,6 +415,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		updateTransparency();
 		VRPanel vp = c.getPlugin(VRPanel.class);
 		vp.addComponent(getClass(), shrinkPanel, 1.0, "VR");
+
 	}
 	
 	@Override
