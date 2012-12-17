@@ -47,6 +47,7 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.EncompassFactory;
 
 /**
  *
@@ -58,11 +59,11 @@ import de.jreality.util.CameraUtility;
 public class EncompassTool extends AbstractTool {
 	
 	double margin = 1.75;		// value greater than one creates a margin around the encompassed object  
-
+	boolean automaticClippingPlanes = true;
   final static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
   final static InputSlot SHIFT = InputSlot.getDevice("Secondary");
   final static InputSlot CTRL = InputSlot.getDevice("Meta");
-
+  EncompassFactory encompassFactory = new EncompassFactory();
   public EncompassTool() {
     addCurrentSlot(encompassSlot);
   }
@@ -77,11 +78,13 @@ public class EncompassTool extends AbstractTool {
         tc.getAxisState(CTRL).isPressed()) return;
     if (tc.getAxisState(encompassSlot).isPressed()) {
       // TODO get the metric from the effective appearance of avatar path
-      CameraUtility.encompass(tc.getAvatarPath(), 
-    		  tc.getRootToLocal(), 
-    		  tc.getViewer().getCameraPath(), 
-    		  margin, 
-    		  Pn.EUCLIDEAN); //tc.getViewer().getMetric());
+    	encompassFactory.setAvatarPath(tc.getAvatarPath());
+    	encompassFactory.setCameraPath(tc.getViewer().getCameraPath());
+    	encompassFactory.setScenePath(tc.getRootToLocal());
+    	encompassFactory.setMargin(margin);
+    	encompassFactory.setMetric(Pn.EUCLIDEAN);		// TODO: other metrics?
+    	encompassFactory.setClippingPlanes(automaticClippingPlanes);
+    	encompassFactory.update();
     }
   }
 
@@ -92,5 +95,13 @@ public class EncompassTool extends AbstractTool {
   public double getMargin()	{
 	  return margin;
   }
+
+public boolean isSetClippingPlanes() {
+	return automaticClippingPlanes;
+}
+
+public void setAutomaticClippingPlanes(boolean setClippingPlanes) {
+	this.automaticClippingPlanes = setClippingPlanes;
+}
 
 }
