@@ -24,6 +24,7 @@ public class Scene extends Plugin {
 	
 	private List<ChangeListener> 
 		changeListeners = synchronizedList(new LinkedList<ChangeListener>());
+	boolean clippingPlanes = true;		// does the scene allow automatics setting of clipping planes?
 	
 	static JrScene defaultScene() {
 		//sceneRoot of the JrScene
@@ -236,5 +237,14 @@ public class Scene extends Plugin {
 	private SceneGraphComponent getLastComponent(SceneGraphPath path) {
 		return path == null ? null : path.getLastComponent();
 	}
+
+	public boolean isAutomaticClippingPlanes() {
+		return clippingPlanes;
+	}
+
+	public void setAutomaticClippingPlanes(boolean clippingPlanes) {
+		this.clippingPlanes = clippingPlanes;
+	}
+
 		
 }
