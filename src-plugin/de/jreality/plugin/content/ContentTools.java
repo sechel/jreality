@@ -117,7 +117,6 @@ public class ContentTools extends Plugin {
 		encompass.setIcon(ImageHook.getIcon("arrow_out.png"));
 		
 		encompassTool = new EncompassTool();
-		
 		rotateTool = new RotateTool();
 		rotateTool.setFixOrigin(false);
 		rotateTool.setMoveChildren(false);
@@ -241,6 +240,7 @@ public class ContentTools extends Plugin {
 		super.install(c);
 		scene = c.getPlugin(Scene.class);
 		content = JRViewerUtility.getContentPlugin(c);
+		encompassTool.setAutomaticClippingPlanes(scene != null ? scene.isAutomaticClippingPlanes() : true);
 		install();
 		ViewMenuBar viewMenuBar = c.getPlugin(ViewMenuBar.class);
 		installMenu(viewMenuBar);
