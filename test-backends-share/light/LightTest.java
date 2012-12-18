@@ -80,10 +80,11 @@ public class LightTest {
 		light2.addChild(torus);
 		
 		JRViewer vr = new JRViewer();
+		
+		vr.setContent(cmp);
 		vr.addVRSupport();
 		vr.addBasicUI();
 		vr.addContentUI();
-		vr.setContent(cmp);
 		vr.startup();
 	}
 
