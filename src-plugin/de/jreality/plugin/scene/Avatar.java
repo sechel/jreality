@@ -116,7 +116,7 @@ public class Avatar extends Plugin implements ChangeListener {
 				// TODO: allow control over these settings, since each scene is different
 				// and when the terrain is active, the encompass() method does not automatically
 				// set the near and far clipping planes.
-				cam.setNear(0.5);		// cam.setNear(0.1);
+				cam.setNear(0.1);		// cam.setNear(0.1);
 				cam.setFar(1000);		// cam.setFar(10000);
 			}
 			MatrixBuilder.euclidean().translate(0,1.7,0).assignTo(cameraComponent);
