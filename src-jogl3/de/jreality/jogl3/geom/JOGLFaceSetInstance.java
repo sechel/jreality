@@ -39,6 +39,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		super.updateAppearance(sgp, gl);
 		JOGLFaceSetEntity entity = (JOGLFaceSetEntity)this.getEntity();
 		IndexedFaceSet fs = (IndexedFaceSet)entity.getNode();
+		faceSetUniforms = new LinkedList<GlUniform>();
 		polygonShader = updateAppearance(sgp, gl, faceSetUniforms, faceTexture, CommonAttributes.POLYGON_SHADER);
 	}
 

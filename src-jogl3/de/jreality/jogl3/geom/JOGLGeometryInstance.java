@@ -39,9 +39,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 				//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.
 				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE2);
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 2);
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "hasTex"), 1);
+				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 1);
 			}else{
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "hasTex"), 0);
+				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 0);
 			}
 		}
 	}
@@ -87,6 +87,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
+			//System.out.println("binding " + name + "= " + value);
 			gl.glUniform1f(gl.glGetUniformLocation(shader.shaderprogram, name), value);
 		}
 	}
@@ -96,6 +97,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
+			//System.out.println("binding " + name + "= " + value[0] + " " + value[1] + " " + value[2] + " " + value[3]);
 			gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, value, 0);
 		}
 	}
@@ -142,6 +144,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	//this method copies appearance attributes to a list of uniform variables for later use in the openGL shader
 	//it furthermore returns the openGL shader to use
 	protected GLShader updateAppearance(SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, String type) {
+		
 		GLShader shader = GLShader.defaultPolygonShader;
 		if(type.equals("lineShader"))
 			shader = GLShader.defaultLineShader;
@@ -180,23 +183,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		for(ShaderVar v : shader.shaderUniforms){
 			//if(type.equals(CommonAttributes.POINT_SHADER))
 				//System.out.println("shader var is " + v.getName() + ", type is " + v.getType());
-    		if(v.getName().equals("numGlobalDirLights"))
-    			continue;
-    		if(v.getName().equals("numGlobalPointLights"))
-    			continue;
-    		if(v.getName().equals("numGlobalSpotLights"))
-    			continue;
-    		if(v.getName().equals("numLocalDirLights"))
-    			continue;
-    		if(v.getName().equals("numLocalPointLights"))
-    			continue;
-    		if(v.getName().equals("numLocalSpotLights"))
-    			continue;
-    		if(v.getName().equals("globalLights"))
-    			continue;
-    		if(v.getName().equals("localLights"))
-    			continue;
-    		if(v.getName().equals("projection"))
+			if(v.getName().equals("projection"))
     			continue;
     		if(v.getName().equals("modelview")){
     			continue;
@@ -207,10 +194,13 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     		if(v.getName().equals("screenSizeInSceneOverScreenSize")){
     			continue;
     		}
-    		if(v.getName().equals("hasTex")){
+    		if(v.getName().length() > 3 && v.getName().substring(0, 4).equals("_")){
     			continue;
     		}
     		if(v.getName().length() > 3 && v.getName().substring(0, 4).equals("has_")){
+    			continue;
+    		}
+    		if(v.getName().length() > 3 && v.getName().substring(0, 4).equals("sys_")){
     			continue;
     		}
     		//System.out.println("updateAppearance " + v.getName());

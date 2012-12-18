@@ -6,6 +6,7 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.GLShader;
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.shader.LineShader;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphPath;
@@ -34,6 +35,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		super.updateAppearance(sgp, gl);
+		lineSetUniforms = new LinkedList<GlUniform>();
 		lineShader = updateAppearance(sgp, gl, lineSetUniforms, lineTexture, CommonAttributes.LINE_SHADER);
 	}
 }

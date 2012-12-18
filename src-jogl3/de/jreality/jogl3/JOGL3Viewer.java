@@ -344,7 +344,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	    int sbuf[] = new int[1];
 
 	    //gl.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	    gl.glEnable(gl.GL_BLEND);
+	    //gl.glEnable(gl.GL_BLEND);
 		//gl.glBlendEquation(gl.GL_FUNC_ADD);
 		//gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 		//initialize shaders once

@@ -41,9 +41,9 @@ public class PolygonShader{
 		GL3 gl = state.getGL();
 		
 		state.getLightHelper().loadLocalLightTexture(state.getLocalLightCollection(), gl);
-		gl.glDisable(gl.GL_BLEND);
+		//gl.glDisable(gl.GL_BLEND);
 		//gl.glBlendEquationSeparate(gl.GL_FUNC_ADD, gl.GL_FUNC_ADD);
-		gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+		//gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 		//gl.glBlendFuncSeparate(0x0302, 0x0303, gl.GL_ZERO, gl.GL_ZERO);
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
@@ -56,16 +56,16 @@ public class PolygonShader{
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
         	
 			//global lights in a texture
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "globalLights"), 0);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
 			
 			//local lights in a texture
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "localLights"), 1);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_localLights"), 1);
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
+			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
 			
 			
 			//bind shader uniforms
@@ -73,6 +73,7 @@ public class PolygonShader{
 			for(GlUniform u : c){
 				u.bindToShader(shader, gl);
 			}
+
 			tex.bind(shader, gl);
 			//TODO all the other types
 			
@@ -90,7 +91,7 @@ public class PolygonShader{
         			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
         		}
         	}
-        	
+
         	//new way to do lights
 			state.getLightHelper().bindGlobalLightTexture(gl);
 			//state.getGlobalLightHelper().bindLocalLightTexture(gl);
@@ -105,7 +106,6 @@ public class PolygonShader{
         			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
         		}
         	}
-        	
 			shader.dontUseShader(gl);
 	}
 }

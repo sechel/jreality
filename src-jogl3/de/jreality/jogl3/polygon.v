@@ -6,18 +6,19 @@ uniform mat4 projection;
 uniform mat4 modelview;
 uniform mat4 textureMatrix;
 
-uniform vec4 camPosition;
-
 uniform int smoothShading = 1;
 
 //shadow map samplers later
 
 //VERTEX ATTRIBUTES
 in vec4 vertex_coordinates;
+
 uniform int has_vertex_normals;
 in vec3 vertex_normals;
+
 uniform int has_face_normals;
 in vec3 face_normals;
+
 uniform int has_vertex_texturecoordinates;
 in vec2 vertex_texturecoordinates;
 
