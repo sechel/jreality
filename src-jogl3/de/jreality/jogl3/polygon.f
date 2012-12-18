@@ -54,13 +54,22 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 	
 	for(int i = 0; i < numDir; i++){
 		vec4 dir = texture(lights, vec2((3*i+1+0.5)/lightTexSize, 0));
+		
+		vec4 col = texture(lights, vec2((3*i+0.5)/lightTexSize, 0));
+		float intensity = texture(lights, vec2((3*i+2+0.5)/lightTexSize, 0)).r;
+		vec4 ambient = ambientColor*col*intensity;
+		lightInflux = lightInflux + ambientCoefficient * ambient.xyz;
+		
 		float dott = dot(normal, normalize(dir.xyz));
 		if(dott > 0){
-			vec4 col = texture(lights, vec2((3*i+0.5)/lightTexSize, 0));
-			float intensity = texture(lights, vec2((3*i+2+0.5)/lightTexSize, 0)).r;
-			vec4 new = dott*col*intensity;
-			vec3 new2 = new.xyz;
-			lightInflux = lightInflux + new2;
+			vec4 diffuse = dott*diffuseColor*col*intensity;
+			
+			float spec = dot(camSpaceNormal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
+			//this specularColor here seems to be diffuseColor*specularColor
+			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			
+			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
+			lightInflux = lightInflux + new.xyz;
 		}
 	}
 	for(int i = 0; i < numPoint; i++){
@@ -121,7 +130,7 @@ void main(void)
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	vec4 texColor = texture( image, texCoord.st);
 	
-	vec4 color2 = diffuseColor; //vec4(1, 0, 0, 1);
+	vec4 color2 = vec4(1, 1, 1, 1);
 	if(has_vertex_texturecoordinates==1 && has_Tex == 1)
 		color2 = texColor;
 	if(color2.a==0)
@@ -130,11 +139,10 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(camSpaceNormal);
 		calculateLocalLightInflux(camSpaceNormal);
-		gl_FragColor = vec4(color2.rgb * lightInflux, color2.a);
+		gl_FragColor = vec4(color2.xyz*lightInflux, color2.a);
 	}else{
 		calculateGlobalLightInflux(-camSpaceNormal);
 		calculateLocalLightInflux(-camSpaceNormal);
-		gl_FragColor = vec4(color2.rgb * lightInflux, color2.a);
+		gl_FragColor = vec4(color2.xyz*lightInflux, color2.a);
 	}
-	
 }

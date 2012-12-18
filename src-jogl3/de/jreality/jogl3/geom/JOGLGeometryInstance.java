@@ -97,7 +97,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
-			//System.out.println("binding " + name + "= " + value[0] + " " + value[1] + " " + value[2] + " " + value[3]);
+			if(name.equals("specularColor"))
+				System.out.println("binding " + name + "= " + value[0] + " " + value[1] + " " + value[2] + " " + value[3]);
 			gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, value, 0);
 		}
 	}
