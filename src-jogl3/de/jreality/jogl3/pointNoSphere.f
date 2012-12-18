@@ -19,15 +19,18 @@ vec3 light = vec3(0.57735, 0.57735, 0.57735);
 
 void main(void)
 {
-	
+	//pixel color from texture
 	vec4 tex = texture( tex, gl_PointCoord);
 	
-	//depth calculations
+	//depth calculations:
+	//transform coordinates to the unit circle
 	vec2 coordsxy = 2*vec2(gl_PointCoord.x-.5, gl_PointCoord.y-.5);
+	//calculate the distance from the origin
 	float radius = length(coordsxy);
+	//z coordinate in the unit sphere
 	float coordsz = sqrt(1-radius*radius);
 	float shade2 = dot(vec3(coordsxy, coordsz), light);
-	if(tex.a == 0){
+	if(radius >= 1){
 		discard;
 	}else{
 		//float offset = sqrt(1-radius*radius);
