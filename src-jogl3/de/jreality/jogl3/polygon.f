@@ -65,7 +65,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		if(dott > 0){
 			vec4 diffuse = dott*diffuseColor*col*intensity;
 			
-			float spec = dot(camSpaceNormal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
+			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
 			//this specularColor here seems to be diffuseColor*specularColor
 			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
 			
