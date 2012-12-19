@@ -49,6 +49,7 @@ float spot(float exp, vec4 dir, vec4 relPos, float coneAngle){
 }
 
 void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numSpot, sampler2D lights){	
+	
 	//size of the light texture
 	int lightTexSize = numDir*3+numPoint*3+numSpot*5;
 	
@@ -117,6 +118,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 }
 
 void calculateGlobalLightInflux(vec3 normal){
+	lightInflux = lightInflux + ambientColor.xyz*ambientCoefficient;
 	calculateLightInfluxGeneral(normal, sys_numGlobalDirLights, sys_numGlobalPointLights, sys_numGlobalSpotLights, sys_globalLights);
 }
 void calculateLocalLightInflux(vec3 normal){

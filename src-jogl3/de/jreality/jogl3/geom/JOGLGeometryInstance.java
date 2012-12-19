@@ -12,6 +12,7 @@ import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.shader.CommonAttributes;
@@ -209,7 +210,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     		//retrieve corresponding attribute from eap
     		if(v.getType().equals("int")){
     			Object value = new Object();
-    			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()), value);
+    			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()),  CommonAttributes.getDefault(v.getName(), value));
     			if(value.getClass().equals(Integer.class)){
     				c.add(new GlUniformInt(v.getName(), (Integer)value));
     				//c.intUniforms.add(new GlUniform<Integer>(v.getName(), (Integer)value));
@@ -230,7 +231,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //    			System.out.println(v.getName());
     			Object value = new Object();
     			//System.out.println(v.getName());
-    			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()), value);
+    			//TODO retrieve default value somehow...
+    			
+    			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()), CommonAttributes.getDefault(v.getName(), value));
     			
     			if(value.getClass().equals(Color.class)){
     				float[] color = ((Color)value).getRGBComponents(null);
@@ -250,7 +253,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //    			System.out.println(v.getName());
     			Object value = new Object();
     			//System.out.println(v.getName());
-    			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()), value);
+    			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()),  CommonAttributes.getDefault(v.getName(), value));
     			
     			if(value.getClass().equals(Double.class)){
     				Double value2 = (Double)value;

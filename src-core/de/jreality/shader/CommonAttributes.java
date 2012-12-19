@@ -243,4 +243,68 @@ import de.jreality.scene.Appearance;
 	public static final double HAPTIC_STATIC_FRICTION_DEFAULT = 0.2;
 	public static final String HAPTIC_DYNAMIC_FRICTION = "dynamicFriction";
 	public static final double HAPTIC_DYNAMIC_FRICTION_DEFAULT = 0.3;
+	
+	public static Object getDefault(String key, Object value){
+		if(key.equals("ambientColor"))
+			return AMBIENT_COLOR_DEFAULT;
+		if(key.equals("diffuseColor"))
+			return DIFFUSE_COLOR_DEFAULT;
+		if(key.equals("specularColor"))
+			return SPECULAR_COLOR_DEFAULT;
+		if(key.equals("specularCoefficient"))
+			return SPECULAR_COEFFICIENT_DEFAULT;
+		if(key.equals("diffuseCoefficient"))
+			return DIFFUSE_COEFFICIENT_DEFAULT;
+		if(key.equals("ambientCoefficient"))
+			return AMBIENT_COEFFICIENT_DEFAULT;
+		
+		if(key.equals("specularExponent"))
+			return SPECULAR_EXPONENT_DEFAULT;
+		
+		if(key.equals("backgroundColors"))
+			return BACKGROUND_COLOR_DEFAULT;
+		if(key.equals("fogEnabled"))
+			return FOG_ENABLED_DEFAULT;
+		if(key.equals("fogDensity"))
+			return FOG_DENSITY_DEFAULT;
+		if(key.equals("levenOfDetail"))
+			return LEVEL_OF_DETAIL_DEFAULT;
+		if(key.equals("opaqueTubesAndSpheres"))
+			return OPAQUE_TUBES_AND_SPHERES_DEFAULT;
+		if(key.equals("radiiWorldCoordinates"))
+			return RADII_WORLD_COORDINATES_DEFAULT;
+		if(key.equals("spheresDraw"))
+			return SPHERES_DRAW_DEFAULT;
+		if(key.equals("pointRadius"))
+			return POINT_RADIUS_DEFAULT;
+		
+		if(key.equals("pointSize"))
+			return POINT_SIZE_DEFAULT;
+		if(key.equals("pointDiffuseColor"))
+			return POINT_DIFFUSE_COLOR_DEFAULT;
+		if(key.equals("attenuatePointSize"))
+			return ATTENUATE_POINT_SIZE_DEFAULT;
+		if(key.equals("pointRadius"))
+			return POINT_RADIUS_DEFAULT;
+		
+		if(key.equals("tubesDraw"))
+			return TUBES_DRAW_DEFAULT;
+		if(key.equals("tubeRadius"))
+			return TUBE_RADIUS_DEFAULT;
+		if(key.equals(TUBE_STYLE))
+			return TUBE_STYLE_DEFAULT;
+		if(key.equals("VERTEX_COLORS_ENABLED"))
+			return VERTEX_COLORS_ENABLED_DEFAULT;
+		
+		if(key.equals(SMOOTH_LINE_SHADING))
+			return SMOOTH_LINE_SHADING_DEFAULT;
+		if(key.equals(LINE_WIDTH))
+			return LINE_WIDTH_DEFAULT;
+		if(key.equals("lineDiffuseColor"))
+			return LINE_DIFFUSE_COLOR_DEFAULT;
+		if(key.equals(SMOOTH_SHADING))
+			return SMOOTH_SHADING_DEFAULT;
+		
+		return value;
+	}
 }
