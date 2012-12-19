@@ -53,6 +53,7 @@ public class LightTest {
 		l3.setIntensity(0.5);
 		l3.setFalloff(1, 0, 0);
 		l3.setDistribution(10);
+		l3.setConeAngle(1.5);
 		SceneGraphComponent light3 = new SceneGraphComponent();
 		light3.setLight(l3);
 		MatrixBuilder.euclidean().translate(new double[]{-2, 1, 2, 1}).rotate(1.5, new double[]{1, 0, 0}).assignTo(light3);

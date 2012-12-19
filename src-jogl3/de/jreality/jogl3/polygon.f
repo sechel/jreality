@@ -66,7 +66,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			vec4 diffuse = dott*diffuseColor*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
-			//this specularColor here seems to be diffuseColor*specularColor
+			
 			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
 			
 			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
@@ -76,42 +76,55 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 	for(int i = 0; i < numPoint; i++){
 		//calculate distance between light and vertex, possible also in HYPERBOLIC geom
 		vec4 pos = texture(lights, vec2((3*numDir+3*i+1+0.5)/lightTexSize, 0));
+		vec4 col = texture(lights, vec2((3*numDir+3*i+0.5)/lightTexSize, 0));
+		vec4 tmp = texture(lights, vec2((3*numDir+3*i+2+0.5)/lightTexSize, 0));
+		float intensity = tmp.a;
+		vec3 att = tmp.xyz;
 		vec4 RelPos = pos - camSpaceCoord;
+		float dist = length(RelPos);
+		float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
+		
+		vec4 ambient = ambientColor*col*intensity;
+		lightInflux = lightInflux + atten*ambientCoefficient * ambient.xyz;
+		
 		float dott = dot(normal, normalize(RelPos.xyz));
 		if(dott > 0){
-			vec4 col = texture(lights, vec2((3*numDir+3*i+0.5)/lightTexSize, 0));
-			vec4 tmp = texture(lights, vec2((3*numDir+3*i+2+0.5)/lightTexSize, 0));
-			vec3 att = tmp.xyz;
-			float intensity = tmp.a;
-			float dist = length(RelPos);
-			float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
+			vec4 diffuse = dott*diffuseColor*col*intensity;
 			
-			vec4 new = atten*dott*col*intensity;
-			vec3 new2 = new.xyz;
-			lightInflux = lightInflux + new2;
+			float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
+			
+			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			
+			
+			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
+			lightInflux = lightInflux + atten*new.xyz;
 		}
 	}
-	//this causes quite some overhead, when we have many spot lights, even if they are not visible for this pixel
-	//the check, whether the light is on the right side of the triangle might better be done after checking whether it is inside the cone
 	for(int i = 0; i < numSpot; i++){
 		vec4 pos = texture(lights, vec2((3*numDir+3*numPoint+5*i+2+0.5)/lightTexSize, 0));
+		vec4 coneAngles = texture(lights, vec2((3*numDir+3*numPoint+5*i+3+0.5)/lightTexSize, 0));
 		vec4 RelPos = pos - camSpaceCoord;
-		float dott = dot(normal, normalize(RelPos.xyz));
-		//light is on the right side of the face
-		if(dott > 0){
-			vec4 dir = texture(lights, vec2((3*numDir+3*numPoint+5*i+1+0.5)/lightTexSize, 0));
-			vec4 coneAngles = texture(lights, vec2((3*numDir+3*numPoint+5*i+3+0.5)/lightTexSize, 0));
-			float angle = acos(dot(-normalize(RelPos.xyz), dir.xyz));
-			if(angle < coneAngles.x){
-				vec4 col = texture(lights, vec2((3*numDir+3*numPoint+5*i+0.5)/lightTexSize, 0));
-				float intensity = coneAngles.a;
-				float factor = pow(cos(angle), coneAngles.z);
-				vec3 att = texture(lights, vec2((3*numDir+3*numPoint+5*i+4+0.5)/lightTexSize, 0)).xyz;
-				float dist = length(RelPos);
-				float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
-				vec4 new = atten*factor*dott*col*intensity;
-				vec3 new2 = new.xyz;
-				lightInflux = lightInflux + new2;
+		vec4 dir = texture(lights, vec2((3*numDir+3*numPoint+5*i+1+0.5)/lightTexSize, 0));
+		float angle = acos(dot(-normalize(RelPos.xyz), dir.xyz));
+		if(angle < coneAngles.x){
+			vec4 col = texture(lights, vec2((3*numDir+3*numPoint+5*i+0.5)/lightTexSize, 0));
+			vec3 att = texture(lights, vec2((3*numDir+3*numPoint+5*i+4+0.5)/lightTexSize, 0)).xyz;
+			float dist = length(RelPos);
+			float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
+			float intensity = coneAngles.a;
+			vec4 ambient = ambientColor*col*intensity;
+			float factor = pow(cos(angle), coneAngles.z);
+			lightInflux = lightInflux + factor*atten*ambientCoefficient * ambient.xyz;
+			
+			//light is on the right side of the face
+			float dott = dot(normal, normalize(RelPos.xyz));
+			if(dott > 0){
+				vec4 diffuse = dott*diffuseColor*col*intensity;
+				float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
+				vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			
+				vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
+				lightInflux = lightInflux + factor*atten*new.xyz;
 			}
 		}
 	}
@@ -141,10 +154,10 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(camSpaceNormal);
 		calculateLocalLightInflux(camSpaceNormal);
-		gl_FragColor = vec4(color2.xyz*lightInflux, color2.a);
+		gl_FragColor = color2*vec4(lightInflux, diffuseColor.a);
 	}else{
 		calculateGlobalLightInflux(-camSpaceNormal);
 		calculateLocalLightInflux(-camSpaceNormal);
-		gl_FragColor = vec4(color2.xyz*lightInflux, color2.a);
+		gl_FragColor = color2*vec4(lightInflux, diffuseColor.a);
 	}
 }
