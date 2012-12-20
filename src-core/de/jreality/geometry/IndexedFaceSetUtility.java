@@ -1426,6 +1426,9 @@ public class IndexedFaceSetUtility {
                             if(neighFace[j] == p2 && neighFace[(j+1)%neighFace.length]==p1) {
                                 break;
                             }
+                            else if(neighFace[j] == p1 && neighFace[(j+1)%neighFace.length]==p2) {
+                                break;
+                            }
                         }
                         if(j == neighFace.length) {
                             nonNeighbors.add(neighIndex);
@@ -1439,6 +1442,7 @@ public class IndexedFaceSetUtility {
 					int neighb = neighbor.iterator().next();
 					// check orientation
 					boolean welloriented=haveSameOrientation(p1,p2,currFace,faces[neighb]);
+//					System.err.println("face "+p1+"and face "+p2+" have same orientation: "+welloriented);
 					if(!welloriented){
 						// have to switch orientation
 						if(doneFace[neighb]|unfinishedFace[neighb]) {
@@ -1744,7 +1748,7 @@ public class IndexedFaceSetUtility {
 		} else
 			fn = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
 		double[][] vertsAs2D = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		return IndexedFaceSetUtility.calculateVertexNormals(indices, vertsAs2D, fn, metric);
+		return calculateVertexNormals(indices, vertsAs2D, fn, metric);
 	}
 
 	/**
@@ -1770,7 +1774,7 @@ public class IndexedFaceSetUtility {
 					Rn.add(nvn[m], fn[j], nvn[m]);
 				}
 			}
-			if (metric == Pn.EUCLIDEAN)
+			if (n == 3 && metric == Pn.EUCLIDEAN)
 				Rn.normalize(nvn, nvn);
 			else
 				Pn.normalize(nvn, nvn, metric);
