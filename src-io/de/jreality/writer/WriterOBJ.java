@@ -44,6 +44,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 
+import com.objectspace.jgl.Array;
+
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
@@ -131,7 +133,6 @@ public class WriterOBJ {
 	}
 
 	static int write( IndexedFaceSet ifs, String groupName, PrintWriter out, int startVertex ) {
-		
 		if( groupName != null ) {
 			out.println();	
 			out.println( "g " + groupName );
