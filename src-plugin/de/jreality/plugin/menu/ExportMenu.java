@@ -11,6 +11,7 @@ import de.jreality.plugin.icon.ImageHook;
 import de.jreality.ui.viewerapp.SunflowMenu;
 import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
+import de.jreality.ui.viewerapp.actions.file.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.file.ExportPDF;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
 import de.jreality.ui.viewerapp.actions.file.ExportRIB;
@@ -57,6 +58,7 @@ public class ExportMenu extends Plugin implements UIFlavor {
 		exportMenu.add(new ExportPS("PS", viewer, parent));
 		exportMenu.add(new ExportVRML("VRML", viewer, parent));
 		exportMenu.add(new ExportSTL("STL", viewer, parent));
+		exportMenu.add(new ExportOBJ("OBJ", viewer, parent));
 		exportMenu.add(new ExportU3D("U3D", viewer, parent));
 		exportMenu.add(exportPDF = new ExportPDF("PDF", viewer, parent));
 		exportMenu.add(new SunflowMenu(viewer));
