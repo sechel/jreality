@@ -5,25 +5,18 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.plugin.basic.Scene;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 
 public class EncompassFactory {
 
-	Scene scene = null;
 	SceneGraphPath avatarPath,  scenePath,  cameraPath;
 	double margin = 0.0;
 	int metric = Pn.EUCLIDEAN;
 	boolean clippingPlanes = true, stereoParameters = true;
 	
 	public void update() {
-		if (scene != null)	{
-			avatarPath = scene.getAvatarPath();
-			cameraPath = scene.getCameraPath();
-			scenePath = scene.getContentPath();
-		}
 	    Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scenePath.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
@@ -59,14 +52,6 @@ public class EncompassFactory {
 	    }
 		camera.setEyeSeparation(camera.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
 //			System.err.println("setting focus to "+camera.getFocus());
-		}
-
-	public Scene getScene() {
-		return scene;
-	}
-
-	public void setScene(Scene scene) {
-		this.scene = scene;
 	}
 
 	public SceneGraphPath getAvatarPath() {
@@ -124,6 +109,4 @@ public class EncompassFactory {
 	public void setStereoParameters(boolean stereoParameters) {
 		this.stereoParameters = stereoParameters;
 	}
-
-		
 }

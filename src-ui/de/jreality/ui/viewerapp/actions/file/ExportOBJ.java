@@ -11,15 +11,11 @@ import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.RemoveDuplicateInfo;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.data.Attribute;
-import de.jreality.tutorial.geom.GeometryMergeExample;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
-import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.WriterOBJ;
-import de.jreality.writer.WriterSTL;
 
 public class ExportOBJ extends AbstractJrAction {
 

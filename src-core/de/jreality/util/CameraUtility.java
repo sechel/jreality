@@ -414,23 +414,23 @@ public class CameraUtility {
 	 * @param metric
 	 * @deprecated See  {@link EncompassFactory}, which additionally allows control of setting camera parameters.
 	 */
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric) {
-		encompass(avatarPath, scene, cameraPath, margin, metric, true);
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scenePath, SceneGraphPath cameraPath, double margin, int metric) {
+		encompass(avatarPath, scenePath, cameraPath, margin, metric, true);
 	}
 	/**
 	 * A method for encompassing the scene.
 	 * @param avatarPath
-	 * @param scene
+	 * @param scenePath
 	 * @param cameraPath
 	 * @param margin
 	 * @param metric
 	 * @param noTerrain
 	 * @deprecated See  {@link EncompassFactory}, which additionally allows control of setting camera parameters.
 	 */
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric, boolean noTerrain) {
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scenePath, SceneGraphPath cameraPath, double margin, int metric, boolean noTerrain) {
 		EncompassFactory ec = new EncompassFactory();
 		ec.setAvatarPath(avatarPath);
-		ec.setScenePath(scene);
+		ec.setScenePath(scenePath);
 		ec.setCameraPath(cameraPath);
 		ec.setMargin(margin);
 		ec.setMetric(metric);
