@@ -44,8 +44,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 
-import com.objectspace.jgl.Array;
-
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
