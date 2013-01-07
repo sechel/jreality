@@ -131,13 +131,14 @@ public class WriterOBJ {
 	}
 
 	static int write( IndexedFaceSet ifs, String groupName, PrintWriter out, int startVertex ) {
+		
 		if( groupName != null ) {
 			out.println();	
 			out.println( "g " + groupName );
 		    out.println();
 		}
 
-		double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
+		double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		if (points[0].length == 4)	{
 			// dehomogenize!
 			double[][] points3 = new double[points.length][3];
@@ -147,7 +148,7 @@ public class WriterOBJ {
         double [][] normals = null;
 		if( ifs.getVertexAttributes( Attribute.NORMALS ) != null ) {
 			try {
-			normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray().toDoubleArrayArray(null);
+			normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
 			} catch (NullPointerException e) {
 				System.err.println("Skipped normals WriterOBJ.write(): Null value normal data");
 			}
@@ -155,7 +156,7 @@ public class WriterOBJ {
 		double [][] texture = null;
 		if( ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES ) != null ) {
 			try {
-				texture = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
+				texture = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
 			} catch (NullPointerException e) {
 				System.err.println("Skipped texture coordinates WriterOBJ.write(): Null value texture coordinate data");
 			}
