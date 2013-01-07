@@ -810,8 +810,8 @@ public class ToolSystem implements ToolEventReceiver {
 				mouseOverSupport.mouseOverToolAdded();
 			}
 		}
-		LoggingSystem.getLogger(this).info(
-				"first=" + first + " tool=" + tool + "   path=" + path);
+//		LoggingSystem.getLogger(this).finer(
+//				"first=" + first + " tool=" + tool + "   path=" + path);
 	}
 
 	/**
@@ -837,8 +837,8 @@ public class ToolSystem implements ToolEventReceiver {
 				mouseOverSupport.mouseOverToolRemoved();
 			}
 		}
-		LoggingSystem.getLogger(this).info(
-				"last=" + last + " tool=" + tool + " path=" + path);
+//		LoggingSystem.getLogger(this).finer(
+//				"last=" + last + " tool=" + tool + " path=" + path);
 	}
 
 	public SceneGraphPath getEmptyPickPath() {
