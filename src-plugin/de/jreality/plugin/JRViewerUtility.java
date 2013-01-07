@@ -70,14 +70,11 @@ public class JRViewerUtility {
 //	}
 //	
 //	public static void encompass(Scene scene, int metric, boolean noTerrain) {
-		EncompassFactory ef = new EncompassFactory();
-		ef.setAvatarPath(scene.getAvatarPath());
-		ef.setCameraPath(scene.getCameraPath());
-		ef.setScenePath(scene.getContentPath());
+		EncompassFactory ef = Scene.encompassFactoryForScene(scene);
 		ef.setClippingPlanes(scene.isAutomaticClippingPlanes());
+		ef.setStereoParameters(scene.isAutomaticClippingPlanes());
 		ef.setMargin(1.75);
 		ef.setMetric(metric);
-		ef.setStereoParameters(scene.isAutomaticClippingPlanes());
 		ef.update();
 		if (!scene.isAutomaticClippingPlanes()) {
 			Camera camera = ((Camera)scene.getCameraPath().getLastElement());

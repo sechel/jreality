@@ -17,6 +17,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.util.EncompassFactory;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
@@ -246,5 +247,12 @@ public class Scene extends Plugin {
 		this.clippingPlanes = clippingPlanes;
 	}
 
-		
+	public static EncompassFactory encompassFactoryForScene(Scene scene)	{
+		EncompassFactory ef = new EncompassFactory();
+		ef.setAvatarPath(scene.getAvatarPath());
+		ef.setCameraPath(scene.getCameraPath());
+		ef.setScenePath(scene.getContentPath());
+		ef.update();
+		return ef;
+	}
 }

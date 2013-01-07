@@ -1,7 +1,5 @@
 package de.jreality.plugin;
 
-import static de.jreality.util.CameraUtility.encompass;
-
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -57,10 +55,10 @@ import de.jreality.plugin.scene.VRExamples;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.SelectionManagerImpl;
 import de.jreality.ui.viewerapp.ViewerSwitch;
+import de.jreality.util.EncompassFactory;
 import de.jreality.util.NativePathUtility;
 import de.jreality.util.Secure;
 import de.jtem.jrworkspace.plugin.Controller;
@@ -643,12 +641,10 @@ public class JRViewer {
 	 */
 	public void encompassEuclidean() {
 		Scene scene = getPlugin(Scene.class);
-		SceneGraphPath avatarPath = scene.getAvatarPath();
-		SceneGraphPath contentPath = scene.getContentPath();
-		SceneGraphPath cameraPath = scene.getCameraPath();
-		try {
-			encompass(avatarPath, contentPath, cameraPath, 1.75, Pn.EUCLIDEAN);
-		} catch (Exception e) {}
+		EncompassFactory ef = Scene.encompassFactoryForScene(scene);
+		ef.setMetric(Pn.EUCLIDEAN);
+		ef.setMargin(1.75);
+		ef.update();
 	}
 	
 	
@@ -690,8 +686,8 @@ public class JRViewer {
 			mc.setContent(content);
 			if (encompass) {
 				Scene scene = c.getPlugin(Scene.class);
-				Terrain terrain = c.getPlugin(Terrain.class);
-				scene.setAutomaticClippingPlanes(terrain == null);
+				List<Terrain> list = c.getPlugins(Terrain.class);
+				scene.setAutomaticClippingPlanes(list.size() == 0);
 				JRViewerUtility.encompassEuclidean(scene);
 				//check for Terrain plugin. If it is installed, don't cut it off
 				//by an all to distant near clipping plane.
