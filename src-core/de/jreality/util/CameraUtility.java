@@ -414,33 +414,41 @@ public class CameraUtility {
 	 * @param metric
 	 * @deprecated See  {@link EncompassFactory}, which additionally allows control of setting camera parameters.
 	 */
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scenePath, SceneGraphPath cameraPath, double margin, int metric) {
-		encompass(avatarPath, scenePath, cameraPath, margin, metric, true);
+	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric) {
+		EncompassFactory ec = new EncompassFactory();
+		ec.setAvatarPath(avatarPath);
+		ec.setScenePath(scene);
+		ec.setCameraPath(cameraPath);
+		ec.setMargin(margin);
+		ec.setMetric(metric);
+		ec.update();
 	}
 	/**
 	 * A method for encompassing the scene.
 	 * @param avatarPath
-	 * @param scenePath
+	 * @param scene
 	 * @param cameraPath
 	 * @param margin
 	 * @param metric
 	 * @param noTerrain
 	 * @deprecated See  {@link EncompassFactory}, which additionally allows control of setting camera parameters.
 	 */
-	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scenePath, SceneGraphPath cameraPath, double margin, int metric, boolean noTerrain) {
-		EncompassFactory ec = new EncompassFactory();
-		ec.setAvatarPath(avatarPath);
-		ec.setScenePath(scenePath);
-		ec.setCameraPath(cameraPath);
-		ec.setMargin(margin);
-		ec.setMetric(metric);
-		ec.update();
-		if(!noTerrain){
-			Camera camera = ((Camera)cameraPath.getLastElement());
-			camera.setFar(1000);
-			camera.setNear(.1);
-		}
-	}
+	// I have removed this version of the encompass method, and replaced it 
+	// (in JRViewerUtility, where it was used) with the EncompassFactory 
+//	public static void encompass(SceneGraphPath avatarPath, SceneGraphPath scene, SceneGraphPath cameraPath, double margin, int metric, boolean noTerrain) {
+//		EncompassFactory ec = new EncompassFactory();
+//		ec.setAvatarPath(avatarPath);
+//		ec.setScenePath(scene);
+//		ec.setCameraPath(cameraPath);
+//		ec.setMargin(margin);
+//		ec.setMetric(metric);
+//		ec.update();
+//		if(!noTerrain){
+//			Camera camera = ((Camera)cameraPath.getLastElement());
+//			camera.setFar(1000);
+//			camera.setNear(.1);
+//		}
+//	}
 //		Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scene.getLastComponent());
 //	    if (bounds.isEmpty()) return;
 //	    Matrix rootToScene = new Matrix();
