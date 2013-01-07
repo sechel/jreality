@@ -30,9 +30,12 @@ public class InfoOverlayPlugin extends Plugin {
 //		Component viewComp = sceneView.getViewer().getViewingComponent();
 		Viewer[] vlist = sceneView.getViewer().getViewers();
 		de.jreality.jogl.JOGLViewer joglViewer = null;
+		// this is unreliable; adding a DomeViewer (subclass of JOGLViewer) also
+		// broke original version (without break;)
 		for (Viewer v : vlist)	{
 			if (v instanceof de.jreality.jogl.JOGLViewer) {
 				joglViewer = (de.jreality.jogl.JOGLViewer) v;
+				break;
 			}
 		}
 		if (joglViewer == null)  { // signal error 
