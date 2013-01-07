@@ -11,8 +11,10 @@ import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.content.CenteredAndScaledContent;
 import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
+import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.util.CameraUtility;
+import de.jreality.util.EncompassFactory;
 import de.jtem.jrworkspace.plugin.Controller;
 
 public class JRViewerUtility {
@@ -64,16 +66,27 @@ public class JRViewerUtility {
 	
 	
 	public static void encompass(Scene scene, int metric) {
-		encompass(scene, metric, true);
-	}
-	
-	public static void encompass(Scene scene, int metric, boolean noTerrain) {
-		SceneGraphPath avatarPath = scene.getAvatarPath();
-		SceneGraphPath contentPath = scene.getContentPath();
-		SceneGraphPath cameraPath = scene.getCameraPath();
-		try {
-			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, metric, noTerrain);
-		} catch (Exception e) {}
+//		encompass(scene, metric, true);
+//	}
+//	
+//	public static void encompass(Scene scene, int metric, boolean noTerrain) {
+		EncompassFactory ef = new EncompassFactory();
+		ef.setAvatarPath(scene.getAvatarPath());
+		ef.setCameraPath(scene.getCameraPath());
+		ef.setScenePath(scene.getContentPath());
+		ef.setClippingPlanes(scene.isAutomaticClippingPlanes());
+		ef.setMargin(1.75);
+		ef.setMetric(metric);
+		ef.setStereoParameters(scene.isAutomaticClippingPlanes());
+		ef.update();
+		if (!scene.isAutomaticClippingPlanes()) {
+			Camera camera = ((Camera)scene.getCameraPath().getLastElement());
+			camera.setFar(1000);
+			camera.setNear(.1);
+		}
+//		try {
+//			CameraUtility.encompass(avatarPath, contentPath, cameraPath, 1.75, metric, doCameraParameters);
+//		} catch (Exception e) {}
 	}
 	
 	
@@ -82,10 +95,10 @@ public class JRViewerUtility {
 	}
 
 
-	public static void encompassEuclidean(Scene scene, boolean noTerrain) {
-		// TODO Auto-generated method stub
-		encompass(scene, Pn.EUCLIDEAN, noTerrain);
-	}
-	
+//	public static void encompassEuclidean(Scene scene, boolean noTerrain) {
+//		// TODO Auto-generated method stub
+//		encompass(scene, Pn.EUCLIDEAN, noTerrain);
+//	}
+//	
 
 }
