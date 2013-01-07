@@ -11,19 +11,13 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 
 public class EncompassFactory {
-
-	Scene scene = null;
 	SceneGraphPath avatarPath,  scenePath,  cameraPath;
 	double margin = 0.0;
 	int metric = Pn.EUCLIDEAN;
 	boolean clippingPlanes = true, stereoParameters = true;
 	
 	public void update() {
-		if (scene != null)	{
-			avatarPath = scene.getAvatarPath();
-			cameraPath = scene.getCameraPath();
-			scenePath = scene.getContentPath();
-		}
+
 	    Rectangle3D bounds = BoundingBoxUtility.calculateBoundingBox(scenePath.getLastComponent());
 	    if (bounds.isEmpty()) return;
 	    Matrix rootToScene = new Matrix();
@@ -45,10 +39,9 @@ public class EncompassFactory {
 			camera.setFar(margin*3*radius);
 		    camera.setNear(.3*radius);
 	    }
-	    if (!stereoParameters) return;
+	    if (!stereoParameters || SystemProperties.isPortal) return;
 	    SceneGraphComponent avatar = avatarPath.getLastComponent();
 	    Matrix m = new Matrix(avatar.getTransformation());
-	    if (SystemProperties.isPortal) return;
 	    if (camera.isPerspective()) {
 		    MatrixBuilder.init(m, metric).translate(c).translate(camMatrix.getColumn(3)).assignTo(avatar);	    	
 			camera.setFocus(Math.abs(m.getColumn(3)[2]) ); 		//focus);
@@ -60,14 +53,6 @@ public class EncompassFactory {
 		camera.setEyeSeparation(camera.getFocus()/12.0);		// estimate a reasonable separation based on the focal length	
 //			System.err.println("setting focus to "+camera.getFocus());
 		}
-
-	public Scene getScene() {
-		return scene;
-	}
-
-	public void setScene(Scene scene) {
-		this.scene = scene;
-	}
 
 	public SceneGraphPath getAvatarPath() {
 		return avatarPath;
