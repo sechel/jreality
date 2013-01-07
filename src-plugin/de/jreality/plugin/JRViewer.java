@@ -690,14 +690,17 @@ public class JRViewer {
 			mc.setContent(content);
 			if (encompass) {
 				Scene scene = c.getPlugin(Scene.class);
+				Terrain terrain = c.getPlugin(Terrain.class);
+				scene.setAutomaticClippingPlanes(terrain == null);
+				JRViewerUtility.encompassEuclidean(scene);
 				//check for Terrain plugin. If it is installed, don't cut it off
 				//by an all to distant near clipping plane.
 				//this fixes the a problem caused by v.setContent()
-				List<Terrain> list = c.getPlugins(Terrain.class);
-				if(list.size() == 0)
-					JRViewerUtility.encompassEuclidean(scene, true);
-				else
-					JRViewerUtility.encompassEuclidean(scene, false);
+//				List<Terrain> list = c.getPlugins(Terrain.class);
+//				if(list.size() == 0)
+//					JRViewerUtility.encompassEuclidean(scene, true);
+//				else
+//					JRViewerUtility.encompassEuclidean(scene, false);
 			}
 		}
 		
