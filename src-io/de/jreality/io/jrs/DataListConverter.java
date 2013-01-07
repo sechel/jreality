@@ -66,7 +66,7 @@ class DataListConverter extends AbstractConverter {
 
 Pattern arrayPattern = Pattern.compile("[^\\[\\]]*\\[\\]");
   Pattern arrayArrayPattern = Pattern.compile("[^\\[\\]]*\\[\\]\\[\\]");
-  Pattern arrayArrayInlinedPattern = Pattern.compile("[^\\[\\]]*\\[\\]\\[([0-9])+\\]");
+  Pattern arrayArrayInlinedPattern = Pattern.compile("[^\\[\\]]*\\[\\]\\[(([0-9])+)\\]");
   
   public boolean canConvert(Class type) {
     return DataList.class.isAssignableFrom(type);
@@ -157,7 +157,11 @@ Pattern arrayPattern = Pattern.compile("[^\\[\\]]*\\[\\]");
   private int slotLength(String sm) {
     Matcher m = arrayArrayInlinedPattern.matcher(sm);
     if (!m.find()) throw new IllegalArgumentException("no length!");
-    return Integer.parseInt(m.group(1));
+//    for (int i = 0; i<m.groupCount(); ++i)	{
+//    		System.err.println("Group "+i+" = "+m.group(i));
+//    }
+    String foo = m.group(1);
+    return Integer.parseInt(foo);
   }
 
   private boolean isArrayArray(String sm) {
