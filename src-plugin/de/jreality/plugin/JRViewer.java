@@ -41,6 +41,8 @@ import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
 import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
+import de.jreality.plugin.experimental.PythonConsole;
+import de.jreality.plugin.experimental.PythonConsole.MyJTextPane;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.plugin.menu.BackgroundColor;
 import de.jreality.plugin.menu.CameraMenu;
@@ -162,7 +164,7 @@ import de.jtem.jrworkspace.plugin.simplecontroller.widget.SplashScreen;
 public class JRViewer {
 
 	private SimpleController
-		c = new SimpleController();
+		c = new SimpleController("jReality Plug-In Controller");
 	private View
 		view = new View();
 	private static RunningEnvironment
@@ -171,6 +173,8 @@ public class JRViewer {
 		viewPreferences = new ViewPreferences();
 	private static WeakReference<JRViewer>
 		lastViewer = new WeakReference<JRViewer>(null);
+	public static MyJTextPane // this has to be instanced before any LNF code runs
+		scriptingTextPane = new MyJTextPane();
 	
 	
 	static {
@@ -529,7 +533,6 @@ public class JRViewer {
 	 */
 	public void addBasicUI() {
 		c.registerPlugin(new Inspector());
-		c.registerPlugin(new Shell());
 		
 		c.registerPlugin(new BackgroundColor());
 		c.registerPlugin(new DisplayOptions());
@@ -539,6 +542,23 @@ public class JRViewer {
 		c.registerPlugin(new ExportMenu());
 		c.registerPlugin(new CameraMenu());
 		c.registerPlugin(new PropertiesMenu());
+	}
+	
+	
+	/**
+	 * Adds a python console to the lower slot
+	 * Warning: this plug-in is incompatible with the Shell plug-in
+	 */
+	public void addPythonConsole() {
+		c.registerPlugin(PythonConsole.class);
+	}
+	
+	/**
+	 * Adds a java bean shell to the lower slot
+	 * Warning: this plug-in is incompatible with the python console plug-in
+	 */
+	public void addBeanShell() {
+		c.registerPlugin(Shell.class);
 	}
 
 
@@ -551,7 +571,7 @@ public class JRViewer {
 		c.registerPlugin(new Terrain());
 		c.registerPlugin(new Sky());
 		//what does this do?
-		Scene scene = getPlugin(Scene.class);
+		getPlugin(Scene.class);
 	}
 	
 	
@@ -713,6 +733,7 @@ public class JRViewer {
 		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
+		v.addPythonConsole();
 		v.registerPlugin(InfoOverlayPlugin.class);
 		if (params.contains("-vr")) {
 			v.addContentUI();

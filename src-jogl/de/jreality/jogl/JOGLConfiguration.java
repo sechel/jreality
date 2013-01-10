@@ -57,7 +57,7 @@ public class JOGLConfiguration {
 	public static Logger theLog;
 	// static boolean debugGL = true;
 	static boolean debugGL = false;
-	static boolean sharedContexts = true;
+	static boolean sharedContexts = false;
 	static boolean isLinux = false;
 	static boolean multiSample = true;
 	public static boolean hasBlendFuncSeparate = true;
