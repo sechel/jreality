@@ -30,6 +30,8 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 		contentPanel = new JScrollPane();
 	private JTextPane
 		textPane = JRViewer.scriptingTextPane;
+	private boolean
+		consoleBooted = false;
 	
 	public PythonConsole() {
         setInitialPosition(ShrinkPanelPlugin.SHRINKER_BOTTOM);
@@ -58,16 +60,21 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 		
 	}
 
-	@Override
-	public void focusGained(FocusEvent e) {
-		if (interpreter != null) return;
-		PySystemState.initialize();
-		interpreter = new PythonInterpreter();
+	protected void bootConsole() {
+		if (consoleBooted) return;
+		interpreter = getInterpreter();
 		interpreter.set("c", controller);
 		interpreter.set("textpane", textPane);
 		interpreter.exec("vars = {'C' : c}");
 		interpreter.exec("from console import Console");
 		interpreter.exec("Console(vars, textpane)");
+		consoleBooted = true;
+	}
+	
+	
+	@Override
+	public void focusGained(FocusEvent e) {
+		bootConsole();
 	}
 	@Override
 	public void focusLost(FocusEvent e) {
@@ -77,6 +84,14 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		this.controller = c;
+	}
+	
+	public PythonInterpreter getInterpreter() {
+		if (interpreter == null) {
+			PySystemState.initialize();
+			interpreter = new PythonInterpreter();
+		}
+		return interpreter;
 	}
 	
 	public static void main(String[] args) {

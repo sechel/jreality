@@ -43,6 +43,7 @@ import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
 import de.jreality.plugin.experimental.PythonConsole;
 import de.jreality.plugin.experimental.PythonConsole.MyJTextPane;
+import de.jreality.plugin.experimental.PythonToolsManager;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.plugin.menu.BackgroundColor;
 import de.jreality.plugin.menu.CameraMenu;
@@ -549,15 +550,16 @@ public class JRViewer {
 	 * Adds a python console to the lower slot
 	 * Warning: this plug-in is incompatible with the Shell plug-in
 	 */
-	public void addPythonConsole() {
+	public void addPythonSupport() {
 		c.registerPlugin(PythonConsole.class);
+		c.registerPlugin(PythonToolsManager.class);
 	}
 	
 	/**
 	 * Adds a java bean shell to the lower slot
 	 * Warning: this plug-in is incompatible with the python console plug-in
 	 */
-	public void addBeanShell() {
+	public void addBeanShellSupport() {
 		c.registerPlugin(Shell.class);
 	}
 
@@ -733,7 +735,7 @@ public class JRViewer {
 		v.setPropertiesFile("JRViewer.xml");
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
-		v.addPythonConsole();
+		v.addPythonSupport();
 		v.registerPlugin(InfoOverlayPlugin.class);
 		if (params.contains("-vr")) {
 			v.addContentUI();
