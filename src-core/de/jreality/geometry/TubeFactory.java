@@ -644,31 +644,37 @@ public  class TubeFactory {
 				Pn.polarize(null, P3.planeFromPoints(null, polygon[i-1], polygon[i], polygon[i+1]),metric);	
 				if (Rn.euclideanNormSquared(bloop) > 10E-16) {
 					Pn.dehomogenize(bloop,bloop);
-					boolean flip = false;
-					if (bloop[0] <0) flip = true;
-					else if (bloop[0] == 0.0 && bloop[1] < 0) flip = true;
-					else if (bloop[1] == 0.0 && bloop[2] < 0) flip = true;
-					if (flip) for (int j = 0; j<3; ++j) bloop[j] = -bloop[j];
+//					boolean flip = false;
+//					if (bloop[0] <0) flip = true;
+//					else if (bloop[0] == 0.0 && bloop[1] < 0) flip = true;
+//					else if (bloop[1] == 0.0 && bloop[2] < 0) flip = true;
+//					if (flip) for (int j = 0; j<3; ++j) bloop[j] = -bloop[j];
 					return bloop;
 				}
 			}
+			// all points are collinear, choose a random plane through the first two points and polarize it to get a point
 			return Pn.polarizePlane(null, P3.planeFromPoints(null, B, polygon[1], polygon[2]),metric);
 		}
 
 		 static double[][] axes = {{0,0,0},{1,0,0},{0,1,0},{0,0,1}};
 		 static int[][] axesIndices = {{0,1},{0,2},{0,3}};
 		 static Color[] axesColors = {Color.red, Color.green, Color.blue};
-		 
+
 		public static SceneGraphComponent getSceneGraphRepresentation(FrameInfo[] frames)	{
+			return getSceneGraphRepresentation(frames, .02);
+		}
+
+		public static SceneGraphComponent getSceneGraphRepresentation(FrameInfo[] frames, double scale)	{
 			SceneGraphComponent result = new SceneGraphComponent();
 			IndexedLineSet ils;
 			SceneGraphComponent geometry = getXYZAxes();
-			MatrixBuilder.euclidean().scale(.02).assignTo(geometry);
+			MatrixBuilder.euclidean().scale(scale).assignTo(geometry);
 			double[][] verts = new double[frames.length][];
 			int i = 0;
 			for (FrameInfo f : frames)	{
 				SceneGraphComponent foo = new SceneGraphComponent();
-				Transformation t = new Transformation(f.frame);
+				double[] scaledFrame = Rn.times(null, f.frame, 	P3.makeRotationMatrixZ(null, f.phi));
+				Transformation t = new Transformation(scaledFrame);
 				foo.setTransformation(t);
 				foo.addChild(geometry);
 				result.addChild(foo);
