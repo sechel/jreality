@@ -134,16 +134,20 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		addToolButton.addActionListener(this);
 		removeToolButton.addActionListener(this);
 		saveButton.addActionListener(this);
+		
+		toolsTable.getColumnModel().getColumn(0).setMaxWidth(30);
+		toolsTable.getTableHeader().setPreferredSize(new Dimension(10, 0));
+		toolsTable.setRowHeight(22);
 	}
 	
 	public class PythonScriptTool extends AbstractAction {
 		
 		private static final long serialVersionUID = 1L;
 		public String
-			name = "Python Scripting Tool",
-			menuPath = "Python Scripts",
-			sourceCode = "";
-		public Icon 
+			name = "New Python Tool",
+			menuPath = "Python Tools",
+			sourceCode = "print('Hallo Welt')\nprint(C)";
+		public Icon
 			icon = ImageHook.getIcon("python.png");
 		public PyCode
 			code = null;
@@ -157,7 +161,10 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			PythonInterpreter pi = console.getInterpreter();
-			pi.exec(getCode());
+			pi.cleanup();
+			pi.set("C", controller);
+			PyCode code = getCode();
+			pi.exec(code);
 		}
 		
 		private PyCode getCode() {
@@ -251,7 +258,22 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
+		updateTooleditor();
+	}
+	
+	public void updateTooleditor() {
 		PythonScriptTool tool = getSelectedTool();
+		if (tool == null) {
+			nameField.setText("");
+			menuPathField.setText("");
+			try {
+				int len = sourceDocument.getLength();
+				sourceDocument.remove(0, len);
+			} catch (BadLocationException e1) {
+				e1.printStackTrace();
+			}
+			return;
+		}
 		nameField.setText(tool.getName());
 		menuPathField.setText(tool.getMenuPath());
 		int len = sourceDocument.getLength();
@@ -295,6 +317,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			}
 			installTool(tool);
 		}
+		updateTooleditor();
 		toolsTable.revalidate();
 	}
 	
@@ -302,6 +325,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	public PythonScriptTool getSelectedTool() {
 		int index = toolsTable.getSelectionModel().getMinSelectionIndex();
 		if (index < 0) return null;
+		if (index >= tools.size()) return null;
 		return tools.get(index);
 	}
 	
