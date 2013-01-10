@@ -101,8 +101,10 @@ public class JOGLConfiguration {
 			// destroyed
 			// TODO: move to de.jreality.util.SystemProperties
 			foo = Secure.getProperty("jreality.jogl.sharedContexts");
-			if (foo != null && foo.equals("false"))
-				sharedContexts = false;
+			if (foo != null)
+				if (foo.equals("false"))
+					sharedContexts = false;
+				else sharedContexts = true;
 			theLog.log(Level.INFO, "Using shared contexts: " + sharedContexts);
 			quadBufferedStereo = "true".equals(Secure
 					.getProperty(SystemProperties.JOGL_QUAD_BUFFERED_STEREO));
