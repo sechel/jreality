@@ -91,8 +91,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	private JScrollPane
 		sourceScroller = new JScrollPane(sourceArea);
 	private JTextField
-		nameField = new JTextField(),
-		menuPathField = new JTextField();
+		nameField = new JTextField(15),
+		menuPathField = new JTextField(15);
 	private JButton
 		saveButton = new JButton("Save and Update"),
 		browseFileLinkButton = new JButton("..."),
