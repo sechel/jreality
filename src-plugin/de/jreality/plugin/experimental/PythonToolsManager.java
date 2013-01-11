@@ -442,6 +442,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		iconLabel.setIcon(tool.getIcon());
 		if (tool.getFileLink() != null) {
 			fileLinkField.setText(tool.getFileLink().getAbsolutePath());
+		} else {
+			fileLinkField.setText("");
 		}
 		int len = sourceDocument.getLength();
 		try {
