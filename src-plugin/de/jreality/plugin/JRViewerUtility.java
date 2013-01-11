@@ -12,8 +12,6 @@ import de.jreality.plugin.content.CenteredAndScaledContent;
 import de.jreality.plugin.content.DirectContent;
 import de.jreality.plugin.content.TerrainAlignedContent;
 import de.jreality.scene.Camera;
-import de.jreality.scene.SceneGraphPath;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.EncompassFactory;
 import de.jtem.jrworkspace.plugin.Controller;
 

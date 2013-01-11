@@ -250,6 +250,7 @@
 			<include name="colorpicker.jar"/>
 			<include name="beans.jar"/>
 			<include name="jrworkspace.jar"/>
+			<include name="jython-standalone-2.5.3.jar"/>
 		</fileset>
 		<fileset dir="dist">
 			<include name="jReality-io.jar"/>
@@ -706,6 +707,8 @@
 	<target name="release-3rdparty" depends="dist" description="zip all jars">
 		<mkdir dir="${release_dir}" />
 		<mkdir dir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/jython-standalone-2.5.3.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/jython_console.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/antlr-3.4-complete.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/beans.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/bsh.jar" todir="${release_dir}/tmp/lib" />
