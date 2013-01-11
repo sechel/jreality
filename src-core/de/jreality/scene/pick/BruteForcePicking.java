@@ -188,7 +188,7 @@ class BruteForcePicking {
           double dist=Rn.euclideanNorm(Rn.subtract(null,hitPoint,from));
           // TODO: pass index j (index in the edge) to the Hit?
           double affCoord = P3.affineCoordinate(from, to, hitPoint);
-          Hit h = new Hit(path.pushNew(ils), hitPoint, dist , affCoord , PickResult.PICK_TYPE_LINE, i, -1);
+          Hit h = new Hit(path.pushNew(ils), hitPoint, dist , affCoord , PickResult.PICK_TYPE_LINE, i, j);
           localHits.add(h);
         }       
       } 

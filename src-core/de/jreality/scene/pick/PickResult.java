@@ -75,6 +75,7 @@ public interface PickResult {
    * @return the index or -1 if not available
    */
   public int getIndex();
+  public int getSecondaryIndex();
   
   /**
    * returns if the type of the pick:

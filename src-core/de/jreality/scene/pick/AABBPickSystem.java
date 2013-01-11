@@ -163,10 +163,10 @@ public class AABBPickSystem implements PickSystem {
         	if (ap == null) return;
             Object foo = ap.getAttribute(CommonAttributes.VERTEX_DRAW, Boolean.class);
             if (foo != Appearance.INHERITED) { hasNewPickInfo = true; pickPoints=drawVertices = (Boolean) foo;}
-           if (drawVertices)	{
+//           if (drawVertices)	{
             	foo = ap.getAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.PICKABLE,Boolean.class);
                 if (foo != Appearance.INHERITED) { hasNewPickInfo = true; pickPoints = (Boolean) foo; }
-             }
+//             }
             foo = ap.getAttribute(CommonAttributes.EDGE_DRAW, Boolean.class);
             if (foo != Appearance.INHERITED)  { hasNewPickInfo = true; pickEdges = drawEdges = (Boolean) foo;}
             if (drawEdges)	{

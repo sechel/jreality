@@ -95,6 +95,11 @@ public class Hit implements PickResult {
     return index;
   }
 
+  public int getSecondaryIndex() {
+	    return triIndex;
+	  }
+
+
   private String nameForType(int pickType)	{
 	  if (pickType == PickResult.PICK_TYPE_FACE) return "face";
 	  if (pickType == PickResult.PICK_TYPE_LINE) return "edge";
@@ -355,4 +360,5 @@ public class Hit implements PickResult {
       
     }
   }
+
 }
