@@ -525,6 +525,10 @@ public void setPipeline(PolygonPipeline pipeline) {
     public double[] getTextureCoordinates() {
         return textureCoords;
     }
+
+    public int getSecondaryIndex() {
+		return -1;
+	}
   }
       public static class HitComparator implements Comparator {
 
