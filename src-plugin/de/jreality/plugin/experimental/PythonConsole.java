@@ -35,7 +35,10 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 	
 	public PythonConsole() {
         setInitialPosition(ShrinkPanelPlugin.SHRINKER_BOTTOM);
-        Dimension d = new Dimension(400, 200);
+	}
+	
+	private void createLayout() {
+		Dimension d = new Dimension(400, 200);
         contentPanel.setPreferredSize(d);
         contentPanel.setMinimumSize(d);
         shrinkPanel.setLayout(new GridLayout());
@@ -45,7 +48,6 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
         textPane.addFocusListener(this);
         textPane.setCaretColor(Color.BLACK);
 	}
-	
 	
 	public static class MyJTextPane extends JTextPane {
 		
@@ -84,6 +86,7 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		this.controller = c;
+		createLayout();
 	}
 	
 	public PythonInterpreter getInterpreter() {

@@ -53,10 +53,11 @@ import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
+import de.jtem.jrworkspace.plugin.flavor.FrontendFlavor;
 import de.jtem.jrworkspace.plugin.flavor.PreferencesFlavor;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
-public class PythonToolsManager extends Plugin implements PreferencesFlavor, ListSelectionListener, ActionListener {
+public class PythonToolsManager extends Plugin implements PreferencesFlavor, ListSelectionListener, ActionListener, FrontendFlavor {
 
 	private static final String
 		DEFAULT_SOURCE = "print('Hallo Welt')\nprint(C)";
@@ -106,6 +107,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		iconChooser = new JFileChooser();
 	private JLabel
 		iconLabel = new JLabel("Tool Icon");
+	private FrontendListener
+		frontendListener = null;
 	
 	private boolean
 		listenersEnabled = true;
@@ -548,6 +551,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		ViewToolBar toolBar = controller.getPlugin(ViewToolBar.class);
 		menu.addMenuItem(PythonToolsManager.class, 1.0, tool, menuPath);
 		toolBar.addAction(PythonToolsManager.class, 10000.0, tool);
+		frontendListener.updateFrontendUI();
 	}
 	
 	public void uninstallTool(PythonScriptTool tool) {
@@ -555,6 +559,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		ViewToolBar toolBar = controller.getPlugin(ViewToolBar.class);
 		menu.removeMenuItem(PythonToolsManager.class, tool);
 		toolBar.removeAction(PythonToolsManager.class, tool);
+		frontendListener.updateFrontendUI();
 	}
 	
 	@Override
@@ -649,6 +654,11 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	@Override
 	public Icon getSubPageIcon(int i) {
 		return null;
+	}
+
+	@Override
+	public void setFrontendListener(FrontendListener l) {
+		this.frontendListener = l;
 	}
 
 }
