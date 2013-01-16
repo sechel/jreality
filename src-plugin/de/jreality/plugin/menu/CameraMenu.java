@@ -92,7 +92,7 @@ public class CameraMenu extends Plugin {
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Viewer v = viewer.getCurrentViewer();
-				((de.jreality.jogl.Viewer) v).setStereoType(0);
+				((de.jreality.jogl.JOGLViewer) v).setStereoType(0);
 			}
 		});
 		bg.add(b);
@@ -102,7 +102,7 @@ public class CameraMenu extends Plugin {
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Viewer v = viewer.getCurrentViewer();
-				((de.jreality.jogl.Viewer) v).setStereoType(1);
+				((de.jreality.jogl.JOGLViewer) v).setStereoType(1);
 			}
 		});
 		bg.add(b);
@@ -112,7 +112,7 @@ public class CameraMenu extends Plugin {
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Viewer v = viewer.getCurrentViewer();
-				((de.jreality.jogl.Viewer) v).setStereoType(2);
+				((de.jreality.jogl.JOGLViewer) v).setStereoType(2);
 			}
 		});
 		bg.add(b);
@@ -122,7 +122,7 @@ public class CameraMenu extends Plugin {
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Viewer v = viewer.getCurrentViewer();
-				((de.jreality.jogl.Viewer) v).setStereoType(3);
+				((de.jreality.jogl.JOGLViewer) v).setStereoType(3);
 			}
 		});
 		bg.add(b);
