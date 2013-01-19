@@ -206,12 +206,26 @@ public class GLShader
 			vertexShaderProgram = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
 			gl.glShaderSource(vertexShaderProgram, 1, vsrc, null, 0);
 			gl.glCompileShader(vertexShaderProgram);
+			IntBuffer intbuf = IntBuffer.allocate(1000);
+			ByteBuffer bytebuf = ByteBuffer.allocate(1000);
+			gl.glGetShaderInfoLog(vertexShaderProgram, 1000, intbuf, bytebuf);
+			byte[] dst = new byte[intbuf.get(0)];
+			bytebuf.get(dst);
+			String message = new String(dst);
+			System.err.println("vertex shader compile error message: " + message + "Ende");
 			gl.glAttachShader(shaderprogram, vertexShaderProgram);
 		}
 		if(fsrc != null){
 			fragmentShaderProgram = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
 			gl.glShaderSource(fragmentShaderProgram, 1, fsrc, null, 0);
 			gl.glCompileShader(fragmentShaderProgram);
+			IntBuffer intbuf = IntBuffer.allocate(1000);
+			ByteBuffer bytebuf = ByteBuffer.allocate(1000);
+			gl.glGetShaderInfoLog(fragmentShaderProgram, 1000, intbuf, bytebuf);
+			byte[] dst = new byte[intbuf.get(0)];
+			bytebuf.get(dst);
+			String message = new String(dst);
+			System.err.println("fragment shader compile error message: " + message + "Ende");
 			gl.glAttachShader(shaderprogram, fragmentShaderProgram);
 		}
 		
