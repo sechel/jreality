@@ -129,4 +129,12 @@ public class Lights extends Plugin implements ChangeListener  {
 			updateCameraLight(scene);
 		}
 	}
+
+	public DirectionalLight getSunLight() {
+		return sunLight;
+	}
+
+	public DirectionalLight getSkyLight() {
+		return skyLight;
+	}
 }
