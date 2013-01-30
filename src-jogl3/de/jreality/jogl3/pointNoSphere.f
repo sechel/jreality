@@ -16,7 +16,7 @@ in float w;
 in float screenPortion;
 
 vec3 light = vec3(0.57735, 0.57735, 0.57735);
-
+in vec4 color;
 void main(void)
 {
 	//pixel color from texture
@@ -39,18 +39,20 @@ void main(void)
 		gl_FragDepth = 0.5+0.5*windowCoords.z/windowCoords.w;
 	}
 	
+	vec4 color2 = color;
+	
 	//either this texture lookup method
 	float shade = tex.b;
 	if(shade < .5){
-		float red = diffuseColor.r*2*shade;
-		float green = diffuseColor.g*2*shade;
-		float blue = diffuseColor.b*2*shade;
+		float red = color2.r*2*shade;
+		float green = color2.g*2*shade;
+		float blue = color2.b*2*shade;
 		gl_FragColor = vec4(red, green, blue, tex.a);
 	}else{
 		shade = (shade-.5)*2;
-		float red = diffuseColor.r + shade - diffuseColor.r*shade;
-		float green = diffuseColor.g + shade - diffuseColor.g*shade;
-		float blue = diffuseColor.b + shade - diffuseColor.b*shade;
+		float red = color2.r + shade - color2.r*shade;
+		float green = color2.g + shade - color2.g*shade;
+		float blue = color2.b + shade - color2.b*shade;
 		gl_FragColor = vec4(red, green, blue, tex.a);
 	}
 	

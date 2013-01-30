@@ -8,6 +8,7 @@ uniform mat4 modelview;
 
 in vec4 vertex_coordinates;
 in float vertex_relativeRadii;
+in vec4 vertex_colors;
 
 uniform float pointRadius;
 uniform float screenSize;
@@ -19,10 +20,10 @@ out float z;
 out float w;
 out float screenPortion;
 
-
+out vec4 color;
 void main(void)
 {
-
+	color = vertex_colors;
 
 	vec4 posInCamSpace = modelview * vertex_coordinates;
 	gl_Position = projection * posInCamSpace;
