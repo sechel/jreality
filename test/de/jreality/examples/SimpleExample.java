@@ -107,7 +107,7 @@ public class SimpleExample {
     cmp.setAppearance(app);
     cmp.setGeometry(faceSet);
     
-    System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
+    //System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT);
 	JRViewer v = new JRViewer();
 	v.addBasicUI();
 	v.setContent(cmp);
