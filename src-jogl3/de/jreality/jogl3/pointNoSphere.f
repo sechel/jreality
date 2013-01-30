@@ -17,6 +17,7 @@ in float screenPortion;
 
 vec3 light = vec3(0.57735, 0.57735, 0.57735);
 in vec4 color;
+uniform int has_vertex_colors;
 void main(void)
 {
 	//pixel color from texture
@@ -39,7 +40,9 @@ void main(void)
 		gl_FragDepth = 0.5+0.5*windowCoords.z/windowCoords.w;
 	}
 	
-	vec4 color2 = color;
+	vec4 color2 = diffuseColor;
+	if(has_vertex_colors == 1)
+		color2 = color;
 	
 	//either this texture lookup method
 	float shade = tex.b;
