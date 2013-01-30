@@ -8,6 +8,6 @@ uniform vec4 diffuseColor;
 void main(void)
 {
 	gl_FragColor = diffuseColor;
-	gl_FragColor = vec4(1, 0, 0, 1);
+	//gl_FragColor = vec4(1, 0, 0, 1);
 	//gl_FragDepth = gl_FragCoord.z*0.99999;
 }

@@ -118,7 +118,7 @@ public class Texture2DLoader {
         	gl.glGetFloatv(gl.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
 	        //System.out.println("max anisotropy "+ maxAnisotropy.get(0));
         	gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy.get(0));
-
+//        	gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAX_ANISOTROPY_EXT, 0);
         	gl.glGenerateMipmap(gl.GL_TEXTURE_2D);
 
     	}
