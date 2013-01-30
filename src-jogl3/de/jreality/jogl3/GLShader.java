@@ -212,7 +212,8 @@ public class GLShader
 			byte[] dst = new byte[intbuf.get(0)];
 			bytebuf.get(dst);
 			String message = new String(dst);
-			System.err.println("vertex shader compile error message: " + message + "Ende");
+			if(message.length() != 0)
+				System.err.println(message);
 			gl.glAttachShader(shaderprogram, vertexShaderProgram);
 		}
 		if(fsrc != null){
@@ -225,7 +226,8 @@ public class GLShader
 			byte[] dst = new byte[intbuf.get(0)];
 			bytebuf.get(dst);
 			String message = new String(dst);
-			System.err.println("fragment shader compile error message: " + message + "Ende");
+			if(message.length() != 0)
+				System.err.println(message);
 			gl.glAttachShader(shaderprogram, fragmentShaderProgram);
 		}
 		

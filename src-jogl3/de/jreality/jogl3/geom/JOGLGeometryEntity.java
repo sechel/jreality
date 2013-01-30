@@ -13,16 +13,25 @@ public abstract class JOGLGeometryEntity extends SceneGraphNodeEntity implements
 		super(node);
 	}
 	
-	protected boolean isDoubleArray(StorageModel sm){
+	protected boolean isDoubleArrayArray(StorageModel sm){
 		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY)
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY.array())
 			return true;
 		if(sm==StorageModel.DOUBLE_ARRAY.array(2))
 			return true;
 		if(sm==StorageModel.DOUBLE_ARRAY.array(3))
 			return true;
+		if(sm == StorageModel.DOUBLE_ARRAY.inlined(4))
+			return true;
 		if(sm==StorageModel.DOUBLE2_INLINED)
 			return true;
 		if(sm==StorageModel.DOUBLE3_INLINED)
+			return true;
+		return false;
+	}
+	protected boolean isDoubleArray(StorageModel sm){
+		if(sm==StorageModel.DOUBLE_ARRAY)
 			return true;
 		return false;
 	}

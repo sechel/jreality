@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.media.opengl.GL3;
 
+import com.itextpdf.text.log.SysoLogger;
+
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
@@ -14,6 +16,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.event.GeometryEvent;
 
 public class JOGLFaceSetEntity extends JOGLLineSetEntity {
@@ -89,7 +92,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 					continue;
 //				System.out.println("!!!!!!!!!!updating face att");
 				DataList attribs = fs.getFaceAttributes(a);
-				if(isDoubleArray(attribs.getStorageModel())){
+				if(isDoubleArrayArray(attribs.getStorageModel())){
 					//the array containing one item per index
 					double[] inflatedAttributeArray = new double[indexArray.length*4];
 					count = 0;
@@ -192,6 +195,20 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 				DataList attribs = fs.getVertexAttributes(a);
 				if(isDoubleArray(attribs.getStorageModel())){
 					//the array containing one item per index
+					double[] inflatedAttributeArray = new double[indexArray.length];
+					//count = 0;
+					//for each index in the indexArray
+					for(int i = 0; i < indexArray.length; i++){
+						//we retrieve the vertex attribute
+						int j = indexArray[i];
+						DoubleArray dA = (DoubleArray)attribs;
+						
+						inflatedAttributeArray[i] = dA.getValueAt(j);
+					}
+					vbos.put("vertex_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "vertex_"+a.getName(), 1));
+					System.out.println("creating " + "vertex_"+a.getName());
+				}else if(isDoubleArrayArray(attribs.getStorageModel())){
+					//the array containing one item per index
 					double[] inflatedAttributeArray = new double[indexArray.length*4];
 					//count = 0;
 					//for each index in the indexArray
@@ -246,7 +263,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else{
-					System.out.println("FSE2: not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("FSE2: not knowing what to do with " + attribs.getStorageModel().toString() + ", " + a.getName());
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}

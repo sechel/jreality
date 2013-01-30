@@ -7,6 +7,7 @@ out vec4 gl_FragColor;
 float shade = .5;
 
 uniform vec4 diffuseColor;
+vec4 diffuse;
 uniform float diffuseCoefficient;
 
 uniform vec4 ambientColor;
@@ -39,6 +40,9 @@ uniform int has_vertex_texturecoordinates;
 
 vec3 lightInflux = vec3(0, 0, 0);
 
+uniform int has_face_colors;
+in vec4 faceColor;
+
 float attenuation(vec3 att, float dist){
 	return 1/(att.x+att.y*dist+att.z*dist*dist);
 }
@@ -63,13 +67,13 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		
 		float dott = dot(normal, normalize(dir.xyz));
 		if(dott > 0){
-			vec4 diffuse = dott*diffuseColor*col*intensity;
+			vec4 diffuse2 = dott*diffuse*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
 			
 			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
 			
-			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
+			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
 			lightInflux = lightInflux + new.xyz;
 		}
 	}
@@ -89,14 +93,14 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		
 		float dott = dot(normal, normalize(RelPos.xyz));
 		if(dott > 0){
-			vec4 diffuse = dott*diffuseColor*col*intensity;
+			vec4 diffuse2 = dott*diffuse*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
 			
 			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
 			
 			
-			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
+			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
 			lightInflux = lightInflux + atten*new.xyz;
 		}
 	}
@@ -119,11 +123,11 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			//light is on the right side of the face
 			float dott = dot(normal, normalize(RelPos.xyz));
 			if(dott > 0){
-				vec4 diffuse = dott*diffuseColor*col*intensity;
+				vec4 diffuse2 = dott*diffuse*col*intensity;
 				float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
 				vec4 specular =specularColor*intensity*pow(spec, specularExponent);
 			
-				vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse;
+				vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
 				lightInflux = lightInflux + factor*atten*new.xyz;
 			}
 		}
@@ -150,6 +154,11 @@ void main(void)
 		color2 = texColor;
 	if(color2.a==0)
 		discard;
+	
+	diffuse = diffuseColor;
+	if(has_face_colors == 1)
+		diffuse = faceColor;
+	
 	lightInflux = vec3(0, 0, 0);
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(camSpaceNormal);

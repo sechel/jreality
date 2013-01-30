@@ -7,6 +7,7 @@ uniform mat4 modelview;
 //uniform vec4 camPosition;
 
 in vec4 vertex_coordinates;
+in float vertex_relativeRadii;
 
 uniform float pointRadius;
 uniform float screenSize;
@@ -32,7 +33,7 @@ void main(void)
 	//float pointSize2 = - (screenSize/100.0)*pointSize/posInCamSpace.z;
 	float pointSize2 = - 2*pointRadius/(posInCamSpace.z*screenSizeInSceneOverScreenSize);
 	screenPortion = screenSizeInSceneOverScreenSize*pointSize2;
-	gl_PointSize = pointSize2;
+	gl_PointSize = pointSize2*vertex_relativeRadii;
 	z = posInCamSpace.z;
 	w = posInCamSpace.w;
 	x = posInCamSpace.x;

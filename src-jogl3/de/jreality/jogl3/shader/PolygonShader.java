@@ -85,7 +85,7 @@ public class PolygonShader{
         			//System.out.println(v.getName());
         			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
         			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-                	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), 4, vbo.getType(), false, 0, 0);
+                	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
                 	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
         		}else{
         			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);

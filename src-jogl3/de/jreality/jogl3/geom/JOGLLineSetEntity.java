@@ -89,7 +89,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 				if(shaderName.equals("indices"))
 					continue;
 				DataList attribs = ls.getEdgeAttributes(a);
-				if(isDoubleArray(attribs.getStorageModel())){
+				if(isDoubleArrayArray(attribs.getStorageModel())){
 					//the array containing one item per index
 					double[] inflatedAttributeArray = new double[indexArray.length*4];
 					//count = 0;
@@ -144,7 +144,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 					lineVbos.put("edge_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "edge_"+a.getName()));
 //					System.out.println("creating " + "edge_"+a.getName());
 				}else{
-					System.out.println("LSE1: not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("LSE1: not knowing what to do with " + attribs.getStorageModel().toString() + ", " + a.getName());
 				}
 			}
 			
@@ -158,7 +158,15 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 				}
 				//System.out.println("vertex attribute: "+a.getName());
 				DataList attribs = ls.getVertexAttributes(a);
+				
 				if(isDoubleArray(attribs.getStorageModel())){
+					double[] inflatedAttributeArray = new double[indexArray.length];
+					DoubleArray dA = (DoubleArray)attribs;
+					for(int i = 0; i < indexArray.length; i++){
+						inflatedAttributeArray[i] = dA.getValueAt(indexArray[i]);
+					}
+					lineVbos.put("vertex_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "vertex_"+a.getName(), 1));
+				}else if(isDoubleArrayArray(attribs.getStorageModel())){
 					//the array containing one item per index
 					double[] inflatedAttributeArray = new double[indexArray.length*4];
 					//count = 0;
@@ -214,7 +222,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 //					System.out.println("creating " + "vertex_"+a.getName());
 				
 				}else{
-					System.out.println("LSE2: not knowing what to do with " + attribs.getStorageModel().toString());
+					System.out.println("LSE2: not knowing what to do with " + attribs.getStorageModel().toString() + ", " + a.getName());
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}

@@ -65,6 +65,13 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 				//System.out.println(ps.getName() + "point set vertex attribute: "+a.getName());
 				DataList attribs = ps.getVertexAttributes(a);
 				if(isDoubleArray(attribs.getStorageModel())){
+					double[] inflatedAttributeArray = new double[ps.getNumPoints()];
+					DoubleArray dA = (DoubleArray)attribs;
+					for(int i = 0; i < ps.getNumPoints(); i++){
+						inflatedAttributeArray[i] = dA.getValueAt(i);
+					}
+					pointVbos.put("vertex_"+shaderName, new GLVBOFloat(gl, Rn.convertDoubleToFloatArray(inflatedAttributeArray), "vertex_"+a.getName(), 1));
+				}else if(isDoubleArrayArray(attribs.getStorageModel())){
 					
 					//the array containing one item per index
 					double[] inflatedAttributeArray = new double[ps.getNumPoints()*4];
