@@ -105,7 +105,6 @@ public class Test {
 		//a.setAttribute("nothing", true);
 		//sgc.setAppearance(b);
 		
-		
 		s.getContentComponent().addChild(sgc);
 		//v.setContent(sgc);
 		
