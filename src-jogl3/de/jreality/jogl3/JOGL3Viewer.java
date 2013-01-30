@@ -24,6 +24,7 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
+import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
@@ -32,6 +33,7 @@ import de.jreality.jogl3.light.JOGLPointLightEntity;
 import de.jreality.jogl3.light.JOGLPointLightInstance;
 import de.jreality.jogl3.light.JOGLSpotLightEntity;
 import de.jreality.jogl3.light.JOGLSpotLightInstance;
+import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.PointShader;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.scene.Appearance;
@@ -283,6 +285,10 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			
 			gl.glClearColor(0f, 0f, 0f, 1f);
 			gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+			
+			//handle background
+			backgroundHelper.doBackground(gl);
+			
 			gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
 			
 	    	gl.glViewport(0, 0, width, height);
@@ -326,6 +332,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		}
 	}
 	LightHelper lightHelper;
+	BackgroundHelper backgroundHelper;
 	public void dispose(GLAutoDrawable arg0) {
 		// TODO Auto-generated method stub
 		System.out.println("calling JOGL3Viewer.dispose");
@@ -350,6 +357,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		//gl.glBlendEquation(gl.GL_FUNC_ADD);
 		//gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 		//initialize shaders once
+	    
 		GLShader.initDefaultShaders(gl);
 		PointShader.init(gl);
 		//skybox = new JOGLSkybox();
@@ -360,6 +368,8 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		lightHelper = new LightHelper();
 		lightHelper.initGlobalLightTexture(gl);
 		lightHelper.initLocalLightTexture(gl);
+		backgroundHelper = new BackgroundHelper();
+		backgroundHelper.initializeBackground(gl);
 	}
 	
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,
