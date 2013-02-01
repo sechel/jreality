@@ -26,6 +26,8 @@ public abstract class JOGLGeometryEntity extends SceneGraphNodeEntity implements
 			return true;
 		if(sm == StorageModel.DOUBLE_ARRAY.inlined(4))
 			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY.inlined(1))
+			return true;
 		if(sm==StorageModel.DOUBLE2_INLINED)
 			return true;
 		if(sm==StorageModel.DOUBLE3_INLINED)
