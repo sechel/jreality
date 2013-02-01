@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 
 import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
+import de.jreality.jogl3.helper.SkyboxHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
@@ -285,19 +286,20 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			
 			gl.glClearColor(0f, 0f, 0f, 1f);
 			gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-			
-			//handle background
-			backgroundHelper.doBackground(gl);
-			
 			gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
-			
 	    	gl.glViewport(0, 0, width, height);
-	        
-	        
+	    	
+			//handle background
 			JOGLSceneGraphComponentInstance rootInstance = (JOGLSceneGraphComponentInstance) proxyScene.getTreeRoot();
-			
-			//update sky box
 			JOGLAppearanceInstance rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
+			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
+				System.out.println("cube map not upToDate");
+				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
+				backgroundHelper.updateBackground(gl, rootAp, width, height);
+			}
+			backgroundHelper.draw(gl);
+			//update sky box
+			rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
 			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
 				System.out.println("cube map not upToDate");
 				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
@@ -310,10 +312,11 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			}
 			
 			//render skybox
-			JOGLSkybox.render(gl, dmat, mat, skyboxCubemap, cam);
+			SkyboxHelper.render(gl, dmat, mat, skyboxCubemap, cam);
 
 			//enable depth test
 			gl.glEnable(gl.GL_DEPTH_TEST);
+			gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
 			//collect lights from scene graph
 			JOGLLightCollection globalLightCollection = new JOGLLightCollection(dmat);
 			rootInstance.collectGlobalLights(dmat, globalLightCollection);
@@ -361,7 +364,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		GLShader.initDefaultShaders(gl);
 		PointShader.init(gl);
 		//skybox = new JOGLSkybox();
-		JOGLSkybox.init(gl);
+		SkyboxHelper.init(gl);
 		//initialize vbo once
 		
 		//create ligth texture

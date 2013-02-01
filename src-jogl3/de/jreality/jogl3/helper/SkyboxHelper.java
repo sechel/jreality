@@ -1,7 +1,9 @@
-package de.jreality.jogl3;
+package de.jreality.jogl3.helper;
 
 import javax.media.opengl.GL3;
 
+import de.jreality.jogl3.GLShader;
+import de.jreality.jogl3.JOGLTexture2D;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
@@ -13,7 +15,7 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 
-public class JOGLSkybox {
+public class SkyboxHelper {
 	// TODO straighten out nomenclature on faces
 	private static float[] cubeVerts3 =  
 		{

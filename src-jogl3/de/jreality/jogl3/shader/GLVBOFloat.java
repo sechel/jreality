@@ -6,6 +6,11 @@ import javax.media.opengl.GL3;
 
 public class GLVBOFloat extends GLVBO{
 	
+	public void updateData(GL3 gl, float[] data){
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, index);
+		gl.glBufferData(gl.GL_ARRAY_BUFFER, 4*data.length, FloatBuffer.wrap(data), gl.GL_DYNAMIC_READ);
+	}
+	
 	public GLVBOFloat(GL3 gl, float[] vertdata, String name){
 		this(gl, vertdata, name, 4);
 	}
