@@ -45,8 +45,6 @@ public class BackgroundHelper {
 	private boolean hasTexture = false, hasColors = false;
 	private Texture2D tex;
 	public void updateBackground(GL3 gl, Appearance topAp, int width, int height){
-		System.out.println("jogl3 width/height: " + width + " " + height);
-		System.out.println("update backGround");
 		//retrieve information from jReality
 		//JOGLRenderingState openGLState = jr.renderingState;
 		Object bgo = null;
