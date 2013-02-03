@@ -3,6 +3,7 @@ package de.jreality.jogl3;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.helper.LightHelper;
+import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.light.JOGLLightInstance;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
@@ -59,14 +60,19 @@ public class JOGLRenderState {
 	}
 
 	private LightHelper globalLightHelper;
+	private TubeHelper globalTubeHelper;
 	
 	public LightHelper getLightHelper() {
 		return globalLightHelper;
 	}
+	public TubeHelper getTubeHelper() {
+		return globalTubeHelper;
+	}
 
-	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, LightHelper globalLightHelper, int screenSize, float screenSizeInScene) {
+	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, LightHelper globalLightHelper, TubeHelper tubeHelper, int screenSize, float screenSizeInScene) {
 		localLights = new JOGLLightCollection(null);
 		this.globalLightHelper = globalLightHelper;
+		this.globalTubeHelper = tubeHelper;
 		this.screenSize = screenSize;
 		this.screenSizeInScene = screenSizeInScene;
 		//this.lightTex = lightTex;
@@ -79,6 +85,7 @@ public class JOGLRenderState {
 	public JOGLRenderState(JOGLRenderState parentState, double[] matrix) {
 		localLights = parentState.copyLocalLights();
 		globalLightHelper = parentState.getLightHelper();
+		globalTubeHelper = parentState.getTubeHelper();
 		screenSize = parentState.screenSize;
 		screenSizeInScene = parentState.screenSizeInScene;
 		//this.lightTex = parentState.lightTex;

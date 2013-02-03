@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.helper.SkyboxHelper;
+import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
@@ -328,7 +329,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			float x = (float)(r.getMaxX()-r.getMinX());
 			float y = (float)(r.getMaxY()-r.getMinY());
 			//render scene graph
-			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, lightHelper, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
+			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, lightHelper, tubeHelper, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
 			rootInstance.render(rootState);
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
@@ -336,6 +337,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	}
 	LightHelper lightHelper;
 	BackgroundHelper backgroundHelper;
+	TubeHelper tubeHelper;
 	public void dispose(GLAutoDrawable arg0) {
 		// TODO Auto-generated method stub
 		System.out.println("calling JOGL3Viewer.dispose");
@@ -373,6 +375,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		lightHelper.initLocalLightTexture(gl);
 		backgroundHelper = new BackgroundHelper();
 		backgroundHelper.initializeBackground(gl);
+		tubeHelper = new TubeHelper();
 	}
 	
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,

@@ -49,6 +49,7 @@ public class LineShader{
         	}
         	
         	//actual draw command
+        	//TODO is lse.getLineVBO("vertex_coordinates").getLength()/4 maybe enough?
         	gl.glDrawArrays(gl.GL_LINES, 0, lse.getLineVBO("vertex_coordinates").getLength()/2);
 		
         	//disable all vbos

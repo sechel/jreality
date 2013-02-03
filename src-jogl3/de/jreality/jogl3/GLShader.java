@@ -27,12 +27,14 @@ public class GLShader
 	public static GLShader defaultPolygonShader = new GLShader("polygon.v", "polygon.f");
 	public static GLShader defaultPointShader = new GLShader("pointNoSphere.v", "pointNoSphere.f");
 	public static GLShader defaultLineShader = new GLShader("edge.v", "edge.f");
+	public static GLShader defaultPolygonLineShader = new GLShader("tubeEdge.v", "tubeEdge.f");
 	//TODO defaultLineShader
 	public static void initDefaultShaders(GL3 gl){
 		
 		defaultPolygonShader.init(gl);
 		defaultPointShader.init(gl);
 		defaultLineShader.init(gl);
+		defaultPolygonLineShader.init(gl);
 	}
 	
 	//represents a uniform or in variable in the shader
@@ -177,7 +179,10 @@ public class GLShader
 				
 //				System.out.println("type = " + type);
 //				System.out.println("name = " + name);
-				target.add(new ShaderVar(name, type));
+				//this is needed, when instanced rendering lines,
+				//where we want to call the second endpoint "_vertex_coordinates"
+				if(name.charAt(0) != '_')
+					target.add(new ShaderVar(name, type));
 			}
 		}
 	}

@@ -146,10 +146,12 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	protected GLShader updateAppearance(SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, String type) {
 		
 		GLShader shader = GLShader.defaultPolygonShader;
-		if(type.equals("lineShader"))
-			shader = GLShader.defaultLineShader;
+//		if(type.equals("lineShader"))
+//			shader = GLShader.defaultLineShader;
 		if(type.equals("pointShader"))
 			shader = GLShader.defaultPointShader;
+		if(type.equals("lineShader"))
+			shader = GLShader.defaultPolygonLineShader;
 		
 		//		System.out.println("UpdateAppearance");
 		eap = EffectiveAppearance.create(sgp);
