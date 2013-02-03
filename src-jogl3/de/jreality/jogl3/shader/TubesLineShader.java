@@ -35,7 +35,7 @@ public class TubesLineShader{
 		}
 		//TODO all the other types
 		
-		GLVBO tubeVBO = state.getTubeHelper().getLineVBO(gl, 30);
+		GLVBO tubeVBO = state.getTubeHelper().getLineVBO(gl, 4);
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tubeVBO.getID());
 		gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, "tube_coords"), tubeVBO.getElementSize(), tubeVBO.getType(), false, 0, 0);
     	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "tube_coords"));

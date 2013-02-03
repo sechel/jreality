@@ -14,8 +14,6 @@ void main(void)
 	//edge endpoints in camera space
 	vec3 v1 = (modelview*vertex_coordinates).xyz;
 	vec3 v2 = (modelview*_vertex_coordinates).xyz;
-	
-	//
 	vec3 newZ = normalize(v1-(v2-v1)*dot(v1, v2-v1)/dot(v2-v1, v2-v1));
 	vec3 newY = normalize(cross(normalize(v2-v1), newZ));
 	mat4 trafo = mat4(v2-v1, 0, newY, 0, newZ, 0, v1, 1);
