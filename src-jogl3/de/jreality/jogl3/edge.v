@@ -10,5 +10,4 @@ in vec4 vertex_coordinates;
 void main(void)
 {
 	gl_Position = projection * modelview * vertex_coordinates;
-	//gl_Position = vertex_coordinates;
 }

@@ -56,8 +56,6 @@ public class PointShader {
         gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_tex"), 2);
 		
 		
-//        gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
-//        gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
         float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
 		
@@ -66,10 +64,6 @@ public class PointShader {
     	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
     	gl.glUniform1f(gl.glGetUniformLocation(shader.shaderprogram, "screenSize"), state.screenSize);
 		gl.glUniform1f(gl.glGetUniformLocation(shader.shaderprogram, "screenSizeInSceneOverScreenSize"), (float)(state.screenSizeInScene/state.screenSize));
-		
-//		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-//		gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"), 3, gl.GL_FLOAT, false, 0, 0);
-//		gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"));
 		
     	for(GlUniform u : c){
 			//System.out.println("point shader render: uniform name is " + u.name);
@@ -93,12 +87,10 @@ public class PointShader {
 		if(pse.getPointVBO("vertex_coordinates") != null)
 			gl.glDrawArrays(gl.GL_POINTS, 0, pse.getPointVBO("vertex_coordinates").getLength()/4);
 		
-		//gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"));
 		//disable all vbos
     	for(ShaderVar v : l){
     		GLVBO vbo = pse.getPointVBO(v.getName());
     		if(vbo != null){
-    			//System.out.println("point shader rendering " + v.getName());
     			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     		}
     	}
@@ -106,36 +98,4 @@ public class PointShader {
 		shader.dontUseShader(gl);
         
 	}
-	
-	
-	//used for testing
-//	public static void render(GL3 gl, GLvboVertex vbo, float[] modelview){
-//		GLShader shader = GLShader.defaultPointShader;
-//		//gl.glPointSize(50.0f);
-//		//due to a driver bug we have to call this. In openGL3 POINT_SPRITE
-//		//mode should be the unchangeable default
-//		//constant for GL2.GL_POINT_SPRITE
-//		gl.glEnable(34913);
-//		gl.glEnable(gl.GL_PROGRAM_POINT_SIZE);
-//		gl.glPointParameterf(gl.GL_POINT_SPRITE_COORD_ORIGIN, gl.GL_UPPER_LEFT);
-//		
-//		shader.useShader(gl);
-//        
-//        gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "pointSize"), pointSize);
-//        gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "tex"), 0);
-//		gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, modelview, 0);
-//		
-//		
-//		
-//		
-//		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-//		gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"), 3, gl.GL_FLOAT, false, 0, 0);
-//		gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"));
-//		
-//		gl.glDrawArrays(gl.GL_POINTS, 0, vbo.getLength());
-//		
-//		gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "in_Position"));
-//
-//        shader.dontUseShader(gl);
-//	}
 }

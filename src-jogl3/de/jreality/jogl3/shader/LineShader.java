@@ -11,10 +11,12 @@ import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLLineSetEntity;
 import de.jreality.math.Rn;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ShaderUtility;
 
 public class LineShader{
 	
-	public static void render(JOGLLineSetEntity lse, LinkedList<GlUniform> c, GLShader shader, JOGLRenderState state){
+	public static void render(JOGLLineSetEntity lse, LinkedList<GlUniform> c, GLShader shader, JOGLRenderState state, float lineWidth){
 		//System.out.println("LineShader.render()");
 		
 		GL3 gl = state.getGL();
@@ -26,8 +28,8 @@ public class LineShader{
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
         	
-			//directional lights
-        	
+			//width
+        	gl.glLineWidth(lineWidth);
 			//bind shader uniforms
 			for(GlUniform u : c){
 				u.bindToShader(shader, gl);
@@ -50,8 +52,8 @@ public class LineShader{
         	
         	//actual draw command
         	//TODO is lse.getLineVBO("vertex_coordinates").getLength()/4 maybe enough?
-        	gl.glDrawArrays(gl.GL_LINES, 0, lse.getLineVBO("vertex_coordinates").getLength()/2);
-		
+        	gl.glDrawArrays(gl.GL_LINES, 0, lse.getLineVBO("vertex_coordinates").getLength()/4);
+        	
         	//disable all vbos
         	for(ShaderVar v : l){
         		GLVBO vbo = lse.getLineVBO(v.getName());

@@ -153,7 +153,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //			shader = GLShader.defaultLineShader;
 		if(type.equals("pointShader"))
 			shader = GLShader.defaultPointShader;
-		if(type.equals("lineShader") || type.equals("lineShader.polygonShader"))
+		if(type.equals("lineShader"))
+			shader = GLShader.defaultLineShader;
+		if(type.equals("lineShader.polygonShader"))
 			shader = GLShader.defaultPolygonLineShader;
 		
 		eap = EffectiveAppearance.create(sgp);
@@ -207,12 +209,10 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //    			}
     			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()),  CommonAttributes.getDefault(v.getName(), value));
     			if(value.getClass().equals(Integer.class)){
-    				System.out.println("adding int " + v.getName() + " " + type);
     				c.add(new GlUniformInt(v.getName(), (Integer)value));
     				//c.intUniforms.add(new GlUniform<Integer>(v.getName(), (Integer)value));
     				//gl.glUniform1i(gl.glGetUniformLocation(polygonShader.shaderprogram, v.getName()), (Integer)value);
     			}else if(value.getClass().equals(Boolean.class)){
-    				System.out.println("adding int " + v.getName() + " " + type);
     				boolean b = (Boolean)value;
     				int valueInt = 0;
         			if(b){

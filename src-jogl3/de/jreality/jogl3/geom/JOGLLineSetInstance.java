@@ -17,7 +17,8 @@ import de.jreality.shader.ShaderUtility;
 public class JOGLLineSetInstance extends JOGLPointSetInstance {
 
 	//GLShader lineShader = GLShader.defaultLineShader;
-	GLShader lineShader = GLShader.defaultPolygonLineShader;
+	GLShader linePolygonShader = GLShader.defaultPolygonLineShader;
+	GLShader lineShader = GLShader.defaultLineShader;
 	
 	public JOGLLineSetInstance(IndexedLineSet node) {
 		super(node);
@@ -28,17 +29,27 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		super.render(state);
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
-		if(visible)
-			TubesLineShader.render(lse, lineSetUniforms, lineShader, state);
+		if(visible){
+			boolean tubesDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
+			if(tubesDraw)
+				TubesLineShader.render(lse, lineSetPolygonUniforms, linePolygonShader, state);
+			else{
+				float lineWidth = (float)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
+	        	LineShader.render(lse, lineSetUniforms, lineShader, state, lineWidth);
+			}
+		}
 	}
 	
 	public LinkedList<GlUniform> lineSetUniforms = new LinkedList<GlUniform>();
+	public LinkedList<GlUniform> lineSetPolygonUniforms = new LinkedList<GlUniform>();
 	public GlTexture lineTexture = new GlTexture();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		super.updateAppearance(sgp, gl);
 		lineSetUniforms = new LinkedList<GlUniform>();
+		linePolygonShader = updateAppearance(sgp, gl, lineSetPolygonUniforms, lineTexture, CommonAttributes.LINE_SHADER);
+		linePolygonShader = updateAppearance(sgp, gl, lineSetPolygonUniforms, lineTexture, "lineShader.polygonShader");
 		lineShader = updateAppearance(sgp, gl, lineSetUniforms, lineTexture, CommonAttributes.LINE_SHADER);
-		lineShader = updateAppearance(sgp, gl, lineSetUniforms, lineTexture, "lineShader.polygonShader");
+		
 	}
 }
