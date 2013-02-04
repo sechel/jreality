@@ -49,63 +49,63 @@ public class PolygonShader{
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
 		
-			shader.useShader(gl);
-			
-        	//matrices
-        	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
-        	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
-        	
-			//global lights in a texture
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
-			
-			//local lights in a texture
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_localLights"), 1);
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
-			
-			
-			//bind shader uniforms
-			//TODOhave to set default values here for shader uniforms not present in the appearance
-			for(GlUniform u : c){
-				u.bindToShader(shader, gl);
-			}
+		shader.useShader(gl);
+		
+    	//matrices
+    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
+    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
+    	
+		//global lights in a texture
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
+		
+		//local lights in a texture
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_localLights"), 1);
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
+		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
+		
+		
+		//bind shader uniforms
+		//TODOhave to set default values here for shader uniforms not present in the appearance
+		for(GlUniform u : c){
+			u.bindToShader(shader, gl);
+		}
 
-			tex.bind(shader, gl);
-			//TODO all the other types
-			
-        	//bind vbos to corresponding shader variables
-        	List<ShaderVar> l = shader.vertexAttributes;
-        	for(ShaderVar v : l){
-        		GLVBO vbo = fse.getVBO(v.getName());
-        		if(vbo != null){
-        			//System.out.println(v.getName());
-        			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
-        			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-                	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
-                	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-        		}else{
-        			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
-        		}
-        	}
+		tex.bind(shader, gl);
+		//TODO all the other types
+		
+    	//bind vbos to corresponding shader variables
+    	List<ShaderVar> l = shader.vertexAttributes;
+    	for(ShaderVar v : l){
+    		GLVBO vbo = fse.getVBO(v.getName());
+    		if(vbo != null){
+    			//System.out.println(v.getName());
+    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
+    			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
+            	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
+            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    		}else{
+    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
+    		}
+    	}
 
-        	//new way to do lights
-			state.getLightHelper().bindGlobalLightTexture(gl);
-			//state.getGlobalLightHelper().bindLocalLightTexture(gl);
-			
-        	//actual draw command
-        	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
-        	
-        	//disable all vbos
-        	for(ShaderVar v : l){
-        		GLVBO vbo = fse.getVBO(v.getName());
-        		if(vbo != null){
-        			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-        		}
-        	}
-			shader.dontUseShader(gl);
+    	//new way to do lights
+		state.getLightHelper().bindGlobalLightTexture(gl);
+		//state.getGlobalLightHelper().bindLocalLightTexture(gl);
+		
+    	//actual draw command
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
+    	
+    	//disable all vbos
+    	for(ShaderVar v : l){
+    		GLVBO vbo = fse.getVBO(v.getName());
+    		if(vbo != null){
+    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    		}
+    	}
+		shader.dontUseShader(gl);
 	}
 }
