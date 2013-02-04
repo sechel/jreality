@@ -293,7 +293,7 @@ class BruteForcePicking {
 			} else {
 				points.getValueAt(j).toDoubleArray(vertex);
 			}
-			double realRad = 2* pointRadius;
+			double realRad =  pointRadius;
 			if (pointRadii != null)
 				realRad = pointRadius * pointRadii.getValueAt(j);
 			intersectSphere(MY_HITS, vertex, fromOb3, dirOb3, realRad);
