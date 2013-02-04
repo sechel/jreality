@@ -53,7 +53,7 @@ public class PointShader {
 		
 		//TODO automatic uniforms
 		//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "pointSize"), pointSize);
-        gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "tex"), 2);
+        gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_tex"), 2);
 		
 		
 //        gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);

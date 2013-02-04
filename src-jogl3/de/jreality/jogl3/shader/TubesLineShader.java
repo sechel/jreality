@@ -31,11 +31,12 @@ public class TubesLineShader{
     	
 		//bind shader uniforms
 		for(GlUniform u : c){
+			//System.out.println("Uniform in TubesLineShader: " + u.name);
 			u.bindToShader(shader, gl);
 		}
 		//TODO all the other types
 		
-		GLVBO tubeVBO = state.getTubeHelper().getLineVBO(gl, 4);
+		GLVBO tubeVBO = state.getTubeHelper().getLineVBO(gl, 2);
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, tubeVBO.getID());
 		gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, "tube_coords"), tubeVBO.getElementSize(), tubeVBO.getType(), false, 0, 0);
     	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "tube_coords"));

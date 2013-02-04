@@ -226,7 +226,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	}
 
 	public void setAuxiliaryRoot(SceneGraphComponent auxRoot) {
-		System.out.println("set Aux Root");
+		//System.out.println("set Aux Root");
 		this.auxiliaryRoot = auxRoot;
 	}
 	SceneGraphPath camPath = null;
@@ -242,7 +242,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	
 	public void setSceneRoot(SceneGraphComponent root) {
 		if (proxyScene != null) proxyScene.dispose();
-		System.out.println("setSceneRoot");
+		//System.out.println("setSceneRoot");
 		sceneRoot = root;
 		proxyScene = new JOGLSceneGraph(root);
 		proxyScene.createProxyTree();
@@ -302,7 +302,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			//update sky box
 			rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
 			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
-				System.out.println("cube map not upToDate");
+				//System.out.println("cube map not upToDate");
 				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
 				if (AttributeEntityUtility.hasAttributeEntity(CubeMap.class,SKY_BOX, rootAp)) {
 					skyboxCubemap = (CubeMap) AttributeEntityUtility.createAttributeEntity(CubeMap.class, SKY_BOX, rootAp, true);

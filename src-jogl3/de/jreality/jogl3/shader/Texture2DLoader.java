@@ -52,7 +52,7 @@ public class Texture2DLoader {
     		gl.glBindTexture(gl.GL_TEXTURE_2D, texid);
     		//do nothing because texture is already loaded
     	}else{
-    		System.out.println("creating new texture");
+    		//System.out.println("creating new texture");
     		//load texture into the gl
     		texid = createTextureID(gl);
     		textureLookup.put(image, texid);

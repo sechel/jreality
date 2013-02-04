@@ -19,7 +19,6 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 	
 	public JOGLPointSetInstance(PointSet node) {
 		super(node);
-		System.out.println("JOGLPointSetInstance.JOGLPointSetInstance()");
 	}
 
 	@Override

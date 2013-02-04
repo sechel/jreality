@@ -2,6 +2,8 @@ package de.jreality.jogl3.geom;
 
 import java.awt.Color;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import javax.media.opengl.GL3;
 
@@ -10,6 +12,7 @@ import de.jreality.jogl3.GLShader.ShaderVar;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.data.Attribute;
@@ -150,24 +153,11 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //			shader = GLShader.defaultLineShader;
 		if(type.equals("pointShader"))
 			shader = GLShader.defaultPointShader;
-		if(type.equals("lineShader"))
+		if(type.equals("lineShader") || type.equals("lineShader.polygonShader"))
 			shader = GLShader.defaultPolygonLineShader;
 		
-		//		System.out.println("UpdateAppearance");
 		eap = EffectiveAppearance.create(sgp);
-		if(type.equals(CommonAttributes.POLYGON_SHADER)){
-			System.out.println("start eap for " + sgp.getLastComponent().getName());
-			//System.out.println(((IndexedFaceSet)(fse.getNode())).getName());
-			
-			//eap.getApp().getAttributes().keySet()
-			for( Object o : eap.getApp().getAttributes().keySet()){
-				String s = (String)o;
-				eap.getApp().getAttribute(s);
-				Object a = new Object();
-				System.out.println(s + " " + eap.getAttribute(s, a).getClass());
-			}
-			System.out.println("stop");
-		}
+		
 		//retrieve shader source if existent
 		String[] source = new String[]{};
 		
@@ -208,14 +198,21 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     		//System.out.println("updateAppearance " + v.getName());
     		//TODO exclude some more like light samplers, camPosition
     		//retrieve corresponding attribute from eap
-    		if(v.getType().equals("int")){
+			if(v.getType().equals("int")){
     			Object value = new Object();
+//    			Set keys = eap.getApp().getAttributes().keySet();
+//    			for(Object o : keys){
+//    				String s = (String)o;
+//    				System.out.println(s);
+//    			}
     			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()),  CommonAttributes.getDefault(v.getName(), value));
     			if(value.getClass().equals(Integer.class)){
+    				System.out.println("adding int " + v.getName() + " " + type);
     				c.add(new GlUniformInt(v.getName(), (Integer)value));
     				//c.intUniforms.add(new GlUniform<Integer>(v.getName(), (Integer)value));
     				//gl.glUniform1i(gl.glGetUniformLocation(polygonShader.shaderprogram, v.getName()), (Integer)value);
     			}else if(value.getClass().equals(Boolean.class)){
+    				System.out.println("adding int " + v.getName() + " " + type);
     				boolean b = (Boolean)value;
     				int valueInt = 0;
         			if(b){
@@ -224,7 +221,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
         			c.add(new GlUniformInt(v.getName(), valueInt));
         			//gl.glUniform1i(gl.glGetUniformLocation(polygonShader.shaderprogram, v.getName()), valueInt);
     			}else{
-    				c.add(new GlUniformInt(v.getName(), 0));
+    				//c.add(new GlUniformInt(v.getName(), 0));
     			}
     		}
     		else if(v.getType().equals("vec4")){
@@ -246,7 +243,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				c.add(new GlUniformVec4(v.getName(), Rn.convertDoubleToFloatArray(value2)));
     			}else{
     				//default value
-    				c.add(new GlUniformVec4(v.getName(), new float[]{0, 0, 0, 1}));
+    				//c.add(new GlUniformVec4(v.getName(), new float[]{0, 0, 0, 1}));
     			}
     		}
     		else if(v.getType().equals("float")){
@@ -261,7 +258,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     			}else if(value.getClass().equals(Float.class)){
     				c.add(new GlUniformFloat(v.getName(), (Float)value));
     			}else{
-    				c.add(new GlUniformFloat(v.getName(), 0f));
+    				//c.add(new GlUniformFloat(v.getName(), 0f));
     			}
     		}else if(v.getType().equals("sampler2D") && v.getName().equals("image")){
     			//ImageData value = new Object();
@@ -272,11 +269,13 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				Texture2D tex = (Texture2D)AttributeEntityUtility.createAttributeEntity(Texture2D.class, type + ".texture2d", eap);
     				texture.setTexture(tex);
     				c.add(new GlUniformMat4("textureMatrix", Rn.convertDoubleToFloatArray(tex.getTextureMatrix().getArray())));
-    				System.out.println("sampler2D: "+ v.getName());
+    				//System.out.println("sampler2D: "+ v.getName());
     				hasTexture = true;
     			}
+    		}else if(v.getName().equals("textureMatrix")){
+    			//do nothing
     		}else{
-    			System.err.println(v.getType() + " not implemented this type yet. have to do so in JOGLGeometryInstance.updateAppearance(...).");
+    			System.err.println(v.getType() + " " + v.getName() + " not implemented this type yet. have to do so in JOGLGeometryInstance.updateAppearance(...).");
     		}
     		//TODO other possible types, textures
     	}

@@ -4,7 +4,7 @@
 
 uniform mat4 projection;
 
-uniform sampler2D tex;
+uniform sampler2D sys_tex;
 
 out vec4 gl_FragColor;
 uniform vec4 diffuseColor;
@@ -21,7 +21,7 @@ uniform int has_vertex_colors;
 void main(void)
 {
 	//pixel color from texture
-	vec4 tex = texture( tex, gl_PointCoord);
+	vec4 tex = texture(sys_tex, gl_PointCoord);
 	
 	//depth calculations:
 	//transform coordinates to the unit circle

@@ -17,7 +17,7 @@ import de.jreality.shader.ShaderUtility;
 public class JOGLLineSetInstance extends JOGLPointSetInstance {
 
 	//GLShader lineShader = GLShader.defaultLineShader;
-	GLShader linePolygonShader = GLShader.defaultPolygonLineShader;
+	GLShader lineShader = GLShader.defaultPolygonLineShader;
 	
 	public JOGLLineSetInstance(IndexedLineSet node) {
 		super(node);
@@ -29,7 +29,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
 		if(visible)
-			TubesLineShader.render(lse, lineSetUniforms, linePolygonShader, state);
+			TubesLineShader.render(lse, lineSetUniforms, lineShader, state);
 	}
 	
 	public LinkedList<GlUniform> lineSetUniforms = new LinkedList<GlUniform>();
@@ -38,6 +38,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		super.updateAppearance(sgp, gl);
 		lineSetUniforms = new LinkedList<GlUniform>();
-		linePolygonShader = updateAppearance(sgp, gl, lineSetUniforms, lineTexture, CommonAttributes.LINE_SHADER);
+		lineShader = updateAppearance(sgp, gl, lineSetUniforms, lineTexture, CommonAttributes.LINE_SHADER);
+		lineShader = updateAppearance(sgp, gl, lineSetUniforms, lineTexture, "lineShader.polygonShader");
 	}
 }

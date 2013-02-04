@@ -5,9 +5,11 @@
 out vec4 gl_FragColor;
 uniform vec4 diffuseColor;
 
+uniform vec4 specularColor;
+
+in vec3 camSpaceNormal;
+
 void main(void)
 {
-	gl_FragColor = diffuseColor;
-	//gl_FragColor = vec4(1, 0, 0, 1);
-	//gl_FragDepth = gl_FragCoord.z*0.99999;
+	gl_FragColor = specularColor*dot(camSpaceNormal, vec3(1, 1, 1));
 }
