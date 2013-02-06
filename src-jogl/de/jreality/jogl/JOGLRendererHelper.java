@@ -160,22 +160,22 @@ public class JOGLRendererHelper {
 				xl = .5 * (1 - ar);
 				xr = 1.0 - xl;
 			}
-			if (jr.offscreenMode) {
-				int numTiles = jr.offscreenRenderer.getNumTiles();
-				double xmin = ((double) jr.whichTile[0]) / numTiles;
-				double xmax = ((double) jr.whichTile[0] + 1) / numTiles;
-				double ymin = ((double) jr.whichTile[1]) / numTiles;
-				double ymax = ((double) jr.whichTile[1] + 1) / numTiles;
-				double nxl, nxr, nyb, nyt;
-				nxr = xr + xmin * (xl - xr);
-				nxl = xr + xmax * (xl - xr);
-				nyt = yt + ymin * (yb - yt);
-				nyb = yt + ymax * (yb - yt);
-				xl = nxl;
-				xr = nxr;
-				yb = nyb;
-				yt = nyt;
-			}
+//			if (jr.offscreenMode) {
+//				int numTiles = jr.offscreenRenderer.getNumTiles();
+//				double xmin = ((double) jr.whichTile[0]) / numTiles;
+//				double xmax = ((double) jr.whichTile[0] + 1) / numTiles;
+//				double ymin = ((double) jr.whichTile[1]) / numTiles;
+//				double ymax = ((double) jr.whichTile[1] + 1) / numTiles;
+//				double nxl, nxr, nyb, nyt;
+//				nxr = xr + xmin * (xl - xr);
+//				nxl = xr + xmax * (xl - xr);
+//				nyt = yt + ymin * (yb - yt);
+//				nyb = yt + ymax * (yb - yt);
+//				xl = nxl;
+//				xr = nxr;
+//				yb = nyb;
+//				yt = nyt;
+//			}
 			double[][] texcoords = { { xl, yb }, { xr, yb }, { xr, yt },
 					{ xl, yt } };
 			float[][] cornersf = new float[4][];

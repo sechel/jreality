@@ -210,4 +210,119 @@ public class JOGLOffscreenRenderer {
 		this.asTexture = asTexture;
 	}
 
+	// IMPORTANT:  This code did the PBuffer tiling approach in the old JOGLRenderer.  It's been replaced now by the FBO's but may
+	// need to be revived since not all machines can  create big FBO's.
+	// The code was grabbed from SVN revision 5453 of JOGLRenderer.java
+//	if (offscreenMode) {
+//		if (true)	{
+//			offscreenRenderer.preRenderOffscreen(gl);
+//			render();
+//			offscreenRenderer.postRenderOffscreen(gl);
+//		}
+//		if (theCamera.isStereo() && renderingState.stereoType != de.jreality.jogl.Viewer.CROSS_EYED_STEREO) {
+//			theLog.warning("Invalid stereo mode: Can only save cross-eyed stereo offscreen");
+//			offscreenMode = false;
+//			return;
+//		}
+//		GLContext context = offscreenRenderer.getOffscreenPBuffer().getContext();
+//		if (context.makeCurrent() == GLContext.CONTEXT_NOT_CURRENT) {
+//			JOGLConfiguration.getLogger().log(Level.WARNING,"Error making pbuffer's context current");
+//			offscreenMode = false;
+//			return;
+//		}
+//		globalGL = offscreenRenderer.getOffscreenPBuffer().getGL();
+//		if (true || !JOGLConfiguration.sharedContexts)  forceNewDisplayLists();
+//		renderingState.initializeGLState();
+//		// we need another camera to avoid alerting the listeners when
+//		// we change the camera while doing the offscreen render
+//		CopyVisitor copier = new CopyVisitor();
+//		copier.visit(theCamera);			
+//		Camera offscreenCamera = theCamera = (Camera) copier.getCopy();
+//		
+//		Color[] bg=null;
+//		float[][] bgColors=null;
+//		int tileSizeX = offscreenRenderer.getTileSizeX(),
+//		tileSizeY = offscreenRenderer.getTileSizeY(),
+//		numTiles = offscreenRenderer.getNumTiles();
+//		if (numTiles > 1) {
+//			if (theRoot.getAppearance() != null && theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class) != Appearance.INHERITED) {
+//				bg = (Color[]) theRoot.getAppearance().getAttribute(BACKGROUND_COLORS, Color[].class);
+//				bgColors=new float[4][];
+//				bgColors[0]=bg[0].getRGBComponents(null);
+//				bgColors[1]=bg[1].getRGBComponents(null);
+//				bgColors[2]=bg[2].getRGBComponents(null);
+//				bgColors[3]=bg[3].getRGBComponents(null);
+//			}
+//		}
+////		double[] c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
+////				CameraUtility.getAspectRatio(theViewer),
+////				CameraUtility.MIDDLE_EYE);
+////		System.err.println("c2ndc is "+Rn.matrixToString(c2ndc));
+//		int numImages = offscreenCamera.isStereo() ? 2 : 1;
+//		tileSizeX = tileSizeX / numImages;
+//		myglViewport(0,0,tileSizeX, tileSizeY);
+//		Rectangle2D vp = CameraUtility.getViewport(theCamera, getAspectRatio()); //CameraUtility.getAspectRatio(theViewer));
+//		double dx = vp.getWidth()/numTiles;
+//		double dy = vp.getHeight()/numTiles;
+//		offscreenCamera.setOnAxis(false);
+//		for (int st = 0; st < numImages; ++st)	{
+//			if (offscreenCamera.isStereo()) {
+//				if (st == 0) whichEye = CameraUtility.RIGHT_EYE;
+//				else whichEye =  CameraUtility.LEFT_EYE;
+//			}
+//			else whichEye = CameraUtility.MIDDLE_EYE;
+//			for (int i = 0; i<numTiles; ++i)	{
+//				for (int j = 0; j<numTiles; ++j)	{
+//					whichTile[0] = j; whichTile[1] = i;
+//					renderingState.clearBufferBits = clearColorBits | GL.GL_DEPTH_BUFFER_BIT;
+//					Rectangle2D lr = new Rectangle2D.Double(vp.getX()+j*dx, vp.getY()+i*dy, dx, dy);
+////					System.err.println("Setting vp to "+lr.toString());
+//					offscreenCamera.setViewPort(lr);
+////					c2ndc = CameraUtility.getCameraToNDC(offscreenCamera, 
+////							CameraUtility.getAspectRatio(theViewer),
+////							CameraUtility.MIDDLE_EYE);
+////					System.err.println(i+j+"c2ndc is "+Rn.matrixToString(c2ndc));
+//					
+//					if (bgColors != null) {
+//						Color[] currentBg = new Color[4];
+//						currentBg[1]=interpolateBG(bgColors, i+1, j, numTiles);
+//						currentBg[2]=interpolateBG(bgColors, i, j, numTiles);
+//						currentBg[3]=interpolateBG(bgColors, i, j+1, numTiles);
+//						currentBg[0]=interpolateBG(bgColors, i+1, j+1, numTiles);
+//						theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, currentBg);
+//					}
+//					
+//					render();
+//					if (i == 0 && j == 0) render();	// ?? rerender the first t
+//					globalGL.glPixelStorei(GL.GL_PACK_ROW_LENGTH,numImages*numTiles*tileSizeX);
+//					globalGL.glPixelStorei(GL.GL_PACK_SKIP_ROWS, i*tileSizeY);
+//					globalGL.glPixelStorei(GL.GL_PACK_SKIP_PIXELS, (st*numTiles+j)*tileSizeX);
+//					globalGL.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
+//
+//					globalGL.glReadPixels(0, 0, tileSizeX, tileSizeY,
+//							GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, offscreenRenderer.getOffscreenBuffer());
+//	//						GL.GL_RGB, GL.GL_UNSIGNED_BYTE, offscreenBuffer);
+//				}
+//			}
+//			
+//		}
+//
+//		if (bgColors != null) theRoot.getAppearance().setAttribute(BACKGROUND_COLORS, bg);
+//		
+//		context.release();
+		// restore the state of non-offscreen mode
+//		theCamera = CameraUtility.getCamera(theViewer);
+//private Color interpolateBG(float[][] bgColors, int i, int j, int numTiles) {
+//	float[] col = new float[bgColors[0].length];
+//	float alpha = ((float)j)/numTiles;
+//	float beta = 1-((float)i)/numTiles;
+//	//col = alpha*(1-beta)*bgColors[0]+(1-alpha)*(1-beta)*bgColors[1]+beta*(1-alpha)*bgColors[2]+alpha*beta*bgColors[3]
+//	for (int k = 0; k < col.length; k++) {
+//		col[k] = alpha*(1-beta)*bgColors[0][k]+(1-alpha)*(1-beta)*bgColors[1][k]+beta*(1-alpha)*bgColors[2][k]+alpha*beta*bgColors[3][k];
+//	}
+//	if (col.length == 3) return new Color(col[0], col[1], col[2]);
+//	else return new Color(col[0], col[1], col[2], col[3]);
+//}
+//
+
 }
