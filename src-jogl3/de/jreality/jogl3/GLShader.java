@@ -29,6 +29,7 @@ public class GLShader
 	public static GLShader defaultLineShader = new GLShader("edge.v", "edge.f");
 	public static GLShader defaultPolygonLineShader = new GLShader("tubeEdge.v", "tubeEdge.f");
 	public static GLShader defaultSphereShader = new GLShader("sphere.v", "sphere.f");
+	public static GLShader defaultPointSphereShader = new GLShader("spherePoint.v", "spherePoint.f");
 	//TODO defaultLineShader
 	public static void initDefaultShaders(GL3 gl){
 		
@@ -37,6 +38,7 @@ public class GLShader
 		defaultLineShader.init(gl);
 		defaultPolygonLineShader.init(gl);
 		defaultSphereShader.init(gl);
+		defaultPointSphereShader.init(gl);
 	}
 	
 	//represents a uniform or in variable in the shader

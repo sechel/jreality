@@ -1,10 +1,11 @@
 //author Benjamin Kutschan
-//default polygon fragment shader
+//default line fragment shader
 #version 330
 
 out vec4 gl_FragColor;
 
 uniform vec4 diffuseColor;
+vec4 diffuse;
 uniform float diffuseCoefficient;
 
 uniform vec4 ambientColor;
@@ -14,12 +15,11 @@ uniform vec4 specularColor;
 uniform float specularCoefficient;
 uniform float specularExponent;
 
-//uniform sampler2D image;
-//uniform int has_Tex;
+uniform int has_vertex_colors;
 
-//in vec2 texCoord;
 in vec4 camSpaceCoord;
 in vec3 camSpaceNormal;
+in vec4 color;
 
 //GLOBAL LIGHTS
 uniform sampler2D sys_globalLights;
@@ -32,8 +32,6 @@ uniform sampler2D sys_localLights;
 uniform int sys_numLocalDirLights;
 uniform int sys_numLocalPointLights;
 uniform int sys_numLocalSpotLights;
-
-//uniform int has_vertex_texturecoordinates;
 
 vec3 lightInflux = vec3(0, 0, 0);
 
@@ -61,7 +59,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		
 		float dott = dot(normal, normalize(dir.xyz));
 		if(dott > 0){
-			vec4 diffuse2 = dott*diffuseColor*col*intensity;
+			vec4 diffuse2 = dott*diffuse*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
 			
@@ -87,11 +85,11 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		
 		float dott = dot(normal, normalize(RelPos.xyz));
 		if(dott > 0){
-			vec4 diffuse2 = dott*diffuseColor*col*intensity;
+			vec4 diffuse2 = dott*diffuse*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
 			
-			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			vec4 specular = specularColor*intensity*pow(spec, specularExponent);
 			
 			
 			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
@@ -117,7 +115,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			//light is on the right side of the face
 			float dott = dot(normal, normalize(RelPos.xyz));
 			if(dott > 0){
-				vec4 diffuse2 = dott*diffuseColor*col*intensity;
+				vec4 diffuse2 = dott*diffuse*col*intensity;
 				float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
 				vec4 specular =specularColor*intensity*pow(spec, specularExponent);
 			
@@ -139,24 +137,22 @@ void calculateLocalLightInflux(vec3 normal){
 void main(void)
 {
 	//calculateLightInflux();
+	//TODO check for availability of texture, check for face colors, what is diffuseColor?
+	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	
-	//vec4 texColor = texture( image, texCoord.st);
+	diffuse = diffuseColor;
+	if(has_vertex_colors == 1)
+		diffuse = color;
 	
-	//vec4 color2 = vec4(1, 1, 1, 1);
-	//if(has_vertex_texturecoordinates==1 && has_Tex == 1)
-	//	color2 = texColor;
-	//if(color2.a==0)
-	//	discard;
 	vec3 normal = normalize(camSpaceNormal);
 	lightInflux = vec3(0, 0, 0);
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);
-		gl_FragColor = vec4(lightInflux, diffuseColor.a);
+		gl_FragColor = vec4(lightInflux, diffuse.a);
 	}else{
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
-		gl_FragColor = vec4(lightInflux, diffuseColor.a);
+		gl_FragColor = vec4(lightInflux, diffuse.a);
 	}
-	//gl_FragColor = diffuseColor;
 }

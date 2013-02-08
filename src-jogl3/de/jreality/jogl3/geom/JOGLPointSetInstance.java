@@ -8,6 +8,8 @@ import de.jreality.jogl3.GLShader;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.shader.PointShader;
+import de.jreality.jogl3.shader.SpherePointShader;
+import de.jreality.jogl3.shader.TubesLineShader;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
@@ -15,6 +17,7 @@ import de.jreality.shader.ShaderUtility;
 
 public class JOGLPointSetInstance extends JOGLGeometryInstance {
 	
+	GLShader pointSphereShader = GLShader.defaultPointSphereShader;
 	GLShader pointShader = GLShader.defaultPointShader;
 	
 	public JOGLPointSetInstance(PointSet node) {
@@ -27,16 +30,26 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 			return;
 		JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
-		if(visible)
-			PointShader.render(pse, pointSetUniforms, pointShader, state);
-			//PointShader.render(state.getGL(), pse.getVertexVBO(), Rn.convertDoubleToFloatArray(state.getModelViewMatrix()), Rn.convertDoubleToFloatArray(state.getProjectionMatrix()));
+		if(visible){
+			boolean spheresDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
+			if(spheresDraw)
+				SpherePointShader.render(pse, pointSetPolygonUniforms, pointSphereShader, state);
+			else{
+				PointShader.render(pse, pointSetUniforms, pointShader, state);
+			}
+		}
 	}
 
 	public LinkedList<GlUniform> pointSetUniforms = new LinkedList<GlUniform>();
+	public LinkedList<GlUniform> pointSetPolygonUniforms = new LinkedList<GlUniform>();
 	public GlTexture pointTexture = new GlTexture();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		pointSetUniforms = new LinkedList<GlUniform>();
+		
+		pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, CommonAttributes.POINT_SHADER);
+		pointSphereShader = updateAppearance(GLShader.defaultPointSphereShader, sgp, gl, pointSetPolygonUniforms, pointTexture, "pointShader.polygonShader");
+		
 		pointShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, CommonAttributes.POINT_SHADER);
 	}
 }

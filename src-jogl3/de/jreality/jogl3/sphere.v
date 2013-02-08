@@ -12,7 +12,7 @@ uniform mat4 modelview;
 in vec4 vertex_coordinates;
 
 out vec4 camSpaceCoord;
-smooth out vec3 camSpaceNormal;
+out vec3 camSpaceNormal;
 
 //!!!!!!!!  if some variable is not initialized properly, don't forget to exclude it
 //!!!!!!!!  from the automatic handling by JOGLGeometryInstance.updateAppearance()

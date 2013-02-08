@@ -21,8 +21,6 @@ public class PointShader {
 	//private static GLShaderHelper shader;
 	private static Texture2D spriteTexture;// = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
 	
-	public static int pointSize = 5;
-	
 	public static void init(GL3 gl){
 		//gl.glPointSize(50.0f);
 		//due to a driver bug we have to call this. In openGL3 POINT_SPRITE
