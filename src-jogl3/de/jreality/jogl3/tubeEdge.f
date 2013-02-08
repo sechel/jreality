@@ -140,13 +140,14 @@ void main(void)
 	diffuse = diffuseColor;
 	
 	lightInflux = vec3(0, 0, 0);
+	vec3 normal = normalize(camSpaceNormal);
 	if(gl_FrontFacing){
-		calculateGlobalLightInflux(camSpaceNormal);
-		calculateLocalLightInflux(camSpaceNormal);
+		calculateGlobalLightInflux(normal);
+		calculateLocalLightInflux(normal);
 		gl_FragColor = vec4(lightInflux, diffuseColor.a);
 	}else{
-		calculateGlobalLightInflux(-camSpaceNormal);
-		calculateLocalLightInflux(-camSpaceNormal);
+		calculateGlobalLightInflux(-normal);
+		calculateLocalLightInflux(-normal);
 		gl_FragColor = vec4(lightInflux, diffuseColor.a);
 	}
 }
