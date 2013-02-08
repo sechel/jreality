@@ -146,17 +146,17 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	
 	//this method copies appearance attributes to a list of uniform variables for later use in the openGL shader
 	//it furthermore returns the openGL shader to use
-	protected GLShader updateAppearance(SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, String type) {
+	protected GLShader updateAppearance(GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, String type) {
 		
-		GLShader shader = GLShader.defaultPolygonShader;
+		GLShader shader = defaultShader;
 //		if(type.equals("lineShader"))
 //			shader = GLShader.defaultLineShader;
-		if(type.equals("pointShader"))
-			shader = GLShader.defaultPointShader;
-		if(type.equals("lineShader"))
-			shader = GLShader.defaultLineShader;
-		if(type.equals("lineShader.polygonShader"))
-			shader = GLShader.defaultPolygonLineShader;
+//		if(type.equals("pointShader"))
+//			shader = GLShader.defaultPointShader;
+//		if(type.equals("lineShader"))
+//			shader = GLShader.defaultLineShader;
+//		if(type.equals("lineShader.polygonShader"))
+//			shader = GLShader.defaultPolygonLineShader;
 		
 		eap = EffectiveAppearance.create(sgp);
 		

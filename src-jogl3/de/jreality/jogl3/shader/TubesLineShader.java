@@ -79,7 +79,7 @@ public class TubesLineShader{
     	}
     	
     	state.getLightHelper().bindGlobalLightTexture(gl);
-    	//actual draw command
+      	//actual draw command
     	//gl.glDrawArrays(gl.GL_LINES, 0, lse.getLineVBO("vertex_coordinates").getLength()/2);
     	//gl.glDrawArrays(mode, first, count);
     	gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, tubeVBO.getLength()/4, lse.getLineVBO("vertex_coordinates").getLength()/8);

@@ -35,7 +35,6 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 
 	void render(JOGLRenderState parentState) {
 		
-		
 		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
 		boolean upToDate = false;
 		if(app != null){

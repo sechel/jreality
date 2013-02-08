@@ -11,6 +11,7 @@ import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
+import de.jreality.jogl3.geom.JOGLSphereEntity;
 import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
@@ -18,7 +19,7 @@ import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.math.Rn;
 import de.jreality.shader.EffectiveAppearance;
 
-public class PolygonShader{
+public class SphereShader{
 	
 	public static void printEffectiveAppearance(EffectiveAppearance eap, String name) {
 		System.out.println("start");
@@ -33,22 +34,15 @@ public class PolygonShader{
 		System.out.println("stop");
 	}
 	
-	public static void render(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, GLShader shader, JOGLRenderState state){
+	public static void render(JOGLSphereEntity se, LinkedList<GlUniform> c, GlTexture tex, GLShader shader, JOGLRenderState state){
 		
-		
-		//TODO replace by fsi or renderState
 		//GLShader shader = GLShader.defaultPolygonShader;
 		GL3 gl = state.getGL();
 		
 		state.getLightHelper().loadLocalLightTexture(state.getLocalLightCollection(), gl);
-		//gl.glDisable(gl.GL_BLEND);
-		//gl.glBlendEquationSeparate(gl.GL_FUNC_ADD, gl.GL_FUNC_ADD);
-		//gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
-		//gl.glBlendFuncSeparate(0x0302, 0x0303, gl.GL_ZERO, gl.GL_ZERO);
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
-		
 		shader.useShader(gl);
 		
     	//matrices
@@ -74,37 +68,23 @@ public class PolygonShader{
 			u.bindToShader(shader, gl);
 		}
 
-		tex.bind(shader, gl);
+		//tex.bind(shader, gl);
 		//TODO all the other types
 		
-    	//bind vbos to corresponding shader variables
-    	List<ShaderVar> l = shader.vertexAttributes;
-    	for(ShaderVar v : l){
-    		GLVBO vbo = fse.getVBO(v.getName());
-    		if(vbo != null){
-    			//System.out.println(v.getName());
-    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
-    			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-            	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
-            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-    		}else{
-    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
-    		}
-    	}
-
+		GLVBO sphereVBO = state.getSphereHelper().getSphereVBO(gl, 20);
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, sphereVBO.getID());
+		gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, "vertex_coordinates"), sphereVBO.getElementSize(), sphereVBO.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "vertex_coordinates"));
+    	
     	//new way to do lights
 		state.getLightHelper().bindGlobalLightTexture(gl);
 		
     	//actual draw command
-    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, sphereVBO.getLength()/4);
     	
     	//disable all vbos
-    	for(ShaderVar v : l){
-    		GLVBO vbo = fse.getVBO(v.getName());
-    		if(vbo != null){
-    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-    		}
-    	}
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "vertex_coordinates"));
+    	
 		shader.dontUseShader(gl);
 	}
 }

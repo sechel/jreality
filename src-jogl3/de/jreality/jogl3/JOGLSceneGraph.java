@@ -7,6 +7,8 @@ import de.jreality.jogl3.geom.JOGLLineSetEntity;
 import de.jreality.jogl3.geom.JOGLLineSetInstance;
 import de.jreality.jogl3.geom.JOGLPointSetEntity;
 import de.jreality.jogl3.geom.JOGLPointSetInstance;
+import de.jreality.jogl3.geom.JOGLSphereEntity;
+import de.jreality.jogl3.geom.JOGLSphereInstance;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLPointLightEntity;
@@ -75,7 +77,7 @@ public class JOGLSceneGraph extends UpToDateSceneProxyBuilder {
 			}
 			@Override
 			public void visit(Sphere s) {
-				entity = new JOGLEmptyEntity(s);
+				entity = new JOGLSphereEntity(s);
 			};
 			@Override
 			public void visit(Cylinder c) {
@@ -130,6 +132,10 @@ public class JOGLSceneGraph extends UpToDateSceneProxyBuilder {
 		}
 	}	
 	class JOGLTreeFactory extends ProxyTreeFactory {
+		@Override
+		public void visit(Sphere s) {
+			proxyNode = new JOGLSphereInstance(s);
+		}
 		@Override
 		public void visit(IndexedFaceSet i) {
 			proxyNode = new JOGLFaceSetInstance(i);

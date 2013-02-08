@@ -12,7 +12,7 @@ public class SphereHelper {
 	
 	private HashMap<Integer, GLVBO> sphereVBOs = new HashMap<Integer, GLVBO>();
 	
-	public GLVBO getLineVBO(GL3 gl, int detail){
+	public GLVBO getSphereVBO(GL3 gl, int detail){
 		if(sphereVBOs.containsKey(new Integer(detail))){
 			return sphereVBOs.get(new Integer(detail));
 		}else{

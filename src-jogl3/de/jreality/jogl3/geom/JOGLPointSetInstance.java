@@ -37,6 +37,6 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		pointSetUniforms = new LinkedList<GlUniform>();
-		pointShader = updateAppearance(sgp, gl, pointSetUniforms, pointTexture, CommonAttributes.POINT_SHADER);
+		pointShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, CommonAttributes.POINT_SHADER);
 	}
 }

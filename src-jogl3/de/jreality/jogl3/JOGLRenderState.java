@@ -3,6 +3,7 @@ package de.jreality.jogl3;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.helper.LightHelper;
+import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.light.JOGLLightInstance;
@@ -61,6 +62,7 @@ public class JOGLRenderState {
 
 	private LightHelper globalLightHelper;
 	private TubeHelper globalTubeHelper;
+	private SphereHelper globalSphereHelper;
 	
 	public LightHelper getLightHelper() {
 		return globalLightHelper;
@@ -68,11 +70,15 @@ public class JOGLRenderState {
 	public TubeHelper getTubeHelper() {
 		return globalTubeHelper;
 	}
+	public SphereHelper getSphereHelper() {
+		return globalSphereHelper;
+	}
 
-	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, LightHelper globalLightHelper, TubeHelper tubeHelper, int screenSize, float screenSizeInScene) {
+	public JOGLRenderState(GL3 gl, double[] inverseCameraMatrix, double[] projection, LightHelper globalLightHelper, TubeHelper tubeHelper, SphereHelper sphereHelper, int screenSize, float screenSizeInScene) {
 		localLights = new JOGLLightCollection(null);
 		this.globalLightHelper = globalLightHelper;
 		this.globalTubeHelper = tubeHelper;
+		this.globalSphereHelper = sphereHelper;
 		this.screenSize = screenSize;
 		this.screenSizeInScene = screenSizeInScene;
 		//this.lightTex = lightTex;
@@ -86,6 +92,7 @@ public class JOGLRenderState {
 		localLights = parentState.copyLocalLights();
 		globalLightHelper = parentState.getLightHelper();
 		globalTubeHelper = parentState.getTubeHelper();
+		globalSphereHelper = parentState.getSphereHelper();
 		screenSize = parentState.screenSize;
 		screenSizeInScene = parentState.screenSizeInScene;
 		//this.lightTex = parentState.lightTex;
@@ -94,7 +101,7 @@ public class JOGLRenderState {
 		else System.arraycopy(parentState.getModelViewMatrix(), 0, modelViewMatrix, 0, 16);
 		gl = parentState.getGL();
 	}
-
+	
 	public GL3 getGL() {
 		return gl;
 	}	
