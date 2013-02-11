@@ -2,7 +2,6 @@ package de.jreality.plugin.scripting.gui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +12,7 @@ import javax.swing.Icon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -90,6 +90,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			c.storeProperty(NumberSpinnerGUI.class, "minValue" + getId(), backend.getMinValue());
 			c.storeProperty(NumberSpinnerGUI.class, "stepSize" + getId(), backend.getStepSize());
 			c.storeProperty(NumberSpinnerGUI.class, "isInteger" + getId(), backend.isIntegerValue());
+			c.storeProperty(NumberSpinnerGUI.class, "showSlider" + getId(), backend.isIntegerValue());
 		}
 
 		@Override
@@ -100,15 +101,21 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			Number minValue = c.getProperty(NumberSpinnerGUI.class, "minValue" + getId(), -10000.0);
 			Number stepSize = c.getProperty(NumberSpinnerGUI.class, "stepSize" + getId(), 0.1);
 			boolean isInteger = c.getProperty(NumberSpinnerGUI.class, "isInteger" + getId(), false);
+			boolean showSlider = c.getProperty(NumberSpinnerGUI.class, "showSlider" + getId(), false);
 			setVariableValue(value);
+			
 			backend.setListenersEnabled(false);
-			backend.setMaxValue(maxValue);
-			backend.setMinValue(minValue);
-			backend.setStepSize(stepSize);
-			backend.setIntegerValue(isInteger);
-			backend.setInstantExecute(isInstant());
-			backend.updateFrontend();
-			backend.setListenersEnabled(true);
+			try {
+				backend.setMaxValue(maxValue);
+				backend.setMinValue(minValue);
+				backend.setStepSize(stepSize);
+				backend.setIntegerValue(isInteger);
+				backend.setInstantExecute(isInstant());
+				backend.setShowSlider(showSlider);
+				backend.updateFrontend();
+			} finally {
+				backend.setListenersEnabled(true);
+			}
 		}
 
 		@Override
@@ -135,24 +142,70 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			model = new SpinnerNumberModel(0.0, -10000, 10000, 0.1);
 		private JSpinner
 			spinner = new JSpinner(model);
+		private JSlider
+			slider = new JSlider(0, 1000);
+		private boolean
+			listenersEnabled = true; 
 		
 		public NumberFrontendGUI(NumberGUI gui) {
 			this.gui = gui;
-			setLayout(new GridLayout(1, 2));
+			setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			c.weightx = 1.0;
+			c.weighty = 0.0;
+			c.gridwidth = GridBagConstraints.RELATIVE;
+			c.fill = GridBagConstraints.HORIZONTAL;
 			nameLabel.setIcon(pluginIcon);
-			add(nameLabel);
-			add(spinner);
+			add(nameLabel, c);
+			c.gridwidth = GridBagConstraints.REMAINDER;
+			add(spinner, c);
+			add(slider, c);
 			spinner.addChangeListener(this);
+			slider.addChangeListener(this);
 		}
 		
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			gui.fireValueChanged();
+			if (!listenersEnabled) return;
+			try {
+				listenersEnabled = false;
+				double maxD = ((Number)model.getMaximum()).doubleValue();
+				double minD = ((Number)model.getMinimum()).doubleValue();
+				double spanD = maxD - minD;
+				int maxI = slider.getMaximum();
+				int minI = slider.getMinimum();
+				int spanI = maxI - minI;
+				if (spinner == e.getSource()) {
+					double val = model.getNumber().doubleValue();
+					double relVal = (val - minD) / spanD;
+					int relIntStep = (int)(relVal * spanI + minI);
+					slider.setValue(relIntStep);
+				}
+				if (slider == e.getSource()) {
+					double val = slider.getValue();
+					double relVal = (val - minI) / spanI;
+					double spinnerVal = relVal * spanD + minD;
+					Number valNum = model.getNumber();
+					if (valNum instanceof Integer) {
+						model.setValue((int)spinnerVal);
+					} else {
+						model.setValue(spinnerVal);
+					}
+				}
+				gui.fireValueChanged();
+			} finally {
+				listenersEnabled = true;
+			}
 		}
 		
 		public void setNumberModel(SpinnerNumberModel model) {
 			this.model = model;
 			spinner.setModel(model);
+			stateChanged(new ChangeEvent(spinner));
+		}
+		
+		public void setShowSlider(boolean showSlider) {
+			slider.setVisible(showSlider);
 		}
 		
 	}
@@ -165,6 +218,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 		private NumberGUI
 			gui = null;
 		private JCheckBox
+			showSliderChecker = new JCheckBox("Show Slider"),
 			integerValueChecker = new JCheckBox("Is Integer Value");
 		private SpinnerNumberModel
 			minValueModel = new SpinnerNumberModel(-10000.0, -100000, 100000, 1.0),
@@ -192,6 +246,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			add(instantChecker, c);
 			c.gridwidth = GridBagConstraints.REMAINDER;
 			add(integerValueChecker, c);
+			add(showSliderChecker, c);
 			c.gridwidth = GridBagConstraints.RELATIVE;
 			add(new JLabel("Min Value"), c);
 			c.gridwidth = GridBagConstraints.REMAINDER;
@@ -210,6 +265,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			stepSizeModel.addChangeListener(this);
 			instantChecker.addActionListener(this);
 			integerValueChecker.addActionListener(this);
+			showSliderChecker.addActionListener(this);
 		}
 		
 		public void setListenersEnabled(boolean listenersEnabled) {
@@ -225,13 +281,13 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (!listenersEnabled) return;
-			updateFrontend();
 			if (integerValueChecker == e.getSource()) {
 				gui.fireValueChanged();
 			}
 			if (instantChecker == e.getSource()) {
 				gui.setInstant(instantChecker.isSelected());
 			}
+			updateFrontend();
 		}
 
 		public void updateFrontend() {
@@ -249,6 +305,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 				double val = gui.frontend.model.getNumber().doubleValue();
 				gui.frontend.setNumberModel(new SpinnerNumberModel(val, min, max, step));
 			}
+			gui.frontend.setShowSlider(isShowSlider());
 		}
 
 		public double getMaxValue() {
@@ -277,6 +334,12 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 		}
 		public void setInstantExecute(boolean instant) {
 			instantChecker.setSelected(instant);
+		}
+		public boolean isShowSlider() {
+			return showSliderChecker.isSelected();
+		}
+		public void setShowSlider(boolean showSlider) {
+			showSliderChecker.setSelected(showSlider);
 		}
 	}
 	

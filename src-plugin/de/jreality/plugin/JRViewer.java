@@ -750,6 +750,7 @@ public class JRViewer {
 		} else {
 			v.registerPlugin(new ContentLoader());
 			v.registerPlugin(new ContentTools());
+			v.registerPlugin(new ContentAppearance());
 			v.getPlugin(Inspector.class).setInitialPosition(ShrinkPanelPlugin.SHRINKER_LEFT);
 			v.addContentSupport(ContentType.CenteredAndScaled);
 			v.setShowPanelSlots(true, false, false, false);
