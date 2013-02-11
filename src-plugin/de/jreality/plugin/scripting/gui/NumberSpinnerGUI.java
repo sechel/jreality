@@ -45,6 +45,10 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			setVariableName("d");
 		}
 		
+		protected void setId(long newId) {
+			this.id = newId;
+		}
+		
 		@Override
 		protected void fireValueChanged() {
 			super.fireValueChanged();
@@ -56,10 +60,6 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			frontend.nameLabel.setText(display);
 		}
 		@Override
-		public void setVariableValue(Number val) {
-			frontend.model.setValue(val);
-		}
-		@Override
 		public Number getVariableValue() {
 			if (backend.isIntegerValue()) {
 				return frontend.model.getNumber().intValue();
@@ -67,6 +67,11 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 				return frontend.model.getNumber();
 			}
 		}
+		@Override
+		public void setVariableValue(Number val) {
+			frontend.model.setValue(val);
+		}
+
 		
 		@Override
 		public JPanel getFrontendGUI() {
@@ -280,6 +285,15 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 		guiMap.put(id, gui);
 		return gui;
 	}
+	
+	@Override
+	public void setGUIId(long oldId, long newId) {
+		NumberGUI gui = guiMap.remove(oldId);
+		if (gui == null) return;
+		gui.setId(newId);
+		guiMap.put(newId, gui);
+	}
+	
 	
 	@Override
 	public PluginInfo getPluginInfo() {

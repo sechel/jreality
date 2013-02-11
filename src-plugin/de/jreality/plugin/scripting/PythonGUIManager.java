@@ -83,6 +83,7 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if (activeTool == null) return;
 			long id = random.nextLong();
 			PythonGUI<?> gui = guiPlugin.getGUI(id);
 			activeTool.getGuiList().add(gui);
@@ -257,6 +258,7 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		c.fill = GridBagConstraints.BOTH;
 		pluginScroller.setPreferredSize(new Dimension(200, 70));
 		pluginScroller.setBorder(BorderFactory.createTitledBorder("GUI Plugins"));
+		pluginScroller.setViewportBorder(BorderFactory.createEtchedBorder());
 		add(pluginScroller, c);
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -266,8 +268,9 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.fill = GridBagConstraints.BOTH;
-		guiScroller.setBorder(BorderFactory.createTitledBorder("GUI Elements"));
 		guiScroller.setPreferredSize(new Dimension(200, 100));
+		guiScroller.setBorder(BorderFactory.createTitledBorder("GUI Elements"));
+		guiScroller.setViewportBorder(BorderFactory.createEtchedBorder());
 		add(guiScroller, c);
 		
 		c.weighty = 0.0;
@@ -280,12 +283,14 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		pluginTable.getColumnModel().getColumn(2).setMaxWidth(30);
 		pluginTable.setRowHeight(22);
 		pluginTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		pluginTable.setFillsViewportHeight(true);
 		guiTable.getTableHeader().setPreferredSize(new Dimension(0, 0));
 		guiTable.setDefaultRenderer(RemoveGUIButton.class, new ButtonCellRenderer());
 		guiTable.setDefaultEditor(RemoveGUIButton.class, new ButtonCellEditor());
 		guiTable.setRowHeight(22);
 		guiTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		guiTable.getSelectionModel().addListSelectionListener(this);
+		guiTable.setFillsViewportHeight(true);
 		updateGUITable();
 		
 		useGuiChecker.addActionListener(this);
@@ -314,7 +319,11 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		backendPanel.setLayout(new GridLayout());
 		backendPanel.setBorder(BorderFactory.createTitledBorder("GUI Properties"));
 		int row = guiTable.getSelectedRow();
-		if (row < 0 || row >= activeTool.getGuiList().size()) return;
+		if (activeTool == null || row < 0 || row >= activeTool.getGuiList().size()) {
+			backendPanel.revalidate();
+			revalidate();
+			return;
+		}
 		PythonGUI<?> gui = activeTool.getGuiList().get(row);
 		if (gui.getBackendGUI() != null) {
 			backendPanel.add(gui.getBackendGUI());
@@ -327,7 +336,11 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		this.activeTool = tool;
 		this.controller = c;
 		guiPlugins = c.getPlugins(PythonGUIPlugin.class);
-		useGuiChecker.setSelected(tool.isUseGUI());
+		if (activeTool == null) {
+			useGuiChecker.setSelected(false);
+		} else {
+			useGuiChecker.setSelected(tool.isUseGUI());
+		}
 		pluginTable.revalidate();
 		guiTable.revalidate();
 		updateBackendPanel();

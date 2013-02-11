@@ -8,14 +8,12 @@ import javax.swing.JPanel;
 
 import de.jtem.jrworkspace.plugin.Controller;
 
-public class AbstractPythonGUI<T> implements PythonGUI<T> {
+public abstract class AbstractPythonGUI<T> implements PythonGUI<T> {
 
-	private long 
+	protected long 
 		id = -1;
 	private Class<? extends PythonGUIPlugin<?>>
 		pluginClass = null;
-	private T
-		value = null;
 	private String
 		variableName = "a",
 		variableDisplay = "A Variable";
@@ -54,14 +52,6 @@ public class AbstractPythonGUI<T> implements PythonGUI<T> {
 	@Override
 	public void setVariableDisplay(String display) {
 		this.variableDisplay = display;
-	}
-	@Override
-	public T getVariableValue() {
-		return value;
-	}
-	@Override
-	public void setVariableValue(T val) {
-		this.value = val;
 	}
 
 	@Override
@@ -110,7 +100,7 @@ public class AbstractPythonGUI<T> implements PythonGUI<T> {
 	public void restoreProperties(Controller c) {
 		String varName = c.getProperty(getClass(), "variableName" + getId(), "a");
 		String varDisplay = c.getProperty(getClass(), "variableDisplay" + getId(), "A Variable");
-		T varValue = c.getProperty(getClass(), "variableValue" + getId(), value);
+		T varValue = c.getProperty(getClass(), "variableValue" + getId(), getVariableValue());
 		boolean instant = c.getProperty(getClass(), "instant" + getId(), false);
 		setVariableName(varName);
 		setVariableDisplay(varDisplay);

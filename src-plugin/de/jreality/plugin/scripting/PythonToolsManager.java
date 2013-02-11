@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -79,8 +80,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	private JScrollPane
 		toolsScroller = new JScrollPane(toolsTable);
 	private JButton
-		importButton = new JButton("Import"),
-		exportButton = new JButton("Export"),
+		importButton = new JButton(ImageHook.getIcon("folder2.png")),
+		exportButton = new JButton(ImageHook.getIcon("disk.png")),
 		addToolButton = new JButton(ImageHook.getIcon("add.png")),
 		removeToolButton = new JButton(ImageHook.getIcon("delete.png"));
 	private Document
@@ -136,25 +137,23 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		c.insets = new Insets(2, 2, 2, 2);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.WEST;
-
-		topPanel.setLayout(new GridBagLayout());
-		c.weightx = 0.0;
-		c.gridwidth = 1;
-		topPanel.add(addToolButton, c);
-		topPanel.add(removeToolButton, c);
-		topPanel.add(importButton, c);
-		c.gridwidth = GridBagConstraints.RELATIVE;
-		topPanel.add(exportButton, c);
-		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
-		JPanel spacer = new JPanel();
-		topPanel.add(spacer, c);
+
+		topPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 2));
+		topPanel.add(addToolButton);
+		topPanel.add(removeToolButton);
+		topPanel.add(new JSeparator(JSeparator.HORIZONTAL));
+		topPanel.add(importButton);
+		topPanel.add(exportButton);
 		panel.add(topPanel, c);
 		
 		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.fill = GridBagConstraints.BOTH;
-		toolsScroller.setPreferredSize(new Dimension(100, 100));
+		toolsTable.setFillsViewportHeight(true);
+		toolsScroller.setViewportBorder(BorderFactory.createEtchedBorder());
+		toolsScroller.setBorder(BorderFactory.createTitledBorder("Installed Tools"));
+		toolsScroller.setPreferredSize(new Dimension(200, 100));
 		panel.add(toolsScroller, c);
 		panel.add(new JSeparator(JSeparator.VERTICAL), c);
 		
@@ -185,6 +184,9 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		
 		c.weighty = 1.0; 
 		c.fill = GridBagConstraints.BOTH;
+		sourceScroller.setPreferredSize(new Dimension(200, 100));
+		sourceScroller.setBorder(BorderFactory.createTitledBorder("Script Source"));
+		sourceScroller.setViewportBorder(BorderFactory.createEtchedBorder());
 		panel.add(sourceScroller, c);
 		
 		c.weighty = 0.0;
@@ -332,6 +334,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		listenersEnabled = false;
 		PythonScriptTool tool = getSelectedTool();
 		if (tool == null) {
+			guiManager.setTool(null, controller);
 			nameField.setText("");
 			menuPathField.setText("");
 			useFileLinkChecker.setSelected(false);
@@ -383,6 +386,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			PythonScriptTool newTool = new PythonScriptTool(console, controller);
 			tools.add(newTool);
 			installTool(newTool);
+			selectTool(newTool);
 		}
 		if (removeToolButton == e.getSource()) {
 			if (tool == null) return;
@@ -402,12 +406,15 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 				int r = JOptionPane.showConfirmDialog(w, "File exists, do you want to overwrite?", "Export Tool", YES_NO_OPTION);
 				if (r != JOptionPane.YES_OPTION) return;
 			}
+			boolean useFileLink = tool.isUseFileLink();
+			tool.setUseFileLink(false);
 			PythonIOController exportController = new PythonIOController(controller);
 			tool.storeProperties(exportController);
 			exportController.storeProperty(getClass(), "toolId", tool.getId());
 			exportController.storeProperty(getClass(), "toolName", tool.getName());
 			exportController.storeProperty(getClass(), "toolIcon", tool.getIcon());
 			exportController.writeProperties(f);
+			tool.setUseFileLink(useFileLink);
 		}
 		if (importButton == e.getSource()) {
 			Window w = SwingUtilities.getWindowAncestor(panel);
@@ -419,6 +426,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			long toolId = importController.getProperty(getClass(), "toolId", -1L);
 			PythonScriptTool newTool = new PythonScriptTool(console, controller, toolId);
 			newTool.restoreProperties(importController); 
+			newTool.setNewGUIIds();
 			tools.add(newTool);
 			installTool(newTool);
 		}
@@ -527,6 +535,11 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		toolBar.removeAction(PythonToolsManager.class, tool);
 		tool.removeGUI();
 		frontendListener.updateFrontendUI();
+	}
+	public void selectTool(PythonScriptTool tool) {
+		int index = tools.indexOf(tool);
+		toolsTable.getSelectionModel().setSelectionInterval(index, index);
+		updateTooleditor();
 	}
 	
 	@Override

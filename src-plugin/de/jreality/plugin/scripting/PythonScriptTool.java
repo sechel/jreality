@@ -48,18 +48,18 @@ public class PythonScriptTool extends AbstractAction {
 	private List<PythonGUI<?>>
 		guiList = new LinkedList<PythonGUI<?>>();
 	private long
-		toolId = random.nextLong();
+		id = random.nextLong();
 	private PythonGUIShrinker
 		guiShrinker = new PythonGUIShrinker(this);
 
 	public PythonScriptTool(PythonConsole console, Controller controller) {
-		this(console, controller, -1);
+		this(console, controller, random.nextLong());
 	}
 	
 	public PythonScriptTool(PythonConsole console, Controller controller, long id) {
 		this.console = console;
 		this.controller = controller;
-		this.toolId = id;
+		this.id = id;
 		setName(name);
 		setIcon(icon);
 		setSourceCode(sourceCode);
@@ -213,7 +213,7 @@ public class PythonScriptTool extends AbstractAction {
 	}
 	
 	public long getId() {
-		return toolId;
+		return id;
 	}
 	
 	public void storeProperties(Controller c) {
@@ -294,5 +294,13 @@ public class PythonScriptTool extends AbstractAction {
 			c.deleteProperty(getClass(), "guiPluginClass" + gui.getId());
 		}
 	}
+	
+	protected void setNewGUIIds() {
+		for (PythonGUI<?> gui : getGuiList()) {
+			 PythonGUIPlugin<?> guiPlugin = controller.getPlugin(gui.getPluginClass());
+			 guiPlugin.setGUIId(gui.getId(), random.nextLong());
+		}
+	}
+	
 	
 }
