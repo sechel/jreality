@@ -341,8 +341,8 @@ public class PythonGUIManager extends JPanel implements ActionListener, ListSele
 		} else {
 			useGuiChecker.setSelected(tool.isUseGUI());
 		}
-		pluginTable.revalidate();
-		guiTable.revalidate();
+		pluginTable.updateUI();
+		guiTable.updateUI();
 		updateBackendPanel();
 		revalidate();
 	}

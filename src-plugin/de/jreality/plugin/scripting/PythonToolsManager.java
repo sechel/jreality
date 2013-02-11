@@ -402,8 +402,11 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			int result = toolFileChooser.showSaveDialog(w);
 			if (result != JFileChooser.APPROVE_OPTION) return;
 			File f = toolFileChooser.getSelectedFile();
+			if (!f.getName().toLowerCase().endsWith(".jpt")) {
+				f = new File(f.getAbsolutePath() + ".jpt");
+			}
 			if (f.exists()) {
-				int r = JOptionPane.showConfirmDialog(w, "File exists, do you want to overwrite?", "Export Tool", YES_NO_OPTION);
+				int r = JOptionPane.showConfirmDialog(w, "File " + f.getName() + " exists, do you want to overwrite?", "Export Tool", YES_NO_OPTION);
 				if (r != JOptionPane.YES_OPTION) return;
 			}
 			boolean useFileLink = tool.isUseFileLink();
