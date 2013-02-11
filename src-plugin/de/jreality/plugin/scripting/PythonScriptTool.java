@@ -207,6 +207,10 @@ public class PythonScriptTool extends AbstractAction {
 			view.getLeftSlot().addShrinkPanel(guiShrinker);
 		}
 	}
+	public void removeGUI() {
+		View view = controller.getPlugin(View.class);
+		view.getLeftSlot().removeShrinkPanel(guiShrinker);
+	}
 	
 	public long getId() {
 		return toolId;

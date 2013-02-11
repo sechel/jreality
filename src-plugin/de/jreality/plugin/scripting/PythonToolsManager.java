@@ -79,6 +79,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	private JScrollPane
 		toolsScroller = new JScrollPane(toolsTable);
 	private JButton
+		importButton = new JButton("Import"),
+		exportButton = new JButton("Export"),
 		addToolButton = new JButton(ImageHook.getIcon("add.png")),
 		removeToolButton = new JButton(ImageHook.getIcon("delete.png"));
 	private Document
@@ -102,6 +104,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	private JTextField
 		fileLinkField = new JTextField();
 	private JFileChooser
+		toolFileChooser = new JFileChooser(),
 		fileLinkChooser = new JFileChooser(),
 		iconChooser = new JFileChooser();
 	private JLabel
@@ -112,6 +115,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		guiManager = new PythonGUIManager();
 	private ShrinkPanel
 		guiShrinker = new ShrinkPanel("Variable Interface");
+		
 	
 	private boolean
 		listenersEnabled = true;
@@ -137,9 +141,10 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		c.weightx = 0.0;
 		c.gridwidth = 1;
 		topPanel.add(addToolButton, c);
-		c.weightx = 0.0;
-		c.gridwidth = GridBagConstraints.RELATIVE;
 		topPanel.add(removeToolButton, c);
+		topPanel.add(importButton, c);
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		topPanel.add(exportButton, c);
 		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		JPanel spacer = new JPanel();
@@ -217,6 +222,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		nameField.addActionListener(this);
 		menuPathField.addActionListener(this);
 		executeButton.addActionListener(this);
+		importButton.addActionListener(this);
+		exportButton.addActionListener(this);
 		
 		toolsTable.getColumnModel().getColumn(0).setMaxWidth(30);
 		toolsTable.getTableHeader().setPreferredSize(new Dimension(10, 0));
@@ -257,6 +264,22 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			}
 			
 		});
+		toolFileChooser.setMultiSelectionEnabled(false);
+		toolFileChooser.setDialogTitle("Open Python Tool");
+		toolFileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
+		toolFileChooser.setFileFilter(new FileFilter() {
+			
+			@Override
+			public String getDescription() {
+				return "jReality Python Tool (*.jpt)";
+			}
+			
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().toLowerCase().endsWith(".jpt");
+			}
+			
+		});		
 	}
 	
 	private class ToolTableModel extends AbstractTableModel {
@@ -369,6 +392,36 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			tools.remove(tool);
 			uninstallTool(tool);
 		}
+		if (exportButton == e.getSource()) {
+			if (tool == null) return;
+			Window w = SwingUtilities.getWindowAncestor(panel);
+			int result = toolFileChooser.showSaveDialog(w);
+			if (result != JFileChooser.APPROVE_OPTION) return;
+			File f = toolFileChooser.getSelectedFile();
+			if (f.exists()) {
+				int r = JOptionPane.showConfirmDialog(w, "File exists, do you want to overwrite?", "Export Tool", YES_NO_OPTION);
+				if (r != JOptionPane.YES_OPTION) return;
+			}
+			PythonIOController exportController = new PythonIOController(controller);
+			tool.storeProperties(exportController);
+			exportController.storeProperty(getClass(), "toolId", tool.getId());
+			exportController.storeProperty(getClass(), "toolName", tool.getName());
+			exportController.storeProperty(getClass(), "toolIcon", tool.getIcon());
+			exportController.writeProperties(f);
+		}
+		if (importButton == e.getSource()) {
+			Window w = SwingUtilities.getWindowAncestor(panel);
+			int result = toolFileChooser.showOpenDialog(w);
+			if (result != JFileChooser.APPROVE_OPTION) return;
+			File f = toolFileChooser.getSelectedFile();
+			PythonIOController importController = new PythonIOController(controller);
+			importController.readProperties(f);
+			long toolId = importController.getProperty(getClass(), "toolId", -1L);
+			PythonScriptTool newTool = new PythonScriptTool(console, controller, toolId);
+			newTool.restoreProperties(importController); 
+			tools.add(newTool);
+			installTool(newTool);
+		}
 		if (executeButton == e.getSource()) {
 			if (tool == null) return;
 			tool.execute();
@@ -472,6 +525,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		ViewToolBar toolBar = controller.getPlugin(ViewToolBar.class);
 		menu.removeMenuItem(PythonToolsManager.class, tool);
 		toolBar.removeAction(PythonToolsManager.class, tool);
+		tool.removeGUI();
 		frontendListener.updateFrontendUI();
 	}
 	
