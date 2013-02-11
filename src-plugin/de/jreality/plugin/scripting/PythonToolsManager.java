@@ -429,6 +429,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			newTool.setNewGUIIds();
 			tools.add(newTool);
 			installTool(newTool);
+			selectTool(newTool);
 		}
 		if (executeButton == e.getSource()) {
 			if (tool == null) return;

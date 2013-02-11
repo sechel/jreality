@@ -110,6 +110,7 @@ public abstract class AbstractPythonGUI<T> implements PythonGUI<T> {
 	@Override
 	public void deleteProperties(Controller c) {
 		c.deleteProperty(getClass(), "variableName" + getId());
+		c.deleteProperty(getClass(), "variableDisplay" + getId());
 		c.deleteProperty(getClass(), "variableValue" + getId());
 		c.deleteProperty(getClass(), "instant" + getId());
 	}

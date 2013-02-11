@@ -101,11 +101,14 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			Number stepSize = c.getProperty(NumberSpinnerGUI.class, "stepSize" + getId(), 0.1);
 			boolean isInteger = c.getProperty(NumberSpinnerGUI.class, "isInteger" + getId(), false);
 			setVariableValue(value);
+			backend.setListenersEnabled(false);
 			backend.setMaxValue(maxValue);
 			backend.setMinValue(minValue);
 			backend.setStepSize(stepSize);
-			backend.updateFrontend();
 			backend.setIntegerValue(isInteger);
+			backend.setInstantExecute(isInstant());
+			backend.updateFrontend();
+			backend.setListenersEnabled(true);
 		}
 
 		@Override
@@ -174,7 +177,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 		private JCheckBox
 			instantChecker = new JCheckBox("Execute On Edit");
 		private boolean
-			listenersDisabled = false;
+			listenersEnabled = true;
 		
 		public NumberBackendGUI(NumberGUI gui) {
 			this.gui = gui;
@@ -209,18 +212,25 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			integerValueChecker.addActionListener(this);
 		}
 		
+		public void setListenersEnabled(boolean listenersEnabled) {
+			this.listenersEnabled = listenersEnabled;
+		}
+		
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			if (listenersDisabled) return;
+			if (!listenersEnabled) return;
 			updateFrontend();
 		}
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (listenersDisabled) return;
+			if (!listenersEnabled) return;
 			updateFrontend();
 			if (integerValueChecker == e.getSource()) {
 				gui.fireValueChanged();
+			}
+			if (instantChecker == e.getSource()) {
+				gui.setInstant(instantChecker.isSelected());
 			}
 		}
 
@@ -239,40 +249,34 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 				double val = gui.frontend.model.getNumber().doubleValue();
 				gui.frontend.setNumberModel(new SpinnerNumberModel(val, min, max, step));
 			}
-			gui.setInstant(instantChecker.isSelected());
 		}
 
 		public double getMaxValue() {
 			return maxValueModel.getNumber().doubleValue();
 		}
 		public void setMaxValue(Number val) {
-			listenersDisabled = true;
 			maxValueModel.setValue(val);
-			listenersDisabled = false;
 		}
 		public double getMinValue() {
 			return minValueModel.getNumber().doubleValue();
 		}
 		public void setMinValue(Number val) {
-			listenersDisabled = true;
 			minValueModel.setValue(val);
-			listenersDisabled = false;
 		}
 		public double getStepSize() {
 			return stepSizeModel.getNumber().doubleValue();
 		}
 		public void setStepSize(Number val) {
-			listenersDisabled = true;
 			stepSizeModel.setValue(val);
-			listenersDisabled = false;
 		}
 		public boolean isIntegerValue() {
 			return integerValueChecker.isSelected();
 		}
 		public void setIntegerValue(boolean integerValue) {
-			listenersDisabled = true;
 			integerValueChecker.setSelected(integerValue);
-			listenersDisabled = false;
+		}
+		public void setInstantExecute(boolean instant) {
+			instantChecker.setSelected(instant);
 		}
 	}
 	
