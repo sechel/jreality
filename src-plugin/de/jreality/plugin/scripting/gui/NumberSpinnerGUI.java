@@ -162,6 +162,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			add(slider, c);
 			spinner.addChangeListener(this);
 			slider.addChangeListener(this);
+			setShowSlider(false);
 		}
 		
 		@Override
