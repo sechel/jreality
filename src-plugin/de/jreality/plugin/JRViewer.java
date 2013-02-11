@@ -55,6 +55,7 @@ import de.jreality.plugin.scene.VRExamples;
 import de.jreality.plugin.scripting.PythonConsole;
 import de.jreality.plugin.scripting.PythonToolsManager;
 import de.jreality.plugin.scripting.PythonConsole.MyJTextPane;
+import de.jreality.plugin.scripting.gui.NumberSpinnerGUI;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
@@ -553,6 +554,7 @@ public class JRViewer {
 	public void addPythonSupport() {
 		c.registerPlugin(PythonConsole.class);
 		c.registerPlugin(PythonToolsManager.class);
+		c.registerPlugin(NumberSpinnerGUI.class);
 	}
 	
 	/**

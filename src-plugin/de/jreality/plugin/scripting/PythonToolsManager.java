@@ -1,8 +1,10 @@
 package de.jreality.plugin.scripting;
 
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static javax.swing.JOptionPane.YES_NO_OPTION;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -15,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -41,7 +44,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
-
 import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
 import de.jreality.plugin.icon.ImageHook;
@@ -59,6 +61,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		DEFAULT_ICON = ImageHook.getIcon("python.png");
 	private JPanel
 		panel = new JPanel(),
+		bottomPanel = new JPanel(),
 		topPanel = new JPanel();
 	private ShrinkPanel
 		fileLinkPanel = new ShrinkPanel("File Link");
@@ -89,7 +92,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		nameField = new JTextField(15),
 		menuPathField = new JTextField(15);
 	private JButton
-		saveButton = new JButton("Save and Update"),
+		executeButton = new JButton("Execute", ImageHook.getIcon("cog_go.png")),
+		saveButton = new JButton("Save and Update", ImageHook.getIcon("cog_edit.png")),
 		browseFileLinkButton = new JButton("..."),
 		browseIconButton = new JButton("...");
 	private JCheckBox
@@ -105,6 +109,10 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		iconLabel = new JLabel("Tool Icon");
 	private FrontendListener
 		frontendListener = null;
+	private PythonGUIManager
+		guiManager = new PythonGUIManager();
+	private ShrinkPanel
+		guiShrinker = new ShrinkPanel("Variable Interface");
 	
 	private boolean
 		listenersEnabled = true;
@@ -166,6 +174,11 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		
 		panel.add(useToolItemChecker, c);
 		
+		guiShrinker.setShrinked(true);
+		guiShrinker.setLayout(new GridLayout());
+		guiShrinker.add(guiManager);
+		panel.add(guiShrinker, c);
+		
 		c.weighty = 1.0; 
 		c.fill = GridBagConstraints.BOTH;
 		panel.add(sourceScroller, c);
@@ -183,11 +196,13 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		c.fill = GridBagConstraints.BOTH;
 		panel.add(fileLinkPanel, c);
 		
+		bottomPanel.setLayout(new FlowLayout(FlowLayout.TRAILING));
+		bottomPanel.add(executeButton);
+		bottomPanel.add(saveButton);
+		
+		c.weightx = 1.0;
 		c.weighty = 0.0;
-		c.weightx = 0.0;
-		c.fill = GridBagConstraints.VERTICAL;
-		c.anchor = GridBagConstraints.EAST;
-		panel.add(saveButton, c);
+		panel.add(bottomPanel, c);
 		
 		toolsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		toolsTable.getSelectionModel().addListSelectionListener(this);
@@ -202,7 +217,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		useToolItemChecker.addActionListener(this);
 		nameField.addActionListener(this);
 		menuPathField.addActionListener(this);
-		
+		executeButton.addActionListener(this);
 		
 		toolsTable.getColumnModel().getColumn(0).setMaxWidth(30);
 		toolsTable.getTableHeader().setPreferredSize(new Dimension(10, 0));
@@ -312,6 +327,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			listenersEnabled = true;
 			return;
 		}
+		guiManager.setTool(tool, controller);
 		nameField.setText(tool.getName());
 		menuPathField.setText(tool.getMenuPath());
 		useFileLinkChecker.setSelected(tool.isUseFileLink());
@@ -348,8 +364,16 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		}
 		if (removeToolButton == e.getSource()) {
 			if (tool == null) return;
+			Window w = SwingUtilities.getWindowAncestor(panel);
+			int result = JOptionPane.showConfirmDialog(w, "Really delete this tool?", "Delete Tool", YES_NO_OPTION);
+			if (result != JOptionPane.YES_OPTION) return;
 			tools.remove(tool);
 			uninstallTool(tool);
+		}
+		if (executeButton == e.getSource()) {
+			if (tool == null) return;
+			tool.execute();
+			return;
 		}
 		if (saveButton == e.getSource()) {
 			if (tool == null) return;
@@ -440,6 +464,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		if (tool.isUseToolItem()) {
 			toolBar.addAction(PythonToolsManager.class, 10000.0, tool);
 		}
+		tool.updateGUI();
 		frontendListener.updateFrontendUI();
 	}
 	
@@ -471,6 +496,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		c.storeProperty(getClass(), "numTools", tools.size());
 		for (PythonScriptTool tool : tools) {
 			int index = tools.indexOf(tool);
+			c.storeProperty(getClass(), "id" + index, tool.getToolId());
 			c.storeProperty(getClass(), "name" + index, tool.getName());
 			c.storeProperty(getClass(), "sourceCode" + index, tool.getSourceCode());
 			c.storeProperty(getClass(), "useFileLink" + index, tool.isUseFileLink());
@@ -478,11 +504,19 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			c.storeProperty(getClass(), "icon" + index, tool.getIcon());
 			c.storeProperty(getClass(), "useMenuItem" + index, tool.isUseMenuItem());
 			c.storeProperty(getClass(), "useToolItem" + index, tool.isUseToolItem());
+			c.storeProperty(getClass(), "useGUI" + index, tool.isUseGUI());
 			if (tool.getFileLink() != null) {
 				c.storeProperty(getClass(), "fileLink" + index, tool.getFileLink().getAbsolutePath());
 			} else {
 				c.storeProperty(getClass(), "fileLink" + index, null);
 			}
+			List<Long> guiIds = new LinkedList<Long>();
+			for (PythonGUI<?> gui : tool.getGuiList()) {
+				guiIds.add(gui.getId());
+				gui.storeProperties(c);
+				c.storeProperty(getClass(), "guiPluginClass" + gui.getId(), gui.getPluginClass().getName());
+			}
+			c.storeProperty(getClass(), "guiIdList" + index, guiIds);
 		}
 	}
 	
@@ -494,8 +528,10 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		String iconDir = c.getProperty(getClass(), "iconChooserDir", ".");
 		iconChooser.setCurrentDirectory(new File(iconDir));
 		int numTools = c.getProperty(getClass(), "numTools", 0);
+		Random rnd = new Random();
 		for (int i = 0; i < numTools; i++) {
-			PythonScriptTool tool = new PythonScriptTool(console, c);
+			long id = c.getProperty(getClass(), "id" + i, rnd.nextLong());
+			PythonScriptTool tool = new PythonScriptTool(console, c, id);
 			String name = c.getProperty(getClass(), "name" + i, "Unknown Name");
 			String sourceCode = c.getProperty(getClass(), "sourceCode" + i, DEFAULT_SOURCE);
 			boolean useFileLink = c.getProperty(getClass(), "useFileLink" + i, false);
@@ -504,6 +540,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			String fileLinkPath = c.getProperty(getClass(), "fileLink" + i, null);
 			boolean useMenuItem = c.getProperty(getClass(), "useMenuItem" + i, true);
 			boolean useToolItem = c.getProperty(getClass(), "useToolItem" + i, true);
+			boolean useGUI = c.getProperty(getClass(), "useGUI" + i, false);
 			tool.setName(name);
 			tool.setSourceCode(sourceCode);
 			tool.setUseFileLink(useFileLink);
@@ -511,9 +548,25 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			tool.setIcon(icon);
 			tool.setUseMenuItem(useMenuItem);
 			tool.setUseToolItem(useToolItem);
+			tool.setUseGUI(useGUI);
 			if (fileLinkPath != null) {
 				File fileLink = new File(fileLinkPath);
 				tool.setFileLink(fileLink);
+			}
+			List<Long> guiIds = c.getProperty(getClass(), "guiIdList" + i, new LinkedList<Long>());
+			for (long guiId : guiIds) {
+				String guiClassName = c.getProperty(getClass(), "guiPluginClass" + guiId, null);
+				try {
+					@SuppressWarnings("unchecked")
+					Class<PythonGUIPlugin<?>> guiClass = (Class<PythonGUIPlugin<?>>)Class.forName(guiClassName);
+					PythonGUIPlugin<?> guiPlugin = c.getPlugin(guiClass);
+					PythonGUI<?> gui = guiPlugin.getGUI(guiId);
+					gui.restoreProperties(c);
+					tool.getGuiList().add(gui);
+				} catch (Exception e) {
+					System.err.println("Could not load gui plugin class " + guiClassName);
+					continue;
+				}
 			}
 			tools.add(tool);
 		}
@@ -522,7 +575,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	
 	@Override
 	public String getMainName() {
-		return "Python Script Tools";
+		return "Python Scripting";
 	}
 
 	@Override

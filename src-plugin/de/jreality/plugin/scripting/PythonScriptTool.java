@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -13,16 +16,20 @@ import javax.swing.Icon;
 import org.python.core.PyCode;
 import org.python.util.PythonInterpreter;
 
+import de.jreality.plugin.basic.View;
 import de.jtem.jrworkspace.plugin.Controller;
 
 public class PythonScriptTool extends AbstractAction {
 	
 	private static final long serialVersionUID = 1L;
+	private static Random
+		random = new Random();
 	private String
 		name = "New Python Tool",
 		menuPath = "Python Tools",
 		sourceCode = PythonToolsManager.DEFAULT_SOURCE;
 	private boolean
+		useGUI = false,
 		useMenuItem = true,
 		useToolItem = true,
 		useFileLink = false;
@@ -38,10 +45,21 @@ public class PythonScriptTool extends AbstractAction {
 		console = null;
 	private Controller
 		controller = null;
+	private List<PythonGUI<?>>
+		guiList = new LinkedList<PythonGUI<?>>();
+	private long
+		toolId = random.nextLong();
+	private PythonGUIShrinker
+		guiShrinker = new PythonGUIShrinker(this);
 
 	public PythonScriptTool(PythonConsole console, Controller controller) {
+		this(console, controller, -1);
+	}
+	
+	public PythonScriptTool(PythonConsole console, Controller controller, long id) {
 		this.console = console;
 		this.controller = controller;
+		this.toolId = id;
 		setName(name);
 		setIcon(icon);
 		setSourceCode(sourceCode);
@@ -49,9 +67,18 @@ public class PythonScriptTool extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		execute();
+	}
+
+	public void execute() {
 		PythonInterpreter pi = console.getInterpreter();
 		pi.cleanup();
 		pi.set("C", controller);
+		if (useGUI) {
+			for (PythonGUI<?> gui : guiList) {
+				pi.set(gui.getVariableName(), gui.getVariableValue());
+			}
+		}
 		PyCode code = getCode();
 		pi.exec(code);
 	}
@@ -122,6 +149,7 @@ public class PythonScriptTool extends AbstractAction {
 		putValue(SMALL_ICON, icon);
 		putValue(LARGE_ICON_KEY, icon);
 		this.icon = icon;
+		guiShrinker.setIcon(icon);
 	}
 	public String getMenuPath() {
 		return menuPath;
@@ -161,6 +189,27 @@ public class PythonScriptTool extends AbstractAction {
 	}
 	public void setUseToolItem(boolean useToolItem) {
 		this.useToolItem = useToolItem;
+	}
+	public boolean isUseGUI() {
+		return useGUI;
+	}
+	public void setUseGUI(boolean useGUI) {
+		this.useGUI = useGUI;
+	}
+	public List<PythonGUI<?>> getGuiList() {
+		return guiList;
+	}
+	public void updateGUI() {
+		guiShrinker.updateGUI();
+		View view = controller.getPlugin(View.class);
+		view.getLeftSlot().removeShrinkPanel(guiShrinker);
+		if (useGUI) {
+			view.getLeftSlot().addShrinkPanel(guiShrinker);
+		}
+	}
+	
+	public long getToolId() {
+		return toolId;
 	}
 	
 }
