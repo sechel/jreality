@@ -1,4 +1,4 @@
-package de.jreality.plugin.experimental;
+package de.jreality.plugin.scripting;
 
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 
@@ -12,15 +12,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -45,8 +41,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
-import org.python.core.PyCode;
-import org.python.util.PythonInterpreter;
 
 import de.jreality.plugin.basic.ViewMenuBar;
 import de.jreality.plugin.basic.ViewToolBar;
@@ -59,9 +53,9 @@ import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;
 
 public class PythonToolsManager extends Plugin implements PreferencesFlavor, ListSelectionListener, ActionListener, FrontendFlavor {
 
-	private static final String
+	protected static final String
 		DEFAULT_SOURCE = "print('Hallo Welt')\nprint(C)";
-	private static final Icon
+	protected static final Icon
 		DEFAULT_ICON = ImageHook.getIcon("python.png");
 	private JPanel
 		panel = new JPanel(),
@@ -75,7 +69,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	private Icon
 		icon = ImageHook.getIcon("python.png");
 	private List<PythonScriptTool>
-		tools = new LinkedList<PythonToolsManager.PythonScriptTool>();
+		tools = new LinkedList<PythonScriptTool>();
 	private ToolTableModel
 		toolTableModel = new ToolTableModel();
 	private JTable
@@ -99,6 +93,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		browseFileLinkButton = new JButton("..."),
 		browseIconButton = new JButton("...");
 	private JCheckBox
+		useMenuEntryChecker = new JCheckBox("Menu Path"),
+		useToolItemChecker = new JCheckBox("Tool Bar Item"),
 		useFileLinkChecker = new JCheckBox("Load Source From File");
 	private JTextField
 		fileLinkField = new JTextField();
@@ -127,7 +123,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets(2, 2, 2, 2);
-		c.fill = GridBagConstraints.BOTH;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		c.anchor = GridBagConstraints.WEST;
 
 		topPanel.setLayout(new GridBagLayout());
@@ -145,19 +141,16 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		
 		c.weightx = 1.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.fill = GridBagConstraints.BOTH;
 		toolsScroller.setPreferredSize(new Dimension(100, 100));
 		panel.add(toolsScroller, c);
 		panel.add(new JSeparator(JSeparator.VERTICAL), c);
 		
+		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 		panel.add(new JLabel("Name"), c);
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		panel.add(nameField, c);
-		
-		c.gridwidth = GridBagConstraints.RELATIVE;
-		panel.add(new JLabel("Menu Path"), c);
-		c.gridwidth = GridBagConstraints.REMAINDER;
-		panel.add(menuPathField, c);
 		
 		c.fill = GridBagConstraints.NONE;
 		c.gridwidth = GridBagConstraints.RELATIVE;
@@ -165,19 +158,30 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		panel.add(browseIconButton, c);
 		
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = GridBagConstraints.RELATIVE;
+		panel.add(useMenuEntryChecker, c);
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		panel.add(menuPathField, c);
+		
+		panel.add(useToolItemChecker, c);
+		
+		c.weighty = 1.0; 
+		c.fill = GridBagConstraints.BOTH;
+		panel.add(sourceScroller, c);
+		
+		c.weighty = 0.0;
+		c.fill = GridBagConstraints.HORIZONTAL;
 		fileLinkPanel.setLayout(new GridBagLayout());
 		fileLinkPanel.add(useFileLinkChecker, c);
 		c.weightx = 1.0;
-		c.fill = GridBagConstraints.BOTH;
 		c.gridwidth = GridBagConstraints.RELATIVE;
 		fileLinkPanel.add(fileLinkField, c);
 		c.weightx = 0.0;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		fileLinkPanel.add(browseFileLinkButton, c);
+		c.fill = GridBagConstraints.BOTH;
 		panel.add(fileLinkPanel, c);
-		
-		c.weighty = 1.0; 
-		panel.add(sourceScroller, c);
 		
 		c.weighty = 0.0;
 		c.weightx = 0.0;
@@ -194,6 +198,11 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		useFileLinkChecker.addActionListener(this);
 		browseFileLinkButton.addActionListener(this);
 		browseIconButton.addActionListener(this);
+		useMenuEntryChecker.addActionListener(this);
+		useToolItemChecker.addActionListener(this);
+		nameField.addActionListener(this);
+		menuPathField.addActionListener(this);
+		
 		
 		toolsTable.getColumnModel().getColumn(0).setMaxWidth(30);
 		toolsTable.getTableHeader().setPreferredSize(new Dimension(10, 0));
@@ -235,136 +244,6 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			
 		});
 	}
-	
-	public class PythonScriptTool extends AbstractAction {
-		
-		private static final long serialVersionUID = 1L;
-		private String
-			name = "New Python Tool",
-			menuPath = "Python Tools",
-			sourceCode = DEFAULT_SOURCE;
-		private boolean
-			useFileLink = false;
-		private File
-			fileLink = null;
-		private long
-			fileLastModified = -1;
-		private Icon
-			icon = DEFAULT_ICON;
-		private PyCode
-			code = null;
-
-		public PythonScriptTool() {
-			setName(name);
-			setIcon(icon);
-			setSourceCode(sourceCode);
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			PythonInterpreter pi = console.getInterpreter();
-			pi.cleanup();
-			pi.set("C", controller);
-			PyCode code = getCode();
-			pi.exec(code);
-		}
-		
-		private PyCode getCode() {
-			if (isSourceDirty()) {
-				code = null;
-			}
-			if (code != null) {
-				return code;
-			} else {
-				PythonInterpreter pi = console.getInterpreter();
-				return code = pi.compile(getSourceCode()); 
-			}
-		}
-
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			putValue(NAME, name);
-			putValue(SHORT_DESCRIPTION, name);
-			putValue(LONG_DESCRIPTION, name);
-			this.name = name;
-		}
-		public String getSourceCode() {
-			if (isSourceDirty()) {
-				FileReader fr = null;
-				try {
-					fr = new FileReader(fileLink);
-				} catch (FileNotFoundException e1) {
-					e1.printStackTrace();
-					return sourceCode;
-				}
-				LineNumberReader lr = new LineNumberReader(fr);
-				try {
-					sourceCode = "";
-					String line = lr.readLine();
-					while (line != null) {
-						sourceCode += line + "\n";
-						line = lr.readLine();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					try {
-						lr.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				code = null;
-				fileLastModified = fileLink.lastModified();
-			}
-			return sourceCode;
-		}
-		private boolean isSourceDirty() {
-			return useFileLink && fileLink != null && fileLink.lastModified() != fileLastModified;
-		}
-		public void setSourceCode(String sourceCode) {
-			this.sourceCode = sourceCode;
-			this.code = null;
-		}
-		public Icon getIcon() {
-			return icon;
-		}
-		public void setIcon(Icon icon) {
-			putValue(SMALL_ICON, icon);
-			putValue(LARGE_ICON_KEY, icon);
-			this.icon = icon;
-		}
-		public String getMenuPath() {
-			return menuPath;
-		}
-		public void setMenuPath(String menuPath) {
-			this.menuPath = menuPath;
-		}
-		
-		public File getFileLink() {
-			return fileLink;
-		}
-		public void setFileLink(File fileLink) {
-			fileLastModified = -1;
-			this.fileLink = fileLink;
-		}
-		public boolean isUseFileLink() {
-			return useFileLink;
-		}
-		public void setUseFileLink(boolean useFileLink) {
-			fileLastModified = -1;
-			this.useFileLink = useFileLink;
-		}
-		
-		@Override
-		public String toString() {
-			return getName();
-		}
-		
-	}
-	
 	
 	private class ToolTableModel extends AbstractTableModel {
 
@@ -440,6 +319,9 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		browseFileLinkButton.setEnabled(tool.isUseFileLink());
 		sourceArea.setEditable(!tool.isUseFileLink());
 		iconLabel.setIcon(tool.getIcon());
+		useMenuEntryChecker.setSelected(tool.isUseMenuItem());
+		useToolItemChecker.setSelected(tool.isUseToolItem());
+		menuPathField.setEnabled(useMenuEntryChecker.isSelected());
 		if (tool.getFileLink() != null) {
 			fileLinkField.setText(tool.getFileLink().getAbsolutePath());
 		} else {
@@ -458,24 +340,19 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (!listenersEnabled) return;
+		PythonScriptTool tool = getSelectedTool();
 		if (addToolButton == e.getSource()) {
-			PythonScriptTool newTool = new PythonScriptTool();
+			PythonScriptTool newTool = new PythonScriptTool(console, controller);
 			tools.add(newTool);
 			installTool(newTool);
 		}
 		if (removeToolButton == e.getSource()) {
-			PythonScriptTool tool = getSelectedTool();
-			if (tool == null) {
-				return;
-			}
+			if (tool == null) return;
 			tools.remove(tool);
 			uninstallTool(tool);
 		}
 		if (saveButton == e.getSource()) {
-			PythonScriptTool tool = getSelectedTool();
-			if (tool == null) {
-				return;
-			}
+			if (tool == null) return;
 			uninstallTool(tool);
 			tool.setName(nameField.getText());
 			tool.setMenuPath(menuPathField.getText());
@@ -489,17 +366,11 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			installTool(tool);
 		}
 		if (useFileLinkChecker == e.getSource()) {
-			PythonScriptTool tool = getSelectedTool();
-			if (tool == null) {
-				return;
-			}
+			if (tool == null) return;
 			tool.setUseFileLink(useFileLinkChecker.isSelected());
 		}
 		if (browseFileLinkButton == e.getSource()) {
-			PythonScriptTool tool = getSelectedTool();
-			if (tool == null) {
-				return;
-			}
+			if (tool == null) return;
 			Window w = SwingUtilities.getWindowAncestor(panel);
 			if (tool.getFileLink() != null) {
 				fileLinkChooser.setSelectedFile(tool.getFileLink());
@@ -512,10 +383,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			tool.setFileLink(fileLink);
 		}
 		if (browseIconButton == e.getSource()) {
-			PythonScriptTool tool = getSelectedTool();
-			if (tool == null) {
-				return;
-			}
+			if (tool == null) return;
 			Window w = SwingUtilities.getWindowAncestor(panel);
 			int r = iconChooser.showOpenDialog(w);
 			if (r != JFileChooser.APPROVE_OPTION) {
@@ -534,6 +402,16 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 				e1.printStackTrace();
 			}
 		}
+		if (useToolItemChecker == e.getSource() || useMenuEntryChecker == e.getSource()) {
+			if (tool == null) return;
+			tool.setUseMenuItem(useMenuEntryChecker.isSelected());
+			tool.setUseToolItem(useToolItemChecker.isSelected());
+			updateTool(tool);
+		}
+		if (menuPathField == e.getSource() || nameField == e.getSource()) {
+			if (tool == null) return;
+			updateTool(tool);
+		}
 		updateTooleditor();
 		toolsTable.revalidate();
 	}
@@ -547,12 +425,21 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	}
 	
 	
+	public void updateTool(PythonScriptTool tool) {
+		uninstallTool(tool);
+		installTool(tool);
+	}
+	
 	public void installTool(PythonScriptTool tool) {
 		ViewMenuBar menu = controller.getPlugin(ViewMenuBar.class);
-		String[] menuPath = tool.menuPath.split(",");
+		String[] menuPath = tool.getMenuPath().split(",");
 		ViewToolBar toolBar = controller.getPlugin(ViewToolBar.class);
-		menu.addMenuItem(PythonToolsManager.class, 1.0, tool, menuPath);
-		toolBar.addAction(PythonToolsManager.class, 10000.0, tool);
+		if (tool.isUseMenuItem()) {
+			menu.addMenuItem(PythonToolsManager.class, 1.0, tool, menuPath);
+		}
+		if (tool.isUseToolItem()) {
+			toolBar.addAction(PythonToolsManager.class, 10000.0, tool);
+		}
 		frontendListener.updateFrontendUI();
 	}
 	
@@ -589,6 +476,8 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 			c.storeProperty(getClass(), "useFileLink" + index, tool.isUseFileLink());
 			c.storeProperty(getClass(), "menuPath" + index, tool.getMenuPath());
 			c.storeProperty(getClass(), "icon" + index, tool.getIcon());
+			c.storeProperty(getClass(), "useMenuItem" + index, tool.isUseMenuItem());
+			c.storeProperty(getClass(), "useToolItem" + index, tool.isUseToolItem());
 			if (tool.getFileLink() != null) {
 				c.storeProperty(getClass(), "fileLink" + index, tool.getFileLink().getAbsolutePath());
 			} else {
@@ -599,24 +488,29 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 	
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
+		PythonConsole console = c.getPlugin(PythonConsole.class);
 		String chooserDir = c.getProperty(getClass(), "chooserDir", ".");
 		fileLinkChooser.setCurrentDirectory(new File(chooserDir));
 		String iconDir = c.getProperty(getClass(), "iconChooserDir", ".");
 		iconChooser.setCurrentDirectory(new File(iconDir));
 		int numTools = c.getProperty(getClass(), "numTools", 0);
 		for (int i = 0; i < numTools; i++) {
-			PythonScriptTool tool = new PythonScriptTool();
+			PythonScriptTool tool = new PythonScriptTool(console, c);
 			String name = c.getProperty(getClass(), "name" + i, "Unknown Name");
 			String sourceCode = c.getProperty(getClass(), "sourceCode" + i, DEFAULT_SOURCE);
 			boolean useFileLink = c.getProperty(getClass(), "useFileLink" + i, false);
 			String menuPath = c.getProperty(getClass(), "menuPath" + i, "Python Tools");
 			Icon icon = c.getProperty(getClass(), "icon" + i, DEFAULT_ICON);
 			String fileLinkPath = c.getProperty(getClass(), "fileLink" + i, null);
+			boolean useMenuItem = c.getProperty(getClass(), "useMenuItem" + i, true);
+			boolean useToolItem = c.getProperty(getClass(), "useToolItem" + i, true);
 			tool.setName(name);
 			tool.setSourceCode(sourceCode);
 			tool.setUseFileLink(useFileLink);
 			tool.setMenuPath(menuPath);
 			tool.setIcon(icon);
+			tool.setUseMenuItem(useMenuItem);
+			tool.setUseToolItem(useToolItem);
 			if (fileLinkPath != null) {
 				File fileLink = new File(fileLinkPath);
 				tool.setFileLink(fileLink);

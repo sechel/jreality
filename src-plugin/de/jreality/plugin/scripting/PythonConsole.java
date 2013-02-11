@@ -1,4 +1,4 @@
-package de.jreality.plugin.experimental;
+package de.jreality.plugin.scripting;
 
 import java.awt.Color;
 import java.awt.Dimension;
