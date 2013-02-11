@@ -284,7 +284,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 	@Override
 	public PluginInfo getPluginInfo() {
 		PluginInfo info = super.getPluginInfo();
-		info.name = "Double Spinner";
+		info.name = "Number Spinner";
 		info.icon = pluginIcon;
 		return info;
 	}

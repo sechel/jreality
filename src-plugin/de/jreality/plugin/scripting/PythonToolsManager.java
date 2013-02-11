@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -493,31 +492,12 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		super.storeStates(c);
 		c.storeProperty(getClass(), "chooserDir", fileLinkChooser.getCurrentDirectory().getAbsolutePath());
 		c.storeProperty(getClass(), "iconChooserDir", iconChooser.getCurrentDirectory().getAbsolutePath());
-		c.storeProperty(getClass(), "numTools", tools.size());
+		List<Long> toolIdList = new LinkedList<Long>();
 		for (PythonScriptTool tool : tools) {
-			int index = tools.indexOf(tool);
-			c.storeProperty(getClass(), "id" + index, tool.getToolId());
-			c.storeProperty(getClass(), "name" + index, tool.getName());
-			c.storeProperty(getClass(), "sourceCode" + index, tool.getSourceCode());
-			c.storeProperty(getClass(), "useFileLink" + index, tool.isUseFileLink());
-			c.storeProperty(getClass(), "menuPath" + index, tool.getMenuPath());
-			c.storeProperty(getClass(), "icon" + index, tool.getIcon());
-			c.storeProperty(getClass(), "useMenuItem" + index, tool.isUseMenuItem());
-			c.storeProperty(getClass(), "useToolItem" + index, tool.isUseToolItem());
-			c.storeProperty(getClass(), "useGUI" + index, tool.isUseGUI());
-			if (tool.getFileLink() != null) {
-				c.storeProperty(getClass(), "fileLink" + index, tool.getFileLink().getAbsolutePath());
-			} else {
-				c.storeProperty(getClass(), "fileLink" + index, null);
-			}
-			List<Long> guiIds = new LinkedList<Long>();
-			for (PythonGUI<?> gui : tool.getGuiList()) {
-				guiIds.add(gui.getId());
-				gui.storeProperties(c);
-				c.storeProperty(getClass(), "guiPluginClass" + gui.getId(), gui.getPluginClass().getName());
-			}
-			c.storeProperty(getClass(), "guiIdList" + index, guiIds);
+			tool.storeProperties(c);
+			toolIdList.add(tool.getId());
 		}
+		c.storeProperty(getClass(), "toolIds", toolIdList);
 	}
 	
 	public void restoreStates(Controller c) throws Exception {
@@ -527,47 +507,10 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		fileLinkChooser.setCurrentDirectory(new File(chooserDir));
 		String iconDir = c.getProperty(getClass(), "iconChooserDir", ".");
 		iconChooser.setCurrentDirectory(new File(iconDir));
-		int numTools = c.getProperty(getClass(), "numTools", 0);
-		Random rnd = new Random();
-		for (int i = 0; i < numTools; i++) {
-			long id = c.getProperty(getClass(), "id" + i, rnd.nextLong());
+		List<Long> toolIds = c.getProperty(getClass(), "toolIds", new LinkedList<Long>());
+		for (long id : toolIds) {
 			PythonScriptTool tool = new PythonScriptTool(console, c, id);
-			String name = c.getProperty(getClass(), "name" + i, "Unknown Name");
-			String sourceCode = c.getProperty(getClass(), "sourceCode" + i, DEFAULT_SOURCE);
-			boolean useFileLink = c.getProperty(getClass(), "useFileLink" + i, false);
-			String menuPath = c.getProperty(getClass(), "menuPath" + i, "Python Tools");
-			Icon icon = c.getProperty(getClass(), "icon" + i, DEFAULT_ICON);
-			String fileLinkPath = c.getProperty(getClass(), "fileLink" + i, null);
-			boolean useMenuItem = c.getProperty(getClass(), "useMenuItem" + i, true);
-			boolean useToolItem = c.getProperty(getClass(), "useToolItem" + i, true);
-			boolean useGUI = c.getProperty(getClass(), "useGUI" + i, false);
-			tool.setName(name);
-			tool.setSourceCode(sourceCode);
-			tool.setUseFileLink(useFileLink);
-			tool.setMenuPath(menuPath);
-			tool.setIcon(icon);
-			tool.setUseMenuItem(useMenuItem);
-			tool.setUseToolItem(useToolItem);
-			tool.setUseGUI(useGUI);
-			if (fileLinkPath != null) {
-				File fileLink = new File(fileLinkPath);
-				tool.setFileLink(fileLink);
-			}
-			List<Long> guiIds = c.getProperty(getClass(), "guiIdList" + i, new LinkedList<Long>());
-			for (long guiId : guiIds) {
-				String guiClassName = c.getProperty(getClass(), "guiPluginClass" + guiId, null);
-				try {
-					@SuppressWarnings("unchecked")
-					Class<PythonGUIPlugin<?>> guiClass = (Class<PythonGUIPlugin<?>>)Class.forName(guiClassName);
-					PythonGUIPlugin<?> guiPlugin = c.getPlugin(guiClass);
-					PythonGUI<?> gui = guiPlugin.getGUI(guiId);
-					gui.restoreProperties(c);
-					tool.getGuiList().add(gui);
-				} catch (Exception e) {
-					System.err.println("Could not load gui plugin class " + guiClassName);
-					continue;
-				}
-			}
+			tool.restoreProperties(c);
 			tools.add(tool);
 		}
 	};

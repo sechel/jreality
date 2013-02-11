@@ -208,8 +208,87 @@ public class PythonScriptTool extends AbstractAction {
 		}
 	}
 	
-	public long getToolId() {
+	public long getId() {
 		return toolId;
+	}
+	
+	public void storeProperties(Controller c) {
+		c.storeProperty(getClass(), "name" + getId(), getName());
+		c.storeProperty(getClass(), "sourceCode" + getId(), getSourceCode());
+		c.storeProperty(getClass(), "useFileLink" + getId(), isUseFileLink());
+		c.storeProperty(getClass(), "menuPath" + getId(), getMenuPath());
+		c.storeProperty(getClass(), "icon" + getId(), getIcon());
+		c.storeProperty(getClass(), "useMenuItem" + getId(), isUseMenuItem());
+		c.storeProperty(getClass(), "useToolItem" + getId(), isUseToolItem());
+		c.storeProperty(getClass(), "useGUI" + getId(), isUseGUI());
+		if (getFileLink() != null) {
+			c.storeProperty(getClass(), "fileLink" + getId(), getFileLink().getAbsolutePath());
+		} else {
+			c.storeProperty(getClass(), "fileLink" + getId(), null);
+		}
+		List<Long> guiIds = new LinkedList<Long>();
+		for (PythonGUI<?> gui : getGuiList()) {
+			guiIds.add(gui.getId());
+			gui.storeProperties(c);
+			c.storeProperty(getClass(), "guiPluginClass" + gui.getId(), gui.getPluginClass().getName());
+		}
+		c.storeProperty(getClass(), "guiIdList" + getId(), guiIds);
+	}
+	
+	public void restoreProperties(Controller c) {
+		String name = c.getProperty(getClass(), "name" + getId(), "Unknown Name");
+		String sourceCode = c.getProperty(getClass(), "sourceCode" + getId(), PythonToolsManager.DEFAULT_SOURCE);
+		boolean useFileLink = c.getProperty(getClass(), "useFileLink" + getId(), false);
+		String menuPath = c.getProperty(getClass(), "menuPath" + getId(), "Python Tools");
+		Icon icon = c.getProperty(getClass(), "icon" + getId(), PythonToolsManager.DEFAULT_ICON);
+		String fileLinkPath = c.getProperty(getClass(), "fileLink" + getId(), null);
+		boolean useMenuItem = c.getProperty(getClass(), "useMenuItem" + getId(), true);
+		boolean useToolItem = c.getProperty(getClass(), "useToolItem" + getId(), true);
+		boolean useGUI = c.getProperty(getClass(), "useGUI" + getId(), false);
+		setName(name);
+		setSourceCode(sourceCode);
+		setUseFileLink(useFileLink);
+		setMenuPath(menuPath);
+		setIcon(icon);
+		setUseMenuItem(useMenuItem);
+		setUseToolItem(useToolItem);
+		setUseGUI(useGUI);
+		if (fileLinkPath != null) {
+			File fileLink = new File(fileLinkPath);
+			setFileLink(fileLink);
+		}
+		List<Long> guiIds = c.getProperty(getClass(), "guiIdList" + getId(), new LinkedList<Long>());
+		for (long guiId : guiIds) {
+			String guiClassName = c.getProperty(getClass(), "guiPluginClass" + guiId, null);
+			try {
+				@SuppressWarnings("unchecked")
+				Class<PythonGUIPlugin<?>> guiClass = (Class<PythonGUIPlugin<?>>)Class.forName(guiClassName);
+				PythonGUIPlugin<?> guiPlugin = c.getPlugin(guiClass);
+				PythonGUI<?> gui = guiPlugin.getGUI(guiId);
+				gui.restoreProperties(c);
+				getGuiList().add(gui);
+			} catch (Exception e) {
+				System.err.println("Could not load gui plugin class " + guiClassName);
+				continue;
+			}
+		}
+
+	}
+	
+	public void deleteProperties(Controller c) {
+		c.deleteProperty(getClass(), "name" + getId());
+		c.deleteProperty(getClass(), "sourceCode" + getId());
+		c.deleteProperty(getClass(), "useFileLink" + getId());
+		c.deleteProperty(getClass(), "menuPath" + getId());
+		c.deleteProperty(getClass(), "icon" + getId());
+		c.deleteProperty(getClass(), "fileLink" + getId());
+		c.deleteProperty(getClass(), "useMenuItem" + getId());
+		c.deleteProperty(getClass(), "useToolItem" + getId());
+		c.deleteProperty(getClass(), "useGUI" + getId());
+		c.deleteProperty(getClass(), "guiIdList" + getId());
+		for (PythonGUI<?> gui : getGuiList()) {
+			c.deleteProperty(getClass(), "guiPluginClass" + gui.getId());
+		}
 	}
 	
 }
