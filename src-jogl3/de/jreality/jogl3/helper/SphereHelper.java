@@ -22,6 +22,16 @@ public class SphereHelper {
 		}
 	}
 	
+	public GLVBO getHalfSphereVBO(GL3 gl, int detail){
+		if(sphereVBOs.containsKey(new Integer(detail))){
+			return sphereVBOs.get(new Integer(detail));
+		}else{
+			GLVBOFloat newVBO = new GLVBOFloat(gl, getHalfSphereCoordinatesArray(detail), "tubeCoords");
+			sphereVBOs.put(new Integer(detail), newVBO);
+			return newVBO;
+		}
+	}
+	
 	public static float[] getSphereCoordinatesArray(int detail){
 		return getAngleSphereCoordinatesArray(detail, 2);
 	}

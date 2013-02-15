@@ -19,11 +19,11 @@ out vec4 color;
 void main(void)
 {
 	color = vertex_colors;
-	vec4 vertex = vertex_coordinates + pointRadius * vec4(sphere_coords.xyz, 0);
+	vec4 vertex = vertex_coordinates;
 	
-	camSpaceCoord = modelview * vertex;
+	camSpaceCoord = modelview * vertex - pointRadius * vec4(sphere_coords.xyz, 0);
 	
 	mat3 rotation = mat3(vec3(modelview[0][0], modelview[0][1], modelview[0][2]), vec3(modelview[1][0], modelview[1][1], modelview[1][2]), vec3(modelview[2][0], modelview[2][1], modelview[2][2]));
-	camSpaceNormal = normalize(rotation*sphere_coords.xyz);
+	camSpaceNormal = sphere_coords.xyz; //normalize(rotation*sphere_coords.xyz);
 	gl_Position = projection * camSpaceCoord;
 }
