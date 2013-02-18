@@ -19,6 +19,7 @@ uniform float specularExponent;
 
 uniform sampler2D image;
 uniform int has_Tex;
+uniform int _combineMode;
 
 in vec2 texCoord;
 in vec4 camSpaceCoord;
@@ -149,11 +150,12 @@ void main(void)
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	vec4 texColor = texture( image, texCoord.st);
 	
-	vec4 color2 = vec4(1, 1, 1, 1);
-	if(has_vertex_texturecoordinates==1 && has_Tex == 1)
-		color2 = texColor;
-	if(color2.a==0)
-		discard;
+//	vec4 color2 = vec4(1, 1, 1, 1);
+//	if(has_vertex_texturecoordinates==1 && has_Tex == 1){
+//		color2 = texColor;
+//	}
+	//if(has_vertex_texturecoordinates == 1 && texColor.a==0)
+	//	discard;
 	
 	diffuse = diffuseColor;
 	if(has_face_colors == 1)
@@ -164,10 +166,23 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);
-		gl_FragColor = color2*vec4(lightInflux, diffuse.a);
+		//gl_FragColor = color2*vec4(lightInflux, diffuse.a);
 	}else{
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
-		gl_FragColor = color2*vec4(lightInflux, diffuse.a);
+		
 	}
+	gl_FragColor = vec4(1, 0, 0, 1);
+	if(_combineMode == 0x2100)//GL_MODULATE
+		gl_FragColor = texColor*vec4(lightInflux, diffuse.a);
+	if(_combineMode == 0x1E01)//GL_REPLACE
+		gl_FragColor = texColor;
+	if(_combineMode == 0x8570)//GL_COMBINE
+		gl_FragColor = texColor;
+	if(_combineMode == 0x2101){//GL_DECAL
+		gl_FragColor.a = diffuse.a;
+		gl_FragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
+	}
+	if(gl_FragColor.a == 0)
+		discard;
 }

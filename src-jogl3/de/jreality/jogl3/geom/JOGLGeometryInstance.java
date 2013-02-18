@@ -268,6 +268,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     			if(AttributeEntityUtility.hasAttributeEntity(Texture2D.class, type + ".texture2d", eap)){
     				Texture2D tex = (Texture2D)AttributeEntityUtility.createAttributeEntity(Texture2D.class, type + ".texture2d", eap);
     				texture.setTexture(tex);
+    				c.add(new GlUniformInt("_combineMode", tex.getApplyMode()));
     				c.add(new GlUniformMat4("textureMatrix", Rn.convertDoubleToFloatArray(tex.getTextureMatrix().getArray())));
     				//System.out.println("sampler2D: "+ v.getName());
     				hasTexture = true;
