@@ -166,30 +166,30 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);
-		//gl_FragColor = color2*vec4(lightInflux, diffuse.a);
 	}else{
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
-		
 	}
-	gl_FragColor = vec4(1, 0, 0, 1);
-	if(_combineMode == 0x2100)//GL_MODULATE
-		gl_FragColor = texColor*vec4(lightInflux, diffuse.a);
-	if(_combineMode == 0x1E01)//GL_REPLACE
-		gl_FragColor = texColor;
-	if(_combineMode == 0x8570)//GL_COMBINE
-		gl_FragColor = texColor;
-	if(_combineMode == 0x2101){//GL_DECAL
-		gl_FragColor.a = diffuse.a;
-		gl_FragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
-	}
-	if(_combineMode == 0x0BE2){//GL_BLEND
-		gl_FragColor.a = diffuse.a*texColor.a;
-		gl_FragColor.rgb = (vec3(1,1,1)-texColor.rgb)*lightInflux + texColor.rgb;
-	}
-	if(_combineMode == 0x0104){//GL_ADD
-		gl_FragColor.a = diffuse.a*texColor.a;
-		gl_FragColor.rgb = lightInflux + texColor.rgb;
+	gl_FragColor = vec4(lightInflux, diffuse.a);
+	if(has_vertex_texturecoordinates==1){
+		if(_combineMode == 0x2100)//GL_MODULATE
+			gl_FragColor = texColor*vec4(lightInflux, diffuse.a);
+		if(_combineMode == 0x1E01)//GL_REPLACE
+			gl_FragColor = texColor;
+		if(_combineMode == 0x8570)//GL_COMBINE
+			gl_FragColor = texColor;
+		if(_combineMode == 0x2101){//GL_DECAL
+			gl_FragColor.a = diffuse.a;
+			gl_FragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
+		}
+		if(_combineMode == 0x0BE2){//GL_BLEND
+			gl_FragColor.a = diffuse.a*texColor.a;
+			gl_FragColor.rgb = (vec3(1,1,1)-texColor.rgb)*lightInflux + texColor.rgb;
+		}
+		if(_combineMode == 0x0104){//GL_ADD
+			gl_FragColor.a = diffuse.a*texColor.a;
+			gl_FragColor.rgb = lightInflux + texColor.rgb;
+		}
 	}
 	if(gl_FragColor.a == 0)
 		discard;
