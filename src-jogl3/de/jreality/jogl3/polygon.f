@@ -183,6 +183,14 @@ void main(void)
 		gl_FragColor.a = diffuse.a;
 		gl_FragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
 	}
+	if(_combineMode == 0x0BE2){//GL_BLEND
+		gl_FragColor.a = diffuse.a*texColor.a;
+		gl_FragColor.rgb = (vec3(1,1,1)-texColor.rgb)*lightInflux + texColor.rgb;
+	}
+	if(_combineMode == 0x0104){//GL_ADD
+		gl_FragColor.a = diffuse.a*texColor.a;
+		gl_FragColor.rgb = lightInflux + texColor.rgb;
+	}
 	if(gl_FragColor.a == 0)
 		discard;
 }
