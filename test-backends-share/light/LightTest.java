@@ -106,6 +106,7 @@ public class LightTest {
 		
 		Texture2D tex = TextureUtility.createTexture(a, CommonAttributes.POLYGON_SHADER, imageData);
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
+//		tex.setApplyMode(Texture2D.GL_BLEND);
 		
 		torus.setAppearance(a);
 		
