@@ -242,11 +242,11 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	JOGLSceneGraph proxyScene = null;
 	
 	public void setSceneRoot(SceneGraphComponent root) {
-		if (proxyScene != null) proxyScene.dispose();
+//		if (proxyScene != null) proxyScene.dispose();
 		//System.out.println("setSceneRoot");
 		sceneRoot = root;
-		proxyScene = new JOGLSceneGraph(root);
-		proxyScene.createProxyTree();
+//		proxyScene = new JOGLSceneGraph(root);
+//		proxyScene.createProxyTree();
 	}
 	public int getStereoType() {
 		System.out.println("getStereoType");
@@ -261,7 +261,10 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	
 	public void display(GLAutoDrawable arg0){
 		display(arg0, component.getWidth(), component.getHeight());
+//		display(arg0, width, height);
 	}
+	
+//	int width, height;
 	
 	CubeMap skyboxCubemap;
 	
@@ -345,6 +348,11 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		System.out.println("calling JOGL3Viewer.dispose");
 	}
 	public void init(GLAutoDrawable arg0) {
+		
+		if (proxyScene != null) proxyScene.dispose();
+		proxyScene = new JOGLSceneGraph(sceneRoot);
+		proxyScene.createProxyTree();
+		
 		System.out.println("init!!!!!!!!!!!!");
 		
 		GL3 gl = arg0.getGL().getGL3();
@@ -384,7 +392,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,
 			int arg4) {
 		// TODO Auto-generated method stub
-		
+		System.out.println("reshape");
 	}
 	
 }
