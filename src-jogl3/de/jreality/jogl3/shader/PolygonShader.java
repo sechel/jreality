@@ -12,6 +12,7 @@ import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.helper.LightHelper;
+import de.jreality.jogl3.helper.SkyboxHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
@@ -48,12 +49,13 @@ public class PolygonShader{
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
-		
+		float[] inverseCamMatrix = Rn.convertDoubleToFloatArray(state.inverseCamMatrix);
 		shader.useShader(gl);
 		
     	//matrices
     	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
     	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
+    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "_inverseCamRotation"), 1, true, inverseCamMatrix, 0);
     	
 		//global lights in a texture
 		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
@@ -76,6 +78,8 @@ public class PolygonShader{
 
 		tex.bind(shader, gl);
 		//TODO all the other types
+		
+		SkyboxHelper.bindSamplers(gl, shader);
 		
     	//bind vbos to corresponding shader variables
     	List<ShaderVar> l = shader.vertexAttributes;

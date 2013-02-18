@@ -44,6 +44,17 @@ vec3 lightInflux = vec3(0, 0, 0);
 uniform int has_face_colors;
 in vec4 faceColor;
 
+//cubemap
+uniform sampler2D front;
+uniform sampler2D back;
+uniform sampler2D left;
+uniform sampler2D right;
+uniform sampler2D up;
+uniform sampler2D down;
+
+uniform mat4 _inverseCamRotation;
+uniform int reflectionMap;
+
 float attenuation(vec3 att, float dist){
 	return 1/(att.x+att.y*dist+att.z*dist*dist);
 }
@@ -171,7 +182,7 @@ void main(void)
 		calculateLocalLightInflux(-normal);
 	}
 	gl_FragColor = vec4(lightInflux, diffuse.a);
-	if(has_vertex_texturecoordinates==1){
+	if(has_vertex_texturecoordinates==1 && has_Tex == 1){
 		if(_combineMode == 0x2100)//GL_MODULATE
 			gl_FragColor = texColor*vec4(lightInflux, diffuse.a);
 		if(_combineMode == 0x1E01)//GL_REPLACE
@@ -191,6 +202,58 @@ void main(void)
 			gl_FragColor.rgb = lightInflux + texColor.rgb;
 		}
 	}
+	
 	if(gl_FragColor.a == 0)
 		discard;
+	
+	if(1 == 1){
+		//do environment reflections
+		vec3 A = -normalize(camSpaceCoord.xyz);
+		vec3 C = -A + 2*dot(A,normal)*normal;
+		
+		//do this computation in jogl3.JOGLRenderState
+		mat4 iRotation = inverse(_inverseCamRotation);
+		mat3 rotation = mat3(vec3(iRotation[0][0], iRotation[0][1], iRotation[0][2]), vec3(iRotation[1][0], iRotation[1][1], iRotation[1][2]), vec3(iRotation[2][0], iRotation[2][1], iRotation[2][2]));
+		C = rotation*C;
+		
+		float x = C.x;
+    	float y = C.y;
+    	float z = C.z;
+    	//we are in the front texture
+    	if(z>abs(x) && z>abs(y)){
+    		float X = x/z;
+    		float Y = -y/z;
+    		gl_FragColor = 0.5*gl_FragColor+0.5*texture( back, vec2(X/2+.5,Y/2+.5));
+   		}else if(z < -abs(x) && z < -abs(y)){
+    		float X = x/z;
+    		float Y = y/z;
+    		gl_FragColor = 0.5*gl_FragColor+0.5*texture( front, vec2(X/2+.5,Y/2+.5));
+    	}else if(abs(y)>abs(x)){
+    		//floor
+    		if(y<0){
+    			float X = -x/y;
+    			float Z = z/y;
+    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( down, vec2(X/2+.5,Z/2+.5));
+    		//top
+    		}else{
+    			float X = x/y;
+    			float Z = -z/y;
+    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( up, vec2(X/2+.5,-Z/2+.5));
+    		}
+    	//left or right texture
+    	}else{
+    		//right
+    		if(x>0){
+    			float Y = -y/x;
+    			float Z = z/x;
+    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( right, vec2(-Z/2+.5,Y/2+.5));
+    		//left
+    		}else if(x<0){
+    			float Y = y/x;
+    			float Z = -z/x;
+    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( left, vec2(Z/2+.5,Y/2+.5));
+    		}
+    	}
+	}
+	
 }

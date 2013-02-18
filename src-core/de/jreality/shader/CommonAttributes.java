@@ -245,6 +245,8 @@ import de.jreality.scene.Appearance;
 	public static final double HAPTIC_DYNAMIC_FRICTION_DEFAULT = 0.3;
 	
 	public static Object getDefault(String key, Object value){
+		if(key.equals("reflectionMap"))
+			return false;
 		if(key.equals("ambientColor"))
 			return AMBIENT_COLOR_DEFAULT;
 		if(key.equals("diffuseColor"))

@@ -18,6 +18,7 @@ public class JOGLRenderState {
 	
 	final double[] modelViewMatrix=Rn.identityMatrix(4);
 	final double[] projectionMatrix=Rn.identityMatrix(4);
+	public double[] inverseCamMatrix=Rn.identityMatrix(4);
 	public boolean appearanceUpToDate = true;
 	public int screenSize = 0;
 	public float screenSizeInScene = 1;
@@ -83,6 +84,7 @@ public class JOGLRenderState {
 		this.screenSizeInScene = screenSizeInScene;
 		//this.lightTex = lightTex;
 		System.arraycopy(inverseCameraMatrix, 0, modelViewMatrix, 0, 16);
+		System.arraycopy(inverseCameraMatrix, 0, inverseCamMatrix, 0, 16);
 		System.arraycopy(projection, 0, projectionMatrix, 0, 16);
 		//System.arraycopy(inverseCameraMatrix, 0, projectionMatrix, 0, 16);
 		this.gl = gl;
@@ -99,6 +101,10 @@ public class JOGLRenderState {
 		System.arraycopy(parentState.getProjectionMatrix(), 0, projectionMatrix, 0, 16);
 		if (matrix != null) Rn.times(modelViewMatrix, parentState.getModelViewMatrix(), matrix);
 		else System.arraycopy(parentState.getModelViewMatrix(), 0, modelViewMatrix, 0, 16);
+		
+		//Caution, not copying matrix
+		inverseCamMatrix = parentState.inverseCamMatrix;
+		
 		gl = parentState.getGL();
 	}
 	

@@ -1,5 +1,7 @@
 package de.jreality.jogl3.geom;
 
+import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
+
 import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +21,7 @@ import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
@@ -41,8 +44,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		public void bind(GLShader shader, GL3 gl){
 			if(hasTexture){
 				//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.
-				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE2);
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 2);
+				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE8);
+				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 8);
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 1);
 			}else{
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 0);
@@ -208,6 +211,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //    				System.out.println(s);
 //    			}
     			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()),  CommonAttributes.getDefault(v.getName(), value));
+    			//System.out.println("" + v.getName() + ", " + v.getType() + ", " + value.getClass());
     			if(value.getClass().equals(Integer.class)){
     				c.add(new GlUniformInt(v.getName(), (Integer)value));
     				//c.intUniforms.add(new GlUniform<Integer>(v.getName(), (Integer)value));

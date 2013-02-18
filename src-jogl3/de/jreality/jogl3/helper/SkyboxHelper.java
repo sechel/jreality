@@ -71,6 +71,26 @@ public class SkyboxHelper {
 		texNoVBO = new GLVBOFloat(gl, texNo, "vertex_tex_no");
 	}
 	
+	public static void bindSamplers(GL3 gl, GLShader _shader){
+		for(int i = 0; i < 6; i++){
+			  String name = "right";
+			  if(i == 1)
+				  name = "left";
+			  else if(i == 2)
+				  name = "up";
+			  else if(i == 3)
+				  name = "down";
+			  else if(i == 4)
+				  name = "back";
+			  else if(i == 5)
+				  name = "front";
+			  gl.glUniform1i(gl.glGetUniformLocation(_shader.shaderprogram, name), i+2);
+			  //jogltex[i].setBlendColor(cm.getBlendColor());
+			  //jogltex[i].setImage(imgs[i]);
+			  Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE2+i);
+		  }
+	}
+	
   @SuppressWarnings("static-access")
 public static void render(GL3 gl, double[] modelview, double[] projection, CubeMap cm, Camera cam)	{
     if(cm == null)
