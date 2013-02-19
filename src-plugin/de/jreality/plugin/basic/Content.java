@@ -1,5 +1,6 @@
 package de.jreality.plugin.basic;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public abstract class Content extends Plugin {
 	protected Scene
 		scene = null;
 	protected List<ContentChangedListener>
-		listeners = new LinkedList<ContentChangedListener>();
+		listeners = Collections.synchronizedList(new LinkedList<ContentChangedListener>());
 	
 	public abstract void setContent(SceneGraphNode content);
 	
@@ -114,26 +115,30 @@ public abstract class Content extends Plugin {
 		return true;
 	}
 	
-	public synchronized void fireContentChanged(ContentChangedEvent cce) {
-		for (ContentChangedListener l : listeners) {
-			l.contentChanged(cce);
+	public void fireContentChanged(ContentChangedEvent cce) {
+		synchronized (listeners) {
+			for (ContentChangedListener l : listeners) {
+				l.contentChanged(cce);
+			}	
 		}
 	}
 	
 	
-	public synchronized void fireContentChanged() {
+	public void fireContentChanged() {
 		ContentChangedEvent cce = new ContentChangedEvent(ChangeEventType.ContentChanged);
-		for (ContentChangedListener l : listeners) {
-			l.contentChanged(cce);
+		synchronized (listeners) {
+			for (ContentChangedListener l : listeners) {
+				l.contentChanged(cce);
+			}
 		}
 	}
 	
 	
-	public synchronized boolean addContentChangedListener(ContentChangedListener l) {
+	public boolean addContentChangedListener(ContentChangedListener l) {
 		return listeners.add(l);
 	}
 	
-	public synchronized boolean removeContentChangedListener(ContentChangedListener l) {
+	public boolean removeContentChangedListener(ContentChangedListener l) {
 		return listeners.remove(l);
 	}
 	
