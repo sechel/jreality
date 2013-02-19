@@ -272,7 +272,7 @@ public class PythonScriptTool extends AbstractAction {
 				gui.restoreProperties(c);
 				getGuiList().add(gui);
 			} catch (Exception e) {
-				System.err.println("Could not load gui plugin class " + guiClassName);
+				System.err.println("Could not load gui plugin class " + guiClassName + ": " + e);
 				continue;
 			}
 		}

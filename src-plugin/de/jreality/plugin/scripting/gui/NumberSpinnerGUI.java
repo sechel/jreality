@@ -69,7 +69,7 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 		}
 		@Override
 		public void setVariableValue(Number val) {
-			frontend.model.setValue(val);
+			frontend.model.setValue(val.doubleValue());
 		}
 
 		
@@ -106,9 +106,9 @@ public class NumberSpinnerGUI extends PythonGUIPlugin<Number> {
 			
 			backend.setListenersEnabled(false);
 			try {
-				backend.setMaxValue(maxValue);
-				backend.setMinValue(minValue);
-				backend.setStepSize(stepSize);
+				backend.setMaxValue(maxValue.doubleValue());
+				backend.setMinValue(minValue.doubleValue());
+				backend.setStepSize(stepSize.doubleValue());
 				backend.setIntegerValue(isInteger);
 				backend.setInstantExecute(isInstant());
 				backend.setShowSlider(showSlider);
