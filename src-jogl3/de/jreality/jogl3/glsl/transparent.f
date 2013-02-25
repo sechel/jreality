@@ -3,8 +3,8 @@
 #version 330
 
 out vec4 gl_FragColor;
-
+in vec4 color;
 void main(void)
 {
-	gl_FragColor = vec4(1, 0, 0, 1);
+	gl_FragColor = color;
 }

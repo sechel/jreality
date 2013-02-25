@@ -24,6 +24,7 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
+import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.helper.SkyboxHelper;

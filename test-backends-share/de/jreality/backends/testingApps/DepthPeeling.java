@@ -9,7 +9,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.awt.GLCanvas;
 import javax.media.opengl.glu.GLU;
 
-import de.jreality.jogl3.GLShader;
+import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
 
 import java.awt.Frame;
@@ -34,13 +34,55 @@ import java.nio.*;
 public class DepthPeeling implements GLEventListener{
 	
 	static float quadCoords[] = {
-		-1, 1, 0, 1,
-		.5f, .5f, 0, 1,
-		1, -1, 0, 1,
-		1, -1, 0, 1,
-		-.5f, -.5f, 0, 1,
-		-1, 1, 0, 1
+		-.2f, .2f, 0.1f, 1,
+		.9f, .2f, 0.1f, 1,
+		.9f, -.9f, 0.1f, 1,
+		.9f, -.9f, 0.1f, 1,
+		-.2f, -.9f, 0.1f, 1,
+		-.2f, .2f, 0.1f, 1,
+		
+		-.3f, .8f, .75f, 1,
+		.8f, .8f, .75f, 1,
+		.8f, -.3f, .75f, 1,
+		.8f, -.3f, .75f, 1,
+		-.3f, -.3f, .75f, 1,
+		-.3f, .8f, .75f, 1,
+		
+		-.8f, .3f, .5f, 1,
+		.3f, .3f, .5f, 1,
+		.3f, -.8f, .5f, 1,
+		.3f, -.8f, .5f, 1,
+		-.8f, -.8f, .5f, 1,
+		-.8f, .3f, .5f, 1
+		
+		
 	   };
+	
+	static float quadColors[] = {
+		1, 0, 0, 0.5f,
+		1, 0, 0, 0.5f,
+		1, 0, 0, 0.5f,
+		1, 0, 0, 0.5f,
+		1, 0, 0, 0.5f,
+		1, 0, 0, 0.5f,
+		
+		0, 1, 0, 0.5f,
+		0, 1, 0, 0.5f,
+		0, 1, 0, 0.5f,
+		0, 1, 0, 0.5f,
+		0, 1, 0, 0.5f,
+		0, 1, 0, 0.5f,
+		
+		0, 0, 1, 0.5f,
+		0, 0, 1, 0.5f,
+		0, 0, 1, 0.5f,
+		0, 0, 1, 0.5f,
+		0, 0, 1, 0.5f,
+		0, 0, 1, 0.5f
+		
+		
+	   };
+	
 	static float texCoords[] = {
 		0,0,
 		0,1,
@@ -50,9 +92,9 @@ public class DepthPeeling implements GLEventListener{
 		0,0
 	};
 	
-	public static GLShader depth = new GLShader("/homes/extern/mvws9-02/depth.v", "/homes/extern/mvws9-02/depth.f");
-	public static GLShader transp = new GLShader("/homes/extern/mvws9-02/transparent.v", "/homes/extern/mvws9-02/transparent.f");
-	GLVBOFloat quadVerts, quadTex;
+	public static GLShader depth = new GLShader("depth.v", "depth.f");
+	public static GLShader transp = new GLShader("transparent.v", "transparent.f");
+	GLVBOFloat quadVerts, quadCols;
 	@Override
     public void reshape(GLAutoDrawable dr, int x, int y, int width, int height){
     	System.out.println("Reshape");
@@ -66,6 +108,12 @@ public class DepthPeeling implements GLEventListener{
     	transp.init(gl);
     	
     	quadVerts = new GLVBOFloat(gl, quadCoords, "vertex_coordinates");
+    	quadCols = new GLVBOFloat(gl, quadColors, "vertex_colors");
+    	
+    	gl.glEnable(gl.GL_DEPTH_TEST);
+    	gl.glEnable(gl.GL_BLEND);
+    	gl.glBlendEquation(gl.GL_FUNC_ADD);
+    	gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
 //    	quadTex = new GLVBOFloat(gl, texCoords, "texCoords");
     	
     	
@@ -128,17 +176,22 @@ public class DepthPeeling implements GLEventListener{
     public void display(GLAutoDrawable dr){
     	System.out.println("Display");
     	GL3 gl = dr.getGL().getGL3();
-    	
+    	gl.glClear(gl.GL_DEPTH_BUFFER);
     	transp.useShader(gl);
     	
     	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, quadVerts.getID());
     	gl.glVertexAttribPointer(gl.glGetAttribLocation(transp.shaderprogram, quadVerts.getName()), quadVerts.getElementSize(), quadVerts.getType(), false, 0, 0);
     	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(transp.shaderprogram, quadVerts.getName()));
-	
+    	
+    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, quadCols.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(transp.shaderprogram, quadCols.getName()), quadCols.getElementSize(), quadCols.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(transp.shaderprogram, quadCols.getName()));
+    	
     	gl.glDrawArrays(gl.GL_TRIANGLES, 0, quadVerts.getLength()/4);
     	
     	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(transp.shaderprogram, quadVerts.getName()));
-		
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(transp.shaderprogram, quadCols.getName()));
+    	
     	transp.dontUseShader(gl);
     	
 //    	//gl2.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);

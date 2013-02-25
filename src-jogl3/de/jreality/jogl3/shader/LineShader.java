@@ -5,11 +5,11 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl3.GLShader;
-import de.jreality.jogl3.GLShader.ShaderVar;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLLineSetEntity;
+import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;

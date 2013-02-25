@@ -8,7 +8,7 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
-import de.jreality.jogl3.GLShader;
+import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.scene.Appearance;

@@ -3,6 +3,7 @@ package de.jreality.jogl3;
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
 
+import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.math.MatrixBuilder;

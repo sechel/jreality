@@ -9,9 +9,9 @@ import java.util.Set;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl3.GLShader;
-import de.jreality.jogl3.GLShader.ShaderVar;
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
