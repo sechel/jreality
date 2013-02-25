@@ -56,6 +56,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.backends.viewer.InstrumentedViewer;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -80,8 +81,8 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
  */
 public class View extends SideContainerPerspective implements ChangeListener {
 
-	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);
-//	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_JOGL_DOME);
+//	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);
+	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_JOGL_DOME);
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_JOGL3_DOME+" "+SystemProperties.VIEWER_DEFAULT_JOGL3); 
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_JOGL_DOME+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT); 
@@ -257,6 +258,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		init(scene);
 		updateScenePaths(scene);
 		scene.addChangeListener(this);
+		iop = c.getPlugin(InfoOverlayPlugin.class);
+		
 	}
 
 	@Override
@@ -302,6 +305,7 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		return renderTrigger;
 	}
 
+	InfoOverlayPlugin iop;
 	public JMenu createViewerMenu() {
 		JMenu menu = new JMenu("Viewer");
 		final ViewerSwitch viewerSwitch = getViewer();
@@ -317,6 +321,10 @@ public class View extends SideContainerPerspective implements ChangeListener {
 				public void actionPerformed(ActionEvent e) {
 					viewerSwitch.selectViewer(index);
 					viewerSwitch.getCurrentViewer().renderAsync();
+					if (iop != null && viewerSwitch.getCurrentViewer() instanceof InstrumentedViewer) {
+						InstrumentedViewer iv = (InstrumentedViewer) viewerSwitch.getCurrentViewer();
+						iop.getInfoOverlay().setInstrumentedViewer(iv);
+					}
 				}
 			});
 			item.setSelected(index==0);

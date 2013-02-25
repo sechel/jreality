@@ -52,6 +52,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLPbuffer;
 
+import de.jreality.backends.viewer.PerformanceMeter;
 import de.jreality.jogl.shader.RenderingHintsInfo;
 import de.jreality.jogl.shader.Texture2DLoaderJOGL;
 import de.jreality.math.Matrix;
@@ -81,7 +82,7 @@ public class JOGLRenderer {
 	transient protected JOGLTopLevelAppearance topAp;
 	transient protected JOGLOffscreenRenderer offscreenRenderer;
 	transient protected JOGLFBO theFBO;
-	transient protected JOGLPerformanceMeter perfMeter;
+	transient protected PerformanceMeter perfMeter;
 	transient protected GeometryGoBetween geometryGB;
 	transient protected SceneGraphPath alternateCameraPath = null;
 
@@ -127,7 +128,7 @@ public class JOGLRenderer {
 		theViewer = viewer;
 		// TODO figure out I do this here
 		offscreenRenderer = new JOGLOffscreenRenderer(this);
-		perfMeter = new JOGLPerformanceMeter(this);
+		perfMeter = new PerformanceMeter();
 		geometryGB = new GeometryGoBetween(this);
 		renderingState = new JOGLRenderingState(this);
 		setAuxiliaryRoot(viewer.getAuxiliaryRoot());

@@ -1,5 +1,6 @@
 package de.jreality.plugin.basic;
 
+import de.jreality.backends.viewer.InstrumentedViewer;
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;
@@ -29,12 +30,12 @@ public class InfoOverlayPlugin extends Plugin {
 		sceneView = c.getPlugin(View.class);
 //		Component viewComp = sceneView.getViewer().getViewingComponent();
 		Viewer[] vlist = sceneView.getViewer().getViewers();
-		de.jreality.jogl.JOGLViewer joglViewer = null;
+		InstrumentedViewer joglViewer = null;
 		// this is unreliable; adding a DomeViewer (subclass of JOGLViewer) also
 		// broke original version (without break;)
 		for (Viewer v : vlist)	{
-			if (v instanceof de.jreality.jogl.JOGLViewer) {
-				joglViewer = (de.jreality.jogl.JOGLViewer) v;
+			if (v instanceof InstrumentedViewer) {
+				joglViewer = (InstrumentedViewer) v;
 				break;
 			}
 		}
@@ -42,7 +43,8 @@ public class InfoOverlayPlugin extends Plugin {
 			LoggingSystem.getLogger(this).warning("No Jogl Viewer in viewer switch!");
 			return;
 		}
-		infoOverlay = InfoOverlay.perfInfoOverlayFor(joglViewer);
+		infoOverlay = InfoOverlay.perfInfoOverlayFor();
+		infoOverlay.setInstrumentedViewer(joglViewer);
 		infoOverlay.setVisible(true);
 	}
 

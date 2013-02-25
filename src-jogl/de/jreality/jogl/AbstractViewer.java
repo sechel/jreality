@@ -64,6 +64,7 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JPanel;
 
+import de.jreality.backends.viewer.InstrumentedViewer;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
@@ -76,7 +77,7 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 abstract public class AbstractViewer implements de.jreality.scene.Viewer,
-		StereoViewer, GLEventListener, Runnable {
+		InstrumentedViewer, StereoViewer, Runnable {
 	protected SceneGraphComponent sceneRoot;
 	SceneGraphComponent auxiliaryRoot;
 	SceneGraphPath cameraPath;
@@ -258,6 +259,27 @@ abstract public class AbstractViewer implements de.jreality.scene.Viewer,
 
 	public JOGLRenderer getRenderer() {
 		return renderer;
+	}
+
+	
+	@Override
+	public void addGLEventListener(GLEventListener e) {
+		drawable.addGLEventListener(e);
+	}
+
+	@Override
+	public double getClockRate() {
+		return renderer.getClockrate();
+	}
+
+	@Override
+	public double getFrameRate() {
+		return renderer.getFramerate();
+	}
+
+	@Override
+	public int getPolygonCount() {
+		return renderer.getPolygonCount();
 	}
 
 	/****** listeners! ************/

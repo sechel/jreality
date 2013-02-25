@@ -1,26 +1,20 @@
-package de.jreality.jogl;
+package de.jreality.backends.viewer;
 
-public class JOGLPerformanceMeter {
+public class PerformanceMeter {
 	transient private static boolean collectFrameRate = true;
 	transient protected double framerate;
-	transient protected int nodeCount = 0;
-	transient int frameCount = 0;
+	public transient int frameCount = 0;
 	transient long[] history = new long[20], clockTime = new long[20];
-	transient long beginRenderTime;
+	transient public long beginRenderTime;
 
-	private JOGLRenderer jr;
 
-	protected JOGLPerformanceMeter(JOGLRenderer jr) {
-		this.jr = jr;
-	}
-
-	protected void beginFrame() {
-		nodeCount = jr.renderingState.polygonCount = 0;
+	public void beginFrame() {
+//		nodeCount = jr.renderingState.polygonCount = 0;
 		if (collectFrameRate)
 			beginRenderTime = System.currentTimeMillis();
 	}
 
-	protected void endFrame() {
+	public void endFrame() {
 		++frameCount;
 		int j = (frameCount % 20);
 		clockTime[j] = beginRenderTime;

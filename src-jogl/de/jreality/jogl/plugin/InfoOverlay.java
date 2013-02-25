@@ -18,8 +18,7 @@ import javax.media.opengl.glu.GLU;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
-import de.jreality.jogl.AbstractViewer;
-import de.jreality.jogl.JOGLViewer;
+import de.jreality.backends.viewer.InstrumentedViewer;
 
 /**
  * @author Pepijn Van Eeckhoudt
@@ -35,7 +34,7 @@ public class InfoOverlay implements GLEventListener {
 		infoProvider = ip;
 	}
 
-	AbstractViewer viewer;
+	InstrumentedViewer viewer;
 
 	public int position = UPPER_LEFT;
 	private boolean visible = false;
@@ -60,9 +59,12 @@ public class InfoOverlay implements GLEventListener {
 	/**
 	 * @param v
 	 */
-	public InfoOverlay(AbstractViewer v) {
+	public void setInstrumentedViewer(InstrumentedViewer v) {
+		if (viewer != null)  {
+			// remove event listener
+		}
 		viewer = v;
-		viewer.getDrawable().addGLEventListener(this);
+		viewer.addGLEventListener(this);
 		infoOverlays.add(this);
 	}
 
@@ -90,6 +92,7 @@ public class InfoOverlay implements GLEventListener {
 	}
 
 	public void display(GLAutoDrawable glDrawable) {
+//		System.out.println("calling display from infoOverlay");
 		if (!visible)
 			return;
 		if (infoProvider != null)
@@ -193,30 +196,30 @@ public class InfoOverlay implements GLEventListener {
 		// TODO document this
 	}
 
-	public static InfoOverlay perfInfoOverlayFor(final JOGLViewer v) {
-		final InfoOverlay perfInfo = new InfoOverlay(v);
+	public static InfoOverlay perfInfoOverlayFor() {
+		final InfoOverlay perfInfo = new InfoOverlay();
 		final List<String> infoStrings = new Vector<String>();
 		perfInfo.setPosition(InfoOverlay.LOWER_RIGHT);
 		perfInfo.setInfoProvider(new InfoOverlay.InfoProvider() {
 
 			public void updateInfoStrings(InfoOverlay io) {
-				InfoOverlay.updateInfoStrings(v, infoStrings, perfInfo);
+				perfInfo.updateInfoStrings( infoStrings, perfInfo);
 			}
 
 		});
 		return perfInfo;
 	}
 
-	public static void updateInfoStrings(JOGLViewer v, List<String> s,
+	public  void updateInfoStrings( List<String> s,
 			InfoOverlay io) {
 		// JOGLConfiguration.theLog.log(Level.INFO,"Providing info strings");
 		if (s != null)
 			s.clear();
 		else
 			s = new ArrayList<String>();
-		s.add("Real FPS: " + v.getRenderer().getFramerate());
-		s.add("Clock FPS: " + v.getRenderer().getClockrate());
-		s.add("Polygon Count:" + v.getRenderer().getPolygonCount());
+		s.add("Real FPS: " + viewer.getFrameRate());
+		s.add("Clock FPS: " + viewer.getClockRate());
+		s.add("Polygon Count:" + viewer.getPolygonCount());
 		s.add(getMemoryUsage());
 		io.setInfoStrings(s);
 	}

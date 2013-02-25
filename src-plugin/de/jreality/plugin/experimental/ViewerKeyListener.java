@@ -75,8 +75,10 @@ public class ViewerKeyListener extends KeyAdapter {
 		if (jViewer != null) {
 			if (io != null)	
 				infoOverlay = io;
-			else 
-				infoOverlay = InfoOverlay.perfInfoOverlayFor(jViewer);
+			else {
+				infoOverlay = InfoOverlay.perfInfoOverlayFor();
+				infoOverlay.setInstrumentedViewer(jViewer);
+			}
 		}
 		if (helpOverlay != null)	{
 			// numeric keys are reserved for applications

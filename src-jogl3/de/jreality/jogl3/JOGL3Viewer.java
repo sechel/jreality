@@ -24,6 +24,8 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
+import de.jreality.backends.viewer.InstrumentedViewer;
+import de.jreality.backends.viewer.PerformanceMeter;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
@@ -51,7 +53,7 @@ import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
 
 
-public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEventListener {
+public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, InstrumentedViewer {
 
 	SceneGraphComponent auxiliaryRoot;
 	protected JPanel component;
@@ -268,9 +270,10 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 //	int width, height;
 	
 	CubeMap skyboxCubemap;
+	PerformanceMeter perfmeter = new PerformanceMeter();
 	
 	public void display(GLAutoDrawable arg0, int width, int height) {
-		
+		perfmeter.beginFrame();
 		// TODO Auto-generated method stub
 		//System.out.println("display called---------------------------------");
 		if(arg0.getGL() != null && arg0.getGL().getGL3() != null){
@@ -339,6 +342,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
 		}
+		perfmeter.endFrame();
 	}
 	LightHelper lightHelper;
 	BackgroundHelper backgroundHelper;
@@ -395,5 +399,27 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, GLEv
 		// TODO Auto-generated method stub
 		System.out.println("reshape");
 	}
+	
+	@Override
+	public double getClockRate() {
+		return perfmeter.getClockrate();
+	}
+
+	@Override
+	public double getFrameRate() {
+		return perfmeter.getFramerate();
+	}
+
+	@Override
+	public int getPolygonCount() {
+		return 0;
+	}
+
+	@Override
+	public void addGLEventListener(GLEventListener e) {
+		canvas.addGLEventListener(e);
+	}
+
+
 	
 }
