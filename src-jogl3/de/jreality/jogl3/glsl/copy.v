@@ -3,12 +3,12 @@
 #version 330
 
 in vec4 vertex_coordinates;
-in vec4 vertex_colors;
+in vec4 texture_coordinates;
 
-out vec4 color;
+smooth out vec4 texCoord;
 
 void main(void)
 {
 	gl_Position = vertex_coordinates;
-	color = vertex_colors;
+	texCoord = texture_coordinates;
 }

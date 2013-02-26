@@ -4,8 +4,8 @@
 
 in vec4 vertex_coordinates;
 in vec4 vertex_colors;
-
 out vec4 color;
+
 
 void main(void)
 {
