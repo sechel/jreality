@@ -170,4 +170,13 @@ void main(void)
 		gl_FragColor = color2*vec4(lightInflux, diffuseColor.a);
 	}
 	gl_FragColor = trunc(gl_FragColor*3)/3;
+	//DEPTH BUFFER VISUALIZATION
+	//float a = 10*(1-gl_FragCoord.z);
+	//float b = 0;
+	//float c = 0;
+	//if(a < 0.1)
+	//	b = 10*a;
+	//if(a < 0.01)
+	//	c = 100*a;
+	//gl_FragColor = vec4(a, b, c, 1);
 }
