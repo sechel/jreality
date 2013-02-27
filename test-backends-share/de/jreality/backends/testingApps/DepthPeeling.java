@@ -1,6 +1,7 @@
 package de.jreality.backends.testingApps;
 
 import javax.media.opengl.GL3;
+import javax.media.opengl.GLAnimatorControl;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
@@ -11,8 +12,11 @@ import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
 
 import java.awt.Frame;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.PrintStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
@@ -25,13 +29,22 @@ import java.nio.ByteBuffer;
 // TODO implement depth peeling
 public class DepthPeeling implements GLEventListener{
 	
+	static float nonT[] = {
+		0, -.1f, .9f, 1,
+		.1f, .33f, .1f, 1,
+		.9f, .33f, .1f, 1,
+		.9f, .33f, .1f, 1,
+		.8f, -.1f, .9f, 1,
+		0, -.1f, .9f, 1
+	};
+	
 	static float quadCoords[] = {
-		-.2f, .2f, 0.1f, 1,
-		.9f, .2f, 0.1f, 1,
-		.9f, -.9f, 0.1f, 1,
-		.9f, -.9f, 0.1f, 1,
-		-.2f, -.9f, 0.1f, 1,
-		-.2f, .2f, 0.1f, 1,
+		-.2f, .2f, 0.4f, 1,
+		.9f, .2f, 0.4f, 1,
+		.8f, -.9f, 0.7f, 1,
+		.8f, -.9f, 0.7f, 1,
+		-.3f, -.9f, 0.7f, 1,
+		-.2f, .2f, 0.4f, 1,
 		
 		-.3f, .8f, .75f, 1,
 		.8f, .8f, .75f, 1,
@@ -49,28 +62,28 @@ public class DepthPeeling implements GLEventListener{
 		
 		
 	   };
-	
+	static final float alpha = 0.6f;
 	static float quadColors[] = {
-		1, 0, 0, 0.7f,
-		1, 0, 0, 0.7f,
-		1, 0, 0, 0.7f,
-		1, 0, 0, 0.7f,
-		1, 0, 0, 0.7f,
-		1, 0, 0, 0.7f,
+		1, 0, 0, alpha,
+		1, 0, 0, alpha,
+		1, 0, 0, alpha,
+		1, 0, 0, alpha,
+		1, 0, 0, alpha,
+		1, 0, 0, alpha,
 		
-		0, 1, 0, 0.5f,
-		0, 1, 0, 0.5f,
-		0, 1, 0, 0.5f,
-		0, 1, 0, 0.5f,
-		0, 1, 0, 0.5f,
-		0, 1, 0, 0.5f,
+		0, 1, 0, alpha,
+		0, 1, 0, alpha,
+		0, 1, 0, alpha,
+		0, 1, 0, alpha,
+		0, 1, 0, alpha,
+		0, 1, 0, alpha,
 		
-		0, 0, 1, 0.7f,
-		0, 0, 1, 0.7f,
-		0, 0, 1, 0.7f,
-		0, 0, 1, 0.7f,
-		0, 0, 1, 0.7f,
-		0, 0, 1, 0.7f
+		0, 0, 1, alpha,
+		0, 0, 1, alpha,
+		0, 0, 1, alpha,
+		0, 0, 1, alpha,
+		0, 0, 1, alpha,
+		0, 0, 1, alpha
 		
 		
 	   };
@@ -96,7 +109,8 @@ public class DepthPeeling implements GLEventListener{
 	public static GLShader depth = new GLShader("depth.v", "depth.f");
 	public static GLShader transp = new GLShader("transparent.v", "transparent.f");
 	public static GLShader copy = new GLShader("copy.v", "copy.f");
-	GLVBOFloat quadVerts, quadCols, testCoords, testTex;
+	public static GLShader nonTS = new GLShader("nonts.v", "nonts.f");
+	GLVBOFloat quadVerts, quadCols, testCoords, testTex, nonTr;
 	@Override
     public void reshape(GLAutoDrawable dr, int x, int y, int width, int height){
     	System.out.println("Reshape");
@@ -183,11 +197,13 @@ public class DepthPeeling implements GLEventListener{
     	depth.init(gl);
     	transp.init(gl);
     	copy.init(gl);
+    	nonTS.init(gl);
     	
     	quadVerts = new GLVBOFloat(gl, quadCoords, "vertex_coordinates");
     	quadCols = new GLVBOFloat(gl, quadColors, "vertex_colors");
     	testCoords = new GLVBOFloat(gl, testQuadCoords, "vertex_coordinates");
     	testTex = new GLVBOFloat(gl, testTexCoords, "texture_coordinates");
+    	nonTr = new GLVBOFloat(gl, nonT, "vertex_coordinates");
     	
     	gl.glGenQueries(1, queries, 0);
     	
@@ -205,10 +221,10 @@ public class DepthPeeling implements GLEventListener{
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	gl.glClearDepth(1);
     	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
-    	gl.glClearColor(0, 0, 0, 1);
+    	gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
     	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
     	//draw nontransparent objects into framebuffer
-    	
+    	drawNonTransparent(gl);
     	int quer = 1;
     	do{
     		//draw transparent objects into FBO with reverse depth values
@@ -283,10 +299,6 @@ public class DepthPeeling implements GLEventListener{
     	gl.glUniform1i(gl.glGetUniformLocation(transp.shaderprogram, "width"), width);
     	gl.glUniform1i(gl.glGetUniformLocation(transp.shaderprogram, "height"), height);
     	
-    	//gl.glClearColor(0, 0, 0, 1);
-    	//gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-    	//gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
-    	
     	
     	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, quadVerts.getID());
     	gl.glVertexAttribPointer(gl.glGetAttribLocation(transp.shaderprogram, quadVerts.getName()), quadVerts.getElementSize(), quadVerts.getType(), false, 0, 0);
@@ -304,6 +316,24 @@ public class DepthPeeling implements GLEventListener{
     	transp.dontUseShader(gl);
     	
     	gl.glDisable(gl.GL_BLEND);
+    }
+    
+    private void drawNonTransparent(GL3 gl){
+    	gl.glViewport(0, 0, width, height);
+    	
+    	gl.glDisable(gl.GL_BLEND);
+    	nonTS.useShader(gl);
+    	
+    	
+    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, nonTr.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(nonTS.shaderprogram, nonTr.getName()), nonTr.getElementSize(), nonTr.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(nonTS.shaderprogram, nonTr.getName()));
+    	
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, nonTr.getLength()/4);
+    	
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(nonTS.shaderprogram, nonTr.getName()));
+    	
+    	nonTS.dontUseShader(gl);
     }
     
     private void copyFBO2FB(GL3 gl, int tex){
@@ -348,6 +378,7 @@ public class DepthPeeling implements GLEventListener{
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
         DepthPeeling depthPeeling = new DepthPeeling();
         glcanvas.addGLEventListener(depthPeeling);
+        //glcanvas.addMouseMotionListener(depthPeeling);
 
         final Frame frame = new Frame( "One Triangle AWT" );
         frame.add( glcanvas );
