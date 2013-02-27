@@ -63,7 +63,7 @@ public class SkyboxHelper {
 	private static GLShader shader;
 	public static void init(GL3 gl){
 		//init shaders
-		shader = new GLShader("cubemap.v", "cubemap.f");
+		shader = new GLShader("nontransp/cubemap.v", "nontransp/cubemap.f");
 		shader.init(gl);
 	    //init vbos
 		verts = new GLVBOFloat(gl, cubeVerts3, "vertex_coordinates");

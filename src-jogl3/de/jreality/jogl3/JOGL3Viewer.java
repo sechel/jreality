@@ -106,7 +106,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		caps.setDoubleBuffered(true);
 		//a value of 1, 2, 4 and 8 has just the same effect on linux nvidia-310.14, i.e. no anti-aliasing
 		//16 times does anti-aliasing
-		caps.setNumSamples(16);
+		caps.setNumSamples(1);
 		caps.setSampleBuffers(true);
 		
 		canvas = new GLCanvas(caps);
@@ -271,6 +271,13 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	
 	CubeMap skyboxCubemap;
 	PerformanceMeter perfmeter = new PerformanceMeter();
+	
+	//TODO transparancy
+	// - write shaders
+	// - extract transparent and nontransparent objects from scene graph into seperate lists
+	// - do this in a way to allow deferred shading later
+	// - do what is being done in the example DepthPeeling application
+	// - think about sensible way of dealing with the occlusion query
 	
 	public void display(GLAutoDrawable arg0, int width, int height) {
 		perfmeter.beginFrame();

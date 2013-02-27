@@ -26,12 +26,12 @@ import com.itextpdf.text.log.SysoLogger;
 public class GLShader
 {
 	
-	public static GLShader defaultPolygonShader = new GLShader("polygon.v", "polygon.f");
-	public static GLShader defaultPointShader = new GLShader("pointNoSphere.v", "pointNoSphere.f");
-	public static GLShader defaultLineShader = new GLShader("edge.v", "edge.f");
-	public static GLShader defaultPolygonLineShader = new GLShader("tubeEdge.v", "tubeEdge.f");
-	public static GLShader defaultSphereShader = new GLShader("sphere.v", "sphere.f");
-	public static GLShader defaultPointSphereShader = new GLShader("spherePoint.v", "spherePoint.f");
+	public static GLShader defaultPolygonShader = new GLShader("nontransp/polygon.v", "nontransp/polygon.f");
+	public static GLShader defaultPointShader = new GLShader("nontransp/pointNoSphere.v", "nontransp/pointNoSphere.f");
+	public static GLShader defaultLineShader = new GLShader("nontransp/edge.v", "nontransp/edge.f");
+	public static GLShader defaultPolygonLineShader = new GLShader("nontransp/tubeEdge.v", "nontransp/tubeEdge.f");
+	public static GLShader defaultSphereShader = new GLShader("nontransp/sphere.v", "nontransp/sphere.f");
+	public static GLShader defaultPointSphereShader = new GLShader("nontransp/spherePoint.v", "nontransp/spherePoint.f");
 	//TODO defaultLineShader
 	public static void initDefaultShaders(GL3 gl){
 		

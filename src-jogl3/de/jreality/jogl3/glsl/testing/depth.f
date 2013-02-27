@@ -2,9 +2,6 @@
 //default polygon fragment shader
 #version 330
 
-//out vec4 gl_FragColor;
-in vec4 color;
-
 uniform sampler2D image;
 uniform int width;
 uniform int height;

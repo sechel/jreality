@@ -247,9 +247,9 @@ public class BackgroundHelper {
 		quad = new GLVBOFloat(gl, quadVerts, "vertex_coordinates");
 		colors = new GLVBOFloat(gl, colorValues, "vertex_colors");
 		texcoords = new GLVBOFloat(gl, texCoords, "texCoords", 2);
-		backgroundShader = new GLShader("background.v", "background.f");
+		backgroundShader = new GLShader("nontransp/background.v", "nontransp/background.f");
 		backgroundShader.init(gl);
-		backgroundShaderTex = new GLShader("backgroundTex.v", "backgroundTex.f");
+		backgroundShaderTex = new GLShader("nontransp/backgroundTex.v", "nontransp/backgroundTex.f");
 		backgroundShaderTex.init(gl);
 	}
 }
