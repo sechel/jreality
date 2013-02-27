@@ -42,7 +42,8 @@ uniform int has_vertex_texturecoordinates;
 vec3 lightInflux = vec3(0, 0, 0);
 
 uniform int has_face_colors;
-in vec4 faceColor;
+uniform int has_vertex_colors;
+in vec4 faceVertexColor;
 
 //cubemap
 uniform sampler2D front;
@@ -169,8 +170,8 @@ void main(void)
 	//	discard;
 	
 	diffuse = diffuseColor;
-	if(has_face_colors == 1)
-		diffuse = faceColor;
+	if(has_face_colors == 1 || has_vertex_colors == 1)
+		diffuse = faceVertexColor;
 	
 	lightInflux = vec3(0, 0, 0);
 	vec3 normal = normalize(camSpaceNormal);
@@ -206,7 +207,7 @@ void main(void)
 	if(gl_FragColor.a == 0)
 		discard;
 	
-	if(1 == 1){
+	if(1 == 0){
 		//do environment reflections
 		vec3 A = -normalize(camSpaceCoord.xyz);
 		vec3 C = -A + 2*dot(A,normal)*normal;

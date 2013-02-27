@@ -22,6 +22,9 @@ in vec3 face_normals;
 uniform int has_face_colors;
 in vec4 face_colors;
 
+uniform int has_vertex_colors;
+in vec4 vertex_colors;
+
 uniform int has_vertex_texturecoordinates;
 in vec2 vertex_texturecoordinates;
 
@@ -29,7 +32,7 @@ out vec2 texCoord;
 out vec4 camSpaceCoord;
 out vec3 camSpaceNormal;
 
-out vec4 faceColor;
+out vec4 faceVertexColor;
 
 //!!!!!!!!  if some variable is not initialized properly, don't forget to exclude it
 //!!!!!!!!  from the automatic handling by JOGLGeometryInstance.updateAppearance()
@@ -37,7 +40,9 @@ out vec4 faceColor;
 void main(void)
 {
 	if(has_face_colors == 1)
-		faceColor = face_colors;
+		faceVertexColor = face_colors;
+	if(has_vertex_colors == 1)
+		faceVertexColor = vertex_colors;
 	if(has_vertex_texturecoordinates==1)
 		texCoord = (textureMatrix * vec4(vertex_texturecoordinates, 0, 1)).st;
 	vec3 normals = vec3(0.57735, 0.57735, 0.57735);
