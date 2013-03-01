@@ -69,9 +69,14 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		if (gtn instanceof JOGLGeometryInstance) {
 		
 			JOGLGeometryInstance geom = (JOGLGeometryInstance) gtn;
+			System.out.println("geometry instance is " + geom.hashCode());
 			if (geom != null) {
 				JOGLGeometryEntity geomEntity = (JOGLGeometryEntity) geom.getEntity();
-				geomEntity.updateData(state.getGL());
+				if(!geomEntity.dataUpToDate){
+					geomEntity.updateData(state.getGL());
+					geom.updateAppearance(this.toPath(), state.getGL());
+					geomEntity.dataUpToDate = true;
+				}
 				if(!state.appearanceUpToDate)
 					geom.updateAppearance(this.toPath(), state.getGL());
 				//geom.eap = EffectiveAppearance.create(this.toPath());

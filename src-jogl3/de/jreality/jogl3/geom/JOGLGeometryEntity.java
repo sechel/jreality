@@ -12,7 +12,7 @@ public abstract class JOGLGeometryEntity extends SceneGraphNodeEntity implements
 	protected JOGLGeometryEntity(SceneGraphNode node) {
 		super(node);
 	}
-	
+	public boolean dataUpToDate = false;
 	protected boolean isDoubleArrayArray(StorageModel sm){
 		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY)
 			return true;

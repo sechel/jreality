@@ -39,7 +39,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 	}
 	
 	//protected GLVBOFloat vertexVBO = null;
-	public boolean dataUpToDate = false;
+	
 
 	public JOGLPointSetEntity(PointSet node) {
 		super(node);
@@ -51,7 +51,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 	}
 
 	public void updateData(GL3 gl) {
-		if (!dataUpToDate) {
+		//if (!dataUpToDate) {
 			pointVbos.clear();
 			//TODO convert to automatic creation of vbos
 			PointSet ps = (PointSet) getNode();
@@ -132,7 +132,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 				//System.out.println("face attribute names: " + a.getName());
 			}
 			
-			dataUpToDate = true;
+			//dataUpToDate = true;
 			
 //			DataList vA = ps.getVertexAttributes(Attribute.COORDINATES);
 //			System.out.println("num points = "+ ps.getNumPoints());
@@ -144,6 +144,6 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 //			
 //			System.out.println("data up to date: "+getNode().getName());
 			
-		}
+		//}
 	}
 }

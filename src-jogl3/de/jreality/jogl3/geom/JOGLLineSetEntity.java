@@ -52,7 +52,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 	
 	public void updateData(GL3 gl) {
 		
-		if (!dataUpToDate) {
+		//if (!dataUpToDate) {
 			super.updateData(gl);
 			lineVbos.clear();
 			//TODO generate VBOs for line rendering
@@ -227,8 +227,8 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 				}
 				//System.out.println("face attribute names: " + a.getName());
 			}
-			dataUpToDate = true;
-		}
+			//dataUpToDate = true;
+		//}
 		
 	}
 	//TODO write line shader

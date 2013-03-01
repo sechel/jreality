@@ -53,7 +53,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 	
 	//replace state to gl
 	public void updateData(GL3 gl) {
-		if (!dataUpToDate) {
+		//if (!dataUpToDate) {
 			super.updateData(gl);
 			vbos.clear();
 			IndexedFaceSet fs = (IndexedFaceSet)getNode();
@@ -296,10 +296,10 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 			
 			normalVBO = new GLVBOFloat(state.getGL(), Rn.convertDoubleToFloatArray(normaldata), "vertex.normals");
 			*/
-			dataUpToDate = true;
+			//dataUpToDate = true;
 			
 //			System.out.println("data up to date: "+getNode().getName());
 			
-		}
+		//}
 	}
 }
