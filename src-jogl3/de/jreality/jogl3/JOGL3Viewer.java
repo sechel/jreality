@@ -14,6 +14,8 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.media.opengl.GL3;
 import javax.media.opengl.GLAutoDrawable;
@@ -26,6 +28,7 @@ import javax.swing.JPanel;
 
 import de.jreality.backends.viewer.InstrumentedViewer;
 import de.jreality.backends.viewer.PerformanceMeter;
+import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
@@ -343,9 +346,17 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			Rectangle2D r = CameraUtility.getViewport(cam, ar);
 			float x = (float)(r.getMaxX()-r.getMinX());
 			float y = (float)(r.getMaxY()-r.getMinY());
-			//render scene graph
 			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, lightHelper, tubeHelper, sphereHelper, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
-			rootInstance.render(rootState);
+			
+			//extract nontransparent objects
+			List<RenderableObject> nonTranspObjects = new LinkedList<RenderableObject>();
+			List<RenderableObject> transpObjects = new LinkedList<RenderableObject>();
+			rootInstance.collectNonTransparent(rootState, nonTranspObjects, transpObjects);
+			for(RenderableObject o : nonTranspObjects){
+				o.render();
+			}
+			//render scene graph
+			//rootInstance.render(rootState);
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
 		}

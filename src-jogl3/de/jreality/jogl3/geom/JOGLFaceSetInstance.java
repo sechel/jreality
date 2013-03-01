@@ -22,7 +22,6 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	
 	@Override
 	public void render(JOGLRenderState state) {
-		System.out.println("Render");
 		if(eap==null)
 			return;
 		super.render(state);

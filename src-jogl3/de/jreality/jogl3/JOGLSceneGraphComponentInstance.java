@@ -1,5 +1,7 @@
 package de.jreality.jogl3;
 
+import java.util.List;
+
 import de.jreality.jogl3.geom.JOGLGeometryEntity;
 import de.jreality.jogl3.geom.JOGLGeometryInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
@@ -8,6 +10,7 @@ import de.jreality.jogl3.light.JOGLLightInstance;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
+import de.jreality.shader.CommonAttributes;
 
 public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 
@@ -34,7 +37,6 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 	}
 
 	void render(JOGLRenderState parentState) {
-		
 		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
 		boolean upToDate = false;
 		if(app != null){
@@ -69,7 +71,6 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		if (gtn instanceof JOGLGeometryInstance) {
 		
 			JOGLGeometryInstance geom = (JOGLGeometryInstance) gtn;
-			System.out.println("geometry instance is " + geom.hashCode());
 			if (geom != null) {
 				JOGLGeometryEntity geomEntity = (JOGLGeometryEntity) geom.getEntity();
 				if(!geomEntity.dataUpToDate){
@@ -93,6 +94,86 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
 			if(sgc.isVisible())
 				childInstance.render(state);
+		}
+	}
+	
+	public class RenderableObject{
+		public RenderableObject(JOGLGeometryInstance geom, JOGLRenderState state){
+			this.state = state;
+			this.geom = geom;
+		}
+		public JOGLRenderState state;
+		public JOGLGeometryInstance geom;
+		public void render(){
+			geom.render(state);
+		}
+	}
+	
+	void collectNonTransparent(JOGLRenderState parentState, List<RenderableObject> nonTranspObjects, List<RenderableObject> transpObjects) {
+		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
+		boolean upToDate = false;
+		if(app != null){
+			if (((JOGLAppearanceEntity)app.getEntity()).dataUpToDate && parentState.appearanceUpToDate){
+				
+				upToDate = true;
+			}
+		}
+		if(app == null && parentState.appearanceUpToDate){
+			upToDate = true;
+		}
+		JOGLRenderState state = new JOGLRenderState(parentState, getTrafo());
+		state.appearanceUpToDate = upToDate;
+		
+		//if two scenegraph nodes on the same scene graph path reference
+		//to the same local light, then the light is duplicated and therefore its
+		//intensity is practically multiplied. There would be no other possible meaning in
+		//referencing a local light twice on the same scene graph path.
+		SceneTreeNode maybelight = this.getLightTreeNode();
+		if(maybelight instanceof JOGLLightInstance){
+			JOGLLightInstance light = (JOGLLightInstance) maybelight;
+			if(light != null){
+				JOGLLightEntity lightEntity = (JOGLLightEntity) light.getEntity();
+				if(!lightEntity.isGlobal()){
+					state.addLocalLight(light);
+				}
+			}
+		}
+		
+		SceneTreeNode gtn =  getGeometryTreeNode();
+		
+		if (gtn instanceof JOGLGeometryInstance) {
+		
+			JOGLGeometryInstance geom = (JOGLGeometryInstance) gtn;
+			if (geom != null) {
+				JOGLGeometryEntity geomEntity = (JOGLGeometryEntity) geom.getEntity();
+				if(!geomEntity.dataUpToDate){
+					geomEntity.updateData(state.getGL());
+					geom.updateAppearance(this.toPath(), state.getGL());
+					geomEntity.dataUpToDate = true;
+				}
+				if(!state.appearanceUpToDate)
+					geom.updateAppearance(this.toPath(), state.getGL());
+				//geom.eap = EffectiveAppearance.create(this.toPath());
+				//rather update only when appearance has changed.
+				//PolygonShader.setFromEffectiveAppearance(EffectiveAppearance.create(this.toPath()), CommonAttributes.POLYGON_SHADER);
+				float transp = (float)geom.eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
+				boolean transpEnabled = (Boolean)geom.eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED, new Boolean(false));
+				if(!transpEnabled){
+					nonTranspObjects.add(new RenderableObject(geom, state));
+				}else{
+					transpObjects.add(new RenderableObject(geom, state));
+				}
+				//geom.render(state);
+			}
+		}
+		
+		for (SceneTreeNode child : getChildren()) {
+			if (!child.isComponent())
+				continue;
+			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
+			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
+			if(sgc.isVisible())
+				childInstance.collectNonTransparent(state, nonTranspObjects, transpObjects);
 		}
 	}
 	
@@ -129,6 +210,8 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 				childInstance.collectGlobalLights(newMatrix, collection);
 		}
 	}
+	
+	
 	
 	private double[] getTrafo() {
 		SceneTreeNode tn = getTransformationTreeNode();
