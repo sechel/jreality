@@ -51,8 +51,8 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 	}
 
 	public void updateData(GL3 gl) {
-		
 		if (!dataUpToDate) {
+			pointVbos.clear();
 			//TODO convert to automatic creation of vbos
 			PointSet ps = (PointSet) getNode();
 			

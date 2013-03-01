@@ -44,6 +44,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 	
 	@Override
 	public void geometryChanged(GeometryEvent ev) {
+		
 //		System.out.println("JOGLFaceSetEntity.geometryChanged()");
 		super.geometryChanged(ev);
 	}
@@ -52,10 +53,9 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 	
 	//replace state to gl
 	public void updateData(GL3 gl) {
-		
 		if (!dataUpToDate) {
 			super.updateData(gl);
-			
+			vbos.clear();
 			IndexedFaceSet fs = (IndexedFaceSet)getNode();
 			//create triangulation and save in indexArray
 			int count = 0;

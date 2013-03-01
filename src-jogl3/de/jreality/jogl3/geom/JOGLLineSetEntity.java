@@ -54,6 +54,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 		
 		if (!dataUpToDate) {
 			super.updateData(gl);
+			lineVbos.clear();
 			//TODO generate VBOs for line rendering
 			IndexedLineSet ls = (IndexedLineSet)getNode();
 			//create lineulation and save in indexArray
