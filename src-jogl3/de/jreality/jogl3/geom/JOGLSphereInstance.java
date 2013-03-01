@@ -34,6 +34,18 @@ public class JOGLSphereInstance extends JOGLGeometryInstance {
 			//PointShader.render(state.getGL(), pse.getVertexVBO(), Rn.convertDoubleToFloatArray(state.getModelViewMatrix()), Rn.convertDoubleToFloatArray(state.getProjectionMatrix()));
 	}
 
+	@Override
+	public void renderDepth(JOGLRenderState state, int width, int height) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addOneLayer(JOGLRenderState state, int width, int height, float alpha) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public LinkedList<GlUniform> sphereUniforms = new LinkedList<GlUniform>();
 	public GlTexture polygonTexture = new GlTexture();
 	public GlReflectionMap polygonReflMap = new GlReflectionMap();

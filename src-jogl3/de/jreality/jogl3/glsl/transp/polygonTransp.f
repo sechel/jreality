@@ -167,8 +167,8 @@ void main(void)
 {
 	float S = gl_FragCoord.s/_width;
 	float T = gl_FragCoord.t/_height;
-	float d = texture( image, vec2(S,T)).x;
-	if(abs(1-d - gl_FragCoord.z) > 0.000000001)
+	float d = texture(_depth, vec2(S,T)).x;
+	if(abs(1-d - gl_FragCoord.z) > 0.00000001)
 		discard;
 	
 	//calculateLightInflux();
@@ -270,4 +270,5 @@ void main(void)
     		}
     	}
 	}
+	gl_FragColor.a = transparency;
 }

@@ -22,12 +22,12 @@ public class TransparencyHelper {
 	};
 	
 	static float testTexCoords[] = {
-		0,0,0,0,
 		0,1,0,0,
 		1,1,0,0,
-		1,1,0,0,
 		1,0,0,0,
-		0,0,0,0
+		1,0,0,0,
+		0,0,0,0,
+		0,1,0,0
 	};
 	public static GLVBOFloat copyCoords, copyTex;
 	private static int[] queries = new int[1];
@@ -108,9 +108,10 @@ public class TransparencyHelper {
     	do{
     		counter++;
     		gl.glGetQueryObjectuiv(queries[0],gl.GL_QUERY_RESULT_AVAILABLE, queryresavail, 0);
-    		System.out.println("not true yet: " + counter);
+    		//System.out.println("not true yet: " + counter);
     	}while(queryresavail[0] != gl.GL_TRUE);
     	gl.glGetQueryObjectuiv(queries[0] ,gl.GL_QUERY_RESULT, queryres, 0);
+//    	System.out.println("query result after " + counter + " waits is " + queryres[0]);
     	return queryres[0];
     	//System.out.println("Query result is " + queryres[0]);
 	}
@@ -123,6 +124,8 @@ public class TransparencyHelper {
     	gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
     	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
     	//draw nontransparent objects into framebuffer
+    	gl.glViewport(0, 0, width, height);
+    	gl.glDisable(gl.GL_BLEND);
     	for(RenderableObject o : nonTransp){
     		o.render();
     	}
@@ -133,15 +136,11 @@ public class TransparencyHelper {
     		//draw transparent objects into FBO with reverse depth values
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
         	startQuery(gl);
-        	for(RenderableObject o : nonTransp){
-        		o.renderDepth();
-        	}
+        	peelDepth(gl, transp, width, height);
         	quer = endQuery(gl);
         	//draw on the SCREEN
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-        	for(RenderableObject o : nonTransp){
-        		o.addOneLayer();
-        	}
+        	addOneLayer(gl, transp, width, height);
     	}while(quer != 0);
     	
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
@@ -152,6 +151,39 @@ public class TransparencyHelper {
     	copyFBO2FB(gl, 2, width, height);
 	}
 	
+	private static void addOneLayer(GL3 gl, List<RenderableObject> transp, int width, int height) {
+		gl.glViewport(0, 0, width, height);
+    	
+    	gl.glEnable(gl.GL_BLEND);
+    	gl.glBlendEquation(gl.GL_FUNC_ADD);
+    	gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+    	
+    	gl.glEnable(gl.GL_TEXTURE_2D);
+    	gl.glActiveTexture(gl.GL_TEXTURE9);
+    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[0]);
+		
+		for(RenderableObject o : transp){
+    		o.addOneLayer(width, height);
+    	}
+		
+    	gl.glDisable(gl.GL_BLEND);
+	}
+	
+	private static void peelDepth(GL3 gl, List<RenderableObject> transp, int width, int height) {
+		gl.glViewport(0, 0, width, height);
+    	gl.glEnable(gl.GL_DEPTH_TEST);
+    	gl.glEnable(gl.GL_TEXTURE_2D);
+    	gl.glActiveTexture(gl.GL_TEXTURE0);
+    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[1]);
+    	gl.glClearColor(0, 0, 0, 1);
+    	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+    	gl.glClearDepth(1);
+    	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+		for(RenderableObject o : transp){
+    		o.renderDepth(width, height);
+    	}
+		
+	}
 	private static void copyFBO2FB(GL3 gl, int tex, int width, int height){
     	gl.glViewport(0, 0, width, height);
     	

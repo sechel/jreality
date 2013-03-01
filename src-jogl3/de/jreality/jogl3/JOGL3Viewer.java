@@ -353,9 +353,11 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			List<RenderableObject> nonTranspObjects = new LinkedList<RenderableObject>();
 			List<RenderableObject> transpObjects = new LinkedList<RenderableObject>();
 			rootInstance.collectNonTransparent(rootState, nonTranspObjects, transpObjects);
-			for(RenderableObject o : nonTranspObjects){
-				o.render();
-			}
+			
+//			for(RenderableObject o : nonTranspObjects){
+//				o.render();
+//			}
+			TransparencyHelper.render(gl, nonTranspObjects, transpObjects, width, height);
 			//render scene graph
 			//rootInstance.render(rootState);
 			rootInstance.setAppearanceEntitiesUpToDate();

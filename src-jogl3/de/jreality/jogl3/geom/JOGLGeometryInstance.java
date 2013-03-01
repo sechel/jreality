@@ -210,6 +210,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	}
 
 	public abstract void render(JOGLRenderState state);
+	public abstract void renderDepth(JOGLRenderState state, int width, int height);
+	public abstract void addOneLayer(JOGLRenderState state, int width, int height, float alpha);
 
 	
 	//this method copies appearance attributes to a list of uniform variables for later use in the openGL shader

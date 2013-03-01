@@ -39,7 +39,16 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 			}
 		}
 	}
+	@Override
+	public void renderDepth(JOGLRenderState state, int width, int height) {
+		
+	}
 
+	@Override
+	public void addOneLayer(JOGLRenderState state, int width, int height, float alpha) {
+		
+	}
+	
 	public LinkedList<GlUniform> pointSetUniforms = new LinkedList<GlUniform>();
 	public LinkedList<GlUniform> pointSetPolygonUniforms = new LinkedList<GlUniform>();
 	public GlTexture pointTexture = new GlTexture();

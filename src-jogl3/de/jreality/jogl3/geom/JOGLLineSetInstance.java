@@ -39,7 +39,17 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 			}
 		}
 	}
-	
+	@Override
+	public void renderDepth(JOGLRenderState state, int width, int height) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addOneLayer(JOGLRenderState state, int width, int height, float alpha) {
+		// TODO Auto-generated method stub
+		
+	}
 	public LinkedList<GlUniform> lineSetUniforms = new LinkedList<GlUniform>();
 	public LinkedList<GlUniform> lineSetPolygonUniforms = new LinkedList<GlUniform>();
 	public GlTexture lineTexture = new GlTexture();

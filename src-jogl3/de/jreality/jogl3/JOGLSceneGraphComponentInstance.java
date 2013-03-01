@@ -11,6 +11,7 @@ import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ShaderUtility;
 
 public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 
@@ -107,11 +108,12 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		public void render(){
 			geom.render(state);
 		}
-		public void renderDepth(){
-			geom.renderDepth(state);
+		public void renderDepth(int width, int height){
+			geom.renderDepth(state, width, height);
 		}
-		public void addOneLayer(){
-			geom.addOneLayer(state);
+		public void addOneLayer(int width, int height){
+			float alpha = 1 - (float)geom.eap.getAttribute(ShaderUtility.nameSpace("polygonShader", CommonAttributes.TRANSPARENCY), CommonAttributes.TRANSPARENCY_DEFAULT);
+			geom.addOneLayer(state, width, height, alpha);
 		}
 	}
 	
@@ -162,7 +164,6 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 				//geom.eap = EffectiveAppearance.create(this.toPath());
 				//rather update only when appearance has changed.
 				//PolygonShader.setFromEffectiveAppearance(EffectiveAppearance.create(this.toPath()), CommonAttributes.POLYGON_SHADER);
-				float transp = (float)geom.eap.getAttribute(CommonAttributes.TRANSPARENCY, CommonAttributes.TRANSPARENCY_DEFAULT);
 				boolean transpEnabled = (Boolean)geom.eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED, new Boolean(false));
 				if(!transpEnabled){
 					nonTranspObjects.add(new RenderableObject(geom, state));
