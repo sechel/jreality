@@ -48,15 +48,15 @@ public class SkyboxHelper {
 //		4,4,4,4,4,4,
 //		5,5,5,5,5,5};
 	static Appearance[] a= new Appearance[6];
-	static Texture2D[] tex = new Texture2D[6];
+	//static Texture2D[] tex = new Texture2D[6];
 	static JOGLTexture2D[] jogltex = new JOGLTexture2D[6];
 	static {
 		for(int i = 0; i < 6; i++){
 			a[i] = new Appearance();
-			tex[i]=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a[i], true);
-			tex[i].setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
-			tex[i].setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
-			jogltex[i] = new JOGLTexture2D(tex[i]);
+			Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", a[i], true);
+			tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+			tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+			jogltex[i] = new JOGLTexture2D(tex);
 		}
 			
 	}

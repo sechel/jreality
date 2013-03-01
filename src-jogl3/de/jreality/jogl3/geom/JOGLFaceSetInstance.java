@@ -28,11 +28,12 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		if(visible)
-			PolygonShader.render(fse, faceSetUniforms, faceTexture, polygonShader, state);
+			PolygonShader.render(fse, faceSetUniforms, faceTexture, reflMap, polygonShader, state);
 	}
 	
 	public LinkedList<GlUniform> faceSetUniforms = new LinkedList<GlUniform>();
 	public GlTexture faceTexture = new GlTexture();
+	public GlReflectionMap reflMap = new GlReflectionMap();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 //		System.out.println("UpdateAppearance");
@@ -40,7 +41,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		JOGLFaceSetEntity entity = (JOGLFaceSetEntity)this.getEntity();
 		IndexedFaceSet fs = (IndexedFaceSet)entity.getNode();
 		faceSetUniforms = new LinkedList<GlUniform>();
-		polygonShader = updateAppearance(GLShader.defaultPolygonShader, sgp, gl, faceSetUniforms, faceTexture, CommonAttributes.POLYGON_SHADER);
+		polygonShader = updateAppearance(GLShader.defaultPolygonShader, sgp, gl, faceSetUniforms, faceTexture, reflMap, CommonAttributes.POLYGON_SHADER);
 	}
 
 }

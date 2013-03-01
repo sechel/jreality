@@ -7,6 +7,7 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.glsl.GLShader;
@@ -34,7 +35,7 @@ public class PolygonShader{
 		System.out.println("stop");
 	}
 	
-	public static void render(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, GLShader shader, JOGLRenderState state){
+	public static void render(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, GlReflectionMap reflMap, GLShader shader, JOGLRenderState state){
 		
 		
 		//TODO replace by fsi or renderState
@@ -77,8 +78,9 @@ public class PolygonShader{
 		}
 
 		tex.bind(shader, gl);
-		//TODO all the other types
 		
+		//TODO find out why SkyboxHelper.bindSamplers(gl, shader) is neccessary
+		reflMap.bind(shader, gl);
 		SkyboxHelper.bindSamplers(gl, shader);
 		
     	//bind vbos to corresponding shader variables

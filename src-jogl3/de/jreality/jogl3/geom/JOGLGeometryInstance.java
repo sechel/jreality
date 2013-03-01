@@ -9,9 +9,12 @@ import java.util.Set;
 
 import javax.media.opengl.GL3;
 
+import de.jreality.jogl.shader.JOGLCubeMap;
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.JOGLTexture2D;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
+import de.jreality.jogl3.helper.SkyboxHelper;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -23,8 +26,10 @@ import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 
 public abstract class JOGLGeometryInstance extends SceneTreeNode {
 
@@ -49,6 +54,60 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 1);
 			}else{
 				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 0);
+			}
+		}
+	}
+	
+	public class GlReflectionMap{
+		boolean hasReflectionMap = false;
+		public GlReflectionMap(){
+			
+		}
+		private JOGLTexture2D[] jogltex = new JOGLTexture2D[6];
+		public void setCubeMap(CubeMap cm){
+			for(int i = 0; i < 6; i++){
+				  String name = "right";
+				  if(i == 1)
+					  name = "left";
+				  else if(i == 2)
+					  name = "up";
+				  else if(i == 3)
+					  name = "down";
+				  else if(i == 4)
+					  name = "back";
+				  else if(i == 5)
+					  name = "front";
+				  Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+				  tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+				  tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
+				  jogltex[i] = new JOGLTexture2D(tex);
+			}
+			hasReflectionMap = true;
+		}
+		public void removeTexture(){
+			hasReflectionMap = false;
+		}
+		public void bind(GLShader shader, GL3 gl){
+			if(hasReflectionMap){
+				//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.
+				for(int i = 0; i < 6; i++){
+					 String name = "right";
+					  if(i == 1)
+						  name = "left";
+					  else if(i == 2)
+						  name = "up";
+					  else if(i == 3)
+						  name = "down";
+					  else if(i == 4)
+						  name = "back";
+					  else if(i == 5)
+						  name = "front";
+					gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), 2+i);
+					gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_reflectionMap"), 1);
+					Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE2+i);
+				}
+			}else{
+				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_reflectionMap"), 0);
 			}
 		}
 	}
@@ -149,17 +208,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	
 	//this method copies appearance attributes to a list of uniform variables for later use in the openGL shader
 	//it furthermore returns the openGL shader to use
-	protected GLShader updateAppearance(GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, String type) {
+	protected GLShader updateAppearance(GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, GlReflectionMap reflMap, String type) {
 		
 		GLShader shader = defaultShader;
-//		if(type.equals("lineShader"))
-//			shader = GLShader.defaultLineShader;
-//		if(type.equals("pointShader"))
-//			shader = GLShader.defaultPointShader;
-//		if(type.equals("lineShader"))
-//			shader = GLShader.defaultLineShader;
-//		if(type.equals("lineShader.polygonShader"))
-//			shader = GLShader.defaultPolygonLineShader;
 		
 		eap = EffectiveAppearance.create(sgp);
 		
@@ -177,6 +228,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		//TODO retrieve and save shader attributes in a sensible
 		//fashion
 		boolean hasTexture = false;
+		boolean hasReflectionMap = false;
 		for(ShaderVar v : shader.shaderUniforms){
 			//if(type.equals(CommonAttributes.POINT_SHADER))
 				//System.out.println("shader var is " + v.getName() + ", type is " + v.getType());
@@ -277,6 +329,13 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				//System.out.println("sampler2D: "+ v.getName());
     				hasTexture = true;
     			}
+    		}else if(v.getType().equals("sampler2D") && v.getName().equals("front")){
+    			if(AttributeEntityUtility.hasAttributeEntity(CubeMap.class, type + ".reflectionMap", eap)){
+    				CubeMap reflectionMap = TextureUtility.readReflectionMap(eap, type + ".reflectionMap");
+    				reflMap.setCubeMap(reflectionMap);
+    				c.add(new GlUniformFloat("_reflectionMapAlpha", reflectionMap.getBlendColor().getRGBComponents(null)[3]));
+    				hasReflectionMap = true;
+    			}
     		}else if(v.getName().equals("textureMatrix")){
     			//do nothing
     		}else{
@@ -286,6 +345,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     	}
 		if(!hasTexture){
 			texture.removeTexture();
+		}
+		if(!hasReflectionMap){
+			reflMap.removeTexture();
 		}
 		return shader;
 	}

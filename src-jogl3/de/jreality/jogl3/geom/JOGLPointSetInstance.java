@@ -43,13 +43,14 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 	public LinkedList<GlUniform> pointSetUniforms = new LinkedList<GlUniform>();
 	public LinkedList<GlUniform> pointSetPolygonUniforms = new LinkedList<GlUniform>();
 	public GlTexture pointTexture = new GlTexture();
+	public GlReflectionMap pointReflMap = new GlReflectionMap();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		pointSetUniforms = new LinkedList<GlUniform>();
 		
-		pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, CommonAttributes.POINT_SHADER);
-		pointSphereShader = updateAppearance(GLShader.defaultPointSphereShader, sgp, gl, pointSetPolygonUniforms, pointTexture, "pointShader.polygonShader");
+		pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, pointReflMap, CommonAttributes.POINT_SHADER);
+		pointSphereShader = updateAppearance(GLShader.defaultPointSphereShader, sgp, gl, pointSetPolygonUniforms, pointTexture, pointReflMap, "pointShader.polygonShader");
 		
-		pointShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, CommonAttributes.POINT_SHADER);
+		pointShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, pointReflMap, CommonAttributes.POINT_SHADER);
 	}
 }
