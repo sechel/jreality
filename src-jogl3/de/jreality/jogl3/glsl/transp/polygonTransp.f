@@ -46,6 +46,8 @@ uniform int has_vertex_colors;
 in vec4 faceVertexColor;
 
 //cubemap
+uniform float _reflectionMapAlpha;
+uniform int has_reflectionMap;
 uniform sampler2D front;
 uniform sampler2D back;
 uniform sampler2D left;
@@ -55,6 +57,12 @@ uniform sampler2D down;
 
 uniform mat4 _inverseCamRotation;
 uniform int reflectionMap;
+
+//depth checking for transparency
+uniform sampler2D _depth;
+uniform int _width;
+uniform int _height;
+uniform float transparency;
 
 float attenuation(vec3 att, float dist){
 	return 1/(att.x+att.y*dist+att.z*dist*dist);
@@ -157,6 +165,12 @@ void calculateLocalLightInflux(vec3 normal){
 
 void main(void)
 {
+	float S = gl_FragCoord.s/_width;
+	float T = gl_FragCoord.t/_height;
+	float d = texture( image, vec2(S,T)).x;
+	if(abs(1-d - gl_FragCoord.z) > 0.000000001)
+		discard;
+	
 	//calculateLightInflux();
 	//TODO check for availability of texture, check for face colors, what is diffuseColor?
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
@@ -207,7 +221,7 @@ void main(void)
 	if(gl_FragColor.a == 0)
 		discard;
 	
-	if(1 == 0){
+	if(has_reflectionMap == 1){
 		//do environment reflections
 		vec3 A = -normalize(camSpaceCoord.xyz);
 		vec3 C = -A + 2*dot(A,normal)*normal;
@@ -224,22 +238,22 @@ void main(void)
     	if(z>abs(x) && z>abs(y)){
     		float X = x/z;
     		float Y = -y/z;
-    		gl_FragColor = 0.5*gl_FragColor+0.5*texture( back, vec2(X/2+.5,Y/2+.5));
+    		gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( back, vec2(X/2+.5,Y/2+.5));
    		}else if(z < -abs(x) && z < -abs(y)){
     		float X = x/z;
     		float Y = y/z;
-    		gl_FragColor = 0.5*gl_FragColor+0.5*texture( front, vec2(X/2+.5,Y/2+.5));
+    		gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( front, vec2(X/2+.5,Y/2+.5));
     	}else if(abs(y)>abs(x)){
     		//floor
     		if(y<0){
     			float X = -x/y;
     			float Z = z/y;
-    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( down, vec2(X/2+.5,Z/2+.5));
+    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( down, vec2(X/2+.5,Z/2+.5));
     		//top
     		}else{
     			float X = x/y;
     			float Z = -z/y;
-    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( up, vec2(X/2+.5,-Z/2+.5));
+    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( up, vec2(X/2+.5,-Z/2+.5));
     		}
     	//left or right texture
     	}else{
@@ -247,14 +261,13 @@ void main(void)
     		if(x>0){
     			float Y = -y/x;
     			float Z = z/x;
-    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( right, vec2(-Z/2+.5,Y/2+.5));
+    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( right, vec2(-Z/2+.5,Y/2+.5));
     		//left
     		}else if(x<0){
     			float Y = y/x;
     			float Z = -z/x;
-    			gl_FragColor = 0.5*gl_FragColor+0.5*texture( left, vec2(Z/2+.5,Y/2+.5));
+    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( left, vec2(Z/2+.5,Y/2+.5));
     		}
     	}
 	}
-	
 }

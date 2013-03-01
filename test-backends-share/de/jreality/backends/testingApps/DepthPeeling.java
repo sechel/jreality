@@ -110,7 +110,7 @@ public class DepthPeeling implements GLEventListener{
 	public static GLShader transp = new GLShader("testing/transparent.v", "testing/transparent.f");
 	public static GLShader copy = new GLShader("testing/copy.v", "testing/copy.f");
 	public static GLShader nonTS = new GLShader("testing/nonts.v", "testing/nonts.f");
-	GLVBOFloat quadVerts, quadCols, testCoords, testTex, nonTr;
+	GLVBOFloat quadVerts, quadCols, copyCoords, copyTex, nonTr;
 	@Override
     public void reshape(GLAutoDrawable dr, int x, int y, int width, int height){
     	System.out.println("Reshape");
@@ -163,6 +163,8 @@ public class DepthPeeling implements GLEventListener{
     	
     	gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_TEXTURE_2D, texs[0], 0);
     	System.out.println(" " + gl.GL_FRAMEBUFFER_COMPLETE + " " + gl.glCheckFramebufferStatus(gl.GL_FRAMEBUFFER));
+    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
+
 	}
 	private void initTextureFramebuffer(GL3 gl){
 		gl.glGenTextures(3, texs, 0);
@@ -201,8 +203,8 @@ public class DepthPeeling implements GLEventListener{
     	
     	quadVerts = new GLVBOFloat(gl, quadCoords, "vertex_coordinates");
     	quadCols = new GLVBOFloat(gl, quadColors, "vertex_colors");
-    	testCoords = new GLVBOFloat(gl, testQuadCoords, "vertex_coordinates");
-    	testTex = new GLVBOFloat(gl, testTexCoords, "texture_coordinates");
+    	copyCoords = new GLVBOFloat(gl, testQuadCoords, "vertex_coordinates");
+    	copyTex = new GLVBOFloat(gl, testTexCoords, "texture_coordinates");
     	nonTr = new GLVBOFloat(gl, nonT, "vertex_coordinates");
     	
     	gl.glGenQueries(1, queries, 0);
@@ -349,18 +351,18 @@ public class DepthPeeling implements GLEventListener{
     	
     	copy.useShader(gl);
     	
-    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, testCoords.getID());
-    	gl.glVertexAttribPointer(gl.glGetAttribLocation(copy.shaderprogram, testCoords.getName()), testCoords.getElementSize(), testCoords.getType(), false, 0, 0);
-    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, testCoords.getName()));
+    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, copyCoords.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(copy.shaderprogram, copyCoords.getName()), copyCoords.getElementSize(), copyCoords.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, copyCoords.getName()));
     	
-    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, testTex.getID());
-    	gl.glVertexAttribPointer(gl.glGetAttribLocation(copy.shaderprogram, testTex.getName()), testTex.getElementSize(), testTex.getType(), false, 0, 0);
-    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, testTex.getName()));
+    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, copyTex.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(copy.shaderprogram, copyTex.getName()), copyTex.getElementSize(), copyTex.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, copyTex.getName()));
     	
-    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, testCoords.getLength()/4);
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, copyCoords.getLength()/4);
     	
-    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, testCoords.getName()));
-    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, testTex.getName()));
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, copyCoords.getName()));
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(copy.shaderprogram, copyTex.getName()));
     	
     	copy.dontUseShader(gl);
     }

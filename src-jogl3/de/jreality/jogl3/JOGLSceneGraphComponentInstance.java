@@ -107,6 +107,12 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		public void render(){
 			geom.render(state);
 		}
+		public void renderDepth(){
+			geom.renderDepth(state);
+		}
+		public void addOneLayer(){
+			geom.addOneLayer(state);
+		}
 	}
 	
 	void collectNonTransparent(JOGLRenderState parentState, List<RenderableObject> nonTranspObjects, List<RenderableObject> transpObjects) {

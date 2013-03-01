@@ -34,6 +34,7 @@ import de.jreality.jogl3.helper.BackgroundHelper;
 import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.helper.SkyboxHelper;
 import de.jreality.jogl3.helper.SphereHelper;
+import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
 import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
@@ -370,7 +371,11 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		// TODO Auto-generated method stub
 		System.out.println("calling JOGL3Viewer.dispose");
 	}
+	
+	
+	private int width, height = 0;
 	public void init(GLAutoDrawable arg0) {
+		
 		
 		if (proxyScene != null) proxyScene.dispose();
 		proxyScene = new JOGLSceneGraph(sceneRoot);
@@ -379,6 +384,12 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		System.out.println("init!!!!!!!!!!!!");
 		
 		GL3 gl = arg0.getGL().getGL3();
+		
+		//initialization for depth peeling
+		width = arg0.getWidth();
+    	height = arg0.getHeight();
+    	TransparencyHelper.initTransparency(gl, width, height);
+    	
 //		int[] arr = new int[1];
 //		gl.glGetIntegerv(gl.GL_SAMPLE_BUFFERS, arr, 0);
 //		System.out.println(arr[0]);
@@ -414,8 +425,10 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,
 			int arg4) {
-		// TODO Auto-generated method stub
 		System.out.println("reshape");
+		this.width = arg3;
+		this.height = arg4;
+		TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
 	}
 	
 	@Override
