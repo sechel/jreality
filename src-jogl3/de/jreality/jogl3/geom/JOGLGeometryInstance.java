@@ -65,22 +65,28 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 		private JOGLTexture2D[] jogltex = new JOGLTexture2D[6];
 		public void setCubeMap(CubeMap cm){
+			ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
 			for(int i = 0; i < 6; i++){
-				  String name = "right";
-				  if(i == 1)
-					  name = "left";
-				  else if(i == 2)
-					  name = "up";
-				  else if(i == 3)
-					  name = "down";
-				  else if(i == 4)
-					  name = "back";
-				  else if(i == 5)
-					  name = "front";
+//				  String name = "right";
+//				  if(i == 1)
+//					  name = "left";
+//				  else if(i == 2)
+//					  name = "up";
+//				  else if(i == 3)
+//					  name = "down";
+//				  else if(i == 4)
+//					  name = "back";
+//				  else if(i == 5)
+//					  name = "front";
 				  Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
 				  tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
 				  tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
 				  jogltex[i] = new JOGLTexture2D(tex);
+				  
+				  //jogltex[i].setBlendColor(cm.getBlendColor());
+				  jogltex[i].setImage(imgs[i]);
+				  
+				  
 			}
 			hasReflectionMap = true;
 		}

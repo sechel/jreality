@@ -78,10 +78,7 @@ public class PolygonShader{
 		}
 
 		tex.bind(shader, gl);
-		
-		//TODO find out why SkyboxHelper.bindSamplers(gl, shader) is neccessary
 		reflMap.bind(shader, gl);
-		SkyboxHelper.bindSamplers(gl, shader);
 		
     	//bind vbos to corresponding shader variables
     	List<ShaderVar> l = shader.vertexAttributes;
