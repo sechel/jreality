@@ -132,16 +132,22 @@ public class TransparencyHelper {
     	int quer = 1;
     	//with this loop it draws as many layers as neccessary to complete the scene
     	//you can experiment by drawing only one layer or two and then view the result (see the comment after the loop)
-    	do{
-    		//draw transparent objects into FBO with reverse depth values
+    	
+    	//draw transparent objects into FBO with reverse depth values
+    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
+    	startQuery(gl);
+    	peelDepth(gl, transp, width, height);
+    	quer = endQuery(gl);
+    	while(quer!=0){
+        	//draw on the SCREEN
+        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+        	addOneLayer(gl, transp, width, height);
+        	//draw transparent objects into FBO with reverse depth values
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
         	startQuery(gl);
         	peelDepth(gl, transp, width, height);
         	quer = endQuery(gl);
-        	//draw on the SCREEN
-        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-        	addOneLayer(gl, transp, width, height);
-    	}while(quer != 0);
+    	}
     	
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
     	//you can change the number here:
