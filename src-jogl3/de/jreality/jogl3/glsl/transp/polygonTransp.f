@@ -218,8 +218,9 @@ void main(void)
 		}
 	}
 	
+	bool discarding = false;
 	if(gl_FragColor.a == 0)
-		discard;
+		discarding = true;
 	
 	if(has_reflectionMap == 1){
 		//do environment reflections
@@ -270,5 +271,8 @@ void main(void)
     		}
     	}
 	}
-	gl_FragColor.a = transparency;
+	if(_combineMode != 0x1E01 && _combineMode != 0x8570)//GL_REPLACE, GL_COMBINE
+		gl_FragColor.a = transparency;
+	if(discarding)
+		gl_FragColor.a = 0;
 }
