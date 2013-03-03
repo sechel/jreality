@@ -347,12 +347,15 @@ public class Primitives {
 		return ifsf.getIndexedFaceSet();
 	}
 
+	public static PointSet point( double[] center)	{
+		return point(center, null);
+	}
 	/**
 	 * A single point as a {@link PointSet}.
 	 * @param center
 	 * @return
 	 */
-	public static PointSet point( double[] center)	{
+	public static PointSet point( double[] center, String label)	{
 		PointSet ps = new PointSet(1);
 		int n = center.length;
 		double[][] pts = new double[1][n];
@@ -360,8 +363,24 @@ public class Primitives {
 		double[][] texc = {{0,0}};
 		ps.setVertexCountAndAttributes(Attribute.COORDINATES,StorageModel.DOUBLE_ARRAY.array(n).createReadOnly(pts));
 		ps.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(2).createReadOnly(texc));
+		if (label != null) ps.setVertexAttributes(Attribute.LABELS,StorageModel.STRING_ARRAY.createReadOnly(new String[]{label}));
 		return ps;
 	}
+	
+	public static SceneGraphComponent labelPoint( SceneGraphComponent sgc, double[] center, String label)	{
+		PointSet ps = point(center, label);
+		Appearance ap ;
+		if (sgc == null)	{
+			sgc = new SceneGraphComponent();
+			ap = new Appearance();
+			sgc.setAppearance(ap);
+		}
+		ap = sgc.getAppearance();
+		sgc.setGeometry(ps);
+		ap.setAttribute(CommonAttributes.POINT_SHADER+"."+CommonAttributes.POINT_RADIUS, 0.0);
+		return sgc;
+	}
+
 
 	/**
 	 * A euclidean sphere with given radius and center.
