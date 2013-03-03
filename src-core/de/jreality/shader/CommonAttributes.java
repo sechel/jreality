@@ -187,11 +187,20 @@ import de.jreality.scene.Appearance;
 	public static final String IMPLODE_FACTOR = "implodeFactor";
 	public static final double IMPLODE_FACTOR_DEFAULT = 0.6;
 	
-	// default text shader
+	// default text shader:  New versions include "TEXT_" to make clear the scope of these constants
+//	@Deprecated
 	public static final String SCALE = "scale";
+//	@Deprecated
 	public static final String OFFSET = "offset";
+//	@Deprecated
 	public static final String ALIGNMENT = "alignment";
-	public static final String FONT	= "font";
+//	@Deprecated
+	public static final String FONT	= "font";	
+	public static final String TEXT_SCALE = "scale";
+	public static final String TEXT_OFFSET = "offset";
+	public static final String TEXT_ALIGNMENT = "alignment";
+	public static final String TEXT_FONT	= "font";
+	public static final String TEXT_COLOR	= TEXT_SHADER+".diffuseColor";
 	
 	// miscellaneous
 	public static final String RENDER_S3 = "renderS3";
