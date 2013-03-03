@@ -1,6 +1,6 @@
 //author Benjamin Kutschan
 //default polygon vertex shader
-#version 330
+#version 150
 
 in vec4 vertex_coordinates;
 in vec4 vertex_colors;

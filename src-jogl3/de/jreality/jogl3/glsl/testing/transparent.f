@@ -1,6 +1,6 @@
 //author Benjamin Kutschan
 //default polygon fragment shader
-#version 330
+#version 150
 
 in vec4 color;
 
