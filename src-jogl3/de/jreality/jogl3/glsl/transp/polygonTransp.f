@@ -2,7 +2,7 @@
 //default polygon fragment shader
 #version 330
 
-out vec4 gl_FragColor;
+out vec4 glFragColor;
 //needed?
 float shade = .5;
 
@@ -196,30 +196,30 @@ void main(void)
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
 	}
-	gl_FragColor = vec4(lightInflux, diffuse.a);
+	glFragColor = vec4(lightInflux, diffuse.a);
 	if(has_vertex_texturecoordinates==1 && has_Tex == 1){
 		if(_combineMode == 0x2100)//GL_MODULATE
-			gl_FragColor = texColor*vec4(lightInflux, diffuse.a);
+			glFragColor = texColor*vec4(lightInflux, diffuse.a);
 		if(_combineMode == 0x1E01)//GL_REPLACE
-			gl_FragColor = texColor;
+			glFragColor = texColor;
 		if(_combineMode == 0x8570)//GL_COMBINE
-			gl_FragColor = texColor;
+			glFragColor = texColor;
 		if(_combineMode == 0x2101){//GL_DECAL
-			gl_FragColor.a = diffuse.a;
-			gl_FragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
+			glFragColor.a = diffuse.a;
+			glFragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
 		}
 		if(_combineMode == 0x0BE2){//GL_BLEND
-			gl_FragColor.a = diffuse.a*texColor.a;
-			gl_FragColor.rgb = (vec3(1,1,1)-texColor.rgb)*lightInflux + texColor.rgb;
+			glFragColor.a = diffuse.a*texColor.a;
+			glFragColor.rgb = (vec3(1,1,1)-texColor.rgb)*lightInflux + texColor.rgb;
 		}
 		if(_combineMode == 0x0104){//GL_ADD
-			gl_FragColor.a = diffuse.a*texColor.a;
-			gl_FragColor.rgb = lightInflux + texColor.rgb;
+			glFragColor.a = diffuse.a*texColor.a;
+			glFragColor.rgb = lightInflux + texColor.rgb;
 		}
 	}
 	
 	bool discarding = false;
-	if(gl_FragColor.a == 0)
+	if(glFragColor.a == 0)
 		discarding = true;
 	
 	if(has_reflectionMap == 1){
@@ -239,22 +239,22 @@ void main(void)
     	if(z>abs(x) && z>abs(y)){
     		float X = x/z;
     		float Y = -y/z;
-    		gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( back, vec2(X/2+.5,Y/2+.5));
+    		glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( back, vec2(X/2+.5,Y/2+.5));
    		}else if(z < -abs(x) && z < -abs(y)){
     		float X = x/z;
     		float Y = y/z;
-    		gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( front, vec2(X/2+.5,Y/2+.5));
+    		glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( front, vec2(X/2+.5,Y/2+.5));
     	}else if(abs(y)>abs(x)){
     		//floor
     		if(y<0){
     			float X = -x/y;
     			float Z = z/y;
-    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( down, vec2(X/2+.5,Z/2+.5));
+    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( down, vec2(X/2+.5,Z/2+.5));
     		//top
     		}else{
     			float X = x/y;
     			float Z = -z/y;
-    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( up, vec2(X/2+.5,-Z/2+.5));
+    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( up, vec2(X/2+.5,-Z/2+.5));
     		}
     	//left or right texture
     	}else{
@@ -262,17 +262,17 @@ void main(void)
     		if(x>0){
     			float Y = -y/x;
     			float Z = z/x;
-    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( right, vec2(-Z/2+.5,Y/2+.5));
+    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( right, vec2(-Z/2+.5,Y/2+.5));
     		//left
     		}else if(x<0){
     			float Y = y/x;
     			float Z = -z/x;
-    			gl_FragColor = (1-_reflectionMapAlpha)*gl_FragColor+_reflectionMapAlpha*texture( left, vec2(Z/2+.5,Y/2+.5));
+    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( left, vec2(Z/2+.5,Y/2+.5));
     		}
     	}
 	}
 	if(_combineMode != 0x1E01 && _combineMode != 0x8570)//GL_REPLACE, GL_COMBINE
-		gl_FragColor.a = transparency;
+		glFragColor.a = transparency;
 	if(discarding)
-		gl_FragColor.a = 0;
+		glFragColor.a = 0;
 }

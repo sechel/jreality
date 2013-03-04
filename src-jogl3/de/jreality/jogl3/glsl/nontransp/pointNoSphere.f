@@ -6,7 +6,7 @@ uniform mat4 projection;
 
 uniform sampler2D sys_tex;
 
-out vec4 gl_FragColor;
+out vec4 glFragColor;
 uniform vec4 diffuseColor;
 
 in float x;
@@ -50,17 +50,17 @@ void main(void)
 		float red = color2.r*2*shade;
 		float green = color2.g*2*shade;
 		float blue = color2.b*2*shade;
-		gl_FragColor = vec4(red, green, blue, tex.a);
+		glFragColor = vec4(red, green, blue, tex.a);
 	}else{
 		shade = (shade-.5)*2;
 		float red = color2.r + shade - color2.r*shade;
 		float green = color2.g + shade - color2.g*shade;
 		float blue = color2.b + shade - color2.b*shade;
-		gl_FragColor = vec4(red, green, blue, tex.a);
+		glFragColor = vec4(red, green, blue, tex.a);
 	}
 	
 	//or using the normal directly
-	//gl_FragColor = vec4((shade2*diffuseColor).rgb, 1);
+	//glFragColor = vec4((shade2*diffuseColor).rgb, 1);
 	//gl_FragDepth = .99;//gl_FragCoord.z;
-	//gl_FragColor = vec4(1, 0, 0, 1);
+	//glFragColor = vec4(1, 0, 0, 1);
 }

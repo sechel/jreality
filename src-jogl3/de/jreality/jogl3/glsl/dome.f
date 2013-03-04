@@ -31,24 +31,24 @@ void main(void)
     if(z>abs(x) && z>abs(y)){
     	float X = x/z;
     	float Y = y/z;
-    	gl_FragColor = texture( texFront, vec2(X/2+.5,Y/2+.5));
+    	glFragColor = texture( texFront, vec2(X/2+.5,Y/2+.5));
     //we are in the back texture
     }else if(z < -abs(x) && z < -abs(y)){
     	float X = x/z;
     	float Y = -y/z;
-    	gl_FragColor = texture( texBack, vec2(X/2+.5,Y/2+.5));
+    	glFragColor = texture( texBack, vec2(X/2+.5,Y/2+.5));
     //in floor or top texture
     }else if(abs(y)>abs(x)){
     	//floor
     	if(y<0){
     		float X = -x/y;
     		float Z = -z/y;
-    		gl_FragColor = texture( texFloor, vec2(X/2+.5,Z/2+.5));
+    		glFragColor = texture( texFloor, vec2(X/2+.5,Z/2+.5));
     	//top
     	}else{
     		float X = x/y;
     		float Z = z/y;
-    		gl_FragColor = texture( texTop, vec2(X/2+.5,-Z/2+.5));
+    		glFragColor = texture( texTop, vec2(X/2+.5,-Z/2+.5));
     	}
     //left or right texture
     }else{
@@ -56,16 +56,16 @@ void main(void)
     	if(x>0){
     		float Y = y/x;
     		float Z = z/x;
-    		gl_FragColor = texture( texRight, vec2(-Z/2+.5,Y/2+.5));
+    		glFragColor = texture( texRight, vec2(-Z/2+.5,Y/2+.5));
     	//left
     	}else{
     		float Y = -y/x;
     		float Z = -z/x;
-    		gl_FragColor = texture( texLeft, vec2(Z/2+.5,Y/2+.5));
+    		glFragColor = texture( texLeft, vec2(Z/2+.5,Y/2+.5));
     	}
     }
   }else{
-  	gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+  	glFragColor = vec4(0.0,0.0,0.0,1.0);
   }
  
 }

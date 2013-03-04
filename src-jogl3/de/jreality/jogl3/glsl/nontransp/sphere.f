@@ -2,7 +2,7 @@
 //default polygon fragment shader
 #version 330
 
-out vec4 gl_FragColor;
+out vec4 glFragColor;
 
 uniform vec4 diffuseColor;
 uniform float diffuseCoefficient;
@@ -152,11 +152,11 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);
-		gl_FragColor = vec4(lightInflux, diffuseColor.a);
+		glFragColor = vec4(lightInflux, diffuseColor.a);
 	}else{
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
-		gl_FragColor = vec4(lightInflux, diffuseColor.a);
+		glFragColor = vec4(lightInflux, diffuseColor.a);
 	}
-	//gl_FragColor = diffuseColor;
+	//glFragColor = diffuseColor;
 }

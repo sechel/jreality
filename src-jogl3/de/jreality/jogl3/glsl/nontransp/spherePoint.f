@@ -2,7 +2,7 @@
 //default line fragment shader
 #version 330
 
-out vec4 gl_FragColor;
+out vec4 glFragColor;
 
 uniform vec4 diffuseColor;
 vec4 diffuse;
@@ -149,10 +149,10 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);
-		gl_FragColor = vec4(lightInflux, diffuse.a);
+		glFragColor = vec4(lightInflux, diffuse.a);
 	}else{
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
-		gl_FragColor = vec4(lightInflux, diffuse.a);
+		glFragColor = vec4(lightInflux, diffuse.a);
 	}
 }
