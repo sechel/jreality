@@ -73,10 +73,10 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			glp = GLProfile.get("GL3");
 			String s = glp.glAvailabilityToString();
 			System.out.println(s);
-			if(!s.contains("3.3") && !s.contains("GL4 true")){
-				System.err.println("opengl 3.3 not available, thus no jogl3-backend");
-				throw new Exception("opengl 3.3 not available, thus no jogl3-backend");
-			}
+//			if(!s.contains("3.3") && !s.contains("GL4 true")){
+//				System.err.println("opengl 3.3 not available, thus no jogl3-backend");
+//				throw new Exception("opengl 3.3 not available, thus no jogl3-backend");
+//			}
 		}catch(GLException e){
 			System.out.println(e.getMessage());
 		}

@@ -258,7 +258,7 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		init(scene);
 		updateScenePaths(scene);
 		scene.addChangeListener(this);
-		iop = c.getPlugin(InfoOverlayPlugin.class);
+//		iop = c.getPlugin(InfoOverlayPlugin.class);
 		
 	}
 
