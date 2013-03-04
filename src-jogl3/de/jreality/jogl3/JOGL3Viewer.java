@@ -26,8 +26,8 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JPanel;
 
-import de.jreality.backends.viewer.InstrumentedViewer;
 import de.jreality.backends.viewer.PerformanceMeter;
+import de.jreality.jogl.InstrumentedViewer;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.BackgroundHelper;
@@ -70,7 +70,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		GLProfile glp = null;
 		
 		try{
-			glp = GLProfile.get("GL3");
+			glp = GLProfile.get("GL2");
 			String s = glp.glAvailabilityToString();
 			System.out.println(s);
 //			if(!s.contains("3.3") && !s.contains("GL4 true")){
@@ -79,6 +79,13 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 //			}
 		}catch(GLException e){
 			System.out.println(e.getMessage());
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL3");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
 		}
 		if(glp == null){
 			try{
