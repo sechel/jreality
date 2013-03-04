@@ -64,7 +64,6 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JPanel;
 
-import de.jreality.backends.viewer.InstrumentedViewer;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
