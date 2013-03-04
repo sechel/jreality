@@ -376,7 +376,7 @@ public class DepthPeeling implements GLEventListener{
  
 	
     public static void main( String [] args ) {
-        GLProfile glprofile = GLProfile.getDefault();
+        GLProfile glprofile = GLProfile.get("GL3");
         GLCapabilities glcapabilities = new GLCapabilities( glprofile );
         final GLCanvas glcanvas = new GLCanvas( glcapabilities );
         DepthPeeling depthPeeling = new DepthPeeling();
