@@ -4,7 +4,7 @@
 
 in vec4 color;
 
-out vec4 gl_FragColor;
+out vec4 glFragColor;
 
 uniform sampler2D image;
 uniform int width;
@@ -17,5 +17,5 @@ void main(void)
 	float d = texture( image, vec2(S,T)).x;
 	if(abs(1-d - gl_FragCoord.z) > 0.000000001)
 		discard;
-	gl_FragColor = color;
+	glFragColor = color;
 }
