@@ -7,7 +7,9 @@ import javax.media.opengl.GL3;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.shader.PointShader;
+import de.jreality.jogl3.shader.PolygonShader;
 import de.jreality.jogl3.shader.SphereShader;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphPath;
@@ -18,6 +20,8 @@ import de.jreality.shader.ShaderUtility;
 public class JOGLSphereInstance extends JOGLGeometryInstance {
 	
 	GLShader sphereShader = GLShader.defaultSphereShader;
+	GLShader sphereShaderDepth = TransparencyHelper.depth;
+	GLShader sphereShaderTransp = TransparencyHelper.transpSphere;
 	
 	public JOGLSphereInstance(Sphere node) {
 		super(node);
@@ -29,21 +33,31 @@ public class JOGLSphereInstance extends JOGLGeometryInstance {
 			return;
 		JOGLSphereEntity se = (JOGLSphereEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
-		if(visible)
-			SphereShader.render(se, sphereUniforms, polygonTexture, sphereShader, state);
-			//PointShader.render(state.getGL(), pse.getVertexVBO(), Rn.convertDoubleToFloatArray(state.getModelViewMatrix()), Rn.convertDoubleToFloatArray(state.getProjectionMatrix()));
+		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
+		if(visible && !transparencyEnabled)
+			SphereShader.render(se, sphereUniforms, polygonTexture, polygonReflMap, sphereShader, state);
 	}
 
 	@Override
 	public void renderDepth(JOGLRenderState state, int width, int height) {
-		// TODO Auto-generated method stub
-		
+		if(eap == null)
+			return;
+		JOGLSphereEntity se = (JOGLSphereEntity) getEntity();
+		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		if(visible)
+			SphereShader.renderDepth(se, sphereShaderDepth, state, width, height);
 	}
 
 	@Override
 	public void addOneLayer(JOGLRenderState state, int width, int height, float alpha) {
-		// TODO Auto-generated method stub
-		
+		//TODO
+		if(eap==null)
+			return;
+		JOGLSphereEntity se = (JOGLSphereEntity) getEntity();
+		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		if(visible)
+			SphereShader.addOneLayer(se, sphereUniforms, polygonTexture, polygonReflMap, sphereShaderTransp, state, width, height, alpha);
+			//SphereShader.render(se, sphereUniforms, polygonTexture, polygonReflMap, sphereShader, state);
 	}
 
 	public LinkedList<GlUniform> sphereUniforms = new LinkedList<GlUniform>();

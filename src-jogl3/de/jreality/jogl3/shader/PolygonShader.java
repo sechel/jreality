@@ -43,10 +43,6 @@ public class PolygonShader{
 		GL3 gl = state.getGL();
 		
 		state.getLightHelper().loadLocalLightTexture(state.getLocalLightCollection(), gl);
-		//gl.glDisable(gl.GL_BLEND);
-		//gl.glBlendEquationSeparate(gl.GL_FUNC_ADD, gl.GL_FUNC_ADD);
-		//gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
-		//gl.glBlendFuncSeparate(0x0302, 0x0303, gl.GL_ZERO, gl.GL_ZERO);
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
@@ -116,7 +112,7 @@ public class PolygonShader{
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
-		//float[] inverseCamMatrix = Rn.convertDoubleToFloatArray(state.inverseCamMatrix);
+		
 		shader.useShader(gl);
 		
     	//matrices
@@ -134,6 +130,7 @@ public class PolygonShader{
     	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, vbo.getName()));
     	//actual draw command
     	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
+    	
     	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, vbo.getName()));
     	
     	shader.dontUseShader(gl);

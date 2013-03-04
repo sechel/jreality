@@ -159,17 +159,7 @@ void calculateLocalLightInflux(vec3 normal){
 
 void main(void)
 {
-	//calculateLightInflux();
-	//TODO check for availability of texture, check for face colors, what is diffuseColor?
-	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	vec4 texColor = texture( image, texCoord.st);
-	
-//	vec4 color2 = vec4(1, 1, 1, 1);
-//	if(has_vertex_texturecoordinates==1 && has_Tex == 1){
-//		color2 = texColor;
-//	}
-	//if(has_vertex_texturecoordinates == 1 && texColor.a==0)
-	//	discard;
 	
 	diffuse = diffuseColor;
 	if(has_face_colors == 1 || has_vertex_colors == 1)
@@ -177,6 +167,7 @@ void main(void)
 	
 	lightInflux = vec3(0, 0, 0);
 	vec3 normal = normalize(camSpaceNormal);
+	
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);

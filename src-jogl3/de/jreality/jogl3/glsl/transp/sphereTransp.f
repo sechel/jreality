@@ -50,6 +50,12 @@ uniform sampler2D down;
 uniform mat4 _inverseCamRotation;
 uniform int reflectionMap;
 
+//depth checking for transparency
+uniform sampler2D _depth;
+uniform int _width;
+uniform int _height;
+uniform float transparency;
+
 float attenuation(vec3 att, float dist){
 	return 1/(att.x+att.y*dist+att.z*dist*dist);
 }
@@ -151,6 +157,12 @@ void calculateLocalLightInflux(vec3 normal){
 
 void main(void)
 {
+	float S = gl_FragCoord.s/_width;
+	float T = gl_FragCoord.t/_height;
+	float d = texture(_depth, vec2(S,T)).x;
+	if(abs(1-d - gl_FragCoord.z) > 0.00000001)
+		discard;
+
 	vec3 normal = normalize(camSpaceNormal);
 	lightInflux = vec3(0, 0, 0);
 	
@@ -213,4 +225,7 @@ void main(void)
     		}
     	}
 	}
+	glFragColor.a = transparency;
+	
+	glFragColor = vec4(1, 0, 0, 1);
 }
