@@ -26,7 +26,7 @@ public class Scene extends Plugin {
 	private List<ChangeListener> 
 		changeListeners = synchronizedList(new LinkedList<ChangeListener>());
 	boolean clippingPlanes = true;		// does the scene allow automatics setting of clipping planes?
-	
+	static double defaultZTranslation = 16.0;
 	static JrScene defaultScene() {
 		//sceneRoot of the JrScene
 		SceneGraphComponent sceneRoot = new SceneGraphComponent("root");
@@ -91,7 +91,7 @@ public class Scene extends Plugin {
 		avatarPath.push(avatar);
 		defaultScene.addPath("avatarPath", avatarPath);
 		
-		MatrixBuilder.euclidean().translate(0,0,16).assignTo(avatar);
+		MatrixBuilder.euclidean().translate(0,0,defaultZTranslation).assignTo(avatar);
 		
 		//emptyPickPath/content
 		SceneGraphPath emptyPickPath = new SceneGraphPath();
@@ -254,5 +254,13 @@ public class Scene extends Plugin {
 		ef.setScenePath(scene.getContentPath());
 		ef.update();
 		return ef;
+	}
+
+	public double getDefaultZTranslation() {
+		return defaultZTranslation;
+	}
+
+	public void setDefaultZTranslation(double defaultZTranslation) {
+		this.defaultZTranslation = defaultZTranslation;
 	}
 }
