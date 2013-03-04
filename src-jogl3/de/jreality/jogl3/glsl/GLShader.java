@@ -62,12 +62,15 @@ public class GLShader
 	public int     vertexShaderProgram;
 	public int     fragmentShaderProgram;
 	public int     shaderprogram;
+	private String vname, fname;
 	private String[] vsrc = null;
 	private String[] fsrc = null;
 	public List<ShaderVar> shaderUniforms = new LinkedList<ShaderVar>();
 	public List<ShaderVar> vertexAttributes = new LinkedList<ShaderVar>();
 	
 	public GLShader(String vert, String frag){
+		vname = vert;
+		fname = frag;
 		loadVertexShaderSource(vert);
 		loadFragmentShaderSource(frag);
 	}
@@ -224,7 +227,7 @@ public class GLShader
 			bytebuf.get(dst);
 			String message = new String(dst);
 			if(message.length() != 0)
-				System.err.println(message);
+				System.err.println(vname + " " + message);
 			gl.glAttachShader(shaderprogram, vertexShaderProgram);
 		}
 		if(fsrc != null){
@@ -238,7 +241,7 @@ public class GLShader
 			bytebuf.get(dst);
 			String message = new String(dst);
 			if(message.length() != 0)
-				System.err.println(message);
+				System.err.println(fname + " " + message);
 			gl.glAttachShader(shaderprogram, fragmentShaderProgram);
 		}
 		
