@@ -30,7 +30,8 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		super.render(state);
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
-		if(visible)
+		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
+		if(visible && !transparencyEnabled)
 			PolygonShader.render(fse, faceSetUniforms, faceTexture, reflMap, polygonShader, state);
 	}
 

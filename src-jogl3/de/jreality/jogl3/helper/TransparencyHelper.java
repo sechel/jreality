@@ -116,17 +116,25 @@ public class TransparencyHelper {
     	//System.out.println("Query result is " + queryres[0]);
 	}
 	
-	public static void render(GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height){
-		gl.glEnable(gl.GL_DEPTH_TEST);
+	public static void render(GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
+		
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-    	gl.glClearDepth(1);
-    	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+    	
     	gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
     	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+    	//draw background here
+    	backgroundHelper.draw(gl);
+    	SkyboxHelper.render(gl);
     	//draw nontransparent objects into framebuffer
+    	gl.glEnable(gl.GL_DEPTH_TEST);
+    	gl.glClearDepth(1);
+    	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
     	gl.glViewport(0, 0, width, height);
     	gl.glDisable(gl.GL_BLEND);
     	for(RenderableObject o : nonTransp){
+    		o.render();
+    	}
+    	for(RenderableObject o : transp){
     		o.render();
     	}
     	int quer = 1;

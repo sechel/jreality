@@ -303,21 +303,15 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	        
 			
 			GL3 gl = arg0.getGL().getGL3();
-			
-			gl.glClearColor(0f, 0f, 0f, 1f);
-			gl.glClear(gl.GL_COLOR_BUFFER_BIT);
-			gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
-	    	gl.glViewport(0, 0, width, height);
 	    	
 			//handle background
 			JOGLSceneGraphComponentInstance rootInstance = (JOGLSceneGraphComponentInstance) proxyScene.getTreeRoot();
 			JOGLAppearanceInstance rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
 			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
-				System.out.println("cube map not upToDate");
 				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
 				backgroundHelper.updateBackground(gl, rootAp, width, height);
 			}
-			backgroundHelper.draw(gl);
+			
 			//update sky box
 			rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
 			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
@@ -332,11 +326,8 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			}
 			
 			//render skybox
-			SkyboxHelper.render(gl, dmat, mat, skyboxCubemap, cam);
-
-			//enable depth test
-			gl.glEnable(gl.GL_DEPTH_TEST);
-			gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+			SkyboxHelper.setup(dmat, mat, skyboxCubemap, cam);
+			
 			//collect lights from scene graph
 			JOGLLightCollection globalLightCollection = new JOGLLightCollection(dmat);
 			rootInstance.collectGlobalLights(dmat, globalLightCollection);
@@ -354,12 +345,9 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			List<RenderableObject> transpObjects = new LinkedList<RenderableObject>();
 			rootInstance.collectNonTransparent(rootState, nonTranspObjects, transpObjects);
 			
-//			for(RenderableObject o : nonTranspObjects){
-//				o.render();
-//			}
-			TransparencyHelper.render(gl, nonTranspObjects, transpObjects, width, height);
 			//render scene graph
-			//rootInstance.render(rootState);
+			TransparencyHelper.render(gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+			
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
 		}

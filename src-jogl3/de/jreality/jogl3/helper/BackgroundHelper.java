@@ -213,7 +213,6 @@ public class BackgroundHelper {
     		gl.glVertexAttribPointer(gl.glGetAttribLocation(backgroundShader.shaderprogram, "vertex_colors"), colors.getElementSize(), colors.getType(), false, 0, 0);
     		gl.glEnableVertexAttribArray(gl.glGetAttribLocation(backgroundShader.shaderprogram, "vertex_colors"));
     	
-    		
     		gl.glDrawArrays(gl.GL_TRIANGLES, 0, quad.getLength()/4);
     		
     		gl.glDisableVertexAttribArray(gl.glGetAttribLocation(backgroundShader.shaderprogram, "vertex_coordinates"));

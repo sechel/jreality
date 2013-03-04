@@ -58,7 +58,6 @@ public class SkyboxHelper {
 			tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
 			jogltex[i] = new JOGLTexture2D(tex);
 		}
-			
 	}
 	private static GLShader shader;
 	public static void init(GL3 gl){
@@ -71,28 +70,40 @@ public class SkyboxHelper {
 		texNoVBO = new GLVBOFloat(gl, texNo, "vertex_tex_no");
 	}
 	
-	public static void bindSamplers(GL3 gl, GLShader _shader){
-		for(int i = 0; i < 6; i++){
-			  String name = "right";
-			  if(i == 1)
-				  name = "left";
-			  else if(i == 2)
-				  name = "up";
-			  else if(i == 3)
-				  name = "down";
-			  else if(i == 4)
-				  name = "back";
-			  else if(i == 5)
-				  name = "front";
-			  gl.glUniform1i(gl.glGetUniformLocation(_shader.shaderprogram, name), i+2);
-			  //jogltex[i].setBlendColor(cm.getBlendColor());
-			  //jogltex[i].setImage(imgs[i]);
-			  Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE2+i);
-		  }
-	}
+//	public static void bindSamplers(GL3 gl, GLShader _shader){
+//		for(int i = 0; i < 6; i++){
+//			  String name = "right";
+//			  if(i == 1)
+//				  name = "left";
+//			  else if(i == 2)
+//				  name = "up";
+//			  else if(i == 3)
+//				  name = "down";
+//			  else if(i == 4)
+//				  name = "back";
+//			  else if(i == 5)
+//				  name = "front";
+//			  gl.glUniform1i(gl.glGetUniformLocation(_shader.shaderprogram, name), i+2);
+//			  //jogltex[i].setBlendColor(cm.getBlendColor());
+//			  //jogltex[i].setImage(imgs[i]);
+//			  Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE2+i);
+//		  }
+//	}
 	
+
+	//TODO simplify this. We don't really need the camera here. Could probably turn off depth test and
+	//somwhow calculate the texture coordinates from modelview, projection matrices.
+	private static double[] modelview, projection;
+	private static CubeMap cm;
+	private static Camera cam;
+	public static void setup(double[] modelview, double[] projection, CubeMap cm, Camera cam){
+		SkyboxHelper.modelview = modelview;
+		SkyboxHelper.projection = projection;
+		SkyboxHelper.cm = cm;
+		SkyboxHelper.cam = cam;
+	}
   @SuppressWarnings("static-access")
-public static void render(GL3 gl, double[] modelview, double[] projection, CubeMap cm, Camera cam)	{
+public static void render(GL3 gl)	{
     if(cm == null)
     	return;
     
