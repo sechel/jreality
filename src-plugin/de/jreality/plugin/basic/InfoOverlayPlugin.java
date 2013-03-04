@@ -1,6 +1,6 @@
 package de.jreality.plugin.basic;
 
-import de.jreality.backends.viewer.InstrumentedViewer;
+import de.jreality.jogl.InstrumentedViewer;
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;

@@ -56,7 +56,7 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.backends.viewer.InstrumentedViewer;
+import de.jreality.jogl.InstrumentedViewer;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
@@ -258,7 +258,7 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		init(scene);
 		updateScenePaths(scene);
 		scene.addChangeListener(this);
-//		iop = c.getPlugin(InfoOverlayPlugin.class);
+		iop = c.getPlugin(InfoOverlayPlugin.class);
 		
 	}
 
