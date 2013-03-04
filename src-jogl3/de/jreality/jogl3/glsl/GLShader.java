@@ -9,8 +9,6 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import com.itextpdf.text.log.SysoLogger;
-
 
 /**
  * 
