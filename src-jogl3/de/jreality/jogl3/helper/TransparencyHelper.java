@@ -148,7 +148,7 @@ public class TransparencyHelper {
     	peelDepth(gl, transp, width, height);
     	quer = endQuery(gl);
     	int counter = 0;
-    	while(quer!=0 && counter < 1){
+    	while(quer!=0 && counter < 20){
     		counter++;
         	//draw on the SCREEN
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
