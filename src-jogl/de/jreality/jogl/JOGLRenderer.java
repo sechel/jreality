@@ -456,6 +456,7 @@ public class JOGLRenderer {
 	public void display(GL2 gl) {
 		// System.err.println("display "+width+" "+height);
 		globalGL = gl;
+		renderingState.polygonCount = 0;
 		perfMeter.beginFrame();
 		renderingState.initializeGLState();
 		renderingState.currentEye = CameraUtility.MIDDLE_EYE;
@@ -547,7 +548,6 @@ public class JOGLRenderer {
 		 }
 
 		perfMeter.endFrame();
-		renderingState.polygonCount = 0;
 	}
 
 	// private Color interpolateBG(float[][] bgColors, int i, int j, int
