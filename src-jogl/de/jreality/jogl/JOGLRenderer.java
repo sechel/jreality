@@ -547,6 +547,7 @@ public class JOGLRenderer {
 		 }
 
 		perfMeter.endFrame();
+		renderingState.polygonCount = 0;
 	}
 
 	// private Color interpolateBG(float[][] bgColors, int i, int j, int
