@@ -122,6 +122,8 @@ public class NonEuclideanExample {
 		SceneGraphComponent root = viewer.getSceneRoot();
 		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLOR, new Color(0,20, 40));
 		root.getAppearance().setAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.INHERITED);
+		root.getAppearance().setAttribute(CommonAttributes.ANY_DISPLAY_LISTS, false);
+		root.getAppearance().setAttribute("oneGLSL", true);  // don't ask!
 	    SceneGraphPath camPath = SceneGraphUtility.getPathsBetween(root, cameraNode).get(0);
 	    camPath.push(camera);
 	    viewer.setCameraPath(camPath);
@@ -187,7 +189,7 @@ public class NonEuclideanExample {
 		// add a light node which gets placed above the disk (see update() below)
 		lightNode = SceneGraphUtility.createFullSceneGraphComponent("child2");
 		lightNode.getAppearance().setAttribute(LIGHTING_ENABLED, false);
-		lightNode.addChild(Primitives.sphere(.05, new double[]{0,0,0}, Pn.EUCLIDEAN));
+//		lightNode.addChild(Primitives.sphere(.05, new double[]{0,0,0}, Pn.EUCLIDEAN));
 		pointLight = new PointLight();
 		pointLight.setIntensity(1);
 		pointLight.setColor(new Color(250, 250, 250));
