@@ -226,6 +226,4 @@ void main(void)
     	}
 	}
 	glFragColor.a = transparency;
-	
-	glFragColor = vec4(1, 0, 0, 1);
 }

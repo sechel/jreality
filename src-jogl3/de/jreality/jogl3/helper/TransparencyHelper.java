@@ -9,6 +9,9 @@ import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
 
 public class TransparencyHelper {
+	public static int supersample = 2;
+	
+	//DONT FORGET TO INITIALIZE SHADERS WITH .init(GL3 gl)
 	public static GLShader depth = new GLShader("transp/polygonDepth.v", "transp/depth.f");
 	public static GLShader transp = new GLShader("nontransp/polygon.v", "transp/polygonTransp.f");
 	public static GLShader transpSphere = new GLShader("nontransp/sphere.v", "transp/sphereTransp.f");
@@ -49,7 +52,7 @@ public class TransparencyHelper {
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
 
-    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA8, width, height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, null);
+    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA8, supersample*width, supersample*height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, null);
     	
     	//bind depth texture to framebuffer object 1
 		gl.glBindTexture(gl.GL_TEXTURE_2D, texs[1]);
@@ -59,7 +62,7 @@ public class TransparencyHelper {
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
 
-    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, width, height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
+    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, supersample*width, supersample*height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
     	
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	
@@ -74,7 +77,7 @@ public class TransparencyHelper {
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
 
-    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, width, height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
+    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, supersample*width, supersample*height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
     	
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
     	
@@ -91,6 +94,7 @@ public class TransparencyHelper {
 	public static void initTransparency(GL3 gl, int width, int height){
 		depth.init(gl);
     	transp.init(gl);
+    	transpSphere.init(gl);
     	copy.init(gl);
     	copyCoords = new GLVBOFloat(gl, testQuadCoords, "vertex_coordinates");
     	copyTex = new GLVBOFloat(gl, testTexCoords, "texture_coordinates");
@@ -120,7 +124,7 @@ public class TransparencyHelper {
 	public static void render(GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
 		
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-    	
+    	gl.glViewport(0, 0, supersample*width, supersample*height);
     	gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
     	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
     	//draw background here
@@ -130,7 +134,7 @@ public class TransparencyHelper {
     	gl.glEnable(gl.GL_DEPTH_TEST);
     	gl.glClearDepth(1);
     	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
-    	gl.glViewport(0, 0, width, height);
+    	
     	gl.glDisable(gl.GL_BLEND);
     	for(RenderableObject o : nonTransp){
     		o.render();
@@ -145,18 +149,19 @@ public class TransparencyHelper {
     	//draw transparent objects into FBO with reverse depth values
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
     	startQuery(gl);
-    	peelDepth(gl, transp, width, height);
+    	peelDepth(gl, transp, supersample*width, supersample*height);
     	quer = endQuery(gl);
+    	
     	int counter = 0;
     	while(quer!=0 && counter < 20){
     		counter++;
         	//draw on the SCREEN
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-        	addOneLayer(gl, transp, width, height);
+        	addOneLayer(gl, transp, supersample*width, supersample*height);
         	//draw transparent objects into FBO with reverse depth values
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
         	startQuery(gl);
-        	peelDepth(gl, transp, width, height);
+        	peelDepth(gl, transp, supersample*width, supersample*height);
         	quer = endQuery(gl);
     	}
     	
