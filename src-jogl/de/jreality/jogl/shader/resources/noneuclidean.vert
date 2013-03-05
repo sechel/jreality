@@ -202,7 +202,9 @@ void main (void)
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
     transformedNormal = -transformedNormal;
     gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
-     if (poincareModel)	{
+    if (gl_BackColor.r + gl_BackColor.g + gl_BackColor.b < .01) gl_BackColor = gl_FrontColor;
+    else if (gl_FrontColor.r + gl_FrontColor.g + gl_FrontColor.b < .01) gl_FrontColor = gl_BackColor;
+    if (poincareModel)	{
         // p4 is in the coordinate system of H3
       	vec4 p4 =  cam2H * ecPosition;
      	dehomogenize(p4);
