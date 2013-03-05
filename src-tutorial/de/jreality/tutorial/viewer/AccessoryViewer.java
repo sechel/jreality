@@ -24,9 +24,6 @@ import de.jreality.util.SceneGraphUtility;
  */
 public class AccessoryViewer {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		JRViewer jrv = new JRViewer();
 		jrv.addBasicUI();
