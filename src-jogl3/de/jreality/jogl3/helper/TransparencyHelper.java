@@ -9,7 +9,7 @@ import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
 
 public class TransparencyHelper {
-	public static int supersample = 2;
+	public static int supersample = 1;
 	
 	//DONT FORGET TO INITIALIZE SHADERS WITH .init(GL3 gl)
 	public static GLShader depth = new GLShader("transp/polygonDepth.v", "transp/depth.f");
