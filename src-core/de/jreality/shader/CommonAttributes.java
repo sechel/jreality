@@ -315,7 +315,10 @@ import de.jreality.scene.Appearance;
 			return LINE_DIFFUSE_COLOR_DEFAULT;
 		if(key.equals(SMOOTH_SHADING))
 			return SMOOTH_SHADING_DEFAULT;
-		
+		if(key.equals(CommonAttributes.VERTEX_COLORS_ENABLED))
+			return VERTEX_COLORS_ENABLED_DEFAULT;
+		if(key.equals(TRANSPARENCY))
+			return TRANSPARENCY_DEFAULT;
 		return value;
 	}
 }
