@@ -62,7 +62,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		
 		try{
 			glp = GLProfile.get("GL3");
-			String s = glp.glAvailabilityToString();
+			String s = GLProfile.glAvailabilityToString();
 			System.out.println(s);
 //			if(!s.contains("3.3") && !s.contains("GL4 true")){
 //				System.err.println("opengl 3.3 not available, thus no jogl3-backend");
@@ -102,7 +102,8 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		//a value of 1, 2, 4 and 8 has just the same effect on linux nvidia-310.14, i.e. no anti-aliasing
 		//16 times does anti-aliasing
 		caps.setSampleBuffers(true);
-		caps.setNumSamples(1);
+		caps.setNumSamples(16);
+		
 		
 		canvas = new GLCanvas(caps);
 		canvas.addGLEventListener(this);

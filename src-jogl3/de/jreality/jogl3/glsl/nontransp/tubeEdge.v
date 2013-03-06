@@ -9,6 +9,22 @@ in vec4 vertex_coordinates;
 in vec4 _vertex_coordinates;
 in vec4 tube_coords;
 
+in float vertex_relativeRadii;
+in float _vertex_relativeRadii;
+uniform int has_vertex_relativeRadii;
+
+in float edge_relativeRadii;
+in float _edge_relativeRadii;
+uniform int has_edge_relativeRadii;
+
+in vec4 vertex_colors;
+in vec4 _vertex_colors;
+in vec4 edge_colors;
+in vec4 _edge_colors;
+out vec4 edgeColor;
+out vec4 vertexColor;
+
+
 uniform float tubeRadius;
 
 out vec4 camSpaceCoord;
@@ -16,6 +32,13 @@ out vec3 camSpaceNormal;
 
 void main(void)
 {
+	float relRad = 1;
+	if(has_vertex_relativeRadii == 1)
+		relRad = vertex_relativeRadii;
+	if(has_edge_relativeRadii == 1)
+		relRad = edge_relativeRadii;
+	vertexColor = vertex_colors;
+	edgeColor = edge_colors;
 	//edge endpoints in camera space
 	vec3 v1 = (modelview*vertex_coordinates).xyz;
 	vec3 v2 = (modelview*_vertex_coordinates).xyz;
@@ -23,7 +46,7 @@ void main(void)
 	vec3 newY = normalize(cross(normalize(v2-v1), newZ));
 	mat4 trafo = mat4(v2-v1, 0, newY, 0, newZ, 0, v1, 1);
 	
-	vec4 scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*tubeRadius, tube_coords.z*tubeRadius, 1);
+	vec4 scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*tubeRadius*relRad, tube_coords.z*tubeRadius*relRad, 1);
 	
 	gl_Position = projection * trafo * scaledTubeCoords;
 	

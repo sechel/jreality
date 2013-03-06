@@ -5,6 +5,7 @@
 out vec4 glFragColor;
 
 uniform vec4 diffuseColor;
+uniform int vertexColors;
 vec4 diffuse;
 uniform float diffuseCoefficient;
 
@@ -17,6 +18,12 @@ uniform float specularExponent;
 
 in vec4 camSpaceCoord;
 in vec3 camSpaceNormal;
+
+in vec4 edgeColor;
+in vec4 vertexColor;
+uniform int has_vertex_colors;
+
+uniform int has_edge_colors;
 
 //GLOBAL LIGHTS
 uniform sampler2D sys_globalLights;
@@ -138,16 +145,21 @@ void main(void)
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	
 	diffuse = diffuseColor;
+	if(has_edge_colors == 1)
+		diffuse = edgeColor;
+	if(has_vertex_colors == 1 && vertexColors == 1)
+		diffuse = vertexColor;
+	 //&& vertexColors == 1
 	
 	lightInflux = vec3(0, 0, 0);
 	vec3 normal = normalize(camSpaceNormal);
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(normal);
 		calculateLocalLightInflux(normal);
-		glFragColor = vec4(lightInflux, diffuseColor.a);
+		glFragColor = vec4(lightInflux, 1);
 	}else{
 		calculateGlobalLightInflux(-normal);
 		calculateLocalLightInflux(-normal);
-		glFragColor = vec4(lightInflux, diffuseColor.a);
+		glFragColor = vec4(lightInflux, 1);
 	}
 }

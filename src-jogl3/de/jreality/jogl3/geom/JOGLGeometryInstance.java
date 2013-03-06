@@ -271,7 +271,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 //    				System.out.println(s);
 //    			}
     			value = eap.getAttribute(ShaderUtility.nameSpace(type,v.getName()),  CommonAttributes.getDefault(v.getName(), value));
-    			//System.out.println("" + v.getName() + ", " + v.getType() + ", " + value.getClass());
+//    			System.out.println("" + v.getName() + ", " + v.getType() + ", " + value.getClass());
     			if(value.getClass().equals(Integer.class)){
     				c.add(new GlUniformInt(v.getName(), (Integer)value));
     				//c.intUniforms.add(new GlUniform<Integer>(v.getName(), (Integer)value));

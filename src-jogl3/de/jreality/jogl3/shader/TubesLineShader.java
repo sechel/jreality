@@ -56,6 +56,8 @@ public class TubesLineShader{
 		
     	//bind vbos to corresponding shader variables
     	List<ShaderVar> l = shader.vertexAttributes;
+    	GLVBO[] glvbo = lse.getAllPointVBOs();
+    	
     	for(ShaderVar v : l){
     		GLVBO vbo = lse.getLineVBO(v.getName());
     		if(vbo != null){
@@ -72,7 +74,6 @@ public class TubesLineShader{
             	//important here: we advance to the next element only after all of tube_coords have been drawn.
             	gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()), 1);
 //            	
-            	
     		}else{
     			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
     		}
