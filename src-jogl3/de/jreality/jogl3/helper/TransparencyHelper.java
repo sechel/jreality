@@ -114,11 +114,16 @@ public class TransparencyHelper {
     		counter++;
     		gl.glGetQueryObjectuiv(queries[0],gl.GL_QUERY_RESULT_AVAILABLE, queryresavail, 0);
     		//System.out.println("not true yet: " + counter);
-    	}while(queryresavail[0] != gl.GL_TRUE);
-    	gl.glGetQueryObjectuiv(queries[0] ,gl.GL_QUERY_RESULT, queryres, 0);
-//    	System.out.println("query result after " + counter + " waits is " + queryres[0]);
-    	return queryres[0];
-    	//System.out.println("Query result is " + queryres[0]);
+    	}while(queryresavail[0] != gl.GL_TRUE && counter < 1000000000);
+    	if(queryresavail[0] == gl.GL_TRUE){
+    		gl.glGetQueryObjectuiv(queries[0] ,gl.GL_QUERY_RESULT, queryres, 0);
+//    		System.out.println("query result after " + counter + " waits is " + queryres[0]);
+    		return queryres[0];
+    		//System.out.println("Query result is " + queryres[0]);
+    	}else{
+    		System.err.println("Oups, we waited for the query result for longer than a billion iterations! Returning 0, to make partial render possible");
+    		return 0;
+    	}
 	}
 	
 	public static void render(GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
