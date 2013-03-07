@@ -82,7 +82,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 public class View extends SideContainerPerspective implements ChangeListener {
 
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT);
-	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_JOGL_DOME);
+	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_JOGL3+" "+SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_JOGL_DOME);
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_JOGL3_DOME+" "+SystemProperties.VIEWER_DEFAULT_JOGL3); 
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_JOGL_DOME+" "+SystemProperties.VIEWER_DEFAULT_SOFT); 
 //	String viewerString = Secure.getProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT); 
