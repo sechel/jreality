@@ -5,8 +5,10 @@
 uniform mat4 projection;
 uniform mat4 modelview;
 
+//the two endpoints of one edge
 in vec4 vertex_coordinates;
 in vec4 _vertex_coordinates;
+//one of the many coordinates of the unit length/radius tube
 in vec4 tube_coords;
 
 in float vertex_relativeRadii;
@@ -14,6 +16,7 @@ in float _vertex_relativeRadii;
 uniform int has_vertex_relativeRadii;
 
 in float edge_relativeRadii;
+//(not neccessary but not harmful either, just again edge_relativeRadii)
 in float _edge_relativeRadii;
 uniform int has_edge_relativeRadii;
 
@@ -33,12 +36,21 @@ out vec3 camSpaceNormal;
 void main(void)
 {
 	float relRad = 1;
-	if(has_vertex_relativeRadii == 1)
-		relRad = vertex_relativeRadii;
+	if(has_vertex_relativeRadii == 1){
+		if(tube_coords.x > 0.5)
+			relRad = _vertex_relativeRadii;
+		else
+			relRad = vertex_relativeRadii;
+	}
 	if(has_edge_relativeRadii == 1)
 		relRad = edge_relativeRadii;
-	vertexColor = vertex_colors;
-	edgeColor = edge_colors;
+	if(tube_coords.x > 0.5){
+		vertexColor = _vertex_colors;
+		edgeColor = _edge_colors;
+	}else{
+		vertexColor = vertex_colors;
+		edgeColor = edge_colors;
+	}
 	//edge endpoints in camera space
 	vec3 v1 = (modelview*vertex_coordinates).xyz;
 	vec3 v2 = (modelview*_vertex_coordinates).xyz;

@@ -5,7 +5,6 @@
 out vec4 glFragColor;
 
 uniform vec4 diffuseColor;
-uniform int vertexColors;
 vec4 diffuse;
 uniform float diffuseCoefficient;
 
@@ -22,7 +21,7 @@ in vec3 camSpaceNormal;
 in vec4 edgeColor;
 in vec4 vertexColor;
 uniform int has_vertex_colors;
-
+uniform int vertexColors;
 uniform int has_edge_colors;
 
 //GLOBAL LIGHTS

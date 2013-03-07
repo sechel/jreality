@@ -10,6 +10,7 @@ import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLLineSetEntity;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
+import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.math.Rn;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
@@ -29,7 +30,7 @@ public class LineShader{
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
         	
 			//width
-        	gl.glLineWidth(lineWidth);
+        	gl.glLineWidth(TransparencyHelper.supersample*lineWidth);
 			//bind shader uniforms
 			for(GlUniform u : c){
 				u.bindToShader(shader, gl);
