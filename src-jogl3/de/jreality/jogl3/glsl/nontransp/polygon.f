@@ -56,7 +56,7 @@ uniform sampler2D up;
 uniform sampler2D down;
 
 uniform mat4 _inverseCamRotation;
-uniform int reflectionMap;
+//uniform int reflectionMap;
 
 float attenuation(vec3 att, float dist){
 	return 1/(att.x+att.y*dist+att.z*dist*dist);

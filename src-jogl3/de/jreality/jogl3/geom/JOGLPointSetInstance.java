@@ -33,7 +33,7 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 		if(visible){
 			boolean spheresDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.SPHERES_DRAW), CommonAttributes.SPHERES_DRAW_DEFAULT);
 			if(spheresDraw)
-				SpherePointShader.render(pse, pointSetPolygonUniforms, pointSphereShader, state);
+				SpherePointShader.render(pse, pointSetPolygonUniforms, pointReflMap, pointSphereShader, state);
 			else{
 				PointShader.render(pse, pointSetUniforms, pointShader, state);
 			}
@@ -57,9 +57,9 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		pointSetUniforms = new LinkedList<GlUniform>();
 		
-		pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, pointReflMap, CommonAttributes.POINT_SHADER);
+		pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, new GlReflectionMap(), CommonAttributes.POINT_SHADER);
 		pointSphereShader = updateAppearance(GLShader.defaultPointSphereShader, sgp, gl, pointSetPolygonUniforms, pointTexture, pointReflMap, "pointShader.polygonShader");
 		
-		pointShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, pointReflMap, CommonAttributes.POINT_SHADER);
+		pointShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, new GlReflectionMap(), CommonAttributes.POINT_SHADER);
 	}
 }

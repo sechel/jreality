@@ -6,6 +6,7 @@ import java.util.List;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLPointSetEntity;
 import de.jreality.jogl3.glsl.GLShader;
@@ -14,7 +15,7 @@ import de.jreality.math.Rn;
 
 public class SpherePointShader{
 	
-	public static void render(JOGLPointSetEntity pse, LinkedList<GlUniform> c, GLShader shader, JOGLRenderState state){
+	public static void render(JOGLPointSetEntity pse, LinkedList<GlUniform> c, GlReflectionMap reflMap, GLShader shader, JOGLRenderState state){
 		//System.out.println("LineShader.render()");
 		
 		GL3 gl = state.getGL();
@@ -23,11 +24,13 @@ public class SpherePointShader{
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
+		float[] inverseCamMatrix = Rn.convertDoubleToFloatArray(state.inverseCamMatrix);
 		shader.useShader(gl);
 		
     	//matrices
     	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
     	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
+    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "_inverseCamRotation"), 1, true, inverseCamMatrix, 0);
     	
     	//global lights in a texture
     	gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
@@ -48,6 +51,7 @@ public class SpherePointShader{
 			u.bindToShader(shader, gl);
 		}
 		//TODO all the other types
+		reflMap.bind(shader, gl);
 		
 		//TODO TODO TODO
 		GLVBO sphereVBO = state.getSphereHelper().getHalfSphereVBO(gl, 4);

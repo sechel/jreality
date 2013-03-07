@@ -32,7 +32,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		if(visible){
 			boolean tubesDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 			if(tubesDraw)
-				TubesLineShader.render(lse, lineSetPolygonUniforms, linePolygonShader, state);
+				TubesLineShader.render(lse, lineSetPolygonUniforms, lineReflMap, linePolygonShader, state);
 			else{
 				float lineWidth = (float)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 	        	LineShader.render(lse, lineSetUniforms, lineShader, state, lineWidth);
@@ -59,11 +59,11 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		super.updateAppearance(sgp, gl);
 		lineSetUniforms = new LinkedList<GlUniform>();
 		lineSetPolygonUniforms = new LinkedList<GlUniform>();
-		linePolygonShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, lineReflMap, CommonAttributes.LINE_SHADER);
+		linePolygonShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
 		
 		linePolygonShader = updateAppearance(GLShader.defaultPolygonLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, lineReflMap, "lineShader.polygonShader");
 		
-		lineShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetUniforms, lineTexture, lineReflMap, CommonAttributes.LINE_SHADER);
+		lineShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
 		
 	}
 }
