@@ -148,10 +148,10 @@ public class ImprovedTransparencyHelper {
     	
     	gl.glDisable(gl.GL_BLEND);
     	for(RenderableObject o : nonTransp){
-    		o.render();
+    		o.render(width, height);
     	}
     	for(RenderableObject o : transp){
-    		o.render();
+    		o.render(width, height);
     	}
     	//with this loop it draws as many layers as neccessary to complete the scene
     	//you can experiment by drawing only one layer or two and then view the result (see the comment after the loop)

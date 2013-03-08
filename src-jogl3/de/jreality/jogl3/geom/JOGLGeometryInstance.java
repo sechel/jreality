@@ -209,7 +209,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		super(node);
 	}
 
-	public abstract void render(JOGLRenderState state);
+	public abstract void render(JOGLRenderState state, int width, int height);
 	public abstract void renderDepth(JOGLRenderState state, int width, int height);
 	public abstract void addOneLayer(JOGLRenderState state, int width, int height, float alpha);
 

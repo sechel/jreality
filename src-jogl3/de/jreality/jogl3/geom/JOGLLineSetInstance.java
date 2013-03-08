@@ -23,16 +23,16 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	public JOGLLineSetInstance(IndexedLineSet node) {
 		super(node);
 	}
-	public void render(JOGLRenderState state) {
+	public void render(JOGLRenderState state, int width, int height) {
 		if(eap==null)
 			return;
-		super.render(state);
+		super.render(state, width, height);
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
 		if(visible){
 			boolean tubesDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 			if(tubesDraw)
-				TubesLineShader.render(lse, lineSetPolygonUniforms, lineReflMap, linePolygonShader, state);
+				TubesLineShader.render(lse, lineSetPolygonUniforms, lineReflMap, linePolygonShader, state, width, height);
 			else{
 				float lineWidth = (float)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 	        	LineShader.render(lse, lineSetUniforms, lineShader, state, lineWidth);

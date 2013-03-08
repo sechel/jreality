@@ -37,7 +37,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 	}
 
-	void render(JOGLRenderState parentState) {
+	void render(JOGLRenderState parentState, int width, int height) {
 		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
 		boolean upToDate = false;
 		if(app != null){
@@ -84,7 +84,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 				//geom.eap = EffectiveAppearance.create(this.toPath());
 				//rather update only when appearance has changed.
 				//PolygonShader.setFromEffectiveAppearance(EffectiveAppearance.create(this.toPath()), CommonAttributes.POLYGON_SHADER);
-				geom.render(state);
+				geom.render(state, width, height);
 			}
 		}
 		
@@ -94,7 +94,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
 			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
 			if(sgc.isVisible())
-				childInstance.render(state);
+				childInstance.render(state, width, height);
 		}
 	}
 	
@@ -105,8 +105,8 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 		public JOGLRenderState state;
 		public JOGLGeometryInstance geom;
-		public void render(){
-			geom.render(state);
+		public void render(int width, int height){
+			geom.render(state, width, height);
 		}
 		public void renderDepth(int width, int height){
 			geom.renderDepth(state, width, height);

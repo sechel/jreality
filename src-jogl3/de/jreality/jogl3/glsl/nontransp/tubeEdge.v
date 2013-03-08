@@ -30,6 +30,8 @@ out vec4 vertexColor;
 
 uniform float tubeRadius;
 
+uniform vec4 _jitter;
+
 out vec4 camSpaceCoord;
 out vec3 camSpaceNormal;
 
@@ -61,6 +63,8 @@ void main(void)
 	vec4 scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*tubeRadius*relRad, tube_coords.z*tubeRadius*relRad, 1);
 	
 	gl_Position = projection * trafo * scaledTubeCoords;
+	//gl_Position = gl_Position / gl_Position.w;
+	gl_Position += _jitter;
 	
 	vec3 Normal = vec3(0, tube_coords.yz);
 	mat3 rotation = mat3(vec3(trafo[0][0], trafo[0][1], trafo[0][2]), vec3(trafo[1][0], trafo[1][1], trafo[1][2]), vec3(trafo[2][0], trafo[2][1], trafo[2][2]));

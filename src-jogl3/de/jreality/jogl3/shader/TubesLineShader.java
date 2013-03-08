@@ -11,11 +11,12 @@ import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLLineSetEntity;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
+import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.math.Rn;
 
 public class TubesLineShader{
 	
-	public static void render(JOGLLineSetEntity lse, LinkedList<GlUniform> c, GlReflectionMap reflMap, GLShader shader, JOGLRenderState state){
+	public static void render(JOGLLineSetEntity lse, LinkedList<GlUniform> c, GlReflectionMap reflMap, GLShader shader, JOGLRenderState state, int width, int height){
 		//System.out.println("LineShader.render()");
 		
 		GL3 gl = state.getGL();
@@ -44,7 +45,8 @@ public class TubesLineShader{
 		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
 		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
 		
-    	
+		gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, "_jitter"), 1, new float[]{TransparencyHelper.jitterx, TransparencyHelper.jittery, 0, 0}, 0);
+		
 		//bind shader uniforms
 		for(GlUniform u : c){
 			//System.out.println("Uniform in TubesLineShader: " + u.name);

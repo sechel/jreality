@@ -28,7 +28,7 @@ public class JOGLSphereInstance extends JOGLGeometryInstance {
 	}
 
 	@Override
-	public void render(JOGLRenderState state) {
+	public void render(JOGLRenderState state, int width, int height) {
 		if(eap == null)
 			return;
 		JOGLSphereEntity se = (JOGLSphereEntity) getEntity();
