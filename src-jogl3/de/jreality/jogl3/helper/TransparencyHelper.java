@@ -9,8 +9,7 @@ import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
 
 public class TransparencyHelper {
-	public static int supersample = 1;
-	private static int jitterstate = 0;
+	public static int supersample = 2;
 	
 	//DONT FORGET TO INITIALIZE SHADERS WITH .init(GL3 gl)
 	public static GLShader depth = new GLShader("transp/polygonDepth.v", "transp/depth.f");
@@ -37,40 +36,39 @@ public class TransparencyHelper {
 	public static GLVBOFloat copyCoords, copyTex;
 	private static int[] queries = new int[1];
 	
-	private static int[] texs = new int[9];
+	private static int[] texs = new int[3];
 	
-	private static int[] fbos = new int[5];
+	private static int[] fbos = new int[2];
     
     private static int[] queryresavail = new int[1];
     private static int[] queryres = new int[1];
 	
 	public static void resizeTexture(GL3 gl, int width, int height){
-		for(int i = 0; i < 4; i++){
-			//bind color texture to framebuffer object 1
-			gl.glBindTexture(gl.GL_TEXTURE_2D, texs[5+i]);
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
-	    	
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
+		//bind color texture to framebuffer object 1
+		gl.glBindTexture(gl.GL_TEXTURE_2D, texs[2]);
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+    	
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
 
-	    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA8, supersample*width, supersample*height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, null);
-	    	
-	    	//bind depth texture to framebuffer object 1
-			gl.glBindTexture(gl.GL_TEXTURE_2D, texs[1+i]);
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
-	    	
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
-	    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
+    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA8, supersample*width, supersample*height, 0, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, null);
+    	
+    	//bind depth texture to framebuffer object 1
+		gl.glBindTexture(gl.GL_TEXTURE_2D, texs[1]);
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+    	
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP_TO_EDGE);
+    	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP_TO_EDGE);
 
-	    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, supersample*width, supersample*height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
-	    	
-	    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1+i]);
-	    	
-	    	gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D, texs[5+i], 0);
-	    	gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_TEXTURE_2D, texs[1+i], 0);
-		}
+    	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, supersample*width, supersample*height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
+    	
+    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+    	
+    	gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D, texs[2], 0);
+    	gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_DEPTH_ATTACHMENT, gl.GL_TEXTURE_2D, texs[1], 0);
+    	
 		//bind depth texture to framebuffer object 0
 		gl.glBindTexture(gl.GL_TEXTURE_2D, texs[0]);
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
@@ -88,8 +86,8 @@ public class TransparencyHelper {
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
 	}
 	private static void initTextureFramebuffer(GL3 gl, int width, int height){
-		gl.glGenTextures(9, texs, 0);
-		gl.glGenFramebuffers(5, fbos, 0);
+		gl.glGenTextures(3, texs, 0);
+		gl.glGenFramebuffers(2, fbos, 0);
     	resizeTexture(gl, width, height);
 	}
 	
@@ -128,31 +126,9 @@ public class TransparencyHelper {
     	}
 	}
 	
-	public static float jitterx = 0;
-	public static float jittery = 0;
 	public static void render(GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
-		jitterstate++;
-		jitterstate %= 4;
-		switch(jitterstate){
-		case 0:
-			jitterx = 0;
-			jittery = 0;
-			break;
-		case 1:
-			jitterx = 1f/width;
-			jittery = 1f/height;
-			break;
-		case 2:
-			jitterx = 0;
-			jittery = 1f/height;
-			break;
-		case 3:
-			jitterx = 1f/width;
-			jittery = 0;
-			break;
-		}
 		
-    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1+jitterstate]);
+    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	gl.glViewport(0, 0, supersample*width, supersample*height);
     	gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
     	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
@@ -185,7 +161,7 @@ public class TransparencyHelper {
     	while(quer!=0 && counter < 20){
     		counter++;
         	//draw on the SCREEN
-        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1+jitterstate]);
+        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
         	addOneLayer(gl, transp, supersample*width, supersample*height);
         	//draw transparent objects into FBO with reverse depth values
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
@@ -199,7 +175,7 @@ public class TransparencyHelper {
     	//0 means the current depth layer generated by peelDepth()
     	//1 the depth layer of the final image generated by addOneLayer()
     	//2 the color layer of the final image generated by addOneLayer()
-    	copyFBO2FB(gl, 5, width, height);
+    	copyFBO2FB(gl, 2, width, height);
 	}
 	
 	private static void addOneLayer(GL3 gl, List<RenderableObject> transp, int width, int height) {
@@ -234,7 +210,7 @@ public class TransparencyHelper {
     	
 		for(RenderableObject o : transp){
 			gl.glActiveTexture(gl.GL_TEXTURE0);
-	    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[1+jitterstate]);
+	    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[1]);
     		o.renderDepth(width, height);
     	}
 		
@@ -243,20 +219,15 @@ public class TransparencyHelper {
     	gl.glViewport(0, 0, width, height);
     	
     	gl.glEnable(gl.GL_TEXTURE_2D);
+    	gl.glActiveTexture(gl.GL_TEXTURE0);
+    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[tex]);
+    	
     	
     	gl.glDisable(gl.GL_DEPTH_TEST);
     	
     	copy.useShader(gl);
     	
-    	for(int i = 0; i < 4; i++){
-    		gl.glActiveTexture(gl.GL_TEXTURE0+i);
-        	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[tex+i]);
-        	gl.glUniform1i(gl.glGetUniformLocation(copy.shaderprogram, "image"+i), i);
-    	}
-//    	gl.glActiveTexture(gl.GL_TEXTURE0);
-//    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[tex+jitterstate]);
-//    	gl.glUniform1i(gl.glGetUniformLocation(transp.shaderprogram, "image"+0), 0);
-    	
+    	gl.glUniform1i(gl.glGetUniformLocation(copy.shaderprogram, "image"), 0);
     	
     	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, copyCoords.getID());
     	gl.glVertexAttribPointer(gl.glGetAttribLocation(copy.shaderprogram, copyCoords.getName()), copyCoords.getElementSize(), copyCoords.getType(), false, 0, 0);
