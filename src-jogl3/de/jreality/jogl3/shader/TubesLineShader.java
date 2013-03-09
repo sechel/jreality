@@ -45,7 +45,7 @@ public class TubesLineShader{
 		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
 		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
 		
-		gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, "_jitter"), 1, new float[]{TransparencyHelper.jitterx, TransparencyHelper.jittery, 0, 0}, 0);
+		//gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, "_jitter"), 1, new float[]{TransparencyHelper.jitterx, TransparencyHelper.jittery, 0, 0}, 0);
 		
 		//bind shader uniforms
 		for(GlUniform u : c){
