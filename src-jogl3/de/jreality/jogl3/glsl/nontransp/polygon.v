@@ -41,7 +41,7 @@ void main(void)
 {
 	if(has_vertex_colors == 1)
 		faceVertexColor = vertex_colors;
-	if(has_face_colors == 1)
+	if(has_face_colors == 1 && !(has_vertex_colors == 1 && smoothShading == 1))
 		faceVertexColor = face_colors;
 	if(has_vertex_texturecoordinates==1)
 		texCoord = (textureMatrix * vec4(vertex_texturecoordinates, 0, 1)).st;
