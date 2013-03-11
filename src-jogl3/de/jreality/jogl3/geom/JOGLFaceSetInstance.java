@@ -62,7 +62,6 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	public GlReflectionMap reflMap = new GlReflectionMap();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
-		System.out.println("UpdateAppearance");
 		super.updateAppearance(sgp, gl);
 //		JOGLFaceSetEntity entity = (JOGLFaceSetEntity)this.getEntity();
 //		IndexedFaceSet fs = (IndexedFaceSet)entity.getNode();
