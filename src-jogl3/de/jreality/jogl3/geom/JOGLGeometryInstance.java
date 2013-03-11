@@ -251,9 +251,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     		if(v.getName().equals("screenSizeInSceneOverScreenSize")){
     			continue;
     		}
-    		if(v.getName().equals("front")){
-    			continue;
-    		}
+//    		if(v.getName().equals("front")){
+//    			continue;
+//    		}
     		if(v.getName().equals("back")){
     			continue;
     		}
