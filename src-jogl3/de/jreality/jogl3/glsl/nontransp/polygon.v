@@ -39,10 +39,10 @@ out vec4 faceVertexColor;
 
 void main(void)
 {
-	if(has_face_colors == 1)
-		faceVertexColor = face_colors;
 	if(has_vertex_colors == 1)
 		faceVertexColor = vertex_colors;
+	if(has_face_colors == 1)
+		faceVertexColor = face_colors;
 	if(has_vertex_texturecoordinates==1)
 		texCoord = (textureMatrix * vec4(vertex_texturecoordinates, 0, 1)).st;
 	vec3 normals = vec3(0.57735, 0.57735, 0.57735);
