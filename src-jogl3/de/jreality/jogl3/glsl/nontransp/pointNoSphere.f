@@ -7,7 +7,7 @@ uniform mat4 projection;
 uniform sampler2D sys_tex;
 
 out vec4 glFragColor;
-uniform vec4 diffuseColor;
+uniform vec4 pointShader_diffuseColor;
 
 in float x;
 in float y;
@@ -40,7 +40,7 @@ void main(void)
 		gl_FragDepth = 0.5+0.5*windowCoords.z/windowCoords.w;
 	}
 	
-	vec4 color2 = diffuseColor;
+	vec4 color2 = pointShader_diffuseColor;
 	if(has_vertex_colors == 1)
 		color2 = color;
 	
