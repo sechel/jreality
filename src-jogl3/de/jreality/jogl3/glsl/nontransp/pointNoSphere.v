@@ -10,7 +10,9 @@ in vec4 vertex_coordinates;
 in float vertex_relativeRadii;
 in vec4 vertex_colors;
 
+uniform int pointShader_attenuatePointSize;
 uniform float pointShader_pointRadius;
+uniform float pointShader_pointSize;
 uniform float screenSize;
 uniform float screenSizeInSceneOverScreenSize;
 
@@ -35,6 +37,8 @@ void main(void)
 	float pointSize2 = - 4*pointShader_pointRadius/(posInCamSpace.z*screenSizeInSceneOverScreenSize);
 	screenPortion = screenSizeInSceneOverScreenSize*pointSize2;
 	gl_PointSize = pointSize2*vertex_relativeRadii;
+	if(pointShader_attenuatePointSize == 0)
+		gl_PointSize = vertex_relativeRadii * pointShader_pointSize/2;
 	z = posInCamSpace.z;
 	w = posInCamSpace.w;
 	x = posInCamSpace.x;
