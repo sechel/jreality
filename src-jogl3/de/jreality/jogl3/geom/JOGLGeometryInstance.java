@@ -380,12 +380,16 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	
 	private String retrieveType(String name){
 		String[] s = name.split("_");
+		if(s.length > 1 && s[1].equals("polygonShader"))
+			return s[0]+"."+s[1];
 		return s[0];
 	}
 	
 	private String retrieveName(String name){
 		String[] s = name.split("_");
-		if(name.length() > s[0].length())
+		if(s.length > 2 && s[1].equals("polygonShader"))
+			return name.substring(s[0].length()+s[1].length()+2);
+		if(s.length > 1)
 			return name.substring(s[0].length()+1);
 		else
 			return s[0];

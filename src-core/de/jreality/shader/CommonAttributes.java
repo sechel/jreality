@@ -156,7 +156,7 @@ import de.jreality.scene.Appearance;
 	public static final Color LINE_DIFFUSE_COLOR_DEFAULT = Color.BLACK;
 	public final static String POINT_SPRITE = "pointSprite";
 	public final static String LINE_LIGHTING_ENABLED 	= 		"lineLighting";
-	
+	public final static boolean LINE_LIGHTING_ENABLED_DEFAULT = false;
 	// default polygon shader
 	public final static String SMOOTH_SHADING = 	"smoothShading";		// interpolate vertex shading values?
 	public final static boolean SMOOTH_SHADING_DEFAULT = true;
@@ -319,6 +319,9 @@ import de.jreality.scene.Appearance;
 			return VERTEX_COLORS_ENABLED_DEFAULT;
 		if(key.equals(TRANSPARENCY))
 			return TRANSPARENCY_DEFAULT;
+		if(key.equals(LINE_LIGHTING_ENABLED))
+			return LINE_LIGHTING_ENABLED_DEFAULT;
+		
 		return value;
 	}
 }

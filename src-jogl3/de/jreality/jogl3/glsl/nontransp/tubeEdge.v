@@ -28,7 +28,7 @@ out vec4 edgeColor;
 out vec4 vertexColor;
 
 
-uniform float tubeRadius;
+uniform float lineShader_tubeRadius;
 
 //uniform vec4 _jitter;
 
@@ -60,7 +60,7 @@ void main(void)
 	vec3 newY = normalize(cross(normalize(v2-v1), newZ));
 	mat4 trafo = mat4(v2-v1, 0, newY, 0, newZ, 0, v1, 1);
 	
-	vec4 scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*tubeRadius*relRad, tube_coords.z*tubeRadius*relRad, 1);
+	vec4 scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*lineShader_tubeRadius*relRad, tube_coords.z*lineShader_tubeRadius*relRad, 1);
 	
 	gl_Position = projection * trafo * scaledTubeCoords;
 	//gl_Position = gl_Position / gl_Position.w;

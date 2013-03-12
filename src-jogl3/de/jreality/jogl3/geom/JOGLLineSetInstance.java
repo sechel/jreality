@@ -59,11 +59,11 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		super.updateAppearance(sgp, gl);
 		lineSetUniforms = new LinkedList<GlUniform>();
 		lineSetPolygonUniforms = new LinkedList<GlUniform>();
-		linePolygonShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
+		linePolygonShader = updateAppearanceNew(GLShader.defaultPolygonLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
 		
-		linePolygonShader = updateAppearance(GLShader.defaultPolygonLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, lineReflMap, "lineShader.polygonShader");
+		linePolygonShader = updateAppearanceNew(GLShader.defaultPolygonLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, lineReflMap, "lineShader.polygonShader");
 		
-		lineShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
+		lineShader = updateAppearanceNew(GLShader.defaultLineShader, sgp, gl, lineSetUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
 		
 	}
 }

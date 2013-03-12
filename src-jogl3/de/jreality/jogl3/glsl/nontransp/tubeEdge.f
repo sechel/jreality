@@ -4,16 +4,16 @@
 
 out vec4 glFragColor;
 
-uniform vec4 diffuseColor;
+uniform vec4 lineShader_polygonShader_diffuseColor;
 vec4 diffuse;
-uniform float diffuseCoefficient;
+uniform float lineShader_polygonShader_diffuseCoefficient;
 
-uniform vec4 ambientColor;
-uniform float ambientCoefficient;
+uniform vec4 lineShader_polygonShader_ambientColor;
+uniform float lineShader_polygonShader_ambientCoefficient;
 
-uniform vec4 specularColor;
-uniform float specularCoefficient;
-uniform float specularExponent;
+uniform vec4 lineShader_polygonShader_specularColor;
+uniform float lineShader_polygonShader_specularCoefficient;
+uniform float lineShader_polygonShader_specularExponent;
 
 in vec4 camSpaceCoord;
 in vec3 camSpaceNormal;
@@ -21,7 +21,7 @@ in vec3 camSpaceNormal;
 in vec4 edgeColor;
 in vec4 vertexColor;
 uniform int has_vertex_colors;
-uniform int vertexColors;
+uniform int lineShader_vertexColors;
 uniform int has_edge_colors;
 
 //GLOBAL LIGHTS
@@ -69,8 +69,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		
 		vec4 col = texture(lights, vec2((3*i+0.5)/lightTexSize, 0));
 		float intensity = texture(lights, vec2((3*i+2+0.5)/lightTexSize, 0)).r;
-		vec4 ambient = ambientColor*col*intensity;
-		lightInflux = lightInflux + ambientCoefficient * ambient.xyz;
+		vec4 ambient = lineShader_polygonShader_ambientColor*col*intensity;
+		lightInflux = lightInflux + lineShader_polygonShader_ambientCoefficient * ambient.xyz;
 		
 		float dott = dot(normal, normalize(dir.xyz));
 		if(dott > 0){
@@ -78,9 +78,9 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			
 			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
 			
-			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			vec4 specular =lineShader_polygonShader_specularColor*intensity*pow(spec, lineShader_polygonShader_specularExponent);
 			
-			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
+			vec4 new = lineShader_polygonShader_specularCoefficient*specular+lineShader_polygonShader_diffuseCoefficient*diffuse2;
 			lightInflux = lightInflux + new.xyz;
 		}
 	}
@@ -95,8 +95,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		float dist = length(RelPos);
 		float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
 		
-		vec4 ambient = ambientColor*col*intensity;
-		lightInflux = lightInflux + atten*ambientCoefficient * ambient.xyz;
+		vec4 ambient = lineShader_polygonShader_ambientColor*col*intensity;
+		lightInflux = lightInflux + atten*lineShader_polygonShader_ambientCoefficient * ambient.xyz;
 		
 		float dott = dot(normal, normalize(RelPos.xyz));
 		if(dott > 0){
@@ -104,10 +104,10 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			
 			float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
 			
-			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			vec4 specular =lineShader_polygonShader_specularColor*intensity*pow(spec, lineShader_polygonShader_specularExponent);
 			
 			
-			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
+			vec4 new = lineShader_polygonShader_specularCoefficient*specular+lineShader_polygonShader_diffuseCoefficient*diffuse2;
 			lightInflux = lightInflux + atten*new.xyz;
 		}
 	}
@@ -123,18 +123,18 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			float dist = length(RelPos);
 			float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
 			float intensity = coneAngles.a;
-			vec4 ambient = ambientColor*col*intensity;
+			vec4 ambient = lineShader_polygonShader_ambientColor*col*intensity;
 			float factor = pow(cos(angle), coneAngles.z);
-			lightInflux = lightInflux + factor*atten*ambientCoefficient * ambient.xyz;
+			lightInflux = lightInflux + factor*atten*lineShader_polygonShader_ambientCoefficient * ambient.xyz;
 			
 			//light is on the right side of the face
 			float dott = dot(normal, normalize(RelPos.xyz));
 			if(dott > 0){
 				vec4 diffuse2 = dott*diffuse*col*intensity;
 				float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
-				vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+				vec4 specular =lineShader_polygonShader_specularColor*intensity*pow(spec, lineShader_polygonShader_specularExponent);
 			
-				vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
+				vec4 new = lineShader_polygonShader_specularCoefficient*specular+lineShader_polygonShader_diffuseCoefficient*diffuse2;
 				lightInflux = lightInflux + factor*atten*new.xyz;
 			}
 		}
@@ -142,7 +142,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 }
 
 void calculateGlobalLightInflux(vec3 normal){
-	lightInflux = lightInflux + ambientColor.xyz*ambientCoefficient;
+	lightInflux = lightInflux + lineShader_polygonShader_ambientColor.xyz*lineShader_polygonShader_ambientCoefficient;
 	calculateLightInfluxGeneral(normal, sys_numGlobalDirLights, sys_numGlobalPointLights, sys_numGlobalSpotLights, sys_globalLights);
 }
 void calculateLocalLightInflux(vec3 normal){
@@ -155,10 +155,10 @@ void main(void)
 	//TODO check for availability of texture, check for face colors, what is diffuseColor?
 	//vec4 texCoord = textureMatrix * vec4(gl_PointCoord, 0, 1);
 	
-	diffuse = diffuseColor;
+	diffuse = lineShader_polygonShader_diffuseColor;
 	if(has_edge_colors == 1)
 		diffuse = edgeColor;
-	if(has_vertex_colors == 1 && vertexColors == 1)
+	if(has_vertex_colors == 1 && lineShader_vertexColors == 1)
 		diffuse = vertexColor;
 	 //&& vertexColors == 1
 	
