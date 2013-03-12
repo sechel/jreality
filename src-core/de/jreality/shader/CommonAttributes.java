@@ -80,6 +80,7 @@ import de.jreality.scene.Appearance;
 	public final static String ANTI_ALIASING_FACTOR = "antiAliasingFactor";
     // rendering hints that can appear anywhere in the scene graph
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
+	public final static boolean LIGHTING_ENABLED_DEFAULT = true;
 	public final static String ANTIALIASING_ENABLED = 	"antiAliasing";
 	public final static String TRANSPARENCY_ENABLED = 	"transparencyEnabled";
     public static final String ADDITIVE_BLENDING_ENABLED = "additiveBlendingEnabled";
@@ -321,6 +322,8 @@ import de.jreality.scene.Appearance;
 			return TRANSPARENCY_DEFAULT;
 		if(key.equals(LINE_LIGHTING_ENABLED))
 			return LINE_LIGHTING_ENABLED_DEFAULT;
+		if(key.equals(LIGHTING_ENABLED))
+			return LIGHTING_ENABLED_DEFAULT;
 		
 		return value;
 	}
