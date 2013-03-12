@@ -54,7 +54,7 @@ public class SpherePointShader{
 		reflMap.bind(shader, gl);
 		
 		//TODO TODO TODO
-		GLVBO sphereVBO = state.getSphereHelper().getHalfSphereVBO(gl, 4);
+		GLVBO sphereVBO = state.getSphereHelper().getSphereVBO(gl, 4);
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, sphereVBO.getID());
 		gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, "sphere_coords"), sphereVBO.getElementSize(), sphereVBO.getType(), false, 0, 0);
     	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "sphere_coords"));

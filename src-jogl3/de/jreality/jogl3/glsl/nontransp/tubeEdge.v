@@ -11,6 +11,8 @@ in vec4 _vertex_coordinates;
 //one of the many coordinates of the unit length/radius tube
 in vec4 tube_coords;
 
+uniform int lineShader_radiiWorldCoordinates;
+
 in float vertex_relativeRadii;
 in float _vertex_relativeRadii;
 uniform int has_vertex_relativeRadii;
@@ -54,22 +56,44 @@ void main(void)
 		edgeColor = edge_colors;
 	}
 	//edge endpoints in camera space
-	vec3 v1 = (modelview*vertex_coordinates).xyz;
-	vec3 v2 = (modelview*_vertex_coordinates).xyz;
-	vec3 newZ = normalize(v1-(v2-v1)*dot(v1, v2-v1)/dot(v2-v1, v2-v1));
-	vec3 newY = normalize(cross(normalize(v2-v1), newZ));
-	mat4 trafo = mat4(v2-v1, 0, newY, 0, newZ, 0, v1, 1);
 	
-	vec4 scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*lineShader_tubeRadius*relRad, tube_coords.z*lineShader_tubeRadius*relRad, 1);
-	
-	gl_Position = projection * trafo * scaledTubeCoords;
+	mat4 trafo;
+	vec4 scaledTubeCoords;
+	if(lineShader_radiiWorldCoordinates == 1){
+		vec3 v1 = (modelview*vertex_coordinates).xyz;
+		vec3 v2 = (modelview*_vertex_coordinates).xyz;
+		vec3 newZ = normalize(v1-(v2-v1)*dot(v1, v2-v1)/dot(v2-v1, v2-v1));
+		vec3 newY = normalize(cross(normalize(v2-v1), newZ));
+		trafo = mat4(v2-v1, 0, newY, 0, newZ, 0, v1, 1);
+		scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*lineShader_tubeRadius*relRad, tube_coords.z*lineShader_tubeRadius*relRad, 1);
+		
+		gl_Position = projection * trafo * scaledTubeCoords;
+		
+		vec3 Normal = vec3(0, tube_coords.yz);
+		mat3 rotation = mat3(vec3(trafo[0][0], trafo[0][1], trafo[0][2]), vec3(trafo[1][0], trafo[1][1], trafo[1][2]), vec3(trafo[2][0], trafo[2][1], trafo[2][2]));
+		camSpaceNormal = normalize(rotation*Normal);
+		camSpaceCoord = trafo*scaledTubeCoords;
+	}else{
+		vec3 v1 = (vertex_coordinates).xyz;
+		vec3 v2 = (_vertex_coordinates).xyz;
+		vec3 newZ = normalize(v1-(v2-v1)*dot(v1, v2-v1)/dot(v2-v1, v2-v1));
+		vec3 newY = normalize(cross(normalize(v2-v1), newZ));
+		trafo = mat4(v2-v1, 0, newY, 0, newZ, 0, v1, 1);
+		scaledTubeCoords = vec4(tube_coords.x, tube_coords.y*lineShader_tubeRadius*relRad, tube_coords.z*lineShader_tubeRadius*relRad, 1);
+		
+		mat4 together = modelview*trafo;
+		
+		gl_Position = projection * together * scaledTubeCoords;
+		
+		vec3 Normal = vec3(0, tube_coords.yz);
+		mat3 rotation = mat3(vec3(together[0][0], together[0][1], together[0][2]), vec3(together[1][0], together[1][1], together[1][2]), vec3(together[2][0], together[2][1], together[2][2]));
+		camSpaceNormal = normalize(rotation*Normal);
+		camSpaceCoord = modelview*trafo*scaledTubeCoords;
+	}
 	//gl_Position = gl_Position / gl_Position.w;
 	//gl_Position += _jitter;
 	
-	vec3 Normal = vec3(0, tube_coords.yz);
-	mat3 rotation = mat3(vec3(trafo[0][0], trafo[0][1], trafo[0][2]), vec3(trafo[1][0], trafo[1][1], trafo[1][2]), vec3(trafo[2][0], trafo[2][1], trafo[2][2]));
-	camSpaceNormal = normalize(rotation*Normal);
-	camSpaceCoord = trafo*scaledTubeCoords;
+	
 
 	//gl_Position = projection * modelview * vec4(((vertex_coordinates.xyz +_vertex_coordinates.xyz)/2.0+tube_coords.xyz), 1);
 	//gl_Position = vertex_coordinates;

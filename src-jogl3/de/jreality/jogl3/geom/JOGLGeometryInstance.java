@@ -396,7 +396,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	}
 	
 	//in the new version we use type only to identify the shader source
-	protected GLShader updateAppearanceNew(GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, GlReflectionMap reflMap, String shaderType) {
+	protected GLShader updateAppearance(GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, GlReflectionMap reflMap, String shaderType) {
 		
 		GLShader shader = defaultShader;
 		
