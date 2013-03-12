@@ -4,6 +4,7 @@
 
 out vec4 glFragColor;
 
+uniform int lightingEnabled;
 uniform vec4 lineShader_polygonShader_diffuseColor;
 vec4 diffuse;
 uniform float lineShader_polygonShader_diffuseCoefficient;
@@ -162,18 +163,22 @@ void main(void)
 		diffuse = vertexColor;
 	 //&& vertexColors == 1
 	
-	lightInflux = vec3(0, 0, 0);
 	vec3 normal = normalize(camSpaceNormal);
-	if(gl_FrontFacing){
-		calculateGlobalLightInflux(normal);
-		calculateLocalLightInflux(normal);
-		glFragColor = vec4(lightInflux, 1);
-	}else{
-		calculateGlobalLightInflux(-normal);
-		calculateLocalLightInflux(-normal);
-		glFragColor = vec4(lightInflux, 1);
-	}
 	
+	if(lightingEnabled == 1){
+		lightInflux = vec3(0, 0, 0);
+		if(gl_FrontFacing){
+			calculateGlobalLightInflux(normal);
+			calculateLocalLightInflux(normal);
+			glFragColor = vec4(lightInflux, 1);
+		}else{
+			calculateGlobalLightInflux(-normal);
+			calculateLocalLightInflux(-normal);
+			glFragColor = vec4(lightInflux, 1);
+		}
+	}else{
+		glFragColor = diffuse;
+	}
 	
 	if(has_reflectionMap == 1){
 		//do environment reflections

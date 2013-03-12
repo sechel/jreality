@@ -6,6 +6,8 @@ out vec4 glFragColor;
 //needed?
 float shade = .5;
 
+uniform int lightingEnabled;
+
 uniform vec4 polygonShader_diffuseColor;
 vec4 diffuse;
 uniform float polygonShader_diffuseCoefficient;
@@ -165,35 +167,38 @@ void main(void)
 	if(has_face_colors == 1 || has_vertex_colors == 1)
 		diffuse = faceVertexColor;
 	
-	lightInflux = vec3(0, 0, 0);
 	vec3 normal = normalize(camSpaceNormal);
-	
-	if(gl_FrontFacing){
-		calculateGlobalLightInflux(normal);
-		calculateLocalLightInflux(normal);
+	if(lightingEnabled == 1){
+		lightInflux = vec3(0, 0, 0);
+		if(gl_FrontFacing){
+			calculateGlobalLightInflux(normal);
+			calculateLocalLightInflux(normal);
+		}else{
+			calculateGlobalLightInflux(-normal);
+			calculateLocalLightInflux(-normal);
+		}
+		glFragColor = vec4(lightInflux, diffuse.a);
 	}else{
-		calculateGlobalLightInflux(-normal);
-		calculateLocalLightInflux(-normal);
+		glFragColor = diffuse;
 	}
-	glFragColor = vec4(lightInflux, diffuse.a);
 	if(has_vertex_texturecoordinates==1 && has_Tex == 1){
 		if(_combineMode == 0x2100)//GL_MODULATE
-			glFragColor = texColor*vec4(lightInflux, diffuse.a);
+			glFragColor = texColor*vec4(glFragColor.xyz, diffuse.a);
 		if(_combineMode == 0x1E01)//GL_REPLACE
 			glFragColor = texColor;
 		if(_combineMode == 0x8570)//GL_COMBINE
 			glFragColor = texColor;
 		if(_combineMode == 0x2101){//GL_DECAL
 			glFragColor.a = diffuse.a;
-			glFragColor.rgb = (1-texColor.a)*lightInflux + texColor.a*texColor.rgb;
+			glFragColor.rgb = (1-texColor.a)*glFragColor.xyz + texColor.a*texColor.rgb;
 		}
 		if(_combineMode == 0x0BE2){//GL_BLEND
 			glFragColor.a = diffuse.a*texColor.a;
-			glFragColor.rgb = (vec3(1,1,1)-texColor.rgb)*lightInflux + texColor.rgb;
+			glFragColor.rgb = (vec3(1,1,1)-texColor.rgb)*glFragColor.xyz + texColor.rgb;
 		}
 		if(_combineMode == 0x0104){//GL_ADD
 			glFragColor.a = diffuse.a*texColor.a;
-			glFragColor.rgb = lightInflux + texColor.rgb;
+			glFragColor.rgb = glFragColor.xyz + texColor.rgb;
 		}
 	}
 	

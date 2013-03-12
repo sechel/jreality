@@ -8,6 +8,7 @@ uniform sampler2D sys_tex;
 
 out vec4 glFragColor;
 uniform vec4 pointShader_diffuseColor;
+uniform int lightingEnabled;
 
 in float x;
 in float y;
@@ -45,7 +46,11 @@ void main(void)
 		color2 = color;
 	
 	//either this texture lookup method
-	float shade = tex.b;
+	float shade;
+	if(lightingEnabled == 1)
+		shade = tex.b;
+	else
+		shade = .5;
 	if(shade < .5){
 		float red = color2.r*2*shade;
 		float green = color2.g*2*shade;

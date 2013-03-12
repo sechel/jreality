@@ -4,6 +4,7 @@
 
 out vec4 glFragColor;
 
+uniform int lightingEnabled;
 uniform vec4 polygonShader_diffuseColor;
 uniform float polygonShader_diffuseCoefficient;
 
@@ -152,16 +153,20 @@ void calculateLocalLightInflux(vec3 normal){
 void main(void)
 {
 	vec3 normal = normalize(camSpaceNormal);
-	lightInflux = vec3(0, 0, 0);
-	
-	if(gl_FrontFacing){
-		calculateGlobalLightInflux(normal);
-		calculateLocalLightInflux(normal);
-		glFragColor = vec4(lightInflux, polygonShader_diffuseColor.a);
+	if(lightingEnabled == 1){
+		lightInflux = vec3(0, 0, 0);
+		
+		if(gl_FrontFacing){
+			calculateGlobalLightInflux(normal);
+			calculateLocalLightInflux(normal);
+			glFragColor = vec4(lightInflux, polygonShader_diffuseColor.a);
+		}else{
+			calculateGlobalLightInflux(-normal);
+			calculateLocalLightInflux(-normal);
+			glFragColor = vec4(lightInflux, polygonShader_diffuseColor.a);
+		}
 	}else{
-		calculateGlobalLightInflux(-normal);
-		calculateLocalLightInflux(-normal);
-		glFragColor = vec4(lightInflux, polygonShader_diffuseColor.a);
+		glFragColor = polygonShader_diffuseColor;
 	}
 	
 	if(has_reflectionMap == 1){

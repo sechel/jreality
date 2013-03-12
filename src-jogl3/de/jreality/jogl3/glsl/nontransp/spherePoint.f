@@ -15,6 +15,8 @@ uniform vec4 pointShader_polygonShader_specularColor;
 uniform float pointShader_polygonShader_specularCoefficient;
 uniform float pointShader_polygonShader_specularExponent;
 
+uniform int lightingEnabled;
+
 uniform int has_vertex_colors;
 
 in vec4 camSpaceCoord;
@@ -157,17 +159,21 @@ void main(void)
 		diffuse = color;
 	
 	vec3 normal = normalize(camSpaceNormal);
-	lightInflux = vec3(0, 0, 0);
-	if(gl_FrontFacing){
-		calculateGlobalLightInflux(normal);
-		calculateLocalLightInflux(normal);
-		glFragColor = vec4(lightInflux, diffuse.a);
+	if(lightingEnabled == 1){
+		lightInflux = vec3(0, 0, 0);
+		if(gl_FrontFacing){
+			calculateGlobalLightInflux(normal);
+			calculateLocalLightInflux(normal);
+			glFragColor = vec4(lightInflux, diffuse.a);
+		}else{
+			calculateGlobalLightInflux(-normal);
+			calculateLocalLightInflux(-normal);
+			glFragColor = vec4(lightInflux, diffuse.a);
+		}
 	}else{
-		calculateGlobalLightInflux(-normal);
-		calculateLocalLightInflux(-normal);
-		glFragColor = vec4(lightInflux, diffuse.a);
+		glFragColor = diffuse;
 	}
-	
+		
 	if(has_reflectionMap == 1){
 		//do environment reflections
 		vec3 A = -normalize(camSpaceCoord.xyz);
@@ -180,7 +186,7 @@ void main(void)
 		
 		float x = C.x;
     	float y = C.y;
-    	float z = C.z;
+ 	 	float z = C.z;
     	//we are in the front texture
     	if(z>abs(x) && z>abs(y)){
     		float X = x/z;

@@ -37,8 +37,10 @@ void main(void)
 	float pointSize2 = - 4*pointShader_pointRadius/(posInCamSpace.z*screenSizeInSceneOverScreenSize);
 	screenPortion = screenSizeInSceneOverScreenSize*pointSize2;
 	gl_PointSize = pointSize2*vertex_relativeRadii;
-	if(pointShader_attenuatePointSize == 0)
+	if(pointShader_attenuatePointSize == 0){
 		gl_PointSize = vertex_relativeRadii * pointShader_pointSize/2;
+		gl_PointSize = pointShader_pointSize*2;
+	}
 	z = posInCamSpace.z;
 	w = posInCamSpace.w;
 	x = posInCamSpace.x;
