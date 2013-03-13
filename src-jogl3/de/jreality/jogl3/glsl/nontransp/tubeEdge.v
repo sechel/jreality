@@ -59,6 +59,8 @@ void main(void)
 	
 	mat4 trafo;
 	vec4 scaledTubeCoords;
+	//here is a serious problem if v1 or v2 become 0. then newZ becomes 0.
+	//SOLUTION: WORK IN PROJECTIVE SPACE!
 	if(lineShader_radiiWorldCoordinates == 1){
 		vec3 v1 = (modelview*vertex_coordinates).xyz;
 		vec3 v2 = (modelview*_vertex_coordinates).xyz;
