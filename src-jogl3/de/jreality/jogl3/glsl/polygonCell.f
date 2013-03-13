@@ -6,16 +6,16 @@ out vec4 glFragColor;
 //needed?
 float shade = .5;
 
-uniform vec4 diffuseColor;
+uniform vec4 polygonShader_diffuseColor;
 vec4 diffuse;
-uniform float diffuseCoefficient;
+uniform float polygonShader_diffuseCoefficient;
 
-uniform vec4 ambientColor;
-uniform float ambientCoefficient;
+uniform vec4 polygonShader_ambientColor;
+uniform float polygonShader_ambientCoefficient;
 
-uniform vec4 specularColor;
-uniform float specularCoefficient;
-uniform float specularExponent;
+uniform vec4 polygonShader_specularColor;
+uniform float polygonShader_specularCoefficient;
+uniform float polygonShader_specularExponent;
 
 uniform sampler2D image;
 uniform int has_Tex;
@@ -62,8 +62,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		
 		vec4 col = texture(lights, vec2((3*i+0.5)/lightTexSize, 0));
 		float intensity = texture(lights, vec2((3*i+2+0.5)/lightTexSize, 0)).r;
-		vec4 ambient = ambientColor*col*intensity;
-		lightInflux = lightInflux + ambientCoefficient * ambient.xyz;
+		vec4 ambient = polygonShader_ambientColor*col*intensity;
+		lightInflux = lightInflux + polygonShader_ambientCoefficient * ambient.xyz;
 		
 		float dott = dot(normal, normalize(dir.xyz));
 		if(dott > 0){
@@ -71,9 +71,9 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			
 			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
 			
-			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			vec4 specular =polygonShader_specularColor*intensity*pow(spec, polygonShader_specularExponent);
 			
-			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
+			vec4 new = polygonShader_specularCoefficient*specular+polygonShader_diffuseCoefficient*diffuse2;
 			lightInflux = lightInflux + new.xyz;
 		}
 	}
@@ -88,8 +88,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 		float dist = length(RelPos);
 		float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
 		
-		vec4 ambient = ambientColor*col*intensity;
-		lightInflux = lightInflux + atten*ambientCoefficient * ambient.xyz;
+		vec4 ambient = polygonShader_ambientColor*col*intensity;
+		lightInflux = lightInflux + atten*polygonShader_ambientCoefficient * ambient.xyz;
 		
 		float dott = dot(normal, normalize(RelPos.xyz));
 		if(dott > 0){
@@ -97,10 +97,10 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			
 			float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
 			
-			vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+			vec4 specular =polygonShader_specularColor*intensity*pow(spec, polygonShader_specularExponent);
 			
 			
-			vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
+			vec4 new = polygonShader_specularCoefficient*specular+polygonShader_diffuseCoefficient*diffuse2;
 			lightInflux = lightInflux + atten*new.xyz;
 		}
 	}
@@ -116,18 +116,18 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			float dist = length(RelPos);
 			float atten = 1/(att.x+att.y*dist+att.z*dist*dist);
 			float intensity = coneAngles.a;
-			vec4 ambient = ambientColor*col*intensity;
+			vec4 ambient = polygonShader_ambientColor*col*intensity;
 			float factor = pow(cos(angle), coneAngles.z);
-			lightInflux = lightInflux + factor*atten*ambientCoefficient * ambient.xyz;
+			lightInflux = lightInflux + factor*atten*polygonShader_ambientCoefficient * ambient.xyz;
 			
 			//light is on the right side of the face
 			float dott = dot(normal, normalize(RelPos.xyz));
 			if(dott > 0){
 				vec4 diffuse2 = dott*diffuse*col*intensity;
 				float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
-				vec4 specular =specularColor*intensity*pow(spec, specularExponent);
+				vec4 specular =polygonShader_specularColor*intensity*pow(spec, polygonShader_specularExponent);
 			
-				vec4 new = specularCoefficient*specular+diffuseCoefficient*diffuse2;
+				vec4 new = polygonShader_specularCoefficient*specular+polygonShader_diffuseCoefficient*diffuse2;
 				lightInflux = lightInflux + factor*atten*new.xyz;
 			}
 		}
@@ -135,7 +135,7 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 }
 
 void calculateGlobalLightInflux(vec3 normal){
-	lightInflux = lightInflux + ambientColor.xyz*ambientCoefficient;
+	lightInflux = lightInflux + polygonShader_ambientColor.xyz*polygonShader_ambientCoefficient;
 	calculateLightInfluxGeneral(normal, sys_numGlobalDirLights, sys_numGlobalPointLights, sys_numGlobalSpotLights, sys_globalLights);
 }
 void calculateLocalLightInflux(vec3 normal){
@@ -155,7 +155,7 @@ void main(void)
 	if(color2.a==0)
 		discard;
 	
-	diffuse = diffuseColor;
+	diffuse = polygonShader_diffuseColor;
 	if(has_face_colors == 1)
 		diffuse = faceColor;
 	
@@ -163,11 +163,11 @@ void main(void)
 	if(gl_FrontFacing){
 		calculateGlobalLightInflux(camSpaceNormal);
 		calculateLocalLightInflux(camSpaceNormal);
-		glFragColor = color2*vec4(lightInflux, diffuseColor.a);
+		glFragColor = color2*vec4(lightInflux, polygonShader_diffuseColor.a);
 	}else{
 		calculateGlobalLightInflux(-camSpaceNormal);
 		calculateLocalLightInflux(-camSpaceNormal);
-		glFragColor = color2*vec4(lightInflux, diffuseColor.a);
+		glFragColor = color2*vec4(lightInflux, polygonShader_diffuseColor.a);
 	}
 	glFragColor = trunc(glFragColor*3)/3;
 	//DEPTH BUFFER VISUALIZATION

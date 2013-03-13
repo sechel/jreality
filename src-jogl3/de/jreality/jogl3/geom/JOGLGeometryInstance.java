@@ -405,10 +405,12 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		//retrieve shader source if existent
 		String[] source = new String[]{};
 		
-		source = (String[])eap.getAttribute(shaderType + "::glsl330-source", source);
+		source = (String[])eap.getAttribute(shaderType + ".glsl330-source", source);
 		// has attribute key like "polygonShader::glsl330-source"
 		// and an array of two Strings
 		if(source != null && source.length == 2){
+			System.out.println("shader type is " + shaderType);
+			System.out.println("creating custom shader. source is " + source[0]);
 			//TODO problem here! we are not passing back the pointer...
 			shader = new GLShader(source[0], source[1]);
 			shader.init(gl);

@@ -9,6 +9,7 @@ import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.scene.Terrain;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
@@ -110,8 +111,8 @@ public class LightTest {
 		
 		torus.setAppearance(a);
 		
-		
-		torus.setGeometry(Primitives.torus(2, 1, 10, 10));
+		IndexedFaceSet torusFaceSet = Primitives.torus(2, 1, 10, 10);
+		torus.setGeometry(torusFaceSet);
 		light2.addChild(torus);
 		
 		JRViewer vr = new JRViewer();

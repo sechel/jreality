@@ -64,7 +64,8 @@ public class Test {
 //		ps.setVertexAttributes(Attribute.TEXTURE_COORDINATES,StorageModel.DOUBLE_ARRAY.array(2).createReadOnly(texc));
 //		
 		IndexedFaceSet ifs = Primitives.torus(5, 1, 20, 20);
-		
+//		IndexedFaceSet ifs = Primitives.torus(5, 1, 5, 5);
+
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 		ifsf.setVertexAttributes(ifs.getVertexAttributes());
 		ifsf.setFaceAttributes(ifs.getFaceAttributes());
@@ -76,9 +77,9 @@ public class Test {
 		
 		Appearance a = new Appearance();
 		String[] source = new String[2];
-		source[0] = "poly.v";
-		source[1] = "poly.f";
-		//a.setAttribute("polygonShader::glsl330-source", source);
+		source[0] = "polygonCell.v";
+		source[1] = "polygonCell.f";
+		a.setAttribute("polygonShader.glsl330-source", source);
 		//TODO strange behaviour here results from not binding a default value
 		//to certain uniform variables
 		//a.set
