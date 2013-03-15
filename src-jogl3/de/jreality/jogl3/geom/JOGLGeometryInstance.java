@@ -15,6 +15,7 @@ import de.jreality.jogl3.JOGLTexture2D;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.jogl3.helper.SkyboxHelper;
+import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -50,10 +51,13 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			if(hasTexture){
 				//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.
 				Texture2DLoader.load(gl, tex, gl.GL_TEXTURE8);
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 8);
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 1);
+				ShaderVarHash.bindUniform(shader, "image", 8, gl);
+				ShaderVarHash.bindUniform(shader, "has_Tex", 1, gl);
+				//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "image"), 8);
+				//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 1);
 			}else{
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 0);
+				ShaderVarHash.bindUniform(shader, "has_Tex", 0, gl);
+				//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_Tex"), 0);
 			}
 		}
 	}
@@ -108,12 +112,15 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 						  name = "back";
 					  else if(i == 5)
 						  name = "front";
-					gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), 2+i);
-					gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_reflectionMap"), 1);
+					ShaderVarHash.bindUniform(shader, name, 2+i, gl);
+					//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), 2+i);
+					ShaderVarHash.bindUniform(shader, "has_reflectionMap", 1, gl);
+					//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_reflectionMap"), 1);
 					Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE2+i);
 				}
 			}else{
-				gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_reflectionMap"), 0);
+				ShaderVarHash.bindUniform(shader, "has_reflectionMap", 0, gl);
+				//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_reflectionMap"), 0);
 			}
 		}
 	}
@@ -150,7 +157,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
-			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), value);
+			ShaderVarHash.bindUniform(shader, name, value, gl);
+			//gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, name), value);
 		}
 	}
 	public class GlUniformFloat extends GlUniform<Float>{
@@ -160,7 +168,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
 			//System.out.println("binding " + name + "= " + value);
-			gl.glUniform1f(gl.glGetUniformLocation(shader.shaderprogram, name), value);
+			ShaderVarHash.bindUniform(shader,  name, value, gl);
+			//gl.glUniform1f(gl.glGetUniformLocation(shader.shaderprogram, name), value);
 		}
 	}
 	public class GlUniformVec4 extends GlUniform<float[]>{
@@ -169,7 +178,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
-			gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, value, 0);
+			ShaderVarHash.bindUniform(shader, name, value, gl);
+			//gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, value, 0);
 		}
 	}
 	public class GlUniformMat4 extends GlUniform<float[]>{
@@ -178,7 +188,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
-			gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, true, value, 0);
+			ShaderVarHash.bindUniformMatrix(shader, name, value, gl);
+			//gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, true, value, 0);
         }
 	}
 	public class GlUniformVec3 extends GlUniform<float[]>{
@@ -187,7 +198,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
-			gl.glUniform3fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, value, 0);
+			ShaderVarHash.bindUniform(shader, name, value, gl);
+			//gl.glUniform3fv(gl.glGetUniformLocation(shader.shaderprogram, name), 1, value, 0);
 		}
 	}
 //	public class UniformCollection{

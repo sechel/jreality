@@ -50,21 +50,32 @@ public class PolygonShader{
 		shader.useShader(gl);
 		
     	//matrices
-    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
-    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
-    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "_inverseCamRotation"), 1, true, inverseCamMatrix, 0);
+		ShaderVarHash.bindUniformMatrix(shader, "projection", projection, gl);
+		ShaderVarHash.bindUniformMatrix(shader, "modelview", modelview, gl);
+		ShaderVarHash.bindUniformMatrix(shader, "_inverseCamRotation", inverseCamMatrix, gl);
+//		gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "projection"), 1, true, projection, 0);
+//    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
+//    	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "_inverseCamRotation"), 1, true, inverseCamMatrix, 0);
     	
 		//global lights in a texture
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
+    	ShaderVarHash.bindUniform(shader, "sys_globalLights", 0, gl);
+    	ShaderVarHash.bindUniform(shader, "sys_numGlobalDirLights", state.getLightHelper().getNumGlobalDirLights(), gl);
+    	ShaderVarHash.bindUniform(shader, "sys_numGlobalPointLights", state.getLightHelper().getNumGlobalPointLights(), gl);
+    	ShaderVarHash.bindUniform(shader, "sys_numGlobalSpotLights", state.getLightHelper().getNumGlobalSpotLights(), gl);
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_globalLights"), 0);
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalDirLights"), state.getLightHelper().getNumGlobalDirLights());
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalPointLights"), state.getLightHelper().getNumGlobalPointLights());
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numGlobalSpotLights"), state.getLightHelper().getNumGlobalSpotLights());
 		
 		//local lights in a texture
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_localLights"), 1);
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
-		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
+		ShaderVarHash.bindUniform(shader, "sys_localLights", 1, gl);
+		ShaderVarHash.bindUniform(shader, "sys_numLocalDirLights", state.getLightHelper().getNumLocalDirLights(), gl);
+		ShaderVarHash.bindUniform(shader, "sys_numLocalPointLights", state.getLightHelper().getNumLocalPointLights(), gl);
+		ShaderVarHash.bindUniform(shader, "sys_numLocalSpotLights", state.getLightHelper().getNumLocalSpotLights(), gl);
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_localLights"), 1);
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalDirLights"), state.getLightHelper().getNumLocalDirLights());
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalPointLights"), state.getLightHelper().getNumLocalPointLights());
+//		gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "sys_numLocalSpotLights"), state.getLightHelper().getNumLocalSpotLights());
 		
 		
 		//bind shader uniforms
@@ -82,12 +93,14 @@ public class PolygonShader{
     		GLVBO vbo = fse.getVBO(v.getName());
     		if(vbo != null){
     			//System.out.println(v.getName());
-    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
+    			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 1, gl);
+//    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
     			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
             	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
             	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     		}else{
-    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
+    			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 0, gl);
+//    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
     		}
     	}
 
