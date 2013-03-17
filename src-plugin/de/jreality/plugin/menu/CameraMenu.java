@@ -175,10 +175,9 @@ public class CameraMenu extends Plugin {
 		c.getPlugin(ViewMenuBar.class).addMenu(getClass(), 2, createCameraMenu());
 		
 		ViewToolBar vtb = c.getPlugin(ViewToolBar.class);
-		
-		vtb.addTool(getClass(), 5.0, loadAction.createToolboxItem());
-		vtb.addTool(getClass(), 5.1, saveAction.createToolboxItem());
-		vtb.addSeparator(getClass(), 5.2);
+//		vtb.addTool(getClass(), 5.0, loadAction.createToolboxItem());
+//		vtb.addTool(getClass(), 5.1, saveAction.createToolboxItem());
+//		vtb.addSeparator(getClass(), 5.2);
 		vtb.addTool(getClass(), 1.25, zoomToolAction.createToolboxItem());
 		
 		setZoomEnabled(zoomToolAction.isSelected());
