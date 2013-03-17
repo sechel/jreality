@@ -2,3 +2,7 @@
 /.pydevproject
 /JRViewer.0.xml
 /JRViewer.xml
+/build
+/dist
+/release
+/docs
