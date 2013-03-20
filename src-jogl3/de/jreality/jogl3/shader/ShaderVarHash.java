@@ -1,27 +1,35 @@
 package de.jreality.jogl3.shader;
 
-import java.util.HashMap;
+import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.shader.ImageData;
 
+/**
+ * 
+ * @author benjamin
+ * 
+ * This class is for storing uniform variable locations. Every uniform variable in a glsl shader
+ * file has an integer describing its location in memory. This location can be queried with a GL call, which is however
+ * rather expensive. Therefore this class stores for every shader the uniform locations. When binding the value of a
+ * uniform this location is needed.
+ */
 public class ShaderVarHash {
-	private static HashMap<GLShader, HashMap<String, Integer>> variables = new HashMap<GLShader, HashMap<String, Integer>>();
+	private static WeakHashMap<GLShader, WeakHashMap<String, Integer>> variables = new WeakHashMap<GLShader, WeakHashMap<String, Integer>>();
 	
 	public static void bindUniform(GLShader s, String name, int value, GL3 gl){
-		HashMap<String, Integer> shaders;
+		WeakHashMap<String, Integer> shaders;
 		shaders = variables.get(s);
 		
 		if(shaders == null){
-			System.out.println("Int: creating new shader hash map");
-			shaders = new HashMap<String, Integer>();
+			//System.out.println("Int: creating new shader hash map");
+			shaders = new WeakHashMap<String, Integer>();
 			variables.put(s, shaders);
 		}
 		Integer i = shaders.get(name);
 		if(i == null){
-			System.out.println("Int: creating new shader-uniform pair in hash map");
+			//System.out.println("Int: creating new shader-uniform pair in hash map");
 			i = gl.glGetUniformLocation(s.shaderprogram, name);
 			shaders.put(name, i);
 		}
@@ -29,17 +37,17 @@ public class ShaderVarHash {
 	}
 	
 	public static void bindUniform(GLShader s, String name, float value, GL3 gl){
-		HashMap<String, Integer> shaders;
+		WeakHashMap<String, Integer> shaders;
 		shaders = variables.get(s);
 		
 		if(shaders == null){
-			System.out.println("Float: creating new shader hash map");
-			shaders = new HashMap<String, Integer>();
+			//System.out.println("Float: creating new shader hash map");
+			shaders = new WeakHashMap<String, Integer>();
 			variables.put(s, shaders);
 		}
 		Integer i = shaders.get(name);
 		if(i == null){
-			System.out.println("Float: creating new shader-uniform pair in hash map");
+			//System.out.println("Float: creating new shader-uniform pair in hash map");
 			i = gl.glGetUniformLocation(s.shaderprogram, name);
 			shaders.put(name, i);
 		}
@@ -47,17 +55,17 @@ public class ShaderVarHash {
 	}
 	
 	public static void bindUniform(GLShader s, String name, float[] value, GL3 gl){
-		HashMap<String, Integer> shaders;
+		WeakHashMap<String, Integer> shaders;
 		shaders = variables.get(s);
 		
 		if(shaders == null){
-			System.out.println("Float[]: creating new shader hash map");
-			shaders = new HashMap<String, Integer>();
+			//System.out.println("Float[]: creating new shader hash map");
+			shaders = new WeakHashMap<String, Integer>();
 			variables.put(s, shaders);
 		}
 		Integer i = shaders.get(name);
 		if(i == null){
-			System.out.println("Float[]: creating new shader-uniform pair in hash map");
+			//System.out.println("Float[]: creating new shader-uniform pair in hash map");
 			i = gl.glGetUniformLocation(s.shaderprogram, name);
 			shaders.put(name, i);
 		}
@@ -65,17 +73,17 @@ public class ShaderVarHash {
 	}
 	
 	public static void bindUniformMatrix(GLShader s, String name, float[] value, GL3 gl){
-		HashMap<String, Integer> shaders;
+		WeakHashMap<String, Integer> shaders;
 		shaders = variables.get(s);
 		
 		if(shaders == null){
-			System.out.println("Matrix: creating new shader hash map");
-			shaders = new HashMap<String, Integer>();
+			//System.out.println("Matrix: creating new shader hash map");
+			shaders = new WeakHashMap<String, Integer>();
 			variables.put(s, shaders);
 		}
 		Integer i = shaders.get(name);
 		if(i == null){
-			System.out.println("Matrix: creating new shader-uniform pair in hash map");
+			//System.out.println("Matrix: creating new shader-uniform pair in hash map");
 			i = gl.glGetUniformLocation(s.shaderprogram, name);
 			shaders.put(name, i);
 		}
