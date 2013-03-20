@@ -117,7 +117,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 	}
 	
-	void collectNonTransparent(JOGLRenderState parentState, List<RenderableObject> nonTranspObjects, List<RenderableObject> transpObjects) {
+	void collectTranspAndNonTransparent(JOGLRenderState parentState, List<RenderableObject> nonTranspObjects, List<RenderableObject> transpObjects) {
 		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
 		boolean upToDate = false;
 		if(app != null){
@@ -180,7 +180,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
 			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
 			if(sgc.isVisible())
-				childInstance.collectNonTransparent(state, nonTranspObjects, transpObjects);
+				childInstance.collectTranspAndNonTransparent(state, nonTranspObjects, transpObjects);
 		}
 	}
 	

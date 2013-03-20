@@ -109,7 +109,7 @@ public class PolygonShader{
 		
     	//actual draw command
     	gl.glDrawArrays(gl.GL_TRIANGLES, 0, fse.getVBO("vertex_coordinates").getLength()/4);
-    	
+		
     	//disable all vbos
     	for(ShaderVar v : l){
     		GLVBO vbo = fse.getVBO(v.getName());
@@ -119,7 +119,7 @@ public class PolygonShader{
     	}
 		shader.dontUseShader(gl);
 	}
-
+	
 	public static void renderDepth(JOGLFaceSetEntity fse, GLShader shader, JOGLRenderState state, int width, int height) {
 		GL3 gl = state.getGL();
 		
