@@ -3,6 +3,7 @@ package light;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -12,6 +13,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.scene.Terrain;
+import de.jreality.reader.ReaderOBJ;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
@@ -21,6 +23,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -29,8 +32,9 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
+import de.jreality.util.Input;
 
-public class LightTest {
+public class TextureTest {
 
 	/**
 	 * @param args
@@ -110,13 +114,37 @@ public class LightTest {
 		scale = 10;
 		dps.setDiffuseColor(Color.white);
 		
-		Texture2D tex = TextureUtility.createTexture(a, CommonAttributes.POLYGON_SHADER, imageData);
-		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
+//		Texture2D tex = TextureUtility.createTexture(a, CommonAttributes.POLYGON_SHADER, imageData);
+//		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(scale).getMatrix());
 //		tex.setApplyMode(Texture2D.GL_BLEND);
-		torus.setAppearance(a);
+		BufferedImage imag = null;
+		try {
+		    imag = ImageIO.read(new File("/home/benjamin/Downloads/qube2.png"));
+		} catch (IOException e) {
+			
+		}
+		ImageData img = new ImageData(imag);
+		TextureUtility.createTexture(a, CommonAttributes.POLYGON_SHADER, img);
+		//TextureUtility.createT
+		ReaderOBJ reader = new ReaderOBJ();
+		try {
+			torus = reader.read(new Input(new File("/home/benjamin/Downloads/qube2.obj")));
+		} catch (Exception e) {
+			
+		}
+		IndexedFaceSet ifs = (IndexedFaceSet) torus.getChildComponent(0).getGeometry();
+		double[][] target = null;
+		//target = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(target);
+		target = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(target);
+		System.out.println("writing array");
+		for(int i = 0; i < target.length; i++){
+			System.out.print("v ");
+			for(int j = 0; j < target[i].length;j++)
+				System.out.print("" + target[i][j] + " ");
+			System.out.println("");
+		}
 		
-		IndexedFaceSet torusFaceSet = Primitives.torus(2, 1, 10, 10);
-		torus.setGeometry(torusFaceSet);
+		torus.setAppearance(a);
 		light2.addChild(torus);
 		
 		JRViewer vr = new JRViewer();

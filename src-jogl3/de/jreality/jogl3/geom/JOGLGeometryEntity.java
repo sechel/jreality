@@ -13,6 +13,27 @@ public abstract class JOGLGeometryEntity extends SceneGraphNodeEntity implements
 		super(node);
 	}
 	public boolean dataUpToDate = false;
+	
+	//for example holds an array of faces, each face is an array of vertices, and each vertices has an array of components,
+	//e.g. u and v coordinates.
+	protected boolean isDoubleArrayArrayArray(StorageModel sm){
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.inlined(2))
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.inlined(3))
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.inlined(4))
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.array())
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.array(2))
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.array(3))
+			return true;
+		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY.array(4))
+			return true;
+		return false;
+	}
+	
 	protected boolean isDoubleArrayArray(StorageModel sm){
 		if(sm==StorageModel.DOUBLE_ARRAY_ARRAY)
 			return true;
