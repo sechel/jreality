@@ -82,11 +82,11 @@ public class TubesLineShader{
     		}else if(!v.getName().equals("_tube_coords") && !v.getName().equals("tube_coords")){
     			
     			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
-    			System.out.println("_"+ v.getName());
+    			//System.out.println("_"+ v.getName());
     			gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()));
             	//gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()), 1);
 
-    			System.out.println(""+ v.getName());
+    			//System.out.println(""+ v.getName());
     			//gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     			//gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), 1);
             	
