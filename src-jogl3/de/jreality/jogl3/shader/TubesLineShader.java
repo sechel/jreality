@@ -63,7 +63,6 @@ public class TubesLineShader{
     	//bind vbos to corresponding shader variables
     	List<ShaderVar> l = shader.vertexAttributes;
     	GLVBO[] glvbo = lse.getAllPointVBOs();
-    	
     	for(ShaderVar v : l){
     		GLVBO vbo = lse.getLineVBO(v.getName());
     		if(vbo != null){
@@ -80,8 +79,17 @@ public class TubesLineShader{
             	//important here: we advance to the next element only after all of tube_coords have been drawn.
             	gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()), 1);
 //            	
-    		}else{
+    		}else if(!v.getName().equals("_tube_coords") && !v.getName().equals("tube_coords")){
+    			
     			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
+    			System.out.println("_"+ v.getName());
+    			gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()));
+            	//gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()), 1);
+
+    			System.out.println(""+ v.getName());
+    			//gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    			//gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), 1);
+            	
     		}
     	}
     	
@@ -91,16 +99,21 @@ public class TubesLineShader{
     	//gl.glDrawArrays(mode, first, count);
     	gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, tubeVBO.getLength()/4, lse.getLineVBO("vertex_coordinates").getLength()/8);
     	//gl.glDrawElementsInstancedBaseVertex(mode, count, type, indices, primcount, basevertex);
-    	
     	//disable all vbos
     	for(ShaderVar v : l){
     		GLVBO vbo = lse.getLineVBO(v.getName());
     		if(vbo != null){
-    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     			gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), 0);
+
+    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
 //    			
-    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()));
     			gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()), 0);
+
+    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()));
+    		}else if(!v.getName().equals("_tube_coords") && !v.getName().equals("tube_coords")){
+    			//gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "_"+v.getName()));
+    			
     		}
     	}
     	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "tube_coords"));

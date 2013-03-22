@@ -97,11 +97,12 @@ public class PolygonShader{
 //    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
     			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
             	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
-            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+            	
     		}else{
     			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 0, gl);
 //    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
     		}
+    		gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     	}
 
     	//new way to do lights
@@ -113,9 +114,9 @@ public class PolygonShader{
     	//disable all vbos
     	for(ShaderVar v : l){
     		GLVBO vbo = fse.getVBO(v.getName());
-    		if(vbo != null){
+    		//if(vbo != null){
     			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-    		}
+    		//}
     	}
 		shader.dontUseShader(gl);
 	}
@@ -201,10 +202,10 @@ public class PolygonShader{
     			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
     			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
             	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
-            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     		}else{
     			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
     		}
+        	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     	}
 
     	//new way to do lights
@@ -216,9 +217,9 @@ public class PolygonShader{
     	//disable all vbos
     	for(ShaderVar v : l){
     		GLVBO vbo = fse.getVBO(v.getName());
-    		if(vbo != null){
+    		//if(vbo != null){
     			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-    		}
+    		//}
     	}
 		shader.dontUseShader(gl);
 	}

@@ -24,8 +24,11 @@ uniform int has_edge_relativeRadii;
 
 in vec4 vertex_colors;
 in vec4 _vertex_colors;
+uniform int has_vertex_colors;
 in vec4 edge_colors;
 in vec4 _edge_colors;
+uniform int has_edge_colors;
+
 out vec4 edgeColor;
 out vec4 vertexColor;
 
@@ -46,16 +49,23 @@ void main(void)
 		else
 			relRad = vertex_relativeRadii;
 	}
-	if(has_edge_relativeRadii == 1)
+	if(has_edge_relativeRadii == 1){
 		relRad = edge_relativeRadii;
-	if(tube_coords.x > 0.5){
-		vertexColor = _vertex_colors;
-		edgeColor = _edge_colors;
-	}else{
-		vertexColor = vertex_colors;
-		edgeColor = edge_colors;
 	}
-	//edge endpoints in camera space
+	vertexColor = vec4(1, .5, .5, 1);
+	edgeColor = vec4(1, .5, .5, 1);
+	if(tube_coords.x > 0.5){
+		if(has_vertex_colors == 1)
+			vertexColor = _vertex_colors;
+		if(has_edge_colors == 1)
+			edgeColor = _edge_colors;
+	}else{
+		if(has_vertex_colors == 1)
+			vertexColor = vertex_colors;
+		if(has_edge_colors == 1)
+			edgeColor = edge_colors;
+	}
+	//edge endpoints IN camera space
 	
 	mat4 trafo;
 	vec4 scaledTubeCoords;

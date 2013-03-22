@@ -188,8 +188,9 @@ public class GLShader
 //				System.out.println("name = " + name);
 				//this is needed, when instanced rendering lines,
 				//where we want to call the second endpoint "_vertex_coordinates"
-				if(name.charAt(0) != '_')
+				if(name.charAt(0) != '_'){
 					target.add(new ShaderVar(name, type));
+				}
 			}
 		}
 	}
