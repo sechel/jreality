@@ -46,15 +46,15 @@ public class LightHelper {
 		numGlobalDirLights = lc.directionalLights.size();
 		numGlobalPointLights = lc.pointLights.size();
 		numGlobalSpotLights = lc.spotLights.size();
-		
-		loadLightTexture(globalTextureID, 0, lc, gl);
+		if(numGlobalDirLights+numGlobalPointLights+numGlobalSpotLights != 0)
+			loadLightTexture(globalTextureID, 0, lc, gl);
 	}
 	public void loadLocalLightTexture(JOGLLightCollection lc, GL3 gl){
 		numLocalDirLights = lc.directionalLights.size();
 		numLocalPointLights = lc.pointLights.size();
 		numLocalSpotLights = lc.spotLights.size();
-		
-		loadLightTexture(localTextureID, 1, lc, gl);
+		if(numLocalDirLights+numLocalPointLights+numLocalSpotLights != 0)
+			loadLightTexture(localTextureID, 1, lc, gl);
 	}
 
 	private int numGlobalDirLights = 0;
