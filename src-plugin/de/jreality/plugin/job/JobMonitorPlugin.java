@@ -2,6 +2,8 @@ package de.jreality.plugin.job;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -25,6 +27,10 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 		queueTabel = new JTable();
 	private JScrollPane
 		queueScroller = new JScrollPane(queueTabel);
+	private Map<Job, Double>
+		progressMap = new HashMap<Job, Double>();
+	private JobAdapter
+		jobAdapter = new JobAdapter();
 	
 	public JobMonitorPlugin() {
 		shrinkPanel.setTitle("Job Monitor");
@@ -47,9 +53,31 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 			while (true) {
 				synchronizeJobQueue();
 				try {
-					Thread.sleep(500);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {}
 			}
+		}
+		
+	}
+	
+	private class JobAdapter implements JobListener {
+
+		@Override
+		public void jobStarted(Job job) {
+			synchronizeJobQueue();
+		}
+		@Override
+		public void jobProgress(Job job, double progress) {
+			progressMap.put(job, progress);
+			synchronizeJobQueue();
+		}
+		@Override
+		public void jobFinished(Job job) {
+			synchronizeJobQueue();
+		}
+		@Override
+		public void jobCancelled(Job job) {
+			synchronizeJobQueue();
 		}
 		
 	}
@@ -77,13 +105,15 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 	}
 	
 	public void synchronizeJobQueue() {
-		queueTabel.updateUI();
+		queueTabel.revalidate();
+		queueTabel.repaint();
 	}
 	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);
 		Q = c.getPlugin(JobQueuePlugin.class);
+		Q.addJobListener(jobAdapter);
 		synchronzerThread.start();
 		queueTabel.setModel(model);
 	}

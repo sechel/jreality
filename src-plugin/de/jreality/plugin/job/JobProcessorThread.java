@@ -2,32 +2,46 @@ package de.jreality.plugin.job;
 
 import static java.util.Collections.synchronizedList;
 
+import java.awt.EventQueue;
 import java.util.LinkedList;
 import java.util.List;
 
 public class JobProcessorThread extends Thread {
 	
 	private Job
-		job = null;
+		activeJob = null;
 	private List<JobProcessorListener>
 		listeners = synchronizedList(new LinkedList<JobProcessorListener>());
 	
-	public JobProcessorThread(Job job) {
-		super(job.getJobName());
-		this.job = job;
+	public JobProcessorThread() {
+		super("jReality Job Processor");
+	}
+
+	public void processJob(Job job) {
+		synchronized (this) {
+			activeJob = job;
+			notifyAll();
+		}
 	}
 	
 	@Override
-	public void run() {
-		fireProcessStarted(job);
-		try {
-			job.execute();
-		} catch (Exception e) {
-			fireProcessFailed(e, job);
-		} catch (Throwable t) {
-			System.err.println("Job failed with Error " + t);
+	public synchronized void run() {
+		while (true) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			};
+			fireProcessStarted(activeJob);
+			try {
+				activeJob.execute();
+			} catch (Exception e) {
+				fireProcessFailed(e, activeJob);
+			} catch (Throwable t) {
+				System.err.println("Job failed with Error " + t);
+			}
+			fireProcessFinished(activeJob);
 		}
-		fireProcessFinished(job);
 	}
 	
 	public void addJobProcessorListener(JobProcessorListener l) {
@@ -38,26 +52,44 @@ public class JobProcessorThread extends Thread {
 	}
 	
 	
-	protected void fireProcessStarted(Job job) {
+	protected void fireProcessStarted(final Job job) {
 		synchronized (listeners) {
-			for (JobProcessorListener l : listeners) {
-				l.processStarted(job);
+			for (final JobProcessorListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.processStarted(job);						
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}
 
-	protected void fireProcessFinished(Job job) {
+	protected void fireProcessFinished(final Job job) {
 		synchronized (listeners) {
-			for (JobProcessorListener l : listeners) {
-				l.processFinished(job);
+			for (final JobProcessorListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.processFinished(job);
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}
 	
-	protected void fireProcessFailed(Exception e, Job job) {
+	protected void fireProcessFailed(final Exception e, final Job job) {
 		synchronized (listeners) {
-			for (JobProcessorListener l : listeners) {
-				l.processFailed(e, job);
+			for (final JobProcessorListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.processFailed(e, job);
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}

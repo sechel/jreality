@@ -6,5 +6,6 @@ public interface Job {
 	public void execute() throws Exception;
 	public void addJobListener(JobListener l);
 	public void removeJobListener(JobListener l);
+	public void removeAllJobListeners();
 	
 }

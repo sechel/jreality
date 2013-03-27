@@ -17,6 +17,10 @@ public abstract class AbstractJob implements Job {
 	public void removeJobListener(JobListener l) {
 		listeners.remove(l);
 	}
+	@Override
+	public void removeAllJobListeners() {
+		listeners.clear();
+	}
 
 	protected void fireJobStarted(Job job) {
 		synchronized (listeners) {
