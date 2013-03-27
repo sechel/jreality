@@ -61,7 +61,7 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 		shrinkPanel.setLayout(new BorderLayout());
 		shrinkPanel.add(queueScroller, BorderLayout.CENTER);
 		
-		queueScroller.setPreferredSize(new Dimension(200, 150));
+		queueScroller.setPreferredSize(new Dimension(200, 100));
 		queueTabel.getTableHeader().setPreferredSize(new Dimension(0, 0));
 		queueTabel.setFillsViewportHeight(true);
 		queueTabel.setDefaultRenderer(Component.class, cellRenderer);
