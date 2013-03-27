@@ -104,6 +104,10 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 			updateJobTable();
 		}
 		@Override
+		public void jobFailed(Job job, Exception e) {
+			updateJobTable();
+		}
+		@Override
 		public void jobCancelled(Job job) {
 			updateJobTable();
 		}

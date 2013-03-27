@@ -1,5 +1,6 @@
 package de.jreality.plugin.job;
 
+import java.awt.EventQueue;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,26 +23,73 @@ public abstract class AbstractJob implements Job {
 		listeners.clear();
 	}
 
-	protected void fireJobStarted(Job job) {
+	@Override
+	public void execute() throws Exception {
+		fireJobStarted();
+		try {
+			executeJob();
+			fireJobFinished();
+		} catch (Exception e) {
+			fireJobFailed(e);
+		} catch (Throwable t) {
+			fireJobFailed(new Exception("Error in job execution", t));
+		}
+	}
+	
+	protected abstract void executeJob() throws Exception;
+	
+	protected void fireJobStarted() {
 		synchronized (listeners) {
-			for (JobListener l : listeners) {
-				l.jobStarted(this);
+			for (final JobListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.jobStarted(AbstractJob.this);						
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}
 	
-	protected void fireJobProgress(Job job, double progress) {
+	protected void fireJobProgress(final double progress) {
 		synchronized (listeners) {
-			for (JobListener l : listeners) {
-				l.jobProgress(job, progress);
+			for (final JobListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.jobProgress(AbstractJob.this, progress);			
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}
 
-	protected void fireJobFinished(Job job) {
+	protected void fireJobFailed(final Exception e) {
 		synchronized (listeners) {
-			for (JobListener l : listeners) {
-				l.jobFinished(job);
+			for (final JobListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.jobFailed(AbstractJob.this, e);			
+					}
+				};
+				EventQueue.invokeLater(r);
+			}
+		}
+	}
+	
+	protected void fireJobFinished() {
+		synchronized (listeners) {
+			for (final JobListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.jobFinished(AbstractJob.this);			
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}

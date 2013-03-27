@@ -1,5 +1,7 @@
 package de.jreality.plugin.job;
 
+import java.awt.EventQueue;
+
 public abstract class AbstractCancelableJob extends AbstractJob implements CancelableJob {
 
 	protected boolean
@@ -13,10 +15,16 @@ public abstract class AbstractCancelableJob extends AbstractJob implements Cance
 		return cancelRequested;
 	}
 	
-	protected void fireJobCancelled(Job job) {
+	protected void fireJobCancelled() {
 		synchronized (listeners) {
-			for (JobListener l : listeners) {
-				l.jobCancelled(job);
+			for (final JobListener l : listeners) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						l.jobCancelled(AbstractCancelableJob.this);
+					}
+				};
+				EventQueue.invokeLater(r);
 			}
 		}
 	}

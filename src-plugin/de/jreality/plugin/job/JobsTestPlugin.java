@@ -47,18 +47,16 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		}
 		
 		@Override
-		public void execute() throws Exception {
-			fireJobStarted(this);
+		public void executeJob() throws Exception {
 			for (int i = 0; i < 100; i++) {
 				if (isCancelRequested()) {
-					fireJobCancelled(this);
+					fireJobCancelled();
 					return;
 				}
 				Thread.sleep(50);
 				double progress = (i + 1) / 100.0;
-				fireJobProgress(this, progress);
+				fireJobProgress(progress);
 			}
-			fireJobFinished(this);
 		}
 		
 	}
@@ -76,14 +74,12 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		}
 		
 		@Override
-		public void execute() throws Exception {
-			fireJobStarted(this);
+		public void executeJob() throws Exception {
 			for (int i = 0; i < 100; i++) {
 				Thread.sleep(20);
 				double progress = (i + 1) / 100.0;
-				fireJobProgress(this, progress);
+				fireJobProgress(progress);
 			}
-			fireJobFinished(this);
 		}
 		
 	}
@@ -101,7 +97,7 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		}
 		
 		@Override
-		public void execute() throws Exception {
+		public void executeJob() throws Exception {
 			Thread.sleep(3000);
 		}
 		
