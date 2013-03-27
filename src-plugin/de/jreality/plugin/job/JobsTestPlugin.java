@@ -17,27 +17,33 @@ import de.jtem.jrworkspace.plugin.simplecontroller.widget.SplashScreen;
 public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener {
 
 	private JButton
-		button = new JButton("Queue Test Job"),
-		cancelButton = new JButton("Cancel Last Job");
+		jobButton1 = new JButton("Queue Job"),
+		jobButton2 = new JButton("Queue Cancelable Job"),
+		jobButton3 = new JButton("Queue No Progress Job");
 	private JobQueuePlugin
 		Q = null;
-	private CancelableJob
-		lastJob = null;
 	
 	public JobsTestPlugin() {
 		shrinkPanel.setTitle("Job Test Plugin");
-		shrinkPanel.setLayout(new GridLayout(2, 1));
-		shrinkPanel.add(button);
-		shrinkPanel.add(cancelButton);
-		button.addActionListener(this);
-		cancelButton.addActionListener(this);
+		shrinkPanel.setLayout(new GridLayout(3, 1, 1, 1));
+		shrinkPanel.add(jobButton1);
+		shrinkPanel.add(jobButton2);
+		shrinkPanel.add(jobButton3);
+		jobButton2.addActionListener(this);
+		jobButton1.addActionListener(this);
+		jobButton3.addActionListener(this);
 	}
 	
-	public class TestJob extends AbstractCancellableJob {
+	public static class CancelableTestJob extends AbstractCancelableJob {
+		
+		private static int
+			count = 1;
+		private int
+			jobIndex = count++;
 		
 		@Override
 		public String getJobName() {
-			return "Test Job";
+			return "Cancelable Job " + jobIndex;
 		}
 		
 		@Override
@@ -50,7 +56,6 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 				}
 				Thread.sleep(50);
 				double progress = (i + 1) / 100.0;
-				System.out.println("job progress: " + progress);
 				fireJobProgress(this, progress);
 			}
 			fireJobFinished(this);
@@ -58,15 +63,63 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		
 	}
 	
+	public static class TestJob extends AbstractJob {
+		
+		private static int
+			count = 1;
+		private int
+			jobIndex = count++;
+		
+		@Override
+		public String getJobName() {
+			return "Test Job " + jobIndex;
+		}
+		
+		@Override
+		public void execute() throws Exception {
+			fireJobStarted(this);
+			for (int i = 0; i < 100; i++) {
+				Thread.sleep(20);
+				double progress = (i + 1) / 100.0;
+				fireJobProgress(this, progress);
+			}
+			fireJobFinished(this);
+		}
+		
+	}
+	
+	public static class TestJobWithoutProgress extends AbstractJob {
+		
+		private static int
+			count = 1;
+		private int
+			jobIndex = count++;
+		
+		@Override
+		public String getJobName() {
+			return "No Progress Job " + jobIndex;
+		}
+		
+		@Override
+		public void execute() throws Exception {
+			Thread.sleep(3000);
+		}
+		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (button == e.getSource()) {
-			lastJob = new TestJob();
-			Q.queueJob(lastJob);
+		if (jobButton2 == e.getSource()) {
+			Job job = new CancelableTestJob();
+			Q.queueJob(job);
 		}
-		if (cancelButton == e.getSource()) {
-			if (lastJob == null) return;
-			lastJob.requestCancel();
+		if (jobButton1 == e.getSource()) {
+			Job job = new TestJob();
+			Q.queueJob(job);
+		}
+		if (jobButton3 == e.getSource()) {
+			Job job = new TestJobWithoutProgress();
+			Q.queueJob(job);
 		}
 	}
 	

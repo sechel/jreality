@@ -18,6 +18,9 @@ public class JobProcessorThread extends Thread {
 	}
 
 	public void processJob(Job job) {
+		if (Thread.currentThread() == this) {
+			throw new RuntimeException("Cannot invoke processJob() from the job processor thread");
+		}
 		synchronized (this) {
 			activeJob = job;
 			notifyAll();

@@ -1,6 +1,6 @@
 package de.jreality.plugin.job;
 
-public abstract class AbstractCancellableJob extends AbstractJob implements CancelableJob {
+public abstract class AbstractCancelableJob extends AbstractJob implements CancelableJob {
 
 	protected boolean
 		cancelRequested = false;

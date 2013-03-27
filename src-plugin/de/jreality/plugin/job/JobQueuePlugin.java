@@ -3,12 +3,15 @@ package de.jreality.plugin.job;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 
 public class JobQueuePlugin extends Plugin implements JobProcessorListener {
 
+	private Logger
+		log = Logger.getLogger(JobQueuePlugin.class.getName());
 	protected List<Job>
 		Q = Collections.synchronizedList(new LinkedList<Job>());
 	private JobProcessorThread
@@ -23,6 +26,18 @@ public class JobQueuePlugin extends Plugin implements JobProcessorListener {
 			Q.add(job);			
 		}
 		processQueue();
+	}
+	public void cancelJob(Job job) {
+		if (job == runningJob) {
+			if (job instanceof CancelableJob) {
+				CancelableJob cancelableJob = (CancelableJob)job;
+				cancelableJob.requestCancel();
+			} else {
+				log.warning("cannot cancel job " + job.getJobName() + ": not cancelable");
+			}
+		} else {
+			Q.remove(job);
+		}
 	}
 	
 	protected void processQueue() {
