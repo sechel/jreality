@@ -99,7 +99,12 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 		@Override
 		public Object getValueAt(int row, int col) {
 			Job job = Q.Q.get(row);
-			return job;
+			String name = job.getJobName();
+			if (progressMap.containsKey(job)) {
+				double progress = progressMap.get(job);
+				name += ": " + (int)(100 * progress) + "%";
+			}
+			return name;
 		}
 		
 	}
