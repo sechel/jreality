@@ -78,17 +78,17 @@ public class JTreeRenderer extends DefaultTreeCellRenderer
 }
 
 
-  static final ImageIcon trafoIcon = createImageIcon("icons/TrafoIcon.jpg");
-  static final ImageIcon camIcon = createImageIcon("icons/CamIcon.jpg");
-  static final ImageIcon geomIcon = createImageIcon("icons/GeometryIcon.jpg");
-  static final ImageIcon sgcIcon = createImageIcon("icons/SceneGraphComponentIcon.jpg");
-  static final ImageIcon sgcOwnedIcon = createImageIcon("icons/SceneGraphComponentOwnedIcon.jpg");
-  static final ImageIcon sgcInvisibleIcon = createImageIcon("icons/SceneGraphComponentInvisibleIcon.jpg");
-  static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.jpg");
-  static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.jpg");
-  static final ImageIcon shaderIcon = createImageIcon("icons/ShaderIcon.jpg");
-  static final ImageIcon toolIcon = createImageIcon("icons/ToolIcon.jpg");
-  static final ImageIcon audioIcon = createImageIcon("icons/AudioSourceIcon.jpg");
+  static final ImageIcon trafoIcon = createImageIcon("icons/TrafoIcon.png");
+  static final ImageIcon camIcon = createImageIcon("icons/CamIcon.png");
+  static final ImageIcon geomIcon = createImageIcon("icons/GeometryIcon.png");
+  static final ImageIcon sgcIcon = createImageIcon("icons/SceneGraphComponentIcon.png");
+  static final ImageIcon sgcOwnedIcon = createImageIcon("icons/SceneGraphComponentOwnedIcon.png");
+  static final ImageIcon sgcInvisibleIcon = createImageIcon("icons/SceneGraphComponentInvisibleIcon.png");
+  static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.png");
+  static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.png");
+  static final ImageIcon shaderIcon = createImageIcon("icons/ShaderIcon.png");
+  static final ImageIcon toolIcon = createImageIcon("icons/ToolIcon.png");
+  static final ImageIcon audioIcon = createImageIcon("icons/AudioSourceIcon.png");
 
   final SceneGraphVisitor iconSelector = new SceneGraphVisitor() {
     public void visit(Appearance a) {

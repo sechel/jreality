@@ -74,12 +74,12 @@ public class JListRenderer extends DefaultListCellRenderer
 }
 
 
-  static final ImageIcon trafoIcon = createImageIcon("icons/TrafoIcon.jpg");
-  static final ImageIcon camIcon = createImageIcon("icons/CamIcon.jpg");
-  static final ImageIcon geomIcon = createImageIcon("icons/GeometryIcon.jpg");
-  static final ImageIcon sgcIcon = createImageIcon("icons/SceneGraphComponentIcon.jpg");
-  static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.jpg");
-  static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.jpg");
+  static final ImageIcon trafoIcon = createImageIcon("icons/TrafoIcon.png");
+  static final ImageIcon camIcon = createImageIcon("icons/CamIcon.png");
+  static final ImageIcon geomIcon = createImageIcon("icons/GeometryIcon.png");
+  static final ImageIcon sgcIcon = createImageIcon("icons/SceneGraphComponentIcon.png");
+  static final ImageIcon appIcon = createImageIcon("icons/AppearanceIcon.png");
+  static final ImageIcon lightIcon = createImageIcon("icons/LightIcon.png");
 
   final SceneGraphVisitor iconSelector = new SceneGraphVisitor() {
     public void visit(Appearance a) {
