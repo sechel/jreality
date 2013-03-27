@@ -1,33 +1,49 @@
 package de.jreality.plugin.job;
 
+import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.List;
 
 import de.jtem.jrworkspace.plugin.Plugin;
 
 public class JobQueuePlugin extends Plugin implements JobProcessorListener {
 
-	protected Queue<Job>
-		Q = new LinkedList<Job>();
+	protected List<Job>
+		Q = Collections.synchronizedList(new LinkedList<Job>());
 	protected Job
 		runningJob = null;
-	
+
 	public void queueJob(Job job) {
 		synchronized (Q) {
-			Q.offer(job);			
+			Q.add(job);			
 		}
-		processJobs();
+		processQueue();
+	}
+	
+	protected void processQueue() {
+		synchronized (Q) {
+			if (Q.isEmpty() || runningJob != null) {
+				return;
+			}
+			Job job = Q.get(0);
+			processJob(job);
+		}
+	}
+	
+	protected void processJob(Job job) {
+		JobProcessorThread processor = new JobProcessorThread(job);
+		processor.addJobProcessorListener(this);
+		processor.start();
+		runningJob = job;
 	}
 
-	protected void processJobs() {
+	protected void finalizeJob(Job job) {
+		assert runningJob == job;
 		synchronized (Q) {
-			if (Q.isEmpty() || runningJob != null) return;
-			Job job = Q.poll();
-			JobProcessorThread processor = new JobProcessorThread(job);
-			processor.addJobProcessorListener(this);
-			processor.start();
-			runningJob = job;
+			Q.remove(runningJob);
+			runningJob = null;
 		}
+		processQueue();
 	}
 	
 	@Override
@@ -35,13 +51,11 @@ public class JobQueuePlugin extends Plugin implements JobProcessorListener {
 	}
 	@Override
 	public void processFinished(Job job) {
-		runningJob = null;
-		processJobs();
+		finalizeJob(job);
 	}
 	@Override
 	public void processFailed(Exception e, Job job) {
-		runningJob = null;
-		processJobs();
+		finalizeJob(job);
 	}
 	
 }

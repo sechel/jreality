@@ -1,18 +1,106 @@
 package de.jreality.plugin.job;
 
+import java.awt.Dimension;
+import java.awt.GridLayout;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.AbstractTableModel;
+
 import de.jreality.plugin.basic.View;
+import de.jtem.jrworkspace.plugin.Controller;
+import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 public class JobMonitorPlugin extends ShrinkPanelPlugin {
 
+	private JobQueuePlugin
+		Q = null;
+	private JobSynchronzerThread
+		synchronzerThread = new JobSynchronzerThread();
+	private QueueTableModel
+		model = new QueueTableModel();
+	private JTable
+		queueTabel = new JTable();
+	private JScrollPane
+		queueScroller = new JScrollPane(queueTabel);
+	
 	public JobMonitorPlugin() {
+		shrinkPanel.setTitle("Job Monitor");
+		shrinkPanel.setLayout(new GridLayout());
+		shrinkPanel.add(queueScroller);
+		
+		queueScroller.setPreferredSize(new Dimension(200, 150));
+		queueTabel.getTableHeader().setPreferredSize(new Dimension(0, 0));
+		queueTabel.setFillsViewportHeight(true);
+	}
+	
+	private class JobSynchronzerThread extends Thread {
+		
+		public JobSynchronzerThread() {
+			super("jReality Job Monitor");
+		}
+		
+		@Override
+		public void run() {
+			while (true) {
+				synchronizeJobQueue();
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e) {}
+			}
+		}
 		
 	}
+	
+	private class QueueTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int getColumnCount() {
+			return 1;
+		}
+
+		@Override
+		public int getRowCount() {
+			return Q.Q.size();
+		}
+
+		@Override
+		public Object getValueAt(int row, int col) {
+			Job job = Q.Q.get(row);
+			return job;
+		}
+		
+	}
+	
+	public void synchronizeJobQueue() {
+		queueTabel.updateUI();
+	}
+	
+	@Override
+	public void install(Controller c) throws Exception {
+		super.install(c);
+		Q = c.getPlugin(JobQueuePlugin.class);
+		synchronzerThread.start();
+		queueTabel.setModel(model);
+	}
+	
 	
 	@Override
 	public Class<? extends SideContainerPerspective> getPerspectivePluginClass() {
 		return View.class;
+	}
+	
+	@Override
+	public PluginInfo getPluginInfo() {
+		PluginInfo info = super.getPluginInfo();
+		info.name = "Job Monitor Plugin";
+		info.vendorName = "Stefan Sechelmann";
+		info.email = "sechel@math.tu-berlin.de";
+		return info;
 	}
 
 }

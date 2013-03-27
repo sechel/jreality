@@ -3,7 +3,6 @@ package de.jreality.plugin.job;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 
 import javax.swing.JButton;
 
@@ -13,20 +12,25 @@ import de.jreality.ui.JRealitySplashScreen;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
-import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController.PropertiesMode;
 import de.jtem.jrworkspace.plugin.simplecontroller.widget.SplashScreen;
 
 public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener {
 
 	private JButton
-		button = new JButton("Queue Test Job");
+		button = new JButton("Queue Test Job"),
+		cancelButton = new JButton("Cancel Last Job");
 	private JobQueuePlugin
 		Q = null;
+	private CancelableJob
+		lastJob = null;
 	
 	public JobsTestPlugin() {
-		shrinkPanel.setLayout(new GridLayout());
+		shrinkPanel.setTitle("Job Test Plugin");
+		shrinkPanel.setLayout(new GridLayout(2, 1));
 		shrinkPanel.add(button);
+		shrinkPanel.add(cancelButton);
 		button.addActionListener(this);
+		cancelButton.addActionListener(this);
 	}
 	
 	public class TestJob extends AbstractCancellableJob {
@@ -56,8 +60,14 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		TestJob job = new TestJob();
-		Q.queueJob(job);
+		if (button == e.getSource()) {
+			lastJob = new TestJob();
+			Q.queueJob(lastJob);
+		}
+		if (cancelButton == e.getSource()) {
+			if (lastJob == null) return;
+			lastJob.requestCancel();
+		}
 	}
 	
 	@Override
@@ -75,8 +85,8 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		SplashScreen splash = new JRealitySplashScreen();
 		splash.setVisible(true);
 		JRViewer v = new JRViewer();
-		v.getController().setPropertiesMode(PropertiesMode.StaticPropertiesFile);
-		v.getController().setStaticPropertiesFile(new File("JobMonitorTest.xml"));
+		v.setShowPanelSlots(true, false, false, false);
+		v.getController().setPropertyEngineEnabled(false);
 		v.addBasicUI();
 		v.addContentUI();
 		v.registerPlugin(JobMonitorPlugin.class);
