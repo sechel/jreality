@@ -309,6 +309,7 @@ public class JobMonitorPlugin extends ShrinkPanelPlugin {
 	
 	public void updateJobTable() {
 		queueTabel.repaint();
+		queueScroller.revalidate();
 	}
 	
 	@Override
