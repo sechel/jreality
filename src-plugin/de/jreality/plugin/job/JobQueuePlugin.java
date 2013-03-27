@@ -28,15 +28,14 @@ public class JobQueuePlugin extends Plugin implements JobProcessorListener {
 		processQueue();
 	}
 	public void cancelJob(Job job) {
-		if (job == runningJob) {
-			if (job instanceof CancelableJob) {
-				CancelableJob cancelableJob = (CancelableJob)job;
-				cancelableJob.requestCancel();
-			} else {
-				log.warning("cannot cancel job " + job.getJobName() + ": not cancelable");
-			}
-		} else {
+		if (job instanceof CancelableJob) {
+			CancelableJob cancelableJob = (CancelableJob)job;
+			cancelableJob.requestCancel();
+		}
+		if (job != runningJob) {
 			Q.remove(job);
+		} else {
+			log.warning("cannot cancel job " + job.getJobName() + ": not cancelable");
 		}
 	}
 	
