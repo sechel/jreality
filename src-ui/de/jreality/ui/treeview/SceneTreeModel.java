@@ -242,74 +242,74 @@ public class SceneTreeModel extends AbstractTreeModel {
     
     public int addChild(final SceneTreeNode child) {
       final int[] ret = new int[1];
-      Runnable runner = new Runnable(){
-        public void run() {
+//      Runnable runner = new Runnable(){
+//        public void run() {
           ret[0] = SceneTreeNodeWithToolListener.super.addChild(child);
           fireNodesAdded(SceneTreeNodeWithToolListener.this, new Object[]{child});
-        }
-      };
-      if (EventQueue.isDispatchThread()) runner.run();
-      else try {
-    	  EventQueue.invokeAndWait(runner);
-     //EventQueue.invokeLater(runner);
-      } catch (Exception e) {
-        throw new Error(e);
-      }
+//        }
+//      };
+//      if (EventQueue.isDispatchThread()) runner.run();
+//      else try {
+//    	  EventQueue.invokeAndWait(runner);
+//     //EventQueue.invokeLater(runner);
+//      } catch (Exception e) {
+//        throw new Error(e);
+//      }
       return ret[0];
     }
     
     protected int removeChild(final SceneTreeNode prevChild) {
       final int[] ret = new int[1];
-      Runnable runner = new Runnable(){
-        public void run() {
+//      Runnable runner = new Runnable(){
+//        public void run() {
           ret[0] = SceneTreeNodeWithToolListener.super.removeChild(prevChild);
           fireNodesRemoved(SceneTreeNodeWithToolListener.this, new int[]{ret[0]}, new Object[]{prevChild});
-        }
-      };
-      if (EventQueue.isDispatchThread()) runner.run();
-      else try {
-			EventQueue.invokeAndWait(runner);
-		} catch (InterruptedException e) {
-			throw new Error(e);
-		} catch (InvocationTargetException e) {
-			throw new Error(e);
-		}
+//        }
+//      };
+//      if (EventQueue.isDispatchThread()) runner.run();
+//      else try {
+//			EventQueue.invokeAndWait(runner);
+//		} catch (InterruptedException e) {
+//			throw new Error(e);
+//		} catch (InvocationTargetException e) {
+//			throw new Error(e);
+//		}
       return ret[0];
     }
     
     public void toolAdded(final ToolEvent ev) {
-      Runnable runner = new Runnable(){
-        public void run() {
+//      Runnable runner = new Runnable(){
+//        public void run() {
           int idx = getChildren().size()+tools.size();
           tools.add(ev.getTool());
           fireNodesAdded(SceneTreeNodeWithToolListener.this, new int[]{idx}, new Object[]{new TreeTool(SceneTreeNodeWithToolListener.this,ev.getTool())});
-        }
-      };
-      if (EventQueue.isDispatchThread()) runner.run();
-      else try {
-        EventQueue.invokeAndWait(runner);
-//      EventQueue.invokeLater(runner);
-      } catch (Exception e) {
-        throw new Error(";-(");
-      }
+//        }
+//      };
+//      if (EventQueue.isDispatchThread()) runner.run();
+//      else try {
+//        EventQueue.invokeAndWait(runner);
+////      EventQueue.invokeLater(runner);
+//      } catch (Exception e) {
+//        throw new Error(";-(");
+//      }
     }
     
     public void toolRemoved(final ToolEvent ev) {
-      Runnable runner = new Runnable(){
-        public void run() {
+//      Runnable runner = new Runnable(){
+//        public void run() {
           int idx = getChildren().size();
           int tind = tools.indexOf(ev.getTool());
           tools.remove(tind);
           fireNodesRemoved(SceneTreeNodeWithToolListener.this, new int[]{idx+tind}, new Object[]{new TreeTool(SceneTreeNodeWithToolListener.this,ev.getTool())});
-        }
-      };
-      if (EventQueue.isDispatchThread()) runner.run();
-      else try {
-        EventQueue.invokeAndWait(runner);
-//      EventQueue.invokeLater(runner);
-      } catch (Exception e) {
-        throw new Error(";-(");
-      }
+//        }
+//      };
+//      if (EventQueue.isDispatchThread()) runner.run();
+//      else try {
+//        EventQueue.invokeAndWait(runner);
+////      EventQueue.invokeLater(runner);
+//      } catch (Exception e) {
+//        throw new Error(";-(");
+//      }
     }
     
     protected void dispose(ArrayList<SceneGraphNodeEntity> disposedEntities) {
@@ -336,18 +336,18 @@ public class SceneTreeModel extends AbstractTreeModel {
 		}
 
 		public void visibilityChanged(SceneGraphComponentEvent ev) {
-      Runnable runner = new Runnable(){
-        public void run() {
+//      Runnable runner = new Runnable(){
+//        public void run() {
           fireNodesChanged(SceneTreeNodeWithToolListener.this.getParent(), new Object[]{SceneTreeNodeWithToolListener.this});
-        }
-      };
-      if (EventQueue.isDispatchThread()) runner.run();
-      else try {
-        EventQueue.invokeAndWait(runner);
-//      EventQueue.invokeLater(runner);
-      } catch (Exception e) {
-        throw new Error(";-(");
-      }
+//        }
+//      };
+//      if (EventQueue.isDispatchThread()) runner.run();
+//      else try {
+//        EventQueue.invokeAndWait(runner);
+////      EventQueue.invokeLater(runner);
+//      } catch (Exception e) {
+//        throw new Error(";-(");
+//      }
 		}
     
   }
