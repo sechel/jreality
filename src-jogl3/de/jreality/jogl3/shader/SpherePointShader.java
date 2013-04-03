@@ -72,8 +72,7 @@ public class SpherePointShader{
             	//important here: we advance to the next element only after all of tube_coords have been drawn.
             	gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), 1);
             	
-    		}else if(!v.getName().equals("sphere_coords")){
-    			gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    		}else{
     			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
     		}
     	}
@@ -91,9 +90,6 @@ public class SpherePointShader{
     		if(vbo != null){
     			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
     			gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), 0);
-    		}else if(!v.getName().equals("sphere_coords")){
-    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
-    			
     		}
     	}
     	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, "sphere_coords"));
