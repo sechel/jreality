@@ -77,8 +77,8 @@ public class Test {
 		
 		Appearance a = new Appearance();
 		String[] source = new String[2];
-		source[0] = "polygonCell.v";
-		source[1] = "polygonCell.f";
+		source[0] = "polygon.v";
+		source[1] = "polygonParam.f";
 		a.setAttribute("polygonShader.glsl330-source", source);
 		//TODO strange behaviour here results from not binding a default value
 		//to certain uniform variables
