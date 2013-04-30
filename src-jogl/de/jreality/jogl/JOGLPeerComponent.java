@@ -19,6 +19,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
+import de.jreality.scene.ClippingPlane;
 import de.jreality.scene.Lock;
 import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
@@ -187,7 +188,8 @@ public class JOGLPeerComponent extends JOGLPeerNode implements
 		}
 		if (goBetween.peerGeometry != null
 				&& goBetween.peerGeometry.localClippingPlane) {
-			JOGLRendererHelper.pushClippingPlane(jr, null);
+			ClippingPlane cp = (ClippingPlane) goBetween.peerGeometry.originalGeometry;
+			JOGLRendererHelper.pushClippingPlane(jr, cp.getPlane());
 		} else if (renderGeometry != null && goBetween.peerGeometry != null) {
 			// LoggingSystem.getLogger(this).info("rendering geometry");
 			Scene.executeReader(goBetween.peerGeometry.originalGeometry,

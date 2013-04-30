@@ -143,10 +143,10 @@ public class JOGLRendererHelper {
 						/ ((double) tex.getImage().getHeight());
 				hasTexture = true;
 			}
-			// bgo = topAp.getAttribute(BACKGROUND_TEXTURE2D);
-			// if (bgo != null && bgo instanceof List) {
-			// tex = (Texture2D) ((List)bgo).get(0);
-			// }
+//			 bgo = topAp.getAttribute(CommonAttributes.BACKGROUND_TEXTURE2D);
+//			 if (bgo != null && bgo instanceof List) {
+//			 tex = (Texture2D) ((List)bgo).get(0);
+//			 }
 			double ar = width / ((double) height) / textureAR;
 			double xl = 0, xr = 1, yb = 0, yt = 1;
 			if (ar > 1.0) {
@@ -852,7 +852,7 @@ public class JOGLRendererHelper {
 				double[] mat = lp.getMatrix(null);
 				jr.globalGL.glPushMatrix();
 				jr.globalGL.glMultTransposeMatrixd(mat, 0);
-				pushClippingPlane(jr, clipPlane);
+				pushClippingPlane(jr, ((ClippingPlane) cp).getPlane());
 				jr.globalGL.glPopMatrix();
 			}
 		}

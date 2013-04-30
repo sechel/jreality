@@ -236,7 +236,6 @@ public class JOGLRenderer {
 		if (topAp.isForceResidentTextures())
 			forceResidentTextures();
 
-		lightListDirty = false;
 
 	}
 

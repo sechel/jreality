@@ -328,6 +328,10 @@ public class GoBetween extends JOGLPeerNode implements GeometryListener,
 		} else if (ev.getChildType() == SceneGraphComponentEvent.CHILD_TYPE_APPEARANCE) {
 			if (originalComponent.getAppearance() != null)
 				originalComponent.getAppearance().addAppearanceListener(this);
+		} else if (ev.getChildType() == SceneGraphComponentEvent.CHILD_TYPE_LIGHT) {
+			if (originalComponent.getLight() != null)
+				originalComponent.getLight().addLightListener(this);
+			jr.lightListDirty = true;
 		}
 		peersLock.readLock();
 		for (JOGLPeerComponent peer : peers) {
@@ -346,7 +350,7 @@ public class GoBetween extends JOGLPeerNode implements GeometryListener,
 	}
 
 	public void lightChanged(LightEvent ev) {
-		jr.lightsChanged = true;
+		jr.lightListDirty = true;
 	}
 
 }
