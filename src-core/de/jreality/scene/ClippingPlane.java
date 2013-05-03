@@ -55,7 +55,8 @@ public class ClippingPlane extends Geometry {
 
 	  private static int UNNAMED_ID;
 	boolean local = false; // apply only to this sub-graph?
-
+	double[] plane = {0,0,-1,0};
+	
 	public ClippingPlane(String name) {
 		super(name);
 	}
@@ -82,6 +83,14 @@ public class ClippingPlane extends Geometry {
 
 	private void superAccept(SceneGraphVisitor v) {
 		super.accept(v);
+	}
+
+	public double[] getPlane() {
+		return plane;
+	}
+
+	public void setPlane(double[] plane) {
+		this.plane = plane;
 	}
 
 }
