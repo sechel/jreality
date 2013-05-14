@@ -92,4 +92,7 @@ class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 		return false;
 	}
 
+	public void updateAlwaysOnTopState() {
+	}
+
 }
