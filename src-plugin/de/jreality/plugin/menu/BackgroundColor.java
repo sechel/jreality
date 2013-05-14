@@ -59,7 +59,7 @@ public class BackgroundColor extends Plugin {
 		addChoice("Transparent Black", new Color(0,0,0,0));
 		addChoice("UI Background", Color.black);
 
-		setColor("Default");
+		setColor("UI Background");
 	}
 
 	public String getColor() {

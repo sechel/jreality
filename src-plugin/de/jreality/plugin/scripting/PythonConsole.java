@@ -43,6 +43,7 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
         contentPanel.setMinimumSize(d);
         shrinkPanel.setLayout(new GridLayout());
         shrinkPanel.add(contentPanel);
+        shrinkPanel.setShrinked(true);
         contentPanel.setViewportView(textPane);
         textPane.setText("Python Console, click to boot up....");
         textPane.addFocusListener(this);
