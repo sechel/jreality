@@ -52,6 +52,11 @@ public class BoundingBoxUtility {
 	}
 
 	public static Rectangle3D calculateBoundingBox(PointSet ps)	{
+	       Object bbox = ps.getGeometryAttributes(GeometryUtility.BOUNDING_BOX);
+	        if (bbox != null && bbox instanceof Rectangle3D)    {
+	            System.err.println("found bbox as GA");
+	            return ((Rectangle3D) bbox);
+	        }
 		double[][] verts = ps.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
 		return calculateBoundingBox(verts);
 	}
