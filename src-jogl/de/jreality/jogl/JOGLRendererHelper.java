@@ -453,12 +453,16 @@ public class JOGLRendererHelper {
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
 		DataList texCoords = sg
-				.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+			.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+		DataList texCoords1 = sg
+		.getVertexAttributes(Attribute.TEXTURE_COORDINATES1);
+		DataList texCoords2 = sg
+		.getVertexAttributes(Attribute.TEXTURE_COORDINATES2);
 		DataList lightMapCoords = sg.getVertexAttributes(Attribute
 				.attributeForName("lightmap coordinates"));
 		int textureCount = jr.renderingState.texUnitCount;
-		// if (lightMapCoords != null)
-		// System.err.println("got light map coordinates, # tex units = "+textureCount+" name "+sg.getName());
+		 if (texCoords2 != null)
+		 System.err.println("got texture coordinates 2, # tex units = "+textureCount+" name "+sg.getName());
 
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
 		// "+((vertexNormals != null) ? vertexNormals.size() : 0));
@@ -600,6 +604,10 @@ public class JOGLRendererHelper {
 							if (nn == textureCount - 1
 									&& lightMapCoords != null) {
 								da = lightMapCoords.item(vnn).toDoubleArray();
+							} else if (texCoords1 != null && nn == 1) {
+								da = texCoords1.item(vnn).toDoubleArray();
+							} else if (texCoords2 != null && nn == 2) {
+								da = texCoords2.item(vnn).toDoubleArray();
 							} else if (texCoords != null) {
 								da = texCoords.item(vnn).toDoubleArray();
 							}
@@ -691,6 +699,10 @@ public class JOGLRendererHelper {
 						if (nn == textureCount - 1 && lightMapCoords != null) {
 							// if (nn == 0 && lightMapCoords != null) {
 							da = lightMapCoords.item(k).toDoubleArray();
+						} else if (texCoords1 != null && nn == 1) {
+							da = texCoords1.item(k).toDoubleArray();
+						} else if (texCoords2 != null && nn == 2) {
+							da = texCoords2.item(k).toDoubleArray();
 						} else if (texCoords != null) {
 							da = texCoords.item(k).toDoubleArray();
 						}
@@ -724,12 +736,7 @@ public class JOGLRendererHelper {
 			.texturedQuadrilateral(new double[] { 0, 1, 0, 1, 1, 0, 1, 0, 0, 0,
 					0, 0 });
 
-	private static final Texture2D tex2d = (Texture2D) AttributeEntityUtility
-			.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
-	static {
-		tex2d.setRepeatS(Texture2D.GL_CLAMP);
-		tex2d.setRepeatT(Texture2D.GL_CLAMP);
-	}
+	private static  Texture2D tex2d = null;
 
 	public static void drawPointLabels(JOGLRenderer jr, PointSet ps,
 			DefaultTextShader ts) {
@@ -788,6 +795,11 @@ public class JOGLRendererHelper {
 			int alignment, double scale) {
 		if (labels == null)
 			return;
+		if (tex2d == null) {
+			tex2d = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+			tex2d.setRepeatS(Texture2D.GL_CLAMP);
+			tex2d.setRepeatT(Texture2D.GL_CLAMP);
+		}
 		GL2 gl = jr.globalGL;
 		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
 		gl.glEnable(GL.GL_BLEND);
