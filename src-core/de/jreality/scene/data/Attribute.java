@@ -56,6 +56,8 @@ public class Attribute implements Serializable {
   public static final Attribute COLORS=attributeForName("colors");
   public static final Attribute INDICES=attributeForName("indices");
   public static final Attribute TEXTURE_COORDINATES=attributeForName("texture coordinates");
+  public static final Attribute TEXTURE_COORDINATES1=attributeForName("texture coordinates 1");
+  public static final Attribute TEXTURE_COORDINATES2=attributeForName("texture coordinates 2");
   public static final Attribute POINT_SIZE=attributeForName("pointSize");
   public static final Attribute RELATIVE_RADII=attributeForName("relativeRadii");
   public static final Attribute LABELS=attributeForName("labels");
