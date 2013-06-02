@@ -81,12 +81,12 @@ public class Rectangle3D {
 	
 	public Rectangle3D(double w, double h, double d)	{
 		this();
-		bounds[0][0] = 0;
-		bounds[0][1] = 0;
-		bounds[0][2] = 0;
-		bounds[1][0] = w;
-		bounds[1][1] = h;
-		bounds[1][2] = d;
+		bounds[0][0] = -w/2;
+		bounds[0][1] = -h/2;
+		bounds[0][2] = -d/2;
+		bounds[1][0] = w/2;
+		bounds[1][1] = h/2;
+		bounds[1][2] = d/2;
 	}
 	public Rectangle3D(double[][] vlist)	{
 		//assert dim checks
@@ -332,5 +332,13 @@ public class Rectangle3D {
 			for (int j = 0; j<2; ++j)	bounds[j][i] += (j == 0 ? -d : d);
 		
 	}
+	public boolean contains(Rectangle3D b2) {
+		for (int i = 0; i<3; ++i)	{
+			if (bounds[0][i] > b2.bounds[0][i]) return false;
+			if (bounds[1][i] < b2.bounds[1][i]) return false;
+		}
+		return true;
+	}
+
 }
 
