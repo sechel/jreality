@@ -21,11 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.AbstractButton;
@@ -103,6 +101,8 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		translateVSpinner = new JSpinner(translateVModel),
 		scaleUSpinner = new JSpinner(scaleUModel),
 		scaleVSpinner = new JSpinner(scaleVModel);
+	private TextureJButton 
+		defaultTextureButton = new TextureJButton(DEFAULT_TEXTURE);
 	private JToggleButton
 		scaleLockToggle = new JToggleButton(ImageHook.getIcon("closedChain.gif"));
 	private Map<String, String> 
@@ -152,7 +152,9 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		c.weightx = 1.0;
 		
 		texPanel.setLayout(new FlowLayout(LEFT));
-		texPanel.setPreferredSize(new Dimension(1, 300)); 
+		texPanel.setPreferredSize(new Dimension(1, 200));
+		texScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		texScroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		texScroller.setMinimumSize(new Dimension(100, 150));
 		texScroller.setViewportBorder(null);
 		c.weighty = 1.0;
@@ -305,6 +307,12 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		add(shearPanel, c);
 		
 		makeFileChooser();
+		
+		defaultTextureButton.setPreferredSize(new Dimension(texButtonSize, texButtonSize));
+		defaultTextureButton.setActionCommand(DEFAULT_TEXTURE);
+		defaultTextureButton.setToolTipText("No Texture");
+		defaultTextureButton.addActionListener(texturesListener);
+		texPanel.add(defaultTextureButton);
 		setTexture(DEFAULT_TEXTURE);
 		setTextureUScale(DEFAULT_TEXTURE_SCALE);
 	}
@@ -379,17 +387,27 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	}
 	
 	
+	public String getActiveTexture() {
+		ButtonModel bm = textureGroup.getSelection();
+		if (bm != null) {
+			return textureGroup.getSelection().getActionCommand();
+		} else {
+			return DEFAULT_TEXTURE;
+		}
+	}
+	
+	public void setTexture(String name) {
+		AbstractButton bm = textureNameToButton.get(name);
+		if (bm != null) {
+			bm.doClick();
+		} else {
+			defaultTextureButton.doClick();
+		}
+	}
+	
 	public void addTexture(String name, String resource) {
-		TextureJButton texButton = new TextureJButton(resource);
-		texButton.setPreferredSize(new Dimension(texButtonSize, texButtonSize));
-		texButton.setActionCommand(name);
-		texButton.setToolTipText(resource);
-		textureNameToButton.put(name, texButton);
-		texButton.addActionListener(texturesListener);
-		textureGroup.add(texButton);
-		texPanel.add(texButton);
-		doLayout();
-		updateUI();
+		textureNameToTexture.put(name, resource);
+		updateTextureButtons();
 	}
 	
 	
@@ -412,25 +430,57 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		texButton.addActionListener(texturesListener);
 		textureGroup.add(texButton);
 		texPanel.add(texButton);
-		doLayout();
-		updateUI();
+		revalidate();
 	}
 	
 	
-	public String addTextures(Map<String, String> textures) {
+	public String setTextures(Map<String, String> textures) {
 		textureNameToTexture = textures;
+		updateTextureButtons();
+		return getActiveTexture();
+	}
+	
+	public void clearTextures() {
+		textureNameToTexture.clear();
+		updateTextureButtons();
+	}
+	
+	public void removeActiveTexture() {
+		String texture = getActiveTexture();
+		removeTexture(texture);
+		setTexture(DEFAULT_TEXTURE);
+	}
+	
+	public void removeTexture(String texture) {
+		textureNameToTexture.remove(texture);
+		updateTextureButtons();
+	}
+	
+	public void removeAllTextures() {
+		textureNameToTexture.clear();
+		updateTextureButtons();
+	}
+	
+	protected void updateTextureButtons() {
+		textureNameToButton.clear();
+		textureGroup = new ButtonGroup();
+		textureGroup.add(defaultTextureButton);
+		texPanel.removeAll();
+		texPanel.add(defaultTextureButton);
 		List<String> keyList = new LinkedList<String>(textureNameToTexture.keySet());
 		Collections.sort(keyList);
-		
-		for (String name : keyList) {
-			String tex = textureNameToTexture.get(name);
-			addTexture(name, tex);
+		for (String texName : keyList) {
+			String resource = textureNameToTexture.get(texName);
+			TextureJButton texButton = new TextureJButton(resource);
+			texButton.setPreferredSize(new Dimension(texButtonSize, texButtonSize));
+			texButton.setActionCommand(texName);
+			texButton.setToolTipText(resource);
+			textureNameToButton.put(texName, texButton);
+			texButton.addActionListener(texturesListener);
+			textureGroup.add(texButton);
+			texPanel.add(texButton);
 		}
-		if (keyList.size() > 0) {
-			return keyList.get(0);
-		} else {
-			return "";
-		}
+		revalidate();
 	}
 	
 	
@@ -500,22 +550,6 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		}
 	}
 
-	public String getActiveTexture() {
-		ButtonModel bm = textureGroup.getSelection();
-		if (bm != null) {
-			return textureGroup.getSelection().getActionCommand();
-		} else {
-			return DEFAULT_TEXTURE;
-		}
-	}
-	
-	public void setTexture(String name) {
-		AbstractButton bm = textureNameToButton.get(name);
-		if (bm != null) {
-			bm.doClick();
-		}
-	}
-	
 	public Matrix getTextureMatrix() {
 		MatrixBuilder mb = MatrixBuilder.euclidean();
 		mb.scale(getTextureUScale(), getTextureVScale(), 1.0);
@@ -611,38 +645,9 @@ public class TextureInspector extends JPanel implements ChangeListener {
 				textureNameToTexture.put(texName, file.getAbsolutePath());
 				addTexture(texName, file.getAbsolutePath());
 				textureNameToButton.get(texName).setSelected(true);
-				int maxScroll = texScroller.getVerticalScrollBar().getMaximum();
-				texScroller.getVerticalScrollBar().setValue(maxScroll);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-	
-	public void removeActiveTexture() {
-		String texture = getActiveTexture();
-		removeTexture(texture);
-	}
-	
-	public void removeTexture(String texture) {
-		String texResource = textureNameToTexture.get(texture);
-		if (texResource != null) {
-			textureNameToTexture.remove(texture);
-			textureNameToButton.clear();
-			texPanel.removeAll();
-			String firstTexture = addTextures(textureNameToTexture);
-			AbstractButton bm = textureNameToButton.get(firstTexture);
-			if (bm != null) {
-				bm.doClick();
-			}
-			updateTexture();
-		}
-	}
-	
-	public void removeAllTextures() {
-		Set<String> texNames = new HashSet<String>(getTextures().keySet());
-		for (String tex : texNames) {
-			removeTexture(tex);
 		}
 	}
 	

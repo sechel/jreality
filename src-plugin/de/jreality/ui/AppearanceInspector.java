@@ -402,7 +402,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 	}
 	
 	public void setTextures(HashMap<String, String> textures) {
-		textureInspector.addTextures(textures);
+		textureInspector.setTextures(textures);
 	}
 	
 	

@@ -199,11 +199,9 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 	}
 
 	public ContentAppearance() {
-		textures.put("1 None", null);
-		textures.put("2 Metal Grid", "textures/boysurface.png");
-		textures.put("3 Metal Floor", "textures/metal_basic88.png");
-		textures.put("4 Chain-Link Fence", "textures/chainlinkfence.png");
-		
+		textures.put("1 Metal Grid", "textures/boysurface.png");
+		textures.put("2 Metal Floor", "textures/metal_basic88.png");
+		textures.put("3 Chain-Link Fence", "textures/chainlinkfence.png");
 		appearanceInspector = new AppearanceInspector();
 		restoreDefaults();
 	}
