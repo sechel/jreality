@@ -261,6 +261,6 @@ public class Scene extends Plugin {
 	}
 
 	public void setDefaultZTranslation(double defaultZTranslation) {
-		this.defaultZTranslation = defaultZTranslation;
+		Scene.defaultZTranslation = defaultZTranslation;
 	}
 }

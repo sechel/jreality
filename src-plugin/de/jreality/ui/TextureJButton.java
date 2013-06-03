@@ -27,7 +27,7 @@ public class TextureJButton extends JToggleButton {
 	
 	public TextureJButton(String texResource) {
 		if (texResource == null) {
-			setText("No Image");
+			setText("");
 			return;
 		} else {
 			try {

@@ -449,7 +449,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		setFacesReflecting(c.getProperty(getClass(), "facesReflecting", DEFAULT_FACES_REFLECTING));
 		setFaceReflection(c.getProperty(getClass(), "faceReflection", DEFAULT_FACE_REFLECTION));
 		setReflectSceneContent(c.getProperty(getClass(), "reflectSceneContent", false));
-		textureInspector.setTextures(c.getProperty(getClass(), "textures", textures));
+		textureInspector.addTextures(c.getProperty(getClass(), "textures", textures));
 		textureInspector.setTexture(c.getProperty(getClass(), "texture", DEFAULT_TEXTURE));
 		textureInspector.setTextureUScale(c.getProperty(getClass(), "textureScale",DEFAULT_TEXTURE_SCALE));
 		setVisible(c.getProperty(getClass(), "visible", true));
@@ -460,7 +460,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 	@Override
 	public void storeStates(Controller c) throws Exception {
 		c.storeProperty(getClass(), "textures", textureInspector.getTextures());
-		c.storeProperty(getClass(), "texture", textureInspector.getTexture());
+		c.storeProperty(getClass(), "texture", textureInspector.getActiveTexture());
 		c.storeProperty(getClass(), "textureScale", textureInspector.getTextureUScale());
 		c.storeProperty(getClass(), "visible", isVisible());
 		c.storeProperty(getClass(), "faceColor", getFaceColor());

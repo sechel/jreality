@@ -21,9 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.AbstractButton;
@@ -174,7 +176,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		removeButton.setToolTipText("Remove the current texture");
 		removeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				removeTexture();
+				removeActiveTexture();
 			}
 		});
 		add(removeButton, c);
@@ -415,7 +417,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	}
 	
 	
-	public String setTextures(Map<String, String> textures) {
+	public String addTextures(Map<String, String> textures) {
 		textureNameToTexture = textures;
 		List<String> keyList = new LinkedList<String>(textureNameToTexture.keySet());
 		Collections.sort(keyList);
@@ -498,7 +500,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		}
 	}
 
-	public String getTexture() {
+	public String getActiveTexture() {
 		ButtonModel bm = textureGroup.getSelection();
 		if (bm != null) {
 			return textureGroup.getSelection().getActionCommand();
@@ -533,7 +535,7 @@ public class TextureInspector extends JPanel implements ChangeListener {
 	
 	
 	private void updateTexture() {
-		String texture = getTexture();
+		String texture = getActiveTexture();
 		if (appearance != null) {
 			String texResource = textureNameToTexture.get(texture);
 			if (texResource == null) {
@@ -617,17 +619,30 @@ public class TextureInspector extends JPanel implements ChangeListener {
 		}
 	}
 	
-	private void removeTexture() {
-		String texture = getTexture();
+	public void removeActiveTexture() {
+		String texture = getActiveTexture();
+		removeTexture(texture);
+	}
+	
+	public void removeTexture(String texture) {
 		String texResource = textureNameToTexture.get(texture);
 		if (texResource != null) {
 			textureNameToTexture.remove(texture);
 			textureNameToButton.clear();
 			texPanel.removeAll();
-			String firstTexture = setTextures(textureNameToTexture);
+			String firstTexture = addTextures(textureNameToTexture);
 			AbstractButton bm = textureNameToButton.get(firstTexture);
-			bm.doClick();
+			if (bm != null) {
+				bm.doClick();
+			}
 			updateTexture();
+		}
+	}
+	
+	public void removeAllTextures() {
+		Set<String> texNames = new HashSet<String>(getTextures().keySet());
+		for (String tex : texNames) {
+			removeTexture(tex);
 		}
 	}
 	
