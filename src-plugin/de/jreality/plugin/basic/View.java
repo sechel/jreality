@@ -42,6 +42,7 @@ package de.jreality.plugin.basic;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
@@ -94,6 +95,8 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		title = "jReality";
 	private static Icon
 		mainIcon = ImageHook.getIcon("hausgruen.png");
+	private static List<Image>
+		mainIconList = null;
 	
 	private RunningEnvironment runningEnvironment;
 
@@ -281,6 +284,13 @@ public class View extends SideContainerPerspective implements ChangeListener {
 	}
 	public static void setIcon(Icon mainIcon) {
 		View.mainIcon = mainIcon;
+	}
+	@Override
+	public List<Image> getIconList() {
+		return mainIconList;
+	}
+	public static void setIconList(List<Image> iconList) {
+		View.mainIconList = iconList;
 	}
 
 	public String getTitle() {
