@@ -252,8 +252,8 @@ public class GlslLoader {
 
 			for (int i = 0; i < charsWritten[0]; ++i)
 				foo.append((char) infoLog[i]);
-			// if (foo.length() > 0)
-			// System.out.println("["+name+"] GLSL info log: "+foo.toString());
+			 if (foo.length() > 0)
+			 System.out.println("["+name+"] GLSL info log: "+foo.toString());
 		}
 	}
 
