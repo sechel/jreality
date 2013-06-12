@@ -58,6 +58,7 @@ public class Hit implements PickResult {
   final SceneGraphPath path;
   final double[] pointWorld;
   final double[] pointObject;
+  final double[] barycentric;
   double[] texCoords = null;
   final int pickType;
   final int index;
@@ -65,12 +66,17 @@ public class Hit implements PickResult {
   final double dist;
   final double affineCoordinate;		// pointWorld = lambda(from + affineCoord*to)
 
-  public Hit(SceneGraphPath path, double[] pointWorld, double dist, double affineCoord, int pickType, int index,int triIndex) {
+  public Hit(SceneGraphPath path, double[] pointWorld, double dist, double affineCoord,int pickType, int index,int triIndex) {
+	  this(path, pointWorld, dist, affineCoord, null, pickType, index, triIndex);
+  }
+  
+ public Hit(SceneGraphPath path, double[] pointWorld, double dist, double affineCoord, double[] bary, int pickType, int index,int triIndex) {
     this.path = (SceneGraphPath) path;
     Matrix m = new Matrix();
     path.getInverseMatrix(m.getArray());
     this.pointWorld= pointWorld;
     this.pointObject=m.multiplyVector(pointWorld);
+    this.barycentric = bary == null ? null : bary.clone();
     this.dist = dist;
     this.affineCoordinate = affineCoord;
     this.pickType=pickType;
@@ -360,5 +366,9 @@ public class Hit implements PickResult {
       
     }
   }
+
+public double[] getBarycentric() {
+	return barycentric;
+}
 
 }

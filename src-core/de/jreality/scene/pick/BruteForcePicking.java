@@ -67,7 +67,7 @@ import de.jreality.scene.data.IntArrayArray;
  * TODO: get rid of the maxDist parameter, use the from and to vectors as the
  * endpoints of the segment of valid pick-points
  */
-class BruteForcePicking {
+public class BruteForcePicking {
 
 	public static void intersectPolygons(IndexedFaceSet ifs, int metric,
 			SceneGraphPath path, Matrix m, Matrix mInv, double[] from,
@@ -75,6 +75,7 @@ class BruteForcePicking {
 
 		double[] fromLocal = mInv.multiplyVector(from);
 		double[] toLocal = mInv.multiplyVector(to);
+		double[] bary = new double[3];
 		double[] p1 = new double[4], p2 = new double[4], p3 = new double[4], pobj = new double[4];
 		p1[3] = p2[3] = p3[3] = 1;
 		IntArrayArray faces = getFaces(ifs);
@@ -93,11 +94,11 @@ class BruteForcePicking {
 				p3 = points.getValueAt(face.getValueAt(2 + j))
 						.toDoubleArray(p3);
 
-				if (intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
+				if (intersects(pobj, fromLocal, toLocal, p1, p2, p3, bary)) {
 					double[] pw = m.multiplyVector(pobj);
 					double d = Pn.distanceBetween(from, pw, metric);
 					double affCoord = P3.affineCoordinate(from, to, pw);
-					hits.add(new Hit(path.pushNew(ifs), pw, d, affCoord,
+					hits.add(new Hit(path.pushNew(ifs), pw, d, affCoord, bary,
 							PickResult.PICK_TYPE_FACE, i, j));
 					// System.err.println("polygon hit");
 				}
@@ -108,7 +109,7 @@ class BruteForcePicking {
 	}
 
 	public static boolean intersects(double[] pobj, double[] fromLocal,
-			double[] toLocal, double[] p1, double[] p2, double[] p3) {
+			double[] toLocal, double[] p1, double[] p2, double[] p3, double[] bary) {
 		double[] plane = P3.planeFromPoints(null, p1, p2, p3);
 		pobj = P3.lineIntersectPlane(pobj, fromLocal, toLocal, plane);
 		// if(pobj[3]*pobj[3]<Rn.TOLERANCE) return false; // parallel
@@ -117,7 +118,7 @@ class BruteForcePicking {
 		Pn.dehomogenize(p2, p2);
 		Pn.dehomogenize(p3, p3);
 
-		double[] bary = new double[3];
+		if (bary == null) bary = new double[3];
 		if (!Hit.convertToBary(bary, p1, p2, p3, pobj))
 			return false;
 		if (((bary[0] < 0 || bary[0] > 1) || (bary[1] < 0 || bary[1] > 1) || (bary[2] < 0 || bary[2] > 1))
@@ -208,7 +209,7 @@ class BruteForcePicking {
 					// TODO: pass index j (index in the edge) to the Hit?
 					double affCoord = P3.affineCoordinate(from, to, hitPoint);
 					Hit h = new Hit(path.pushNew(ils), hitPoint, dist,
-							affCoord, PickResult.PICK_TYPE_LINE, i, j);
+							affCoord, null, PickResult.PICK_TYPE_LINE, i, j);
 					localHits.add(h);
 				}
 			}
@@ -304,7 +305,7 @@ class BruteForcePicking {
 				double dist = Rn.euclideanNorm(Rn
 						.subtract(null, hitPoint, from));
 				double affCoord = P3.affineCoordinate(from, to, hitPoint);
-				Hit h = new Hit(path.pushNew(ps), hitPoint, dist, affCoord,
+				Hit h = new Hit(path.pushNew(ps), hitPoint, dist, affCoord, null,
 						PickResult.PICK_TYPE_POINT, j, -1);
 				localHits.add(h);
 			}
@@ -346,7 +347,7 @@ class BruteForcePicking {
 			i.remove();
 			double dist = Rn.euclideanNorm(Rn.subtract(null, hitPoint, from));
 			double affCoord = P3.affineCoordinate(from, to, hitPoint);
-			Hit h = new Hit(path.pushNew(sphere), hitPoint, dist, affCoord,
+			Hit h = new Hit(path.pushNew(sphere), hitPoint, dist, affCoord, null,
 					PickResult.PICK_TYPE_OBJECT, -1, -1);
 			localHits.add(h);
 		}
@@ -430,7 +431,7 @@ class BruteForcePicking {
 			i.remove();
 			double affCoord = P3.affineCoordinate(from, to, hitPoint);
 			double dist = Rn.euclideanNorm(Rn.subtract(tmp, hitPoint, from));
-			Hit h = new Hit(path.pushNew(cylinder), hitPoint, dist, affCoord,
+			Hit h = new Hit(path.pushNew(cylinder), hitPoint, dist, affCoord, null,
 					PickResult.PICK_TYPE_OBJECT, -1, -1);
 			localHits.add(h);
 		}
