@@ -95,7 +95,7 @@
 		<path refid="backend.classpath"/>
 		<fileset dir="lib">
 			<include name="antlr-3.4-complete.jar"/>
-			<include name="xstream-1.4.2.jar.jar"/>
+			<include name="xstream-1.4.2.jar"/>
 			<include name="xpp3-1.1.4c.jar"/>
 			<include name="itextpdf-5.3.2.jar"/>
 		</fileset>
@@ -249,7 +249,7 @@
 			<include name="jjack_min.jar"/>
 			<include name="colorpicker.jar"/>
 			<include name="beans.jar"/>
-			<include name="xstream-1.4.2.jar.jar"/>
+			<include name="xstream-1.4.2.jar"/>
 			<include name="jrworkspace.jar"/>
 			<include name="jython-standalone-2.5.3.jar"/>
 		</fileset>
@@ -720,7 +720,7 @@
 		<copy file="${lib}/jrworkspace.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/NetUtil.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/sunflow.jar" todir="${release_dir}/tmp/lib" />
-		<copy file="${lib}/xstream-1.4.2.jar.jar" todir="${release_dir}/tmp/lib" />
+		<copy file="${lib}/xstream-1.4.2.jar" todir="${release_dir}/tmp/lib" />
 		<copy file="${lib}/xpp3-1.1.4c.jar" todir="${release_dir}/tmp/lib" />
 		<copy todir="${release_dir}/tmp/lib">
 			<fileset dir="3rd-party" />
