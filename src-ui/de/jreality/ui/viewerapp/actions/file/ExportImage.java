@@ -60,7 +60,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.SwingConstants;
 
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileFilter;

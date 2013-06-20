@@ -69,6 +69,7 @@ public class WriterVRML2{
 	private boolean flipTextureUpsideDown = true;
 	private boolean evaluateTextureMatrix =true;
 	private boolean writeTextureCoordIndices=true;
+	private boolean excludeTerrain = true;
 
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
@@ -614,6 +615,7 @@ public class WriterVRML2{
 		}		
 		public void visit(SceneGraphComponent c) {// fin
 			if(!c.isVisible())return;
+			if(excludeTerrain && c.getName().equals("backdrop"))return;
 			Transformation trafo= c.getTransformation();
 			if (trafo!=null){
 				out.println(""+hist+"Transform { # "+c.getName());
@@ -1109,5 +1111,8 @@ public class WriterVRML2{
 	 */
 	public boolean isWriteTextureCoordIndices() {
 		return writeTextureCoordIndices;
+	}
+	public void setExcludeTerrain(boolean excludeTerrain) {
+		excludeTerrain = excludeTerrain;
 	}
 }

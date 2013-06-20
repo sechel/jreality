@@ -67,6 +67,7 @@ public class WriterVRML
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
 	private boolean writeTextureFiles = false;
+	private boolean excludeTerrain = true;
 	
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;
@@ -585,6 +586,7 @@ public class WriterVRML
 		}		
 		public void visit(SceneGraphComponent c) {
 			if(!c.isVisible())return;
+			if(excludeTerrain && c.getName().equals("backdrop"))return;
 			out.println(""+hist+"Separator { # "+c.getName());
 			String oldhist= hist;
 			hist=hist+spacing;
@@ -906,6 +908,7 @@ public class WriterVRML
 	public void setMoveLightsToSceneRoot(boolean moveLightsToSceneRoot) {
 		this.moveLightsToSceneRoot = moveLightsToSceneRoot;
 	}
-
-	
+	public void setExcludeTerrain(boolean excludeTerrain) {
+		this.excludeTerrain = excludeTerrain;
+	}
 }

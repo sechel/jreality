@@ -29,6 +29,7 @@ public class ExportVRML extends AbstractJrAction {
 	private boolean drawTubes = true;
 	private boolean drawSpheres = true;
 	private boolean moveLightsToSceneRoot=true;
+	private boolean excludeTerrain=true;
 	
 	private JComponent options;
 
@@ -65,6 +66,7 @@ public class ExportVRML extends AbstractJrAction {
 				writer.setFlipTextureUpsideDown(flipTexture);
 				writer.setWriteTextureCoordIndices(writeTexIndis);
 				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
+				writer.setExcludeTerrain(excludeTerrain);
 				writer.setUseDefs(useDefs);
 				writer.write(viewer.getSceneRoot());
 			}
@@ -75,6 +77,7 @@ public class ExportVRML extends AbstractJrAction {
 				writer.setDrawSpheres(drawSpheres);
 				writer.setDrawTubes(drawTubes);
 				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
+				writer.setExcludeTerrain(excludeTerrain);
 				writer.setUseDefs(useDefs);
 				writer.write(viewer.getSceneRoot());
 			}
@@ -92,6 +95,7 @@ public class ExportVRML extends AbstractJrAction {
 	JCheckBox evalTexMatrixCB;
 	JCheckBox writeTexIndisCB;
 	JCheckBox flipTextureCB;
+	JCheckBox excludeTerrainCB;
 	
 	private JComponent createAccessory() {
 		Box accessory = Box.createVerticalBox();
@@ -141,6 +145,11 @@ public class ExportVRML extends AbstractJrAction {
 				moveLightsToSceneRoot= lightCB.isSelected();
 			}
 		});
+		excludeTerrainCB = new JCheckBox(new AbstractAction("exclude terrain-geometry from export") {
+			public void actionPerformed(ActionEvent e) {
+				excludeTerrain = excludeTerrainCB.isSelected();
+			}
+		});
 		accessory.add(vrml2CB);
 		accessory.add(textureCB);
 		accessory.add(useDefsCB);
@@ -150,6 +159,7 @@ public class ExportVRML extends AbstractJrAction {
 		accessory.add(tubesCB);
 		accessory.add(spheresCB);
 		accessory.add(lightCB);
+		accessory.add(excludeTerrainCB);
 		
 		vrml2CB.setSelected(writeVrml2);
 		textureCB.setSelected(writeTextureFiles);
@@ -160,6 +170,7 @@ public class ExportVRML extends AbstractJrAction {
 		tubesCB.setSelected(drawTubes);
 		spheresCB.setSelected(drawSpheres);
 		lightCB.setSelected(moveLightsToSceneRoot);
+		excludeTerrainCB.setSelected(excludeTerrain);
 		
 		return accessory;
 	}
