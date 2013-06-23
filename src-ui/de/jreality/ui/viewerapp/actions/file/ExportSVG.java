@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.SVGRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -60,14 +61,26 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 public class ExportSVG extends AbstractJrAction {
 
 	private Viewer viewer;
-
+	private SceneGraphComponent sgc;
+	
 	public ExportSVG(String name, Viewer viewer, Component parentComp) {
 		super(name, parentComp);
 
 		if (viewer == null)
 			throw new IllegalArgumentException("Viewer is null!");
 		this.viewer = viewer;
+		sgc = this.viewer.getSceneRoot();
 
+		setShortDescription("Export SVG file");
+	}
+	
+	public ExportSVG(String name, SceneGraphComponent sgc, Component parentComp) {
+		super(name, parentComp);
+
+		if (sgc == null)
+			throw new IllegalArgumentException("SceneGraphComponent is null!");
+		this.sgc = sgc;
+		
 		setShortDescription("Export SVG file");
 	}
 

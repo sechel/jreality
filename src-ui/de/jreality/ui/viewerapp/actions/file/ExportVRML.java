@@ -10,6 +10,7 @@ import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
@@ -19,6 +20,8 @@ import de.jreality.writer.WriterVRML2;
 public class ExportVRML extends AbstractJrAction {
 
 	private Viewer viewer;
+	
+	private SceneGraphComponent sgc;
 
 	private boolean writeTextureFiles = false;
 	private boolean writeVrml2 = false;
@@ -39,10 +42,21 @@ public class ExportVRML extends AbstractJrAction {
 		if (viewer == null)
 			throw new IllegalArgumentException("Viewer is null!");
 		this.viewer = viewer;
+		this.sgc = this.viewer.getSceneRoot();
 
 		setShortDescription("Export the current scene as VRML file");
 	}
 
+	
+	public ExportVRML(String name, SceneGraphComponent sgc, Component parentComp) {
+		super(name, parentComp);
+
+		if (sgc == null)
+			throw new IllegalArgumentException("SceneGraphComponent is null!");
+		this.sgc = sgc;
+
+		setShortDescription("Export the current scene as VRML file");
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -68,7 +82,7 @@ public class ExportVRML extends AbstractJrAction {
 				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
 				writer.setExcludeTerrain(excludeTerrain);
 				writer.setUseDefs(useDefs);
-				writer.write(viewer.getSceneRoot());
+				writer.write(sgc);
 			}
 			else{
 				WriterVRML writer = new WriterVRML(new FileOutputStream(file));
@@ -79,7 +93,7 @@ public class ExportVRML extends AbstractJrAction {
 				writer.setMoveLightsToSceneRoot(moveLightsToSceneRoot);
 				writer.setExcludeTerrain(excludeTerrain);
 				writer.setUseDefs(useDefs);
-				writer.write(viewer.getSceneRoot());
+				writer.write(sgc);
 			}
 		} catch (Exception exc) {
 			exc.printStackTrace();
