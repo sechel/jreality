@@ -75,7 +75,6 @@ import de.jreality.ui.viewerapp.actions.edit.AddTool;
 import de.jreality.ui.viewerapp.actions.edit.AssignFaceAABBTree;
 import de.jreality.ui.viewerapp.actions.edit.CreateAppearance;
 import de.jreality.ui.viewerapp.actions.edit.CurrentSelection;
-import de.jreality.ui.viewerapp.actions.edit.ExportOBJ;
 import de.jreality.ui.viewerapp.actions.edit.LoadFileToNode;
 import de.jreality.ui.viewerapp.actions.edit.LoadReflectionMap;
 import de.jreality.ui.viewerapp.actions.edit.LoadTexture;
@@ -86,6 +85,9 @@ import de.jreality.ui.viewerapp.actions.edit.SaveSelected;
 import de.jreality.ui.viewerapp.actions.edit.ToggleAppearance;
 import de.jreality.ui.viewerapp.actions.edit.TogglePickable;
 import de.jreality.ui.viewerapp.actions.edit.ToggleVisibility;
+import de.jreality.ui.viewerapp.actions.edit.export.ExportIFStoSTL;
+import de.jreality.ui.viewerapp.actions.edit.export.ExportIFStoVRML;
+import de.jreality.ui.viewerapp.actions.edit.export.ExportIFStoOBJ;
 import de.jreality.ui.viewerapp.actions.file.ExportImage;
 import de.jreality.ui.viewerapp.actions.file.ExportPDF;
 import de.jreality.ui.viewerapp.actions.file.ExportPS;
@@ -155,6 +157,8 @@ public class ViewerAppMenu {
 	public static String ROTATE_REFLECTIONMAP_SIDES = "Rotate reflection map sides";
 	public static String GEOMETRY = "Geometry";
 	public static String EXPORT_OBJ = "Write OBJ";
+	public static String EXPORT_VRML = "Write VRML";
+	public static String EXPORT_STL = "Write STL";
 	public static String TOGGLE_PICKABLE = "Toggle pickable";
 	public static String ADD_TOOL = "Add Tools";
 
@@ -329,7 +333,9 @@ private JMenu createFileMenu() {
 			}
 		});
 		editMenu.add(geometry);
-		geometry.add(new JMenuItem(new ExportOBJ(EXPORT_OBJ, sm, parentComp)));
+		geometry.add(new JMenuItem(new ExportIFStoOBJ(EXPORT_OBJ, sm, parentComp)));
+		geometry.add(new JMenuItem(new ExportIFStoVRML(EXPORT_VRML, sm, parentComp)));
+		geometry.add(new JMenuItem(new ExportIFStoSTL(EXPORT_STL, sm, parentComp)));
 		geometry.add(new JMenuItem(new TogglePickable(TOGGLE_PICKABLE, sm)));
 		editMenu.addSeparator();
 

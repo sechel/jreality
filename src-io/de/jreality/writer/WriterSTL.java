@@ -42,10 +42,7 @@ package de.jreality.writer;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Vector;
 
-import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.scene.Geometry;
@@ -85,11 +82,12 @@ public class WriterSTL {
 		endFile(pw);
 	}
 	
-	static void writeGeometry( Geometry g, PrintWriter out ) {
+	public static void writeGeometry( Geometry g, PrintWriter out ) {
 		
 		if(g == null || !(g instanceof IndexedFaceSet) )
 			return;
 		IndexedFaceSet ifs = (IndexedFaceSet) g;
+		System.out.println(ifs.toString());
 	
 		double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray().toDoubleArrayArray(null);
 		
@@ -123,6 +121,13 @@ public class WriterSTL {
 	
 	public static void write( SceneGraphComponent sgc, OutputStream out ) {
 		write( sgc, new PrintWriter( out ));
+	}
+	
+	public static void write( IndexedFaceSet ifs, PrintWriter out ) {
+		
+		beginFile(out);
+		writeGeometry( ifs, out); //, ifsList );
+		endFile(out);
 	}
 	
 	public static void write( SceneGraphComponent sgc, PrintWriter out ) {

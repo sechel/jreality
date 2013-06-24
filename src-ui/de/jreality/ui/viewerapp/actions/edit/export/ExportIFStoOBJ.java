@@ -38,7 +38,7 @@
  */
 
 
-package de.jreality.ui.viewerapp.actions.edit;
+package de.jreality.ui.viewerapp.actions.edit.export;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -61,9 +61,9 @@ import de.jreality.writer.WriterOBJ;
  * 
  * @author msommer
  */
-public class ExportOBJ extends AbstractSelectionListenerAction {
+public class ExportIFStoOBJ extends AbstractSelectionListenerAction {
 
-	public ExportOBJ(String name, SelectionManager sm, Component parentComp) {
+	public ExportIFStoOBJ(String name, SelectionManager sm, Component parentComp) {
 		super(name, sm, parentComp);
 		setShortDescription("Export selected IndexedFaceSet as OBJ file");
 	}
