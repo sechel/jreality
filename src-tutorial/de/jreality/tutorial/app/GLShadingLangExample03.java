@@ -17,6 +17,8 @@ import de.jreality.shader.ImageData;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
+import de.jreality.tutorial.util.SimpleTextureFactory;
+import de.jreality.tutorial.util.SimpleTextureFactory.TextureType;
 import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
@@ -44,32 +46,32 @@ public class GLShadingLangExample03 {
 		GlslProgram brickProg = null;		
 		world.setGeometry(SphereUtility.sphericalPatch(0, 0, 90, 90, 30, 30, 1)); 
 		MatrixBuilder.euclidean().rotateY(-Math.PI/2).assignTo(world);
-		byte[] imageRGBAdata = new byte[256 * 4]; 
-		for (int x = 0; x <256; x++) 
-		{ 
-		   imageRGBAdata[x*4] = (byte) (x>>1); 
-		   imageRGBAdata[x*4+1] = (byte) x; 
-		   imageRGBAdata[x*4+2] = (byte) x; 
-		   imageRGBAdata[x*4+3] = (byte) x; 
-		} 
-		       
-		ImageData id = new de.jreality.shader.ImageData(imageRGBAdata, 256, 1); 
+		SimpleTextureFactory stf = new SimpleTextureFactory();
+		stf.setType(TextureType.GRADIENT);
+		stf.update();
+		ImageData id =  stf.getImageData();
 		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, 0, id);
 		// rotate this texture by 90 degrees
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(4).rotateZ(Math.PI/2).getMatrix());
-		tex.setApplyMode(Texture2D.GL_DECAL);
+//		tex.setApplyMode(Texture2D.GL_DECAL);
 
+		stf.setColor(0, Color.red);
+		stf.update();
+		id = stf.getImageData();
 		Texture2D gradTexture = (Texture2D) TextureUtility.createTexture(ap, POLYGON_SHADER, 1, id); 
 		gradTexture.setTextureMatrix(MatrixBuilder.euclidean().scale(3).getMatrix());
-		gradTexture.setApplyMode(Texture2D.GL_COMBINE);
+//		gradTexture.setApplyMode(Texture2D.GL_COMBINE);
 		// sampler.frag:
 //		uniform sampler2D  sampler;
 //		uniform sampler2D sampler2;
+//		uniform float BlendFactor;
 //		void main(void)
 //		{
 //		    vec4 currentSample = texture2D(sampler,gl_TexCoord[0].st); 
-//		    vec4 currentSample2 = texture2D(sampler2,gl_TexCoord[1].st); 
-//		    gl_FragColor = currentSample*currentSample2 * gl_Color; 
+//		    vec4 currentSample2 = texture2D(sampler2,gl_TexCoord[1].st);
+//		    float alpha = BlendFactor * currentSample2.a; 
+//		    gl_FragColor.rgb = mix(currentSample.rgb, currentSample2.rgb, alpha); //( currentSample.rgb * (1.0-alpha) + currentSample2.rgb *alpha); 
+//		    gl_FragColor.a = 1.0;
 //		}
 		try {
 			brickProg = new GlslProgram(ap, "polygonShader",   
@@ -80,7 +82,9 @@ public class GLShadingLangExample03 {
 			e.printStackTrace();
 		}
 		brickProg.setUniform("sampler",0);
-		brickProg.setUniform("sampler2",1);		
+		brickProg.setUniform("sampler2",1);	
+		// a value of 1 will ue only the second texture, while 0 gives the first texture
+		brickProg.setUniform("BlendFactor", 0.8);
 		JRViewer.display(world);
 //		CameraUtility.encompass(va.getCurrentViewer());
 	}
