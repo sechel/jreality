@@ -5,13 +5,11 @@
 package de.jreality.tutorial.tool;
 
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.pick.PickResult;
 import de.jreality.scene.tool.AbstractTool;

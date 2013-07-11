@@ -1,10 +1,8 @@
 package de.jreality.tutorial.tool;
 
 import de.jreality.geometry.Primitives;
-import de.jreality.math.FactoredMatrix;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.AxisState;
 import de.jreality.scene.tool.InputSlot;
