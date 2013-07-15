@@ -43,10 +43,15 @@ package de.jreality.softviewer;
 import java.awt.Color;
 
 import de.jreality.math.Rn;
-import de.jreality.scene.*;
-import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.ClippingPlane;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.PointLight;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphVisitor;
+import de.jreality.scene.SpotLight;
+import de.jreality.scene.Transformation;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.CubeMap;
 
 /**
  * This class holds information about the environment---mainly lights and the camera at the moment.

@@ -50,7 +50,6 @@ import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.renderman.shader.ConstantTexture;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;

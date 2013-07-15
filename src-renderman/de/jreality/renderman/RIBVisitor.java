@@ -94,7 +94,6 @@ import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.LineShader;
 import de.jreality.shader.PointShader;
 import de.jreality.shader.PolygonShader;
 import de.jreality.shader.RenderingHintsShader;

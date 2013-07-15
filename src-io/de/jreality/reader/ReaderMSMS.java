@@ -50,15 +50,8 @@ import java.io.StreamTokenizer;
 import java.util.logging.Level;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.geometry.Primitives;
-import de.jreality.geometry.QuadMeshFactory;
-import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;

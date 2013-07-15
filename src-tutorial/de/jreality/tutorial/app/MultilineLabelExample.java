@@ -47,7 +47,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import de.jreality.backends.label.LabelUtility;
-import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
@@ -57,11 +56,8 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-import de.jreality.tutorial.util.SimpleTextureFactory;
 import de.jreality.util.Input;
 
 public class MultilineLabelExample {

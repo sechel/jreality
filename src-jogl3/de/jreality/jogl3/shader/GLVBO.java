@@ -1,6 +1,5 @@
 package de.jreality.jogl3.shader;
 
-import javax.media.opengl.GL3;
 
 public abstract class GLVBO{
 	protected int arraySize = 4;

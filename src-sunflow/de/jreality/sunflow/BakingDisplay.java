@@ -4,9 +4,9 @@ import java.awt.image.BufferedImage;
 
 import org.sunflow.core.Display;
 import org.sunflow.image.Color;
-import org.sunflow.system.UserInterface;
 import org.sunflow.system.UI.Module;
 import org.sunflow.system.UI.PrintLevel;
+import org.sunflow.system.UserInterface;
 import org.sunflow.system.ui.ConsoleInterface;
 
 import de.jreality.math.Matrix;

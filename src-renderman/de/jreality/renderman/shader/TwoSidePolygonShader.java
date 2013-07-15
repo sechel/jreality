@@ -40,24 +40,10 @@
 
 package de.jreality.renderman.shader;
 
-import java.awt.Color;
-import java.io.File;
-import java.util.Map;
-
-import de.jreality.math.Matrix;
-import de.jreality.math.Pn;
-import de.jreality.math.Rn;
-import de.jreality.renderman.RIBHelper;
 import de.jreality.renderman.RIBVisitor;
-import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
 
 /**
  * @author bleicher

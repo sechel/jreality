@@ -45,7 +45,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 
 import de.jreality.io.JrScene;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 
 public interface SceneWriter {

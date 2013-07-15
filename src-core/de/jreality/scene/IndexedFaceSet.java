@@ -40,8 +40,6 @@
 
 package de.jreality.scene;
 
-import java.util.Collections;
-
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;

@@ -41,8 +41,8 @@
 package de.jreality.io.jrs;
 
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
@@ -65,7 +65,6 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.tool.Tool;
 import de.jreality.util.LoggingSystem;
 

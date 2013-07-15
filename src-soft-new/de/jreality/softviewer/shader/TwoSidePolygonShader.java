@@ -42,8 +42,6 @@ package de.jreality.softviewer.shader;
 
 import de.jreality.backends.texture.Texture;
 import de.jreality.math.Rn;
-import de.jreality.scene.Geometry;
-import de.jreality.shader.EffectiveAppearance;
 import de.jreality.softviewer.Environment;
 import de.jreality.softviewer.Polygon;
 

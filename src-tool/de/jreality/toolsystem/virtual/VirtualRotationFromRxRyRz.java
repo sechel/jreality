@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.jreality.math.MatrixBuilder;
-import de.jreality.math.Rn;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.toolsystem.MissingSlotException;

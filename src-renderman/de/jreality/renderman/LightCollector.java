@@ -43,7 +43,6 @@ package de.jreality.renderman;
 import java.util.HashMap;
 
 import de.jreality.math.Matrix;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -51,9 +50,9 @@ import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.EffectiveAppearance;
 

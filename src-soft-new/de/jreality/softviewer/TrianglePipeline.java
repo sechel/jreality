@@ -43,8 +43,16 @@ import java.util.Arrays;
 
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.data.*;
-import de.jreality.softviewer.shader.*;
+import de.jreality.scene.data.DataList;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
+import de.jreality.softviewer.shader.DefaultPolygonShader;
+import de.jreality.softviewer.shader.LineShader;
+import de.jreality.softviewer.shader.PointShader;
+import de.jreality.softviewer.shader.PolygonShader;
+import de.jreality.softviewer.shader.VertexShader;
 
 /**
  * A render pass will consit of the following: 1. calls to processPolygon for

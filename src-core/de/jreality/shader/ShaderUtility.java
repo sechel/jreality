@@ -43,7 +43,6 @@ package de.jreality.shader;
 import java.awt.Color;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.data.AttributeEntityUtility;
 
 /**

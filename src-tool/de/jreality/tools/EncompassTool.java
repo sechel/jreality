@@ -46,7 +46,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.EncompassFactory;
 
 /**

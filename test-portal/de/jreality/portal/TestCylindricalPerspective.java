@@ -1,19 +1,13 @@
 package de.jreality.portal;
 
-import java.awt.geom.Rectangle2D;
-import java.io.IOException;
-
-import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Sphere;
 import de.jreality.shader.GlslProgram;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.CameraUtility;
 import de.jreality.util.Input;
 
 public class TestCylindricalPerspective {

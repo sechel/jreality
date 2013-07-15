@@ -40,8 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.logging.Level;
-
-import de.jreality.util.LoggingSystem;
 /**
  * Handles dealing with targa image files.
  * +--------------------------------------+

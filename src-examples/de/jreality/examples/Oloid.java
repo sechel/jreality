@@ -2,7 +2,6 @@ package de.jreality.examples;
 
 import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;

@@ -1,14 +1,9 @@
 package light;
 
 import de.jreality.geometry.PointSetFactory;
-import de.jreality.geometry.Primitives;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.SceneGraphNode;
-import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 
 public class ScalingTest {

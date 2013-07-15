@@ -45,9 +45,13 @@ import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.SphereUtility;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.data.*;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CubeMap;
-import de.jreality.softviewer.shader.PolygonShader;
 import de.jreality.softviewer.shader.SkyboxPolygonShader;
 
 public class PrimitiveCache {

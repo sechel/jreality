@@ -43,7 +43,6 @@ package de.jreality.ui.viewerapp.actions.view;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;

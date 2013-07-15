@@ -21,7 +21,6 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.Light;
-import de.jreality.scene.Scene;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
@@ -32,7 +31,6 @@ import de.jreality.shader.TextureUtility;
 import de.jreality.tools.RotateTool;
 import de.jreality.tutorial.util.SimpleTextureFactory;
 import de.jreality.ui.viewerapp.ViewerSwitch;
-import de.jreality.util.RenderTrigger;
 import de.jreality.util.SceneGraphUtility;
 
 /**

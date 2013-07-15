@@ -42,8 +42,8 @@ package de.jreality.scene;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import de.jreality.scene.data.AttributeEntity;
 import de.jreality.scene.event.AppearanceEvent;

@@ -46,13 +46,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Map;
 
 import de.jreality.renderman.shader.RendermanShader;
-import de.jreality.shader.CubeMap;
-import de.jreality.shader.ImageData;
-import de.jreality.shader.Texture2D;
 
 /**
  * The methods in this class typically stand in 1:1 relationship to possible RIB commands.

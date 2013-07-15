@@ -1,6 +1,5 @@
 package de.jreality.tutorial.projects.darboux;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,10 +7,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.PointSetFactory;
-import de.jreality.shader.DefaultPointShader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
+import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.tools.DragEventTool;
 import de.jreality.tools.PointDragEvent;

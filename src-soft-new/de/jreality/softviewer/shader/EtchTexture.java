@@ -48,8 +48,6 @@ import javax.imageio.ImageIO;
 import de.jreality.backends.texture.SimpleTexture;
 import de.jreality.backends.texture.Texture;
 import de.jreality.shader.ImageData;
-import de.jreality.shader.Texture2D;
-import de.jreality.shader.TextureUtility;
 
 /**
  * 

@@ -40,10 +40,6 @@
 
 package de.jreality.softviewer.shader;
 
-import de.jreality.scene.Geometry;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
 
 /**
  * 

@@ -5,8 +5,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import de.jreality.math.FactoredMatrix;
-import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
@@ -19,7 +17,6 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
-import de.jreality.scene.data.DataListSet;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.EffectiveAppearance;
 import de.jreality.shader.ImageData;

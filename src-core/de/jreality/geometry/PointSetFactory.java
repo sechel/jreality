@@ -46,9 +46,6 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DataListSet;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.StorageModel;
 
 /**
  * 

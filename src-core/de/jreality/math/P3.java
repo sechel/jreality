@@ -44,7 +44,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import de.jreality.util.LoggingSystem;
 
 /**

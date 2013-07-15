@@ -44,6 +44,7 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import de.jreality.geometry.GeometryMergeFactory;
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.IndexedLineSetFactory;

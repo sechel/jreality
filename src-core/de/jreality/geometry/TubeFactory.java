@@ -43,7 +43,6 @@ package de.jreality.geometry;
 import java.awt.Color;
 import java.util.Vector;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import de.jreality.geometry.TubeUtility.FrameInfo;
 import de.jreality.math.Matrix;

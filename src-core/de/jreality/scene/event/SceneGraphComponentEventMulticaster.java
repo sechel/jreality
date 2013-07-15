@@ -40,7 +40,6 @@
 
 package de.jreality.scene.event;
 
-import java.awt.event.ContainerListener;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 

@@ -3,12 +3,10 @@ package de.jreality.vr;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import java.util.Map.Entry;
 
 import javax.swing.ButtonGroup;

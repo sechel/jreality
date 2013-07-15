@@ -1,20 +1,15 @@
 package light;
 import java.awt.Component;
-import java.awt.Frame;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.ToolSystemPlugin;
-import de.jreality.plugin.basic.View;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.Viewer;
 import de.jreality.scene.tool.Tool;
-import de.jreality.toolsystem.ToolSystem;
 
 
 public class MainApp {

@@ -1,8 +1,8 @@
 package de.jreality.geometry;
 
+import junit.framework.TestCase;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.data.Attribute;
-import junit.framework.TestCase;
 
 public class TestIndexedFaceSetBug extends TestCase {
 

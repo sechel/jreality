@@ -43,7 +43,6 @@ package de.jreality.geometry;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.StorageModel;

@@ -1,27 +1,20 @@
 package de.jreality.jogl3.geom;
 
-import static de.jreality.shader.CommonAttributes.REFLECTION_MAP;
-
 import java.awt.Color;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import javax.media.opengl.GL3;
 
-import de.jreality.jogl.shader.JOGLCubeMap;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLTexture2D;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
-import de.jreality.jogl3.helper.SkyboxHelper;
 import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
 import de.jreality.shader.CommonAttributes;

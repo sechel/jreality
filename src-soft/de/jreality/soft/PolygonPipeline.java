@@ -45,12 +45,12 @@ import java.util.Arrays;
 import de.jreality.math.Rn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.PointSet;
-import de.jreality.scene.data.*;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.StorageModel;
 
 /**
  * 

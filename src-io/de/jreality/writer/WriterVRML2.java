@@ -69,7 +69,7 @@ public class WriterVRML2{
 	private boolean flipTextureUpsideDown = true;
 	private boolean evaluateTextureMatrix =true;
 	private boolean writeTextureCoordIndices=true;
-	private boolean excludeTerrain = true;
+	private boolean excludeTerrain = false;
 
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;

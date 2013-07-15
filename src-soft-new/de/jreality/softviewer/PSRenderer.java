@@ -42,12 +42,6 @@ package de.jreality.softviewer;
 
 
 import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
-import java.awt.image.MemoryImageSource;
-import java.awt.image.VolatileImage;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 

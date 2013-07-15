@@ -2,9 +2,7 @@ package de.jreality.audio;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
 
-import de.jreality.audio.javasound.AudioInputStreamSource;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
@@ -17,7 +15,6 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.ActionTool;
 import de.jreality.tools.DraggingTool;
-import de.jreality.util.Input;
 
 /**
  * Basic test to check spatial audio.

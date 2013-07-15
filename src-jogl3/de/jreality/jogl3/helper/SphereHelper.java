@@ -6,7 +6,6 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
-import de.jreality.math.Rn;
 
 public class SphereHelper {
 	

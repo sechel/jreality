@@ -6,7 +6,6 @@ import java.util.LinkedList;
 
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
-import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;

@@ -60,7 +60,6 @@ import de.jreality.scene.SceneGraphVisitor;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Transformation;
-import de.jreality.scene.proxy.ProxyFactory;
 
 /**
  * Creates a copy of the visited SceneGraphNode. The copy may be accessed with getCopy().

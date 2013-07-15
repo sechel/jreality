@@ -41,12 +41,9 @@ package de.jreality.softviewer;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.Arrays;
-import java.util.logging.Logger;
 
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.backends.texture.SimpleTexture;
-import de.jreality.geometry.SphereUtility;
 import de.jreality.math.Pn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.ClippingPlane;
@@ -68,7 +65,13 @@ import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.shader.*;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.DefaultGeometryShader;
+import de.jreality.shader.DefaultTextShader;
+import de.jreality.shader.EffectiveAppearance;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.RenderingHintsShader;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.softviewer.shader.DefaultPolygonShader;
 import de.jreality.softviewer.shader.LineShader;
 import de.jreality.softviewer.shader.PointShader;

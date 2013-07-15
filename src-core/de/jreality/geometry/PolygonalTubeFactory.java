@@ -42,14 +42,11 @@ package de.jreality.geometry;
 
 import java.util.logging.Level;
 
-import de.jreality.geometry.TubeUtility.FrameInfo;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.util.LoggingSystem;
 
 /**

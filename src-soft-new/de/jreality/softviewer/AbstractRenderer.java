@@ -41,11 +41,14 @@
 package de.jreality.softviewer;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.util.List;
 
 import de.jreality.math.Rn;
-import de.jreality.scene.*;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.Camera;
+import de.jreality.scene.SceneGraphComponent;
+import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Transformation;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;

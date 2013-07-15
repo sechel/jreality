@@ -50,8 +50,6 @@ import de.jreality.scene.Transformation;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.scene.data.DoubleArrayArray.Array;
-import de.jreality.scene.data.DoubleArrayArray.Inlined;
 import de.jreality.util.ColorGradient;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;

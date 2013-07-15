@@ -12,8 +12,6 @@ import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.math.Rn;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.ShaderUtility;
 
 public class LineShader{
 	

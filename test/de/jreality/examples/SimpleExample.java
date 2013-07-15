@@ -44,7 +44,6 @@ import java.awt.Color;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.content.ContentAppearance;
 import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
@@ -56,7 +55,6 @@ import de.jreality.shader.DefaultLineShader;
 import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.SystemProperties;
 
 public class SimpleExample {
 

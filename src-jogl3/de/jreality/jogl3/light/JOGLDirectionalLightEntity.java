@@ -1,7 +1,5 @@
 package de.jreality.jogl3.light;
 
-import java.awt.Color;
-
 import de.jreality.scene.DirectionalLight;
 
 public class JOGLDirectionalLightEntity extends JOGLLightEntity {

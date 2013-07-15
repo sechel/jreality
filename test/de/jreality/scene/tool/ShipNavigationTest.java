@@ -1,19 +1,15 @@
 package de.jreality.scene.tool;
 
-import java.io.IOException;
 import java.util.Arrays;
-
 
 import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.reader.Readers;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.tools.HeadTransformationTool;
 import de.jreality.tools.ShipNavigationTool;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.Input;
 import de.jreality.util.PickUtility;
 import de.jreality.util.Rectangle3D;
 

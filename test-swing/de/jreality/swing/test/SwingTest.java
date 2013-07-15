@@ -51,7 +51,6 @@ import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Transformation;
 import de.jreality.swing.JFakeFrame;
-import de.jreality.ui.viewerapp.ViewerApp;
 public class SwingTest {
 
 

@@ -1,26 +1,16 @@
 package light;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
-import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.scene.Terrain;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.Light;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;

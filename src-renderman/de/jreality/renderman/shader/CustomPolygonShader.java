@@ -1,7 +1,5 @@
 package de.jreality.renderman.shader;
 
-import java.util.Map;
-
 import de.jreality.renderman.RIBVisitor;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;

@@ -45,12 +45,11 @@ import de.jreality.backends.texture.EnvironmentTexture;
 import de.jreality.backends.texture.SimpleTexture;
 import de.jreality.backends.texture.Texture;
 import de.jreality.scene.Geometry;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CubeMap;
-import de.jreality.shader.EffectiveAppearance;
-import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
-import de.jreality.softviewer.*;
+import de.jreality.softviewer.Environment;
+import de.jreality.softviewer.Polygon;
+import de.jreality.softviewer.VecMat;
 
 /**
  * 

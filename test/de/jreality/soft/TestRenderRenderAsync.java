@@ -2,16 +2,13 @@ package de.jreality.soft;
 
 import java.awt.Component;
 import java.awt.EventQueue;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.JFrame;
 
 import de.jreality.examples.CatenoidHelicoid;
-import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.io.JrSceneFactory;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Viewer;
 
 public class TestRenderRenderAsync {
 

@@ -43,7 +43,6 @@ package de.jreality.scene.proxy.tree;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.logging.Level;
 
 import de.jreality.scene.SceneGraphComponent;

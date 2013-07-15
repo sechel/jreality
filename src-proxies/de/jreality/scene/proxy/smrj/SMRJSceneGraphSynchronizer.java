@@ -40,11 +40,9 @@
 
 package de.jreality.scene.proxy.smrj;
 
-import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import de.jreality.math.Matrix;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Geometry;

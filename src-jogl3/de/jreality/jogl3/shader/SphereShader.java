@@ -1,23 +1,15 @@
 package de.jreality.jogl3.shader;
 
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.JOGLRenderState;
-import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLSphereEntity;
 import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.jogl3.glsl.GLShader.ShaderVar;
-import de.jreality.jogl3.helper.LightHelper;
-import de.jreality.jogl3.helper.TransparencyHelper;
-import de.jreality.jogl3.light.JOGLDirectionalLightEntity;
-import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
-import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.math.Rn;
 import de.jreality.shader.EffectiveAppearance;
 

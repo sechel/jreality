@@ -17,7 +17,6 @@ import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.tools.ActionTool;
-import de.jreality.util.SceneGraphUtility;
 
 public class ScenePanel {
 	private boolean inScene = true;

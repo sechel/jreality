@@ -11,7 +11,6 @@ import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLLineSetEntity;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
-import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.math.Rn;
 
 public class TubesLineShader{

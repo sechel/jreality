@@ -1,9 +1,8 @@
 package de.jreality.geometry;
 
-import de.jreality.scene.IndexedFaceSet;
+import junit.framework.TestCase;
 import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
-import junit.framework.TestCase;
 
 public class PointSetFactoryTest extends TestCase {
 

@@ -1,10 +1,7 @@
 package de.jreality.portal;
 
 import java.awt.Component;
-import java.awt.GraphicsEnvironment;
 import java.lang.reflect.Method;
-
-import javax.swing.JFrame;
 
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.basic.ToolSystemPlugin;
@@ -13,8 +10,6 @@ import de.jreality.scene.Viewer;
 import de.jreality.toolsystem.PortalToolSystem;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.ui.viewerapp.ViewerApp;
-import de.jreality.util.ConfigurationAttributes;
-import de.jreality.util.GuiUtility;
 
 public class RemoteExecutor {
 

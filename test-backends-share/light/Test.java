@@ -2,20 +2,14 @@ package light;
 import java.awt.Color;
 
 import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.Primitives;
-import de.jreality.jogl3.JOGLSceneGraph;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
-import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.scene.Transformation;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
@@ -24,7 +18,6 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
-import de.jreality.util.Input;
 
 
 public class Test {

@@ -45,7 +45,6 @@ import java.util.Map;
 
 import de.jreality.math.Matrix;
 import de.jreality.math.P3;
-import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.tool.InputSlot;

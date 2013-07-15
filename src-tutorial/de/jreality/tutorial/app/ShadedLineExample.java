@@ -1,28 +1,18 @@
 package de.jreality.tutorial.app;
 
-import static de.jreality.shader.CommonAttributes.LINE_SHADER;
-import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
-import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
-
 import java.awt.Color;
-
-import javax.swing.SwingConstants;
 
 import de.jreality.geometry.BallAndStickFactory;
 import de.jreality.geometry.FrameFieldType;
 import de.jreality.geometry.IndexedLineSetFactory;
-import de.jreality.geometry.IndexedLineSetUtility;
-import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.PointSetUtility;
 import de.jreality.geometry.PolygonalTubeFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.geometry.TubeFactory;
 import de.jreality.geometry.TubeUtility.FrameInfo;
-import de.jreality.math.MatrixBuilder;
 import de.jreality.math.Rn;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
-import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.Viewer;
@@ -31,9 +21,7 @@ import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultLineShader;
-import de.jreality.shader.DefaultPointShader;
 import de.jreality.shader.DefaultPolygonShader;
-import de.jreality.shader.DefaultTextShader;
 import de.jreality.shader.RenderingHintsShader;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.SceneGraphUtility;

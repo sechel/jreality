@@ -52,7 +52,6 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
-import de.jreality.util.LoggingSystem;
 
 public class Hit implements PickResult {
   final SceneGraphPath path;

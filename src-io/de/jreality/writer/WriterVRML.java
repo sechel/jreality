@@ -67,7 +67,7 @@ public class WriterVRML
 	private boolean drawSpheres = false;
 	private boolean moveLightsToSceneRoot=true;
 	private boolean writeTextureFiles = false;
-	private boolean excludeTerrain = true;
+	private boolean excludeTerrain = false;
 	
 	private VRMLWriterHelper wHelp= new VRMLWriterHelper();
 	private DefaultGeometryShader dgs;

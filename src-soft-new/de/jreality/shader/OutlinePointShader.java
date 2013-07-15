@@ -40,7 +40,6 @@
 
 package de.jreality.shader;
 
-import java.awt.Color;
 
 /**
  * The default point shader for jReality. 

@@ -46,14 +46,12 @@ import java.awt.Color;
 import java.io.IOException;
 
 import de.jreality.examples.CatenoidHelicoid;
-import de.jreality.geometry.IndexedFaceSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.DefaultPolygonShader;
 import de.jreality.shader.ImageData;
