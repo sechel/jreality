@@ -87,7 +87,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			vec4 diffuse2 = dott*diffuse*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(dir.xyz)-normalize(camSpaceCoord.xyz)));
-			
+			if(spec < 0)
+				spec = 0;
 			vec4 specular =polygonShader_specularColor*intensity*pow(spec, polygonShader_specularExponent);
 			
 			vec4 new = polygonShader_specularCoefficient*specular+polygonShader_diffuseCoefficient*diffuse2;
@@ -113,7 +114,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			vec4 diffuse2 = dott*diffuse*col*intensity;
 			
 			float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
-			
+			if(spec < 0)
+				spec = 0;
 			vec4 specular =polygonShader_specularColor*intensity*pow(spec, polygonShader_specularExponent);
 			
 			
@@ -142,6 +144,8 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 			if(dott > 0){
 				vec4 diffuse2 = dott*diffuse*col*intensity;
 				float spec = dot(normal, normalize(normalize(RelPos.xyz)-normalize(camSpaceCoord.xyz)));
+				if(spec < 0)
+					spec = 0;
 				vec4 specular =polygonShader_specularColor*intensity*pow(spec, polygonShader_specularExponent);
 			
 				vec4 new = polygonShader_specularCoefficient*specular+polygonShader_diffuseCoefficient*diffuse2;
