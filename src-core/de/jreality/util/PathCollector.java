@@ -43,8 +43,6 @@ package de.jreality.util;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.thoughtworks.xstream.io.path.Path;
-
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphNode;
 import de.jreality.scene.SceneGraphPath;
