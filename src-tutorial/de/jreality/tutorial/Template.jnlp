@@ -21,7 +21,6 @@
       <jar href="../jars/vrData.jar" download="lazy"/>
       <jar href="../jars/vrExamples.jar" download="lazy"/>     
 
-	  <jar href="../jars/NetUtil.jar" download="lazy"/>
       <jar href="../jars/antlr-3.4-complete.jar" download="lazy"/>
       <jar href="../jars/beans.jar" download="lazy"/>
       <jar href="../jars/bsh.jar" download="lazy"/>
@@ -30,9 +29,10 @@
       <jar href="../jars/janino.jar" download="lazy"/>
       <jar href="../jars/jrworkspace.jar" download="lazy"/>
       <jar href="../jars/jterm.jar" download="lazy"/>
+      <jar href="../jars/NetUtil.jar" download="lazy"/>
       <jar href="../jars/sunflow.jar" download="lazy"/>
-      <jar href="../jars/xpp3.jar" download="lazy"/>
-      <jar href="../jars/xstream.jar" download="lazy"/>
+      <jar href="../jars/xpp3-1.1.4c.jar" download="lazy"/>
+      <jar href="../jars/xstream-1.4.2.jar" download="lazy"/>
       
       <extension name="jogl" href="http://www3.math.tu-berlin.de/jreality/ws/jogl2/jogl.jnlp" />
     </resources>
