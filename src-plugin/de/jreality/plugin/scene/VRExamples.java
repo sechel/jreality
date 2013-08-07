@@ -13,8 +13,8 @@ import javax.swing.JRadioButton;
 
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.content.ContentAppearance;

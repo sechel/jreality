@@ -1,10 +1,10 @@
 package de.jreality.swing;
 
+import java.awt.BufferCapabilities.FlipContents;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GraphicsConfiguration;
 import java.awt.Rectangle;
-import java.awt.BufferCapabilities.FlipContents;
 import java.awt.image.BufferedImage;
 import java.awt.peer.ComponentPeer;
 import java.awt.peer.FramePeer;

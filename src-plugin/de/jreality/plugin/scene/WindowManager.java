@@ -12,9 +12,9 @@ import javax.swing.event.ChangeListener;
 
 import de.jreality.geometry.IndexedLineSetUtility;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
-import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.portal.PortalCoordinateSystem;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;

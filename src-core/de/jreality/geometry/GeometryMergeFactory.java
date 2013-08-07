@@ -43,6 +43,7 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
 import de.jreality.math.Matrix;
 import de.jreality.math.P3;
 import de.jreality.math.Rn;

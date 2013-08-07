@@ -41,10 +41,10 @@
 package de.jreality.swing;
 
 import java.awt.Desktop;
-import java.awt.Frame;
-import java.awt.HeadlessException;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dialog.ModalityType;
+import java.awt.Frame;
+import java.awt.HeadlessException;
 import java.awt.peer.DesktopPeer;
 import java.awt.peer.FramePeer;
 

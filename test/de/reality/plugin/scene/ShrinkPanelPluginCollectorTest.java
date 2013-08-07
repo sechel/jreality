@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.jreality.junitutils.GuiTestUtils;
-import de.jreality.junitutils.PropertyVault;
 import de.jreality.junitutils.GuiTestUtils.ComponentsFinder;
+import de.jreality.junitutils.PropertyVault;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.scene.ShrinkPanelPluginCollector;
 import de.jtem.jrworkspace.plugin.Controller;

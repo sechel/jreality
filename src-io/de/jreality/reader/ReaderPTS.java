@@ -44,9 +44,9 @@ import java.awt.Color;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
+import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.geometry.GeometryUtility;
 import de.jreality.geometry.PointSetFactory;
-import de.jreality.geometry.BoundingBoxUtility;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;

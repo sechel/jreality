@@ -42,7 +42,10 @@ package de.jreality.util;
 
 import java.io.Serializable;
 
-import de.jreality.math.*;
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
+import de.jreality.math.Quaternion;
+import de.jreality.math.Rn;
 
 /**
  * I've put this class in here to be able to compare the results from the new class FactoredMatrix

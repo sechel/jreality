@@ -50,11 +50,11 @@ import javax.swing.JScrollPane;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import bsh.EvalError;
+import de.jreality.scene.SceneGraphNode;
 import de.jtem.jterm.BshEvaluator;
 import de.jtem.jterm.JTerm;
 import de.jtem.jterm.Session;
-import bsh.EvalError;
-import de.jreality.scene.SceneGraphNode;
 
 
 /**

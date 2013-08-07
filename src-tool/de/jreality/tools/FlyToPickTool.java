@@ -12,8 +12,6 @@ import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.tools.AnimatorTask;
-import de.jreality.tools.AnimatorTool;
 
 /** Tool to fly to a picked target
  * 

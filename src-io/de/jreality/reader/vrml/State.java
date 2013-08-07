@@ -8,7 +8,6 @@ import java.awt.Color;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
-//import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
@@ -19,8 +18,9 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
-//import de.jreality.ui.viewerapp.ViewerApp;
 import de.jreality.util.Input;
+//import de.jreality.scene.IndexedFaceSet;
+//import de.jreality.ui.viewerapp.ViewerApp;
 
 public class State {
 	// konstanten

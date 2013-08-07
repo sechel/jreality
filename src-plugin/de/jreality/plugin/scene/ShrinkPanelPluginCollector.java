@@ -9,7 +9,6 @@ import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.List;
 
-import de.jreality.plugin.scene.SceneShrinkPanel;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 import de.jtem.jrworkspace.plugin.sidecontainer.widget.ShrinkPanel;

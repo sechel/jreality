@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.HashSet;
+
 import de.jreality.shader.Texture2D;
 
 class RenderScript {

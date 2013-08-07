@@ -6,8 +6,8 @@ package de.jreality.tutorial.plugin;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Inspector;
 import de.jreality.plugin.content.ContentLoader;

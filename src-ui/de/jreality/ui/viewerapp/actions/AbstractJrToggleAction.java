@@ -8,8 +8,8 @@ import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JToggleButton;
-import javax.swing.KeyStroke;
 import javax.swing.JToggleButton.ToggleButtonModel;
+import javax.swing.KeyStroke;
 
 // this is quite a hack, in java 6 the button model
 // would not be required. Then, the action has a

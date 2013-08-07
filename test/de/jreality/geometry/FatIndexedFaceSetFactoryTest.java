@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
-import de.jreality.geometry.FatIndexedFaceSetFactory;
-import de.jreality.geometry.IndexedFaceSetFactory;
-import de.jreality.geometry.ParametricSurfaceFactory;
-import de.jreality.geometry.QuadMeshFactory;
 import de.jreality.geometry.ParametricSurfaceFactory.Immersion;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.IndexedFaceSet;

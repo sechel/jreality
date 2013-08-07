@@ -20,14 +20,14 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTML.Attribute;
 import javax.swing.text.html.HTML.Tag;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
 
 import de.jreality.plugin.JRViewer;
-import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;

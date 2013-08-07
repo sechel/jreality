@@ -2,8 +2,9 @@ package de.jreality.portal.calibration;
 
 import java.awt.Color;
 
-import de.jreality.scene.*;
 import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
 
 public class Coordinates{

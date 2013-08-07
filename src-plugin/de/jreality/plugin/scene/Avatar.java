@@ -11,9 +11,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.plugin.basic.View;
-import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphComponent;

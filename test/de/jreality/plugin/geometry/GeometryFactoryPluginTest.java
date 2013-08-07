@@ -20,8 +20,8 @@ import org.junit.Test;
 import de.jreality.geometry.AbstractGeometryFactoryCustomizer;
 import de.jreality.geometry.ParametricSurfaceFactory;
 import de.jreality.geometry.ParametricSurfaceFactoryCustomizer;
-import de.jreality.junitutils.PropertyVault;
 import de.jreality.junitutils.GuiTestUtils.ComponentsFinder;
+import de.jreality.junitutils.PropertyVault;
 import de.jreality.ui.widgets.TextSlider;
 import de.jtem.jrworkspace.plugin.simplecontroller.SimpleController;
 

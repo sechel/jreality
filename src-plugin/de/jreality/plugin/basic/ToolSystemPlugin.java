@@ -48,7 +48,6 @@ import java.security.PrivilegedAction;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.jreality.plugin.basic.RunningEnvironment;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.toolsystem.ToolSystem;
 import de.jreality.toolsystem.config.ToolSystemConfiguration;

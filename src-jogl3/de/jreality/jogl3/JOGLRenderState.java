@@ -5,11 +5,11 @@ import javax.media.opengl.GL3;
 import de.jreality.jogl3.helper.LightHelper;
 import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TubeHelper;
+import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.light.JOGLLightInstance;
-import de.jreality.jogl3.light.JOGLDirectionalLightInstance;
-import de.jreality.jogl3.light.JOGLSpotLightInstance;
 import de.jreality.jogl3.light.JOGLPointLightInstance;
+import de.jreality.jogl3.light.JOGLSpotLightInstance;
 import de.jreality.math.Rn;
 
 public class JOGLRenderState {

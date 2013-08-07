@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.URL;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioFormat.Encoding;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import javax.sound.sampled.AudioFormat.Encoding;
 
 import de.jreality.audio.RingBuffer;
 import de.jreality.audio.RingBufferSource;

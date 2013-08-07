@@ -7,8 +7,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
-import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.Mixer.Info;
+import javax.sound.sampled.SourceDataLine;
 import javax.swing.JFrame;
 
 import de.jreality.audio.javasound.JavaSoundUtility;
