@@ -113,11 +113,11 @@ public class JOGLOffscreenRenderer {
 			jr.setFboMode(false);
 		} else { // use pbuffers
 			jr.offscreenMode = true;
-			if (!GLDrawableFactory.getFactory(GLProfile.get("GL2"))
+			if (!GLDrawableFactory.getFactory(canvas.getGLProfile())
 					.canCreateGLPbuffer(
 							canvas.getNativeSurface()
 									.getGraphicsConfiguration().getScreen()
-									.getDevice())) {
+									.getDevice(), canvas.getGLProfile())) {
 				JOGLConfiguration.getLogger().log(Level.WARNING,
 						"PBuffers not supported");
 				return null;
