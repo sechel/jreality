@@ -12,6 +12,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -274,9 +275,15 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	// - do this in a way to allow deferred shading later
 	// - do what is being done in the example DepthPeeling application
 	// - think about sensible way of dealing with the occlusion query
-	
+	BufferedImage dst = null;
+	boolean offscreen = false;
 	public void display(GLAutoDrawable arg0, int width, int height) {
 		perfmeter.beginFrame();
+		
+		if(offscreen){
+			TransparencyHelper.supersample = (int)aa;
+			TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
+		}
 		// TODO Auto-generated method stub
 		//System.out.println("display called---------------------------------");
 		if(arg0.getGL() != null && arg0.getGL().getGL3() != null){
@@ -337,11 +344,22 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			List<RenderableObject> transpObjects = new LinkedList<RenderableObject>();
 			rootInstance.collectTranspAndNonTransparent(rootState, nonTranspObjects, transpObjects);
 			
+			
 			//render scene graph
-			TransparencyHelper.render(gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+			if(offscreen == false){
+				TransparencyHelper.render(gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+			}else{
+				this.dst = TransparencyHelper.renderOffscreen(aa, this.dst, gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+				System.out.println("rendering offscreen");
+			}
+			
 			
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
+		}
+		if(offscreen){
+			TransparencyHelper.supersample = supersample;
+			TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
 		}
 		perfmeter.endFrame();
 	}
@@ -353,7 +371,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		// TODO Auto-generated method stub
 		System.out.println("calling JOGL3Viewer.dispose");
 	}
-	
+	private int supersample = 2;
 	
 	private int width, height = 0;
 	public void init(GLAutoDrawable arg0) {
@@ -410,7 +428,9 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		System.out.println("reshape");
 		this.width = arg3;
 		this.height = arg4;
+		TransparencyHelper.supersample = supersample;
 		TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
+		
 	}
 	
 	@Override
@@ -432,7 +452,34 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	public void addGLEventListener(GLEventListener e) {
 		canvas.addGLEventListener(e);
 	}
+	
+	
+	
+	
+	public BufferedImage renderOffscreen(int w, int h) {
+		return renderOffscreen(null, w, h);
+	}
 
+	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h) {
+		return renderOffscreen(dst, w, h, 1.0);
+	}
 
+	public BufferedImage renderOffscreen(int w, int h, double aa) {
+		return renderOffscreen(null, w, h, aa);
+	}
+	double aa = 1;
+	//aa stands for Anti-Aliasing
+	public BufferedImage renderOffscreen(BufferedImage dst, int w, int h,
+			double aa) {
+		this.width = w;
+		this.height = h;
+		System.out.println("aa is " + aa);
+		this.aa = aa;
+		this.dst = dst;
+		offscreen = true;
+		canvas.display();
+		offscreen = false;
+		return this.dst;
+	}
 	
 }
