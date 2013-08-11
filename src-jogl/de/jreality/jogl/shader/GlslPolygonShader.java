@@ -101,7 +101,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 	CubeMap environmentMap;
 	private DefaultVertexShader vertexShader = new DefaultVertexShader();
 	private boolean smoothShading;
-	private int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
+	// private int frontBack = DefaultPolygonShader.FRONT_AND_BACK;
 	private boolean useVertexArrays = true, doNormals4 = false;
 
 	public void setFromEffectiveAppearance(EffectiveAppearance eap, String name) {
@@ -283,7 +283,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			gl.glActiveTexture(GL.GL_TEXTURE1);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
-		if (texture2!= null) {
+		if (texture2 != null) {
 			gl.glActiveTexture(GL.GL_TEXTURE2);
 			gl.glDisable(GL.GL_TEXTURE_2D);
 		}
@@ -296,8 +296,14 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 		}
 	}
 
+	/**
+	 * Method does nothing! FrontBack is private and nowhere used inside
+	 * GlslPolygonShader.
+	 * 
+	 * @param f
+	 */
 	public void setFrontBack(int f) {
-		frontBack = f;
+		// frontBack = f;
 	}
 
 	public void setProgram(GlslProgram program) {
@@ -316,8 +322,12 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 		DataList faceNormals = sg.getFaceAttributes(Attribute.NORMALS);
 		DataList vertexColors = sg.getVertexAttributes(Attribute.COLORS);
 		DataList faceColors = sg.getFaceAttributes(Attribute.COLORS);
-		DataList texCoords = sg
+		DataList texCoords0 = sg
 				.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+		DataList texCoords1 = sg
+				.getVertexAttributes(Attribute.TEXTURE_COORDINATES1);
+		DataList texCoords2 = sg
+				.getVertexAttributes(Attribute.TEXTURE_COORDINATES2);
 		DataList lightMapCoords = sg.getVertexAttributes(Attribute
 				.attributeForName("lightmap coordinates"));
 		// JOGLConfiguration.theLog.log(Level.INFO,"Vertex normals are:
@@ -353,7 +363,8 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			normalBind = PER_PART;
 		renderFaces(sg, alpha, gl, false, colorBind, normalBind, colorLength,
 				vertices, vertexNormals, faceNormals, vertexColors, faceColors,
-				texCoords, lightMapCoords, vertexLength, smooth, doNormals4);
+				texCoords0, texCoords1, texCoords2, lightMapCoords,
+				vertexLength, smooth, doNormals4);
 	}
 
 	public static DataList correctNormals(DataList n) {
@@ -390,9 +401,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 	private static void renderFaces(IndexedFaceSet sg, double alpha, GL2 gl,
 			boolean pickMode, int colorBind, int normalBind, int colorLength,
 			DataList vertices, DataList vertexNormals, DataList faceNormals,
-			DataList vertexColors, DataList faceColors, DataList texCoords,
-			DataList lightMapCoords, int vertexLength, boolean smooth,
-			boolean doNormals4) {
+			DataList vertexColors, DataList faceColors, DataList texCoords0,
+			DataList texCoords1, DataList texCoords2, DataList lightMapCoords,
+			int vertexLength, boolean smooth, boolean doNormals4) {
 		// System.err.println("rendering with vertex arrays");
 		boolean faceN = normalBind == PER_FACE;
 
@@ -402,7 +413,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 		Attribute TANGENTS = Attribute.attributeForName("TANGENTS");
 
 		DataList tanCoords = null;
-		System.err.println("face color = "+faceC);
+		// System.err.println("face color = "+faceC);
 		if (doNormals4) {
 			if (faceN) {
 				tanCoords = correctNormals4(faceNormals);
@@ -449,21 +460,47 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			if (inlineV) {
 				vertexBuffer = BufferCache.vertex(sg, triagCnt, vertexLength);
 			}
-			DoubleArrayArray tc = null;
-			int texLength = 0;
-			double[] tmpTex = null;
-			boolean inlineTex = texCoords != null;
-			DoubleBuffer texBuffer = null;
-			if (inlineTex) {
-				texBuffer = BufferCache.texCoord(sg, triagCnt);
-				tc = texCoords.toDoubleArrayArray();
-				texLength = tc.getLengthAt(0);
-				tmpTex = new double[texLength];
+			// handle 0th texture coordinates
+			DoubleArrayArray tc0 = null;
+			int texLength0 = 0;
+			double[] tmpTex0 = null;
+			DoubleBuffer texBuffer0 = null;
+			boolean inlineTex0 = texCoords0 != null;
+			if (inlineTex0) {
+				texBuffer0 = BufferCache.texCoord0(sg, triagCnt);
+				tc0 = texCoords0.toDoubleArrayArray();
+				texLength0 = tc0.getLengthAt(0);
+				tmpTex0 = new double[texLength0];
 			}
-
+			// handle 1st texture coordinates
+			DoubleArrayArray tc1 = null;
+			int texLength1 = 1;
+			double[] tmpTex1 = null;
+			DoubleBuffer texBuffer1 = null;
+			boolean inlineTex1 = texCoords1 != null;
+			if (inlineTex1) {
+				texBuffer1 = BufferCache.texCoord1(sg, triagCnt);
+				tc1 = texCoords1.toDoubleArrayArray();
+				texLength1 = tc1.getLengthAt(0);
+				tmpTex1 = new double[texLength1];
+			}
+			// handle 2th texture coordinates
+			DoubleArrayArray tc2 = null;
+			int texLength2 = 2;
+			double[] tmpTex2 = null;
+			DoubleBuffer texBuffer2 = null;
+			boolean inlineTex2 = texCoords2 != null;
+			if (inlineTex2) {
+				texBuffer2 = BufferCache.texCoord2(sg, triagCnt);
+				tc2 = texCoords2.toDoubleArrayArray();
+				texLength2 = tc2.getLengthAt(0);
+				tmpTex2 = new double[texLength2];
+			}
 			double[] tmpTan = new double[4];
 			// this can be currently either tangents or normal4 field
-			boolean inlineTan = tanCoords != null;
+			// tangents are store in texture coords1. if these are set already,
+			// ignore tangents
+			boolean inlineTan = tanCoords != null && !inlineTex1;
 			DoubleBuffer tanBuffer = null;
 			if (inlineTan) {
 				tanBuffer = BufferCache.tangent(sg, triagCnt, 4);
@@ -488,7 +525,7 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 				DoubleArray da;
 
 				DoubleArrayArray verts = vertices.toDoubleArrayArray();
-				tc = inlineTex ? tc : null;
+				tc0 = inlineTex0 ? tc0 : null;
 				DoubleArrayArray t = inlineTan ? tanCoords.toDoubleArrayArray()
 						: null;
 				DoubleArrayArray norms = null;
@@ -526,16 +563,38 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 							da.toDoubleArray(tmpV);
 							vertexBuffer.put(tmpV);
 						}
-						if (inlineTex) {
-							da = tc.getValueAt(i1);
-							da.toDoubleArray(tmpTex);
-							texBuffer.put(tmpTex);
-							da = tc.getValueAt(i2);
-							da.toDoubleArray(tmpTex);
-							texBuffer.put(tmpTex);
-							da = tc.getValueAt(i3);
-							da.toDoubleArray(tmpTex);
-							texBuffer.put(tmpTex);
+						if (inlineTex0) {
+							da = tc0.getValueAt(i1);
+							da.toDoubleArray(tmpTex0);
+							texBuffer0.put(tmpTex0);
+							da = tc0.getValueAt(i2);
+							da.toDoubleArray(tmpTex0);
+							texBuffer0.put(tmpTex0);
+							da = tc0.getValueAt(i3);
+							da.toDoubleArray(tmpTex0);
+							texBuffer0.put(tmpTex0);
+						}
+						if (inlineTex1) {
+							da = tc1.getValueAt(i1);
+							da.toDoubleArray(tmpTex1);
+							texBuffer1.put(tmpTex1);
+							da = tc1.getValueAt(i2);
+							da.toDoubleArray(tmpTex1);
+							texBuffer1.put(tmpTex1);
+							da = tc1.getValueAt(i3);
+							da.toDoubleArray(tmpTex1);
+							texBuffer1.put(tmpTex1);
+						}
+						if (inlineTex2) {
+							da = tc2.getValueAt(i1);
+							da.toDoubleArray(tmpTex2);
+							texBuffer2.put(tmpTex2);
+							da = tc2.getValueAt(i2);
+							da.toDoubleArray(tmpTex2);
+							texBuffer2.put(tmpTex2);
+							da = tc2.getValueAt(i3);
+							da.toDoubleArray(tmpTex2);
+							texBuffer2.put(tmpTex2);
 						}
 						if (inlineTan) {
 							da = t.getValueAt(faceT ? i : i1);
@@ -601,11 +660,23 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 				colorBuffer.rewind();
 				gl.glColorPointer(colorLength, GL2.GL_DOUBLE, 0, colorBuffer);
 			}
-			if (texCoords != null) {
+			if (texCoords0 != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE0);
 				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-				texBuffer.rewind();
-				gl.glTexCoordPointer(texLength, GL2.GL_DOUBLE, 0, texBuffer);
+				texBuffer0.rewind();
+				gl.glTexCoordPointer(texLength0, GL2.GL_DOUBLE, 0, texBuffer0);
+			}
+			if (texCoords1 != null) {
+				gl.glClientActiveTexture(GL.GL_TEXTURE1);
+				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+				texBuffer1.rewind();
+				gl.glTexCoordPointer(texLength1, GL2.GL_DOUBLE, 0, texBuffer1);
+			}
+			if (texCoords2 != null) {
+				gl.glClientActiveTexture(GL.GL_TEXTURE2);
+				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+				texBuffer2.rewind();
+				gl.glTexCoordPointer(texLength2, GL2.GL_DOUBLE, 0, texBuffer2);
 			}
 			// int TANGENT_ID=9;
 			if (tanCoords != null) {
@@ -627,8 +698,16 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
 			if (!doNormals4)
 				gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-			if (texCoords != null) {
+			if (texCoords0 != null) {
 				gl.glClientActiveTexture(GL.GL_TEXTURE0);
+				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+			}
+			if (texCoords1 != null) {
+				gl.glClientActiveTexture(GL.GL_TEXTURE1);
+				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+			}
+			if (texCoords2 != null) {
+				gl.glClientActiveTexture(GL.GL_TEXTURE2);
 				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 			}
 			if (hasColors) {
@@ -639,7 +718,6 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 				gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 				// gl.glDisableVertexAttribArray(TANGENT_ID);
 			}
-
 		} else {
 			System.out.println("GlslPolygonShader inlined: ??");
 		}
@@ -668,7 +746,9 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 	private static final class BufferCache {
 
 		static WeakHashMap<IndexedFaceSet, ByteBuffer> vertexBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
-		static WeakHashMap<IndexedFaceSet, ByteBuffer> texCoordBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
+		static WeakHashMap<IndexedFaceSet, ByteBuffer> texCoord0Buffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
+		static WeakHashMap<IndexedFaceSet, ByteBuffer> texCoord1Buffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
+		static WeakHashMap<IndexedFaceSet, ByteBuffer> texCoord2Buffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
 		static WeakHashMap<IndexedFaceSet, ByteBuffer> tangentBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
 		static WeakHashMap<IndexedFaceSet, ByteBuffer> normalBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
 		static WeakHashMap<IndexedFaceSet, ByteBuffer> colorBuffers = new WeakHashMap<IndexedFaceSet, ByteBuffer>();
@@ -683,8 +763,18 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 					.asDoubleBuffer();
 		}
 
-		static DoubleBuffer texCoord(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, texCoordBuffers, numTris * 3 * 2 * 8)
+		static DoubleBuffer texCoord0(IndexedFaceSet ifs, int numTris) {
+			return get(ifs, texCoord0Buffers, numTris * 3 * 2 * 8)
+					.asDoubleBuffer();
+		}
+
+		static DoubleBuffer texCoord1(IndexedFaceSet ifs, int numTris) {
+			return get(ifs, texCoord1Buffers, numTris * 3 * 2 * 8)
+					.asDoubleBuffer();
+		}
+
+		static DoubleBuffer texCoord2(IndexedFaceSet ifs, int numTris) {
+			return get(ifs, texCoord2Buffers, numTris * 3 * 2 * 8)
 					.asDoubleBuffer();
 		}
 
