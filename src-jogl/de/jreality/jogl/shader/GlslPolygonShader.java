@@ -467,10 +467,10 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			DoubleBuffer texBuffer0 = null;
 			boolean inlineTex0 = texCoords0 != null;
 			if (inlineTex0) {
-				texBuffer0 = BufferCache.texCoord0(sg, triagCnt);
 				tc0 = texCoords0.toDoubleArrayArray();
 				texLength0 = tc0.getLengthAt(0);
 				tmpTex0 = new double[texLength0];
+				texBuffer0 = BufferCache.texCoord0(sg, triagCnt, texLength0);
 			}
 			// handle 1st texture coordinates
 			DoubleArrayArray tc1 = null;
@@ -479,10 +479,10 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			DoubleBuffer texBuffer1 = null;
 			boolean inlineTex1 = texCoords1 != null;
 			if (inlineTex1) {
-				texBuffer1 = BufferCache.texCoord1(sg, triagCnt);
 				tc1 = texCoords1.toDoubleArrayArray();
 				texLength1 = tc1.getLengthAt(0);
 				tmpTex1 = new double[texLength1];
+				texBuffer1 = BufferCache.texCoord1(sg, triagCnt, texLength1);
 			}
 			// handle 2th texture coordinates
 			DoubleArrayArray tc2 = null;
@@ -491,10 +491,10 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 			DoubleBuffer texBuffer2 = null;
 			boolean inlineTex2 = texCoords2 != null;
 			if (inlineTex2) {
-				texBuffer2 = BufferCache.texCoord2(sg, triagCnt);
 				tc2 = texCoords2.toDoubleArrayArray();
 				texLength2 = tc2.getLengthAt(0);
 				tmpTex2 = new double[texLength2];
+				texBuffer2 = BufferCache.texCoord2(sg, triagCnt, texLength2);
 			}
 			double[] tmpTan = new double[4];
 			// this can be currently either tangents or normal4 field
@@ -763,18 +763,21 @@ public class GlslPolygonShader extends AbstractPrimitiveShader implements
 					.asDoubleBuffer();
 		}
 
-		static DoubleBuffer texCoord0(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, texCoord0Buffers, numTris * 3 * 2 * 8)
+		static DoubleBuffer texCoord0(IndexedFaceSet ifs, int numTris,
+				int texcoordlength) {
+			return get(ifs, texCoord0Buffers, numTris * 3 * texcoordlength * 8)
 					.asDoubleBuffer();
 		}
 
-		static DoubleBuffer texCoord1(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, texCoord1Buffers, numTris * 3 * 2 * 8)
+		static DoubleBuffer texCoord1(IndexedFaceSet ifs, int numTris,
+				int texcoordlength) {
+			return get(ifs, texCoord1Buffers, numTris * 3 * texcoordlength * 8)
 					.asDoubleBuffer();
 		}
 
-		static DoubleBuffer texCoord2(IndexedFaceSet ifs, int numTris) {
-			return get(ifs, texCoord2Buffers, numTris * 3 * 2 * 8)
+		static DoubleBuffer texCoord2(IndexedFaceSet ifs, int numTris,
+				int texcoordlength) {
+			return get(ifs, texCoord2Buffers, numTris * 3 * texcoordlength * 8)
 					.asDoubleBuffer();
 		}
 
