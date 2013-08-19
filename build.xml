@@ -3,6 +3,11 @@
 		jReality build file
 	</description>
 	
+	<echo message="Using Java version ${ant.java.version}."/>
+	<echo message="Switch to a Java version 7"/>
+	<property name="jdk7_javac" location="/usr/lib/jvm/java-7-oracle/bin/javac"/>
+	<echo message="Default: ${jdk7_javac}"/>
+		
 	<tstamp>
 		<format property="version" pattern="yyyy-MM-dd"/>
 	</tstamp>
@@ -289,7 +294,11 @@
 	<!-- all the core classes will be build here - all backends depend on it-->
 	<target name="core" depends="init" description="compile the source ">
 		<mkdir dir="${build}/core" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${core}" destdir="${build}/core" debug="true" includeantruntime="false"/>
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${core}" destdir="${build}/core" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}"
+		/>
 		<copy todir="${build}/core">
 			<fileset dir="${core}">
 				<exclude name="**/*.java"/>
@@ -301,7 +310,10 @@
 
 	<target name="tools" depends="core" description="compile the source ">
 		<mkdir dir="${build}/tools" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${tools}" destdir="${build}/tools" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${tools}" destdir="${build}/tools" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="tools.classpath"/>
 		</javac>
 		<copy todir="${build}/tools">
@@ -315,7 +327,10 @@
 
 	<target name="audio" depends="core" description="compile the src-audio">
 		<mkdir dir="${build}/audio" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${audio}" destdir="${build}/audio" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${audio}" destdir="${build}/audio" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="audio.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-audio.jar" basedir="${build}/audio" />
@@ -323,18 +338,24 @@
 
 	<target name="backends-share" depends="core" description="compile the backends-share">
 		<mkdir dir="${build}/backends-share" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${backends-share}" destdir="${build}/backends-share" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${backends-share}" destdir="${build}/backends-share" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="backends-share.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-backends-share.jar" basedir="${build}/backends-share" />
 	</target>
 
     <target name="swing" depends="core,tools,backends-share" description="compile the swing widget integration">
-        <condition property="java6">
+        <condition property="java7">
         	<equals arg1="${ant.java.version}" arg2="1.7"/>
       	</condition>
         <mkdir dir="${build}/swing" />
-        <javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${swing}" destdir="${build}/swing" debug="true" includeantruntime="false">
+        <javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+        	srcdir="${swing}" destdir="${build}/swing" 
+        	debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
         	<exclude name="**/Fake*5.java" if="java6"/>
         	<exclude name="**/Fake*6.java" if="java5"/>
         	<classpath refid="swing.classpath"/>
@@ -357,7 +378,10 @@
 		<antlr target="${io}/de/jreality/reader/mathematica/mathematica.g">
 			<classpath refid="io.classpath"/>
 		</antlr>
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${io}" destdir="${build}/io" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${io}" destdir="${build}/io" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="io.classpath"/>
 		</javac>
 		<copy todir="build/io">
@@ -373,7 +397,10 @@
 
 	<target name="ui" depends="core, tools, io, jogl, soft" description="compile the ui">
 		<mkdir dir="${build}/ui" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${ui}" destdir="${build}/ui" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${ui}" destdir="${build}/ui" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="ui.classpath"/>
 		</javac>
 		<copy todir="${build}/ui">
@@ -386,7 +413,10 @@
 
 	<target name="vr" depends="core, ui, swing, sunflow" description="compile vr">
 		<mkdir dir="${build}/vr" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${vr}" destdir="${build}/vr" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${vr}" destdir="${build}/vr" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="vr.classpath"/>
 		</javac>
 		<copy todir="${build}/vr">
@@ -399,7 +429,10 @@
 
 	<target name="examples" depends="vr" description="compile the examples">
 		<mkdir dir="${build}/examples" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${examples}" destdir="${build}/examples" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${examples}" destdir="${build}/examples" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="examples.classpath"/>
 		</javac>
 		<copy todir="${build}/examples">
@@ -413,7 +446,10 @@
 
 	<target name="proxies" depends="core" description="compile the proxies">
 		<mkdir dir="${build}/proxies" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${proxies}" destdir="${build}/proxies" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${proxies}" destdir="${build}/proxies" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="proxies.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-proxies.jar" basedir="${build}/proxies" />
@@ -421,7 +457,10 @@
 
 	<target name="soft" depends="backends-share" description="build soft backend">
 		<mkdir dir="${build}/soft" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${soft}:${soft-new}" destdir="${build}/soft" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${soft}:${soft-new}" destdir="${build}/soft" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="backend.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-soft.jar" basedir="${build}/soft" />
@@ -429,7 +468,10 @@
 	
 	<target name="jogl" depends="backends-share, proxies" description="build jogl backend">
 		<mkdir dir="${build}/jogl" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${jogl}"  destdir="${build}/jogl" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${jogl}"  destdir="${build}/jogl" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="jogl.classpath"/>
 		</javac>
 		<copy todir="build/jogl">
@@ -444,7 +486,10 @@
 	
 	<target name="jogl3" depends="backends-share, proxies, jogl" description="build jogl3 backend">
 		<mkdir dir="${build}/jogl3" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${jogl3}"  destdir="${build}/jogl3" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${jogl3}"  destdir="${build}/jogl3" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="jogl3.classpath"/>
 		</javac>
 		<copy todir="build/jogl3">
@@ -459,7 +504,10 @@
 
 	<target name="gpgpu" depends="jogl" description="build gpgpu backend">
 		<mkdir dir="${build}/gpgpu" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${gpgpu}"  destdir="${build}/gpgpu" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${gpgpu}"  destdir="${build}/gpgpu" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="gpgpu.classpath"/>
 		</javac>
 		<copy todir="build/gpgpu">
@@ -474,7 +522,10 @@
 
 	<target name="swt" depends="jogl, tools" description="build swt viewer for the jogl backend">
 		<mkdir dir="${build}/swt" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${swt}"  destdir="${build}/swt" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${swt}"  destdir="${build}/swt" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="swt.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-swt.jar" basedir="${build}/swt" />
@@ -482,7 +533,10 @@
 
 	<target name="renderman" depends="core" description="build renderman backend">
 		<mkdir dir="${build}/renderman" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${renderman}" destdir="${build}/renderman" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${renderman}" destdir="${build}/renderman" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="backend.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-renderman.jar" basedir="${build}/renderman" />
@@ -490,7 +544,10 @@
 
 	<target name="sunflow" depends="core,backends-share" description="build sunflow backend">
 		<mkdir dir="${build}/sunflow" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${sunflow}" destdir="${build}/sunflow" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${sunflow}" destdir="${build}/sunflow" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="sunflow.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-sunflow.jar" basedir="${build}/sunflow" />
@@ -498,7 +555,10 @@
 
 	<target name="portal" depends="ui,jogl,soft,proxies" description="build portal backend">
 		<mkdir dir="${build}/portal" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${portal}" destdir="${build}/portal" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${portal}" destdir="${build}/portal" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="portal.classpath"/>
 		</javac>
 		<jar jarfile="${dist}/jReality-portal.jar" basedir="${build}/portal" />
@@ -507,7 +567,10 @@
 
 	<target name="plugin" depends="audio,ui,jogl,soft,proxies,portal,swing" description="build the jrworkspace plugins">
 		<mkdir dir="${build}/plugin" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${plugin}" destdir="${build}/plugin" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${plugin}" destdir="${build}/plugin" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="plugin.classpath"/>
 		</javac>
 		<copy todir="${build}/plugin">
@@ -520,7 +583,10 @@
 
 	<target name="tutorial" depends="audio,ui,jogl,soft,proxies,portal,swing,plugin" description="build tutorial ">
 		<mkdir dir="${build}/tutorial" />
-		<javac source="1.7" target="1.7" excludesfile="excludes.txt" srcdir="${tutorial}" destdir="${build}/tutorial" debug="true" includeantruntime="false">
+		<javac source="1.7" target="1.7" excludesfile="excludes.txt" 
+			srcdir="${tutorial}" destdir="${build}/tutorial" 
+			debug="true" includeantruntime="false"
+			fork="yes" executable="${jdk7_javac}">
 			<classpath refid="tutorial.classpath"/>
 		</javac>
 		<copy todir="${build}/tutorial">
