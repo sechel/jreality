@@ -559,7 +559,7 @@
 			<fileset dir="${tutorial}" defaultexcludes="yes">
 				<include name="de/jreality/**/*.java" />
 			</fileset>
-			<link href="http://java.sun.com/j2se/1.6/docs/api/"/>
+			<link href="http://docs.oracle.com/javase/6/docs/api/"/>
 			<link href="http://www3.math.tu-berlin.de/jtem/beans/api/"/>
 			<link href="http://www3.math.tu-berlin.de/jtem/jrworkspace/api/"/>
 			<link href="http://www3.math.tu-berlin.de/jtem/jterm/api/"/>
