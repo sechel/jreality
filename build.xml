@@ -5,7 +5,10 @@
 	
 	<echo message="Using Java version ${ant.java.version}."/>
 	<echo message="Switch to a Java version 7"/>
-	<property name="jdk7_javac" location="/usr/lib/jvm/java-7-oracle/bin/javac"/>
+	<!--standard for TU-Berlin SuSe/-->
+	<property name="jdk7_javac" location="/net/MathVis/java/java-7-oracle/bin/javac"/>
+	<!--standard for ubuntu/-->
+	<!--property name="jdk7_javac" location="/usr/lib/jvm/java-7-oracle/bin/javac"/-->
 	<echo message="Default: ${jdk7_javac}"/>
 		
 	<tstamp>
