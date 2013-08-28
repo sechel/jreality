@@ -365,7 +365,6 @@ public class SceneGraphUtility {
 	            	}
 	                double[] cmp = null;
 	         	    if (geometry instanceof IndexedFaceSet)	{
-	         	    	System.err.println("Visitng ifs "+geometry.getName());
 	         	    	IndexedFaceSet ifs =  (IndexedFaceSet) geometry;
 	         	    	ifs.setName(ifs.getName()+"Copy");
 	                    double[] mat = Rn.transpose(null, currentMatrix);          	
