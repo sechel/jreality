@@ -481,7 +481,6 @@ import de.jreality.scene.data.IntArrayArray;
 			if (keepFaceColors && oldFaceColors != null)	
 				oldFaceColor = oldFaceColors.item(i).toDoubleArray(null);
 			if (oldFaceColor == null) oldFaceColor = new double[]{1,1,1,1};
-			System.err.println("Old face color = "+Rn.toString(oldFaceColor));
 			int[] ndvi = nonDuplicateVertexIndicesForThisHole;
 			for (int k = 0; k<profileCurveSize-1; ++k)	{
 				for (int j = 0; j<totalVerticesPerLoop-1; ++j)	{
