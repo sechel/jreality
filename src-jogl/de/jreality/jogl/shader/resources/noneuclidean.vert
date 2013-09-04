@@ -118,10 +118,12 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
    vec4  halfVector;   // direction of maximum highlights
 
    // Compute distance between surface and light position
-   d = distance4(gl_LightSource[i].position, ecPosition4);
    toLight = gl_LightSource[i].position;
+    d = distance4(toLight, ecPosition4);
     // Normalize the vector from surface to light position
    normalize4(ecPosition4, toLight );
+//    if (!hyperbolic && toLight.w * ecPosition4.w < 0)
+//        toLight = -toLight;
 
  //   Compute attenuation
    if (hyperbolic) 
@@ -131,7 +133,7 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
     halfVector = (toLight + eye);
     if (hyperbolic) halfVector = -halfVector;
    normalize4(ecPosition4, halfVector); 
-   nDotVP = max(0.0, dot4(normal, toLight));
+    nDotVP = abs(dot4(normal, toLight)); //max(0.0, dot4(normal, toLight));
    nDotHV = max(0.0, dot4(normal, halfVector));
 
    if (nDotVP == 0.0) pf = 0.0;
@@ -139,7 +141,7 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
 		pf = pow(nDotHV, gl_FrontMaterial.shininess);
 
    Ambient  += gl_LightSource[i].ambient * attenuation;
-   Diffuse  += gl_LightSource[i].diffuse * nDotVP * attenuation;
+    Diffuse  += gl_LightSource[i].diffuse * nDotVP * attenuation;
    Specular += gl_LightSource[i].specular * pf * attenuation;
 }
 
@@ -169,7 +171,7 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
         }
    		color = gl_FrontLightModelProduct.sceneColor +
       	    Ambient  * matpar.ambient +
-      	    Diffuse  * gl_Color + // matpar.diffuse  +
+      	    Diffuse  * gl_Color*matpar.diffuse  +
       	    Specular * matpar.specular;
     } else  {
    		color = matpar.diffuse; //gl_FrontLightModelProduct.sceneColor +
@@ -189,8 +191,9 @@ void main (void)
 	bool normals4d = false;
 	// various ugly hacks used here to ship over the normals
 	if  (gl_Fog.start > 0.0) normals4d = true;
-	vec4 n4 = (normals4d) ? gl_MultiTexCoord3 : vec4(gl_Normal, Nw);
-    vec4  transformedNormal = gl_ModelViewMatrix * n4; 
+	vec4 n4 = (normals4d) ? gl_MultiTexCoord3 : vec4(gl_Normal, 1.0);
+    vec4  transformedNormal = gl_ModelViewMatrix * n4;
+    normalize4(transformedNormal);
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
     normalize4(ecPosition);
     normalize4(ecPosition, transformedNormal);
@@ -202,8 +205,8 @@ void main (void)
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
     transformedNormal = -transformedNormal;
     gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
-    if (gl_BackColor.r + gl_BackColor.g + gl_BackColor.b < .01) gl_BackColor = gl_FrontColor;
-    else if (gl_FrontColor.r + gl_FrontColor.g + gl_FrontColor.b < .01) gl_FrontColor = gl_BackColor;
+//    if (gl_BackColor.r + gl_BackColor.g + gl_BackColor.b < .01) gl_BackColor = gl_FrontColor;
+//    else if (gl_FrontColor.r + gl_FrontColor.g + gl_FrontColor.b < .01) gl_FrontColor = gl_BackColor;
     if (poincareModel)	{
         // p4 is in the coordinate system of H3
       	vec4 p4 =  cam2H * ecPosition;
@@ -217,5 +220,7 @@ void main (void)
 //     	gl_Position = gl_ModelViewProjectionMatrix * ( gl_ModelViewMatrixInverse * (H2NDC * p4)); 
      }
 	else     gl_Position = ftransform();
+    gl_BackColor = .75 * gl_BackColor;
+//    gl_BackColor.a = 2 * gl_BackColor.a;
 }
 
