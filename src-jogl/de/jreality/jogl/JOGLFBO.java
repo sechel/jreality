@@ -11,10 +11,11 @@ import javax.media.opengl.GL2;
 
 import com.jogamp.opengl.util.awt.ImageUtil;
 
+//import com.sun.opengl.util.ImageUtil;
+
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
-//import com.sun.opengl.util.ImageUtil;
 
 /**
  * Parts of this implementation are not pretty. Particularly the case when the
@@ -183,9 +184,10 @@ public class JOGLFBO {
 				tex.setSource0Alpha(Texture2D.SOURCE0_ALPHA_DEFAULT);
 			}
 		} else {
-			if (tex != null)
+			if (tex != null && tex.getSource1Alpha() != txt[0]) {
 				tex.setSource1Alpha(txt[0]);
-			tex.setSource0Alpha(23);
+				tex.setSource0Alpha(23);				
+			}
 		}
 		if (dispose)
 			dispose(gl);
