@@ -26,7 +26,7 @@ public class Scene extends Plugin {
 	private List<ChangeListener> 
 		changeListeners = synchronizedList(new LinkedList<ChangeListener>());
 	boolean clippingPlanes = true;		// does the scene allow automatics setting of clipping planes?
-	static double defaultZTranslation = 16.0;
+	public static double defaultZTranslation = 16.0;
 	static JrScene defaultScene() {
 		//sceneRoot of the JrScene
 		SceneGraphComponent sceneRoot = new SceneGraphComponent("root");
@@ -256,11 +256,11 @@ public class Scene extends Plugin {
 		return ef;
 	}
 
-	public double getDefaultZTranslation() {
+	public static double getDefaultZTranslation() {
 		return defaultZTranslation;
 	}
 
-	public void setDefaultZTranslation(double defaultZTranslation) {
+	public static void setDefaultZTranslation(double defaultZTranslation) {
 		Scene.defaultZTranslation = defaultZTranslation;
 	}
 }
