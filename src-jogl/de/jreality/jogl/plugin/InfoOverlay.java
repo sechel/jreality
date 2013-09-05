@@ -183,9 +183,9 @@ public class InfoOverlay implements GLEventListener {
 			gl.glMatrixMode(GL2.GL_MODELVIEW);
 			gl.glPopMatrix();
 		}catch(Exception e){
-			System.out.println("No Info InfoOverlay in jogl3 backend, because cannot mix GL2 and GL3 on your system, more exactly: " + e.getMessage() + 
-					"This can be fixed by writing a seperate InfoOverlay implementation for both jogl and jogl3. Basically" +
-					"there must not be openGL code outside the backend to avoid this problem");
+			//System.out.println("No Info InfoOverlay in jogl3 backend, because cannot mix GL2 and GL3 on your system, more exactly: " + e.getMessage() + 
+			//		"This can be fixed by writing a seperate InfoOverlay implementation for both jogl and jogl3. Basically" +
+			//		"there must not be openGL code outside the backend to avoid this problem");
 		}
 	}
 
