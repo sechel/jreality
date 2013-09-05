@@ -328,11 +328,23 @@ final public class P2 {
 			double[] xdir, int metric) {
 		if (dst == null) dst = new double[9];
 		Pn.normalize(point, point, metric);
-		double[] polarP = Pn.polarize(null, point, metric);
-		double[] lineP = lineFromPoints(null, point, xdir);
-		double[] p1n = Pn.normalize(null, pointFromLines(null, polarP, lineP), metric);
-		double[] p2 = Pn.polarize(null, lineP, metric);
-		Pn.normalize(p2, p2, metric);
+		double[] p2 = null, p1n = null;
+		if (metric == Pn.EUCLIDEAN)	{ // handle it special since the code is fragile
+			p1n = xdir.clone();
+			if (p1n[2] != 0)	{	// have to convert to free vector
+				Pn.dehomogenize(p1n, p1n);
+				Rn.subtract(p1n, p1n, point);	// now it should have w-coordinate = 0
+			}
+			Rn.normalize(p1n, p1n);		// normalize wrt euclidean VS metric
+			p2 = new double[]{-p1n[1], p1n[0], 0};  // rotate clockwise by 90 degrees
+		} else {	
+			double[] polarP = Pn.polarize(null, point, metric);
+			double[] lineP = lineFromPoints(null, point, xdir);
+			// the following is not reliable in the euclidean case: sometimes produces flipped result
+			p1n = Pn.normalize(null, pointFromLines(null, polarP, lineP), metric);
+			p2 = Pn.polarize(null, lineP, metric);
+			Pn.normalize(p2, p2, metric);			
+		}
 		makeMatrixFromColumns(dst, p1n, p2, point);
 		return dst;
 	}
