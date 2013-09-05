@@ -64,6 +64,7 @@ public final class Readers {
 		registerFileEndings("POV", "pov");
 		registerFileEndings("BSH", "bsh");
 		registerFileEndings("LAS", "las");
+		//registerFileEndings("OBJTexture", "obj");
 		registerFileEndings("OBJ", "obj");
 		registerFileEndings("3DS", "3ds");
 		registerFileEndings("JVX", "jvx");
