@@ -59,9 +59,7 @@
 	<property name="jni-macosx" location="jni/macosx" />
 	<property name="jni-win32" location="jni/win32" />
 	<property name="jni-win64" location="jni/win64" />
-	
-	<property environment="env"/>
-		
+
 	<path id="backends-share.classpath">
 		<fileset dir="dist">
 			<include name="jReality-core.jar"/>
@@ -352,9 +350,9 @@
 	</target>
 
     <target name="swing" depends="core,tools,backends-share" description="compile the swing widget integration">
-        <!--condition property="java7">
+        <condition property="java6">
         	<equals arg1="${ant.java.version}" arg2="${target}"/>
-      	</condition-->
+      	</condition>
         <mkdir dir="${build}/swing" />
         <javac source="${source}" target="${target}" excludesfile="excludes.txt" 
         	srcdir="${swing}" destdir="${build}/swing" 
