@@ -41,6 +41,11 @@
 package de.jreality.shader;
 
 import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.SwingConstants;
+
+import sun.awt.resources.awt;
 
 import de.jreality.geometry.FrameFieldType;
 import de.jreality.scene.Appearance;
@@ -196,10 +201,13 @@ import de.jreality.scene.Appearance;
 //	@Deprecated
 	public static final String ALIGNMENT = "alignment";
 //	@Deprecated
-	public static final String FONT	= "font";	
+	public static final String FONT	= "font";
 	public static final String TEXT_SCALE = "scale";
+	public static final double TEXT_SCALE_DEFAULT = 0.01;
 	public static final String TEXT_OFFSET = "offset";
 	public static final String TEXT_ALIGNMENT = "alignment";
+	public static final int TEXT_ALIGNMENT_DEFAULT = SwingConstants.CENTER;
+	public static final double[] TEXT_OFFSET_DEFAULT = new double[]{0d,0d,0d};
 	public static final String TEXT_FONT	= "font";
 	public static final String TEXT_COLOR	= TEXT_SHADER+".diffuseColor";
 	
@@ -254,7 +262,12 @@ import de.jreality.scene.Appearance;
 	public static final String HAPTIC_DYNAMIC_FRICTION = "dynamicFriction";
 	public static final double HAPTIC_DYNAMIC_FRICTION_DEFAULT = 0.3;
 	
+	final static Boolean SHOW_LABELS_DEFAULT = Boolean.TRUE;
+	final static String SHOW_LABELS = "showLabels";
+	
 	public static Object getDefault(String key, Object value){
+		if(key.equals(SHOW_LABELS))
+			return SHOW_LABELS_DEFAULT;
 		if(key.equals("reflectionMap"))
 			return false;
 		if(key.equals("ambientColor"))
@@ -324,6 +337,15 @@ import de.jreality.scene.Appearance;
 			return LINE_LIGHTING_ENABLED_DEFAULT;
 		if(key.equals(LIGHTING_ENABLED))
 			return LIGHTING_ENABLED_DEFAULT;
+		
+		if(key.equals(FONT))
+			return new Font(Font.SANS_SERIF, Font.BOLD, 30);
+		if(key.equals(TEXT_SCALE))
+			return TEXT_SCALE_DEFAULT;
+		if(key.equals(TEXT_OFFSET))
+			return TEXT_OFFSET_DEFAULT;
+		if(key.equals(TEXT_ALIGNMENT))
+			return TEXT_ALIGNMENT_DEFAULT;
 		
 		return value;
 	}

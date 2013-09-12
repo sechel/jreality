@@ -147,6 +147,7 @@ public class TransparencyHelper {
     	gl.glClearDepth(1);
     	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
     	
+    	//TODO is this correct??
     	gl.glDisable(gl.GL_BLEND);
     	for(RenderableObject o : nonTransp){
     		o.render(width, height);

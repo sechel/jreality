@@ -70,6 +70,11 @@ public abstract class JOGLGeometryEntity extends SceneGraphNodeEntity implements
 			return true;
 		return false;
 	}
+	protected boolean isStringArray(StorageModel sm){
+		if(sm==StorageModel.STRING_ARRAY)
+			return true;
+		return false;
+	}
 	
 	public abstract void updateData(GL3 gl);
 

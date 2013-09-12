@@ -15,13 +15,15 @@ import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.StringArray;
 import de.jreality.scene.event.GeometryEvent;
 
 public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 
 	//private GLVBOFloat normalVBO = null;
 	private HashMap<String, GLVBO> vbos = new HashMap<String, GLVBO>();
-	
+	public Label[] labels = new Label[0];
+	public int labelsChangedNo = 0;
 	public int getNumVBOs(){
 		return vbos.size();
 	}
@@ -49,8 +51,6 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 //		System.out.println("JOGLFaceSetEntity.geometryChanged()");
 		super.geometryChanged(ev);
 	}
-
-	
 	
 	//replace state to gl
 	public void updateData(GL3 gl) {
@@ -226,6 +226,51 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 						count += (face.getLength()-2)*3;
 					}
 					vbos.put("face_"+nameInShader, new GLVBOInt(gl, inflatedAttributeArray, "face_"+a.getName()));
+					System.out.println("creating " + "face_"+a.getName());
+				}else if(/*a.getName().equals("labels") && */isStringArray(attribs.getStorageModel())){
+					labelsChangedNo++;
+					StringArray SA = (StringArray)attribs;
+					count = 0;
+					for(int i = 0; i < fs.getNumFaces(); i++){
+						String s = SA.getValueAt(i);
+						if(!s.equals(""))
+							count++;
+					}
+					labels = new Label[count];
+					
+					//coordinates of the 8 vertices
+					DataList attrib = fs.getVertexAttributes(Attribute.COORDINATES);
+					count = 0;
+					for(int i = 0; i < fs.getNumFaces(); i++){
+						String s = SA.getValueAt(i);
+						if(!s.equals("")){
+							labels[count] = new Label();
+							labels[count].text = s;
+							
+							//indices of the i'th face
+							IntArray face = fs.getFaceAttributes(Attribute.INDICES).item(i).toIntArray();
+							
+							double[] du = new double[4];
+							for(int j = 0; j < face.getLength(); j++){
+								int k = face.getValueAt(j);
+								DoubleArrayArray dA = (DoubleArrayArray)attrib;
+								DoubleArray d = dA.getValueAt(k);
+								du[0] += d.getValueAt(0);
+								du[1] += d.getValueAt(1);
+								du[2] += d.getValueAt(2);
+								//du[3] += d.getValueAt(3);
+							}
+							du[0] /= face.getLength();
+							du[1] /= face.getLength();
+							du[2] /= face.getLength();
+							//this is neccessary because we add it as a vector to another vector in the vertex shader
+							du[3] = 1;
+							
+							labels[count].position = du;
+							count++;
+						}
+					}
+					
 					System.out.println("creating " + "face_"+a.getName());
 				}else{
 					System.out.println("FSE 1: not knowing what to do with " + attribs.getStorageModel().toString());

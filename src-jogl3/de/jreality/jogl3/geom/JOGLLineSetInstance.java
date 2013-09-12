@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.InstanceFontData;
 import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.LineShader;
 import de.jreality.jogl3.shader.TubesLineShader;
 import de.jreality.scene.IndexedLineSet;
@@ -22,6 +24,10 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	public JOGLLineSetInstance(IndexedLineSet node) {
 		super(node);
 	}
+	
+	private int labelsChangedNoCache = 0;
+	private LabelRenderData labelData = new LabelRenderData();
+	
 	public void render(JOGLRenderState state, int width, int height) {
 		if(eap==null)
 			return;
@@ -29,6 +35,12 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
 		if(visible){
+			if(lse.labelsChangedNo != labelsChangedNoCache){
+				//update label texture
+				updateLabelTextureAndVBOsAndUniforms(state.getGL(), labelData, lse.labels, ifd);
+				labelsChangedNoCache = lse.labelsChangedNo;
+			}
+			
 			boolean tubesDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.TUBES_DRAW), CommonAttributes.TUBES_DRAW_DEFAULT);
 			if(tubesDraw)
 				TubesLineShader.render(lse, lineSetPolygonUniforms, lineReflMap, linePolygonShader, state, width, height);
@@ -36,6 +48,9 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 				float lineWidth = (float)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 	        	LineShader.render(lse, lineSetUniforms, lineShader, state, lineWidth);
 			}
+			
+			if(labelData.drawLabels)
+				LabelShader.render(labelData, lse.labels, state);
 		}
 	}
 	@Override
@@ -51,6 +66,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	}
 	public LinkedList<GlUniform> lineSetUniforms = new LinkedList<GlUniform>();
 	public LinkedList<GlUniform> lineSetPolygonUniforms = new LinkedList<GlUniform>();
+	public InstanceFontData ifd = new InstanceFontData();
 	public GlTexture lineTexture = new GlTexture();
 	public GlReflectionMap lineReflMap = new GlReflectionMap();
 	@Override
@@ -59,9 +75,12 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		lineSetUniforms = new LinkedList<GlUniform>();
 		lineSetPolygonUniforms = new LinkedList<GlUniform>();
 		
-		linePolygonShader = updateAppearance(GLShader.defaultPolygonLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, lineReflMap, "lineShader.polygonShader");
+		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		
-		lineShader = updateAppearance(GLShader.defaultLineShader, sgp, gl, lineSetUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
+		linePolygonShader = updateAppearance(ifd, GLShader.defaultPolygonLineShader, sgp, gl, lineSetPolygonUniforms, lineTexture, lineReflMap, "lineShader.polygonShader");
 		
+		lineShader = updateAppearance(ifd, GLShader.defaultLineShader, sgp, gl, lineSetUniforms, lineTexture, new GlReflectionMap(), CommonAttributes.LINE_SHADER);
+		
+		updateLabelTextureAndVBOsAndUniforms(gl, labelData, fse.labels, ifd);
 	}
 }

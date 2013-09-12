@@ -13,13 +13,16 @@ import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.StringArray;
 import de.jreality.scene.event.GeometryEvent;
 
 public class JOGLLineSetEntity extends JOGLPointSetEntity {
 
 	private HashMap<String, GLVBO> lineVbos = new HashMap<String, GLVBO>();
-	
+	public Label[] labels = new Label[0];
+	public int labelsChangedNo = 0;
 	
 	public JOGLLineSetEntity(IndexedLineSet node) {
 		super(node);
@@ -144,6 +147,51 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 					}
 					lineVbos.put("edge_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "edge_"+a.getName()));
 //					System.out.println("creating " + "edge_"+a.getName());
+				}else if(/*a.getName().equals("labels") && */isStringArray(attribs.getStorageModel())){
+					labelsChangedNo++;
+					StringArray SA = (StringArray)attribs;
+					count = 0;
+					for(int i = 0; i < ls.getNumEdges(); i++){
+						String s = SA.getValueAt(i);
+						if(!s.equals(""))
+							count++;
+					}
+					labels = new Label[count];
+					
+					//coordinates of the 8 vertices
+					DataList attrib = ls.getVertexAttributes(Attribute.COORDINATES);
+					count = 0;
+					for(int i = 0; i < ls.getNumEdges(); i++){
+						String s = SA.getValueAt(i);
+						if(!s.equals("")){
+							labels[count] = new Label();
+							labels[count].text = s;
+							
+							//indices of the i'th face
+							IntArray edge = ls.getEdgeAttributes(Attribute.INDICES).item(i).toIntArray();
+							
+							double[] du = new double[4];
+							for(int j = 0; j < edge.getLength(); j++){
+								int k = edge.getValueAt(j);
+								DoubleArrayArray dA = (DoubleArrayArray)attrib;
+								DoubleArray d = dA.getValueAt(k);
+								du[0] += d.getValueAt(0);
+								du[1] += d.getValueAt(1);
+								du[2] += d.getValueAt(2);
+								//du[3] += d.getValueAt(3);
+							}
+							du[0] /= edge.getLength();
+							du[1] /= edge.getLength();
+							du[2] /= edge.getLength();
+							//this is neccessary because we add it as a vector to another vector in the vertex shader
+							du[3] = 1;
+							
+							labels[count].position = du;
+							count++;
+						}
+					}
+					
+					System.out.println("creating " + "edge_"+a.getName());
 				}else{
 					System.out.println("LSE1: not knowing what to do with " + attribs.getStorageModel().toString() + ", " + a.getName());
 				}

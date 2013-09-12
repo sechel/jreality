@@ -13,12 +13,16 @@ import de.jreality.scene.PointSet;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.StringArray;
 import de.jreality.scene.event.GeometryEvent;
 
 public class JOGLPointSetEntity extends JOGLGeometryEntity {
 
 	private HashMap<String, GLVBO> pointVbos = new HashMap<String, GLVBO>();
+	public Label[] labels = new Label[0];
+	public int labelsChangedNo = 0;
 	
 	public GLVBO getPointVBO(String s) {
 		// TODO Auto-generated method stub
@@ -126,6 +130,40 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 					pointVbos.put("vertex_"+shaderName, new GLVBOInt(gl, inflatedAttributeArray, "vertex_"+a.getName()));
 //					System.out.println("creating " + "vertex_"+a.getName());
 				
+				}else if(/*a.getName().equals("labels") && */isStringArray(attribs.getStorageModel())){
+					labelsChangedNo++;
+					StringArray SA = (StringArray)attribs;
+					int count = 0;
+					for(int i = 0; i < ps.getNumPoints(); i++){
+						String s = SA.getValueAt(i);
+						if(!s.equals(""))
+							count++;
+					}
+					labels = new Label[count];
+					
+					//coordinates of the 8 vertices
+					DataList attrib = ps.getVertexAttributes(Attribute.COORDINATES);
+					count = 0;
+					for(int i = 0; i < ps.getNumPoints(); i++){
+						String s = SA.getValueAt(i);
+						if(!s.equals("")){
+							labels[count] = new Label();
+							labels[count].text = s;
+							
+							
+							double[] du = new double[4];
+							DoubleArrayArray dA = (DoubleArrayArray)attrib;
+							du[0] = dA.getValueAt(count).getValueAt(0);
+							du[1] = dA.getValueAt(count).getValueAt(1);
+							du[2] = dA.getValueAt(count).getValueAt(2);
+							du[3] = 1;
+							
+							labels[count].position = du;
+							count++;
+						}
+					}
+					
+					System.out.println("creating " + "point_"+a.getName());
 				}else{
 					System.out.println("PSE1: not knowing what to do with " + attribs.getStorageModel().toString()+" "+attribs.getStorageModel().getClass().toString() + a.getName());
 				}

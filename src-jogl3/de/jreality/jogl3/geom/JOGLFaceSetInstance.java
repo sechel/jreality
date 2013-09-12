@@ -7,11 +7,13 @@ import javax.media.opengl.GL3;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.TransparencyHelper;
+import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.PolygonShader;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
+import de.jreality.shader.Texture2D;
 
 public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 
@@ -23,6 +25,8 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		super(node);
 	}
 	
+	private int labelsChangedNoCache = 0;
+	private LabelRenderData labelData = new LabelRenderData();
 	@Override
 	public void render(JOGLRenderState state, int width, int height) {
 		if(eap==null)
@@ -31,8 +35,16 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
-		if(visible && !transparencyEnabled)
+		if(visible && !transparencyEnabled){
+			if(fse.labelsChangedNo != labelsChangedNoCache){
+				//update label texture
+				updateLabelTextureAndVBOsAndUniforms(state.getGL(), labelData, fse.labels, ifd);
+				labelsChangedNoCache = fse.labelsChangedNo;
+			}
 			PolygonShader.render(fse, faceSetUniforms, faceTexture, reflMap, polygonShader, state);
+			if(labelData.drawLabels)
+				LabelShader.render(labelData, fse.labels, state);
+		}
 	}
 
 	@Override
@@ -58,6 +70,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	}
 	
 	public LinkedList<GlUniform> faceSetUniforms = new LinkedList<GlUniform>();
+	public InstanceFontData ifd = new InstanceFontData();
 	public GlTexture faceTexture = new GlTexture();
 	public GlReflectionMap reflMap = new GlReflectionMap();
 	@Override
@@ -66,7 +79,9 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 //		JOGLFaceSetEntity entity = (JOGLFaceSetEntity)this.getEntity();
 //		IndexedFaceSet fs = (IndexedFaceSet)entity.getNode();
 		faceSetUniforms = new LinkedList<GlUniform>();
-		polygonShader = updateAppearance(GLShader.defaultPolygonShader, sgp, gl, faceSetUniforms, faceTexture, reflMap, CommonAttributes.POLYGON_SHADER);
+		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
+		polygonShader = updateAppearance(ifd, GLShader.defaultPolygonShader, sgp, gl, faceSetUniforms, faceTexture, reflMap, CommonAttributes.POLYGON_SHADER);
+		updateLabelTextureAndVBOsAndUniforms(gl, labelData, fse.labels, ifd);
 	}
 
 }

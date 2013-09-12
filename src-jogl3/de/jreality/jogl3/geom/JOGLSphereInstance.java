@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.InstanceFontData;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.shader.SphereShader;
@@ -57,11 +58,12 @@ public class JOGLSphereInstance extends JOGLGeometryInstance {
 	}
 
 	public LinkedList<GlUniform> sphereUniforms = new LinkedList<GlUniform>();
+	public InstanceFontData ifd = new InstanceFontData();
 	public GlTexture polygonTexture = new GlTexture();
 	public GlReflectionMap polygonReflMap = new GlReflectionMap();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
 		sphereUniforms = new LinkedList<GlUniform>();
-		sphereShader = updateAppearance(GLShader.defaultSphereShader, sgp, gl, sphereUniforms, polygonTexture, polygonReflMap, CommonAttributes.POLYGON_SHADER);
+		sphereShader = updateAppearance(ifd, GLShader.defaultSphereShader, sgp, gl, sphereUniforms, polygonTexture, polygonReflMap, CommonAttributes.POLYGON_SHADER);
 	}
 }
