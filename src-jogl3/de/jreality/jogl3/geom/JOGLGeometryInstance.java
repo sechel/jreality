@@ -211,12 +211,12 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	}
 	
 	public class LabelRenderData{
-		public Texture2D tex;//
-		public GLVBOFloat points;//
-		public GLVBOFloat ltwh;//
+		public Texture2D[] tex;//
+		public GLVBOFloat[] points;//
+		public GLVBOFloat[] ltwh;//
 		//public float scale;//
 		public float[] xyzOffsetScale = new float[4];//
-		public float[] xyAlignmentTotalWH = new float[4];//
+		public float[][] xyAlignmentTotalWH;// = new float[4];//
 		public boolean drawLabels;
 	}
 	
@@ -227,7 +227,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			bi = new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
 			frc = bi.createGraphics().getFontRenderContext();
 		}
-	
+	private final int MAX_TEX_SIZE = 16000;
 	public void updateLabelTextureAndVBOsAndUniforms(GL3 gl, LabelRenderData lrd, Label[] labels, InstanceFontData ifd){
 		if(labels == null || labels.length == 0)
 			return;
@@ -238,24 +238,17 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		lrd.xyzOffsetScale[0] = (float)ifd.offset[0];
 		lrd.xyzOffsetScale[1] = (float)ifd.offset[1];
 		lrd.xyzOffsetScale[2] = (float)ifd.offset[2];
-		float[] points = new float[4*labels.length];
-		for(int i = 0; i < labels.length; i++){
-			points[4*i+0] = (float)labels[i].position[0];
-			points[4*i+1] = (float)labels[i].position[1];
-			points[4*i+2] = (float)labels[i].position[2];
-			points[4*i+3] = (float)labels[i].position[3];
-		}
-		lrd.points = new GLVBOFloat(gl, points, "centers");
 		
-		float[] ltwh = new float[4*labels.length];
+		
+		
+		//first, find out how many textures we need
+		int texcount = 1;
 		
 		BufferedImage buf;
-		
 		int totalwidth = 0, totalheight = 0, hh[][] = new int[labels.length][];
+		int width[] = new int[labels.length];
 		String[][] ss = new String[labels.length][];
 		float border[] = new float[labels.length];
-		int width[] = new int[labels.length];
-		
 		for(int j = 0; j < labels.length; j++){
 			border[j] = 0.0f;
 			ss[j] = labels[j].text.split("\n");
@@ -288,52 +281,148 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			if(height > totalheight)
 				totalheight = height;
 			totalwidth += width[j];
-		}
 			
-			
-		buf = new BufferedImage(totalwidth, totalheight,BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = (Graphics2D) buf.getGraphics();
-		g.setBackground(new Color(0,0,0,0));
-		g.clearRect(0, 0, totalwidth, totalheight);
-		g.setColor(ifd.color);
-		g.setFont(ifd.font);
-		// LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		int widthOffset = 0;
-		for(int j = 0; j < labels.length; j++){
-			int height = 0;
-			for (int i = 0; i < ss[j].length; ++i) {
-				g.drawString(ss[j][i], widthOffset, height + border[j]);
-				height += hh[j][i];
+//			System.out.println("totalwidth = " + totalwidth);
+//			System.out.println("totalwidth 1st loop = " + totalwidth);
+			if(totalwidth > MAX_TEX_SIZE){
+				texcount++;
+				totalwidth = width[j];
+				totalheight = height;
 			}
-			ltwh[4*j+0] = (widthOffset*1.0f)/totalwidth;
-			ltwh[4*j+1] = 0;
-			ltwh[4*j+2] = (width[j]*1.0f)/totalwidth;
-			ltwh[4*j+3] = (height*1.0f)/totalheight;
-			widthOffset += width[j];
 		}
-		lrd.ltwh = new GLVBOFloat(gl, ltwh, "ltwh");
+//		System.out.println("texcount = " + texcount);
+		lrd.tex = new Texture2D[texcount];//
+		lrd.points = new GLVBOFloat[texcount];//
+		lrd.ltwh = new GLVBOFloat[texcount];//
+		lrd.xyAlignmentTotalWH = new float[texcount][];//
 		
-		//TODO do alignment
-		lrd.xyAlignmentTotalWH = new float[]{0, 0, totalwidth, totalheight};
+		int[] pointCounter = new int[texcount];
+		//and everything again, this time saving all variables
+		texcount = 0;
+		totalwidth = 0;
+		for(int j = 0; j < labels.length; j++){
+			pointCounter[texcount]++;
+			border[j] = 0.0f;
+			//maybe unneccessary
+			ss[j] = labels[j].text.split("\n");
+			width[j] = 0;
+			int height = 0;
+			//maybe unneccessary
+			hh[j] = new int[ss[j].length];
+		  
+			
+			if (ifd.font == null)
+				ifd.font = new Font("Sans Serif",Font.PLAIN,48);
+			// process the strings to find out how large the image needs to be
+			// I'm not sure if I'm handling the border correctly: should a new border
+			// be added for each string?  Or only for the first or last?
+		  
+			//only measuring the size of the rectangle needed to draw all these lines of text
+			for (int i = 0; i < ss[j].length; ++i) {
+				String s = ss[j][i];
+				if (s == null || s.length() == 0) {
+					buf=bi;
+				}
+				TextLayout tl = new TextLayout(s, ifd.font, frc);
+				Rectangle r = tl.getBounds().getBounds();
+				//maybe unneccessary
+				hh[j][i] = (int) ifd.font.getLineMetrics(s, frc).getHeight();
+				height += hh[j][i];
+				int tmp = (r.width + 20);
+				if (tmp > width[j]) width[j] = tmp;
+				float ftmp = hh[j][i] - tl.getDescent();
+				if (ftmp > border[j]) border[j] = ftmp;
+			}
+			if(height > totalheight)
+				totalheight = height;
+			totalwidth += width[j];
+			
+//			System.out.println("totalwidth 2nd loop = " + totalwidth);
+			if(totalwidth > MAX_TEX_SIZE){
+//				System.out.println("texcount inside loop = " + texcount);
+				pointCounter[texcount]--;
+				pointCounter[texcount+1] = 1;
+				lrd.xyAlignmentTotalWH[texcount] = new float[4];
+				lrd.xyAlignmentTotalWH[texcount][2] = totalwidth-width[j];
+				lrd.xyAlignmentTotalWH[texcount][3] = totalheight;
+				switch(ifd.alignment){
+					case SwingConstants.NORTH  : lrd.xyAlignmentTotalWH[texcount][0] = -.5f; lrd.xyAlignmentTotalWH[texcount][1] = -1f; break;
+					case SwingConstants.EAST   : lrd.xyAlignmentTotalWH[texcount][0] = 0; lrd.xyAlignmentTotalWH[texcount][1] = -.5f; break;
+					case SwingConstants.SOUTH  : lrd.xyAlignmentTotalWH[texcount][0] = -.5f; lrd.xyAlignmentTotalWH[texcount][1] = 0; break;
+					case SwingConstants.WEST   : lrd.xyAlignmentTotalWH[texcount][0] = -1f; lrd.xyAlignmentTotalWH[texcount][1] = -.5f; break;
+					case SwingConstants.CENTER : lrd.xyAlignmentTotalWH[texcount][0] = -.5f; lrd.xyAlignmentTotalWH[texcount][1] = -.5f; break;
+					case SwingConstants.NORTH_EAST : lrd.xyAlignmentTotalWH[texcount][0] = 0; lrd.xyAlignmentTotalWH[texcount][1] = -1f; break;
+					//case SwingConstants.SOUTH_EAST : default
+					case SwingConstants.SOUTH_WEST : lrd.xyAlignmentTotalWH[texcount][0] = -1f; lrd.xyAlignmentTotalWH[texcount][1] = 0f; break;
+					case SwingConstants.NORTH_WEST : lrd.xyAlignmentTotalWH[texcount][0] = -1f; lrd.xyAlignmentTotalWH[texcount][1] = -1f; break;
+				}
+				texcount++;
+				totalwidth = width[j];
+				totalheight = height;
+			}
+		}
+//		System.out.println("texcount = " + texcount);
+		lrd.xyAlignmentTotalWH[texcount] = new float[4];
+		lrd.xyAlignmentTotalWH[texcount][2] = totalwidth;
+		lrd.xyAlignmentTotalWH[texcount][3] = totalheight;
 		switch(ifd.alignment){
-			case SwingConstants.NORTH  : lrd.xyAlignmentTotalWH[0] = -.5f; lrd.xyAlignmentTotalWH[1] = -1f; break;
-			case SwingConstants.EAST   : lrd.xyAlignmentTotalWH[0] = 0; lrd.xyAlignmentTotalWH[1] = -.5f; break;
-			case SwingConstants.SOUTH  : lrd.xyAlignmentTotalWH[0] = -.5f; lrd.xyAlignmentTotalWH[1] = 0; break;
-			case SwingConstants.WEST   : lrd.xyAlignmentTotalWH[0] = -1f; lrd.xyAlignmentTotalWH[1] = -.5f; break;
-			case SwingConstants.CENTER : lrd.xyAlignmentTotalWH[0] = -.5f; lrd.xyAlignmentTotalWH[1] = -.5f; break;
-			case SwingConstants.NORTH_EAST : lrd.xyAlignmentTotalWH[0] = 0; lrd.xyAlignmentTotalWH[1] = -1f; break;
+			case SwingConstants.NORTH  : lrd.xyAlignmentTotalWH[texcount][0] = -.5f; lrd.xyAlignmentTotalWH[texcount][1] = -1f; break;
+			case SwingConstants.EAST   : lrd.xyAlignmentTotalWH[texcount][0] = 0; lrd.xyAlignmentTotalWH[texcount][1] = -.5f; break;
+			case SwingConstants.SOUTH  : lrd.xyAlignmentTotalWH[texcount][0] = -.5f; lrd.xyAlignmentTotalWH[texcount][1] = 0; break;
+			case SwingConstants.WEST   : lrd.xyAlignmentTotalWH[texcount][0] = -1f; lrd.xyAlignmentTotalWH[texcount][1] = -.5f; break;
+			case SwingConstants.CENTER : lrd.xyAlignmentTotalWH[texcount][0] = -.5f; lrd.xyAlignmentTotalWH[texcount][1] = -.5f; break;
+			case SwingConstants.NORTH_EAST : lrd.xyAlignmentTotalWH[texcount][0] = 0; lrd.xyAlignmentTotalWH[texcount][1] = -1f; break;
 			//case SwingConstants.SOUTH_EAST : default
-			case SwingConstants.SOUTH_WEST : lrd.xyAlignmentTotalWH[0] = -1f; lrd.xyAlignmentTotalWH[1] = 0f; break;
-			case SwingConstants.NORTH_WEST : lrd.xyAlignmentTotalWH[0] = -1f; lrd.xyAlignmentTotalWH[1] = -1f; break;
+			case SwingConstants.SOUTH_WEST : lrd.xyAlignmentTotalWH[texcount][0] = -1f; lrd.xyAlignmentTotalWH[texcount][1] = 0f; break;
+			case SwingConstants.NORTH_WEST : lrd.xyAlignmentTotalWH[texcount][0] = -1f; lrd.xyAlignmentTotalWH[texcount][1] = -1f; break;
 		}
 		
-		ImageData img = new ImageData(buf);
-		
-		Texture2D labelTexture = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
-		labelTexture.setImage(img);
-		lrd.tex = labelTexture;
+		int jCounter = 0;
+//		System.out.println("tex.length = " + lrd.tex.length);
+		for(int i = 0; i < lrd.tex.length; i++){
+//			System.out.println("i = " + i);
+			float[] ltwh = new float[4*pointCounter[i]];
+			buf = new BufferedImage((int)lrd.xyAlignmentTotalWH[i][2], (int)lrd.xyAlignmentTotalWH[i][3],BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g = (Graphics2D) buf.getGraphics();
+			g.setBackground(new Color(0,0,0,0));
+			g.clearRect(0, 0, (int)lrd.xyAlignmentTotalWH[i][2], (int)lrd.xyAlignmentTotalWH[i][3]);
+			g.setColor(ifd.color);
+			g.setFont(ifd.font);
+			// LineMetrics lineMetrics = f.getLineMetrics(s,frc).getHeight();
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_ON);
+			int widthOffset = 0;
+			for(int j = jCounter; j < jCounter+pointCounter[i]; j++){
+				int height = 0;
+				
+				for (int k = 0; k < ss[j].length; ++k) {
+					g.drawString(ss[j][k], widthOffset, height + border[j]);
+					height += hh[j][k];
+				}
+				ltwh[4*(j-jCounter)+0] = (widthOffset*1.0f)/lrd.xyAlignmentTotalWH[i][2];
+				ltwh[4*(j-jCounter)+1] = 0;
+				ltwh[4*(j-jCounter)+2] = (width[j]*1.0f)/lrd.xyAlignmentTotalWH[i][2];
+				ltwh[4*(j-jCounter)+3] = (height*1.0f)/lrd.xyAlignmentTotalWH[i][3];
+				widthOffset += width[j];
+			}
+			float[] points = new float[4*pointCounter[i]];
+			for(int k = 0; k < pointCounter[i]; k++){
+				points[4*k+0] = (float)labels[k+jCounter].position[0];
+				points[4*k+1] = (float)labels[k+jCounter].position[1];
+				points[4*k+2] = (float)labels[k+jCounter].position[2];
+				points[4*k+3] = (float)labels[k+jCounter].position[3];
+			}
+			lrd.points[i] = new GLVBOFloat(gl, points, "centers");
+			
+			jCounter += pointCounter[i];
+			lrd.ltwh[i] = new GLVBOFloat(gl, ltwh, "ltwh");
+			
+			ImageData img = new ImageData(buf);
+			
+			Texture2D labelTexture = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+			labelTexture.setImage(img);
+			lrd.tex[i] = labelTexture;
+		}
 	}
 	
 	//in the new version we use type only to identify the shader source
