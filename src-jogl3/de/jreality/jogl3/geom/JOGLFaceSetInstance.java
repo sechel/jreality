@@ -42,6 +42,8 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 				labelsChangedNoCache = fse.labelsChangedNo;
 			}
 			PolygonShader.render(fse, faceSetUniforms, faceTexture, reflMap, polygonShader, state);
+		}
+		if(visible){
 			super.render(state, width, height);
 			if(labelData.drawLabels)
 				LabelShader.render(labelData, fse.labels, state);
