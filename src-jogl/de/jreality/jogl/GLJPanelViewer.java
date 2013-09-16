@@ -212,4 +212,16 @@ public class GLJPanelViewer extends AbstractViewer {
 
 	}
 
+	@Override
+	public void installOverlay() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void uninstallOverlay() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

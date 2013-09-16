@@ -11,6 +11,7 @@ import javax.media.opengl.GL3;
 import com.jogamp.opengl.util.awt.ImageUtil;
 
 import de.jreality.jogl.plugin.InfoOverlay;
+import de.jreality.jogl3.InfoOverlayData;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.GLVBOFloat;
@@ -135,7 +136,7 @@ public class TransparencyHelper {
     	}
 	}
 	
-	public static void render(double framerate, double clockrate, int polycount, GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
+	public static void render(InfoOverlayData infoData, GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
 		
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	gl.glViewport(0, 0, supersample*width, supersample*height);
@@ -157,8 +158,8 @@ public class TransparencyHelper {
     	for(RenderableObject o : transp){
     		o.render(width, height);
     	}
-    	
-    	LabelShader.renderOverlay("Framerate = " + framerate + "\nClockrate = " + clockrate + "\nPolygonCount = " + polycount + "\n" + InfoOverlay.getMemoryUsage(), gl);
+    	if(infoData.activated)
+    		LabelShader.renderOverlay("Framerate = " + infoData.framerate + "\nClockrate = " + infoData.clockrate + "\nPolygonCount = " + infoData.polygoncount + "\n" + InfoOverlay.getMemoryUsage(), gl);
     	
     	int quer = 1;
     	//with this loop it draws as many layers as neccessary to complete the scene

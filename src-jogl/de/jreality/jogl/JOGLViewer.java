@@ -121,4 +121,16 @@ public class JOGLViewer extends AbstractViewer {
 			component.add("Center", (Component) drawable);
 		}
 	}
+
+	@Override
+	public void installOverlay() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void uninstallOverlay() {
+		// TODO Auto-generated method stub
+		
+	}
 }

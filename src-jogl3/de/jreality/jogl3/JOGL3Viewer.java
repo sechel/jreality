@@ -345,9 +345,13 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			rootInstance.collectTranspAndNonTransparent(rootState, nonTranspObjects, transpObjects);
 			
 			
+			infodata.clockrate = this.getClockRate();
+			infodata.framerate = this.getFrameRate();
+			infodata.polygoncount = this.getPolygonCount();
+			
 			//render scene graph
 			if(offscreen == false){
-				TransparencyHelper.render(this.getFrameRate(), this.getClockRate(), this.getPolygonCount(), gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+				TransparencyHelper.render(infodata, gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
 			}else{
 				this.dst = TransparencyHelper.renderOffscreen(aa, this.dst, gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
 				System.out.println("rendering offscreen");
@@ -372,6 +376,8 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		System.out.println("calling JOGL3Viewer.dispose");
 	}
 	private int supersample = 2;
+	
+	InfoOverlayData infodata = new InfoOverlayData();
 	
 	private int width, height = 0;
 	public void init(GLAutoDrawable arg0) {
@@ -480,6 +486,18 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		canvas.display();
 		offscreen = false;
 		return this.dst;
+	}
+
+	@Override
+	public void installOverlay() {
+		// TODO Auto-generated method stub
+		infodata.activated = true;
+	}
+
+	@Override
+	public void uninstallOverlay() {
+		// TODO Auto-generated method stub
+		infodata.activated = false;
 	}
 	
 }

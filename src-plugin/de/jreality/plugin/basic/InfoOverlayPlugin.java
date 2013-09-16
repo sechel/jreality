@@ -1,6 +1,8 @@
 package de.jreality.plugin.basic;
 
+import de.jreality.jogl.DomeViewer;
 import de.jreality.jogl.InstrumentedViewer;
+import de.jreality.jogl.JOGLViewer;
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Viewer;
@@ -33,10 +35,17 @@ public class InfoOverlayPlugin extends Plugin {
 		InstrumentedViewer joglViewer = null;
 		// this is unreliable; adding a DomeViewer (subclass of JOGLViewer) also
 		// broke original version (without break;)
+	
 		for (Viewer v : vlist)	{
 			if (v instanceof InstrumentedViewer) {
 				joglViewer = (InstrumentedViewer) v;
-				break;
+				joglViewer.installOverlay();
+			}
+		}
+		
+		for (Viewer v : vlist)	{
+			if (v instanceof JOGLViewer && !(v instanceof DomeViewer)) {
+				joglViewer = (InstrumentedViewer) v;
 			}
 		}
 		if (joglViewer == null)  { // signal error 
@@ -47,11 +56,24 @@ public class InfoOverlayPlugin extends Plugin {
 		infoOverlay.setInstrumentedViewer(joglViewer);
 		infoOverlay.setVisible(true);
 	}
-
+	
 	@Override
 	public void uninstall(Controller c) throws Exception {
 //		SceneGraphComponent root = sceneView.getSceneRoot();
 		infoOverlay.setVisible(false);
+		
+		sceneView = c.getPlugin(View.class);
+//		Component viewComp = sceneView.getViewer().getViewingComponent();
+		Viewer[] vlist = sceneView.getViewer().getViewers();
+		InstrumentedViewer joglViewer = null;
+		// this is unreliable; adding a DomeViewer (subclass of JOGLViewer) also
+		// broke original version (without break;)
+		for (Viewer v : vlist)	{
+			if (v instanceof InstrumentedViewer) {
+				joglViewer = (InstrumentedViewer) v;
+				joglViewer.uninstallOverlay();
+			}
+		}
 	}
 	
 	public InfoOverlay getInfoOverlay() {
