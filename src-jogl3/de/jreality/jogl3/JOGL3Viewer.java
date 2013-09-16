@@ -347,7 +347,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			//render scene graph
 			if(offscreen == false){
-				TransparencyHelper.render(gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+				TransparencyHelper.render(this.getFrameRate(), this.getClockRate(), this.getPolygonCount(), gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
 			}else{
 				this.dst = TransparencyHelper.renderOffscreen(aa, this.dst, gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
 				System.out.println("rendering offscreen");

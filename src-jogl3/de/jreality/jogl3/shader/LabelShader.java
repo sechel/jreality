@@ -1,18 +1,82 @@
 package de.jreality.jogl3.shader;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.List;
+
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
+import com.itextpdf.text.log.SysoLogger;
+
+import de.jreality.backends.label.LabelUtility;
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.geom.JOGLFaceSetEntity;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.LabelRenderData;
 import de.jreality.jogl3.geom.Label;
 import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.math.Rn;
+import de.jreality.scene.Appearance;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.ImageData;
+import de.jreality.shader.Texture2D;
 
 public class LabelShader {
 
+	private static GLShader overlayShader = new GLShader("overlay.v", "overlay.f");
+	public static void renderOverlay(String text, GL3 gl){
+		
+		overlayShader.init(gl);
+		
+		BufferedImage buf = LabelUtility.createImageFromString(text, new Font("Arial", Font.PLAIN, 30), Color.BLACK, Color.WHITE);
+		ImageData img = new ImageData(buf);
+		
+		Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+		tex.setImage(img);
+		
+		Texture2DLoader.load(gl, tex, gl.GL_TEXTURE2);
+		
+		overlayShader.useShader(gl);
+		
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA,
+				GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		
+		
+		gl.glUniform1i(gl.glGetUniformLocation(overlayShader.shaderprogram, "tex"), 2);
+		
+		GLVBOFloat vbo = new GLVBOFloat(gl, new float[]{1, -1, 0, 1,
+														1, 0, 0, 1,
+														0, 0, 0, 1,
+														0, 0, 0, 1,
+														0, -1, 0, 1,
+														1, -1, 0, 1}, "vertices");
+		
+		
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(overlayShader.shaderprogram, vbo.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(overlayShader.shaderprogram, vbo.getName()));
+		
+    	
+    	
+    	//actual draw command
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, vbo.getLength()/4);
+    	
+		
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(overlayShader.shaderprogram, vbo.getName()));
+    	
+		
+    	overlayShader.dontUseShader(gl);
+	}
 	
-	
+	private static GLShader shader = new GLShader("label.v", "label.f");
 	public static void render(LabelRenderData labelData, Label[] labels, JOGLRenderState state){
 		if(labels == null || labels.length == 0)
 			return;
@@ -21,7 +85,7 @@ public class LabelShader {
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
 		
-		GLShader shader = new GLShader("label.v", "label.f");
+		
 		shader.init(gl);
 		
 		

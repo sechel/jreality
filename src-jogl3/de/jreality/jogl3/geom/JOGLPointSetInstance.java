@@ -71,7 +71,9 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 		
 		//pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, new GlReflectionMap(), CommonAttributes.POINT_SHADER);
 		pointSphereShader = updateAppearance(ifd, GLShader.defaultPointSphereShader, sgp, gl, pointSetPolygonUniforms, pointTexture, pointReflMap, "pointShader.polygonShader");
-		
+		JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
 		pointShader = updateAppearance(ifd, GLShader.defaultPointShader, sgp, gl, pointSetUniforms, pointTexture, new GlReflectionMap(), CommonAttributes.POINT_SHADER);
+		updateLabelTextureAndVBOsAndUniforms(gl, labelData, pse.labels, ifd);
+
 	}
 }

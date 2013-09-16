@@ -31,7 +31,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	public void render(JOGLRenderState state, int width, int height) {
 		if(eap==null)
 			return;
-		super.render(state, width, height);
+		
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
@@ -42,6 +42,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 				labelsChangedNoCache = fse.labelsChangedNo;
 			}
 			PolygonShader.render(fse, faceSetUniforms, faceTexture, reflMap, polygonShader, state);
+			super.render(state, width, height);
 			if(labelData.drawLabels)
 				LabelShader.render(labelData, fse.labels, state);
 		}
