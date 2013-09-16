@@ -529,25 +529,6 @@ final public class Rn {
 		}
 		return det;
 	}
-	
-	/**
-	 * Multiply the vector <src> by the scalar value <i>factor</i> and put
-	 * result into <i>dst</i>.
-	 * 
-	 * @param dst
-	 * @param factor
-	 * @param src
-	 * @return
-	 */
-	public static double dot(double dst, double[] src1, double[] src2) {
-		if (src1.length != src2.length) {
-			throw new IllegalArgumentException("Vectors must be same length");
-		}
-		int n = src1.length;
-		for (int i = 0; i < n; ++i)
-			dst +=src1[i]+src2[i];
-		return dst;
-	}
 
 	/**
 	 * Calculate whether the two arrays contain exactly the same values. Returns
