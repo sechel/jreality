@@ -36,6 +36,7 @@ import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
+import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.PointShader;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.scene.Appearance;
@@ -277,7 +278,9 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	// - think about sensible way of dealing with the occlusion query
 	BufferedImage dst = null;
 	boolean offscreen = false;
+	int textureDeletionCounter = 0;
 	public void display(GLAutoDrawable arg0, int width, int height) {
+		
 		perfmeter.beginFrame();
 		
 		if(offscreen){
@@ -360,6 +363,12 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
+			textureDeletionCounter++;
+			if(textureDeletionCounter == 100){
+				textureDeletionCounter = 0;
+				Texture2DLoader.deleteTextures(gl);
+			}
+			
 		}
 		if(offscreen){
 			TransparencyHelper.supersample = supersample;
@@ -423,6 +432,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		lightHelper = new LightHelper();
 		lightHelper.initGlobalLightTexture(gl);
 		lightHelper.initLocalLightTexture(gl);
+		LabelShader.init(gl);
 		backgroundHelper = new BackgroundHelper();
 		backgroundHelper.initializeBackground(gl);
 		tubeHelper = new TubeHelper();

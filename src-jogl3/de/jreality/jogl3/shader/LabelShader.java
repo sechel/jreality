@@ -31,16 +31,35 @@ import de.jreality.shader.Texture2D;
 public class LabelShader {
 
 	private static GLShader overlayShader = new GLShader("overlay.v", "overlay.f");
+	private static GLVBOFloat vbo;
+	private static GLVBOFloat vbo2;
+	public static void init(GL3 gl){
+		vbo = new GLVBOFloat(gl, new float[]{1, -1, 0.2f, 1,
+				1, 0, 0.2f, 1,
+				0, 0, 0.2f, 1,
+				0, 0, 0.2f, 1,
+				0, -1, 0.2f, 1,
+				1, -1, 0.2f, 1}, "vertices");
+		vbo2 = new GLVBOFloat(gl, new float[]{1, 1, 0.2f, 1,
+				1, 0, 0.2f, 1,
+				0, 0, 0.2f, 1,
+				0, 0, 0.2f, 1,
+				0, 1, 0.2f, 1,
+				1, 1, 0.2f, 1}, "vertices");
+		overlayShader.init(gl);
+		shader.init(gl);
+	}
+	public static Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+	public static BufferedImage buf;
+	public static ImageData img;
 	public static void renderOverlay(String text, GL3 gl){
 		
-		overlayShader.init(gl);
 		
-		BufferedImage buf = LabelUtility.createImageFromString(text, new Font("Arial", Font.PLAIN, 30), Color.BLACK, Color.WHITE);
-		ImageData img = new ImageData(buf);
 		
-		Texture2D tex = (Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
+		buf = LabelUtility.createImageFromString(text, new Font("Arial", Font.PLAIN, 30), Color.BLACK, Color.WHITE);
+		img = new ImageData(buf);
+		
 		tex.setImage(img);
-		
 		Texture2DLoader.load(gl, tex, gl.GL_TEXTURE2);
 		
 		overlayShader.useShader(gl);
@@ -52,12 +71,7 @@ public class LabelShader {
 		
 		gl.glUniform1i(gl.glGetUniformLocation(overlayShader.shaderprogram, "tex"), 2);
 		
-		GLVBOFloat vbo = new GLVBOFloat(gl, new float[]{1, -1, 0, 1,
-														1, 0, 0, 1,
-														0, 0, 0, 1,
-														0, 0, 0, 1,
-														0, -1, 0, 1,
-														1, -1, 0, 1}, "vertices");
+		
 		
 		
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
@@ -86,7 +100,7 @@ public class LabelShader {
 		float[] modelview = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
 		
 		
-		shader.init(gl);
+		
 		
 		
 		for(int L = 0; L < labelData.tex.length; L++){
@@ -107,17 +121,12 @@ public class LabelShader {
 			ShaderVarHash.bindUniformMatrix(shader, "projection", projection, gl);
 			ShaderVarHash.bindUniformMatrix(shader, "modelview", modelview, gl);
 			
-			GLVBOFloat vbo = new GLVBOFloat(gl, new float[]{1, 1, 0.2f, 1,
-															1, 0, 0.2f, 1,
-															0, 0, 0.2f, 1,
-															0, 0, 0.2f, 1,
-															0, 1, 0.2f, 1,
-															1, 1, 0.2f, 1}, "vertices");
 			
 			
-			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-	    	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, vbo.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
-	    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, vbo.getName()));
+			
+			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo2.getID());
+	    	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, vbo2.getName()), vbo2.getElementSize(), vbo2.getType(), false, 0, 0);
+	    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, vbo2.getName()));
 			
 	    	
 	    	GLVBO p = labelData.points[L];
@@ -138,10 +147,10 @@ public class LabelShader {
 	    	//actual draw command
 	    	//gl.glDrawArrays(gl.GL_TRIANGLES, 0, vbo.getLength()/4);
 	    	
-	    	gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, vbo.getLength()/4, p.getLength()/4);
+	    	gl.glDrawArraysInstanced(gl.GL_TRIANGLES, 0, vbo2.getLength()/4, p.getLength()/4);
 	    	
 			
-	    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, vbo.getName()));
+	    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, vbo2.getName()));
 	    	
 	    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, p.getName()));
 			gl.glVertexAttribDivisor(gl.glGetAttribLocation(shader.shaderprogram, p.getName()), 0);
