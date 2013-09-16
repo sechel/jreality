@@ -364,7 +364,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			rootInstance.setAppearanceEntitiesUpToDate();
 			
 			textureDeletionCounter++;
-			if(textureDeletionCounter == 100){
+			if(textureDeletionCounter == 10){
 				textureDeletionCounter = 0;
 				Texture2DLoader.deleteTextures(gl);
 			}
