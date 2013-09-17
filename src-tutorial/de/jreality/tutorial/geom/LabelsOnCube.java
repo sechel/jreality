@@ -130,7 +130,10 @@ public static void main(String[] args) {
     ets.setFont(f);
     fts.setFont(f);
     
- 	JRViewer.display(cmp);
+ 	JRViewer jrv = new JRViewer();
+ 	jrv.addBasicUI();
+ 	jrv.addContentUI();
+ 	jrv.setContent(cmp);
+ 	jrv.startup();
 	}
-
 }
