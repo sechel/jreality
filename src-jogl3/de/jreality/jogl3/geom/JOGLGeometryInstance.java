@@ -308,7 +308,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			width[j] = 0;
 			int height = 0;
 			//maybe unneccessary
-			hh[j] = new int[ss[j].length];
+//			hh[j] = new int[ss[j].length];
 		  
 			
 			if (ifd.font == null)
@@ -326,7 +326,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 				TextLayout tl = new TextLayout(s, ifd.font, frc);
 				Rectangle r = tl.getBounds().getBounds();
 				//maybe unneccessary
-				hh[j][i] = (int) ifd.font.getLineMetrics(s, frc).getHeight();
+//				hh[j][i] = (int) ifd.font.getLineMetrics(s, frc).getHeight();
 				height += hh[j][i];
 				int tmp = (r.width + 20);
 				if (tmp > width[j]) width[j] = tmp;

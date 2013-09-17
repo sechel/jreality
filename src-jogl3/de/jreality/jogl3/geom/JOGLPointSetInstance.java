@@ -32,6 +32,7 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 			return;
 		JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
+		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
 		if(visible){
 			if(pse.labelsChangedNo != labelsChangedNoCache){
 				//update label texture
@@ -46,18 +47,36 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 				PointShader.render(pse, pointSetUniforms, pointShader, state);
 			}
 			
-			if(labelData.drawLabels)
+			if(!transparencyEnabled && labelData.drawLabels)
 				LabelShader.render(labelData, pse.labels, state);
 		}
 	}
 	@Override
 	public void renderDepth(JOGLRenderState state, int width, int height) {
-		
+		// TODO Auto-generated method stub
+				if(eap==null)
+					return;
+				
+				JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
+				boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+				if(visible){
+					if(labelData.drawLabels)
+						LabelShader.renderDepth(labelData, pse.labels, state, width, height);
+				}
 	}
 
 	@Override
 	public void addOneLayer(JOGLRenderState state, int width, int height, float alpha) {
-		
+		// TODO Auto-generated method stub
+				if(eap==null)
+					return;
+				
+				JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
+				boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+				if(visible){
+					if(labelData.drawLabels)
+						LabelShader.addOneLayer(labelData, pse.labels, state, width, height);
+				}
 	}
 	
 	public LinkedList<GlUniform> pointSetUniforms = new LinkedList<GlUniform>();

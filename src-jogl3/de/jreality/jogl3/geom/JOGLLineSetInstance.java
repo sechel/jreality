@@ -34,6 +34,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 		
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
 		if(visible){
 			if(lse.labelsChangedNo != labelsChangedNoCache){
 				//update label texture
@@ -49,20 +50,39 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	        	LineShader.render(lse, lineSetUniforms, lineShader, state, lineWidth);
 			}
 			super.render(state, width, height);
-			if(labelData.drawLabels)
+			if(!transparencyEnabled && labelData.drawLabels)
 				LabelShader.render(labelData, lse.labels, state);
 		}
 	}
 	@Override
 	public void renderDepth(JOGLRenderState state, int width, int height) {
+		super.renderDepth(state, width, height);
 		// TODO Auto-generated method stub
+		if(eap==null)
+			return;
 		
+		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
+		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+		if(visible){
+			if(labelData.drawLabels)
+				LabelShader.renderDepth(labelData, lse.labels, state, width, height);
+		}
 	}
 
 	@Override
 	public void addOneLayer(JOGLRenderState state, int width, int height, float alpha) {
-		// TODO Auto-generated method stub
+		super.addOneLayer(state, width, height, alpha);
 		
+		// TODO Auto-generated method stub
+		if(eap==null)
+			return;
+		
+		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
+		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+		if(visible){
+			if(labelData.drawLabels)
+				LabelShader.addOneLayer(labelData, lse.labels, state, width, height);
+		}
 	}
 	public LinkedList<GlUniform> lineSetUniforms = new LinkedList<GlUniform>();
 	public LinkedList<GlUniform> lineSetPolygonUniforms = new LinkedList<GlUniform>();

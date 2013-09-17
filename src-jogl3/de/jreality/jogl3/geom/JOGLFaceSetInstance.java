@@ -45,6 +45,8 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		}
 		if(visible){
 			super.render(state, width, height);
+		}
+		if(visible && !transparencyEnabled){
 			if(labelData.drawLabels)
 				LabelShader.render(labelData, fse.labels, state);
 		}
@@ -57,8 +59,10 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		super.renderDepth(state, width, height);
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
-		if(visible)
+		if(visible){
 			PolygonShader.renderDepth(fse, polygonShaderDepth, state, width, height);
+			LabelShader.renderDepth(labelData, fse.labels, state, width, height);
+		}
 	}
 
 	@Override
@@ -68,8 +72,10 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		super.addOneLayer(state, width, height, alpha);
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
-		if(visible)
+		if(visible){
 			PolygonShader.addOneLayer(fse, faceSetUniforms, faceTexture, reflMap, polygonShaderTransp, state, width, height, alpha);
+			LabelShader.addOneLayer(labelData, fse.labels, state, width, height);
+		}
 	}
 	
 	public LinkedList<GlUniform> faceSetUniforms = new LinkedList<GlUniform>();

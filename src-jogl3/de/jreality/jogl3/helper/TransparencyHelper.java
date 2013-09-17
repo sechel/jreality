@@ -124,6 +124,8 @@ public class TransparencyHelper {
     		counter++;
     		gl.glGetQueryObjectuiv(queries[0],gl.GL_QUERY_RESULT_AVAILABLE, queryresavail, 0);
     		//System.out.println("not true yet: " + counter);
+    		if(counter == 1000000000)
+    			System.out.println("reached max no of iterations in query loop");
     	}while(queryresavail[0] != gl.GL_TRUE && counter < 1000000000);
     	if(queryresavail[0] == gl.GL_TRUE){
     		gl.glGetQueryObjectuiv(queries[0] ,gl.GL_QUERY_RESULT, queryres, 0);
@@ -158,8 +160,10 @@ public class TransparencyHelper {
     	for(RenderableObject o : transp){
     		o.render(width, height);
     	}
-    	if(infoData.activated)
-    		LabelShader.renderOverlay("Framerate = " + infoData.framerate + "\nClockrate = " + infoData.clockrate + "\nPolygonCount = " + infoData.polygoncount + "\n" + InfoOverlay.getMemoryUsage(), gl);
+    	
+    	//TODO TODO TODO
+    	//if transp.size == 0 then don't do anything of this!
+    	//Except for drawing labels nicely on top of each other with correct AA.
     	
     	int quer = 1;
     	//with this loop it draws as many layers as neccessary to complete the scene
@@ -183,6 +187,11 @@ public class TransparencyHelper {
         	peelDepth(gl, transp, supersample*width, supersample*height);
         	quer = endQuery(gl);
     	}
+    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+    	gl.glDisable(gl.GL_DEPTH_TEST);
+    	if(infoData.activated)
+    		LabelShader.renderOverlay("Framerate = " + infoData.framerate + "\nClockrate = " + infoData.clockrate + "\nPolygonCount = " + infoData.polygoncount + "\n" + InfoOverlay.getMemoryUsage(), gl);
+    	
     	
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
     	//you can change the number here:
@@ -231,7 +240,8 @@ public class TransparencyHelper {
 	}
 	
 	private static void copyFBO2FB(GL3 gl, int tex, int width, int height){
-    	gl.glViewport(0, 0, width, height);
+		gl.glDisable(gl.GL_BLEND);
+		gl.glViewport(0, 0, width, height);
     	
     	gl.glEnable(gl.GL_TEXTURE_2D);
     	gl.glActiveTexture(gl.GL_TEXTURE0);
