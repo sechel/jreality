@@ -19,7 +19,13 @@ import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.util.ImageUtility;
 
 public class TransparencyHelper {
-	public static int supersample = 2;
+	public static void setSupersample(int ss){
+		TransparencyHelper.supersample = ss;
+	}
+	public static int getSupersample(){
+		return TransparencyHelper.supersample;
+	}
+	private static int supersample = 2;
 	
 	//DONT FORGET TO INITIALIZE SHADERS WITH .init(GL3 gl)
 	public static GLShader depth = new GLShader("transp/polygonDepth.v", "transp/depth.f");

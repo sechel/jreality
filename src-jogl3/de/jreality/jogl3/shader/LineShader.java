@@ -28,7 +28,7 @@ public class LineShader{
         	gl.glUniformMatrix4fv(gl.glGetUniformLocation(shader.shaderprogram, "modelview"), 1, true, modelview, 0);
         	
 			//width
-        	gl.glLineWidth(TransparencyHelper.supersample*lineWidth);
+        	gl.glLineWidth(TransparencyHelper.getSupersample()*lineWidth);
 			//bind shader uniforms
 			for(GlUniform u : c){
 				u.bindToShader(shader, gl);

@@ -52,6 +52,7 @@ import de.jreality.util.SceneGraphUtility;
 
 public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, InstrumentedViewer {
 
+	private int supersample = 2;
 	SceneGraphComponent auxiliaryRoot;
 	protected JPanel component;
 	protected GLCanvas canvas;
@@ -284,7 +285,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		perfmeter.beginFrame();
 		
 		if(offscreen){
-			TransparencyHelper.supersample = (int)aa;
+			TransparencyHelper.setSupersample((int)aa);
 			TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
 		}
 		// TODO Auto-generated method stub
@@ -371,7 +372,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 		}
 		if(offscreen){
-			TransparencyHelper.supersample = supersample;
+			TransparencyHelper.setSupersample(supersample);
 			TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
 		}
 		perfmeter.endFrame();
@@ -384,7 +385,6 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		// TODO Auto-generated method stub
 		System.out.println("calling JOGL3Viewer.dispose");
 	}
-	private int supersample = 2;
 	
 	InfoOverlayData infodata = new InfoOverlayData();
 	
@@ -444,7 +444,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		System.out.println("reshape");
 		this.width = arg3;
 		this.height = arg4;
-		TransparencyHelper.supersample = supersample;
+		TransparencyHelper.setSupersample(supersample);
 		TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
 		
 	}
