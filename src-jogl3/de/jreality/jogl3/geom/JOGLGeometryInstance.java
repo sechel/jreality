@@ -141,9 +141,9 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			ShaderVarHash.bindUniform(shader,  name, value, gl);
 		}
 	}
-	public class GlUniformVec4 extends GlUniform<float[]>{
+	public class GlUniformVec extends GlUniform<float[]>{
 
-		public GlUniformVec4(String name, float[] value) {
+		public GlUniformVec(String name, float[] value) {
 			super(name, value);
 		}
 		public void bindToShader(GLShader shader, GL3 gl){
@@ -159,15 +159,15 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			ShaderVarHash.bindUniformMatrix(shader, name, value, gl);
         }
 	}
-	public class GlUniformVec3 extends GlUniform<float[]>{
-
-		public GlUniformVec3(String name, float[] value) {
-			super(name, value);
-		}
-		public void bindToShader(GLShader shader, GL3 gl){
-			ShaderVarHash.bindUniform(shader, name, value, gl);
-		}
-	}
+//	public class GlUniformVec3 extends GlUniform<float[]>{
+//
+//		public GlUniformVec3(String name, float[] value) {
+//			super(name, value);
+//		}
+//		public void bindToShader(GLShader shader, GL3 gl){
+//			ShaderVarHash.bindUniform(shader, name, value, gl);
+//		}
+//	}
 	
 	//TODO make private
 	public EffectiveAppearance eap;
@@ -562,12 +562,49 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     			if(value.getClass().equals(Color.class)){
     				float[] color = ((Color)value).getRGBComponents(null);
     				//System.out.println(sgp.getLastComponent().getName() + type + "." + v.getName() + color[0] + " " + color[1] + " " + color[2]);
-    				c.add(new GlUniformVec4(v.getName(), color));
+    				c.add(new GlUniformVec(v.getName(), color));
     			}else if(value.getClass().equals(float[].class)){
-    				c.add(new GlUniformVec4(v.getName(), (float[])value));
+    				c.add(new GlUniformVec(v.getName(), (float[])value));
     			}else if(value.getClass().equals(double[].class)){
     				double[] value2 = (double[])value;
-    				c.add(new GlUniformVec4(v.getName(), Rn.convertDoubleToFloatArray(value2)));
+    				c.add(new GlUniformVec(v.getName(), Rn.convertDoubleToFloatArray(value2)));
+    			}else{
+    				//default value
+    				//c.add(new GlUniformVec4(v.getName(), new float[]{0, 0, 0, 1}));
+    			}
+    		}else if(v.getType().equals("vec3")){
+//    			System.out.println(v.getName());
+    			Object value = new Object();
+    			//System.out.println(v.getName());
+    			//TODO retrieve default value somehow...
+    			
+    			value = eap.getAttribute(ShaderUtility.nameSpace(type,name), CommonAttributes.getDefault(name, value));
+    			
+    			if(value.getClass().equals(float[].class)){
+    				float[] tmp = (float[])value;
+    				c.add(new GlUniformVec(v.getName(), tmp));
+    			}else if(value.getClass().equals(double[].class)){
+    				double[] value2 = (double[])value;
+    				float[] tmp = Rn.convertDoubleToFloatArray(value2);
+    				c.add(new GlUniformVec(v.getName(), tmp));
+    			}else{
+    				//default value
+    				//c.add(new GlUniformVec4(v.getName(), new float[]{0, 0, 0, 1}));
+    			}
+    		}else if(v.getType().equals("vec2")){
+//    			System.out.println(v.getName());
+    			Object value = new Object();
+    			//System.out.println(v.getName());
+    			//TODO retrieve default value somehow...
+    			
+    			value = eap.getAttribute(ShaderUtility.nameSpace(type,name), CommonAttributes.getDefault(name, value));
+    			if(value.getClass().equals(float[].class)){
+    				float[] tmp = (float[])value;
+    				c.add(new GlUniformVec(v.getName(), tmp));
+    			}else if(value.getClass().equals(double[].class)){
+    				double[] value2 = (double[])value;
+    				float[] tmp = Rn.convertDoubleToFloatArray(value2);
+    				c.add(new GlUniformVec(v.getName(), tmp));
     			}else{
     				//default value
     				//c.add(new GlUniformVec4(v.getName(), new float[]{0, 0, 0, 1}));

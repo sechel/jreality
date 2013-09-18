@@ -182,6 +182,7 @@ public class GLShader
 						}
 						cont = false;
 					}
+					currentPos++;
 				}
 				
 //				System.out.println("type = " + type);

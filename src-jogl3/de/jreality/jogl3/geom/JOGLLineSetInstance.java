@@ -49,7 +49,9 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 				float lineWidth = (float)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.LINE_WIDTH), CommonAttributes.LINE_WIDTH_DEFAULT);
 	        	LineShader.render(lse, lineSetUniforms, lineShader, state, lineWidth);
 			}
-			super.render(state, width, height);
+		}
+		super.render(state, width, height);
+		if(visible){
 			if(!transparencyEnabled && labelData.drawLabels)
 				LabelShader.render(labelData, lse.labels, state);
 		}

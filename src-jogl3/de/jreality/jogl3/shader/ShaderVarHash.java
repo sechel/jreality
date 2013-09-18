@@ -69,7 +69,12 @@ public class ShaderVarHash {
 			i = gl.glGetUniformLocation(s.shaderprogram, name);
 			shaders.put(name, i);
 		}
-		gl.glUniform4fv(i, 1, value, 0);
+		if(value.length == 4)
+			gl.glUniform4fv(i, 1, value, 0);
+		if(value.length == 3)
+			gl.glUniform3fv(i, 1, value, 0);
+		if(value.length == 2)
+			gl.glUniform2fv(i, 1, value, 0);
 	}
 	
 	public static void bindUniformMatrix(GLShader s, String name, float[] value, GL3 gl){

@@ -43,9 +43,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 			}
 			PolygonShader.render(fse, faceSetUniforms, faceTexture, reflMap, polygonShader, state);
 		}
-		if(visible){
-			super.render(state, width, height);
-		}
+		super.render(state, width, height);
 		if(visible && !transparencyEnabled){
 			if(labelData.drawLabels)
 				LabelShader.render(labelData, fse.labels, state);
