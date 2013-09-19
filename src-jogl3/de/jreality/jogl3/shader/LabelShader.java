@@ -34,18 +34,18 @@ public class LabelShader {
 	private static GLVBOFloat vbo;
 	private static GLVBOFloat vbo2;
 	public static void init(GL3 gl){
-		vbo = new GLVBOFloat(gl, new float[]{1, -1, 0.2f, 1,
-				1, 0, 0.2f, 1,
-				0, 0, 0.2f, 1,
-				0, 0, 0.2f, 1,
-				0, -1, 0.2f, 1,
-				1, -1, 0.2f, 1}, "vertices");
-		vbo2 = new GLVBOFloat(gl, new float[]{1, 1, 0.2f, 1,
-				1, 0, 0.2f, 1,
-				0, 0, 0.2f, 1,
-				0, 0, 0.2f, 1,
-				0, 1, 0.2f, 1,
-				1, 1, 0.2f, 1}, "vertices");
+		vbo = new GLVBOFloat(gl, new float[]{1, -1, 0f, 1,
+				1, 0, 0f, 1,
+				0, 0, 0f, 1,
+				0, 0, 0f, 1,
+				0, -1, 0f, 1,
+				1, -1, 0f, 1}, "vertices");
+		vbo2 = new GLVBOFloat(gl, new float[]{1, 1, 0f, 1,
+				1, 0, 0f, 1,
+				0, 0, 0f, 1,
+				0, 0, 0f, 1,
+				0, 1, 0f, 1,
+				1, 1, 0f, 1}, "vertices");
 		overlayShader.init(gl);
 		shader.init(gl);
 		shaderDepth.init(gl);

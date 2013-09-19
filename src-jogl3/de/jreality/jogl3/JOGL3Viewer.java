@@ -52,7 +52,7 @@ import de.jreality.util.SceneGraphUtility;
 
 public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, InstrumentedViewer {
 
-	private int supersample = 2;
+	private int supersample = 1;
 	SceneGraphComponent auxiliaryRoot;
 	protected JPanel component;
 	protected GLCanvas canvas;

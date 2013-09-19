@@ -206,7 +206,7 @@ import de.jreality.scene.Appearance;
 	public static final double TEXT_SCALE_DEFAULT = 0.01;
 	public static final String TEXT_OFFSET = "offset";
 	public static final String TEXT_ALIGNMENT = "alignment";
-	public static final int TEXT_ALIGNMENT_DEFAULT = SwingConstants.CENTER;
+	public static final int TEXT_ALIGNMENT_DEFAULT = SwingConstants.NORTH_EAST;
 	public static final double[] TEXT_OFFSET_DEFAULT = new double[]{0d,0d,0d};
 	public static final String TEXT_FONT	= "font";
 	public static final String TEXT_COLOR	= TEXT_SHADER+".diffuseColor";

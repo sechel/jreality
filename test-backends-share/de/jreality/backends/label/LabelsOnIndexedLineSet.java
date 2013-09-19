@@ -126,7 +126,7 @@ public class LabelsOnIndexedLineSet {
     
     dgs.setShowPoints(Boolean.TRUE);
     
-    System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL); // de.jreality.portal.DesktopPortalViewer");
+    System.setProperty(SystemProperties.VIEWER, SystemProperties.VIEWER_DEFAULT_SOFT+" "+SystemProperties.VIEWER_DEFAULT_JOGL+" "+SystemProperties.VIEWER_DEFAULT_JOGL3); // de.jreality.portal.DesktopPortalViewer");
     
     JRViewer v = new JRViewer();
 	v.addBasicUI();
