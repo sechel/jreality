@@ -52,6 +52,8 @@ import de.jreality.util.SceneGraphUtility;
 
 public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, InstrumentedViewer {
 
+	//TODO there's a bug here. When supersample is 2 point sprites are displayed with the correct size,
+	//if supersample is 1 here they are twice the size.
 	private int supersample = 1;
 	SceneGraphComponent auxiliaryRoot;
 	protected JPanel component;
