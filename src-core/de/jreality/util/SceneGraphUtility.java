@@ -293,6 +293,7 @@ public class SceneGraphUtility {
      */
     public static <T extends SceneGraphNode> T copy(T template) {
       CopyVisitor cv = new CopyVisitor();
+//      cv.visit(template);
       template.accept(cv);
       return (T) cv.getCopy();
     }
@@ -364,10 +365,12 @@ public class SceneGraphUtility {
 	            	}
 	                double[] cmp = null;
 	         	    if (geometry instanceof IndexedFaceSet)	{
-	            	    IndexedFaceSet ifs = (IndexedFaceSet) geometry; //(IndexedFaceSet) SceneGraphUtility.copy(i); //
+	         	    	IndexedFaceSet ifs =  (IndexedFaceSet) geometry;
+	         	    	ifs.setName(ifs.getName()+"Copy");
 	                    double[] mat = Rn.transpose(null, currentMatrix);          	
 	                    mat[12] = mat[13] = mat[14] = 0.0;
 	                    Rn.inverse(mat, mat);
+	                    double det = Rn.determinant(mat);
 	//             	   if (Rn.determinant(currentMatrix) < 0.0)	cmp = Rn.times(null, flipit, mat);
 	//             	   else 
 	             	   cmp = mat;
@@ -376,6 +379,7 @@ public class SceneGraphUtility {
 	            		   v = ifs.getFaceAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
 	            		   if (removeTform)	{
 		            		   nv = Rn.matrixTimesVector(null, cmp, v);
+		            		   if (det < 1) Rn.times(nv, -1, nv);
 		            		   ifs.setFaceAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));	            			   
 	            		   } else if (Rn.determinant(currentMatrix) < 0.0 ) {
 		               	   		nv = Rn.matrixTimesVector(null, flipit, v);
@@ -387,16 +391,18 @@ public class SceneGraphUtility {
 	               		   if (removeTform) {
 		           	   			//System.out.println("Setting vertex normals");
 		                        nv = Rn.matrixTimesVector(null, cmp, v);
+		                        if (det < 1) Rn.times(nv, -1, nv);
 		                        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
 	               		   } else if (Rn.determinant(currentMatrix) < 0.0 ) {
 		               	   		nv = Rn.matrixTimesVector(null, flipit, v);	               	 		               			   
 		                        ifs.setVertexAttributes(Attribute.NORMALS, StorageModel.DOUBLE_ARRAY.array(nv[0].length).createWritableDataList(nv));
 	               		   }
 	            	   } //else IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
+	               	   geometry = ifs;
 	           	   }
 	         	   //System.out.println("det is "+Rn.determinant(currentMatrix));
 	//	          if (Rn.determinant(currentMatrix) < 0.0)	{
-		                SceneGraphComponent foo = new SceneGraphComponent();
+		                SceneGraphComponent foo = new SceneGraphComponent("flatfoo");
 		                foo.setGeometry(geometry);
 		                if (!removeTform) MatrixBuilder.euclidean(new Matrix(currentMatrix)).assignTo(foo);
 		                if (thePath.getLastComponent().getAppearance() != null)	{
@@ -420,7 +426,7 @@ public class SceneGraphUtility {
 	            }
 	        };
 	        v.visit(sgc);
-	        SceneGraphComponent flat = new SceneGraphComponent();
+	        SceneGraphComponent flat = new SceneGraphComponent("flat"+sgc.getName());
 	        if (sgc.getAppearance() != null) flat.setAppearance(sgc.getAppearance());
 	        for (Iterator iter = geoms.iterator(); iter.hasNext();) {
 	             SceneGraphComponent foo = (SceneGraphComponent)iter.next(); ;
