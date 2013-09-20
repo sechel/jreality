@@ -64,7 +64,7 @@ public class GlslLoader {
 	}
 
 	public static void render(GlslProgram prog, GL2 gl) {
-		// System.err.println("in glslLoader render()");
+//		 System.err.println("in glslLoader render()");
 		ProgramContext context = getContext(gl, prog);
 		context.linkProgram(gl);
 		context.activateProgram(gl);
@@ -219,7 +219,7 @@ public class GlslLoader {
 			printInfoLog("prog attatch", progID.intValue(), gl);
 			gl.glLinkProgramARB(progID.intValue());
 			printInfoLog("prog link", progID.intValue(), gl);
-			// System.out.println("loaded program ["+progID+"]");
+			 System.out.println("loaded program ["+progID+"]");
 			isLinked = true;
 		}
 
@@ -252,8 +252,8 @@ public class GlslLoader {
 
 			for (int i = 0; i < charsWritten[0]; ++i)
 				foo.append((char) infoLog[i]);
-			// if (foo.length() > 0)
-			// System.out.println("["+name+"] GLSL info log: "+foo.toString());
+			 if (foo.length() > 0)
+			 System.out.println("["+name+"] GLSL info log: "+foo.toString());
 		}
 	}
 
