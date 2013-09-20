@@ -26,7 +26,8 @@ public class Scene extends Plugin {
 	private List<ChangeListener> 
 		changeListeners = synchronizedList(new LinkedList<ChangeListener>());
 	boolean clippingPlanes = true;		// does the scene allow automatics setting of clipping planes?
-	static double defaultZTranslation = 16.0;
+	// if I wait to try to set this using get/set methods, it's too late.
+	static public double defaultZTranslation = 16.0;
 	static JrScene defaultScene() {
 		//sceneRoot of the JrScene
 		SceneGraphComponent sceneRoot = new SceneGraphComponent("root");
