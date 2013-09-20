@@ -79,7 +79,7 @@ import de.jreality.scene.data.IntArrayArray;
 	double shiftAlongNormal = .5;
 	int stepsPerEdge = 3;
 	int metric = Pn.EUCLIDEAN;
-	boolean keepFaceColors = false;
+	boolean keepFaceColors = true;
 	double[][] profileCurve = {{0,0}, {.5,1}, {1,0}};
 	boolean getGoodTextureCoordinates = true;
 	private IndexedFaceSetFactory thickSurfaceIFSF;
@@ -256,21 +256,26 @@ import de.jreality.scene.data.IntArrayArray;
 	public void update()	{
 		if (thickSurfaceIFSF == null) thickSurfaceIFSF = new IndexedFaceSetFactory();
 		origVertices = theSurface.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		double[][] oldVN;
-		if (theSurface.getVertexAttributes(Attribute.NORMALS) == null)	{
-			oldVN = IndexedFaceSetUtility.calculateVertexNormals(theSurface);
-		}
-		else oldVN = theSurface.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
-		origIndices = theSurface.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
-		processBoundary();
 		int originalVertexCount = origVertices.length;
 		int fiberlength = origVertices[0].length;
-		double[][] newVertices = new double[originalVertexCount*2][4];
+		double[][] oldVN = null;
+		if (theSurface.getVertexAttributes(Attribute.NORMALS) == null)	
+			oldVN = IndexedFaceSetUtility.calculateVertexNormals(theSurface);
+		else 
+			oldVN = theSurface.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);			
+
 		if (oldVN[0].length == 3)	{
 			oldVN = Pn.homogenize(null, oldVN);
-			for (int i = 0; i<oldVN.length; ++i) oldVN[i][3] = 0.0;
 		}
+		if (oldVN[0].length == 4) 
+			for (int i = 0; i<oldVN.length; ++i) {
+				oldVN[i][3] = 0.0;
+			}
 		double[][] newVN = doubleIt(oldVN);
+
+		origIndices = theSurface.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
+		processBoundary();
+		double[][] newVertices = new double[originalVertexCount*2][4];
 
 		for (int i = 0; i<originalVertexCount; ++i)	{
 			System.arraycopy(origVertices[i], 0, newVertices[i], 0, fiberlength);
@@ -283,6 +288,7 @@ import de.jreality.scene.data.IntArrayArray;
 			double[] tmp = Rn.linearCombination(null, 1.0, newVertices[i], shiftAlongNormal*thickness, oldVN[i]);
 			Rn.linearCombination(newVertices[i+originalVertexCount], 1.0, newVertices[i], (shiftAlongNormal-1.0)*thickness, oldVN[i]);
 			System.arraycopy(tmp, 0, newVertices[i], 0, tmp.length);
+//			System.err.println("Normal = "+Rn.toString(oldVN[i]));
 		}
 		
 		int numFaces = origIndices.length;
@@ -397,7 +403,7 @@ import de.jreality.scene.data.IntArrayArray;
 		DoubleArrayArray oldFaceColors = null;
 		double[][] newFaceColors = null;
 		double[][] faceColorsWithoutHoles = null;
-		if (keepFaceColors)	{
+		if (keepFaceColors && theSurface.getFaceAttributes(Attribute.COLORS) != null)	{
 			oldFaceColors = theSurface.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray();
 			newFaceColors = new double[allFaces][];
 			faceColorsWithoutHoles = doubleIt(theSurface.getFaceAttributes(Attribute.COLORS).toDoubleArrayArray(null), edgelist);
@@ -472,8 +478,10 @@ import de.jreality.scene.data.IntArrayArray;
 			}
 			// build the faces using the non-duplicate indices found above
 			double[] oldFaceColor = null;
-			if (keepFaceColors)	
+			if (keepFaceColors && oldFaceColors != null)	
 				oldFaceColor = oldFaceColors.item(i).toDoubleArray(null);
+			if (oldFaceColor == null) oldFaceColor = new double[]{1,1,1,1};
+			System.err.println("Old face color = "+Rn.toString(oldFaceColor));
 			int[] ndvi = nonDuplicateVertexIndicesForThisHole;
 			for (int k = 0; k<profileCurveSize-1; ++k)	{
 				for (int j = 0; j<totalVerticesPerLoop-1; ++j)	{
@@ -482,7 +490,7 @@ import de.jreality.scene.data.IntArrayArray;
 						thisF[1] = ndvi[k*totalVerticesPerLoop + (j+1)%totalVerticesPerLoop];
 						thisF[2] = ndvi[(k+1)*totalVerticesPerLoop + (j+1)%totalVerticesPerLoop];
 						thisF[3] = ndvi[(k+1)*totalVerticesPerLoop + j];
-						if (keepFaceColors) newFaceColors[allFaceCount] = oldFaceColor;
+						if (keepFaceColors && newFaceColors != null) newFaceColors[allFaceCount] = oldFaceColor;
 						allFaceCount++;
 				}
 			}
@@ -500,17 +508,22 @@ import de.jreality.scene.data.IntArrayArray;
 				thisF[1] = offset+diff+1+i1;
 				thisF[2] = offset+1+i1;
 				thisF[3] = offset+i1;
+				if (keepFaceColors && newFaceColors != null) newFaceColors[allFaceCount] = new double[]{1,1,1,1};;
 				allFaceCount++;
 			}
 		}
 
 //		System.err.println("Found "+foundSharedVerts+" shared vertices");
+//		if (newFaceColors != null) System.err.println("new face colors = "+Rn.toString(newFaceColors));
 		thickSurfaceIFSF.setVertexCount(allVerts);
 		thickSurfaceIFSF.setFaceCount(allFaces);
 		thickSurfaceIFSF.setVertexCoordinates(allVertices);
 		thickSurfaceIFSF.setVertexTextureCoordinates(allTexCoords);
 		thickSurfaceIFSF.setFaceIndices(allIndices);
-		if (keepFaceColors && newFaceColors != null) thickSurfaceIFSF.setFaceColors(newFaceColors);
+		if (keepFaceColors && newFaceColors != null) {
+//			thickSurfaceIFSF.setFaceColors( (double[][]) null);
+			thickSurfaceIFSF.setFaceColors(newFaceColors);
+		}
 		thickSurfaceIFSF.setGenerateEdgesFromFaces(true);
 		thickSurfaceIFSF.setGenerateFaceNormals(true);
 		thickSurfaceIFSF.setGenerateVertexNormals(true);
