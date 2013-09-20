@@ -127,9 +127,9 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
 
  //   Compute attenuation
    if (hyperbolic) 
-   	  attenuation = gl_LightSource[i].constantAttenuation * exp(-gl_LightSource[i].linearAttenuation * d);
+       attenuation = gl_LightSource[i].constantAttenuation + exp(-gl_LightSource[i].linearAttenuation * d);
    else attenuation =  gl_LightSource[i].constantAttenuation + (2.0 - gl_LightSource[i].linearAttenuation)*abs(cos(d));
-
+    
 //    attenuation = clamp(attenuation, 0.0, 1.0);
     halfVector = (toLight + eye);
     if (hyperbolic) halfVector = -halfVector;
