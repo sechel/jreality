@@ -238,7 +238,7 @@ public class AABBTree {
           tempt = tris[i];
           for (int j = 0; j < tempt.getNumTriangles(); j++) {
             tempt.getTriangle(j, p1, p2, p3);
-            if (BruteForcePicking.intersects(pobj, fromLocal, toLocal, p1, p2, p3)) {
+            if (BruteForcePicking.intersects(pobj, fromLocal, toLocal, p1, p2, p3, null)) {
               double[] pw = m.multiplyVector(pobj);
               hits.add(new Hit(path.pushNew(ifs), pw, Pn.distanceBetween(from, pw,metric), 
             		  P3.affineCoordinate(from, to, pw), PickResult.PICK_TYPE_FACE, tempt.getIndex(),j));
