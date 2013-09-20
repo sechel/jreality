@@ -59,7 +59,7 @@ public class TransparencyHelper {
     private static int[] queryresavail = new int[1];
     private static int[] queryres = new int[1];
 	
-	public static void resizeTexture(GL3 gl, int width, int height){
+	public static void resizeFramebufferTextures(GL3 gl, int width, int height){
 		//bind color texture to framebuffer object 1
 		gl.glBindTexture(gl.GL_TEXTURE_2D, texs[2]);
     	gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
@@ -104,7 +104,7 @@ public class TransparencyHelper {
 	private static void initTextureFramebuffer(GL3 gl, int width, int height){
 		gl.glGenTextures(3, texs, 0);
 		gl.glGenFramebuffers(2, fbos, 0);
-    	resizeTexture(gl, width, height);
+    	resizeFramebufferTextures(gl, width, height);
 	}
 	
 	public static void initTransparency(GL3 gl, int width, int height){

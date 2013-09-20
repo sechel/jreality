@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import javax.media.opengl.GL3;
 
+import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.helper.TransparencyHelper;

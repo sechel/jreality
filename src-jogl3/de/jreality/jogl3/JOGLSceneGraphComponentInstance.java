@@ -36,67 +36,6 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			childInstance.setAppearanceEntitiesUpToDate();
 		}
 	}
-
-//	void render(JOGLRenderState parentState, int width, int height) {
-//		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
-//		boolean upToDate = false;
-//		if(app != null){
-//			if (((JOGLAppearanceEntity)app.getEntity()).dataUpToDate && parentState.appearanceUpToDate){
-//				
-//				upToDate = true;
-//			}
-//		}
-//		if(app == null && parentState.appearanceUpToDate){
-//			upToDate = true;
-//		}
-//		JOGLRenderState state = new JOGLRenderState(parentState, getTrafo());
-//		state.appearanceUpToDate = upToDate;
-//		
-//		//if two scenegraph nodes on the same scene graph path reference
-//		//to the same local light, then the light is duplicated and therefore its
-//		//intensity is practically multiplied. There would be no other possible meaning in
-//		//referencing a local light twice on the same scene graph path.
-//		SceneTreeNode maybelight = this.getLightTreeNode();
-//		if(maybelight instanceof JOGLLightInstance){
-//			JOGLLightInstance light = (JOGLLightInstance) maybelight;
-//			if(light != null){
-//				JOGLLightEntity lightEntity = (JOGLLightEntity) light.getEntity();
-//				if(!lightEntity.isGlobal()){
-//					state.addLocalLight(light);
-//				}
-//			}
-//		}
-//		
-//		SceneTreeNode gtn =  getGeometryTreeNode();
-//		
-//		if (gtn instanceof JOGLGeometryInstance) {
-//		
-//			JOGLGeometryInstance geom = (JOGLGeometryInstance) gtn;
-//			if (geom != null) {
-//				JOGLGeometryEntity geomEntity = (JOGLGeometryEntity) geom.getEntity();
-//				if(!geomEntity.dataUpToDate){
-//					geomEntity.updateData(state.getGL());
-//					geom.updateAppearance(this.toPath(), state.getGL());
-//					geomEntity.dataUpToDate = true;
-//				}
-//				if(!state.appearanceUpToDate)
-//					geom.updateAppearance(this.toPath(), state.getGL());
-//				//geom.eap = EffectiveAppearance.create(this.toPath());
-//				//rather update only when appearance has changed.
-//				//PolygonShader.setFromEffectiveAppearance(EffectiveAppearance.create(this.toPath()), CommonAttributes.POLYGON_SHADER);
-//				geom.render(state, width, height);
-//			}
-//		}
-//		
-//		for (SceneTreeNode child : getChildren()) {
-//			if (!child.isComponent())
-//				continue;
-//			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
-//			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
-//			if(sgc.isVisible())
-//				childInstance.render(state, width, height);
-//		}
-//	}
 	
 	public class RenderableObject{
 		public RenderableObject(JOGLGeometryInstance geom, JOGLRenderState state){
@@ -218,8 +157,6 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 	}
 	
-	
-	
 	private double[] getTrafo() {
 		SceneTreeNode tn = getTransformationTreeNode();
 		if (tn != null) {
@@ -228,40 +165,4 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 		return null;
 	}
-
-
-	
-//	@Override
-//	public int addChild(SceneTreeNode child) {
-//		if (child.getNode() instanceof Appearance) {
-//			propagateAppearanceChanged(null);
-//		}
-//		return super.addChild(child);
-//	}
-//
-//	@Override
-//	public int removeChild(SceneTreeNode child) {
-//		if (child.getNode() instanceof Appearance) {
-//			propagateAppearanceChanged(null);
-//		}
-//		return super.removeChild(child);
-//	}
-
-//	protected void propagateAppearanceChanged(String key) {
-//		EffectiveAppearance eap = EffectiveAppearance.create();
-//		propagateAppearanceChanged(eap, key);
-//	}
-//	
-//	protected void propagateAppearanceChanged(EffectiveAppearance parentEap, String key) {
-//		EffectiveAppearance eap = parentEap;
-//		if (getAppearanceTreeNode() != null) {
-//			eap = parentEap.create((Appearance) getAppearanceTreeNode().getNode());
-//		}
-//		PolygonShader.setFromEffectiveAppearance(parentEap, "polygonShader");
-//		for (SceneTreeNode n : getChildren()) {
-//			if (!n.isComponent()) continue;
-//			JOGLSceneGraphComponentInstance ci = (JOGLSceneGraphComponentInstance) n;
-//			ci.propagateAppearanceChanged(eap, key);
-//		}
-//	}
 }

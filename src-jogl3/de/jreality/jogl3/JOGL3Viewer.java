@@ -288,7 +288,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		
 		if(offscreen){
 			TransparencyHelper.setSupersample((int)aa);
-			TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
+			TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
 		}
 		// TODO Auto-generated method stub
 		//System.out.println("display called---------------------------------");
@@ -375,7 +375,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		}
 		if(offscreen){
 			TransparencyHelper.setSupersample(supersample);
-			TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
+			TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
 		}
 		perfmeter.endFrame();
 	}
@@ -447,7 +447,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		this.width = arg3;
 		this.height = arg4;
 		TransparencyHelper.setSupersample(supersample);
-		TransparencyHelper.resizeTexture(arg0.getGL().getGL3(), width, height);
+		TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
 		
 	}
 	

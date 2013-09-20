@@ -16,7 +16,7 @@ import de.jreality.backends.label.LabelUtility;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlTexture;
+import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.LabelRenderData;
 import de.jreality.jogl3.geom.Label;
