@@ -75,7 +75,9 @@ void calculateLightInfluxGeneral(vec3 normal, int numDir, int numPoint, int numS
 	int lightTexSize = numDir*3+numPoint*3+numSpot*5;
 	
 	for(int i = 0; i < numDir; i++){
-		vec4 dir = texture(lights, vec2((3*i+1+0.5)/lightTexSize, 0));
+		//do this instead, it might be much better and doesn't need lightTexSize!
+		vec4 dir = texelFetch(lights, ivec2(3*i+1+0.5, 0), 0);
+		//vec4 dir = texture(lights, vec2((3*i+1+0.5)/lightTexSize, 0));
 		
 		vec4 col = texture(lights, vec2((3*i+0.5)/lightTexSize, 0));
 		float intensity = texture(lights, vec2((3*i+2+0.5)/lightTexSize, 0)).r;
