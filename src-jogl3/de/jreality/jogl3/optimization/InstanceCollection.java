@@ -28,16 +28,19 @@ public class InstanceCollection {
 	private WeakHashMap<String, GLVBO> gpuData = new WeakHashMap<String, GLVBO>();
 	
 	public void kill(Instance i){
-		i.kill();
-		//TODO null all vbos
-		GLVBOFloat vertexData = (GLVBOFloat) gpuData.get("vertex_coordinates");
-		float[] subdata = new float[i.length/4];
-		//here we have to set the some coordinate (e.g. x-coord) to 1, so that w=0 will have the effect of sending
-		//the vertex to infinity
-		for(int j = 0; j < i.length/4; j+=4){
-			subdata[j*4] = 1;
+		if(i.isAlive()){
+			i.kill();
+			//TODO null all vbos
+			GLVBOFloat vertexData = (GLVBOFloat) gpuData.get("vertex_coordinates");
+			float[] subdata = new float[i.length/4];
+			//here we have to set the some coordinate (e.g. x-coord) to 1, so that w=0 will have the effect of sending
+			//the vertex to infinity
+			for(int j = 0; j < i.length/4; j+=4){
+				subdata[j*4] = 1;
+			}
+			vertexData.updateSubData(gl, subdata, i.posInVBOs, i.length);
+			dead_count += i.length;
 		}
-		vertexData.updateSubData(gl, subdata, i.posInVBOs, i.length);
 	}
 	
 	private void putNewVBO(String name, int type, int elementSize){

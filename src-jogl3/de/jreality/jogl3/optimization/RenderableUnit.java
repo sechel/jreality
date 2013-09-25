@@ -56,11 +56,7 @@ public class RenderableUnit {
 			if(!registered.contains(fsi)){
 				Instance ins = instances.get(fsi);
 				//if already dead, stays dead
-				ins.kill();
-				//TODO have to null all w-coordinates on GPU
-				
-				//increase dead_count
-				ins.collection.dead_count += ins.length;
+				ins.collection.kill(ins);
 			}
 		}
 		
