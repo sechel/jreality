@@ -12,6 +12,7 @@ import de.jreality.jogl3.geom.JOGLGeometryInstance;
 
 public class RenderableUnitCollection{
 	WeakHashMap<GlTexture, RenderableUnit> units = new WeakHashMap<GlTexture, RenderableUnit>();
+	
 	public void addRenderableObject(RenderableObject o){
 		JOGLGeometryInstance geom = o.geom;
 		JOGLRenderState state = o.state;
@@ -25,4 +26,6 @@ public class RenderableUnitCollection{
 			}
 		}
 	}
+	
+	
 }

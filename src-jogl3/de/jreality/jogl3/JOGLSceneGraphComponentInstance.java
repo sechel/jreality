@@ -96,6 +96,8 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 				if(!geomEntity.dataUpToDate){
 					geomEntity.updateData(state.getGL());
 					geom.updateAppearance(this.toPath(), state.getGL());
+					//TODO here needs to be a second dataChanged variable to indicate that RenderableUnit
+					//needs updating
 					geomEntity.dataUpToDate = true;
 				}
 				if(!state.appearanceUpToDate)

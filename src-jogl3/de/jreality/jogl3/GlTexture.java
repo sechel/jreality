@@ -7,6 +7,13 @@ import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.shader.Texture2D;
 
+
+
+/**
+ * The 1st standard texture of a geometry.
+ * @author Benjamin
+ */
+
 public class GlTexture{
 	boolean hasTexture = false;
 	public GlTexture(){
@@ -20,6 +27,10 @@ public class GlTexture{
 	public void removeTexture(){
 		hasTexture = false;
 	}
+    /**
+     * loads the texture specified in {@link #setTexture(Texture2D)} and binds it to the glsl shader
+     * @param shader the glsl shader that uses this texture
+     */
 	public void bind(GLShader shader, GL3 gl){
 		if(hasTexture){
 			//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.

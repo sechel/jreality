@@ -1,5 +1,8 @@
 //author Benjamin Kutschan
 //default polygon fragment shader
+
+//EVERY VARIABLE MUST BE DEFINED ON ITS OWN LINE, i.e. nothing like "int a,b;"
+//this must be the LAST MACRO before the variables
 #version 330
 
 out vec4 glFragColor;
