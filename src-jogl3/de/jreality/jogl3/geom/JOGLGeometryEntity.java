@@ -75,7 +75,11 @@ public abstract class JOGLGeometryEntity extends SceneGraphNodeEntity implements
 			return true;
 		return false;
 	}
-	
-	public abstract void updateData(GL3 gl);
+	/**
+	 * 
+	 * @param gl
+	 * @return whether the length has changed or not
+	 */
+	public abstract boolean updateData(GL3 gl);
 
 }

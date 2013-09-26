@@ -54,7 +54,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 		dataUpToDate = false;
 	}
 
-	public void updateData(GL3 gl) {
+	public boolean updateData(GL3 gl) {
 		//if (!dataUpToDate) {
 			pointVbos.clear();
 			//TODO convert to automatic creation of vbos
@@ -183,5 +183,6 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 //			System.out.println("data up to date: "+getNode().getName());
 			
 		//}
+			return false;
 	}
 }

@@ -20,6 +20,7 @@ import de.jreality.scene.event.GeometryEvent;
 
 public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 
+	private int length = 0;
 	//private GLVBOFloat normalVBO = null;
 	private HashMap<String, GLVBO> vbos = new HashMap<String, GLVBO>();
 	public Label[] labels = new Label[0];
@@ -53,7 +54,8 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 	}
 	
 	//replace state to gl
-	public void updateData(GL3 gl) {
+	public boolean updateData(GL3 gl) {
+		boolean ret = false;
 		//if (!dataUpToDate) {
 			super.updateData(gl);
 			vbos.clear();
@@ -63,6 +65,10 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 			for(int i = 0; i < fs.getNumFaces(); i++){
 				IntArray face = fs.getFaceAttributes(Attribute.INDICES).item(i).toIntArray();
 				count += (face.getLength()-2)*3;
+			}
+			if(count != length){
+				ret = true;
+				length = count;
 			}
 			//the array to hold the vertex indices of triangles
 			int[] indexArray = new int[count];
@@ -368,7 +374,7 @@ public class JOGLFaceSetEntity extends JOGLLineSetEntity {
 //				System.out.println(a.getName());
 				//TODO
 			}
-			
+			return ret;
 			
 //			aS = fs.getFaceAttributes().storedAttributes();
 //			for(Attribute a : aS){

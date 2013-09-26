@@ -94,14 +94,12 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			if (geom != null) {
 				JOGLGeometryEntity geomEntity = (JOGLGeometryEntity) geom.getEntity();
 				if(!geomEntity.dataUpToDate){
-					geomEntity.updateData(state.getGL());
-					geom.updateAppearance(this.toPath(), state.getGL());
-					//TODO here needs to be a second dataChanged variable to indicate that RenderableUnit
-					//needs updating
+					boolean changedLength = geomEntity.updateData(state.getGL());
+					geom.updateAppearance(this.toPath(), state.getGL(), false, changedLength, true);
 					geomEntity.dataUpToDate = true;
 				}
 				if(!state.appearanceUpToDate)
-					geom.updateAppearance(this.toPath(), state.getGL());
+					geom.updateAppearance(this.toPath(), state.getGL(), true, false, false);
 				//geom.eap = EffectiveAppearance.create(this.toPath());
 				//rather update only when appearance has changed.
 				//PolygonShader.setFromEffectiveAppearance(EffectiveAppearance.create(this.toPath()), CommonAttributes.POLYGON_SHADER);

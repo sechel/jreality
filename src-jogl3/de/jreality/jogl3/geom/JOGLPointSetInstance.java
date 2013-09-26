@@ -86,7 +86,7 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 	public GlTexture pointTexture = new GlTexture();
 	public GlReflectionMap pointReflMap = new GlReflectionMap();
 	@Override
-	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
+	public void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged) {
 		pointSetUniforms = new LinkedList<GlUniform>();
 		
 		//pointSphereShader = updateAppearance(GLShader.defaultPointShader, sgp, gl, pointSetPolygonUniforms, pointTexture, new GlReflectionMap(), CommonAttributes.POINT_SHADER);

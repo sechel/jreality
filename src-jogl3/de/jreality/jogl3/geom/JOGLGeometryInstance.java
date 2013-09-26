@@ -638,5 +638,5 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		return shader;
 	}
 
-	public abstract void updateAppearance(SceneGraphPath sgp, GL3 gl);
+	public abstract void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged);
 }

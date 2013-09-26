@@ -93,8 +93,8 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 	public GlTexture lineTexture = new GlTexture();
 	public GlReflectionMap lineReflMap = new GlReflectionMap();
 	@Override
-	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
-		super.updateAppearance(sgp, gl);
+	public void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged) {
+		super.updateAppearance(sgp, gl, appChanged, geomLengthChanged, geomPosChanged);
 		lineSetUniforms = new LinkedList<GlUniform>();
 		lineSetPolygonUniforms = new LinkedList<GlUniform>();
 		

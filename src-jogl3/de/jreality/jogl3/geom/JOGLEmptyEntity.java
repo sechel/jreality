@@ -12,7 +12,8 @@ public class JOGLEmptyEntity extends JOGLGeometryEntity {
 	}
 
 	@Override
-	public void updateData(GL3 gl) {
+	public boolean updateData(GL3 gl) {
+		return false;
 	}
 
 	public void geometryChanged(GeometryEvent ev) {

@@ -63,7 +63,7 @@ public class JOGLSphereInstance extends JOGLGeometryInstance {
 	public GlTexture polygonTexture = new GlTexture();
 	public GlReflectionMap polygonReflMap = new GlReflectionMap();
 	@Override
-	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
+	public void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged) {
 		sphereUniforms = new LinkedList<GlUniform>();
 		sphereShader = updateAppearance(ifd, GLShader.defaultSphereShader, sgp, gl, sphereUniforms, polygonTexture, polygonReflMap, CommonAttributes.POLYGON_SHADER);
 	}

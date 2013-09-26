@@ -13,13 +13,17 @@ import de.jreality.jogl3.glsl.GLShader;
 public class RenderableUnit {
 	
 	private static final int FRAGMENT_THRESHOLD = 100000;
+	private static final int MAX_NUMBER_OBJ_IN_COLLECTION = 1000;
 	
 	private GlTexture texture;
 	private GLShader shader;
 	
+	
+	//an Instance collection contains upto MAX_NUMBER_OBJ_IN_COLLECTION small objects.
+	//This limitation is due to the maximum texture size.
 	private LinkedList<InstanceCollection> instanceCollections = new LinkedList<InstanceCollection>();
 	
-	//contains the current Instances for all FaceSetInstances
+	//contains the current Instances for all FaceSetInstances, without dead
 	private WeakHashMap<JOGLFaceSetInstance, Instance> instances = new WeakHashMap<JOGLFaceSetInstance, Instance>();
 	
 	//a simple set of all the new FaceSetInstances to be registered
@@ -50,38 +54,44 @@ public class RenderableUnit {
 	public void update(){
 		
 		//check which fsi are missing in the registered ones
-		//if there is an Instance in instances that is neither dead nor belongs to a FaceSetInstance in registered, kill it
+		//if there is an Instance in instances not belonging to a FaceSetInstance in registered, kill it
 		Set<JOGLFaceSetInstance> set = instances.keySet();
 		for(JOGLFaceSetInstance fsi : set){
 			if(!registered.contains(fsi)){
 				Instance ins = instances.get(fsi);
-				//if already dead, stays dead
+				//we know it's alive, because instances only contains alive elements
 				ins.collection.kill(ins);
+				instances.remove(fsi);
+			}
+		}
+		
+		//order into sets newSet, lengthSet and posASet for FaceSetInstances that are completely new,
+		//have changed their length or changed either positions or attributes respectively.
+		HashSet<JOGLFaceSetInstance> newSet = new HashSet<JOGLFaceSetInstance>();
+		HashSet<JOGLFaceSetInstance> lengthSet = new HashSet<JOGLFaceSetInstance>();
+		HashSet<JOGLFaceSetInstance> posASet = new HashSet<JOGLFaceSetInstance>();
+		for(JOGLFaceSetInstance f : registered){
+			//check if new
+			if(instances.get(f) == null){
+				//in fact it's new
+				newSet.add(f);
+			}else if(f.oChangedLength()){
+				//is old, but changed its length
+				lengthSet.add(f);
+				f.resetOChangedLength();
+			}else if(f.oChangedPositionsOrAttributes()){
+				//changed only positions or attributes
+				posASet.add(f);
+				f.resetOChangedPositionsOrAttributes();
+			}else{
+				//nothing changed, needs not be touched if not neccessary
+				//do nothing here!
 			}
 		}
 		
 		
 		
-		//TODO CARRY ON WORKING HERE-------------------------------------------****************--------------------
-		//check, which ones are new and how many they are.
-		int new_count = 0;
-		set = registered;
-		for(JOGLFaceSetInstance fsi : set){
-			if(instances.get(fsi) == null){
-				//found new fsi, count its length towards new_count
-				JOGLFaceSetEntity fse = (JOGLFaceSetEntity)fsi.getEntity();
-				new_count += fse.getVBO("vertex_coordinates").getLength();
-			}
-		}
 		
-		if(new_count < available){
-			//TODO append new data to vbo in GPU
-			//TODO process the changed face set instances
-		}else if(new_count < dead_count + available){
-			//TODO recreate with equal size
-		}else{
-			//TODO recreate with enough size (START_SIZE*2^n)
-		}
 		
 		//clean up the registration hash map
 		registered = new HashSet<JOGLFaceSetInstance>();

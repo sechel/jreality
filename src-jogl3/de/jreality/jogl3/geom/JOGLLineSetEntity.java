@@ -53,7 +53,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 		return ret;
 	}
 	
-	public void updateData(GL3 gl) {
+	public boolean updateData(GL3 gl) {
 		
 		//if (!dataUpToDate) {
 			super.updateData(gl);
@@ -277,7 +277,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 			}
 			//dataUpToDate = true;
 		//}
-		
+		return false;
 	}
 	//TODO write line shader
 }
