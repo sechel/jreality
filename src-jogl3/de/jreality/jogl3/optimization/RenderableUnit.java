@@ -13,12 +13,8 @@ import de.jreality.jogl3.glsl.GLShader;
 
 public class RenderableUnit {
 	
-	public static final int FRAGMENT_THRESHOLD = 100000;
-	public static final int MAX_NUMBER_OBJ_IN_COLLECTION = 1000;
-	
 	private GlTexture texture;
 	private GLShader shader;
-	
 	
 	//an Instance collection contains upto MAX_NUMBER_OBJ_IN_COLLECTION small objects.
 	//This limitation is due to the maximum texture size.
@@ -29,8 +25,6 @@ public class RenderableUnit {
 	
 	//a simple set of all the new FaceSetInstances to be registered
 	private HashSet<JOGLFaceSetInstance> registered = new HashSet<JOGLFaceSetInstance>();
-	
-	
 	
 	/**
 	 * create a new entity containing all small geometries (below 1000 verts) with one equal texture/shader pair

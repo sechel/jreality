@@ -1,6 +1,7 @@
 package de.jreality.jogl3.geom;
 
 import java.util.LinkedList;
+import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
@@ -78,6 +79,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	}
 	
 	public LinkedList<GlUniform> faceSetUniforms = new LinkedList<GlUniform>();
+	public WeakHashMap<String, GlUniform> faceSetUniformsHash = new WeakHashMap<String, GlUniform>();
 	public InstanceFontData ifd = new InstanceFontData();
 	public GlTexture faceTexture = new GlTexture();
 	public GlReflectionMap reflMap = new GlReflectionMap();
@@ -93,9 +95,16 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		faceSetUniforms = new LinkedList<GlUniform>();
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		polygonShader = updateAppearance(ifd, GLShader.defaultPolygonShader, sgp, gl, faceSetUniforms, faceTexture, reflMap, CommonAttributes.POLYGON_SHADER);
+		createFaceSetUniformsHashMap();
 		updateLabelTextureAndVBOsAndUniforms(gl, labelData, fse.labels, ifd);
 	}
 	
+	private void createFaceSetUniformsHashMap() {
+		for(GlUniform glu : faceSetUniforms){
+			faceSetUniformsHash.put(glu.name, glu);
+		}
+	}
+
 	//the "o" indicates that this code is only neccessary for the optimization of scenes with 10.000 small
 	//geometries or more.
 	private boolean oChangedLength = true;

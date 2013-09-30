@@ -1,5 +1,6 @@
 package de.jreality.jogl3.optimization;
 
+import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -9,6 +10,7 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
@@ -20,7 +22,114 @@ import de.jreality.jogl3.shader.GLVBOInt;
  */
 public class InstanceCollection {
 	
+	private int textureID;
+	private int texUnit = 1;
+	private float data[];
+	
+	private void initUniformTexture(GL3 gl){
+		textureID = generateNewTexID(gl);
+		
+		data = new float[shader.getNumFloatsNecessary()*MAX_NUMBER_OBJ_IN_COLLECTION];
+		
+		updateUniformsTexture(gl);
+	}
+	private int offset;
+	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, int j){
+		for(String[] s : Uniforms){
+			GlUniform u = uniforms.get(s[1]);
+			if(s[0].equals("mat4")){
+				float[] f = (float[])u.value;
+				for(int l = 0; l < 16; l++)
+					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
+				offset += 16;
+			}else if(s[0].equals("vec4")){
+				float[] f = (float[])u.value;
+				for(int l = 0; l < 4; l++)
+					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
+				offset += 4;
+			}else if(s[0].equals("float")){
+				float f = (Float)u.value;
+				data[offset+j*shader.getNumFloatsNecessary()] = f;
+				offset += 1;
+			}else if(s[0].equals("int")){
+				int f = (Integer)u.value;
+				data[offset+j*shader.getNumFloatsNecessary()] = Float.intBitsToFloat(f);
+				offset += 1;
+			}else if(s[0].equals("vec2")){
+				float[] f = (float[])u.value;
+				for(int l = 0; l < 2; l++)
+					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
+				offset += 2;
+			}else if(s[0].equals("vec3")){
+				float[] f = (float[])u.value;
+				for(int l = 0; l < 3; l++)
+					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
+				offset += 3;
+			}
+		}
+	}
+	
+	private void updateUniformsTexture(GL3 gl){
+		//update data
+		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
+		LinkedList<String[]> fragUniforms = shader.getFragUniforms();
+		
+		for(int j = 0; j < instances.size(); j++){
+			//j is the height offset in the texture
+			Instance i = instances.get(j);
+			//retrieve appearance data from fsi uniforms
+			JOGLFaceSetInstance fsi = i.fsi;
+			WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
+			//the width offset
+			offset = 0;
+			DataWriteHelper(vertUniforms, uniforms, j);
+			if (offset%4 != 0)
+				offset = 4*(offset/4) + 4;
+			DataWriteHelper(fragUniforms, uniforms, j);
+		}
+		
+		gl.glEnable(gl.GL_TEXTURE_2D);
+		gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
+		
+		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
+		
+		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
+	    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+	    
+	    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, shader.getNumFloatsNecessary(), MAX_NUMBER_OBJ_IN_COLLECTION, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+	}
+	
+	private int generateNewTexID(GL3 gl){
+		int[] textures = new int[1];
+		gl.glGenTextures(1, textures, 0);
+		return textures[0];
+	}
+	
+	public void bindUniformsTexture(GL3 gl) {
+		gl.glEnable(gl.GL_TEXTURE_2D);
+		gl.glActiveTexture(gl.GL_TEXTURE0);
+		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
+	}
+	
+	private OptimizedGLShader shader;
+	
+	public InstanceCollection(OptimizedGLShader shader){
+		this.shader = shader;
+		putNewVBO("vertex_coordinates", GL3.GL_FLOAT, 4);
+		nullRest();
+	}
+	
+	public void init(GL3 gl){
+		this.gl = gl;
+		initUniformTexture(gl);
+	}
+	
 	GL3 gl;
+	
+	/**
+	 * depends on the maximum texture dimension
+	 */
+	private static final int MAX_NUMBER_OBJ_IN_COLLECTION = 1000;
 	
 	/**
 	 * initial size in floats
@@ -134,24 +243,13 @@ public class InstanceCollection {
 			}
 		}
 	}
-	
-	/**
-	 * this method can easily be changed to facilitate fine tuning of the optimization
-	 * @return
-	 */
-	private boolean isFragmented() {
-		if(dead_count >= RenderableUnit.FRAGMENT_THRESHOLD)
-			return true;
-		else
-			return false;
-	}
 	//_______________________****************PUBLIC METHODS****************__________________________
 	/**
 	 * get the number of instances, you can still add to this collection
 	 * @return
 	 */
 	public int getNumberFreeInstances() {
-		return RenderableUnit.MAX_NUMBER_OBJ_IN_COLLECTION-numAliveInstances;
+		return MAX_NUMBER_OBJ_IN_COLLECTION-numAliveInstances;
 	}
 	/**
 	 * only registers a new Instance to this InstanceCollection. To push changes to GPU, use update()
@@ -171,18 +269,6 @@ public class InstanceCollection {
 			dyingInstances.add(i);
 			numAliveInstances--;
 		}
-	}
-	/**
-	 * defragment in RAM, but leave GPU data unchanged until update() is called.
-	 * ignore dead, they will be removed by RenderableUnit.update()
-	 */
-	private void defragment() {
-		
-		
-		
-		// TODO don't forget to set instance.upToDate = true for all recreated instances;
-		// TODO remove all dead from instances
-		// TODO only register the changes, do not push to GPU yet, update() has to do this.
 	}
 	
 	private void writeAllInstancesNewToVBO(){
@@ -245,9 +331,11 @@ public class InstanceCollection {
 					instances.add(i);
 					pushInstanceToGPU(i);
 				}
-				//and null the dead ones
+				//and null (and remove?) the dead ones
 				for(Instance i : dyingInstances){
 					nullInstance(i);
+					//TODO is this right?
+					instances.remove(i);
 				}
 				//and done!
 			}else{
@@ -258,6 +346,7 @@ public class InstanceCollection {
 		}
 		dyingInstances = new LinkedList<Instance>();
 		newInstances = new LinkedList<Instance>();
+		updateUniformsTexture(gl);
 	}
 	
 }

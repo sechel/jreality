@@ -10,7 +10,19 @@ public class OptimizedGLShader extends GLShader {
 	private LinkedList<String[]> VertUniforms;
 	private LinkedList<String[]> FragUniforms;
 	
+	public LinkedList<String[]> getFragUniforms(){
+		return FragUniforms;
+	}
+	
+	public LinkedList<String[]> getVertUniforms(){
+		return VertUniforms;
+	}
+	
 	private int offset = 0;
+	
+	public int getNumFloatsNecessary(){
+		return offset;
+	}
 	
 	public OptimizedGLShader(String v, String f){
 		super(v,f);
@@ -127,8 +139,6 @@ public class OptimizedGLShader extends GLShader {
 								+ this.texel((offset)/4+3, isVertexShader) + ");\n";
 						offset += 16;
 					}else if(s[0].equals("vec4")){
-						if(offset/4 == 4)
-							source[0] += "polygonShader_specularColor = texelFetch(uniforms, ivec2(4, instanceID), 0);\n";
 						source[0] += s[1] + " = " + this.texel(offset/4, isVertexShader) + ";\n";
 						offset += 4;
 					}else if(s[0].equals("float")){
