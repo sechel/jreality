@@ -13,57 +13,66 @@ import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
 
+/**
+ * A collection of up to MAX_TEXTURE_DIMENSION FaceSetInstances
+ * @author benjamin
+ *
+ */
 public class InstanceCollection {
 	
 	GL3 gl;
 	
-	public static final int START_SIZE = 1000;
+	/**
+	 * initial size in floats
+	 */
+	private static final int START_SIZE = 1000;
 	
 	//the number of dead bytes, needed to decide, when to defragment
-	public int dead_count = 0;
+	/**
+	 * number of dead floats
+	 */
+	private int dead_count = 0;
 	//1000 is the starting size of the VBOs
-	public int available = START_SIZE;
-	public int current_vbo_size = START_SIZE;
+	/**
+	 * available size in floats
+	 */
+	private int availableFloats = START_SIZE;
+	/**
+	 * current size in floats
+	 */
+	private int current_vbo_size = START_SIZE;
 	private int numAliveInstances = 0;
 	
-	public LinkedList<Instance> instances = new LinkedList<Instance>();
-	public LinkedList<Instance> newInstances = new LinkedList<Instance>();
+	private LinkedList<Instance> instances = new LinkedList<Instance>();
+	private LinkedList<Instance> newInstances = new LinkedList<Instance>();
 	//This is needed, because we might delete the deadInstances in defragmentation.
 	//if not so, we need to manually null these.
-	public LinkedList<Instance> deadInstances = new LinkedList<Instance>();
+	private LinkedList<Instance> dyingInstances = new LinkedList<Instance>();
 	
 	private WeakHashMap<String, GLVBO> gpuData = new WeakHashMap<String, GLVBO>();
 	
-	public void kill(Instance i){
-		if(i.isAlive()){
-			i.kill();
-			dead_count += i.length;
-			deadInstances.add(i);
-			numAliveInstances--;
-		}
-	}
 	
 	private void nullInstance(Instance i){
 		this.nullFromTo(i.posInVBOs, i.length+i.posInVBOs);
 	}
 	private void nullRest(){
-		nullFromTo(current_vbo_size-available, current_vbo_size);
+		nullFromTo(current_vbo_size-availableFloats, current_vbo_size);
 	}
 	/**
 	 * 
-	 * @param start in Bytes
-	 * @param end in Bytes
+	 * @param start in Floats
+	 * @param end in Floats
 	 */
 	private void nullFromTo(int start, int end){
 		//null vertex_coordinates.w
 		GLVBOFloat vertexData = (GLVBOFloat) gpuData.get("vertex_coordinates");
-		float[] subdata = new float[(end-start)/4];
+		float[] subdata = new float[(end-start)];
 		//here we have to set some coordinate (e.g. x-coord) to 1, so that w=0 will have the effect of sending
 		//the vertex to infinity
-		for(int j = 0; j < (end-start)/4; j+=4){
-			subdata[j*4] = 1;
+		for(int j = 0; j < (end-start); j+=4){
+			subdata[j] = 1;
 		}
-		vertexData.updateSubData(gl, subdata, start, end-start);
+		vertexData.updateSubData(gl, subdata, 4*start, 4*(end-start));
 	}
 	
 	/**
@@ -78,10 +87,13 @@ public class InstanceCollection {
 		}else if(type == GL3.GL_INT){
 			gpuData.put(name, new GLVBOInt(gl, new int[current_vbo_size], name));
 		}else{
-			System.err.println("largevbo has unknown type (InstanceCollection.java)");
+			System.err.println("unknown type of elements in VBO (InstanceCollection.java)");
 		}
 	}
-	
+	/**
+	 * changes the size of the gpuData VBOs. All data in them is being lost by this process.
+	 * @param powerofTwo decides the new size by the formula 1000*2^(powerofTwo)
+	 */
 	private void changeVBOSize(int powerofTwo){
 		current_vbo_size = START_SIZE*(int)Math.round(Math.pow(2, powerofTwo));
 		Set<String> keys = gpuData.keySet();
@@ -97,7 +109,6 @@ public class InstanceCollection {
 	 * This method sends the data to VBOs in GPU.
 	 * The size of the VBOs in GPU are not changed by this method.
 	 * @param i the instance being added
-	 * @param position in bytes
 	 */
 	private void pushInstanceToGPU(Instance i){
 		//add to all vbos
@@ -107,26 +118,65 @@ public class InstanceCollection {
 			//create new GLVBO for this name, if not present
 			if(gpuData.get(vbo.getName()) == null){
 				putNewVBO(vbo.getName(), vbo.getType(), vbo.getElementSize());
+				//needs not be nulled, because it's not vertex_coordinates
 			}
 			//fill in vbo data
 			GLVBO largevbo = gpuData.get(vbo.getName());
 			if(largevbo.getType() == GL3.GL_FLOAT){
 				GLVBOFloat f = (GLVBOFloat)largevbo;
-				f.updateSubData(gl, ((GLVBOFloat)vbo).getData(), i.posInVBOs, i.length);
+				f.updateSubData(gl, ((GLVBOFloat)vbo).getData(), 4*i.posInVBOs, 4*i.length);
 			}else if(largevbo.getType() == GL3.GL_INT){
 				GLVBOInt f = (GLVBOInt)largevbo;
 				//vbo.getLength()*4 must equal i.length
-				f.updateSubData(gl, ((GLVBOInt)vbo).getData(), i.posInVBOs, i.length);
+				f.updateSubData(gl, ((GLVBOInt)vbo).getData(), 4*i.posInVBOs, 4*i.length);
 			}else{
 				System.err.println("largevbo has unknown type (InstanceCollection.java 3)");
 			}
+		}
+	}
+	
+	/**
+	 * this method can easily be changed to facilitate fine tuning of the optimization
+	 * @return
+	 */
+	private boolean isFragmented() {
+		if(dead_count >= RenderableUnit.FRAGMENT_THRESHOLD)
+			return true;
+		else
+			return false;
+	}
+	//_______________________****************PUBLIC METHODS****************__________________________
+	/**
+	 * get the number of instances, you can still add to this collection
+	 * @return
+	 */
+	public int getNumberFreeInstances() {
+		return RenderableUnit.MAX_NUMBER_OBJ_IN_COLLECTION-numAliveInstances;
+	}
+	/**
+	 * only registers a new Instance to this InstanceCollection. To push changes to GPU, use update()
+	 * @param fsi
+	 */
+	public void registerNewInstance(JOGLFaceSetInstance fsi){
+		newInstances.add(new Instance(this, fsi, 0));
+		numAliveInstances++;
+	}
+	/**
+	 * register Instance for deletion
+	 * @param i
+	 */
+	public void kill(Instance i){
+		if(i.isAlive()){
+			i.kill();
+			dyingInstances.add(i);
+			numAliveInstances--;
 		}
 	}
 	/**
 	 * defragment in RAM, but leave GPU data unchanged until update() is called.
 	 * ignore dead, they will be removed by RenderableUnit.update()
 	 */
-	public void defragment() {
+	private void defragment() {
 		
 		
 		
@@ -135,78 +185,79 @@ public class InstanceCollection {
 		// TODO only register the changes, do not push to GPU yet, update() has to do this.
 	}
 	
-	/**
-	 * this method can easily be changed to facilitate fine tuning of the optimization
-	 * @return
-	 */
-	public boolean isFragmented() {
-		if(dead_count >= RenderableUnit.FRAGMENT_THRESHOLD)
-			return true;
-		else
-			return false;
-	}
-
-	public int getNumberFreeInstances() {
-		return RenderableUnit.MAX_NUMBER_OBJ_IN_COLLECTION-numAliveInstances;
-	}
-
-	/**
-	 * only adds an Instance to this InstanceCollection. To push changes to GPU, use update()
-	 * @param fsi
-	 */
-	public void add(JOGLFaceSetInstance fsi) {
-		// TODO only add, not push to GPU
-		Instance i = new Instance(this, fsi, 0);
-		available -= i.length;
+	private void writeAllInstancesNewToVBO(){
+		//write rest to gpu
+		dead_count = 0;
+		//delete all dyingInstances from instances
+		for(Instance i : dyingInstances){
+			instances.remove(i);
+		}
+		//move all newInstances to instances
+		for(Instance i : newInstances){
+			instances.add(i);
+		}
+		
+		//push ALL instances to GPU
+		int pos = 0;
+		for(Instance i : instances){
+			availableFloats -= i.length;
+			i.posInVBOs = pos;
+			pos += i.length;
+			pushInstanceToGPU(i);
+		}
+		//null the rest of the VBO
+		nullRest();
 	}
 	/**
 	 * very important method! Pushes all changes to the GPU
 	 */
 	public void update(){
-		//TODO if defragmentable, defragment!
 		
-		if(available < 0){
-			//if not defragmentable
-			if(-available > dead_count){
-				int needed = current_vbo_size - available - dead_count;
-				float neededPow = needed/1000f;
-				int pow = (int)Math.ceil(Math.log(neededPow)/Math.log(2));
-				changeVBOSize(pow);
-			}
-			//defragment
+		//update dead_count
+		for(Instance i : dyingInstances){
+			dead_count += i.length;
+		}
+		//update availableFloats
+		for(Instance i : newInstances){
+			availableFloats -= i.length;
+		}
+		boolean mustResize = false;
+		int numFloatsNeeded = current_vbo_size - availableFloats - dead_count;
+		if(numFloatsNeeded > current_vbo_size || (numFloatsNeeded <= current_vbo_size/2 && current_vbo_size > START_SIZE))
+			mustResize = true;
+		if(mustResize){
+			//resize
+			float neededPow = numFloatsNeeded/1000f;
+			int pow = (int)Math.ceil(Math.log(neededPow)/Math.log(2));
+			changeVBOSize(pow);
+			//write everything to vbo
+			availableFloats = current_vbo_size;
+			writeAllInstancesNewToVBO();
 			
-			dead_count = 0;
-			for(Instance i : newInstances){
-				instances.add(i);
-			}
-			//push ALL instances to GPU
-			int pos = 0;
-			for(Instance i : instances){
-				i.posInVBOs = pos;
-				pos += i.length;
-				pushInstanceToGPU(i);
-			}
-			//null the rest of the VBO
-			nullRest();
 		}else{
-			//push ONLY the new instances to GPU
-			int pos = current_vbo_size-available;
-			for(Instance i : newInstances){
-				i.posInVBOs = pos;
-				pos += i.length;
-				pushInstanceToGPU(i);
-			}
-			//and null the dead ones
-			for(Instance i : deadInstances){
-				nullInstance(i);
+			//do not resize
+			if(availableFloats >= 0){
+				//push ONLY the new instances to GPU
+				int pos = current_vbo_size-availableFloats;
+				for(Instance i : newInstances){
+					i.posInVBOs = pos;
+					pos += i.length;
+					instances.add(i);
+					pushInstanceToGPU(i);
+				}
+				//and null the dead ones
+				for(Instance i : dyingInstances){
+					nullInstance(i);
+				}
+				//and done!
+			}else{
+				//don't resize, but rewrite everything to vbo
+				availableFloats = current_vbo_size;
+				writeAllInstancesNewToVBO();
 			}
 		}
-		for(Instance i : deadInstances){
-			instances.remove(i);
-		}
-		deadInstances = new LinkedList<Instance>();
+		dyingInstances = new LinkedList<Instance>();
 		newInstances = new LinkedList<Instance>();
-		// TODO use the method private add() and private changeVBOSize()
 	}
 	
 }

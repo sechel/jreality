@@ -31,9 +31,12 @@ public class Instance {
 	public InstanceCollection collection;
 	public JOGLFaceSetInstance fsi;
 	/**
-	 * number of Floats or Integers
+	 * number of floats or integers
 	 */
 	public int length;
+	/**
+	 * position in VBO in floats
+	 */
 	public int posInVBOs;
 	/**
 	 * dead actually means, that it needs to be nulled in GPU, if it's not removed by defragmentation or merging

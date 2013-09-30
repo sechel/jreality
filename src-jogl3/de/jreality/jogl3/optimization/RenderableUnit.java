@@ -118,13 +118,14 @@ public class RenderableUnit {
 				for(int i = 0; i < free; i++){
 					if(newSet.iterator().hasNext()){
 						JOGLFaceSetInstance fsi = newSet.iterator().next();
-						currentCollection.add(fsi);
+						currentCollection.registerNewInstance(fsi);
 						newSet.remove(fsi);
 					}else{
 						fillingUp = false;
 					}
 				}
 			}
+			//TODO currentCollectin.update() ?
 		}
 		
 		

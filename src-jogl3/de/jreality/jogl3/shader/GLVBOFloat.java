@@ -12,7 +12,6 @@ public class GLVBOFloat extends GLVBO{
 		return data;
 	}
 	/**
-	 * 
 	 * @param gl
 	 * @param subdata
 	 * @param begin
