@@ -10,6 +10,7 @@ public class Instance {
 		this.fsi = ins;
 		this.posInVBOs = posInVBOs;
 		dead = false;
+		upToDate = true;
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)fsi.getEntity();
 		length = fse.getVBO("vertex_coordinates").getLength();
 	}
@@ -29,7 +30,14 @@ public class Instance {
 	
 	public InstanceCollection collection;
 	public JOGLFaceSetInstance fsi;
+	/**
+	 * number of Floats or Integers
+	 */
 	public int length;
 	public int posInVBOs;
+	/**
+	 * dead actually means, that it needs to be nulled in GPU, if it's not removed by defragmentation or merging
+	 */
 	private boolean dead = false;
+	public boolean upToDate = true;
 }

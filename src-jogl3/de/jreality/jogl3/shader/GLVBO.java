@@ -14,6 +14,10 @@ public abstract class GLVBO{
 	public int getID() {
 		return index;
 	}
+	/**
+	 * 
+	 * @return number of floats/integers in the vbo, i.e. number of bytes divided by 4.
+	 */
 	public int getLength() {
 		return length;
 	}

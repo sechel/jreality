@@ -31,7 +31,6 @@ public class GLVBOFloat extends GLVBO{
 	public GLVBOFloat(GL3 gl, float[] vertdata, String name){
 		this(gl, vertdata, name, 4);
 	}
-	
 	public GLVBOFloat(GL3 gl, float[] vertdata, String name, int arraySize){
 		data = vertdata;
 		this.arraySize = arraySize;

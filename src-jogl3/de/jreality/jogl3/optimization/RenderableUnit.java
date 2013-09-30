@@ -1,5 +1,6 @@
 package de.jreality.jogl3.optimization;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -12,8 +13,8 @@ import de.jreality.jogl3.glsl.GLShader;
 
 public class RenderableUnit {
 	
-	private static final int FRAGMENT_THRESHOLD = 100000;
-	private static final int MAX_NUMBER_OBJ_IN_COLLECTION = 1000;
+	public static final int FRAGMENT_THRESHOLD = 100000;
+	public static final int MAX_NUMBER_OBJ_IN_COLLECTION = 1000;
 	
 	private GlTexture texture;
 	private GLShader shader;
@@ -23,7 +24,7 @@ public class RenderableUnit {
 	//This limitation is due to the maximum texture size.
 	private LinkedList<InstanceCollection> instanceCollections = new LinkedList<InstanceCollection>();
 	
-	//contains the current Instances for all FaceSetInstances, without dead
+	//contains the current Instances for all FaceSetInstances, with dead!
 	private WeakHashMap<JOGLFaceSetInstance, Instance> instances = new WeakHashMap<JOGLFaceSetInstance, Instance>();
 	
 	//a simple set of all the new FaceSetInstances to be registered
@@ -48,6 +49,12 @@ public class RenderableUnit {
 	public void register(JOGLFaceSetInstance f){
 		registered.add(f);
 	}
+	private void killAndRemove(JOGLFaceSetInstance f){
+		Instance ins = instances.get(f);
+		//we know it's alive, because instances only contains alive elements
+		ins.collection.kill(ins);
+		instances.remove(f);
+	}
 	/**
 	 * writes all registered data (see {@link #register(JOGLFaceSetInstance)}) to the GPU
 	 */
@@ -59,9 +66,7 @@ public class RenderableUnit {
 		for(JOGLFaceSetInstance fsi : set){
 			if(!registered.contains(fsi)){
 				Instance ins = instances.get(fsi);
-				//we know it's alive, because instances only contains alive elements
 				ins.collection.kill(ins);
-				instances.remove(fsi);
 			}
 		}
 		
@@ -82,14 +87,49 @@ public class RenderableUnit {
 			}else if(f.oChangedPositionsOrAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
+				instances.get(f).upToDate = false;
 				f.resetOChangedPositionsOrAttributes();
 			}else{
 				//nothing changed, needs not be touched if not neccessary
 				//do nothing here!
 			}
 		}
+		//kill all Instances from lengthSet and move them to newSet
+		for(JOGLFaceSetInstance f : lengthSet){
+			//kill
+			killAndRemove(f);
+			//and add to newSet
+			newSet.add(f);
+		}
+		//fill up InstanceCollections with all the elements from newSet
+		boolean fillingUp = true;
+		int insCollNumber = -1;
+		while(fillingUp){
+			insCollNumber++;
+			InstanceCollection currentCollection = instanceCollections.get(insCollNumber);
+//			//defragment
+//			if(currentCollection.isFragmented()){
+//				//remove all current collection's dead from instances
+//				currentCollection.defragment();
+//			}
+			//fill up with elements from newSet
+			int free = currentCollection.getNumberFreeInstances();
+			if(free > 0){
+				for(int i = 0; i < free; i++){
+					if(newSet.iterator().hasNext()){
+						JOGLFaceSetInstance fsi = newSet.iterator().next();
+						currentCollection.add(fsi);
+						newSet.remove(fsi);
+					}else{
+						fillingUp = false;
+					}
+				}
+			}
+		}
 		
 		
+		
+		//update all the elements from posASet, that have not been moved in a defragmentation or merge operation
 		
 		
 		
