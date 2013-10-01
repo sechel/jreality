@@ -3,21 +3,37 @@ package de.jreality.jogl3.optimization;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.GlTexture;
+import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformInt;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformMat4;
 import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.glsl.GLShader.ShaderVar;
+import de.jreality.jogl3.shader.GLVBO;
+import de.jreality.jogl3.shader.ShaderVarHash;
+import de.jreality.math.Rn;
+import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.Texture2D;
 
 public class RenderableUnit {
 	
 	private GlTexture texture;
 	private GLShader shader;
+	private GlReflectionMap reflMap;
+	private Texture2D tex;
+	GlUniformInt combineMode;
+	GlUniformMat4 texMatrix;
 	
 	//an Instance collection contains upto MAX_NUMBER_OBJ_IN_COLLECTION small objects.
 	//This limitation is due to the maximum texture size.
@@ -34,9 +50,11 @@ public class RenderableUnit {
 	 * no local lights allowed
 	 * @param t
 	 */
-	public RenderableUnit(GlTexture t, GLShader s){
+	public RenderableUnit(GlTexture t, GLShader s, GlReflectionMap reflMap){
 		texture = t;
 		shader = s;
+		this.reflMap = reflMap;
+		texture.setTexture(tex);
 	}
 	/**
 	 * register a {@link JOGLFaceSetInstance} for sending to GPU
@@ -44,7 +62,10 @@ public class RenderableUnit {
 	 */
 	public void register(RenderableObject o){
 		registered.add(o);
+		state = o.state;
 	}
+	JOGLRenderState state;
+	
 	private void killAndRemove(RenderableObject o){
 		Instance ins = instances.get(o);
 		//we know it's alive, because instances only contains alive elements
@@ -127,6 +148,7 @@ public class RenderableUnit {
 		}
 		
 		//TODO merge the rest...
+		//...not so important right now
 		
 		//clean up the registration hash map
 		registered = new HashSet<RenderableObject>();
@@ -134,6 +156,40 @@ public class RenderableUnit {
 	
 	public void render(GL3 gl){
 		
+		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
+		float[] inverseCamMatrix = Rn.convertDoubleToFloatArray(state.inverseCamMatrix);
+		shader.useShader(gl);
+		
+		ShaderVarHash.bindUniform(shader, "_combineMode", texture.getTexture2D().getApplyMode(), gl);
+		
+		//matrices
+		ShaderVarHash.bindUniformMatrix(shader, "textureMatrix", Rn.convertDoubleToFloatArray(texture.getTexture2D().getTextureMatrix().getArray()), gl);
+		ShaderVarHash.bindUniformMatrix(shader, "projection", projection, gl);
+		ShaderVarHash.bindUniformMatrix(shader, "_inverseCamRotation", inverseCamMatrix, gl);
+		
+		//global lights in a texture
+    	ShaderVarHash.bindUniform(shader, "sys_globalLights", 0, gl);
+    	ShaderVarHash.bindUniform(shader, "sys_numGlobalDirLights", state.getLightHelper().getNumGlobalDirLights(), gl);
+    	ShaderVarHash.bindUniform(shader, "sys_numGlobalPointLights", state.getLightHelper().getNumGlobalPointLights(), gl);
+    	ShaderVarHash.bindUniform(shader, "sys_numGlobalSpotLights", state.getLightHelper().getNumGlobalSpotLights(), gl);
+    	
+		ShaderVarHash.bindUniform(shader, "sys_numLocalDirLights", 0, gl);
+		ShaderVarHash.bindUniform(shader, "sys_numLocalPointLights", 0, gl);
+		ShaderVarHash.bindUniform(shader, "sys_numLocalSpotLights", 0, gl);
+		
+		//bind shader uniforms not necessary
+
+		texture.bind(shader, gl);
+		reflMap.bind(shader, gl);
+
+    	//new way to do lights
+		state.getLightHelper().bindGlobalLightTexture(gl);
+    	
+		for(InstanceCollection insColl : instanceCollections){
+			insColl.render(gl);
+		}
+		
+		shader.dontUseShader(gl);
 	}
 	
 }

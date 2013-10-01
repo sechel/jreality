@@ -102,7 +102,7 @@ public class OptimizedGLShader extends GLShader {
 //				System.out.println("name = " + name);
 				//this is needed, when instanced rendering lines,
 				//where we want to call the second endpoint "_vertex_coordinates"
-				if(!(name.length() >= 4 && name.substring(0, 4).equals("sys_")) && name.charAt(0) != '_' && !name.equals("projection") && !name.equals("_inverseCamRotation") && !name.equals("textureMatrix") && !type.equals("sampler2D")){
+				if(!(name.length() >= 4 && name.substring(0, 4).equals("sys_")) && name.charAt(0) != '_' && !name.equals("projection") && !name.equals("_inverseCamRotation") && !name.equals("textureMatrix") && !type.equals("sampler2D") && !name.equals("has_Tex")){
 					//TODO and remove from source!
 					lines[i] = "";
 					uniforms.add(new String[]{type, name});

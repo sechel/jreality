@@ -21,6 +21,9 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 
 	//GLShader polygonShader = new DefaultPolygonShader();
 	GLShader polygonShader = GLShader.defaultPolygonShader;
+	public GLShader getPolygonShader(){
+		return polygonShader;
+	}
 	GLShader polygonShaderDepth = TransparencyHelper.depth;
 	GLShader polygonShaderTransp = TransparencyHelper.transp;
 	public JOGLFaceSetInstance(IndexedFaceSet node) {

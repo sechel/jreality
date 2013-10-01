@@ -20,6 +20,9 @@ public class GlTexture{
 		
 	}
 	private Texture2D tex = null;
+	public Texture2D getTexture2D(){
+		return tex;
+	}
 	public void setTexture(Texture2D tex){
 		this.tex = tex;
 		hasTexture = true;

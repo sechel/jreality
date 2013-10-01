@@ -36,6 +36,8 @@ import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
+import de.jreality.jogl3.optimization.RenderableUnit;
+import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.PointShader;
 import de.jreality.jogl3.shader.Texture2DLoader;
@@ -282,6 +284,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	BufferedImage dst = null;
 	boolean offscreen = false;
 	int textureDeletionCounter = 0;
+	RenderableUnitCollection RUC = new RenderableUnitCollection();
 	public void display(GLAutoDrawable arg0, int width, int height) {
 		
 		perfmeter.beginFrame();
