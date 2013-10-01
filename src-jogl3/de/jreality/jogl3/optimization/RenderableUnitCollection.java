@@ -57,6 +57,7 @@ public class RenderableUnitCollection{
 				if(ru == null){
 					System.out.println("new reflection map forces new RenderableUnit");
 					ru = new RenderableUnit(tex, new OptimizedGLShader("../glsl/" + shader.getVertFilename(), "../glsl/" + shader.getFragFilename()), reflMap);
+//					ru = new RenderableUnit(tex, new GLShader("nontransp/Cpolygon.v", "nontransp/Cpolygon.f"), reflMap);
 					hm2.put(reflMap, ru);
 				}
 				ru.register(o);

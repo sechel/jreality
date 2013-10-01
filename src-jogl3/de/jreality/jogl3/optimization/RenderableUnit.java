@@ -167,6 +167,8 @@ public class RenderableUnit {
 		float[] inverseCamMatrix = Rn.convertDoubleToFloatArray(state.inverseCamMatrix);
 		shader.useShader(gl);
 		
+		ShaderVarHash.bindUniform(shader, "uniforms", 1, gl);
+		
 		ShaderVarHash.bindUniform(shader, "_combineMode", texture.getTexture2D().getApplyMode(), gl);
 		
 		//matrices

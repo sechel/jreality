@@ -134,7 +134,7 @@ public class InstanceCollection {
 	
 	public void bindUniformsTexture(GL3 gl) {
 		gl.glEnable(gl.GL_TEXTURE_2D);
-		gl.glActiveTexture(gl.GL_TEXTURE0);
+		gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
 		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
 	}
 	
@@ -413,6 +413,9 @@ public class InstanceCollection {
     	}
     	
     	//actual draw command
+    	//TODO InstanceID is missing!!!
+    	//introduce instanceID as an integer-VBO, und fertig ist der lack.
+    	doesn't work here.
     	gl.glDrawArrays(gl.GL_TRIANGLES, 0, gpuData.get("vertex_coordinates").getLength()/4);
 		
     	//disable all vbos
