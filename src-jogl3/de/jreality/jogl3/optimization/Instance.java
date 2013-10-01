@@ -1,13 +1,15 @@
 package de.jreality.jogl3.optimization;
 
+import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 
 public class Instance {
 	
-	public Instance(InstanceCollection ic, JOGLFaceSetInstance ins, int posInVBOs){
+	public Instance(InstanceCollection ic, JOGLFaceSetInstance ins, JOGLRenderState state, int posInVBOs){
 		this.collection = ic;
 		this.fsi = ins;
+		this.state = state;
 		this.posInVBOs = posInVBOs;
 		dead = false;
 		upToDate = true;
@@ -18,6 +20,7 @@ public class Instance {
 	public void kill(){
 		dead = true;
 		fsi = null;
+		state = null;
 	}
 	
 	public boolean isDead(){
@@ -30,6 +33,7 @@ public class Instance {
 	
 	public InstanceCollection collection;
 	public JOGLFaceSetInstance fsi;
+	public JOGLRenderState state;
 	/**
 	 * number of floats or integers
 	 */

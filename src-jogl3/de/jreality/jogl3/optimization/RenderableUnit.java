@@ -34,7 +34,6 @@ public class RenderableUnit {
 	public RenderableUnit(GlTexture t, GLShader s){
 		texture = t;
 		shader = s;
-		//TODO create starting vbo
 	}
 	/**
 	 * register a {@link JOGLFaceSetInstance} for sending to GPU

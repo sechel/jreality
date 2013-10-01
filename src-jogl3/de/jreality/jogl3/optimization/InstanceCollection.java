@@ -3,17 +3,24 @@ package de.jreality.jogl3.optimization;
 import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
+import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
+import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
+import de.jreality.jogl3.shader.ShaderVarHash;
+import de.jreality.math.Rn;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ShaderUtility;
 
 /**
  * A collection of up to MAX_TEXTURE_DIMENSION FaceSetInstances
@@ -33,12 +40,22 @@ public class InstanceCollection {
 		
 		updateUniformsTexture(gl);
 	}
+	
 	private int offset;
-	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, int j){
+	
+	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, int j, JOGLRenderState state){
 		for(String[] s : Uniforms){
+			
 			GlUniform u = uniforms.get(s[1]);
+			if(u == null && !s[1].equals("modelview"))
+				continue;
+			
 			if(s[0].equals("mat4")){
-				float[] f = (float[])u.value;
+				float[] f;
+				if(s[1].equals("modelview"))
+					f = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
+				else
+					f = (float[])u.value;
 				for(int l = 0; l < 16; l++)
 					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
 				offset += 16;
@@ -82,10 +99,11 @@ public class InstanceCollection {
 			WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
 			//the width offset
 			offset = 0;
-			DataWriteHelper(vertUniforms, uniforms, j);
+			JOGLRenderState state = i.state;
+			DataWriteHelper(vertUniforms, uniforms, j, state);
 			if (offset%4 != 0)
 				offset = 4*(offset/4) + 4;
-			DataWriteHelper(fragUniforms, uniforms, j);
+			DataWriteHelper(fragUniforms, uniforms, j, state);
 		}
 		
 		gl.glEnable(gl.GL_TEXTURE_2D);
@@ -243,6 +261,7 @@ public class InstanceCollection {
 			}
 		}
 	}
+	
 	//_______________________****************PUBLIC METHODS****************__________________________
 	/**
 	 * get the number of instances, you can still add to this collection
@@ -255,8 +274,13 @@ public class InstanceCollection {
 	 * only registers a new Instance to this InstanceCollection. To push changes to GPU, use update()
 	 * @param fsi
 	 */
-	public void registerNewInstance(JOGLFaceSetInstance fsi){
-		newInstances.add(new Instance(this, fsi, 0));
+	public void registerNewInstance(JOGLFaceSetInstance fsi, JOGLRenderState state){
+		if(fsi.eap==null)
+			return;
+		boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		if(!visible)
+			return;
+		newInstances.add(new Instance(this, fsi, state, 0));
 		numAliveInstances++;
 	}
 	/**
@@ -296,6 +320,7 @@ public class InstanceCollection {
 	}
 	/**
 	 * very important method! Pushes all changes to the GPU
+	 * !only necessary to call this, if actually changes have been made!
 	 */
 	public void update(){
 		
@@ -349,4 +374,37 @@ public class InstanceCollection {
 		updateUniformsTexture(gl);
 	}
 	
+	public void render(GL3 gl){
+		
+		bindUniformsTexture(gl);
+		
+		//bind vbos to corresponding shader variables
+    	List<ShaderVar> l = shader.vertexAttributes;
+    	for(ShaderVar v : l){
+    		GLVBO vbo = gpuData.get(v.getName());
+    		if(vbo != null){
+    			//System.out.println(v.getName());
+    			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 1, gl);
+//    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
+    			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
+            	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
+            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    		}else{
+    			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 0, gl);
+//    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
+    		}
+    	}
+    	
+    	//actual draw command
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, gpuData.get("vertex_coordinates").getLength()/4);
+		
+    	//disable all vbos
+    	for(ShaderVar v : l){
+    		GLVBO vbo = gpuData.get(v.getName());
+    		if(vbo != null){
+    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    		}
+    	}
+    	
+	}
 }
