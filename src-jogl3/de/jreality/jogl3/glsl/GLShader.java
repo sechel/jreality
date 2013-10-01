@@ -28,7 +28,7 @@ public class GLShader
 	
 	public static GLShader defaultPolygonShader = new GLShader("nontransp/polygon.v", "nontransp/polygon.f");
 //	public static GLShader defaultCPolygonShader = new GLShader("nontransp/Cpolygon.v", "nontransp/Cpolygon.f");
-	public static GLShader defaultOPolygonShader = new OptimizedGLShader("../glsl/nontransp/polygon.v", "../glsl/nontransp/polygon.f");
+//	public static GLShader defaultOPolygonShader = new OptimizedGLShader("../glsl/nontransp/polygon.v", "../glsl/nontransp/polygon.f");
 	public static GLShader defaultPointShader = new GLShader("nontransp/pointNoSphere.v", "nontransp/pointNoSphere.f");
 	public static GLShader defaultLineShader = new GLShader("nontransp/edge.v", "nontransp/edge.f");
 	public static GLShader defaultPolygonLineShader = new GLShader("nontransp/tubeEdge.v", "nontransp/tubeEdge.f");
@@ -38,7 +38,7 @@ public class GLShader
 	public static void initDefaultShaders(GL3 gl){
 
 //		defaultCPolygonShader.init(gl);
-		defaultOPolygonShader.init(gl);
+//		defaultOPolygonShader.init(gl);
 		defaultPolygonShader.init(gl);
 		defaultPointShader.init(gl);
 		defaultLineShader.init(gl);

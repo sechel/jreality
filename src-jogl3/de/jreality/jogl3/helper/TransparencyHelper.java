@@ -14,6 +14,7 @@ import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.jogl3.InfoOverlayData;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.util.ImageUtility;
@@ -144,7 +145,7 @@ public class TransparencyHelper {
     	}
 	}
 	
-	public static void render(InfoOverlayData infoData, GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
+	public static void render(InfoOverlayData infoData, GL3 gl, RenderableUnitCollection ruc, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
 		
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	gl.glViewport(0, 0, supersample*width, supersample*height);
@@ -160,9 +161,7 @@ public class TransparencyHelper {
     	
     	//TODO is this correct??
     	gl.glDisable(gl.GL_BLEND);
-    	for(RenderableObject o : nonTransp){
-    		o.render(width, height);
-    	}
+    	ruc.render(width, height);
     	for(RenderableObject o : transp){
     		o.render(width, height);
     	}
@@ -276,7 +275,7 @@ public class TransparencyHelper {
     	copy.dontUseShader(gl);
     }
 	
-	public static BufferedImage renderOffscreen(double AA, BufferedImage dst, GL3 gl, List<RenderableObject> nonTransp, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
+	public static BufferedImage renderOffscreen(double AA, BufferedImage dst, GL3 gl, RenderableUnitCollection ruc, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
 		System.out.println("supersample is " + supersample);
 		gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	gl.glViewport(0, 0, supersample*width, supersample*height);
@@ -291,9 +290,7 @@ public class TransparencyHelper {
     	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
     	
     	gl.glDisable(gl.GL_BLEND);
-    	for(RenderableObject o : nonTransp){
-    		o.render(width, height);
-    	}
+    	ruc.render(width, height);
     	for(RenderableObject o : transp){
     		o.render(width, height);
     	}

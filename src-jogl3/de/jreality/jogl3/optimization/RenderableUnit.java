@@ -30,8 +30,8 @@ public class RenderableUnit {
 	
 	private GlTexture texture;
 	private GLShader shader;
+	private boolean shaderInited = false;
 	private GlReflectionMap reflMap;
-	private Texture2D tex;
 	GlUniformInt combineMode;
 	GlUniformMat4 texMatrix;
 	
@@ -53,8 +53,8 @@ public class RenderableUnit {
 	public RenderableUnit(GlTexture t, GLShader s, GlReflectionMap reflMap){
 		texture = t;
 		shader = s;
+		shaderInited = false;
 		this.reflMap = reflMap;
-		texture.setTexture(tex);
 	}
 	/**
 	 * register a {@link JOGLFaceSetInstance} for sending to GPU
@@ -63,6 +63,8 @@ public class RenderableUnit {
 	public void register(RenderableObject o){
 		registered.add(o);
 		state = o.state;
+		if(!shaderInited)
+			shader.init(state.getGL());
 	}
 	JOGLRenderState state;
 	
@@ -154,7 +156,12 @@ public class RenderableUnit {
 		registered = new HashSet<RenderableObject>();
 	}
 	
-	public void render(GL3 gl){
+	public void render(){
+		if(texture.getTexture2D() == null){
+			System.out.println("tex is null!!!");
+			return;
+		}
+		GL3 gl = state.getGL();
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
 		float[] inverseCamMatrix = Rn.convertDoubleToFloatArray(state.inverseCamMatrix);
