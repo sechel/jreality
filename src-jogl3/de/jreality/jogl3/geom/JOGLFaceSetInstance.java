@@ -105,23 +105,5 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 		}
 	}
 
-	//the "o" indicates that this code is only neccessary for the optimization of scenes with 10.000 small
-	//geometries or more.
-	private boolean oChangedLength = true;
-	private boolean oChangedPosA = true;
-	public boolean oChangedLength() {
-		return oChangedLength;
-	}
 	
-	public boolean oChangedPositionsOrAttributes() {
-		return oChangedPosA;
-	}
-	
-	public void resetOChangedLength() {
-		oChangedLength = false;
-	}
-	
-	public void resetOChangedPositionsOrAttributes() {
-		oChangedPosA = false;
-	}
 }

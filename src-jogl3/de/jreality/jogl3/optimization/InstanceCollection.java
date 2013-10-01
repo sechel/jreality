@@ -354,13 +354,21 @@ public class InstanceCollection {
 					i.posInVBOs = pos;
 					pos += i.length;
 					instances.add(i);
+					i.upToDate = true;
 					pushInstanceToGPU(i);
 				}
 				//and null (and remove?) the dead ones
 				for(Instance i : dyingInstances){
 					nullInstance(i);
+					i.upToDate = true;
 					//TODO is this right?
 					instances.remove(i);
+				}
+				//and update the !up_to_date ones
+				for(Instance i : instances){
+					if(!i.upToDate){
+						pushInstanceToGPU(i);
+					}
 				}
 				//and done!
 			}else{

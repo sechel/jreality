@@ -6,7 +6,10 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import javax.media.opengl.GL3;
+
 import de.jreality.jogl3.GlTexture;
+import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 import de.jreality.jogl3.glsl.GLShader;
@@ -21,10 +24,10 @@ public class RenderableUnit {
 	private LinkedList<InstanceCollection> instanceCollections = new LinkedList<InstanceCollection>();
 	
 	//contains the current Instances for all FaceSetInstances, with dead!
-	private WeakHashMap<JOGLFaceSetInstance, Instance> instances = new WeakHashMap<JOGLFaceSetInstance, Instance>();
+	private WeakHashMap<RenderableObject, Instance> instances = new WeakHashMap<RenderableObject, Instance>();
 	
 	//a simple set of all the new FaceSetInstances to be registered
-	private HashSet<JOGLFaceSetInstance> registered = new HashSet<JOGLFaceSetInstance>();
+	private HashSet<RenderableObject> registered = new HashSet<RenderableObject>();
 	
 	/**
 	 * create a new entity containing all small geometries (below 1000 verts) with one equal texture/shader pair
@@ -39,15 +42,16 @@ public class RenderableUnit {
 	 * register a {@link JOGLFaceSetInstance} for sending to GPU
 	 * @param f
 	 */
-	public void register(JOGLFaceSetInstance f){
-		registered.add(f);
+	public void register(RenderableObject o){
+		registered.add(o);
 	}
-	private void killAndRemove(JOGLFaceSetInstance f){
-		Instance ins = instances.get(f);
+	private void killAndRemove(RenderableObject o){
+		Instance ins = instances.get(o);
 		//we know it's alive, because instances only contains alive elements
 		ins.collection.kill(ins);
-		instances.remove(f);
+		instances.remove(o);
 	}
+	
 	/**
 	 * writes all registered data (see {@link #register(JOGLFaceSetInstance)}) to the GPU
 	 */
@@ -55,40 +59,41 @@ public class RenderableUnit {
 		
 		//check which fsi are missing in the registered ones
 		//if there is an Instance in instances not belonging to a FaceSetInstance in registered, kill it
-		Set<JOGLFaceSetInstance> set = instances.keySet();
-		for(JOGLFaceSetInstance fsi : set){
-			if(!registered.contains(fsi)){
-				Instance ins = instances.get(fsi);
+		Set<RenderableObject> set = instances.keySet();
+		for(RenderableObject o : set){
+			if(!registered.contains(o)){
+				Instance ins = instances.get(o);
 				ins.collection.kill(ins);
 			}
 		}
 		
 		//order into sets newSet, lengthSet and posASet for FaceSetInstances that are completely new,
 		//have changed their length or changed either positions or attributes respectively.
-		HashSet<JOGLFaceSetInstance> newSet = new HashSet<JOGLFaceSetInstance>();
-		HashSet<JOGLFaceSetInstance> lengthSet = new HashSet<JOGLFaceSetInstance>();
-		HashSet<JOGLFaceSetInstance> posASet = new HashSet<JOGLFaceSetInstance>();
-		for(JOGLFaceSetInstance f : registered){
+		HashSet<RenderableObject> newSet = new HashSet<RenderableObject>();
+		HashSet<RenderableObject> lengthSet = new HashSet<RenderableObject>();
+		HashSet<RenderableObject> posASet = new HashSet<RenderableObject>();
+		for(RenderableObject f : registered){
+			instances.get(f).upToDate = true;
 			//check if new
 			if(instances.get(f) == null){
 				//in fact it's new
 				newSet.add(f);
-			}else if(f.oChangedLength()){
+			}else if(f.geom.oChangedLength()){
 				//is old, but changed its length
 				lengthSet.add(f);
-				f.resetOChangedLength();
-			}else if(f.oChangedPositionsOrAttributes()){
+			}else if(f.geom.oChangedPositionsOrAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
 				instances.get(f).upToDate = false;
-				f.resetOChangedPositionsOrAttributes();
 			}else{
 				//nothing changed, needs not be touched if not neccessary
 				//do nothing here!
 			}
+			f.geom.resetOChangedLength();
+			f.geom.resetOChangedPositionsOrAttributes();
 		}
 		//kill all Instances from lengthSet and move them to newSet
-		for(JOGLFaceSetInstance f : lengthSet){
+		for(RenderableObject f : lengthSet){
 			//kill
 			killAndRemove(f);
 			//and add to newSet
@@ -110,24 +115,25 @@ public class RenderableUnit {
 			if(free > 0){
 				for(int i = 0; i < free; i++){
 					if(newSet.iterator().hasNext()){
-						JOGLFaceSetInstance fsi = newSet.iterator().next();
-						currentCollection.registerNewInstance(fsi);
+						RenderableObject fsi = newSet.iterator().next();
+						currentCollection.registerNewInstance((JOGLFaceSetInstance)fsi.geom, fsi.state);
 						newSet.remove(fsi);
 					}else{
 						fillingUp = false;
 					}
 				}
 			}
-			//TODO currentCollectin.update() ?
+			currentCollection.update();
 		}
 		
-		
-		
-		//update all the elements from posASet, that have not been moved in a defragmentation or merge operation
-		
-		
+		//TODO merge the rest...
 		
 		//clean up the registration hash map
-		registered = new HashSet<JOGLFaceSetInstance>();
+		registered = new HashSet<RenderableObject>();
 	}
+	
+	public void render(GL3 gl){
+		
+	}
+	
 }
