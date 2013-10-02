@@ -21,7 +21,10 @@ public class OptimizedGLShader extends GLShader {
 	private int offset = 0;
 	
 	public int getNumFloatsNecessary(){
-		return offset;
+		if(offset%4==0)
+			return offset;
+		else
+			return 4*(offset/4) + 4;
 	}
 	
 	public OptimizedGLShader(String v, String f){
@@ -29,9 +32,9 @@ public class OptimizedGLShader extends GLShader {
 		VertUniforms = new LinkedList<String[]>();
 		FragUniforms = new LinkedList<String[]>();
 		findUniformsAndReplace(vsrc, VertUniforms, true);
-		System.out.println(vsrc[0]);
+//		System.out.println(vsrc[0]);
 		findUniformsAndReplace(fsrc, FragUniforms, false);
-		System.out.println(fsrc[0]);
+//		System.out.println(fsrc[0]);
 		
 		this.shaderUniforms = new LinkedList<GLShader.ShaderVar>();
 		findUniforms(vsrc[0], this.shaderUniforms);
@@ -115,7 +118,7 @@ public class OptimizedGLShader extends GLShader {
 				source[0] += "void main(void){\n";
 				//add everything else...
 				if(isVertexShader)
-					source[0] += "instanceID = gl_InstanceID;\n";
+					source[0] += "instanceID = vertex_id;\n";
 				
 				if (offset%4 != 0)
 					offset = 4*(offset/4) + 4;
@@ -168,9 +171,10 @@ public class OptimizedGLShader extends GLShader {
 				source[0] += "\n";
 				//append in front the line "uniform sampler2D uniforms
 				if(l.length() >= 8 && l.substring(0, 8).equals("#version")){
-					if(isVertexShader)
+					if(isVertexShader){
 						source[0] += "flat out int instanceID;\n";
-					else
+						source[0] += "in int vertex_id;\n";
+					}else
 						source[0] += "flat in int instanceID;\n";
 					source[0] += "uniform sampler2D uniforms;";
 					source[0] += "\n";

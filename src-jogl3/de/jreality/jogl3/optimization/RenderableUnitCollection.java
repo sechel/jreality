@@ -32,9 +32,9 @@ public class RenderableUnitCollection{
 		if(o.geom instanceof JOGLFaceSetInstance){
 			JOGLFaceSetInstance f = (JOGLFaceSetInstance)o.geom;
 			JOGLFaceSetEntity fse = (JOGLFaceSetEntity) f.getEntity();
-			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
+//			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
 			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS){
-				System.out.println("adding to renderableUnit");
+//				System.out.println("adding to renderableUnit");
 				GlTexture tex = f.faceTexture;
 				GLShader shader = f.getPolygonShader();
 				GlReflectionMap reflMap = f.reflMap;
@@ -62,19 +62,20 @@ public class RenderableUnitCollection{
 				}
 				ru.register(o);
 			}else{
-				System.out.println("adding to rest, because big enough");
+//				System.out.println("adding to rest, because big enough");
 				restNonTranspObjects.add(o);
 			}
 		}else{
-			System.out.println("adding to rest, because no face set");
+//			System.out.println("adding to rest, because no face set");
 			restNonTranspObjects.add(o);
 		}
 	}
 	
-	public void render(int width, int height){
+	public void render(GL3 gl, int width, int height){
 		for(GLShader t : units.keySet()){
 			for(GlTexture tex : units.get(t).keySet()){
 				for(GlReflectionMap r : units.get(t).get(tex).keySet()){
+					units.get(t).get(tex).get(r).update(gl);
 					units.get(t).get(tex).get(r).render();
 				}
 			}

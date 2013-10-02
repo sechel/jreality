@@ -29,7 +29,7 @@ import de.jreality.shader.Texture2D;
 public class RenderableUnit {
 	
 	private GlTexture texture;
-	private GLShader shader;
+	private OptimizedGLShader shader;
 	private boolean shaderInited = false;
 	private GlReflectionMap reflMap;
 	GlUniformInt combineMode;
@@ -50,7 +50,7 @@ public class RenderableUnit {
 	 * no local lights allowed
 	 * @param t
 	 */
-	public RenderableUnit(GlTexture t, GLShader s, GlReflectionMap reflMap){
+	public RenderableUnit(GlTexture t, OptimizedGLShader s, GlReflectionMap reflMap){
 		texture = t;
 		shader = s;
 		shaderInited = false;
@@ -63,8 +63,10 @@ public class RenderableUnit {
 	public void register(RenderableObject o){
 		registered.add(o);
 		state = o.state;
-		if(!shaderInited)
+		if(!shaderInited){
 			shader.init(state.getGL());
+			shaderInited = true;
+		}
 	}
 	JOGLRenderState state;
 	
@@ -78,8 +80,8 @@ public class RenderableUnit {
 	/**
 	 * writes all registered data (see {@link #register(JOGLFaceSetInstance)}) to the GPU
 	 */
-	public void update(){
-		
+	public void update(GL3 gl){
+		System.out.println("starting to update RU");
 		//check which fsi are missing in the registered ones
 		//if there is an Instance in instances not belonging to a FaceSetInstance in registered, kill it
 		Set<RenderableObject> set = instances.keySet();
@@ -95,19 +97,30 @@ public class RenderableUnit {
 		HashSet<RenderableObject> newSet = new HashSet<RenderableObject>();
 		HashSet<RenderableObject> lengthSet = new HashSet<RenderableObject>();
 		HashSet<RenderableObject> posASet = new HashSet<RenderableObject>();
+		
 		for(RenderableObject f : registered){
-			instances.get(f).upToDate = true;
+//			instances.get(f).upToDate = true;
 			//check if new
+			System.out.println("instances contains:");
+			for(RenderableObject o : instances.keySet()){
+				System.out.println("RO is " + o);
+				System.out.println("Instance is " + instances.get(o));
+				System.out.println("FSI is " + o.geom);
+			}
+			
 			if(instances.get(f) == null){
 				//in fact it's new
 				newSet.add(f);
+				System.out.println("adding to new set");
 			}else if(f.geom.oChangedLength()){
 				//is old, but changed its length
 				lengthSet.add(f);
+				System.out.println("adding to oChLength set");
 			}else if(f.geom.oChangedPositionsOrAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
 				instances.get(f).upToDate = false;
+				System.out.println("adding to oChPosA set");
 			}else{
 				//nothing changed, needs not be touched if not neccessary
 				//do nothing here!
@@ -124,8 +137,12 @@ public class RenderableUnit {
 		}
 		//fill up InstanceCollections with all the elements from newSet
 		boolean fillingUp = true;
+		if(instanceCollections.size() == 0)
+			fillingUp = false;
 		int insCollNumber = -1;
+		System.out.println("start filling up");
 		while(fillingUp){
+			System.out.println("filling up...");
 			insCollNumber++;
 			InstanceCollection currentCollection = instanceCollections.get(insCollNumber);
 //			//defragment
@@ -134,6 +151,31 @@ public class RenderableUnit {
 //				currentCollection.defragment();
 //			}
 			//fill up with elements from newSet
+			int free = currentCollection.getNumberFreeInstances();
+			if(free > 0){
+				for(int i = 0; i < free; i++){
+					if(newSet.iterator().hasNext()){
+						RenderableObject o = newSet.iterator().next();
+						Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)o.geom, o.state);
+						if(ins != null)
+							instances.put(o, ins);
+						newSet.remove(o);
+					}else{
+						fillingUp = false;
+					}
+				}
+			}
+			currentCollection.update();
+		}
+		
+		//if newSet not empty yet, create new insColl:
+		while(newSet.size() > 0){
+			System.out.println("- adding new InstanceCollection to this RU");
+			RenderableObject o = newSet.iterator().next();
+			InstanceCollection currentCollection = new InstanceCollection(shader);
+			currentCollection.init(gl);
+			instanceCollections.add(currentCollection);
+			
 			int free = currentCollection.getNumberFreeInstances();
 			if(free > 0){
 				for(int i = 0; i < free; i++){

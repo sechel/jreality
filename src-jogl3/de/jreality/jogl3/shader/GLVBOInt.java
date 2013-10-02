@@ -27,6 +27,10 @@ public class GLVBOInt extends GLVBO{
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, index);
 		gl.glBufferData(gl.GL_ARRAY_BUFFER, 4*data.length, IntBuffer.wrap(data), gl.GL_STATIC_READ);
 	}
+	public GLVBOInt(GL3 gl, int[] vertdata, String name, int arraySize){
+		this(gl, vertdata, name);
+		this.arraySize = arraySize;
+	}
 	public GLVBOInt(GL3 gl, int[] vertdata, String name){
 		data = vertdata;
 		this.name = name;

@@ -161,7 +161,7 @@ public class TransparencyHelper {
     	
     	//TODO is this correct??
     	gl.glDisable(gl.GL_BLEND);
-    	ruc.render(width, height);
+    	ruc.render(gl, width, height);
     	for(RenderableObject o : transp){
     		o.render(width, height);
     	}
@@ -290,7 +290,7 @@ public class TransparencyHelper {
     	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
     	
     	gl.glDisable(gl.GL_BLEND);
-    	ruc.render(width, height);
+    	ruc.render(gl, width, height);
     	for(RenderableObject o : transp){
     		o.render(width, height);
     	}

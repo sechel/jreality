@@ -47,4 +47,5 @@ public class Instance {
 	 */
 	private boolean dead = false;
 	public boolean upToDate = true;
+	public int id = 0;
 }
