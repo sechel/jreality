@@ -194,6 +194,7 @@ public class TransparencyHelper {
     	}
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	gl.glDisable(gl.GL_DEPTH_TEST);
+//    	
     	if(infoData.activated)
     		LabelShader.renderOverlay("Framerate = " + infoData.framerate + "\nClockrate = " + infoData.clockrate + "\nPolygonCount = " + infoData.polygoncount + "\n" + InfoOverlay.getMemoryUsage(), gl);
     	

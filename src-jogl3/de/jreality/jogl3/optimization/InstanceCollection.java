@@ -96,9 +96,10 @@ public class InstanceCollection {
 		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
 		LinkedList<String[]> fragUniforms = shader.getFragUniforms();
 		
-		for(Instance i : instances){
+		for(JOGLFaceSetInstance fsi : instances.keySet()){
+			Instance i = instances.get(fsi);
 			//retrieve appearance data from fsi uniforms
-			JOGLFaceSetInstance fsi = i.fsi;
+//			JOGLFaceSetInstance fsi = i.fsi;
 			WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
 			//the width offset
 			offset = 0;
@@ -177,7 +178,8 @@ public class InstanceCollection {
 	private int current_vbo_size = START_SIZE;
 	private int numAliveInstances = 0;
 	
-	private LinkedList<Instance> instances = new LinkedList<Instance>();
+//	private LinkedList<Instance> instances = new LinkedList<Instance>();
+	private WeakHashMap<JOGLFaceSetInstance, Instance> instances = new WeakHashMap<JOGLFaceSetInstance, Instance>();
 	private LinkedList<Instance> newInstances = new LinkedList<Instance>();
 	//This is needed, because we might delete the deadInstances in defragmentation.
 	//if not so, we need to manually null these.
@@ -296,6 +298,13 @@ public class InstanceCollection {
 	public int getNumberFreeInstances() {
 		return MAX_NUMBER_OBJ_IN_COLLECTION-numAliveInstances;
 	}
+	
+	public boolean contains(JOGLFaceSetInstance fsi){
+		if(instances.get(fsi) == null)
+			return false;
+		return true;
+	}
+	
 	/**
 	 * only registers a new Instance to this InstanceCollection. To push changes to GPU, use update()
 	 * @param fsi
@@ -332,13 +341,14 @@ public class InstanceCollection {
 		}
 		//move all newInstances to instances
 		for(Instance i : newInstances){
-			instances.add(i);
+			instances.put(i.fsi, i);
 		}
 		
 		//push ALL instances to GPU
 		int pos = 0;
 		int counter = 0;
-		for(Instance i : instances){
+		for(JOGLFaceSetInstance fsi : instances.keySet()){
+			Instance i = instances.get(fsi);
 			i.id = counter;
 			counter++;
 			availableFloats -= i.length;
@@ -385,7 +395,7 @@ public class InstanceCollection {
 				for(Instance i : newInstances){
 					i.posInVBOs = pos;
 					pos += i.length;
-					instances.add(i);
+					instances.put(i.fsi, i);
 					i.upToDate = true;
 					pushInstanceToGPU(i);
 				}
@@ -398,7 +408,8 @@ public class InstanceCollection {
 				}
 				//and update the !up_to_date ones
 				int counter = 0;
-				for(Instance i : instances){
+				for(JOGLFaceSetInstance fsi : instances.keySet()){
+					Instance i = instances.get(fsi);
 					if(!i.upToDate){
 						pushInstanceToGPU(i);
 						i.upToDate = true;

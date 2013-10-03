@@ -24,6 +24,8 @@ import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.math.Rn;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 
 public class RenderableUnit {
@@ -40,10 +42,10 @@ public class RenderableUnit {
 	private LinkedList<InstanceCollection> instanceCollections = new LinkedList<InstanceCollection>();
 	
 	//contains the current Instances for all FaceSetInstances, with dead!
-	private WeakHashMap<RenderableObject, Instance> instances = new WeakHashMap<RenderableObject, Instance>();
+	private WeakHashMap<JOGLFaceSetInstance, Instance> instances = new WeakHashMap<JOGLFaceSetInstance, Instance>();
 	
 	//a simple set of all the new FaceSetInstances to be registered
-	private HashSet<RenderableObject> registered = new HashSet<RenderableObject>();
+	private WeakHashMap<JOGLFaceSetInstance, RenderableObject> registered = new WeakHashMap<JOGLFaceSetInstance, RenderableObject>();
 	
 	/**
 	 * create a new entity containing all small geometries (below 1000 verts) with one equal texture/shader pair
@@ -61,7 +63,7 @@ public class RenderableUnit {
 	 * @param f
 	 */
 	public void register(RenderableObject o){
-		registered.add(o);
+		registered.put((JOGLFaceSetInstance) o.geom, o);
 		state = o.state;
 		if(!shaderInited){
 			shader.init(state.getGL());
@@ -81,14 +83,29 @@ public class RenderableUnit {
 	 * writes all registered data (see {@link #register(JOGLFaceSetInstance)}) to the GPU
 	 */
 	public void update(GL3 gl){
-		System.out.println("starting to update RU");
+//		System.out.println("starting to update RU");
 		//check which fsi are missing in the registered ones
 		//if there is an Instance in instances not belonging to a FaceSetInstance in registered, kill it
-		Set<RenderableObject> set = instances.keySet();
-		for(RenderableObject o : set){
-			if(!registered.contains(o)){
-				Instance ins = instances.get(o);
+		Set<JOGLFaceSetInstance> set = instances.keySet();
+		//TODO why is fsi not being killed, when turning invisible?
+		for(JOGLFaceSetInstance fsi : set){
+			if(null == registered.get(fsi)){
+				System.out.println("killing");
+				Instance ins = instances.get(fsi);
 				ins.collection.kill(ins);
+			}else{
+				if(fsi.eap==null){
+					System.out.println("killing");
+					Instance ins = instances.get(fsi);
+					ins.collection.kill(ins);
+				}else{
+					boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+					if(!visible){
+						System.out.println("killing");
+						Instance ins = instances.get(fsi);
+						ins.collection.kill(ins);
+					}
+				}
 			}
 		}
 		
@@ -98,29 +115,29 @@ public class RenderableUnit {
 		HashSet<RenderableObject> lengthSet = new HashSet<RenderableObject>();
 		HashSet<RenderableObject> posASet = new HashSet<RenderableObject>();
 		
-		for(RenderableObject f : registered){
+		for(JOGLFaceSetInstance fsi : registered.keySet()){
+			RenderableObject f = registered.get(fsi);
 //			instances.get(f).upToDate = true;
 			//check if new
-			System.out.println("instances contains:");
-			for(RenderableObject o : instances.keySet()){
-				System.out.println("RO is " + o);
-				System.out.println("Instance is " + instances.get(o));
-				System.out.println("FSI is " + o.geom);
-			}
+//			System.out.println("instances contains:");
+//			for(JOGLFaceSetInstance fsi2 : instances.keySet()){
+//				System.out.println("Instance is " + instances.get(fsi2));
+//				System.out.println("FSI is " + fsi2);
+//			}
 			
 			if(instances.get(f) == null){
 				//in fact it's new
 				newSet.add(f);
-				System.out.println("adding to new set");
+//				System.out.println("adding to new set");
 			}else if(f.geom.oChangedLength()){
 				//is old, but changed its length
 				lengthSet.add(f);
-				System.out.println("adding to oChLength set");
+//				System.out.println("adding to oChLength set");
 			}else if(f.geom.oChangedPositionsOrAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
 				instances.get(f).upToDate = false;
-				System.out.println("adding to oChPosA set");
+//				System.out.println("adding to oChPosA set");
 			}else{
 				//nothing changed, needs not be touched if not neccessary
 				//do nothing here!
@@ -140,9 +157,9 @@ public class RenderableUnit {
 		if(instanceCollections.size() == 0)
 			fillingUp = false;
 		int insCollNumber = -1;
-		System.out.println("start filling up");
+//		System.out.println("start filling up");
 		while(fillingUp){
-			System.out.println("filling up...");
+//			System.out.println("filling up...");
 			insCollNumber++;
 			InstanceCollection currentCollection = instanceCollections.get(insCollNumber);
 //			//defragment
@@ -152,16 +169,23 @@ public class RenderableUnit {
 //			}
 			//fill up with elements from newSet
 			int free = currentCollection.getNumberFreeInstances();
+//			System.out.println("free = " + free);
 			if(free > 0){
-				for(int i = 0; i < free; i++){
+				for(int i = 0; i < free; ){
 					if(newSet.iterator().hasNext()){
+//						System.out.println("newSet has next");
 						RenderableObject o = newSet.iterator().next();
-						Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)o.geom, o.state);
-						if(ins != null)
-							instances.put(o, ins);
+						if(!currentCollection.contains((JOGLFaceSetInstance) o.geom)){
+							Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)o.geom, o.state);
+							if(ins != null)
+								instances.put((JOGLFaceSetInstance) o.geom, ins);
+							i++;
+//							System.out.println("here3");
+						}
 						newSet.remove(o);
 					}else{
 						fillingUp = false;
+						i=free;
 					}
 				}
 			}
@@ -195,7 +219,7 @@ public class RenderableUnit {
 		//...not so important right now
 		
 		//clean up the registration hash map
-		registered = new HashSet<RenderableObject>();
+		registered = new WeakHashMap<JOGLFaceSetInstance, RenderableObject>();
 	}
 	
 	public void render(){

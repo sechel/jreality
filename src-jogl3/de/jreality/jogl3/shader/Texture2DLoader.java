@@ -21,6 +21,8 @@ public class Texture2DLoader {
 			texs[i] = textureLookup.get(id);
 			i++;
 		}
+//		for(int j = 0; j < texs.length; j++)
+//			System.err.println("deleting texid no " + texs[j]);
 		if(texs.length != 0)
 			gl.glDeleteTextures(texs.length, texs, 0);
 		textureLookup = new WeakHashMap<ImageData, Integer>();
@@ -55,6 +57,7 @@ public class Texture2DLoader {
     		//System.out.println("creating new texture");
     		//load texture into the gl
     		texid = createTextureID(gl);
+//    		System.err.println("creating new texid no " + texid);
     		textureLookup.put(image, texid);
     		
     		gl.glBindTexture(gl.GL_TEXTURE_2D, texid);
