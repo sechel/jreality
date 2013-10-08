@@ -8,7 +8,7 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-import com.jogamp.opengl.util.awt.ImageUtil;
+//import com.jogamp.opengl.util.awt.ImageUtil;
 
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.jogl3.InfoOverlayData;
@@ -343,7 +343,8 @@ public class TransparencyHelper {
 		System.err.println("reading pixels");
 		
 		dst = ImageUtility.rearrangeChannels(null, dst);
-		ImageUtil.flipImageVertically(dst);
+		//TODO revert here
+//		ImageUtil.flipImageVertically(dst);
 		return dst;
 	}
 }

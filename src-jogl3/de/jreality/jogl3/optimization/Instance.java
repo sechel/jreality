@@ -3,6 +3,7 @@ package de.jreality.jogl3.optimization;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
+import de.jreality.jogl3.shader.GLVBO;
 
 public class Instance {
 	
@@ -14,12 +15,23 @@ public class Instance {
 		dead = false;
 		upToDate = true;
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)fsi.getEntity();
+		if(fse == null){
+			System.err.println("FSI has no entity");
+		}
+		if(fse.getVBO("vertex_coordinates") == null){
+			System.err.println("FSE has no vertex coordinates vbo, but");
+		}
+		GLVBO[] vbos = fse.getAllVBOs();
+//		System.out.println("FSE contains:");
+//		for(GLVBO vbo : vbos){
+//			System.out.println(vbo.getName());
+//		}
+		
 		length = fse.getVBO("vertex_coordinates").getLength();
 	}
 	
 	public void kill(){
 		dead = true;
-		fsi = null;
 		state = null;
 	}
 	

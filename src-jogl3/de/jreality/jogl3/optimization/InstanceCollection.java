@@ -9,6 +9,8 @@ import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
+import com.itextpdf.text.LargeElement;
+
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
@@ -56,9 +58,10 @@ public class InstanceCollection {
 			
 			if(s[0].equals("mat4")){
 				float[] f;
-				if(s[1].equals("modelview"))
-					f = Rn.convertDoubleToFloatArray(state.getModelViewMatrix());
-				else
+				if(s[1].equals("modelview")){
+					f = new float[16];
+					Rn.transposeD2F(f, state.getModelViewMatrix());
+				}else
 					f = (float[])u.value;
 				for(int l = 0; l < 16; l++)
 					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
@@ -91,7 +94,7 @@ public class InstanceCollection {
 	}
 	
 	private void updateUniformsTexture(GL3 gl){
-		
+//		System.out.println("update uniforms texture");
 		//update data
 		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
 		LinkedList<String[]> fragUniforms = shader.getFragUniforms();
@@ -130,7 +133,7 @@ public class InstanceCollection {
 		return textures[0];
 	}
 	
-	public void bindUniformsTexture(GL3 gl) {
+	private void bindUniformsTexture(GL3 gl) {
 		gl.glEnable(gl.GL_TEXTURE_2D);
 		gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
 		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
@@ -144,6 +147,7 @@ public class InstanceCollection {
 	
 	public void init(GL3 gl){
 		this.gl = gl;
+		shader.init(gl);
 		putNewVBO("vertex_coordinates", GL3.GL_FLOAT, 4);
 		putNewVBO("vertex_id", GL3.GL_INT, 1);
 		nullRest();
@@ -155,7 +159,7 @@ public class InstanceCollection {
 	/**
 	 * depends on the maximum texture dimension
 	 */
-	private static final int MAX_NUMBER_OBJ_IN_COLLECTION = 100;
+	public static final int MAX_NUMBER_OBJ_IN_COLLECTION = 100;
 	
 	/**
 	 * initial size in floats
@@ -218,6 +222,10 @@ public class InstanceCollection {
 	 * @param elementSize
 	 */
 	private void putNewVBO(String name, int type, int elementSize){
+		if(type == 5126)
+			System.out.println("putting vbo " + name + " with type glFloat");
+		if(type == 5124)
+			System.out.println("putting vbo " + name + " with type glInt");
 		if(type == GL3.GL_FLOAT){
 			gpuData.put(name, new GLVBOFloat(gl, new float[current_vbo_size], name, elementSize));
 		}else if(type == GL3.GL_INT){
@@ -232,12 +240,12 @@ public class InstanceCollection {
 	 */
 	private void changeVBOSize(int powerofTwo){
 		current_vbo_size = START_SIZE*(int)Math.round(Math.pow(2, powerofTwo));
+		System.out.println("new size = " + current_vbo_size);
 		Set<String> keys = gpuData.keySet();
 		String[] keyArray = keys.toArray(new String[0]);
 		for(String s : keyArray){
 			GLVBO vbo = gpuData.get(s);
 			putNewVBO(vbo.getName(), vbo.getType(), vbo.getElementSize());
-			
 		}
 	}
 	
@@ -281,6 +289,10 @@ public class InstanceCollection {
 	}
 	
 	private void pushOnlyInstanceIDToGPU(Instance i){
+		if(gpuData.get("vertex_id") == null)
+			System.err.println("vertex_id = null in InstanceCollection.pushOnlyInstanceIDToGPU");
+		if(!gpuData.get("vertex_id").getClass().equals(GLVBOInt.class))
+			System.err.println("vertex_id not of class GLVBOInt but " + gpuData.get("vertex_id").getClass().getName());
 		GLVBOInt largevbo = (GLVBOInt)gpuData.get("vertex_id");
 		int id = i.id;
 		int[] vertex_id = new int[i.length];
@@ -310,11 +322,15 @@ public class InstanceCollection {
 	 * @param fsi
 	 */
 	public Instance registerNewInstance(JOGLFaceSetInstance fsi, JOGLRenderState state){
-		if(fsi.eap==null)
+		if(fsi.eap==null){
+			System.err.println("effective appearance of fsi is null, not registering this instance");
 			return null;
+		}
 		boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
-		if(!visible)
+		if(!visible){
+			System.err.println("FSI not visible -> not registering");
 			return null;
+		}
 		Instance ret = new Instance(this, fsi, state, 0);
 		newInstances.add(ret);
 		numAliveInstances++;
@@ -325,6 +341,8 @@ public class InstanceCollection {
 	 * @param i
 	 */
 	public void kill(Instance i){
+		if(!instances.containsKey(i.fsi))
+			System.err.println("cannot kill this Instance, because it is not in this InstanceCollection");
 		if(i.isAlive()){
 			i.kill();
 			dyingInstances.add(i);
@@ -337,10 +355,16 @@ public class InstanceCollection {
 		dead_count = 0;
 		//delete all dyingInstances from instances
 		for(Instance i : dyingInstances){
-			instances.remove(i);
+//			System.out.println("removing dying instance?...");
+//			System.out.println(i.fsi);
+//			if(instances.containsKey(i.fsi))
+//				System.out.println("...for real!");
+			instances.remove(i.fsi);
 		}
 		//move all newInstances to instances
 		for(Instance i : newInstances){
+//			System.out.println("putting new instance");
+//			System.out.println(i.fsi);
 			instances.put(i.fsi, i);
 		}
 		
@@ -348,6 +372,7 @@ public class InstanceCollection {
 		int pos = 0;
 		int counter = 0;
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
+			System.out.println("writing still alive instances to gpu");
 			Instance i = instances.get(fsi);
 			i.id = counter;
 			counter++;
@@ -365,7 +390,6 @@ public class InstanceCollection {
 	 * !only necessary to call this, if actually changes have been made!
 	 */
 	public void update(){
-		
 		//update dead_count
 		for(Instance i : dyingInstances){
 			dead_count += i.length;
@@ -375,6 +399,9 @@ public class InstanceCollection {
 			availableFloats -= i.length;
 		}
 		boolean mustResize = false;
+//		System.out.println("vbo_size = " + current_vbo_size);
+//		System.out.println("avail = " + availableFloats);
+//		System.out.println("dead_count = " + dead_count);
 		int numFloatsNeeded = current_vbo_size - availableFloats - dead_count;
 		if(numFloatsNeeded > current_vbo_size || (numFloatsNeeded <= current_vbo_size/2 && current_vbo_size > START_SIZE))
 			mustResize = true;
@@ -382,6 +409,9 @@ public class InstanceCollection {
 			//resize
 			float neededPow = numFloatsNeeded/1000f;
 			int pow = (int)Math.ceil(Math.log(neededPow)/Math.log(2));
+			if(pow < 0)
+				pow = 0;
+//			System.out.println("pow = " + pow);
 			changeVBOSize(pow);
 			//write everything to vbo
 			availableFloats = current_vbo_size;
@@ -431,34 +461,34 @@ public class InstanceCollection {
 	}
 	
 	public void render(GL3 gl){
-		
+//		System.out.println("IC.render(gl)");
 		bindUniformsTexture(gl);
 		
 		//bind vbos to corresponding shader variables
     	List<ShaderVar> l = shader.vertexAttributes;
-    	for(ShaderVar v : l){
-    		GLVBO vbo = gpuData.get(v.getName());
+    	for(String s : gpuData.keySet()){
+    		GLVBO vbo = gpuData.get(s);
     		if(vbo != null){
-    			//System.out.println(v.getName());
-    			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 1, gl);
+//    			System.out.println(s);
+    			ShaderVarHash.bindUniform(shader, "has_" + s, 1, gl);
 //    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
     			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
-            	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, v.getName()), vbo.getElementSize(), vbo.getType(), false, 0, 0);
-            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+            	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, s), vbo.getElementSize(), vbo.getType(), false, 0, 0);
+            	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, s));
     		}else{
-    			ShaderVarHash.bindUniform(shader, "has_" + v.getName(), 0, gl);
+    			ShaderVarHash.bindUniform(shader, "has_" + s, 0, gl);
 //    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 0);
     		}
     	}
-    	
+//    	System.out.println("___");
     	//actual draw command
     	gl.glDrawArrays(gl.GL_TRIANGLES, 0, gpuData.get("vertex_coordinates").getLength()/4);
 		
     	//disable all vbos
-    	for(ShaderVar v : l){
-    		GLVBO vbo = gpuData.get(v.getName());
+    	for(String s : gpuData.keySet()){
+    		GLVBO vbo = gpuData.get(s);
     		if(vbo != null){
-    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, v.getName()));
+    			gl.glDisableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, s));
     		}
     	}
     	

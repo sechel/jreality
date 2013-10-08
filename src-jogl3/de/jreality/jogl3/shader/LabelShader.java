@@ -6,8 +6,6 @@ import java.awt.image.BufferedImage;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL3;
 
 import com.itextpdf.text.log.SysoLogger;
@@ -66,9 +64,9 @@ public class LabelShader {
 		
 		overlayShader.useShader(gl);
 		
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA,
-				GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(gl.GL_BLEND);
+		gl.glBlendFuncSeparate(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA,
+				gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA);
 		
 		
 		gl.glUniform1i(gl.glGetUniformLocation(overlayShader.shaderprogram, "tex"), 2);
@@ -113,9 +111,9 @@ public class LabelShader {
 			
 			shader.useShader(gl);
 			
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA,
-					GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glEnable(gl.GL_BLEND);
+			gl.glBlendFuncSeparate(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA,
+					gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA);
 			
 			
 			gl.glUniform4fv(gl.glGetUniformLocation(shader.shaderprogram, "xyAlignmentTotalWH"), 1, labelData.xyAlignmentTotalWH[L], 0);
@@ -179,9 +177,9 @@ public class LabelShader {
 			
 			shaderDepth.useShader(gl);
 			
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA,
-					GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glEnable(gl.GL_BLEND);
+			gl.glBlendFuncSeparate(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA,
+					gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA);
 			
 			
 			gl.glUniform4fv(gl.glGetUniformLocation(shaderDepth.shaderprogram, "xyAlignmentTotalWH"), 1, labelData.xyAlignmentTotalWH[L], 0);
@@ -251,9 +249,9 @@ public class LabelShader {
 			
 			shaderTransp.useShader(gl);
 			
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA,
-					GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glEnable(gl.GL_BLEND);
+			gl.glBlendFuncSeparate(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA,
+					gl.GL_ONE, gl.GL_ONE_MINUS_SRC_ALPHA);
 			
 			
 			gl.glUniform4fv(gl.glGetUniformLocation(shaderTransp.shaderprogram, "xyAlignmentTotalWH"), 1, labelData.xyAlignmentTotalWH[L], 0);
