@@ -738,7 +738,7 @@ public class JRViewer {
 		v.setPropertiesResource(JRViewer.class, "JRViewer.xml");
 		v.addBasicUI();
 		v.addPythonSupport();
-		v.registerPlugin(InfoOverlayPlugin.class);
+//		v.registerPlugin(InfoOverlayPlugin.class);
 		if (params.contains("-vr")) {
 			v.addContentUI();
 			v.addVRSupport();
