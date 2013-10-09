@@ -10,15 +10,15 @@ import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
+import de.jreality.jogl3.geom.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 import de.jreality.jogl3.geom.JOGLGeometryInstance;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
 import de.jreality.jogl3.glsl.GLShader;
 
 public class RenderableUnitCollection{
 	
-	public final int MAX_NUM_FLOATS = 0;
+	public final int MAX_NUM_FLOATS = 10000;
 	
 	public void resetRestNonTranspObjects(){
 		restNonTranspObjects = new LinkedList<RenderableObject>();
@@ -28,14 +28,17 @@ public class RenderableUnitCollection{
 	
 	WeakHashMap<GLShader, WeakHashMap<GlTexture, WeakHashMap<GlReflectionMap, RenderableUnit>>> units = new WeakHashMap<GLShader,WeakHashMap<GlTexture,WeakHashMap<GlReflectionMap,RenderableUnit>>>();
 	
+	GlTexture nullTex = new GlTexture();
+	
 	public void add(RenderableObject o){
 		if(o.geom instanceof JOGLFaceSetInstance){
 			JOGLFaceSetInstance f = (JOGLFaceSetInstance)o.geom;
 			JOGLFaceSetEntity fse = (JOGLFaceSetEntity) f.getEntity();
-//			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
+			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
 			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS){
 //				System.out.println("adding to renderableUnit");
 				GlTexture tex = f.faceTexture;
+				
 				GLShader shader = f.getPolygonShader();
 				GlReflectionMap reflMap = f.reflMap;
 				
@@ -46,6 +49,7 @@ public class RenderableUnitCollection{
 					units.put(shader, hm1);
 				}
 				//hm1 now usable
+				System.err.println("tex is " + tex);
 				WeakHashMap<GlReflectionMap, RenderableUnit> hm2 = hm1.get(tex);
 				if(hm2 == null){
 					System.out.println("new texture forces new RenderableUnit");

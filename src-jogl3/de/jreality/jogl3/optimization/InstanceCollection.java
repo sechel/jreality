@@ -49,12 +49,38 @@ public class InstanceCollection {
 	
 	private int offset;
 	
-	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, int j, JOGLRenderState state){
+	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, Instance ins, JOGLRenderState state){
+		int j = ins.id;
+		System.out.println("DWH");
 		for(String[] s : Uniforms){
-			
+			System.out.println("uniform " + s[1]);
 			GlUniform u = uniforms.get(s[1]);
-			if(u == null && !s[1].equals("modelview"))
-				continue;
+			
+			System.out.println("numFloatsNe" + shader.getNumFloatsNecessary());
+			System.out.println("ID" + j);
+			System.out.println("offset" + offset);
+			
+			if(u == null){
+				if(s[1].substring(0, 4).equals("has_")){
+					if(s[1].equals("has_reflectionMap"))
+						continue;
+					
+					JOGLFaceSetEntity fse = (JOGLFaceSetEntity) ins.fsi.getEntity();
+					//fse.getAllVBOs();
+					boolean b = false;
+					for(GLVBO vbo : fse.getAllVBOs()){
+						if(vbo.getName().equals(s[1].substring(4))){
+							b = true;
+						}
+					}
+					int f = b ? 1 : 0;
+					data[offset+j*shader.getNumFloatsNecessary()] = Float.intBitsToFloat(f);
+					offset += 1;
+					continue;
+				}else if(!s[1].equals("modelview"))
+					continue;
+			}
+			
 			
 			if(s[0].equals("mat4")){
 				float[] f;
@@ -67,7 +93,10 @@ public class InstanceCollection {
 					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
 				offset += 16;
 			}else if(s[0].equals("vec4")){
+//				System.out.println(u.name + u.value + " " + offset);
 				float[] f = (float[])u.value;
+//				System.out.println("value is " + f[0] + ", " + f[1] + ", " + f[2] + ", " + f[3]);
+				
 				for(int l = 0; l < 4; l++)
 					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
 				offset += 4;
@@ -107,10 +136,13 @@ public class InstanceCollection {
 			//the width offset
 			offset = 0;
 			JOGLRenderState state = i.state;
-			DataWriteHelper(vertUniforms, uniforms, i.id, state);
+			System.err.println("i.id = " + i.id);
+			DataWriteHelper(vertUniforms, uniforms, i, state);
+			System.out.println("offset after vert is " + offset);
 			if (offset%4 != 0)
 				offset = 4*(offset/4) + 4;
-			DataWriteHelper(fragUniforms, uniforms, i.id, state);
+			System.out.println("offset before frag is " + offset);
+			DataWriteHelper(fragUniforms, uniforms, i, state);
 		}
 		
 		gl.glEnable(gl.GL_TEXTURE_2D);
@@ -141,8 +173,16 @@ public class InstanceCollection {
 	
 	private OptimizedGLShader shader;
 	
+	private void resetFreeIDs(){
+		freeIDs = new HashSet<Integer>();
+		for(int i = 0; i < MAX_NUMBER_OBJ_IN_COLLECTION; i++){
+			freeIDs.add(i);
+		}
+	}
+	
 	public InstanceCollection(OptimizedGLShader shader){
 		this.shader = shader;
+		resetFreeIDs();
 	}
 	
 	public void init(GL3 gl){
@@ -184,6 +224,7 @@ public class InstanceCollection {
 	
 //	private LinkedList<Instance> instances = new LinkedList<Instance>();
 	private WeakHashMap<JOGLFaceSetInstance, Instance> instances = new WeakHashMap<JOGLFaceSetInstance, Instance>();
+	private HashSet<Integer> freeIDs = new HashSet<Integer>();
 	private LinkedList<Instance> newInstances = new LinkedList<Instance>();
 	//This is needed, because we might delete the deadInstances in defragmentation.
 	//if not so, we need to manually null these.
@@ -328,7 +369,7 @@ public class InstanceCollection {
 		}
 		boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 		if(!visible){
-			System.err.println("FSI not visible -> not registering");
+			System.out.println("FSI not visible -> not registering");
 			return null;
 		}
 		Instance ret = new Instance(this, fsi, state, 0);
@@ -351,6 +392,7 @@ public class InstanceCollection {
 	}
 	
 	private void writeAllInstancesNewToVBO(){
+		resetFreeIDs();
 		//write rest to gpu
 		dead_count = 0;
 		//delete all dyingInstances from instances
@@ -370,12 +412,14 @@ public class InstanceCollection {
 		
 		//push ALL instances to GPU
 		int pos = 0;
-		int counter = 0;
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
 			System.out.println("writing still alive instances to gpu");
 			Instance i = instances.get(fsi);
-			i.id = counter;
-			counter++;
+			//take an unused ID from freeIDs ans give it to the Instance
+			Integer inte = freeIDs.iterator().next();
+			freeIDs.remove(inte);
+			i.id = inte;
+			
 			availableFloats -= i.length;
 			i.posInVBOs = pos;
 			i.upToDate = true;
@@ -420,6 +464,7 @@ public class InstanceCollection {
 		}else{
 			//do not resize
 			if(availableFloats >= 0){
+				
 				//push ONLY the new instances to GPU
 				int pos = current_vbo_size-availableFloats;
 				for(Instance i : newInstances){
@@ -427,6 +472,11 @@ public class InstanceCollection {
 					pos += i.length;
 					instances.put(i.fsi, i);
 					i.upToDate = true;
+					//get free ID and give it to the Instance
+					Integer inte = freeIDs.iterator().next();
+					freeIDs.remove(inte);
+					i.id = inte;
+					
 					pushInstanceToGPU(i);
 				}
 				//and null (and remove?) the dead ones
@@ -435,18 +485,17 @@ public class InstanceCollection {
 					i.upToDate = true;
 					//TODO is this right?
 					instances.remove(i);
+					//free the ID of the removed Instance
+					freeIDs.add(new Integer(i.id));
 				}
 				//and update the !up_to_date ones
-				int counter = 0;
+				
 				for(JOGLFaceSetInstance fsi : instances.keySet()){
 					Instance i = instances.get(fsi);
 					if(!i.upToDate){
 						pushInstanceToGPU(i);
 						i.upToDate = true;
 					}
-					i.id = counter;
-					counter++;
-					pushOnlyInstanceIDToGPU(i);
 				}
 				//and done!
 			}else{

@@ -69,6 +69,14 @@ public class GLShader
 	private String vname, fname;
 	protected String[] vsrc = null;
 	protected String[] fsrc = null;
+	
+	public String[] getVSRC(){
+		return vsrc;
+	}
+	public String[] getFSRC(){
+		return fsrc;
+	}
+	
 	public List<ShaderVar> shaderUniforms = new LinkedList<ShaderVar>();
 	public List<ShaderVar> vertexAttributes = new LinkedList<ShaderVar>();
 	

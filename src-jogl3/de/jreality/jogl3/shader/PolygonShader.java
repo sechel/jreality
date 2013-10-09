@@ -7,7 +7,6 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
 import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.glsl.GLShader;
@@ -30,7 +29,7 @@ public class PolygonShader{
 		System.out.println("stop");
 	}
 	
-	public static void render(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, GlReflectionMap reflMap, GLShader shader, JOGLRenderState state){
+	public static void render(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, de.jreality.jogl3.geom.GlReflectionMap reflMap, GLShader shader, JOGLRenderState state){
 
 		
 		//TODO replace by fsi or renderState
@@ -144,7 +143,7 @@ public class PolygonShader{
     	shader.dontUseShader(gl);
 	}
 
-	public static void addOneLayer(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, GlReflectionMap reflMap, GLShader shader, JOGLRenderState state, int width, int height, float transparency) {
+	public static void addOneLayer(JOGLFaceSetEntity fse, LinkedList<GlUniform> c, GlTexture tex, de.jreality.jogl3.geom.GlReflectionMap reflMap, GLShader shader, JOGLRenderState state, int width, int height, float transparency) {
 		GL3 gl = state.getGL();
 		
 		state.getLightHelper().loadLocalLightTexture(state.getLocalLightCollection(), gl);

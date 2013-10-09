@@ -1,9 +1,7 @@
 package de.jreality.jogl3.optimization;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -12,21 +10,14 @@ import javax.media.opengl.GL3;
 import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
-import de.jreality.jogl3.geom.JOGLFaceSetEntity;
+import de.jreality.jogl3.geom.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformInt;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformMat4;
-import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.jogl3.glsl.GLShader.ShaderVar;
-import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.math.Rn;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 public class RenderableUnit {
 	
@@ -87,8 +78,9 @@ public class RenderableUnit {
 		//check which fsi are missing in the registered ones
 		//if there is an Instance in instances not belonging to a FaceSetInstance in registered, kill it
 		Set<JOGLFaceSetInstance> set = instances.keySet();
+		JOGLFaceSetInstance[] setA = set.toArray(new JOGLFaceSetInstance[set.size()]);
 		//TODO why is fsi not being killed, when turning invisible?
-		for(JOGLFaceSetInstance fsi : set){
+		for(JOGLFaceSetInstance fsi : setA){
 			if(null == registered.get(fsi)){
 				System.out.println("killing");
 				Instance ins = instances.get(fsi);
@@ -160,7 +152,18 @@ public class RenderableUnit {
 		if(instanceCollections.size() == 0)
 			fillingUp = false;
 		int insCollNumber = -1;
+		
+		for(JOGLFaceSetInstance fsi : instances.keySet()){
+//			System.out.println("fsi is " + fsi.getNode().getName());
+			RenderableObject o = registered.get(fsi);
+			//if fsi is invisible, it is not contained in the keySet of instances
+//			if(instances.get(fsi) != null)
+			instances.get(fsi).state = o.state;
+		}
+		
+		
 //		System.out.println("start filling up");
+//		System.out.println("InsColls.size = " + instanceCollections.size());
 		while(fillingUp){
 //			System.out.println("filling up...");
 			insCollNumber++;
@@ -180,7 +183,11 @@ public class RenderableUnit {
 						RenderableObject o = newSet.iterator().next();
 						if(!currentCollection.contains((JOGLFaceSetInstance) o.geom)){
 							Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)o.geom, o.state);
-							instances.put((JOGLFaceSetInstance) o.geom, ins);
+							//ins could be null, because it is invisible
+							if(ins != null){
+								ins.state = o.state;
+								instances.put((JOGLFaceSetInstance) o.geom, ins);
+							}
 							
 							i++;
 //							System.out.println("here3");
@@ -209,7 +216,11 @@ public class RenderableUnit {
 					if(newSet.iterator().hasNext()){
 						RenderableObject fsi = newSet.iterator().next();
 						Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)fsi.geom, fsi.state);
-						instances.put((JOGLFaceSetInstance) o.geom, ins);
+						//ins could be null, because it is invisible
+						if(ins != null){
+							ins.state = o.state;
+							instances.put((JOGLFaceSetInstance) o.geom, ins);
+						}
 						
 						newSet.remove(fsi);
 					}else{
@@ -226,14 +237,7 @@ public class RenderableUnit {
 		
 		//update state of all instances
 		//by now registered should contain the same keys as instances
-		for(JOGLFaceSetInstance fsi : registered.keySet()){
-//			System.out.println("fsi is " + fsi.getNode().getName());
-			RenderableObject o = registered.get(fsi);
-			if(instances.get(fsi) == null)
-				System.err.println("instances.get(fsi) = null");
-			else
-				instances.get(fsi).state = o.state;
-		}
+		
 		
 		
 		//clean up the registration hash map
