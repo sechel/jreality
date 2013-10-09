@@ -36,6 +36,8 @@ import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
+import de.jreality.jogl3.optimization.RenderableUnit;
+import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.PointShader;
 import de.jreality.jogl3.shader.Texture2DLoader;
@@ -282,6 +284,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	BufferedImage dst = null;
 	boolean offscreen = false;
 	int textureDeletionCounter = 0;
+	RenderableUnitCollection RUC = new RenderableUnitCollection();
 	public void display(GLAutoDrawable arg0, int width, int height) {
 		
 		perfmeter.beginFrame();
@@ -346,9 +349,10 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			JOGLRenderState rootState = new JOGLRenderState(gl, dmat, mat, lightHelper, tubeHelper, sphereHelper, Math.min(component.getWidth(), component.getHeight()), Math.min(x, y));
 			
 			//extract nontransparent objects
-			List<RenderableObject> nonTranspObjects = new LinkedList<RenderableObject>();
+			//List<RenderableObject> nonTranspObjects = new LinkedList<RenderableObject>();
+			RUC.resetRestNonTranspObjects();
 			List<RenderableObject> transpObjects = new LinkedList<RenderableObject>();
-			rootInstance.collectTranspAndNonTransparent(rootState, nonTranspObjects, transpObjects);
+			rootInstance.collectTranspAndNonTransparent(rootState, RUC, transpObjects);
 			
 			
 			infodata.clockrate = this.getClockRate();
@@ -357,9 +361,9 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			//render scene graph
 			if(offscreen == false){
-				TransparencyHelper.render(infodata, gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+				TransparencyHelper.render(infodata, gl, RUC, transpObjects, width, height, backgroundHelper);
 			}else{
-				this.dst = TransparencyHelper.renderOffscreen(aa, this.dst, gl, nonTranspObjects, transpObjects, width, height, backgroundHelper);
+				this.dst = TransparencyHelper.renderOffscreen(aa, this.dst, gl, RUC, transpObjects, width, height, backgroundHelper);
 				System.out.println("rendering offscreen");
 			}
 			

@@ -36,8 +36,8 @@ public class JOGLSphereEntity extends JOGLGeometryEntity {
 	}
 	
 	//replace state to gl
-	public void updateData(GL3 gl) {
-		
+	public boolean updateData(GL3 gl) {
+		return false;
 	}
 	
 	@Override

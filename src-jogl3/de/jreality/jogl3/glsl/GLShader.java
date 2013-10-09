@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
+import de.jreality.jogl3.optimization.OptimizedGLShader;
+
 
 /**
  * 
@@ -25,6 +27,8 @@ public class GLShader
 {
 	
 	public static GLShader defaultPolygonShader = new GLShader("nontransp/polygon.v", "nontransp/polygon.f");
+//	public static GLShader defaultCPolygonShader = new GLShader("nontransp/Cpolygon.v", "nontransp/Cpolygon.f");
+//	public static GLShader defaultOPolygonShader = new OptimizedGLShader("../glsl/nontransp/polygon.v", "../glsl/nontransp/polygon.f");
 	public static GLShader defaultPointShader = new GLShader("nontransp/pointNoSphere.v", "nontransp/pointNoSphere.f");
 	public static GLShader defaultLineShader = new GLShader("nontransp/edge.v", "nontransp/edge.f");
 	public static GLShader defaultPolygonLineShader = new GLShader("nontransp/tubeEdge.v", "nontransp/tubeEdge.f");
@@ -32,7 +36,9 @@ public class GLShader
 	public static GLShader defaultPointSphereShader = new GLShader("nontransp/spherePoint.v", "nontransp/spherePoint.f");
 	//TODO defaultLineShader
 	public static void initDefaultShaders(GL3 gl){
-		
+
+//		defaultCPolygonShader.init(gl);
+//		defaultOPolygonShader.init(gl);
 		defaultPolygonShader.init(gl);
 		defaultPointShader.init(gl);
 		defaultLineShader.init(gl);
@@ -61,10 +67,17 @@ public class GLShader
 	public int     fragmentShaderProgram;
 	public int     shaderprogram;
 	private String vname, fname;
-	private String[] vsrc = null;
-	private String[] fsrc = null;
+	protected String[] vsrc = null;
+	protected String[] fsrc = null;
 	public List<ShaderVar> shaderUniforms = new LinkedList<ShaderVar>();
 	public List<ShaderVar> vertexAttributes = new LinkedList<ShaderVar>();
+	
+	public String getVertFilename(){
+		return vname;
+	}
+	public String getFragFilename(){
+		return fname;
+	}
 	
 	public GLShader(String vert, String frag){
 		vname = vert;
@@ -114,18 +127,8 @@ public class GLShader
 	 * @param shaderSource
 	 * @param target
 	 */
-	private void findUniforms(String shaderSource, List<ShaderVar> target){
-		
+	protected void findUniforms(String shaderSource, List<ShaderVar> target){
 		findVars(shaderSource, new String[]{"uniform"}, target);
-		
-//		String[] lines = shaderSource.split("\n");
-//		for(String l : lines){
-//			String[] words = l.split(" ");
-//			if(words[0].equals("uniform") && !words[2].equals("projection") && !words[2].equals("modelview")){
-//				target.add(new ShaderVar(words[2], words[1]));
-//				//System.out.println("found uniform: " + words[2] + " of type " + words[1]);
-//			}
-//		}
 	}
 	
 	private void findVars(String source, String[] qualifiers, List<ShaderVar> target){

@@ -7,6 +7,7 @@ import de.jreality.jogl3.geom.JOGLGeometryInstance;
 import de.jreality.jogl3.light.JOGLLightCollection;
 import de.jreality.jogl3.light.JOGLLightEntity;
 import de.jreality.jogl3.light.JOGLLightInstance;
+import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.math.Rn;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.proxy.tree.SceneTreeNode;
@@ -56,7 +57,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 		}
 	}
 	
-	void collectTranspAndNonTransparent(JOGLRenderState parentState, List<RenderableObject> nonTranspObjects, List<RenderableObject> transpObjects) {
+	void collectTranspAndNonTransparent(JOGLRenderState parentState, RenderableUnitCollection ruc, List<RenderableObject> transpObjects) {
 		JOGLAppearanceInstance app = (JOGLAppearanceInstance) getAppearanceTreeNode();
 		boolean upToDate = false;
 		if(app != null){
@@ -94,18 +95,18 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			if (geom != null) {
 				JOGLGeometryEntity geomEntity = (JOGLGeometryEntity) geom.getEntity();
 				if(!geomEntity.dataUpToDate){
-					geomEntity.updateData(state.getGL());
-					geom.updateAppearance(this.toPath(), state.getGL());
+					boolean changedLength = geomEntity.updateData(state.getGL());
+					geom.updateAppearance(this.toPath(), state.getGL(), false, changedLength, true);
 					geomEntity.dataUpToDate = true;
 				}
 				if(!state.appearanceUpToDate)
-					geom.updateAppearance(this.toPath(), state.getGL());
+					geom.updateAppearance(this.toPath(), state.getGL(), true, false, false);
 				//geom.eap = EffectiveAppearance.create(this.toPath());
 				//rather update only when appearance has changed.
 				//PolygonShader.setFromEffectiveAppearance(EffectiveAppearance.create(this.toPath()), CommonAttributes.POLYGON_SHADER);
 				boolean transpEnabled = (Boolean)geom.eap.getAttribute(CommonAttributes.TRANSPARENCY_ENABLED, new Boolean(false));
 				if(!transpEnabled){
-					nonTranspObjects.add(new RenderableObject(geom, state));
+					ruc.add(new RenderableObject(geom, state));
 				}else{
 					transpObjects.add(new RenderableObject(geom, state));
 				}
@@ -119,7 +120,7 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
 			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
 			if(sgc.isVisible())
-				childInstance.collectTranspAndNonTransparent(state, nonTranspObjects, transpObjects);
+				childInstance.collectTranspAndNonTransparent(state, ruc, transpObjects);
 		}
 	}
 	

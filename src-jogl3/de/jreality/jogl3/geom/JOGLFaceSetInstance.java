@@ -1,6 +1,7 @@
 package de.jreality.jogl3.geom;
 
 import java.util.LinkedList;
+import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
@@ -20,6 +21,9 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 
 	//GLShader polygonShader = new DefaultPolygonShader();
 	GLShader polygonShader = GLShader.defaultPolygonShader;
+	public GLShader getPolygonShader(){
+		return polygonShader;
+	}
 	GLShader polygonShaderDepth = TransparencyHelper.depth;
 	GLShader polygonShaderTransp = TransparencyHelper.transp;
 	public JOGLFaceSetInstance(IndexedFaceSet node) {
@@ -78,18 +82,31 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	}
 	
 	public LinkedList<GlUniform> faceSetUniforms = new LinkedList<GlUniform>();
+	public WeakHashMap<String, GlUniform> faceSetUniformsHash = new WeakHashMap<String, GlUniform>();
 	public InstanceFontData ifd = new InstanceFontData();
 	public GlTexture faceTexture = new GlTexture();
 	public GlReflectionMap reflMap = new GlReflectionMap();
 	@Override
-	public void updateAppearance(SceneGraphPath sgp, GL3 gl) {
-		super.updateAppearance(sgp, gl);
+	public void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged) {
+		if(appChanged || geomPosChanged)
+			oChangedPosA = true;
+		if(geomLengthChanged)
+			oChangedLength = true;
+		super.updateAppearance(sgp, gl, appChanged, geomLengthChanged, geomPosChanged);
 //		JOGLFaceSetEntity entity = (JOGLFaceSetEntity)this.getEntity();
 //		IndexedFaceSet fs = (IndexedFaceSet)entity.getNode();
 		faceSetUniforms = new LinkedList<GlUniform>();
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity) getEntity();
 		polygonShader = updateAppearance(ifd, GLShader.defaultPolygonShader, sgp, gl, faceSetUniforms, faceTexture, reflMap, CommonAttributes.POLYGON_SHADER);
+		createFaceSetUniformsHashMap();
 		updateLabelTextureAndVBOsAndUniforms(gl, labelData, fse.labels, ifd);
 	}
+	
+	private void createFaceSetUniformsHashMap() {
+		for(GlUniform glu : faceSetUniforms){
+			faceSetUniformsHash.put(glu.name, glu);
+		}
+	}
 
+	
 }
