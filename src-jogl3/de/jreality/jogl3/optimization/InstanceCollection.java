@@ -51,16 +51,17 @@ public class InstanceCollection {
 	
 	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, Instance ins, JOGLRenderState state){
 		int j = ins.id;
-		System.out.println("DWH");
+//		System.out.println("DWH");
 		for(String[] s : Uniforms){
-			System.out.println("uniform " + s[1]);
+//			System.out.println("uniform " + s[1]);
 			GlUniform u = uniforms.get(s[1]);
 			
-			System.out.println("numFloatsNe" + shader.getNumFloatsNecessary());
-			System.out.println("ID" + j);
-			System.out.println("offset" + offset);
+//			System.out.println("numFloatsNe" + shader.getNumFloatsNecessary());
+//			System.out.println("ID" + j);
+//			System.out.println("offset" + offset);
 			
 			if(u == null){
+//				System.out.println("uniform from outside uniformsCollection" + s[1]);
 				if(s[1].substring(0, 4).equals("has_")){
 					if(s[1].equals("has_reflectionMap"))
 						continue;
@@ -81,6 +82,7 @@ public class InstanceCollection {
 					continue;
 			}
 			
+//			System.out.println("uniform from uniformsCollection and modelview " + s[1]);
 			
 			if(s[0].equals("mat4")){
 				float[] f;
@@ -123,7 +125,7 @@ public class InstanceCollection {
 	}
 	
 	private void updateUniformsTexture(GL3 gl){
-//		System.out.println("update uniforms texture");
+//		System.err.println("update uniforms texture");
 		//update data
 		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
 		LinkedList<String[]> fragUniforms = shader.getFragUniforms();
@@ -136,12 +138,12 @@ public class InstanceCollection {
 			//the width offset
 			offset = 0;
 			JOGLRenderState state = i.state;
-			System.err.println("i.id = " + i.id);
+//			System.err.println("i.id = " + i.id);
 			DataWriteHelper(vertUniforms, uniforms, i, state);
-			System.out.println("offset after vert is " + offset);
+//			System.out.println("offset after vert is " + offset);
 			if (offset%4 != 0)
 				offset = 4*(offset/4) + 4;
-			System.out.println("offset before frag is " + offset);
+//			System.out.println("offset before frag is " + offset);
 			DataWriteHelper(fragUniforms, uniforms, i, state);
 		}
 		
@@ -392,6 +394,7 @@ public class InstanceCollection {
 	}
 	
 	private void writeAllInstancesNewToVBO(){
+		System.out.println("write all instances new to vbo of size " + gpuData.get("vertex_coordinates").getLength());
 		resetFreeIDs();
 		//write rest to gpu
 		dead_count = 0;
@@ -481,10 +484,12 @@ public class InstanceCollection {
 				}
 				//and null (and remove?) the dead ones
 				for(Instance i : dyingInstances){
+					System.out.println("remove instance from dyingInstances");
 					nullInstance(i);
 					i.upToDate = true;
 					//TODO is this right?
-					instances.remove(i);
+					instances.remove(i.fsi);
+					System.out.println("instances.size = " + instances.size());
 					//free the ID of the removed Instance
 					freeIDs.add(new Integer(i.id));
 				}
@@ -510,6 +515,26 @@ public class InstanceCollection {
 	}
 	
 	public void render(GL3 gl){
+		
+		System.out.println("printing vertex data");
+		GLVBOFloat vertCoord = (GLVBOFloat) gpuData.get("vertex_coordinates");
+		float[] data = vertCoord.getData();
+		boolean running = true;
+		int k = 0;
+		while(running){
+			for(int i = 0; i < 36; i++){
+				for(int j = 0; j < 4; j++){
+					if(144*4*k+4*i+j>=data.length)
+						running = false;
+					else
+						System.out.print("" + data[144*k*4+4*i+j] + ",");
+				}
+			}
+			System.out.println("");
+			k++;
+		}
+		
+		
 //		System.out.println("IC.render(gl)");
 		bindUniformsTexture(gl);
 		

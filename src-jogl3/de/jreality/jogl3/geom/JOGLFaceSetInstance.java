@@ -84,10 +84,10 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	public LinkedList<GlUniform> faceSetUniforms = new LinkedList<GlUniform>();
 	public WeakHashMap<String, GlUniform> faceSetUniformsHash = new WeakHashMap<String, GlUniform>();
 	public InstanceFontData ifd = new InstanceFontData();
-	private static GlTexture nullTexture = new GlTexture();
-	public GlTexture faceTexture = nullTexture;
-	private static GlReflectionMap nullReflMap = new GlReflectionMap();
-	public GlReflectionMap reflMap = nullReflMap;
+	//public static GlTexture nullTexture = new GlTexture();
+	public GlTexture faceTexture = new GlTexture();
+	//private static GlReflectionMap nullReflMap = new GlReflectionMap();
+	public GlReflectionMap reflMap = new GlReflectionMap();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged) {
 		if(appChanged || geomPosChanged)

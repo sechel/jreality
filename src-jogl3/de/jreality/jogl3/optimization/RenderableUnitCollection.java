@@ -28,19 +28,25 @@ public class RenderableUnitCollection{
 	
 	WeakHashMap<GLShader, WeakHashMap<GlTexture, WeakHashMap<GlReflectionMap, RenderableUnit>>> units = new WeakHashMap<GLShader,WeakHashMap<GlTexture,WeakHashMap<GlReflectionMap,RenderableUnit>>>();
 	
-	GlTexture nullTex = new GlTexture();
+	private GlTexture nullTex = new GlTexture();
+	private GlReflectionMap nullReflMap = new GlReflectionMap();
 	
 	public void add(RenderableObject o){
 		if(o.geom instanceof JOGLFaceSetInstance){
 			JOGLFaceSetInstance f = (JOGLFaceSetInstance)o.geom;
 			JOGLFaceSetEntity fse = (JOGLFaceSetEntity) f.getEntity();
-			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
+//			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
 			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS){
 //				System.out.println("adding to renderableUnit");
+				
 				GlTexture tex = f.faceTexture;
+				if(!tex.hasTexture())
+					tex = nullTex;
 				
 				GLShader shader = f.getPolygonShader();
 				GlReflectionMap reflMap = f.reflMap;
+				if(!reflMap.hasReflMap())
+					reflMap = nullReflMap;
 				
 				WeakHashMap<GlTexture, WeakHashMap<GlReflectionMap, RenderableUnit>> hm1 = units.get(shader);
 				if(hm1 == null){
@@ -49,7 +55,7 @@ public class RenderableUnitCollection{
 					units.put(shader, hm1);
 				}
 				//hm1 now usable
-				System.err.println("tex is " + tex);
+//				System.err.println("tex is " + tex);
 				WeakHashMap<GlReflectionMap, RenderableUnit> hm2 = hm1.get(tex);
 				if(hm2 == null){
 					System.out.println("new texture forces new RenderableUnit");

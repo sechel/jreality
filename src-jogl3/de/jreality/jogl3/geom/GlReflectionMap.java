@@ -14,7 +14,11 @@ import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 
 public class GlReflectionMap{
-	boolean hasReflectionMap = false;
+	private boolean hasReflectionMap = false;
+	public float alpha = 0.5f;
+	public boolean hasReflMap(){
+		return hasReflectionMap;
+	}
 	public GlReflectionMap(){
 		
 	}

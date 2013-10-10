@@ -15,11 +15,15 @@ import de.jreality.shader.Texture2D;
  */
 
 public class GlTexture{
-	boolean hasTexture = false;
+	private boolean hasTexture = false;
+	public boolean hasTexture(){
+		return hasTexture;
+	}
 	public GlTexture(){
 		
 	}
 	private Texture2D tex = null;
+	public int combineMode = 0;
 	public Texture2D getTexture2D(){
 		return tex;
 	}

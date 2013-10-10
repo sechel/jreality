@@ -458,6 +458,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     		if(name.equals("down")){
     			continue;
     		}
+    		//TODO clean this up, it doesn't do anything I believe
     		if(v.getName().length() > 3 && v.getName().substring(0, 4).equals("_")){
     			continue;
     		}
@@ -580,6 +581,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				Texture2D tex = (Texture2D)AttributeEntityUtility.createAttributeEntity(Texture2D.class, shaderType + ".texture2d", eap);
     				texture.setTexture(tex);
     				c.add(new GlUniformInt("_combineMode", tex.getApplyMode()));
+    				texture.combineMode = tex.getApplyMode();
     				c.add(new GlUniformMat4("textureMatrix", Rn.convertDoubleToFloatArray(tex.getTextureMatrix().getArray())));
     				System.err.println("sampler2D: "+ v.getName());
     				hasTexture = true;
@@ -589,7 +591,10 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				CubeMap reflectionMap = TextureUtility.readReflectionMap(eap, shaderType + ".reflectionMap");
     				reflMap.setCubeMap(reflectionMap);
     				c.add(new GlUniformFloat("_reflectionMapAlpha", reflectionMap.getBlendColor().getRGBComponents(null)[3]));
+    				reflMap.alpha = reflectionMap.getBlendColor().getRGBComponents(null)[3];
     				hasReflectionMap = true;
+    			}else{
+    				hasReflectionMap = false;
     			}
     		}else if(v.getName().equals("textureMatrix")){
     			//do nothing

@@ -74,7 +74,9 @@ public class PolygonShader{
 		
 		//bind shader uniforms
 		//TODOhave to set default values here for shader uniforms not present in the appearance
+//		System.err.println("uniforms for " + fse.getNode().getName());
 		for(GlUniform u : c){
+//			System.err.println(u.name);
 			u.bindToShader(shader, gl);
 		}
 

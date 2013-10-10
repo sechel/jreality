@@ -23,13 +23,13 @@ public class OptimizedGLShader extends GLShader {
 	private int offset = 0;
 	
 	//TODO remove this override method. It's only for testing
-	public void init(GL3 gl){
-		
-		GLShader sh = new GLShader("../glsl/nontransp/Cpolygon.v", "../glsl/nontransp/Cpolygon.f");
-		this.vsrc = sh.getVSRC();
-		this.fsrc = sh.getFSRC();
-		super.init(gl);
-	}
+//	public void init(GL3 gl){
+//		
+//		GLShader sh = new GLShader("../glsl/nontransp/Cpolygon.v", "../glsl/nontransp/Cpolygon.f");
+//		this.vsrc = sh.getVSRC();
+//		this.fsrc = sh.getFSRC();
+//		super.init(gl);
+//	}
 	
 	public int getNumFloatsNecessary(){
 		return numFloatsNecessary;
@@ -42,9 +42,9 @@ public class OptimizedGLShader extends GLShader {
 		VertUniforms = new LinkedList<String[]>();
 		FragUniforms = new LinkedList<String[]>();
 		findUniformsAndReplace(vsrc, VertUniforms, true);
-		System.out.println(vsrc[0]);
+//		System.out.println(vsrc[0]);
 		findUniformsAndReplace(fsrc, FragUniforms, false);
-		System.out.println(fsrc[0]);
+//		System.out.println(fsrc[0]);
 		
 		if(offset%4==0)
 			numFloatsNecessary =  offset;
@@ -58,6 +58,12 @@ public class OptimizedGLShader extends GLShader {
 	}
 	
 	private void findUniformsAndReplace(String[] source, LinkedList<String[]> uniforms, boolean isVertexShader) {
+//		System.err.println("uniforms:");
+//		for(String[] s : uniforms)
+//			System.err.println(s[1]);
+//		System.err.println("uniforms ende.");
+		
+		
 		String[] qualifiers = new String[]{"uniform"};
 		String[] lines = source[0].split("\n");
 		

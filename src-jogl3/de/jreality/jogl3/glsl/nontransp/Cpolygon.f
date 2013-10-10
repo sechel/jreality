@@ -241,7 +241,8 @@ has_reflectionMap = floatBitsToInt(texelFetch(uniforms, ivec2(11, instanceID), 0
 	if(glFragColor.a == 0)
 		discard;
 	
-	if(has_reflectionMap == 1){
+	//if(has_reflectionMap == 1){
+	if(true){
 		//do environment reflections
 		vec3 A = -normalize(camSpaceCoord.xyz);
 		vec3 C = -A + 2*dot(A,normal)*normal;
@@ -290,6 +291,5 @@ has_reflectionMap = floatBitsToInt(texelFetch(uniforms, ivec2(11, instanceID), 0
     		}
     	}
 	}
-	
 }
 }
