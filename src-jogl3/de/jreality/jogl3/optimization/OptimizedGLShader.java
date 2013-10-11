@@ -193,10 +193,10 @@ public class OptimizedGLShader extends GLShader {
 				//append in front the line "uniform sampler2D uniforms
 				if(l.length() >= 8 && l.substring(0, 8).equals("#version")){
 					if(isVertexShader){
-						source[0] += "flat out int instanceID;\n";
-						source[0] += "in int vertex_id;\n";
+						source[0] += "flat out float instanceID;\n";
+						source[0] += "in float vertex_id;\n";
 					}else
-						source[0] += "flat in int instanceID;\n";
+						source[0] += "flat in float instanceID;\n";
 					source[0] += "uniform sampler2D uniforms;";
 					source[0] += "\n";
 					for(String[] s : uniforms){

@@ -1,10 +1,10 @@
-//author Benjamin Kutschan
+///author Benjamin Kutschan
 //default polygon fragment shader
 
 //EVERY VARIABLE MUST BE DEFINED ON ITS OWN LINE, i.e. nothing like "int a,b;"
 //this must be the LAST MACRO before the variables
 #version 330
-flat in int instanceID;
+flat in float instanceI;
 uniform sampler2D uniforms;
 int lightingEnabled;
 vec4 polygonShader_diffuseColor;
@@ -183,113 +183,13 @@ void calculateLocalLightInflux(vec3 normal){
 }
 
 void main(void){
-polygonShader_specularColor = texelFetch(uniforms, ivec2(6, instanceID), 0);
-polygonShader_ambientColor = texelFetch(uniforms, ivec2(7, instanceID), 0);
-polygonShader_diffuseColor = texelFetch(uniforms, ivec2(8, instanceID), 0);
-lightingEnabled = floatBitsToInt(texelFetch(uniforms, ivec2(9, instanceID), 0)[0]);
-polygonShader_diffuseCoefficient = texelFetch(uniforms, ivec2(9, instanceID), 0)[1];
-polygonShader_ambientCoefficient = texelFetch(uniforms, ivec2(9, instanceID), 0)[2];
-polygonShader_specularCoefficient = texelFetch(uniforms, ivec2(9, instanceID), 0)[3];
-polygonShader_specularExponent = texelFetch(uniforms, ivec2(10, instanceID), 0)[0];
-has_vertex_texturecoordinates = floatBitsToInt(texelFetch(uniforms, ivec2(10, instanceID), 0)[1]);
-has_face_colors = floatBitsToInt(texelFetch(uniforms, ivec2(10, instanceID), 0)[2]);
-has_vertex_colors = floatBitsToInt(texelFetch(uniforms, ivec2(10, instanceID), 0)[3]);
-has_reflectionMap = floatBitsToInt(texelFetch(uniforms, ivec2(11, instanceID), 0)[0]);
 
 {
-	vec4 texColor = texture( image, texCoord.st);
+	glFragColor = vec4(instanceI, 1, 1, 1);
+	if(instanceI==0)
+		glFragColor = vec4(1, 0, 0, 1);
+	if(instanceI==1)
+		glFragColor = vec4(0, 0, 1, 1);
 	
-	diffuse = polygonShader_diffuseColor;
-	if(has_face_colors == 1 || has_vertex_colors == 1)
-		diffuse = faceVertexColor;
-	
-	vec3 normal = normalize(camSpaceNormal);
-	if(lightingEnabled == 1){
-		lightInflux = vec3(0, 0, 0);
-		if(gl_FrontFacing){
-			calculateGlobalLightInflux(normal);
-			calculateLocalLightInflux(normal);
-		}else{
-			calculateGlobalLightInflux(-normal);
-			calculateLocalLightInflux(-normal);
-		}
-		glFragColor = vec4(lightInflux, diffuse.a);
-	}else{
-		glFragColor = diffuse;
-	}
-	if(has_vertex_texturecoordinates==1 && has_Tex == 1){
-		if(_combineMode == 0x2100)//GL_MODULATE
-			glFragColor = texColor*vec4(glFragColor.xyz, diffuse.a);
-		if(_combineMode == 0x1E01)//GL_REPLACE
-			glFragColor = texColor;
-		if(_combineMode == 0x8570)//GL_COMBINE
-			glFragColor = texColor;
-		if(_combineMode == 0x2101){//GL_DECAL
-			glFragColor.a = diffuse.a;
-			glFragColor.rgb = (1-texColor.a)*glFragColor.xyz + texColor.a*texColor.rgb;
-		}
-		if(_combineMode == 0x0BE2){//GL_BLEND
-			glFragColor.a = diffuse.a*texColor.a;
-			glFragColor.rgb = (vec3(1,1,1)-texColor.rgb)*glFragColor.xyz + texColor.rgb;
-		}
-		if(_combineMode == 0x0104){//GL_ADD
-			glFragColor.a = diffuse.a*texColor.a;
-			glFragColor.rgb = glFragColor.xyz + texColor.rgb;
-		}
-	}
-	
-	if(glFragColor.a == 0)
-		discard;
-	
-	//if(has_reflectionMap == 1){
-	if(true){
-		//do environment reflections
-		vec3 A = -normalize(camSpaceCoord.xyz);
-		vec3 C = -A + 2*dot(A,normal)*normal;
-		
-		//do this computation in jogl3.JOGLRenderState
-		mat4 iRotation = inverse(_inverseCamRotation);
-		mat3 rotation = mat3(vec3(iRotation[0][0], iRotation[0][1], iRotation[0][2]), vec3(iRotation[1][0], iRotation[1][1], iRotation[1][2]), vec3(iRotation[2][0], iRotation[2][1], iRotation[2][2]));
-		C = rotation*C;
-		
-		float x = C.x;
-    	float y = C.y;
-    	float z = C.z;
-    	//we are in the front texture
-    	if(z>abs(x) && z>abs(y)){
-    		float X = x/z;
-    		float Y = -y/z;
-    		glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( back, vec2(X/2+.5,Y/2+.5));
-   		}else if(z < -abs(x) && z < -abs(y)){
-    		float X = x/z;
-    		float Y = y/z;
-    		glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( front, vec2(X/2+.5,Y/2+.5));
-    	}else if(abs(y)>abs(x)){
-    		//floor
-    		if(y<0){
-    			float X = -x/y;
-    			float Z = z/y;
-    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( down, vec2(X/2+.5,Z/2+.5));
-    		//top
-    		}else{
-    			float X = x/y;
-    			float Z = -z/y;
-    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( up, vec2(X/2+.5,-Z/2+.5));
-    		}
-    	//left or right texture
-    	}else{
-    		//right
-    		if(x>0){
-    			float Y = -y/x;
-    			float Z = z/x;
-    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( right, vec2(-Z/2+.5,Y/2+.5));
-    		//left
-    		}else if(x<0){
-    			float Y = y/x;
-    			float Z = -z/x;
-    			glFragColor = (1-_reflectionMapAlpha)*glFragColor+_reflectionMapAlpha*texture( left, vec2(Z/2+.5,Y/2+.5));
-    		}
-    	}
-	}
 }
 }

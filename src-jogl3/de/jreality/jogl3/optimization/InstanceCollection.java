@@ -35,6 +35,53 @@ import de.jreality.shader.Texture2D;
  */
 public class InstanceCollection {
 	
+	public void printData(){
+		System.out.println("printing vertex data");
+		GLVBOFloat vertCoord = (GLVBOFloat) gpuData.get("vertex_coordinates");
+		if(vertCoord == null){
+			System.out.println("vertCoord == null. not printing");
+			return;
+		}
+		float[] data = vertCoord.getData();
+		boolean running = true;
+		int k = 0;
+		while(running){
+			for(int i = 0; i < 36; i++){
+				for(int j = 0; j < 4; j++){
+					if(36*4*k+4*i+j>=data.length)
+						running = false;
+					else
+						System.out.print("" + data[36*k*4+4*i+j] + ",");
+				}
+			}
+			System.out.println("ende");
+			k++;
+		}
+	}
+	public void printInstanceID(){
+		System.out.println("printing vertex ID");
+		GLVBOInt vertCoord = (GLVBOInt) gpuData.get("vertex_id");
+		if(vertCoord == null){
+			System.out.println("vertCoord == null. not printing");
+			return;
+		}
+		int[] data = vertCoord.getData();
+		boolean running = true;
+		int k = 0;
+		while(running){
+			for(int i = 0; i < 36; i++){
+				for(int j = 0; j < 4; j++){
+					if(36*4*k+4*i+j>=data.length)
+						running = false;
+					else
+						System.out.print("" + data[36*k*4+4*i+j] + ",");
+				}
+			}
+			System.out.println("ende");
+			k++;
+		}
+	}
+	
 	private int textureID;
 	private int texUnit = 1;
 	private float data[];
@@ -87,12 +134,16 @@ public class InstanceCollection {
 			if(s[0].equals("mat4")){
 				float[] f;
 				if(s[1].equals("modelview")){
+//					System.out.println("offset equals " + offset + ", j equals " + j + ": ");
+//					System.out.println(shader.getNumFloatsNecessary());
 					f = new float[16];
 					Rn.transposeD2F(f, state.getModelViewMatrix());
 				}else
 					f = (float[])u.value;
-				for(int l = 0; l < 16; l++)
+				for(int l = 0; l < 16; l++){
 					data[offset+j*shader.getNumFloatsNecessary()+l] = f[l];
+//					System.out.print("" + f[l] + ", ");
+				}
 				offset += 16;
 			}else if(s[0].equals("vec4")){
 //				System.out.println(u.name + u.value + " " + offset);
@@ -137,14 +188,13 @@ public class InstanceCollection {
 			WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
 			//the width offset
 			offset = 0;
-			JOGLRenderState state = i.state;
-//			System.err.println("i.id = " + i.id);
-			DataWriteHelper(vertUniforms, uniforms, i, state);
+//			System.err.println("updating texture for i.id = " + i.id);
+			DataWriteHelper(vertUniforms, uniforms, i, i.state);
 //			System.out.println("offset after vert is " + offset);
 			if (offset%4 != 0)
 				offset = 4*(offset/4) + 4;
 //			System.out.println("offset before frag is " + offset);
-			DataWriteHelper(fragUniforms, uniforms, i, state);
+			DataWriteHelper(fragUniforms, uniforms, i, i.state);
 		}
 		
 		gl.glEnable(gl.GL_TEXTURE_2D);
@@ -247,6 +297,7 @@ public class InstanceCollection {
 	 * @param end in Floats
 	 */
 	private void nullFromTo(int start, int end){
+		System.err.println("start = " + start + ", end = " + end);
 		//null vertex_coordinates.w
 		GLVBOFloat vertexData = (GLVBOFloat) gpuData.get("vertex_coordinates");
 		float[] subdata = new float[(end-start)];
@@ -255,7 +306,7 @@ public class InstanceCollection {
 		for(int j = 0; j < (end-start); j+=4){
 			subdata[j] = 1;
 		}
-		vertexData.updateSubData(gl, subdata, 4*start, 4*(end-start));
+		vertexData.updateSubData(gl, subdata, start, (end-start));
 	}
 	
 	/**
@@ -270,9 +321,11 @@ public class InstanceCollection {
 		if(type == 5124)
 			System.out.println("putting vbo " + name + " with type glInt");
 		if(type == GL3.GL_FLOAT){
-			gpuData.put(name, new GLVBOFloat(gl, new float[current_vbo_size], name, elementSize));
+			System.err.println(name + " elementSize = " + elementSize);
+			gpuData.put(name, new GLVBOFloat(gl, new float[current_vbo_size/4*elementSize], name, elementSize));
 		}else if(type == GL3.GL_INT){
-			gpuData.put(name, new GLVBOInt(gl, new int[current_vbo_size], name, elementSize));
+			System.err.println(name + " elementSize = " + elementSize);
+			gpuData.put(name, new GLVBOInt(gl, new int[current_vbo_size/4*elementSize], name, elementSize));
 		}else{
 			System.err.println("unknown type of elements in VBO (InstanceCollection.java)");
 		}
@@ -298,10 +351,23 @@ public class InstanceCollection {
 	 * @param i the instance being added
 	 */
 	private void pushInstanceToGPU(Instance i){
+		System.err.println("pushInstanceToGPU");
 		//add to all vbos
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)i.fsi.getEntity();
+		
+		GLVBOInt vertIDVBO = (GLVBOInt) gpuData.get("vertex_id");
+		System.err.println("updating vertex_id no " + i.id);
+		int id = i.id;
+		int[] vertex_id = new int[i.length/4];
+		for(int g = 0; g < i.length/4; g++){
+			vertex_id[g] = id;
+		}
+		vertIDVBO.updateSubData(gl, vertex_id, i.posInVBOs/4, i.length/4);
+		
+		//updating all the remaining vbos
 		GLVBO[] vbos = fse.getAllVBOs();
 		for(GLVBO vbo : vbos){
+			System.out.println("vbo.name = " + vbo.getName());
 			//create new GLVBO for this name, if not present
 			if(gpuData.get(vbo.getName()) == null){
 				putNewVBO(vbo.getName(), vbo.getType(), vbo.getElementSize());
@@ -310,21 +376,16 @@ public class InstanceCollection {
 			//fill in vbo data
 			GLVBO largevbo = gpuData.get(vbo.getName());
 			if(largevbo.getType() == GL3.GL_FLOAT){
+				System.out.println(((GLVBOFloat)vbo).getData()[4]);
 				GLVBOFloat f = (GLVBOFloat)largevbo;
-				f.updateSubData(gl, ((GLVBOFloat)vbo).getData(), 4*i.posInVBOs, 4*i.length);
+				f.updateSubData(gl, ((GLVBOFloat)vbo).getData(), i.posInVBOs, i.length);
 			}else if(largevbo.getType() == GL3.GL_INT){
 				GLVBOInt f = (GLVBOInt)largevbo;
-				if(largevbo.getName().equals("vertex_id")){
-					int id = i.id;
-					int[] vertex_id = new int[i.length];
-					for(int g = 0; g < i.length; g++){
-						vertex_id[g] = id;
-					}
-					f.updateSubData(gl, vertex_id, 4*i.posInVBOs, 4*i.length);
-				}else{
-					//vbo.getLength()*4 must equal i.length
-					f.updateSubData(gl, ((GLVBOInt)vbo).getData(), 4*i.posInVBOs, 4*i.length);
-				}
+				System.err.println("largevbo.getName() = " + largevbo.getName());
+				
+				//vbo.getLength()*4 must equal i.length
+				f.updateSubData(gl, ((GLVBOInt)vbo).getData(), i.posInVBOs, i.length);
+				
 			}else{
 				System.err.println("largevbo has unknown type (InstanceCollection.java 3)");
 			}
@@ -338,11 +399,11 @@ public class InstanceCollection {
 			System.err.println("vertex_id not of class GLVBOInt but " + gpuData.get("vertex_id").getClass().getName());
 		GLVBOInt largevbo = (GLVBOInt)gpuData.get("vertex_id");
 		int id = i.id;
-		int[] vertex_id = new int[i.length];
-		for(int g = 0; g < i.length; g++){
+		int[] vertex_id = new int[i.length/4];
+		for(int g = 0; g < i.length/4; g++){
 			vertex_id[g] = id;
 		}
-		largevbo.updateSubData(gl, vertex_id, 4*i.posInVBOs, 4*i.length);
+		largevbo.updateSubData(gl, vertex_id, i.posInVBOs/4, i.length/4);
 	}
 	
 	//_______________________****************PUBLIC METHODS****************__________________________
@@ -442,6 +503,7 @@ public class InstanceCollection {
 			dead_count += i.length;
 		}
 		//update availableFloats
+		int availableBeforeCalc = availableFloats;
 		for(Instance i : newInstances){
 			availableFloats -= i.length;
 		}
@@ -469,7 +531,8 @@ public class InstanceCollection {
 			if(availableFloats >= 0){
 				
 				//push ONLY the new instances to GPU
-				int pos = current_vbo_size-availableFloats;
+//				System.out.println("currsize = " + current_vbo_size + ", avail = " + availableBeforeCalc);
+				int pos = current_vbo_size-availableBeforeCalc;
 				for(Instance i : newInstances){
 					i.posInVBOs = pos;
 					pos += i.length;
@@ -478,6 +541,7 @@ public class InstanceCollection {
 					//get free ID and give it to the Instance
 					Integer inte = freeIDs.iterator().next();
 					freeIDs.remove(inte);
+					System.err.println("setting id to " + inte);
 					i.id = inte;
 					
 					pushInstanceToGPU(i);
@@ -516,27 +580,12 @@ public class InstanceCollection {
 	
 	public void render(GL3 gl){
 		
-		System.out.println("printing vertex data");
-		GLVBOFloat vertCoord = (GLVBOFloat) gpuData.get("vertex_coordinates");
-		float[] data = vertCoord.getData();
-		boolean running = true;
-		int k = 0;
-		while(running){
-			for(int i = 0; i < 36; i++){
-				for(int j = 0; j < 4; j++){
-					if(144*4*k+4*i+j>=data.length)
-						running = false;
-					else
-						System.out.print("" + data[144*k*4+4*i+j] + ",");
-				}
-			}
-			System.out.println("");
-			k++;
-		}
-		
+//		printData();
+//		printInstanceID();
 		
 //		System.out.println("IC.render(gl)");
 		bindUniformsTexture(gl);
+		
 		
 		//bind vbos to corresponding shader variables
     	List<ShaderVar> l = shader.vertexAttributes;
@@ -547,6 +596,7 @@ public class InstanceCollection {
     			ShaderVarHash.bindUniform(shader, "has_" + s, 1, gl);
 //    			gl.glUniform1i(gl.glGetUniformLocation(shader.shaderprogram, "has_" + v.getName()), 1);
     			gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo.getID());
+//    			System.out.println(vbo.getElementSize());
             	gl.glVertexAttribPointer(gl.glGetAttribLocation(shader.shaderprogram, s), vbo.getElementSize(), vbo.getType(), false, 0, 0);
             	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(shader.shaderprogram, s));
     		}else{
