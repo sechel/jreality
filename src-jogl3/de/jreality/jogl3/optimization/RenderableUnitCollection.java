@@ -18,7 +18,7 @@ import de.jreality.jogl3.glsl.GLShader;
 
 public class RenderableUnitCollection{
 	
-	public final int MAX_NUM_FLOATS = 10000;
+	public final int MAX_NUM_FLOATS = 0;//10000;
 	
 	public void resetRestNonTranspObjects(){
 		restNonTranspObjects = new LinkedList<RenderableObject>();

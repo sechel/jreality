@@ -251,7 +251,7 @@ public class InstanceCollection {
 	/**
 	 * depends on the maximum texture dimension
 	 */
-	public static final int MAX_NUMBER_OBJ_IN_COLLECTION = 100;
+	public static final int MAX_NUMBER_OBJ_IN_COLLECTION = 16000;
 	
 	/**
 	 * initial size in floats

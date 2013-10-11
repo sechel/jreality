@@ -171,6 +171,8 @@ public class RenderableUnit {
 		while(fillingUp){
 //			System.out.println("filling up...");
 			insCollNumber++;
+			if(insCollNumber >= instanceCollections.size())
+				break;
 			InstanceCollection currentCollection = instanceCollections.get(insCollNumber);
 //			//defragment
 //			if(currentCollection.isFragmented()){
