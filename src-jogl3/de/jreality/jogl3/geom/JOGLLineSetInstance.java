@@ -35,9 +35,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 			return;
 		
 		JOGLLineSetEntity lse = (JOGLLineSetEntity) getEntity();
-		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
-		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
-		if(visible){
+		if(edgeDraw){
 			if(lse.labelsChangedNo != labelsChangedNoCache){
 				//update label texture
 				updateLabelTextureAndVBOsAndUniforms(state.getGL(), labelData, lse.labels, ifd);
@@ -53,7 +51,7 @@ public class JOGLLineSetInstance extends JOGLPointSetInstance {
 			}
 		}
 		super.render(state, width, height);
-		if(visible){
+		if(edgeDraw){
 			if(!transparencyEnabled && labelData.drawLabels)
 				LabelShader.render(labelData, lse.labels, state);
 		}

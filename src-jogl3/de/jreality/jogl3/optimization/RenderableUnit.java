@@ -133,7 +133,7 @@ public class RenderableUnit {
 			}else if(f.geom.oChangedPositionsOrAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
-				instances.get(f).upToDate = false;
+				instances.get(fsi).upToDate = false;
 				System.out.println("adding to oChPosA set");
 			}else{
 				//nothing changed, needs not be touched if not neccessary

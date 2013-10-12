@@ -430,8 +430,7 @@ public class InstanceCollection {
 			System.err.println("effective appearance of fsi is null, not registering this instance");
 			return null;
 		}
-		boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
-		if(!visible){
+		if(!fsi.getFaceDraw()){
 			System.out.println("FSI not visible -> not registering");
 			return null;
 		}

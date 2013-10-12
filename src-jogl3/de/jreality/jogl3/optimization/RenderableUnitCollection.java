@@ -15,6 +15,8 @@ import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 import de.jreality.jogl3.geom.JOGLGeometryInstance;
 import de.jreality.jogl3.glsl.GLShader;
+import de.jreality.shader.CommonAttributes;
+import de.jreality.shader.ShaderUtility;
 
 public class RenderableUnitCollection{
 	
@@ -43,7 +45,8 @@ public class RenderableUnitCollection{
 			JOGLFaceSetInstance f = (JOGLFaceSetInstance)o.geom;
 			JOGLFaceSetEntity fse = (JOGLFaceSetEntity) f.getEntity();
 //			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
-			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS && active){
+			
+			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS && active && !f.getEdgeDraw() && !f.getVertexDraw()){
 //				System.out.println("adding to renderableUnit");
 				
 				GlTexture tex = f.faceTexture;

@@ -33,9 +33,7 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 		if(eap == null)
 			return;
 		JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
-		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
-		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
-		if(visible){
+		if(vertexDraw){
 			if(pse.labelsChangedNo != labelsChangedNoCache){
 				//update label texture
 				updateLabelTextureAndVBOsAndUniforms(state.getGL(), labelData, pse.labels, ifd);

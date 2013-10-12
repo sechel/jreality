@@ -372,12 +372,36 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 	}
 	
+	protected boolean faceDraw = false;
+	protected boolean vertexDraw = false;
+	protected boolean edgeDraw = false;
+	protected boolean transparencyEnabled = false;
+	
+	public boolean getFaceDraw(){
+		return faceDraw;
+	}
+	public boolean getVertexDraw(){
+		return vertexDraw;
+	}
+	public boolean getEdgeDraw(){
+		return edgeDraw;
+	}
+	public boolean getTransparencyEnabled(){
+		return transparencyEnabled;
+	}
+	
 	//in the new version we use type only to identify the shader source
 	protected GLShader updateAppearance(InstanceFontData ifd, GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, GlReflectionMap reflMap, String shaderType) {
 		
 		GLShader shader = defaultShader;
 		
 		eap = EffectiveAppearance.create(sgp);
+		
+		edgeDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+		vertexDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
+		faceDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
+		
 		
 		//retrieve shader source if existent
 		String[] source = new String[]{};
