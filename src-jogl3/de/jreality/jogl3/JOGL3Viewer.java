@@ -47,6 +47,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.StereoViewer;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
@@ -312,12 +313,25 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			GL3 gl = arg0.getGL().getGL3();
 	    	
-			//handle background
+			//handle background and RenderableUnitsCollection state
 			JOGLSceneGraphComponentInstance rootInstance = (JOGLSceneGraphComponentInstance) proxyScene.getTreeRoot();
 			JOGLAppearanceInstance rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
+			
+			
+			
+			
 			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
 				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
 				backgroundHelper.updateBackground(gl, rootAp, width, height);
+				
+				Object bgo = null;
+				if (rootAp != null)
+					bgo = rootAp.getAttribute(CommonAttributes.SMALL_OBJ_OPTIMIZATION);
+				if (bgo != null && bgo instanceof Boolean)
+					RUC.setActive((Boolean) bgo);
+				else{
+					RUC.setActive(CommonAttributes.SMALL_OBJ_OPTIMIZATION_DEFAULT);
+				}
 			}
 			
 			//update sky box
@@ -464,7 +478,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	public double getFrameRate() {
 		return perfmeter.getFramerate();
 	}
-
+	
 	@Override
 	public int getPolygonCount() {
 		return 0;

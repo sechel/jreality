@@ -18,7 +18,14 @@ import de.jreality.jogl3.glsl.GLShader;
 
 public class RenderableUnitCollection{
 	
-	public final int MAX_NUM_FLOATS = 0;//10000;
+	public final int MAX_NUM_FLOATS = 10000;
+	
+	private boolean active = true;
+	
+	public void setActive(boolean val){
+		System.out.println("SETTING ACTIVE TO " + val);
+		active = val;
+	}
 	
 	public void resetRestNonTranspObjects(){
 		restNonTranspObjects = new LinkedList<RenderableObject>();
@@ -36,7 +43,7 @@ public class RenderableUnitCollection{
 			JOGLFaceSetInstance f = (JOGLFaceSetInstance)o.geom;
 			JOGLFaceSetEntity fse = (JOGLFaceSetEntity) f.getEntity();
 //			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
-			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS){
+			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS && active){
 //				System.out.println("adding to renderableUnit");
 				
 				GlTexture tex = f.faceTexture;

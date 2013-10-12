@@ -63,7 +63,9 @@ import de.jreality.scene.Appearance;
   private CommonAttributes() {}
 
 	// goes in root appearance: first set controls how the background of generated image appears
-	public final static String BACKGROUND_COLOR = 	"backgroundColor";
+  	public static final String SMALL_OBJ_OPTIMIZATION = "smallObjectsOptimization";
+  	public static final boolean SMALL_OBJ_OPTIMIZATION_DEFAULT = true;
+  	public final static String BACKGROUND_COLOR = 	"backgroundColor";
     public final static Color  BACKGROUND_COLOR_DEFAULT = new java.awt.Color(225, 225, 225);
 	public final static String BACKGROUND_COLORS = 	"backgroundColors";		// array of four colors for corners of background
 	// correct handling of background colors with stereo cameras requires stretching it to cover both views
@@ -265,6 +267,7 @@ import de.jreality.scene.Appearance;
 	final static Boolean SHOW_LABELS_DEFAULT = Boolean.TRUE;
 	final static String SHOW_LABELS = "showLabels";
 	
+	
 	public static Object getDefault(String key, Object value){
 		if(key.equals(SHOW_LABELS))
 			return SHOW_LABELS_DEFAULT;
@@ -346,6 +349,9 @@ import de.jreality.scene.Appearance;
 			return TEXT_OFFSET_DEFAULT;
 		if(key.equals(TEXT_ALIGNMENT))
 			return TEXT_ALIGNMENT_DEFAULT;
+		if(key.equals(SMALL_OBJ_OPTIMIZATION))
+			return SMALL_OBJ_OPTIMIZATION_DEFAULT;
+		
 		
 		return value;
 	}
