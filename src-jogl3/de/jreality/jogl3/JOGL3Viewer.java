@@ -69,7 +69,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		GLProfile glp = null;
 		
 		try{
-			glp = GLProfile.get("GL3");
+			glp = GLProfile.get("GL4");
 			String s = GLProfile.glAvailabilityToString();
 			System.out.println(s);
 //			if(!s.contains("3.3") && !s.contains("GL4 true")){
@@ -81,21 +81,21 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		}
 		if(glp == null){
 			try{
-				glp = GLProfile.get("GL3bc");
-			}catch(GLException e){
-				System.out.println(e.getMessage());
-			}
-		}
-		if(glp == null){
-			try{
-				glp = GLProfile.get("GL4");
-			}catch(GLException e){
-				System.out.println(e.getMessage());
-			}
-		}
-		if(glp == null){
-			try{
 				glp = GLProfile.get("GL4bc");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL3");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL3bc");
 			}catch(GLException e){
 				System.out.println(e.getMessage());
 				throw new Exception("no openGL profile available to support JOGL3");
