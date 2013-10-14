@@ -126,7 +126,7 @@ public class OptimizedGLShader extends GLShader {
 //				System.out.println("name = " + name);
 				//this is needed, when instanced rendering lines,
 				//where we want to call the second endpoint "_vertex_coordinates"
-				if(!(name.length() >= 4 && name.substring(0, 4).equals("sys_")) && name.charAt(0) != '_' && !name.equals("projection") && !name.equals("_inverseCamRotation") && !name.equals("textureMatrix") && !type.equals("sampler2D") && !name.equals("has_Tex")){
+				if(!(name.length() >= 4 && name.substring(0, 4).equals("sys_")) && name.charAt(0) != '_' && !name.equals("projection") && !name.equals("_inverseCamRotation") && !name.equals("textureMatrix") && !type.equals("sampler2D") && !name.equals("has_Tex") && !name.equals("has_reflectionMap")){
 					//TODO and remove from source!
 					lines[i] = "";
 					uniforms.add(new String[]{type, name});
@@ -170,7 +170,7 @@ public class OptimizedGLShader extends GLShader {
 						//coordinate from texel is offset%4
 						source[0] += s[1] + " = " + this.texel(offset/4, isVertexShader) + "[" + offset%4 + "];\n";
 						offset += 1;
-					}else if(s[0].equals("int")){
+					}else if(s[0].equals("int") && !s[1].equals("has_reflectionMap")){
 						source[0] += s[1] + " = " + this.floatToInt(this.texel(offset/4, isVertexShader) + "[" + offset%4 + "]") + ";\n";
 						offset += 1;
 					}else if(s[0].equals("vec2")){
@@ -200,7 +200,8 @@ public class OptimizedGLShader extends GLShader {
 					source[0] += "uniform sampler2D uniforms;";
 					source[0] += "\n";
 					for(String[] s : uniforms){
-						source[0] += s[0] + " " + s[1] + ";\n";
+						if(!s[1].equals("has_reflectionMap"))
+							source[0] += s[0] + " " + s[1] + ";\n";
 					}
 				}
 			}

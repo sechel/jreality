@@ -161,6 +161,8 @@ public class InstanceCollection {
 				int f = (Integer)u.value;
 				data[offset+j*shader.getNumFloatsNecessary()] = Float.intBitsToFloat(f);
 				offset += 1;
+//				System.out.println("writing " + s[1] + " with value " + f);
+				
 			}else if(s[0].equals("vec2")){
 				float[] f = (float[])u.value;
 				for(int l = 0; l < 2; l++)

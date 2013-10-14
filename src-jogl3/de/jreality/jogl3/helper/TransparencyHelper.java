@@ -162,38 +162,41 @@ public class TransparencyHelper {
     	//TODO is this correct??
     	gl.glDisable(gl.GL_BLEND);
     	ruc.render(gl, width, height);
-    	for(RenderableObject o : transp){
-    		o.render(width, height);
-    	}
     	
-    	//TODO TODO TODO
-    	//if transp.size == 0 then don't do anything of this!
-    	//Except for drawing labels nicely on top of each other with correct AA.
-    	
-    	int quer = 1;
-    	//with this loop it draws as many layers as neccessary to complete the scene
-    	//you can experiment by drawing only one layer or two and then view the result (see the comment after the loop)
-    	
-    	//draw transparent objects into FBO with reverse depth values
-    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
-    	startQuery(gl);
-    	peelDepth(gl, transp, supersample*width, supersample*height);
-    	quer = endQuery(gl);
-    	
-    	int counter = 0;
-    	while(quer!=0 && counter < 20){
-    		counter++;
-        	//draw on the SCREEN
-        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-        	addOneLayer(gl, transp, supersample*width, supersample*height);
+    	if(transp.size() != 0){
+    		for(RenderableObject o : transp){
+        		o.render(width, height);
+        	}
+        	
+        	//TODO TODO TODO
+        	//if transp.size == 0 then don't do anything of this!
+        	//Except for drawing labels nicely on top of each other with correct AA.
+        	
+        	int quer = 1;
+        	//with this loop it draws as many layers as neccessary to complete the scene
+        	//you can experiment by drawing only one layer or two and then view the result (see the comment after the loop)
+        	
         	//draw transparent objects into FBO with reverse depth values
         	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
         	startQuery(gl);
         	peelDepth(gl, transp, supersample*width, supersample*height);
         	quer = endQuery(gl);
+        	
+        	int counter = 0;
+        	while(quer!=0 && counter < 20){
+        		counter++;
+            	//draw on the SCREEN
+            	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+            	addOneLayer(gl, transp, supersample*width, supersample*height);
+            	//draw transparent objects into FBO with reverse depth values
+            	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
+            	startQuery(gl);
+            	peelDepth(gl, transp, supersample*width, supersample*height);
+            	quer = endQuery(gl);
+        	}
+        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+        	gl.glDisable(gl.GL_DEPTH_TEST);
     	}
-    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
-    	gl.glDisable(gl.GL_DEPTH_TEST);
 //    	
     	if(infoData.activated)
     		LabelShader.renderOverlay("Framerate = " + infoData.framerate + "\nClockrate = " + infoData.clockrate + "\nPolygonCount = " + infoData.polygoncount + "\n" + InfoOverlay.getMemoryUsage(), gl);
