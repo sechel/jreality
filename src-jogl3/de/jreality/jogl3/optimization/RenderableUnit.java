@@ -260,6 +260,8 @@ public class RenderableUnit {
 //			System.out.println("tex is null!!!");
 //			return;
 //		}
+		if(instances.size() == 0)
+			return;
 		GL3 gl = state.getGL();
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
