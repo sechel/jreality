@@ -1,5 +1,6 @@
 package de.jreality.jogl3.light;
 
+import de.jreality.jogl3.JOGLSceneGraph;
 import de.jreality.scene.PointLight;
 
 public class JOGLPointLightEntity extends JOGLLightEntity {
@@ -8,8 +9,8 @@ public class JOGLPointLightEntity extends JOGLLightEntity {
 	public String shadowMap;
 	public float A0, A1, A2;
 	
-	public JOGLPointLightEntity(PointLight node) {
-		super(node);
+	public JOGLPointLightEntity(PointLight node, JOGLSceneGraph sg) {
+		super(node, sg);
 	}
 
 	@Override

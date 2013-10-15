@@ -1,11 +1,12 @@
 package de.jreality.jogl3.light;
 
+import de.jreality.jogl3.JOGLSceneGraph;
 import de.jreality.scene.DirectionalLight;
 
 public class JOGLDirectionalLightEntity extends JOGLLightEntity {
 	
-	public JOGLDirectionalLightEntity(DirectionalLight node) {
-		super(node);
+	public JOGLDirectionalLightEntity(DirectionalLight node, JOGLSceneGraph sg) {
+		super(node, sg);
 		// TODO Auto-generated constructor stub
 	}
 

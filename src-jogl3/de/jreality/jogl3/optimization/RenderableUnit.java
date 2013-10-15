@@ -1,9 +1,7 @@
 package de.jreality.jogl3.optimization;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -12,21 +10,15 @@ import javax.media.opengl.GL3;
 import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
-import de.jreality.jogl3.geom.JOGLFaceSetEntity;
+import de.jreality.jogl3.geom.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformInt;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformMat4;
-import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.jogl3.glsl.GLShader.ShaderVar;
-import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.math.Rn;
-import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 public class RenderableUnit {
 	
@@ -87,23 +79,24 @@ public class RenderableUnit {
 		//check which fsi are missing in the registered ones
 		//if there is an Instance in instances not belonging to a FaceSetInstance in registered, kill it
 		Set<JOGLFaceSetInstance> set = instances.keySet();
-		//TODO why is fsi not being killed, when turning invisible?
-		for(JOGLFaceSetInstance fsi : set){
+		JOGLFaceSetInstance[] setA = set.toArray(new JOGLFaceSetInstance[set.size()]);
+		
+		for(JOGLFaceSetInstance fsi : setA){
 			if(null == registered.get(fsi)){
-				System.out.println("killing");
+				System.err.println("killing");
 				Instance ins = instances.get(fsi);
 				ins.collection.kill(ins);
 				instances.remove(fsi);
 			}else{
 				if(fsi.eap==null){
-					System.out.println("killing");
+					System.err.println("killing");
 					Instance ins = instances.get(fsi);
 					ins.collection.kill(ins);
 					instances.remove(fsi);
 				}else{
 					boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 					if(!visible){
-						System.out.println("killing");
+						System.err.println("killing");
 						Instance ins = instances.get(fsi);
 						ins.collection.kill(ins);
 						instances.remove(fsi);
@@ -119,6 +112,7 @@ public class RenderableUnit {
 		HashSet<RenderableObject> posASet = new HashSet<RenderableObject>();
 		
 		for(JOGLFaceSetInstance fsi : registered.keySet()){
+//			System.out.println("checking fsi " + fsi.getNode().getName() + " from registered");
 			RenderableObject f = registered.get(fsi);
 //			instances.get(f).upToDate = true;
 			//check if new
@@ -128,22 +122,23 @@ public class RenderableUnit {
 //				System.out.println("FSI is " + fsi2);
 //			}
 			
-			if(instances.get(f) == null){
+			if(instances.get(fsi) == null){
 				//in fact it's new
 				newSet.add(f);
-//				System.out.println("adding to new set");
+				System.out.println("adding to new set");
 			}else if(f.geom.oChangedLength()){
 				//is old, but changed its length
 				lengthSet.add(f);
-//				System.out.println("adding to oChLength set");
+				System.out.println("adding to oChLength set");
 			}else if(f.geom.oChangedPositionsOrAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
-				instances.get(f).upToDate = false;
-//				System.out.println("adding to oChPosA set");
+				instances.get(fsi).upToDate = false;
+				System.out.println("adding to oChPosA set");
 			}else{
 				//nothing changed, needs not be touched if not neccessary
 				//do nothing here!
+//				System.out.println("neither");
 			}
 			f.geom.resetOChangedLength();
 			f.geom.resetOChangedPositionsOrAttributes();
@@ -160,10 +155,24 @@ public class RenderableUnit {
 		if(instanceCollections.size() == 0)
 			fillingUp = false;
 		int insCollNumber = -1;
+		
+		for(JOGLFaceSetInstance fsi : instances.keySet()){
+//			System.out.println("fsi is " + fsi.getNode().getName());
+			RenderableObject o = registered.get(fsi);
+			//if fsi is invisible, it is not contained in the keySet of instances
+//			if(instances.get(fsi) != null)
+//			System.out.println("1updating state for " + fsi.getNode().getName());
+			instances.get(fsi).state = o.state;
+		}
+		
+		
 //		System.out.println("start filling up");
+//		System.out.println("InsColls.size = " + instanceCollections.size());
 		while(fillingUp){
 //			System.out.println("filling up...");
 			insCollNumber++;
+			if(insCollNumber >= instanceCollections.size())
+				break;
 			InstanceCollection currentCollection = instanceCollections.get(insCollNumber);
 //			//defragment
 //			if(currentCollection.isFragmented()){
@@ -180,7 +189,12 @@ public class RenderableUnit {
 						RenderableObject o = newSet.iterator().next();
 						if(!currentCollection.contains((JOGLFaceSetInstance) o.geom)){
 							Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)o.geom, o.state);
-							instances.put((JOGLFaceSetInstance) o.geom, ins);
+							//ins could be null, because it is invisible
+							if(ins != null){
+//								System.out.println("2updating state for " + ins.fsi.getNode().getName());
+								//ins.state = o.state;
+								instances.put((JOGLFaceSetInstance) o.geom, ins);
+							}
 							
 							i++;
 //							System.out.println("here3");
@@ -192,13 +206,14 @@ public class RenderableUnit {
 					}
 				}
 			}
+//			System.out.println("updating collection");
 			currentCollection.update();
 		}
 		
 		//if newSet not empty yet, create new insColl:
 		while(newSet.size() > 0){
 			System.out.println("- adding new InstanceCollection to this RU");
-			RenderableObject o = newSet.iterator().next();
+			
 			InstanceCollection currentCollection = new InstanceCollection(shader);
 			currentCollection.init(gl);
 			instanceCollections.add(currentCollection);
@@ -207,12 +222,19 @@ public class RenderableUnit {
 			if(free > 0){
 				for(int i = 0; i < free; i++){
 					if(newSet.iterator().hasNext()){
+						RenderableObject o = newSet.iterator().next();
 						RenderableObject fsi = newSet.iterator().next();
 						Instance ins = currentCollection.registerNewInstance((JOGLFaceSetInstance)fsi.geom, fsi.state);
-						instances.put((JOGLFaceSetInstance) o.geom, ins);
+						//ins could be null, because it is invisible
+						if(ins != null){
+//							System.out.println("3updating state for " +ins.fsi.getNode().getName());
+							//ins.state = o.state;
+							instances.put((JOGLFaceSetInstance) o.geom, ins);
+						}
 						
 						newSet.remove(fsi);
 					}else{
+						i = free;
 						fillingUp = false;
 					}
 				}
@@ -226,14 +248,7 @@ public class RenderableUnit {
 		
 		//update state of all instances
 		//by now registered should contain the same keys as instances
-		for(JOGLFaceSetInstance fsi : registered.keySet()){
-//			System.out.println("fsi is " + fsi.getNode().getName());
-			RenderableObject o = registered.get(fsi);
-			if(instances.get(fsi) == null)
-				System.err.println("instances.get(fsi) = null");
-			else
-				instances.get(fsi).state = o.state;
-		}
+		
 		
 		
 		//clean up the registration hash map
@@ -245,6 +260,8 @@ public class RenderableUnit {
 //			System.out.println("tex is null!!!");
 //			return;
 //		}
+		if(instances.size() == 0)
+			return;
 		GL3 gl = state.getGL();
 		
 		float[] projection = Rn.convertDoubleToFloatArray(state.getProjectionMatrix());
@@ -252,8 +269,6 @@ public class RenderableUnit {
 		shader.useShader(gl);
 		
 		ShaderVarHash.bindUniform(shader, "uniforms", 1, gl);
-		if(texture.getTexture2D() != null)
-			ShaderVarHash.bindUniform(shader, "_combineMode", texture.getTexture2D().getApplyMode(), gl);
 		
 		//matrices
 		if(texture.getTexture2D() != null)
@@ -271,15 +286,24 @@ public class RenderableUnit {
 		ShaderVarHash.bindUniform(shader, "sys_numLocalPointLights", 0, gl);
 		ShaderVarHash.bindUniform(shader, "sys_numLocalSpotLights", 0, gl);
 		
+		
+		
 		//bind shader uniforms not necessary
 		if(texture.getTexture2D() != null)
 			texture.bind(shader, gl);
+		if(texture.hasTexture())
+			ShaderVarHash.bindUniform(shader, "_combineMode", texture.combineMode, gl);
+		
 		reflMap.bind(shader, gl);
+		if(reflMap.hasReflMap())
+			ShaderVarHash.bindUniform(shader, "_reflectionMapAlpha", reflMap.alpha, gl);
+		
 
     	//new way to do lights
 		state.getLightHelper().bindGlobalLightTexture(gl);
     	
 		for(InstanceCollection insColl : instanceCollections){
+//			System.out.println("Render an insColl");
 			insColl.render(gl);
 		}
 		
