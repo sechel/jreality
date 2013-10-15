@@ -6,6 +6,7 @@ import javax.media.opengl.GL3;
 
 public class GLVBOFloat extends GLVBO{
 	
+	//TODO data array only for debugging I believe.
 	private float[] data;
 	
 	public float[] getData(){
@@ -15,14 +16,18 @@ public class GLVBOFloat extends GLVBO{
 	 * @param gl
 	 * @param subdata
 	 * @param begin
-	 * @param length The length in Bytes, i.e. 4 for a single float.
+	 * @param length The length in Floats.
 	 */
 	public void updateSubData(GL3 gl, float[] subdata, int begin, int length){
+		System.err.println("updating subdata " + subdata.length + ", " + begin + ", " + length);
+		System.arraycopy(subdata, 0, this.data, begin, length);
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, index);
-		gl.glBufferSubData(gl.GL_ARRAY_BUFFER, begin, length, FloatBuffer.wrap(subdata));
+		gl.glBufferSubData(gl.GL_ARRAY_BUFFER, 4*begin, 4*length, FloatBuffer.wrap(subdata));
 	}
 	
 	public void updateData(GL3 gl, float[] data){
+		System.err.println("updating data " + data.length);
+		System.arraycopy(data, 0, this.data, 0, data.length);
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, index);
 		gl.glBufferData(gl.GL_ARRAY_BUFFER, 4*data.length, FloatBuffer.wrap(data), gl.GL_STATIC_READ);
 	}
@@ -31,7 +36,9 @@ public class GLVBOFloat extends GLVBO{
 		this(gl, vertdata, name, 4);
 	}
 	public GLVBOFloat(GL3 gl, float[] vertdata, String name, int arraySize){
-		data = vertdata;
+		data = new float[vertdata.length];
+		System.arraycopy(vertdata, 0, data, 0, vertdata.length);
+		//data = vertdata;
 		this.arraySize = arraySize;
 		this.name = name;
 		int[] vertindex = new int[1];

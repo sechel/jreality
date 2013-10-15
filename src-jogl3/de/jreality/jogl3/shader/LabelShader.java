@@ -3,23 +3,13 @@ package de.jreality.jogl3.shader;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.media.opengl.GL3;
-
-import com.itextpdf.text.log.SysoLogger;
 
 import de.jreality.backends.label.LabelUtility;
 import de.jreality.jogl3.JOGLRenderState;
-import de.jreality.jogl3.geom.JOGLFaceSetEntity;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlReflectionMap;
-import de.jreality.jogl3.GlTexture;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.LabelRenderData;
 import de.jreality.jogl3.geom.Label;
 import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.data.AttributeEntityUtility;

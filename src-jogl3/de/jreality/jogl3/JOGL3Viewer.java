@@ -47,6 +47,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.StereoViewer;
 import de.jreality.scene.data.AttributeEntityUtility;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.CubeMap;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
@@ -68,7 +69,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		GLProfile glp = null;
 		
 		try{
-			glp = GLProfile.get("GL3");
+			glp = GLProfile.get("GL4");
 			String s = GLProfile.glAvailabilityToString();
 			System.out.println(s);
 //			if(!s.contains("3.3") && !s.contains("GL4 true")){
@@ -80,21 +81,21 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		}
 		if(glp == null){
 			try{
-				glp = GLProfile.get("GL3bc");
-			}catch(GLException e){
-				System.out.println(e.getMessage());
-			}
-		}
-		if(glp == null){
-			try{
-				glp = GLProfile.get("GL4");
-			}catch(GLException e){
-				System.out.println(e.getMessage());
-			}
-		}
-		if(glp == null){
-			try{
 				glp = GLProfile.get("GL4bc");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL3");
+			}catch(GLException e){
+				System.out.println(e.getMessage());
+			}
+		}
+		if(glp == null){
+			try{
+				glp = GLProfile.get("GL3bc");
 			}catch(GLException e){
 				System.out.println(e.getMessage());
 				throw new Exception("no openGL profile available to support JOGL3");
@@ -293,7 +294,6 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			TransparencyHelper.setSupersample((int)aa);
 			TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
 		}
-		// TODO Auto-generated method stub
 		//System.out.println("display called---------------------------------");
 		if(arg0.getGL() != null && arg0.getGL().getGL3() != null){
 			
@@ -312,12 +312,25 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			GL3 gl = arg0.getGL().getGL3();
 	    	
-			//handle background
+			//handle background and RenderableUnitsCollection state
 			JOGLSceneGraphComponentInstance rootInstance = (JOGLSceneGraphComponentInstance) proxyScene.getTreeRoot();
 			JOGLAppearanceInstance rootApInst = (JOGLAppearanceInstance)rootInstance.getAppearanceTreeNode();
+			
+			
+			
+			
 			if(!((JOGLAppearanceEntity)rootApInst.getEntity()).dataUpToDate){
 				Appearance rootAp = (Appearance) rootApInst.getEntity().getNode();
 				backgroundHelper.updateBackground(gl, rootAp, width, height);
+				
+				Object bgo = null;
+				if (rootAp != null)
+					bgo = rootAp.getAttribute(CommonAttributes.SMALL_OBJ_OPTIMIZATION);
+				if (bgo != null && bgo instanceof Boolean)
+					RUC.setActive((Boolean) bgo);
+				else{
+					RUC.setActive(CommonAttributes.SMALL_OBJ_OPTIMIZATION_DEFAULT);
+				}
 			}
 			
 			//update sky box
@@ -338,7 +351,8 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			//collect lights from scene graph
 			JOGLLightCollection globalLightCollection = new JOGLLightCollection(dmat);
-			rootInstance.collectGlobalLights(dmat, globalLightCollection);
+			rootInstance.collectGlobalLights(dmat, globalLightCollection, proxyScene.lightsChanged);
+			proxyScene.lightsChanged = false;
 			//can load global lights texture here.
 			lightHelper.loadGlobalLightTexture(globalLightCollection, gl);
 			
@@ -464,7 +478,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	public double getFrameRate() {
 		return perfmeter.getFramerate();
 	}
-
+	
 	@Override
 	public int getPolygonCount() {
 		return 0;

@@ -58,55 +58,6 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 			oChangedPosA = false;
 		}
 	
-	public class GlReflectionMap{
-		boolean hasReflectionMap = false;
-		public GlReflectionMap(){
-			
-		}
-		private JOGLTexture2D[] jogltex = new JOGLTexture2D[6];
-		public void setCubeMap(CubeMap cm){
-			ImageData[] imgs=TextureUtility.getCubeMapImages(cm);
-			for(int i = 0; i < 6; i++){
-				  Texture2D tex=(Texture2D) AttributeEntityUtility.createAttributeEntity(Texture2D.class, "", new Appearance(), true);
-				  tex.setRepeatS(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
-				  tex.setRepeatT(de.jreality.shader.Texture2D.GL_CLAMP_TO_EDGE);
-				  jogltex[i] = new JOGLTexture2D(tex);
-				  
-				  //jogltex[i].setBlendColor(cm.getBlendColor());
-				  jogltex[i].setImage(imgs[i]);
-				  
-				  
-			}
-			hasReflectionMap = true;
-		}
-		public void removeTexture(){
-			hasReflectionMap = false;
-		}
-		public void bind(GLShader shader, GL3 gl){
-			if(hasReflectionMap){
-				//GL_TEXTURE0 and GL_TEXTURE1 reserved for lights.
-				for(int i = 0; i < 6; i++){
-					 String name = "right";
-					  if(i == 1)
-						  name = "left";
-					  else if(i == 2)
-						  name = "up";
-					  else if(i == 3)
-						  name = "down";
-					  else if(i == 4)
-						  name = "back";
-					  else if(i == 5)
-						  name = "front";
-					ShaderVarHash.bindUniform(shader, name, 2+i, gl);
-					ShaderVarHash.bindUniform(shader, "has_reflectionMap", 1, gl);
-					Texture2DLoader.load(gl, jogltex[i], gl.GL_TEXTURE2+i);
-				}
-			}else{
-				ShaderVarHash.bindUniform(shader, "has_reflectionMap", 0, gl);
-			}
-		}
-	}
-	
 	public abstract class GlUniform<T>{
 		public GlUniform(String name, T value){
 			this.name = name;
@@ -421,12 +372,36 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 	}
 	
+	protected boolean faceDraw = false;
+	protected boolean vertexDraw = false;
+	protected boolean edgeDraw = false;
+	protected boolean transparencyEnabled = false;
+	
+	public boolean getFaceDraw(){
+		return faceDraw;
+	}
+	public boolean getVertexDraw(){
+		return vertexDraw;
+	}
+	public boolean getEdgeDraw(){
+		return edgeDraw;
+	}
+	public boolean getTransparencyEnabled(){
+		return transparencyEnabled;
+	}
+	
 	//in the new version we use type only to identify the shader source
 	protected GLShader updateAppearance(InstanceFontData ifd, GLShader defaultShader, SceneGraphPath sgp, GL3 gl, LinkedList<GlUniform> c, GlTexture texture, GlReflectionMap reflMap, String shaderType) {
 		
 		GLShader shader = defaultShader;
 		
 		eap = EffectiveAppearance.create(sgp);
+		
+		edgeDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.LINE_SHADER, CommonAttributes.EDGE_DRAW), CommonAttributes.EDGE_DRAW_DEFAULT);
+		vertexDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
+		faceDraw = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
+		transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
+		
 		
 		//retrieve shader source if existent
 		String[] source = new String[]{};
@@ -507,6 +482,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     		if(name.equals("down")){
     			continue;
     		}
+    		//TODO clean this up, it doesn't do anything I believe
     		if(v.getName().length() > 3 && v.getName().substring(0, 4).equals("_")){
     			continue;
     		}
@@ -629,6 +605,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				Texture2D tex = (Texture2D)AttributeEntityUtility.createAttributeEntity(Texture2D.class, shaderType + ".texture2d", eap);
     				texture.setTexture(tex);
     				c.add(new GlUniformInt("_combineMode", tex.getApplyMode()));
+    				texture.combineMode = tex.getApplyMode();
     				c.add(new GlUniformMat4("textureMatrix", Rn.convertDoubleToFloatArray(tex.getTextureMatrix().getArray())));
     				System.err.println("sampler2D: "+ v.getName());
     				hasTexture = true;
@@ -638,7 +615,10 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				CubeMap reflectionMap = TextureUtility.readReflectionMap(eap, shaderType + ".reflectionMap");
     				reflMap.setCubeMap(reflectionMap);
     				c.add(new GlUniformFloat("_reflectionMapAlpha", reflectionMap.getBlendColor().getRGBComponents(null)[3]));
+    				reflMap.alpha = reflectionMap.getBlendColor().getRGBComponents(null)[3];
     				hasReflectionMap = true;
+    			}else{
+    				hasReflectionMap = false;
     			}
     		}else if(v.getName().equals("textureMatrix")){
     			//do nothing

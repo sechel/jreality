@@ -2,6 +2,8 @@ package de.jreality.jogl3.optimization;
 
 import java.util.LinkedList;
 
+import javax.media.opengl.GL3;
+
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 
@@ -20,12 +22,20 @@ public class OptimizedGLShader extends GLShader {
 	
 	private int offset = 0;
 	
+	//TODO remove this override method. It's only for testing
+//	public void init(GL3 gl){
+//		
+//		GLShader sh = new GLShader("../glsl/nontransp/Cpolygon.v", "../glsl/nontransp/Cpolygon.f");
+//		this.vsrc = sh.getVSRC();
+//		this.fsrc = sh.getFSRC();
+//		super.init(gl);
+//	}
+	
 	public int getNumFloatsNecessary(){
-		if(offset%4==0)
-			return offset;
-		else
-			return 4*(offset/4) + 4;
+		return numFloatsNecessary;
+		
 	}
+	private int numFloatsNecessary = 0;
 	
 	public OptimizedGLShader(String v, String f){
 		super(v,f);
@@ -36,6 +46,11 @@ public class OptimizedGLShader extends GLShader {
 		findUniformsAndReplace(fsrc, FragUniforms, false);
 //		System.out.println(fsrc[0]);
 		
+		if(offset%4==0)
+			numFloatsNecessary =  offset;
+		else
+			numFloatsNecessary = 4*(offset/4) + 4;
+		
 		this.shaderUniforms = new LinkedList<GLShader.ShaderVar>();
 		findUniforms(vsrc[0], this.shaderUniforms);
 		
@@ -43,6 +58,12 @@ public class OptimizedGLShader extends GLShader {
 	}
 	
 	private void findUniformsAndReplace(String[] source, LinkedList<String[]> uniforms, boolean isVertexShader) {
+//		System.err.println("uniforms:");
+//		for(String[] s : uniforms)
+//			System.err.println(s[1]);
+//		System.err.println("uniforms ende.");
+		
+		
 		String[] qualifiers = new String[]{"uniform"};
 		String[] lines = source[0].split("\n");
 		
@@ -105,7 +126,7 @@ public class OptimizedGLShader extends GLShader {
 //				System.out.println("name = " + name);
 				//this is needed, when instanced rendering lines,
 				//where we want to call the second endpoint "_vertex_coordinates"
-				if(!(name.length() >= 4 && name.substring(0, 4).equals("sys_")) && name.charAt(0) != '_' && !name.equals("projection") && !name.equals("_inverseCamRotation") && !name.equals("textureMatrix") && !type.equals("sampler2D") && !name.equals("has_Tex")){
+				if(!(name.length() >= 4 && name.substring(0, 4).equals("sys_")) && name.charAt(0) != '_' && !name.equals("projection") && !name.equals("_inverseCamRotation") && !name.equals("textureMatrix") && !type.equals("sampler2D") && !name.equals("has_Tex") && !name.equals("has_reflectionMap")){
 					//TODO and remove from source!
 					lines[i] = "";
 					uniforms.add(new String[]{type, name});
@@ -149,7 +170,7 @@ public class OptimizedGLShader extends GLShader {
 						//coordinate from texel is offset%4
 						source[0] += s[1] + " = " + this.texel(offset/4, isVertexShader) + "[" + offset%4 + "];\n";
 						offset += 1;
-					}else if(s[0].equals("int")){
+					}else if(s[0].equals("int") && !s[1].equals("has_reflectionMap")){
 						source[0] += s[1] + " = " + this.floatToInt(this.texel(offset/4, isVertexShader) + "[" + offset%4 + "]") + ";\n";
 						offset += 1;
 					}else if(s[0].equals("vec2")){
@@ -172,14 +193,15 @@ public class OptimizedGLShader extends GLShader {
 				//append in front the line "uniform sampler2D uniforms
 				if(l.length() >= 8 && l.substring(0, 8).equals("#version")){
 					if(isVertexShader){
-						source[0] += "flat out int instanceID;\n";
-						source[0] += "in int vertex_id;\n";
+						source[0] += "flat out float instanceID;\n";
+						source[0] += "in float vertex_id;\n";
 					}else
-						source[0] += "flat in int instanceID;\n";
+						source[0] += "flat in float instanceID;\n";
 					source[0] += "uniform sampler2D uniforms;";
 					source[0] += "\n";
 					for(String[] s : uniforms){
-						source[0] += s[0] + " " + s[1] + ";\n";
+						if(!s[1].equals("has_reflectionMap"))
+							source[0] += s[0] + " " + s[1] + ";\n";
 					}
 				}
 			}

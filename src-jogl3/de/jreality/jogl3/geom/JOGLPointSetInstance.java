@@ -6,6 +6,7 @@ import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.JOGLRenderState;
+import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformFloat;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.InstanceFontData;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.shader.LabelShader;
@@ -32,9 +33,7 @@ public class JOGLPointSetInstance extends JOGLGeometryInstance {
 		if(eap == null)
 			return;
 		JOGLPointSetEntity pse = (JOGLPointSetEntity) getEntity();
-		boolean visible = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POINT_SHADER, CommonAttributes.VERTEX_DRAW), CommonAttributes.VERTEX_DRAW_DEFAULT);
-		boolean transparencyEnabled = (boolean)eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.TRANSPARENCY_ENABLED), false);
-		if(visible){
+		if(vertexDraw){
 			if(pse.labelsChangedNo != labelsChangedNoCache){
 				//update label texture
 				updateLabelTextureAndVBOsAndUniforms(state.getGL(), labelData, pse.labels, ifd);
