@@ -38,6 +38,10 @@ import de.jreality.scene.proxy.tree.UpToDateSceneProxyBuilder;
 
 public class JOGLSceneGraph extends UpToDateSceneProxyBuilder {
 	
+	public boolean lightsChanged = false;
+	
+	JOGLSceneGraph me = this;
+	
 	class JOGLEntityFactory extends EntityFactory {
 		
 		SceneGraphNodeEntity entity;
@@ -65,15 +69,15 @@ public class JOGLSceneGraph extends UpToDateSceneProxyBuilder {
 			}
 			@Override
 			public void visit(SpotLight l) {
-				entity = new JOGLSpotLightEntity(l);
+				entity = new JOGLSpotLightEntity(l, me);
 			}
 			@Override
 			public void visit(PointLight l) {
-				entity = new JOGLPointLightEntity(l);
+				entity = new JOGLPointLightEntity(l, me);
 			}
 			@Override
 			public void visit(DirectionalLight l) {
-				entity = new JOGLDirectionalLightEntity(l);
+				entity = new JOGLDirectionalLightEntity(l, me);
 			}
 			@Override
 			public void visit(Sphere s) {
@@ -174,6 +178,7 @@ public class JOGLSceneGraph extends UpToDateSceneProxyBuilder {
 		super(root);
 		setEntityFactory(new JOGLEntityFactory());
 		setProxyTreeFactory(new JOGLTreeFactory());
+		me = this;
 	}
 
 }

@@ -123,38 +123,77 @@ public class JOGLSceneGraphComponentInstance extends SceneTreeNode {
 				childInstance.collectTranspAndNonTransparent(state, ruc, transpObjects);
 		}
 	}
-	
+	private boolean hasLights = false;
 	//this method collects global lights and updates the data in every
 	//(also local) lights
-	public void collectGlobalLights(double[] trafo, JOGLLightCollection collection) {
-
-		double[] newMatrix = new double[16];
-		
-		double[] matrix = getTrafo();
-		if (matrix != null)
-			Rn.times(newMatrix, trafo, matrix);
-		else
-			System.arraycopy(trafo, 0, newMatrix, 0, 16);
-		
-		JOGLLightInstance light = (JOGLLightInstance)getLightTreeNode();
-		
-		
-		if (light != null) {
-			JOGLLightEntity lightEntity = (JOGLLightEntity) light.getEntity();
-			lightEntity.updateData();
-			//System.out.println(light.getEntity().getNode().getName() + light.getEntity().getNode().getClass());
-			//copy transformation to light.trafo
-			light.trafo = newMatrix;
-			if(lightEntity.isGlobal())
-				light.addToList(collection);
-		}
-		
-		for (SceneTreeNode child : getChildren()) {
-			if (!child.isComponent()) continue;
-			JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
-			SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
-			if(sgc.isVisible())
-				childInstance.collectGlobalLights(newMatrix, collection);
+	public boolean collectGlobalLights(double[] trafo, JOGLLightCollection collection, boolean visitAll) {
+		if(!visitAll){
+			if(!hasLights){
+			}else{
+				double[] newMatrix = new double[16];
+				
+				double[] matrix = getTrafo();
+				if (matrix != null)
+					Rn.times(newMatrix, trafo, matrix);
+				else
+					System.arraycopy(trafo, 0, newMatrix, 0, 16);
+				
+				JOGLLightInstance light = (JOGLLightInstance)getLightTreeNode();
+				
+				if (light != null) {
+					JOGLLightEntity lightEntity = (JOGLLightEntity) light.getEntity();
+					lightEntity.updateData();
+					//System.out.println(light.getEntity().getNode().getName() + light.getEntity().getNode().getClass());
+					//copy transformation to light.trafo
+					light.trafo = newMatrix;
+					if(lightEntity.isGlobal())
+						light.addToList(collection);
+				}
+				
+				for (SceneTreeNode child : getChildren()) {
+					if (!child.isComponent()) continue;
+					JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
+					SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
+					if(sgc.isVisible()){
+						childInstance.collectGlobalLights(newMatrix, collection, visitAll);
+					}
+				}
+			}
+			return false;
+		}else{
+			double[] newMatrix = new double[16];
+			
+			double[] matrix = getTrafo();
+			if (matrix != null)
+				Rn.times(newMatrix, trafo, matrix);
+			else
+				System.arraycopy(trafo, 0, newMatrix, 0, 16);
+			
+			JOGLLightInstance light = (JOGLLightInstance)getLightTreeNode();
+			
+			hasLights = false;
+			if (light != null) {
+				hasLights = true;
+				JOGLLightEntity lightEntity = (JOGLLightEntity) light.getEntity();
+				lightEntity.updateData();
+				//System.out.println(light.getEntity().getNode().getName() + light.getEntity().getNode().getClass());
+				//copy transformation to light.trafo
+				light.trafo = newMatrix;
+				if(lightEntity.isGlobal())
+					light.addToList(collection);
+			}
+			
+			for (SceneTreeNode child : getChildren()) {
+				if (!child.isComponent()) continue;
+				JOGLSceneGraphComponentInstance childInstance = (JOGLSceneGraphComponentInstance) child;
+				SceneGraphComponent sgc = (SceneGraphComponent)child.getNode();
+				if(sgc.isVisible()){
+					boolean temp = childInstance.collectGlobalLights(newMatrix, collection, visitAll);
+					if(temp)
+						hasLights = true;
+				}
+			}
+			return hasLights;
 		}
 	}
 	

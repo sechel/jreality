@@ -294,7 +294,6 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			TransparencyHelper.setSupersample((int)aa);
 			TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
 		}
-		// TODO Auto-generated method stub
 		//System.out.println("display called---------------------------------");
 		if(arg0.getGL() != null && arg0.getGL().getGL3() != null){
 			
@@ -352,7 +351,8 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 			
 			//collect lights from scene graph
 			JOGLLightCollection globalLightCollection = new JOGLLightCollection(dmat);
-			rootInstance.collectGlobalLights(dmat, globalLightCollection);
+			rootInstance.collectGlobalLights(dmat, globalLightCollection, proxyScene.lightsChanged);
+			proxyScene.lightsChanged = false;
 			//can load global lights texture here.
 			lightHelper.loadGlobalLightTexture(globalLightCollection, gl);
 			
