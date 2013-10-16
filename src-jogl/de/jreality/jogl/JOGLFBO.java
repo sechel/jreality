@@ -54,7 +54,6 @@ public class JOGLFBO {
 	}
 
 	boolean dirty = true;
-	private ImageData imageData;
 
 	public void setSize(Dimension dim) {
 		if (width == dim.width && height == dim.height)
@@ -94,7 +93,6 @@ public class JOGLFBO {
 			tex.setImage(null);
 		} else {
 			tex.setSource0Alpha(Texture2D.SOURCE0_ALPHA_DEFAULT);
-			tex.setAnimated(true);
 		}
 	}
 
@@ -149,6 +147,7 @@ public class JOGLFBO {
 			// gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP,
 			// GL.GL_TRUE);
 			gl.glGenerateMipmap(GL.GL_TEXTURE_2D);
+//			System.err.println("rendering joglfbo");
 		}
 		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
 		if (status != GL2.GL_FRAMEBUFFER_COMPLETE) {
@@ -159,10 +158,8 @@ public class JOGLFBO {
 
 	protected void postRender(GL2 gl) {
 		if (!asTexture) {
-			if (image.getWidth() != width || image.getHeight() != height || image.getType() != BufferedImage.TYPE_4BYTE_ABGR)
-				image = new BufferedImage(width, height,
+			image = new BufferedImage(width, height,
 					BufferedImage.TYPE_4BYTE_ABGR); // TYPE_3BYTE_BGR); //
-			System.err.println("image = "+image);
 			buffer = ByteBuffer.wrap(((DataBufferByte) image.getRaster()
 					.getDataBuffer()).getData());
 			gl.glBindFramebuffer(GL2.GL_DRAW_FRAMEBUFFER, fboN[0]);
@@ -181,22 +178,11 @@ public class JOGLFBO {
 					GL.GL_UNSIGNED_BYTE, buffer);
 			// System.err.println("reading pixels");
 			image = ImageUtility.rearrangeChannels(null, image);
-//			byte[] byteArray = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-//			int n = width * height;
-//			for (int i = 0; i<n; ++i)	{
-//				byte tmp = byteArray[4*i];
-//				byteArray[4*i] = byteArray[4*i+2];
-//				byteArray[4*i+2] =tmp;
-//				tmp = byteArray[4*i+1];
-//				byteArray[4*i+1] = byteArray[4*i+3];
-//				byteArray[4*i+3] = tmp;
-//			}
 			ImageUtil.flipImageVertically(image);
-			if (tex != null) { // && (tex.getImage() != imageData)) {
-//				System.err.println("image = "+image+"\ngetImage()="+tex.getImage().getImage());
-				imageData = new ImageData(image);
-				tex.setImage(imageData);
-//				tex.setSource0Alpha(Texture2D.SOURCE0_ALPHA_DEFAULT);
+			if (tex != null) {
+				// if (tex.getImage().getImage() != image)
+				tex.setImage(new ImageData(image));
+				tex.setSource0Alpha(Texture2D.SOURCE0_ALPHA_DEFAULT);
 			}
 		} else {
 			if (tex != null)
