@@ -20,7 +20,7 @@ import de.jreality.shader.ShaderUtility;
 
 public class RenderableUnitCollection{
 	
-	public final int MAX_NUM_FLOATS = 1000;
+	public final int MAX_NUM_FLOATS = 100000;
 	
 	private boolean active = true;
 	

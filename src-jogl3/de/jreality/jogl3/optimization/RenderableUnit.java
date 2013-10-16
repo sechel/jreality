@@ -130,10 +130,14 @@ public class RenderableUnit {
 				//is old, but changed its length
 				lengthSet.add(f);
 				System.out.println("adding to oChLength set");
-			}else if(f.geom.oChangedPositionsOrAttributes()){
+			}else if(f.geom.oChangedPositions()){
 				//changed only positions or attributes
 				posASet.add(f);
-				instances.get(fsi).upToDate = false;
+				instances.get(fsi).posUpToDate = false;
+				System.out.println("adding to oChPosA set");
+			}else if(f.geom.oChangedAttributes()){
+				//changed only positions or attributes
+				posASet.add(f);
 				instances.get(fsi).appChanged = true;
 				System.out.println("adding to oChPosA set");
 			}else{

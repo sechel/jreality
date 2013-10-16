@@ -41,13 +41,18 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	//the "o" indicates that this code is only neccessary for the optimization of scenes with 10.000 small
 		//geometries or more.
 		protected boolean oChangedLength = true;
-		protected boolean oChangedPosA = true;
+		protected boolean oChangedPos = true;
+		protected boolean oChangedAtt = true;
 		public boolean oChangedLength() {
 			return oChangedLength;
 		}
 		
-		public boolean oChangedPositionsOrAttributes() {
-			return oChangedPosA;
+		public boolean oChangedPositions() {
+			return oChangedPos;
+		}
+		
+		public boolean oChangedAttributes() {
+			return oChangedAtt;
 		}
 		
 		public void resetOChangedLength() {
@@ -55,7 +60,8 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 		}
 		
 		public void resetOChangedPositionsOrAttributes() {
-			oChangedPosA = false;
+			oChangedPos = false;
+			oChangedAtt = false;
 		}
 	
 	public abstract class GlUniform<T>{

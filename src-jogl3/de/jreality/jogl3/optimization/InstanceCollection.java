@@ -92,7 +92,7 @@ public class InstanceCollection {
 		
 		data = new float[shader.getNumFloatsNecessary()*MAX_NUMBER_OBJ_IN_COLLECTION];
 		modelviewData = new float[16*MAX_NUMBER_OBJ_IN_COLLECTION];
-		updateUniformsTexture(gl);
+		updateUniformsTexture(gl, true);
 	}
 	
 	private int offset;
@@ -190,7 +190,7 @@ public class InstanceCollection {
 		}
 	}
 	
-	private void updateUniformsTexture(GL3 gl){
+	private void updateUniformsTexture(GL3 gl, boolean makeAllNew){
 //		System.err.println("update uniforms texture");
 		//update data
 		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
@@ -199,7 +199,7 @@ public class InstanceCollection {
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
 			Instance i = instances.get(fsi);
 //			System.out.println("appChanged for instance " + i.id + " is " + i.appChanged);
-			if(i.appChanged){
+			if(i.appChanged || makeAllNew){
 				changedAnyApp = true;
 				i.appChanged = false;
 				//retrieve appearance data from fsi uniforms
@@ -216,7 +216,7 @@ public class InstanceCollection {
 				appDataWriteHelper(fragUniforms, uniforms, i, i.state);
 			}
 		}
-		if(changedAnyApp){
+		if(changedAnyApp || makeAllNew){
 			gl.glEnable(gl.GL_TEXTURE_2D);
 			gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
 			
@@ -520,7 +520,7 @@ public class InstanceCollection {
 			
 			availableFloats -= i.length;
 			i.posInVBOs = pos;
-			i.upToDate = true;
+			i.posUpToDate = true;
 			pos += i.length;
 			pushInstanceToGPU(i);
 		}
@@ -559,19 +559,32 @@ public class InstanceCollection {
 			//write everything to vbo
 			availableFloats = current_vbo_size;
 			writeAllInstancesNewToVBO();
-			
+			updateUniformsTexture(gl, true);
 		}else{
 			//do not resize
 			if(availableFloats >= 0){
 				
+				//and null (and remove?) the dead ones
+				for(Instance i : dyingInstances){
+					System.out.println("remove instance from dyingInstances");
+					nullInstance(i);
+					i.posUpToDate = true;
+					//TODO is this right?
+					instances.remove(i.fsi);
+					System.out.println("instances.size = " + instances.size());
+					//free the ID of the removed Instance
+					freeIDs.add(new Integer(i.id));
+				}
+				
 				//push ONLY the new instances to GPU
 //				System.out.println("currsize = " + current_vbo_size + ", avail = " + availableBeforeCalc);
+				
 				int pos = current_vbo_size-availableBeforeCalc;
 				for(Instance i : newInstances){
 					i.posInVBOs = pos;
 					pos += i.length;
 					instances.put(i.fsi, i);
-					i.upToDate = true;
+					i.posUpToDate = true;
 					//get free ID and give it to the Instance
 					Integer inte = freeIDs.iterator().next();
 					freeIDs.remove(inte);
@@ -580,36 +593,31 @@ public class InstanceCollection {
 					
 					pushInstanceToGPU(i);
 				}
-				//and null (and remove?) the dead ones
-				for(Instance i : dyingInstances){
-					System.out.println("remove instance from dyingInstances");
-					nullInstance(i);
-					i.upToDate = true;
-					//TODO is this right?
-					instances.remove(i.fsi);
-					System.out.println("instances.size = " + instances.size());
-					//free the ID of the removed Instance
-					freeIDs.add(new Integer(i.id));
-				}
+				
 				//and update the !up_to_date ones
 				
 				for(JOGLFaceSetInstance fsi : instances.keySet()){
 					Instance i = instances.get(fsi);
-					if(!i.upToDate){
+					if(!i.posUpToDate){
 						pushInstanceToGPU(i);
-						i.upToDate = true;
+						i.posUpToDate = true;
 					}
 				}
+				if(newInstances.size() > 0)
+					updateUniformsTexture(gl, true);
+				else
+					updateUniformsTexture(gl, false);
 				//and done!
 			}else{
 				//don't resize, but rewrite everything to vbo
 				availableFloats = current_vbo_size;
 				writeAllInstancesNewToVBO();
+				updateUniformsTexture(gl, true);
 			}
 		}
 		dyingInstances = new LinkedList<Instance>();
 		newInstances = new LinkedList<Instance>();
-		updateUniformsTexture(gl);
+		
 	}
 	
 	public void render(GL3 gl){

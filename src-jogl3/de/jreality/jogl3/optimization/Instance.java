@@ -59,7 +59,7 @@ public class Instance {
 	 * dead actually means, that it needs to be nulled in GPU, if it's not removed by defragmentation or merging
 	 */
 	private boolean dead = false;
-	public boolean upToDate = true;
+	public boolean posUpToDate = true;
 	public boolean appChanged = true;
 	public int id = 0;
 }
