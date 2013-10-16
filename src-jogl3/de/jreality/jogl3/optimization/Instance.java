@@ -13,7 +13,6 @@ public class Instance {
 		this.state = state;
 		this.posInVBOs = posInVBOs;
 		dead = false;
-		upToDate = true;
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)fsi.getEntity();
 		if(fse == null){
 			System.err.println("FSI has no entity");
@@ -61,5 +60,6 @@ public class Instance {
 	 */
 	private boolean dead = false;
 	public boolean upToDate = true;
+	public boolean appChanged = true;
 	public int id = 0;
 }

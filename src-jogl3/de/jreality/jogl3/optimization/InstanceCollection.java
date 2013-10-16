@@ -85,18 +85,31 @@ public class InstanceCollection {
 	private int textureID;
 	private int texUnit = 1;
 	private float data[];
+	private float[] modelviewData;
 	
 	private void initUniformTexture(GL3 gl){
 		textureID = generateNewTexID(gl);
 		
 		data = new float[shader.getNumFloatsNecessary()*MAX_NUMBER_OBJ_IN_COLLECTION];
-		
+		modelviewData = new float[16*MAX_NUMBER_OBJ_IN_COLLECTION];
 		updateUniformsTexture(gl);
 	}
 	
 	private int offset;
 	
-	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, Instance ins, JOGLRenderState state){
+	private void writeAllModelviewMatrices(){
+		for(JOGLFaceSetInstance fsi : instances.keySet()){
+			Instance i = instances.get(fsi);
+			int j = i.id;
+			float[] f = new float[16];
+			Rn.transposeD2F(f, i.state.getModelViewMatrix());
+			for(int l = 0; l < 16; l++){
+				modelviewData[j*16+l] = f[l];
+			}
+		}
+	}
+	
+	private void appDataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, Instance ins, JOGLRenderState state){
 		int j = ins.id;
 //		System.out.println("DWH");
 		for(String[] s : Uniforms){
@@ -182,35 +195,55 @@ public class InstanceCollection {
 		//update data
 		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
 		LinkedList<String[]> fragUniforms = shader.getFragUniforms();
-		
+		boolean changedAnyApp = false;
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
 			Instance i = instances.get(fsi);
-			//retrieve appearance data from fsi uniforms
-//			JOGLFaceSetInstance fsi = i.fsi;
-			WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
-			//the width offset
-			offset = 0;
-//			System.err.println("updating texture for i.id = " + i.id);
-			DataWriteHelper(vertUniforms, uniforms, i, i.state);
-//			System.out.println("offset after vert is " + offset);
-			if (offset%4 != 0)
-				offset = 4*(offset/4) + 4;
-//			System.out.println("offset before frag is " + offset);
-			DataWriteHelper(fragUniforms, uniforms, i, i.state);
+//			System.out.println("appChanged for instance " + i.id + " is " + i.appChanged);
+			if(i.appChanged){
+				changedAnyApp = true;
+				i.appChanged = false;
+				//retrieve appearance data from fsi uniforms
+//				JOGLFaceSetInstance fsi = i.fsi;
+				WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
+				//the width offset
+				offset = 0;
+//				System.err.println("updating texture for i.id = " + i.id);
+				appDataWriteHelper(vertUniforms, uniforms, i, i.state);
+//				System.out.println("offset after vert is " + offset);
+				if (offset%4 != 0)
+					offset = 4*(offset/4) + 4;
+//				System.out.println("offset before frag is " + offset);
+				appDataWriteHelper(fragUniforms, uniforms, i, i.state);
+			}
 		}
-		
-		gl.glEnable(gl.GL_TEXTURE_2D);
-		gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
-		
-		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
-		
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
-	    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-	    
-	    gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, shader.getNumFloatsNecessary()/4);
-    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS, 0);
-    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS, 0);
-	    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, shader.getNumFloatsNecessary()/4, MAX_NUMBER_OBJ_IN_COLLECTION, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+		if(changedAnyApp){
+			gl.glEnable(gl.GL_TEXTURE_2D);
+			gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
+			
+			gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
+			
+			gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
+		    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+		    
+		    gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, shader.getNumFloatsNecessary()/4);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS, 0);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS, 0);
+		    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, shader.getNumFloatsNecessary()/4, MAX_NUMBER_OBJ_IN_COLLECTION, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+		}else{
+			writeAllModelviewMatrices();
+			gl.glEnable(gl.GL_TEXTURE_2D);
+			gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
+			
+			gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
+			
+			gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
+		    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+		    
+		    gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, 4);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS, 0);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS, 0);
+		    gl.glTexSubImage2D(gl.GL_TEXTURE_2D, 0, 0, 0, 4, MAX_NUMBER_OBJ_IN_COLLECTION, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(modelviewData));
+		}
 	}
 	
 	private int generateNewTexID(GL3 gl){

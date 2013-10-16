@@ -134,6 +134,7 @@ public class RenderableUnit {
 				//changed only positions or attributes
 				posASet.add(f);
 				instances.get(fsi).upToDate = false;
+				instances.get(fsi).appChanged = true;
 				System.out.println("adding to oChPosA set");
 			}else{
 				//nothing changed, needs not be touched if not neccessary
