@@ -18,6 +18,7 @@ public class NoneuclideanGLSLShader extends StandardGLSLShader {
 		poincareModel = eap.getAttribute(
 				ShaderUtility.nameSpace(name, POINCARE_MODEL), false);
 		if (poincareModel) {
+			
 			poincarePath = (SceneGraphPath) eap.getAttribute(
 					ShaderUtility.nameSpace(name, POINCARE_PATH),
 					new SceneGraphPath());
@@ -40,8 +41,10 @@ public class NoneuclideanGLSLShader extends StandardGLSLShader {
 		// System.err.println("writing glsl shader");
 		if (true || needsRendered) { // return;
 			JOGLRenderingState jrs = jr.renderingState;
+//			System.err.println("current metric is "+jrs.currentMetric);
 			glslProgram.setUniform("hyperbolic",
 					jrs.currentMetric == Pn.HYPERBOLIC);
+//			glslProgram.setUniform("Nw", 1.0);
 			glslProgram.setUniform("useNormals4", jrs.normals4d);
 			glslProgram.setUniform("poincareModel", poincareModel);
 			if (poincarePath != null) {

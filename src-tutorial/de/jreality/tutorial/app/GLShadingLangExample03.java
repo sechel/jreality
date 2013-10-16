@@ -53,8 +53,6 @@ public class GLShadingLangExample03 {
 		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, 0, id);
 		// rotate this texture by 90 degrees
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(4).rotateZ(Math.PI/2).getMatrix());
-//		tex.setApplyMode(Texture2D.GL_DECAL);
-
 		stf.setColor(0, Color.red);
 		stf.update();
 		id = stf.getImageData();
@@ -73,6 +71,8 @@ public class GLShadingLangExample03 {
 //		    gl_FragColor.rgb = mix(currentSample.rgb, currentSample2.rgb, alpha); //( currentSample.rgb * (1.0-alpha) + currentSample2.rgb *alpha); 
 //		    gl_FragColor.a = 1.0;
 //		}
+=======
+>>>>>>> master
 		try {
 			brickProg = new GlslProgram(ap, "polygonShader",   
 					null,

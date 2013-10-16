@@ -126,14 +126,7 @@ public class JOGLLightHelper {
 	private float[] origin = { 0, 0, 0, 1 };
 
 	private void wisit(Light dl, GL2 globalGL, int lightCount) {
-		globalGL.glLightf(lightCount, GL2.GL_SPOT_CUTOFF, 180f); // use cutoff
-																	// ==
-																	// 0 as
-																	// marker
-																	// for
-																	// invalid
-																	// lights in
-																	// glsl
+		globalGL.glLightf(lightCount, GL2.GL_SPOT_CUTOFF, 180f); 
 		globalGL.glLightfv(lightCount, GL2.GL_DIFFUSE,
 				dl.getScaledColorAsFloat(), 0);
 		float f = (float) dl.getIntensity();

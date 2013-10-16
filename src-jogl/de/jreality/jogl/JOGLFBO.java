@@ -147,6 +147,7 @@ public class JOGLFBO {
 			// gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_GENERATE_MIPMAP,
 			// GL.GL_TRUE);
 			gl.glGenerateMipmap(GL.GL_TEXTURE_2D);
+//			System.err.println("rendering joglfbo");
 		}
 		int status = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
 		if (status != GL2.GL_FRAMEBUFFER_COMPLETE) {

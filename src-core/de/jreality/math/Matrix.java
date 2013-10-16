@@ -158,6 +158,13 @@ public class Matrix implements Serializable {
 		return new Matrix(Rn.conjugateByMatrix(null, A.matrix, B.matrix));
 	}
 
+	public static Matrix power(Matrix m, int n)		{
+		Matrix res = new Matrix();
+		for (int i = 0; i<n; ++i)	{
+			res.multiplyOnLeft(m);
+		}
+		return res;
+	}
   /**
    * this flag is kept for extending classes, that need to know
    * whether the matrix aray was changed. It's their responsibility
