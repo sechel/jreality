@@ -71,8 +71,6 @@ public class GLShadingLangExample03 {
 //		    gl_FragColor.rgb = mix(currentSample.rgb, currentSample2.rgb, alpha); //( currentSample.rgb * (1.0-alpha) + currentSample2.rgb *alpha); 
 //		    gl_FragColor.a = 1.0;
 //		}
-=======
->>>>>>> master
 		try {
 			brickProg = new GlslProgram(ap, "polygonShader",   
 					null,

@@ -141,13 +141,7 @@ public class Matrix implements Serializable {
 	public static Matrix sum(Matrix A, Matrix B) {
 		return new Matrix(Rn.add(null, A.matrix, B.matrix));
 	}
-
-	public static Matrix power(Matrix A, int n)	{
-		Matrix pow = new Matrix();
-		for (int i = 0; i<n; ++i)
-			pow.multiplyOnLeft(A);
-		return pow;
-	}
+	
 	/**
 	 * 
 	 * @param A
