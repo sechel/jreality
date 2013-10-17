@@ -83,20 +83,20 @@ public class RenderableUnit {
 		
 		for(JOGLFaceSetInstance fsi : setA){
 			if(null == registered.get(fsi)){
-				System.err.println("killing");
+//				System.err.println("killing");
 				Instance ins = instances.get(fsi);
 				ins.collection.kill(ins);
 				instances.remove(fsi);
 			}else{
 				if(fsi.eap==null){
-					System.err.println("killing");
+//					System.err.println("killing");
 					Instance ins = instances.get(fsi);
 					ins.collection.kill(ins);
 					instances.remove(fsi);
 				}else{
 					boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 					if(!visible){
-						System.err.println("killing");
+//						System.err.println("killing");
 						Instance ins = instances.get(fsi);
 						ins.collection.kill(ins);
 						instances.remove(fsi);
@@ -125,21 +125,21 @@ public class RenderableUnit {
 			if(instances.get(fsi) == null){
 				//in fact it's new
 				newSet.add(f);
-				System.out.println("adding to new set");
+//				System.out.println("adding to new set");
 			}else if(f.geom.oChangedLength()){
 				//is old, but changed its length
 				lengthSet.add(f);
-				System.out.println("adding to oChLength set");
+//				System.out.println("adding to oChLength set");
 			}else if(f.geom.oChangedPositions()){
 				//changed only positions or attributes
 				posASet.add(f);
 				instances.get(fsi).posUpToDate = false;
-				System.out.println("adding to oChPosA set");
+//				System.out.println("adding to oChPosA set");
 			}else if(f.geom.oChangedAttributes()){
 				//changed only positions or attributes
 				posASet.add(f);
 				instances.get(fsi).appChanged = true;
-				System.out.println("adding to oChPosA set");
+//				System.out.println("adding to oChPosA set");
 			}else{
 				//nothing changed, needs not be touched if not neccessary
 				//do nothing here!
@@ -217,7 +217,7 @@ public class RenderableUnit {
 		
 		//if newSet not empty yet, create new insColl:
 		while(newSet.size() > 0){
-			System.out.println("- adding new InstanceCollection to this RU");
+//			System.out.println("- adding new InstanceCollection to this RU");
 			
 			InstanceCollection currentCollection = new InstanceCollection(shader);
 			currentCollection.init(gl);

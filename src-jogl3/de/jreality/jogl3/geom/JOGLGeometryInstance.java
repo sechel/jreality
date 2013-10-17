@@ -613,7 +613,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
     				c.add(new GlUniformInt("_combineMode", tex.getApplyMode()));
     				texture.combineMode = tex.getApplyMode();
     				c.add(new GlUniformMat4("textureMatrix", Rn.convertDoubleToFloatArray(tex.getTextureMatrix().getArray())));
-    				System.err.println("sampler2D: "+ v.getName());
+//    				System.out.println("sampler2D: "+ v.getName());
     				hasTexture = true;
     			}
     		}else if(v.getType().equals("sampler2D") && name.equals("front")){

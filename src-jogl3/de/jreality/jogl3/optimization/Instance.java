@@ -27,8 +27,8 @@ public class Instance {
 //		}
 		
 		length = fse.getVBO("vertex_coordinates").getLength();
-		System.out.println("instance length = " + length);
-		System.out.println("length = " + length);
+//		System.out.println("instance length = " + length);
+//		System.out.println("length = " + length);
 	}
 	
 	public void kill(){

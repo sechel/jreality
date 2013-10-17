@@ -163,7 +163,7 @@ public class JOGLPointSetEntity extends JOGLGeometryEntity {
 						}
 					}
 					
-					System.out.println("creating " + "point_"+a.getName());
+//					System.out.println("creating " + "point_"+a.getName());
 				}else{
 					System.out.println("PSE1: not knowing what to do with " + attribs.getStorageModel().toString()+" "+attribs.getStorageModel().getClass().toString() + a.getName());
 				}

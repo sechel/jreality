@@ -332,7 +332,7 @@ public class InstanceCollection {
 	 * @param end in Floats
 	 */
 	private void nullFromTo(int start, int end){
-		System.err.println("start = " + start + ", end = " + end);
+//		System.err.println("start = " + start + ", end = " + end);
 		//null vertex_coordinates.w
 		GLVBOFloat vertexData = (GLVBOFloat) gpuData.get("vertex_coordinates");
 		float[] subdata = new float[(end-start)];
@@ -351,15 +351,15 @@ public class InstanceCollection {
 	 * @param elementSize
 	 */
 	private void putNewVBO(String name, int type, int elementSize){
-		if(type == 5126)
-			System.out.println("putting vbo " + name + " with type glFloat");
-		if(type == 5124)
-			System.out.println("putting vbo " + name + " with type glInt");
+//		if(type == 5126)
+//			System.out.println("putting vbo " + name + " with type glFloat");
+//		if(type == 5124)
+//			System.out.println("putting vbo " + name + " with type glInt");
 		if(type == GL3.GL_FLOAT){
-			System.err.println(name + " elementSize = " + elementSize);
+//			System.err.println(name + " elementSize = " + elementSize);
 			gpuData.put(name, new GLVBOFloat(gl, new float[current_vbo_size/4*elementSize], name, elementSize));
 		}else if(type == GL3.GL_INT){
-			System.err.println(name + " elementSize = " + elementSize);
+//			System.err.println(name + " elementSize = " + elementSize);
 			gpuData.put(name, new GLVBOInt(gl, new int[current_vbo_size/4*elementSize], name, elementSize));
 		}else{
 			System.err.println("unknown type of elements in VBO (InstanceCollection.java)");
@@ -371,7 +371,7 @@ public class InstanceCollection {
 	 */
 	private void changeVBOSize(int powerofTwo){
 		current_vbo_size = START_SIZE*(int)Math.round(Math.pow(2, powerofTwo));
-		System.out.println("new size = " + current_vbo_size);
+//		System.out.println("new size = " + current_vbo_size);
 		Set<String> keys = gpuData.keySet();
 		String[] keyArray = keys.toArray(new String[0]);
 		for(String s : keyArray){
@@ -386,12 +386,12 @@ public class InstanceCollection {
 	 * @param i the instance being added
 	 */
 	private void pushInstanceToGPU(Instance i){
-		System.err.println("pushInstanceToGPU");
+//		System.err.println("pushInstanceToGPU");
 		//add to all vbos
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)i.fsi.getEntity();
 		
 		GLVBOInt vertIDVBO = (GLVBOInt) gpuData.get("vertex_id");
-		System.err.println("updating vertex_id no " + i.id);
+//		System.err.println("updating vertex_id no " + i.id);
 		int id = i.id;
 		int[] vertex_id = new int[i.length/4];
 		for(int g = 0; g < i.length/4; g++){
@@ -402,7 +402,7 @@ public class InstanceCollection {
 		//updating all the remaining vbos
 		GLVBO[] vbos = fse.getAllVBOs();
 		for(GLVBO vbo : vbos){
-			System.out.println("vbo.name = " + vbo.getName());
+//			System.out.println("vbo.name = " + vbo.getName());
 			//create new GLVBO for this name, if not present
 			if(gpuData.get(vbo.getName()) == null){
 				putNewVBO(vbo.getName(), vbo.getType(), vbo.getElementSize());
@@ -411,12 +411,12 @@ public class InstanceCollection {
 			//fill in vbo data
 			GLVBO largevbo = gpuData.get(vbo.getName());
 			if(largevbo.getType() == GL3.GL_FLOAT){
-				System.out.println(((GLVBOFloat)vbo).getData()[4]);
+//				System.out.println(((GLVBOFloat)vbo).getData()[4]);
 				GLVBOFloat f = (GLVBOFloat)largevbo;
 				f.updateSubData(gl, ((GLVBOFloat)vbo).getData(), i.posInVBOs, i.length);
 			}else if(largevbo.getType() == GL3.GL_INT){
 				GLVBOInt f = (GLVBOInt)largevbo;
-				System.err.println("largevbo.getName() = " + largevbo.getName());
+//				System.err.println("largevbo.getName() = " + largevbo.getName());
 				
 				//vbo.getLength()*4 must equal i.length
 				f.updateSubData(gl, ((GLVBOInt)vbo).getData(), i.posInVBOs, i.length);
@@ -466,7 +466,7 @@ public class InstanceCollection {
 			return null;
 		}
 		if(!fsi.getFaceDraw()){
-			System.out.println("FSI not visible -> not registering");
+//			System.out.println("FSI not visible -> not registering");
 			return null;
 		}
 		Instance ret = new Instance(this, fsi, state, 0);
@@ -489,7 +489,7 @@ public class InstanceCollection {
 	}
 	
 	private void writeAllInstancesNewToVBO(){
-		System.out.println("write all instances new to vbo of size " + gpuData.get("vertex_coordinates").getLength());
+//		System.out.println("write all instances new to vbo of size " + gpuData.get("vertex_coordinates").getLength());
 		resetFreeIDs();
 		//write rest to gpu
 		dead_count = 0;
@@ -511,7 +511,7 @@ public class InstanceCollection {
 		//push ALL instances to GPU
 		int pos = 0;
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
-			System.out.println("writing still alive instances to gpu");
+//			System.out.println("writing still alive instances to gpu");
 			Instance i = instances.get(fsi);
 			//take an unused ID from freeIDs ans give it to the Instance
 			Integer inte = freeIDs.iterator().next();
@@ -566,12 +566,12 @@ public class InstanceCollection {
 				
 				//and null (and remove?) the dead ones
 				for(Instance i : dyingInstances){
-					System.out.println("remove instance from dyingInstances");
+//					System.out.println("remove instance from dyingInstances");
 					nullInstance(i);
 					i.posUpToDate = true;
 					//TODO is this right?
 					instances.remove(i.fsi);
-					System.out.println("instances.size = " + instances.size());
+//					System.out.println("instances.size = " + instances.size());
 					//free the ID of the removed Instance
 					freeIDs.add(new Integer(i.id));
 				}
@@ -588,7 +588,7 @@ public class InstanceCollection {
 					//get free ID and give it to the Instance
 					Integer inte = freeIDs.iterator().next();
 					freeIDs.remove(inte);
-					System.err.println("setting id to " + inte);
+//					System.err.println("setting id to " + inte);
 					i.id = inte;
 					
 					pushInstanceToGPU(i);
