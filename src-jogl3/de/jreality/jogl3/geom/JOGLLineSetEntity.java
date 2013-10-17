@@ -191,7 +191,7 @@ public class JOGLLineSetEntity extends JOGLPointSetEntity {
 						}
 					}
 					
-					System.out.println("creating " + "edge_"+a.getName());
+//					System.out.println("creating " + "edge_"+a.getName());
 				}else{
 					System.out.println("LSE1: not knowing what to do with " + attribs.getStorageModel().toString() + ", " + a.getName());
 				}

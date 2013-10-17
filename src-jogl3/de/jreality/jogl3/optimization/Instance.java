@@ -13,7 +13,6 @@ public class Instance {
 		this.state = state;
 		this.posInVBOs = posInVBOs;
 		dead = false;
-		upToDate = true;
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)fsi.getEntity();
 		if(fse == null){
 			System.err.println("FSI has no entity");
@@ -28,8 +27,8 @@ public class Instance {
 //		}
 		
 		length = fse.getVBO("vertex_coordinates").getLength();
-		System.out.println("instance length = " + length);
-		System.out.println("length = " + length);
+//		System.out.println("instance length = " + length);
+//		System.out.println("length = " + length);
 	}
 	
 	public void kill(){
@@ -60,6 +59,7 @@ public class Instance {
 	 * dead actually means, that it needs to be nulled in GPU, if it's not removed by defragmentation or merging
 	 */
 	private boolean dead = false;
-	public boolean upToDate = true;
+	public boolean posUpToDate = true;
+	public boolean appChanged = true;
 	public int id = 0;
 }

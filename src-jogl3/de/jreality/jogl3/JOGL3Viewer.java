@@ -285,7 +285,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 	BufferedImage dst = null;
 	boolean offscreen = false;
 	int textureDeletionCounter = 0;
-	RenderableUnitCollection RUC = new RenderableUnitCollection();
+	RenderableUnitCollection RUC = null;
 	public void display(GLAutoDrawable arg0, int width, int height) {
 		
 		perfmeter.beginFrame();
@@ -457,6 +457,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		backgroundHelper.initializeBackground(gl);
 		tubeHelper = new TubeHelper();
 		sphereHelper = new SphereHelper();
+		RUC = new RenderableUnitCollection();
 	}
 	
 	public void reshape(GLAutoDrawable arg0, int arg1, int arg2, int arg3,

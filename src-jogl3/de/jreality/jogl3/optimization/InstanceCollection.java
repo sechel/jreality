@@ -85,18 +85,31 @@ public class InstanceCollection {
 	private int textureID;
 	private int texUnit = 1;
 	private float data[];
+	private float[] modelviewData;
 	
 	private void initUniformTexture(GL3 gl){
 		textureID = generateNewTexID(gl);
 		
 		data = new float[shader.getNumFloatsNecessary()*MAX_NUMBER_OBJ_IN_COLLECTION];
-		
-		updateUniformsTexture(gl);
+		modelviewData = new float[16*MAX_NUMBER_OBJ_IN_COLLECTION];
+		updateUniformsTexture(gl, true);
 	}
 	
 	private int offset;
 	
-	private void DataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, Instance ins, JOGLRenderState state){
+	private void writeAllModelviewMatrices(){
+		for(JOGLFaceSetInstance fsi : instances.keySet()){
+			Instance i = instances.get(fsi);
+			int j = i.id;
+			float[] f = new float[16];
+			Rn.transposeD2F(f, i.state.getModelViewMatrix());
+			for(int l = 0; l < 16; l++){
+				modelviewData[j*16+l] = f[l];
+			}
+		}
+	}
+	
+	private void appDataWriteHelper(LinkedList<String[]> Uniforms, WeakHashMap<String, GlUniform> uniforms, Instance ins, JOGLRenderState state){
 		int j = ins.id;
 //		System.out.println("DWH");
 		for(String[] s : Uniforms){
@@ -177,40 +190,60 @@ public class InstanceCollection {
 		}
 	}
 	
-	private void updateUniformsTexture(GL3 gl){
+	private void updateUniformsTexture(GL3 gl, boolean makeAllNew){
 //		System.err.println("update uniforms texture");
 		//update data
 		LinkedList<String[]> vertUniforms = shader.getVertUniforms();
 		LinkedList<String[]> fragUniforms = shader.getFragUniforms();
-		
+		boolean changedAnyApp = false;
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
 			Instance i = instances.get(fsi);
-			//retrieve appearance data from fsi uniforms
-//			JOGLFaceSetInstance fsi = i.fsi;
-			WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
-			//the width offset
-			offset = 0;
-//			System.err.println("updating texture for i.id = " + i.id);
-			DataWriteHelper(vertUniforms, uniforms, i, i.state);
-//			System.out.println("offset after vert is " + offset);
-			if (offset%4 != 0)
-				offset = 4*(offset/4) + 4;
-//			System.out.println("offset before frag is " + offset);
-			DataWriteHelper(fragUniforms, uniforms, i, i.state);
+//			System.out.println("appChanged for instance " + i.id + " is " + i.appChanged);
+			if(i.appChanged || makeAllNew){
+				changedAnyApp = true;
+				i.appChanged = false;
+				//retrieve appearance data from fsi uniforms
+//				JOGLFaceSetInstance fsi = i.fsi;
+				WeakHashMap<String, GlUniform> uniforms = fsi.faceSetUniformsHash;
+				//the width offset
+				offset = 0;
+//				System.err.println("updating texture for i.id = " + i.id);
+				appDataWriteHelper(vertUniforms, uniforms, i, i.state);
+//				System.out.println("offset after vert is " + offset);
+				if (offset%4 != 0)
+					offset = 4*(offset/4) + 4;
+//				System.out.println("offset before frag is " + offset);
+				appDataWriteHelper(fragUniforms, uniforms, i, i.state);
+			}
 		}
-		
-		gl.glEnable(gl.GL_TEXTURE_2D);
-		gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
-		
-		gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
-		
-		gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
-	    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
-	    
-	    gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, shader.getNumFloatsNecessary()/4);
-    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS, 0);
-    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS, 0);
-	    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, shader.getNumFloatsNecessary()/4, MAX_NUMBER_OBJ_IN_COLLECTION, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+		if(changedAnyApp || makeAllNew){
+			gl.glEnable(gl.GL_TEXTURE_2D);
+			gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
+			
+			gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
+			
+			gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
+		    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+		    
+		    gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, shader.getNumFloatsNecessary()/4);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS, 0);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS, 0);
+		    gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA32F, shader.getNumFloatsNecessary()/4, MAX_NUMBER_OBJ_IN_COLLECTION, 0, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(data));
+		}else{
+			writeAllModelviewMatrices();
+			gl.glEnable(gl.GL_TEXTURE_2D);
+			gl.glActiveTexture(gl.GL_TEXTURE0+texUnit);
+			
+			gl.glBindTexture(gl.GL_TEXTURE_2D, textureID);
+			
+			gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST); 
+		    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+		    
+		    gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH, 4);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS, 0);
+	    	gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS, 0);
+		    gl.glTexSubImage2D(gl.GL_TEXTURE_2D, 0, 0, 0, 4, MAX_NUMBER_OBJ_IN_COLLECTION, gl.GL_RGBA, gl.GL_FLOAT, FloatBuffer.wrap(modelviewData));
+		}
 	}
 	
 	private int generateNewTexID(GL3 gl){
@@ -299,7 +332,7 @@ public class InstanceCollection {
 	 * @param end in Floats
 	 */
 	private void nullFromTo(int start, int end){
-		System.err.println("start = " + start + ", end = " + end);
+//		System.err.println("start = " + start + ", end = " + end);
 		//null vertex_coordinates.w
 		GLVBOFloat vertexData = (GLVBOFloat) gpuData.get("vertex_coordinates");
 		float[] subdata = new float[(end-start)];
@@ -318,15 +351,15 @@ public class InstanceCollection {
 	 * @param elementSize
 	 */
 	private void putNewVBO(String name, int type, int elementSize){
-		if(type == 5126)
-			System.out.println("putting vbo " + name + " with type glFloat");
-		if(type == 5124)
-			System.out.println("putting vbo " + name + " with type glInt");
+//		if(type == 5126)
+//			System.out.println("putting vbo " + name + " with type glFloat");
+//		if(type == 5124)
+//			System.out.println("putting vbo " + name + " with type glInt");
 		if(type == GL3.GL_FLOAT){
-			System.err.println(name + " elementSize = " + elementSize);
+//			System.err.println(name + " elementSize = " + elementSize);
 			gpuData.put(name, new GLVBOFloat(gl, new float[current_vbo_size/4*elementSize], name, elementSize));
 		}else if(type == GL3.GL_INT){
-			System.err.println(name + " elementSize = " + elementSize);
+//			System.err.println(name + " elementSize = " + elementSize);
 			gpuData.put(name, new GLVBOInt(gl, new int[current_vbo_size/4*elementSize], name, elementSize));
 		}else{
 			System.err.println("unknown type of elements in VBO (InstanceCollection.java)");
@@ -338,7 +371,7 @@ public class InstanceCollection {
 	 */
 	private void changeVBOSize(int powerofTwo){
 		current_vbo_size = START_SIZE*(int)Math.round(Math.pow(2, powerofTwo));
-		System.out.println("new size = " + current_vbo_size);
+//		System.out.println("new size = " + current_vbo_size);
 		Set<String> keys = gpuData.keySet();
 		String[] keyArray = keys.toArray(new String[0]);
 		for(String s : keyArray){
@@ -353,12 +386,12 @@ public class InstanceCollection {
 	 * @param i the instance being added
 	 */
 	private void pushInstanceToGPU(Instance i){
-		System.err.println("pushInstanceToGPU");
+//		System.err.println("pushInstanceToGPU");
 		//add to all vbos
 		JOGLFaceSetEntity fse = (JOGLFaceSetEntity)i.fsi.getEntity();
 		
 		GLVBOInt vertIDVBO = (GLVBOInt) gpuData.get("vertex_id");
-		System.err.println("updating vertex_id no " + i.id);
+//		System.err.println("updating vertex_id no " + i.id);
 		int id = i.id;
 		int[] vertex_id = new int[i.length/4];
 		for(int g = 0; g < i.length/4; g++){
@@ -369,7 +402,7 @@ public class InstanceCollection {
 		//updating all the remaining vbos
 		GLVBO[] vbos = fse.getAllVBOs();
 		for(GLVBO vbo : vbos){
-			System.out.println("vbo.name = " + vbo.getName());
+//			System.out.println("vbo.name = " + vbo.getName());
 			//create new GLVBO for this name, if not present
 			if(gpuData.get(vbo.getName()) == null){
 				putNewVBO(vbo.getName(), vbo.getType(), vbo.getElementSize());
@@ -378,12 +411,12 @@ public class InstanceCollection {
 			//fill in vbo data
 			GLVBO largevbo = gpuData.get(vbo.getName());
 			if(largevbo.getType() == GL3.GL_FLOAT){
-				System.out.println(((GLVBOFloat)vbo).getData()[4]);
+//				System.out.println(((GLVBOFloat)vbo).getData()[4]);
 				GLVBOFloat f = (GLVBOFloat)largevbo;
 				f.updateSubData(gl, ((GLVBOFloat)vbo).getData(), i.posInVBOs, i.length);
 			}else if(largevbo.getType() == GL3.GL_INT){
 				GLVBOInt f = (GLVBOInt)largevbo;
-				System.err.println("largevbo.getName() = " + largevbo.getName());
+//				System.err.println("largevbo.getName() = " + largevbo.getName());
 				
 				//vbo.getLength()*4 must equal i.length
 				f.updateSubData(gl, ((GLVBOInt)vbo).getData(), i.posInVBOs, i.length);
@@ -433,7 +466,7 @@ public class InstanceCollection {
 			return null;
 		}
 		if(!fsi.getFaceDraw()){
-			System.out.println("FSI not visible -> not registering");
+//			System.out.println("FSI not visible -> not registering");
 			return null;
 		}
 		Instance ret = new Instance(this, fsi, state, 0);
@@ -456,7 +489,7 @@ public class InstanceCollection {
 	}
 	
 	private void writeAllInstancesNewToVBO(){
-		System.out.println("write all instances new to vbo of size " + gpuData.get("vertex_coordinates").getLength());
+//		System.out.println("write all instances new to vbo of size " + gpuData.get("vertex_coordinates").getLength());
 		resetFreeIDs();
 		//write rest to gpu
 		dead_count = 0;
@@ -478,7 +511,7 @@ public class InstanceCollection {
 		//push ALL instances to GPU
 		int pos = 0;
 		for(JOGLFaceSetInstance fsi : instances.keySet()){
-			System.out.println("writing still alive instances to gpu");
+//			System.out.println("writing still alive instances to gpu");
 			Instance i = instances.get(fsi);
 			//take an unused ID from freeIDs ans give it to the Instance
 			Integer inte = freeIDs.iterator().next();
@@ -487,7 +520,7 @@ public class InstanceCollection {
 			
 			availableFloats -= i.length;
 			i.posInVBOs = pos;
-			i.upToDate = true;
+			i.posUpToDate = true;
 			pos += i.length;
 			pushInstanceToGPU(i);
 		}
@@ -526,57 +559,65 @@ public class InstanceCollection {
 			//write everything to vbo
 			availableFloats = current_vbo_size;
 			writeAllInstancesNewToVBO();
-			
+			updateUniformsTexture(gl, true);
 		}else{
 			//do not resize
 			if(availableFloats >= 0){
 				
+				//and null (and remove?) the dead ones
+				for(Instance i : dyingInstances){
+//					System.out.println("remove instance from dyingInstances");
+					nullInstance(i);
+					i.posUpToDate = true;
+					//TODO is this right?
+					instances.remove(i.fsi);
+//					System.out.println("instances.size = " + instances.size());
+					//free the ID of the removed Instance
+					freeIDs.add(new Integer(i.id));
+				}
+				
 				//push ONLY the new instances to GPU
 //				System.out.println("currsize = " + current_vbo_size + ", avail = " + availableBeforeCalc);
+				
 				int pos = current_vbo_size-availableBeforeCalc;
 				for(Instance i : newInstances){
 					i.posInVBOs = pos;
 					pos += i.length;
 					instances.put(i.fsi, i);
-					i.upToDate = true;
+					i.posUpToDate = true;
 					//get free ID and give it to the Instance
 					Integer inte = freeIDs.iterator().next();
 					freeIDs.remove(inte);
-					System.err.println("setting id to " + inte);
+//					System.err.println("setting id to " + inte);
 					i.id = inte;
 					
 					pushInstanceToGPU(i);
 				}
-				//and null (and remove?) the dead ones
-				for(Instance i : dyingInstances){
-					System.out.println("remove instance from dyingInstances");
-					nullInstance(i);
-					i.upToDate = true;
-					//TODO is this right?
-					instances.remove(i.fsi);
-					System.out.println("instances.size = " + instances.size());
-					//free the ID of the removed Instance
-					freeIDs.add(new Integer(i.id));
-				}
+				
 				//and update the !up_to_date ones
 				
 				for(JOGLFaceSetInstance fsi : instances.keySet()){
 					Instance i = instances.get(fsi);
-					if(!i.upToDate){
+					if(!i.posUpToDate){
 						pushInstanceToGPU(i);
-						i.upToDate = true;
+						i.posUpToDate = true;
 					}
 				}
+				if(newInstances.size() > 0)
+					updateUniformsTexture(gl, true);
+				else
+					updateUniformsTexture(gl, false);
 				//and done!
 			}else{
 				//don't resize, but rewrite everything to vbo
 				availableFloats = current_vbo_size;
 				writeAllInstancesNewToVBO();
+				updateUniformsTexture(gl, true);
 			}
 		}
 		dyingInstances = new LinkedList<Instance>();
 		newInstances = new LinkedList<Instance>();
-		updateUniformsTexture(gl);
+		
 	}
 	
 	public void render(GL3 gl){

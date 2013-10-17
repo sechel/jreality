@@ -23,7 +23,7 @@ public class GLVBOInt extends GLVBO{
 	public void updateSubData(GL3 gl, int[] subdata, int begin, int length){
 		System.arraycopy(subdata, 0, this.data, begin, length);
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, index);
-		System.out.println("begin = " + begin);
+//		System.out.println("begin = " + begin);
 		gl.glBufferSubData(gl.GL_ARRAY_BUFFER, 4*begin, 4*length, IntBuffer.wrap(subdata));
 	}
 	public void updateData(GL3 gl, int[] data){

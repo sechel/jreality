@@ -20,12 +20,12 @@ import de.jreality.shader.ShaderUtility;
 
 public class RenderableUnitCollection{
 	
-	public final int MAX_NUM_FLOATS = 10000;
+	public final int MAX_NUM_FLOATS = 100000;
 	
 	private boolean active = true;
 	
 	public void setActive(boolean val){
-		System.out.println("SETTING ACTIVE TO " + val);
+//		System.out.println("SETTING ACTIVE TO " + val);
 		active = val;
 	}
 	
@@ -60,7 +60,7 @@ public class RenderableUnitCollection{
 				
 				WeakHashMap<GlTexture, WeakHashMap<GlReflectionMap, RenderableUnit>> hm1 = units.get(shader);
 				if(hm1 == null){
-					System.out.println("new shader forces new RenderableUnit");
+//					System.out.println("new shader forces new RenderableUnit");
 					hm1 = new WeakHashMap<GlTexture, WeakHashMap<GlReflectionMap,RenderableUnit>>();
 					units.put(shader, hm1);
 				}
@@ -68,14 +68,14 @@ public class RenderableUnitCollection{
 //				System.err.println("tex is " + tex);
 				WeakHashMap<GlReflectionMap, RenderableUnit> hm2 = hm1.get(tex);
 				if(hm2 == null){
-					System.out.println("new texture forces new RenderableUnit");
+//					System.out.println("new texture forces new RenderableUnit");
 					hm2 = new WeakHashMap<GlReflectionMap,RenderableUnit>();
 					hm1.put(tex, hm2);
 				}
 				//hm2 now usable
 				RenderableUnit ru = hm2.get(reflMap);
 				if(ru == null){
-					System.out.println("new reflection map forces new RenderableUnit");
+//					System.out.println("new reflection map forces new RenderableUnit");
 					ru = new RenderableUnit(tex, new OptimizedGLShader("../glsl/" + shader.getVertFilename(), "../glsl/" + shader.getFragFilename()), reflMap);
 //					ru = new RenderableUnit(tex, new GLShader("nontransp/Cpolygon.v", "nontransp/Cpolygon.f"), reflMap);
 					hm2.put(reflMap, ru);

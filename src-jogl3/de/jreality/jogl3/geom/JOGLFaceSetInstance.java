@@ -88,8 +88,10 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	public GlReflectionMap reflMap = new GlReflectionMap();
 	@Override
 	public void updateAppearance(SceneGraphPath sgp, GL3 gl, boolean appChanged, boolean geomLengthChanged, boolean geomPosChanged) {
-		if(appChanged || geomPosChanged)
-			oChangedPosA = true;
+		if(geomPosChanged)
+			oChangedPos = true;
+		if(appChanged)
+			oChangedAtt = true;
 		if(geomLengthChanged)
 			oChangedLength = true;
 		super.updateAppearance(sgp, gl, appChanged, geomLengthChanged, geomPosChanged);
