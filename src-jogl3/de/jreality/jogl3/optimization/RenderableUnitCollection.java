@@ -41,12 +41,13 @@ public class RenderableUnitCollection{
 	private GlReflectionMap nullReflMap = new GlReflectionMap();
 	
 	public void add(RenderableObject o){
+//		System.out.println(o.geom.getClass());
 		if(o.geom instanceof JOGLFaceSetInstance){
 			JOGLFaceSetInstance f = (JOGLFaceSetInstance)o.geom;
 			JOGLFaceSetEntity fse = (JOGLFaceSetEntity) f.getEntity();
 //			System.out.println("Length = " + fse.getAllVBOs()[0].getLength());
-			
-			if(fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS && active && !f.getEdgeDraw() && !f.getVertexDraw()){
+//			System.out.println(f.ifd.drawLabels);
+			if((!f.ifd.drawLabels || f.labelData.tex == null) && fse.getAllVBOs()[0].getLength() <= MAX_NUM_FLOATS && active && !f.getEdgeDraw() && !f.getVertexDraw()){
 //				System.out.println("adding to renderableUnit");
 				
 				GlTexture tex = f.faceTexture;

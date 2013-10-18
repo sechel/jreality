@@ -184,7 +184,7 @@ public abstract class JOGLGeometryInstance extends SceneTreeNode {
 	public void updateLabelTextureAndVBOsAndUniforms(GL3 gl, LabelRenderData lrd, Label[] labels, InstanceFontData ifd){
 		if(labels == null || labels.length == 0)
 			return;
-		System.out.println("updateLabelTextureAndVBOsAndUniforms called");
+//		System.out.println("updateLabelTextureAndVBOsAndUniforms called");
 		lrd.drawLabels = ifd.drawLabels;
 		lrd.xyzOffsetScale[3] = (float)ifd.scale;
 		

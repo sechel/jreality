@@ -31,7 +31,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	}
 	
 	private int labelsChangedNoCache = 0;
-	private LabelRenderData labelData = new LabelRenderData();
+	public LabelRenderData labelData = new LabelRenderData();
 	@Override
 	public void render(JOGLRenderState state, int width, int height) {
 		if(eap==null)
