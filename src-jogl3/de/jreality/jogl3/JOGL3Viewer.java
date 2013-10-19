@@ -331,6 +331,38 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 				else{
 					RUC.setActive(CommonAttributes.SMALL_OBJ_OPTIMIZATION_DEFAULT);
 				}
+				
+				bgo = null;
+				boolean enabled;
+				if (rootAp != null)
+					bgo = rootAp.getAttribute(CommonAttributes.ANTIALIASING_ENABLED);
+				if (bgo != null && bgo instanceof Boolean)
+					enabled = (Boolean) bgo;
+				else{
+					enabled = CommonAttributes.ANTIALIASING_ENABLED_DEFAULT;
+				}
+				if(enabled){
+					int factor;
+					if (rootAp != null)
+						bgo = rootAp.getAttribute(CommonAttributes.ANTI_ALIASING_FACTOR);
+					if (bgo != null && bgo instanceof Integer)
+						factor = (Integer) bgo;
+					else{
+						factor = CommonAttributes.ANTI_ALIASING_FACTOR_DEFAULT;
+					}
+					if(factor != supersample){
+						supersample = factor;
+						TransparencyHelper.setSupersample(factor);
+						TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
+					}
+				}else{
+					if(supersample != 1){
+						//reset
+						supersample = 1;
+						TransparencyHelper.setSupersample(supersample);
+						TransparencyHelper.resizeFramebufferTextures(arg0.getGL().getGL3(), width, height);
+					}
+				}
 			}
 			
 			//update sky box
