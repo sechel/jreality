@@ -220,9 +220,11 @@ public class CameraUtility {
 		double zmin = cameraBox.getMinZ();
 		double zmax = cameraBox.getMaxZ();
 		
-		if ( cam.getFar() > 0.0 && zmax < 0.0 && -zmax > .1*cam.getFar() )  cam.setFar(-10*zmax);
-		if ( zmin < 0.0 && -zmin < 10*cam.getNear() )  cam.setNear(-.1*zmin);
+//		if ( cam.getFar() > 0.0 && zmax < 0.0 && -zmax > .1*cam.getFar() )  cam.setFar(-10*zmax);
+//		if ( zmin < 0.0 && -zmin < 10*cam.getNear() )  cam.setNear(-.1*zmin);
 		//cam.update();
+		if (zmin < 0.0) cam.setNear(-.5*zmin);
+		if (zmax < 0.0) cam.setFar(2*zmax);
 		
 	}
 
