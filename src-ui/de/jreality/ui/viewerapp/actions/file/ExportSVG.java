@@ -41,12 +41,15 @@ package de.jreality.ui.viewerapp.actions.file;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-import de.jreality.scene.SceneGraphComponent;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+
 import de.jreality.scene.Viewer;
 import de.jreality.softviewer.SVGRenderer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
@@ -60,44 +63,41 @@ import de.jreality.ui.viewerapp.actions.AbstractJrAction;
  */
 public class ExportSVG extends AbstractJrAction {
 
+	private static final long serialVersionUID = 1L;
 	private Viewer viewer;
-	private SceneGraphComponent sgc;
+	
+	private JPanel
+		optionsPanel = new JPanel();
+	private JCheckBox
+		doIntersectionsChecker = new JCheckBox("Intersect Polygons", true),
+		doSortingChecker = new JCheckBox("Sort Polygons", true);
+	
+	public ExportSVG(String name, Component parentComp) {
+		super(name, parentComp);
+		setShortDescription("Export SVG file");
+		optionsPanel.setLayout(new GridLayout(2, 1));
+		optionsPanel.add(doIntersectionsChecker);
+		optionsPanel.add(doSortingChecker);
+	}
 	
 	public ExportSVG(String name, Viewer viewer, Component parentComp) {
-		super(name, parentComp);
-
-		if (viewer == null)
+		this(name, parentComp);
+		if (viewer == null) {
 			throw new IllegalArgumentException("Viewer is null!");
+		}
 		this.viewer = viewer;
-		sgc = this.viewer.getSceneRoot();
-
-		setShortDescription("Export SVG file");
 	}
 	
-	public ExportSVG(String name, SceneGraphComponent sgc, Component parentComp) {
-		super(name, parentComp);
-
-		if (sgc == null)
-			throw new IllegalArgumentException("SceneGraphComponent is null!");
-		this.sgc = sgc;
-		
-		setShortDescription("Export SVG file");
-	}
-
-//	public ExportSVG(String name, ViewerApp v) {
-//	this(name, v.getViewerSwitch(), v.getFrame());
-//	}
-
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		File file = FileLoaderDialog.selectTargetFile(parentComp, "svg", "SVG files");
+		File file = FileLoaderDialog.selectTargetFile(parentComp, optionsPanel, "svg", "SVG files");
 		if (file == null) return;  //dialog cancelled
 
+		boolean doIntersections = doIntersectionsChecker.isSelected();
+		boolean doSorting = doSortingChecker.isSelected();
 		Dimension d = viewer.getViewingComponentSize();
-		SVGRenderer rv;
 		try {
-			rv = new SVGRenderer(new PrintWriter(file), d.width, d.height);
+			SVGRenderer rv = new SVGRenderer(new PrintWriter(file), d.width, d.height, doIntersections, doSorting);
 			rv.setCameraPath(viewer.getCameraPath());
 			rv.setSceneRoot(viewer.getSceneRoot());
 			rv.setAuxiliaryRoot(viewer.getAuxiliaryRoot());
@@ -106,5 +106,5 @@ public class ExportSVG extends AbstractJrAction {
 			e1.printStackTrace();
 		}
 	}
-
+	
 }

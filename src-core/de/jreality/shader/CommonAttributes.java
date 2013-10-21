@@ -45,8 +45,6 @@ import java.awt.Font;
 
 import javax.swing.SwingConstants;
 
-import sun.awt.resources.awt;
-
 import de.jreality.geometry.FrameFieldType;
 import de.jreality.scene.Appearance;
 
