@@ -12,7 +12,6 @@ import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.geom.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformInt;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformMat4;
 import de.jreality.jogl3.shader.ShaderVarHash;

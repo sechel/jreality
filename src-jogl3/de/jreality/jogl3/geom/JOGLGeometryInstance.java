@@ -15,13 +15,10 @@ import javax.swing.SwingConstants;
 
 import de.jreality.jogl3.GlTexture;
 import de.jreality.jogl3.JOGLRenderState;
-import de.jreality.jogl3.JOGLTexture2D;
-import de.jreality.jogl3.geom.Label;
 import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.ShaderVarHash;
-import de.jreality.jogl3.shader.Texture2DLoader;
 import de.jreality.math.Rn;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;

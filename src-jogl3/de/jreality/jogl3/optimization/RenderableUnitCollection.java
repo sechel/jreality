@@ -7,16 +7,11 @@ import java.util.WeakHashMap;
 import javax.media.opengl.GL3;
 
 import de.jreality.jogl3.GlTexture;
-import de.jreality.jogl3.JOGLRenderState;
-import de.jreality.jogl3.JOGLSceneGraphComponentInstance;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.geom.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
-import de.jreality.jogl3.geom.JOGLGeometryInstance;
 import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.ShaderUtility;
 
 public class RenderableUnitCollection{
 	

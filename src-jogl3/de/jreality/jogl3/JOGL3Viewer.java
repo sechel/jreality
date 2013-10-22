@@ -36,7 +36,6 @@ import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
-import de.jreality.jogl3.optimization.RenderableUnit;
 import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.PointShader;

@@ -8,8 +8,6 @@ import java.util.List;
 
 import javax.media.opengl.GL3;
 
-//import com.jogamp.opengl.util.awt.ImageUtil;
-
 import de.jreality.jogl.plugin.InfoOverlay;
 import de.jreality.jogl3.InfoOverlayData;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
@@ -18,6 +16,7 @@ import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.util.ImageUtility;
+//import com.jogamp.opengl.util.awt.ImageUtil;
 
 public class TransparencyHelper {
 	public static void setSupersample(int ss){
