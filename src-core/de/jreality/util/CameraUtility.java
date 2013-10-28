@@ -224,7 +224,7 @@ public class CameraUtility {
 //		if ( zmin < 0.0 && -zmin < 10*cam.getNear() )  cam.setNear(-.1*zmin);
 		//cam.update();
 		if (zmin < 0.0) cam.setNear(-.5*zmin);
-		if (zmax < 0.0) cam.setFar(2*zmax);
+		if (zmax < 0.0) cam.setFar(-2*zmax);
 		
 	}
 
