@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.KeyStroke;
@@ -191,7 +192,7 @@ public class ContentAppearance extends SceneShrinkPanel implements ColorPickerMo
 				}
 			};
 	
-	private HashMap<String, String> 
+	private Map<String, String> 
 		textures = new HashMap<String, String>();
 
 	public AppearanceInspector getPanel() {

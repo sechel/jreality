@@ -15,7 +15,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -401,7 +400,7 @@ public class AppearanceInspector extends JPanel implements ActionListener, Chang
 		return textureInspector.getTextures();
 	}
 	
-	public void setTextures(HashMap<String, String> textures) {
+	public void setTextures(Map<String, String> textures) {
 		textureInspector.setTextures(textures);
 	}
 	
