@@ -9,24 +9,16 @@ import java.util.WeakHashMap;
 
 import javax.media.opengl.GL3;
 
-import com.itextpdf.text.LargeElement;
-
 import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.geom.JOGLFaceSetEntity;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformInt;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformMat4;
 import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 import de.jreality.jogl3.shader.GLVBO;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.GLVBOInt;
 import de.jreality.jogl3.shader.ShaderVarHash;
 import de.jreality.math.Rn;
-import de.jreality.scene.data.AttributeEntityUtility;
-import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 /**
  * A collection of up to MAX_TEXTURE_DIMENSION FaceSetInstances
