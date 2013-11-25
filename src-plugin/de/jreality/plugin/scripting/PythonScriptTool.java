@@ -71,29 +71,29 @@ public class PythonScriptTool extends AbstractAction {
 	}
 
 	public void execute() {
-		PythonInterpreter pi = console.getInterpreter();
-		pi.cleanup();
-		pi.set("C", controller);
-		if (useGUI) {
-			for (PythonGUI<?> gui : guiList) {
-				pi.set(gui.getVariableName(), gui.getVariableValue());
-			}
-		}
-		PyCode code = getCode();
-		pi.exec(code);
+//		PythonInterpreter pi = console.getInterpreter();
+//		pi.cleanup();
+//		pi.set("C", controller);
+//		if (useGUI) {
+//			for (PythonGUI<?> gui : guiList) {
+//				pi.set(gui.getVariableName(), gui.getVariableValue());
+//			}
+//		}
+//		PyCode code = getCode();
+//		pi.exec(code);
 	}
 	
-	private PyCode getCode() {
-		if (isSourceDirty()) {
-			code = null;
-		}
-		if (code != null) {
-			return code;
-		} else {
-			PythonInterpreter pi = console.getInterpreter();
-			return code = pi.compile(getSourceCode()); 
-		}
-	}
+//	private PyCode getCode() {
+//		if (isSourceDirty()) {
+//			code = null;
+//		}
+//		if (code != null) {
+//			return code;
+//		} else {
+//			PythonInterpreter pi = console.getInterpreter();
+//			return code = pi.compile(getSourceCode()); 
+//		}
+//	}
 
 	public String getName() {
 		return name;
