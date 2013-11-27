@@ -149,6 +149,44 @@ public class IndexedLineSetUtility {
 		return ifsf.getIndexedLineSet();
 	}
 
+	//assume each edge is a closed loop
+	public static double[][] calculateAngles(double[][] angles, IndexedLineSet ils)	{
+		double[][] verts = ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		int[][] indices = ils.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+		int numEdges = ils.getNumEdges();
+		if (angles == null ||  angles.length != indices.length)
+		angles = new double[numEdges][];
+		for (int j = 0; j<numEdges; ++j)	{
+			int length = indices[j].length-1;
+			double total = 0;
+			angles[j] = new double[length];
+			for (int i = 0; i< length; ++i)	{
+				int prev = indices[j][(i+length-1)%length], 
+						hier = indices[j][i],
+						next = indices[j][(i+1)%length];
+//				double euclideanAngle = calculateAngle(boundaryPts[prev], boundaryPts[i], boundaryPts[next]);
+				double[] v0 = Rn.subtract(null, verts[next], verts[hier]);
+				double[] v1 = Rn.subtract(null, verts[hier], verts[prev]);
+				double euclideanAngle = Rn.euclideanAngle(v0, v1);
+				double[] xpro = Rn.crossProduct(null, v0, v1);
+				if (xpro[2] > 0) euclideanAngle *= -1.0;
+//				angles[i] = euclideanAngle;
+//				euclideanAngle = Math.PI - Math.abs(euclideanAngle);
+//				total = total + euclideanAngle;
+				total = total + euclideanAngle;
+				euclideanAngle = Math.PI - euclideanAngle;
+				angles[j][i] = euclideanAngle;
+			}
+			System.err.println("total = "+total);
+			for (int k = 0; k<angles[j].length; ++k)	{
+				if (total < 0.0)  angles[j][k] = Math.PI*2.0 - angles[j][k];
+				System.err.println("angle = "+angles[j][k]);
+			}
+
+		}
+		
+		return angles;
+	}
 
 
 	/**
