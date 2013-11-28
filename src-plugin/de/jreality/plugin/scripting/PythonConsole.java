@@ -5,14 +5,12 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.net.URI;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.Keymap;
 
-import org.python.core.PySystemState;
-import org.python.util.PythonInterpreter;
+//import org.python.util.PythonInterpreter;
 
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.basic.View;
@@ -24,8 +22,8 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 
 	private Controller
 		controller = null;
-	private PythonInterpreter 
-		interpreter = null;
+//	private PythonInterpreter 
+//		interpreter = null;
 	private JScrollPane
 		contentPanel = new JScrollPane();
 	private JTextPane
@@ -65,12 +63,12 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 
 	protected void bootConsole() {
 		if (consoleBooted) return;
-		interpreter = getInterpreter();
-		interpreter.set("c", controller);
-		interpreter.set("textpane", textPane);
-		interpreter.exec("vars = {'C' : c}");
-		interpreter.exec("from console import Console");
-		interpreter.exec("Console(vars, textpane)");
+//		interpreter = getInterpreter();
+//		interpreter.set("c", controller);
+//		interpreter.set("textpane", textPane);
+//		interpreter.exec("vars = {'C' : c}");
+//		interpreter.exec("from console import Console");
+//		interpreter.exec("Console(vars, textpane)");
 		consoleBooted = true;
 	}
 	
@@ -90,20 +88,20 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener {
 		createLayout();
 	}
 	
-	public PythonInterpreter getInterpreter() {
-		if (interpreter == null) {
-			PySystemState.initialize();
-			interpreter = new PythonInterpreter();
-		}
-		return interpreter;
-	}
+//	public PythonInterpreter getInterpreter() {
+//		if (interpreter == null) {
+//			PySystemState.initialize();
+//			interpreter = new PythonInterpreter();
+//		}
+//		return interpreter;
+//	}
 	
 	public static void main(String[] args) {
 		try {
-			PythonInterpreter interpreter = new PythonInterpreter();
-			interpreter.set("__name__", "__main__");
-			URI consoleURI = URI.create("jar:file:lib/jython/console.jar!/console.py");
-			interpreter.execfile(consoleURI.toURL().openStream());
+//			PythonInterpreter interpreter = new PythonInterpreter();
+//			interpreter.set("__name__", "__main__");
+//			URI consoleURI = URI.create("jar:file:lib/jython/console.jar!/console.py");
+//			interpreter.execfile(consoleURI.toURL().openStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
