@@ -153,7 +153,7 @@ public class Matrix implements Serializable {
 	}
 
 	public static Matrix power(Matrix m, int n)		{
-		Matrix res = new Matrix(), tmp = m;
+		Matrix res = new Matrix();
 		for (int i = 0; i<Math.abs(n); ++i)	{
 			res.multiplyOnLeft(m);
 		}
