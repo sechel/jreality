@@ -41,6 +41,7 @@
 package de.jreality.math;
 
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.MatrixTest;
 
 
 
@@ -515,6 +516,15 @@ public class Pn {
 		return innerProduct(dst, src, metric);
 	}
 	 
+	public static boolean isEquivalentPoints(double[] p1, double[] p2)	{
+		for (int j = 0; j<p1.length; ++j)	{
+			for (int i = j+1; i<p1.length; ++i)	{
+				double det = p1[i]*p2[j] - p1[j]*p2[i];
+				if (Math.abs(det) > 1E-10) return false;
+			}			
+		}
+		return true;
+	}
 	public static boolean isValidCoordinate(double[] transVec, int dim, int metric) {
 		boolean ret = true;
 		if (transVec.length < dim) return false;
@@ -865,6 +875,40 @@ public class Pn {
 		return polarize(dst, point, metric);
 	}
 	
+	/**
+	 * 
+	 * @param dst
+	 * @param domainPts
+	 * @param imagePts
+	 * @return
+	 */
+	public static double[] projectivityFromCanonical(double[] dst, double[][] dm)	{
+		int n = dm.length-1;
+		if (dst == null ||  Rn.mysqrt(dst.length) != n)
+			dst = new double[n*n];
+		double[] std2dm = new double[n*n];
+		// copy the first n rows of dm into the columns of std2dm
+		for (int i = 0; i<n; ++i)	{
+			for (int j = 0; j<n; ++j)	{
+				std2dm[i+n*j] = dm[i][j];
+			}
+		}
+		double[] dm2std = Rn.inverse(null, std2dm);
+		double[] un = Rn.matrixTimesVector(null, dm2std, dm[n]);
+		// calculate the matrix which sends the unit point to (11...111)
+		for (int i = 0; i<n; ++i)	{
+			for (int j = 0; j<n; ++j)	{
+				dst[i+n*j] = un[i] * dm[i][j];
+			}
+		}
+		return dst;
+	}
+	
+	public static double[] projectivity(double[] dst, double[][] dm, double[][] im)	{
+		double[] A = projectivityFromCanonical(null, dm);
+		double[] B = projectivityFromCanonical(null, im);
+		return Rn.times(dst, B, Rn.inverse(null, A));
+	}
 	/**
 	 * Determine the projection of the point <i>victim</i> onto the point <i>master</i>.  
 	 * This is orthogonal projection with respect to the metric associated to <i>metric</i>.

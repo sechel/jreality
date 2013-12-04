@@ -31,7 +31,6 @@
 	<classpathentry kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
-	<classpathentry kind="src" path="src-python"/>
 	<classpathentry kind="lib" path="lib/jterm.jar"/>
 	<classpathentry kind="lib" path="lib/smrj.jar"/>
 	<classpathentry kind="lib" path="lib/sunflow.jar"/>

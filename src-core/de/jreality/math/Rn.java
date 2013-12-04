@@ -1976,4 +1976,15 @@ final public class Rn {
 		return out;
 	}
 
+//	public static double[][] transpose(double[][] dst, double[][] dm) {
+//		if (dst == null || dst.length != dm[0].length || dst[0].length != dm.length) 
+//			dst = new double[dm[0].length][dm.length];
+//		for (int i = 0; i<dm.length; ++i)	{
+//			for (int j = 0; j<dm[0].length; ++j)	{
+//				dst[j][i] = dm[i][j];
+//			}
+//		}
+//		return dst;
+//	}
+
 }
