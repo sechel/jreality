@@ -63,7 +63,7 @@ public class JOGLLightHelper {
 			globalGL.glDisable(GL2.GL_LIGHT0 + i);
 		}
 		int n = lights.size();
-		for (int i = 8; i < n; ++i)
+		for (int i = lights.size()-1; i >=8; --i)
 			lights.remove(i);
 		for (SceneGraphPath sgp : lights) {
 			SceneGraphPathObserver sgpo = new SceneGraphPathObserver(sgp);
