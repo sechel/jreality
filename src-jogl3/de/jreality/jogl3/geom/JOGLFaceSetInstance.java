@@ -15,7 +15,6 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 
@@ -31,7 +30,7 @@ public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 	}
 	
 	private int labelsChangedNoCache = 0;
-	private LabelRenderData labelData = new LabelRenderData();
+	public LabelRenderData labelData = new LabelRenderData();
 	@Override
 	public void render(JOGLRenderState state, int width, int height) {
 		if(eap==null)

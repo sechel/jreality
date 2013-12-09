@@ -5,6 +5,7 @@ import java.awt.Color;
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
+import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.Scene;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.DirectionalLight;
@@ -117,9 +118,11 @@ public class LightTest {
 		vr.addBasicUI();
 		vr.addContentUI();
 		vr.addBeanShellSupport();
+		vr.registerPlugin(InfoOverlayPlugin.class);
 		vr.startup();
 		Scene scene = vr.getPlugin(Scene.class);
-//		scene.getRootAppearance().setAttribute(CommonAttributes.SMALL_OBJ_OPTIMIZATION, false);
+		scene.getRootAppearance().setAttribute(CommonAttributes.ANTIALIASING_ENABLED, false);
+		scene.getRootAppearance().setAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, 2);
 	}
 
 }

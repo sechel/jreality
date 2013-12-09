@@ -85,10 +85,12 @@ import de.jreality.scene.Appearance;
 	public final static String FORCE_RESIDENT_TEXTURES = "forceResidentTextures";
 	public final static String USE_OLD_TRANSPARENCY = "useOldTransparency";		// use the alpha channels of shader colors: pre-2006
 	public final static String ANTI_ALIASING_FACTOR = "antiAliasingFactor";
+	public final static int ANTI_ALIASING_FACTOR_DEFAULT = 2;
     // rendering hints that can appear anywhere in the scene graph
 	public final static String LIGHTING_ENABLED 	= 		"lightingEnabled";
 	public final static boolean LIGHTING_ENABLED_DEFAULT = true;
 	public final static String ANTIALIASING_ENABLED = 	"antiAliasing";
+	public final static boolean ANTIALIASING_ENABLED_DEFAULT = 	false;
 	public final static String TRANSPARENCY_ENABLED = 	"transparencyEnabled";
     public static final String ADDITIVE_BLENDING_ENABLED = "additiveBlendingEnabled";
 	public final static String Z_BUFFER_ENABLED = 		"zBufferEnabled";
@@ -351,7 +353,10 @@ import de.jreality.scene.Appearance;
 			return TEXT_ALIGNMENT_DEFAULT;
 		if(key.equals(SMALL_OBJ_OPTIMIZATION))
 			return SMALL_OBJ_OPTIMIZATION_DEFAULT;
-		
+		if(key.equals(ANTI_ALIASING_FACTOR))
+			return ANTI_ALIASING_FACTOR_DEFAULT;
+		if(key.equals(ANTIALIASING_ENABLED))
+			return ANTIALIASING_ENABLED_DEFAULT;
 		
 		return value;
 	}

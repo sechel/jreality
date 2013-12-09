@@ -12,7 +12,6 @@ import de.jreality.jogl3.JOGLRenderState;
 import de.jreality.jogl3.JOGLSceneGraphComponentInstance.RenderableObject;
 import de.jreality.jogl3.geom.GlReflectionMap;
 import de.jreality.jogl3.geom.JOGLFaceSetInstance;
-import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniform;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformInt;
 import de.jreality.jogl3.geom.JOGLGeometryInstance.GlUniformMat4;
 import de.jreality.jogl3.shader.ShaderVarHash;
@@ -83,20 +82,20 @@ public class RenderableUnit {
 		
 		for(JOGLFaceSetInstance fsi : setA){
 			if(null == registered.get(fsi)){
-//				System.err.println("killing");
+				System.err.println("killing from RenderableUnit no " + this.toString());
 				Instance ins = instances.get(fsi);
 				ins.collection.kill(ins);
 				instances.remove(fsi);
 			}else{
 				if(fsi.eap==null){
-//					System.err.println("killing");
+					System.err.println("killing from RenderableUnit no " + this.toString());
 					Instance ins = instances.get(fsi);
 					ins.collection.kill(ins);
 					instances.remove(fsi);
 				}else{
 					boolean visible = (boolean)fsi.eap.getAttribute(ShaderUtility.nameSpace(CommonAttributes.POLYGON_SHADER, CommonAttributes.FACE_DRAW), CommonAttributes.FACE_DRAW_DEFAULT);
 					if(!visible){
-//						System.err.println("killing");
+						System.err.println("killing from RenderableUnit no " + this.toString());
 						Instance ins = instances.get(fsi);
 						ins.collection.kill(ins);
 						instances.remove(fsi);
@@ -125,7 +124,7 @@ public class RenderableUnit {
 			if(instances.get(fsi) == null){
 				//in fact it's new
 				newSet.add(f);
-//				System.out.println("adding to new set");
+				System.out.println("adding to new set of RenderableUnit no " + this.toString());
 			}else if(f.geom.oChangedLength()){
 				//is old, but changed its length
 				lengthSet.add(f);
