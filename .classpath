@@ -14,7 +14,11 @@
 	<classpathentry kind="src" path="src-jogl"/>
 	<classpathentry kind="src" path="src-jogl3"/>
 	<classpathentry kind="src" path="src-plugin"/>
-	<classpathentry kind="src" path="src-portal"/>
+	<classpathentry kind="src" path="src-portal">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/portal/jreality_portal/native32"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="src-proxies"/>
 	<classpathentry kind="src" path="src-renderman"/>
 	<classpathentry kind="src" path="src-soft"/>
@@ -39,7 +43,7 @@
 	<classpathentry kind="lib" path="lib/bsh.jar"/>
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
 	<classpathentry kind="lib" path="lib/vrData.jar"/>
-	<classpathentry kind="lib" path="lib/jacknativeclient.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jacknativeclient.jar"/>
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/beans.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-3.4-complete.jar"/>
@@ -50,7 +54,8 @@
 	<classpathentry kind="lib" path="lib/jython_console.jar"/>
 	<classpathentry kind="lib" path="lib/jython-standalone-2.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-1.4.2.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/vrpn.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-6-sun-1.6.0.26"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar" sourcepath="/jrworkspace"/>
 	<classpathentry kind="lib" path="lib/itextpdf-5.3.2.jar"/>
@@ -67,3 +72,4 @@
 	<classpathentry kind="lib" path="lib/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
+

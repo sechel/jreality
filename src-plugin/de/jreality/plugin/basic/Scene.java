@@ -18,6 +18,7 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.EncompassFactory;
+import de.jreality.util.SystemProperties;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 
@@ -91,8 +92,9 @@ public class Scene extends Plugin {
 		avatarPath.push(avatar);
 		defaultScene.addPath("avatarPath", avatarPath);
 		
+//		MatrixBuilder.euclidean().translate(0,0,SystemProperties.isPortal ? 0 : defaultZTranslation).assignTo(avatar);
 		MatrixBuilder.euclidean().translate(0,0,defaultZTranslation).assignTo(avatar);
-		
+
 		//emptyPickPath/content
 		SceneGraphPath emptyPickPath = new SceneGraphPath();
 		emptyPickPath.push(sceneRoot);
@@ -264,3 +266,4 @@ public class Scene extends Plugin {
 		Scene.defaultZTranslation = defaultZTranslation;
 	}
 }
+

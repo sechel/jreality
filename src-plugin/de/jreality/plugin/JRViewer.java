@@ -23,7 +23,6 @@ import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
 import de.jreality.plugin.basic.Content;
-import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.Inspector;
 import de.jreality.plugin.basic.PropertiesMenu;
 import de.jreality.plugin.basic.RunningEnvironment;
@@ -65,6 +64,7 @@ import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.EncompassFactory;
 import de.jreality.util.NativePathUtility;
 import de.jreality.util.Secure;
+import de.jreality.util.SystemProperties;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
@@ -682,12 +682,12 @@ public class JRViewer {
 		
 		
 		public ContentInjectionPlugin(SceneGraphNode content) {
-			this.content = content; 
+			this(content, !SystemProperties.isPortal);
 		}
 		
 		
 		public ContentInjectionPlugin(SceneGraphNode content, boolean encompass) {
-			this(content);
+			this.content = content;
 			this.encompass = encompass;
 		}
 		
@@ -789,3 +789,4 @@ public class JRViewer {
 
 
 }
+
