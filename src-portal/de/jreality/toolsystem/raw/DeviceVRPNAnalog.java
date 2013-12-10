@@ -50,8 +50,6 @@ public class DeviceVRPNAnalog implements AnalogChangeListener {
 	public void analogUpdate(AnalogUpdate u, AnalogRemote an) {
 		for(int i=0;i<numAnalogs;i++){
 			analogValue[i] =  u.channel[i];
-			System.out.println("state changed for Analog " + i + " to value" + analogValue[i]);
-			
 		}
 	}
 }
