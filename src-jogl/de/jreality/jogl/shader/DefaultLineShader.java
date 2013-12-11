@@ -223,12 +223,15 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 
 		// this little bit of code forces tubes to be opaque: could add
 		// transparency-enable flag to the line shader to allow this to be
-		// controlled
+		// controlled.  Do this after calling the polygonShader.render()
+		// since this might override what it does
 		changedTransp = false;
 		if (tubeDraw) {
 			if (opaqueTubes) {
 				gl.glDepthMask(true);
 				gl.glDisable(GL.GL_BLEND);
+//				jrs.transparencyEnabled = false;
+//				jrs.zbufferEnabled = true;
 				jrs.currentAlpha = 1.0;
 			} else {
 				gl.glEnable(GL.GL_BLEND);
