@@ -21,7 +21,7 @@
 	<classpathentry kind="src" path="src-soft-new"/>
 	<classpathentry kind="src" path="src-sunflow"/>
 	<classpathentry kind="src" path="src-swing"/>
-	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceSpacenav.java|de/jreality/toolsystem/raw/WiiMoteOSC.java" kind="src" path="src-tool"/>
+	<classpathentry excluding="de/jreality/toolsystem/raw/WiiMoteOSC.java|de/jreality/toolsystem/raw/DeviceSpacenav.java" kind="src" path="src-tool"/>
 	<classpathentry excluding="de/jreality/tutorial/audio/Example.java|de/jreality/tutorial/misc/JLinkExample.java|de/jreality/tutorial/audio/MinimalExample.java" kind="src" path="src-tutorial"/>
 	<classpathentry kind="src" path="src-ui"/>
 	<classpathentry kind="src" path="src-vr"/>
