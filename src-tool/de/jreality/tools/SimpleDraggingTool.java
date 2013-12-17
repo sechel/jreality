@@ -60,23 +60,20 @@ import de.jreality.shader.EffectiveAppearance;
  * @author brinkman
  *
  */
-public class DraggingTool extends AbstractTool {
+public class SimpleDraggingTool extends AbstractTool {
 
     private boolean moveChildren;
-    transient protected boolean dragInViewDirection;
     
-    static InputSlot activationSlot = InputSlot.getDevice("DragActivation2");
-    static InputSlot alongPointerSlot = InputSlot.getDevice("DragAlongViewDirection");
-    static InputSlot evolutionSlot = InputSlot.getDevice("PointerEvolution");
+    static InputSlot activationSlot = InputSlot.getDevice("SimpleDragActivation");
+    static InputSlot evolutionSlot = InputSlot.getDevice("SimpleTranslateTransformation");
     
-    public DraggingTool(InputSlot ...activationSlots )	{
+    public SimpleDraggingTool(InputSlot ...activationSlots )	{
     	super(activationSlots);
     }
     
-    public DraggingTool() {
+    public SimpleDraggingTool() {
         this(activationSlot);
         addCurrentSlot(evolutionSlot);
-        addCurrentSlot(alongPointerSlot);
     }
     
     transient protected SceneGraphComponent comp;
@@ -84,17 +81,6 @@ public class DraggingTool extends AbstractTool {
     public void activate(ToolContext tc) {
       comp = (moveChildren ? tc.getRootToLocal() : tc.getRootToToolComponent()).getLastComponent();
       if (comp.getTransformation() == null) comp.setTransformation(new Transformation());
-      try {
-        if (tc.getAxisState(alongPointerSlot).isPressed()) {
-          dragInViewDirection = true;
-        }
-        else {
-          dragInViewDirection = false;
-        }
-      } catch (Exception me) {
-        // no drag in zaxis
-        dragInViewDirection = false;
-      }
       if (eap == null || !EffectiveAppearance.matches(eap, tc.getRootToToolComponent())) {
           eap = EffectiveAppearance.create(tc.getRootToToolComponent());
         }
@@ -109,16 +95,6 @@ public class DraggingTool extends AbstractTool {
     transient Matrix pointer = new Matrix();
     
     public void perform(ToolContext tc) {
-      if (tc.getSource() == alongPointerSlot) {
-        if (tc.getAxisState(alongPointerSlot).isPressed()) {
-          dragInViewDirection = true;
-        }
-        else {
-          dragInViewDirection = false;
-        }
-        return;
-      }
-
       Matrix evolution = new Matrix(tc.getTransformationMatrix(evolutionSlot));
       // need to convert from euclidean to possibly non-euclidean translation
 	  if (metric != Pn.EUCLIDEAN)
@@ -129,13 +105,6 @@ public class DraggingTool extends AbstractTool {
       
       comp.getTransformation().getMatrix(result.getArray());
       
-      if (dragInViewDirection) {
-        tc.getTransformationMatrix(InputSlot.getDevice("CameraToWorld")).toDoubleArray(pointer.getArray());
-        double dz = evolution.getEntry(0,3)+evolution.getEntry(1,3);
-        double[] tlate = Rn.times(null, dz, pointer.getColumn(2));
-        if (metric==Pn.EUCLIDEAN) tlate[3] = 1.0;
-        MatrixBuilder.init(null, metric).translate(tlate).assignTo(evolution);
-      } 
      evolution.conjugateBy(local2world.getInverse());
      if (metric != Pn.EUCLIDEAN) P3.orthonormalizeMatrix(evolution.getArray(), evolution.getArray(), 10E-8, metric);
      result.multiplyOnRight(evolution);
