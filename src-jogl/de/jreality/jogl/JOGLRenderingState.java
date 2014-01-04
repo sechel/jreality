@@ -65,7 +65,8 @@ public class JOGLRenderingState {
 	public boolean lighting = true;
 	public boolean backFaceCullingEnabled = false;
 	public boolean zbufferEnabled = true;
-	public boolean flipped = false;
+	public boolean flipNormals = false;
+	public boolean negativeDet = false;
 	public boolean transparencyEnabled = false;
 	public boolean fogEnabled;
 	public boolean localLightModel = false;
@@ -168,7 +169,7 @@ public class JOGLRenderingState {
 		else
 			gl.glShadeModel(GL2.GL_FLAT);
 
-		if (flipped)
+		if (flipNormals)
 			gl.glFrontFace(GL.GL_CW);
 		else
 			gl.glFrontFace(GL.GL_CCW);
