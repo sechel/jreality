@@ -197,7 +197,7 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 			metric = jr.renderingState.currentMetric;
 			if (debug)
 				theLog.fine("In renderChildren()" + name);
-			boolean isReflectionBefore = jr.renderingState.flipped; // cumulativeIsReflection;
+			boolean isReflectionBefore = jr.renderingState.flipNormals; // cumulativeIsReflection;
 			int nn = matrices.length;
 			theDropBox.setRendering(true);
 			boolean clipToCamera = theDropBox.isClipToCamera()
@@ -219,10 +219,10 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				}
 				count++;
 				cumulativeIsReflection = (isReflectionBefore ^ matrixIsReflection[j]);
-				if (cumulativeIsReflection != jr.renderingState.flipped) {
+				if (cumulativeIsReflection != jr.renderingState.flipNormals) {
 					jr.globalGL.glFrontFace(cumulativeIsReflection ? GL.GL_CW
 							: GL.GL_CCW);
-					jr.renderingState.flipped = cumulativeIsReflection;
+					jr.renderingState.flipNormals = cumulativeIsReflection;
 				}
 				pushTransformation(matrices[j]);
 				child.render();
@@ -233,8 +233,8 @@ public class MatrixListJOGLPeerComponent extends JOGLPeerComponent {
 				jr.renderingState.shadeGeometry = true;
 			}
 			theDropBox.setRendering(false);
-			jr.renderingState.flipped = isReflectionBefore;
-			jr.globalGL.glFrontFace(jr.renderingState.flipped ? GL.GL_CW
+			jr.renderingState.flipNormals = isReflectionBefore;
+			jr.globalGL.glFrontFace(jr.renderingState.flipNormals ? GL.GL_CW
 					: GL.GL_CCW);
 			jr.renderingState.componentDisplayLists = false;
 
