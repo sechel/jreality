@@ -212,7 +212,7 @@ public class RenderingHintsInfo {
 		if (values[FN][ACTIVE]) {
 			if (values[FN][which] != jr.renderingState.flipNormals) {
 				jr.renderingState.flipNormals = values[FN][which];
-				jr.globalGL.glFrontFace(jr.renderingState.flipNormals ? GL.GL_CW
+				jr.globalGL.glFrontFace(jr.renderingState.flipNormals ^ jr.renderingState.negativeDet ? GL.GL_CW
 						: GL.GL_CCW);
 				// System.err.println("flipped "+jr.renderingState.flipped);
 			}

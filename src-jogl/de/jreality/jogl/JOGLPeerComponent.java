@@ -183,7 +183,7 @@ public class JOGLPeerComponent extends JOGLPeerNode implements
 		oldFlipped = jr.renderingState.negativeDet;
 		jr.renderingState.negativeDet = isReflection ^ jr.renderingState.negativeDet;
 		if (oldFlipped != jr.renderingState.negativeDet) {
-			System.err.println("prerender change in flip: "+goBetween.originalComponent.getName()+" is reflection = "+isReflection);
+//			System.err.println("prerender change in flip: "+goBetween.originalComponent.getName()+" is reflection = "+isReflection);
 			jr.globalGL.glFrontFace(jr.renderingState.negativeDet ^ jr.renderingState.flipNormals ? GL.GL_CW
 					: GL.GL_CCW);
 		}
