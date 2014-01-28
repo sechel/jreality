@@ -56,9 +56,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.stringtemplate.v4.compiler.CodeGenerator.primary_return;
+
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -75,6 +78,7 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
+import de.jreality.tutorial.intro.Icosahedron;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
@@ -338,6 +342,12 @@ public class IndexedFaceSetUtility {
 			newc[0] = cc[which];
 			ifs2.setFaceAttributes(Attribute.COLORS, StorageModel.DOUBLE_ARRAY.array().createReadOnly(newc));
 		}
+		// avoid rendering the vertices not contained in the selected face
+		int[] pointindices = new int[ifs.getNumPoints()];
+		for (int i = 0; i<indices[which].length; ++i)	{
+			pointindices[indices[which][i]] = 1;
+		}
+		ifs2.setVertexAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.createReadOnly(pointindices));
 		IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs2);
 		IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs2);
 		return ifs2;
@@ -1831,5 +1841,4 @@ public class IndexedFaceSetUtility {
 	                StorageModel.DOUBLE_ARRAY.array(nLength).createWritableDataList(n));
 	    }
 	}
-
 }
