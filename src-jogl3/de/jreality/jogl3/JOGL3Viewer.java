@@ -109,7 +109,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		//a value of 1, 2, 4 and 8 has just the same effect on linux nvidia-310.14, i.e. no anti-aliasing
 		//16 times does anti-aliasing
 		caps.setSampleBuffers(true);
-		caps.setNumSamples(16);
+		caps.setNumSamples(8);
 		
 		
 		canvas = new GLCanvas(caps);
