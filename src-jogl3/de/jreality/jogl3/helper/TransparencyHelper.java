@@ -15,6 +15,10 @@ import de.jreality.jogl3.glsl.GLShader;
 import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.GLVBOFloat;
 import de.jreality.jogl3.shader.LabelShader;
+import de.jreality.jogl3.shader.Texture2DLoader;
+import de.jreality.scene.Appearance;
+import de.jreality.shader.Texture2D;
+import de.jreality.shader.TextureUtility;
 import de.jreality.util.ImageUtility;
 //import com.jogamp.opengl.util.awt.ImageUtil;
 
@@ -32,6 +36,7 @@ public class TransparencyHelper {
 	public static GLShader transp = new GLShader("nontransp/polygon.v", "transp/polygonTransp.f");
 	public static GLShader transpSphere = new GLShader("nontransp/sphere.v", "transp/sphereTransp.f");
 	public static GLShader copy = new GLShader("testing/copy.v", "testing/copy.f");
+	public static GLShader stereogramShader = new GLShader("testing/stereogram.v", "testing/stereogram.f");
 	static float testQuadCoords[] = {
 		-1f, 1f, 0.1f, 1,
 		1f, 1f, 0.1f, 1,
@@ -80,6 +85,7 @@ public class TransparencyHelper {
 
     	gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_DEPTH_COMPONENT, supersample*width, supersample*height, 0, gl.GL_DEPTH_COMPONENT, gl.GL_FLOAT, null);
     	
+    	//attach both with the framebuffer object 1
     	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
     	
     	gl.glFramebufferTexture2D(gl.GL_FRAMEBUFFER, gl.GL_COLOR_ATTACHMENT0, gl.GL_TEXTURE_2D, texs[2], 0);
@@ -112,6 +118,7 @@ public class TransparencyHelper {
     	transp.init(gl);
     	transpSphere.init(gl);
     	copy.init(gl);
+    	stereogramShader.init(gl);
     	copyCoords = new GLVBOFloat(gl, testQuadCoords, "vertex_coordinates");
     	copyTex = new GLVBOFloat(gl, testTexCoords, "texture_coordinates");
     	gl.glGenQueries(1, queries, 0);
@@ -144,7 +151,141 @@ public class TransparencyHelper {
     	}
 	}
 	
+	private static Texture2D stereogramTexture;
+	private static boolean stereogram = false;
+	public static void setUpStereogramTexture(GL3 gl, Appearance rootAp){
+		System.out.println("set up stereogram texture");
+		
+		Object obj = TextureUtility.getBackgroundTexture(rootAp);
+		stereogramTexture = null;
+		if (obj != null) {
+			stereogramTexture = (Texture2D) obj;
+			
+			stereogram = true;
+			
+		}else{
+			stereogram = false;
+		}
+	}
+	public static void noStereogramRender(){
+		System.out.println("no stereogram render");
+		stereogramTexture = null;
+		stereogram = false;
+	}
+	
+	private static void renderStereogram(InfoOverlayData infoData, GL3 gl, RenderableUnitCollection ruc, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
+		System.out.println("render stereogram");
+		//TODO render scene to depth texture
+		
+		gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+	    gl.glViewport(0, 0, supersample*width, supersample*height);
+		
+		gl.glClearColor(0.5f, 0.5f, 0.5f, 1);
+    	gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+    	//draw background here
+    	backgroundHelper.draw(gl);
+    	SkyboxHelper.render(gl);
+    	//draw nontransparent objects into framebuffer
+    	gl.glEnable(gl.GL_DEPTH_TEST);
+    	gl.glClearDepth(1);
+    	gl.glClear(gl.GL_DEPTH_BUFFER_BIT);
+    	
+    	//TODO is this correct??
+    	gl.glDisable(gl.GL_BLEND);
+    	ruc.render(gl, width, height);
+		
+    	
+    	if(transp.size() != 0){
+    		for(RenderableObject o : transp){
+        		o.render(width, height);
+        	}
+        	
+        	//TODO TODO TODO
+        	//if transp.size == 0 then don't do anything of this!
+        	//Except for drawing labels nicely on top of each other with correct AA.
+        	
+        	int quer = 1;
+        	//with this loop it draws as many layers as neccessary to complete the scene
+        	//you can experiment by drawing only one layer or two and then view the result (see the comment after the loop)
+        	
+        	//draw transparent objects into FBO with reverse depth values
+        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
+        	startQuery(gl);
+        	peelDepth(gl, transp, supersample*width, supersample*height);
+        	quer = endQuery(gl);
+        	
+        	int counter = 0;
+        	while(quer!=0 && counter < 20){
+        		counter++;
+            	//draw on the SCREEN
+            	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+            	addOneLayer(gl, transp, supersample*width, supersample*height);
+            	//draw transparent objects into FBO with reverse depth values
+            	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[0]);
+            	startQuery(gl);
+            	peelDepth(gl, transp, supersample*width, supersample*height);
+            	quer = endQuery(gl);
+        	}
+        	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
+        	gl.glDisable(gl.GL_DEPTH_TEST);
+    	}
+    	
+    	
+		//TODO set up stereogram texture
+    	
+    	
+    	
+    	
+		
+		//TODO change copyFBO2FB to use stereogram shader from rootAp
+    	gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0);
+    	//you can change the number here:
+    	//0 means the current depth layer generated by peelDepth()
+    	//1 the depth layer of the final image generated by addOneLayer()
+    	//2 the color layer of the final image generated by addOneLayer()
+    	copySTEREOGRAM2FB(gl, 1, width, height);
+	}
+	
+	private static void copySTEREOGRAM2FB(GL3 gl, int tex, int width, int height){
+		gl.glDisable(gl.GL_BLEND);
+		gl.glViewport(0, 0, width, height);
+    	
+    	gl.glEnable(gl.GL_TEXTURE_2D);
+    	gl.glActiveTexture(gl.GL_TEXTURE0);
+    	gl.glBindTexture(gl.GL_TEXTURE_2D, texs[tex]);
+    	
+    	Texture2DLoader.load(gl, stereogramTexture, gl.GL_TEXTURE1);
+    	
+    	gl.glDisable(gl.GL_DEPTH_TEST);
+    	
+    	stereogramShader.useShader(gl);
+    	
+    	gl.glUniform1i(gl.glGetUniformLocation(stereogramShader.shaderprogram, "image"), 0);
+    	gl.glUniform1i(gl.glGetUniformLocation(stereogramShader.shaderprogram, "background"), 1);
+    	
+    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, copyCoords.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(stereogramShader.shaderprogram, copyCoords.getName()), copyCoords.getElementSize(), copyCoords.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(stereogramShader.shaderprogram, copyCoords.getName()));
+    	
+    	gl.glBindBuffer(gl.GL_ARRAY_BUFFER, copyTex.getID());
+    	gl.glVertexAttribPointer(gl.glGetAttribLocation(stereogramShader.shaderprogram, copyTex.getName()), copyTex.getElementSize(), copyTex.getType(), false, 0, 0);
+    	gl.glEnableVertexAttribArray(gl.glGetAttribLocation(stereogramShader.shaderprogram, copyTex.getName()));
+    	
+    	gl.glDrawArrays(gl.GL_TRIANGLES, 0, copyCoords.getLength()/4);
+    	
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(stereogramShader.shaderprogram, copyCoords.getName()));
+    	gl.glDisableVertexAttribArray(gl.glGetAttribLocation(stereogramShader.shaderprogram, copyTex.getName()));
+    	
+    	stereogramShader.dontUseShader(gl);
+    }
+	
 	public static void render(InfoOverlayData infoData, GL3 gl, RenderableUnitCollection ruc, List<RenderableObject> transp, int width, int height, BackgroundHelper backgroundHelper){
+		if(stereogram){
+			renderStereogram(infoData, gl, ruc, transp, width, height, backgroundHelper);
+			return;
+		}
+		
+		
 		if(transp.size() != 0){
 			gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, fbos[1]);
 	    	gl.glViewport(0, 0, supersample*width, supersample*height);

@@ -1,6 +1,7 @@
 package light;
 
 import java.awt.Color;
+import java.io.IOException;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.math.MatrixBuilder;
@@ -21,6 +22,7 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.tutorial.util.SimpleTextureFactory;
+import de.jreality.util.Input;
 
 public class LightTest {
 
@@ -121,8 +123,19 @@ public class LightTest {
 		vr.registerPlugin(InfoOverlayPlugin.class);
 		vr.startup();
 		Scene scene = vr.getPlugin(Scene.class);
-		scene.getRootAppearance().setAttribute(CommonAttributes.ANTIALIASING_ENABLED, false);
-		scene.getRootAppearance().setAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, 2);
+		Appearance rootApp = scene.getRootAppearance();
+		rootApp.setAttribute(CommonAttributes.ANTIALIASING_ENABLED, false);
+		rootApp.setAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, 2);
+		ImageData id = null;
+		try{
+			id = ImageData.load(Input.getInput("textures/grid.jpeg"));
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		TextureUtility.setBackgroundTexture(rootApp, id);
+		rootApp.setAttribute(CommonAttributes.BACKGROUND_COLOR, Appearance.INHERITED);
+		rootApp.setAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.INHERITED);
+		rootApp.setAttribute(CommonAttributes.STEREOGRAM_RENDERING, true);
 	}
 
 }

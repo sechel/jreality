@@ -332,6 +332,15 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 				}
 				
 				bgo = null;
+				if (rootAp != null)
+					bgo = rootAp.getAttribute(CommonAttributes.STEREOGRAM_RENDERING);
+				if (bgo != null && bgo instanceof Boolean && (Boolean)bgo == true)
+					TransparencyHelper.setUpStereogramTexture(gl, rootAp);
+				else{
+					TransparencyHelper.noStereogramRender();
+				}
+				
+				bgo = null;
 				boolean enabled;
 				if (rootAp != null)
 					bgo = rootAp.getAttribute(CommonAttributes.ANTIALIASING_ENABLED);
