@@ -131,6 +131,7 @@ public class LightTest {
 		ImageData id = null;
 		try{
 			id = ImageData.load(Input.getInput("textures/desert/desert_dn.jpg"));
+//			id = ImageData.load(Input.getInput("textures/grid.jpeg"));
 		}catch(IOException e){
 			e.printStackTrace();
 		}
