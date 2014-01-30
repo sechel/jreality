@@ -126,6 +126,8 @@ public class LightTest {
 		Appearance rootApp = scene.getRootAppearance();
 		rootApp.setAttribute(CommonAttributes.ANTIALIASING_ENABLED, false);
 		rootApp.setAttribute(CommonAttributes.ANTI_ALIASING_FACTOR, 2);
+		
+		
 		ImageData id = null;
 		try{
 			id = ImageData.load(Input.getInput("textures/grid.jpeg"));
@@ -135,6 +137,8 @@ public class LightTest {
 		TextureUtility.setBackgroundTexture(rootApp, id);
 		rootApp.setAttribute(CommonAttributes.BACKGROUND_COLOR, Appearance.INHERITED);
 		rootApp.setAttribute(CommonAttributes.BACKGROUND_COLORS, Appearance.INHERITED);
+		
+		
 		rootApp.setAttribute(CommonAttributes.STEREOGRAM_RENDERING, true);
 	}
 
