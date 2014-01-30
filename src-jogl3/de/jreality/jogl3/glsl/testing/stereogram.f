@@ -7,6 +7,8 @@ smooth in vec4 texCoord;
 
 uniform sampler2D image;
 uniform sampler2D background;
+uniform int slice;
+uniform int numSlices;
 //uniform sampler2D image0;
 //uniform sampler2D image1;
 //uniform sampler2D image2;
@@ -15,11 +17,10 @@ uniform sampler2D background;
 void main(void)
 {
 	float displacement = texture(image, texCoord.st).r;
-	glFragColor = texture(background, vec2(texCoord.s+displacement, texCoord.t));
-	//vec4 color = texture( image0, texCoord.st);
-	//color += texture( image1, texCoord.st);
-	//color += texture( image2, texCoord.st);
-	//color += texture( image3, texCoord.st);
-	//color = vec4(color.r/4, color.g/4, color.b/4, 1);
-	//glFragColor = color;
+	//glFragColor = texture(background, vec2(texCoord.s+displacement, texCoord.t));
+	
+	if(floor(texCoord.s*numSlices) == slice)
+		glFragColor = vec4((slice+1)*1.0/numSlices, 0, 0, 1);
+	else
+		glFragColor = texture(background, texCoord.st);
 }

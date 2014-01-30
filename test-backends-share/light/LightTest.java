@@ -130,7 +130,7 @@ public class LightTest {
 		
 		ImageData id = null;
 		try{
-			id = ImageData.load(Input.getInput("textures/grid.jpeg"));
+			id = ImageData.load(Input.getInput("textures/desert/desert_dn.jpg"));
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -140,6 +140,7 @@ public class LightTest {
 		
 		
 		rootApp.setAttribute(CommonAttributes.STEREOGRAM_RENDERING, true);
+		rootApp.setAttribute(CommonAttributes.STEREOGRAM_NUM_SLICES, 5);
 	}
 
 }
