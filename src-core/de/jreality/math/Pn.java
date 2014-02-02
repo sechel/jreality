@@ -41,10 +41,6 @@
 package de.jreality.math;
 
 import de.jreality.util.LoggingSystem;
-import de.jreality.util.MatrixTest;
-
-
-
 
 /**
  * 	A set of static methods related to real n-dimensional real projective space RP<sup>n</sup>.
