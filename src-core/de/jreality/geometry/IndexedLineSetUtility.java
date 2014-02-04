@@ -40,6 +40,8 @@
 
 package de.jreality.geometry;
 
+import com.sun.xml.internal.bind.util.Which;
+
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Scene;
@@ -149,6 +151,46 @@ public class IndexedLineSetUtility {
 		return ifsf.getIndexedLineSet();
 	}
 
+	public static void removeVertex(IndexedLineSetFactory ilsf, int vertexIndex)	{
+		for (int i = 0; i<ilsf.getEdgeCount(); ++i)	{
+			removeVertex( ilsf, vertexIndex, i);	
+		}
+		// now remove the vertex from the list
+		// we use the index attribute on point set
+//		int[][] edges = ilsf.getIndexedLineSet().getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+//		for (int i = 0; i<ilsf.getEdgeCount(); ++i)	{
+//			for (int j = 0; j<edges[i].length; ++j)	
+//				edges[i][j] = edges[i][j] > vertexIndex ? edges[i][j]-1 : edges[i][j];		
+//		}
+//		int outcount = 0;
+//		for (int i = 0; i<ilsf.getVertexCount(); ++i)	{
+//			if (i == vertexIndex) continue;	
+//			nverts[outcount++] = verts[i];
+//		}
+//		ilsf.setVertexCount(nverts.length);
+//		ilsf.setVertexCoordinates(nverts);
+//		ilsf.setEdgeIndices(edges);
+//		ilsf.update();
+		int[] visible = new int[ilsf.getVertexCount()];
+		for (int i = 0; i<visible.length; ++i)	visible[i] = i == vertexIndex ? 0 : 1;
+		ilsf.getIndexedLineSet().setVertexAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.createReadOnly(visible));
+	}
+	
+	public static void removeVertex(IndexedLineSetFactory ilsf, int vertexIndex, int edgeIndex)	{
+		// this leaves the vertex in the vertex list but removes it from the given edge
+		int[][] edges = ilsf.getIndexedLineSet().getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+		int occurrences = 0;
+		for (int i = 0; i<edges[edgeIndex].length; ++i)	
+			if (edges[edgeIndex][i] == vertexIndex) occurrences++;
+		
+		int[] newedge = new int[edges[edgeIndex].length-occurrences];
+		int outcount = 0;
+		for (int i = 0; i<edges[edgeIndex].length; ++i)	{
+			if (edges[edgeIndex][i] != vertexIndex) newedge[outcount++] = edges[edgeIndex][i];
+		}
+		ilsf.setEdgeAttribute(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(edges));
+		ilsf.update();
+	}
 	//assume each edge is a closed loop
 	public static double[][] calculateAngles(double[][] angles, IndexedLineSet ils)	{
 		double[][] verts = ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
