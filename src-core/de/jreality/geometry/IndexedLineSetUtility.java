@@ -182,7 +182,7 @@ public class IndexedLineSetUtility {
 		int occurrences = 0;
 		for (int i = 0; i<edges[edgeIndex].length; ++i)	
 			if (edges[edgeIndex][i] == vertexIndex) occurrences++;
-		
+		if (occurrences == 0) return;
 		int[] newedge = new int[edges[edgeIndex].length-occurrences];
 		int outcount = 0;
 		for (int i = 0; i<edges[edgeIndex].length; ++i)	{
