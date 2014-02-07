@@ -172,7 +172,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements
 			hasTextures = true;
 		}
 
-		hasStandardGLSL = false;
+//		hasStandardGLSL = false;
 		if (useGLSL) {
 			int metric = eap.getAttribute(
 					ShaderUtility.nameSpace(name, CommonAttributes.METRIC),
@@ -198,7 +198,7 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements
 					standard = oneStandard;
 					glslProgram = oneGlslProgram;
 				}
-				// System.err.println("using non euc shader");
+//				 System.err.println("using non euc shader");
 			}
 		}
 		vertexShader.setFromEffectiveAppearance(eap, name);

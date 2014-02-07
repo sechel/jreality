@@ -128,9 +128,10 @@ void pointLight(in int i, in vec4 normal, in vec4 eye, in vec4 ecPosition4)
  //   Compute attenuation
    if (hyperbolic) 
        attenuation = gl_LightSource[i].constantAttenuation + exp(-gl_LightSource[i].linearAttenuation * d);
-   else attenuation =  gl_LightSource[i].constantAttenuation + (2.0 - gl_LightSource[i].linearAttenuation)*abs(cos(d));
-    
-//    attenuation = clamp(attenuation, 0.0, 1.0);
+   else
+       attenuation =  gl_LightSource[i].constantAttenuation + (2.0 - gl_LightSource[i].linearAttenuation)*abs(cos(d));
+
+    //    attenuation = clamp(attenuation, 0.0, 1.0);
     halfVector = (toLight + eye);
     if (hyperbolic) halfVector = -halfVector;
    normalize4(ecPosition4, halfVector); 
@@ -189,10 +190,7 @@ vec4 light(in vec4 normal, in vec4 ecPosition, in gl_MaterialParameters matpar)
 
 void main (void)
 {
-	bool normals4d = false;
-	// various ugly hacks used here to ship over the normals
-	if  (gl_Fog.start > 0.0) normals4d = true;
-	vec4 n4 = (normals4d) ? gl_MultiTexCoord3 : vec4(gl_Normal, 1.0);
+	vec4 n4 = (useNormals4) ? gl_MultiTexCoord3 : vec4(gl_Normal, 0.0);
     vec4  transformedNormal = gl_ModelViewMatrix * n4;
     normalize4(transformedNormal);
     vec4 ecPosition = gl_ModelViewMatrix * gl_Vertex ;
@@ -201,7 +199,7 @@ void main (void)
     if (hyperbolic && transformedNormal.w * transformedNormal.z > 0.0) 
     	transformedNormal = -transformedNormal;
 // set the texture coordinate
-    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0]*gl_MultiTexCoord0;
+    gl_TexCoord[0] = texcoord = gl_TextureMatrix[0] * gl_MultiTexCoord0;
     gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
     gl_FrontColor = light(transformedNormal, ecPosition, gl_FrontMaterial);
     transformedNormal = -transformedNormal;
@@ -221,7 +219,7 @@ void main (void)
 //     	gl_Position = gl_ModelViewProjectionMatrix * ( gl_ModelViewMatrixInverse * (H2NDC * p4)); 
      }
 	else     gl_Position = ftransform();
-    gl_BackColor = .75 * gl_BackColor;
+//    gl_BackColor = .075 * gl_BackColor;
 //    gl_BackColor.a = 2 * gl_BackColor.a;
 }
 
