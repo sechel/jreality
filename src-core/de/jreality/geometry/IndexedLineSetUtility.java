@@ -151,46 +151,48 @@ public class IndexedLineSetUtility {
 		return ifsf.getIndexedLineSet();
 	}
 
-	public static void removeVertex(IndexedLineSetFactory ilsf, int vertexIndex)	{
+	public static void removeVertex(final IndexedLineSetFactory ilsf, int vertexIndex)	{
 		for (int i = 0; i<ilsf.getEdgeCount(); ++i)	{
 			removeVertex( ilsf, vertexIndex, i);	
 		}
-		// now remove the vertex from the list
-		// we use the index attribute on point set
-//		int[][] edges = ilsf.getIndexedLineSet().getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-//		for (int i = 0; i<ilsf.getEdgeCount(); ++i)	{
-//			for (int j = 0; j<edges[i].length; ++j)	
-//				edges[i][j] = edges[i][j] > vertexIndex ? edges[i][j]-1 : edges[i][j];		
-//		}
-//		int outcount = 0;
-//		for (int i = 0; i<ilsf.getVertexCount(); ++i)	{
-//			if (i == vertexIndex) continue;	
-//			nverts[outcount++] = verts[i];
-//		}
-//		ilsf.setVertexCount(nverts.length);
-//		ilsf.setVertexCoordinates(nverts);
-//		ilsf.setEdgeIndices(edges);
-//		ilsf.update();
-		int[] visible = new int[ilsf.getVertexCount()];
-		for (int i = 0; i<visible.length; ++i)	visible[i] = i == vertexIndex ? 0 : 1;
-		ilsf.getIndexedLineSet().setVertexAttributes(Attribute.INDICES, StorageModel.INT_ARRAY.createReadOnly(visible));
+		// now remove the index from the vertex list: have to renumber all indices in the edge indices!
+		final int[][] edges = ilsf.getIndexedLineSet().getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+		for (int[] edgeList : edges)	{
+			for (int i = 0; i<edgeList.length; ++i)	{
+				int index = edgeList[i];
+				if (index > vertexIndex) edgeList[i] = index-1;
+			}
+		}
+		final double[][] verts = ilsf.getIndexedLineSet().getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		final double[][] nverts = new double[verts.length-1][];
+		for (int i = 0, outcount = 0; i<verts.length; ++i)	{
+			if (i == vertexIndex) continue;
+			nverts[outcount++] = verts[i];
+		}
+		ilsf.setVertexCount(nverts.length);
+		ilsf.setVertexCoordinates(nverts);
+		ilsf.setEdgeIndices(edges);
+		ilsf.update();
 	}
 	
-	public static void removeVertex(IndexedLineSetFactory ilsf, int vertexIndex, int edgeIndex)	{
+	public static void removeVertex(final IndexedLineSetFactory ilsf, int vertexIndex, int edgeIndex)	{
 		// this leaves the vertex in the vertex list but removes it from the given edge
-		int[][] edges = ilsf.getIndexedLineSet().getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
+		final int[][] edges = ilsf.getIndexedLineSet().getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 		int occurrences = 0;
 		for (int i = 0; i<edges[edgeIndex].length; ++i)	
 			if (edges[edgeIndex][i] == vertexIndex) occurrences++;
 		if (occurrences == 0) return;
+		System.err.println("removing # "+occurrences);
 		int[] newedge = new int[edges[edgeIndex].length-occurrences];
 		int outcount = 0;
 		for (int i = 0; i<edges[edgeIndex].length; ++i)	{
 			if (edges[edgeIndex][i] != vertexIndex) newedge[outcount++] = edges[edgeIndex][i];
 		}
-		ilsf.setEdgeAttribute(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(edges));
+		edges[edgeIndex] = newedge;
+		ilsf.setEdgeIndices(edges);
 		ilsf.update();
 	}
+	
 	//assume each edge is a closed loop
 	public static double[][] calculateAngles(double[][] angles, IndexedLineSet ils)	{
 		double[][] verts = ils.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
