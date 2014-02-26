@@ -7,8 +7,10 @@ smooth in vec4 texCoord;
 
 uniform sampler2D image;
 uniform sampler2D background;
+uniform sampler2D color;
 uniform int slice;
 uniform int numSlices;
+uniform int seed;
 //uniform sampler2D image0;
 //uniform sampler2D image1;
 //uniform sampler2D image2;
@@ -18,7 +20,8 @@ void main(void)
 {
 	if(slice==0){
 		if(floor(texCoord.s*numSlices) == 0)
-			glFragColor = texture(background, texCoord.st);
+			//glFragColor = texture(background, texCoord.st);
+			glFragColor = vec4(fract(sin(dot(vec2(texCoord.s,texCoord.t+seed) ,vec2(12.9898,78.233))) * 43758.5453), 0, 0, 1);
 		else
 			discard;
 	}else{
