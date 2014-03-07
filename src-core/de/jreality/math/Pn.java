@@ -287,13 +287,18 @@ public class Pn {
 				uu = innerProduct(u, u, metric);
 				vv = innerProduct(v, v, metric);
 				uv = innerProduct(u, v, metric);
-				if (uu == 0 || vv == 0) 	// error: infinite distance
-//					throw new IllegalArgumentException("Points cannot lie on the hyperbolic absolute");
-					return (Double.MAX_VALUE);
-				double k =  (uv)/Math.sqrt(Math.abs(uu*vv));
-				if (uu < 0 && vv < 0) d = acosh(k);
-				else if ((uu < 0 && vv > 0) || (uu > 0 && vv < 0)) d = asinh(k);
-				else if (uu > 0 && vv > 0) d = Math.acos(k);
+				if (uu >= 0 || vv >= 0) 	{// error: infinite distance
+					throw new IllegalArgumentException("Points cannot lie on or outside the hyperbolic absolute");
+//					return (Double.MAX_VALUE);
+				}
+				double k =  -(uv)/Math.sqrt((uu*vv));
+				if (k < 1.0) k = 1.0;
+				d = Math.abs(acosh(k));
+//				else  //d = Math.abs(asinh(k));
+//					throw new IllegalArgumentException("Points cannot lie on or outside the hyperbolic absolute");
+//				if (uu < 0 && vv < 0) d = acosh(k);
+//				else if ((uu < 0 && vv > 0) || (uu > 0 && vv < 0)) d = asinh(k);
+//				else if (uu > 0 && vv > 0) d = Math.acos(k);
 				break;
 			case ELLIPTIC:
 				uu = innerProduct(u, u, metric);
