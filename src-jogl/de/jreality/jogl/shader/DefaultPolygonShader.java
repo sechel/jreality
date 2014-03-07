@@ -197,6 +197,8 @@ public class DefaultPolygonShader extends AbstractPrimitiveShader implements
 				if (oneGLSL) {
 					standard = oneStandard;
 					glslProgram = oneGlslProgram;
+					// this is unfortunate, but if I don't do this the shader doesn't get updated
+					standard.setFromEffectiveAppearance(eap, name);
 				}
 				// System.err.println("using non euc shader");
 			}
