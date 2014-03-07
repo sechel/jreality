@@ -52,7 +52,7 @@ public class NoneuclideanGLSLShader extends StandardGLSLShader {
 						poincarePath.getMatrix(null)), cam2H = Rn.inverse(null,
 						H2Cam);
 				double[] H2NDC = Rn.times(null, jrs.cameraToNDC, H2Cam);
-				// System.err.println("c2p = "+Rn.matrixToString(c2p));
+//				 System.err.println("c2p = "+Rn.matrixToString(H2NDC));
 				glslProgram
 						.setUniform("cam2H", Rn.convertDoubleToFloatArray(Rn
 								.transpose(null, cam2H)));
