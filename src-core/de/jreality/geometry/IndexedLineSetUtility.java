@@ -65,6 +65,9 @@ public class IndexedLineSetUtility {
 	}
 
 	public static IndexedLineSet refine(IndexedLineSet ils, int n)	{
+		return refineFactory(ils, n).getIndexedLineSet();
+	}
+	public static IndexedLineSetFactory refineFactory(IndexedLineSet ils, int n)	{
 		int[][] indices = ils.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
 		int totalSegments = 0;
 		for (int i=0; i<indices.length; ++i)	{
@@ -100,7 +103,7 @@ public class IndexedLineSetUtility {
 		ifsf.setEdgeCount(newIndices.length);
 		ifsf.setEdgeIndices(newIndices);
 		ifsf.update();
-		return ifsf.getIndexedLineSet();
+		return ifsf;
 	}
 
 	public static IndexedLineSet refine2(IndexedLineSet ils, int[] which)	{
