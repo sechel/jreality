@@ -516,6 +516,10 @@ public class IndexedFaceSetUtility {
 	 * @return
 	 */
 	public static IndexedFaceSet removeTextureCoordinateJumps(IndexedFaceSet src, double jumpSize)	{
+		return removeTextureCoordinateJumps(src, jumpSize, jumpSize);
+	}
+	
+	public static IndexedFaceSet removeTextureCoordinateJumps(IndexedFaceSet src, double ujumpSize, double vjumpSize)	{
 		int np = src.getNumPoints();
 		int nf = src.getNumFaces();
 		double[][] textureCoords = src.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
@@ -526,8 +530,8 @@ public class IndexedFaceSetUtility {
 		// mark the faces in which texture coordinates have large jumps
 		for (int i = 0; i<nf; ++i)		{
 			minmax[i] = getMinMax(indices[i], textureCoords );
-			for (int k = 0; k<2; ++k)	
-				if ( minmax[i][1][k] - minmax[i][0][k] > jumpSize) textureJumps[i][k] = true;
+			if ( minmax[i][1][0] - minmax[i][0][0] > ujumpSize) textureJumps[i][0] = true;
+			if ( minmax[i][1][1] - minmax[i][0][1] > vjumpSize) textureJumps[i][1] = true;
 			if (textureJumps[i][0] || textureJumps[i][1]) {
 				newVerts += indices[i].length;
 			}
