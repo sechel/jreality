@@ -192,7 +192,7 @@ public class GlslLoader {
 				return;
 
 			progID = new Integer(gl.glCreateProgramObjectARB());
-
+			System.err.println("progid = "+progID);
 			if (source.getVertexProgram() != null) {
 				int vertexProgID = gl
 						.glCreateShaderObjectARB(GL2.GL_VERTEX_SHADER);
