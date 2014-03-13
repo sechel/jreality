@@ -1,21 +1,19 @@
 <toolconfig>
 	<rawdevices>
-		<rawdevice id="SpaceNavigator"
-			type="de.jreality.toolsystem.raw.DeviceJinputJoystick">
-			<prop name="id_string">
-				<string>.*SpaceExplorer.*</string>
-			</prop>
+		<rawdevice 
+			id="3DConnexionDevice"
+			type="de.jreality.toolsystem.raw.Device3DConnexionHID">
 		</rawdevice>
 	</rawdevices>
 
 	<rawslots>
-		<mapping device="SpaceNavigator" src="x_4_0" target="X" />
-		<mapping device="SpaceNavigator" src="y_4_1" target="Y" />
-		<mapping device="SpaceNavigator" src="z_4_2" target="Z" />
-		<mapping device="SpaceNavigator" src="rx_4_3" target="RX" />
-		<mapping device="SpaceNavigator" src="ry_4_4" target="RY" />
-		<mapping device="SpaceNavigator" src="rz_4_5" target="RZ" />
-		<mapping device="SpaceNavigator" src="button_4_16" target="EncompassActivation"/>
+		<mapping device="3DConnexionDevice" src="x" target="X" />
+		<mapping device="3DConnexionDevice" src="y" target="Y" />
+		<mapping device="3DConnexionDevice" src="z" target="Z" />
+		<mapping device="3DConnexionDevice" src="rx" target="RX" />
+		<mapping device="3DConnexionDevice" src="ry" target="RY" />
+		<mapping device="3DConnexionDevice" src="rz" target="RZ" />
+		<mapping device="3DConnexionDevice" src="button_fit" target="EncompassActivation"/>
 	</rawslots>
 
 	<virtualdevices>

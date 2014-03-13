@@ -67,6 +67,7 @@
 		<fileset dir="lib">
 			<include name="jinput.jar"/>
 			<include name="netutil.jar" />
+			<include name="hidapi-1.1.jar" />
 		</fileset>
 	</path>
 
