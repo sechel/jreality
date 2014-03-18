@@ -155,6 +155,8 @@ public class IndexedLineSetUtility {
 	}
 
 	public static void removeVertex(final IndexedLineSetFactory ilsf, int vertexIndex)	{
+		final double[][] verts = ilsf.getIndexedLineSet().getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		final double[][] nverts = new double[verts.length-1][];
 		for (int i = 0; i<ilsf.getEdgeCount(); ++i)	{
 			removeVertex( ilsf, vertexIndex, i);	
 		}
@@ -166,8 +168,6 @@ public class IndexedLineSetUtility {
 				if (index > vertexIndex) edgeList[i] = index-1;
 			}
 		}
-		final double[][] verts = ilsf.getIndexedLineSet().getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		final double[][] nverts = new double[verts.length-1][];
 		for (int i = 0, outcount = 0; i<verts.length; ++i)	{
 			if (i == vertexIndex) continue;
 			nverts[outcount++] = verts[i];
