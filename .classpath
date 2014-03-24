@@ -14,7 +14,7 @@
 	<classpathentry kind="src" path="src-jogl"/>
 	<classpathentry kind="src" path="src-jogl3"/>
 	<classpathentry kind="src" path="src-plugin"/>
-	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceVPRNARTrack.java|de/jreality/toolsystem/raw/DeviceVRPNAnalog.java|de/jreality/toolsystem/raw/DeviceVRPNButton.java|de/jreality/toolsystem/raw/DeviceVRPNTracker.java|de/jreality/toolsystem/raw/DeviceVRPNARTrack.java" kind="src" path="src-portal">
+	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceVPRNARTrack.java|de/jreality/toolsystem/raw/DeviceVRPNAnalog.java|de/jreality/toolsystem/raw/DeviceVRPNButton.java|de/jreality/toolsystem/raw/DeviceVRPNTracker.java" kind="src" path="src-portal">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/portal/jreality_portal/native32"/>
 		</attributes>
