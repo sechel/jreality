@@ -141,7 +141,7 @@ public class LightTest {
 		
 		
 		rootApp.setAttribute(CommonAttributes.STEREOGRAM_RENDERING, true);
-		rootApp.setAttribute(CommonAttributes.STEREOGRAM_NUM_SLICES, 8);
+		rootApp.setAttribute(CommonAttributes.STEREOGRAM_NUM_SLICES, 5);
 	}
 
 }
