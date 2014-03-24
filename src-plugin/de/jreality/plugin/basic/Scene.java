@@ -18,7 +18,6 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Transformation;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.util.EncompassFactory;
-import de.jreality.util.SystemProperties;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 

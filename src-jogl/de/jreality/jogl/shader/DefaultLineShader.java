@@ -58,7 +58,6 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;

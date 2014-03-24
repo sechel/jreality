@@ -14,7 +14,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 
 import org.python.core.PyCode;
-import org.python.util.PythonInterpreter;
 
 import de.jreality.plugin.basic.View;
 import de.jtem.jrworkspace.plugin.Controller;

@@ -12,7 +12,6 @@ import javax.media.opengl.GL2;
 import com.jogamp.opengl.util.awt.ImageUtil;
 
 //import com.sun.opengl.util.ImageUtil;
-
 import de.jreality.shader.ImageData;
 import de.jreality.shader.Texture2D;
 import de.jreality.util.ImageUtility;
