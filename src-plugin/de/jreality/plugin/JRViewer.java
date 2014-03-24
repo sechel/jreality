@@ -64,7 +64,6 @@ import de.jreality.ui.viewerapp.ViewerSwitch;
 import de.jreality.util.EncompassFactory;
 import de.jreality.util.NativePathUtility;
 import de.jreality.util.Secure;
-import de.jreality.util.SystemProperties;
 import de.jtem.jrworkspace.plugin.Controller;
 import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
@@ -682,12 +681,12 @@ public class JRViewer {
 		
 		
 		public ContentInjectionPlugin(SceneGraphNode content) {
-			this(content, !SystemProperties.isPortal);
+			this.content = content; 
 		}
 		
 		
 		public ContentInjectionPlugin(SceneGraphNode content, boolean encompass) {
-			this.content = content;
+			this(content);
 			this.encompass = encompass;
 		}
 		
@@ -789,4 +788,4 @@ public class JRViewer {
 
 
 }
-
+>>>>>>> refs/remotes/stefan/develop
