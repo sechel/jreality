@@ -23,7 +23,6 @@ import de.jreality.plugin.audio.Audio;
 import de.jreality.plugin.audio.AudioOptions;
 import de.jreality.plugin.audio.AudioPreferences;
 import de.jreality.plugin.basic.Content;
-import de.jreality.plugin.basic.InfoOverlayPlugin;
 import de.jreality.plugin.basic.Inspector;
 import de.jreality.plugin.basic.PropertiesMenu;
 import de.jreality.plugin.basic.RunningEnvironment;
