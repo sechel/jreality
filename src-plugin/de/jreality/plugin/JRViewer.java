@@ -552,7 +552,7 @@ public class JRViewer {
 	 * Warning: this plug-in is incompatible with the Shell plug-in
 	 */
 	public void addPythonSupport() {
-//		c.registerPlugin(PythonConsole.class);
+		c.registerPlugin(PythonConsole.class);
 		c.registerPlugin(PythonToolsManager.class);
 		c.registerPlugin(NumberSpinnerGUI.class);
 	}
