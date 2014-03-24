@@ -94,5 +94,9 @@ class FakeFramePeer6 extends FakeFramePeer implements FramePeer {
 
 	public void updateAlwaysOnTopState() {
 	}
+	
+	public void emulateActivation(boolean emulate) {
+		
+	}
 
 }

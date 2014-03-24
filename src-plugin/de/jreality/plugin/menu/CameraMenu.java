@@ -147,7 +147,7 @@ public class CameraMenu extends Plugin {
 	}
 
 	
-	private void setZoomEnabled(boolean enable) {
+	public void setZoomEnabled(boolean enable) {
 		if (scene != null) {
 			scene.getSceneRoot().removeTool(zoomTool);
 			if (enable) {
@@ -157,7 +157,7 @@ public class CameraMenu extends Plugin {
 		zoomToolAction.setSelected(enable);
 	}
 	
-	private boolean isZoomEnabled() {
+	public boolean isZoomEnabled() {
 		return zoomToolAction.isSelected();
 	}
 	

@@ -37,40 +37,41 @@
  *
  */
 
-
 package de.jreality.softviewer;
 
-
 import java.awt.Dimension;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-
 
 /**
  * 
  * @version 1.0
  * @author <a href="mailto:hoffmann@math.tu-berlin.de">Tim Hoffmann</a>
- *
+ * 
  */
-public class SVGRenderer  extends AbstractRenderer {
-    private final Dimension d;
-    private final  PrintWriter writer;
-    
-    public SVGRenderer(PrintWriter writer, int width, int height ) throws FileNotFoundException {
-        super(new SVGRasterizer(writer), true, true);
-        d = new Dimension (width,height);
-        this.writer = writer;
-    } 
-  
-   
-	public void render() {
-          render(d.width, d.height);
-          writer.close();
-          System.out.println("done");
-      }
-      public void update() {
-      }
+public class SVGRenderer extends AbstractRenderer {
+	
+	private final Dimension d;
+	private final PrintWriter writer;
 
+	public SVGRenderer(PrintWriter writer, int width, int height) {
+		this(writer, width, height, true, true);
+	}
+
+	public SVGRenderer(PrintWriter writer, int width, int height, boolean intersecting, boolean sortAll) {
+		super(new SVGRasterizer(writer), intersecting, sortAll);
+		d = new Dimension(width, height);
+		this.writer = writer;
+	}
+
+	@Override
+	public void render() {
+		render(d.width, d.height);
+		writer.close();
+		System.out.println("done");
+	}
+
+	@Override
+	public void update() {
+	}
 
 }
-
