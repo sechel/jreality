@@ -14,7 +14,7 @@
 	<classpathentry kind="src" path="src-jogl"/>
 	<classpathentry kind="src" path="src-jogl3"/>
 	<classpathentry kind="src" path="src-plugin"/>
-	<classpathentry kind="src" path="src-portal">
+	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceVPRNARTrack.java|de/jreality/toolsystem/raw/DeviceVRPNAnalog.java|de/jreality/toolsystem/raw/DeviceVRPNButton.java|de/jreality/toolsystem/raw/DeviceVRPNTracker.java|de/jreality/toolsystem/raw/DeviceVRPNARTrack.java" kind="src" path="src-portal">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/portal/jreality_portal/native32"/>
 		</attributes>
@@ -32,7 +32,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>
 	<classpathentry kind="src" path="test-backends-share"/>
-	<classpathentry kind="src" path="test-portal"/>
+	<classpathentry excluding="de/jreality/portal/vrpn/TestVRPNAnalog.java|de/jreality/portal/vrpn/TestVRPNARTrack.java|de/jreality/portal/vrpn/TestVRPNButton.java|de/jreality/portal/vrpn/TestVRPNTracker.java" kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
 	<classpathentry kind="src" path="src-python"/>
@@ -54,8 +54,7 @@
 	<classpathentry kind="lib" path="lib/jython_console.jar"/>
 	<classpathentry kind="lib" path="lib/jython-standalone-2.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/xstream-1.4.2.jar"/>
-	<classpathentry kind="lib" path="lib/vrpn.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-6-sun-1.6.0.26"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry exported="true" kind="lib" path="lib/jrworkspace.jar" sourcepath="/jrworkspace"/>
 	<classpathentry kind="lib" path="lib/itextpdf-5.3.2.jar"/>
@@ -72,4 +71,3 @@
 	<classpathentry kind="lib" path="lib/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
-
