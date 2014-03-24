@@ -99,7 +99,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 	transient float[] diffuseColorAsFloat;
 	transient int faceCount = 0;
 
-	StandardGLSLShader noneuc = new EuclideanGLSLShader();
+	StandardGLSLShader noneuc = new NoneuclideanGLSLShader();
 	boolean useGLSL, hasNoneuc = false;
 	GlslProgram glslProgram;
 
@@ -178,6 +178,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 //				glslProgram = new GlslProgram(app, eap, name);
 //				hasNoneuc = false;
 //			} else {
+//				System.err.println("rendering noneuc line");
 //				noneuc.setFromEffectiveAppearance(eap, name);
 //				glslProgram = noneuc.getStandardShader();
 //				hasNoneuc = true;
