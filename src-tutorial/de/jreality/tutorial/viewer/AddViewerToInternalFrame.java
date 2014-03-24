@@ -29,7 +29,7 @@ public class AddViewerToInternalFrame {
 		      v.getPlugin(Inspector.class).setInitialPosition(ShrinkPanelPlugin.SHRINKER_LEFT);
 		      v.addContentSupport(ContentType.CenteredAndScaled);
 		      v.setShowPanelSlots(true, false, false, false);
-
+		      v.setContent(de.jreality.geometry.Primitives.icosahedron());
 		      // call this to avoid creating a Frame
 		      JRootPane rootPanel = v.startupLocal();
 		      // create your own frame, with a JInternalFrame, and

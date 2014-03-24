@@ -35,7 +35,6 @@
 	<classpathentry excluding="de/jreality/portal/vrpn/TestVRPNAnalog.java|de/jreality/portal/vrpn/TestVRPNARTrack.java|de/jreality/portal/vrpn/TestVRPNButton.java|de/jreality/portal/vrpn/TestVRPNTracker.java" kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
-	<classpathentry kind="src" path="src-python"/>
 	<classpathentry kind="lib" path="lib/jterm.jar"/>
 	<classpathentry kind="lib" path="lib/smrj.jar"/>
 	<classpathentry kind="lib" path="lib/sunflow.jar"/>
