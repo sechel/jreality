@@ -785,7 +785,4 @@ public class JRViewer {
 		return p;
 
 	}
-
-
 }
->>>>>>> refs/remotes/stefan/develop
