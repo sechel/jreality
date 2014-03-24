@@ -53,19 +53,7 @@ public interface RootAppearance extends AttributeEntity {
   public final static double FOG_DENSITY_DEFAULT = 0.1;
   public final static boolean RENDER_S3_DEFAULT = false;
   public final static boolean USE_GLSL_DEFAULT = false;
-  
-  public static final boolean SMALL_OBJ_OPTIMIZATION_DEFAULT = true;
-  public static final boolean STEREOGRAM_RENDERING_DEFAULT = false;
-  public static final int STEREOGRAM_NUM_SLICES_DEFAULT = 2;
 
-  Boolean getSmallObjOptimization();
-  void setSmallObjOptimization(Boolean smallObj);
-  
-  Integer getStereogramNumSlices();
-  void setStereogramNumSlices(Integer slices);
-  
-  Boolean getStereogramRendering();
-  void setStereogramRendering(Boolean stereo);
 
   Color getBackgroundColor();
   void setBackgroundColor(Color color);
