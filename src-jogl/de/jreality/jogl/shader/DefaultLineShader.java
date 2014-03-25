@@ -58,7 +58,6 @@ import de.jreality.jogl.JOGLRenderer;
 import de.jreality.jogl.JOGLRendererHelper;
 import de.jreality.jogl.JOGLRenderingState;
 import de.jreality.math.Rn;
-import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -99,7 +98,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 	transient float[] diffuseColorAsFloat;
 	transient int faceCount = 0;
 
-	StandardGLSLShader noneuc = new EuclideanGLSLShader();
+	StandardGLSLShader noneuc = new NoneuclideanGLSLShader();
 	boolean useGLSL, hasNoneuc = false;
 	GlslProgram glslProgram;
 
@@ -171,19 +170,20 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 			// polygonShader = (PolygonShader) ShaderLookup.getShaderAttr(eap,
 			// name, "polygonShader");
 			throw new IllegalStateException("Not from a template!");
-		if (useGLSL) {
-			if (GlslProgram.hasGlslProgram(eap, name)) {
-				// dummy to write glsl values like "lightingEnabled"
-				Appearance app = new Appearance();
-				glslProgram = new GlslProgram(app, eap, name);
-				hasNoneuc = false;
-			} else {
-				noneuc.setFromEffectiveAppearance(eap, name);
-				glslProgram = noneuc.getStandardShader();
-				hasNoneuc = true;
-			}
-		} else
-			hasNoneuc = false;
+//		if (useGLSL) {
+//			if (GlslProgram.hasGlslProgram(eap, name)) {
+//				// dummy to write glsl values like "lightingEnabled"
+//				Appearance app = new Appearance();
+//				glslProgram = new GlslProgram(app, eap, name);
+//				hasNoneuc = false;
+//			} else {
+//				System.err.println("rendering noneuc line");
+//				noneuc.setFromEffectiveAppearance(eap, name);
+//				glslProgram = noneuc.getStandardShader();
+//				hasNoneuc = true;
+//			}
+//		} else
+//			hasNoneuc = false;
 	}
 
 	public void preRender(JOGLRenderingState jrs) {
@@ -241,12 +241,12 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 
 		if (!tubeDraw)
 			gl.glDepthRange(0.0d, jrs.depthFudgeFactor);
-		if (useGLSL) {
-			if (hasNoneuc) {
-				noneuc.render(jr);
-			}
-			GlslLoader.render(glslProgram, jr);
-		}
+//		if (useGLSL) {
+//			if (hasNoneuc) {
+//				noneuc.render(jr);
+//			}
+//			GlslLoader.render(glslProgram, jr);
+//		}
 	}
 
 	public void postRender(JOGLRenderingState jrs) {
@@ -254,8 +254,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements
 			return;
 		JOGLRenderer jr = jrs.renderer;
 		GL2 gl = jr.globalGL;
-		if (useGLSL)
-			GlslLoader.postRender(glslProgram, gl);
+//		if (useGLSL)
+//			GlslLoader.postRender(glslProgram, gl);
 		if (!tubeDraw) {
 			jr.globalGL.glDepthRange(0.0d, 1d);
 		} else

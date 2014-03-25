@@ -77,7 +77,7 @@ public abstract class AbstractRenderer {
             pipeline = new IntersectingPipeline(rasterizer,sortAll);
         //    pipeline = new CutTrianglesPipeline(rasterizer);
         else
-            pipeline = new TrianglePipeline(rasterizer);
+            pipeline = new TrianglePipeline(rasterizer, sortAll);
             //pipeline = new IntersectingPipeline(rasterizer,sortAll);
         renderTraversal = new RenderingVisitor();
         renderTraversal.setPipeline(pipeline);
