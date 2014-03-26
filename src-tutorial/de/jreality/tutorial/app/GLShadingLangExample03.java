@@ -53,8 +53,6 @@ public class GLShadingLangExample03 {
 		Texture2D tex = TextureUtility.createTexture(ap, POLYGON_SHADER, 0, id);
 		// rotate this texture by 90 degrees
 		tex.setTextureMatrix(MatrixBuilder.euclidean().scale(4).rotateZ(Math.PI/2).getMatrix());
-//		tex.setApplyMode(Texture2D.GL_DECAL);
-
 		stf.setColor(0, Color.red);
 		stf.update();
 		id = stf.getImageData();

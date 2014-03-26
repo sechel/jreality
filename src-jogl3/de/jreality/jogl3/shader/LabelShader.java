@@ -3,6 +3,7 @@ package de.jreality.jogl3.shader;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
+
 import javax.media.opengl.GL3;
 
 import de.jreality.backends.label.LabelUtility;

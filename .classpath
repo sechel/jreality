@@ -14,7 +14,11 @@
 	<classpathentry kind="src" path="src-jogl"/>
 	<classpathentry kind="src" path="src-jogl3"/>
 	<classpathentry kind="src" path="src-plugin"/>
-	<classpathentry kind="src" path="src-portal"/>
+	<classpathentry excluding="de/jreality/toolsystem/raw/DeviceVPRNARTrack.java|de/jreality/toolsystem/raw/DeviceVRPNAnalog.java|de/jreality/toolsystem/raw/DeviceVRPNButton.java|de/jreality/toolsystem/raw/DeviceVRPNTracker.java|de/jreality/toolsystem/raw/DeviceVRPNARTrack.java" kind="src" path="src-portal">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/portal/jreality_portal/native32"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" path="src-proxies"/>
 	<classpathentry kind="src" path="src-renderman"/>
 	<classpathentry kind="src" path="src-soft"/>
@@ -28,10 +32,9 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry excluding="de/jreality/audio/jack/|de/jreality/audio/csound/|de/jreality/audio/jass/" kind="src" path="test-audio"/>
 	<classpathentry kind="src" path="test-backends-share"/>
-	<classpathentry kind="src" path="test-portal"/>
+	<classpathentry excluding="de/jreality/portal/vrpn/TestVRPNAnalog.java|de/jreality/portal/vrpn/TestVRPNARTrack.java|de/jreality/portal/vrpn/TestVRPNButton.java|de/jreality/portal/vrpn/TestVRPNTracker.java" kind="src" path="test-portal"/>
 	<classpathentry kind="src" path="test-proxies"/>
 	<classpathentry kind="src" path="test-swing"/>
-	<classpathentry kind="src" path="src-python"/>
 	<classpathentry kind="lib" path="lib/jterm.jar"/>
 	<classpathentry kind="lib" path="lib/smrj.jar"/>
 	<classpathentry kind="lib" path="lib/sunflow.jar"/>
@@ -39,7 +42,7 @@
 	<classpathentry kind="lib" path="lib/bsh.jar"/>
 	<classpathentry kind="lib" path="lib/colorpicker.jar"/>
 	<classpathentry kind="lib" path="lib/vrData.jar"/>
-	<classpathentry kind="lib" path="lib/jacknativeclient.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jacknativeclient.jar"/>
 	<classpathentry kind="lib" path="lib/vrExamples.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/beans.jar"/>
 	<classpathentry kind="lib" path="lib/antlr-3.4-complete.jar"/>

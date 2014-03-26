@@ -15,7 +15,6 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.shader.Texture2D;
 
 public class JOGLFaceSetInstance extends JOGLLineSetInstance {
 

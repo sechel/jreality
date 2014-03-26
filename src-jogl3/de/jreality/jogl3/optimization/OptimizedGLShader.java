@@ -2,10 +2,7 @@ package de.jreality.jogl3.optimization;
 
 import java.util.LinkedList;
 
-import javax.media.opengl.GL3;
-
 import de.jreality.jogl3.glsl.GLShader;
-import de.jreality.jogl3.glsl.GLShader.ShaderVar;
 
 public class OptimizedGLShader extends GLShader {
 	

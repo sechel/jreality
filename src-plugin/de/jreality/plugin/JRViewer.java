@@ -785,6 +785,4 @@ public class JRViewer {
 		return p;
 
 	}
-
-
 }
