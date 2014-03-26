@@ -259,7 +259,7 @@ final public class Rn {
 			ddst = dst;
 		int n = Math.min(corners[0].length, ddst.length);
 		double[] tmp = new double[n];
-		Arrays.fill(dst, 0);
+		Arrays.fill(ddst, 0);
 		for (int i = 0; i < 3; ++i) {
 			add(ddst, ddst, times(tmp, weights[i], corners[i]));
 		}
