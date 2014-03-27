@@ -1,5 +1,6 @@
 package de.jreality.ui;
 
+import static de.jreality.scene.Appearance.INHERITED;
 import static de.jreality.shader.CommonAttributes.Z_BUFFER_ENABLED;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
@@ -14,6 +15,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -30,6 +32,51 @@ import de.jreality.ui.ColorChooseJButton.ColorChangedListener;
 public class SimpleAppearanceInspector extends JPanel implements ActionListener, ChangeListener, ColorChangedListener {
 
 	private static final long serialVersionUID = 1L;
+	
+	private enum LinesState {
+		HIDE("Hide"), LINES("Lines"), TUBES("Tubes");
+
+		private String displayName = "";
+		
+		private LinesState(String str) {
+			displayName = str;
+		}
+		
+		@Override
+		public String toString() {
+			return displayName;
+		}
+	}
+	
+	private enum VertexState {
+		HIDE("Hide"), POINTS("Points"), SPHERES("Spheres");
+
+		private String displayName = "";
+		
+		private VertexState(String str) {
+			displayName = str;
+		}
+		
+		@Override
+		public String toString() {
+			return displayName;
+		}
+	}
+	
+	private enum FaceState {
+		HIDE("Hide"), FLAT("Flat"), SMOOTH("Smooth");
+
+		private String displayName = "";
+		
+		private FaceState(String str) {
+			displayName = str;
+		}
+		
+		@Override
+		public String toString() {
+			return displayName;
+		}
+	}
 	
 	/*
 	 * maximal radius of tubes or points compared to content size
@@ -58,13 +105,15 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		transparencySlider = new JSliderVR(HORIZONTAL, 0, 100, 0);
 
 	private JCheckBox 
-		showLines = new JCheckBox("Lines"),
-		showPoints = new JCheckBox("Points"),
-		showFaces = new JCheckBox("Faces"),
-		transparency = new JCheckBox("Transp."),
-		facesFlat = new JCheckBox("Flat Shading"),
-		tubes = new JCheckBox ("Tubes"),
-		spheres = new JCheckBox("Spheres");
+		lines = new JCheckBox("Lines"),
+		points = new JCheckBox("Points"),
+		faces = new JCheckBox("Faces"),
+		transparency = new JCheckBox("Transp.");
+	
+	private JButton
+		linesButton = new JButton(LinesState.TUBES.toString()),
+		pointsButton = new JButton(VertexState.SPHERES.toString()),
+		facesButton = new JButton(FaceState.FLAT.toString());
 	
 	private Appearance appearance = new Appearance();
 	
@@ -80,26 +129,24 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		add(mainPanel);
 		
 		// lines
+		lines.addActionListener(this);
+		linesButton.addActionListener(this);
 		lineColorButton.addColorChangedListener(this);
-		showLines.addActionListener(this);
+//		showLines.addActionListener(this);
 		tubeRadiusSlider.addChangeListener(this);
-		tubes.addActionListener(this);
 		
 		// points
+		points.addActionListener(this);
+		pointsButton.addActionListener(this);
 		pointColorButton.addColorChangedListener(this);
-		showPoints.addActionListener(this);
 		sphereRadiusSlider.addChangeListener(this);
-		spheres.addActionListener(this);
 		
 		// faces
+		faces.addActionListener(this);
+		facesButton.addActionListener(this);
 		faceColorButton.addColorChangedListener(this);
-		showFaces.addActionListener(this);
 		transparencySlider.addChangeListener(this);
 		transparency.addActionListener(this);
-		facesFlat.addActionListener(this);
-		
-		showFaces.setSelected(true);
-		
 	}
 	
 	
@@ -114,10 +161,10 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		
 		c.gridwidth = 4;
 		c.weightx = 0.0;
-		mainPanel.add(showLines, c);
+		mainPanel.add(lines, c);
 		c.gridwidth = 1;
 		c.weightx = 1.0;
-		mainPanel.add(tubes, c);
+		mainPanel.add(linesButton, c);
 		c.gridwidth = REMAINDER;
 		c.weightx = 1.0;
 		mainPanel.add(lineColorButton, c);
@@ -128,10 +175,10 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		// points
 		c.gridwidth = 4;
 		c.weightx = 0.0;
-		mainPanel.add(showPoints, c);
+		mainPanel.add(points, c);
 		c.gridwidth = 1;
 		c.weightx = 0.0;
-		mainPanel.add(spheres, c);
+		mainPanel.add(pointsButton, c);
 		c.gridwidth = REMAINDER;
 		c.weightx = 1.0;
 		mainPanel.add(pointColorButton, c);
@@ -144,8 +191,10 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		// faces
 		c.gridwidth = 4;
 		c.weightx = 0.0;
-		mainPanel.add(showFaces, c);
-		mainPanel.add(facesFlat, c);
+		mainPanel.add(faces, c);
+		c.gridwidth = 1;
+		c.weightx = 0.0;
+		mainPanel.add(facesButton, c);
 		c.gridwidth = REMAINDER;
 		c.weightx = 1.0;
 		mainPanel.add(faceColorButton, c);
@@ -156,31 +205,66 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		c.weightx = 1.0;
 		mainPanel.add(transparencySlider, c);
 
-		
+		updateEnabledStates();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		// lines
-		if (showLines == s) {
-			updateShowLines();
-		} else if (tubes == s) {
-			updateTubes();
-		} else
+		if (lines == s) {
+			if(isEditLines()) {
+				updateLines();
+			} else {
+				resetLinesToInherited();
+			}
+			
+		} else 
+		if (linesButton == s) {
+			if(linesButton.getText().equals("Hide")) {
+				linesButton.setText("Lines");
+			} else if(linesButton.getText().equals("Lines")) {
+				linesButton.setText("Tubes");
+			} else if(linesButton.getText().equals("Tubes")) {
+				linesButton.setText("Hide");
+			}
+			updateLines();
+		}
 		
 		// points
-		if (showPoints == s) {
-			updateShowPoints();
-		} else if (spheres == s) {
-			updateSpheres();
+		if (points == s) {
+			if(isEditPoints()) {
+				updatePoints();
+			} else {
+				resetPointsToInherited();
+			}
+		} else if (pointsButton == s) {
+			if(pointsButton.getText().equals(VertexState.HIDE.toString())) {
+				pointsButton.setText(VertexState.POINTS.toString());
+			} else if(pointsButton.getText().equals(VertexState.POINTS.toString())) {
+				pointsButton.setText(VertexState.SPHERES.toString());
+			} else if(pointsButton.getText().equals(VertexState.SPHERES.toString())) {
+				pointsButton.setText(VertexState.HIDE.toString());
+			}
+			updatePoints();
 		} else
 		
 		// faces
-		if (showFaces == s) {
-			updateShowFaces();
-		} else if (facesFlat == s) {
-			updateFacesFlat();
+		if (faces == s) {
+			if(isEditFaces()) {
+				updateFaces();
+			} else {
+				resetFacesToInherited();
+			}
+		} else if (facesButton == s) {
+			if(facesButton.getText().equals(FaceState.HIDE.toString())) {
+				facesButton.setText(FaceState.FLAT.toString());
+			} else if(facesButton.getText().equals(FaceState.FLAT.toString())) {
+				facesButton.setText(FaceState.SMOOTH.toString());
+			} else if(facesButton.getText().equals(FaceState.SMOOTH.toString())) {
+				facesButton.setText(FaceState.HIDE.toString());
+			}
+			updateFaces();
 		} else if (transparency == s) {
 			updateTransparencyEnabled();
 		} else
@@ -192,6 +276,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		} else if (faceColorButton == s) {
 			updateFaceColor();
 		}
+		updateEnabledStates();
 	}
 	
 	@Override
@@ -201,7 +286,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		if (tubeRadiusSlider == s) {
 			updateTubeRadius();
 		} else
-		
+
 		// points
 		if (sphereRadiusSlider == s) {
 			updateSphereRadius();
@@ -215,18 +300,18 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 
 	
 	public void updateEnabledStates() {
-		lineColorButton.setEnabled(isShowLines());
-		tubes.setEnabled(isShowLines());
-		tubeRadiusSlider.setEnabled(isShowLines());
+		lineColorButton.setEnabled(isEditLines());
+		linesButton.setEnabled(isEditLines());
+		tubeRadiusSlider.setEnabled(isEditLines());
 		
-		pointColorButton.setEnabled(isShowPoints());
-		spheres.setEnabled(isShowPoints());
-		sphereRadiusSlider.setEnabled(isShowPoints());
+		pointColorButton.setEnabled(isEditPoints());
+		pointsButton.setEnabled(isEditPoints());
+		sphereRadiusSlider.setEnabled(isEditPoints());
 		
-		faceColorButton.setEnabled(isShowFaces());
-		transparency.setEnabled(isShowFaces());
-		transparencySlider.setEnabled(isShowFaces() && isTransparencyEnabled());
-		facesFlat.setEnabled(isShowFaces());
+		faceColorButton.setEnabled(isEditFaces());
+		transparency.setEnabled(isEditFaces());
+		transparencySlider.setEnabled(isEditFaces() && isTransparencyEnabled());
+		facesButton.setEnabled(isEditFaces());
 	}
 	
 	public Appearance getAppearance() {
@@ -267,11 +352,22 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		updateTubeRadius();
 	}
 	
-	public boolean isShowPoints() {
-		return showPoints.isSelected();
+	public boolean isEditPoints() {
+		return points.isSelected();
 	}
-	public void setShowPoints(boolean selected) {
-		showPoints.setSelected(selected);
+	public boolean isShowPoints() {
+		return !pointsButton.getText().equals(VertexState.HIDE.toString());
+	}
+	public void setShowPoints(VertexState state) {
+		pointsButton.setText(state.toString());
+		updatePoints();
+	}
+	private void updatePoints() {
+		updateShowPoints();
+		updateSpheres();
+		updatePointColor();
+		updateSphereRadius();
+		updateEnabledStates();
 	}
 	private void updateShowPoints() {
 		if (appearance != null) {
@@ -284,10 +380,17 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 	}
 	
 	public boolean isSpheres() {
-		return spheres.isSelected();
+		return pointsButton.getText().equals(VertexState.SPHERES.toString());
 	}
 	public void setSpheres(boolean b) {
-		spheres.setSelected(b);
+		if(isShowPoints()) {
+			if(b) {
+				pointsButton.setText(VertexState.SPHERES.toString());
+			} else {
+				pointsButton.setText(VertexState.POINTS.toString());
+			}
+		}
+		updatePoints();
 	}
 	private void updateSpheres() {
 		boolean spheres = isSpheres();
@@ -345,33 +448,56 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 		pointColorButton.setColor(getPointColor());
 	}
+	private void resetPointsToInherited() {
+		if(appearance != null) {
+			appearance.setAttribute(
+					CommonAttributes.VERTEX_DRAW,
+					INHERITED
+			);
+			appearance.setAttribute(
+					CommonAttributes.POINT_SHADER + "." +
+					CommonAttributes.SPHERES_DRAW,
+					INHERITED
+			);
+			appearance.setAttribute(
+					CommonAttributes.POINT_SHADER + "." +
+					CommonAttributes.POINT_RADIUS,
+					INHERITED
+			);
+			// 64 pixels is the maximum size for point sprites
+			appearance.setAttribute(
+					CommonAttributes.POINT_SHADER + "." +
+					CommonAttributes.POINT_SIZE,
+					INHERITED
+			);
+			appearance.setAttribute(CommonAttributes.LINE_SHADER + "." + 
+					CommonAttributes.DEPTH_FUDGE_FACTOR, INHERITED);
+			appearance.setAttribute(
+					CommonAttributes.POINT_SHADER + "." +
+					CommonAttributes.DIFFUSE_COLOR,
+					INHERITED
+			);
+		}
+	}
+	
+	//-----------------------------lines---------------------
+	public boolean isEditLines() {
+		return lines.isSelected();
+	}
 	
 	public boolean isShowLines() {
-		return showLines.isSelected();
+		return !linesButton.getText().equals(LinesState.HIDE.toString());
 	}
-	public void setShowLines(boolean selected) {
-		showLines.setSelected(selected);
-		updateShowLines();
+	public void setShowLines(LinesState state) {
+		linesButton.setText(state.toString());
+		updateLines();
 	}
-	private void updateShowLines() {
+	private void updateLines() {
 		if (appearance != null) {
 			appearance.setAttribute(
 					CommonAttributes.EDGE_DRAW,
 					isShowLines()
 			);
-		}
-		updateEnabledStates();
-	}
-	
-	public boolean isTubes() {
-		return tubes.isSelected();
-	}
-	public void setTubes(boolean b) {
-		tubes.setSelected(b);
-		updateTubes();
-	}
-	private void updateTubes() {
-		if (appearance != null) {
 			boolean tubes = isTubes();
 			appearance.setAttribute(
 					CommonAttributes.LINE_SHADER + "." +
@@ -379,7 +505,51 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 					tubes
 			);
 		}
+		updateTubeRadius();
+		updateLineColor();
 		updateEnabledStates();
+	}
+	private void resetLinesToInherited() {
+		appearance.setAttribute(
+				CommonAttributes.EDGE_DRAW,
+				INHERITED
+		);
+		appearance.setAttribute(
+				CommonAttributes.LINE_SHADER + "." +
+				CommonAttributes.TUBES_DRAW,
+				INHERITED
+		);
+		
+		appearance.setAttribute(
+				CommonAttributes.LINE_SHADER + "."	+
+				CommonAttributes.LINE_WIDTH,
+				INHERITED
+		);
+		appearance.setAttribute(
+				CommonAttributes.LINE_SHADER + "."	+
+				CommonAttributes.TUBE_RADIUS,
+				INHERITED
+		);
+		
+		appearance.setAttribute(
+				CommonAttributes.LINE_SHADER + "." +
+				CommonAttributes.DIFFUSE_COLOR ,
+				INHERITED
+		);
+	}
+	
+	public boolean isTubes() {
+		return linesButton.getText().equals(LinesState.TUBES.toString());
+	}
+	public void setTubes(boolean b) {
+		if(isShowLines()) {
+			if(b) {
+				linesButton.setText(LinesState.TUBES.toString());
+			} else {
+				linesButton.setText(LinesState.LINES.toString());
+			}
+		}
+		updateLines();
 	}
 
 	public double getTubeRadius() {
@@ -422,15 +592,25 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 	}
 	
+	
+	public boolean isEditFaces() {
+		return faces.isSelected();
+	}
 	public boolean isShowFaces() {
-		return showFaces.isSelected();
+		return !facesButton.getText().equals(FaceState.HIDE.toString());
 	}
 
-	public void setShowFaces(boolean selected) {
-		showFaces.setSelected(selected);
-		if (appearance != null) {
-			appearance.setAttribute("showFaces", selected);
-		}
+	public void setShowFaces(FaceState state) {
+		facesButton.setText(state.toString());
+		updateFaces();
+	}
+	
+	private void updateFaces() {
+		updateShowFaces();
+		updateFacesFlat();
+		updateFaceColor();
+		updateTransparencyEnabled();
+		updateTransparency();
 	}
 	
 	private void updateShowFaces() {
@@ -440,14 +620,20 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 					isShowFaces()
 			);
 		}
-		updateEnabledStates();
 	}
 	
 	public boolean isFacesFlat() {
-		return facesFlat.isSelected();
+		return facesButton.getText().equals(FaceState.FLAT.toString());
 	}
 	public void setFacesFlat(boolean b) {
-		facesFlat.setSelected(b);
+		if(isShowFaces()) {
+			if(b) {
+				facesButton.setText(FaceState.FLAT.toString());
+			} else {
+				facesButton.setText(FaceState.SMOOTH.toString());
+			}
+		}
+		updateFaces();
 	}
 	private void updateFacesFlat() {
 		if (appearance != null) {
@@ -496,9 +682,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 	}
 
 	public Color getFaceColor() {
-		return (Color) appearance.getAttribute(
-				CommonAttributes.POLYGON_SHADER + "." +
-				CommonAttributes.DIFFUSE_COLOR);
+		return faceColorButton.getColor();
 	}
 	public void setFaceColor(Color c) {
 		appearance.setAttribute(
@@ -515,6 +699,39 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 		faceColorButton.setColor(getFaceColor());
 	}
+	private void resetFacesToInherited() {
+		if (appearance != null) {
+			appearance.setAttribute(
+					CommonAttributes.FACE_DRAW,
+					INHERITED
+			);
+			appearance.setAttribute(
+					CommonAttributes.POLYGON_SHADER + "." +
+					CommonAttributes.SMOOTH_SHADING,
+					INHERITED
+			);
+			appearance.setAttribute(
+					CommonAttributes.TRANSPARENCY_ENABLED,
+					INHERITED
+			);
+			appearance.setAttribute(Z_BUFFER_ENABLED, INHERITED);
+			appearance.setAttribute(
+					CommonAttributes.POLYGON_SHADER + "." +
+					CommonAttributes.TRANSPARENCY,
+					INHERITED
+			);
+			appearance.setAttribute(
+					CommonAttributes.POLYGON_SHADER + "." +
+					CommonAttributes.DIFFUSE_COLOR,INHERITED);
+			appearance.setAttribute(
+					CommonAttributes.POLYGON_SHADER + "." +
+					CommonAttributes.DIFFUSE_COLOR,
+					INHERITED
+			);
+			
+		}
+	}
+	
 	
 	@Override
 	public void colorChanged(ColorChangedEvent cce) {
