@@ -10,14 +10,17 @@ import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.JRViewerUtility;
 import de.jreality.plugin.basic.Content;
 import de.jreality.plugin.basic.Inspector;
+import de.jreality.plugin.basic.SimpleAppearancePlugin;
 import de.jreality.plugin.content.ContentLoader;
 import de.jreality.plugin.content.ContentTools;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.tool.AbstractTool;
 import de.jreality.scene.tool.InputSlot;
 import de.jreality.scene.tool.Tool;
 import de.jreality.scene.tool.ToolContext;
 import de.jreality.tools.ClickWheelCameraZoomTool;
+import de.jreality.ui.SimpleAppearanceInspector;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 /**
@@ -45,13 +48,24 @@ import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 		v.setContent(sgc);
 		v.addBasicUI();
 		v.registerPlugin(new ContentLoader());
+
 		contentTools = new ContentTools();
 		v.registerPlugin(contentTools);
 		v.getPlugin(Inspector.class).setInitialPosition(
 		            ShrinkPanelPlugin.SHRINKER_LEFT);
 		v.addContentSupport(ContentType.CenteredAndScaled);
+		
+		SceneGraphComponent world = new SceneGraphComponent();
+		world.setGeometry(Primitives.sharedIcosahedron);
+		Appearance app = new Appearance();
+		SimpleAppearancePlugin sap = new SimpleAppearancePlugin(app);
+		v.registerPlugin(sap);		
+		world.setAppearance(app);
 		v.startup();
 		content = JRViewerUtility.getContentPlugin(v.getController());
+		content.setContent(world);
+		
+		
 		final Tool toggleTool = new ToggleTool();
 		content.addContentTool(toggleTool);
 	}
