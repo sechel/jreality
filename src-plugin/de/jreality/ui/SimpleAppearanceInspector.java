@@ -320,6 +320,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 
 	public void setAppearance(Appearance appearance) {
 		this.appearance = appearance;
+		updateGUI();
 	}
 
 	public double getMaximalRadius() {
@@ -480,6 +481,53 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 	}
 	
+	private void updatePointsGUI() {
+		boolean pointsDraw = false;
+		try {
+			pointsDraw = (Boolean) appearance.getAttribute(CommonAttributes.VERTEX_DRAW);
+			if(!pointsDraw) {
+				pointsButton.setText(FaceState.HIDE.toString());
+			}
+		} catch(ClassCastException e) {
+			// points draw not set
+		}
+		boolean spheresDraw = true;
+		try {
+			 spheresDraw = (Boolean) appearance.getAttribute(
+					CommonAttributes.POINT_SHADER + "." + CommonAttributes.SPHERES_DRAW);
+			if(pointsDraw) {
+				if(spheresDraw) {
+					pointsButton.setText(VertexState.SPHERES.toString());
+				} else {
+					pointsButton.setText(VertexState.POINTS.toString());
+				}
+			}
+		} catch(ClassCastException e) {
+			// spheresDraw not set
+		}
+		try {
+			Color pointColor = (Color) appearance.getAttribute(
+				CommonAttributes.POINT_SHADER + "." + CommonAttributes.DIFFUSE_COLOR);
+			pointColorButton.setColor(pointColor);
+		} catch(ClassCastException ex) {
+			// no color set in appearance
+		}
+		try {
+			if(spheresDraw) {
+				double r = (Double)	appearance.getAttribute(
+										CommonAttributes.POINT_SHADER + "." +
+										CommonAttributes.POINT_RADIUS);
+				setPointRadius(convertTubeRadius(getLogarithmicRange(), getMaximalRadius(), r));
+			} else {
+				double r = (Double) appearance.getAttribute(
+										CommonAttributes.POINT_SHADER + "."	+
+										CommonAttributes.POINT_RADIUS);
+				setPointRadius(convertTubeRadius(getLogarithmicRange(), getMaximalRadius(), r)/10);
+			}
+		} catch(ClassCastException ex) {
+			// no color set in appearance
+		}
+	}
 	//-----------------------------lines---------------------
 	public boolean isEditLines() {
 		return lines.isSelected();
@@ -558,6 +606,11 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 	public void setTubeRadius(double d) {
 		tubeRadiusSlider.setValue((int) (d * 100));
 	}
+	
+	private double convertTubeRadius(double L, double M, Double r) {
+		return Math.log(r * L / M)/Math.log(L);
+	}
+	
 	private void updateTubeRadius() {
 		double r = Math.exp(Math.log(logarithmicRange) * getTubeRadius())
 		/ logarithmicRange * maximalRadius;
@@ -592,7 +645,55 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 	}
 	
+	private void updateLinesGUI() {
+		boolean linesDraw = false;
+		try {
+			linesDraw = (Boolean) appearance.getAttribute(CommonAttributes.EDGE_DRAW);
+			if(!linesDraw) {
+				linesButton.setText(LinesState.HIDE.toString());
+			}
+		} catch(ClassCastException e) {
+			// lines draw not set
+		}
+		boolean tubesDraw = false;
+		try {
+			tubesDraw = (Boolean) appearance.getAttribute(
+					CommonAttributes.LINE_SHADER + "." + CommonAttributes.TUBES_DRAW);
+			if(linesDraw) {
+				if(tubesDraw) {
+					linesButton.setText(LinesState.TUBES.toString());
+				} else {
+					linesButton.setText(LinesState.LINES.toString());
+				}
+			}
+		} catch(ClassCastException e) {
+			// tubes draw not set
+		}
+		try {
+			Color lineColor = (Color) appearance.getAttribute(
+				CommonAttributes.LINE_SHADER + "." + CommonAttributes.DIFFUSE_COLOR);
+			lineColorButton.setColor(lineColor);
+		} catch(ClassCastException ex) {
+			// no color set in appearance
+		}
+		try {
+			if(tubesDraw) {
+				double r = (Double)	appearance.getAttribute(
+										CommonAttributes.LINE_SHADER + "." +
+										CommonAttributes.TUBE_RADIUS);
+				setTubeRadius(convertTubeRadius(getLogarithmicRange(), getMaximalRadius(), r));
+			} else {
+				double r = (Double) appearance.getAttribute(
+										CommonAttributes.LINE_SHADER + "."	+
+										CommonAttributes.LINE_WIDTH);
+				setTubeRadius(convertTubeRadius(getLogarithmicRange(), getMaximalRadius(), r)/10);
+			}
+		} catch(ClassCastException ex) {
+			// no color set in appearance
+		}
+	}
 	
+//----------------------faces----------------------------
 	public boolean isEditFaces() {
 		return faces.isSelected();
 	}
@@ -658,8 +759,8 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 					CommonAttributes.TRANSPARENCY_ENABLED,
 					isTransparencyEnabled()
 			);
-			appearance.setAttribute(Z_BUFFER_ENABLED, true);
-		}
+			appearance.setAttribute(Z_BUFFER_ENABLED, isTransparencyEnabled());
+		} 
 		updateTransparency();
 		updateEnabledStates();
 	}
@@ -722,16 +823,62 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 			);
 			appearance.setAttribute(
 					CommonAttributes.POLYGON_SHADER + "." +
-					CommonAttributes.DIFFUSE_COLOR,INHERITED);
-			appearance.setAttribute(
-					CommonAttributes.POLYGON_SHADER + "." +
 					CommonAttributes.DIFFUSE_COLOR,
 					INHERITED
 			);
-			
 		}
 	}
 	
+	private void updateFacesGUI() {
+		if (appearance != null) {
+			boolean faceDraw = false;
+			try {
+				faceDraw = (Boolean) appearance.getAttribute(CommonAttributes.FACE_DRAW);
+				if(!faceDraw) {
+					facesButton.setText(FaceState.HIDE.toString());
+				}
+			} catch (ClassCastException e) {
+				// faceDraw not set
+			}
+			try {
+				boolean smooth = (Boolean) appearance.getAttribute(
+											CommonAttributes.POLYGON_SHADER + "." +
+											CommonAttributes.SMOOTH_SHADING);
+				if(faceDraw) {
+					if(smooth) {
+						facesButton.setText(FaceState.SMOOTH.toString());
+					} else {	
+						facesButton.setText(FaceState.FLAT.toString());
+					}
+				}
+			} catch(ClassCastException e) {
+				// smooth shading not set.
+			}
+			try {
+				boolean transparencyEnabled = (Boolean)appearance.getAttribute(
+												CommonAttributes.TRANSPARENCY_ENABLED);
+				transparency.setSelected(transparencyEnabled);
+				double t = (Double) appearance.getAttribute(CommonAttributes.POLYGON_SHADER + "." +
+								CommonAttributes.TRANSPARENCY);
+				setTransparency(t);
+			} catch(ClassCastException e) {
+				// transparencyEnabled not set
+			}
+			try {
+				Color faceColor = (Color) appearance.getAttribute(
+						CommonAttributes.POLYGON_SHADER + "." +	CommonAttributes.DIFFUSE_COLOR);
+				faceColorButton.setColor(faceColor);
+			} catch(ClassCastException ex) {
+				// no color set in appearance
+			}
+		}
+	}
+	
+	private void updateGUI() {
+		updatePointsGUI();
+		updateLinesGUI();
+		updateFacesGUI();
+	}
 	
 	@Override
 	public void colorChanged(ColorChangedEvent cce) {
