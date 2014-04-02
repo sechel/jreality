@@ -182,6 +182,10 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		transparencySlider.addChangeListener(this);
 		transparencySlider.setPreferredSize(new Dimension(0,10));
 		transparency.addActionListener(this);
+
+		vertexFontInspector.setFontColor(Color.black);
+		lineFontInspector.setFontColor(Color.black);
+		faceFontInspector.setFontColor(Color.black);
 	}
 	
 	
