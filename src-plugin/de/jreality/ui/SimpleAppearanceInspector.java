@@ -4,10 +4,12 @@ import static de.jreality.scene.Appearance.INHERITED;
 import static de.jreality.shader.CommonAttributes.Z_BUFFER_ENABLED;
 import static java.awt.GridBagConstraints.BOTH;
 import static java.awt.GridBagConstraints.REMAINDER;
+import static java.awt.GridBagConstraints.VERTICAL;
 import static java.awt.GridBagConstraints.WEST;
 import static javax.swing.SwingConstants.HORIZONTAL;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -17,10 +19,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.jreality.plugin.icon.ImageHook;
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.ui.ColorChooseJButton.ColorChangedEvent;
@@ -92,7 +97,10 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		logarithmicRange = 200;
 	
 	private JPanel
-		mainPanel = new JPanel();
+		mainPanel = new JPanel(),
+		vertexLabelsPanel = new JPanel(),
+		lineLabelsPanel = new JPanel(),
+		faceLabelsPanel = new JPanel();
 
 	private ColorChooseJButton
 		lineColorButton = new ColorChooseJButton(true),
@@ -112,8 +120,19 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 	
 	private JButton
 		linesButton = new JButton(LinesState.TUBES.toString()),
-		pointsButton = new JButton(VertexState.SPHERES.toString()),
-		facesButton = new JButton(FaceState.FLAT.toString());
+		lineInspectorButton = new JButton(ImageHook.getIcon("font.png")),
+		closeLineInspectorButton = new JButton("Done"),
+		vertexButton = new JButton(VertexState.SPHERES.toString()),
+		vertexInspectorButton = new JButton(ImageHook.getIcon("font.png")),
+		closeVertexInspectorButton = new JButton("Done"),
+		facesButton = new JButton(FaceState.FLAT.toString()),
+		faceInspectorButton = new JButton(ImageHook.getIcon("font.png")),
+		closeFaceInspectorButton = new JButton("Done");
+	
+	private LabelsInspector
+		faceFontInspector = new LabelsInspector("polygonShader"),
+		lineFontInspector = new LabelsInspector("lineShader"),
+		vertexFontInspector = new LabelsInspector("pointShader");
 	
 	private Appearance appearance = new Appearance();
 	
@@ -124,32 +143,72 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		insets = new Insets(1,0,1,0);
 	
 	public SimpleAppearanceInspector() {
-		setLayout(new GridLayout());
+		setLayout(new GridLayout(0,1));
 		makePanel();
+		makeLabelPanels();
+
+		
 		add(mainPanel);
 		
 		// lines
 		lines.addActionListener(this);
 		linesButton.addActionListener(this);
+		lineInspectorButton.addActionListener(this);
+		lineInspectorButton.setPreferredSize(new Dimension(20,20));
+		closeLineInspectorButton.addActionListener(this);
 		lineColorButton.addColorChangedListener(this);
+		lineInspectorButton.addActionListener(this);
 //		showLines.addActionListener(this);
 		tubeRadiusSlider.addChangeListener(this);
+		tubeRadiusSlider.setPreferredSize(new Dimension(0,20));
 		
 		// points
 		points.addActionListener(this);
-		pointsButton.addActionListener(this);
+		vertexButton.addActionListener(this);
+		vertexInspectorButton.addActionListener(this);
+		vertexInspectorButton.setPreferredSize(new Dimension(20,20));
 		pointColorButton.addColorChangedListener(this);
+		closeVertexInspectorButton.addActionListener(this);
 		sphereRadiusSlider.addChangeListener(this);
+		sphereRadiusSlider.setPreferredSize(new Dimension(0,20));
 		
 		// faces
 		faces.addActionListener(this);
 		facesButton.addActionListener(this);
+		faceInspectorButton.addActionListener(this);
+		faceInspectorButton.setPreferredSize(new Dimension(20,20));
 		faceColorButton.addColorChangedListener(this);
+		closeFaceInspectorButton.addActionListener(this);
 		transparencySlider.addChangeListener(this);
+		transparencySlider.setPreferredSize(new Dimension(0,10));
 		transparency.addActionListener(this);
 	}
 	
 	
+	private void makeLabelPanels() {
+		makeLabelPanel(vertexLabelsPanel, vertexFontInspector, closeVertexInspectorButton);
+		makeLabelPanel(lineLabelsPanel, lineFontInspector, closeLineInspectorButton);
+		makeLabelPanel(faceLabelsPanel, faceFontInspector, closeFaceInspectorButton);
+		
+	}
+
+
+	private void makeLabelPanel(JPanel panel, JPanel inspector, JButton returnButton) {
+		panel.setLayout(new GridBagLayout());
+		GridBagConstraints c1 = new GridBagConstraints();
+		c1.weightx = 1.0;
+		c1.weighty = 1.0;
+		c1.insets = new Insets(1, 0, 1, 0);
+		c1.gridwidth = REMAINDER;
+		c1.anchor = GridBagConstraints.EAST;
+		c1.fill = BOTH;
+		panel.add(inspector, c1);
+		c1.fill = VERTICAL;
+		c1.weighty = 0.0;
+		panel.add(returnButton, c1);
+	}
+
+
 	private void makePanel() {
 		mainPanel.setLayout(new GridBagLayout());
 		c.fill = BOTH;
@@ -163,12 +222,12 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		c.weightx = 0.0;
 		mainPanel.add(lines, c);
 		c.gridwidth = 1;
-		c.weightx = 1.0;
+		c.weightx = 0.0;
 		mainPanel.add(linesButton, c);
-		c.gridwidth = REMAINDER;
-		c.weightx = 1.0;
+		c.weightx = 0.0;
 		mainPanel.add(lineColorButton, c);
 		c.gridwidth = REMAINDER;
+		mainPanel.add(lineInspectorButton,c);
 		c.weightx = 1.0;
 		mainPanel.add(tubeRadiusSlider, c);
 
@@ -178,15 +237,15 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		mainPanel.add(points, c);
 		c.gridwidth = 1;
 		c.weightx = 0.0;
-		mainPanel.add(pointsButton, c);
-		c.gridwidth = REMAINDER;
-		c.weightx = 1.0;
+		mainPanel.add(vertexButton, c);
+		c.weightx = 0.0;
 		mainPanel.add(pointColorButton, c);
 		c.gridwidth = REMAINDER;
+		c.weightx = 0.0;
+//		vertexInspectorButton.setSize(32, 32);
+		mainPanel.add(vertexInspectorButton,c);
 		c.weightx = 1.0;
 		mainPanel.add(sphereRadiusSlider, c);
-		c.gridwidth = REMAINDER;
-		c.weightx = 1.0;
 		
 		// faces
 		c.gridwidth = 4;
@@ -195,10 +254,12 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		c.gridwidth = 1;
 		c.weightx = 0.0;
 		mainPanel.add(facesButton, c);
-		c.gridwidth = REMAINDER;
-		c.weightx = 1.0;
+		c.weightx = 0.0;
 		mainPanel.add(faceColorButton, c);
-		c.gridwidth = 4;
+		c.gridwidth = REMAINDER;
+		c.weightx = 0.0;
+		mainPanel.add(faceInspectorButton,c);
+		c.gridwidth = 1;
 		c.weightx = 0.0;
 		mainPanel.add(transparency, c);
 		c.gridwidth = REMAINDER;
@@ -229,8 +290,9 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 				linesButton.setText("Hide");
 			}
 			updateLines();
-		}
-		
+		} else if (lineInspectorButton == s) {
+			switchTo(lineLabelsPanel);
+		} else
 		// points
 		if (points == s) {
 			if(isEditPoints()) {
@@ -238,17 +300,18 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 			} else {
 				resetPointsToInherited();
 			}
-		} else if (pointsButton == s) {
-			if(pointsButton.getText().equals(VertexState.HIDE.toString())) {
-				pointsButton.setText(VertexState.POINTS.toString());
-			} else if(pointsButton.getText().equals(VertexState.POINTS.toString())) {
-				pointsButton.setText(VertexState.SPHERES.toString());
-			} else if(pointsButton.getText().equals(VertexState.SPHERES.toString())) {
-				pointsButton.setText(VertexState.HIDE.toString());
+		} else if (vertexButton == s) {
+			if(vertexButton.getText().equals(VertexState.HIDE.toString())) {
+				vertexButton.setText(VertexState.POINTS.toString());
+			} else if(vertexButton.getText().equals(VertexState.POINTS.toString())) {
+				vertexButton.setText(VertexState.SPHERES.toString());
+			} else if(vertexButton.getText().equals(VertexState.SPHERES.toString())) {
+				vertexButton.setText(VertexState.HIDE.toString());
 			}
 			updatePoints();
-		} else
-		
+		} else if (vertexInspectorButton == s) {
+			switchTo(vertexLabelsPanel);
+		} else		
 		// faces
 		if (faces == s) {
 			if(isEditFaces()) {
@@ -268,13 +331,18 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		} else if (transparency == s) {
 			updateTransparencyEnabled();
 		} else
-		
 		if (lineColorButton == s) {
 			updateLineColor();
 		} else if (pointColorButton == s) {
 			updatePointColor();
 		} else if (faceColorButton == s) {
 			updateFaceColor();
+		} else if (faceInspectorButton == s) {
+			switchTo(faceLabelsPanel);
+		} else 
+		// for done buttons.
+		{
+			switchTo(mainPanel);
 		}
 		updateEnabledStates();
 	}
@@ -305,13 +373,17 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		tubeRadiusSlider.setEnabled(isEditLines());
 		
 		pointColorButton.setEnabled(isEditPoints());
-		pointsButton.setEnabled(isEditPoints());
+		vertexButton.setEnabled(isEditPoints());
 		sphereRadiusSlider.setEnabled(isEditPoints());
 		
 		faceColorButton.setEnabled(isEditFaces());
 		transparency.setEnabled(isEditFaces());
 		transparencySlider.setEnabled(isEditFaces() && isTransparencyEnabled());
 		facesButton.setEnabled(isEditFaces());
+		
+		vertexInspectorButton.setEnabled(isEditPoints());
+		lineInspectorButton.setEnabled(isEditLines());
+		faceInspectorButton.setEnabled(isEditFaces());
 	}
 	
 	public Appearance getAppearance() {
@@ -320,6 +392,9 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 
 	public void setAppearance(Appearance appearance) {
 		this.appearance = appearance;
+		vertexFontInspector.setNoUpdate(appearance);
+		lineFontInspector.setNoUpdate(appearance);
+		faceFontInspector.setNoUpdate(appearance);
 		updateGUI();
 	}
 
@@ -357,10 +432,10 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		return points.isSelected();
 	}
 	public boolean isShowPoints() {
-		return !pointsButton.getText().equals(VertexState.HIDE.toString());
+		return !vertexButton.getText().equals(VertexState.HIDE.toString());
 	}
 	public void setShowPoints(VertexState state) {
-		pointsButton.setText(state.toString());
+		vertexButton.setText(state.toString());
 		updatePoints();
 	}
 	private void updatePoints() {
@@ -368,6 +443,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		updateSpheres();
 		updatePointColor();
 		updateSphereRadius();
+		vertexFontInspector.setEditAppearance(true);
 		updateEnabledStates();
 	}
 	private void updateShowPoints() {
@@ -381,14 +457,14 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 	}
 	
 	public boolean isSpheres() {
-		return pointsButton.getText().equals(VertexState.SPHERES.toString());
+		return vertexButton.getText().equals(VertexState.SPHERES.toString());
 	}
 	public void setSpheres(boolean b) {
 		if(isShowPoints()) {
 			if(b) {
-				pointsButton.setText(VertexState.SPHERES.toString());
+				vertexButton.setText(VertexState.SPHERES.toString());
 			} else {
-				pointsButton.setText(VertexState.POINTS.toString());
+				vertexButton.setText(VertexState.POINTS.toString());
 			}
 		}
 		updatePoints();
@@ -478,6 +554,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 					CommonAttributes.DIFFUSE_COLOR,
 					INHERITED
 			);
+			vertexFontInspector.setEditAppearance(false);
 		}
 	}
 	
@@ -486,7 +563,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		try {
 			pointsDraw = (Boolean) appearance.getAttribute(CommonAttributes.VERTEX_DRAW);
 			if(!pointsDraw) {
-				pointsButton.setText(FaceState.HIDE.toString());
+				vertexButton.setText(FaceState.HIDE.toString());
 			}
 		} catch(ClassCastException e) {
 			// points draw not set
@@ -497,9 +574,9 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 					CommonAttributes.POINT_SHADER + "." + CommonAttributes.SPHERES_DRAW);
 			if(pointsDraw) {
 				if(spheresDraw) {
-					pointsButton.setText(VertexState.SPHERES.toString());
+					vertexButton.setText(VertexState.SPHERES.toString());
 				} else {
-					pointsButton.setText(VertexState.POINTS.toString());
+					vertexButton.setText(VertexState.POINTS.toString());
 				}
 			}
 		} catch(ClassCastException e) {
@@ -555,7 +632,9 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 		updateTubeRadius();
 		updateLineColor();
+		lineFontInspector.setEditAppearance(true);
 		updateEnabledStates();
+		
 	}
 	private void resetLinesToInherited() {
 		appearance.setAttribute(
@@ -584,6 +663,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 				CommonAttributes.DIFFUSE_COLOR ,
 				INHERITED
 		);
+		lineFontInspector.setEditAppearance(false);
 	}
 	
 	public boolean isTubes() {
@@ -712,6 +792,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		updateFaceColor();
 		updateTransparencyEnabled();
 		updateTransparency();
+		faceFontInspector.setEditAppearance(true);
 	}
 	
 	private void updateShowFaces() {
@@ -827,6 +908,7 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 					INHERITED
 			);
 		}
+		faceFontInspector.setEditAppearance(false);
 	}
 	
 	private void updateFacesGUI() {
@@ -892,4 +974,19 @@ public class SimpleAppearanceInspector extends JPanel implements ActionListener,
 		}
 	}
 	
+	private void switchTo(JComponent content) {
+		removeAll();
+		setLayout(new GridLayout());
+		add(content);
+		revalidate();
+		repaint();
+	}
+	
+	@Override
+	public void updateUI() {
+		super.updateUI();
+		if (isShowing()) {
+			SwingUtilities.updateComponentTreeUI(vertexLabelsPanel);
+		}
+	}
 }

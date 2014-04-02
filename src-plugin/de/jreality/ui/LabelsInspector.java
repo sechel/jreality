@@ -87,7 +87,56 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 		add(resolutionSpinner, c2);
 	}
 	
+	public void setEditAppearance(boolean b) {
+		if(b) {
+			updateAppearance();
+		} else {
+			resetToInherited();
+		}
+	}
 	
+	private void updateGUI() {
+		try {
+			boolean isShowLabels = (Boolean) app.getAttribute(shaderPrefix + ".textShader.showLabels");
+			visibleChecker.setSelected(isShowLabels);
+		} catch(ClassCastException e){
+			visibleChecker.setSelected(false);
+		}
+		try {
+			Color labelsColor = (Color) app.getAttribute(shaderPrefix + ".textShader.diffuseColor");
+			fontColorButton.setColor(labelsColor);
+		} catch (ClassCastException e) {
+			// no color set in appearance
+		}
+		try {
+//			labelFont = new Font("arial", Font.PLAIN, fontSize);
+			Font font = (Font) app.getAttribute(shaderPrefix + ".textShader.font");
+			int resolution = font.getSize();
+			double labelSize = (Double) app.getAttribute(shaderPrefix + ".textShader.scale");
+			resModel.setValue(resolution);
+			sizeSlider.setValue((int)(labelSize*resolution*100));
+		} catch (ClassCastException e) {
+			// no LabeSize specified
+		}
+		try {
+			double[] off = (double[]) app.getAttribute(shaderPrefix + ".textShader.offset");
+			offsetXSlider.setValue((int)(100.0*off[0]));
+			offsetYSlider.setValue((int)(100.0*off[1]));
+			offsetZSlider.setValue((int)(100.0*off[2]));
+		} catch (ClassCastException e) {
+			// no offset specified
+		}
+		updateAppearance();
+	}
+
+	private void resetToInherited() {
+		app.setAttribute(shaderPrefix + ".textShader.showLabels", Appearance.INHERITED);
+		app.setAttribute(shaderPrefix + ".textShader.diffuseColor", Appearance.INHERITED);
+		app.setAttribute(shaderPrefix + ".textShader.scale", Appearance.INHERITED);
+		app.setAttribute(shaderPrefix + ".textShader.font", Appearance.INHERITED);
+		app.setAttribute(shaderPrefix + ".textShader.offset", Appearance.INHERITED);
+	}
+
 	public void actionPerformed(ActionEvent e) {
 		if (visibleChecker == e.getSource()) {
 			updateShowLabels();
@@ -202,8 +251,18 @@ public class LabelsInspector extends JPanel implements ActionListener, ChangeLis
 	}
 	
 	
+	public void setNoUpdate(Appearance app) {
+		this.app = app;
+		updateGUI();
+	}
+	
 	public void setAppearance(Appearance app) {
 		this.app = app;
+		updateAppearance();
+	}
+
+
+	private void updateAppearance() {
 		updateShowLabels();
 		updateLabelColor();
 		updateLabelSize();

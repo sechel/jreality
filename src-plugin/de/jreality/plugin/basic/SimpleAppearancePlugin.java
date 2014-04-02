@@ -1,5 +1,7 @@
 package de.jreality.plugin.basic;
 
+import java.awt.GridLayout;
+
 import de.jreality.scene.Appearance;
 import de.jreality.ui.SimpleAppearanceInspector;
 import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
@@ -16,6 +18,7 @@ public class SimpleAppearancePlugin extends ShrinkPanelPlugin {
 	
 	public SimpleAppearancePlugin(Appearance a) {
 		ai.setAppearance(a);
+		shrinkPanel.setLayout(new GridLayout());
 		shrinkPanel.add(ai);
 	}
 	
