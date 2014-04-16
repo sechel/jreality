@@ -42,6 +42,8 @@ package de.jreality.geometry;
 
 import java.awt.Color;
 
+import de.jreality.math.P3;
+import de.jreality.math.Pn;
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointSet;

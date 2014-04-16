@@ -40,6 +40,8 @@
 
 package de.jreality.geometry;
 
+import com.sun.xml.internal.bind.util.Which;
+
 import de.jreality.math.Rn;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.Scene;
