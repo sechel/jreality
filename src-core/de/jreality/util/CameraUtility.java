@@ -224,7 +224,7 @@ public class CameraUtility {
 //		if ( zmin < 0.0 && -zmin < 10*cam.getNear() )  cam.setNear(-.1*zmin);
 		// set the near and far parameters based on the transformed bounding box.  
 		// be generous but not too generous: openGL rendering quality depends on somewhat tight bounds here.
-		System.err.println("zmin zmax "+zmin+" : "+zmax);
+//		System.err.println("zmin zmax "+zmin+" : "+zmax);
 		if (zmax < 0.0) cam.setNear(-.5*zmax);
 		if (zmin < 0.0) cam.setFar(-2*zmin);
 		
