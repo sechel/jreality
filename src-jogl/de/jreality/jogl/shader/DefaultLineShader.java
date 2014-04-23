@@ -78,20 +78,32 @@ import de.jreality.util.LoggingSystem;
  * @author Charles Gunn
  * 
  */
-public class DefaultLineShader extends AbstractPrimitiveShader implements
-		LineShader {
-	protected de.jreality.shader.DefaultLineShader templateShader = null;
-	FrameFieldType tubeStyle = FrameFieldType.PARALLEL;
-	double tubeRadius = 0.05, lineWidth = 1.0;
-
-	boolean lineStipple = false;
-	int lineFactor = 1;
-	int lineStipplePattern = 0x1c47;
-	boolean tubeDraw = false, lineLighting = false, opaqueTubes = false,
-			vertexColors = false, radiiWorldCoords = false;
-	Color diffuseColor = java.awt.Color.BLACK;
-	double[][] crossSection,
-			defaultCrossSection = TubeUtility.octagonalCrossSection;
+public class DefaultLineShader extends AbstractPrimitiveShader implements LineShader {
+	
+	protected de.jreality.shader.DefaultLineShader 
+		templateShader = null;
+	
+	private FrameFieldType 
+		tubeStyle = FrameFieldType.PARALLEL;
+	private double 
+		tubeRadius = 0.05,
+		lineWidth = 1.0;
+	private boolean 
+		lineStipple = false;
+	private int 
+		lineFactor = 1,
+		lineStipplePattern = 0x1c47;
+	private boolean 
+		tubeDraw = false,
+		lineLighting = false, 
+		opaqueTubes = false,
+		vertexColors = false, 
+		radiiWorldCoords = false;
+	private Color 
+		diffuseColor = java.awt.Color.BLACK;
+	private double[][] 
+		crossSection,
+		defaultCrossSection = TubeUtility.octagonalCrossSection;
 
 	private PolygonShader polygonShader;
 	transient boolean changedTransp, changedLighting;

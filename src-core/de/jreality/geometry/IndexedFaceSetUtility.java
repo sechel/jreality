@@ -56,12 +56,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
-import org.stringtemplate.v4.compiler.CodeGenerator.primary_return;
-
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
 import de.jreality.math.Rn;
-import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
@@ -78,7 +75,6 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.scene.data.StringArray;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.tutorial.intro.Icosahedron;
 import de.jreality.util.LoggingSystem;
 import de.jreality.util.Rectangle3D;
 import de.jreality.util.SceneGraphUtility;
