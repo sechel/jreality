@@ -107,7 +107,6 @@ public class JOGLOffscreenRenderer {
 			jr.setFboMode(true);
 			jr.setAlternateCameraPath(cp);
 			jr.theViewer.render();
-			// canvas.display();
 			dst = joglFBOSlow.getImage();
 			jr.setAlternateCameraPath(null);
 			jr.setFboMode(false);
