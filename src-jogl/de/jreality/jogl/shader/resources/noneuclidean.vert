@@ -47,6 +47,7 @@ vec4 Specular;
 vec4 texcoord;
 attribute vec4 normals4;
 uniform bool hyperbolic;
+uniform float metric;
 uniform bool 	useNormals4;
 uniform bool 	lightingEnabled; 
 uniform bool 	fogEnabled;
@@ -58,12 +59,12 @@ uniform sampler2D texture;
 uniform int numLights;
 uniform int numTextures;
 uniform bool poincareModel;
-uniform mat4 cam2H;
+uniform mat4 cam2H, H2Cam;
 uniform mat4 H2NDC;
 
 // the inner product in klein model of hyperbolic space
 float dot4(in vec4 P, in vec4 Q)	{
-	return P.x*Q.x+P.y*Q.y+P.z*Q.z + (hyperbolic ? -1.0 : 1.0)* P.w*Q.w;
+	return P.x*Q.x+P.y*Q.y+P.z*Q.z + metric* P.w*Q.w;
 }
 
 // the derived length function
@@ -206,19 +207,19 @@ void main (void)
     gl_BackColor = light(transformedNormal, ecPosition, gl_BackMaterial);
 //    if (gl_BackColor.r + gl_BackColor.g + gl_BackColor.b < .01) gl_BackColor = gl_FrontColor;
 //    else if (gl_FrontColor.r + gl_FrontColor.g + gl_FrontColor.b < .01) gl_FrontColor = gl_BackColor;
-    if (poincareModel)	{
+    if ( poincareModel)	{
         // p4 is in the coordinate system of H3
       	vec4 p4 =  cam2H * ecPosition;
      	dehomogenize(p4);
-     	float d = length4(p4);
-     	float s = 1.0/(1.0+d);
+        float r = p4.x*p4.x+p4.y*p4.y+p4.z*p4.z;
+        float s = 1.0/(1.0 + sqrt(1.0-r));
     	p4.x = s * p4.x;
      	p4.y = s * p4.y;
      	p4.z = s * p4.z;
-    	gl_Position = H2NDC * p4; 
-//     	gl_Position = gl_ModelViewProjectionMatrix * ( gl_ModelViewMatrixInverse * (H2NDC * p4)); 
+     	gl_Position = gl_ProjectionMatrix * (H2Cam * p4); 
      }
-	else     gl_Position = ftransform();
+	else     
+        gl_Position = ftransform();
 //    gl_BackColor = .075 * gl_BackColor;
 //    gl_BackColor.a = 2 * gl_BackColor.a;
 }

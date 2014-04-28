@@ -44,6 +44,8 @@ public class NoneuclideanGLSLShader extends StandardGLSLShader {
 //			System.err.println("current metric is "+jrs.currentMetric);
 			glslProgram.setUniform("hyperbolic",
 					jrs.currentMetric == Pn.HYPERBOLIC);
+			glslProgram.setUniform("metric",
+					(float) (jrs.currentMetric == Pn.HYPERBOLIC ? -1 : 1));
 //			glslProgram.setUniform("Nw", 1.0);
 			glslProgram.setUniform("useNormals4", jrs.normals4d);
 			glslProgram.setUniform("poincareModel", poincareModel);
@@ -56,9 +58,8 @@ public class NoneuclideanGLSLShader extends StandardGLSLShader {
 				glslProgram
 						.setUniform("cam2H", Rn.convertDoubleToFloatArray(Rn
 								.transpose(null, cam2H)));
-				glslProgram
-						.setUniform("H2NDC", Rn.convertDoubleToFloatArray(Rn
-								.transpose(null, H2NDC)));
+				glslProgram.setUniform("H2Cam", Rn.convertDoubleToFloatArray(Rn
+						.transpose(null,  Rn.inverse(null, cam2H))));
 			}
 		}
 		super.render(jr);
