@@ -12,7 +12,7 @@ public class P2Test {
 		double[] q1 = {0,0.5,1};
 		double[] b1 = P2.perpendicularBisector(null, p1, q1, Pn.EUCLIDEAN);
 		double[] b2 = P2.perpendicularBisector(null, p2, q1, Pn.EUCLIDEAN);
-		Assert.assertEquals(0.0, Pn.distanceBetween(b1, b2, Pn.EUCLIDEAN), 1E-10);
+		Assert.assertEquals(0.0, b1[0]/b2[0] - b1[1]/b2[1], 1E-10);
 	}
 	
 	@Test
@@ -33,7 +33,9 @@ public class P2Test {
 		double[] p2 = {1,0,1};
 		double[] q2 = {0,1.5,1};
 		Rn.times(p1, 2, p1);
-		double[] o = P2.pointFromLines(null, P2.perpendicularBisector(null, p1, q1, Pn.EUCLIDEAN), P2.perpendicularBisector(null, p2, q2, Pn.EUCLIDEAN));
+		double[] o = P2.pointFromLines(null, 
+				P2.perpendicularBisector(null, p1, q1, Pn.EUCLIDEAN), 
+				P2.perpendicularBisector(null, p2, q2, Pn.EUCLIDEAN));
 		Assert.assertEquals(Pn.distanceBetween(p1, o, Pn.EUCLIDEAN), Pn.distanceBetween(q1, o, Pn.EUCLIDEAN), 1E-10);
 		Assert.assertEquals(Pn.distanceBetween(p2, o, Pn.EUCLIDEAN), Pn.distanceBetween(q2, o, Pn.EUCLIDEAN), 1E-10);
 	}
