@@ -40,11 +40,16 @@
 
 package de.jreality.reader;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 
 import junit.framework.TestCase;
+
+import org.junit.Test;
+
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.SceneGraphComponent;
@@ -94,5 +99,17 @@ public class OBJReaderTest extends TestCase {
         List<?> list = ParserMTL.readAppearences(Input.getInput(url));
         assertEquals("baerFinal", ((Appearance) list.get(0)).getName());
     }
+    
+    @Test
+	public void testReadInvalidFile() throws Exception {
+		File testFile = File.createTempFile("test", "obj");
+		testFile.deleteOnExit();
+		FileWriter w = new FileWriter(testFile);
+		//this content produced infinite loops in the reader
+		w.write("g");
+		w.close();
+		ReaderOBJ reader = new ReaderOBJ();
+		reader.read(testFile);
+	}
 
 }

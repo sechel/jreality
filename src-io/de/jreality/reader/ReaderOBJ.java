@@ -183,11 +183,13 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				LoggingSystem.getLogger(this).fine("unhandled tag: " + word);
-				while (st.nextToken() != StreamTokenizer.TT_EOL) {
+				int token = st.nextToken();
+				while (token != TT_EOL && token != TT_EOF) {
 					if (st.ttype == StreamTokenizer.TT_NUMBER)
 						LoggingSystem.getLogger(this).fine("" + st.nval);
 					else
 						LoggingSystem.getLogger(this).fine(st.sval);
+					token = st.nextToken();
 				}
 				LoggingSystem.getLogger(this).fine(
 						"unhandled tag: " + word + " end");
@@ -406,7 +408,7 @@ public class ReaderOBJ extends AbstractReader {
 		currentGroups.clear();
 		st.nextToken();
 		String gName = "default";
-		if (st.ttype == StreamTokenizer.TT_EOL) {
+		if (st.ttype == TT_EOL) {
 			LoggingSystem.getLogger(this).fine("Warning: empty group name");
 			st.pushBack();
 		} else
@@ -417,7 +419,9 @@ public class ReaderOBJ extends AbstractReader {
 			Group g = new Group(gName);
 			groups.put(gName, g);
 		}
-		while (st.nextToken() != StreamTokenizer.TT_EOL) {
+		int token = st.nextToken();
+		while (token != TT_EOL && token != TT_EOF) {
+			token = st.nextToken();
 		}
 	}
 
