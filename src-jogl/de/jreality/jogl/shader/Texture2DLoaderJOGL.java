@@ -208,7 +208,11 @@ public class Texture2DLoaderJOGL {
 					} else if (g != null) {
 						LoggingSystem.getLogger(Texture2DLoaderJOGL.class)
 								.fine("deleted texture...");
-						g.glDeleteTextures(1, new int[] { id.intValue() }, 0);
+						try {
+							g.glDeleteTextures(1, new int[] { id.intValue() }, 0);
+						} catch (NullPointerException e) {
+							LoggingSystem.getLogger(Texture2DLoaderJOGL.class).warning("NullPointerException in glDeleteTextures()");
+						}
 					}
 				}
 				LoggingSystem.getLogger(Texture2DLoaderJOGL.class).fine(
