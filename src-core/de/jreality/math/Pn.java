@@ -877,7 +877,7 @@ public class Pn {
 	}
 	
 	/**
-	 * 
+	 * Calculate the projectivity that takes the standard basis to the basis given by dm and the unit point to the last entry of dm
 	 * @param dst
 	 * @param domainPts
 	 * @param imagePts

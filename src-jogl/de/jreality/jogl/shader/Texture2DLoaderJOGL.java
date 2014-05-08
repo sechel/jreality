@@ -205,7 +205,7 @@ public class Texture2DLoaderJOGL {
 						texid = id;
 						replace = true;
 						first = false;
-					} else {
+					} else if (g != null) {
 						LoggingSystem.getLogger(Texture2DLoaderJOGL.class)
 								.fine("deleted texture...");
 						g.glDeleteTextures(1, new int[] { id.intValue() }, 0);
