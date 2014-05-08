@@ -436,6 +436,7 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				}
 				ptf.setCrossSection(crossSection);
 				ptf.setFrameFieldType(tubeStyle);
+				ptf.setGenerateTextureCoordinates(false);
 				ptf.setMetric(sig);
 				ptf.setRadius(effectiveRadius);
 				if (dl != null) {
@@ -447,9 +448,8 @@ public class DefaultLineShader extends AbstractPrimitiveShader implements LineSh
 				ptf.update();
 				IndexedFaceSet tube = ptf.getTube();
 				if (tube != null) {
-					JOGLRendererHelper.drawFaces(jr, tube,
-							jr.renderingState.smoothShading,
-							jr.renderingState.diffuseColor[3]);
+					jr.renderingState.currentAlpha = jr.renderingState.diffuseColor[3];
+					JOGLRendererHelper.drawFaces(jr, tube);
 					faceCount += tube.getNumFaces();
 				}
 			}
