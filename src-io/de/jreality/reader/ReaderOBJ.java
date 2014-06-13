@@ -47,11 +47,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.scene.Appearance;
@@ -79,6 +81,24 @@ public class ReaderOBJ extends AbstractReader {
 	private HashMap<String, Group> groups = new HashMap<String, Group>();
 	private List<double[]> v, vNorms, vTexs;
 	private LinkedList<String> currentGroups;
+	private boolean ignoreUnusedVertices = false;
+	private boolean generateEdgesFromFaces = true;
+
+	public boolean isGenerateEdgesFromFaces() {
+		return generateEdgesFromFaces;
+	}
+
+	public void setGenerateEdgesFromFaces(boolean generateEdgesFromFaces) {
+		this.generateEdgesFromFaces = generateEdgesFromFaces;
+	}
+
+	public boolean isIgnoreUnusedVertices() {
+		return ignoreUnusedVertices;
+	}
+
+	public void setIgnoreUnusedVertices(boolean ignoreUnusedVertices) {
+		this.ignoreUnusedVertices = ignoreUnusedVertices;
+	}
 
 	public ReaderOBJ() {
 		v = new ArrayList<double[]>(1000);
@@ -167,7 +187,7 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				if (word.equalsIgnoreCase("l")) { // lines v1/vt1 v2/vt2 ...
-					ignoreTag(st);
+					addLine(st);
 					continue;
 				}
 				if (word.equalsIgnoreCase("f")) { // facet v1/vt1/vn1 v2/vt2/vn2
@@ -216,9 +236,10 @@ public class ReaderOBJ extends AbstractReader {
 			if ("off".equals(st.sval))
 				smoothShading = false;
 		}
-		while (st.nextToken() != StreamTokenizer.TT_EOL)
-			;
-		for (Iterator i = currentGroups.iterator(); i.hasNext();) {
+		while (st.nextToken() != StreamTokenizer.TT_EOL) {
+		}
+		
+		for (Iterator<String> i = currentGroups.iterator(); i.hasNext();) {
 			// System.out.println("Appearance ["+matName+"]: "+materials.get(matName));
 			Group current = (Group) (groups.get(i.next()));
 			current.setSmoothening(smoothShading);
@@ -303,8 +324,8 @@ public class ReaderOBJ extends AbstractReader {
 			if (fileName == null)
 				continue;
 			try {
-				List app = ParserMTL.readAppearences(input.resolveInput(fileName));
-				for (Iterator i = app.iterator(); i.hasNext();) {
+				List<Appearance> app = ParserMTL.readAppearences(input.resolveInput(fileName));
+				for (Iterator<Appearance> i = app.iterator(); i.hasNext();) {
 					Appearance a = (Appearance) i.next();
 					materials.put(a.getName(), a);
 				}
@@ -326,13 +347,14 @@ public class ReaderOBJ extends AbstractReader {
 				System.err.println("Warning: " + matName
 						+ " [Material name] is null");
 			else
-				for (Iterator i = currentGroups.iterator(); i.hasNext();) {
+				for (Iterator<String> i = currentGroups.iterator(); i.hasNext();) {
 					Group current = (Group) (groups.get(i.next()));
 					current.setMaterial(currMat);
 				}
 		}
 	}
 
+	// FIXME: Why 1000?
 	private int[][] temp = new int[3][1000];
 	{
 		for (int i = 0; i < 1000; i++) {
@@ -397,9 +419,65 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		// TODO what means that? adding face to all groups?
-		for (Iterator i = currentGroups.iterator(); i.hasNext();) {
+		for (Iterator<String> i = currentGroups.iterator(); i.hasNext();) {
 			Group g = ((Group) groups.get(i.next()));
 			g.addFace(faceV, faceVT, faceVN);
+		}
+	}
+	
+	private void addLine(StreamTokenizer st) throws IOException {
+		int ix = 0; // segment counter
+		int jx = 0; // vertex/vertex-texture index
+		boolean lastWasNumber = false;
+		st.nextToken();
+		while (st.ttype != TT_EOL && st.ttype != TT_EOF) {
+			if (st.ttype == '/') {
+				jx++;
+				lastWasNumber = false;
+				st.nextToken();
+				continue;
+			} 
+			else if (st.ttype == '\\') {
+				st.nextToken(); // the EOL
+				st.nextToken(); // continue parsing in the next line
+				continue;
+			} 
+			else if (st.ttype == StreamTokenizer.TT_NUMBER) {
+				if (lastWasNumber) {
+					ix++;
+					jx = 0;
+				}
+				// System.out.println("adding ["+jx+"]["+ix+"]="+(int)st.nval);
+				if (st.nval > 0)
+					temp[jx][ix] = (int) (st.nval - 1);
+				else {
+					// count backwards
+					System.err.println("OBJReader.addLine() negative line");
+					temp[jx][ix] = v.size() + (int) st.nval;
+				}
+				lastWasNumber = true;
+			}
+			else {
+				System.out.println("unknown tag " + st.sval + " " + st.ttype);
+			}
+			st.nextToken();
+		}
+		ix++;
+		int[] lineV = new int[ix];
+		int[] lineVT = new int[ix];
+		System.arraycopy(temp[0], 0, lineV, 0, ix);
+		System.arraycopy(temp[1], 0, lineVT, 0, ix);
+
+		// clean dirty entries in temp
+		for (int i = 0; i < ix; i++) {
+			temp[0][i] = -1;
+			temp[1][i] = -1;
+		}
+
+		// TODO what means that? adding face to all groups?
+		for (Iterator<String> i = currentGroups.iterator(); i.hasNext();) {
+			Group g = ((Group) groups.get(i.next()));
+			g.addLine(lineV, lineVT);
 		}
 	}
 
@@ -411,8 +489,9 @@ public class ReaderOBJ extends AbstractReader {
 		if (st.ttype == TT_EOL) {
 			LoggingSystem.getLogger(this).fine("Warning: empty group name");
 			st.pushBack();
-		} else
+		} else {
 			gName = st.sval;
+		}
 		// System.out.println("adding "+gName+" to current groups. ["+st.nval+","+st.sval+","+st.ttype+"]");
 		currentGroups.add(gName);
 		if (groups.get(gName) == null) {
@@ -427,43 +506,54 @@ public class ReaderOBJ extends AbstractReader {
 
 	private class Group {
 
-		final List<int[]> faces;
+		final List<int[]> faces, lines;
 		final String name;
 		final Appearance material;
 		boolean smooth;
 
 		boolean hasTex, hasNorms;
 
-		FaceData fd;
+		VertexData vd = new VertexData();
 
 		Group(String name) {
 			this.name = name;
 			faces = new ArrayList<int[]>(11);
+			lines = new ArrayList<int[]>();
 			material = ParserMTL.createDefault();
 			setSmoothening(smoothShading);
 			setMaterial(currMat);
-			fd = new FaceData();
 		}
 
 		void addFace(int[] verts, int[] texs, int[] norms) {
 			int[] face = new int[verts.length];
 			for (int i = 0; i < verts.length; i++) {
-				face[i] = fd.getID(verts[i], texs[i], norms[i]);
+				face[i] = vd.getID(verts[i], texs[i], norms[i]);
 			}
 			faces.add(face);
+		}
+		
+		void addLine(int[] verts, int[] texs) {
+			int[] polyline = new int[verts.length];
+			for (int i = 0; i < verts.length; i++) {
+				polyline[i] = vd.getID(verts[i], texs[i]);
+			}
+			for (int i = 0; i < polyline.length - 1; i++) {
+				lines.add(new int[]{polyline[i],polyline[i+1]});
+			}
 		}
 
 		void setSmoothening(boolean smoothShading) {
 			// TODO: check what smoothening should do...
-			if (true)
+			if (true) {
 				return;
+			}
 			smooth = smoothShading;
 			material.setAttribute(CommonAttributes.POLYGON_SHADER + "."
 					+ CommonAttributes.SMOOTH_SHADING, smooth);
 		}
 
 		public boolean hasGeometry() {
-			return faces.size() > 0 || 
+			return faces.size() > 0 || lines.size() > 0 ||
 			(groups.size() == 1 && v.size() > 0); // vertices only
 		}
 
@@ -472,8 +562,8 @@ public class ReaderOBJ extends AbstractReader {
 				System.err.println("Warning: current app==null");
 				return;
 			}
-			Set lst = a.getStoredAttributes();
-			for (Iterator i = lst.iterator(); i.hasNext();) {
+			Set<String> lst = a.getStoredAttributes();
+			for (Iterator<String> i = lst.iterator(); i.hasNext();) {
 				String aName = (String) i.next();
 				material.setAttribute(aName, a.getAttribute(aName));
 			}
@@ -481,21 +571,17 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		Geometry createGeometry() {
-			ArrayList vertices = extractVertices();
+			ArrayList<double[]> vertices = extractVertices();
 			IndexedFaceSet ifs = new IndexedFaceSet();
 			// data is definitly available
-			ifs.setVertexCountAndAttributes(Attribute.COORDINATES,
-					StorageModel.DOUBLE3_ARRAY.createReadOnly(vertices
-							.toArray(new double[vertices.size()][])));
-			ifs.setFaceCountAndAttributes(Attribute.INDICES,
-					StorageModel.INT_ARRAY_ARRAY.createReadOnly(
-						faces.toArray(new int[faces.size()][]))
-					);
-
+			ifs.setVertexCountAndAttributes(Attribute.COORDINATES, StorageModel.DOUBLE3_ARRAY.createReadOnly(vertices.toArray(new double[vertices.size()][])));
+			
+			ifs.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(faces.toArray(new int[faces.size()][])));
+			
 			// check if texture coordinates are available and if size fits
-			if (fd.size() > 0) {
-				ArrayList vertexTex = extractTexCoords();
-				ArrayList vertexNorms = extractNormals();
+			if (vd.size() > 0) {
+				ArrayList<double[]> vertexTex = extractTexCoords();
+				ArrayList<double[]> vertexNorms = extractNormals();
 				if (vertexTex != null) {
 					double[][] vTexArray = new double[vertexTex.size()][];
 					vertexTex.toArray(vTexArray);
@@ -514,47 +600,62 @@ public class ReaderOBJ extends AbstractReader {
 							);
 				}
 			}
-			boolean hasVertexNormals = ifs
-					.getVertexAttributes(Attribute.NORMALS) != null;
+			boolean hasVertexNormals = ifs.getVertexAttributes(Attribute.NORMALS) != null;
+			
 			if (!hasVertexNormals && smooth) {
 				IndexedFaceSetUtility.calculateAndSetVertexNormals(ifs);
 			}
+			
 			if (!smooth && !hasVertexNormals) {
 				IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
 			}
-			if (fd.size() > 0) {
-				IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
+			if(faces.size() > 0 && generateEdgesFromFaces) {
+				if(lines.size() == 0) {
+					IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
+				} else {
+					int[][] edges = IndexedFaceSetUtility.edgesFromFaces(faces.toArray(new int[faces.size()][])).toIntArrayArray(null);
+					for(int i = 0; i < edges.length; ++i) {
+						lines.add(edges[i]);
+					}
+					
+				}
+			}
+			
+			if (lines.size() != 0) {
+				ifs.setEdgeCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(lines.toArray(new int[lines.size()][])));
 			}
 			return ifs;
 		}
 
 		private ArrayList<double[]> extractNormals() {
-			if (fd.normalId(0) == -1)
-				return null;
-			ArrayList<double[]> list = new ArrayList<double[]>(fd.size());
-			for (int i = 0; i < fd.size(); i++) {
-				list.add(i, vNorms.get(fd.normalId(i)));
+			ArrayList<double[]> list = new ArrayList<double[]>();
+			for (int i = 0; i < vd.size(); i++) {
+				int normalId = vd.normalId(i);
+				if(normalId != -1) {
+					list.add(i, vNorms.get(normalId));
+				}
 			}
 			return list;
 		}
 
 		private ArrayList<double[]> extractTexCoords() {
-			if (fd.texId(0) == -1)
+			if (vd.texId(0) == -1)
 				return null;
-			ArrayList<double[]> list = new ArrayList<double[]>(fd.size());
-			for (int i = 0; i < fd.size(); i++) {
-				list.add(i, vTexs.get(fd.texId(i)));
+			ArrayList<double[]> list = new ArrayList<double[]>(vd.size());
+			for (int i = 0; i < vd.size(); i++) {
+				list.add(i, vTexs.get(vd.texId(i)));
 			}
 			return list;
 		}
 
 		private ArrayList<double[]> extractVertices() {
-			if (fd.size() == 0) {
+			if (vd.size() == 0 && !ignoreUnusedVertices) { // neither lines nor faces
 				return new ArrayList<double[]>(v);
 			}
-			ArrayList<double[]> list = new ArrayList<double[]>(fd.size());
-			for (int i = 0; i < fd.size(); i++) {
-				list.add(i, v.get(fd.vertexId(i)));
+			
+			ArrayList<double[]> list = new ArrayList<double[]>(vd.size());
+			for (int i = 0; i < vd.size(); i++) {
+				list.add(i, v.get(vd.vertexId(i)));
 			}
 			return list;
 		}
@@ -571,8 +672,10 @@ public class ReaderOBJ extends AbstractReader {
 	/**
 	 * creates indices for triples of vertex/tex/normal
 	 */
-	private static class FaceData {
-		private HashMap<String, Integer> storedData = new HashMap<String, Integer>();
+	private static class VertexData {
+		
+		private TreeMap<Triple, Integer> storedData = new TreeMap<Triple, Integer>(new TripleComparator());
+		
 		private ArrayList<Triple> list = new ArrayList<Triple>();
 
 		private class Triple {
@@ -585,14 +688,35 @@ public class ReaderOBJ extends AbstractReader {
 			}
 		}
 
-		private FaceData() {
+		private class TripleComparator implements Comparator<Triple> {
+
+			@Override
+			public int compare(Triple o1, Triple o2) {
+				if(o1.v != o2.v) {
+					return o1.v - o2.v;
+				} else if(o1.t != o2.t) {
+					return o1.t - o2.t;
+				} else { //o1.v == o2.v and o1.t == o2.t
+					if(o1.n == -1 || o2.n == -1) {
+						return 0;
+					} else {
+						return o1.n - o2.n;
+					}
+				}
+			}
+		}
+		
+		private VertexData() {
+		}
+
+		public int getID(int i, int j) {
+			return getID(i,j,-1);
 		}
 
 		private int idCounter;
 
 		int getID(int vertexIndex, int texIndex, int normalIndex) {
-			final String key = vertexIndex + "::" + texIndex + "::"
-					+ normalIndex;
+			Triple key = new Triple(vertexIndex, texIndex, normalIndex);
 			Integer ret = storedData.get(key);
 			if (ret == null) {
 				ret = new Integer(idCounter++);

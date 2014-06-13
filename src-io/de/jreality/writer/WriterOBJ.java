@@ -48,6 +48,8 @@ import de.jreality.geometry.GeometryUtility;
 import de.jreality.math.Pn;
 import de.jreality.scene.Geometry;
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.IndexedLineSet;
+import de.jreality.scene.PointSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
@@ -94,6 +96,10 @@ public class WriterOBJ {
 		
 		if( geom instanceof IndexedFaceSet ) {
 			return write( ((IndexedFaceSet)geom), groupName, out, startVertex);
+		} else if( geom instanceof IndexedLineSet ) {
+			return write( ((IndexedLineSet)geom), groupName, out, startVertex);
+		} else if( geom instanceof PointSet ) {
+			return write( ((PointSet)geom), groupName, out, startVertex);
 		} else {
 			 LoggingSystem.getLogger(GeometryUtility.class).log(Level.WARNING, 
 					 	"ignoring scene graph component " + groupName );
@@ -168,13 +174,12 @@ public class WriterOBJ {
 
 		out.println();
 
-		DataList indices = ifs.getFaceAttributes(Attribute.INDICES  );
+		DataList indices = ifs.getFaceAttributes(Attribute.INDICES);
 		
 		for (int i= 0; i < ifs.getNumFaces(); i++) {
 			out.print( "f  ");
-			IntArray faceIndices=indices.item(i).toIntArray();
-			writeFaceIndex( out, startVertex + faceIndices.getValueAt(0), texture!=null, normals!=null );	
-			for (int j= 1; j < faceIndices.size(); j++) {
+			IntArray faceIndices = indices.item(i).toIntArray();
+			for (int j = 0; j < faceIndices.size(); j++) {
 				out.print( " " );
 				writeFaceIndex( out, startVertex + faceIndices.getValueAt(j), texture!=null, normals!=null );
 			}
@@ -182,9 +187,116 @@ public class WriterOBJ {
 			out.println();	
 		}
 
+		indices = ifs.getEdgeAttributes(Attribute.INDICES);
+		
+		for (int i= 0; i < ifs.getNumEdges(); i++) {
+			out.print( "l ");
+			IntArray edgeIndices = indices.item(i).toIntArray();
+			for (int j=0; j < edgeIndices.size(); j++) {
+				out.print(" ");
+				writeFaceIndex( out, startVertex + edgeIndices.getValueAt(j), texture!=null, false);
+			}
+
+			out.println();	
+		}
 		out.flush();
 		return ifs.getNumPoints();
 	}
 	
+	static int write( IndexedLineSet ifs, String groupName, PrintWriter out, int startVertex ) {
+		
+		if( groupName != null ) {
+			out.println();	
+			out.println( "g " + groupName );
+		    out.println();
+		}
+
+		double [][] points = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		if (points[0].length == 4)	{
+			// dehomogenize!
+			double[][] points3 = new double[points.length][3];
+			Pn.dehomogenize(points3, points);
+			points = points3;
+		}
+        double [][] normals = null;
+		if( ifs.getVertexAttributes( Attribute.NORMALS ) != null ) {
+			try {
+			normals = ifs.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+			} catch (NullPointerException e) {
+				System.err.println("Skipped normals WriterOBJ.write(): Null value normal data");
+			}
+		}
+		double [][] texture = null;
+		if( ifs.getVertexAttributes( Attribute.TEXTURE_COORDINATES ) != null ) {
+			try {
+				texture = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
+			} catch (NullPointerException e) {
+				System.err.println("Skipped texture coordinates WriterOBJ.write(): Null value texture coordinate data");
+			}
+		}
+		
+		write( out, points, "v" );
+		write( out, texture, "vt" );
+		write( out, normals, "vn" );
+
+		out.println();
+
+		DataList indices = ifs.getEdgeAttributes(Attribute.INDICES  );
+		
+		for (int i= 0; i < ifs.getNumEdges(); i++) {
+			out.print( "f ");
+			IntArray faceIndices = indices.item(i).toIntArray();
+			writeFaceIndex( out, startVertex + faceIndices.getValueAt(0), texture!=null, normals!=null );	
+			for (int j= 1; j < faceIndices.size(); j++) {
+				out.print( " " );
+				writeFaceIndex( out, startVertex + faceIndices.getValueAt(j), texture!=null, normals!=null );
+			}
+			out.println();	
+		}
+
+		out.flush();
+		return ifs.getNumPoints();
+	}
 	
+	static int write( PointSet pts, String groupName, PrintWriter out, int startVertex ) {
+		
+		if( groupName != null ) {
+			out.println();	
+			out.println( "g " + groupName );
+		    out.println();
+		}
+
+		double [][] points = pts.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
+		if (points[0].length == 4)	{
+			// dehomogenize!
+			double[][] points3 = new double[points.length][3];
+			Pn.dehomogenize(points3, points);
+			points = points3;
+		}
+        double [][] normals = null;
+		if( pts.getVertexAttributes( Attribute.NORMALS ) != null ) {
+			try {
+			normals = pts.getVertexAttributes(Attribute.NORMALS).toDoubleArrayArray(null);
+			} catch (NullPointerException e) {
+				System.err.println("Skipped normals WriterOBJ.write(): Null value normal data");
+			}
+		}
+		double [][] texture = null;
+		if( pts.getVertexAttributes( Attribute.TEXTURE_COORDINATES ) != null ) {
+			try {
+				texture = pts.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
+			} catch (NullPointerException e) {
+				System.err.println("Skipped texture coordinates WriterOBJ.write(): Null value texture coordinate data");
+			}
+		}
+		
+		write( out, points, "v" );
+		write( out, texture, "vt" );
+		write( out, normals, "vn" );
+
+		out.println();
+
+		out.flush();
+		return pts.getNumPoints();
+	}
 }
