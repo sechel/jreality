@@ -598,11 +598,12 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		private ArrayList<double[]> extractNormals() {
-			if (vd.normalId(0) == -1)
-				return null;
-			ArrayList<double[]> list = new ArrayList<double[]>(vd.size());
+			ArrayList<double[]> list = new ArrayList<double[]>();
 			for (int i = 0; i < vd.size(); i++) {
-				list.add(i, vNorms.get(vd.normalId(i)));
+				int normalId = vd.normalId(i);
+				if(normalId != -1) {
+					list.add(i, vNorms.get(normalId));
+				}
 			}
 			return list;
 		}
