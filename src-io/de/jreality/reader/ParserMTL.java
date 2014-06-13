@@ -49,9 +49,7 @@ import java.util.List;
 import java.util.Vector;
 
 import de.jreality.scene.Appearance;
-import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.CommonAttributes;
-import de.jreality.shader.Texture2D;
 import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
@@ -93,7 +91,7 @@ public class ParserMTL {
         this.input = input;
     }
 
-    public static List readAppearences(Input mtlInput) throws IOException {
+    public static List<Appearance> readAppearences(Input mtlInput) throws IOException {
         return new ParserMTL(mtlInput).load(); 
     }
      
@@ -101,11 +99,11 @@ public class ParserMTL {
         return defaultApp;
     }
 
-    public List load() {
+    public List<Appearance> load() {
         Reader r = input.getReader();
-        SceneGraphComponent disk=new SceneGraphComponent();
+        //        SceneGraphComponent disk = new SceneGraphComponent();
         StreamTokenizer st = new StreamTokenizer(r);
-        Vector ret = new Vector();
+        Vector<Appearance> ret = new Vector<Appearance>();
      try {
          while (st.ttype != StreamTokenizer.TT_EOF)
              ret.add(loadCurrent(st));
@@ -236,7 +234,7 @@ public class ParserMTL {
     private void setTextureMap(StreamTokenizer st, Appearance ret) throws IOException {
         String texFile = readString(st);
         try {
-            Texture2D tex = TextureUtility.createTexture(ret, CommonAttributes.POLYGON_SHADER, input.resolveInput(texFile), false);
+            TextureUtility.createTexture(ret, CommonAttributes.POLYGON_SHADER, input.resolveInput(texFile), false);
         } catch (FileNotFoundException e) {
         	LoggingSystem.getLogger(this).warning("couldn't find "+texFile);
         } catch (IOException e) {
