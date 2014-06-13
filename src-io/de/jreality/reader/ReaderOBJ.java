@@ -81,7 +81,24 @@ public class ReaderOBJ extends AbstractReader {
 	private HashMap<String, Group> groups = new HashMap<String, Group>();
 	private List<double[]> v, vNorms, vTexs;
 	private LinkedList<String> currentGroups;
-	private boolean discardUnusedVertices = false;
+	private boolean ignoreUnusedVertices = false;
+	private boolean generateEdgesFromFaces = true;
+
+	public boolean isGenerateEdgesFromFaces() {
+		return generateEdgesFromFaces;
+	}
+
+	public void setGenerateEdgesFromFaces(boolean generateEdgesFromFaces) {
+		this.generateEdgesFromFaces = generateEdgesFromFaces;
+	}
+
+	public boolean isIgnoreUnusedVertices() {
+		return ignoreUnusedVertices;
+	}
+
+	public void setIgnoreUnusedVertices(boolean ignoreUnusedVertices) {
+		this.ignoreUnusedVertices = ignoreUnusedVertices;
+	}
 
 	public ReaderOBJ() {
 		v = new ArrayList<double[]>(1000);
@@ -557,8 +574,6 @@ public class ReaderOBJ extends AbstractReader {
 			
 			ifs.setFaceCountAndAttributes(Attribute.INDICES, StorageModel.INT_ARRAY_ARRAY.createReadOnly(faces.toArray(new int[faces.size()][])));
 			
-			ifs.setEdgeCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(lines.toArray(new int[lines.size()][])));
-			
 			// check if texture coordinates are available and if size fits
 			if (vd.size() > 0) {
 				ArrayList<double[]> vertexTex = extractTexCoords();
@@ -590,9 +605,20 @@ public class ReaderOBJ extends AbstractReader {
 			if (!smooth && !hasVertexNormals) {
 				IndexedFaceSetUtility.calculateAndSetFaceNormals(ifs);
 			}
+			if(faces.size() > 0 && generateEdgesFromFaces) {
+				if(lines.size() == 0) {
+					IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
+				} else {
+					int[][] edges = IndexedFaceSetUtility.edgesFromFaces(faces.toArray(new int[faces.size()][])).toIntArrayArray(null);
+					for(int i = 0; i < edges.length; ++i) {
+						lines.add(edges[i]);
+					}
+					
+				}
+			}
 			
-			if (lines.size() == 0 && faces.size() > 0) {
-				IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(ifs);
+			if (lines.size() != 0) {
+				ifs.setEdgeCountAndAttributes(Attribute.INDICES,StorageModel.INT_ARRAY_ARRAY.createReadOnly(lines.toArray(new int[lines.size()][])));
 			}
 			return ifs;
 		}
@@ -619,7 +645,7 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		private ArrayList<double[]> extractVertices() {
-			if (vd.size() == 0 && !discardUnusedVertices) { // neither lines nor faces
+			if (vd.size() == 0 && !ignoreUnusedVertices) { // neither lines nor faces
 				return new ArrayList<double[]>(v);
 			}
 			
