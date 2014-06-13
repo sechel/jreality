@@ -164,7 +164,6 @@ public class ContentTools extends Plugin {
 		setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
 		setToolEnabled(snapDragTool, drag.isSelected() && snapToGrid.isSelected());
 	}
-
 	public boolean isSnapToGrid() {
 		return snapToGrid.isSelected();
 	}
@@ -173,17 +172,14 @@ public class ContentTools extends Plugin {
 		pickVertices.setSelected(b);
 		setPickable(CommonAttributes.POINT_SHADER, b);
 	}
-
 	public void setPickEdges(boolean b) {
 		pickEdges.setSelected(b);
 		setPickable(CommonAttributes.LINE_SHADER, b);
 	}
-
 	public void setPickFaces(boolean b) {
 		pickFaces.setSelected(b);
 		setPickable(CommonAttributes.POLYGON_SHADER, b);
 	}
-
 	private void setPickable(String shader, boolean b) {
 		if (scene != null) {
 			Appearance contentAppearance = scene.getContentAppearance();
@@ -199,7 +195,6 @@ public class ContentTools extends Plugin {
 	public boolean isDragEnabled() {
 		return drag.isSelected();
 	}
-
 	public void setDragEnabled(boolean b) {
 		drag.setSelected(b);
 		boolean success = setToolEnabled(draggingTool, drag.isSelected() && !snapToGrid.isSelected());
@@ -210,10 +205,15 @@ public class ContentTools extends Plugin {
 	public boolean isRotationEnabled() {
 		return rotate.isSelected();
 	}
-
 	public void setRotationEnabled(boolean b) {
 		rotate.setSelected(b);
 		rotate.setSelected(setToolEnabled(rotateTool, b));
+	}
+	public boolean isRotateAnimationEnabled() {
+		return rotateTool.isAnimationEnabled();
+	}
+	public void setRotateAnimationEnabled(boolean enable) {
+		rotateTool.setAnimationEnabled(enable);
 	}
 
 	private boolean setToolEnabled(Tool tool, boolean b) {
@@ -228,25 +228,21 @@ public class ContentTools extends Plugin {
 	public boolean isPickFaces() {
 		return pickFaces.isSelected();
 	}
-
 	public boolean isPickEdges() {
 		return pickEdges.isSelected();
 	}
-
 	public boolean isPickVertices() {
 		return pickVertices.isSelected();
 	}
-
 	
 	public boolean isEncompassEnabled() {
 		return encompass.isSelected();
 	}
-	
 	public void setEncompassEnabled(boolean b) {
 		encompass.setSelected(b);
 		setToolEnabled(encompassTool, b);
 	}
-
+	
 	@Override
 	public void install(Controller c) throws Exception {
 		super.install(c);

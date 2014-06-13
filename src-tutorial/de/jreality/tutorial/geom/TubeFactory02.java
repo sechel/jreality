@@ -24,6 +24,7 @@ import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
 import de.jreality.plugin.basic.View;
 import de.jreality.plugin.content.ContentAppearance;
+import de.jreality.plugin.content.ContentTools;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.IndexedLineSet;
 import de.jreality.scene.SceneGraphComponent;
@@ -82,6 +83,7 @@ public class TubeFactory02 {
 		JRViewer v = new JRViewer();
 		v.addBasicUI();
 		v.addContentSupport(ContentType.Raw);
+		v.registerPlugin(new ContentTools());
 		v.registerPlugin(new ContentAppearance());
 		v.setContent(torussgc);
 		SimpleController c = v.getController();

@@ -135,10 +135,12 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		splash.setVisible(true);
 		JRViewer v = new JRViewer();
 		v.setShowPanelSlots(true, false, false, false);
+		v.setShowToolBar(true);
 		v.getController().setPropertyEngineEnabled(false);
 		v.addBasicUI();
 		v.addContentUI();
 		v.registerPlugin(JobMonitorPlugin.class);
+		v.registerPlugin(JobMonitorTooBar.class);
 		v.registerPlugin(JobsTestPlugin.class);
 		v.setSplashScreen(splash);
 		v.startup();

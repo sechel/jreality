@@ -31,7 +31,7 @@ public class GLVertexArrayExample {
 		displayLists = true;
 	public static void main(String[] args)	{
 		world = SceneGraphUtility.createFullSceneGraphComponent("world");
-		world.setGeometry(SphereUtility.sphericalPatch(0, 0.0, 180.0, 90.0, 256, 256, 1.0));
+		world.setGeometry(SphereUtility.sphericalPatch(0, 0.0, 180.0, 90.0, 512, 512, 1.0));
 		//set up two appearances, one that uses vertex arrays and one that doesn't
 		DefaultGeometryShader dgs = (DefaultGeometryShader) 
    			ShaderUtility.createDefaultGeometryShader(vertexArrayAp, true);

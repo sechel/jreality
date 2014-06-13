@@ -32,6 +32,7 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.math.P3;
 import de.jreality.math.Pn;
+import de.jreality.math.Rn;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
@@ -40,6 +41,7 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.AttributeEntityUtility;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
@@ -112,10 +114,6 @@ public class NonEuclideanExample {
 		myroot.addChildren(cameraNode, world);
 		myroot.addTool(new ClickWheelCameraZoomTool());
 	    
-//		ViewerApp va = new ViewerApp(root, camPath, null, null);
-//		va.setAttachNavigator(true);
-//		va.setExternalNavigator(false);
-//		viewer = va.getCurrentViewer();
 	    viewer = JRViewer.display(myroot);
 	    SceneGraphUtility.removeLights(viewer);
 		world.addChild(lightNode);
@@ -255,7 +253,7 @@ public class NonEuclideanExample {
 	 *  making the hyperbolic boundary sphere visible if the metric is ... hyperbolic
 	 */
 	public void update()	{
-		viewer.getSceneRoot().getAppearance().setAttribute("metric", metric);
+		viewer.getSceneRoot().getAppearance().setAttribute(CommonAttributes.METRIC, metric);
 		CameraUtility.getCamera(viewer).setNear(cameraClips[metric+1][0]);
 		CameraUtility.getCamera(viewer).setFar(cameraClips[metric+1][1]);
 		for (int i = 0; i<3; ++i) sigs[i].setVisible(false);

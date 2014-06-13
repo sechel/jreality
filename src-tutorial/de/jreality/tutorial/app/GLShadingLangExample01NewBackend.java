@@ -1,15 +1,11 @@
 package de.jreality.tutorial.app;
 
-import java.io.IOException;
-
 import de.jreality.geometry.SphereUtility;
 import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.shader.DefaultGeometryShader;
-import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
 /**

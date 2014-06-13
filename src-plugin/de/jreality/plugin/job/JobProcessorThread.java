@@ -5,9 +5,12 @@ import static java.util.Collections.synchronizedList;
 import java.awt.EventQueue;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class JobProcessorThread extends Thread {
 	
+	private Logger
+		log = Logger.getLogger(JobProcessorThread.class.getName());
 	private Job
 		activeJob = null;
 	private List<JobProcessorListener>
@@ -41,7 +44,8 @@ public class JobProcessorThread extends Thread {
 			} catch (Exception e) {
 				fireProcessFailed(e, activeJob);
 			} catch (Throwable t) {
-				System.err.println("Job failed with Error " + t);
+				log.severe("Error in job execution: " + t);
+				fireProcessFailed(new Exception("Error in job execution", t), activeJob);
 			}
 			fireProcessFinished(activeJob);
 		}

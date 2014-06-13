@@ -1,7 +1,5 @@
 package de.jreality.tutorial.app;
 
-import java.io.IOException;
-
 import de.jreality.geometry.SphereUtility;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
@@ -11,7 +9,6 @@ import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.DefaultGeometryShader;
 import de.jreality.shader.GlslProgram;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.util.Input;
 import de.jreality.util.SceneGraphUtility;
 
 /**

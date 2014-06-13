@@ -36,7 +36,6 @@ import de.jreality.jogl3.helper.SphereHelper;
 import de.jreality.jogl3.helper.TransparencyHelper;
 import de.jreality.jogl3.helper.TubeHelper;
 import de.jreality.jogl3.light.JOGLLightCollection;
-import de.jreality.jogl3.optimization.RenderableUnit;
 import de.jreality.jogl3.optimization.RenderableUnitCollection;
 import de.jreality.jogl3.shader.LabelShader;
 import de.jreality.jogl3.shader.PointShader;
@@ -110,7 +109,7 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 		//a value of 1, 2, 4 and 8 has just the same effect on linux nvidia-310.14, i.e. no anti-aliasing
 		//16 times does anti-aliasing
 		caps.setSampleBuffers(true);
-		caps.setNumSamples(16);
+		caps.setNumSamples(8);
 		
 		
 		canvas = new GLCanvas(caps);
@@ -330,6 +329,15 @@ public class JOGL3Viewer implements de.jreality.scene.Viewer, StereoViewer, Inst
 					RUC.setActive((Boolean) bgo);
 				else{
 					RUC.setActive(CommonAttributes.SMALL_OBJ_OPTIMIZATION_DEFAULT);
+				}
+				
+				bgo = null;
+				if (rootAp != null)
+					bgo = rootAp.getAttribute(CommonAttributes.STEREOGRAM_RENDERING);
+				if (bgo != null && bgo instanceof Boolean && (Boolean)bgo == true)
+					TransparencyHelper.setUpStereogramTexture(gl, rootAp);
+				else{
+					TransparencyHelper.noStereogramRender();
 				}
 				
 				bgo = null;
