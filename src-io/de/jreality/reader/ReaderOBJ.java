@@ -63,7 +63,6 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
 
@@ -277,17 +276,23 @@ public class ReaderOBJ extends AbstractReader {
 	}
 
 	private void addVertex(StreamTokenizer st) throws IOException {
-		List<Double> cList = new LinkedList<Double>();
+ 		List<Double> cList = new LinkedList<Double>();
 		st.nextToken();
-		while (st.ttype == TT_NUMBER || st.ttype == '\\') {
+		while (st.ttype == TT_NUMBER || st.ttype == '\\' || st.sval.startsWith("+")) {
 			if (st.ttype == '\\') {
 				st.nextToken(); // the EOL
 				st.nextToken(); // continue parsing in the next line
 				continue;
-			} 
-			st.pushBack();
-			cList.add(ParserUtil.parseNumber(st));
+			} else if(st.ttype == TT_NUMBER) {
+				st.pushBack();
+				cList.add(ParserUtil.parseNumber(st));
+			} else if(st.sval.startsWith("+")) {
+				cList.add(Double.parseDouble(st.sval.replace("+", "")));
+			}
 			st.nextToken();
+			if(st.ttype == TT_EOF || st.ttype == TT_EOL) {
+				break;
+			}
 		}
 		st.pushBack();
 		double[] coords = new double[cList.size()];
@@ -548,16 +553,15 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		void addFace(int[] verts, int[] texs, int[] norms) {
-			if(!useMultipleTexAndNormalCoords) {
-				faces.add(verts);
-				return;
-			} else {
-				int[] face = new int[verts.length];
-				for (int i = 0; i < verts.length; i++) {
+			int[] face = new int[verts.length];
+			for (int i = 0; i < verts.length; i++) {
+				if(!useMultipleTexAndNormalCoords) {
+					face[i] = vd.getID(verts[i], -1, -1);
+				} else {
 					face[i] = vd.getID(verts[i], texs[i], norms[i]);
 				}
-				faces.add(face);
 			}
+			faces.add(face);
 		}
 		
 		void addLine(int[] verts, int[] texs) {
@@ -581,9 +585,9 @@ public class ReaderOBJ extends AbstractReader {
 			if (true) {
 				return;
 			}
-			smooth = smoothShading;
-			material.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-					+ CommonAttributes.SMOOTH_SHADING, smooth);
+//			smooth = smoothShading;
+//			material.setAttribute(CommonAttributes.POLYGON_SHADER + "."
+//					+ CommonAttributes.SMOOTH_SHADING, smooth);
 		}
 
 		public boolean hasGeometry() {
@@ -683,7 +687,7 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		private ArrayList<double[]> extractVertices() {
-			if (vd.size() == 0 || !useMultipleTexAndNormalCoords) { 
+			if (vd.size() == 0 && !useMultipleTexAndNormalCoords) { 
 				return new ArrayList<double[]>(v);
 			}
 			
@@ -770,6 +774,7 @@ public class ReaderOBJ extends AbstractReader {
 			return ret.intValue();
 		}
 
+		@SuppressWarnings("unused")
 		void reset() {
 			storedData.clear();
 		}
