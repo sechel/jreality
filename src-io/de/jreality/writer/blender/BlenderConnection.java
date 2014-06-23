@@ -1,6 +1,5 @@
-package de.jreality.plugin.blender;
+package de.jreality.writer.blender;
 
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,11 +11,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.scene.Camera;
@@ -24,33 +18,18 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
 import de.jreality.writer.WriterJRS;
 
-public class BlenderRenderer {
+public class BlenderConnection {
 
 	private Logger
-		log = Logger.getLogger(BlenderRenderer.class.getName());
-	private JrScene
-		scene = null;
+		log = Logger.getLogger(BlenderConnection.class.getName());
 	private File
 		blenderApp = new File("/Applications/Blender/blender.app/Contents/MacOS/blender"),
 		rendererScript = null;
 	
-	public BlenderRenderer(JrScene scene) {
-		this.scene = scene;
+	public BlenderConnection() {
 	}
 	
-	public BufferedImage render() throws IOException {
-		// write scene
-		File sceneFile = new File("test.jrs");//File.createTempFile("jrealityBlenderScene", ".jrs");
-//		sceneFile.deleteOnExit();
-		OutputStream sceneOut = new FileOutputStream(sceneFile); 
-		WriterJRS jrsWriter = new WriterJRS();
-		jrsWriter.writeScene(scene, sceneOut);
-		sceneOut.close();
-		
-		// create result file
-		File result = File.createTempFile("jrealityBlenderResult", ".png");
-		result.deleteOnExit();
-		
+	protected void invokeBlender(File sceneFile, File outBlenderFile, File outImage) throws IOException {
 		// run renderer
 		File script = null;
 		try {
@@ -67,9 +46,9 @@ public class BlenderRenderer {
 			"--python",
 			script.toString(),
 			"--",
-			"--render=" + result.getAbsolutePath(),
-			"--file=" + sceneFile.getAbsolutePath(),
-			"--save=/Users/sechel/workspace/jreality/test.blend"
+//			outImage != null ? "--render=" + outImage.getAbsolutePath() : "",
+			outBlenderFile != null ? "--save=" + outBlenderFile.getAbsolutePath() : "",
+			"--file=" + sceneFile.getAbsolutePath()
 		};
 		try {
 			File dir = blenderApp.getParentFile();
@@ -89,23 +68,41 @@ public class BlenderRenderer {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return ImageIO.read(result);
+	}
+	
+	protected File writeScene(JrScene scene) throws IOException {
+		File sceneFile = File.createTempFile("jrealityBlenderExportScene", ".jrs");
+		sceneFile.deleteOnExit();
+		OutputStream sceneOut = new FileOutputStream(sceneFile); 
+		WriterJRS jrsWriter = new WriterJRS();
+		jrsWriter.writeScene(scene, sceneOut);
+		sceneOut.close();
+		return sceneFile;
+	}
+	
+	public void writeFile(JrScene scene, File f) throws IOException {
+		File sceneFile = writeScene(scene);
+		invokeBlender(sceneFile, f, null);
+	}
+	
+	public void renderImage(JrScene scene, File f) throws IOException {
+		File sceneFile = writeScene(scene);
+		invokeBlender(sceneFile, null, f);
 	}
 	
 	private File getRendererScript() throws IOException {
-		return new File("/Users/sechel/workspace/jreality/src-plugin/de/jreality/plugin/blender/renderer.py");
-//		if (rendererScript != null) {
-//			return rendererScript;
-//		}
-//		rendererScript = File.createTempFile("jrealityBlenderRenderer", "py");
-//		rendererScript.deleteOnExit();
-//		ReadableByteChannel rbc = Channels.newChannel(getClass().getResourceAsStream("renderer.py"));
-//		FileOutputStream fin = new FileOutputStream(rendererScript);
-//		FileChannel outChannel = fin.getChannel();
-//		outChannel.transferFrom(rbc, 0, Long.MAX_VALUE);
-//		outChannel.close();
-//		fin.close();
-//		return rendererScript;
+		if (rendererScript != null) {
+			return rendererScript;
+		}
+		rendererScript = File.createTempFile("jrealityBlenderRenderer", "py");
+		rendererScript.deleteOnExit();
+		ReadableByteChannel rbc = Channels.newChannel(getClass().getResourceAsStream("renderer.py"));
+		FileOutputStream fin = new FileOutputStream(rendererScript);
+		FileChannel outChannel = fin.getChannel();
+		outChannel.transferFrom(rbc, 0, Long.MAX_VALUE);
+		outChannel.close();
+		fin.close();
+		return rendererScript;
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -120,17 +117,26 @@ public class BlenderRenderer {
 		Camera cam = new Camera("My Camera");
 		cameraRoot.setCamera(cam);
 		root.add(cameraRoot);
+		root.add(cameraRoot);
 		JrScene scene = new JrScene(root);
 		scene.addPath("cameraPath", new SceneGraphPath(root, cameraRoot, cam));
-		BlenderRenderer r = new BlenderRenderer(scene);
-		BufferedImage image = r.render();
-		if (image != null) {
-			JFrame f = new JFrame();
-			f.add(new JLabel(new ImageIcon(image)));
-			f.pack();
-			f.setVisible(true);
-			f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		}
+		
+		// write scene file
+		WriterJRS jrsWriter = new WriterJRS();
+		jrsWriter.writeScene(scene, new FileOutputStream("test.jrs"));
+		
+		// write blender file 
+		BlenderConnection r = new BlenderConnection();
+		File blenderFile = new File("test.blend");
+		r.writeFile(scene, blenderFile);
+//		BufferedImage image = ImageIO.read(imageFile);
+//		if (image != null) {
+//			JFrame f = new JFrame();
+//			f.add(new JLabel(new ImageIcon(image)));
+//			f.pack();
+//			f.setVisible(true);
+//			f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		}
 	}
 	
 }

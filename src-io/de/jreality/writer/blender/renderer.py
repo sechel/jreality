@@ -1,40 +1,9 @@
 import bpy
 import xml.etree.ElementTree as ET
 import xml.sax as SAX
+from _ast import For
 
 objectTags = ['sceneRoot', 'child', 'camera']
-
-def example_function(scene_file, save_path, render_path):
-    
-    scene = bpy.context.scene
-    
-    # Clear existing objects.
-    scene.camera = None
-    for obj in scene.objects:
-        scene.objects.unlink(obj)
-    
-    create_scene(scene_file)
-    
-    if save_path:
-        try:
-            f = open(save_path, 'w')
-            f.close()
-            ok = True
-        except:
-            print("Cannot save to path %r" % save_path)
-            
-            import traceback
-            traceback.print_exc()
-        
-        if ok:
-            bpy.ops.wm.save_as_mainfile(filepath=save_path)
-    
-    if render_path:
-        render = scene.render
-        render.use_file_extension = True
-        render.filepath = render_path
-        bpy.ops.render.render(write_still=True)
-
 
 class SceneParser(SAX.ContentHandler):
     def __init__(self):
@@ -76,19 +45,70 @@ class SceneParser(SAX.ContentHandler):
             obj = self.objectStack[-1]
             obj.name = content
 
-def create_scene(scene_file):
-    parser = SceneParser()
-    SAX.parse(scene_file, parser)
-    bpy.context.scene.update()
-    # Default Camera
-    if not parser.activeCamera == None :
-        bpy.context.scene.camera = parser.activeCamera
-    else :
-        cam_data = bpy.data.cameras.new('Default Camera')
-        cam_ob = bpy.data.objects.new(name='Default Camera', object_data=cam_data)
-        bpy.context.scene.objects.link(cam_ob)  # instance the camera object in the scene
-        bpy.context.scene.camera = cam_ob       # set the active camera
-        cam_ob.location = 0.0, 0.0, 10.0
+def createCameraChild(treeRoot, objectRoot, rootPath, parentObject):
+    if objectRoot == None: pass
+    objectRoot = resolveReference(treeRoot, objectRoot, rootPath);
+    if objectRoot.find('name') == None: pass
+    name = objectRoot[0].text
+    cam = bpy.data.cameras.new(name)
+    camobj = bpy.data.objects.new(name=name, object_data = cam)
+    camobj.parent = parentObject
+    bpy.context.scene.objects.link(camobj)
+    
+def createObjectFromXML(treeRoot, objectRoot, rootPath, parentObject):
+    objectRoot = resolveReference(treeRoot, objectRoot, rootPath);
+    name = objectRoot[0].text
+    obj = bpy.data.objects.new(name, None)
+    bpy.context.scene.objects.link(obj)
+    if parentObject != None :
+        obj.parent = parentObject
+    createCameraChild(treeRoot, objectRoot.find('camera'), rootPath + '/camera', obj)
+    counter = 1;
+    for child in objectRoot.find("./children"):
+        path = rootPath + '/children/child[' + str(counter) + ']'
+        counter += 1
+        createObjectFromXML(treeRoot, child, path, obj);
+
+def resolveReference(treeRoot, objectRoot, rootPath):
+    if 'reference' in objectRoot.attrib :
+        refPath = rootPath + '/' + objectRoot.attrib['reference']
+        print(refPath)
+        return treeRoot.find(refPath)
+    return objectRoot
+        
+def createSceneFromXML(scene_file):
+    sceneTree = ET.parse(scene_file)
+    root = sceneTree.getroot()
+    createObjectFromXML(root, root[0], './sceneRoot', None)
+
+def readJRealityScene(scene_file, save_path, render_path):
+    scene = bpy.context.scene
+    # Clear existing objects.
+    scene.camera = None
+    for obj in scene.objects:
+        scene.objects.unlink(obj)
+    
+    createSceneFromXML(scene_file)
+    
+    if save_path:
+        try:
+            f = open(save_path, 'w')
+            f.close()
+            ok = True
+        except:
+            print("Cannot save to path %r" % save_path)
+            
+            import traceback
+            traceback.print_exc()
+        
+        if ok:
+            bpy.ops.wm.save_as_mainfile(filepath=save_path)
+    
+    if render_path:
+        render = scene.render
+        render.use_file_extension = True
+        render.filepath = render_path
+        bpy.ops.render.render(write_still=True)
 
 def main():
     import sys       # to get command line args
@@ -117,11 +137,9 @@ def main():
         parser.print_help()
         return
 
-    # Run the example function
-    example_function(args.scene_path, args.save_path, args.render_path)
+    readJRealityScene(args.scene_path, args.save_path, args.render_path)
                                                                 
     print("batch job finished, exiting")
-
 
 if __name__ == "__main__":
     main()
