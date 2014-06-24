@@ -29,8 +29,15 @@ def parseIndexedFaceSet(tag):
     if edgeAttributes != None:
         edgeAttributesSize = int(edgeAttributes.get('size'));
         if edgeAttributesSize != 0:
-            edgeIndexData = edgeAttributes.find("DataList[@attribute='indices']").findall('int-array')
-            edgeData = [[int(index) for index in edgeData.text.split()] for edgeData in edgeIndexData]
+            edgeIndexList = edgeAttributes.find("DataList[@attribute='indices']")
+            edgeIndexData = edgeIndexList.findall('int-array')
+            if len(edgeIndexData) == 0:
+                edgeIndexDataInt = [float(eij) for eij in edgeIndexList.text.split()]
+                l = int(len(edgeIndexDataInt) / edgeAttributesSize);
+                # TODO: blender does not support edge sequences longer than 1
+                edgeData = [edgeIndexDataInt[i*l : i*l+l] for i in range(0, edgeAttributesSize)]
+            else:    
+                edgeData = [[int(index) for index in edgeData.text.split()] for edgeData in edgeIndexData]
     # parse faces
     faceData = []
     faceAttributes = tag.find('faceAttributes')
@@ -40,9 +47,6 @@ def parseIndexedFaceSet(tag):
             faceIndexData = faceAttributes.find("DataList[@attribute='indices']").findall('int-array')
             faceData = [[int(index) for index in faceData.text.split()] for faceData in faceIndexData]
     # create mesh geometry
-    print(vertexData)
-    print(edgeData)
-    print(faceData)
     me.from_pydata(vertexData, edgeData, faceData)
     return me
 
@@ -57,7 +61,9 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
         if tag.get('type') == 'IndexedFaceSet':
             geom = parseIndexedFaceSet(tag)
         if tag.get('type') == 'IndexedLineSet':
-            geom = parseIndexedFaceSet(tag)            
+            geom = parseIndexedFaceSet(tag)         
+        if tag.get('type') == 'PointSet':
+            geom = parseIndexedFaceSet(tag)         
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     geomobj.parent = parentObject
     bpy.context.scene.objects.link(geomobj)
@@ -184,7 +190,6 @@ def main():
         parser.print_help()
         return
     readJRealityScene(args.scene_path, args.save_path, args.render_path)
-    print("jreality export finished, exiting")
 
 
 if __name__ == "__main__":
