@@ -1,5 +1,6 @@
 import bpy
 from mathutils import Matrix
+from mathutils import Euler
 import xml.etree.ElementTree as ET
 import math
 
@@ -19,13 +20,30 @@ def parseIndexedFaceSet(tag):
     vertexDataFloat = [float(vij) for vij in vertexDataText.split()]
     l = int(len(vertexDataFloat) / vertexAttributesSize);
     vertexData = [vertexDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
+    if l == 4: vertexData = [[vi/v[3] for vi in v[0:3]] for v in vertexData]
+    if l == 2: vertexData = [[v[0], v[1], 0.0] for v in vertexData] 
+    if l == 1: vertexData = [[v[0], 0.0, 0.0] for v in vertexData]
+    # parse edges
+    edgeData = []
+    edgeAttributes = tag.find('edgeAttributes')
+    if edgeAttributes != None:
+        edgeAttributesSize = int(edgeAttributes.get('size'));
+        if edgeAttributesSize != 0:
+            edgeIndexData = edgeAttributes.find("DataList[@attribute='indices']").findall('int-array')
+            edgeData = [[int(index) for index in edgeData.text.split()] for edgeData in edgeIndexData]
     # parse faces
+    faceData = []
     faceAttributes = tag.find('faceAttributes')
-    faceAttributesSize = int(faceAttributes.get('size'));
-    faceIndexData = faceAttributes.find("DataList[@attribute='indices']").findall('int-array')
-    indexData = [[int(index) for index in faceData.text.split()] for faceData in faceIndexData]
+    if faceAttributes != None:
+        faceAttributesSize = int(faceAttributes.get('size'));
+        if faceAttributesSize != 0:
+            faceIndexData = faceAttributes.find("DataList[@attribute='indices']").findall('int-array')
+            faceData = [[int(index) for index in faceData.text.split()] for faceData in faceIndexData]
     # create mesh geometry
-    me.from_pydata(vertexData, (), indexData)
+    print(vertexData)
+    print(edgeData)
+    print(faceData)
+    me.from_pydata(vertexData, edgeData, faceData)
     return me
 
 def createGeometry(treeRoot, tag, rootPath, parentObject):
@@ -38,6 +56,8 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
     else :
         if tag.get('type') == 'IndexedFaceSet':
             geom = parseIndexedFaceSet(tag)
+        if tag.get('type') == 'IndexedLineSet':
+            geom = parseIndexedFaceSet(tag)            
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     geomobj.parent = parentObject
     bpy.context.scene.objects.link(geomobj)
@@ -85,6 +105,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject):
         path = rootPath + '/children/child[' + str(counter) + ']'
         counter += 1
         createObjectFromXML(treeRoot, child, path, obj);
+    return obj    
 
 
 def resolveReference(treeRoot, tag, rootPath):
@@ -95,9 +116,18 @@ def resolveReference(treeRoot, tag, rootPath):
         
         
 def createSceneFromXML(scene_file):
+    # parse xml
     sceneTree = ET.parse(scene_file)
     root = sceneTree.getroot()
-    createObjectFromXML(root, root[0], './sceneRoot', None)
+    # traverse scene xml
+    rootObject = createObjectFromXML(root, root[0], './sceneRoot', None)
+    # create coordinate conversion root
+    sceneObject = bpy.data.objects.new('JReality Scene', None)
+    jrealityToBlender = Euler((math.pi/2, 0.0, math.pi/2), 'XYZ')
+    sceneObject.matrix_local = jrealityToBlender.to_matrix().to_4x4()
+    bpy.context.scene.objects.link(sceneObject)
+    rootObject.parent = sceneObject;
+    # find active camera
     cameraPath = root.find("scenePaths/path[@name='cameraPath']")
     if cameraPath != None:
         node = cameraPath.find('node[last()]')

@@ -1,5 +1,7 @@
 package de.jreality.writer.blender;
 
+import static java.lang.Math.PI;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +13,8 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.logging.Logger;
 
+import de.jreality.geometry.IndexedFaceSetFactory;
+import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
@@ -153,6 +157,50 @@ public class BlenderConnection {
 		root.addChild(transformedObject);
 		JrScene scene = new JrScene(root);
 		scene.addPath("cameraPath", new SceneGraphPath(root, camera2Root, cam2));
+		
+		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
+		ifsf.setVertexCount(4);
+		ifsf.setEdgeCount(2);
+		ifsf.setFaceCount(1);
+		ifsf.setVertexCoordinates(new double[][]{
+			{0,0,1,10},
+			{10,0,1,10},
+			{10,10,1,10},
+			{0,10,1,10}
+		});
+		ifsf.setEdgeIndices(new int[][]{
+			{0,1},
+			{2,3}
+		});
+		ifsf.setFaceIndices(new int[][]{
+			{0,1,2,3}
+		});
+		ifsf.update();
+		SceneGraphComponent geometryComponent1 = new SceneGraphComponent();
+		geometryComponent1.setName("DoubleArrayArray Geometry Component");
+		geometryComponent1.setGeometry(ifsf.getGeometry());
+		MatrixBuilder.euclidean().translate(0, -3, 0).assignTo(geometryComponent1);
+		root.addChild(geometryComponent1);
+		
+		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
+		ilsf.setVertexCount(100);
+		ilsf.setEdgeCount(99);
+		double[][] vertData = new double[100][];
+		int[][] indexData = new int[vertData.length - 1][];
+		for (int i = 0; i < vertData.length; i++) {
+			vertData[i] = new double[]{i/10.0, Math.sin(2*PI*i/(double)vertData.length)};
+			if (i < indexData.length) {
+				indexData[i] = new int[]{i, i+1};
+			}
+		}
+		ilsf.setVertexCoordinates(vertData);
+		ilsf.setEdgeIndices(indexData);
+		ilsf.update();
+		SceneGraphComponent lineSetObject = new SceneGraphComponent();
+		lineSetObject.setName("Line Set Geometry Component");
+		lineSetObject.setGeometry(ilsf.getGeometry());
+		root.addChild(lineSetObject);
+		
 		
 //		JRViewer.display(root);
 		
