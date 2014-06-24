@@ -20,6 +20,11 @@ import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
 import de.jreality.writer.WriterJRS;
 
+/**
+ * 
+ * @author Stefan Sechelmann, Thilo Rörig
+ *
+ */
 public class BlenderConnection {
 
 	private Logger

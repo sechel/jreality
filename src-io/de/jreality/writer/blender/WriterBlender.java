@@ -14,6 +14,11 @@ import de.jreality.scene.SceneGraphNode;
 import de.jreality.util.SceneGraphUtility;
 import de.jreality.writer.SceneWriter;
 
+/**
+ * 
+ * @author Stefan Sechelmann, Thilo Rörig
+ *
+ */
 public class WriterBlender implements SceneWriter {
 
 	private File writeBlenderSceneTmp(JrScene scene) throws IOException {
