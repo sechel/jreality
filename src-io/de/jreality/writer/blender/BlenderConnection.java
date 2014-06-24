@@ -119,6 +119,11 @@ public class BlenderConnection {
 		icosahedron.setName("Icosahedron Root");
 		icosahedron.setGeometry(Primitives.icosahedron());
 		root.addChild(icosahedron);
+		SceneGraphComponent icosahedron2 = new SceneGraphComponent();
+		icosahedron2.setName("Transformed Icosahedron Root");
+		icosahedron2.setGeometry(icosahedron.getGeometry());
+		MatrixBuilder.euclidean().translate(2, 2, 2).assignTo(icosahedron2);
+		root.addChild(icosahedron2);
 		SceneGraphComponent cameraRoot = new SceneGraphComponent();
 		cameraRoot.setName("Camera Root");
 		Camera cam = new Camera("My Camera");

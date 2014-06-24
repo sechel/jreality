@@ -9,55 +9,89 @@ def parseMatrix(tag):
     mm = [float(mij) for mij in tag.text.split()]
     return Matrix((mm[0:4], mm[4:8], mm[8:12], mm[12:16]))
 
-def createCameraChild(treeRoot, objectRoot, rootPath, parentObject):
-    if objectRoot == None: pass
-    objectRoot = resolveReference(treeRoot, objectRoot, rootPath);
-    if objectRoot.find('name') == None: return
-    name = objectRoot.find('name').text
-    if objectRoot in tagToObject :
-        cam = tagToObject[objectRoot].data
+def parseIndexedFaceSet(tag):
+    name = tag.find('name').text;
+    me = bpy.data.meshes.new(name)
+    # parse vertices
+    vertexAttributes = tag.find('vertexAttributes')
+    vertexAttributesSize = int(vertexAttributes.get('size'));
+    vertexDataText = vertexAttributes.find("DataList[@attribute='coordinates']").text
+    vertexDataFloat = [float(vij) for vij in vertexDataText.split()]
+    l = int(len(vertexDataFloat) / vertexAttributesSize);
+    vertexData = [vertexDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
+    # parse faces
+    faceAttributes = tag.find('faceAttributes')
+    faceAttributesSize = int(faceAttributes.get('size'));
+    faceIndexData = faceAttributes.find("DataList[@attribute='indices']").findall('int-array')
+    indexData = [[int(index) for index in faceData.text.split()] for faceData in faceIndexData]
+    # create mesh geometry
+    me.from_pydata(vertexData, (), indexData)
+    return me
+
+def createGeometry(treeRoot, tag, rootPath, parentObject):
+    tag = resolveReference(treeRoot, tag, rootPath);
+    name = tag.find('name');
+    if name == None: return
+    geom = None
+    if tag in tagToObject :
+        geom = tagToObject[tag].data
+    else :
+        if tag.get('type') == 'IndexedFaceSet':
+            geom = parseIndexedFaceSet(tag)
+    geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
+    geomobj.parent = parentObject
+    bpy.context.scene.objects.link(geomobj)
+    tagToObject[tag] = geomobj
+
+def createCameraChild(treeRoot, tag, rootPath, parentObject):
+    tag = resolveReference(treeRoot, tag, rootPath);
+    if tag.find('name') == None: return
+    name = tag.find('name').text
+    if tag in tagToObject :
+        cam = tagToObject[tag].data
     else :
         cam = bpy.data.cameras.new(name)
-    cam.clip_start = float(objectRoot.find('near').text);
-    cam.clip_end = float(objectRoot.find('far').text);
-    cam.angle = math.radians(float(objectRoot.find('fieldOfView').text));
-    cam.ortho_scale = float(objectRoot.find('focus').text);
-    if objectRoot.find('perspective').text == 'false':
+    cam.clip_start = float(tag.find('near').text);
+    cam.clip_end = float(tag.find('far').text);
+    cam.angle = math.radians(float(tag.find('fieldOfView').text));
+    cam.ortho_scale = float(tag.find('focus').text);
+    if tag.find('perspective').text == 'false':
         cam.type = 'ORTHO'
     camobj = bpy.data.objects.new(name=name, object_data = cam)
-    trafo = objectRoot.find('orientationMatrix')
+    trafo = tag.find('orientationMatrix')
     if trafo.text != None:
         camobj.matrix_local = parseMatrix(trafo)
     camobj.parent = parentObject
     bpy.context.scene.objects.link(camobj)
-    tagToObject[objectRoot] = camobj
+    tagToObject[tag] = camobj
     
     
-def createObjectFromXML(treeRoot, objectRoot, rootPath, parentObject):
-    objectRoot = resolveReference(treeRoot, objectRoot, rootPath);
-    name = objectRoot[0].text
+def createObjectFromXML(treeRoot, tag, rootPath, parentObject):
+    tag = resolveReference(treeRoot, tag, rootPath);
+    name = tag[0].text
     obj = bpy.data.objects.new(name, None)
-    if objectRoot.find('visible').text == 'false':
+    if tag.find('visible').text == 'false':
         obj.hide = True
-    trafo = objectRoot.find('transformation/matrix')
+    trafo = tag.find('transformation/matrix')
     if trafo != None:
         obj.matrix_local = parseMatrix(trafo)
     bpy.context.scene.objects.link(obj)
     if parentObject != None :
         obj.parent = parentObject
-    createCameraChild(treeRoot, objectRoot.find('camera'), rootPath + '/camera', obj)
+    createCameraChild(treeRoot, tag.find('camera'), rootPath + '/camera', obj)
+    createGeometry(treeRoot, tag.find('geometry'), rootPath + '/geometry', obj);
     counter = 1;
-    for child in objectRoot.find("./children"):
+    for child in tag.find("./children"):
         path = rootPath + '/children/child[' + str(counter) + ']'
         counter += 1
         createObjectFromXML(treeRoot, child, path, obj);
 
 
-def resolveReference(treeRoot, objectRoot, rootPath):
-    if 'reference' in objectRoot.attrib :
-        refPath = rootPath + '/' + objectRoot.attrib['reference']
+def resolveReference(treeRoot, tag, rootPath):
+    if 'reference' in tag.attrib :
+        refPath = rootPath + '/' + tag.attrib['reference']
         return treeRoot.find(refPath)
-    return objectRoot
+    return tag
         
         
 def createSceneFromXML(scene_file):
