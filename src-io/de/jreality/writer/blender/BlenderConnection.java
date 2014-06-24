@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
+import de.jreality.math.Matrix;
+import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Camera;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
@@ -116,10 +118,33 @@ public class BlenderConnection {
 		cameraRoot.setName("Camera Root");
 		Camera cam = new Camera("My Camera");
 		cameraRoot.setCamera(cam);
-		root.add(cameraRoot);
-		root.add(cameraRoot);
+		root.addChild(cameraRoot);
+		root.addChild(cameraRoot);
+		SceneGraphComponent camera2Root = new SceneGraphComponent();
+		camera2Root.setName("Orthographic Camera Root");
+		Camera cam2 = new Camera("My Orthographic Camera");
+		cam2.setOrientationMatrix(MatrixBuilder.euclidean().rotateX(Math.PI/2).getArray());
+		cam2.setPerspective(false);
+		camera2Root.setCamera(cam2);
+		root.addChild(camera2Root);
+		SceneGraphComponent invisible = new SceneGraphComponent();
+		invisible.setName("Invisible Object");
+		invisible.setVisible(false);
+		root.addChild(invisible);
+		SceneGraphComponent transformedObject = new SceneGraphComponent();
+		transformedObject.setName("Transformed Object");
+		double[] pos = {1,2,3,1};
+		MatrixBuilder mb = MatrixBuilder.euclidean();
+		mb.rotate(Math.PI / 4, 1, 0, 0);
+		Matrix M = mb.getMatrix();
+		pos = M.multiplyVector(pos);
+		mb.translate(pos);
+		mb.assignTo(transformedObject);
+		root.addChild(transformedObject);
 		JrScene scene = new JrScene(root);
-		scene.addPath("cameraPath", new SceneGraphPath(root, cameraRoot, cam));
+		scene.addPath("cameraPath", new SceneGraphPath(root, camera2Root, cam2));
+		
+//		JRViewer.display(root);
 		
 		// write scene file
 		WriterJRS jrsWriter = new WriterJRS();
