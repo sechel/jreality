@@ -19,6 +19,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
@@ -26,6 +27,7 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -144,7 +146,7 @@ public class BlenderTestScene {
 		PointSetFactory psf = new PointSetFactory();
 		psf.setVertexCount(1000);
 		double[][] pointData = new double[1000][];
-		Random rnd = new Random();
+		Random rnd = new Random(0);
 		for (int i = 0; i < pointData.length; i++) {
 			pointData[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
 		}

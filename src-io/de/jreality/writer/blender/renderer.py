@@ -21,7 +21,7 @@ def parseColor(tag):
 
 def createMesh(tag):
     name = tag.find('name').text;
-    me = bpy.data.meshes.new(name)
+    mesh = bpy.data.meshes.new(name)
     # parse vertices
     vertexAttributes = tag.find('vertexAttributes')
     vertexAttributesSize = int(vertexAttributes.get('size'));
@@ -50,20 +50,16 @@ def createMesh(tag):
     # parse faces
     faceData = []
     faceAttributes = tag.find('faceAttributes')
-    if faceAttributes != None:
+    if faceAttributes is not None:
         faceAttributesSize = int(faceAttributes.get('size'));
         if faceAttributesSize != 0:
             faceIndexData = faceAttributes.find("DataList[@attribute='indices']").findall('int-array')
             faceData = [[int(index) for index in faceData.text.split()] for faceData in faceIndexData]
-    # create mesh geometry
-    me.from_pydata(vertexData, edgeData, faceData)
-    return me
-
-
-def createMeshAttributes(tag, object):
+    
+    # create mesh
+    mesh.from_pydata(vertexData, edgeData, faceData)
+    
     # vertex colors
-    vertexAttributes = tag.find('vertexAttributes')
-    vertexAttributesSize = int(vertexAttributes.get('size'));
     vertexColorsTag = vertexAttributes.find("DataList[@attribute='colors']")
     if vertexColorsTag is not None:
         vertexColorDataFloat = [float(cij) for cij in vertexColorsTag.text.split()]
@@ -72,13 +68,32 @@ def createMeshAttributes(tag, object):
         if l == 4: vertexColorData = [[vi for vi in v[0:3]] for v in vertexColorData]
         if l == 2: vertexColorData = [[v[0], v[1], 0.0] for v in vertexColorData] 
         if l == 1: vertexColorData = [[v[0], 0.0, 0.0] for v in vertexColorData]
-        object.data.vertex_colors.new()
-        color_layer = object.data.vertex_colors[0]
+        color_layer = mesh.vertex_colors.new(name='Vertex Colors')
         index = 0
-        for color in color_layer.data:
-            if index < len(vertexColorData):
-                color.color = vertexColorData[index]
-                index += 1 
+        for poly in mesh.polygons:
+            for vertexIndex in poly.vertices:
+                color_layer.data[index].color = vertexColorData[vertexIndex]
+                index += 1
+                
+    # face colors
+    faceColorsTag = tag.find("faceAttributes/DataList[@attribute='colors']")
+    if faceColorsTag is not None:
+        faceColorDataFloat = [float(cij) for cij in faceColorsTag.text.split()]
+        faceAttributesSize = int(faceAttributes.get('size'));
+        l = int(len(faceColorDataFloat) / faceAttributesSize);
+        faceColorData = [faceColorDataFloat[i*l : i*l+l] for i in range(0, faceAttributesSize)]
+        if l == 4: faceColorData = [[vi for vi in v[0:3]] for v in faceColorData]
+        if l == 2: faceColorData = [[v[0], v[1], 0.0] for v in faceColorData]
+        if l == 1: faceColorData = [[v[0], 0.0, 0.0] for v in faceColorData]
+        color_layer = mesh.vertex_colors.new(name='Face Colors')
+        colorIndex = 0
+        faceIndex= 0
+        for poly in mesh.polygons:
+            for vertexIndex in poly.vertices:
+                color_layer.data[colorIndex].color = faceColorData[faceIndex]
+                colorIndex += 1 
+            faceIndex += 1                   
+    return mesh
 
 
 def createMaterial(treeRoot, tag, rootPath, parentMaterial):
@@ -106,7 +121,6 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     bpy.context.scene.objects.link(geomobj)
     geomobj.parent = parentObject
-    createMeshAttributes(tag, geomobj);
     tagToObject[tag] = geomobj
     return geomobj
 
@@ -190,6 +204,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
         geometry.material_slots[0].link = 'OBJECT'
         geometry.material_slots[0].material = effectiveMaterial
         if len(geometry.data.materials) > 1: geometry.data.materials.pop()
+        geometry.data.materials[0] = None
     counter = 1;
     for child in tag.find("./children"):
         path = rootPath + '/children/child[' + str(counter) + ']'
