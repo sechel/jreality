@@ -30,6 +30,8 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
@@ -210,7 +212,7 @@ public class BlenderTestScene {
 		colorsFaceComponent.setAppearance(flatShadingApp);
 		colorsFaceComponent.setName("Smooth Colors Test Component");
 		IndexedFaceSet cube2 = Primitives.coloredCube();
-		cube2.setVertexAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(vertexColors));
+		cube2.setVertexAttributes(COLORS, new DoubleArrayArray.Array(vertexColors));
 		colorsFaceComponent.setGeometry(cube2);
 		MatrixBuilder.euclidean().translate(2, 0, 1).scale(0.5).assignTo(colorsFaceComponent);
 		root.addChild(colorsFaceComponent);

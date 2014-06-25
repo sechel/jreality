@@ -62,9 +62,14 @@ def createMesh(tag):
     # vertex colors
     vertexColorsTag = vertexAttributes.find("DataList[@attribute='colors']")
     if vertexColorsTag is not None:
-        vertexColorDataFloat = [float(cij) for cij in vertexColorsTag.text.split()]
-        l = int(len(vertexColorDataFloat) / vertexAttributesSize);
-        vertexColorData = [vertexColorDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
+        vertexColorDataTags = vertexColorsTag.findall('double-array')
+        if vertexColorDataTags:
+            vertexColorData = [[float(cij) for cij in colorTag.text.split()] for colorTag in vertexColorDataTags]
+            l = len(vertexColorData[0]);
+        else:    
+            vertexColorDataFloat = [float(cij) for cij in vertexColorsTag.text.split()]
+            l = int(len(vertexColorDataFloat) / vertexAttributesSize);
+            vertexColorData = [vertexColorDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
         if l == 4: vertexColorData = [[vi for vi in v[0:3]] for v in vertexColorData]
         if l == 2: vertexColorData = [[v[0], v[1], 0.0] for v in vertexColorData] 
         if l == 1: vertexColorData = [[v[0], 0.0, 0.0] for v in vertexColorData]
@@ -78,10 +83,15 @@ def createMesh(tag):
     # face colors
     faceColorsTag = tag.find("faceAttributes/DataList[@attribute='colors']")
     if faceColorsTag is not None:
-        faceColorDataFloat = [float(cij) for cij in faceColorsTag.text.split()]
-        faceAttributesSize = int(faceAttributes.get('size'));
-        l = int(len(faceColorDataFloat) / faceAttributesSize);
-        faceColorData = [faceColorDataFloat[i*l : i*l+l] for i in range(0, faceAttributesSize)]
+        faceColorDataTags = faceColorsTag.findall('double-array')
+        if faceColorDataTags:
+            faceColorData = [[float(cij) for cij in colorTag.text.split()] for colorTag in faceColorDataTags]
+            l = len(faceColorData[0]);
+        else:    
+            faceColorDataFloat = [float(cij) for cij in faceColorsTag.text.split()]
+            faceAttributesSize = int(faceAttributes.get('size'));
+            l = int(len(faceColorDataFloat) / faceAttributesSize);
+            faceColorData = [faceColorDataFloat[i*l : i*l+l] for i in range(0, faceAttributesSize)]
         if l == 4: faceColorData = [[vi for vi in v[0:3]] for v in faceColorData]
         if l == 2: faceColorData = [[v[0], v[1], 0.0] for v in faceColorData]
         if l == 1: faceColorData = [[v[0], 0.0, 0.0] for v in faceColorData]
@@ -90,7 +100,8 @@ def createMesh(tag):
         faceIndex= 0
         for poly in mesh.polygons:
             for vertexIndex in poly.vertices:
-                color_layer.data[colorIndex].color = faceColorData[faceIndex]
+                if len(faceColorData[faceIndex]) == 3:
+                    color_layer.data[colorIndex].color = faceColorData[faceIndex]
                 colorIndex += 1 
             faceIndex += 1                   
     return mesh
