@@ -199,12 +199,12 @@ public class BlenderTestScene {
 		IndexedFaceSet cube = Primitives.coloredCube();
 		cube.setVertexAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(vertexColors));
 		colorsComponent.setGeometry(cube);
-		MatrixBuilder.euclidean().translate(-5, 3, 5).scale(0.4).assignTo(colorsComponent);
+		MatrixBuilder.euclidean().translate(-2, 0, 1).scale(0.5).assignTo(colorsComponent);
 		root.addChild(colorsComponent);
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
-//		Viewer v = JRViewer.display(root);
+		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
 		JrScene scene = new JrScene(root);

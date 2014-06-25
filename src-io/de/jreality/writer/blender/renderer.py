@@ -96,16 +96,22 @@ def createMesh(tag):
     return mesh
 
 
-def createMaterial(treeRoot, tag, rootPath, parentMaterial):
+def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     tag = resolveReference(treeRoot, tag, rootPath);
-    name = tag.find('name');
-    if name == None: return None
-    material = bpy.data.materials.new(name.text)
+    nameTag = tag.find('name');
+    isVertexPaintMaterial = False
+    if nameTag == None:
+        if geometryObject == None or not geometryObject.data.vertex_colors:
+            return None
+        else:
+            isVertexPaintMaterial = True
+            name = "Vertex Paint Material"
+    else: name = nameTag.text
+    material = bpy.data.materials.new(name)
+    material.use_vertex_color_paint = isVertexPaintMaterial
     diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
-    if diffuseColorTag is not None:
-        material.diffuse_color = parseColor(diffuseColorTag.find('awt-color'))
-    else:
-        material.diffuse_color = parentMaterial.diffuse_color 
+    if diffuseColorTag is not None: material.diffuse_color = parseColor(diffuseColorTag.find('awt-color'))
+    else: material.diffuse_color = parentMaterial.diffuse_color 
     return material
 
 
@@ -195,7 +201,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     camera = createCamera(treeRoot, tag.find('camera'), rootPath + '/camera', obj)
     geometry = createGeometry(treeRoot, tag.find('geometry'), rootPath + '/geometry', obj);
     light = createLight(treeRoot, tag.find('light'), rootPath + '/light', obj);
-    material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1]);
+    material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1], geometry);
     if material is not None: materialStack.append(material)
     if geometry is not None: 
         effectiveMaterial = materialStack[-1]
