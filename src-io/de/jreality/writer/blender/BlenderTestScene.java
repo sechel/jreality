@@ -1,7 +1,10 @@
 package de.jreality.writer.blender;
 
+import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
+import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static java.lang.Math.PI;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Random;
@@ -14,9 +17,15 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.SpotLight;
 import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.shader.RootAppearance;
+import de.jreality.shader.ShaderUtility;
 import de.jreality.writer.WriterJRS;
 
 public class BlenderTestScene {
@@ -24,6 +33,13 @@ public class BlenderTestScene {
 	public static void main(String[] args) throws Exception {
 		SceneGraphComponent root = new SceneGraphComponent();
 		root.setName("Scene Root");
+		Appearance rootAppearance = new Appearance("Root Appearance");
+		rootAppearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.8f, 0.4f, 0.6f));
+		rootAppearance.setName("Root Appearance");
+		RootAppearance rootApp = ShaderUtility.createRootAppearance(rootAppearance);
+		rootApp.setBackgroundColor(new Color(0.8f, 0.9f, 0.7f));
+		root.setAppearance(rootAppearance);
+		
 		SceneGraphComponent icosahedron = new SceneGraphComponent();
 		icosahedron.setName("Icosahedron Root");
 		icosahedron.setGeometry(Primitives.icosahedron());
@@ -36,13 +52,14 @@ public class BlenderTestScene {
 		SceneGraphComponent cameraRoot = new SceneGraphComponent();
 		cameraRoot.setName("Camera Root");
 		Camera cam = new Camera("My Camera");
+		cam.setOrientationMatrix(MatrixBuilder.euclidean().translate(0, 3, 8).rotateX(-0.3).getArray());
 		cameraRoot.setCamera(cam);
 		root.addChild(cameraRoot);
 		root.addChild(cameraRoot);
 		SceneGraphComponent camera2Root = new SceneGraphComponent();
 		camera2Root.setName("Orthographic Camera Root");
 		Camera cam2 = new Camera("My Orthographic Camera");
-		cam2.setOrientationMatrix(MatrixBuilder.euclidean().rotateX(Math.PI/2).getArray());
+		cam2.setOrientationMatrix(MatrixBuilder.euclidean().translate(-3, 1, 2).rotateX(-0.1).getArray());
 		cam2.setPerspective(false);
 		camera2Root.setCamera(cam2);
 		root.addChild(camera2Root);
@@ -50,6 +67,9 @@ public class BlenderTestScene {
 		invisible.setName("Invisible Object");
 		invisible.setVisible(false);
 		root.addChild(invisible);
+		SceneGraphComponent visibilityInherited = new SceneGraphComponent();
+		visibilityInherited.setName("Inherited Visibility");
+		invisible.addChild(visibilityInherited);
 		SceneGraphComponent transformedObject = new SceneGraphComponent();
 		transformedObject.setName("Transformed Object");
 		double[] pos = {1,2,3,1};
@@ -60,8 +80,6 @@ public class BlenderTestScene {
 		mb.translate(pos);
 		mb.assignTo(transformedObject);
 		root.addChild(transformedObject);
-		JrScene scene = new JrScene(root);
-		scene.addPath("cameraPath", new SceneGraphPath(root, camera2Root, cam2));
 		
 		IndexedFaceSetFactory ifsf = new IndexedFaceSetFactory();
 		ifsf.setVertexCount(4);
@@ -129,7 +147,37 @@ public class BlenderTestScene {
 		MatrixBuilder.euclidean().translate(0, 0, -4).scale(0.5).assignTo(customGeoemtryRoot);
 		root.addChild(customGeoemtryRoot);
 		
-//		JRViewer.display(root);
+		SceneGraphComponent pointLightRoot = new SceneGraphComponent();
+		pointLightRoot.setName("Point Light Component");
+		PointLight plight = new PointLight("Point Light");
+		plight.setColor(Color.RED);
+		pointLightRoot.setLight(plight);
+		MatrixBuilder.euclidean().translate(-3, 5, 2).assignTo(pointLightRoot);
+		root.addChild(pointLightRoot);
+		
+		SceneGraphComponent spotLightRoot = new SceneGraphComponent();
+		spotLightRoot.setName("Spot Light Component");
+		SpotLight spotlight = new SpotLight("Spot Light");
+		spotlight.setColor(Color.GREEN);
+		spotLightRoot.setLight(spotlight);
+		MatrixBuilder.euclidean().translate(0, -2, 5).assignTo(spotLightRoot);
+		root.addChild(spotLightRoot);
+		
+		SceneGraphComponent dirLightRoot = new SceneGraphComponent();
+		dirLightRoot.setName("Directional Light Component");
+		DirectionalLight dirLight = new DirectionalLight("Directional Light");
+		dirLight.setColor(Color.WHITE);
+		dirLightRoot.setLight(dirLight);
+		MatrixBuilder.euclidean().translate(5, 0, 5).rotateY(Math.PI/4).assignTo(dirLightRoot);
+		root.addChild(dirLightRoot);
+		
+		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
+		
+//		Viewer v = JRViewer.display(root);
+//		v.setCameraPath(camPath);
+		
+		JrScene scene = new JrScene(root);
+		scene.addPath("cameraPath", camPath);
 		
 		// write scene file
 		WriterJRS jrsWriter = new WriterJRS();

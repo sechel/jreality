@@ -5,12 +5,21 @@ import xml.etree.ElementTree as ET
 import math
 
 tagToObject = {}
+materialStack = []
 
 def parseMatrix(tag):
     mm = [float(mij) for mij in tag.text.split()]
     return Matrix((mm[0:4], mm[4:8], mm[8:12], mm[12:16]))
 
-def parseIndexedFaceSet(tag):
+
+def parseColor(tag):
+    r = float(tag.find('red').text) / 255.0
+    g = float(tag.find('green').text) / 255.0
+    b = float(tag.find('blue').text) / 255.0
+    return [r, g, b]
+
+
+def createMesh(tag):
     name = tag.find('name').text;
     me = bpy.data.meshes.new(name)
     # parse vertices
@@ -50,39 +59,55 @@ def parseIndexedFaceSet(tag):
     me.from_pydata(vertexData, edgeData, faceData)
     return me
 
+
+def createMaterial(treeRoot, tag, rootPath, parentMaterial):
+    tag = resolveReference(treeRoot, tag, rootPath);
+    name = tag.find('name');
+    if name == None: return None
+    material = bpy.data.materials.new(name.text)
+    diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
+    if diffuseColorTag is not None:
+        material.diffuse_color = parseColor(diffuseColorTag.find('awt-color'))
+    else:
+        material.diffuse_color = parentMaterial.diffuse_color 
+    return material
+
+
 def createGeometry(treeRoot, tag, rootPath, parentObject):
     tag = resolveReference(treeRoot, tag, rootPath);
     name = tag.find('name');
-    if name == None: return
+    if name == None: return None
     geom = None
     if tag in tagToObject :
         geom = tagToObject[tag].data
     else :
         if tag.get('type') == 'IndexedFaceSet':
-            geom = parseIndexedFaceSet(tag)
+            geom = createMesh(tag)
         if tag.get('type') == 'IndexedLineSet':
-            geom = parseIndexedFaceSet(tag)         
+            geom = createMesh(tag)         
         if tag.get('type') == 'PointSet':
-            geom = parseIndexedFaceSet(tag)         
+            geom = createMesh(tag)         
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     geomobj.parent = parentObject
     bpy.context.scene.objects.link(geomobj)
     tagToObject[tag] = geomobj
+    return geomobj
 
-def createCameraChild(treeRoot, tag, rootPath, parentObject):
+
+def createCamera(treeRoot, tag, rootPath, parentObject):
     tag = resolveReference(treeRoot, tag, rootPath);
-    if tag.find('name') == None: return
+    if tag.find('name') == None: return None
     name = tag.find('name').text
     if tag in tagToObject :
         cam = tagToObject[tag].data
     else :
         cam = bpy.data.cameras.new(name)
-    cam.clip_start = float(tag.find('near').text);
-    cam.clip_end = float(tag.find('far').text);
-    cam.angle = math.radians(float(tag.find('fieldOfView').text));
-    cam.ortho_scale = float(tag.find('focus').text);
-    if tag.find('perspective').text == 'false':
-        cam.type = 'ORTHO'
+        cam.clip_start = float(tag.find('near').text);
+        cam.clip_end = float(tag.find('far').text);
+        cam.angle = math.radians(float(tag.find('fieldOfView').text));
+        cam.ortho_scale = float(tag.find('focus').text);
+        if tag.find('perspective').text == 'false':
+            cam.type = 'ORTHO'
     camobj = bpy.data.objects.new(name=name, object_data = cam)
     trafo = tag.find('orientationMatrix')
     if trafo.text != None:
@@ -90,27 +115,70 @@ def createCameraChild(treeRoot, tag, rootPath, parentObject):
     camobj.parent = parentObject
     bpy.context.scene.objects.link(camobj)
     tagToObject[tag] = camobj
+    return camobj
+
+
+def createLight(treeRoot, tag, rootPath, parentObject):
+    tag = resolveReference(treeRoot, tag, rootPath);
+    if tag.find('name') == None: return None
+    name = tag.find('name').text
+    type = tag.get('type')
+    if tag in tagToObject :
+        light = tagToObject[tag].data
+    else :
+        blenderType = 'POINT'
+        if type == 'PointLight': 
+            light = bpy.data.lamps.new(name, 'POINT')
+        elif len(tag.findall('coneAngle')) != 0: 
+            light = bpy.data.lamps.new(name, 'SPOT')
+            light.spot_size = float(tag.find('coneAngle').text)
+            light.show_cone = True
+        elif type == 'DirectionalLight':
+            light = bpy.data.lamps.new(name, 'HEMI')     
+        else:
+            light = bpy.data.lamps.new(name, 'POINT')
+        light.color = parseColor(tag.find('color'))
+        light.energy = float(tag.find('intensity').text)
+    lightobj = bpy.data.objects.new(name=name, object_data = light)
+    lightobj.parent = parentObject
+    bpy.context.scene.objects.link(lightobj)
+    tagToObject[tag] = lightobj
+    return lightobj
+
     
-    
-def createObjectFromXML(treeRoot, tag, rootPath, parentObject):
+def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     tag = resolveReference(treeRoot, tag, rootPath);
     name = tag[0].text
     obj = bpy.data.objects.new(name, None)
-    if tag.find('visible').text == 'false':
+    if not visible:
         obj.hide = True
+    else: 
+        visible = tag.find('visible').text == 'true'
+        obj.hide = not visible
     trafo = tag.find('transformation/matrix')
     if trafo != None:
         obj.matrix_local = parseMatrix(trafo)
     bpy.context.scene.objects.link(obj)
     if parentObject != None :
         obj.parent = parentObject
-    createCameraChild(treeRoot, tag.find('camera'), rootPath + '/camera', obj)
-    createGeometry(treeRoot, tag.find('geometry'), rootPath + '/geometry', obj);
+    camera = createCamera(treeRoot, tag.find('camera'), rootPath + '/camera', obj)
+    geometry = createGeometry(treeRoot, tag.find('geometry'), rootPath + '/geometry', obj);
+    light = createLight(treeRoot, tag.find('light'), rootPath + '/light', obj);
+    material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1]);
+    if material is not None: materialStack.append(material)
+    if geometry is not None: 
+        effectiveMaterial = materialStack[-1]
+        # do not set twice for multiple occurrences
+        if len(geometry.data.materials) == 0:
+            geometry.data.materials.append(effectiveMaterial)
+            geometry.material_slots[-1].link = 'OBJECT'
+            geometry.material_slots[-1].material = effectiveMaterial
     counter = 1;
     for child in tag.find("./children"):
         path = rootPath + '/children/child[' + str(counter) + ']'
         counter += 1
-        createObjectFromXML(treeRoot, child, path, obj);
+        createObjectFromXML(treeRoot, child, path, obj, visible);
+    if material is not None: materialStack.pop()  
     return obj    
 
 
@@ -120,13 +188,20 @@ def resolveReference(treeRoot, tag, rootPath):
         return treeRoot.find(refPath)
     return tag
         
+def createDefaultMaterial():
+    mtl = bpy.data.materials[0]
+    mtl.name = 'JReality Default Material'
+    mtl.diffuse_color = [0, 0, 1]
+    return mtl
+        
         
 def createSceneFromXML(scene_file):
     # parse xml
     sceneTree = ET.parse(scene_file)
     root = sceneTree.getroot()
     # traverse scene xml
-    rootObject = createObjectFromXML(root, root[0], './sceneRoot', None)
+    materialStack.append(createDefaultMaterial())
+    rootObject = createObjectFromXML(root, root[0], './sceneRoot', None, True)
     # create coordinate conversion root
     sceneObject = bpy.data.objects.new('JReality Scene', None)
     jrealityToBlender = Euler((math.pi/2, 0.0, math.pi/2), 'XYZ')
