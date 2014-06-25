@@ -4,6 +4,7 @@ import static de.jreality.scene.data.Attribute.COLORS;
 import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
+import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static java.lang.Math.PI;
 
 import java.awt.Color;
@@ -25,10 +26,11 @@ import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Viewer;
-import de.jreality.scene.proxy.scene.SceneGraphComponent;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.writer.WriterJRS;
@@ -191,7 +193,7 @@ public class BlenderTestScene {
 		root.addChild(dirLightRoot);
 		
 		SceneGraphComponent colorsComponent = new SceneGraphComponent();
-		colorsComponent.setName("Colors Test Component");
+		colorsComponent.setName("Smooth Colors Test Component");
 		double[][] vertexColors = new double[8][];
 		for (int i = 0; i < vertexColors.length; i++) {
 			vertexColors[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble()};
@@ -202,9 +204,20 @@ public class BlenderTestScene {
 		MatrixBuilder.euclidean().translate(-2, 0, 1).scale(0.5).assignTo(colorsComponent);
 		root.addChild(colorsComponent);
 		
+		SceneGraphComponent colorsFaceComponent = new SceneGraphComponent();
+		Appearance flatShadingApp = new Appearance("Flat Shading Appearance");
+		flatShadingApp.setAttribute(POLYGON_SHADER + "." + SMOOTH_SHADING, false);
+		colorsFaceComponent.setAppearance(flatShadingApp);
+		colorsFaceComponent.setName("Smooth Colors Test Component");
+		IndexedFaceSet cube2 = Primitives.coloredCube();
+		cube2.setVertexAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(vertexColors));
+		colorsFaceComponent.setGeometry(cube2);
+		MatrixBuilder.euclidean().translate(2, 0, 1).scale(0.5).assignTo(colorsFaceComponent);
+		root.addChild(colorsFaceComponent);
+		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
-		Viewer v = JRViewer.display(root);
+//		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
 		JrScene scene = new JrScene(root);

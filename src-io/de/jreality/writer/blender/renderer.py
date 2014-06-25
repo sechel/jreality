@@ -99,19 +99,38 @@ def createMesh(tag):
 def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     tag = resolveReference(treeRoot, tag, rootPath);
     nameTag = tag.find('name');
-    isVertexPaintMaterial = False
-    if nameTag == None:
-        if geometryObject == None or not geometryObject.data.vertex_colors:
+    mesh = None if geometryObject is None else geometryObject.data
+    vertex_colors = None if mesh is None else mesh.vertex_colors
+    if nameTag is None:
+        if geometryObject is None or not vertex_colors:
             return None
         else:
-            isVertexPaintMaterial = True
             name = "Vertex Paint Material"
-    else: name = nameTag.text
+    else: 
+        name = nameTag.text
     material = bpy.data.materials.new(name)
-    material.use_vertex_color_paint = isVertexPaintMaterial
+    material.use_vertex_color_paint = bool(vertex_colors)
+    # diffuse color
     diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
-    if diffuseColorTag is not None: material.diffuse_color = parseColor(diffuseColorTag.find('awt-color'))
-    else: material.diffuse_color = parentMaterial.diffuse_color 
+    if diffuseColorTag is not None: 
+        material.diffuse_color = parseColor(diffuseColorTag.find('awt-color'))
+    else: 
+        material.diffuse_color = parentMaterial.diffuse_color
+    # smooth/flat shading
+    smoothShadingTag = tag.find("attribute[@name='polygonShader.smoothShading']")
+    if smoothShadingTag is not None:
+        smoothShading = smoothShadingTag.find('boolean').text == 'true'
+    else:
+        smoothShading = parentMaterial['smoothShading']
+    material['smoothShading'] = smoothShading        
+    if vertex_colors is not None:    
+        # TODO: does not work correctly with shared geometry
+        if 'Vertex Colors' in vertex_colors:
+            vertex_colors['Vertex Colors'].active = smoothShading
+            vertex_colors['Vertex Colors'].active_render = smoothShading
+        if 'Face Colors' in vertex_colors:
+            vertex_colors['Face Colors'].active = not smoothShading
+            vertex_colors['Face Colors'].active_render = not smoothShading 
     return material
 
 
@@ -230,6 +249,7 @@ def createDefaultMaterial():
     mtl = bpy.data.materials[0]
     mtl.name = 'JReality Default Material'
     mtl.diffuse_color = [0, 0, 1]
+    mtl['smoothShading'] = True
     return mtl
         
         
