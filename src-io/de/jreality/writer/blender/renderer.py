@@ -60,6 +60,27 @@ def createMesh(tag):
     return me
 
 
+def createMeshAttributes(tag, object):
+    # vertex colors
+    vertexAttributes = tag.find('vertexAttributes')
+    vertexAttributesSize = int(vertexAttributes.get('size'));
+    vertexColorsTag = vertexAttributes.find("DataList[@attribute='colors']")
+    if vertexColorsTag is not None:
+        vertexColorDataFloat = [float(cij) for cij in vertexColorsTag.text.split()]
+        l = int(len(vertexColorDataFloat) / vertexAttributesSize);
+        vertexColorData = [vertexColorDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
+        if l == 4: vertexColorData = [[vi for vi in v[0:3]] for v in vertexColorData]
+        if l == 2: vertexColorData = [[v[0], v[1], 0.0] for v in vertexColorData] 
+        if l == 1: vertexColorData = [[v[0], 0.0, 0.0] for v in vertexColorData]
+        object.data.vertex_colors.new()
+        color_layer = object.data.vertex_colors[0]
+        index = 0
+        for color in color_layer.data:
+            if index < len(vertexColorData):
+                color.color = vertexColorData[index]
+                index += 1 
+
+
 def createMaterial(treeRoot, tag, rootPath, parentMaterial):
     tag = resolveReference(treeRoot, tag, rootPath);
     name = tag.find('name');
@@ -78,18 +99,14 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
     name = tag.find('name');
     if name == None: return None
     geom = None
-    if tag in tagToObject :
+    if tag in tagToObject: 
         geom = tagToObject[tag].data
-    else :
-        if tag.get('type') == 'IndexedFaceSet':
-            geom = createMesh(tag)
-        if tag.get('type') == 'IndexedLineSet':
-            geom = createMesh(tag)         
-        if tag.get('type') == 'PointSet':
-            geom = createMesh(tag)         
+    else:
+        geom = createMesh(tag)
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
-    geomobj.parent = parentObject
     bpy.context.scene.objects.link(geomobj)
+    geomobj.parent = parentObject
+    createMeshAttributes(tag, geomobj);
     tagToObject[tag] = geomobj
     return geomobj
 
@@ -169,10 +186,10 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     if geometry is not None: 
         effectiveMaterial = materialStack[-1]
         # do not set twice for multiple occurrences
-        if len(geometry.data.materials) == 0:
-            geometry.data.materials.append(effectiveMaterial)
-            geometry.material_slots[-1].link = 'OBJECT'
-            geometry.material_slots[-1].material = effectiveMaterial
+        geometry.data.materials.append(effectiveMaterial)
+        geometry.material_slots[0].link = 'OBJECT'
+        geometry.material_slots[0].material = effectiveMaterial
+        if len(geometry.data.materials) > 1: geometry.data.materials.pop()
     counter = 1;
     for child in tag.find("./children"):
         path = rootPath + '/children/child[' + str(counter) + ']'

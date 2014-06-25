@@ -1,5 +1,7 @@
 package de.jreality.writer.blender;
 
+import static de.jreality.scene.data.Attribute.COLORS;
+import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static java.lang.Math.PI;
@@ -20,6 +22,7 @@ import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
@@ -43,12 +46,26 @@ public class BlenderTestScene {
 		SceneGraphComponent icosahedron = new SceneGraphComponent();
 		icosahedron.setName("Icosahedron Root");
 		icosahedron.setGeometry(Primitives.icosahedron());
+		Appearance icosahedronAppearance = new Appearance("Icosahedron Appearance");
+		icosahedronAppearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.3f, 0.9f, 0.8f));
+		icosahedron.setAppearance(icosahedronAppearance);
 		root.addChild(icosahedron);
 		SceneGraphComponent icosahedron2 = new SceneGraphComponent();
-		icosahedron2.setName("Transformed Icosahedron Root");
+		icosahedron2.setName("Icosahedron Transformed Root");
 		icosahedron2.setGeometry(icosahedron.getGeometry());
+		Appearance icosahedron2Appearance = new Appearance("Transformed Icosahedron Appearance");
+		icosahedron2Appearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.9f, 0.2f, 0.7f));
+		icosahedron2.setAppearance(icosahedron2Appearance);
 		MatrixBuilder.euclidean().translate(2, 2, 2).assignTo(icosahedron2);
 		root.addChild(icosahedron2);
+		SceneGraphComponent icosahedron3 = new SceneGraphComponent();
+		icosahedron3.setName("Icosahedron 2 Root");
+		icosahedron3.setGeometry(icosahedron.getGeometry());
+		Appearance icosahedron3Appearance = new Appearance("Icosahedron 2 Appearance");
+		icosahedron3Appearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.5f, 0.3f, 0.9f));
+		icosahedron3.setAppearance(icosahedron3Appearance);
+		MatrixBuilder.euclidean().translate(-2, 2, 2).assignTo(icosahedron3);
+		root.addChild(icosahedron3);		
 		SceneGraphComponent cameraRoot = new SceneGraphComponent();
 		cameraRoot.setName("Camera Root");
 		Camera cam = new Camera("My Camera");
@@ -170,6 +187,18 @@ public class BlenderTestScene {
 		dirLightRoot.setLight(dirLight);
 		MatrixBuilder.euclidean().translate(5, 0, 5).rotateY(Math.PI/4).assignTo(dirLightRoot);
 		root.addChild(dirLightRoot);
+		
+		SceneGraphComponent colorsComponent = new SceneGraphComponent();
+		colorsComponent.setName("Colors Test Component");
+		double[][] vertexColors = new double[8][];
+		for (int i = 0; i < vertexColors.length; i++) {
+			vertexColors[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble()};
+		}
+		IndexedFaceSet cube = Primitives.coloredCube();
+		cube.setVertexAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(vertexColors));
+		colorsComponent.setGeometry(cube);
+		MatrixBuilder.euclidean().translate(-5, 3, 5).scale(0.4).assignTo(colorsComponent);
+		root.addChild(colorsComponent);
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
