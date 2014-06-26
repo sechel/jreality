@@ -1,6 +1,8 @@
 package de.jreality.writer.blender;
 
 import static de.jreality.scene.data.Attribute.COLORS;
+import static de.jreality.scene.data.Attribute.COORDINATES;
+import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
@@ -30,7 +32,10 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.Viewer;
+import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.scene.data.IntArrayArray;
 import de.jreality.scene.data.StorageModel;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.RootAppearance;
@@ -195,11 +200,17 @@ public class BlenderTestScene {
 		root.addChild(dirLightRoot);
 		
 		SceneGraphComponent colorsComponent = new SceneGraphComponent();
-		colorsComponent.setName("Smooth Colors Test Component");
+		colorsComponent.setName("Colors Smooth Component");
 		double[][] vertexColors = new double[8][];
 		for (int i = 0; i < vertexColors.length; i++) {
 			vertexColors[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble()};
 		}
+		double[][] faceColors = new double[6][];
+		for (int i = 0; i < faceColors.length; i++) {
+			faceColors[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble()};
+		}
+		int[] faceIndices = {0, 2, 3, 1, 1, 5, 4, 0, 0, 4, 6, 2, 5, 7, 6, 4, 2, 6, 7, 3, 3, 7, 5, 1};
+		double[][] vertexCoordinates = {{1.0, 1.0, 1.0}, {1.0, 1.0, -1.0}, {1.0, -1.0, 1.0}, {1.0, -1.0, -1.0}, {-1.0, 1.0, 1.0}, {-1.0, 1.0, -1.0}, {-1.0, -1.0, 1.0}, {-1.0, -1.0, -1.0}};
 		IndexedFaceSet cube = Primitives.coloredCube();
 		cube.setVertexAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(vertexColors));
 		colorsComponent.setGeometry(cube);
@@ -210,9 +221,15 @@ public class BlenderTestScene {
 		Appearance flatShadingApp = new Appearance("Flat Shading Appearance");
 		flatShadingApp.setAttribute(POLYGON_SHADER + "." + SMOOTH_SHADING, false);
 		colorsFaceComponent.setAppearance(flatShadingApp);
-		colorsFaceComponent.setName("Smooth Colors Test Component");
+		colorsFaceComponent.setName("Colors Flat Component");
 		IndexedFaceSet cube2 = Primitives.coloredCube();
+		cube2.setFaceAttributes(INDICES, null);
+		cube2.setFaceAttributes(INDICES, new IntArrayArray.Inlined(faceIndices, 4));
 		cube2.setVertexAttributes(COLORS, new DoubleArrayArray.Array(vertexColors));
+		cube2.setVertexAttributes(COORDINATES, null);
+		cube2.setVertexAttributes(COORDINATES, new DoubleArrayArray.Array(vertexCoordinates));
+		cube2.setFaceAttributes(COLORS, null);
+		cube2.setFaceAttributes(COLORS, new DoubleArrayArray.Array(faceColors));
 		colorsFaceComponent.setGeometry(cube2);
 		MatrixBuilder.euclidean().translate(2, 0, 1).scale(0.5).assignTo(colorsFaceComponent);
 		root.addChild(colorsFaceComponent);

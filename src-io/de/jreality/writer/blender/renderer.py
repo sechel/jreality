@@ -18,6 +18,28 @@ def parseColor(tag):
     b = float(tag.find('blue').text) / 255.0
     return [r, g, b]
 
+def parseGeometryAttribute(tag, count, isFloat, normalizeTo3Components):
+    if tag is None: return []
+    if isFloat: dataTags = tag.findall('double-array')
+    else: dataTags = tag.findall('int-array')
+    if dataTags:
+        if isFloat:
+            data = [[float(f) for f in dataTag.text.split()] for dataTag in dataTags]
+        else:
+            data = [[int(i) for i in dataTag.text.split()] for dataTag in dataTags]    
+    else:
+        if isFloat:
+            dataInline = [float(f) for f in tag.text.split()]
+        else:
+            dataInline = [int(i) for i in tag.text.split()]    
+        l = int(len(dataInline) / count);  
+        data = [dataInline[i*l : i*l+l] for i in range(0, count)]
+        if normalizeTo3Components:
+            if l > 3: data = [[vi/vec[-1] for vi in vec[0:3]] for vec in data]
+            if l == 2: data = [[vec[0], vec[1], 0.0] for vec in data] 
+            if l == 1: data = [[vec[0], 0.0, 0.0] for vec in data]
+    return data    
+
 
 def createMesh(tag):
     name = tag.find('name').text;
@@ -25,83 +47,46 @@ def createMesh(tag):
     # parse vertices
     vertexAttributes = tag.find('vertexAttributes')
     vertexAttributesSize = int(vertexAttributes.get('size'));
-    vertexDataText = vertexAttributes.find("DataList[@attribute='coordinates']").text
-    vertexDataFloat = [float(vij) for vij in vertexDataText.split()]
-    l = int(len(vertexDataFloat) / vertexAttributesSize);
-    vertexData = [vertexDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
-    if l == 4: vertexData = [[vi/v[3] for vi in v[0:3]] for v in vertexData]
-    if l == 2: vertexData = [[v[0], v[1], 0.0] for v in vertexData] 
-    if l == 1: vertexData = [[v[0], 0.0, 0.0] for v in vertexData]
+    vertexDataTag = vertexAttributes.find("DataList[@attribute='coordinates']")
+    vertexData = parseGeometryAttribute(vertexDataTag, vertexAttributesSize, True, True)
     # parse edges
     edgeData = []
     edgeAttributes = tag.find('edgeAttributes')
-    if edgeAttributes != None:
+    if edgeAttributes is not None:
         edgeAttributesSize = int(edgeAttributes.get('size'));
-        if edgeAttributesSize != 0:
-            edgeIndexList = edgeAttributes.find("DataList[@attribute='indices']")
-            edgeIndexData = edgeIndexList.findall('int-array')
-            if len(edgeIndexData) == 0:
-                edgeIndexDataInt = [float(eij) for eij in edgeIndexList.text.split()]
-                l = int(len(edgeIndexDataInt) / edgeAttributesSize);
-                # TODO: blender does not support edge sequences longer than 1
-                edgeData = [edgeIndexDataInt[i*l : i*l+l] for i in range(0, edgeAttributesSize)]
-            else:    
-                edgeData = [[int(index) for index in edgeData.text.split()] for edgeData in edgeIndexData]
+        edgeDataTag = edgeAttributes.find("DataList[@attribute='indices']")
+        edgeData = parseGeometryAttribute(edgeDataTag, edgeAttributesSize, False, False)
     # parse faces
     faceData = []
     faceAttributes = tag.find('faceAttributes')
     if faceAttributes is not None:
         faceAttributesSize = int(faceAttributes.get('size'));
-        if faceAttributesSize != 0:
-            faceIndexData = faceAttributes.find("DataList[@attribute='indices']").findall('int-array')
-            faceData = [[int(index) for index in faceData.text.split()] for faceData in faceIndexData]
-    
+        faceDataTag = tag.find("faceAttributes/DataList[@attribute='indices']")
+        faceData = parseGeometryAttribute(faceDataTag, faceAttributesSize, False, False)
     # create mesh
     mesh.from_pydata(vertexData, edgeData, faceData)
     
     # vertex colors
     vertexColorsTag = vertexAttributes.find("DataList[@attribute='colors']")
     if vertexColorsTag is not None:
-        vertexColorDataTags = vertexColorsTag.findall('double-array')
-        if vertexColorDataTags:
-            vertexColorData = [[float(cij) for cij in colorTag.text.split()] for colorTag in vertexColorDataTags]
-            l = len(vertexColorData[0]);
-        else:    
-            vertexColorDataFloat = [float(cij) for cij in vertexColorsTag.text.split()]
-            l = int(len(vertexColorDataFloat) / vertexAttributesSize);
-            vertexColorData = [vertexColorDataFloat[i*l : i*l+l] for i in range(0, vertexAttributesSize)]
-        if l == 4: vertexColorData = [[vi for vi in v[0:3]] for v in vertexColorData]
-        if l == 2: vertexColorData = [[v[0], v[1], 0.0] for v in vertexColorData] 
-        if l == 1: vertexColorData = [[v[0], 0.0, 0.0] for v in vertexColorData]
-        color_layer = mesh.vertex_colors.new(name='Vertex Colors')
-        index = 0
+        vertexColors = parseGeometryAttribute(vertexColorsTag, vertexAttributesSize, True, True)
+        colorLayer = mesh.vertex_colors.new(name='Vertex Colors')
+        colorIndex = 0
         for poly in mesh.polygons:
             for vertexIndex in poly.vertices:
-                color_layer.data[index].color = vertexColorData[vertexIndex]
-                index += 1
+                colorLayer.data[colorIndex].color = vertexColors[vertexIndex]
+                colorIndex += 1
                 
     # face colors
     faceColorsTag = tag.find("faceAttributes/DataList[@attribute='colors']")
     if faceColorsTag is not None:
-        faceColorDataTags = faceColorsTag.findall('double-array')
-        if faceColorDataTags:
-            faceColorData = [[float(cij) for cij in colorTag.text.split()] for colorTag in faceColorDataTags]
-            l = len(faceColorData[0]);
-        else:    
-            faceColorDataFloat = [float(cij) for cij in faceColorsTag.text.split()]
-            faceAttributesSize = int(faceAttributes.get('size'));
-            l = int(len(faceColorDataFloat) / faceAttributesSize);
-            faceColorData = [faceColorDataFloat[i*l : i*l+l] for i in range(0, faceAttributesSize)]
-        if l == 4: faceColorData = [[vi for vi in v[0:3]] for v in faceColorData]
-        if l == 2: faceColorData = [[v[0], v[1], 0.0] for v in faceColorData]
-        if l == 1: faceColorData = [[v[0], 0.0, 0.0] for v in faceColorData]
-        color_layer = mesh.vertex_colors.new(name='Face Colors')
+        faceColors = parseGeometryAttribute(faceColorsTag, faceAttributesSize, True, True)
+        colorLayer = mesh.vertex_colors.new(name='Face Colors')
         colorIndex = 0
-        faceIndex= 0
+        faceIndex = 0
         for poly in mesh.polygons:
             for vertexIndex in poly.vertices:
-                if len(faceColorData[faceIndex]) == 3:
-                    color_layer.data[colorIndex].color = faceColorData[faceIndex]
+                colorLayer.data[colorIndex].color = faceColors[faceIndex]
                 colorIndex += 1 
             faceIndex += 1                   
     return mesh
@@ -234,6 +219,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1], geometry);
     if material is not None: materialStack.append(material)
     if geometry is not None: 
+        geometry.hide = obj.hide
         effectiveMaterial = materialStack[-1]
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
