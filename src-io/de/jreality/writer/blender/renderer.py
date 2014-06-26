@@ -156,7 +156,7 @@ def createCamera(treeRoot, tag, rootPath, parentObject):
         cam = bpy.data.cameras.new(name)
         cam.clip_start = float(tag.find('near').text);
         cam.clip_end = float(tag.find('far').text);
-        cam.angle = math.radians(float(tag.find('fieldOfView').text));
+        cam.angle = 2.0 * math.radians(float(tag.find('fieldOfView').text));
         cam.ortho_scale = float(tag.find('focus').text);
         if tag.find('perspective').text == 'false':
             cam.type = 'ORTHO'
