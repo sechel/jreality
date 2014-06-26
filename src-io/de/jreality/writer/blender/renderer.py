@@ -204,9 +204,11 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     obj = bpy.data.objects.new(name, None)
     if not visible:
         obj.hide = True
+        obj.hide_render = obj.hide
     else: 
         visible = tag.find('visible').text == 'true'
         obj.hide = not visible
+        obj.hide_render = obj.hide
     trafo = tag.find('transformation/matrix')
     if trafo != None:
         obj.matrix_local = parseMatrix(trafo)
@@ -220,6 +222,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     if material is not None: materialStack.append(material)
     if geometry is not None: 
         geometry.hide = obj.hide
+        geometry.hide_render = obj.hide
         effectiveMaterial = materialStack[-1]
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
@@ -241,6 +244,12 @@ def resolveReference(treeRoot, tag, rootPath):
         refPath = rootPath + '/' + tag.attrib['reference']
         return treeRoot.find(refPath)
     return tag
+
+def resolveReferencePath(treeRoot, tag, rootPath):
+    if 'reference' in tag.attrib :
+        refPath = rootPath + '/' + tag.attrib['reference']
+        return refPath
+    return rootPath
         
 def createDefaultMaterial():
     mtl = bpy.data.materials[0]
@@ -265,9 +274,11 @@ def createSceneFromXML(scene_file):
     rootObject.parent = sceneObject;
     # find active camera
     cameraPath = root.find("scenePaths/path[@name='cameraPath']")
+    cameraPathXpath = resolveReferencePath(root, cameraPath, "./scenePaths/path[@name='cameraPath']")
+    cameraPath = resolveReference(root, cameraPath, "./scenePaths/path[@name='cameraPath']")
     if cameraPath != None:
         node = cameraPath.find('node[last()]')
-        camTag = resolveReference(root, node, "./scenePaths/path[@name='cameraPath']/node[last()]")
+        camTag = resolveReference(root, node, cameraPathXpath + "/node[last()]")
         bpy.context.scene.camera = tagToObject[camTag]
     else:
         print('WARNING: no camera path set')  
