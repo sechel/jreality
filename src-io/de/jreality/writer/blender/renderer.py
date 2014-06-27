@@ -7,6 +7,27 @@ import math
 tagToObject = {}
 materialStack = []
 
+
+def createNURBSSphereData(name):
+    bpy.ops.surface.primitive_nurbs_surface_sphere_add()
+    sphereObject = bpy.context.scene.objects.active
+    sphereSurface = sphereObject.data
+    bpy.context.scene.objects.unlink(sphereObject)
+    bpy.data.objects.remove(sphereObject)
+    sphereSurface.name = name
+    return sphereSurface
+
+
+def createNURBSCylinderData(name):
+    bpy.ops.surface.primitive_nurbs_surface_cylinder_add()
+    cylinderObject = bpy.context.scene.objects.active
+    cylinderSurface = cylinderObject.data
+    bpy.context.scene.objects.unlink(cylinderObject)
+    bpy.data.objects.remove(cylinderObject)
+    cylinderSurface.name = name
+    return cylinderSurface
+
+
 def parseMatrix(tag):
     mm = [float(mij) for mij in tag.text.split()]
     return Matrix((mm[0:4], mm[4:8], mm[8:12], mm[12:16]))
@@ -133,6 +154,18 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         if 'Face Colors' in vertex_colors:
             vertex_colors['Face Colors'].active = not smoothShading
             vertex_colors['Face Colors'].active_render = not smoothShading 
+    spheresDrawTag = tag.find("attribute[@name='pointShader.spheresDraw']")
+    if spheresDrawTag is not None:
+        spheresDraw = spheresDrawTag.find('boolean').text == 'true'
+    else:
+        spheresDraw = parentMaterial['drawSpheres']
+    material['drawSpheres'] = spheresDraw
+    tubesDrawTag = tag.find("attribute[@name='lineShader.tubeDraw']")
+    if tubesDrawTag is not None:
+        tubesDraw = tubesDrawTag.find('boolean').text == 'true'
+    else:
+        tubesDraw = parentMaterial['drawTubes']
+    material['drawTubes'] = tubesDraw    
     return material
 
 
@@ -203,6 +236,34 @@ def createLight(treeRoot, tag, rootPath, parentObject):
     tagToObject[tag] = lightobj
     return lightobj
 
+
+def createTubesAndSpheres(geometryObject, material):
+    mesh = geometryObject.data
+    if material['drawSpheres']:
+        spheresObject = bpy.data.objects.new(name='Vertex Spheres', object_data=None)
+        spheresObject.parent = geometryObject
+        bpy.context.scene.objects.link(spheresObject)
+        sphereGeometry = createNURBSSphereData('NURBS Sphere')
+        for v in mesh.vertices:
+            sphereObject = bpy.data.objects.new(name='Sphere', object_data=sphereGeometry)
+            sphereObject.parent = spheresObject
+            sphereObject.location = v.co
+            sphereObject.scale = [0.1,0.1,0.1]
+            bpy.context.scene.objects.link(sphereObject)
+    if material['drawTubes']:
+        tubesObject = bpy.data.objects.new(name='Edge Tubes', object_data=None)
+        tubesObject.parent = geometryObject
+        bpy.context.scene.objects.link(tubesObject)
+        tubeGeometry = createNURBSCylinderData('NURBS Cylinder')
+        for e in mesh.edges:
+            v0 = e.vertices[0]
+            v1 = e.vertices[1]  
+            length = v0      
+            tubeObject = bpy.data.objects.new(name='Tube', object_data=tubeGeometry)
+            tubeObject.parent = tubesObject
+            tubeObject.location = v.co
+            tubeObject.scale = [0.2,0.2,0.2]
+            bpy.context.scene.objects.link(tubeObject)
     
 def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     tag = resolveReference(treeRoot, tag, rootPath);
@@ -226,10 +287,11 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     light = createLight(treeRoot, tag.find('light'), rootPath + '/light', obj);
     material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1], geometry);
     if material is not None: materialStack.append(material)
-    if geometry is not None: 
+    if geometry is not None:
         geometry.hide = obj.hide
         geometry.hide_render = obj.hide
         effectiveMaterial = materialStack[-1]
+        createTubesAndSpheres(geometry, effectiveMaterial)
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
         geometry.material_slots[0].link = 'OBJECT'
@@ -262,6 +324,8 @@ def createDefaultMaterial():
     mtl.name = 'JReality Default Material'
     mtl.diffuse_color = [0, 0, 1]
     mtl['smoothShading'] = True
+    mtl['drawSpheres'] = True
+    mtl['drawTubes'] = True
     return mtl
         
         
@@ -287,7 +351,7 @@ def createSceneFromXML(scene_file):
         camTag = resolveReference(root, node, cameraPathXpath + "/node[last()]")
         bpy.context.scene.camera = tagToObject[camTag]
     else:
-        print('WARNING: no camera path set')  
+        print('WARNING: no camera path set')
         
 
 def readJRealityScene(scene_file, save_path, render_path):

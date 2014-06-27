@@ -5,8 +5,12 @@ import static de.jreality.scene.data.Attribute.COORDINATES;
 import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
+import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
+import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
+import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
 import static java.lang.Math.PI;
 
 import java.awt.Color;
@@ -131,6 +135,10 @@ public class BlenderTestScene {
 		geometryComponent1.setName("DoubleArrayArray Geometry Component");
 		geometryComponent1.setGeometry(ifsf.getGeometry());
 		MatrixBuilder.euclidean().translate(0, -3, 0).assignTo(geometryComponent1);
+		Appearance tubesAndSpheresApp = new Appearance("Tubes and Spheres Appearance");
+		tubesAndSpheresApp.setAttribute(POINT_SHADER + '.' + SPHERES_DRAW, true);
+		tubesAndSpheresApp.setAttribute(LINE_SHADER + '.' + TUBES_DRAW, true);
+		geometryComponent1.setAppearance(tubesAndSpheresApp);
 		root.addChild(geometryComponent1);
 		
 		IndexedLineSetFactory ilsf = new IndexedLineSetFactory();
