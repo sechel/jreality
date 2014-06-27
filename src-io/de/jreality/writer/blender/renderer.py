@@ -26,7 +26,7 @@ def parseGeometryAttribute(tag, count, isFloat, normalizeTo3Components):
         if isFloat:
             data = [[float(f) for f in dataTag.text.split()] for dataTag in dataTags]
         else:
-            data = [[int(i) for i in dataTag.text.split()] for dataTag in dataTags]    
+            data = [[int(i) for i in dataTag.text.split()] for dataTag in dataTags]
     else:
         if isFloat:
             dataInline = [float(f) for f in tag.text.split()]
@@ -34,12 +34,17 @@ def parseGeometryAttribute(tag, count, isFloat, normalizeTo3Components):
             dataInline = [int(i) for i in tag.text.split()]    
         l = int(len(dataInline) / count);  
         data = [dataInline[i*l : i*l+l] for i in range(0, count)]
-        if normalizeTo3Components:
-            if l > 3: data = [[vi/vec[-1] for vi in vec[0:3]] for vec in data]
-            if l == 2: data = [[vec[0], vec[1], 0.0] for vec in data] 
-            if l == 1: data = [[vec[0], 0.0, 0.0] for vec in data]
+    if normalizeTo3Components:
+        data = [normalizeTo3D(vec) for vec in data]
     return data    
 
+def normalizeTo3D(vec):
+    l = int(len(vec))
+    if l == 4: return [vi/vec[-1] for vi in vec[0:3]]
+    if l == 3: return vec
+    if l == 2: return [vec[0], vec[1], 0.0] 
+    if l == 1: return [vec[0], 0.0, 0.0]
+    return None
 
 def createMesh(tag):
     name = tag.find('name').text;
@@ -109,7 +114,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     # diffuse color
     diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
     if diffuseColorTag is not None: 
-        material.diffuse_color = parseColor(diffuseColorTag.find('awt-color'))
+        awtColorTag = resolveReference(treeRoot, diffuseColorTag.find('awt-color'), rootPath + '/attribute/awt-color');
+        material.diffuse_color = parseColor(awtColorTag)
     else: 
         material.diffuse_color = parentMaterial.diffuse_color
     # smooth/flat shading
