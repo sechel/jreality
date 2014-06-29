@@ -280,6 +280,8 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     bpy.context.scene.objects.link(geomobj)
     geomobj.parent = parentObject
+    geomobj.hide = parentObject.hide
+    geomobj.hide_render = parentObject.hide_render
     tagToObject[tag] = geomobj
     return geomobj
 
@@ -401,7 +403,6 @@ def createTubesAndSpheres(geometryObject, material):
         tubeRadius = material['tubeRadius']
         if tubeRadiiWorldCoordinates:
             tubeRadius /= getWorldScale(geometryObject)
-        tubeRadius /= 2    
         tubesObject = bpy.data.objects.new(name='Edge Tubes', object_data=None)
         tubesObject.parent = geometryObject
         tubesObject.hide = geometryObject.hide
@@ -431,7 +432,7 @@ def createTubesAndSpheres(geometryObject, material):
             tubeObject.hide = geometryObject.hide
             tubeObject.hide_render = geometryObject.hide_render
             tubeObject.matrix_local = T
-            tubeObject.scale = [tubeRadius, tubeRadius, length/2]
+            tubeObject.scale = [radius, radius, length/2]
             bpy.context.scene.objects.link(tubeObject)
             mat = createTubeMaterial(mesh, e.index, material)
             tubeGeometry.materials.append(material)
@@ -466,10 +467,10 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     if material is not None: materialStack.append(material)
     if geometry is not None:
         effectiveMaterial = materialStack[-1]
+        createTubesAndSpheres(geometry, effectiveMaterial)
         showFaces = bool(effectiveMaterial['showFaces'])
         geometry.hide = obj.hide or not showFaces
         geometry.hide_render = obj.hide or not showFaces
-        createTubesAndSpheres(geometry, effectiveMaterial)
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
         geometry.material_slots[0].link = 'OBJECT'

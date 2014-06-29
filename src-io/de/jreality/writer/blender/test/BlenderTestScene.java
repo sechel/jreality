@@ -3,6 +3,7 @@ package de.jreality.writer.blender.test;
 import static de.jreality.scene.data.Attribute.COLORS;
 import static de.jreality.scene.data.Attribute.COORDINATES;
 import static de.jreality.scene.data.Attribute.INDICES;
+import static de.jreality.scene.data.Attribute.RELATIVE_RADII;
 import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.LINE_SHADER;
@@ -36,6 +37,7 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
+import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.RootAppearance;
@@ -168,11 +170,14 @@ public class BlenderTestScene {
 		PointSetFactory psf = new PointSetFactory();
 		psf.setVertexCount(1000);
 		double[][] pointData = new double[1000][];
+		double[] pointRadiusData = new double[1000];
 		Random rnd = new Random(0);
 		for (int i = 0; i < pointData.length; i++) {
 			pointData[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
+			pointRadiusData[i] = rnd.nextGaussian();
 		}
 		psf.setVertexCoordinates(pointData);
+		psf.setVertexRelativeRadii(pointRadiusData);
 		psf.setVertexColors(pointData);
 		psf.update();
 		SceneGraphComponent pointSetRoot = new SceneGraphComponent();
@@ -186,10 +191,13 @@ public class BlenderTestScene {
 		CatenoidHelicoid cat = new CatenoidHelicoid(20);
 		cat.setAlpha(Math.PI/2);
 		double[][] catEdgeColor = new double[cat.getNumEdges()][];
+		double[] catEdgeRadiusData = new double[cat.getNumEdges()];
 		for (int i = 0; i < catEdgeColor.length; i++) {
 			catEdgeColor[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
+			catEdgeRadiusData[i] = rnd.nextGaussian();
 		}
 		cat.setEdgeAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(catEdgeColor));
+		cat.setEdgeAttributes(RELATIVE_RADII, new DoubleArray(catEdgeRadiusData));
 		customGeoemtryRoot.setGeometry(cat);
 		MatrixBuilder.euclidean().translate(0, 0, -4).scale(0.5).assignTo(customGeoemtryRoot);
 		root.addChild(customGeoemtryRoot);
