@@ -7,7 +7,7 @@ import math
 
 tagToObject = {}
 materialStack = []
-
+transformStack = []
 
 def createNURBSSphereData(name):
     bpy.ops.surface.primitive_nurbs_surface_sphere_add()
@@ -106,11 +106,23 @@ def createMesh(tag):
                 colorLayer.data[colorIndex].color = vertexColors[vertexIndex]
                 colorIndex += 1
     
+    # relative point radii
+    vertexRadiiTag = vertexAttributes.find("DataList[@attribute='relativeRadii']")
+    if vertexRadiiTag is not None:
+        vertexRadii = parseGeometryAttribute(vertexRadiiTag, vertexAttributesSize, True, False)
+        mesh['relativePointRadii'] = vertexRadii
+    
     # edge colors
     edgeColorsTag = tag.find("edgeAttributes/DataList[@attribute='colors']")
     if edgeColorsTag is not None:
         edgeColors = parseGeometryAttribute(edgeColorsTag, edgeAttributesSize, True, True)
         mesh['edgeColors'] = edgeColors
+        
+    # relative line radii
+    lineRadiiTag = tag.find("edgeAttributes/DataList[@attribute='relativeRadii']")
+    if lineRadiiTag is not None:
+        lineRadii = parseGeometryAttribute(lineRadiiTag, edgeAttributesSize, True, False)
+        mesh['relativeLineRadii'] = lineRadii           
                 
     # face colors
     faceColorsTag = tag.find("faceAttributes/DataList[@attribute='colors']")
@@ -175,7 +187,28 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
             vertex_colors['Vertex Colors'].active_render = smoothShading
         if 'Face Colors' in vertex_colors:
             vertex_colors['Face Colors'].active = not smoothShading
-            vertex_colors['Face Colors'].active_render = not smoothShading 
+            vertex_colors['Face Colors'].active_render = not smoothShading
+    # point visibility        
+    showPointsTag = tag.find("attribute[@name='showPoints']")
+    if showPointsTag is not None:
+        showPoints = showPointsTag.find('boolean').text == 'true'
+    else:
+        showPoints = parentMaterial['showPoints']
+    material['showPoints'] = showPoints
+    # edge visibility        
+    showLinesTag = tag.find("attribute[@name='showLines']")
+    if showLinesTag is not None:
+        showLines = showLinesTag.find('boolean').text == 'true'
+    else:
+        showLines = parentMaterial['showLines']
+    material['showLines'] = showLines
+    # face visibility        
+    showFacesTag = tag.find("attribute[@name='showFaces']")
+    if showFacesTag is not None:
+        showFaces = showFacesTag.find('boolean').text == 'true'
+    else:
+        showFaces = parentMaterial['showFaces']
+    material['showFaces'] = showFaces  
     # draw spheres        
     spheresDrawTag = tag.find("attribute[@name='pointShader.spheresDraw']")
     if spheresDrawTag is not None:
@@ -197,6 +230,13 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         pointRadius = parentMaterial['sphereRadius']
     material['sphereRadius'] = pointRadius
+    # spheres radii world coordinates   
+    sphereRadiiWorldCoordsTag = tag.find("attribute[@name='pointShader.radiiWorldCoordinates']")
+    if sphereRadiiWorldCoordsTag is not None:
+        sphereRadiiWorldCoords = sphereRadiiWorldCoordsTag.find('boolean').text == 'true'
+    else:
+        sphereRadiiWorldCoords = parentMaterial['pointShader.radiiWorldCoordinates']
+    material['pointShader.radiiWorldCoordinates'] = sphereRadiiWorldCoords     
     # tube radius   
     tubeRadiusTag = tag.find("attribute[@name='lineShader.tubeRadius']")
     if tubeRadiusTag is not None:
@@ -204,6 +244,13 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         tubeRadius = parentMaterial['sphereRadius']
     material['tubeRadius'] = tubeRadius
+    # tubes radii world coordinates   
+    tubeRadiiWorldCoordsTag = tag.find("attribute[@name='lineShader.radiiWorldCoordinates']")
+    if tubeRadiiWorldCoordsTag is not None:
+        tubeRadiiiWorldCoords = tubeRadiiWorldCoordsTag.find('boolean').text == 'true'
+    else:
+        tubeRadiiiWorldCoords = parentMaterial['lineShader.radiiWorldCoordinates']
+    material['lineShader.radiiWorldCoordinates'] = tubeRadiiiWorldCoords    
     # line colors
     lineColorTag = tag.find("attribute[@name='lineShader.diffuseColor']")
     if lineColorTag is not None:
@@ -311,20 +358,37 @@ def createTubeMaterial(mesh, index, parentMaterial):
     return material
 
 
+def getWorldScale(object):
+    T = transformStack[-1]
+    scale = T.decompose()[2][0]
+    return scale
+
+
 def createTubesAndSpheres(geometryObject, material):
     mesh = geometryObject.data
-    if material['drawSpheres'] and mesh.vertices:
+    sphereRadiiWorldCoordinates = material['pointShader.radiiWorldCoordinates']
+    tubeRadiiWorldCoordinates = material['lineShader.radiiWorldCoordinates']
+    if material['drawSpheres'] and material['showPoints'] and mesh.vertices:
         # TODO: respect radii world coordinates flag here and for tubes
         sphereRadius = material['sphereRadius']
+        if sphereRadiiWorldCoordinates:
+            sphereRadius /= getWorldScale(geometryObject)
         spheresObject = bpy.data.objects.new(name='Vertex Spheres', object_data=None)
         spheresObject.parent = geometryObject
+        spheresObject.hide = geometryObject.hide
+        spheresObject.hide_render = geometryObject.hide_render 
         bpy.context.scene.objects.link(spheresObject)
         sphereGeometry = createNURBSSphereData('NURBS Sphere')
         for v in mesh.vertices:
+            radius = sphereRadius
+            if 'relativePointRadii' in mesh:
+                radius *= mesh['relativePointRadii'][v.index][0]
             sphereObject = bpy.data.objects.new(name='Sphere', object_data=sphereGeometry)
             sphereObject.parent = spheresObject
+            sphereObject.hide = geometryObject.hide
+            sphereObject.hide_render = geometryObject.hide_render
             sphereObject.location = v.co
-            sphereObject.scale = [sphereRadius, sphereRadius, sphereRadius]
+            sphereObject.scale = [radius, radius, radius]
             bpy.context.scene.objects.link(sphereObject)
             mat = createSphereMaterial(mesh, v.index, material)
             sphereGeometry.materials.append(mat)
@@ -333,13 +397,21 @@ def createTubesAndSpheres(geometryObject, material):
             if len(sphereGeometry.materials) > 1: 
                 sphereGeometry.materials.pop()
             sphereGeometry.materials[0] = None
-    if material['drawTubes'] and mesh.edges:
+    if material['drawTubes'] and material['showLines'] and mesh.edges:
         tubeRadius = material['tubeRadius']
+        if tubeRadiiWorldCoordinates:
+            tubeRadius /= getWorldScale(geometryObject)
+        tubeRadius /= 2    
         tubesObject = bpy.data.objects.new(name='Edge Tubes', object_data=None)
         tubesObject.parent = geometryObject
+        tubesObject.hide = geometryObject.hide
+        tubesObject.hide_render = geometryObject.hide_render 
         bpy.context.scene.objects.link(tubesObject)
         tubeGeometry = createNURBSCylinderData('NURBS Cylinder')
         for e in mesh.edges:
+            radius = tubeRadius
+            if 'relativeLineRadii' in mesh:
+                radius *= mesh['relativeLineRadii'][e.index][0]
             v0 = mesh.vertices[e.vertices[0]].co
             v1 = mesh.vertices[e.vertices[1]].co  
             mid = (v0 + v1) / 2
@@ -356,6 +428,8 @@ def createTubesAndSpheres(geometryObject, material):
             T[2][3] = mid[2]
             tubeObject = bpy.data.objects.new(name='Tube', object_data=tubeGeometry)
             tubeObject.parent = tubesObject
+            tubeObject.hide = geometryObject.hide
+            tubeObject.hide_render = geometryObject.hide_render
             tubeObject.matrix_local = T
             tubeObject.scale = [tubeRadius, tubeRadius, length/2]
             bpy.context.scene.objects.link(tubeObject)
@@ -381,6 +455,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     trafo = tag.find('transformation/matrix')
     if trafo != None:
         obj.matrix_local = parseMatrix(trafo)
+    transformStack.append(transformStack[-1] * obj.matrix_local)   
     bpy.context.scene.objects.link(obj)
     if parentObject != None :
         obj.parent = parentObject
@@ -390,9 +465,10 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1], geometry);
     if material is not None: materialStack.append(material)
     if geometry is not None:
-        geometry.hide = obj.hide
-        geometry.hide_render = obj.hide
         effectiveMaterial = materialStack[-1]
+        showFaces = bool(effectiveMaterial['showFaces'])
+        geometry.hide = obj.hide or not showFaces
+        geometry.hide_render = obj.hide or not showFaces
         createTubesAndSpheres(geometry, effectiveMaterial)
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
@@ -405,7 +481,8 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
         path = rootPath + '/children/child[' + str(counter) + ']'
         counter += 1
         createObjectFromXML(treeRoot, child, path, obj, visible);
-    if material is not None: materialStack.pop()  
+    if material is not None: materialStack.pop() 
+    transformStack.pop() 
     return obj    
 
 
@@ -425,13 +502,18 @@ def createDefaultMaterial():
     mtl = bpy.data.materials[0]
     mtl.name = 'JReality Default Material'
     mtl.diffuse_color = [0, 0, 1]
+    mtl['showPoints'] = True
+    mtl['showLines'] = True
+    mtl['showFaces'] = True
     mtl['smoothShading'] = True
     mtl['drawSpheres'] = True
     mtl['pointShader.diffuseColor'] = [0.0, 0.0, 1.0]
+    mtl['pointShader.radiiWorldCoordinates'] = False
     mtl['sphereRadius'] = 0.025
     mtl['drawTubes'] = True
     mtl['tubeRadius'] = 0.025
     mtl['lineShader.diffuseColor'] = [0.0, 0.0, 1.0]
+    mtl['lineShader.radiiWorldCoordinates'] = False
     return mtl
         
         
@@ -441,6 +523,7 @@ def createSceneFromXML(scene_file):
     root = sceneTree.getroot()
     # traverse scene xml
     materialStack.append(createDefaultMaterial())
+    transformStack.append(Matrix.Identity(4))
     rootObject = createObjectFromXML(root, root[0], './sceneRoot', None, True)
     # create coordinate conversion root
     sceneObject = bpy.data.objects.new('JReality Scene', None)
@@ -450,9 +533,9 @@ def createSceneFromXML(scene_file):
     rootObject.parent = sceneObject;
     # find active camera
     cameraPath = root.find("scenePaths/path[@name='cameraPath']")
-    cameraPathXpath = resolveReferencePath(root, cameraPath, "./scenePaths/path[@name='cameraPath']")
-    cameraPath = resolveReference(root, cameraPath, "./scenePaths/path[@name='cameraPath']")
     if cameraPath != None:
+        cameraPathXpath = resolveReferencePath(root, cameraPath, "./scenePaths/path[@name='cameraPath']")
+        cameraPath = resolveReference(root, cameraPath, "./scenePaths/path[@name='cameraPath']")
         node = cameraPath.find('node[last()]')
         camTag = resolveReference(root, node, cameraPathXpath + "/node[last()]")
         bpy.context.scene.camera = tagToObject[camTag]

@@ -24,4 +24,4 @@
 **/DeviceSpacenav.java
 **/WiiMoteOSC.java
 **/OSCPool.java
-**/BlenderTestScene.java
+**/blender/test/**

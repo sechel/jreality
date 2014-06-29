@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -60,12 +61,16 @@ public class BlenderConnection {
 			while ((bIn = in.read()) != -1) {
 				System.out.write(bIn);
 			}
+			StringWriter sw = new StringWriter();
 			while ((bIn = err.read()) != -1) {
 				System.err.write(bIn);
+				sw.write(bIn);
 			}
 			p.waitFor();
-		} catch (IOException e) {
-			e.printStackTrace();
+			String errString = sw.getBuffer().toString();
+			if (!errString.isEmpty()) {
+				throw new RuntimeException(errString);
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

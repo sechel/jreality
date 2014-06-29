@@ -1,4 +1,4 @@
-package de.jreality.writer.blender;
+package de.jreality.writer.blender.test;
 
 import static de.jreality.scene.data.Attribute.COLORS;
 import static de.jreality.scene.data.Attribute.COORDINATES;
@@ -41,6 +41,7 @@ import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.writer.WriterJRS;
+import de.jreality.writer.blender.BlenderConnection;
 
 public class BlenderTestScene {
 
