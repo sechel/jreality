@@ -6,11 +6,13 @@ import static de.jreality.scene.data.Attribute.INDICES;
 import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.POINT_RADIUS;
 import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
 import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
+import static de.jreality.shader.CommonAttributes.TUBE_RADIUS;
 import static java.lang.Math.PI;
 
 import java.awt.Color;
@@ -26,7 +28,6 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
@@ -35,13 +36,8 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Viewer;
-import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DoubleArrayArray;
-import de.jreality.scene.data.IntArray;
 import de.jreality.scene.data.IntArrayArray;
-import de.jreality.scene.data.StorageModel;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.writer.WriterJRS;
@@ -53,6 +49,7 @@ public class BlenderTestScene {
 		root.setName("Scene Root");
 		Appearance rootAppearance = new Appearance("Root Appearance");
 		rootAppearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.8f, 0.4f, 0.6f));
+		rootAppearance.setAttribute(LINE_SHADER + "." + DIFFUSE_COLOR, new Color(1.0f, 1.0f, 1.0f));
 		rootAppearance.setName("Root Appearance");
 		RootAppearance rootApp = ShaderUtility.createRootAppearance(rootAppearance);
 		rootApp.setBackgroundColor(new Color(0.8f, 0.9f, 0.7f));
@@ -84,6 +81,7 @@ public class BlenderTestScene {
 		SceneGraphComponent cameraRoot = new SceneGraphComponent();
 		cameraRoot.setName("Camera Root");
 		Camera cam = new Camera("My Camera");
+		cam.setFieldOfView(30);
 		cam.setOrientationMatrix(MatrixBuilder.euclidean().translate(0, 3, 8).rotateX(-0.3).getArray());
 		cameraRoot.setCamera(cam);
 		root.addChild(cameraRoot);
@@ -127,6 +125,9 @@ public class BlenderTestScene {
 			{0,1},
 			{2,3}
 		});
+		ifsf.setEdgeColors(new double[][]{
+			{0.3,1.0,0.6}, {0.2,1.0,0.3}	
+		});
 		ifsf.setFaceIndices(new int[][]{
 			{0,1,2,3}
 		});
@@ -137,7 +138,9 @@ public class BlenderTestScene {
 		MatrixBuilder.euclidean().translate(0, -3, 0).assignTo(geometryComponent1);
 		Appearance tubesAndSpheresApp = new Appearance("Tubes and Spheres Appearance");
 		tubesAndSpheresApp.setAttribute(POINT_SHADER + '.' + SPHERES_DRAW, true);
+		tubesAndSpheresApp.setAttribute(POINT_SHADER + '.' + POINT_RADIUS, 0.1);
 		tubesAndSpheresApp.setAttribute(LINE_SHADER + '.' + TUBES_DRAW, true);
+		tubesAndSpheresApp.setAttribute(LINE_SHADER + '.' + TUBE_RADIUS, 0.05);
 		geometryComponent1.setAppearance(tubesAndSpheresApp);
 		root.addChild(geometryComponent1);
 		
@@ -153,6 +156,7 @@ public class BlenderTestScene {
 			}
 		}
 		ilsf.setVertexCoordinates(vertData);
+		ilsf.setVertexColors(vertData);
 		ilsf.setEdgeIndices(indexData);
 		ilsf.update();
 		SceneGraphComponent lineSetObject = new SceneGraphComponent();
@@ -168,6 +172,7 @@ public class BlenderTestScene {
 			pointData[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
 		}
 		psf.setVertexCoordinates(pointData);
+		psf.setVertexColors(pointData);
 		psf.update();
 		SceneGraphComponent pointSetRoot = new SceneGraphComponent();
 		MatrixBuilder.euclidean().translate(-3, 0, 0).assignTo(pointSetRoot);
@@ -179,6 +184,11 @@ public class BlenderTestScene {
 		customGeoemtryRoot.setName("Custom Geometry Component");
 		CatenoidHelicoid cat = new CatenoidHelicoid(20);
 		cat.setAlpha(Math.PI/2);
+		double[][] catEdgeColor = new double[cat.getNumEdges()][];
+		for (int i = 0; i < catEdgeColor.length; i++) {
+			catEdgeColor[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
+		}
+		cat.setEdgeAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(catEdgeColor));
 		customGeoemtryRoot.setGeometry(cat);
 		MatrixBuilder.euclidean().translate(0, 0, -4).scale(0.5).assignTo(customGeoemtryRoot);
 		root.addChild(customGeoemtryRoot);

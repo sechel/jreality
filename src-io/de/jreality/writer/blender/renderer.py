@@ -1,5 +1,6 @@
 import bpy
 from mathutils import Matrix
+from mathutils import Vector
 from mathutils import Euler
 import xml.etree.ElementTree as ET
 import math
@@ -33,7 +34,8 @@ def parseMatrix(tag):
     return Matrix((mm[0:4], mm[4:8], mm[8:12], mm[12:16]))
 
 
-def parseColor(tag):
+def parseColor(treeRoot, tag, rootPath):
+    tag = resolveReference(treeRoot, tag, rootPath);
     r = float(tag.find('red').text) / 255.0
     g = float(tag.find('green').text) / 255.0
     b = float(tag.find('blue').text) / 255.0
@@ -96,17 +98,25 @@ def createMesh(tag):
     vertexColorsTag = vertexAttributes.find("DataList[@attribute='colors']")
     if vertexColorsTag is not None:
         vertexColors = parseGeometryAttribute(vertexColorsTag, vertexAttributesSize, True, True)
+        mesh['vertexColors'] = vertexColors
         colorLayer = mesh.vertex_colors.new(name='Vertex Colors')
         colorIndex = 0
         for poly in mesh.polygons:
             for vertexIndex in poly.vertices:
                 colorLayer.data[colorIndex].color = vertexColors[vertexIndex]
                 colorIndex += 1
+    
+    # edge colors
+    edgeColorsTag = tag.find("edgeAttributes/DataList[@attribute='colors']")
+    if edgeColorsTag is not None:
+        edgeColors = parseGeometryAttribute(edgeColorsTag, edgeAttributesSize, True, True)
+        mesh['edgeColors'] = edgeColors
                 
     # face colors
     faceColorsTag = tag.find("faceAttributes/DataList[@attribute='colors']")
     if faceColorsTag is not None:
         faceColors = parseGeometryAttribute(faceColorsTag, faceAttributesSize, True, True)
+        mesh['faceColors'] = faceColors
         colorLayer = mesh.vertex_colors.new(name='Face Colors')
         colorIndex = 0
         faceIndex = 0
@@ -116,6 +126,17 @@ def createMesh(tag):
                 colorIndex += 1 
             faceIndex += 1                   
     return mesh
+
+
+def parseCustomMaterialAttribute(tag, attribute, parentMaterial, type):
+    attributeTag = tag.find("attribute[@name='" + attribute + "']")
+    if attributeTag is not None:
+        if type == 'BOOL':
+            return spheresDrawTag.find('boolean').text == true
+        else:
+            spheresDrawTag.find('boolean').text
+    else:
+        return parentMaterial[attribute]
 
 
 def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
@@ -130,13 +151,13 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
             name = "Vertex Paint Material"
     else: 
         name = nameTag.text
-    material = bpy.data.materials.new(name)
+    material = parentMaterial.copy()
+    material.name = name
     material.use_vertex_color_paint = bool(vertex_colors)
     # diffuse color
     diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
     if diffuseColorTag is not None: 
-        awtColorTag = resolveReference(treeRoot, diffuseColorTag.find('awt-color'), rootPath + '/attribute/awt-color');
-        material.diffuse_color = parseColor(awtColorTag)
+        material.diffuse_color = parseColor(treeRoot, diffuseColorTag.find('awt-color'), rootPath + "/attribute[@name='polygonShader.diffuseColor']/awt-color")
     else: 
         material.diffuse_color = parentMaterial.diffuse_color
     # smooth/flat shading
@@ -145,7 +166,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         smoothShading = smoothShadingTag.find('boolean').text == 'true'
     else:
         smoothShading = parentMaterial['smoothShading']
-    material['smoothShading'] = smoothShading        
+    material['smoothShading'] = smoothShading     
+    # choose vertex color channel   
     if vertex_colors is not None:    
         # TODO: does not work correctly with shared geometry
         if 'Vertex Colors' in vertex_colors:
@@ -154,18 +176,48 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         if 'Face Colors' in vertex_colors:
             vertex_colors['Face Colors'].active = not smoothShading
             vertex_colors['Face Colors'].active_render = not smoothShading 
+    # draw spheres        
     spheresDrawTag = tag.find("attribute[@name='pointShader.spheresDraw']")
     if spheresDrawTag is not None:
         spheresDraw = spheresDrawTag.find('boolean').text == 'true'
     else:
         spheresDraw = parentMaterial['drawSpheres']
     material['drawSpheres'] = spheresDraw
+    # draw tubes
     tubesDrawTag = tag.find("attribute[@name='lineShader.tubeDraw']")
     if tubesDrawTag is not None:
         tubesDraw = tubesDrawTag.find('boolean').text == 'true'
     else:
         tubesDraw = parentMaterial['drawTubes']
-    material['drawTubes'] = tubesDraw    
+    material['drawTubes'] = tubesDraw  
+    # sphere radius
+    pointRadiusTag = tag.find("attribute[@name='pointShader.pointRadius']")
+    if pointRadiusTag is not None:
+        pointRadius = float(pointRadiusTag.find('double').text)
+    else:
+        pointRadius = parentMaterial['sphereRadius']
+    material['sphereRadius'] = pointRadius
+    # tube radius   
+    tubeRadiusTag = tag.find("attribute[@name='lineShader.tubeRadius']")
+    if tubeRadiusTag is not None:
+        tubeRadius = float(tubeRadiusTag.find('double').text)
+    else:
+        tubeRadius = parentMaterial['sphereRadius']
+    material['tubeRadius'] = tubeRadius
+    # line colors
+    lineColorTag = tag.find("attribute[@name='lineShader.diffuseColor']")
+    if lineColorTag is not None:
+        tubeColor = parseColor(treeRoot, lineColorTag.find('awt-color'), rootPath + "/attribute[@name='lineShader.diffuseColor']/awt-color")
+    else:
+        tubeColor = parentMaterial['lineShader.diffuseColor']
+    material['lineShader.diffuseColor'] = tubeColor
+    # line colors
+    pointColorTag = tag.find("attribute[@name='pointShader.diffuseColor']")
+    if pointColorTag is not None:
+        sphereColor = parseColor(treeRoot, pointColorTag.find('awt-color'), rootPath + "/attribute[@name='pointShader.diffuseColor']/awt-color")
+    else:
+        sphereColor = parentMaterial['pointShader.diffuseColor']
+    material['pointShader.diffuseColor'] = sphereColor    
     return material
 
 
@@ -228,7 +280,7 @@ def createLight(treeRoot, tag, rootPath, parentObject):
             light = bpy.data.lamps.new(name, 'HEMI')     
         else:
             light = bpy.data.lamps.new(name, 'POINT')
-        light.color = parseColor(tag.find('color'))
+        light.color = parseColor(treeRoot, tag.find('color'), rootPath + '/color')
         light.energy = float(tag.find('intensity').text)
     lightobj = bpy.data.objects.new(name=name, object_data = light)
     lightobj.parent = parentObject
@@ -237,9 +289,33 @@ def createLight(treeRoot, tag, rootPath, parentObject):
     return lightobj
 
 
+def createSphereMaterial(mesh, index, parentMaterial):
+    material = parentMaterial.copy()
+    material.name = 'Vertex Color'
+    material.use_vertex_color_paint = False
+    if 'vertexColors' in mesh:
+        material.diffuse_color = mesh['vertexColors'][index]
+    else: 
+        material.diffuse_color = material['pointShader.diffuseColor']
+    return material
+
+
+def createTubeMaterial(mesh, index, parentMaterial):
+    material = parentMaterial.copy()
+    material.name = 'Edge Color'
+    material.use_vertex_color_paint = False
+    if 'edgeColors' in mesh:
+        material.diffuse_color = mesh['edgeColors'][index]
+    else:
+        material.diffuse_color = material['lineShader.diffuseColor']
+    return material
+
+
 def createTubesAndSpheres(geometryObject, material):
     mesh = geometryObject.data
-    if material['drawSpheres']:
+    if material['drawSpheres'] and mesh.vertices:
+        # TODO: respect radii world coordinates flag here and for tubes
+        sphereRadius = material['sphereRadius']
         spheresObject = bpy.data.objects.new(name='Vertex Spheres', object_data=None)
         spheresObject.parent = geometryObject
         bpy.context.scene.objects.link(spheresObject)
@@ -248,22 +324,48 @@ def createTubesAndSpheres(geometryObject, material):
             sphereObject = bpy.data.objects.new(name='Sphere', object_data=sphereGeometry)
             sphereObject.parent = spheresObject
             sphereObject.location = v.co
-            sphereObject.scale = [0.1,0.1,0.1]
+            sphereObject.scale = [sphereRadius, sphereRadius, sphereRadius]
             bpy.context.scene.objects.link(sphereObject)
-    if material['drawTubes']:
+            mat = createSphereMaterial(mesh, v.index, material)
+            sphereGeometry.materials.append(mat)
+            sphereObject.material_slots[0].link = 'OBJECT'
+            sphereObject.material_slots[0].material = mat
+            if len(sphereGeometry.materials) > 1: 
+                sphereGeometry.materials.pop()
+            sphereGeometry.materials[0] = None
+    if material['drawTubes'] and mesh.edges:
+        tubeRadius = material['tubeRadius']
         tubesObject = bpy.data.objects.new(name='Edge Tubes', object_data=None)
         tubesObject.parent = geometryObject
         bpy.context.scene.objects.link(tubesObject)
         tubeGeometry = createNURBSCylinderData('NURBS Cylinder')
         for e in mesh.edges:
-            v0 = e.vertices[0]
-            v1 = e.vertices[1]  
-            length = v0      
+            v0 = mesh.vertices[e.vertices[0]].co
+            v1 = mesh.vertices[e.vertices[1]].co  
+            mid = (v0 + v1) / 2
+            length = (v0 - v1).length
+            targetZ = (v0 - v1).normalized()
+            seed = Vector([[1, 0, 0],[0, 1, 0]][targetZ[0] != 0])
+            targetX = targetZ.cross(seed).normalized()
+            targetY = targetX.cross(targetZ)
+            T = Matrix([targetX, targetY, targetZ])
+            T.transpose()
+            T.resize_4x4()
+            T[0][3] = mid[0] 
+            T[1][3] = mid[1]
+            T[2][3] = mid[2]
             tubeObject = bpy.data.objects.new(name='Tube', object_data=tubeGeometry)
             tubeObject.parent = tubesObject
-            tubeObject.location = v.co
-            tubeObject.scale = [0.2,0.2,0.2]
+            tubeObject.matrix_local = T
+            tubeObject.scale = [tubeRadius, tubeRadius, length/2]
             bpy.context.scene.objects.link(tubeObject)
+            mat = createTubeMaterial(mesh, e.index, material)
+            tubeGeometry.materials.append(material)
+            tubeObject.material_slots[0].link = 'OBJECT'
+            tubeObject.material_slots[0].material = mat
+            if len(tubeGeometry.materials) > 1: 
+                tubeGeometry.materials.pop()
+            tubeGeometry.materials[0] = None
     
 def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     tag = resolveReference(treeRoot, tag, rootPath);
@@ -325,7 +427,11 @@ def createDefaultMaterial():
     mtl.diffuse_color = [0, 0, 1]
     mtl['smoothShading'] = True
     mtl['drawSpheres'] = True
+    mtl['pointShader.diffuseColor'] = [0.0, 0.0, 1.0]
+    mtl['sphereRadius'] = 0.025
     mtl['drawTubes'] = True
+    mtl['tubeRadius'] = 0.025
+    mtl['lineShader.diffuseColor'] = [0.0, 0.0, 1.0]
     return mtl
         
         
