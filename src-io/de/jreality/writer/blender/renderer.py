@@ -4,6 +4,8 @@ from mathutils import Vector
 from mathutils import Euler
 import xml.etree.ElementTree as ET
 import math
+import zlib
+import base64
 
 tagToObject = {}
 materialStack = []
@@ -136,7 +138,21 @@ def createMesh(tag):
             for vertexIndex in poly.vertices:
                 colorLayer.data[colorIndex].color = faceColors[faceIndex]
                 colorIndex += 1 
-            faceIndex += 1                   
+            faceIndex += 1   
+            
+    # texture coordinates
+    textureCoordinatesTag = vertexAttributes.find("DataList[@attribute='texture coordinates']")
+    if textureCoordinatesTag is not None:
+        textureCoordinates = parseGeometryAttribute(textureCoordinatesTag, vertexAttributesSize, True, True)
+        mesh['texture coordinates'] = textureCoordinates
+        uvTexture = mesh.uv_textures.new(name='Texture Coordinates')
+        uvLayer = mesh.uv_layers['Texture Coordinates']
+        coordIndex = 0
+        for poly in mesh.polygons:
+            for vertexIndex in poly.vertices:
+                uvLayer.data[coordIndex].uv = textureCoordinates[vertexIndex][0:2]
+                coordIndex += 1
+                    
     return mesh
 
 
@@ -180,7 +196,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         smoothShading = smoothShadingTag.find('boolean').text == 'true'
     else:
         smoothShading = parentMaterial['smoothShading']
-    material['smoothShading'] = smoothShading     
+    material['smoothShading'] = smoothShading
     
     # choose vertex color channel   
     if vertex_colors is not None:    
@@ -304,7 +320,24 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     if backgroundColorTag is not None:
         backgroundColor = parseColor(treeRoot, backgroundColorTag.find('awt-color'), rootPath + "/attribute[@name='backgroundColor']/awt-color")
         bpy.context.scene.world.horizon_color = backgroundColor
-
+        
+    # texture
+    textureImageTag = tag.find("attribute[@name='polygonShader.texture2d:image']")
+    if textureImageTag is not None:
+        imageDataTag = textureImageTag.find('ImageData')
+        imageDataTag = resolveReference(treeRoot, imageDataTag, rootPath + "/attribute[@name='polygonShader.texture2d:image']/ImageData")
+        imageWidth = int(imageDataTag.get('width'))
+        imageHeight = int(imageDataTag.get('height'))
+        imageString = base64.b64decode(imageDataTag.text)
+        imageDataByte = zlib.decompress(imageString)
+        imageDataFloat = [b/255.0 for b in imageDataByte]
+        texture = bpy.data.textures.new(name=name + ' Texture', type='IMAGE')
+        material.texture_slots[0].texture = texture
+        image = bpy.data.images.new(name=name + ' Image', width=imageWidth, height=imageHeight, alpha=True, float_buffer=False)
+        image.pixels = imageDataFloat
+        texture.image = image
+        image.pack(as_png=True)
+        
     return material
 
 

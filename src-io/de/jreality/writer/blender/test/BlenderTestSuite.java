@@ -36,10 +36,10 @@ public class BlenderTestSuite {
 //		exportScene("geometry02.jrs");
 //	}
 
-	@Test
-	public void testGeometry03() throws Exception {
-		exportScene("geometry03.jrs");
-	}
+//	@Test
+//	public void testGeometry03() throws Exception {
+//		exportScene("geometry03.jrs");
+//	}
 	
 	@Test
 	public void testManyFeatures01() throws Exception {
