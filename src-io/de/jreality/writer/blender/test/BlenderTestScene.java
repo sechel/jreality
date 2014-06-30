@@ -274,7 +274,7 @@ public class BlenderTestScene {
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
-		Viewer v = JRViewer.display(root);
+//		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
 		JrScene scene = new JrScene(root);

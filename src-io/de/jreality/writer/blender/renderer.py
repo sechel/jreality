@@ -10,6 +10,8 @@ import base64
 tagToObject = {}
 materialStack = []
 transformStack = []
+sphereMaterials = {}
+tubeMaterials = {}
 
 def createNURBSSphereData(name):
     bpy.ops.surface.primitive_nurbs_surface_sphere_add()
@@ -335,8 +337,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         material.texture_slots[0].texture = texture
         image = bpy.data.images.new(name=name + ' Image', width=imageWidth, height=imageHeight, alpha=True, float_buffer=False)
         image.pixels = imageDataFloat
-        texture.image = image
         image.pack(as_png=True)
+        texture.image = image
         
     return material
 
@@ -412,26 +414,38 @@ def createLight(treeRoot, tag, rootPath, parentObject):
 
 
 def createSphereMaterial(mesh, index, parentMaterial):
-    material = parentMaterial.copy()
-    material.name = 'Vertex Color'
-    material.use_vertex_color_paint = False
     if 'vertexColors' in mesh:
+        material = parentMaterial.copy()
+        material.name = parentMaterial.name + ' Sphere Color'
         material.diffuse_color = mesh['vertexColors'][index]
     else: 
-        material.diffuse_color = material['pointShader.diffuseColor']
+        if parentMaterial.name in sphereMaterials:
+            return sphereMaterials[parentMaterial.name]
+        else:
+            material = parentMaterial.copy()
+            material.name = parentMaterial.name + ' Spheres'
+            material.diffuse_color = material['pointShader.diffuseColor']
+            sphereMaterials[parentMaterial.name] = material
     material.use_transparency = not parentMaterial['opaqueTubesAndSpheres']
+    material.use_vertex_color_paint = False
     return material
 
 
 def createTubeMaterial(mesh, index, parentMaterial):
-    material = parentMaterial.copy()
-    material.name = 'Edge Color'
-    material.use_vertex_color_paint = False
     if 'edgeColors' in mesh:
+        material = parentMaterial.copy()
+        material.name = parentMaterial.name + ' Tube Color'
         material.diffuse_color = mesh['edgeColors'][index]
     else:
-        material.diffuse_color = material['lineShader.diffuseColor']
+        if parentMaterial.name in tubeMaterials:
+            return tubeMaterials[parentMaterial.name]
+        else:
+            material = parentMaterial.copy()
+            material.name = parentMaterial.name + ' Tubes'
+            material.diffuse_color = material['lineShader.diffuseColor']
+            tubeMaterials[parentMaterial.name] = material
     material.use_transparency = not parentMaterial['opaqueTubesAndSpheres']
+    material.use_vertex_color_paint = False
     return material
 
 
@@ -647,6 +661,10 @@ def readJRealityScene(scene_file, save_path, render_path):
         bpy.ops.render.render(write_still=True)
 
 
+def checkBlenderVersion():
+    version = bpy.app.version
+    return version[0] == 2 and version[1] >= 70
+
 def main():
     import sys
     import argparse
@@ -665,6 +683,10 @@ def main():
     args = parser.parse_args(argv)  # In this example we wont use the args
     if not argv:
         parser.print_help()
+        return
+    
+    if not checkBlenderVersion():
+        sys.stderr.write('JReality blender export needs blender version 2.70 or newer')
         return
     readJRealityScene(args.scene_path, args.save_path, args.render_path)
 
