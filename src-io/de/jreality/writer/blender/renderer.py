@@ -166,12 +166,14 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     material = parentMaterial.copy()
     material.name = name
     material.use_vertex_color_paint = bool(vertex_colors)
+    
     # diffuse color
     diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
     if diffuseColorTag is not None: 
         material.diffuse_color = parseColor(treeRoot, diffuseColorTag.find('awt-color'), rootPath + "/attribute[@name='polygonShader.diffuseColor']/awt-color")
     else: 
         material.diffuse_color = parentMaterial.diffuse_color
+        
     # smooth/flat shading
     smoothShadingTag = tag.find("attribute[@name='polygonShader.smoothShading']")
     if smoothShadingTag is not None:
@@ -179,6 +181,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         smoothShading = parentMaterial['smoothShading']
     material['smoothShading'] = smoothShading     
+    
     # choose vertex color channel   
     if vertex_colors is not None:    
         # TODO: does not work correctly with shared geometry
@@ -188,6 +191,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         if 'Face Colors' in vertex_colors:
             vertex_colors['Face Colors'].active = not smoothShading
             vertex_colors['Face Colors'].active_render = not smoothShading
+            
     # point visibility        
     showPointsTag = tag.find("attribute[@name='showPoints']")
     if showPointsTag is not None:
@@ -195,6 +199,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         showPoints = parentMaterial['showPoints']
     material['showPoints'] = showPoints
+    
     # edge visibility        
     showLinesTag = tag.find("attribute[@name='showLines']")
     if showLinesTag is not None:
@@ -202,6 +207,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         showLines = parentMaterial['showLines']
     material['showLines'] = showLines
+    
     # face visibility        
     showFacesTag = tag.find("attribute[@name='showFaces']")
     if showFacesTag is not None:
@@ -222,7 +228,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         tubesDraw = tubesDrawTag.find('boolean').text == 'true'
     else:
         tubesDraw = parentMaterial['drawTubes']
-    material['drawTubes'] = tubesDraw  
+    material['drawTubes'] = tubesDraw 
+     
     # sphere radius
     pointRadiusTag = tag.find("attribute[@name='pointShader.pointRadius']")
     if pointRadiusTag is not None:
@@ -230,13 +237,15 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         pointRadius = parentMaterial['sphereRadius']
     material['sphereRadius'] = pointRadius
+    
     # spheres radii world coordinates   
     sphereRadiiWorldCoordsTag = tag.find("attribute[@name='pointShader.radiiWorldCoordinates']")
     if sphereRadiiWorldCoordsTag is not None:
         sphereRadiiWorldCoords = sphereRadiiWorldCoordsTag.find('boolean').text == 'true'
     else:
         sphereRadiiWorldCoords = parentMaterial['pointShader.radiiWorldCoordinates']
-    material['pointShader.radiiWorldCoordinates'] = sphereRadiiWorldCoords     
+    material['pointShader.radiiWorldCoordinates'] = sphereRadiiWorldCoords  
+       
     # tube radius   
     tubeRadiusTag = tag.find("attribute[@name='lineShader.tubeRadius']")
     if tubeRadiusTag is not None:
@@ -244,13 +253,15 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         tubeRadius = parentMaterial['sphereRadius']
     material['tubeRadius'] = tubeRadius
+    
     # tubes radii world coordinates   
     tubeRadiiWorldCoordsTag = tag.find("attribute[@name='lineShader.radiiWorldCoordinates']")
     if tubeRadiiWorldCoordsTag is not None:
         tubeRadiiiWorldCoords = tubeRadiiWorldCoordsTag.find('boolean').text == 'true'
     else:
         tubeRadiiiWorldCoords = parentMaterial['lineShader.radiiWorldCoordinates']
-    material['lineShader.radiiWorldCoordinates'] = tubeRadiiiWorldCoords    
+    material['lineShader.radiiWorldCoordinates'] = tubeRadiiiWorldCoords  
+      
     # line colors
     lineColorTag = tag.find("attribute[@name='lineShader.diffuseColor']")
     if lineColorTag is not None:
@@ -258,13 +269,42 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         tubeColor = parentMaterial['lineShader.diffuseColor']
     material['lineShader.diffuseColor'] = tubeColor
-    # line colors
+    
+    # point colors
     pointColorTag = tag.find("attribute[@name='pointShader.diffuseColor']")
     if pointColorTag is not None:
         sphereColor = parseColor(treeRoot, pointColorTag.find('awt-color'), rootPath + "/attribute[@name='pointShader.diffuseColor']/awt-color")
     else:
         sphereColor = parentMaterial['pointShader.diffuseColor']
-    material['pointShader.diffuseColor'] = sphereColor    
+    material['pointShader.diffuseColor'] = sphereColor 
+    
+    # transparency
+    faceTransparencyTag = tag.find("attribute[@name='polygonShader.transparency']")
+    if faceTransparencyTag is not None:
+        faceTransparency = float(faceTransparencyTag.find('double').text)
+    else:
+        faceTransparency = 1 - parentMaterial.alpha
+    transparencyEnabledTag = tag.find("attribute[@name='transparencyEnabled']")
+    if transparencyEnabledTag is not None:
+        transparencyEnabled = transparencyEnabledTag.find('boolean').text == 'true'
+    else:
+        transparencyEnabled = parentMaterial.use_transparency
+    opaqueTubesAndSpheresTag = tag.find("attribute[@name='opaqueTubesAndSpheres']")
+    if opaqueTubesAndSpheresTag is not None:
+        opaqueTubesAndSpheres = opaqueTubesAndSpheresTag.find('boolean').text == 'true'
+    else:
+        opaqueTubesAndSpheres = parentMaterial['opaqueTubesAndSpheres']    
+    material.alpha = 1 - faceTransparency
+    material.use_transparency = transparencyEnabled
+    material.transparency_method = 'RAYTRACE'
+    material['opaqueTubesAndSpheres'] = opaqueTubesAndSpheres
+    
+    # global background color
+    backgroundColorTag = tag.find("attribute[@name='backgroundColor']")
+    if backgroundColorTag is not None:
+        backgroundColor = parseColor(treeRoot, backgroundColorTag.find('awt-color'), rootPath + "/attribute[@name='backgroundColor']/awt-color")
+        bpy.context.scene.world.horizon_color = backgroundColor
+
     return material
 
 
@@ -346,6 +386,7 @@ def createSphereMaterial(mesh, index, parentMaterial):
         material.diffuse_color = mesh['vertexColors'][index]
     else: 
         material.diffuse_color = material['pointShader.diffuseColor']
+    material.use_transparency = not parentMaterial['opaqueTubesAndSpheres']
     return material
 
 
@@ -357,6 +398,7 @@ def createTubeMaterial(mesh, index, parentMaterial):
         material.diffuse_color = mesh['edgeColors'][index]
     else:
         material.diffuse_color = material['lineShader.diffuseColor']
+    material.use_transparency = not parentMaterial['opaqueTubesAndSpheres']
     return material
 
 
@@ -515,6 +557,7 @@ def createDefaultMaterial():
     mtl['tubeRadius'] = 0.025
     mtl['lineShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['lineShader.radiiWorldCoordinates'] = False
+    mtl['opaqueTubesAndSpheres'] = False
     return mtl
         
         

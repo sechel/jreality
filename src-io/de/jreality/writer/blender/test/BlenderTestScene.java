@@ -7,13 +7,17 @@ import static de.jreality.scene.data.Attribute.RELATIVE_RADII;
 import static de.jreality.scene.data.StorageModel.DOUBLE_ARRAY;
 import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.OPAQUE_TUBES_AND_SPHERES;
 import static de.jreality.shader.CommonAttributes.POINT_RADIUS;
 import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.SMOOTH_SHADING;
 import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY;
+import static de.jreality.shader.CommonAttributes.TRANSPARENCY_ENABLED;
 import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
 import static de.jreality.shader.CommonAttributes.TUBE_RADIUS;
+import static de.jreality.shader.CommonAttributes.Z_BUFFER_ENABLED;
 import static java.lang.Math.PI;
 
 import java.awt.Color;
@@ -29,6 +33,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.DirectionalLight;
@@ -37,9 +42,11 @@ import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.SpotLight;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
 import de.jreality.writer.WriterJRS;
@@ -78,6 +85,10 @@ public class BlenderTestScene {
 		icosahedron3.setGeometry(icosahedron.getGeometry());
 		Appearance icosahedron3Appearance = new Appearance("Icosahedron 2 Appearance");
 		icosahedron3Appearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.5f, 0.3f, 0.9f));
+		icosahedron3Appearance.setAttribute(POLYGON_SHADER + "." + TRANSPARENCY, 0.5);
+		icosahedron3Appearance.setAttribute(TRANSPARENCY_ENABLED, true);
+		icosahedron3Appearance.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
+		icosahedron3Appearance.setAttribute(Z_BUFFER_ENABLED, true);
 		icosahedron3.setAppearance(icosahedron3Appearance);
 		MatrixBuilder.euclidean().translate(-2, 2, 2).assignTo(icosahedron3);
 		root.addChild(icosahedron3);		
@@ -263,7 +274,7 @@ public class BlenderTestScene {
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
-//		Viewer v = JRViewer.display(root);
+		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
 		JrScene scene = new JrScene(root);
