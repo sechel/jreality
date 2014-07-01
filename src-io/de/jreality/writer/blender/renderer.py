@@ -88,6 +88,7 @@ def createMesh(tag):
         edgeAttributesSize = int(edgeAttributes.get('size'));
         edgeDataTag = edgeAttributes.find("DataList[@attribute='indices']")
         edgeData = parseGeometryAttribute(edgeDataTag, edgeAttributesSize, False, False)
+        edgeData = [[e[0], e[-1]] for e in edgeData] # simplify edge sequences 
     # parse faces
     faceData = []
     faceAttributes = tag.find('faceAttributes')
@@ -253,8 +254,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     if pointRadiusTag is not None:
         pointRadius = float(pointRadiusTag.find('double').text)
     else:
-        pointRadius = parentMaterial['sphereRadius']
-    material['sphereRadius'] = pointRadius
+        pointRadius = parentMaterial['pointShader.pointRadius']
+    material['pointShader.pointRadius'] = pointRadius
     
     # spheres radii world coordinates   
     sphereRadiiWorldCoordsTag = tag.find("attribute[@name='pointShader.radiiWorldCoordinates']")
@@ -269,8 +270,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     if tubeRadiusTag is not None:
         tubeRadius = float(tubeRadiusTag.find('double').text)
     else:
-        tubeRadius = parentMaterial['sphereRadius']
-    material['tubeRadius'] = tubeRadius
+        tubeRadius = parentMaterial['lineShader.tubeRadius']
+    material['lineShader.tubeRadius'] = tubeRadius
     
     # tubes radii world coordinates   
     tubeRadiiWorldCoordsTag = tag.find("attribute[@name='lineShader.radiiWorldCoordinates']")
@@ -461,7 +462,7 @@ def createTubesAndSpheres(geometryObject, material):
     tubeRadiiWorldCoordinates = material['lineShader.radiiWorldCoordinates']
     if material['drawSpheres'] and material['showPoints'] and mesh.vertices:
         # TODO: respect radii world coordinates flag here and for tubes
-        sphereRadius = material['sphereRadius']
+        sphereRadius = material['pointShader.pointRadius']
         if sphereRadiiWorldCoordinates:
             sphereRadius /= getWorldScale(geometryObject)
         spheresObject = bpy.data.objects.new(name='Vertex Spheres', object_data=None)
@@ -489,7 +490,7 @@ def createTubesAndSpheres(geometryObject, material):
                 sphereGeometry.materials.pop()
             sphereGeometry.materials[0] = None
     if material['drawTubes'] and material['showLines'] and mesh.edges:
-        tubeRadius = material['tubeRadius']
+        tubeRadius = material['lineShader.tubeRadius']
         if tubeRadiiWorldCoordinates:
             tubeRadius /= getWorldScale(geometryObject)
         tubesObject = bpy.data.objects.new(name='Edge Tubes', object_data=None)
@@ -599,9 +600,9 @@ def createDefaultMaterial():
     mtl['drawSpheres'] = True
     mtl['pointShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['pointShader.radiiWorldCoordinates'] = False
-    mtl['sphereRadius'] = 0.025
+    mtl['pointShader.pointRadius'] = 0.025
     mtl['drawTubes'] = True
-    mtl['tubeRadius'] = 0.025
+    mtl['lineShader.tubeRadius'] = 0.025
     mtl['lineShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['lineShader.radiiWorldCoordinates'] = False
     mtl['opaqueTubesAndSpheres'] = False
