@@ -49,6 +49,7 @@ import java.io.StreamTokenizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,8 +82,32 @@ public class ReaderOBJ extends AbstractReader {
 	private HashMap<String, Group> groups = new HashMap<String, Group>();
 	private List<double[]> v, vNorms, vTexs;
 	private LinkedList<String> currentGroups;
-	private boolean ignoreUnusedVertices = false;
+	
+	
+	/**
+	 * If true, all vertices are added to the geometry. 
+	 */
+	private boolean useAllVertices = true;
+	
+	/**
+	 * If true the edges of the indexed face set are generated automatically. 
+	 */
 	private boolean generateEdgesFromFaces = true;
+	
+	/**
+	 * In an obj-file multiple texture and normal coordinates may be specified.
+	 * These are ignored depending on the value of this parameter. 
+	 */
+	private boolean useMultipleTexAndNormalCoords = false;
+	
+
+	public boolean isUseMultipleTexAndNomalCoords() {
+		return useMultipleTexAndNormalCoords;
+	}
+
+	public void setUseMultipleTexAndNormalCoords(boolean useMultipleTexAndNormalCoords) {
+		this.useMultipleTexAndNormalCoords = useMultipleTexAndNormalCoords;
+	}
 
 	public boolean isGenerateEdgesFromFaces() {
 		return generateEdgesFromFaces;
@@ -92,12 +117,12 @@ public class ReaderOBJ extends AbstractReader {
 		this.generateEdgesFromFaces = generateEdgesFromFaces;
 	}
 
-	public boolean isIgnoreUnusedVertices() {
-		return ignoreUnusedVertices;
+	public boolean isUseAllVertices() {
+		return useAllVertices;
 	}
 
-	public void setIgnoreUnusedVertices(boolean ignoreUnusedVertices) {
-		this.ignoreUnusedVertices = ignoreUnusedVertices;
+	public void setUseAllVertices(boolean useVertices) {
+		this.useAllVertices = useVertices;
 	}
 
 	public ReaderOBJ() {
@@ -511,8 +536,6 @@ public class ReaderOBJ extends AbstractReader {
 		final Appearance material;
 		boolean smooth;
 
-		boolean hasTex, hasNorms;
-
 		VertexData vd = new VertexData();
 
 		Group(String name) {
@@ -525,20 +548,31 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		void addFace(int[] verts, int[] texs, int[] norms) {
-			int[] face = new int[verts.length];
-			for (int i = 0; i < verts.length; i++) {
-				face[i] = vd.getID(verts[i], texs[i], norms[i]);
+			if(!useMultipleTexAndNormalCoords) {
+				faces.add(verts);
+				return;
+			} else {
+				int[] face = new int[verts.length];
+				for (int i = 0; i < verts.length; i++) {
+					face[i] = vd.getID(verts[i], texs[i], norms[i]);
+				}
+				faces.add(face);
 			}
-			faces.add(face);
 		}
 		
 		void addLine(int[] verts, int[] texs) {
-			int[] polyline = new int[verts.length];
-			for (int i = 0; i < verts.length; i++) {
-				polyline[i] = vd.getID(verts[i], texs[i]);
-			}
-			for (int i = 0; i < polyline.length - 1; i++) {
-				lines.add(new int[]{polyline[i],polyline[i+1]});
+			if(!useMultipleTexAndNormalCoords) {
+				for (int i = 0; i < verts.length - 1; i++) {
+					lines.add(new int[]{verts[i],verts[i+1]});
+				}
+			} else {
+				int[] polyline = new int[verts.length];
+				for (int i = 0; i < verts.length; i++) {
+					polyline[i] = vd.getID(verts[i], texs[i]);
+				}
+				for (int i = 0; i < polyline.length - 1; i++) {
+					lines.add(new int[]{polyline[i],polyline[i+1]});
+				}
 			}
 		}
 
@@ -593,7 +627,7 @@ public class ReaderOBJ extends AbstractReader {
 							Attribute.TEXTURE_COORDINATES,
 							StorageModel.DOUBLE_ARRAY.array(numPerEntry).createReadOnly(vTexArray));
 				}
-				if (vertexNorms != null) {
+				if (!vertexNorms.isEmpty()) {
 					ifs.setVertexAttributes(Attribute.NORMALS,
 							StorageModel.DOUBLE3_ARRAY.createReadOnly(vertexNorms
 									.toArray(new double[vertexNorms.size()][]))
@@ -649,13 +683,23 @@ public class ReaderOBJ extends AbstractReader {
 		}
 
 		private ArrayList<double[]> extractVertices() {
-			if (vd.size() == 0 && !ignoreUnusedVertices) { // neither lines nor faces
+			if (vd.size() == 0 || !useMultipleTexAndNormalCoords) { 
 				return new ArrayList<double[]>(v);
 			}
+			
+			HashSet<Integer> usedVertices = new HashSet<Integer>();
 			
 			ArrayList<double[]> list = new ArrayList<double[]>(vd.size());
 			for (int i = 0; i < vd.size(); i++) {
 				list.add(i, v.get(vd.vertexId(i)));
+				usedVertices.add(vd.vertexId(i));
+			}
+			if(useAllVertices) {
+				for (int i = 0; i < v.size(); i++) {
+					if(!usedVertices.contains(i)) {
+						list.add(v.get(i));
+					}
+				}
 			}
 			return list;
 		}
