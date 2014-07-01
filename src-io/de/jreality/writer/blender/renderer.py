@@ -198,8 +198,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     if smoothShadingTag is not None:
         smoothShading = smoothShadingTag.find('boolean').text == 'true'
     else:
-        smoothShading = parentMaterial['smoothShading']
-    material['smoothShading'] = smoothShading
+        smoothShading = parentMaterial['polygonShader.smoothShading']
+    material['polygonShader.smoothShading'] = smoothShading
     
     # choose vertex color channel   
     if vertex_colors is not None:    
@@ -239,15 +239,15 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     if spheresDrawTag is not None:
         spheresDraw = spheresDrawTag.find('boolean').text == 'true'
     else:
-        spheresDraw = parentMaterial['drawSpheres']
-    material['drawSpheres'] = spheresDraw
+        spheresDraw = parentMaterial['pointShader.spheresDraw']
+    material['pointShader.spheresDraw'] = spheresDraw
     # draw tubes
     tubesDrawTag = tag.find("attribute[@name='lineShader.tubeDraw']")
     if tubesDrawTag is not None:
         tubesDraw = tubesDrawTag.find('boolean').text == 'true'
     else:
-        tubesDraw = parentMaterial['drawTubes']
-    material['drawTubes'] = tubesDraw 
+        tubesDraw = parentMaterial['lineShader.tubeDraw']
+    material['lineShader.tubeDraw'] = tubesDraw 
      
     # sphere radius
     pointRadiusTag = tag.find("attribute[@name='pointShader.pointRadius']")
@@ -460,7 +460,7 @@ def createTubesAndSpheres(geometryObject, material):
     mesh = geometryObject.data
     sphereRadiiWorldCoordinates = material['pointShader.radiiWorldCoordinates']
     tubeRadiiWorldCoordinates = material['lineShader.radiiWorldCoordinates']
-    if material['drawSpheres'] and material['showPoints'] and mesh.vertices:
+    if material['pointShader.spheresDraw'] and material['showPoints'] and mesh.vertices:
         # TODO: respect radii world coordinates flag here and for tubes
         sphereRadius = material['pointShader.pointRadius']
         if sphereRadiiWorldCoordinates:
@@ -489,7 +489,7 @@ def createTubesAndSpheres(geometryObject, material):
             if len(sphereGeometry.materials) > 1: 
                 sphereGeometry.materials.pop()
             sphereGeometry.materials[0] = None
-    if material['drawTubes'] and material['showLines'] and mesh.edges:
+    if material['lineShader.tubeDraw'] and material['showLines'] and mesh.edges:
         tubeRadius = material['lineShader.tubeRadius']
         if tubeRadiiWorldCoordinates:
             tubeRadius /= getWorldScale(geometryObject)
@@ -596,12 +596,12 @@ def createDefaultMaterial():
     mtl['showPoints'] = True
     mtl['showLines'] = True
     mtl['showFaces'] = True
-    mtl['smoothShading'] = True
-    mtl['drawSpheres'] = True
+    mtl['polygonShader.smoothShading'] = True
+    mtl['pointShader.spheresDraw'] = True
     mtl['pointShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['pointShader.radiiWorldCoordinates'] = False
     mtl['pointShader.pointRadius'] = 0.025
-    mtl['drawTubes'] = True
+    mtl['lineShader.tubeDraw'] = True
     mtl['lineShader.tubeRadius'] = 0.025
     mtl['lineShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['lineShader.radiiWorldCoordinates'] = False
