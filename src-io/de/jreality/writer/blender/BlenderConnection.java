@@ -11,6 +11,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
 import de.jreality.io.JrScene;
 import de.jreality.writer.WriterJRS;
@@ -22,13 +23,30 @@ import de.jreality.writer.WriterJRS;
  */
 public class BlenderConnection {
 
-	private Logger
+	private static Logger
 		log = Logger.getLogger(BlenderConnection.class.getName());
-	private File
-		blenderApp = new File("/Applications/Blender/blender.app/Contents/MacOS/blender"),
+	private static Preferences 
+		preferences = Preferences.userNodeForPackage(BlenderConnection.class);
+	private static File
+		blenderApp = null,
 		rendererScript = null;
 	
+	static {
+		String blenderExecutable = preferences.get("blenderExecutable", "blender");
+		blenderApp = new File(blenderExecutable);
+	}
+	
 	public BlenderConnection() {
+	}
+	
+	public static void setBlenderExecutable(File blender) {
+		BlenderConnection.blenderApp = blender;
+		preferences.put("blenderExecutable", blender.getAbsolutePath());
+		try {
+			preferences.flush();
+		} catch (Exception e) {
+			log.warning("Could not flush preferences: " + e);
+		}
 	}
 	
 	protected void invokeBlender(File sceneFile, File outBlenderFile, File outImage) throws IOException {
