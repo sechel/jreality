@@ -143,11 +143,11 @@ public class BlenderTestScene {
 			{0,10,1,10}
 		});
 		ifsf.setEdgeIndices(new int[][]{
-			{0,1},
+			{0,1,3},
 			{2,3}
 		});
 		ifsf.setEdgeColors(new double[][]{
-			{0.3,1.0,0.6}, {0.2,1.0,0.3}	
+			{0.3,1.0,0.6}, {1.0,0.1,0.3}	
 		});
 		ifsf.setFaceIndices(new int[][]{
 			{0,1,2,3}
@@ -290,22 +290,22 @@ public class BlenderTestScene {
 		sphereAndCylinderComponent.addChild(cylinderComponent);
 		root.addChild(sphereAndCylinderComponent);
 		
-//		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
+		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
-		Viewer v = JRViewer.display(root);
+//		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
-//		JrScene scene = new JrScene(root);
-//		scene.addPath("cameraPath", camPath);
+		JrScene scene = new JrScene(root);
+		scene.addPath("cameraPath", camPath);
 		
 		// write scene file
 //		WriterJRS jrsWriter = new WriterJRS();
 //		jrsWriter.writeScene(scene, new FileOutputStream("test.jrs"));
 		
 		// write blender file 
-//		BlenderConnection r = new BlenderConnection();
-//		File blenderFile = new File("test.blend");
-//		r.writeFile(scene, blenderFile);
+		BlenderConnection r = new BlenderConnection();
+		File blenderFile = new File("test.blend");
+		r.writeFile(scene, blenderFile);
 //		File imageFile = new File("test.png");
 //		r.renderImage(scene, imageFile);
 //		BufferedImage image = ImageIO.read(imageFile);

@@ -101,8 +101,14 @@ def createMesh(tag):
     if edgeAttributes is not None:
         edgeAttributesSize = int(edgeAttributes.get('size'));
         edgeDataTag = edgeAttributes.find("DataList[@attribute='indices']")
-        edgeData = parseGeometryAttribute(edgeDataTag, edgeAttributesSize, False, False)
-        edgeData = [[e[0], e[-1]] for e in edgeData] # simplify edge sequences 
+        rawEdgeData = parseGeometryAttribute(edgeDataTag, edgeAttributesSize, False, False)
+        edgeData = []
+        for edges in rawEdgeData:
+            if len(edges) == 2:
+                edgeData.append(edges)
+            else: # split edge sequence into single edges
+                for ie in range(0, len(edges) - 1): 
+                    edgeData.append([edges[ie], edges[ie + 1]])
     # parse faces
     faceData = []
     faceAttributes = tag.find('faceAttributes')
@@ -134,13 +140,23 @@ def createMesh(tag):
     # edge colors
     edgeColorsTag = tag.find("edgeAttributes/DataList[@attribute='colors']")
     if edgeColorsTag is not None:
-        edgeColors = parseGeometryAttribute(edgeColorsTag, edgeAttributesSize, True, True)
+        rawEdgeColors = parseGeometryAttribute(edgeColorsTag, edgeAttributesSize, True, True)
+        colorIndex = 0
+        edgeColors = []
+        for edgeList in rawEdgeData: 
+            edgeColors.extend([rawEdgeColors[colorIndex] for i in range(0,len(edgeList) - 1)])
+            colorIndex += 1
         mesh['edgeColors'] = edgeColors
         
     # relative line radii
     lineRadiiTag = tag.find("edgeAttributes/DataList[@attribute='relativeRadii']")
     if lineRadiiTag is not None:
-        lineRadii = parseGeometryAttribute(lineRadiiTag, edgeAttributesSize, True, False)
+        rawLineRadii = parseGeometryAttribute(lineRadiiTag, edgeAttributesSize, True, False)
+        radiusIndex = 0
+        lineRadii = []
+        for edgeList in rawEdgeData:
+            lineRadii.extend([rawLineRadii[radiusIndex] for i in range(0,len(edgeList) - 1)])
+            radiusIndex += 1
         mesh['relativeLineRadii'] = lineRadii           
                 
     # face colors

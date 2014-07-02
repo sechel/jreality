@@ -130,6 +130,7 @@ public class ExportBlenderImage extends AbstractJrAction {
 		f.setLayout(new GridLayout());
 		JTextArea progressArea = new JTextArea("Starting Blender Renderer...\n");
 		JScrollPane progressScroller = new JScrollPane(progressArea);
+		JLabel imageLabel = new JLabel();
 		Font textFont = new Font("Arial", Font.PLAIN, 10);
 		progressArea.setFont(textFont);
 		progressArea.setEditable(false);
@@ -143,12 +144,13 @@ public class ExportBlenderImage extends AbstractJrAction {
 		RenderJob job = new RenderJob(file, sw);
 		job.start();
 		
-		doRenderProgress(file, f, progressArea, progressScroller, sw, job);
+		doRenderProgress(file, f, imageLabel, progressArea, progressScroller, sw, job);
 	}
 
 	private void doRenderProgress(
 		final File file, 
 		final JDialog f, 
+		final JLabel imageLabel,
 		final JTextArea progressArea,
 		final JScrollPane progressScroller, 
 		final StringWriter sw, 
@@ -194,9 +196,8 @@ public class ExportBlenderImage extends AbstractJrAction {
 				try {
 					image = ImageIO.read(file);
 					f.remove(progressScroller);
-					JLabel dialogLabel = new JLabel();
-					dialogLabel.setIcon(new ImageIcon(image));
-					f.add(dialogLabel);
+					imageLabel.setIcon(new ImageIcon(image));
+					f.add(imageLabel);
 					f.pack();
 				} catch (IOException e) {
 					e.printStackTrace();
