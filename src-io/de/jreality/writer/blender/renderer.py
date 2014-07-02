@@ -13,6 +13,9 @@ transformStack = []
 sphereMaterials = {}
 tubeMaterials = {}
 
+urSphere = None
+urCylinder = None
+
 def createNURBSSphereData(name):
     bpy.ops.surface.primitive_nurbs_surface_sphere_add()
     sphereObject = bpy.context.scene.objects.active
@@ -32,6 +35,17 @@ def createNURBSCylinderData(name):
     cylinderSurface.name = name
     return cylinderSurface
 
+def getStandardSphere():
+    global urSphere 
+    if urSphere is None:
+        urSphere = createNURBSSphereData('Sphere')
+    return urSphere    
+
+def getStandardCylinder(): 
+    global urCylinder
+    if urCylinder is None:
+        urCylinder = createNURBSCylinderData('Cylinder')
+    return urCylinder
 
 def parseMatrix(tag):
     mm = [float(mij) for mij in tag.text.split()]
@@ -174,7 +188,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     tag = resolveReference(treeRoot, tag, rootPath);
     nameTag = tag.find('name');
     mesh = None if geometryObject is None else geometryObject.data
-    vertex_colors = None if mesh is None else mesh.vertex_colors
+    vertex_colors = None if mesh is None else mesh.vertex_colors if type(mesh) == bpy.types.Mesh else None
     if nameTag is None:
         if geometryObject is None or not vertex_colors:
             return None
@@ -192,6 +206,11 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         material.diffuse_color = parseColor(treeRoot, diffuseColorTag.find('awt-color'), rootPath + "/attribute[@name='polygonShader.diffuseColor']/awt-color")
     else: 
         material.diffuse_color = parentMaterial.diffuse_color
+    diffuseFactorTag = tag.find("attribute[@name='polygonShader.diffuseCoefficient']")
+    if diffuseFactorTag is not None: 
+        material.diffuse_intensity = float(diffuseFactorTag.find('double').text)
+    else: 
+        material.diffuse_intensity = parentMaterial.diffuse_intensity
         
     # smooth/flat shading
     smoothShadingTag = tag.find("attribute[@name='polygonShader.smoothShading']")
@@ -348,11 +367,17 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
     tag = resolveReference(treeRoot, tag, rootPath);
     name = tag.find('name');
     if name == None: return None
+    type = tag.get('type')
     geom = None
     if tag in tagToObject: 
         geom = tagToObject[tag].data
     else:
-        geom = createMesh(tag)
+        if type == 'IndexedFaceSet' or type == 'IndexedLineSet' or type == 'PointSet':
+            geom = createMesh(tag)
+        elif type == 'Sphere':
+            geom = getStandardSphere()
+        elif type == 'Cylinder':
+            geom = getStandardCylinder()
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     bpy.context.scene.objects.link(geomobj)
     geomobj.parent = parentObject
@@ -397,7 +422,7 @@ def createLight(treeRoot, tag, rootPath, parentObject):
         blenderType = 'POINT'
         if type == 'PointLight': 
             light = bpy.data.lamps.new(name, 'POINT')
-        elif len(tag.findall('coneAngle')) != 0: 
+        elif type == 'SpotLight': 
             light = bpy.data.lamps.new(name, 'SPOT')
             light.spot_size = float(tag.find('coneAngle').text)
             light.show_cone = True
@@ -460,7 +485,7 @@ def createTubesAndSpheres(geometryObject, material):
     mesh = geometryObject.data
     sphereRadiiWorldCoordinates = material['pointShader.radiiWorldCoordinates']
     tubeRadiiWorldCoordinates = material['lineShader.radiiWorldCoordinates']
-    if material['pointShader.spheresDraw'] and material['showPoints'] and mesh.vertices:
+    if material['pointShader.spheresDraw'] and material['showPoints'] and type(mesh) == bpy.types.Mesh and mesh.vertices:
         # TODO: respect radii world coordinates flag here and for tubes
         sphereRadius = material['pointShader.pointRadius']
         if sphereRadiiWorldCoordinates:
@@ -489,7 +514,7 @@ def createTubesAndSpheres(geometryObject, material):
             if len(sphereGeometry.materials) > 1: 
                 sphereGeometry.materials.pop()
             sphereGeometry.materials[0] = None
-    if material['lineShader.tubeDraw'] and material['showLines'] and mesh.edges:
+    if material['lineShader.tubeDraw'] and material['showLines'] and type(mesh) == bpy.types.Mesh and mesh.edges:
         tubeRadius = material['lineShader.tubeRadius']
         if tubeRadiiWorldCoordinates:
             tubeRadius /= getWorldScale(geometryObject)
@@ -593,6 +618,7 @@ def createDefaultMaterial():
     mtl = bpy.data.materials[0]
     mtl.name = 'JReality Default Material'
     mtl.diffuse_color = [0, 0, 1]
+    mtl.diffuse_intensity = 1.0
     mtl['showPoints'] = True
     mtl['showLines'] = True
     mtl['showFaces'] = True

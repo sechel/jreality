@@ -35,11 +35,13 @@ import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.Cylinder;
 import de.jreality.scene.DirectionalLight;
 import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
@@ -268,6 +270,17 @@ public class BlenderTestScene {
 		colorsFaceComponent.setGeometry(cube2);
 		MatrixBuilder.euclidean().translate(2, 0, 1).scale(0.5).assignTo(colorsFaceComponent);
 		root.addChild(colorsFaceComponent);
+		
+		SceneGraphComponent sphereAndCylinderComponent = new SceneGraphComponent("Sphere And Cylinder Component");
+		MatrixBuilder.euclidean().translate(0, -2, 0).scale(0.5).assignTo(sphereAndCylinderComponent);
+		SceneGraphComponent sphereComponent = new SceneGraphComponent("Sphere Component");
+		SceneGraphComponent cylinderComponent = new SceneGraphComponent("Cylinder Component");
+		sphereComponent.setGeometry(new Sphere());
+		MatrixBuilder.euclidean().scale(0.5).assignTo(sphereComponent);
+		cylinderComponent.setGeometry(new Cylinder());
+		sphereAndCylinderComponent.addChild(sphereComponent);
+		sphereAndCylinderComponent.addChild(cylinderComponent);
+		root.addChild(sphereAndCylinderComponent);
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
