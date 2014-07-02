@@ -49,6 +49,7 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -74,7 +75,6 @@ import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
 import de.jreality.writer.blender.BlenderConnection;
-import de.smrj.tcp.util.ByteArrayOutputStream;
 
 /**
  * 
@@ -184,7 +184,7 @@ public class ExportBlenderImage extends AbstractJrAction {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					progressArea.append(new String(to.toArray()));
+					progressArea.append(new String(to.toByteArray()));
 					Document doc = progressArea.getDocument();
 					progressArea.select(doc.getLength(), doc.getLength()); 
 					return;
