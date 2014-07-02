@@ -40,8 +40,6 @@
 package de.jreality.ui.viewerapp.actions.file;
 
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
-import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
-import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -50,8 +48,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -59,7 +55,6 @@ import de.jreality.io.JrScene;
 import de.jreality.scene.Viewer;
 import de.jreality.ui.viewerapp.FileLoaderDialog;
 import de.jreality.ui.viewerapp.actions.AbstractJrAction;
-import de.jreality.writer.blender.BlenderConnection;
 import de.jreality.writer.blender.WriterBlender;
 
 /**
@@ -97,28 +92,18 @@ public class ExportBlender extends AbstractJrAction {
 			return;
 		}
 		try {
-			writeSceneToFile(file);
+			writeSceneToFile(file, viewer);
 		} catch (IOException ioe) {
-			Icon blenderIcon = new ImageIcon(getClass().getResource("blender.png"), "Blender Icon");
-			String[] options = {"Choose Executable", "Cancel"};
-			int result = JOptionPane.showOptionDialog(parentComp, "Blender executable not found.", "Export Error", YES_NO_CANCEL_OPTION, INFORMATION_MESSAGE, blenderIcon, options, null);
-			if (result != 0) return;
-			result = executableChooser.showOpenDialog(parentComp);
-			if (result != JFileChooser.APPROVE_OPTION) return;
-			File executable = executableChooser.getSelectedFile();
-			if (executable.isDirectory()) { // mac application package
-				executable = new File(executable + "/Contents/MacOS/blender");
-			}
-			BlenderConnection.setBlenderExecutable(executable);
+			ExportBlenderImage.showBlenderxExcutableDialog(parentComp);
 			try {
-				writeSceneToFile(file);
+				writeSceneToFile(file, viewer);
 			} catch (Exception e1) {
 				JOptionPane.showMessageDialog(parentComp, "Could not write blender file", "Error", ERROR_MESSAGE);
 			}
 		}
 	}
-
-	private void writeSceneToFile(File file) throws FileNotFoundException, IOException {
+	
+	private void writeSceneToFile(File file, Viewer viewer) throws FileNotFoundException, IOException {
 		WriterBlender writer = new WriterBlender();
 		JrScene s = new JrScene(viewer.getSceneRoot());
 		s.addPath("cameraPath", viewer.getCameraPath());

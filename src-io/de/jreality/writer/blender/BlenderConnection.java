@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
@@ -30,6 +33,8 @@ public class BlenderConnection {
 	private static File
 		blenderApp = null,
 		rendererScript = null;
+	private Writer
+		stdoutRedirect = null;
 	
 	static {
 		String blenderExecutable = preferences.get("blenderExecutable", "blender");
@@ -58,26 +63,34 @@ public class BlenderConnection {
 			log.warning("could not write blender renderer script: " + e1.getMessage());
 			throw e1;
 		}
-		String[] args = {
-			"./blender",
-			"--background",
-			"--factory-startup",
-			"--render-format", "PNG",
-			"--python",
-			script.toString(),
-			"--",
-//			outImage != null ? "--render=" + outImage.getAbsolutePath() : "",
-			outBlenderFile != null ? "--save=" + outBlenderFile.getAbsolutePath() : "",
-			"--file=" + sceneFile.getAbsolutePath()
-		};
+		List<String> argList = new ArrayList<String>();
+		argList.add("./blender");
+		argList.add("--background");
+		argList.add("--factory-startup");
+		argList.add("--render-format");
+		argList.add("PNG");
+		argList.add("--python");
+		argList.add(script.toString());
+		argList.add("--");
+		if (outImage != null) {
+			argList.add("--render=" + outImage.getAbsolutePath());
+		}
+		if (outBlenderFile != null) {
+			argList.add("--save=" + outBlenderFile.getAbsolutePath());
+		}
+		argList.add("--file=" + sceneFile.getAbsolutePath());
+		String[] argArray = argList.toArray(new String[argList.size()]);
 		try {
 			File dir = blenderApp.getParentFile();
-			Process p = Runtime.getRuntime().exec(args, new String[]{}, dir);
+			Process p = Runtime.getRuntime().exec(argArray, new String[]{}, dir);
 			InputStream in = new BufferedInputStream(p.getInputStream());
 			InputStream err = new BufferedInputStream(p.getErrorStream());
 			int bIn = 0;
 			while ((bIn = in.read()) != -1) {
 				System.out.write(bIn);
+				if (stdoutRedirect != null) {
+					stdoutRedirect.write(bIn);
+				}
 			}
 			StringWriter sw = new StringWriter();
 			while ((bIn = err.read()) != -1) {
@@ -91,6 +104,10 @@ public class BlenderConnection {
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally {
+			if (stdoutRedirect != null) {
+				stdoutRedirect.close();
+			}
 		}
 	}
 	
@@ -127,6 +144,10 @@ public class BlenderConnection {
 		outChannel.close();
 		fin.close();
 		return rendererScript;
+	}
+	
+	public void setStdoutRedirect(Writer stdoutRedirect) {
+		this.stdoutRedirect = stdoutRedirect;
 	}
 	
 }

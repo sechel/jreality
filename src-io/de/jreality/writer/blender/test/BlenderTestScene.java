@@ -21,9 +21,15 @@ import static de.jreality.shader.CommonAttributes.Z_BUFFER_ENABLED;
 import static java.lang.Math.PI;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.IndexedFaceSetFactory;
@@ -33,6 +39,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -43,6 +50,7 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
+import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
@@ -272,7 +280,7 @@ public class BlenderTestScene {
 		root.addChild(colorsFaceComponent);
 		
 		SceneGraphComponent sphereAndCylinderComponent = new SceneGraphComponent("Sphere And Cylinder Component");
-		MatrixBuilder.euclidean().translate(0, -2, 0).scale(0.5).assignTo(sphereAndCylinderComponent);
+		MatrixBuilder.euclidean().translate(2, -2, 0).scale(0.5).assignTo(sphereAndCylinderComponent);
 		SceneGraphComponent sphereComponent = new SceneGraphComponent("Sphere Component");
 		SceneGraphComponent cylinderComponent = new SceneGraphComponent("Cylinder Component");
 		sphereComponent.setGeometry(new Sphere());
@@ -282,22 +290,24 @@ public class BlenderTestScene {
 		sphereAndCylinderComponent.addChild(cylinderComponent);
 		root.addChild(sphereAndCylinderComponent);
 		
-		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
+//		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
-//		Viewer v = JRViewer.display(root);
+		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
-		JrScene scene = new JrScene(root);
-		scene.addPath("cameraPath", camPath);
+//		JrScene scene = new JrScene(root);
+//		scene.addPath("cameraPath", camPath);
 		
 		// write scene file
-		WriterJRS jrsWriter = new WriterJRS();
-		jrsWriter.writeScene(scene, new FileOutputStream("test.jrs"));
+//		WriterJRS jrsWriter = new WriterJRS();
+//		jrsWriter.writeScene(scene, new FileOutputStream("test.jrs"));
 		
 		// write blender file 
-		BlenderConnection r = new BlenderConnection();
-		File blenderFile = new File("test.blend");
-		r.writeFile(scene, blenderFile);
+//		BlenderConnection r = new BlenderConnection();
+//		File blenderFile = new File("test.blend");
+//		r.writeFile(scene, blenderFile);
+//		File imageFile = new File("test.png");
+//		r.renderImage(scene, imageFile);
 //		BufferedImage image = ImageIO.read(imageFile);
 //		if (image != null) {
 //			JFrame f = new JFrame();
