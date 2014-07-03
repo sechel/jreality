@@ -268,16 +268,22 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         showFaces = showFacesTag.find('boolean').text == 'true'
     else:
         showFaces = parentMaterial['showFaces']
-    material['showFaces'] = showFaces  
+    material['showFaces'] = showFaces
+
     # draw spheres        
     spheresDrawTag = tag.find("attribute[@name='pointShader.spheresDraw']")
+    if spheresDrawTag is None:
+        spheresDrawTag = tag.find("attribute[@name='spheresDraw']")
     if spheresDrawTag is not None:
         spheresDraw = spheresDrawTag.find('boolean').text == 'true'
     else:
         spheresDraw = parentMaterial['pointShader.spheresDraw']
     material['pointShader.spheresDraw'] = spheresDraw
+
     # draw tubes
     tubesDrawTag = tag.find("attribute[@name='lineShader.tubeDraw']")
+    if tubesDrawTag is None:
+        tubesDrawTag = tag.find("attribute[@name='tubeDraw']")
     if tubesDrawTag is not None:
         tubesDraw = tubesDrawTag.find('boolean').text == 'true'
     else:
@@ -286,6 +292,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
      
     # sphere radius
     pointRadiusTag = tag.find("attribute[@name='pointShader.pointRadius']")
+    if pointRadiusTag is None:
+        pointRadiusTag = tag.find("attribute[@name='pointRadius']")
     if pointRadiusTag is not None:
         pointRadius = float(pointRadiusTag.find('double').text)
     else:
@@ -302,6 +310,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
        
     # tube radius   
     tubeRadiusTag = tag.find("attribute[@name='lineShader.tubeRadius']")
+    if tubeRadiusTag is None:
+        tubeRadiusTag = tag.find("attribute[@name='tubeRadius']")
     if tubeRadiusTag is not None:
         tubeRadius = float(tubeRadiusTag.find('double').text)
     else:
@@ -334,6 +344,8 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     
     # transparency
     faceTransparencyTag = tag.find("attribute[@name='polygonShader.transparency']")
+    if faceTransparencyTag is None:
+        faceTransparencyTag = tag.find("attribute[@name='transparency']")
     if faceTransparencyTag is not None:
         faceTransparency = float(faceTransparencyTag.find('double').text)
     else:
