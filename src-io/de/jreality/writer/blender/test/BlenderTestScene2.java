@@ -84,6 +84,12 @@ public class BlenderTestScene2 {
 		MatrixBuilder.euclidean().translate(0, 0, 3).assignTo(texturedQuad);
 		root.addChild(texturedQuad);
 		
+		SceneGraphComponent quad2 = new SceneGraphComponent("Textured Quad2");
+		quad2.setGeometry(texturedQuad.getGeometry());
+		quad2.setAppearance(texturedQuad.getAppearance());
+		MatrixBuilder.euclidean().translate(-2, 0, 3).assignTo(quad2);
+		root.addChild(quad2);
+		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
 //		Viewer v = JRViewer.display(root);

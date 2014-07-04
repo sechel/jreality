@@ -8,6 +8,7 @@ import zlib
 import base64
 
 tagToObject = {}
+tagToMaterial = {}
 materialStack = []
 transformStack = []
 sphereMaterials = {}
@@ -54,6 +55,7 @@ def parseMatrix(tag):
 
 def parseColor(treeRoot, tag, rootPath):
     tag = resolveReference(treeRoot, tag, rootPath);
+    if tag is None: return [1.0, 1.0, 1.0]
     r = float(tag.find('red').text) / 255.0
     g = float(tag.find('green').text) / 255.0
     b = float(tag.find('blue').text) / 255.0
@@ -202,6 +204,8 @@ def parseCustomMaterialAttribute(tag, attribute, parentMaterial, type):
 
 def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     tag = resolveReference(treeRoot, tag, rootPath);
+    if tag in tagToMaterial: 
+    	return tagToMaterial[tag]
     nameTag = tag.find('name');
     mesh = None if geometryObject is None else geometryObject.data
     vertex_colors = None if mesh is None else mesh.vertex_colors if type(mesh) == bpy.types.Mesh else None
@@ -213,6 +217,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else: 
         name = nameTag.text
     material = parentMaterial.copy()
+    tagToMaterial[tag] = material
     material.name = name
     material.use_vertex_color_paint = bool(vertex_colors)
     
