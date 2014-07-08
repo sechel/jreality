@@ -4,10 +4,15 @@ import static de.jreality.shader.CommonAttributes.DIFFUSE_COLOR;
 import static de.jreality.shader.CommonAttributes.EDGE_DRAW;
 import static de.jreality.shader.CommonAttributes.FACE_DRAW;
 import static de.jreality.shader.CommonAttributes.LINE_SHADER;
+import static de.jreality.shader.CommonAttributes.POINT_RADIUS;
 import static de.jreality.shader.CommonAttributes.POINT_SHADER;
 import static de.jreality.shader.CommonAttributes.POLYGON_SHADER;
 import static de.jreality.shader.CommonAttributes.RADII_WORLD_COORDINATES;
+import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
+import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
+import static de.jreality.shader.CommonAttributes.TUBE_RADIUS;
 import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
+import static de.jreality.writer.blender.BlenderAttributes.BLENDER_USESKINTUBES;
 import static java.awt.Color.WHITE;
 
 import java.awt.Color;
@@ -15,17 +20,26 @@ import java.awt.Image;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
+import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
+import de.jreality.scene.Viewer;
+import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DoubleArray;
+import de.jreality.scene.data.IntArray;
+import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.writer.WriterJRS;
@@ -89,6 +103,34 @@ public class BlenderTestScene2 {
 		quad2.setAppearance(texturedQuad.getAppearance());
 		MatrixBuilder.euclidean().translate(-2, 0, 3).assignTo(quad2);
 		root.addChild(quad2);
+		
+		SceneGraphComponent skinTubeComponent = new SceneGraphComponent("Skin Tubes Test");
+		IndexedFaceSet polygon = Primitives.regularPolygon(100);
+		IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(polygon);
+		Random rnd = new Random();
+		double[] radii = new double[100];
+		for (int i = 0; i < radii.length; i++) {
+			radii[i] = rnd.nextDouble();
+		}
+		polygon.setVertexAttributes(Attribute.RELATIVE_RADII, new DoubleArray(radii));
+		skinTubeComponent.setGeometry(polygon);
+		Appearance skinApp = new Appearance("Skin Material");
+		skinApp.setAttribute(VERTEX_DRAW, true);
+		skinApp.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, true);
+		skinApp.setAttribute(POINT_SHADER + "." + POINT_RADIUS, 0.1);
+		skinApp.setAttribute(EDGE_DRAW, true);
+		skinApp.setAttribute(LINE_SHADER + "." + TUBES_DRAW, false);
+		skinApp.setAttribute(LINE_SHADER + "." + BLENDER_USESKINTUBES, true);
+		skinApp.setAttribute(LINE_SHADER + "." + TUBE_RADIUS,	0.1);
+		skinApp.setAttribute(FACE_DRAW, false);
+		skinTubeComponent.setAppearance(skinApp);
+		root.addChild(skinTubeComponent);
+		
+		SceneGraphComponent skinTubeComponent2 = new SceneGraphComponent("Skin Tubes Test 2");
+		skinTubeComponent2.setAppearance(skinApp);
+		skinTubeComponent2.setGeometry(polygon);
+		MatrixBuilder.euclidean().translate(2, 0, 0).assignTo(skinTubeComponent2);
+		root.addChild(skinTubeComponent2);
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		

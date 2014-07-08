@@ -71,12 +71,15 @@ def parseGeometryAttribute(tag, count, isFloat, normalizeTo3Components):
         else:
             data = [[int(i) for i in dataTag.text.split()] for dataTag in dataTags]
     else:
-        if isFloat:
-            dataInline = [float(f) for f in tag.text.split()]
+        if tag.text is None:
+            data = []
         else:
-            dataInline = [int(i) for i in tag.text.split()]    
-        l = int(len(dataInline) / count);  
-        data = [dataInline[i*l : i*l+l] for i in range(0, count)]
+            if isFloat:
+                dataInline = [float(f) for f in tag.text.split()]
+            else:
+                dataInline = [int(i) for i in tag.text.split()]    
+            l = int(len(dataInline) / count);  
+            data = [dataInline[i*l : i*l+l] for i in range(0, count)]
     if normalizeTo3Components:
         data = [normalizeTo3D(vec) for vec in data]
     return data    
@@ -392,6 +395,14 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         image.pixels = imageDataFloat
         image.pack(as_png=True)
         texture.image = image
+       
+    # skin tubes
+    useSkinTubesTag = tag.find("attribute[@name='lineShader.blender.useSkinTubes']")  
+    if useSkinTubesTag is not None:
+        useSkinTubes = useSkinTubesTag.find('boolean').text == 'true'
+        material['lineShader.blender.useSkinTubes'] = useSkinTubes
+    else:
+        material['lineShader.blender.useSkinTubes'] = parentMaterial['lineShader.blender.useSkinTubes']
         
     return material
 
@@ -508,7 +519,7 @@ def createTubeMaterial(mesh, index, parentMaterial):
     return material
 
 
-def getWorldScale(object):
+def getWorldScale():
     T = transformStack[-1]
     scale = T.decompose()[2][0]
     return scale
@@ -522,7 +533,7 @@ def createTubesAndSpheres(geometryObject, material):
         # TODO: respect radii world coordinates flag here and for tubes
         sphereRadius = material['pointShader.pointRadius']
         if sphereRadiiWorldCoordinates:
-            sphereRadius /= getWorldScale(geometryObject)
+            sphereRadius /= getWorldScale()
         spheresObject = bpy.data.objects.new(name='Vertex Spheres', object_data=None)
         spheresObject.parent = geometryObject
         spheresObject.hide = geometryObject.hide
@@ -547,10 +558,14 @@ def createTubesAndSpheres(geometryObject, material):
             if len(sphereGeometry.materials) > 1: 
                 sphereGeometry.materials.pop()
             sphereGeometry.materials[0] = None
-    if material['lineShader.tubeDraw'] and material['showLines'] and type(mesh) == bpy.types.Mesh and mesh.edges:
+    if not material['lineShader.blender.useSkinTubes'] and \
+           material['lineShader.tubeDraw'] and \
+           material['showLines'] and \
+           type(mesh) == bpy.types.Mesh and \
+           mesh.edges:
         tubeRadius = material['lineShader.tubeRadius']
         if tubeRadiiWorldCoordinates:
-            tubeRadius /= getWorldScale(geometryObject)
+            tubeRadius /= getWorldScale()
         tubesObject = bpy.data.objects.new(name='Edge Tubes', object_data=None)
         tubesObject.parent = geometryObject
         tubesObject.hide = geometryObject.hide
@@ -590,6 +605,23 @@ def createTubesAndSpheres(geometryObject, material):
                 tubeGeometry.materials.pop()
             tubeGeometry.materials[0] = None
     
+def createSkinTubes(geometryObject, material):
+    mesh = geometryObject.data
+    skin = geometryObject.modifiers.new('Skin', 'SKIN')
+    skin.use_smooth_shade = True
+    subsurf = geometryObject.modifiers.new('Subdivision', 'SUBSURF')
+    subsurf.levels = 2
+    subsurf.render_levels = 3
+    tubeRadius = material['lineShader.tubeRadius']
+    if material['lineShader.radiiWorldCoordinates']:
+        tubeRadius /= getWorldScale()
+    for v in mesh.vertices:
+        radius = tubeRadius
+        if 'relativePointRadii' in mesh:
+            radius *= mesh['relativePointRadii'][v.index][0]
+        mesh.skin_vertices[0].data[v.index].radius = [radius, radius]
+    
+    
 def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     tag = resolveReference(treeRoot, tag, rootPath);
     name = tag[0].text
@@ -612,13 +644,17 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     geometry = createGeometry(treeRoot, tag.find('geometry'), rootPath + '/geometry', obj);
     light = createLight(treeRoot, tag.find('light'), rootPath + '/light', obj);
     material = createMaterial(treeRoot, tag.find('appearance'), rootPath + '/appearance', materialStack[-1], geometry);
-    if material is not None: materialStack.append(material)
+    if material is not None: 
+        materialStack.append(material)
     if geometry is not None:
         effectiveMaterial = materialStack[-1]
+        useSkinTubes = effectiveMaterial['lineShader.blender.useSkinTubes']
         createTubesAndSpheres(geometry, effectiveMaterial)
+        if useSkinTubes and geometry.data is not None:
+            createSkinTubes(geometry, effectiveMaterial)
         showFaces = bool(effectiveMaterial['showFaces'])
-        geometry.hide = obj.hide or not showFaces
-        geometry.hide_render = obj.hide or not showFaces
+        geometry.hide = obj.hide or not (showFaces or useSkinTubes)
+        geometry.hide_render = geometry.hide
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
         geometry.material_slots[0].link = 'OBJECT'
@@ -664,6 +700,7 @@ def createDefaultMaterial():
     mtl['lineShader.tubeRadius'] = 0.025
     mtl['lineShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['lineShader.radiiWorldCoordinates'] = False
+    mtl['lineShader.blender.useSkinTubes'] = False
     mtl['opaqueTubesAndSpheres'] = False
     return mtl
         
