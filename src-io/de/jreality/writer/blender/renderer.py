@@ -333,6 +333,14 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     else:
         tubeRadiiiWorldCoords = parentMaterial['lineShader.radiiWorldCoordinates']
     material['lineShader.radiiWorldCoordinates'] = tubeRadiiiWorldCoords  
+    
+    # generic world coordinates
+    radiiWorldCoordinatesTag = tag.find("attribute[@name='radiiWorldCoordinates']")
+    if radiiWorldCoordinatesTag is not None:
+        radiiWorldCoordinates = radiiWorldCoordinatesTag.find('boolean').text == 'true'
+    else:
+        radiiWorldCoordinates = parentMaterial['radiiWorldCoordinates']
+    material['radiiWorldCoordinates'] = radiiWorldCoordinates
       
     # line colors
     lineColorTag = tag.find("attribute[@name='lineShader.diffuseColor']")
@@ -529,6 +537,9 @@ def createTubesAndSpheres(geometryObject, material):
     mesh = geometryObject.data
     sphereRadiiWorldCoordinates = material['pointShader.radiiWorldCoordinates']
     tubeRadiiWorldCoordinates = material['lineShader.radiiWorldCoordinates']
+    if material['radiiWorldCoordinates']:
+        sphereRadiiWorldCoordinates = True
+        tubeRadiiWorldCoordinates = True
     if material['pointShader.spheresDraw'] and material['showPoints'] and type(mesh) == bpy.types.Mesh and mesh.vertices:
         # TODO: respect radii world coordinates flag here and for tubes
         sphereRadius = material['pointShader.pointRadius']
@@ -613,13 +624,14 @@ def createSkinTubes(geometryObject, material):
     subsurf.levels = 2
     subsurf.render_levels = 3
     tubeRadius = material['lineShader.tubeRadius']
-    if material['lineShader.radiiWorldCoordinates']:
+    if material['lineShader.radiiWorldCoordinates'] or material['radiiWorldCoordinates']:
         tubeRadius /= getWorldScale()
     for v in mesh.vertices:
         radius = tubeRadius
         if 'relativePointRadii' in mesh:
             radius *= mesh['relativePointRadii'][v.index][0]
         mesh.skin_vertices[0].data[v.index].radius = [radius, radius]
+    material.diffuse_color = material['lineShader.diffuseColor']
     
     
 def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
@@ -649,8 +661,9 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     if geometry is not None:
         effectiveMaterial = materialStack[-1]
         useSkinTubes = effectiveMaterial['lineShader.blender.useSkinTubes']
+        tubeDraw = effectiveMaterial['lineShader.tubeDraw']
         createTubesAndSpheres(geometry, effectiveMaterial)
-        if useSkinTubes and geometry.data is not None:
+        if tubeDraw and useSkinTubes and geometry.data is not None:
             createSkinTubes(geometry, effectiveMaterial)
         showFaces = bool(effectiveMaterial['showFaces'])
         geometry.hide = obj.hide or not (showFaces or useSkinTubes)
@@ -691,6 +704,7 @@ def createDefaultMaterial():
     mtl['showPoints'] = True
     mtl['showLines'] = True
     mtl['showFaces'] = True
+    mtl['radiiWorldCoordinates'] = False
     mtl['polygonShader.smoothShading'] = True
     mtl['pointShader.spheresDraw'] = True
     mtl['pointShader.diffuseColor'] = [0.0, 0.0, 1.0]

@@ -29,6 +29,7 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
+import de.jreality.reader.ReaderOBJ;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.IndexedFaceSet;
@@ -104,6 +105,11 @@ public class BlenderTestScene2 {
 		MatrixBuilder.euclidean().translate(-2, 0, 3).assignTo(quad2);
 		root.addChild(quad2);
 		
+		
+		SceneGraphComponent skinRoot = new SceneGraphComponent("Skin Component");
+		MatrixBuilder.euclidean().scale(0.5).assignTo(skinRoot);
+		root.addChild(skinRoot);
+		
 		SceneGraphComponent skinTubeComponent = new SceneGraphComponent("Skin Tubes Test");
 		IndexedFaceSet polygon = Primitives.regularPolygon(100);
 		IndexedFaceSetUtility.calculateAndSetEdgesFromFaces(polygon);
@@ -112,28 +118,49 @@ public class BlenderTestScene2 {
 		for (int i = 0; i < radii.length; i++) {
 			radii[i] = rnd.nextDouble();
 		}
-		polygon.setVertexAttributes(Attribute.RELATIVE_RADII, new DoubleArray(radii));
+//		polygon.setVertexAttributes(Attribute.RELATIVE_RADII, new DoubleArray(radii));
 		skinTubeComponent.setGeometry(polygon);
 		Appearance skinApp = new Appearance("Skin Material");
 		skinApp.setAttribute(VERTEX_DRAW, true);
 		skinApp.setAttribute(POINT_SHADER + "." + SPHERES_DRAW, true);
-		skinApp.setAttribute(POINT_SHADER + "." + POINT_RADIUS, 0.1);
+		skinApp.setAttribute(POINT_SHADER + "." + POINT_RADIUS, 0.05);
 		skinApp.setAttribute(EDGE_DRAW, true);
-		skinApp.setAttribute(LINE_SHADER + "." + TUBES_DRAW, false);
+		skinApp.setAttribute(LINE_SHADER + "." + TUBES_DRAW, true);
+		skinApp.setAttribute(LINE_SHADER + "." + DIFFUSE_COLOR, new Color(0.1f, 0.6f, 0.2f));
 		skinApp.setAttribute(LINE_SHADER + "." + BLENDER_USESKINTUBES, true);
-		skinApp.setAttribute(LINE_SHADER + "." + TUBE_RADIUS,	0.1);
+		skinApp.setAttribute(LINE_SHADER + "." + TUBE_RADIUS,	0.05);
 		skinApp.setAttribute(FACE_DRAW, false);
 		skinTubeComponent.setAppearance(skinApp);
-		root.addChild(skinTubeComponent);
+		skinRoot.addChild(skinTubeComponent);
+
 		
 		SceneGraphComponent skinTubeComponent2 = new SceneGraphComponent("Skin Tubes Test 2");
 		skinTubeComponent2.setAppearance(skinApp);
 		skinTubeComponent2.setGeometry(polygon);
 		MatrixBuilder.euclidean().translate(2, 0, 0).assignTo(skinTubeComponent2);
-		root.addChild(skinTubeComponent2);
+		skinRoot.addChild(skinTubeComponent2);
+		
+		ReaderOBJ robj = new ReaderOBJ();
+		SceneGraphComponent torusRoot = robj.read(BlenderTestScene2.class.getResource("torus.obj"));
+		MatrixBuilder.euclidean().translate(-2, -1, 0).scale(0.1).assignTo(torusRoot);
+		Appearance texApp2 = new Appearance("Quad Texture Appearance");
+		texApp2.setAttribute(POLYGON_SHADER + '.' + DIFFUSE_COLOR, WHITE);
+		texApp2.setAttribute(FACE_DRAW, true);
+		texApp2.setAttribute(EDGE_DRAW, false);
+		texApp2.setAttribute(VERTEX_DRAW, false);
+		Image imageQuads = ImageIO.read(BlenderTestScene2.class.getResource("quads01.png"));
+		TextureUtility.createTexture(texApp2, POLYGON_SHADER, new ImageData(imageQuads));
+		torusRoot.setAppearance(texApp2);
+		root.addChild(torusRoot);
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
+		JRViewer v = new JRViewer();
+		v.addPythonSupport();
+		v.addContentUI();
+		v.addBasicUI();
+		v.setContent(root);
+		v.startup();
 //		Viewer v = JRViewer.display(root);
 //		v.setCameraPath(camPath);
 		
