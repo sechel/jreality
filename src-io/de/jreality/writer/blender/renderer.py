@@ -407,8 +407,9 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
         bpy.context.scene.world.horizon_color = backgroundColor
         
     # texture
+    texture2DTag = tag.find("attribute[@name='polygonShader.texture2d']")
     textureImageTag = tag.find("attribute[@name='polygonShader.texture2d:image']")
-    if textureImageTag is not None:
+    if texture2DTag is not None and textureImageTag is not None:
         imageDataTag = textureImageTag.find('ImageData')
         imageDataTag = resolveReference(treeRoot, imageDataTag, rootPath + "/attribute[@name='polygonShader.texture2d:image']/ImageData")
         if imageDataTag in tagToTexture:
@@ -530,6 +531,7 @@ def createSphereMaterial(mesh, index, parentMaterial):
             sphereMaterials[parentMaterial.name] = material
     material.use_transparency = not parentMaterial['opaqueTubesAndSpheres']
     material.use_vertex_color_paint = False
+    material.texture_slots[0].texture = None
     return material
 
 
@@ -548,6 +550,7 @@ def createTubeMaterial(mesh, index, parentMaterial):
             tubeMaterials[parentMaterial.name] = material
     material.use_transparency = not parentMaterial['opaqueTubesAndSpheres']
     material.use_vertex_color_paint = False
+    material.texture_slots[0].texture = None
     return material
 
 

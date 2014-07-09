@@ -87,7 +87,7 @@ public class BlenderTestScene2 {
 		Appearance texApp = new Appearance("Texture Appearance");
 		texApp.setAttribute(POLYGON_SHADER + '.' + DIFFUSE_COLOR, WHITE);
 		texApp.setAttribute(FACE_DRAW, true);
-		texApp.setAttribute(EDGE_DRAW, false);
+		texApp.setAttribute(EDGE_DRAW, true);
 		texApp.setAttribute(VERTEX_DRAW, false);
 		Image image = ImageIO.read(BlenderTestScene2.class.getResourceAsStream("texture01.jpg"));
 		TextureUtility.createTexture(texApp, POLYGON_SHADER, new ImageData(image));
