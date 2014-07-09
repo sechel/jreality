@@ -9,6 +9,7 @@ import base64
 
 tagToObject = {}
 tagToMaterial = {}
+tagToTexture = {}
 materialStack = []
 transformStack = []
 sphereMaterials = {}
@@ -86,7 +87,11 @@ def parseGeometryAttribute(tag, count, isFloat, normalizeTo3Components):
 
 def normalizeTo3D(vec):
     l = int(len(vec))
-    if l == 4: return [vi/vec[-1] for vi in vec[0:3]]
+    if l == 4: 
+        if vec[-1] != 0.0:
+            return [vi/vec[-1] for vi in vec[0:3]]
+        else:
+            return vec[0:3]
     if l == 3: return vec
     if l == 2: return [vec[0], vec[1], 0.0] 
     if l == 1: return [vec[0], 0.0, 0.0]
@@ -203,6 +208,20 @@ def parseCustomMaterialAttribute(tag, attribute, parentMaterial, type):
             spheresDrawTag.find('boolean').text
     else:
         return parentMaterial[attribute]
+
+
+def createTexture(tag, baseName):
+    imageWidth = int(tag.get('width'))
+    imageHeight = int(tag.get('height'))
+    imageString = base64.b64decode(tag.text)
+    imageDataByte = zlib.decompress(imageString)
+    imageDataFloat = [b/255.0 for b in imageDataByte]
+    texture = bpy.data.textures.new(name=baseName + ' Texture', type='IMAGE')
+    image = bpy.data.images.new(name=baseName + ' Image', width=imageWidth, height=imageHeight, alpha=True, float_buffer=False)
+    image.pixels = imageDataFloat
+    image.pack(as_png=True)
+    texture.image = image
+    return texture
 
 
 def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
@@ -392,17 +411,22 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     if textureImageTag is not None:
         imageDataTag = textureImageTag.find('ImageData')
         imageDataTag = resolveReference(treeRoot, imageDataTag, rootPath + "/attribute[@name='polygonShader.texture2d:image']/ImageData")
-        imageWidth = int(imageDataTag.get('width'))
-        imageHeight = int(imageDataTag.get('height'))
-        imageString = base64.b64decode(imageDataTag.text)
-        imageDataByte = zlib.decompress(imageString)
-        imageDataFloat = [b/255.0 for b in imageDataByte]
-        texture = bpy.data.textures.new(name=name + ' Texture', type='IMAGE')
+        if imageDataTag in tagToTexture:
+            texture = tagToTexture[imageDataTag]
+        else:
+            texture = createTexture(imageDataTag, name)
+            tagToTexture[imageDataTag] = texture
         material.texture_slots[0].texture = texture
-        image = bpy.data.images.new(name=name + ' Image', width=imageWidth, height=imageHeight, alpha=True, float_buffer=False)
-        image.pixels = imageDataFloat
-        image.pack(as_png=True)
-        texture.image = image
+        material.texture_slots[0].texture_coords = 'UV'
+        material.texture_slots[0].uv_layer = 'Texture Coordinates'
+       
+    # texture matrix
+    textureMatrixTag = tag.find("attribute[@name='polygonShader.texture2d:textureMatrix']") 
+    if textureMatrixTag is not None:
+        textureMatrix = parseMatrix(textureMatrixTag.find('Matrix'))
+    else:
+        textureMatrix = parentMaterial['polygonShader.texture2d:textureMatrix']      
+    material['polygonShader.texture2d:textureMatrix'] = textureMatrix   
        
     # skin tubes
     useSkinTubesTag = tag.find("attribute[@name='lineShader.blender.useSkinTubes']")  
@@ -634,8 +658,19 @@ def createSkinTubes(geometryObject, material):
     material.diffuse_color = material['lineShader.diffuseColor']
     
     
+def applyTextureMatrix(mesh, material):
+    T = Matrix(material['polygonShader.texture2d:textureMatrix'])
+    for uv in mesh.uv_layers['Texture Coordinates'].data:
+        uv2 = T * Vector([uv.uv[0], uv.uv[1], 0, 1])
+        uv.uv = [uv2[0] / uv2[3], uv2[1] / uv2[3]]
+    
+    
 def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
+    originalTag = tag
     tag = resolveReference(treeRoot, tag, rootPath);
+    if originalTag != tag:
+        rootPath = resolveReferencePath(treeRoot, originalTag, rootPath);
+        print('new root path: ', rootPath)
     name = tag[0].text
     obj = bpy.data.objects.new(name, None)
     if not visible:
@@ -668,6 +703,8 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
         showFaces = bool(effectiveMaterial['showFaces'])
         geometry.hide = obj.hide or not (showFaces or useSkinTubes)
         geometry.hide_render = geometry.hide
+        if 'Texture Coordinates' in geometry.data.uv_layers:
+            applyTextureMatrix(geometry.data, effectiveMaterial)
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
         geometry.material_slots[0].link = 'OBJECT'
@@ -706,6 +743,7 @@ def createDefaultMaterial():
     mtl['showFaces'] = True
     mtl['radiiWorldCoordinates'] = False
     mtl['polygonShader.smoothShading'] = True
+    mtl['polygonShader.texture2d:textureMatrix'] = Matrix()
     mtl['pointShader.spheresDraw'] = True
     mtl['pointShader.diffuseColor'] = [0.0, 0.0, 1.0]
     mtl['pointShader.radiiWorldCoordinates'] = False

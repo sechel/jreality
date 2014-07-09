@@ -97,7 +97,7 @@ public class ReaderOBJ extends AbstractReader {
 	 * In an obj-file multiple texture and normal coordinates may be specified.
 	 * These are ignored depending on the value of this parameter. 
 	 */
-	private boolean useMultipleTexAndNormalCoords = false;
+	private boolean useMultipleTexAndNormalCoords = true;
 	
 
 	public boolean isUseMultipleTexAndNomalCoords() {

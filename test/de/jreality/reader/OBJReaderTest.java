@@ -130,8 +130,11 @@ public class OBJReaderTest extends TestCase {
     		"f 1/1 2/2 3/3";
     	ByteArrayInputStream in = new ByteArrayInputStream(objData.getBytes());
     	ReaderOBJ o = new ReaderOBJ();
+    	o.setUseMultipleTexAndNormalCoords(false);
     	IndexedFaceSet g = (IndexedFaceSet)SceneGraphUtility.getFirstGeometry(o.read(new Input("Direct String Data", in)));
+    	DataList c = g.getVertexAttributes(Attribute.COORDINATES);
     	DataList tc = g.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    	Assert.assertNotNull(c);
     	Assert.assertNotNull(tc);
     }
 

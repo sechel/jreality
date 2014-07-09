@@ -12,8 +12,9 @@ import static de.jreality.shader.CommonAttributes.SPHERES_DRAW;
 import static de.jreality.shader.CommonAttributes.TUBES_DRAW;
 import static de.jreality.shader.CommonAttributes.TUBE_RADIUS;
 import static de.jreality.shader.CommonAttributes.VERTEX_DRAW;
-import static de.jreality.writer.blender.BlenderAttributes.BLENDER_USESKINTUBES;
+import static de.jreality.writer.blender.BlenderAttributes.BLENDER_USE_SKINTUBES;
 import static java.awt.Color.WHITE;
+import static java.lang.Math.PI;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -27,6 +28,7 @@ import javax.imageio.ImageIO;
 import de.jreality.geometry.IndexedFaceSetUtility;
 import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
+import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
 import de.jreality.plugin.JRViewer;
 import de.jreality.reader.ReaderOBJ;
@@ -36,11 +38,6 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.PointLight;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
-import de.jreality.scene.Viewer;
-import de.jreality.scene.data.Attribute;
-import de.jreality.scene.data.DoubleArray;
-import de.jreality.scene.data.IntArray;
-import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.ImageData;
 import de.jreality.shader.TextureUtility;
 import de.jreality.writer.WriterJRS;
@@ -127,7 +124,7 @@ public class BlenderTestScene2 {
 		skinApp.setAttribute(EDGE_DRAW, true);
 		skinApp.setAttribute(LINE_SHADER + "." + TUBES_DRAW, true);
 		skinApp.setAttribute(LINE_SHADER + "." + DIFFUSE_COLOR, new Color(0.1f, 0.6f, 0.2f));
-		skinApp.setAttribute(LINE_SHADER + "." + BLENDER_USESKINTUBES, true);
+		skinApp.setAttribute(LINE_SHADER + "." + BLENDER_USE_SKINTUBES, true);
 		skinApp.setAttribute(LINE_SHADER + "." + TUBE_RADIUS,	0.05);
 		skinApp.setAttribute(FACE_DRAW, false);
 		skinTubeComponent.setAppearance(skinApp);
@@ -142,6 +139,7 @@ public class BlenderTestScene2 {
 		
 		ReaderOBJ robj = new ReaderOBJ();
 		SceneGraphComponent torusRoot = robj.read(BlenderTestScene2.class.getResource("torus.obj"));
+		torusRoot.setName("Textured Torus");
 		MatrixBuilder.euclidean().translate(-2, -1, 0).scale(0.1).assignTo(torusRoot);
 		Appearance texApp2 = new Appearance("Quad Texture Appearance");
 		texApp2.setAttribute(POLYGON_SHADER + '.' + DIFFUSE_COLOR, WHITE);
@@ -150,8 +148,21 @@ public class BlenderTestScene2 {
 		texApp2.setAttribute(VERTEX_DRAW, false);
 		Image imageQuads = ImageIO.read(BlenderTestScene2.class.getResource("quads01.png"));
 		TextureUtility.createTexture(texApp2, POLYGON_SHADER, new ImageData(imageQuads));
+		texApp2.setAttribute("polygonShader.texture2d:textureMatrix", new Matrix(new double[]{
+			16.1100, 0.00000, 0.00000, 1.17603,
+			0.00000, 16.1900, 0.00000, 0.129520,
+			0.00000, 0.00000, 1.00000, 0.00000,
+			0.00000, 0.00000, 0.00000, 1.00000
+		}));
 		torusRoot.setAppearance(texApp2);
 		root.addChild(torusRoot);
+		
+		robj = new ReaderOBJ();
+		SceneGraphComponent catRoot = robj.read(BlenderTestScene2.class.getResource("cathead_conformal.obj"));
+		catRoot.setName("Homogeneously Textured Cat");
+		catRoot.setAppearance(texApp2);
+		MatrixBuilder.euclidean().rotate(-PI/2, 1, 0, 0).translate(2, -1, 0).scale(1).assignTo(catRoot);
+		root.addChild(catRoot);
 		
 		SceneGraphPath camPath = new SceneGraphPath(root, cameraRoot, cam);
 		
@@ -160,9 +171,7 @@ public class BlenderTestScene2 {
 		v.addContentUI();
 		v.addBasicUI();
 		v.setContent(root);
-		v.startup();
-//		Viewer v = JRViewer.display(root);
-//		v.setCameraPath(camPath);
+//		v.startup();
 		
 		JrScene scene = new JrScene(root);
 		scene.addPath("cameraPath", camPath);
