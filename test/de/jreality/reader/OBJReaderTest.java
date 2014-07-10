@@ -46,8 +46,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 
-import junit.framework.TestCase;
-
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.jreality.scene.Appearance;
@@ -65,12 +65,8 @@ import de.jreality.util.LoggingSystem;
  * @author weissman
  *
  */
-public class OBJReaderTest extends TestCase {
+public class OBJReaderTest {
 
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(OBJReaderTest.class);
-    }
-	
 	public void setUp() {
        LoggingSystem.getLogger(ParserMTL.class).setLevel(Level.OFF);
 	}
@@ -79,13 +75,14 @@ public class OBJReaderTest extends TestCase {
        LoggingSystem.getLogger(ParserMTL.class).setLevel(null);
 	}
 
+	@Ignore("File not committed")@Test
     public void testOBJReader() throws Exception {
         //String fileName = "/home/gollwas/bolt1.obj";
         //String fileName = "/home/gollwas/cube2.obj";
         URL url = this.getClass().getResource("square.obj");
         SceneGraphComponent sgc = new ReaderOBJ().read(url); 
-        assertEquals("sgc 0", sgc.getName());
-        assertEquals("[len=4 storage=double[][3]]", 
+        Assert.assertEquals("sgc 0", sgc.getName());
+        Assert.assertEquals("[len=4 storage=double[][3]]", 
         	sgc.getChildComponent(0).getGeometry().getAttributes(Geometry.CATEGORY_VERTEX, Attribute.COORDINATES).toString());
     }
     
@@ -94,10 +91,11 @@ public class OBJReaderTest extends TestCase {
 //        SceneGraphComponent sgc = new Reader3DS().read(new File(fileName)); 
 //    }
 
+	@Test
     public void testMTLReader() throws Exception {
         URL url = this.getClass().getResource("vp.mtl");
         List<?> list = ParserMTL.readAppearences(Input.getInput(url));
-        assertEquals("baerFinal", ((Appearance) list.get(0)).getName());
+        Assert.assertEquals("baerFinal", ((Appearance) list.get(0)).getName());
     }
     
     @Test
