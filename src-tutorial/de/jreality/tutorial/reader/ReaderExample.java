@@ -5,6 +5,7 @@ import java.net.URL;
 
 import de.jreality.plugin.JRViewer;
 import de.jreality.plugin.JRViewer.ContentType;
+import de.jreality.reader.ReaderOBJ;
 import de.jreality.reader.Readers;
 import de.jreality.scene.SceneGraphComponent;
 
@@ -17,12 +18,17 @@ import de.jreality.scene.SceneGraphComponent;
  */
 public class ReaderExample {
 
+	/**
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		
 		// register the reader class for the DEMO-format
 		Readers.registerReader("DEMO", DemoReader.class);
+		Readers.registerReader("OBJ", ReaderOBJ.class);
 		// register the file ending .demo for files containing DEMO-format data
 		Readers.registerFileEndings("DEMO", "demo");
+		Readers.registerFileEndings("OBJ", "obj");
 		
 		// load the sample file:
 		//
