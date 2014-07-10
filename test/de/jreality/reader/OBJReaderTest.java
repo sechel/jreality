@@ -40,22 +40,28 @@
 
 package de.jreality.reader;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 
 import junit.framework.TestCase;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
 import de.jreality.util.Input;
 import de.jreality.util.LoggingSystem;
+import de.jreality.util.SceneGraphUtility;
 
 
 /**
@@ -111,5 +117,25 @@ public class OBJReaderTest extends TestCase {
 		ReaderOBJ reader = new ReaderOBJ();
 		reader.read(testFile);
 	}
+    
+    
+    @Test public void testReadTextureCoordinates() throws Exception {
+    	String objData = 
+    		"v 0 0 0\n" + 
+    		"v 0 0 1\n" + 
+    		"v 1 1 0\n" +
+    		"vt 0 0\n" +
+    		"vt 0 1\n" +
+    		"vt 1 1\n" +
+    		"f 1/1 2/2 3/3";
+    	ByteArrayInputStream in = new ByteArrayInputStream(objData.getBytes());
+    	ReaderOBJ o = new ReaderOBJ();
+    	o.setUseMultipleTexAndNormalCoords(false);
+    	IndexedFaceSet g = (IndexedFaceSet)SceneGraphUtility.getFirstGeometry(o.read(new Input("Direct String Data", in)));
+    	DataList c = g.getVertexAttributes(Attribute.COORDINATES);
+    	DataList tc = g.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    	Assert.assertNotNull(c);
+    	Assert.assertNotNull(tc);
+    }
 
 }

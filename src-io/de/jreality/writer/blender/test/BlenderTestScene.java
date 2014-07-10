@@ -192,7 +192,7 @@ public class BlenderTestScene {
 		Random rnd = new Random(0);
 		for (int i = 0; i < pointData.length; i++) {
 			pointData[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
-			pointRadiusData[i] = rnd.nextGaussian();
+			pointRadiusData[i] = rnd.nextDouble() * 3;
 		}
 		psf.setVertexCoordinates(pointData);
 		psf.setVertexRelativeRadii(pointRadiusData);
@@ -211,8 +211,8 @@ public class BlenderTestScene {
 		double[][] catEdgeColor = new double[cat.getNumEdges()][];
 		double[] catEdgeRadiusData = new double[cat.getNumEdges()];
 		for (int i = 0; i < catEdgeColor.length; i++) {
-			catEdgeColor[i] = new double[]{rnd.nextGaussian(), rnd.nextGaussian(), rnd.nextGaussian(), 1.0};
-			catEdgeRadiusData[i] = rnd.nextGaussian();
+			catEdgeColor[i] = new double[]{rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble(), 1.0};
+			catEdgeRadiusData[i] = rnd.nextDouble() * 3;
 		}
 		cat.setEdgeAttributes(COLORS, DOUBLE_ARRAY.array(3).createReadOnly(catEdgeColor));
 		cat.setEdgeAttributes(RELATIVE_RADII, new DoubleArray(catEdgeRadiusData));
