@@ -1,11 +1,9 @@
 package de.jreality.reader.obj;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.IndexedFaceSetUtility;

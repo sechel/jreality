@@ -1,9 +1,12 @@
 package de.jreality.reader;
 
+import static de.jreality.reader.TestUtils.testDoubleArrayArray;
+import static de.jreality.reader.TestUtils.testEdgeIndices;
+import static de.jreality.reader.TestUtils.testIntArrayArray;
+import static de.jreality.reader.TestUtils.testVertexCoordinates;
+
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,38 +61,15 @@ public class ReaderOBJTest {
         IndexedFaceSet ifs = (IndexedFaceSet) sgc.getChildComponent(0).getGeometry();
         
         double[][] vertices = { {0,0,0}, {0,1,0}, {1,0,0}, {1,1,0} };
-		testVertexCoordinates(vertices, ifs);
+		testVertexCoordinates(vertices, ifs, delta);
         
         int[] faces = {0,1,2,3};
         Assert.assertArrayEquals(faces, ifs.getFaceAttributes(Attribute.INDICES).toIntArray(null));
         
-        int[][] edges = {{0,1},{1,2},{2,3},{3,0}};
-        int[][] edgesIFS = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-        
-        Assert.assertEquals(edges.length, edgesIFS.length);
-        
-        for(int i = 0; i < edges.length; ++i) {
-        	Arrays.sort(edges[i]);
-        	Arrays.sort(edgesIFS[i]);
-        }
-        Comparator<int[]> cmp = new Comparator<int[]>() {
-			@Override
-			public int compare(int[] o1, int[] o2) {
-				for(int i = 0; i < o1.length; ++i) {
-					if(o1[i] != o2[i]) {
-						return o1[i] - o2[i];
-					}
-				}
-				return 0;
-			}};
-        Arrays.sort(edges,cmp);
-        Arrays.sort(edgesIFS, cmp);
-        
-        for(int i = 0; i < edges.length; ++i) {
-        	Assert.assertArrayEquals(edges[i], edgesIFS[i]);
-        }
+        int[][] edges = {{0,1},{1,2},{2,3},{0,3}};
+        testEdgeIndices(edges, ifs);
 	}
-	
+
 	@Test
 	public void testUseAllRead() throws IOException{
 		URL url = this.getClass().getResource("tri_4verts.obj");
@@ -98,39 +78,14 @@ public class ReaderOBJTest {
         reader.read(url);
         SceneGraphComponent sgc = reader.getComponent();
         IndexedFaceSet ifs = (IndexedFaceSet) sgc.getChildComponent(0).getGeometry();
-        double[] vertices = { 0,0,0,0,1,0,1,0,0};
-        
-        
-        Assert.assertArrayEquals(vertices, ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null), delta);
+        double[][] vertices = { {0,0,0} , {0,1,0} , {1,0,0}};
+        testVertexCoordinates(vertices, ifs, delta);
         
         int[] faces = {0,1,2};
         Assert.assertArrayEquals(faces, ifs.getFaceAttributes(Attribute.INDICES).toIntArray(null));
         
-        int[][] edges = {{0,1},{1,2},{2,0}};
-        int[][] edgesIFS = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-        
-        Assert.assertEquals(edges.length, edgesIFS.length);
-        
-        for(int i = 0; i < edges.length; ++i) {
-        	Arrays.sort(edges[i]);
-        	Arrays.sort(edgesIFS[i]);
-        }
-        Comparator<int[]> cmp = new Comparator<int[]>() {
-			@Override
-			public int compare(int[] o1, int[] o2) {
-				for(int i = 0; i < o1.length; ++i) {
-					if(o1[i] != o2[i]) {
-						return o1[i] - o2[i];
-					}
-				}
-				return 0;
-			}};
-        Arrays.sort(edges,cmp);
-        Arrays.sort(edgesIFS, cmp);
-        
-        for(int i = 0; i < edges.length; ++i) {
-        	Assert.assertArrayEquals(edges[i], edgesIFS[i]);
-        }
+        int[][] edges = {{0,1},{1,2},{0,2}};
+        testEdgeIndices(edges, ifs);
 	}
 	
 	@Test
@@ -143,17 +98,14 @@ public class ReaderOBJTest {
         reader.read(url);
         SceneGraphComponent sgc = reader.getComponent();
         IndexedFaceSet ifs = (IndexedFaceSet) sgc.getChildComponent(0).getGeometry();
-        double[] vertices = { 0,0,0,0,1,0,1,0,0 };
+        double[][] vertices = { {0,0,0},{0,1,0},{1,0,0} };
+        testVertexCoordinates(vertices, ifs, delta);
         
-        Assert.assertArrayEquals(vertices, ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null), delta);
+        int[][] faces = {{0,1,2}};
+        Assert.assertArrayEquals(faces, ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null));
         
-        int[] faces = {0,1,2};
-        Assert.assertArrayEquals(faces, ifs.getFaceAttributes(Attribute.INDICES).toIntArray(null));
-        
-        int[][] edges = {{0,1},{1,2},{2,0}};
-        int[][] edgesIFS = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-        
-        testIntArrayArray(edges, edgesIFS);
+        int[][] edges = {{0,1},{1,2},{0,2}};
+        testEdgeIndices(edges, ifs);
 	}
 	
 	@Test
@@ -194,9 +146,7 @@ public class ReaderOBJTest {
         Assert.assertArrayEquals(faces, ifs.getFaceAttributes(Attribute.INDICES).toIntArray(null));
         
         int[][] edges = {{0,1,2,3}};
-        int[][] edgesIFS = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-        
-        testIntArrayArray(edges, edgesIFS);
+        testEdgeIndices(edges, ifs);
 	}
 	
 	@Test
@@ -209,20 +159,19 @@ public class ReaderOBJTest {
         reader.read(url);
         SceneGraphComponent sgc = reader.getComponent();
         IndexedFaceSet ifs = (IndexedFaceSet) sgc.getChildComponent(0).getGeometry();
-        double[][] vertices = { {0,0,0},{0,1,0},{1,0,0},{1,1,0},{0,1,0},{1,0,0} };
-        testVertexCoordinates(vertices, ifs);
+        double[][] vertices = { {0,0,0},{0,1,0},{1,0,0},{0,1,0},{1,0,0},{1,1,0} };
+        testVertexCoordinates(vertices, ifs, delta);
         
         int[][] faces = {{0,1,2},{3,4,5}};
         int[][] facesIFS = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
         testIntArrayArray(faces, facesIFS);
         
-        int[][] edges = {{0,1},{1,2},{2,0},{3,4},{4,5},{3,5}};
-        int[][] edgesIFS = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-        testIntArrayArray(edges, edgesIFS);
+        int[][] edges = {{0,1},{1,2},{0,2},{3,4},{4,5},{3,5}};
+        testEdgeIndices(edges, ifs);
         
         double[][] texCoords = {{0,0,0},{0,1,0},{1,0,0},{0,0,0},{0,1,0},{1,0,0}};
         double[][] texIFS = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
-        testDoubleArrayArray(texCoords,texIFS);
+        testDoubleArrayArray(texCoords,texIFS, delta);
 	}
 
 	@Test
@@ -236,74 +185,18 @@ public class ReaderOBJTest {
         SceneGraphComponent sgc = reader.getComponent();
         IndexedFaceSet ifs = (IndexedFaceSet) sgc.getChildComponent(0).getGeometry();
         double[][] vertices = { {0,0,0},{0,1,0},{1,0,0},{1,1,0}};
-        testVertexCoordinates(vertices, ifs);
+        testVertexCoordinates(vertices, ifs, delta);
         
         int[][] faces = {{0,1,2},{1,2,3}};
         int[][] facesIFS = ifs.getFaceAttributes(Attribute.INDICES).toIntArrayArray(null);
         testIntArrayArray(faces, facesIFS);
         
-        int[][] edges = {{0,1},{1,2},{2,0},{2,3},{3,1}};
-        int[][] edgesIFS = ifs.getEdgeAttributes(Attribute.INDICES).toIntArrayArray(null);
-        testIntArrayArray(edges, edgesIFS);
+        int[][] edges = {{0,1},{1,2},{0,2},{2,3},{1,3}};
+        testEdgeIndices(edges, ifs);
         
         double[][] texture = {{0,0,0},{0,1,0},{1,0,0},{1,0,0}};
         double[][] textureIFS = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
-        testDoubleArrayArray(texture, textureIFS);
-	}
-	
-	private void testVertexCoordinates(double[][] vertices, IndexedFaceSet ifs) {
-        double[][] verticesIFS = ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArrayArray(null);
-		Assert.assertEquals(vertices.length, verticesIFS.length);
-		
-		Comparator<double[]> cmp = new Comparator<double[]>() {
-			@Override
-			public int compare(double[] o1, double[] o2) {
-				for(int i = 0; i < o1.length; ++i) {
-					if(o1[i] != o2[i]) {
-						return Double.compare(o1[i], o2[i]);
-					}
-				}
-				return 0;
-			}};
-			
-        Arrays.sort(vertices, cmp);
-        Arrays.sort(verticesIFS,cmp);
-        for(int i = 0; i < vertices.length; ++i) {
-        	Assert.assertArrayEquals(vertices[i], verticesIFS[i], delta);
-        }
-	}
-	
-	private void testIntArrayArray(int[][] edges, int[][] edgesIFS) {
-		Assert.assertEquals(edges.length, edgesIFS.length);
-        
-        for(int i = 0; i < edges.length; ++i) {
-        	Arrays.sort(edges[i]);
-        	Arrays.sort(edgesIFS[i]);
-        }
-        Comparator<int[]> cmp = new Comparator<int[]>() {
-			@Override
-			public int compare(int[] o1, int[] o2) {
-				for(int i = 0; i < o1.length; ++i) {
-					if(o1[i] != o2[i]) {
-						return o1[i] - o2[i];
-					}
-				}
-				return 0;
-			}};
-        Arrays.sort(edges,cmp);
-        Arrays.sort(edgesIFS, cmp);
-        
-        for(int i = 0; i < edges.length; ++i) {
-        	Assert.assertArrayEquals(edges[i], edgesIFS[i]);
-        }
-	}
-	
-	private void testDoubleArrayArray(double[][] coords, double[][] coordsIFS) {
-		Assert.assertEquals(coords.length, coordsIFS.length);
-        
-        for(int i = 0; i < coords.length; ++i) {
-        	Assert.assertArrayEquals(coords[i], coordsIFS[i],1E-10);
-        }
+        testDoubleArrayArray(texture, textureIFS, delta);
 	}
 
 }
