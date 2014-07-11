@@ -42,12 +42,15 @@ package de.jreality.reader;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.logging.LogManager;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -58,7 +61,6 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.DataList;
 import de.jreality.util.Input;
-import de.jreality.util.LoggingSystem;
 import de.jreality.util.SceneGraphUtility;
 
 
@@ -71,12 +73,14 @@ import de.jreality.util.SceneGraphUtility;
  */
 public class OBJReaderTest {
 
+	@Before
 	public void setUp() {
-       LoggingSystem.getLogger(ParserMTL.class).setLevel(Level.OFF);
-	}
-
-	public void tearDown() {
-       LoggingSystem.getLogger(ParserMTL.class).setLevel(null);
+		try {
+			LogManager.getLogManager().readConfiguration(new FileInputStream( new File("test_logging.properties")));
+		} catch (IOException e) {
+			System.out.println("File test_logging.properties not found.");
+			// You can customize log levels in test_logging.properties file.
+		} 
 	}
 
 	@Ignore("File not committed")@Test

@@ -18,8 +18,6 @@ class OBJGroup {
 		name = "NN";
 	private Appearance 
 		material = ParserMTL.createDefault();
-	private boolean 
-		smooth = false;
 	private List<OBJVertex> 
 		points = new ArrayList<OBJVertex>();
 	private List<List<OBJVertex>> 
@@ -49,28 +47,6 @@ class OBJGroup {
 		return name;
 	}
 
-//	void addFace(int[] verts, int[] texs, int[] norms) {
-//		int[] face = new int[verts.length];
-//		for (int i = 0; i < verts.length; i++) {
-//			if(!useMultipleTexAndNormalCoords) {
-//				face[i] = vd.getID(verts[i], -1, -1);
-//			} else {
-//				face[i] = vd.getID(verts[i], texs[i], norms[i]);
-//			}
-//		}
-//		faces.add(face);
-//	}
-	
-	void setSmoothening(boolean smoothShading) {
-		// TODO: check what smoothening should do...
-		if (true) {
-			return;
-		}
-//		smooth = smoothShading;
-//		material.setAttribute(CommonAttributes.POLYGON_SHADER + "."
-//				+ CommonAttributes.SMOOTH_SHADING, smooth);
-	}
-
 	public boolean hasGeometry() {
 		return faces.size() > 0 || lines.size() > 0 || points.size() > 0;
 	}
@@ -85,7 +61,6 @@ class OBJGroup {
 			String aName = (String) i.next();
 			material.setAttribute(aName, a.getAttribute(aName));
 		}
-		setSmoothening(smooth);
 	}
 
 	public Appearance getMaterial() {

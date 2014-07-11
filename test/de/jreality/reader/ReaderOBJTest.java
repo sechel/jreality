@@ -1,14 +1,19 @@
 package de.jreality.reader;
 
+import static de.jreality.reader.TestUtils.parseString;
 import static de.jreality.reader.TestUtils.testDoubleArrayArray;
 import static de.jreality.reader.TestUtils.testEdgeIndices;
 import static de.jreality.reader.TestUtils.testIntArrayArray;
 import static de.jreality.reader.TestUtils.testVertexCoordinates;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.LogManager;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.jreality.scene.IndexedFaceSet;
@@ -18,6 +23,16 @@ import de.jreality.scene.data.Attribute;
 public class ReaderOBJTest {
 
 	public static double delta = 1E-10;
+	
+	@Before
+	public void readCustomLoggingProperties() {
+		try {
+			LogManager.getLogManager().readConfiguration(new FileInputStream( new File("test_logging.properties")));
+		} catch (IOException e) {
+			System.out.println("File test_logging.properties not found.");
+			// You can customize log levels in test_logging.properties file.
+		} 
+	}
 	
 	@Test
 	public void testPointSetRead() throws IOException{
@@ -198,5 +213,57 @@ public class ReaderOBJTest {
         double[][] textureIFS = ifs.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
         testDoubleArrayArray(texture, textureIFS, delta);
 	}
+	
+	@Test public void testNegativeIndices() throws Exception {
+    	String testGroup = "testGroup";
+		String objData = 
+    		"g "+ testGroup +"\n"+
+    		"v 0 0 0\n" + 
+    		"v 0 0 1\n" + 
+    		"v 1 1 0\n" +
+    		"vt 0 0\n" +
+    		"vt 0 1\n" +
+    		"vt 1 1\n" +
+    		"f -1/1 -2/2 -3/3";
+    	SceneGraphComponent root = parseString(objData);
+    	SceneGraphComponent child = root.getChildComponent(0);
+    	Assert.assertTrue(testGroup.equals(child.getName()));
+		IndexedFaceSet g = (IndexedFaceSet)child.getGeometry();
+    	
+		double[][] vertices = {{1,1,0},{0,0,1},{0,0,0}};
+    	TestUtils.testVertexCoordinates(vertices, g, delta);
+    	double[][] texture = {{0,0},{0,1},{1,1}};
+    	TestUtils.testTextureCoordinates(texture,g,delta);
+    }
+
+	@Test public void testNegativeIndicesTexture() throws Exception {
+    	String testGroup = "testGroup";
+		String objData = 
+    		"g "+ testGroup +"\n"+
+    		"v 0 0 0\n" + 
+    		"v 0 0 1\n" + 
+    		"v 1 1 0\n" +
+    		"vt 0 0\n" +
+    		"vt 0 1\n" +
+    		"vt 1 1\n" +
+    		"f -1/-3 -2/-2 -3/-1";
+    	SceneGraphComponent root = parseString(objData);
+    	SceneGraphComponent child = root.getChildComponent(0);
+    	Assert.assertTrue(testGroup.equals(child.getName()));
+		IndexedFaceSet g = (IndexedFaceSet)child.getGeometry();
+    	
+		double[][] vertices = {{1,1,0},{0,0,1},{0,0,0}};
+    	TestUtils.testVertexCoordinates(vertices, g, delta);
+    	double[][] texture = {{0,0},{0,1},{1,1}};
+    	TestUtils.testTextureCoordinates(texture,g,delta);
+    }
+
+	@Test public void testIgnoreTag() throws Exception {
+		String objData = 
+    		"k 0 0 0\n" + 
+    		"k 0 0 1";
+    	SceneGraphComponent root = parseString(objData);
+    	Assert.assertEquals(root.getChildComponentCount(), 0);
+    }
 
 }

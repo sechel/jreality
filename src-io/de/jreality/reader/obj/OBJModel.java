@@ -13,11 +13,10 @@ import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
 import de.jreality.scene.data.StorageModel;
-import de.jreality.util.LoggingSystem;
 
 public class OBJModel {
 	
-	private static Logger logger = LoggingSystem.getLogger(OBJModel.class.getSimpleName());
+	private static Logger logger = Logger.getLogger(OBJModel.class.getSimpleName());
 
 	private HashMap<String, OBJGroup> groups = new HashMap<String, OBJGroup>();
 	private List<OBJGroup> activeGroups = new LinkedList<OBJGroup>();
@@ -106,7 +105,7 @@ public class OBJModel {
 			if (g.hasGeometry()) {
 				cps.add(createComponent(g,useMultipleTexAndNormalCoords,generateEdgesFromFaces));
 			} else {
-				LoggingSystem.getLogger(this).fine("Ignoring group " + g.getName() + " [has no geometry]");
+				logger.fine("Ignoring group " + g.getName() + " [has no geometry]");
 			}
 		}
 		return cps;

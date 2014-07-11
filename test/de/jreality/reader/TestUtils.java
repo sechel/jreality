@@ -1,12 +1,14 @@
 package de.jreality.reader;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.junit.Assert;
 
 import de.jreality.scene.IndexedFaceSet;
+import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
+import de.jreality.util.Input;
 
 public class TestUtils {
 
@@ -56,6 +58,14 @@ public class TestUtils {
 	public static void testTextureCoordinates(double[][] texture, IndexedFaceSet g, double delta) {
 		double[][] textureIFS = g.getVertexAttributes(Attribute.TEXTURE_COORDINATES).toDoubleArrayArray(null);
 		testDoubleArrayArray(texture, textureIFS, delta);
+	}
+	
+	public static SceneGraphComponent parseString(String objData) throws IOException {
+		ByteArrayInputStream stream = new ByteArrayInputStream(objData.getBytes());
+		Input input = new Input("Direct String Data", stream);
+		ReaderOBJ o = new ReaderOBJ();
+        SceneGraphComponent root = o.read(input);
+		return root;
 	}
 
 }

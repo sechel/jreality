@@ -56,20 +56,19 @@ import de.jreality.reader.obj.OBJVertex;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
-import de.jreality.util.LoggingSystem;
 
 /**
  * 
  * simple reader for the OBJ file format.
  * 
- * smoothening group support is poor (what is a smoothining group?)
+ * smoothening group support is removed
  * 
- * @author weissman
+ * @author weissman, roerig
  * 
  */
 public class ReaderOBJ extends AbstractReader {
 
-	private static Logger logger = LoggingSystem.getLogger(ReaderOBJ.class.getSimpleName());
+	private static Logger logger = Logger.getLogger(ReaderOBJ.class.getSimpleName());
 	
 	/**
 	 * If true the edges of the indexed face set are generated automatically. 
@@ -121,7 +120,7 @@ public class ReaderOBJ extends AbstractReader {
 				if (word.equalsIgnoreCase("v")) { // vertex
 					double[] coords = OBJParserUtils.parseDoubleArray(st);
 					if (coords.length != 3 && coords.length != 4 ) {
-						System.err.println("vertex coordinates must have dimension 3 or 4");
+						logger.warning("Vertex coordinates must have dimension 3 or 4");
 					} else {
 						model.addVertexCoords(coords);
 					}
@@ -133,8 +132,8 @@ public class ReaderOBJ extends AbstractReader {
 				}
 				if (word.equalsIgnoreCase("vn")) { // vertex normal
 					double[] n = OBJParserUtils.parseDoubleArray(st);
-					if (n.length > 3) {
-						System.err.println("vertex normal must have dimension 3");
+					if (n.length != 3) {
+						logger.warning("vertex normal must have dimension 3");
 					} else {
 						model.addNormalCoords(n);
 					}
@@ -143,7 +142,7 @@ public class ReaderOBJ extends AbstractReader {
 				if (word.equalsIgnoreCase("vt")) { // vertex texture coordinate
 					double[] tex = OBJParserUtils.parseDoubleArray(st);
 					if (tex.length > 4) {
-						System.err.println("texture coordinates must have dimension <= 4");
+						logger.warning("Texture coordinates must have dimension <= 4");
 					} else {
 						model.addTextureCoords(tex);
 					}
@@ -184,7 +183,7 @@ public class ReaderOBJ extends AbstractReader {
 								model.addMaterial(a);
 							}
 						} catch (FileNotFoundException fnfe) {
-							logger.info("Couldn't find material file: " + fileName);
+							logger.warning("Couldn't find material file: " + fileName);
 						}
 					}
 					OBJParserUtils.globalSyntax(st);
@@ -196,7 +195,7 @@ public class ReaderOBJ extends AbstractReader {
 					model.useMaterial(mtlName);
 					continue;
 				}
-				logger.fine("Unhandled tag: " + word);
+				logger.warning("Unknown tag: " + word);
 				int token = st.nextToken();
 				while (token != TT_EOL && token != TT_EOF) {
 					if (st.ttype == StreamTokenizer.TT_NUMBER)

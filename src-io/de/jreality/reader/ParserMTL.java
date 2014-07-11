@@ -47,12 +47,12 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import de.jreality.scene.Appearance;
 import de.jreality.shader.CommonAttributes;
 import de.jreality.shader.TextureUtility;
 import de.jreality.util.Input;
-import de.jreality.util.LoggingSystem;
 
 
 /**
@@ -65,6 +65,8 @@ import de.jreality.util.LoggingSystem;
  */
 public class ParserMTL {
     
+	private static Logger logger = Logger.getLogger(ParserMTL.class.getSimpleName());
+	
     public static Appearance defaultApp = createDefault();
     
     public static Appearance createDefault() {
@@ -210,12 +212,12 @@ public class ParserMTL {
                     ignoreToken(st);
                     continue;
                 }
-                LoggingSystem.getLogger(this).fine("unknown tag: "+word);
+                logger.warning("Unknown tag: "+word);
                 while (st.nextToken() != StreamTokenizer.TT_EOL) {
                     if (st.ttype == StreamTokenizer.TT_NUMBER) 
-                    	LoggingSystem.getLogger(this).fine("["+st.nval+","+st.sval+","+st.ttype+"]");
+                    	logger.fine("["+st.nval+","+st.sval+","+st.ttype+"]");
                 }
-                LoggingSystem.getLogger(this).fine("unknown tag: "+word+" end");
+                logger.fine("unknown tag: "+word+" end");
             }
         }
         return ret;
@@ -236,9 +238,9 @@ public class ParserMTL {
         try {
             TextureUtility.createTexture(ret, CommonAttributes.POLYGON_SHADER, input.resolveInput(texFile), false);
         } catch (FileNotFoundException e) {
-        	LoggingSystem.getLogger(this).warning("couldn't find "+texFile);
+        	logger.warning("Couldn't find "+texFile);
         } catch (IOException e) {
-            LoggingSystem.getLogger(this).warning("read error "+texFile);
+            logger.warning("Read error "+texFile);
         }
     }
  
@@ -263,16 +265,16 @@ public class ParserMTL {
         int ix = 0;
         while (st.nextToken() != StreamTokenizer.TT_EOL) {
             if (st.ttype != StreamTokenizer.TT_NUMBER) {
-            	LoggingSystem.getLogger(this).fine("color ignoring token: "+st.sval);
+            	logger.fine("Color ignoring token: "+st.sval);
                 continue;
             }
             if (ix > 2) {
-            	LoggingSystem.getLogger(this).fine("ignoring "+(ix+1)+"th color coord.");
+            	logger.fine("Ignoring "+(ix+1)+"th color coord.");
                 continue;
             }
             coords[ix++] = st.nval;
         }
-        if (ix < 2) LoggingSystem.getLogger(this).fine("Warning: only "+ix+" color vals read.");
+        if (ix < 2) logger.fine("Only "+ix+" color vals read.");
         Color ret = new Color((float)coords[0], (float)coords[1], (float)coords[2]);
         return ret;
     }
