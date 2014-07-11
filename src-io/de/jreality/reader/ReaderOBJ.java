@@ -39,18 +39,20 @@
 
 package de.jreality.reader;
 
+import static de.jreality.reader.obj.OBJParserUtils.parseVertexList;
 import static java.io.StreamTokenizer.TT_EOF;
 import static java.io.StreamTokenizer.TT_EOL;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StreamTokenizer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import de.jreality.reader.OBJModel.Vertex;
+import de.jreality.reader.obj.OBJModel;
+import de.jreality.reader.obj.OBJParserUtils;
+import de.jreality.reader.obj.OBJVertex;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.util.Input;
@@ -107,45 +109,9 @@ public class ReaderOBJ extends AbstractReader {
 		load();
 	}
 
-	private StreamTokenizer globalSyntax(StreamTokenizer st) {
-		st.resetSyntax();
-		st.eolIsSignificant(true);
-		st.wordChars('0', '9');
-		st.wordChars('A', 'Z');
-		st.wordChars('a', 'z');
-		st.wordChars('_', '_');
-		st.wordChars('.', '.');
-		st.wordChars('-', '-');
-		st.wordChars('+', '+');
-		st.wordChars('\u00A0', '\u00FF');
-		st.whitespaceChars('\u0000', '\u0020');
-		st.commentChar('#');
-		st.ordinaryChar('/');
-		st.parseNumbers();
-		return st;
-	}
-
-	private StreamTokenizer filenameSyntax(StreamTokenizer st) {
-		st.resetSyntax();
-		st.eolIsSignificant(true);
-		st.wordChars('0', '9');
-		st.wordChars('A', 'Z');
-		st.wordChars('a', 'z');
-		st.wordChars('_', '_');
-		st.wordChars('.', '.');
-		st.wordChars('-', '-');
-		st.wordChars('+', '+');
-		st.wordChars('\u00A0', '\u00FF');
-		st.whitespaceChars('\u0000', '\u0020');
-		st.commentChar('#');
-		st.ordinaryChar('/');
-		st.parseNumbers();
-		return st;
-	}
-
 	private void load() throws IOException {
 		StreamTokenizer st = new StreamTokenizer(input.getReader());
-		globalSyntax(st);
+		OBJParserUtils.globalSyntax(st);
 		
 		OBJModel model = new OBJModel();
 		
@@ -153,7 +119,7 @@ public class ReaderOBJ extends AbstractReader {
 			if (st.ttype == StreamTokenizer.TT_WORD) {
 				String word = st.sval;
 				if (word.equalsIgnoreCase("v")) { // vertex
-					double[] coords = ParserUtil.parseDoubleArray(st);
+					double[] coords = OBJParserUtils.parseDoubleArray(st);
 					if (coords.length != 3 && coords.length != 4 ) {
 						System.err.println("vertex coordinates must have dimension 3 or 4");
 					} else {
@@ -166,7 +132,7 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				if (word.equalsIgnoreCase("vn")) { // vertex normal
-					double[] n = ParserUtil.parseDoubleArray(st);
+					double[] n = OBJParserUtils.parseDoubleArray(st);
 					if (n.length > 3) {
 						System.err.println("vertex normal must have dimension 3");
 					} else {
@@ -175,7 +141,7 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				if (word.equalsIgnoreCase("vt")) { // vertex texture coordinate
-					double[] tex = ParserUtil.parseDoubleArray(st);
+					double[] tex = OBJParserUtils.parseDoubleArray(st);
 					if (tex.length > 4) {
 						System.err.println("texture coordinates must have dimension <= 4");
 					} else {
@@ -184,7 +150,7 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				if (word.equalsIgnoreCase("g")) { // grouping
-					List<String> groupNames = ParserUtil.parseStringArray(st);
+					List<String> groupNames = OBJParserUtils.parseStringArray(st);
 					model.setActiveGroups(groupNames);
 					continue;
 				}
@@ -193,23 +159,23 @@ public class ReaderOBJ extends AbstractReader {
 					continue;
 				}
 				if (word.equalsIgnoreCase("p")) { // points v1 v2 v3 ...
-					List<Vertex> points = parseVertexList(st);
+					List<OBJVertex> points = parseVertexList(st);
 					model.addPoints(points);
 					continue;
 				}
 				if (word.equalsIgnoreCase("l")) { // lines v1/vt1 v2/vt2 ...
-					List<Vertex> l = parseVertexList(st);
+					List<OBJVertex> l = parseVertexList(st);
 					model.addLine(l);
 					continue;
 				}
 				if (word.equalsIgnoreCase("f")) { // facet v1/vt1/vn1 v2/vt2/vn2
-					List<Vertex> face = parseVertexList(st);
+					List<OBJVertex> face = parseVertexList(st);
 					model.addFace(face);
 					continue;
 				}
 				if (word.equalsIgnoreCase("mtllib")) { //mtllib filename1 filename2
-					filenameSyntax(st);
-					List<String> mtlfiles = ParserUtil.parseStringArray(st);
+					OBJParserUtils.filenameSyntax(st);
+					List<String> mtlfiles = OBJParserUtils.parseStringArray(st);
 					for(String fileName : mtlfiles) {
 						try {
 							List<Appearance> app = ParserMTL.readAppearences(input.resolveInput(fileName));
@@ -221,11 +187,11 @@ public class ReaderOBJ extends AbstractReader {
 							logger.info("Couldn't find material file: " + fileName);
 						}
 					}
-					globalSyntax(st);
+					OBJParserUtils.globalSyntax(st);
 					continue;
 				}
 				if (word.equalsIgnoreCase("usemtl")) { // facet v1/vt1/vn1
-					List<String> mtlList = ParserUtil.parseStringArray(st);
+					List<String> mtlList = OBJParserUtils.parseStringArray(st);
 					String mtlName = mtlList.get(0);
 					model.useMaterial(mtlName);
 					continue;
@@ -250,48 +216,5 @@ public class ReaderOBJ extends AbstractReader {
 	private void ignoreTag(StreamTokenizer st) throws IOException {
 		while (st.nextToken() != StreamTokenizer.TT_EOL)
 			;
-	}
-
-	static Vertex parseVertex(StreamTokenizer st) throws IOException {
-		Vertex v = new OBJModel.Vertex();
-		st.nextToken();
-		v.setVertexIndex((int) st.nval);
-		st.nextToken();
-		if (st.ttype == '/') {
-			st.nextToken();
-			if (st.ttype == StreamTokenizer.TT_NUMBER) {
-				v.setTextureIndex((int) st.nval);
-				st.nextToken();
-			} 
-			if(st.ttype == '/') {
-				st.nextToken();
-				if (st.ttype == StreamTokenizer.TT_NUMBER) {
-					v.setNormalIndex((int) st.nval);
-				}
-			} else {
-				st.pushBack();
-			}
-		} else {
-			st.pushBack();
-		}
-		return v;
-	}
-	
-	static List<Vertex> parseVertexList(StreamTokenizer st) throws IOException {
-		ArrayList<Vertex> v = new ArrayList<Vertex>(3);
-		st.nextToken();
-		while (st.ttype != TT_EOL && st.ttype != TT_EOF) {
-			if (st.ttype == '\\') {
-				st.nextToken(); // the EOL
-				st.nextToken(); // continue parsing in the next line
-				continue;
-			} 
-			else {
-				st.pushBack();
-				v.add(parseVertex(st));
-			}
-			st.nextToken();
-		}
-		return v;
 	}
 }

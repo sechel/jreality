@@ -40,14 +40,7 @@
 
 package de.jreality.reader;
 
-import static java.io.StreamTokenizer.TT_EOF;
-import static java.io.StreamTokenizer.TT_EOL;
-import static java.io.StreamTokenizer.TT_NUMBER;
-
-import java.io.IOException;
 import java.io.StreamTokenizer;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * @author weissman
@@ -77,65 +70,4 @@ public class ParserUtil {
 	    double exp = Double.parseDouble( st.sval.substring(1) );
 	    return number *  Math.pow(10, exp);
 	  }
-
-	public static double[] parseDoubleArray(StreamTokenizer st) throws IOException {
-		List<Double> cList = new LinkedList<Double>();
-		st.nextToken();
-		while (st.ttype == TT_NUMBER || st.ttype == '\\' || st.sval.startsWith("+")) {
-			if (st.ttype == '\\') {
-				st.nextToken(); // the EOL
-				st.nextToken(); // continue parsing in the next line
-				continue;
-			} else if(st.ttype == TT_NUMBER) {
-				st.pushBack();
-				cList.add(ParserUtil.parseNumber(st));
-			} else if(st.sval.startsWith("+")) {
-				cList.add(Double.parseDouble(st.sval.replace("+", "")));
-			}
-			st.nextToken();
-			if(st.ttype == TT_EOF || st.ttype == TT_EOL) {
-				break;
-			}
-		}
-		st.pushBack();
-		double[] coords = new double[cList.size()];
-		for (int i = 0; i < coords.length; i++) {
-			coords[i] = cList.get(i);
-		}
-		return coords;
-	}
-
-	public static List<String> parseStringArray(StreamTokenizer st) throws IOException {
-		List<String> groupNames = new LinkedList<String>();
-		
-		st.nextToken();
-		while(st.ttype != TT_EOL && st.ttype != TT_EOF) {
-			if (st.ttype == '\\') {
-				st.nextToken(); // the EOL
-				st.nextToken(); // continue parsing in the next line
-				continue;
-			} 
-			groupNames.add(st.sval);
-			st.nextToken();
-		}
-		return groupNames;
-	}
-
-	public static List<Integer> parseIntArray(StreamTokenizer st) throws IOException {
-		List<Integer> integers = new LinkedList<Integer>();
-		
-		st.nextToken();
-		while(st.ttype != TT_EOL && st.ttype != TT_EOF) {
-			if (st.ttype == '\\') {
-				st.nextToken(); // the EOL
-				st.nextToken(); // continue parsing in the next line
-				continue;
-			}
-			if(st.ttype == StreamTokenizer.TT_NUMBER) {
-				integers.add((int) st.nval);
-			}
-			st.nextToken();
-		}
-		return integers;
-	}
 }
