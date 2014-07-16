@@ -1,4 +1,4 @@
-package de.reality.plugin.scene;
+package de.jreality.plugin.scene;
 
 import static org.junit.Assert.assertEquals;
 
