@@ -19,7 +19,8 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 	private JButton
 		jobButton1 = new JButton("Queue Job"),
 		jobButton2 = new JButton("Queue Cancelable Job"),
-		jobButton3 = new JButton("Queue No Progress Job");
+		jobButton3 = new JButton("Queue No Progress Job"),
+		blockJobButton = new JButton("Queue Blocker Job");
 	private JobQueuePlugin
 		Q = null;
 	
@@ -29,9 +30,11 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		shrinkPanel.add(jobButton1);
 		shrinkPanel.add(jobButton2);
 		shrinkPanel.add(jobButton3);
+		shrinkPanel.add(blockJobButton);
 		jobButton2.addActionListener(this);
 		jobButton1.addActionListener(this);
 		jobButton3.addActionListener(this);
+		blockJobButton.addActionListener(this);
 	}
 	
 	public static class CancelableTestJob extends AbstractCancelableJob {
@@ -116,6 +119,22 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 		if (jobButton3 == e.getSource()) {
 			Job job = new TestJobWithoutProgress();
 			Q.queueJob(job);
+		}
+		if (blockJobButton == e.getSource()) {
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					BlockerJob blocker = Q.block("Blocker 2sec");
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {}
+					finally {
+						blocker.unblock();
+					}
+				}
+			};
+			Thread t = new Thread(r, "Blocking Thread");
+			t.start();
 		}
 	}
 	

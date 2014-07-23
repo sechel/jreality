@@ -2,7 +2,6 @@ package de.jreality.plugin.job;
 
 import static java.util.Collections.synchronizedList;
 
-import java.awt.EventQueue;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -12,20 +11,20 @@ public class JobProcessorThread extends Thread {
 	private Logger
 		log = Logger.getLogger(JobProcessorThread.class.getName());
 	private Job
-		activeJob = null;
-	private List<JobProcessorListener>
+		nextJob = null;
+	List<JobProcessorListener>
 		listeners = synchronizedList(new LinkedList<JobProcessorListener>());
 	
 	public JobProcessorThread() {
 		super("jReality Job Processor");
 	}
 
-	public void processJob(Job job) {
-		if (Thread.currentThread() == this) {
-			throw new RuntimeException("Cannot invoke processJob() from the job processor thread");
-		}
+	protected void processJob(Job job) {
+//		if (Thread.currentThread() == this) {
+//			throw new RuntimeException("Cannot invoke processJob() from the job processor thread");
+//		}
 		synchronized (this) {
-			activeJob = job;
+			nextJob = job;
 			notifyAll();
 		}
 	}
@@ -34,27 +33,31 @@ public class JobProcessorThread extends Thread {
 	public synchronized void run() {
 		while (true) {
 			try {
-				wait();
+				if (nextJob == null) {
+					wait();
+				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			};
-			fireProcessStarted(activeJob);
+			Job executedJob = nextJob;
+			fireProcessStarted(executedJob);
 			try {
-				activeJob.execute();
+				executedJob.execute();
+				nextJob = null;
 			} catch (Exception e) {
-				fireProcessFailed(e, activeJob);
+				fireProcessFailed(e, executedJob);
 			} catch (Throwable t) {
 				log.severe("Error in job execution: " + t);
-				fireProcessFailed(new Exception("Error in job execution", t), activeJob);
+				fireProcessFailed(new Exception("Error in job execution", t), nextJob);
 			}
-			fireProcessFinished(activeJob);
+			fireProcessFinished(executedJob);
 		}
 	}
 	
-	public void addJobProcessorListener(JobProcessorListener l) {
+	protected void addJobProcessorListener(JobProcessorListener l) {
 		listeners.add(l);
 	}
-	public void removeJobProcessorListener(JobProcessorListener l) {
+	protected void removeJobProcessorListener(JobProcessorListener l) {
 		listeners.remove(l);
 	}
 	
@@ -62,13 +65,7 @@ public class JobProcessorThread extends Thread {
 	protected void fireProcessStarted(final Job job) {
 		synchronized (listeners) {
 			for (final JobProcessorListener l : listeners) {
-				Runnable r = new Runnable() {
-					@Override
-					public void run() {
-						l.processStarted(job);						
-					}
-				};
-				EventQueue.invokeLater(r);
+				l.processStarted(job);						
 			}
 		}
 	}
@@ -76,13 +73,7 @@ public class JobProcessorThread extends Thread {
 	protected void fireProcessFinished(final Job job) {
 		synchronized (listeners) {
 			for (final JobProcessorListener l : listeners) {
-				Runnable r = new Runnable() {
-					@Override
-					public void run() {
-						l.processFinished(job);
-					}
-				};
-				EventQueue.invokeLater(r);
+				l.processFinished(job);
 			}
 		}
 	}
@@ -90,13 +81,7 @@ public class JobProcessorThread extends Thread {
 	protected void fireProcessFailed(final Exception e, final Job job) {
 		synchronized (listeners) {
 			for (final JobProcessorListener l : listeners) {
-				Runnable r = new Runnable() {
-					@Override
-					public void run() {
-						l.processFailed(e, job);
-					}
-				};
-				EventQueue.invokeLater(r);
+				l.processFailed(e, job);
 			}
 		}
 	}
