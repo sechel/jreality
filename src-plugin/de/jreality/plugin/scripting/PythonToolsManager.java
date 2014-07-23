@@ -571,6 +571,7 @@ public class PythonToolsManager extends Plugin implements PreferencesFlavor, Lis
 		c.storeProperty(getClass(), "toolIds", toolIdList);
 	}
 	
+	@Override
 	public void restoreStates(Controller c) throws Exception {
 		super.restoreStates(c);
 		PythonConsole console = c.getPlugin(PythonConsole.class);

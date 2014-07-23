@@ -41,7 +41,7 @@ import de.jtem.jrworkspace.plugin.sidecontainer.SideContainerPerspective;
 import de.jtem.jrworkspace.plugin.sidecontainer.template.ShrinkPanelPlugin;
 
 
-@Experimental
+@Experimental@SuppressWarnings({"rawtypes", "unchecked"})
 public class WebContentLoader extends ShrinkPanelPlugin implements ActionListener {
 
 	private Content 
@@ -87,6 +87,8 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 		loadButton.addActionListener(this);
 	}
 	
+	@SuppressWarnings("deprecation")
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (locationField == e.getSource()) {
 			updateContent();
@@ -183,10 +185,12 @@ public class WebContentLoader extends ShrinkPanelPlugin implements ActionListene
 		private static final long 
 			serialVersionUID = 1L;
 
+		@Override
 		public Object getElementAt(int index) {
 			return content.get(index);
 		}
 
+		@Override
 		public int getSize() {
 			return content.size();
 		}

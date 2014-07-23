@@ -73,6 +73,7 @@ public class ExportMenu extends Plugin implements UIFlavor {
 	}
 	
 	
+	@Override
 	public void mainUIChanged(String uiClass) {
 		SwingUtilities.updateComponentTreeUI(exportPDF.getAccessory());
 	}

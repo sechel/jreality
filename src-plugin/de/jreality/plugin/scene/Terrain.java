@@ -202,6 +202,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		faceColorChooser.getColorPanel().addChangeListener(this);
 	}
 	
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		if (closeButton == s) {
@@ -224,6 +225,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		}
 	}
 	
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		Object s = e.getSource();
 		if (faceReflectionSlider == s) {
@@ -247,6 +249,7 @@ public class Terrain extends Plugin implements ActionListener, ChangeListener, C
 		updateFaceColor();
 	}
 
+	@Override
 	public void colorPickerModeChanged(int mode) {
 		faceColorChooser.setMode(mode);		
 	}

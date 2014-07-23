@@ -36,6 +36,7 @@ import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.flavor.PreferencesFlavor;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class AudioPreferences extends Plugin implements PreferencesFlavor, ActionListener {
 	
 	private static final Integer DEFAULT_FRAME_SIZE = 2048;
@@ -162,6 +163,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		sampleRateCombo.addActionListener(this);
 	}
 	
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object s = e.getSource();
 		if (noSoundChecker == s) {
@@ -241,30 +243,37 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 		return new PluginInfo("Audio Preferences", "jReality Group");
 	}
 
+	@Override
 	public Icon getMainIcon() {
 		return ImageHook.getIcon("audio/sound.png");
 	}
 
+	@Override
 	public String getMainName() {
 		return "Audio";
 	}
 
+	@Override
 	public JPanel getMainPage() {
 		return mainPage;
 	}
 
+	@Override
 	public int getNumSubPages() {
 		return 0;
 	}
 
+	@Override
 	public JPanel getSubPage(int i) {
 		return null;
 	}
 
+	@Override
 	public Icon getSubPageIcon(int i) {
 		return null;
 	}
 
+	@Override
 	public String getSubPageName(int i) {
 		return null;
 	}
@@ -346,6 +355,7 @@ public class AudioPreferences extends Plugin implements PreferencesFlavor, Actio
 	
 	protected Preferences getPreferences(final String nodeName) {
 		return Secure.doPrivileged(new PrivilegedAction<Preferences>() {
+			@Override
 			public Preferences run() {
 				return Preferences.userNodeForPackage(getClass()).node(nodeName);
 			}
