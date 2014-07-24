@@ -5,6 +5,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 
 import javax.swing.JScrollPane;
@@ -91,6 +94,8 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener, S
 		this.controller = c;
 		createLayout();
 		c.getPlugin(View.class).getSelectionManager().addSelectionListener(this);
+		System.setOut(new PrintStream(new ConsolePrintStream(System.out), true));
+		System.setErr(new PrintStream(new ConsolePrintStream(System.err), true));
 	}
 	
 	public PythonInterpreter getInterpreter() {
@@ -126,6 +131,30 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener, S
 		interpreter.exec("console.locals['N'] = n");
 		interpreter.exec("console.printResult('N = ' + n.toString() + '\\n')");
 		interpreter.exec("console.enter()");
+	}
+	
+	private class ConsolePrintStream extends ByteArrayOutputStream {
+
+		private PrintStream	
+			forward = null;
+		
+		public ConsolePrintStream(PrintStream forward) {
+			this.forward = forward;
+		}
+		
+		@Override
+		public void flush() throws IOException {
+			super.flush();
+			String msg = toString();
+//			if (interpreter != null) {
+//				interpreter.exec("console.printResult('" + msg + "')");
+//			}
+			if (forward != null) {
+				forward.print(msg);
+			}
+			super.reset();
+		}
+		
 	}
 	
 }
