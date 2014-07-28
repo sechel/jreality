@@ -20,9 +20,6 @@ public class JobProcessorThread extends Thread {
 	}
 
 	protected void processJob(Job job) {
-//		if (Thread.currentThread() == this) {
-//			throw new RuntimeException("Cannot invoke processJob() from the job processor thread");
-//		}
 		synchronized (this) {
 			nextJob = job;
 			notifyAll();
@@ -43,14 +40,15 @@ public class JobProcessorThread extends Thread {
 			fireProcessStarted(executedJob);
 			try {
 				executedJob.execute();
-				nextJob = null;
 			} catch (Exception e) {
 				fireProcessFailed(e, executedJob);
 			} catch (Throwable t) {
 				log.severe("Error in job execution: " + t);
 				fireProcessFailed(new Exception("Error in job execution", t), nextJob);
+			} finally {
+				nextJob = null;
+				fireProcessFinished(executedJob);
 			}
-			fireProcessFinished(executedJob);
 		}
 	}
 	
