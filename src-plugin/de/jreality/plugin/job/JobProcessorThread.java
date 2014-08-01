@@ -4,15 +4,12 @@ import static java.util.Collections.synchronizedList;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class JobProcessorThread extends Thread {
 	
-	private Logger
-		log = Logger.getLogger(JobProcessorThread.class.getName());
 	private Job
 		nextJob = null;
-	List<JobProcessorListener>
+	private List<JobProcessorListener>
 		listeners = synchronizedList(new LinkedList<JobProcessorListener>());
 	
 	public JobProcessorThread() {
@@ -35,7 +32,7 @@ public class JobProcessorThread extends Thread {
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			};
+			}
 			Job executedJob = nextJob;
 			fireProcessStarted(executedJob);
 			try {
@@ -43,7 +40,6 @@ public class JobProcessorThread extends Thread {
 			} catch (Exception e) {
 				fireProcessFailed(e, executedJob);
 			} catch (Throwable t) {
-				log.severe("Error in job execution: " + t);
 				fireProcessFailed(new Exception("Error in job execution", t), nextJob);
 			} finally {
 				nextJob = null;

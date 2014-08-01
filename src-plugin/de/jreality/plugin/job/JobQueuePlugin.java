@@ -98,14 +98,16 @@ public class JobQueuePlugin extends Plugin {
 	
 		@Override
 		public void processStarted(Job job) {
+			log.fine("job " + job + " started");
 		}
 		@Override
 		public void processFinished(Job job) {
+			log.fine("job " + job + " finished");
 			finalizeJob(job);
 		}
 		@Override
 		public void processFailed(Exception e, Job job) {
-			finalizeJob(job);
+			log.severe("Error in job execution: " + e);
 		}
 	
 	}
