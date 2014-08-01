@@ -21,15 +21,8 @@ import static de.jreality.shader.CommonAttributes.Z_BUFFER_ENABLED;
 import static java.lang.Math.PI;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Random;
-
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import de.jreality.examples.CatenoidHelicoid;
 import de.jreality.geometry.IndexedFaceSetFactory;
@@ -39,7 +32,6 @@ import de.jreality.geometry.Primitives;
 import de.jreality.io.JrScene;
 import de.jreality.math.Matrix;
 import de.jreality.math.MatrixBuilder;
-import de.jreality.plugin.JRViewer;
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Camera;
 import de.jreality.scene.Cylinder;
@@ -50,13 +42,11 @@ import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.SceneGraphPath;
 import de.jreality.scene.Sphere;
 import de.jreality.scene.SpotLight;
-import de.jreality.scene.Viewer;
 import de.jreality.scene.data.DoubleArray;
 import de.jreality.scene.data.DoubleArrayArray;
 import de.jreality.scene.data.IntArrayArray;
 import de.jreality.shader.RootAppearance;
 import de.jreality.shader.ShaderUtility;
-import de.jreality.writer.WriterJRS;
 import de.jreality.writer.blender.BlenderConnection;
 
 public class BlenderTestScene {
@@ -89,7 +79,8 @@ public class BlenderTestScene {
 		root.addChild(icosahedron2);
 		SceneGraphComponent icosahedron3 = new SceneGraphComponent();
 		icosahedron3.setName("Icosahedron 2 Root");
-		icosahedron3.setGeometry(icosahedron.getGeometry());
+		SceneGraphComponent geometryChild = new SceneGraphComponent("parent");
+		geometryChild.setGeometry(icosahedron.getGeometry());
 		Appearance icosahedron3Appearance = new Appearance("Icosahedron 2 Appearance");
 		icosahedron3Appearance.setAttribute(POLYGON_SHADER + "." + DIFFUSE_COLOR, new Color(0.5f, 0.3f, 0.9f));
 		icosahedron3Appearance.setAttribute(POLYGON_SHADER + "." + TRANSPARENCY, 0.5);
@@ -97,6 +88,7 @@ public class BlenderTestScene {
 		icosahedron3Appearance.setAttribute(OPAQUE_TUBES_AND_SPHERES, true);
 		icosahedron3Appearance.setAttribute(Z_BUFFER_ENABLED, true);
 		icosahedron3.setAppearance(icosahedron3Appearance);
+		icosahedron3.addChild(geometryChild);
 		MatrixBuilder.euclidean().translate(-2, 2, 2).assignTo(icosahedron3);
 		root.addChild(icosahedron3);		
 		SceneGraphComponent cameraRoot = new SceneGraphComponent();

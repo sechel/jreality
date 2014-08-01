@@ -673,7 +673,6 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
     tag = resolveReference(treeRoot, tag, rootPath);
     if originalTag != tag:
         rootPath = resolveReferencePath(treeRoot, originalTag, rootPath);
-        print('new root path: ', rootPath)
     name = tag[0].text
     obj = bpy.data.objects.new(name, None)
     if not visible:
@@ -706,7 +705,7 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
         showFaces = bool(effectiveMaterial['showFaces'])
         geometry.hide = obj.hide or not (showFaces or useSkinTubes)
         geometry.hide_render = geometry.hide
-        if 'Texture Coordinates' in geometry.data.uv_layers:
+        if type(geometry.data) == bpy.types.Mesh and 'Texture Coordinates' in geometry.data.uv_layers:
             applyTextureMatrix(geometry.data, effectiveMaterial)
         # do not set twice for multiple occurrences
         geometry.data.materials.append(effectiveMaterial)
@@ -741,6 +740,7 @@ def createDefaultMaterial():
     mtl.name = 'JReality Default Material'
     mtl.diffuse_color = [0, 0, 1]
     mtl.diffuse_intensity = 1.0
+    mtl.alpha = 1.0
     mtl['showPoints'] = True
     mtl['showLines'] = True
     mtl['showFaces'] = True
