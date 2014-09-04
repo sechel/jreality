@@ -3,6 +3,7 @@ package de.jreality.plugin.job;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import de.jtem.jrworkspace.plugin.Controller;
@@ -98,16 +99,19 @@ public class JobQueuePlugin extends Plugin {
 	
 		@Override
 		public void processStarted(Job job) {
+			Logger log = Logger.getLogger(job.getClass().getName());
 			log.fine("job " + job + " started");
 		}
 		@Override
 		public void processFinished(Job job) {
+			Logger log = Logger.getLogger(job.getClass().getName());
 			log.fine("job " + job + " finished");
 			finalizeJob(job);
 		}
 		@Override
 		public void processFailed(Exception e, Job job) {
-			log.severe("Error in job execution: " + e);
+			Logger log = Logger.getLogger(job.getClass().getName());
+			log.log(Level.SEVERE, "Error in job execution: " + e, e);
 		}
 	
 	}
