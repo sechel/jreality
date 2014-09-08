@@ -1,9 +1,12 @@
 package de.jreality.reader.obj;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import de.jreality.geometry.IndexedFaceSetUtility;
@@ -32,11 +35,6 @@ public class OBJModel {
 		activeGroups.add(defaultGroup);
 	}
 		
-
-
-	
-
-
 	public void addVertexCoords(double[] coords) {
 		vertexCoords.add(coords);
 	}
@@ -169,7 +167,7 @@ public class OBJModel {
 		}
 		
 		//Lines
-		List<int[]> lineIndices = new ArrayList<int[]>();
+		Set<int[]> lineIndices = new TreeSet<int[]>(new EdgeComparator());
 		if(lines.size() > 0) {
 			lineIndices.addAll(vd.extractIndicesList(lines)); 
 		}
@@ -202,5 +200,28 @@ public class OBJModel {
 			}
 		}
 		return list;
+	}
+	
+	private class EdgeComparator implements Comparator<int[]> {
+
+		@Override
+		public int compare(int[] o1, int[] o2) {
+			if(o1.length != o2.length || o1.length < 2 || o2.length < 2) {
+				return 1;
+			} else {
+				int[] tmp1 = (o1[0] > o1[1])?new int[]{o1[1],o1[0]}:o1;
+				int[] tmp2 = (o2[0] > o2[1])?new int[]{o2[1],o2[0]}:o2;
+				if(tmp1[0] - tmp2[0] != 0) {
+					return tmp1[0] - tmp2[0];
+				} else if(tmp1[1] - tmp2[1] != 0) {
+					return tmp1[1] - tmp2[1];
+				} else {
+					return 0;
+				}
+			}
+		}
+		
+		
+		
 	}
 }

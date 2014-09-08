@@ -30,10 +30,10 @@ public class OBJIndexFactoryTest {
 		points.add(v4);
 		
 		OBJIndexFactory vd = new OBJIndexFactory(points,null,null,false);
-		Assert.assertEquals(0,vd.getId(v1));
-		Assert.assertEquals(0,vd.getId(v2));
-		Assert.assertEquals(0,vd.getId(v3));
-		Assert.assertEquals(1,vd.getId(v4));
+		Assert.assertEquals(0,vd.getId(v1).intValue());
+		Assert.assertEquals(0,vd.getId(v2).intValue());
+		Assert.assertEquals(0,vd.getId(v3).intValue());
+		Assert.assertEquals(1,vd.getId(v4).intValue());
 	}
 
 	@Test
@@ -49,10 +49,10 @@ public class OBJIndexFactoryTest {
 		points.add(v4);
 		
 		OBJIndexFactory vd = new OBJIndexFactory(points,null,null,true);
-		Assert.assertEquals(0,vd.getId(v1));
-		Assert.assertEquals(1,vd.getId(v2));
-		Assert.assertEquals(2,vd.getId(v3));
-		Assert.assertEquals(3,vd.getId(v4));
+		Assert.assertEquals(0,vd.getId(v1).intValue());
+		Assert.assertEquals(0,vd.getId(v2).intValue());
+		Assert.assertEquals(1,vd.getId(v3).intValue());
+		Assert.assertEquals(2,vd.getId(v4).intValue());
 	}
 
 }

@@ -2,7 +2,11 @@ package de.jreality.reader.obj;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -15,13 +19,16 @@ public class OBJIndexFactory {
 	 * creates indices for triples of vertex/tex/normal
 	 */
 	private TreeMap<OBJVertex, Integer> 
-	vertexIndexMap = null;
+		vertexIndexMap = null;
 
 	private ArrayList<OBJVertex> 
-	list = new ArrayList<OBJVertex>();
-
+		list = new ArrayList<OBJVertex>();
+	
+	private Map<Integer, LinkedHashSet<OBJVertex>> 
+		vertexClusters = new LinkedHashMap<Integer, LinkedHashSet<OBJVertex>>();
+	
 	private boolean
-	useMultipleTexAndNormalCoords = true;
+		useMultipleTexAndNormalCoords = true;
 
 	public OBJIndexFactory(List<OBJVertex> points, List<List<OBJVertex>> lines, List<List<OBJVertex>> faces, boolean useMultipleTexAndNormalCoords) {
 
@@ -51,10 +58,21 @@ public class OBJIndexFactory {
 		}
 	}
 
-	public int getId(OBJVertex v) {
+	public Integer getId(OBJVertex v) {
 		Integer index = vertexIndexMap.get(v); 
 		if(useMultipleTexAndNormalCoords) {
-			return index;
+			if(index == null) {
+				Set<OBJVertex> mergeableVertices = getMergeableVertices(v);
+				if(mergeableVertices.size() != 0) {
+					OBJVertex knownVertex = mergeableVertices.iterator().next();
+					int mergeableIndex = vertexIndexMap.get(knownVertex);
+					return mergeableIndex;
+				} 
+				logger.severe("Could not find vertex index for vertex " + v.toString());
+				return null;
+			} else {
+				return index;
+			}
 		} else {
 			if(index != null) {
 				return index;
@@ -62,6 +80,16 @@ public class OBJIndexFactory {
 				return vertexIndexMap.get(new OBJVertex(v.getVertexIndex(), 0,0));
 			}
 		}
+	}
+
+	private Set<OBJVertex> getMergeableVertices(OBJVertex v) {
+		Set<OBJVertex> verts = new LinkedHashSet<OBJVertex>();
+		for(OBJVertex k : vertexClusters.get(v.getVertexIndex())) {
+			if(mergeableVertices(k, v)) {
+				verts.add(k);
+			}
+		}
+		return verts;
 	}
 
 	public List<Integer> extractVertexIndices() {
@@ -89,10 +117,26 @@ public class OBJIndexFactory {
 	}
 
 	private int addVertex(OBJVertex v) {
+		if(vertexClusters.get(v.getVertexIndex()) == null) {
+			vertexClusters.put(v.getVertexIndex(),new LinkedHashSet<OBJVertex>());
+		}
 		if(useMultipleTexAndNormalCoords) {
 			Integer index = vertexIndexMap.get(v);
 			if(index == null) {
-				return createID(v);
+				Set<OBJVertex> mergeableVerts = getMergeableVertices(v);
+				if(mergeableVerts.size() != 0) {
+					OBJVertex knownVertex = mergeableVerts.iterator().next();
+					vertexClusters.get(knownVertex.getVertexIndex()).remove(knownVertex);
+					int sameVertexIndex = vertexIndexMap.get(knownVertex);
+					mergeVertices(knownVertex, v);
+					vertexClusters.get(knownVertex.getVertexIndex()).add(knownVertex);
+					vertexIndexMap.put(knownVertex, sameVertexIndex);
+					list.set(sameVertexIndex, knownVertex);
+					return sameVertexIndex;
+				} else {
+					vertexClusters.get(v.getVertexIndex()).add(v);
+					return createID(v);
+				}
 			} else {
 				return index;
 			}

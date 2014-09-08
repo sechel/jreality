@@ -63,6 +63,10 @@ import de.jreality.util.SceneGraphUtility;
  */
 public class WriterOBJ {
 
+	public static int write( IndexedFaceSet ifs, OutputStream out, int startVertex, boolean writeEdgesOfFaceSet) {
+		return write( ifs, null, new PrintWriter( out ), startVertex, writeEdgesOfFaceSet);
+	}
+	
 	public static int write( IndexedFaceSet ifs, OutputStream out, int startVertex ) {
 		return write( ifs, null, new PrintWriter( out ), startVertex);
 	}
@@ -91,11 +95,15 @@ public class WriterOBJ {
 		}
 	}
 
-	static int write( Geometry geom, String groupName, PrintWriter out, int startVertex ) {
+	static int write( Geometry geom, String groupName, PrintWriter out, int startVertex) {
+		return write(geom, groupName, out, startVertex);
+	}
+	
+	static int write( Geometry geom, String groupName, PrintWriter out, int startVertex, boolean writeEdgesOfFaceSet ) {
 		if( geom == null ) return 0;
 		
 		if( geom instanceof IndexedFaceSet ) {
-			return write( ((IndexedFaceSet)geom), groupName, out, startVertex);
+			return write( ((IndexedFaceSet)geom), groupName, out, startVertex, writeEdgesOfFaceSet);
 		} else if( geom instanceof IndexedLineSet ) {
 			return write( ((IndexedLineSet)geom), groupName, out, startVertex);
 		} else if( geom instanceof PointSet ) {
@@ -112,7 +120,11 @@ public class WriterOBJ {
 		write( sgc, new PrintWriter( out ));
 	}
 	
-	public static void write( SceneGraphComponent sgc, PrintWriter out ) {
+	public static void write( SceneGraphComponent sgc, PrintWriter out) {
+		write(sgc,out,false);
+	}
+	
+	public static void write( SceneGraphComponent sgc, PrintWriter out, boolean writeEdgesOfFaceSet ) {
 		
 		SceneGraphComponent flat = SceneGraphUtility.flatten(sgc);
 		
@@ -122,7 +134,7 @@ public class WriterOBJ {
 			
 		for( int i=0; i<noc; i++ ) {
 			SceneGraphComponent child=flat.getChildComponent(i);
-			vertex += write( child.getGeometry(), child.getName(), out, vertex);
+			vertex += write( child.getGeometry(), child.getName(), out, vertex, writeEdgesOfFaceSet);
 		}
 	}
 	
@@ -137,6 +149,10 @@ public class WriterOBJ {
 	}
 
 	static int write( IndexedFaceSet ifs, String groupName, PrintWriter out, int startVertex ) {
+		return write(ifs,groupName,out,startVertex,false);
+	}
+	
+	static int write( IndexedFaceSet ifs, String groupName, PrintWriter out, int startVertex, boolean writeEdgesOfFaceSet ) {
 		
 		if( groupName != null ) {
 			out.println();	
@@ -187,17 +203,19 @@ public class WriterOBJ {
 			out.println();	
 		}
 
-		indices = ifs.getEdgeAttributes(Attribute.INDICES);
-		
-		for (int i= 0; i < ifs.getNumEdges(); i++) {
-			out.print( "l ");
-			IntArray edgeIndices = indices.item(i).toIntArray();
-			for (int j=0; j < edgeIndices.size(); j++) {
-				out.print(" ");
-				writeFaceIndex( out, startVertex + edgeIndices.getValueAt(j), texture!=null, false);
-			}
+		if(writeEdgesOfFaceSet) {
+			indices = ifs.getEdgeAttributes(Attribute.INDICES);
 
-			out.println();	
+			for (int i= 0; i < ifs.getNumEdges(); i++) {
+				out.print( "l ");
+				IntArray edgeIndices = indices.item(i).toIntArray();
+				for (int j=0; j < edgeIndices.size(); j++) {
+					out.print(" ");
+					writeFaceIndex( out, startVertex + edgeIndices.getValueAt(j), texture!=null, false);
+				}
+
+				out.println();	
+			}
 		}
 		out.flush();
 		return ifs.getNumPoints();

@@ -163,7 +163,7 @@ public class JobsTestPlugin extends ShrinkPanelPlugin implements ActionListener 
 				j.setDelay(i+1);
 				jobs.add(j);
 			}
-			ParallelJob parallelJob = new ParallelJob(jobs);
+			ParallelJob parallelJob = new ParallelJob(jobs, "Parallel Job");
 			Q.queueJob(parallelJob);
 		}
 	}

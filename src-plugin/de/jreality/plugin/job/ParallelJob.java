@@ -19,20 +19,19 @@ public class ParallelJob extends AbstractJob implements JobListener {
 	
 	private long timeout = 3600000;
 	
-	public ParallelJob(Collection<AbstractJob> jobs) {
+	private String jobName = "Parallel Job";
+
+	public ParallelJob(Collection<AbstractJob> jobs, String name) {
 		this.jobs  = jobs;
+		this.jobName = name;
 	}
 	
-	public ParallelJob(Collection<AbstractJob> jobs, long timeout) {
+	public ParallelJob(Collection<AbstractJob> jobs, String name, long timeout) {
 		this.jobs  = jobs;
+		this.jobName = name;
 		this.timeout = timeout;
 	}
 	
-	@Override
-	public String getJobName() {
-		return "ParallelJob";
-	}
-
 	@Override
 	protected void executeJob() throws Exception {
 		for(final Job j : jobs) {
@@ -85,6 +84,11 @@ public class ParallelJob extends AbstractJob implements JobListener {
 			}
 			return progress/jobs.size();
 		}
+	}
+
+	@Override
+	public String getJobName() {
+		return jobName;
 	}
 	
 }
