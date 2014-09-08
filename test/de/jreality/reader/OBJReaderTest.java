@@ -40,22 +40,28 @@
 
 package de.jreality.reader;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.logging.LogManager;
 
-import junit.framework.TestCase;
-
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.jreality.scene.Appearance;
 import de.jreality.scene.Geometry;
+import de.jreality.scene.IndexedFaceSet;
 import de.jreality.scene.SceneGraphComponent;
 import de.jreality.scene.data.Attribute;
+import de.jreality.scene.data.DataList;
 import de.jreality.util.Input;
-import de.jreality.util.LoggingSystem;
+import de.jreality.util.SceneGraphUtility;
 
 
 /**
@@ -65,27 +71,26 @@ import de.jreality.util.LoggingSystem;
  * @author weissman
  *
  */
-public class OBJReaderTest extends TestCase {
+public class OBJReaderTest {
 
-    public static void main(String[] args) {
-        junit.textui.TestRunner.run(OBJReaderTest.class);
-    }
-	
+	@Before
 	public void setUp() {
-       LoggingSystem.getLogger(ParserMTL.class).setLevel(Level.OFF);
+		try {
+			LogManager.getLogManager().readConfiguration(new FileInputStream( new File("test_logging.properties")));
+		} catch (IOException e) {
+			System.out.println("File test_logging.properties not found.");
+			// You can customize log levels in test_logging.properties file.
+		} 
 	}
 
-	public void tearDown() {
-       LoggingSystem.getLogger(ParserMTL.class).setLevel(null);
-	}
-
+	@Ignore("File not committed")@Test
     public void testOBJReader() throws Exception {
         //String fileName = "/home/gollwas/bolt1.obj";
         //String fileName = "/home/gollwas/cube2.obj";
         URL url = this.getClass().getResource("square.obj");
         SceneGraphComponent sgc = new ReaderOBJ().read(url); 
-        assertEquals("sgc 0", sgc.getName());
-        assertEquals("[len=4 storage=double[][3]]", 
+        Assert.assertEquals("sgc 0", sgc.getName());
+        Assert.assertEquals("[len=4 storage=double[][3]]", 
         	sgc.getChildComponent(0).getGeometry().getAttributes(Geometry.CATEGORY_VERTEX, Attribute.COORDINATES).toString());
     }
     
@@ -94,10 +99,11 @@ public class OBJReaderTest extends TestCase {
 //        SceneGraphComponent sgc = new Reader3DS().read(new File(fileName)); 
 //    }
 
+	@Test
     public void testMTLReader() throws Exception {
         URL url = this.getClass().getResource("vp.mtl");
         List<?> list = ParserMTL.readAppearences(Input.getInput(url));
-        assertEquals("baerFinal", ((Appearance) list.get(0)).getName());
+        Assert.assertEquals("baerFinal", ((Appearance) list.get(0)).getName());
     }
     
     @Test
@@ -111,5 +117,44 @@ public class OBJReaderTest extends TestCase {
 		ReaderOBJ reader = new ReaderOBJ();
 		reader.read(testFile);
 	}
+    
+    
+    @Test public void testReadTextureCoordinates_MultipleFalse() throws Exception {
+    	String objData = 
+    		"v 0 0 0\n" + 
+    		"v 0 0 1\n" + 
+    		"v 1 1 0\n" +
+    		"vt 0 0\n" +
+    		"vt 0 1\n" +
+    		"vt 1 1\n" +
+    		"f 1/1 2/2 3/3";
+    	ByteArrayInputStream in = new ByteArrayInputStream(objData.getBytes());
+    	ReaderOBJ o = new ReaderOBJ();
+    	o.setUseMultipleTexAndNormalCoords(false);
+    	IndexedFaceSet g = (IndexedFaceSet)SceneGraphUtility.getFirstGeometry(o.read(new Input("Direct String Data", in)));
+    	DataList c = g.getVertexAttributes(Attribute.COORDINATES);
+    	DataList tc = g.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    	Assert.assertNotNull(c);
+    	Assert.assertNotNull(tc);
+    }
+    
+    @Test public void testReadTextureCoordinates_MultipleTrue() throws Exception {
+    	String objData = 
+    		"v 0 0 0\n" + 
+    		"v 0 0 1\n" + 
+    		"v 1 1 0\n" +
+    		"vt 0 0\n" +
+    		"vt 0 1\n" +
+    		"vt 1 1\n" +
+    		"f 1/1 2/2 3/3";
+    	ByteArrayInputStream in = new ByteArrayInputStream(objData.getBytes());
+    	ReaderOBJ o = new ReaderOBJ();
+    	o.setUseMultipleTexAndNormalCoords(true);
+    	IndexedFaceSet g = (IndexedFaceSet)SceneGraphUtility.getFirstGeometry(o.read(new Input("Direct String Data", in)));
+    	DataList c = g.getVertexAttributes(Attribute.COORDINATES);
+    	DataList tc = g.getVertexAttributes(Attribute.TEXTURE_COORDINATES);
+    	Assert.assertNotNull(c);
+    	Assert.assertNotNull(tc);
+    }
 
 }

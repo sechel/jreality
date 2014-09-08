@@ -118,14 +118,17 @@ public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEd
 		private static final long 
 			serialVersionUID = 1L;
 
+		@Override
 		public int getColumnCount() {
 			return 3;
 		}
 
+		@Override
 		public int getRowCount() {
 			return pluginList.size();
 		}
 
+		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (rowIndex < 0 || rowIndex >= pluginList.size()) {
 				return "Error";
@@ -182,10 +185,12 @@ public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEd
 	}
 	
 	
+	@Override
 	public void editingCanceled(ChangeEvent e) {
 		
 	}
 
+	@Override
 	public void editingStopped(ChangeEvent e) {
 		int row = pluginTable.getSelectedRow();
 		if (row < 0 || row >= pluginList.size()) {
@@ -266,30 +271,37 @@ public class JRPluginManager extends Plugin implements PreferencesFlavor, CellEd
 		return info;
 	}
 
+	@Override
 	public Icon getMainIcon() {
 		return ImageHook.getIcon("plugin.png");
 	}
 
+	@Override
 	public String getMainName() {
 		return "jReality Plugin Manager";
 	}
 
+	@Override
 	public JPanel getMainPage() {
 		return panel;
 	}
 
+	@Override
 	public int getNumSubPages() {
 		return 0;
 	}
 
+	@Override
 	public JPanel getSubPage(int i) {
 		return null;
 	}
 
+	@Override
 	public Icon getSubPageIcon(int i) {
 		return null;
 	}
 
+	@Override
 	public String getSubPageName(int i) {
 		return null;
 	}

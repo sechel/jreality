@@ -61,6 +61,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 	private int[] selectedProcs = new int[0];
 	private class PreProcessorFactory implements SampleProcessorFactory {
+		@Override
 		public SampleProcessor getInstance(SampleReader reader) {
 			for(int n: selectedProcs) {
 				int cnt = 1;
@@ -73,6 +74,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 	private int[] selectedCues = new int[0];
 	private class DirectedCueFactory implements DistanceCueFactory {
+		@Override
 		public DistanceCue getInstance(float sampleRate) {
 			List<DistanceCue> list = new ArrayList<DistanceCue>(4);
 			for(int i: selectedCues) {
@@ -91,6 +93,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 
 	private int reverbType = 0;
 	private class ReverbFactory implements SampleProcessorFactory {
+		@Override
 		public SampleProcessor getInstance(SampleReader reader) {
 			int cnt = 1;
 			if      (reverbType==cnt++) return new SchroederReverb(reader);
@@ -126,6 +129,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		noReverbButton.setSelected(true);
 
 		ChangeListener cl = new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				int rt = 0;
 				if (schroederReverbButton.isSelected()) rt = 1;
@@ -141,6 +145,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		fdnReverbButton.addChangeListener(cl);
 		
 		cl = new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				int[] sel = new int[] {0, 0, 0, 0, 0};
 				if (conicalBox.isSelected()) sel[0] = 1;
@@ -159,6 +164,7 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		exponentialBox.addChangeListener(cl);
 		
 		cl = new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				int[] sel = new int[] {0, 0};
 				if (reflectionBox.isSelected()) sel[0] = 1;
@@ -171,30 +177,35 @@ public class AudioOptions extends ShrinkPanelPlugin {
 		shiftBox.addChangeListener(cl);
 		
 		pitchShiftWidget.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				pitchShift = fromCents(pitchShiftWidget.getValue()*10);
 				setPitchAttribute();
 			}
 		});
 		speedWidget.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				speedOfSound = speedWidget.getValue();
 				setSpeedAttribute();
 			}
 		});
 		gainWidget.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				gain = fromDecibels(gainWidget.getValue());
 				setGainAttribute();
 			}
 		});
 		reverbGainWidget.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				reverbGain = fromDecibels(reverbGainWidget.getValue());
 				setReverbGainAttribute();
 			}
 		});
 		reverbTimeWidget.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
 				reverbTime = (float) reverbTimeWidget.getValue()/10;
 				setReverbTimeAttribute();

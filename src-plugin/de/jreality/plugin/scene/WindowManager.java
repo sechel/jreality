@@ -109,6 +109,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 		if (env != RunningEnvironment.DESKTOP)
 			PortalCoordinateSystem.addChangeListener(portalScaleListener = new ActionListener() {
 			
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				updateWindowRootTransformation(-1);
 				System.err.println("WM: Updating portal scale");
@@ -175,6 +176,7 @@ public class WindowManager extends Plugin implements ChangeListener {
 		return showDesktopBorder;
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof Scene) {
 			Scene scene = (Scene) e.getSource();

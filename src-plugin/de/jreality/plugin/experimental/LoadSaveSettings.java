@@ -65,21 +65,27 @@ public class LoadSaveSettings extends Plugin {
 		
 		final HashMap<String, Object> map = new HashMap<String, Object>();
 		Controller faceC = new Controller() {
+			@Override
 			public <T> T deleteProperty(Class<?> context, String key) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public <T extends Plugin> T getPlugin(Class<T> clazz) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public <T> List<T> getPlugins(Class<T> class1) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public <T> T getProperty(Class<?> context, String key, T defaultValue) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public boolean isActive(Plugin p) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public Object storeProperty(Class<?> context, String key, Object property) {
 				return map.put(key, property);
 			}
@@ -119,19 +125,25 @@ public class LoadSaveSettings extends Plugin {
 			} catch (Exception e) {
 				e.printStackTrace();
 				break;
+			} finally {
+				dec.close();
 			}
 		}
 		
 		Controller faceC = new Controller() {
+			@Override
 			public <T> T deleteProperty(Class<?> context, String key) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public <T extends Plugin> T getPlugin(Class<T> clazz) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public <T> List<T> getPlugins(Class<T> class1) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public <T> T getProperty(Class<?> context, String key, T defaultValue) {
 				T ret = defaultValue;
 				HashMap<String, Object> hashMap = properyMap.get(context);
@@ -141,9 +153,11 @@ public class LoadSaveSettings extends Plugin {
 				}
 				return ret;
 			}
+			@Override
 			public boolean isActive(Plugin p) {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public Object storeProperty(Class<?> context, String key, Object property) {
 				throw new UnsupportedOperationException();
 			}

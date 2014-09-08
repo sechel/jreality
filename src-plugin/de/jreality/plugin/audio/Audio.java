@@ -162,6 +162,7 @@ public class Audio extends Plugin implements ChangeListener {
 		}
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		try {
 			if (e.getSource() instanceof AudioPreferences) updateAudioRenderer();

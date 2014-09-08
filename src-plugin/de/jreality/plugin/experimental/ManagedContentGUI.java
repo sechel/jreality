@@ -24,7 +24,7 @@ import de.jtem.jrworkspace.plugin.Plugin;
 import de.jtem.jrworkspace.plugin.PluginInfo;
 import de.jtem.jrworkspace.plugin.annotation.Experimental;
 
-@Experimental
+@Experimental@SuppressWarnings({"rawtypes", "unchecked"})
 public class ManagedContentGUI extends Plugin implements ActionListener {
 
 	private ManagedContent
@@ -38,7 +38,6 @@ public class ManagedContentGUI extends Plugin implements ActionListener {
 	private Icon
 		layersIcon = ImageHook.getIcon("layers.png");
 	
-	
 	public ManagedContentGUI() {
 		layerCombo.setRenderer(new LayerComboRenderer());
 		layerCombo.setModel(new LayerModel());
@@ -46,6 +45,7 @@ public class ManagedContentGUI extends Plugin implements ActionListener {
 		layerCombo.setPrototypeDisplayValue(LayerComboRenderer.class);
 	}
 	
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		 if (e.getSource() == layerCombo) {
 			 if (!(layerCombo.getSelectedItem() instanceof Class<?>)) {
@@ -64,6 +64,7 @@ public class ManagedContentGUI extends Plugin implements ActionListener {
 	
 	private class ContextComparator implements Comparator<Class<?>> {
 		
+		@Override
 		public int compare(Class<?> o1, Class<?> o2) {
 			return o1.getSimpleName().compareTo(o2.getSimpleName());
 		}

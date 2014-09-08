@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -274,7 +275,7 @@ public class IndexedFaceSetUtility {
 	 */
 	public static IntArrayArray edgesFromFaces( IntArrayArray faces )
 	{
-	    HashSet set =new HashSet();
+	    LinkedHashSet<Pair> set = new LinkedHashSet<Pair>();
 	   
 	    for (int i= 0; i < faces.getLength(); i++)
 	    {
@@ -289,8 +290,8 @@ public class IndexedFaceSetUtility {
 	    final int num= set.size();
 	    int[] edge=new int[num*2];
 	    int count=0;
-	    for (Iterator iter = set.iterator(); iter.hasNext(); count+=2) {
-	      Pair p = (Pair) iter.next();
+	    for (Iterator<Pair> iter = set.iterator(); iter.hasNext(); count+=2) {
+	      Pair p = iter.next();
 	      edge[count]=p.l;
 	      edge[count+1]=p.h;
 	    }

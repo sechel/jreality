@@ -36,11 +36,17 @@ public class ManagedContent extends Plugin {
 	}
 	
 	public static class ContentAdapter implements ContentListener {
+		@Override
 		public void contentAdded(Class<?> context, SceneGraphComponent c) { }
+		@Override
 		public void contentRemoved(Class<?> context, SceneGraphComponent c) { }
+		@Override
 		public void contentRemoved(Class<?> context) { }
+		@Override
 		public void contentCleared() { }
+		@Override
 		public void toolAdded(Class<?> context, Tool t) { }
+		@Override
 		public void toolRemoved(Class<?> context, Tool t) { }
 	}
 	

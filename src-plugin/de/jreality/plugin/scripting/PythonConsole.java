@@ -91,6 +91,8 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener, S
 		this.controller = c;
 		createLayout();
 		c.getPlugin(View.class).getSelectionManager().addSelectionListener(this);
+//		System.setOut(new PrintStream(new ConsolePrintStream(System.out), true));
+//		System.setErr(new PrintStream(new ConsolePrintStream(System.err), true));
 	}
 	
 	public PythonInterpreter getInterpreter() {
@@ -124,8 +126,34 @@ public class PythonConsole extends ShrinkPanelPlugin implements FocusListener, S
 		}
 		interpreter.set("n", e.getSelection().getLastNode());
 		interpreter.exec("console.locals['N'] = n");
-		interpreter.exec("console.printResult('N = ' + n.toString() + '\\n')");
+		interpreter.exec("console.printResult('N')");
 		interpreter.exec("console.enter()");
 	}
+	
+//	private class ConsolePrintStream extends ByteArrayOutputStream {
+//
+//		private PrintStream	
+//			forward = null;
+//		
+//		public ConsolePrintStream(PrintStream forward) {
+//			this.forward = forward;
+//		}
+//		
+//		@Override
+//		public void flush() throws IOException {
+//			super.flush();
+//			String msg = toString();
+//			if (interpreter != null) {
+//				msg = msg.replaceAll("\n", "\\\\n");
+//				String exec = "console.write(\"" + msg + "\")";
+//				interpreter.exec(exec);
+//			}
+//			if (forward != null) {
+//				forward.print(msg);
+//			}
+//			super.reset();
+//		}
+//		
+//	}
 	
 }
