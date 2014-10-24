@@ -44,6 +44,7 @@ import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -56,6 +57,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
@@ -89,6 +93,8 @@ public class ExportBlenderImage extends AbstractJrAction {
 		viewer = null;
 	private static JFileChooser
 		executableChooser = new JFileChooser();
+	private Logger
+		log = Logger.getLogger(ExportBlenderImage.class.getName());
 
 	static {
 		executableChooser.setAcceptAllFileFilterUsed(true);
@@ -115,12 +121,7 @@ public class ExportBlenderImage extends AbstractJrAction {
 		try {
 			renderSceneToFile(file, viewer);
 		} catch (IOException ioe) {
-			showBlenderxExcutableDialog(parentComp);
-			try {
-				renderSceneToFile(file, viewer);
-			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(parentComp, "Could not write blender file", "Error", ERROR_MESSAGE);
-			}
+			log.log(Level.WARNING, ioe.getMessage(), ioe);
 		}
 	}
 
@@ -232,14 +233,32 @@ public class ExportBlenderImage extends AbstractJrAction {
 			try {
 				c.renderImage(s, imageFile);
 			} catch (IOException e) {
-				exception = e;
+				//try setting the blender executable
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						Window w = SwingUtilities.getWindowAncestor(parentComp);
+						showBlenderExcutableDialog(w);		
+					}
+				};
+				try {
+					EventQueue.invokeAndWait(r);
+				} catch (Exception e2) {
+					log.warning(e2.getMessage());
+				}
+				try {
+					c.renderImage(s, imageFile);
+				} catch (Exception e1) {
+					exception = e1;
+					JOptionPane.showMessageDialog(parentComp, "Could not write blender file", "Error", ERROR_MESSAGE);
+				}
 			}
 		}
 		
 	}
 	
 
-	protected static void showBlenderxExcutableDialog(Component parentComp) {
+	protected static void showBlenderExcutableDialog(Component parentComp) {
 		Icon blenderIcon = new ImageIcon(ExportBlenderImage.class.getResource("blender.png"), "Blender Icon");
 		String[] options = {"Choose Executable", "Cancel"};
 		int result = JOptionPane.showOptionDialog(parentComp, "Blender executable not found.", "Export Error", YES_NO_CANCEL_OPTION, INFORMATION_MESSAGE, blenderIcon, options, null);

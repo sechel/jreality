@@ -42,6 +42,7 @@ package de.jreality.ui.viewerapp.actions.file;
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
 
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,6 +51,7 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import de.jreality.io.JrScene;
 import de.jreality.scene.Viewer;
@@ -94,7 +96,8 @@ public class ExportBlender extends AbstractJrAction {
 		try {
 			writeSceneToFile(file, viewer);
 		} catch (IOException ioe) {
-			ExportBlenderImage.showBlenderxExcutableDialog(parentComp);
+			Window w = SwingUtilities.getWindowAncestor(parentComp);
+			ExportBlenderImage.showBlenderExcutableDialog(w);
 			try {
 				writeSceneToFile(file, viewer);
 			} catch (Exception e1) {
