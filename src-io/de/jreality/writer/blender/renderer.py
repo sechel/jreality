@@ -25,6 +25,7 @@ def createNURBSSphereData(name):
     bpy.context.scene.objects.unlink(sphereObject)
     bpy.data.objects.remove(sphereObject)
     sphereSurface.name = name
+    sphereSurface.materials.append(None)
     return sphereSurface
 
 
@@ -35,6 +36,7 @@ def createNURBSCylinderData(name):
     bpy.context.scene.objects.unlink(cylinderObject)
     bpy.data.objects.remove(cylinderObject)
     cylinderSurface.name = name
+    cylinderSurface.materials.append(None)
     return cylinderSurface
 
 def getStandardSphere():
@@ -455,6 +457,8 @@ def createGeometry(treeRoot, tag, rootPath, parentObject):
             geom = getStandardSphere()
         elif type == 'Cylinder':
             geom = getStandardCylinder()
+        # add dummy material to create slot on object
+        geom.materials.append(None)
     geomobj = bpy.data.objects.new(name=name.text, object_data = geom)
     bpy.context.scene.objects.link(geomobj)
     geomobj.parent = parentObject
@@ -590,12 +594,8 @@ def createTubesAndSpheres(geometryObject, material):
             sphereObject.scale = [radius, radius, radius]
             bpy.context.scene.objects.link(sphereObject)
             mat = createSphereMaterial(mesh, v.index, material)
-            sphereGeometry.materials.append(mat)
             sphereObject.material_slots[0].link = 'OBJECT'
             sphereObject.material_slots[0].material = mat
-            if len(sphereGeometry.materials) > 1: 
-                sphereGeometry.materials.pop()
-            sphereGeometry.materials[0] = None
     if not material['lineShader.blender.useSkinTubes'] and \
            material['lineShader.tubeDraw'] and \
            material['showLines'] and \
@@ -636,12 +636,9 @@ def createTubesAndSpheres(geometryObject, material):
             tubeObject.scale = [radius, radius, length/2]
             bpy.context.scene.objects.link(tubeObject)
             mat = createTubeMaterial(mesh, e.index, material)
-            tubeGeometry.materials.append(material)
             tubeObject.material_slots[0].link = 'OBJECT'
             tubeObject.material_slots[0].material = mat
-            if len(tubeGeometry.materials) > 1: 
-                tubeGeometry.materials.pop()
-            tubeGeometry.materials[0] = None
+
     
 def createSkinTubes(geometryObject, material):
     mesh = geometryObject.data
@@ -707,12 +704,8 @@ def createObjectFromXML(treeRoot, tag, rootPath, parentObject, visible):
         geometry.hide_render = geometry.hide
         if type(geometry.data) == bpy.types.Mesh and 'Texture Coordinates' in geometry.data.uv_layers:
             applyTextureMatrix(geometry.data, effectiveMaterial)
-        # do not set twice for multiple occurrences
-        geometry.data.materials.append(effectiveMaterial)
         geometry.material_slots[0].link = 'OBJECT'
         geometry.material_slots[0].material = effectiveMaterial
-        if len(geometry.data.materials) > 1: geometry.data.materials.pop()
-        geometry.data.materials[0] = None
     counter = 1;
     for child in tag.find("./children"):
         path = rootPath + '/children/child[' + str(counter) + ']'
