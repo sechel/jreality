@@ -248,7 +248,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     # diffuse color
     diffuseColorTag = tag.find("attribute[@name='polygonShader.diffuseColor']")
     if diffuseColorTag is not None: 
-        material.diffuse_color = parseColor(treeRoot, diffuseColorTag.find('awt-color'), rootPath + "/attribute[@name='polygonShader.diffuseColor']/awt-color")
+        material.diffuse_color = parseColor(treeRoot, diffuseColorTag.find('color'), rootPath + "/attribute[@name='polygonShader.diffuseColor']/color")
     else: 
         material.diffuse_color = parentMaterial.diffuse_color
     diffuseFactorTag = tag.find("attribute[@name='polygonShader.diffuseCoefficient']")
@@ -366,7 +366,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     # line colors
     lineColorTag = tag.find("attribute[@name='lineShader.diffuseColor']")
     if lineColorTag is not None:
-        tubeColor = parseColor(treeRoot, lineColorTag.find('awt-color'), rootPath + "/attribute[@name='lineShader.diffuseColor']/awt-color")
+        tubeColor = parseColor(treeRoot, lineColorTag.find('color'), rootPath + "/attribute[@name='lineShader.diffuseColor']/color")
     else:
         tubeColor = parentMaterial['lineShader.diffuseColor']
     material['lineShader.diffuseColor'] = tubeColor
@@ -374,7 +374,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     # point colors
     pointColorTag = tag.find("attribute[@name='pointShader.diffuseColor']")
     if pointColorTag is not None:
-        sphereColor = parseColor(treeRoot, pointColorTag.find('awt-color'), rootPath + "/attribute[@name='pointShader.diffuseColor']/awt-color")
+        sphereColor = parseColor(treeRoot, pointColorTag.find('color'), rootPath + "/attribute[@name='pointShader.diffuseColor']/color")
     else:
         sphereColor = parentMaterial['pointShader.diffuseColor']
     material['pointShader.diffuseColor'] = sphereColor 
@@ -405,7 +405,7 @@ def createMaterial(treeRoot, tag, rootPath, parentMaterial, geometryObject):
     # global background color
     backgroundColorTag = tag.find("attribute[@name='backgroundColor']")
     if backgroundColorTag is not None:
-        backgroundColor = parseColor(treeRoot, backgroundColorTag.find('awt-color'), rootPath + "/attribute[@name='backgroundColor']/awt-color")
+        backgroundColor = parseColor(treeRoot, backgroundColorTag.find('color'), rootPath + "/attribute[@name='backgroundColor']/color")
         bpy.context.scene.world.horizon_color = backgroundColor
         
     # texture

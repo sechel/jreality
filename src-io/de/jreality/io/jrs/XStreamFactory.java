@@ -157,6 +157,7 @@ public class XStreamFactory {
     ret.alias("Sphere", Sphere.class);
     ret.alias("SpotLight", SpotLight.class);    
     ret.alias("Transformation", Transformation.class);
+    ret.alias("color", Color.class);
 
     // data package
     ret.alias("Attribute", Attribute.class);
