@@ -1,6 +1,7 @@
 package de.jreality.reader.obj;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-
 
 public class OBJIndexFactory {
 	
@@ -29,6 +29,9 @@ public class OBJIndexFactory {
 	
 	private boolean
 		useMultipleTexAndNormalCoords = true;
+	
+	private int
+		maxIndex = 0;
 
 	public OBJIndexFactory(List<OBJVertex> points, List<List<OBJVertex>> lines, List<List<OBJVertex>> faces, boolean useMultipleTexAndNormalCoords) {
 
@@ -94,6 +97,12 @@ public class OBJIndexFactory {
 
 	public List<Integer> extractVertexIndices() {
 		List<Integer> vertexIndices = new ArrayList<Integer>();
+		if(maxIndex == list.size()) {
+			Collections.sort(list,new VertexComparator(false));
+			for(OBJVertex v : vertexIndexMap.keySet()) {
+				vertexIndexMap.put(v, v.getVertexIndex()-1);
+			}
+		}
 		for(OBJVertex v : list) {
 			vertexIndices.add(v.getVertexIndex());
 		}
@@ -117,6 +126,9 @@ public class OBJIndexFactory {
 	}
 
 	private int addVertex(OBJVertex v) {
+		if(v.getVertexIndex() > maxIndex) {
+			maxIndex = v.getVertexIndex();
+		}
 		if(vertexClusters.get(v.getVertexIndex()) == null) {
 			vertexClusters.put(v.getVertexIndex(),new LinkedHashSet<OBJVertex>());
 		}

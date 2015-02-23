@@ -144,6 +144,31 @@ public class ReaderOBJTest {
 	}
 	
 	@Test
+	public void testVertexOrderingRead() throws IOException{
+		URL url = this.getClass().getResource("quad_order.obj");
+        ReaderOBJ reader = new ReaderOBJ();
+        
+        reader.read(url);
+        reader.setGenerateEdgesFromFaces(false);
+        SceneGraphComponent sgc = reader.getComponent();
+        IndexedFaceSet ifs = (IndexedFaceSet) sgc.getChildComponent(0).getGeometry();
+        double[] vertices = { 
+        			0,0,0,
+        		 	1,0,0,
+        		 	0,1,0,
+        		 	1,1,0
+        		 	};
+        
+        Assert.assertArrayEquals(vertices, ifs.getVertexAttributes(Attribute.COORDINATES).toDoubleArray(null), delta);
+        
+        int[] faces = {0,2,3,1};
+        Assert.assertArrayEquals(faces, ifs.getFaceAttributes(Attribute.INDICES).toIntArray(null));
+        
+        int[][] edges = {{0,2},{2,3},{1,3},{0,1}};
+        testEdgeIndices(edges, ifs);
+	}
+	
+	@Test
 	public void testLinesAndFacesGenerateEdgesFalseRead() throws IOException{
 		URL url = this.getClass().getResource("trilines.obj");
         ReaderOBJ reader = new ReaderOBJ();
