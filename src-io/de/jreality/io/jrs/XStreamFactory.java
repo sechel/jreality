@@ -208,7 +208,9 @@ public class XStreamFactory {
     try {
       Class type = mapper.realClass(reader.getNodeName());
       ret = context.convertAnother(null, type);
-    } catch (Exception e) { /* signal error */ }
+    } catch (Exception e) { 
+    	e.printStackTrace();
+    }
     reader.moveUp();
     return ret;
   }

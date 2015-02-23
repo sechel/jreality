@@ -66,6 +66,7 @@ public class ReaderJRS extends AbstractReader {
     try {
     	stuff = xstr.fromXML(input.getReader());
     } catch (Exception e) {
+    	e.printStackTrace();
         xstr = XStreamFactory.forVersion(0.1);
         try {
             System.out.println("trying to read JRS v0.1");

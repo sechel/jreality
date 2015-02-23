@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene>
+	<sceneRoot>
+		<name>root</name>
+		<visible>true</visible>
+		<transformation />
+		<appearance />
+		<camera />
+		<light />
+		<geometry />
+		<children/>
+		<tools />
+	</sceneRoot>
+	<scenePaths>
+		<path name="emptyPickPath">
+			<node reference="../../../sceneRoot" />
+		</path>
+	</scenePaths>
+	<sceneAttributes />
+</scene>

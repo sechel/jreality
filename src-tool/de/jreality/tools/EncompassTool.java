@@ -62,7 +62,7 @@ public class EncompassTool extends AbstractTool {
   final static InputSlot encompassSlot = InputSlot.getDevice("EncompassActivation");
   final static InputSlot SHIFT = InputSlot.getDevice("Secondary");
   final static InputSlot CTRL = InputSlot.getDevice("Meta");
-  EncompassFactory encompassFactory = new EncompassFactory();
+  transient EncompassFactory encompassFactory = new EncompassFactory();
   public EncompassTool() {
     addCurrentSlot(encompassSlot);
   }
