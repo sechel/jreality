@@ -116,7 +116,7 @@ public class JOGLOffscreenRenderer {
 					.canCreateGLPbuffer(
 							canvas.getNativeSurface()
 									.getGraphicsConfiguration().getScreen()
-									.getDevice())) {
+									.getDevice(), GLProfile.getDefault())) {
 				JOGLConfiguration.getLogger().log(Level.WARNING,
 						"PBuffers not supported");
 				return null;

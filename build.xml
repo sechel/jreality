@@ -162,7 +162,7 @@
 			<include name="*.jar"/>
 		</fileset>
 		<fileset dir="lib">
-			<include name="*.jar"/>
+			<include name="**/*.jar"/>
 		</fileset>
 	</path>
 
@@ -175,7 +175,7 @@
 	
 	<path id="jogl.classpath">
 		<path refid="backend.classpath"/>
-		<fileset dir="lib">
+		<fileset dir="lib/jogamp">
 			<include name="jogl-all.jar"/>
 			<include name="gluegen-rt.jar"/>
 		</fileset>
@@ -183,7 +183,7 @@
 	
 	<path id="jogl3.classpath">
 		<path refid="backend.classpath"/>
-		<fileset dir="lib">
+		<fileset dir="lib/jogamp">
 			<include name="jogl-all.jar"/>
 			<include name="gluegen-rt.jar"/>
 		</fileset>
@@ -216,7 +216,7 @@
 			<include name="alex.jar"/>
 			<include name="discreteGroup.jar"/>
 			<include name="junit.jar"/>
-			<include name="jogl-all.jar"/>
+			<include name="jogamp/jogl-all.jar"/>
 		</fileset>
 		<fileset dir="dist">
 			<include name="jReality-io.jar"/>
@@ -240,7 +240,7 @@
 		<path refid="backend.classpath"/>
 		<fileset dir="lib">
 			<include name="smrj.jar"/>
-			<include name="jogl-all.jar"/>
+			<include name="jogamp/jogl-all.jar"/>
 		</fileset>
 		<fileset dir="dist">
 			<include name="jReality-io.jar"/>
@@ -256,7 +256,7 @@
 		<path refid="backend.classpath"/>
 		<fileset dir="lib">
 			<include name="smrj.jar"/>
-			<include name="jogl-all.jar"/>
+			<include name="jogamp/jogl-all.jar"/>
 			<include name="jjack_min.jar"/>
 			<include name="colorpicker.jar"/>
 			<include name="beans.jar"/>
@@ -284,7 +284,7 @@
         <fileset dir="lib">
             <include name="jrworkspace.jar" />
         	<include name="beans.jar" />
-            <include name="jogl-all.jar" />
+            <include name="jogamp/jogl-all.jar" />
             <include name="numericalMethods.jar" />
         </fileset>
 	</path>
