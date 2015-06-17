@@ -67,6 +67,10 @@ public class WriterOBJ {
 		return write( ifs, null, new PrintWriter( out ), startVertex, writeEdgesOfFaceSet);
 	}
 	
+	public static int write( IndexedFaceSet ifs, String groupName, int startVertex, OutputStream out) {
+		return write( ifs, groupName, new PrintWriter( out ), startVertex);
+	}
+	
 	public static int write( IndexedFaceSet ifs, OutputStream out, int startVertex ) {
 		return write( ifs, null, new PrintWriter( out ), startVertex);
 	}

@@ -352,4 +352,20 @@ public class View extends SideContainerPerspective implements ChangeListener {
 		return menu;
 	}
 	
+	
+	public void startRenderTriggerCollect() {
+		if(renderTrigger != null) {
+			renderTrigger.startCollect();
+		} else {
+			LoggingSystem.getLogger(this.getClass()).warning("No RenderTrigger attached since autoRender is false.");
+		}
+	}
+	
+	public void finishRenderTriggerCollect() {
+		if(renderTrigger != null) {
+			renderTrigger.finishCollect();
+		} else {
+			LoggingSystem.getLogger(this.getClass()).warning("No RenderTrigger attached since autoRender is false.");
+		}
+	}
 }
